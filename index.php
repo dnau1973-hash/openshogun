@@ -1,0 +1,65 @@
+<?php
+/**
+ * Point d'entrée principal et Routeur de l'application OpenGalaxy
+ */
+require_once __DIR__ . '/core/Auth.php';
+
+$auth = new Auth();
+$authError = null;
+
+// Traitement des actions d'authentification
+$action = $_GET['action'] ?? null;
+
+if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $res = $auth->login($username, $password);
+    if ($res['success']) {
+        header('Location: /');
+        exit;
+    } else {
+        $authError = $res['error'];
+    }
+} elseif ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = $_POST['username'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $faction = $_POST['faction'] ?? 'terran';
+    $res = $auth->register($username, $email, $password, $faction);
+    if ($res['success']) {
+        header('Location: /');
+        exit;
+    } else {
+        $authError = $res['error'];
+    }
+} elseif ($action === 'logout') {
+    $auth->logout();
+    header('Location: /');
+    exit;
+}
+
+// Si non connecté, afficher le portail d'authentification
+if (!Auth::check()) {
+    require __DIR__ . '/views/auth.php';
+    exit;
+}
+
+// Récupérer la page demandée
+$page = $_GET['page'] ?? 'resources';
+$allowedPages = ['resources', 'city', 'galaxy', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin'];
+
+if (!in_array($page, $allowedPages)) {
+    $page = 'resources';
+}
+
+// Vérifier les droits si la page demandée est admin
+if ($page === 'admin' && !$auth->isAdmin()) {
+    header('Location: /?page=resources');
+    exit;
+}
+
+// Rendu de la vue avec le Layout HUD
+require __DIR__ . '/views/partials/header.php';
+require __DIR__ . '/views/' . $page . '.php';
+require __DIR__ . '/views/partials/footer.php';
+

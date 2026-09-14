@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bg3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4c1d95"/>
+      <stop offset="50%" stop-color="#18181b"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <filter id="voidglow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="400" height="400" fill="url(#bg3)"/>
+  <!-- Fissure Quantique de Téléportation -->
+  <path d="M120 40 Q200 180 140 340" stroke="#c084fc" stroke-width="2" fill="none" opacity="0.6" filter="url(#voidglow)"/>
+  <path d="M280 40 Q200 180 260 340" stroke="#818cf8" stroke-width="2" fill="none" opacity="0.6" filter="url(#voidglow)"/>
+  <!-- Silhouette Sombre à Cape Énergétique -->
+  <path d="M200 90 L240 150 L270 300 L200 330 L130 300 L160 150 Z" fill="#09090b" stroke="#71717a" stroke-width="2"/>
+  <!-- Cape Psionique Voilée -->
+  <path d="M160 140 Q200 70 240 140 Q270 260 200 290 Q130 260 160 140 Z" fill="#2e1065" stroke="#a855f7" stroke-width="1.5"/>
+  <!-- Masque Furtif & Yeux du Néant -->
+  <polygon points="190,125 200,140 210,125 205,115 195,115" fill="#18181b" stroke="#c084fc" stroke-width="1.5"/>
+  <circle cx="196" cy="122" r="2.5" fill="#38bdf8" filter="url(#voidglow)"/>
+  <circle cx="204" cy="122" r="2.5" fill="#38bdf8" filter="url(#voidglow)"/>
+  <!-- Dagues Énergétiques de Distorsion -->
+  <polygon points="130,220 90,140 115,220" fill="#a855f7" filter="url(#voidglow)"/>
+  <polygon points="270,220 310,140 285,220" fill="#c084fc" filter="url(#voidglow)"/>
+  <line x1="90" y1="140" x2="125" y2="225" stroke="#ffffff" stroke-width="2" filter="url(#voidglow)"/>
+  <line x1="310" y1="140" x2="275" y2="225" stroke="#ffffff" stroke-width="2" filter="url(#voidglow)"/>
+  <text x="200" y="375" font-family="'Courier New', monospace" font-size="14" font-weight="bold" fill="#c084fc" text-anchor="middle" letter-spacing="3">TEMPLIER DISTORSION</text>
+</svg>
+

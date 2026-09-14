@@ -1,0 +1,1430 @@
+/* ==========================================================
+   OPENSHOGUN - THEME FEODAL : ROUGE, NOIR & PAPIER DE RIZ
+   ========================================================== */
+
+:root {
+    /* 🖤 Noir de Laque (Urushi) & Noir d'Encre (Sumi-e) */
+    --bg-dark: #090a0d;
+    --bg-surface: #111217;
+    --bg-card: rgba(17, 18, 24, 0.88);
+    --bg-card-solid: #15161d;
+    --bg-ink: #050608;
+    
+    /* 📜 Papier de Riz (Washi & Parchemin Antique) */
+    --rice-paper: #f4eee1;
+    --rice-paper-light: #faf7f0;
+    --rice-paper-warm: #ede3ce;
+    --rice-paper-dim: #d4c7af;
+    --rice-paper-ink: #14151a;
+    
+    /* 🔴 Rouge Impérial, Vermillon Torii & Sceau Hanko */
+    --red-primary: #dc2626;
+    --red-hover: #ef4444;
+    --red-deep: #b91c1c;
+    --red-dark: #991b1b;
+    --red-glow: 0 0 16px rgba(220, 38, 38, 0.45);
+    --red-soft: rgba(220, 38, 38, 0.15);
+    
+    /* Bordures & Accents */
+    --border-color: rgba(220, 38, 38, 0.28);
+    --border-highlight: #dc2626;
+    --border-rice: rgba(244, 238, 225, 0.25);
+    
+    /* Typographie */
+    --text-main: #f4eee1;       /* Papier de riz sur fond sombre */
+    --text-muted: #aba394;      /* Papier de riz estompé */
+    --text-bright: #ffffff;
+    --text-ink-dark: #121318;   /* Encre de Chine sur papier de riz */
+    
+    /* Factions Féodales */
+    --color-terran: #dc2626;    /* Clan Oda : Rouge Écarlate */
+    --color-vorash: #b91c1c;    /* Clan Takeda : Rouge Carmin */
+    --color-aethelis: #eab308;  /* Clan Tokugawa : Or Impérial */
+    
+    /* Ressources Féodales */
+    --res-metal: #a8a29e;       /* Bois de Cèdre */
+    --res-crystal: #f4eee1;     /* Pierre de Taille */
+    --res-deut: #eab308;        /* Riz Impérial (Koku Doré) */
+    --res-energy: #dc2626;      /* Sérénité & Ferveur Torii */
+    
+    --glow-cyan: 0 0 15px rgba(220, 38, 38, 0.4);
+    --glow-card: 0 10px 35px 0 rgba(0, 0, 0, 0.85);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    background-image: 
+        radial-gradient(ellipse at 15% 20%, rgba(220, 38, 38, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 80%, rgba(185, 28, 28, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(18, 19, 26, 1) 0%, var(--bg-dark) 100%);
+    background-attachment: fixed;
+    color: var(--text-main);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+a {
+    color: var(--border-highlight);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+a:hover {
+    color: #fca5a5;
+    text-shadow: var(--red-glow);
+}
+
+/* ==========================================================
+   TOPBAR HUD & RESSOURCES
+   ========================================================== */
+.hud-header {
+    background: rgba(10, 11, 16, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+}
+
+.hud-top > div:first-child {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.hud-top > .user-profile {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.brand-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 0 8px #dc2626);
+}
+
+.planet-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+}
+
+.faction-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.faction-badge.terran { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #3b82f6; }
+.faction-badge.vorash { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+.faction-badge.aethelis { background: rgba(192, 132, 252, 0.2); color: #e9d5ff; border: 1px solid #c084fc; }
+
+/* Barre des Ressources Travian-Style */
+.resources-bar {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 0.5rem 1rem;
+    flex-wrap: wrap;
+    background: rgba(8, 9, 13, 0.75);
+}
+
+.res-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(18, 19, 26, 0.7);
+    border: 1px solid rgba(220, 38, 38, 0.18);
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    min-width: 150px;
+}
+
+.res-icon {
+    font-size: 1.25rem;
+}
+
+.res-data {
+    display: flex;
+    flex-direction: column;
+}
+
+.res-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+
+.res-prod {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.res-bar-cont {
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-top: 3px;
+    overflow: hidden;
+}
+
+.res-bar-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.res-bar-fill.metal { background: var(--res-metal); }
+.res-bar-fill.crystal { background: var(--res-crystal); }
+.res-bar-fill.deut { background: var(--res-deut); }
+.res-bar-fill.energy { background: var(--res-energy); }
+
+/* ==========================================================
+   MÉDAILLONS CIRCULAIRES DE NAVIGATION (STYLE TRAVIAN)
+   ========================================================== */
+.travian-nav-medallions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: -10px;
+    position: relative;
+    z-index: 50;
+}
+
+.travian-medallion {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 3px solid rgba(203, 213, 225, 0.35);
+    background: #090e1d;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), inset 0 2px 4px rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.travian-medallion-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(0.85) contrast(1.05);
+    transition: all 0.25s ease;
+}
+
+/* État Survol (Hover) */
+.travian-medallion:hover {
+    transform: translateY(-4px) scale(1.15);
+    border-color: #dc2626;
+    box-shadow: 0 8px 22px rgba(220, 38, 38, 0.65), inset 0 2px 6px rgba(255, 255, 255, 0.4);
+    z-index: 60;
+}
+
+.travian-medallion:hover .travian-medallion-img {
+    filter: brightness(1.15) contrast(1.1);
+}
+
+/* État Actif (Vue Courante comme dans Travian) */
+.travian-medallion.active {
+    width: 62px;
+    height: 62px;
+    border: 3.5px solid #facc15;
+    box-shadow: 0 0 18px rgba(250, 204, 21, 0.75), 0 6px 14px rgba(0, 0, 0, 0.9), inset 0 2px 6px rgba(255, 255, 255, 0.6);
+    z-index: 55;
+}
+
+.travian-medallion.active .travian-medallion-img {
+    filter: brightness(1.1) contrast(1.1);
+}
+
+/* Infobulle de Texte au Survol UNIQUEMENT */
+.travian-medallion-tooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: rgba(10, 15, 30, 0.98);
+    border: 1px solid #dc2626;
+    color: var(--rice-paper-light);
+    background: rgba(12, 13, 18, 0.98);
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 0.35rem 0.75rem;
+    border-radius: 5px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 12px rgba(220, 38, 38, 0.4);
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+}
+
+.travian-medallion-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #dc2626;
+}
+
+.travian-medallion:hover .travian-medallion-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 900px) {
+    .hud-top {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+    }
+    .travian-nav-medallions {
+        order: 2;
+        margin-bottom: 0;
+    }
+}
+
+/* ==========================================================
+   LAYOUT CONTENU
+   ========================================================== */
+.container {
+    max-width: 1850px;
+    width: 98%;
+    margin: 1rem auto;
+    padding: 0 1rem;
+}
+
+.grid-main {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.5rem;
+}
+
+@media (max-width: 960px) {
+    .grid-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: var(--glow-card);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* ==========================================================
+   VUE 1 : INTERFACE RTS SOL PLANÉTAIRE & COMPLEXE MINIER
+   ========================================================== */
+.fields-viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: url('/public/assets/shogun_rural_terroir_bg.jpg') center/cover no-repeat;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5), 0 10px 25px rgba(0, 0, 0, 0.4);
+    overflow: visible;
+    user-select: none;
+}
+
+/* Barre de filtres tactiques par secteur */
+.rts-sector-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    align-items: center;
+}
+
+.sector-btn {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.sector-btn:hover, .sector-btn.active {
+    background: rgba(220, 38, 38, 0.18);
+    color: var(--rice-paper-light);
+    border-color: #dc2626;
+    box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+}
+
+.sector-btn.filter-metal:hover { border-color: #f97316; color: #f97316; }
+.sector-btn.filter-crystal:hover { border-color: var(--rice-paper); color: var(--rice-paper); }
+.sector-btn.filter-deut:hover { border-color: #34d399; color: #34d399; }
+.sector-btn.filter-energy:hover { border-color: #facc15; color: #facc15; }
+.sector-btn.filter-hq:hover { border-color: #60a5fa; color: #60a5fa; }
+
+/* Hotspots cliquables sur les bâtiments du terrain */
+.rts-hotspot {
+    position: absolute;
+    cursor: pointer;
+    z-index: 10;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Cadre de visée tactique RTS (4 coins) */
+.rts-reticle {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.25;
+    transition: all 0.2s ease-out;
+    border-radius: 4px;
+}
+
+.rts-reticle::before,
+.rts-reticle::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-style: solid;
+    border-width: 0;
+    transition: all 0.2s ease;
+}
+
+/* Coins Haut-Gauche et Bas-Droite */
+.rts-reticle::before {
+    top: -2px;
+    left: -2px;
+    border-top-width: 2px;
+    border-left-width: 2px;
+}
+
+.rts-reticle::after {
+    bottom: -2px;
+    right: -2px;
+    border-bottom-width: 2px;
+    border-right-width: 2px;
+}
+
+.rts-reticle-alt {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.25;
+    transition: all 0.2s ease-out;
+}
+
+.rts-reticle-alt::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    border-top: 2px solid;
+    border-right: 2px solid;
+}
+
+.rts-reticle-alt::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: -2px;
+    width: 12px;
+    height: 12px;
+    border-bottom: 2px solid;
+    border-left: 2px solid;
+}
+
+/* Couleurs par secteur */
+.sector-metal_mine { --sector-color: #f97316; }
+.sector-crystal_mine { --sector-color: #e2e8f0; }
+.sector-deuterium_synth { --sector-color: #34d399; }
+.sector-solar_plant { --sector-color: #facc15; }
+.sector-hq { --sector-color: #60a5fa; }
+
+.rts-hotspot .rts-reticle::before,
+.rts-hotspot .rts-reticle::after,
+.rts-hotspot .rts-reticle-alt::before,
+.rts-hotspot .rts-reticle-alt::after {
+    border-color: var(--sector-color);
+}
+
+/* Sprites PNG transparents des bâtiments féodaux */
+.rts-tile-sprite {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.22s ease;
+}
+
+.rts-hotspot:hover .rts-tile-sprite,
+.rts-hotspot.highlighted .rts-tile-sprite {
+    transform: translateX(-50%);
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7)) brightness(1.1);
+}
+
+.rts-tenshu-sprite {
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+}
+
+/* Hover & Focus sur les bâtiments */
+.rts-hotspot:hover {
+    z-index: 50 !important;
+    background: transparent;
+}
+
+.rts-hotspot .rts-reticle,
+.rts-hotspot .rts-reticle-alt {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.rts-hotspot:hover .rts-reticle,
+.rts-hotspot:hover .rts-reticle-alt,
+.rts-hotspot.highlighted .rts-reticle,
+.rts-hotspot.highlighted .rts-reticle-alt {
+    opacity: 1;
+    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.rts-hotspot:hover .rts-badge,
+.rts-hotspot.highlighted .rts-badge {
+    border-color: #fff;
+    box-shadow: 0 0 12px var(--sector-color);
+    transform: translateX(-50%);
+}
+
+/* Badge HUD de Niveau sur la structure */
+.rts-badge {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 15, 29, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--sector-color);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.rts-lvl-pill {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0 0.35rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    color: #fff;
+}
+
+.rts-upgrading-pulse {
+    animation: pulseQueue 1.5s infinite;
+    color: #f59e0b;
+}
+
+@keyframes pulseQueue {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+/* Infobulle Tactique d'Amélioration au survol (Tooltip RTS) */
+.rts-tooltip {
+    position: absolute;
+    width: 230px;
+    background: rgba(9, 14, 28, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--sector-color);
+    border-radius: 6px;
+    padding: 0.65rem 0.8rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateY(4px);
+    pointer-events: none;
+    z-index: 100;
+    font-size: 0.75rem;
+    color: #e2e8f0;
+}
+
+.rts-hotspot:hover .rts-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.rts-tt-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rts-tt-prod {
+    color: #94a3b8;
+    margin-bottom: 0.4rem;
+    font-size: 0.75rem;
+}
+
+.rts-tt-cost {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 0.4rem;
+    margin-top: 0.4rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+}
+
+.rts-tt-cta {
+    margin-top: 0.45rem;
+    text-align: center;
+    color: var(--sector-color);
+    font-weight: 700;
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.2rem;
+    border-radius: 3px;
+}
+
+/* ==========================================================
+   POSITIONNEMENT PRÉCIS DES 18 BÂTIMENTS SUR LE TERROIR
+   ========================================================== */
+.hotspot-slot-1  { left: 12.0%; top: 30.1%; width: 11.0%; height: 18.6%; z-index: 7; }
+.hotspot-slot-2  { left: 9.5%;  top: 40.1%; width: 11.0%; height: 18.6%; z-index: 8; }
+.hotspot-slot-3  { left: 11.5%; top: 50.1%; width: 11.0%; height: 18.6%; z-index: 9; }
+.hotspot-slot-4  { left: 20.5%; top: 36.1%; width: 11.0%; height: 18.6%; z-index: 8; }
+.hotspot-slot-5  { left: 24.5%; top: 45.1%; width: 11.0%; height: 18.6%; z-index: 9; }
+.hotspot-slot-6  { left: 21.5%; top: 64.1%; width: 11.0%; height: 18.6%; z-index: 12; }
+.hotspot-slot-7  { left: 29.0%; top: 71.1%; width: 11.0%; height: 18.6%; z-index: 13; }
+.hotspot-slot-8  { left: 31.5%; top: 55.6%; width: 11.0%; height: 18.6%; z-index: 10; }
+.hotspot-slot-9  { left: 39.5%; top: 60.1%; width: 11.0%; height: 18.6%; z-index: 11; }
+.hotspot-slot-10 { left: 49.5%; top: 58.6%; width: 11.0%; height: 18.6%; z-index: 11; }
+.hotspot-slot-11 { left: 60.5%; top: 53.1%; width: 11.0%; height: 18.6%; z-index: 10; }
+.hotspot-slot-12 { left: 59.5%; top: 73.1%; width: 11.0%; height: 18.6%; z-index: 13; }
+.hotspot-slot-13 { left: 68.5%; top: 45.1%; width: 11.0%; height: 18.6%; z-index: 9; }
+.hotspot-slot-14 { left: 73.0%; top: 36.1%; width: 11.0%; height: 18.6%; z-index: 8; }
+.hotspot-slot-15 { left: 80.5%; top: 30.6%; width: 11.0%; height: 18.6%; z-index: 7; }
+.hotspot-slot-16 { left: 73.0%; top: 25.1%; width: 11.0%; height: 18.6%; z-index: 6; }
+.hotspot-slot-17 { left: 64.5%; top: 17.6%; width: 11.0%; height: 18.6%; z-index: 5; }
+.hotspot-slot-18 { left: 56.5%; top: 10.6%; width: 11.0%; height: 18.6%; z-index: 4; }
+
+/* Tooltip position par défaut pour les parcelles */
+.rts-hotspot .rts-tooltip {
+    bottom: 105%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Ajustements pour les parcelles du haut pour que le tooltip s'affiche vers le bas */
+.hotspot-slot-17 .rts-tooltip,
+.hotspot-slot-18 .rts-tooltip,
+.hotspot-slot-1 .rts-tooltip,
+.hotspot-slot-4 .rts-tooltip,
+.hotspot-slot-16 .rts-tooltip {
+    bottom: auto;
+    top: 105%;
+}
+
+/* Tenshu et Cœur Castral Central */
+.hotspot-bunker-hq {
+    left: 43.5%;
+    top: 17.0%;
+    width: 19.0%;
+    height: 32.0%;
+    z-index: 7;
+}
+
+.hotspot-bunker-hq .rts-badge {
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    border-color: #dc2626;
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+    font-size: 0.8rem;
+    padding: 3px 10px;
+}
+
+.hotspot-bunker-hq:hover .rts-badge {
+    box-shadow: 0 0 25px rgba(220, 38, 38, 0.9);
+    transform: translateX(-50%) scale(1.08);
+}
+
+.hotspot-bunker-hq .rts-tooltip {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+    width: 250px;
+}
+
+/* ==========================================================
+   VUE CITÉ COLONIALE RTS (PLANETARY BASE CITY)
+   ========================================================== */
+.fields-viewport.rts-city-surface {
+    background: url('/public/assets/planet_colony_city.jpg') center/cover no-repeat;
+}
+
+.sector-military { --sector-color: #f87171; }
+.sector-science { --sector-color: #c084fc; }
+.sector-logistics { --sector-color: #22d3ee; }
+.sector-gateway { --sector-color: #34d399; }
+
+.sector-btn.filter-military:hover { border-color: #f87171; color: #f87171; }
+.sector-btn.filter-science:hover { border-color: #c084fc; color: #c084fc; }
+.sector-btn.filter-logistics:hover { border-color: #22d3ee; color: #22d3ee; }
+.sector-btn.filter-gateway:hover { border-color: #34d399; color: #34d399; }
+
+/* Positionnement des 10 bâtiments urbains et du portail */
+.hotspot-city-hq { top: 17%; left: 42%; width: 28%; height: 38%; z-index: 12; }
+.hotspot-city-hq .rts-badge { bottom: 10%; left: 50%; transform: translateX(-50%); }
+.hotspot-city-hq .rts-tooltip { top: 100%; left: 50%; transform: translateX(-50%); }
+
+.hotspot-city-shipyard { top: 10%; left: 11%; width: 24%; height: 34%; }
+.hotspot-city-shipyard .rts-badge { bottom: 8%; left: 12px; }
+.hotspot-city-shipyard .rts-tooltip { top: 100%; left: 0; }
+
+.hotspot-city-barracks { top: 42%; left: 18%; width: 30%; height: 30%; }
+.hotspot-city-barracks .rts-badge { bottom: 8%; left: 15px; }
+.hotspot-city-barracks .rts-tooltip { bottom: 100%; left: 0; }
+
+.hotspot-city-storage { top: 0%; left: 32%; width: 22%; height: 26%; }
+.hotspot-city-storage .rts-badge { bottom: 6px; left: 12px; }
+.hotspot-city-storage .rts-tooltip { top: 100%; left: 0; }
+
+.hotspot-city-tank { top: 4%; left: 53%; width: 17%; height: 20%; }
+.hotspot-city-tank .rts-badge { bottom: 6px; left: 12px; }
+.hotspot-city-tank .rts-tooltip { top: 100%; left: 0; }
+
+.hotspot-city-research_lab { top: 47%; left: 63%; width: 22%; height: 24%; }
+.hotspot-city-research_lab .rts-badge { bottom: 6px; left: 12px; }
+.hotspot-city-research_lab .rts-tooltip { bottom: 100%; right: 0; }
+
+.hotspot-city-radar { top: 11%; left: 77%; width: 11%; height: 30%; }
+.hotspot-city-radar .rts-badge { bottom: 6px; left: 10px; }
+.hotspot-city-radar .rts-tooltip { top: 100%; right: 0; }
+
+.hotspot-city-embassy { top: 25%; left: 85%; width: 11%; height: 30%; }
+.hotspot-city-embassy .rts-badge { bottom: 6px; left: 8px; }
+.hotspot-city-embassy .rts-tooltip { top: 100%; right: 0; }
+
+.hotspot-city-market { top: 63%; left: 40%; width: 26%; height: 26%; }
+.hotspot-city-market .rts-badge { bottom: 8px; left: 50%; transform: translateX(-50%); }
+.hotspot-city-market .rts-tooltip { bottom: 100%; left: 50%; transform: translateX(-50%); }
+
+.hotspot-city-quantum_vault { top: 73%; left: 78%; width: 12%; height: 18%; }
+.hotspot-city-quantum_vault .rts-badge { bottom: 6px; left: 8px; }
+.hotspot-city-quantum_vault .rts-tooltip { bottom: 100%; right: 0; }
+
+.hotspot-city-gateway_mines { top: 71%; left: 16%; width: 10%; height: 16%; }
+.hotspot-city-gateway_mines .rts-badge { bottom: 6px; left: 50%; transform: translateX(-50%); }
+.hotspot-city-gateway_mines .rts-tooltip { bottom: 100%; left: 0; }
+
+/* ==========================================================
+   VUE 2 : CITÉ PLANÉTAIRE (BÂTIMENTS)
+   ========================================================== */
+.city-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+}
+
+.building-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.building-card:hover {
+    border-color: var(--border-highlight);
+    box-shadow: var(--glow-cyan);
+    transform: translateY(-2px);
+}
+
+.building-avatar {
+    width: 65px;
+    height: 65px;
+    border-radius: 12px;
+    background: rgba(220, 38, 38, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.building-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.25rem;
+}
+
+.building-lvl-badge {
+    background: rgba(56, 189, 248, 0.2);
+    color: #7dd3fc;
+    padding: 0.15rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+/* ==========================================================
+   FILE DE CONSTRUCTION (SIDEBAR)
+   ========================================================== */
+.queue-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.queue-info h4 {
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.queue-timer {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #dc2626;
+    font-family: monospace;
+}
+
+.btn-cancel {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.btn-cancel:hover {
+    background: #ef4444;
+    color: #fff;
+}
+
+/* ==========================================================
+   BOUTONS ET MODALES
+   ========================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    color: var(--rice-paper-light);
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+    border: 1px solid #ef4444;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+    box-shadow: 0 6px 25px rgba(220, 38, 38, 0.65);
+    color: #ffffff;
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: #fff;
+}
+
+.btn-secondary {
+    background: rgba(20, 21, 28, 0.85);
+    color: var(--rice-paper);
+    border: 1px solid var(--border-rice);
+}
+.btn-secondary:hover {
+    background: rgba(30, 32, 42, 0.95);
+    border-color: #dc2626;
+    color: #fff;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-card {
+    background: #111218;
+    border: 1px solid #dc2626;
+    box-shadow: 0 0 40px rgba(220, 38, 38, 0.45);
+    border-radius: 10px;
+    width: 90%;
+    max-width: 480px;
+    overflow: hidden;
+    animation: modalPop 0.25s ease-out;
+}
+
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.alert-modal-card {
+    max-width: 440px;
+}
+.alert-modal-card.type-error {
+    border-color: #ef4444;
+    box-shadow: 0 0 35px rgba(239, 68, 68, 0.4);
+}
+.alert-modal-card.type-success {
+    border-color: #22c55e;
+    box-shadow: 0 0 35px rgba(34, 197, 94, 0.4);
+}
+.alert-modal-card.type-warning {
+    border-color: #eab308;
+    box-shadow: 0 0 35px rgba(234, 179, 8, 0.4);
+}
+.alert-modal-card.type-confirm {
+    border-color: #dc2626;
+    box-shadow: 0 0 35px rgba(220, 38, 38, 0.4);
+}
+
+.alert-modal-content {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.75rem 0;
+}
+.alert-modal-icon {
+    font-size: 2.2rem;
+}
+.alert-modal-text {
+    font-size: 0.95rem;
+    color: #fff;
+    line-height: 1.45;
+}
+.alert-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.modal-close-btn:hover {
+    color: #fff;
+}
+
+.cost-row {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    justify-content: space-around;
+}
+
+.cost-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* ==========================================================
+   CARTE GALACTIQUE 2D
+   ========================================================== */
+.galaxy-nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    background: rgba(15, 23, 42, 0.8);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.galaxy-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 6px;
+    background: rgba(8, 12, 24, 0.9);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+/* ==========================================================
+   CARTE GALACTIQUE AVEC DRAG & DROP
+   ========================================================== */
+.galaxy-nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    background: rgba(15, 23, 42, 0.8);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.galaxy-map-wrapper {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(10, 15, 29, 0.8);
+    background: #060913;
+}
+
+.galaxy-hud-overlay {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.hud-coords-badge {
+    background: rgba(10, 11, 16, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    pointer-events: auto;
+}
+
+.hud-coords-badge strong {
+    color: #dc2626;
+    margin-left: 0.35rem;
+    font-family: monospace;
+    font-size: 0.95rem;
+}
+
+.hud-controls-group {
+    display: flex;
+    gap: 0.4rem;
+    pointer-events: auto;
+}
+
+.hud-btn {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    color: #fff;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.hud-btn:hover {
+    background: rgba(220, 38, 38, 0.2);
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.galaxy-viewport {
+    width: 100%;
+    height: 540px;
+    overflow: hidden;
+    position: relative;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    background: 
+        radial-gradient(circle at center, rgba(30, 58, 138, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+        #050814;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.galaxy-viewport.grabbing {
+    cursor: grabbing;
+}
+
+.galaxy-canvas {
+    display: grid;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+}
+
+.galaxy-drag-hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 15, 29, 0.8);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(220, 38, 38, 0.18);
+    padding: 0.3rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    pointer-events: none;
+    z-index: 5;
+    white-space: nowrap;
+}
+
+.galaxy-tile {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    font-size: 0.75rem;
+    user-select: none;
+}
+
+.galaxy-tile:hover {
+    border-color: #dc2626;
+    background: rgba(220, 38, 38, 0.2);
+    transform: scale(1.04);
+    z-index: 2;
+}
+
+.galaxy-tile.current-planet {
+    border: 2px solid #dc2626;
+    box-shadow: 0 0 18px rgba(220, 38, 38, 0.5);
+}
+
+.galaxy-tile.tile-center {
+    border-color: rgba(220, 38, 38, 0.4);
+    background: rgba(30, 58, 138, 0.25);
+}
+
+.tile-planet-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.5));
+}
+
+.tile-empty-star {
+    opacity: 0.15;
+    font-size: 1.1rem;
+    color: #94a3b8;
+}
+
+.tile-coords {
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    font-family: monospace;
+    margin-top: 0.2rem;
+}
+
+.tile-owner {
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90%;
+    font-size: 0.7rem;
+}
+
+/* ==========================================================
+   CARTES DE SOLDATS & TROUPES (CASERNE MILITAIRE)
+   ========================================================== */
+.unit-card {
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.unit-card:hover {
+    transform: translateY(-4px);
+    border-color: #dc2626 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 0 20px rgba(220, 38, 38, 0.35) !important;
+}
+
+.unit-card:hover .unit-img {
+    transform: scale(1.07);
+}
+
+.unit-locked {
+    opacity: 0.65;
+    filter: grayscale(0.35);
+}
+
+.unit-locked:hover {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important;
+}
+
+.unit-img-thumb {
+    transition: transform 0.2s ease;
+}
+
+.unit-img-thumb:hover {
+    transform: scale(1.25);
+}
+
+/* ==========================================================
+   CENTRE DE COMMUNICATIONS (MESSAGERIE INTERNE)
+   ========================================================== */
+.hud-msg-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+    text-decoration: none;
+    color: #94a3b8;
+    transition: all 0.2s ease;
+}
+
+.hud-msg-btn:hover {
+    color: #fff;
+    border-color: #dc2626;
+    box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+}
+
+.hud-msg-btn.has-unread {
+    color: #dc2626;
+    border-color: #dc2626;
+    animation: msgPulse 2s infinite;
+}
+
+@keyframes msgPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(56, 189, 248, 0); }
+}
+
+.hud-unread-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 9999px;
+    border: 1px solid #000;
+}
+
+.nav-badge-unread, .badge-unread {
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 9999px;
+    margin-left: 0.35rem;
+}
+
+.msg-table-container {
+    overflow-x: auto;
+    background: rgba(10, 15, 29, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.msg-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.msg-table th {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.85rem 1rem;
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.msg-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+    transition: background 0.15s;
+}
+
+.msg-table tr:hover td {
+    background: rgba(220, 38, 38, 0.08);
+}
+
+.msg-table tr.msg-unread td {
+    background: rgba(220, 38, 38, 0.15);
+    color: #fff;
+}
+
+.unread-dot {
+    color: #dc2626;
+    font-size: 1rem;
+    text-shadow: 0 0 8px #dc2626;
+}
+
+.msg-subject {
+    color: #e2e8f0;
+}
+
+.msg-unread .msg-subject {
+    font-weight: 700;
+    color: #ef4444;
+}
+
