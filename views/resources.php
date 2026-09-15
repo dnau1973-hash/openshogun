@@ -235,8 +235,6 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                      title="🏯 Tenshu Donjon & Cité Castrale (Niveau <?= $hqLevel ?>)"
                      onclick="window.location.href='?page=city'">
                     <img src="/public/assets/tile_tenshu.png" class="rts-tile-sprite rts-tenshu-sprite" alt="Tenshu Palais" draggable="false">
-                    <div class="rts-reticle"></div>
-                    <div class="rts-reticle-alt"></div>
                     
                     <!-- Badge niveau simple en haut à droite -->
                     <div class="rts-level-bubble rts-tenshu-bubble" title="Tenshu (Niveau <?= $hqLevel ?>)">
@@ -269,10 +267,6 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         
                         <!-- Image PNG transparente de la ressource -->
                         <img src="/public/assets/<?= $tileImg ?>" class="rts-tile-sprite" alt="<?= htmlspecialchars($info['name']) ?>" draggable="false">
-
-                        <!-- Viseurs tactiques 4 coins -->
-                        <div class="rts-reticle"></div>
-                        <div class="rts-reticle-alt"></div>
 
                         <!-- Badge minimaliste de niveau en hauteur et à droite du bâtiment (Style Travian) -->
                         <div class="rts-level-bubble <?= $isUpgrading ? 'upgrading' : '' ?>" title="<?= htmlspecialchars($info['name']) ?> (Niveau <?= $lvl ?>)">

@@ -458,73 +458,12 @@ a:hover {
     cursor: pointer;
     z-index: 10;
     border-radius: 6px;
-    transition: all 0.2s ease-in-out;
 }
 
-/* Cadre de visée tactique RTS (4 coins) */
-.rts-reticle {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.25;
-    transition: all 0.2s ease-out;
-    border-radius: 4px;
-}
-
-.rts-reticle::before,
-.rts-reticle::after {
-    content: '';
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-style: solid;
-    border-width: 0;
-    transition: all 0.2s ease;
-}
-
-/* Coins Haut-Gauche et Bas-Droite */
-.rts-reticle::before {
-    top: -2px;
-    left: -2px;
-    border-top-width: 2px;
-    border-left-width: 2px;
-}
-
-.rts-reticle::after {
-    bottom: -2px;
-    right: -2px;
-    border-bottom-width: 2px;
-    border-right-width: 2px;
-}
-
+/* Cadre de visée tactique RTS (Désactivé pour pure immersion féodale) */
+.rts-reticle,
 .rts-reticle-alt {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.25;
-    transition: all 0.2s ease-out;
-}
-
-.rts-reticle-alt::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 12px;
-    height: 12px;
-    border-top: 2px solid;
-    border-right: 2px solid;
-}
-
-.rts-reticle-alt::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: -2px;
-    width: 12px;
-    height: 12px;
-    border-bottom: 2px solid;
-    border-left: 2px solid;
+    display: none !important;
 }
 
 /* Couleurs par secteur */
@@ -534,14 +473,7 @@ a:hover {
 .sector-solar_plant { --sector-color: #c2252b; }
 .sector-hq { --sector-color: #b91c1c; }
 
-.rts-hotspot .rts-reticle::before,
-.rts-hotspot .rts-reticle::after,
-.rts-hotspot .rts-reticle-alt::before,
-.rts-hotspot .rts-reticle-alt::after {
-    border-color: var(--sector-color);
-}
-
-/* Sprites PNG transparents des bâtiments féodaux */
+/* Sprites PNG transparents des bâtiments féodaux (stables, sans effet yoyo au survol) */
 .rts-tile-sprite {
     position: absolute;
     bottom: 0;
@@ -552,44 +484,14 @@ a:hover {
     object-fit: contain;
     pointer-events: none;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
-    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.22s ease;
-}
-
-.rts-hotspot:hover .rts-tile-sprite,
-.rts-hotspot.highlighted .rts-tile-sprite {
-    transform: translateX(-50%);
-    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)) brightness(1.08);
 }
 
 .rts-tenshu-sprite {
     filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
 }
 
-/* Hover & Focus sur les bâtiments */
-.rts-hotspot:hover {
-    z-index: 50 !important;
-    background: transparent;
-}
-
-.rts-hotspot .rts-reticle,
-.rts-hotspot .rts-reticle-alt {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.rts-hotspot:hover .rts-reticle,
-.rts-hotspot:hover .rts-reticle-alt,
-.rts-hotspot.highlighted .rts-reticle,
-.rts-hotspot.highlighted .rts-reticle-alt {
-    opacity: 1;
-    box-shadow: inset 0 0 15px rgba(194, 37, 43, 0.15);
-}
-
-.rts-hotspot:hover .rts-badge,
-.rts-hotspot.highlighted .rts-badge {
-    border-color: #c2252b;
-    box-shadow: 0 0 12px rgba(194, 37, 43, 0.35);
-    transform: translateX(-50%);
+.rts-hotspot.highlighted .rts-tile-sprite {
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)) brightness(1.08);
 }
 
 /* Badge HUD de Niveau sur la structure (Cité) */
@@ -658,13 +560,6 @@ a:hover {
     justify-content: center;
     z-index: 25;
     pointer-events: none;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.rts-hotspot:hover .rts-level-bubble {
-    transform: scale(1.18);
-    border-color: #c2252b;
-    box-shadow: 0 4px 14px rgba(194, 37, 43, 0.5);
 }
 
 .rts-level-bubble.upgrading {
@@ -691,10 +586,6 @@ a:hover {
     border-color: #c2252b;
     font-size: 0.95rem;
     color: #c2252b;
-}
-
-.rts-hotspot:hover .rts-tenshu-bubble {
-    transform: scale(1.15);
 }
 
 /* Infobulle Tactique d'Amélioration au survol (Tooltip RTS) */
@@ -818,11 +709,6 @@ a:hover {
     color: #1c1917;
     font-size: 0.8rem;
     padding: 3px 10px;
-}
-
-.hotspot-bunker-hq:hover .rts-badge {
-    box-shadow: 0 4px 20px rgba(194, 37, 43, 0.5);
-    transform: translateX(-50%) scale(1.08);
 }
 
 .hotspot-bunker-hq .rts-tooltip {
