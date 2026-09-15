@@ -1428,3 +1428,622 @@ a:hover {
     color: #ef4444;
 }
 
+/* ==========================================================
+   PAGE DÉDIÉE CHAMP DE RESSOURCES (STYLE TRAVIAN BUILD.PHP)
+   ========================================================== */
+.field-view-container {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.field-nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.field-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(20, 20, 24, 0.85);
+    border: 1px solid var(--border-color);
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.field-back-btn:hover {
+    background: rgba(220, 38, 38, 0.2);
+    border-color: var(--accent-red);
+    color: #fff;
+    transform: translateX(-3px);
+}
+
+.field-slot-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(15, 15, 18, 0.85);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.3rem 0.5rem;
+}
+
+.field-arrow-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.field-arrow-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.field-slot-badge {
+    padding: 0.35rem 0.85rem;
+    background: rgba(220, 38, 38, 0.25);
+    border: 1px solid rgba(220, 38, 38, 0.5);
+    border-radius: 6px;
+    color: #fca5a5;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* CARTE DE HÉROS : FOND DE CARTE SCÉNIQUE & TILE */
+.field-hero-card {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+    margin-bottom: 1.5rem;
+    background: #0f1115;
+}
+
+.field-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center 40%;
+    filter: blur(2px) brightness(0.42) saturate(1.15);
+    transform: scale(1.04);
+}
+
+.field-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(12, 12, 15, 0.94) 0%, rgba(15, 15, 20, 0.82) 50%, rgba(20, 10, 10, 0.92) 100%);
+}
+
+.field-hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    padding: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.field-tile-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.field-tile-pedestal {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(220, 38, 38, 0.22) 0%, rgba(0, 0, 0, 0.85) 75%);
+    border: 2px solid rgba(220, 38, 38, 0.4);
+    box-shadow: 0 0 35px rgba(220, 38, 38, 0.3), inset 0 0 25px rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.field-tile-img {
+    width: 175px;
+    height: 175px;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.85));
+    user-select: none;
+}
+
+.field-level-emblem {
+    position: absolute;
+    bottom: -10px;
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    border: 2px solid #fca5a5;
+    border-radius: 20px;
+    padding: 0.25rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.emblem-lvl-text {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    color: #fecaca;
+    font-weight: 700;
+}
+
+.emblem-lvl-number {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+}
+
+.field-meta-pane {
+    flex: 1;
+    min-width: 300px;
+}
+
+.field-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.field-type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+}
+
+.field-type-pill.sec-metal { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+.field-type-pill.sec-crystal { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.4); }
+.field-type-pill.sec-deut { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
+.field-type-pill.sec-energy { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.4); }
+
+.field-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.field-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.field-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.field-status-badge.ready {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.field-status-badge.upgrading {
+    background: rgba(234, 179, 8, 0.2);
+    color: #facc15;
+    border: 1px solid rgba(234, 179, 8, 0.4);
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #facc15;
+    animation: pulse 1.5s infinite;
+}
+
+.field-description {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: #cbd5e1;
+    margin: 0.85rem 0 1.25rem 0;
+    max-width: 850px;
+}
+
+.field-quick-stats {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.quick-stat-box {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.quick-stat-box.highlight {
+    border-color: rgba(34, 197, 94, 0.4);
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.stat-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.stat-value small {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.stat-gain {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #4ade80;
+}
+
+/* SECTION AMÉLIORATION & COÛTS */
+.field-upgrade-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .field-upgrade-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.field-card {
+    background: rgba(18, 18, 22, 0.95);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.field-card-header {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.field-card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #fff;
+    font-weight: 700;
+}
+
+.field-card-body {
+    padding: 1.25rem;
+    flex: 1;
+}
+
+.cost-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.cost-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cost-item.cost-ok {
+    border-left: 3px solid #22c55e;
+}
+
+.cost-item.cost-missing {
+    border-left: 3px solid #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.cost-icon {
+    font-size: 1.35rem;
+    width: 32px;
+    text-align: center;
+}
+
+.cost-details {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cost-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+.cost-req {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.cost-stock {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.cost-check {
+    font-weight: 800;
+    font-size: 1rem;
+    width: 24px;
+    text-align: center;
+}
+
+.cost-ok .cost-check { color: #22c55e; }
+.cost-missing .cost-check { color: #ef4444; }
+
+/* BANDEAU TEMPS DE CONSTRUCTION POUR LE NIVEAU SUIVANT */
+.construction-time-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.12), rgba(0, 0, 0, 0.5));
+    border: 1px solid rgba(220, 38, 38, 0.35);
+    border-radius: 8px;
+    padding: 0.85rem 1.15rem;
+    margin-top: 1rem;
+}
+
+.time-label-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.time-icon {
+    font-size: 1.5rem;
+}
+
+.time-value-display {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #fca5a5;
+    letter-spacing: 1px;
+    font-family: monospace;
+}
+
+/* BOÎTES D'ACTION */
+.field-active-job-box, .field-blocked-box, .field-ready-box {
+    text-align: center;
+    padding: 1.5rem 1rem;
+}
+
+.job-status-title {
+    font-size: 1.15rem;
+    color: #fde047;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.job-timer-display {
+    font-size: 1.8rem;
+    font-weight: 900;
+    font-family: monospace;
+    color: #4ade80;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 8px;
+    padding: 0.6rem;
+    display: inline-block;
+    min-width: 180px;
+    margin: 0.5rem 0;
+}
+
+.field-btn-primary {
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    color: #fff;
+    border: 1px solid #ef4444;
+    padding: 0.85rem 1.75rem;
+    font-size: 1rem;
+    font-weight: 800;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+    transition: all 0.2s ease;
+    width: 100%;
+    max-width: 360px;
+}
+
+.field-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
+}
+
+.field-btn-cancel {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 0.65rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.field-btn-cancel:hover {
+    background: rgba(239, 68, 68, 0.3);
+    color: #fff;
+}
+
+.field-btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.field-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.time-to-afford {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: #fbbf24;
+    background: rgba(234, 179, 8, 0.1);
+    border: 1px solid rgba(234, 179, 8, 0.25);
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    display: inline-block;
+}
+
+/* BANDEAU DES 18 PARCELLES DU DOMAINE (STYLE TRAVIAN) */
+.field-strip-card {
+    background: rgba(15, 15, 18, 0.95);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+}
+
+.field-strip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.85rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.field-strip-header h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #fff;
+    font-weight: 700;
+}
+
+.field-strip-grid {
+    display: grid;
+    grid-template-columns: repeat(18, 1fr);
+    gap: 0.4rem;
+}
+
+@media (max-width: 1100px) {
+    .field-strip-grid {
+        grid-template-columns: repeat(9, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .field-strip-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+.field-strip-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 0.35rem 0.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.field-strip-item:hover {
+    background: rgba(220, 38, 38, 0.2);
+    border-color: var(--accent-red);
+    transform: translateY(-2px);
+}
+
+.field-strip-item.active {
+    background: rgba(220, 38, 38, 0.35);
+    border-color: #ef4444;
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
+}
+
+.strip-item-img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.strip-item-num {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+}
+
+.strip-item-lvl {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #fca5a5;
+}
+
+

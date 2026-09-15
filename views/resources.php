@@ -306,7 +306,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                     <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?>" 
                          data-sector="<?= $type ?>"
                          data-slot="<?= $slot ?>"
-                         onclick="openUpgradeModal('field', '<?= $slot ?>', '<?= addslashes($info['name']) ?> #<?= $slot ?>', <?= $lvl ?>, <?= $cost['metal'] ?>, <?= $cost['crystal'] ?>, <?= $cost['deuterium'] ?>, <?= $duration ?>)">
+                         onclick="window.location.href='/?page=field&slot=<?= $slot ?>'">
                         
                         <!-- Image PNG transparente de la ressource -->
                         <img src="/public/assets/<?= $tileImg ?>" class="rts-tile-sprite" alt="<?= htmlspecialchars($info['name']) ?>" draggable="false">
@@ -341,7 +341,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                                 <span style="color:var(--text-muted);">⏱️ <?= gmdate('i:s', $duration) ?></span>
                             </div>
                             <div class="rts-tt-cta">
-                                <?= $canAfford ? '⚡ Cliquer pour améliorer' : '⚠️ Ressources insuffisantes' ?>
+                                <?= $isUpgrading ? '⏳ Chantier en cours &rarr;' : '🔍 Inspecter & Améliorer la parcelle &rarr;' ?>
                             </div>
                         </div>
                     </div>
@@ -349,7 +349,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
             </div>
             
             <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted); text-align:center;">
-                💡 <strong>Gestion du Domaine Féodal :</strong> Cliquez directement sur les parcelles de bûcherons, carrières, rizières, sanctuaires ou le Tenshu central pour lancer les améliorations ou accéder à la cité castrale.
+                💡 <strong>Gestion du Domaine Féodal :</strong> Cliquez directement sur une parcelle de bûcheron, carrière, rizière ou sanctuaire pour ouvrir sa page dédiée de travaux, ou sur le Tenshu central pour visiter la cité castrale.
             </p>
         </div>
     </div>

@@ -65,7 +65,7 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
         <!-- 🧭 3 Médaillons Circulaires de Navigation Féodale Travian (Terroir, Cité, Provinces) -->
         <div class="travian-nav-medallions">
             <!-- 1. Terroir & Récoltes -->
-            <a href="?page=resources" class="travian-medallion <?= ($page === 'resources') ? 'active' : '' ?>" title="Terroir & Récoltes">
+            <a href="?page=resources" class="travian-medallion <?= ($page === 'resources' || $page === 'field') ? 'active' : '' ?>" title="Terroir & Récoltes">
                 <img src="/public/assets/nav_resources.jpg" alt="Terroir" class="travian-medallion-img">
                 <span class="travian-medallion-tooltip">Terroir & Récoltes</span>
             </a>

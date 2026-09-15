@@ -68,3 +68,4 @@ Jeu de stratégie multijoueur en temps réel sur navigateur (style **Travian**),
 
 ## 📜 Licence
 Projet sous licence MIT - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+

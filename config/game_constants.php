@@ -61,7 +61,9 @@ const FIELD_LAYOUT = [
 const FIELD_TYPES = [
     'metal_mine' => [
         'name' => 'Camp de Bûcherons',
+        'res_name' => 'Bois de Cèdre',
         'icon' => '🪵',
+        'description' => 'Exploitation forestière taillant les nobles cèdres des forêts montagneuses du fief. Le bois est la matière première indispensable pour dresser les charpentes de vos donjons, vos palissades fortifiées et fabriquer les arcs et armes d\'hast de vos bataillons.',
         'base_cost' => ['metal' => 60, 'crystal' => 15, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
         'base_time' => 15,
@@ -70,7 +72,9 @@ const FIELD_TYPES = [
     ],
     'crystal_mine' => [
         'name' => 'Carrière de Pierre',
+        'res_name' => 'Pierre de Taille',
         'icon' => '🪨',
+        'description' => 'Carrière à ciel ouvert extrayant les blocs de granit et roches volcaniques des coteaux. Les pierres taillées permettent d\'édifier les fondations cyclopéennes (Nozura-zumi) de vos remparts, vos fossés et vos forteresses imprenables.',
         'base_cost' => ['metal' => 48, 'crystal' => 24, 'deuterium' => 0],
         'cost_multiplier' => 1.6,
         'base_time' => 20,
@@ -79,7 +83,9 @@ const FIELD_TYPES = [
     ],
     'deuterium_synth' => [
         'name' => 'Rizière Inondée',
+        'res_name' => 'Riz Impérial (Koku)',
         'icon' => '🌾',
+        'description' => 'Vastes rizières aménagées en terrasses irriguées par les canaux fluviaux. Le riz est la véritable monnaie du Japon féodal (mesurée en Koku) : il nourrit votre population, entretient vos garnisons samouraïs et finance vos campagnes militaires.',
         'base_cost' => ['metal' => 225, 'crystal' => 75, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
         'base_time' => 25,
@@ -88,7 +94,9 @@ const FIELD_TYPES = [
     ],
     'solar_plant' => [
         'name' => 'Sanctuaire Shintō & Moulin',
+        'res_name' => 'Ferveur & Sérénité',
         'icon' => '⛩️',
+        'description' => 'Lieu sacré érigé sous les pins ancestraux avec torii vermillon et roue à aubes fluviale. Il honore les esprits tutélaires (Kami), maintenant l\'harmonie spirituelle et l\'énergie indispensable au rendement de toutes les parcelles du domaine.',
         'base_cost' => ['metal' => 75, 'crystal' => 30, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
         'base_time' => 15,

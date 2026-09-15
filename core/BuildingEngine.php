@@ -149,10 +149,12 @@ class BuildingEngine {
             VALUES (?, ?, ?, ?, ?, ?)
         ");
         $stmtInsert->execute([$planetId, $category, $targetId, $details['target_level'], $now, $finishesAt]);
+        $queueId = (int)$this->db->lastInsertId();
 
         return [
             'success' => true,
             'message' => 'Construction initiée avec succès !',
+            'queue_id' => $queueId,
             'finishes_at' => $finishesAt,
             'duration' => $duration
         ];
