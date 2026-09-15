@@ -31,10 +31,10 @@ $tab = $_GET['tab'] ?? 'login';
             z-index: 10;
         }
         .auth-box {
-            background: rgba(12, 12, 18, 0.90);
-            border: 1px solid rgba(220, 38, 38, 0.35);
+            background: rgba(253, 251, 247, 0.96);
+            border: 2px solid #b91c1c;
             border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(220, 38, 38, 0.25);
+            box-shadow: 0 20px 60px rgba(60, 45, 30, 0.35), 0 0 35px rgba(194, 37, 43, 0.15);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             overflow: hidden;
@@ -42,7 +42,7 @@ $tab = $_GET['tab'] ?? 'login';
         .auth-header {
             text-align: center;
             padding: 2.5rem 1rem 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid var(--border-color);
         }
         .auth-tabs {
             display: flex;
@@ -51,7 +51,7 @@ $tab = $_GET['tab'] ?? 'login';
         .auth-tab-btn {
             flex: 1;
             padding: 1rem;
-            background: rgba(0,0,0,0.35);
+            background: rgba(246, 242, 232, 0.7);
             border: none;
             color: var(--text-muted);
             font-weight: 700;
@@ -62,26 +62,27 @@ $tab = $_GET['tab'] ?? 'login';
             transition: all 0.2s;
         }
         .auth-tab-btn.active {
-            color: #fff;
-            background: rgba(220, 38, 38, 0.15);
-            border-bottom: 3px solid #dc2626;
+            color: #c2252b;
+            background: #ffffff;
+            border-bottom: 3px solid #c2252b;
         }
         .faction-choice-card {
-            border: 2px solid rgba(255,255,255,0.1);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             padding: 1rem;
             cursor: pointer;
             transition: all 0.2s;
-            background: rgba(0,0,0,0.3);
+            background: #ffffff;
+            box-shadow: 0 2px 6px rgba(60, 45, 30, 0.04);
         }
         .faction-choice-card:hover {
-            border-color: #dc2626;
+            border-color: #c2252b;
             transform: translateY(-2px);
         }
         .faction-choice-card.selected {
-            border-color: #dc2626;
-            background: rgba(220, 38, 38, 0.18);
-            box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
+            border-color: #c2252b;
+            background: rgba(194, 37, 43, 0.06);
+            box-shadow: 0 0 15px rgba(194, 37, 43, 0.25);
         }
         .form-group {
             margin-bottom: 1.25rem;
@@ -89,24 +90,24 @@ $tab = $_GET['tab'] ?? 'login';
         .form-group label {
             display: block;
             font-size: 0.85rem;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 0.4rem;
-            color: var(--text-muted);
+            color: #1c1917;
         }
         .form-control {
             width: 100%;
-            background: rgba(10, 10, 16, 0.85);
+            background: #ffffff;
             border: 1px solid var(--border-color);
-            color: #fff;
+            color: #1c1917;
             padding: 0.75rem 1rem;
             border-radius: 6px;
             font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         .form-control:focus {
-            border-color: #dc2626;
-            box-shadow: 0 0 10px rgba(220, 38, 38, 0.35);
+            border-color: #c2252b;
+            box-shadow: 0 0 10px rgba(194, 37, 43, 0.25);
         }
     </style>
 </head>
@@ -115,7 +116,7 @@ $tab = $_GET['tab'] ?? 'login';
 <div class="auth-container">
     <div class="auth-box">
         <div class="auth-header">
-            <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: 3px; color: #fff; text-transform: uppercase;">
+            <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: 3px; color: #1c1917; text-transform: uppercase;">
                 🏯 OpenShogun
             </h1>
             <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">

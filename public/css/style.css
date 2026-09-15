@@ -1,54 +1,54 @@
 /* ==========================================================
-   OPENSHOGUN - THEME FEODAL : ROUGE, NOIR & PAPIER DE RIZ
+   OPENSHOGUN - THEME FEODAL : WASHI (PAPIER DE RIZ) & ENCRE (SUMI-E)
    ========================================================== */
 
 :root {
-    /* 🖤 Noir de Laque (Urushi) & Noir d'Encre (Sumi-e) */
-    --bg-dark: #090a0d;
-    --bg-surface: #111217;
-    --bg-card: rgba(17, 18, 24, 0.88);
-    --bg-card-solid: #15161d;
-    --bg-ink: #050608;
+    /* 📜 Papier de Riz Naturel (Washi) & Fonds Lumineux */
+    --bg-dark: #f6f2e8;          /* Fond dominant : papier de riz naturel */
+    --bg-surface: #fdfbf7;       /* Cartes & Panneaux : blanc de riz pur */
+    --bg-card: #fdfbf7;          /* Fond des cartes de jeu */
+    --bg-card-solid: #ffffff;
+    --bg-ink: #ede5d5;           /* Fond secondaire lin / ivoire d'époque */
     
-    /* 📜 Papier de Riz (Washi & Parchemin Antique) */
-    --rice-paper: #f4eee1;
-    --rice-paper-light: #faf7f0;
-    --rice-paper-warm: #ede3ce;
-    --rice-paper-dim: #d4c7af;
-    --rice-paper-ink: #14151a;
+    /* Nuances de Papier de Riz */
+    --rice-paper: #f6f2e8;
+    --rice-paper-light: #ffffff;
+    --rice-paper-warm: #ede4d3;
+    --rice-paper-dim: #dfd4c0;
+    --rice-paper-ink: #1c1917;
     
     /* 🔴 Rouge Impérial, Vermillon Torii & Sceau Hanko */
-    --red-primary: #dc2626;
-    --red-hover: #ef4444;
-    --red-deep: #b91c1c;
-    --red-dark: #991b1b;
-    --red-glow: 0 0 16px rgba(220, 38, 38, 0.45);
-    --red-soft: rgba(220, 38, 38, 0.15);
+    --red-primary: #c2252b;
+    --red-hover: #dc2626;
+    --red-deep: #991b1b;
+    --red-dark: #7f1d1d;
+    --red-glow: 0 0 12px rgba(194, 37, 43, 0.25);
+    --red-soft: rgba(194, 37, 43, 0.08);
     
-    /* Bordures & Accents */
-    --border-color: rgba(220, 38, 38, 0.28);
-    --border-highlight: #dc2626;
-    --border-rice: rgba(244, 238, 225, 0.25);
+    /* 🪵 Bordures Parchemin, Cèdre & Laque */
+    --border-color: #dccbb3;
+    --border-highlight: #c2252b;
+    --border-rice: #e5d8c5;
     
-    /* Typographie */
-    --text-main: #f4eee1;       /* Papier de riz sur fond sombre */
-    --text-muted: #aba394;      /* Papier de riz estompé */
-    --text-bright: #ffffff;
-    --text-ink-dark: #121318;   /* Encre de Chine sur papier de riz */
+    /* ✒️ Typographie : Encre de Chine profonde (Sumi-e) */
+    --text-main: #1c1917;        /* Encre de Chine sur papier de riz */
+    --text-muted: #6b6355;       /* Encre délayée / cendre de cèdre */
+    --text-bright: #0c0a09;
+    --text-ink-dark: #1c1917;
     
     /* Factions Féodales */
-    --color-terran: #dc2626;    /* Clan Oda : Rouge Écarlate */
-    --color-vorash: #b91c1c;    /* Clan Takeda : Rouge Carmin */
-    --color-aethelis: #eab308;  /* Clan Tokugawa : Or Impérial */
+    --color-terran: #c2252b;     /* Clan Oda : Rouge Écarlate */
+    --color-vorash: #991b1b;     /* Clan Takeda : Rouge Carmin */
+    --color-aethelis: #b45309;   /* Clan Tokugawa : Ambre & Or */
     
     /* Ressources Féodales */
-    --res-metal: #a8a29e;       /* Bois de Cèdre */
-    --res-crystal: #f4eee1;     /* Pierre de Taille */
-    --res-deut: #eab308;        /* Riz Impérial (Koku Doré) */
-    --res-energy: #dc2626;      /* Sérénité & Ferveur Torii */
+    --res-metal: #78350f;        /* Bois de Cèdre */
+    --res-crystal: #334155;      /* Pierre de Taille */
+    --res-deut: #b45309;         /* Riz Impérial (Koku Doré) */
+    --res-energy: #c2252b;       /* Sérénité & Ferveur Torii */
     
-    --glow-cyan: 0 0 15px rgba(220, 38, 38, 0.4);
-    --glow-card: 0 10px 35px 0 rgba(0, 0, 0, 0.85);
+    --glow-cyan: 0 4px 15px rgba(194, 37, 43, 0.15);
+    --glow-card: 0 4px 20px rgba(60, 45, 30, 0.07);
 }
 
 * {
@@ -60,9 +60,9 @@
 body {
     background-color: var(--bg-dark);
     background-image: 
-        radial-gradient(ellipse at 15% 20%, rgba(220, 38, 38, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 85% 80%, rgba(185, 28, 28, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(18, 19, 26, 1) 0%, var(--bg-dark) 100%);
+        radial-gradient(ellipse at 15% 20%, rgba(194, 37, 43, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 80%, rgba(180, 83, 9, 0.04) 0%, transparent 50%),
+        linear-gradient(180deg, #f7f3e8 0%, #f2ebdd 100%);
     background-attachment: fixed;
     color: var(--text-main);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -77,17 +77,17 @@ a {
 }
 
 a:hover {
-    color: #fca5a5;
-    text-shadow: var(--red-glow);
+    color: #991b1b;
 }
 
 /* ==========================================================
    TOPBAR HUD & RESSOURCES
    ========================================================== */
 .hud-header {
-    background: rgba(10, 11, 16, 0.92);
+    background: rgba(253, 251, 247, 0.96);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid #b91c1c;
+    box-shadow: 0 4px 20px rgba(60, 45, 30, 0.08);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -98,7 +98,7 @@ a:hover {
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color);
     position: relative;
 }
 
@@ -123,24 +123,26 @@ a:hover {
     font-size: 1.25rem;
     font-weight: 800;
     letter-spacing: 2px;
-    color: #fff;
+    color: #1c1917;
     text-transform: uppercase;
 }
 
 .brand-icon {
     font-size: 1.5rem;
-    filter: drop-shadow(0 0 8px #dc2626);
+    filter: drop-shadow(0 2px 4px rgba(194, 37, 43, 0.3));
 }
 
 .planet-selector {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: #ffffff;
     padding: 0.35rem 0.85rem;
     border-radius: 6px;
     border: 1px solid var(--border-color);
     font-size: 0.9rem;
+    color: #1c1917;
+    box-shadow: 0 2px 5px rgba(60, 45, 30, 0.04);
 }
 
 .user-profile {
@@ -160,29 +162,31 @@ a:hover {
     font-weight: 600;
 }
 
-.faction-badge.terran { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #3b82f6; }
-.faction-badge.vorash { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
-.faction-badge.aethelis { background: rgba(192, 132, 252, 0.2); color: #e9d5ff; border: 1px solid #c084fc; }
+.faction-badge.terran { background: rgba(194, 37, 43, 0.1); color: #b91c1c; border: 1px solid #c2252b; }
+.faction-badge.vorash { background: rgba(153, 27, 27, 0.1); color: #991b1b; border: 1px solid #991b1b; }
+.faction-badge.aethelis { background: rgba(180, 83, 9, 0.1); color: #b45309; border: 1px solid #b45309; }
 
 /* Barre des Ressources Travian-Style */
 .resources-bar {
     display: flex;
     justify-content: center;
-    gap: 2rem;
+    gap: 1.5rem;
     padding: 0.5rem 1rem;
     flex-wrap: wrap;
-    background: rgba(8, 9, 13, 0.75);
+    background: rgba(246, 242, 232, 0.9);
+    border-top: 1px solid rgba(220, 203, 179, 0.5);
 }
 
 .res-item {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    background: rgba(18, 19, 26, 0.7);
-    border: 1px solid rgba(220, 38, 38, 0.18);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
     padding: 0.4rem 0.85rem;
     border-radius: 6px;
     min-width: 150px;
+    box-shadow: 0 2px 6px rgba(60, 45, 30, 0.04);
 }
 
 .res-icon {
@@ -197,7 +201,7 @@ a:hover {
 .res-value {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #fff;
+    color: #1c1917;
     font-variant-numeric: tabular-nums;
 }
 
@@ -209,7 +213,7 @@ a:hover {
 .res-bar-cont {
     width: 100%;
     height: 3px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.08);
     border-radius: 2px;
     margin-top: 3px;
     overflow: hidden;
@@ -246,9 +250,9 @@ a:hover {
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    border: 3px solid rgba(203, 213, 225, 0.35);
-    background: #090e1d;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), inset 0 2px 4px rgba(255, 255, 255, 0.25);
+    border: 3px solid #dccbb3;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(60, 45, 30, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.8);
     cursor: pointer;
     text-decoration: none;
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -260,33 +264,33 @@ a:hover {
     border-radius: 50%;
     object-fit: cover;
     display: block;
-    filter: brightness(0.85) contrast(1.05);
+    filter: brightness(0.95) contrast(1.05);
     transition: all 0.25s ease;
 }
 
 /* État Survol (Hover) */
 .travian-medallion:hover {
     transform: translateY(-4px) scale(1.15);
-    border-color: #dc2626;
-    box-shadow: 0 8px 22px rgba(220, 38, 38, 0.65), inset 0 2px 6px rgba(255, 255, 255, 0.4);
+    border-color: #c2252b;
+    box-shadow: 0 8px 22px rgba(194, 37, 43, 0.4), inset 0 2px 6px rgba(255, 255, 255, 0.9);
     z-index: 60;
 }
 
 .travian-medallion:hover .travian-medallion-img {
-    filter: brightness(1.15) contrast(1.1);
+    filter: brightness(1.05) contrast(1.1);
 }
 
 /* État Actif (Vue Courante comme dans Travian) */
 .travian-medallion.active {
     width: 62px;
     height: 62px;
-    border: 3.5px solid #facc15;
-    box-shadow: 0 0 18px rgba(250, 204, 21, 0.75), 0 6px 14px rgba(0, 0, 0, 0.9), inset 0 2px 6px rgba(255, 255, 255, 0.6);
+    border: 3.5px solid #c2252b;
+    box-shadow: 0 0 16px rgba(194, 37, 43, 0.45), 0 6px 14px rgba(60, 45, 30, 0.2), inset 0 2px 6px rgba(255, 255, 255, 0.9);
     z-index: 55;
 }
 
 .travian-medallion.active .travian-medallion-img {
-    filter: brightness(1.1) contrast(1.1);
+    filter: brightness(1.02) contrast(1.1);
 }
 
 /* Infobulle de Texte au Survol UNIQUEMENT */
@@ -295,17 +299,16 @@ a:hover {
     top: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%) translateY(4px);
-    background: rgba(10, 15, 30, 0.98);
-    border: 1px solid #dc2626;
-    color: var(--rice-paper-light);
-    background: rgba(12, 13, 18, 0.98);
+    background: #1c1917;
+    border: 1px solid #c2252b;
+    color: #fdfbf7;
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     padding: 0.35rem 0.75rem;
     border-radius: 5px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 12px rgba(220, 38, 38, 0.4);
+    box-shadow: 0 8px 24px rgba(60, 45, 30, 0.35), 0 0 12px rgba(194, 37, 43, 0.3);
     pointer-events: none;
     white-space: nowrap;
     opacity: 0;
@@ -322,7 +325,7 @@ a:hover {
     transform: translateX(-50%);
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-bottom: 5px solid #dc2626;
+    border-bottom: 5px solid #c2252b;
 }
 
 .travian-medallion:hover .travian-medallion-tooltip {
@@ -369,16 +372,15 @@ a:hover {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    box-shadow: var(--glow-card);
-    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(60, 45, 30, 0.06);
     overflow: hidden;
     margin-bottom: 1.5rem;
 }
 
 .card-header {
     padding: 1rem 1.25rem;
-    background: rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(246, 242, 232, 0.7);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -387,7 +389,7 @@ a:hover {
 .card-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #fff;
+    color: #1c1917;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -407,7 +409,7 @@ a:hover {
     background: url('/public/assets/shogun_rural_terroir_bg.jpg') center/cover no-repeat;
     border-radius: 12px;
     border: 2px solid var(--border-color);
-    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5), 0 10px 25px rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.3), 0 10px 25px rgba(60, 45, 30, 0.15);
     overflow: visible;
     user-select: none;
 }
@@ -422,7 +424,7 @@ a:hover {
 }
 
 .sector-btn {
-    background: rgba(15, 23, 42, 0.75);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     color: var(--text-muted);
     padding: 0.35rem 0.75rem;
@@ -434,20 +436,21 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    box-shadow: 0 2px 5px rgba(60, 45, 30, 0.04);
 }
 
 .sector-btn:hover, .sector-btn.active {
-    background: rgba(220, 38, 38, 0.18);
-    color: var(--rice-paper-light);
-    border-color: #dc2626;
-    box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+    background: rgba(194, 37, 43, 0.08);
+    color: #c2252b;
+    border-color: #c2252b;
+    box-shadow: 0 2px 8px rgba(194, 37, 43, 0.2);
 }
 
-.sector-btn.filter-metal:hover { border-color: #f97316; color: #f97316; }
-.sector-btn.filter-crystal:hover { border-color: var(--rice-paper); color: var(--rice-paper); }
-.sector-btn.filter-deut:hover { border-color: #34d399; color: #34d399; }
-.sector-btn.filter-energy:hover { border-color: #facc15; color: #facc15; }
-.sector-btn.filter-hq:hover { border-color: #60a5fa; color: #60a5fa; }
+.sector-btn.filter-metal:hover { border-color: #78350f; color: #78350f; }
+.sector-btn.filter-crystal:hover { border-color: #334155; color: #334155; }
+.sector-btn.filter-deut:hover { border-color: #b45309; color: #b45309; }
+.sector-btn.filter-energy:hover { border-color: #c2252b; color: #c2252b; }
+.sector-btn.filter-hq:hover { border-color: #b91c1c; color: #b91c1c; }
 
 /* Hotspots cliquables sur les bâtiments du terrain */
 .rts-hotspot {
@@ -525,11 +528,11 @@ a:hover {
 }
 
 /* Couleurs par secteur */
-.sector-metal_mine { --sector-color: #f97316; }
-.sector-crystal_mine { --sector-color: #e2e8f0; }
-.sector-deuterium_synth { --sector-color: #34d399; }
-.sector-solar_plant { --sector-color: #facc15; }
-.sector-hq { --sector-color: #60a5fa; }
+.sector-metal_mine { --sector-color: #78350f; }
+.sector-crystal_mine { --sector-color: #334155; }
+.sector-deuterium_synth { --sector-color: #b45309; }
+.sector-solar_plant { --sector-color: #c2252b; }
+.sector-hq { --sector-color: #b91c1c; }
 
 .rts-hotspot .rts-reticle::before,
 .rts-hotspot .rts-reticle::after,
@@ -548,18 +551,18 @@ a:hover {
     height: 100%;
     object-fit: contain;
     pointer-events: none;
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
     transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.22s ease;
 }
 
 .rts-hotspot:hover .rts-tile-sprite,
 .rts-hotspot.highlighted .rts-tile-sprite {
     transform: translateX(-50%);
-    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7)) brightness(1.1);
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)) brightness(1.08);
 }
 
 .rts-tenshu-sprite {
-    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
 }
 
 /* Hover & Focus sur les bâtiments */
@@ -579,13 +582,13 @@ a:hover {
 .rts-hotspot.highlighted .rts-reticle,
 .rts-hotspot.highlighted .rts-reticle-alt {
     opacity: 1;
-    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 15px rgba(194, 37, 43, 0.15);
 }
 
 .rts-hotspot:hover .rts-badge,
 .rts-hotspot.highlighted .rts-badge {
-    border-color: #fff;
-    box-shadow: 0 0 12px var(--sector-color);
+    border-color: #c2252b;
+    box-shadow: 0 0 12px rgba(194, 37, 43, 0.35);
     transform: translateX(-50%);
 }
 
@@ -595,18 +598,18 @@ a:hover {
     bottom: -6px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(10, 15, 29, 0.92);
+    background: rgba(253, 251, 247, 0.96);
     backdrop-filter: blur(8px);
-    border: 1px solid var(--sector-color);
+    border: 1.5px solid var(--sector-color);
     border-radius: 4px;
     padding: 2px 7px;
     font-size: 0.72rem;
     font-weight: 700;
-    color: #fff;
+    color: #1c1917;
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.85);
+    box-shadow: 0 4px 10px rgba(60, 45, 30, 0.25);
     white-space: nowrap;
     transition: all 0.2s ease;
     pointer-events: none;
@@ -614,16 +617,16 @@ a:hover {
 }
 
 .rts-lvl-pill {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(28, 25, 23, 0.08);
     padding: 0 0.35rem;
     border-radius: 3px;
     font-size: 0.7rem;
-    color: #fff;
+    color: #1c1917;
 }
 
 .rts-upgrading-pulse {
     animation: pulseQueue 1.5s infinite;
-    color: #f59e0b;
+    color: #b45309;
 }
 
 @keyframes pulseQueue {
@@ -635,12 +638,12 @@ a:hover {
 .rts-tooltip {
     position: absolute;
     width: 230px;
-    background: rgba(9, 14, 28, 0.95);
+    background: rgba(253, 251, 247, 0.98);
     backdrop-filter: blur(12px);
-    border: 1px solid var(--sector-color);
+    border: 1.5px solid var(--sector-color);
     border-radius: 6px;
     padding: 0.65rem 0.8rem;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 25px rgba(60, 45, 30, 0.2);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -648,7 +651,7 @@ a:hover {
     pointer-events: none;
     z-index: 100;
     font-size: 0.75rem;
-    color: #e2e8f0;
+    color: #1c1917;
 }
 
 .rts-hotspot:hover .rts-tooltip {
@@ -660,7 +663,7 @@ a:hover {
 .rts-tt-title {
     font-size: 0.85rem;
     font-weight: 800;
-    color: #fff;
+    color: #1c1917;
     margin-bottom: 0.25rem;
     display: flex;
     justify-content: space-between;
@@ -668,13 +671,13 @@ a:hover {
 }
 
 .rts-tt-prod {
-    color: #94a3b8;
+    color: #6b6355;
     margin-bottom: 0.4rem;
     font-size: 0.75rem;
 }
 
 .rts-tt-cost {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--border-color);
     padding-top: 0.4rem;
     margin-top: 0.4rem;
     display: flex;
@@ -689,7 +692,7 @@ a:hover {
     color: var(--sector-color);
     font-weight: 700;
     font-size: 0.7rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(194, 37, 43, 0.06);
     padding: 0.2rem;
     border-radius: 3px;
 }
@@ -746,15 +749,16 @@ a:hover {
     bottom: -6px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(15, 23, 42, 0.95);
-    border-color: #dc2626;
-    box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+    background: #ffffff;
+    border: 2px solid #c2252b;
+    box-shadow: 0 4px 15px rgba(194, 37, 43, 0.3);
+    color: #1c1917;
     font-size: 0.8rem;
     padding: 3px 10px;
 }
 
 .hotspot-bunker-hq:hover .rts-badge {
-    box-shadow: 0 0 25px rgba(220, 38, 38, 0.9);
+    box-shadow: 0 4px 20px rgba(194, 37, 43, 0.5);
     transform: translateX(-50%) scale(1.08);
 }
 
@@ -773,15 +777,15 @@ a:hover {
     background: url('/public/assets/planet_colony_city.jpg') center/cover no-repeat;
 }
 
-.sector-military { --sector-color: #f87171; }
-.sector-science { --sector-color: #c084fc; }
-.sector-logistics { --sector-color: #22d3ee; }
-.sector-gateway { --sector-color: #34d399; }
+.sector-military { --sector-color: #c2252b; }
+.sector-science { --sector-color: #b45309; }
+.sector-logistics { --sector-color: #334155; }
+.sector-gateway { --sector-color: #15803d; }
 
-.sector-btn.filter-military:hover { border-color: #f87171; color: #f87171; }
-.sector-btn.filter-science:hover { border-color: #c084fc; color: #c084fc; }
-.sector-btn.filter-logistics:hover { border-color: #22d3ee; color: #22d3ee; }
-.sector-btn.filter-gateway:hover { border-color: #34d399; color: #34d399; }
+.sector-btn.filter-military:hover { border-color: #c2252b; color: #c2252b; }
+.sector-btn.filter-science:hover { border-color: #b45309; color: #b45309; }
+.sector-btn.filter-logistics:hover { border-color: #334155; color: #334155; }
+.sector-btn.filter-gateway:hover { border-color: #15803d; color: #15803d; }
 
 /* Positionnement des 10 bâtiments urbains et du portail */
 .hotspot-city-hq { top: 17%; left: 42%; width: 28%; height: 38%; z-index: 12; }
@@ -838,7 +842,7 @@ a:hover {
 }
 
 .building-card {
-    background: rgba(15, 23, 42, 0.7);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 1rem;
@@ -848,11 +852,12 @@ a:hover {
     text-align: center;
     transition: all 0.2s;
     position: relative;
+    box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);
 }
 
 .building-card:hover {
-    border-color: var(--border-highlight);
-    box-shadow: var(--glow-cyan);
+    border-color: #c2252b;
+    box-shadow: 0 4px 16px rgba(194, 37, 43, 0.2);
     transform: translateY(-2px);
 }
 
@@ -860,8 +865,8 @@ a:hover {
     width: 65px;
     height: 65px;
     border-radius: 12px;
-    background: rgba(220, 38, 38, 0.15);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    background: rgba(194, 37, 43, 0.08);
+    border: 1px solid rgba(194, 37, 43, 0.25);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -872,13 +877,13 @@ a:hover {
 .building-title {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #fff;
+    color: #1c1917;
     margin-bottom: 0.25rem;
 }
 
 .building-lvl-badge {
-    background: rgba(56, 189, 248, 0.2);
-    color: #7dd3fc;
+    background: rgba(194, 37, 43, 0.1);
+    color: #c2252b;
     padding: 0.15rem 0.6rem;
     border-radius: 9999px;
     font-size: 0.8rem;
@@ -893,29 +898,30 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(15, 23, 42, 0.8);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 0.75rem;
     margin-bottom: 0.75rem;
+    box-shadow: 0 2px 6px rgba(60, 45, 30, 0.04);
 }
 
 .queue-info h4 {
     font-size: 0.9rem;
-    color: #fff;
+    color: #1c1917;
 }
 
 .queue-timer {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #dc2626;
+    color: #c2252b;
     font-family: monospace;
 }
 
 .btn-cancel {
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid #ef4444;
-    color: #fca5a5;
+    background: rgba(194, 37, 43, 0.08);
+    border: 1px solid #c2252b;
+    color: #c2252b;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     cursor: pointer;
@@ -923,8 +929,8 @@ a:hover {
 }
 
 .btn-cancel:hover {
-    background: #ef4444;
-    color: #fff;
+    background: #c2252b;
+    color: #ffffff;
 }
 
 /* ==========================================================
@@ -947,39 +953,39 @@ a:hover {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-    color: var(--rice-paper-light);
-    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
-    border: 1px solid #ef4444;
+    background: linear-gradient(135deg, #c2252b 0%, #991b1b 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(194, 37, 43, 0.3);
+    border: 1px solid #c2252b;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-    box-shadow: 0 6px 25px rgba(220, 38, 38, 0.65);
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 6px 20px rgba(194, 37, 43, 0.45);
     color: #ffffff;
 }
 
 .btn-danger {
-    background: #dc2626;
+    background: #c2252b;
     color: #fff;
 }
 
 .btn-secondary {
-    background: rgba(20, 21, 28, 0.85);
-    color: var(--rice-paper);
-    border: 1px solid var(--border-rice);
+    background: #ffffff;
+    color: #1c1917;
+    border: 1px solid var(--border-color);
 }
 .btn-secondary:hover {
-    background: rgba(30, 32, 42, 0.95);
-    border-color: #dc2626;
-    color: #fff;
+    background: #f6f2e8;
+    border-color: #c2252b;
+    color: #c2252b;
 }
 
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(6px);
+    background: rgba(40, 30, 20, 0.5);
+    backdrop-filter: blur(4px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -987,13 +993,14 @@ a:hover {
 }
 
 .modal-card {
-    background: #111218;
-    border: 1px solid #dc2626;
-    box-shadow: 0 0 40px rgba(220, 38, 38, 0.45);
+    background: #fdfbf7;
+    border: 2px solid #b91c1c;
+    box-shadow: 0 10px 40px rgba(60, 45, 30, 0.25);
     border-radius: 10px;
     width: 90%;
     max-width: 480px;
     overflow: hidden;
+    color: #1c1917;
     animation: modalPop 0.25s ease-out;
 }
 
@@ -1007,19 +1014,19 @@ a:hover {
 }
 .alert-modal-card.type-error {
     border-color: #ef4444;
-    box-shadow: 0 0 35px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 25px rgba(239, 68, 68, 0.25);
 }
 .alert-modal-card.type-success {
     border-color: #22c55e;
-    box-shadow: 0 0 35px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 4px 25px rgba(34, 197, 94, 0.25);
 }
 .alert-modal-card.type-warning {
-    border-color: #eab308;
-    box-shadow: 0 0 35px rgba(234, 179, 8, 0.4);
+    border-color: #b45309;
+    box-shadow: 0 4px 25px rgba(180, 83, 9, 0.25);
 }
 .alert-modal-card.type-confirm {
-    border-color: #dc2626;
-    box-shadow: 0 0 35px rgba(220, 38, 38, 0.4);
+    border-color: #c2252b;
+    box-shadow: 0 4px 25px rgba(194, 37, 43, 0.25);
 }
 
 .alert-modal-content {
@@ -1033,7 +1040,7 @@ a:hover {
 }
 .alert-modal-text {
     font-size: 0.95rem;
-    color: #fff;
+    color: #1c1917;
     line-height: 1.45;
 }
 .alert-modal-actions {
@@ -1045,13 +1052,13 @@ a:hover {
 .modal-close-btn {
     background: none;
     border: none;
-    color: #94a3b8;
+    color: #6b6355;
     font-size: 1.25rem;
     cursor: pointer;
     transition: color 0.2s;
 }
 .modal-close-btn:hover {
-    color: #fff;
+    color: #1c1917;
 }
 
 .cost-row {
@@ -1059,7 +1066,7 @@ a:hover {
     gap: 1rem;
     margin: 1rem 0;
     padding: 0.75rem;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(246, 242, 232, 0.7);
     border-radius: 6px;
     justify-content: space-around;
 }
@@ -1070,6 +1077,7 @@ a:hover {
     gap: 0.4rem;
     font-size: 0.9rem;
     font-weight: 700;
+    color: #1c1917;
 }
 
 /* ==========================================================
@@ -1080,17 +1088,18 @@ a:hover {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
-    background: rgba(15, 23, 42, 0.8);
+    background: #ffffff;
     padding: 0.75rem 1rem;
     border-radius: 8px;
     border: 1px solid var(--border-color);
+    box-shadow: 0 2px 6px rgba(60, 45, 30, 0.04);
 }
 
 .galaxy-grid {
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     gap: 6px;
-    background: rgba(8, 12, 24, 0.9);
+    background: #ede5d5;
     padding: 1rem;
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -1100,24 +1109,13 @@ a:hover {
 /* ==========================================================
    CARTE GALACTIQUE AVEC DRAG & DROP
    ========================================================== */
-.galaxy-nav-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    background: rgba(15, 23, 42, 0.8);
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-}
-
 .galaxy-map-wrapper {
     position: relative;
     border-radius: 10px;
     overflow: hidden;
     border: 2px solid var(--border-color);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(10, 15, 29, 0.8);
-    background: #060913;
+    box-shadow: 0 4px 20px rgba(60, 45, 30, 0.1), inset 0 0 30px rgba(60, 45, 30, 0.08);
+    background: #f6f2e8;
 }
 
 .galaxy-hud-overlay {
@@ -1133,19 +1131,18 @@ a:hover {
 }
 
 .hud-coords-badge {
-    background: rgba(10, 11, 16, 0.92);
-    backdrop-filter: blur(8px);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     padding: 0.4rem 0.85rem;
     border-radius: 6px;
     font-size: 0.85rem;
     color: var(--text-muted);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    box-shadow: 0 2px 8px rgba(60, 45, 30, 0.08);
     pointer-events: auto;
 }
 
 .hud-coords-badge strong {
-    color: #dc2626;
+    color: #c2252b;
     margin-left: 0.35rem;
     font-family: monospace;
     font-size: 0.95rem;
@@ -1158,23 +1155,22 @@ a:hover {
 }
 
 .hud-btn {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(8px);
+    background: #ffffff;
     border: 1px solid var(--border-color);
-    color: #fff;
+    color: #1c1917;
     padding: 0.4rem 0.75rem;
     border-radius: 6px;
     font-size: 0.85rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    box-shadow: 0 2px 6px rgba(60, 45, 30, 0.06);
 }
 
 .hud-btn:hover {
-    background: rgba(220, 38, 38, 0.2);
-    border-color: #dc2626;
-    color: #dc2626;
+    background: rgba(194, 37, 43, 0.08);
+    border-color: #c2252b;
+    color: #c2252b;
 }
 
 .galaxy-viewport {
@@ -1186,9 +1182,8 @@ a:hover {
     user-select: none;
     touch-action: none;
     background: 
-        radial-gradient(circle at center, rgba(30, 58, 138, 0.15) 0%, transparent 60%),
-        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
-        #050814;
+        radial-gradient(circle at center, rgba(194, 37, 43, 0.04) 0%, transparent 60%),
+        #ede5d5;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1209,21 +1204,21 @@ a:hover {
     bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(10, 15, 29, 0.8);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(220, 38, 38, 0.18);
+    background: rgba(253, 251, 247, 0.92);
+    border: 1px solid var(--border-color);
     padding: 0.3rem 0.85rem;
     border-radius: 20px;
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--text-muted);
     pointer-events: none;
     z-index: 5;
     white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(60, 45, 30, 0.08);
 }
 
 .galaxy-tile {
-    background: rgba(15, 23, 42, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(253, 251, 247, 0.95);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     display: flex;
     flex-direction: column;
@@ -1234,34 +1229,35 @@ a:hover {
     transition: background 0.2s, border-color 0.2s, transform 0.15s;
     font-size: 0.75rem;
     user-select: none;
+    box-shadow: 0 1px 4px rgba(60, 45, 30, 0.04);
 }
 
 .galaxy-tile:hover {
-    border-color: #dc2626;
-    background: rgba(220, 38, 38, 0.2);
+    border-color: #c2252b;
+    background: rgba(194, 37, 43, 0.08);
     transform: scale(1.04);
     z-index: 2;
 }
 
 .galaxy-tile.current-planet {
-    border: 2px solid #dc2626;
-    box-shadow: 0 0 18px rgba(220, 38, 38, 0.5);
+    border: 2px solid #c2252b;
+    box-shadow: 0 0 16px rgba(194, 37, 43, 0.35);
 }
 
 .galaxy-tile.tile-center {
-    border-color: rgba(220, 38, 38, 0.4);
-    background: rgba(30, 58, 138, 0.25);
+    border-color: #c2252b;
+    background: rgba(194, 37, 43, 0.08);
 }
 
 .tile-planet-icon {
     font-size: 1.5rem;
-    filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.5));
+    filter: drop-shadow(0 2px 4px rgba(194, 37, 43, 0.25));
 }
 
 .tile-empty-star {
-    opacity: 0.15;
+    opacity: 0.3;
     font-size: 1.1rem;
-    color: #94a3b8;
+    color: #a8a29e;
 }
 
 .tile-coords {
@@ -1273,7 +1269,7 @@ a:hover {
 
 .tile-owner {
     font-weight: 700;
-    color: #fff;
+    color: #1c1917;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1285,27 +1281,31 @@ a:hover {
    CARTES DE SOLDATS & TROUPES (CASERNE MILITAIRE)
    ========================================================== */
 .unit-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);
 }
 
 .unit-card:hover {
     transform: translateY(-4px);
-    border-color: #dc2626 !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 0 20px rgba(220, 38, 38, 0.35) !important;
+    border-color: #c2252b !important;
+    box-shadow: 0 8px 24px rgba(60, 45, 30, 0.15), 0 0 15px rgba(194, 37, 43, 0.2) !important;
 }
 
 .unit-card:hover .unit-img {
-    transform: scale(1.07);
+    transform: scale(1.05);
 }
 
 .unit-locked {
     opacity: 0.65;
-    filter: grayscale(0.35);
+    filter: grayscale(0.4);
 }
 
 .unit-locked:hover {
-    border-color: #ef4444 !important;
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important;
+    border-color: #c2252b !important;
+    box-shadow: 0 0 12px rgba(194, 37, 43, 0.2) !important;
 }
 
 .unit-img-thumb {
@@ -1313,7 +1313,7 @@ a:hover {
 }
 
 .unit-img-thumb:hover {
-    transform: scale(1.25);
+    transform: scale(1.2);
 }
 
 /* ==========================================================
@@ -1324,49 +1324,50 @@ a:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     padding: 0.2rem 0.6rem;
     border-radius: 6px;
     font-size: 0.9rem;
     margin-left: 0.5rem;
     text-decoration: none;
-    color: #94a3b8;
+    color: #1c1917;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(60, 45, 30, 0.04);
 }
 
 .hud-msg-btn:hover {
-    color: #fff;
-    border-color: #dc2626;
-    box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+    color: #c2252b;
+    border-color: #c2252b;
+    box-shadow: 0 0 10px rgba(194, 37, 43, 0.25);
 }
 
 .hud-msg-btn.has-unread {
-    color: #dc2626;
-    border-color: #dc2626;
+    color: #c2252b;
+    border-color: #c2252b;
     animation: msgPulse 2s infinite;
 }
 
 @keyframes msgPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-    50% { box-shadow: 0 0 0 6px rgba(56, 189, 248, 0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(194, 37, 43, 0.35); }
+    50% { box-shadow: 0 0 0 6px rgba(194, 37, 43, 0); }
 }
 
 .hud-unread-count {
     position: absolute;
     top: -6px;
     right: -6px;
-    background: #ef4444;
+    background: #c2252b;
     color: #fff;
     font-size: 0.65rem;
     font-weight: 800;
     padding: 1px 5px;
     border-radius: 9999px;
-    border: 1px solid #000;
+    border: 1px solid #ffffff;
 }
 
 .nav-badge-unread, .badge-unread {
-    background: #ef4444;
+    background: #c2252b;
     color: #fff;
     font-size: 0.68rem;
     font-weight: 800;
@@ -1377,9 +1378,10 @@ a:hover {
 
 .msg-table-container {
     overflow-x: auto;
-    background: rgba(10, 15, 29, 0.6);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(60, 45, 30, 0.05);
 }
 
 .msg-table {
@@ -1389,43 +1391,42 @@ a:hover {
 }
 
 .msg-table th {
-    background: rgba(255, 255, 255, 0.04);
+    background: #f6f2e8;
     padding: 0.85rem 1rem;
     text-align: left;
-    color: var(--text-muted);
-    font-weight: 600;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #1c1917;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .msg-table td {
     padding: 0.85rem 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    color: #cbd5e1;
+    border-bottom: 1px solid #f0e8db;
+    color: #292524;
     transition: background 0.15s;
 }
 
 .msg-table tr:hover td {
-    background: rgba(220, 38, 38, 0.08);
+    background: rgba(194, 37, 43, 0.05);
 }
 
 .msg-table tr.msg-unread td {
-    background: rgba(220, 38, 38, 0.15);
-    color: #fff;
+    background: rgba(194, 37, 43, 0.08);
+    color: #1c1917;
 }
 
 .unread-dot {
-    color: #dc2626;
+    color: #c2252b;
     font-size: 1rem;
-    text-shadow: 0 0 8px #dc2626;
 }
 
 .msg-subject {
-    color: #e2e8f0;
+    color: #1c1917;
 }
 
 .msg-unread .msg-subject {
     font-weight: 700;
-    color: #ef4444;
+    color: #c2252b;
 }
 
 /* ==========================================================
@@ -1448,21 +1449,22 @@ a:hover {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(20, 20, 24, 0.85);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     padding: 0.6rem 1.25rem;
     border-radius: 8px;
-    color: var(--text-color);
+    color: #1c1917;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(60, 45, 30, 0.04);
 }
 
 .field-back-btn:hover {
-    background: rgba(220, 38, 38, 0.2);
-    border-color: var(--accent-red);
-    color: #fff;
+    background: rgba(194, 37, 43, 0.08);
+    border-color: #c2252b;
+    color: #c2252b;
     transform: translateX(-3px);
 }
 
@@ -1470,10 +1472,11 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(15, 15, 18, 0.85);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 0.3rem 0.5rem;
+    box-shadow: 0 2px 5px rgba(60, 45, 30, 0.04);
 }
 
 .field-arrow-btn {
@@ -1486,18 +1489,18 @@ a:hover {
 }
 
 .field-arrow-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
+    background: rgba(194, 37, 43, 0.08);
+    color: #c2252b;
 }
 
 .field-slot-badge {
     padding: 0.35rem 0.85rem;
-    background: rgba(220, 38, 38, 0.25);
-    border: 1px solid rgba(220, 38, 38, 0.5);
+    background: rgba(194, 37, 43, 0.1);
+    border: 1px solid rgba(194, 37, 43, 0.3);
     border-radius: 6px;
-    color: #fca5a5;
+    color: #c2252b;
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 0.5px;
 }
 
@@ -1507,9 +1510,9 @@ a:hover {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--border-color);
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 8px 30px rgba(60, 45, 30, 0.08);
     margin-bottom: 1.5rem;
-    background: #0f1115;
+    background: #fdfbf7;
 }
 
 .field-hero-bg {
@@ -1520,7 +1523,7 @@ a:hover {
     height: 100%;
     background-size: cover;
     background-position: center 40%;
-    filter: blur(2px) brightness(0.42) saturate(1.15);
+    filter: blur(1.5px) brightness(0.85) saturate(1.05);
     transform: scale(1.04);
 }
 
@@ -1530,7 +1533,7 @@ a:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(12, 12, 15, 0.94) 0%, rgba(15, 15, 20, 0.82) 50%, rgba(20, 10, 10, 0.92) 100%);
+    background: linear-gradient(135deg, rgba(253, 251, 247, 0.95) 0%, rgba(246, 242, 232, 0.88) 50%, rgba(240, 232, 218, 0.95) 100%);
 }
 
 .field-hero-content {
@@ -1556,9 +1559,9 @@ a:hover {
     width: 200px;
     height: 200px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(220, 38, 38, 0.22) 0%, rgba(0, 0, 0, 0.85) 75%);
-    border: 2px solid rgba(220, 38, 38, 0.4);
-    box-shadow: 0 0 35px rgba(220, 38, 38, 0.3), inset 0 0 25px rgba(0, 0, 0, 0.9);
+    background: radial-gradient(circle, rgba(194, 37, 43, 0.12) 0%, rgba(246, 242, 232, 0.95) 75%);
+    border: 2px solid rgba(194, 37, 43, 0.4);
+    box-shadow: 0 4px 20px rgba(60, 45, 30, 0.12), inset 0 0 25px rgba(246, 242, 232, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1568,21 +1571,21 @@ a:hover {
     width: 175px;
     height: 175px;
     object-fit: contain;
-    filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.85));
+    filter: drop-shadow(0 10px 16px rgba(60, 45, 30, 0.35));
     user-select: none;
 }
 
 .field-level-emblem {
     position: absolute;
     bottom: -10px;
-    background: linear-gradient(135deg, #b91c1c, #991b1b);
-    border: 2px solid #fca5a5;
+    background: linear-gradient(135deg, #c2252b, #991b1b);
+    border: 2px solid #ffffff;
     border-radius: 20px;
     padding: 0.25rem 1rem;
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 4px 12px rgba(60, 45, 30, 0.25);
 }
 
 .emblem-lvl-text {
@@ -1625,15 +1628,15 @@ a:hover {
     margin-bottom: 0.4rem;
 }
 
-.field-type-pill.sec-metal { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
-.field-type-pill.sec-crystal { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.4); }
-.field-type-pill.sec-deut { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
-.field-type-pill.sec-energy { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.4); }
+.field-type-pill.sec-metal { background: rgba(120, 53, 15, 0.1); color: #78350f; border: 1px solid rgba(120, 53, 15, 0.3); }
+.field-type-pill.sec-crystal { background: rgba(51, 65, 85, 0.1); color: #334155; border: 1px solid rgba(51, 65, 85, 0.3); }
+.field-type-pill.sec-deut { background: rgba(180, 83, 9, 0.1); color: #b45309; border: 1px solid rgba(180, 83, 9, 0.3); }
+.field-type-pill.sec-energy { background: rgba(194, 37, 43, 0.1); color: #c2252b; border: 1px solid rgba(194, 37, 43, 0.3); }
 
 .field-title {
     font-size: 2rem;
     font-weight: 800;
-    color: #fff;
+    color: #1c1917;
     margin: 0;
     letter-spacing: -0.5px;
     line-height: 1.2;
@@ -1655,29 +1658,29 @@ a:hover {
 }
 
 .field-status-badge.ready {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    color: #15803d;
     border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 .field-status-badge.upgrading {
-    background: rgba(234, 179, 8, 0.2);
-    color: #facc15;
-    border: 1px solid rgba(234, 179, 8, 0.4);
+    background: rgba(180, 83, 9, 0.12);
+    color: #b45309;
+    border: 1px solid rgba(180, 83, 9, 0.3);
 }
 
 .pulse-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #facc15;
+    background: #b45309;
     animation: pulse 1.5s infinite;
 }
 
 .field-description {
     font-size: 0.95rem;
     line-height: 1.65;
-    color: #cbd5e1;
+    color: #292524;
     margin: 0.85rem 0 1.25rem 0;
     max-width: 850px;
 }
@@ -1689,17 +1692,18 @@ a:hover {
 }
 
 .quick-stat-box {
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 0.65rem 1rem;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 2px 6px rgba(60, 45, 30, 0.04);
 }
 
 .quick-stat-box.highlight {
     border-color: rgba(34, 197, 94, 0.4);
-    background: rgba(34, 197, 94, 0.08);
+    background: rgba(34, 197, 94, 0.06);
 }
 
 .stat-label {
@@ -1712,7 +1716,7 @@ a:hover {
 .stat-value {
     font-size: 1.15rem;
     font-weight: 800;
-    color: #fff;
+    color: #1c1917;
 }
 
 .stat-value small {
@@ -1724,7 +1728,7 @@ a:hover {
 .stat-gain {
     font-size: 0.75rem;
     font-weight: 700;
-    color: #4ade80;
+    color: #15803d;
 }
 
 /* SECTION AMÉLIORATION & COÛTS */
@@ -1742,18 +1746,19 @@ a:hover {
 }
 
 .field-card {
-    background: rgba(18, 18, 22, 0.95);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 10px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 4px 16px rgba(60, 45, 30, 0.05);
 }
 
 .field-card-header {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(246, 242, 232, 0.7);
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1762,7 +1767,7 @@ a:hover {
 .field-card-header h3 {
     margin: 0;
     font-size: 1.1rem;
-    color: #fff;
+    color: #1c1917;
     font-weight: 700;
 }
 
@@ -1784,17 +1789,17 @@ a:hover {
     gap: 0.85rem;
     padding: 0.65rem 0.85rem;
     border-radius: 6px;
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #fdfbf7;
+    border: 1px solid var(--border-color);
 }
 
 .cost-item.cost-ok {
-    border-left: 3px solid #22c55e;
+    border-left: 3px solid #16a34a;
 }
 
 .cost-item.cost-missing {
-    border-left: 3px solid #ef4444;
-    background: rgba(239, 68, 68, 0.08);
+    border-left: 3px solid #dc2626;
+    background: rgba(220, 38, 38, 0.04);
 }
 
 .cost-icon {
@@ -1813,13 +1818,13 @@ a:hover {
 .cost-name {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #cbd5e1;
+    color: #292524;
 }
 
 .cost-req {
     font-size: 1rem;
     font-weight: 800;
-    color: #fff;
+    color: #1c1917;
 }
 
 .cost-stock {
@@ -1834,16 +1839,16 @@ a:hover {
     text-align: center;
 }
 
-.cost-ok .cost-check { color: #22c55e; }
-.cost-missing .cost-check { color: #ef4444; }
+.cost-ok .cost-check { color: #16a34a; }
+.cost-missing .cost-check { color: #dc2626; }
 
 /* BANDEAU TEMPS DE CONSTRUCTION POUR LE NIVEAU SUIVANT */
 .construction-time-banner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.12), rgba(0, 0, 0, 0.5));
-    border: 1px solid rgba(220, 38, 38, 0.35);
+    background: linear-gradient(135deg, rgba(194, 37, 43, 0.08), rgba(246, 242, 232, 0.9));
+    border: 1px solid rgba(194, 37, 43, 0.3);
     border-radius: 8px;
     padding: 0.85rem 1.15rem;
     margin-top: 1rem;
@@ -1862,7 +1867,7 @@ a:hover {
 .time-value-display {
     font-size: 1.4rem;
     font-weight: 900;
-    color: #fca5a5;
+    color: #c2252b;
     letter-spacing: 1px;
     font-family: monospace;
 }
@@ -1875,7 +1880,7 @@ a:hover {
 
 .job-status-title {
     font-size: 1.15rem;
-    color: #fde047;
+    color: #b45309;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -1887,41 +1892,42 @@ a:hover {
     font-size: 1.8rem;
     font-weight: 900;
     font-family: monospace;
-    color: #4ade80;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #15803d;
+    background: #ffffff;
+    border: 1px solid rgba(34, 197, 94, 0.4);
     border-radius: 8px;
     padding: 0.6rem;
     display: inline-block;
     min-width: 180px;
     margin: 0.5rem 0;
+    box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);
 }
 
 .field-btn-primary {
-    background: linear-gradient(135deg, #dc2626, #991b1b);
+    background: linear-gradient(135deg, #c2252b, #991b1b);
     color: #fff;
-    border: 1px solid #ef4444;
+    border: 1px solid #c2252b;
     padding: 0.85rem 1.75rem;
     font-size: 1rem;
     font-weight: 800;
     border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+    box-shadow: 0 4px 14px rgba(194, 37, 43, 0.3);
     transition: all 0.2s ease;
     width: 100%;
     max-width: 360px;
 }
 
 .field-btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
+    box-shadow: 0 6px 20px rgba(194, 37, 43, 0.45);
 }
 
 .field-btn-cancel {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(194, 37, 43, 0.08);
+    color: #c2252b;
+    border: 1px solid rgba(194, 37, 43, 0.3);
     padding: 0.65rem 1.25rem;
     font-size: 0.85rem;
     font-weight: 700;
@@ -1931,14 +1937,14 @@ a:hover {
 }
 
 .field-btn-cancel:hover {
-    background: rgba(239, 68, 68, 0.3);
+    background: #c2252b;
     color: #fff;
 }
 
 .field-btn-secondary {
-    background: rgba(255, 255, 255, 0.08);
-    color: #cbd5e1;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #ffffff;
+    color: #1c1917;
+    border: 1px solid var(--border-color);
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
     border-radius: 6px;
@@ -1947,16 +1953,17 @@ a:hover {
 }
 
 .field-btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
+    background: #f6f2e8;
+    color: #c2252b;
+    border-color: #c2252b;
 }
 
 .time-to-afford {
     margin-top: 0.75rem;
     font-size: 0.85rem;
-    color: #fbbf24;
-    background: rgba(234, 179, 8, 0.1);
-    border: 1px solid rgba(234, 179, 8, 0.25);
+    color: #b45309;
+    background: rgba(180, 83, 9, 0.1);
+    border: 1px solid rgba(180, 83, 9, 0.25);
     border-radius: 6px;
     padding: 0.4rem 0.75rem;
     display: inline-block;
@@ -1964,10 +1971,11 @@ a:hover {
 
 /* BANDEAU DES 18 PARCELLES DU DOMAINE (STYLE TRAVIAN) */
 .field-strip-card {
-    background: rgba(15, 15, 18, 0.95);
+    background: #fdfbf7;
     border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 1rem 1.25rem;
+    box-shadow: 0 4px 16px rgba(60, 45, 30, 0.05);
 }
 
 .field-strip-header {
@@ -1982,7 +1990,7 @@ a:hover {
 .field-strip-header h4 {
     margin: 0;
     font-size: 0.95rem;
-    color: #fff;
+    color: #1c1917;
     font-weight: 700;
 }
 
@@ -2005,8 +2013,8 @@ a:hover {
 }
 
 .field-strip-item {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 0.35rem 0.2rem;
     display: flex;
@@ -2017,15 +2025,15 @@ a:hover {
 }
 
 .field-strip-item:hover {
-    background: rgba(220, 38, 38, 0.2);
-    border-color: var(--accent-red);
+    background: rgba(194, 37, 43, 0.08);
+    border-color: #c2252b;
     transform: translateY(-2px);
 }
 
 .field-strip-item.active {
-    background: rgba(220, 38, 38, 0.35);
-    border-color: #ef4444;
-    box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
+    background: rgba(194, 37, 43, 0.12);
+    border-color: #c2252b;
+    box-shadow: 0 2px 8px rgba(194, 37, 43, 0.25);
 }
 
 .strip-item-img {
@@ -2043,7 +2051,7 @@ a:hover {
 .strip-item-lvl {
     font-size: 0.7rem;
     font-weight: 800;
-    color: #fca5a5;
+    color: #c2252b;
 }
 
 

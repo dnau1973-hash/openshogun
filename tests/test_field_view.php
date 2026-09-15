@@ -102,3 +102,4 @@ assert($cancelled === true, "L'annulation doit réussir");
 echo "✔ Chantier annulé avec succès (remboursement vérifié).\n";
 
 echo "\n=== TOUS LES TESTS FIELD.PHP ONT RÉUSSI AVEC SUCCÈS (100%) ===\n";
+
