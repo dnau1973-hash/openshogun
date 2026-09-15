@@ -57,6 +57,25 @@ const FIELD_LAYOUT = [
     18 => 'solar_plant',
 ];
 
+// Configuration des emplacements urbains de la Cité Castrale (Slots 19 à 33, style Travian Dorf 2)
+const CITY_SLOT_LAYOUT = [
+    19 => 'hq',            // Tenshu (Donjon Castral sur terrasse haute)
+    20 => 'storage',       // Entrepôt Bois & Pierre (près de la rive)
+    21 => 'tank',          // Grenier à Riz Kura
+    22 => 'barracks',      // Dojo Militaire & Garnison
+    23 => 'shipyard',      // Atelier de Siège & Écuries
+    24 => 'market',        // Marché Féodal & Caravanes
+    25 => 'research_lab',  // Académie des Savoirs & Forge
+    26 => 'radar',         // Tour de Guet Yagura (octogonale centrale)
+    27 => 'quantum_vault', // Cachette Secrète Sous Terre
+    28 => 'embassy',       // Pavillon Diplomatique des Clans
+    29 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
+    30 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
+    31 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
+    32 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
+    33 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
+];
+
 // Métadonnées des parcelles rurales du domaine
 const FIELD_TYPES = [
     'metal_mine' => [
@@ -110,6 +129,7 @@ const BUILDINGS = [
     'hq' => [
         'name' => 'Tenshu (Donjon Castral)',
         'icon' => '🏯',
+        'tile_img' => 'tile_tenshu.png',
         'description' => 'Le donjon fortifié et palais du Daimyō. Réduit la durée de construction de tous les bâtiments urbains et parcelles rurales du fief.',
         'base_cost' => ['metal' => 100, 'crystal' => 80, 'deuterium' => 40],
         'cost_multiplier' => 1.5,
@@ -119,6 +139,7 @@ const BUILDINGS = [
     'storage' => [
         'name' => 'Entrepôt de Matériaux (Bois & Pierre)',
         'icon' => '🪵',
+        'tile_img' => 'tile_storage.png',
         'description' => 'Augmente la capacité de stockage maximale de Bois de Cèdre et de Pierre de Taille.',
         'base_cost' => ['metal' => 120, 'crystal' => 60, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
@@ -128,6 +149,7 @@ const BUILDINGS = [
     'tank' => [
         'name' => 'Grenier à Riz Fortifié (Kura)',
         'icon' => '🌾',
+        'tile_img' => 'tile_tank.png',
         'description' => 'Augmente la capacité de stockage maximale des récoltes de riz (Koku).',
         'base_cost' => ['metal' => 100, 'crystal' => 100, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
@@ -137,6 +159,7 @@ const BUILDINGS = [
     'shipyard' => [
         'name' => 'Atelier de Siège & Écuries',
         'icon' => '🐎',
+        'tile_img' => 'tile_shipyard.png',
         'description' => 'Permet d\'élever la cavalerie de guerre, les convois de transport et de fabriquer béliers et trébuchets.',
         'base_cost' => ['metal' => 400, 'crystal' => 200, 'deuterium' => 100],
         'cost_multiplier' => 1.6,
@@ -146,6 +169,7 @@ const BUILDINGS = [
     'research_lab' => [
         'name' => 'Académie des Savoirs & Forge',
         'icon' => '📜',
+        'tile_img' => 'tile_research_lab.png',
         'description' => 'Permet de perfectionner la métallurgie du tamahagane, l\'art de la guerre et les tactiques militaires.',
         'base_cost' => ['metal' => 200, 'crystal' => 400, 'deuterium' => 200],
         'cost_multiplier' => 1.6,
@@ -155,6 +179,7 @@ const BUILDINGS = [
     'radar' => [
         'name' => 'Tour de Guet Yagura & Feux d\'Alarme',
         'icon' => '🏮',
+        'tile_img' => 'tile_radar.png',
         'description' => 'Surveille les vallées et détecte les armées et espions ennemis en marche vers votre fief.',
         'base_cost' => ['metal' => 150, 'crystal' => 250, 'deuterium' => 100],
         'cost_multiplier' => 1.5,
@@ -164,6 +189,7 @@ const BUILDINGS = [
     'quantum_vault' => [
         'name' => 'Cachette Secrète Sous Terre',
         'icon' => '🕳️',
+        'tile_img' => 'tile_quantum_vault.png',
         'description' => 'Protège une réserve secrète de vivres et matériaux contre les pillages adverses (capacité doublée pour le Clan Tokugawa).',
         'base_cost' => ['metal' => 100, 'crystal' => 100, 'deuterium' => 50],
         'cost_multiplier' => 1.4,
@@ -173,6 +199,7 @@ const BUILDINGS = [
     'market' => [
         'name' => 'Marché Féodal & Caravanes',
         'icon' => '🏪',
+        'tile_img' => 'tile_market.png',
         'description' => 'Permet d\'échanger des ressources avec les marchands itinérants et autres daimyōs provinciaux.',
         'base_cost' => ['metal' => 300, 'crystal' => 200, 'deuterium' => 150],
         'cost_multiplier' => 1.5,
@@ -182,6 +209,7 @@ const BUILDINGS = [
     'embassy' => [
         'name' => 'Pavillon Diplomatique des Clans',
         'icon' => '🎌',
+        'tile_img' => 'tile_embassy.png',
         'description' => 'Permet de sceller ou rejoindre un pacte d\'alliance entre daimyōs.',
         'base_cost' => ['metal' => 180, 'crystal' => 130, 'deuterium' => 70],
         'cost_multiplier' => 1.5,
@@ -191,6 +219,7 @@ const BUILDINGS = [
     'barracks' => [
         'name' => 'Dojo & Quartier Militaire',
         'icon' => '🥋',
+        'tile_img' => 'tile_barracks.png',
         'description' => 'Entraîne les fantassins Ashigarus, archers Yumi, arquebusiers et samouraïs d\'élite pour la défense et les conquêtes.',
         'base_cost' => ['metal' => 200, 'crystal' => 150, 'deuterium' => 50],
         'cost_multiplier' => 1.5,

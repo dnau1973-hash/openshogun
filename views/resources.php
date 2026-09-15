@@ -90,55 +90,15 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
     object-fit: contain !important;
     pointer-events: none !important;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.55)) !important;
-    transition: filter 0.2s ease !important;
-}
-
-/* Au survol : aucun saut/effet yoyo, simple rehaussement de clarté doux */
-.rts-hotspot:hover .rts-tile-sprite,
-.rts-hotspot.highlighted .rts-tile-sprite {
-    transform: translateX(-50%) !important;
-    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.75)) brightness(1.12) !important;
 }
 
 .rts-tenshu-sprite {
     filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65)) !important;
 }
 
-.rts-hotspot:hover {
-    z-index: 50 !important;
-    background: transparent !important;
-}
-
 .rts-hotspot .rts-reticle,
 .rts-hotspot .rts-reticle-alt {
-    opacity: 0 !important;
-    transition: opacity 0.2s ease !important;
-}
-
-.rts-hotspot:hover .rts-reticle,
-.rts-hotspot:hover .rts-reticle-alt,
-.rts-hotspot.highlighted .rts-reticle,
-.rts-hotspot.highlighted .rts-reticle-alt {
-    opacity: 1 !important;
-    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.1) !important;
-}
-
-.rts-hotspot .rts-badge {
-    position: absolute !important;
-    bottom: -6px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    white-space: nowrap !important;
-    z-index: 10 !important;
-    pointer-events: none !important;
-    transition: border-color 0.2s, box-shadow 0.2s !important;
-}
-
-.rts-hotspot:hover .rts-badge,
-.rts-hotspot.highlighted .rts-badge {
-    border-color: #fff !important;
-    box-shadow: 0 0 12px var(--sector-color) !important;
-    transform: translateX(-50%) !important;
+    display: none !important;
 }
 
 /* Positions calibrées sur la carte shogun_rural_terroir_bg.jpg */

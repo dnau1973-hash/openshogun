@@ -720,10 +720,10 @@ a:hover {
 }
 
 /* ==========================================================
-   VUE CITÉ COLONIALE RTS (PLANETARY BASE CITY)
+   VUE CITÉ CASTRALE FÉODALE RTS (STYLE TRAVIAN DORF 2)
    ========================================================== */
 .fields-viewport.rts-city-surface {
-    background: url('/public/assets/planet_colony_city.jpg') center/cover no-repeat;
+    background: url('/public/assets/shogun_castle_city_bg.jpg') center/cover no-repeat;
 }
 
 .sector-military { --sector-color: #c2252b; }
@@ -736,50 +736,46 @@ a:hover {
 .sector-btn.filter-logistics:hover { border-color: #334155; color: #334155; }
 .sector-btn.filter-gateway:hover { border-color: #15803d; color: #15803d; }
 
-/* Positionnement des 10 bâtiments urbains et du portail */
-.hotspot-city-hq { top: 17%; left: 42%; width: 28%; height: 38%; z-index: 12; }
-.hotspot-city-hq .rts-badge { bottom: 10%; left: 50%; transform: translateX(-50%); }
-.hotspot-city-hq .rts-tooltip { top: 100%; left: 50%; transform: translateX(-50%); }
+/* Positions précises des slots urbains calibrées sur shogun_castle_city_bg.jpg */
+.hotspot-city-slot-19 { left: 52.5%; top: 2.4%; width: 18.0%; height: 27.0%; z-index: 10; }
+.hotspot-city-slot-20 { left: 36.2%; top: 11.4%; width: 12.5%; height: 20.0%; z-index: 6; }
+.hotspot-city-slot-21 { left: 27.0%; top: 19.1%; width: 12.0%; height: 21.0%; z-index: 7; }
+.hotspot-city-slot-22 { left: 19.0%; top: 25.9%; width: 13.0%; height: 20.0%; z-index: 8; }
+.hotspot-city-slot-23 { left: 11.5%; top: 34.1%; width: 14.0%; height: 21.0%; z-index: 9; }
+.hotspot-city-slot-24 { left: 19.5%; top: 44.2%; width: 13.0%; height: 19.0%; z-index: 11; }
+.hotspot-city-slot-25 { left: 28.0%; top: 34.1%; width: 13.0%; height: 21.0%; z-index: 10; }
+.hotspot-city-slot-26 { left: 47.2%; top: 44.3%; width: 11.5%; height: 24.0%; z-index: 12; }
+.hotspot-city-slot-27 { left: 37.2%; top: 59.7%; width: 12.5%; height: 19.0%; z-index: 14; }
+.hotspot-city-slot-28 { left: 47.0%; top: 64.1%; width: 13.0%; height: 21.0%; z-index: 15; }
+.hotspot-city-slot-29 { left: 56.2%; top: 59.0%; width: 11.5%; height: 18.0%; z-index: 14; }
+.hotspot-city-slot-30 { left: 62.2%; top: 52.5%; width: 11.5%; height: 18.0%; z-index: 13; }
+.hotspot-city-slot-31 { left: 59.8%; top: 37.0%; width: 11.5%; height: 18.0%; z-index: 10; }
+.hotspot-city-slot-32 { left: 69.8%; top: 44.5%; width: 11.5%; height: 18.0%; z-index: 12; }
+.hotspot-city-slot-33 { left: 73.8%; top: 34.5%; width: 11.5%; height: 18.0%; z-index: 10; }
+.hotspot-city-slot-gateway { left: 21.5%; top: 62.0%; width: 11.0%; height: 18.0%; z-index: 15; }
 
-.hotspot-city-shipyard { top: 10%; left: 11%; width: 24%; height: 34%; }
-.hotspot-city-shipyard .rts-badge { bottom: 8%; left: 12px; }
-.hotspot-city-shipyard .rts-tooltip { top: 100%; left: 0; }
+/* Emplacements libres / Terrains disponibles */
+.rts-hotspot.is-empty-plot {
+    border: 1.5px dashed rgba(194, 37, 43, 0.4);
+    border-radius: 50%;
+    transition: background 0.2s, border-color 0.2s;
+}
+.rts-hotspot.is-empty-plot:hover {
+    background: rgba(194, 37, 43, 0.08);
+    border-color: #c2252b;
+}
+.rts-hotspot.is-empty-plot .rts-level-bubble {
+    background: #fdfbf7;
+    border-color: #78716c;
+    color: #78716c;
+    font-size: 0.82rem;
+}
 
-.hotspot-city-barracks { top: 42%; left: 18%; width: 30%; height: 30%; }
-.hotspot-city-barracks .rts-badge { bottom: 8%; left: 15px; }
-.hotspot-city-barracks .rts-tooltip { bottom: 100%; left: 0; }
-
-.hotspot-city-storage { top: 0%; left: 32%; width: 22%; height: 26%; }
-.hotspot-city-storage .rts-badge { bottom: 6px; left: 12px; }
-.hotspot-city-storage .rts-tooltip { top: 100%; left: 0; }
-
-.hotspot-city-tank { top: 4%; left: 53%; width: 17%; height: 20%; }
-.hotspot-city-tank .rts-badge { bottom: 6px; left: 12px; }
-.hotspot-city-tank .rts-tooltip { top: 100%; left: 0; }
-
-.hotspot-city-research_lab { top: 47%; left: 63%; width: 22%; height: 24%; }
-.hotspot-city-research_lab .rts-badge { bottom: 6px; left: 12px; }
-.hotspot-city-research_lab .rts-tooltip { bottom: 100%; right: 0; }
-
-.hotspot-city-radar { top: 11%; left: 77%; width: 11%; height: 30%; }
-.hotspot-city-radar .rts-badge { bottom: 6px; left: 10px; }
-.hotspot-city-radar .rts-tooltip { top: 100%; right: 0; }
-
-.hotspot-city-embassy { top: 25%; left: 85%; width: 11%; height: 30%; }
-.hotspot-city-embassy .rts-badge { bottom: 6px; left: 8px; }
-.hotspot-city-embassy .rts-tooltip { top: 100%; right: 0; }
-
-.hotspot-city-market { top: 63%; left: 40%; width: 26%; height: 26%; }
-.hotspot-city-market .rts-badge { bottom: 8px; left: 50%; transform: translateX(-50%); }
-.hotspot-city-market .rts-tooltip { bottom: 100%; left: 50%; transform: translateX(-50%); }
-
-.hotspot-city-quantum_vault { top: 73%; left: 78%; width: 12%; height: 18%; }
-.hotspot-city-quantum_vault .rts-badge { bottom: 6px; left: 8px; }
-.hotspot-city-quantum_vault .rts-tooltip { bottom: 100%; right: 0; }
-
-.hotspot-city-gateway_mines { top: 71%; left: 16%; width: 10%; height: 16%; }
-.hotspot-city-gateway_mines .rts-badge { bottom: 6px; left: 50%; transform: translateX(-50%); }
-.hotspot-city-gateway_mines .rts-tooltip { bottom: 100%; left: 0; }
+.rts-level-bubble.rts-gateway-bubble {
+    border-color: #15803d;
+    color: #15803d;
+    font-size: 0.95rem;
+}
 
 /* ==========================================================
    VUE 2 : CITÉ PLANÉTAIRE (BÂTIMENTS)
