@@ -37,8 +37,10 @@ foreach ($stationedTroops as $t) {
                 <?php 
                     $count = (int)$t['stationed_count'];
                     $hasUnits = ($count > 0);
-                    $imgSrc = "/public/assets/units/{$t['code']}.jpg";
-                    if (!file_exists($_SERVER['DOCUMENT_ROOT'] . $imgSrc)) {
+                    $diskJpg = __DIR__ . "/../../public/assets/units/{$t['code']}.jpg";
+                    if (file_exists($diskJpg)) {
+                        $imgSrc = "/public/assets/units/{$t['code']}.jpg?v=" . filemtime($diskJpg);
+                    } else {
                         $imgSrc = "/public/assets/units/{$t['code']}.svg";
                     }
                 ?>
