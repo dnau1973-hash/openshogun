@@ -232,27 +232,15 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                 <!-- Tenshu & Donjon Central (Centre Cité) -->
                 <div class="rts-hotspot sector-hq hotspot-bunker-hq" 
                      data-sector="hq"
-                     title="Tenshu & Palais du Daimyō"
+                     title="🏯 Tenshu Donjon & Cité Castrale (Niveau <?= $hqLevel ?>)"
                      onclick="window.location.href='?page=city'">
                     <img src="/public/assets/tile_tenshu.png" class="rts-tile-sprite rts-tenshu-sprite" alt="Tenshu Palais" draggable="false">
                     <div class="rts-reticle"></div>
                     <div class="rts-reticle-alt"></div>
-                    <div class="rts-badge">
-                        <span>🏯</span>
-                        <span>Tenshu</span>
-                        <span class="rts-lvl-pill">Niv. <?= $hqLevel ?></span>
-                    </div>
-                    <div class="rts-tooltip">
-                        <div class="rts-tt-title">
-                            <span>🏯 Tenshu & Palais du Daimyō</span>
-                            <span style="color:#dc2626;">Niv. <?= $hqLevel ?></span>
-                        </div>
-                        <div class="rts-tt-prod">
-                            Cœur fortifié et palais du Daimyō. Accès direct aux dojos, écuries, académies et greniers du domaine.
-                        </div>
-                        <div class="rts-tt-cta">
-                            🖱️ Cliquer pour entrer dans la Cité Castrale &rarr;
-                        </div>
+                    
+                    <!-- Badge niveau simple en haut à droite -->
+                    <div class="rts-level-bubble rts-tenshu-bubble" title="Tenshu (Niveau <?= $hqLevel ?>)">
+                        <?= $hqLevel ?>
                     </div>
                 </div>
 
@@ -263,9 +251,6 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         $type = $f['type'];
                         $lvl = (int)$f['level'];
                         $info = FIELD_TYPES[$type];
-                        $details = $buildingEngine->getUpgradeDetails('field', $type, $lvl, $hqLevel);
-                        $cost = $details['cost'];
-                        $duration = $details['duration'];
                         $isUpgrading = isset($activeFieldQueue[$slot]);
 
                         $tileImg = match($type) {
@@ -275,37 +260,11 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                             'solar_plant' => 'tile_sanctuaire.png',
                             default => 'tile_bucheron.png'
                         };
-
-                        // Calcul de la production
-                        if ($type === 'solar_plant') {
-                            $curProd = ($lvl > 0) ? (int)($info['base_prod'] * $lvl * pow(1.12, $lvl)) : 0;
-                            $nextProd = (int)($info['base_prod'] * ($lvl + 1) * pow(1.12, $lvl + 1));
-                            $prodText = "+{$curProd} ⛩️ Sérénité (Suiv : +{$nextProd})";
-                        } else {
-                            $curProd = ($lvl > 0) ? (int)($info['base_prod'] * $lvl * pow(1.15, $lvl)) : 0;
-                            $nextProd = (int)($info['base_prod'] * ($lvl + 1) * pow(1.15, $lvl + 1));
-                            $unitLabel = match($type) {
-                                'metal_mine' => 'Bois/h',
-                                'crystal_mine' => 'Pierre/h',
-                                'deuterium_synth' => 'Riz/h',
-                                default => '/h'
-                            };
-                            $prodText = "+{$curProd} {$unitLabel} (Suiv : +{$nextProd})";
-                        }
-
-                        $shortLabel = match($type) {
-                            'metal_mine' => "Bûch. #$slot",
-                            'crystal_mine' => "Carr. #$slot",
-                            'deuterium_synth' => "Riz. #$slot",
-                            'solar_plant' => "Sanc. #$slot",
-                            default => "#$slot"
-                        };
-
-                        $canAfford = ($planet['metal'] >= $cost['metal'] && $planet['crystal'] >= $cost['crystal'] && $planet['deuterium'] >= $cost['deuterium']);
                     ?>
                     <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?>" 
                          data-sector="<?= $type ?>"
                          data-slot="<?= $slot ?>"
+                         title="<?= htmlspecialchars($info['name']) ?> #<?= $slot ?> (Niveau <?= $lvl ?>)"
                          onclick="window.location.href='/?page=field&slot=<?= $slot ?>'">
                         
                         <!-- Image PNG transparente de la ressource -->
@@ -315,34 +274,12 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         <div class="rts-reticle"></div>
                         <div class="rts-reticle-alt"></div>
 
-                        <!-- Badge HUD ancré sur le bâtiment -->
-                        <div class="rts-badge">
-                            <span><?= $info['icon'] ?></span>
-                            <span><?= $shortLabel ?></span>
-                            <span class="rts-lvl-pill">Nv.<?= $lvl ?></span>
+                        <!-- Badge minimaliste de niveau en hauteur et à droite du bâtiment (Style Travian) -->
+                        <div class="rts-level-bubble <?= $isUpgrading ? 'upgrading' : '' ?>" title="<?= htmlspecialchars($info['name']) ?> (Niveau <?= $lvl ?>)">
+                            <?= $lvl ?>
                             <?php if ($isUpgrading): ?>
-                                <span class="rts-upgrading-pulse" title="Amélioration en cours">⏳</span>
+                                <span class="bubble-pulse">⏳</span>
                             <?php endif; ?>
-                        </div>
-
-                        <!-- Infobulle Tactique d'Amélioration (Survol) -->
-                        <div class="rts-tooltip">
-                            <div class="rts-tt-title">
-                                <span><?= $info['icon'] ?> <?= htmlspecialchars($info['name']) ?> #<?= $slot ?></span>
-                                <span style="color:var(--sector-color);">Nv. <?= $lvl ?></span>
-                            </div>
-                            <div class="rts-tt-prod">
-                                📈 Prod : <strong><?= $prodText ?></strong>
-                            </div>
-                            <div class="rts-tt-cost">
-                                <span style="color:var(--res-metal);">🪵 <?= number_format($cost['metal']) ?></span>
-                                <span style="color:var(--res-crystal);">🪨 <?= number_format($cost['crystal']) ?></span>
-                                <span style="color:var(--res-deut);">🌾 <?= number_format($cost['deuterium']) ?></span>
-                                <span style="color:var(--text-muted);">⏱️ <?= gmdate('i:s', $duration) ?></span>
-                            </div>
-                            <div class="rts-tt-cta">
-                                <?= $isUpgrading ? '⏳ Chantier en cours &rarr;' : '🔍 Inspecter & Améliorer la parcelle &rarr;' ?>
-                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
