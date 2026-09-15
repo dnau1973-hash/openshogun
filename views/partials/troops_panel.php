@@ -37,11 +37,17 @@ foreach ($stationedTroops as $t) {
                 <?php 
                     $count = (int)$t['stationed_count'];
                     $hasUnits = ($count > 0);
-                    $diskJpg = __DIR__ . "/../../public/assets/units/{$t['code']}.jpg";
-                    if (file_exists($diskJpg)) {
-                        $imgSrc = "/public/assets/units/{$t['code']}.jpg?v=" . filemtime($diskJpg);
+                    $imgFile = !empty($t['image']) ? $t['image'] : ($t['code'] . '.jpg');
+                    $diskFile = __DIR__ . '/../../public/assets/units/' . $imgFile;
+                    if (file_exists($diskFile)) {
+                        $imgSrc = '/public/assets/units/' . $imgFile . '?v=' . filemtime($diskFile);
                     } else {
-                        $imgSrc = "/public/assets/units/{$t['code']}.svg";
+                        $legacyDisk = __DIR__ . "/../../public/assets/units/{$t['code']}.jpg";
+                        if (file_exists($legacyDisk)) {
+                            $imgSrc = "/public/assets/units/{$t['code']}.jpg?v=" . filemtime($legacyDisk);
+                        } else {
+                            $imgSrc = "/public/assets/units/{$t['code']}.svg";
+                        }
                     }
                 ?>
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:0.35rem 0.5rem; background:var(--bg-ink, #ede5d5); border:1px solid var(--border-color); border-radius:4px; <?= !$hasUnits ? 'opacity:0.6;' : '' ?>">

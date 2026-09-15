@@ -93,13 +93,21 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
             <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:1.5rem;">
                 <?php foreach ($availableUnits as $u): ?>
                     <?php 
-                        $diskJpg = __DIR__ . "/../public/assets/units/{$u['code']}.jpg";
-                        if (file_exists($diskJpg)) {
-                            $imgSrc = "/public/assets/units/{$u['code']}.jpg?v=" . filemtime($diskJpg);
-                            $fullImg = "/public/assets/units/{$u['code']}.jpg?v=" . filemtime($diskJpg);
-                        } else {
-                            $imgSrc = "/public/assets/units/{$u['code']}.svg";
+                        // Image nommée d'après le nom du soldat
+                        $imgFile = !empty($u['image']) ? $u['image'] : ($u['code'] . '.jpg');
+                        $diskFile = __DIR__ . '/../public/assets/units/' . $imgFile;
+                        if (file_exists($diskFile)) {
+                            $imgSrc = '/public/assets/units/' . $imgFile . '?v=' . filemtime($diskFile);
                             $fullImg = $imgSrc;
+                        } else {
+                            $legacyDisk = __DIR__ . "/../public/assets/units/{$u['code']}.jpg";
+                            if (file_exists($legacyDisk)) {
+                                $imgSrc = "/public/assets/units/{$u['code']}.jpg?v=" . filemtime($legacyDisk);
+                                $fullImg = $imgSrc;
+                            } else {
+                                $imgSrc = "/public/assets/units/{$u['code']}.svg";
+                                $fullImg = $imgSrc;
+                            }
                         }
 
                         $roleLabels = [

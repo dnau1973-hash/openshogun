@@ -9,26 +9,31 @@ $db = Database::getConnection();
 echo "Starting Feudal Japan theme migration...\n";
 
 // 1. Mettre à jour la table `units`
+$cols = $db->query("SHOW COLUMNS FROM units LIKE 'image'")->fetchAll();
+if (empty($cols)) {
+    $db->exec("ALTER TABLE units ADD COLUMN image VARCHAR(100) NULL AFTER icon");
+}
+
 $units = [
-    'terran_marine' => ['name' => 'Piquier Ashigaru (Yari)', 'desc' => 'Fantassin de base discipliné de l\'armée Oda, maniant la longue lance yari avec rigueur.'],
-    'terran_sentinel' => ['name' => 'Arquebusier Oda (Tanegashima)', 'desc' => 'Tireur d\'élite armé du mousquet à mèche japonais Tanegashima avec une formidable puissance perforante.'],
-    'terran_exo_assault' => ['name' => 'Samouraï au Katana', 'desc' => 'Noble bretteur d\'élite au moral d\'acier, expert dans le combat rapproché au fil tranchant.'],
-    'terran_titan_mech' => ['name' => 'Garde Hatamoto en Armure Lourde', 'desc' => 'Champion en armure laquée ornée de la garde rapprochée du Daimyō, brisant les lignes de défense.'],
+    'terran_marine' => ['name' => 'Piquier Ashigaru (Yari)', 'desc' => 'Fantassin de base discipliné de l\'armée Oda, maniant la longue lance yari avec rigueur.', 'icon' => '🎋', 'image' => 'piquier_ashigaru_yari.jpg'],
+    'terran_sentinel' => ['name' => 'Arquebusier Oda (Tanegashima)', 'desc' => 'Tireur d\'élite armé du mousquet à mèche japonais Tanegashima avec une formidable puissance perforante.', 'icon' => '🎯', 'image' => 'arquebusier_oda_tanegashima.jpg'],
+    'terran_exo_assault' => ['name' => 'Samouraï au Katana', 'desc' => 'Noble bretteur d\'élite au moral d\'acier, expert dans le combat rapproché au fil tranchant.', 'icon' => '⚔️', 'image' => 'samourai_katana.jpg'],
+    'terran_titan_mech' => ['name' => 'Garde Hatamoto en Armure Lourde', 'desc' => 'Champion en armure laquée ornée de la garde rapprochée du Daimyō, brisant les lignes de défense.', 'icon' => '🥋', 'image' => 'garde_hatamoto_armure_lourde.jpg'],
     
-    'vorash_skitter' => ['name' => 'Fantassin Léger Takeda', 'desc' => 'Guerrier conscrit vif et féroce lancé à vive allure à l\'assaut des réserves adverses.'],
-    'vorash_chitin' => ['name' => 'Archer Yumi Monté', 'desc' => 'Cavalier archer agile harcelant les convois et défenses à distance.'],
-    'vorash_berserker' => ['name' => 'Cavalier Rouge de Choc (Akazonae)', 'desc' => 'Légendaire cavalerie rouge d\'assaut du clan Takeda, perçant toute muraille sous la charge.'],
-    'vorash_goliath' => ['name' => 'Guerrier Maître Nodachi de Kai', 'desc' => 'Colosse maniant la redoutable et gigantesque lame nodachi pour fendre armures et chevaux.'],
+    'vorash_skitter' => ['name' => 'Fantassin Léger Takeda', 'desc' => 'Guerrier conscrit vif et féroce lancé à vive allure à l\'assaut des réserves adverses.', 'icon' => '🗡️', 'image' => 'fantassin_leger_takeda.jpg'],
+    'vorash_chitin' => ['name' => 'Archer Yumi Monté', 'desc' => 'Cavalier archer agile harcelant les convois et défenses à distance.', 'icon' => '🏹', 'image' => 'archer_yumi_monte.jpg'],
+    'vorash_berserker' => ['name' => 'Cavalier Rouge de Choc (Akazonae)', 'desc' => 'Légendaire cavalerie rouge d\'assaut du clan Takeda, perçant toute muraille sous la charge.', 'icon' => '🐎', 'image' => 'cavalier_rouge_akazonae.jpg'],
+    'vorash_goliath' => ['name' => 'Guerrier Maître Nodachi de Kai', 'desc' => 'Colosse maniant la redoutable et gigantesque lame nodachi pour fendre armures et chevaux.', 'icon' => '⚡', 'image' => 'maitre_nodachi_kai.jpg'],
     
-    'aethelis_initiate' => ['name' => 'Sentinelle Yari Tokugawa', 'desc' => 'Garde défensif dévoué à la protection imprenable du domaine castral.'],
-    'aethelis_phalanx' => ['name' => 'Archer Protecteur de Muraille', 'desc' => 'Archer d\'élite tirant des volées de flèches protectrices depuis les créneaux du château.'],
-    'aethelis_shadow' => ['name' => 'Ombre Shinobi Infiltrée', 'desc' => 'Maître espion et assassin furtif se glissant sans bruit derrière les lignes ennemies.'],
-    'aethelis_colossus' => ['name' => 'Hatamoto Vénérable Tokugawa', 'desc' => 'Garde imprenable au grand pavois d\'acier, roc inébranlable du domaine.']
+    'aethelis_initiate' => ['name' => 'Sentinelle Yari Tokugawa', 'desc' => 'Garde défensif dévoué à la protection imprenable du domaine castral.', 'icon' => '🛡️', 'image' => 'sentinelle_yari_tokugawa.svg'],
+    'aethelis_phalanx' => ['name' => 'Archer Protecteur de Muraille', 'desc' => 'Archer d\'élite tirant des volées de flèches protectrices depuis les créneaux du château.', 'icon' => '🏹', 'image' => 'archer_protecteur_muraille.svg'],
+    'aethelis_shadow' => ['name' => 'Ombre Shinobi Infiltrée', 'desc' => 'Maître espion et assassin furtif se glissant sans bruit derrière les lignes ennemies.', 'icon' => '🥷', 'image' => 'ombre_shinobi_infiltree.svg'],
+    'aethelis_colossus' => ['name' => 'Hatamoto Vénérable Tokugawa', 'desc' => 'Garde imprenable au grand pavois d\'acier, roc inébranlable du domaine.', 'icon' => '🏯', 'image' => 'hatamoto_venerable_tokugawa.svg']
 ];
 
-$stmtUnit = $db->prepare("UPDATE units SET name = ?, description = ? WHERE code = ?");
+$stmtUnit = $db->prepare("UPDATE units SET name = ?, description = ?, icon = ?, image = ? WHERE code = ?");
 foreach ($units as $code => $u) {
-    $stmtUnit->execute([$u['name'], $u['desc'], $code]);
+    $stmtUnit->execute([$u['name'], $u['desc'], $u['icon'], $u['image'], $code]);
 }
 echo "Units updated (" . count($units) . ").\n";
 
