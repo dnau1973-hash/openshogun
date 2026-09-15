@@ -42,14 +42,14 @@ foreach ($stationedTroops as $t) {
                         $imgSrc = "/public/assets/units/{$t['code']}.svg";
                     }
                 ?>
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:0.35rem 0.5rem; background:rgba(0,0,0,0.25); border-radius:4px; <?= !$hasUnits ? 'opacity:0.45;' : '' ?>">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:0.35rem 0.5rem; background:var(--bg-ink, #ede5d5); border:1px solid var(--border-color); border-radius:4px; <?= !$hasUnits ? 'opacity:0.6;' : '' ?>">
                     <div style="display:flex; align-items:center; gap:0.5rem;">
-                        <img src="<?= $imgSrc ?>" alt="" class="unit-img-thumb" style="width:28px; height:28px; border-radius:4px; object-fit:cover; border:1px solid rgba(255,255,255,0.15); background:#0f172a;">
-                        <span style="font-size:0.85rem; color:<?= $hasUnits ? '#fff' : 'var(--text-muted)' ?>;">
+                        <img src="<?= $imgSrc ?>" alt="" class="unit-img-thumb" style="width:28px; height:28px; border-radius:4px; object-fit:cover; border:1px solid var(--border-color); background:var(--bg-card);">
+                        <span style="font-size:0.85rem; font-weight:<?= $hasUnits ? '600' : 'normal' ?>; color:<?= $hasUnits ? 'var(--text-main)' : 'var(--text-muted)' ?>;">
                             <?= htmlspecialchars($t['name']) ?>
                         </span>
                     </div>
-                    <strong style="font-size:0.9rem; font-family:monospace; color:<?= $hasUnits ? '#dc2626' : '#64748b' ?>;">
+                    <strong style="font-size:0.9rem; font-family:monospace; color:<?= $hasUnits ? 'var(--red-primary, #c2252b)' : 'var(--text-muted)' ?>;">
                         <?= number_format($count) ?>
                     </strong>
                 </div>
@@ -57,18 +57,18 @@ foreach ($stationedTroops as $t) {
         </div>
 
         <!-- Bilan Puissance de Garnison -->
-        <div style="background:rgba(15,23,42,0.8); border:1px solid rgba(255,255,255,0.06); padding:0.6rem; border-radius:6px; font-size:0.8rem;">
+        <div style="background:var(--bg-surface, #fdfbf7); border:1px solid var(--border-color); padding:0.6rem; border-radius:6px; font-size:0.8rem;">
             <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
                 <span style="color:var(--text-muted);">Total Guerriers :</span>
-                <strong style="color:#fff;"><?= number_format($totalSoldiers) ?></strong>
+                <strong style="color:var(--text-main);"><?= number_format($totalSoldiers) ?></strong>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
                 <span style="color:var(--text-muted);">Puissance d'Attaque :</span>
-                <strong style="color:#f87171;"><?= number_format($totalAttackPower) ?></strong>
+                <strong style="color:var(--red-primary, #c2252b);"><?= number_format($totalAttackPower) ?></strong>
             </div>
             <div style="display:flex; justify-content:space-between;">
                 <span style="color:var(--text-muted);">Défense du Fief :</span>
-                <strong style="color:#4ade80;"><?= number_format($totalDefensePower) ?></strong>
+                <strong style="color:#166534;"><?= number_format($totalDefensePower) ?></strong>
             </div>
         </div>
 

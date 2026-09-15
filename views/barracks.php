@@ -61,20 +61,20 @@ $queue = $barracksEngine->getQueue((int)$planet['id']);
                             $imgSrc = "/public/assets/units/{$u['code']}.svg";
                         }
                     ?>
-                    <div class="card unit-card <?= !$u['can_train'] ? 'unit-locked' : '' ?>" style="margin:0; background:rgba(15,23,42,0.9); overflow:hidden; border:1px solid var(--border-color); border-radius:8px; display:flex; flex-direction:column;">
+                    <div class="card unit-card <?= !$u['can_train'] ? 'unit-locked' : '' ?>" style="margin:0; background:var(--bg-surface, #fdfbf7); overflow:hidden; border:1px solid var(--border-color); border-radius:8px; display:flex; flex-direction:column; box-shadow:0 4px 12px rgba(0,0,0,0.04);">
                         <!-- Illustration du Soldat -->
-                        <div style="position:relative; width:100%; height:190px; overflow:hidden; background:#070a13;">
+                        <div style="position:relative; width:100%; height:190px; overflow:hidden; background:var(--bg-ink, #ede5d5);">
                             <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($u['name']) ?>" class="unit-img" style="width:100%; height:100%; object-fit:cover; object-position:top center; transition:transform 0.4s ease;">
-                            <div style="position:absolute; top:8px; left:8px; background:rgba(10,15,29,0.88); backdrop-filter:blur(4px); border:1px solid rgba(220,38,38,0.5); border-radius:4px; padding:2px 8px; font-size:0.7rem; font-weight:800; color:#dc2626;">
+                            <div style="position:absolute; top:8px; left:8px; background:rgba(253,251,247,0.92); backdrop-filter:blur(4px); border:1px solid rgba(194,37,43,0.5); border-radius:4px; padding:2px 8px; font-size:0.7rem; font-weight:800; color:var(--red-primary, #c2252b);">
                                 Rang <?= $u['tier'] ?>
                             </div>
-                            <div style="position:absolute; bottom:8px; right:8px; background:rgba(10,15,29,0.9); backdrop-filter:blur(4px); border:1px solid rgba(74,222,128,0.6); border-radius:4px; padding:2px 8px; font-size:0.75rem; font-weight:800; color:#4ade80;">
+                            <div style="position:absolute; bottom:8px; right:8px; background:rgba(253,251,247,0.92); backdrop-filter:blur(4px); border:1px solid rgba(22,101,52,0.4); border-radius:4px; padding:2px 8px; font-size:0.75rem; font-weight:800; color:#166534;">
                                 Garnison : <?= number_format($u['stationed_count']) ?>
                             </div>
                         </div>
 
-                        <div class="card-header" style="border-top:1px solid rgba(255,255,255,0.08); padding:0.75rem 1rem;">
-                            <h3 class="card-title" style="font-size:1rem; display:flex; align-items:center; gap:0.4rem;">
+                        <div class="card-header" style="border-top:1px solid var(--border-color); padding:0.75rem 1rem; background:transparent;">
+                            <h3 class="card-title" style="font-size:1rem; display:flex; align-items:center; gap:0.4rem; color:var(--text-main);">
                                 <span><?= $u['icon'] ?></span>
                                 <span><?= htmlspecialchars($u['name']) ?></span>
                             </h3>
@@ -85,7 +85,7 @@ $queue = $barracksEngine->getQueue((int)$planet['id']);
                             </p>
 
                             <!-- Caractéristiques Militaire Travian-Style -->
-                            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.5rem; font-size:0.75rem; background:rgba(0,0,0,0.3); padding:0.5rem; border-radius:6px; margin-bottom:0.75rem;">
+                            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.5rem; font-size:0.75rem; background:var(--bg-ink, #ede5d5); padding:0.5rem; border-radius:6px; margin-bottom:0.75rem; border:1px solid var(--border-color); color:var(--text-main);">
                                 <div>⚔️ Attaque : <strong><?= $u['attack'] ?></strong></div>
                                 <div>🛡️ Df Infan : <strong><?= $u['def_infantry'] ?></strong></div>
                                 <div>🐎 Df Caval : <strong><?= $u['def_mech'] ?></strong></div>
@@ -106,14 +106,14 @@ $queue = $barracksEngine->getQueue((int)$planet['id']);
                                 <?php if ($u['can_train']): ?>
                                     <div style="display:flex; gap:0.5rem;">
                                         <input type="number" id="unit-count-<?= $u['code'] ?>" min="1" max="1000" value="5" 
-                                               style="width:80px; background:rgba(0,0,0,0.5); border:1px solid var(--border-color); color:#fff; padding:0.4rem; border-radius:4px; text-align:center;">
+                                               style="width:80px; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-main); padding:0.4rem; border-radius:4px; text-align:center; font-weight:bold;">
                                         <button class="btn btn-primary" style="flex:1; font-size:0.8rem;" 
                                                 onclick="trainTroops('<?= $u['code'] ?>')">
                                             Entraîner les Guerriers
                                         </button>
                                     </div>
                                 <?php else: ?>
-                                    <div style="text-align:center; padding:0.4rem; background:rgba(239,68,68,0.15); border-radius:4px; font-size:0.8rem; color:#fca5a5;">
+                                    <div style="text-align:center; padding:0.4rem; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:4px; font-size:0.8rem; color:#dc2626; font-weight:600;">
                                         🔒 Requiert Dojo Niveau <?= $u['required_barracks_level'] ?>
                                     </div>
                                 <?php endif; ?>
