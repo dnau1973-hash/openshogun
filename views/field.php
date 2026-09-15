@@ -21,6 +21,10 @@ $buildingEngine = new BuildingEngine();
 
 // Récupérer le numéro de slot demandé (entre 1 et 18)
 $slot = (int)($_GET['slot'] ?? 1);
+if ($slot >= 19 && $slot <= 34) {
+    header("Location: /?page=building&slot=$slot");
+    exit;
+}
 if ($slot < 1 || $slot > 18) {
     $slot = 1;
 }

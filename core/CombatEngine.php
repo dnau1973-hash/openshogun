@@ -83,9 +83,31 @@ class CombatEngine {
             $defHull += $s['defense'] * $count;
         }
 
+        // Récupérer le niveau des remparts / muraille féodale du village cible
+        $targetBuildings = $this->planetEngine->getBuildings($targetPlanetId);
+        $wallLvl = (int)($targetBuildings['wall'] ?? 0);
+        $wallMult = 0.04;
+        if ($defenderUser) {
+            if ($defenderUser['faction'] === 'aethelis') { // Tokugawa : maîtres bâtisseurs défensifs
+                $wallMult = 0.05;
+            } elseif ($defenderUser['faction'] === 'vorash') { // Takeda : palissade rapide
+                $wallMult = 0.035;
+            }
+        }
+        $wallDefenseMultiplier = 1.0 + ($wallLvl * $wallMult);
+        $wallStructuralDefense = $wallLvl * 25; // Points de structure des remparts
+        $wallRipostePower = (int)($wallLvl * 5); // Tirs de courtine / meurtrières
+
         // Bonus faction défenseur Aethelis (+15% bouclier)
         if ($defenderUser && $defenderUser['faction'] === 'aethelis') {
             $defShield = (int)($defShield * 1.15);
+        }
+
+        // Application des bonus de la muraille féodale
+        if ($wallLvl > 0) {
+            $defShield = (int)($defShield * $wallDefenseMultiplier);
+            $defHull = (int)($defHull * $wallDefenseMultiplier) + $wallStructuralDefense;
+            $defPower += $wallRipostePower;
         }
 
         // Simulation de 3 rounds de combat

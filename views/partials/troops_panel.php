@@ -9,6 +9,14 @@ $barracksEngineWidget = new BarracksEngine();
 $stationedTroops = $barracksEngineWidget->getStationedUnits((int)$planet['id'], $user['faction']);
 $trainingQueue = $barracksEngineWidget->getQueue((int)$planet['id']);
 
+require_once __DIR__ . '/../../core/PlanetEngine.php';
+
+$planetEngineWidget = new PlanetEngine();
+$panelBuildings = $planetEngineWidget->getBuildings((int)$planet['id']);
+$wallLevel = (int)($panelBuildings['wall'] ?? 0);
+$wallMultPct = ($user['faction'] === 'aethelis') ? 5 : (($user['faction'] === 'vorash') ? 3.5 : 4);
+$wallBonusFactor = 1.0 + ($wallLevel * ($wallMultPct / 100));
+
 $totalSoldiers = 0;
 $totalAttackPower = 0;
 $totalDefensePower = 0;
@@ -19,6 +27,8 @@ foreach ($stationedTroops as $t) {
     $totalAttackPower += $cnt * (int)$t['attack'];
     $totalDefensePower += $cnt * ((int)$t['def_infantry'] + (int)$t['def_mech']);
 }
+
+$totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLevel * 25);
 ?>
 
 <div class="card" style="border-color: rgba(220, 38, 38, 0.3);">
@@ -74,9 +84,17 @@ foreach ($stationedTroops as $t) {
                 <span style="color:var(--text-muted);">Puissance d'Attaque :</span>
                 <strong style="color:var(--red-primary, #c2252b);"><?= number_format($totalAttackPower) ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span style="color:var(--text-muted);">Défense du Fief :</span>
+            <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+                <span style="color:var(--text-muted);">Défense des Troupes :</span>
                 <strong style="color:#166534;"><?= number_format($totalDefensePower) ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding-top:0.3rem; border-top:1px dashed var(--border-color); align-items:center;">
+                <a href="/?page=building&code=wall" style="text-decoration:none; color:inherit;" title="Accéder aux Remparts Féodaux">
+                    <span style="color:var(--text-muted); font-size:0.75rem;">🧱 Remparts (Niv. <?= $wallLevel ?>) :</span>
+                </a>
+                <strong style="color:var(--red-primary, #c2252b); font-size:0.85rem;">
+                    <?= ($wallLevel > 0) ? ('+' . ($wallLevel * $wallMultPct) . '% (' . number_format($totalFortifiedDefense) . ')') : '<a href="/?page=building&code=wall" style="font-size:0.75rem; color:#b45309; text-decoration:underline;">Non Bâti</a>' ?>
+                </strong>
             </div>
         </div>
 

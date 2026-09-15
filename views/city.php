@@ -32,6 +32,7 @@ $buildingSectors = [
     'shipyard' => 'military',
     'barracks' => 'military',
     'radar' => 'military',
+    'wall' => 'military',
     'research_lab' => 'science',
     'embassy' => 'science',
     'storage' => 'logistics',
@@ -78,7 +79,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg'
             <div class="rts-sector-bar">
                 <button class="sector-btn active" id="btn-city-all" onclick="filterCitySector('all')">🌐 Vue Globale Cité</button>
                 <button class="sector-btn filter-hq" id="btn-city-hq" onclick="filterCitySector('hq')">🏯 Tenshu Donjon</button>
-                <button class="sector-btn filter-military" id="btn-city-military" onclick="filterCitySector('military')">🥋 Dojo & Cavalerie</button>
+                <button class="sector-btn filter-military" id="btn-city-military" onclick="filterCitySector('military')">🥋 Dojo, Cavalerie & Remparts</button>
                 <button class="sector-btn filter-science" id="btn-city-science" onclick="filterCitySector('science')">📜 Savoirs & Forge</button>
                 <button class="sector-btn filter-logistics" id="btn-city-logistics" onclick="filterCitySector('logistics')">📦 Greniers & Réserves</button>
                 <button class="sector-btn filter-gateway" id="btn-city-gateway" onclick="window.location.href='?page=resources'">🌾 Porte du Terroir</button>
@@ -94,7 +95,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg'
                     <div class="rts-level-bubble rts-gateway-bubble" title="🌾 Vers le Terroir">🌾</div>
                 </div>
 
-                <!-- Boucle sur les 15 Slots de la Cité Féodale (Slots 19 à 33) -->
+                <!-- Boucle sur les 16 Slots de la Cité Féodale (Slots 19 à 34) -->
                 <?php foreach (CITY_SLOT_LAYOUT as $slot => $code): ?>
                     <?php 
                         if ($code === 'free_plot'):
@@ -104,7 +105,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg'
                              data-sector="logistics"
                              data-slot="<?= $slot ?>"
                              title="Emplacement Libre #<?= $slot ?> (Terrain disponible)"
-                             onclick="showModalAlert('Cet emplacement (#<?= $slot ?>) est disponible pour les futures extensions du domaine.', 'info', 'Emplacement Libre #<?= $slot ?>')">
+                             onclick="window.location.href='/?page=building&slot=<?= $slot ?>'">
                             <div class="rts-level-bubble" title="Emplacement Libre #<?= $slot ?>">+</div>
                         </div>
                     <?php 
@@ -124,9 +125,9 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg'
                              data-slot="<?= $slot ?>"
                              data-building="<?= $code ?>"
                              title="<?= htmlspecialchars($bInfo['name']) ?> (Niveau <?= $lvl ?>)"
-                             onclick="handleCitySlotClick('<?= $code ?>', '<?= addslashes($bInfo['name']) ?>', <?= $lvl ?>, <?= $cost['metal'] ?>, <?= $cost['crystal'] ?>, <?= $cost['deuterium'] ?>, <?= $duration ?>)">
+                             onclick="window.location.href='/?page=building&slot=<?= $slot ?>'">
                             
-                            <?php if ($lvl > 0): ?>
+                            <?php if ($lvl > 0 && $code !== 'wall'): ?>
                                 <!-- Sprite PNG du bâtiment féodal -->
                                 <img src="/public/assets/<?= $tileImg ?>" 
                                      class="rts-tile-sprite <?= ($code === 'hq') ? 'rts-tenshu-sprite' : '' ?>" 
@@ -177,10 +178,9 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg'
                                 <a href="?page=research" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">📜 Académie des Savoirs</a>
                             <?php endif; ?>
 
-                            <button class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem;"
-                                    onclick="openUpgradeModal('building', '<?= $code ?>', '<?= addslashes($bInfo['name']) ?>', <?= $lvl ?>, <?= $cost['metal'] ?>, <?= $cost['crystal'] ?>, <?= $cost['deuterium'] ?>, <?= $duration ?>)">
-                                <?= ($lvl === 0) ? '🔨 Construire' : '⚡ Améliorer (Niv ' . ($lvl + 1) . ')' ?>
-                            </button>
+                            <a href="/?page=building&code=<?= $code ?>" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">
+                                <?= ($lvl === 0) ? '🔨 Construire' : '⚡ Consulter & Améliorer (Niv ' . ($lvl + 1) . ')' ?>
+                            </a>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -232,72 +232,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg'
     </div>
 </div>
 
-<!-- Modale de Choix d'Action pour Bâtiments Fonctionnels -->
-<div class="modal-overlay" id="cityActionModal" style="display:none;">
-    <div class="modal-card">
-        <div class="card-header">
-            <h3 class="card-title" id="cityActionTitle">Options du Bâtiment</h3>
-            <button onclick="closeCityActionModal()" class="modal-close-btn">&times;</button>
-        </div>
-        <div class="card-body">
-            <p id="cityActionSubtitle" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.25rem;"></p>
-            <div style="display:flex; flex-direction:column; gap:0.75rem;">
-                <button class="btn btn-primary" id="cityActionAccessBtn" style="justify-content:center; padding:0.75rem;">
-                    Accéder au Bâtiment
-                </button>
-                <button class="btn btn-secondary" id="cityActionUpgradeBtn" style="justify-content:center; padding:0.75rem;">
-                    Améliorer le Bâtiment
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-function handleCitySlotClick(code, name, level, costMetal, costCrystal, costDeut, duration) {
-    if (level === 0) {
-        openUpgradeModal('building', code, name, 0, costMetal, costCrystal, costDeut, duration);
-        return;
-    }
-
-    // Bâtiments avec fonction directe
-    const actionPages = {
-        'barracks': { url: '?page=barracks', text: '🥋 Entraîner les Guerriers (Dojo)' },
-        'shipyard': { url: '?page=shipyard', text: '🐎 Mobiliser Cavalerie & Siège (Écuries)' },
-        'research_lab': { url: '?page=research', text: '📜 Développer Savoirs & Forges (Académie)' }
-    };
-
-    if (actionPages[code]) {
-        const modal = document.getElementById('cityActionModal');
-        const title = document.getElementById('cityActionTitle');
-        const subtitle = document.getElementById('cityActionSubtitle');
-        const accessBtn = document.getElementById('cityActionAccessBtn');
-        const upgradeBtn = document.getElementById('cityActionUpgradeBtn');
-
-        title.innerText = name;
-        subtitle.innerText = `Bâtiment fortifié de Niveau ${level}. Que souhaitez-vous faire ?`;
-        
-        accessBtn.innerText = actionPages[code].text;
-        accessBtn.onclick = () => window.location.href = actionPages[code].url;
-
-        upgradeBtn.innerText = `⚡ Améliorer au Niveau ${level + 1}`;
-        upgradeBtn.onclick = () => {
-            closeCityActionModal();
-            openUpgradeModal('building', code, name, level, costMetal, costCrystal, costDeut, duration);
-        };
-
-        modal.style.display = 'flex';
-        return;
-    }
-
-    // Pour tous les autres bâtiments : ouvrir la modale d'amélioration
-    openUpgradeModal('building', code, name, level, costMetal, costCrystal, costDeut, duration);
-}
-
-function closeCityActionModal() {
-    const modal = document.getElementById('cityActionModal');
-    if (modal) modal.style.display = 'none';
-}
 
 function filterCitySector(sector) {
     document.querySelectorAll('.sector-btn').forEach(btn => btn.classList.remove('active'));

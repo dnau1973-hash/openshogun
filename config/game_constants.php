@@ -74,6 +74,7 @@ const CITY_SLOT_LAYOUT = [
     31 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
     32 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
     33 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
+    34 => 'wall',          // Muraille & Remparts de Cité (Enceinte fortifiée)
 ];
 
 // Métadonnées des parcelles rurales du domaine
@@ -224,6 +225,16 @@ const BUILDINGS = [
         'base_cost' => ['metal' => 200, 'crystal' => 150, 'deuterium' => 50],
         'cost_multiplier' => 1.5,
         'base_time' => 35,
+        'max_level' => 20
+    ],
+    'wall' => [
+        'name' => 'Muraille & Remparts de Cité',
+        'icon' => '🧱',
+        'tile_img' => 'tile_wall.png',
+        'description' => 'Enceinte fortifiée en pierre de taille, palissades en cèdre et douves protégeant le fief. Confère une défense structurelle de base et un puissant bonus défensif multiplicateur (+4% par niveau) à l\'ensemble des guerriers stationnés en garnison face aux assauts ennemis.',
+        'base_cost' => ['metal' => 110, 'crystal' => 160, 'deuterium' => 90],
+        'cost_multiplier' => 1.45,
+        'base_time' => 30,
         'max_level' => 20
     ]
 ];

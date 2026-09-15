@@ -752,7 +752,8 @@ a:hover {
 .hotspot-city-slot-31 { left: 59.8%; top: 37.0%; width: 11.5%; height: 18.0%; z-index: 10; }
 .hotspot-city-slot-32 { left: 69.8%; top: 44.5%; width: 11.5%; height: 18.0%; z-index: 12; }
 .hotspot-city-slot-33 { left: 73.8%; top: 34.5%; width: 11.5%; height: 18.0%; z-index: 10; }
-.hotspot-city-slot-gateway { left: 21.5%; top: 62.0%; width: 11.0%; height: 18.0%; z-index: 15; }
+.hotspot-city-slot-34 { left: 17.5%; top: 56.5%; width: 13.5%; height: 20.0%; z-index: 15; }
+.hotspot-city-slot-gateway { left: 12.0%; top: 68.5%; width: 7.5%; height: 12.0%; z-index: 16; }
 
 /* Emplacements libres / Terrains disponibles */
 .rts-hotspot.is-empty-plot {
@@ -1577,6 +1578,10 @@ a:hover {
 .field-type-pill.sec-crystal { background: rgba(51, 65, 85, 0.1); color: #334155; border: 1px solid rgba(51, 65, 85, 0.3); }
 .field-type-pill.sec-deut { background: rgba(180, 83, 9, 0.1); color: #b45309; border: 1px solid rgba(180, 83, 9, 0.3); }
 .field-type-pill.sec-energy { background: rgba(194, 37, 43, 0.1); color: #c2252b; border: 1px solid rgba(194, 37, 43, 0.3); }
+.field-type-pill.sec-hq { background: rgba(185, 28, 28, 0.1); color: #b91c1c; border: 1px solid rgba(185, 28, 28, 0.3); }
+.field-type-pill.sec-military { background: rgba(220, 38, 38, 0.1); color: #c2252b; border: 1px solid rgba(220, 38, 38, 0.3); }
+.field-type-pill.sec-science { background: rgba(30, 64, 175, 0.1); color: #1e40af; border: 1px solid rgba(30, 64, 175, 0.3); }
+.field-type-pill.sec-logistics { background: rgba(180, 83, 9, 0.1); color: #b45309; border: 1px solid rgba(180, 83, 9, 0.3); }
 
 .field-title {
     font-size: 2rem;
