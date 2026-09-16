@@ -93,9 +93,9 @@ class BotEngine {
 
             // 6. Donner une garnison initiale
             $starterUnits = [
-                'terran' => ['code' => 'terran_marine', 'count' => 30],
-                'vorash' => ['code' => 'vorash_skitter', 'count' => 45],
-                'aethelis' => ['code' => 'aethelis_initiate', 'count' => 25]
+                'terran' => ['code' => 'piquier_ashigaru_yari', 'count' => 30],
+                'vorash' => ['code' => 'fantassin_leger_takeda', 'count' => 45],
+                'aethelis' => ['code' => 'sentinelle_yari_tokugawa', 'count' => 25]
             ];
             $u = $starterUnits[$faction] ?? $starterUnits['terran'];
             $this->db->prepare("
@@ -235,9 +235,9 @@ class BotEngine {
 
                 // 3. Recrutement de soldats en garnison
                 $unitCodes = [
-                    'terran' => ['terran_marine', 'terran_sentinel'],
-                    'vorash' => ['vorash_skitter', 'vorash_chitin'],
-                    'aethelis' => ['aethelis_initiate', 'aethelis_phalanx']
+                    'terran' => ['piquier_ashigaru_yari', 'arquebusier_oda_tanegashima'],
+                    'vorash' => ['fantassin_leger_takeda', 'archer_yumi_monte'],
+                    'aethelis' => ['sentinelle_yari_tokugawa', 'archer_protecteur_muraille']
                 ];
                 $possibleUnits = $unitCodes[$faction] ?? $unitCodes['terran'];
                 $chosenUnit = $possibleUnits[array_rand($possibleUnits)];

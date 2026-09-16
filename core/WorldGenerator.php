@@ -229,8 +229,8 @@ class WorldGenerator {
         $stmtUnit = $this->db->prepare("
             INSERT INTO planet_units (planet_id, unit_code, count) VALUES (?, ?, ?)
         ");
-        $stmtUnit->execute([$capitalPlanetId, 'terran_marine', 40]);
-        $stmtUnit->execute([$capitalPlanetId, 'terran_sentinel', 15]);
+        $stmtUnit->execute([$capitalPlanetId, 'piquier_ashigaru_yari', 40]);
+        $stmtUnit->execute([$capitalPlanetId, 'arquebusier_oda_tanegashima', 15]);
 
         // 8. Flotte de départ de l'Admin
         $stmtShip = $this->db->prepare("

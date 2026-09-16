@@ -20,84 +20,84 @@ $tab = $_GET['tab'] ?? 'troops';
 
 // Métadonnées enrichies des unités (rôle tactique, points forts/faibles, citations)
 $unitTactics = [
-    'terran_marine' => [
+    'piquier_ashigaru_yari' => [
         'role' => 'Infanterie de ligne & Anti-Cavalerie',
         'lore_detail' => 'Formés dans la rigueur absolue des réformes militaires d\'Oda Nobunaga, ces fantassins paysans sont armés d\'une pique nagae-yari de plus de 5 mètres. Organisés en rangs serrés, ils forment une haie d\'acier infranchissable capable de briser l\'élan des charges les plus furieuses.',
         'strengths' => 'Coût de recrutement très faible, excellent rapport qualité/prix contre la cavalerie, formation rapide en grand nombre.',
         'weaknesses' => 'Vulnérable face aux tirs d\'arquebuse et aux maîtres d\'armes samouraïs en duel rapproché.',
         'quote' => '« Une forêt de lances ne plie jamais devant l\'orage. »'
     ],
-    'terran_sentinel' => [
+    'arquebusier_oda_tanegashima' => [
         'role' => 'Tir Perforant & Défense de Position',
         'lore_detail' => 'Pionniers dans l\'utilisation massive des mousquets à mèche importés par les marchands portugais à Tanegashima en 1543. Déployés derrière des palissades de bambou tressé (tate), ils délivrent des salves successives impitoyables qui déchiquètent les armures laquées adverses.',
         'strengths' => 'Puissance d\'arrêt défensive colossale (65 déf. infanterie / 55 déf. méca), tir dévastateur à distance.',
         'weaknesses' => 'Lenteur de rechargement, faible en combat de mêlée sans couverture d\'infanterie.',
         'quote' => '« Trois volées de feu suffisent à balayer une dynastie. » — Oda Nobunaga'
     ],
-    'terran_exo_assault' => [
+    'samourai_katana' => [
         'role' => 'Assaut d\'Élite & Percée de Lignes',
         'lore_detail' => 'Nobles bretteurs dévoués au code du Bushidō. Vêtus de cuirasses dō-maru renforcées et maniant le katana forgé dans l\'acier tamahagane, ces maîtres d\'armes pénètrent les brèches créées par les arquebusiers pour tailler en pièces les rangs adverses désorganisés.',
         'strengths' => 'Attaque puissante (85), vitesse élevée (8), excellent équilibre offensive/défensive, moral inébranlable.',
         'weaknesses' => 'Coût élevé en fer et en riz, effectifs plus réduits sur le champ de bataille.',
         'quote' => '« La lame est l\'âme vivante du guerrier. »'
     ],
-    'terran_titan_mech' => [
+    'garde_hatamoto_armure_lourde' => [
         'role' => 'Garde Rapprochée & Choc Titanesque',
         'lore_detail' => 'Les gardes du corps d\'élite (Hatamoto) sous la bannière directe du Daimyō. Équipés d\'armures lourdes Nanban dō inspirées des armures occidentales à l\'épreuve des balles et arborant de majestueux casques kabuto dorés, ils constituent le rempart ultime du clan Oda.',
         'strengths' => 'Attaque titanesque (210), défenses imprenables (120/150), capacité de fret de 120, brise les forteresses.',
         'weaknesses' => 'Coût colossal en ressources (600 bois, 450 pierre, 250 riz), vitesse de déplacement lente (5).',
         'quote' => '« Devant l\'Hatamoto, même les montagnes s\'écartent. »'
     ],
-    'vorash_skitter' => [
+    'fantassin_leger_takeda' => [
         'role' => 'Fantassin Léger de Raid & Éclaireur',
         'lore_detail' => 'Conscrits des rudes montagnes de la province de Kai, ces fantassins légers sont entraînés à gravir les pentes abruptes et à surprendre les garnisons ennemies. Leur équipement minimaliste leur confère une célérité hors du commun pour piller les réserves de grain.',
         'strengths' => 'Vitesse de marche exceptionnelle (9), grande capacité de pillage (65 pour 90 bois), recrutement ultra rapide (10s).',
         'weaknesses' => 'Défense très faible (20/15), décimé en cas d\'engagement prolongé contre une ligne d\'infanterie lourde.',
         'quote' => '« Rapide comme le vent des montagnes de Kai. »'
     ],
-    'vorash_chitin' => [
+    'archer_yumi_monte' => [
         'role' => 'Tir Mobile & Harcèlement de Cavalerie',
         'lore_detail' => 'Héritiers de l\'antique tradition du Yabusame (tir à l\'arc à cheval), ces cavaliers décochent des volées précises au grand arc yumi tout en caracolant hors de portée des lances ennemies. Ils excellent à couper les lignes de ravitaillement et épuiser les armées en marche.',
         'strengths' => 'Excellente défense anti-cavalerie (60) et anti-infanterie (55), mobilité de tir supérieure, harcèlement parfait.',
         'weaknesses' => 'Attaque modérée (20), capacité de fret limitée (25).',
         'quote' => '« Une flèche dans le ciel, un ennemi qui s\'effondre avant même d\'avoir vu son bourreau. »'
     ],
-    'vorash_berserker' => [
+    'cavalier_rouge_akazonae' => [
         'role' => 'Cavalerie Rouge de Choc Frontal (Akazonae)',
         'lore_detail' => 'La légendaire cavalerie rouge d\'assaut levée par Takeda Shingen. Revêtus d\'armures entièrement laquées de vermillon flamboyant et brandissant de longues lances d\'assaut, ces cavaliers chargent en formations compactes irrésistibles qui terrifient quiconque ose leur faire face.',
         'strengths' => 'Attaque destructrice (95), vitesse rapide (8), bonus passif de raid (+25% de butin chez Takeda), foudroie les troupes à distance.',
         'weaknesses' => 'Vulnérable aux forêts de piques Ashigaru bien retranchées.',
         'quote' => '« Furieux comme le feu, inébranlable comme la montagne. » — Takeda Shingen'
     ],
-    'vorash_goliath' => [
+    'maitre_nodachi_kai' => [
         'role' => 'Maître Bretteur Berserker & Perceur de Siège',
         'lore_detail' => 'Guerriers géants sélectionnés parmi les vétérans des monts de Kai. Brandissant le gigantesque sabre nodachi dont la lame forgée mesure près de deux mètres, ils fauchent d\'un seul moulinet plusieurs combattants et tranchent les jarrets des chevaux ennemis.',
         'strengths' => 'Attaque la plus haute du jeu (225 !), capacité de transport immense (140), pulvérise les armures lourdes ennemies.',
         'weaknesses' => 'Vitesse de déplacement lente (5), coûteux à former au Dojo.',
         'quote' => '« Aucun bouclier n\'a jamais arrêté la coupe d\'un Nodachi de Kai. »'
     ],
-    'aethelis_initiate' => [
+    'sentinelle_yari_tokugawa' => [
         'role' => 'Garde de Garnison & Mur de Boucliers',
         'lore_detail' => 'Soldats réguliers voués à la défense tenace des forteresses de Mikawa. Équipés de chapeaux de fer coniques (jingasa) et d\'armures robustes couleur bronze et indigo ornées du blason aux trois feuilles de mauve (Mitsuba Aoi), ils ne reculent jamais d\'un pas.',
         'strengths' => 'Très bonne résilience défensive (38 infanterie / 25 cavalerie), vitesse correcte (8), polyvalent.',
         'weaknesses' => 'Attaque moyenne (42), faible capacité de fret (45).',
         'quote' => '« Un pouce de terre du clan ne sera jamais cédé sans le sang de l\'assaillant. »'
     ],
-    'aethelis_phalanx' => [
+    'archer_protecteur_muraille' => [
         'role' => 'Tir de Muraille & Défense Imprenable',
         'lore_detail' => 'Archers d\'élite affectés à la surveillance des courtines et des donjons de pierre. Tirant à l\'abri des merlons en chêne et des meurtrières sama, leurs volées de flèches pleuvent sur les assiégeants avec une régularité et une précision meurtrières.',
         'strengths' => 'Défense colossale en garnison (70 infanterie / 65 cavalerie), synergie magistrale avec la Muraille de Cité.',
         'weaknesses' => 'Attaque offensive faible (22), vitesse de marche modeste.',
         'quote' => '« Le château n\'est pas fait de pierres, il est fait des flèches de ses défenseurs. »'
     ],
-    'aethelis_shadow' => [
+    'ombre_shinobi_infiltree' => [
         'role' => 'Infiltration Nocturne & Assassinat d\'Élite',
         'lore_detail' => 'Membres des légendaires réseaux de ninjas Iga et Kōga alliés à Tokugawa Ieyasu. Spécialisés dans le sabotage, l\'empoisonnement des puits, le vol de parchemins et l\'élimination ciblée des officiers ennemis sous la lumière blafarde de la lune.',
         'strengths' => 'Attaque foudroyante (90), vitesse suprême (9), furtivité inégalée pour espionner et saboter les fiefs rivaux.',
         'weaknesses' => 'Coût élevé en ressources techniques, vulnérable si cerné en combat frontal ouvert.',
         'quote' => '« Nous sommes l\'ombre qui veille quand le jour s\'éteint. »'
     ],
-    'aethelis_colossus' => [
+    'hatamoto_venerable_tokugawa' => [
         'role' => 'Général Vétéran & Bastion Vivant du Domaine',
         'lore_detail' => 'Les vénérables Hatamoto du clan Tokugawa, vétérans des plus grandes batailles de l\'époque Sengoku. Portant la grande armure antique Ō-yoroi avec des plaques dorées et guidant les troupes avec l\'éventail de guerre en fer gunbai, leur simple présence galvanise toute la garnison.',
         'strengths' => 'Meilleures défenses du jeu (140 infanterie / 160 cavalerie !), attaque formidable (200), point d\'ancrage absolu.',

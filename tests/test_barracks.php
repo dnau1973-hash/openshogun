@@ -9,10 +9,9 @@ require_once __DIR__ . '/../core/BarracksEngine.php';
 
 echo "=== TEST DU SYSTÈME D'ARMÉE & TROUPES (STYLE TRAVIAN) ===\n\n";
 
-$auth = new Auth();
-$auth->login('TerranCommander', 'password123');
-$user = $auth->getCurrentUser();
-$planet = $auth->getCurrentPlanet();
+$db = Database::getConnection();
+$user = $db->query("SELECT * FROM users WHERE faction = 'terran' LIMIT 1")->fetch();
+$planet = $db->query("SELECT * FROM planets WHERE user_id = " . (int)$user['id'] . " LIMIT 1")->fetch();
 
 echo "-> Joueur: {$user['username']} ({$user['faction']}) sur Planète ID {$planet['id']}\n";
 
@@ -28,12 +27,12 @@ foreach ($troops as $t) {
 echo "\n";
 
 // 2. Entraînement de nouvelles recrues
-echo "2. Lancement entraînement de 10 Marines Terran...\n";
+echo "2. Lancement entraînement de 10 Piquiers Ashigaru (Yari)...\n";
 // Assurons des ressources suffisantes pour le test
 $db = Database::getConnection();
 $db->prepare("UPDATE planets SET metal = metal + 3000, crystal = crystal + 3000, deuterium = deuterium + 1000 WHERE id = ?")->execute([$planet['id']]);
 
-$trainResult = $barracksEngine->trainUnits((int)$planet['id'], 'terran_marine', 10, $user['faction']);
+$trainResult = $barracksEngine->trainUnits((int)$planet['id'], 'piquier_ashigaru_yari', 10, $user['faction']);
 echo "-> Résultat : " . ($trainResult['success'] ? "SUCCÈS" : "ÉCHEC") . " : {$trainResult['message']}\n";
 
 // 3. Vérification de la file active
@@ -47,7 +46,7 @@ $db->prepare("UPDATE barracks_queue SET finishes_at = UNIX_TIMESTAMP() - 1 WHERE
 $planetEngine->updatePlanet((int)$planet['id']);
 
 $troopsAfter = $barracksEngine->getStationedUnits((int)$planet['id'], $user['faction']);
-echo "-> Effectif des Marines après entraînement : {$troopsAfter[0]['stationed_count']} unités (+10 recrues validées)\n\n";
+echo "-> Effectif des Piquiers Ashigaru après entraînement : {$troopsAfter[0]['stationed_count']} unités (+10 recrues validées)\n\n";
 
 echo "=== TEST DU SYSTÈME D'ARMÉE RÉUSSI AVEC SUCCÈS ! ===\n";
 

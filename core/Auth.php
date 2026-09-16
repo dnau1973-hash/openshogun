@@ -165,9 +165,9 @@ class Auth {
 
             // 7. Donner une première garnison de soldats (Style Travian)
             $starterUnits = [
-                'terran' => ['code' => 'terran_marine', 'count' => 15],
-                'vorash' => ['code' => 'vorash_skitter', 'count' => 20],
-                'aethelis' => ['code' => 'aethelis_initiate', 'count' => 15]
+                'terran' => ['code' => 'piquier_ashigaru_yari', 'count' => 15],
+                'vorash' => ['code' => 'fantassin_leger_takeda', 'count' => 20],
+                'aethelis' => ['code' => 'sentinelle_yari_tokugawa', 'count' => 15]
             ];
             $starter = $starterUnits[$faction] ?? $starterUnits['terran'];
             $stmtUnit = $this->db->prepare("
