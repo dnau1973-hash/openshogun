@@ -76,10 +76,10 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
                 <span class="travian-medallion-tooltip">Cité Castrale</span>
             </a>
 
-            <!-- 3. Provinces du Japon -->
-            <a href="?page=galaxy" class="travian-medallion <?= ($page === 'galaxy') ? 'active' : '' ?>" title="Provinces du Japon">
+            <!-- 3. Provinces du Japon (Carte) -->
+            <a href="?page=map" class="travian-medallion <?= ($page === 'map' || $page === 'galaxy') ? 'active' : '' ?>" title="Provinces du Japon (Carte)">
                 <img src="/public/assets/nav_galaxy.jpg" alt="Provinces du Japon" class="travian-medallion-img">
-                <span class="travian-medallion-tooltip">Provinces du Japon</span>
+                <span class="travian-medallion-tooltip">Provinces du Japon (Carte)</span>
             </a>
         </div>
 
@@ -219,5 +219,5 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
 
 </header>
 
-<div class="container">
+<div class="container <?= ($page === 'map' || $page === 'galaxy') ? 'container-fullwidth' : '' ?>">
 

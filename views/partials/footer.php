@@ -284,7 +284,7 @@ async function openPlayerProfileModal(userId) {
                     <td style="padding: 0.5rem 0.75rem; color: var(--text-muted);">${pl.planet_type || 'Fief Castral'}</td>
                     <td style="padding: 0.5rem 0.75rem; font-family: monospace; color: #dc2626;">[${pl.coord_x} : ${pl.coord_y}]</td>
                     <td style="padding: 0.5rem 0.75rem; text-align: right;">
-                        <a href="?page=galaxy&cx=${pl.coord_x}&cy=${pl.coord_y}" class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;" title="Voir sur la carte">
+                        <a href="?page=map&x=${pl.coord_x}&y=${pl.coord_y}" class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;" title="Voir sur la carte">
                             🗾 Provinces
                         </a>
                         ${!p.is_self ? `

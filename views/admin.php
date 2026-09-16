@@ -581,7 +581,7 @@ $humanUsers = $db->query("
                                             📜 Fiche
                                         </a>
                                         <?php if ($isSpawned): ?>
-                                            <a href="/?page=galaxy&x=<?= $curX ?>&y=<?= $curY ?>" target="_blank" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; text-decoration: none;" title="Voir sur la carte">
+                                            <a href="/?page=map&x=<?= $curX ?>&y=<?= $curY ?>" target="_blank" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; text-decoration: none;" title="Voir sur la carte">
                                                 🗾 Carte
                                             </a>
                                         <?php endif; ?>

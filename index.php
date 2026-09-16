@@ -45,7 +45,12 @@ if (!Auth::check()) {
 }
 
 // Récupérer la page demandée
-$allowedPages = ['resources', 'field', 'building', 'city', 'galaxy', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs'];
+$page = $_GET['page'] ?? 'resources';
+if ($page === 'galaxy') {
+    $page = 'map';
+}
+
+$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';

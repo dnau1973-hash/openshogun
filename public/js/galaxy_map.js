@@ -13,11 +13,18 @@ class GalaxyMapController {
         this.playerX = options.playerX || 0;
         this.playerY = options.playerY || 0;
         this.currentUserId = options.userId || 0;
-        this.radius = options.radius || 4; // Grille 9x9
-
         this.tileSize = 76; // pixels par case
         this.gap = 6;
         this.stepSize = this.tileSize + this.gap;
+
+        // Calcul dynamique du rayon pour occuper toute la largeur d'écran
+        if (options.radius && options.radius > 0) {
+            this.radius = options.radius;
+        } else {
+            const availW = Math.max(window.innerWidth, this.container.clientWidth || 1200);
+            const neededCols = Math.ceil(availW / this.stepSize) + 2;
+            this.radius = Math.min(13, Math.max(5, Math.ceil((neededCols - 1) / 2)));
+        }
 
         // État du Drag
         this.isDragging = false;
@@ -107,6 +114,21 @@ class GalaxyMapController {
                 if (e.key === 'ArrowLeft') this.moveTo(this.centerX - 1, this.centerY);
                 if (e.key === 'ArrowRight') this.moveTo(this.centerX + 1, this.centerY);
             }
+        });
+
+        // Redimensionnement automatique pour couvrir toute la largeur de l'écran
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const availW = Math.max(window.innerWidth, this.container.clientWidth || 1200);
+                const neededCols = Math.ceil(availW / this.stepSize) + 2;
+                const newRadius = Math.min(13, Math.max(5, Math.ceil((neededCols - 1) / 2)));
+                if (newRadius !== this.radius) {
+                    this.radius = newRadius;
+                    this.loadSector(this.centerX, this.centerY);
+                }
+            }, 300);
         });
     }
 

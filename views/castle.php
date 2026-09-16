@@ -39,7 +39,7 @@ $nextCastle = $allCastles[($currentIndex < count($allCastles) - 1) ? $currentInd
 
     <!-- Barre de Navigation Supérieure -->
     <div class="field-nav-bar" style="margin-bottom: 1.5rem;">
-        <a href="/?page=galaxy<?= $castle['is_spawned'] ? ('&x=' . $castle['coord_x'] . '&y=' . $castle['coord_y']) : '' ?>" class="field-back-btn">
+        <a href="/?page=map<?= $castle['is_spawned'] ? ('&x=' . $castle['coord_x'] . '&y=' . $castle['coord_y']) : '' ?>" class="field-back-btn">
             <span>&larr;</span>
             <span>Retour à la Carte des Provinces</span>
         </a>
@@ -119,7 +119,7 @@ $nextCastle = $allCastles[($currentIndex < count($allCastles) - 1) ? $currentInd
                 <!-- Actions Rapides -->
                 <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
                     <?php if ($castle['is_spawned']): ?>
-                        <a href="/?page=galaxy&x=<?= $castle['coord_x'] ?>&y=<?= $castle['coord_y'] ?>" class="btn btn-primary" style="background: #b91c1c; font-weight: 700;">
+                        <a href="/?page=map&x=<?= $castle['coord_x'] ?>&y=<?= $castle['coord_y'] ?>" class="btn btn-primary" style="background: #b91c1c; font-weight: 700;">
                             🗾 Localiser sur la Carte des Provinces [<?= $castle['coord_x'] ?> : <?= $castle['coord_y'] ?>] &rarr;
                         </a>
                     <?php endif; ?>

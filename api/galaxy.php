@@ -14,7 +14,7 @@ if (!Auth::check()) {
 
 $centerX = (int)($_GET['x'] ?? 0);
 $centerY = (int)($_GET['y'] ?? 0);
-$radius = min(10, max(2, (int)($_GET['radius'] ?? 4)));
+$radius = min(15, max(2, (int)($_GET['radius'] ?? 6)));
 
 $galaxyEngine = new GalaxyEngine();
 $data = $galaxyEngine->getSectorMap($centerX, $centerY, $radius);

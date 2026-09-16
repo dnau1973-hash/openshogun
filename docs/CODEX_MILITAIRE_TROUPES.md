@@ -250,3 +250,4 @@ Chaque clan féodal dispose de **4 régiments emblématiques** (répartis en 4 R
 
 4. **Bonus Défensif de Muraille :**
    La Muraille de Cité (Emplacement 34) confère à toutes les unités en garnison un bonus défensif cumulatif de **+4% par niveau de muraille**.
+

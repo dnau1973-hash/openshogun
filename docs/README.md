@@ -27,3 +27,4 @@ Bienvenue dans la documentation officielle et le guide stratégique d'**OpenShog
 5. **⚔️ Chapitre 5 : Système de Combat, Expéditions & Formations**
    - Formules de dégâts, confrontation Attaque vs Défense Infanterie / Cavalerie
    - Ravitaillement des troupes et pillage des réserves
+
