@@ -18,9 +18,11 @@ if (!Auth::check() || !$auth->isAdmin()) {
 }
 
 require_once __DIR__ . '/../core/CastleEngine.php';
+require_once __DIR__ . '/../core/OasisEngine.php';
 
 $botEngine = new BotEngine();
 $castleEngine = new CastleEngine();
+$oasisEngine = new OasisEngine();
 $db = Database::getConnection();
 
 // Statistiques globales
@@ -34,6 +36,21 @@ $currentWeekCode = date('Y') . '-S' . date('W');
 // Châteaux authentiques (現存十二天守)
 $authenticCastles = $castleEngine->getAllCastles();
 $spawnedCastlesCount = count(array_filter($authenticCastles, fn($c) => (int)$c['is_spawned'] === 1));
+
+// Statistiques & liste des Oasis
+$oasisStats = $oasisEngine->getOasisStatistics();
+$allOases = $db->query("
+    SELECT o.*, p.name as owner_planet_name, u.username as owner_username 
+    FROM oases o 
+    LEFT JOIN planets p ON o.owner_planet_id = p.id 
+    LEFT JOIN users u ON p.user_id = u.id 
+    ORDER BY o.owner_planet_id DESC, o.id ASC
+")->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($allOases as &$oRow) {
+    $oRow['garrison'] = $oasisEngine->getOasisGarrison((int)$oRow['id']);
+}
+unset($oRow);
 
 // Variables de configuration
 $settings = GameConfig::load();
@@ -165,6 +182,41 @@ $humanUsers = $db->query("
                                    oninput="document.getElementById('fleet_speed_range').value = this.value">
                         </div>
                         <small style="color: var(--text-muted); font-size: 0.75rem;">Accélère la durée des trajets aller-retour pour raids, transports et colonisations.</small>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.25rem;">
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; color: #4ade80;">
+                            🌿 Couverture / Densité des Oasis sur la Carte (%)
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <input type="range" id="oasis_density_percent_range" min="0.5" max="15.0" step="0.5" value="<?= (float)($settings['oasis_density_percent'] ?? 2.0) ?>" 
+                                   style="flex: 1;" oninput="document.getElementById('oasis_density_percent_input').value = this.value">
+                            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <input type="number" id="oasis_density_percent_input" name="oasis_density_percent" min="0.5" max="20" step="0.5" 
+                                       value="<?= (float)($settings['oasis_density_percent'] ?? 2.0) ?>" class="form-control" style="width: 70px; text-align: center;"
+                                       oninput="document.getElementById('oasis_density_percent_range').value = this.value">
+                                <span style="color: #94a3b8; font-weight: 700;">%</span>
+                            </div>
+                        </div>
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">Définit la proportion de tuiles réservées aux oasis naturelles par rapport à la superficie totale de la carte.</small>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; color: #4ade80;">
+                            🔄 Réapparition d'une Oasis après Capture
+                        </label>
+                        <div style="margin-top: 0.5rem;">
+                            <label style="display: inline-flex; align-items: center; gap: 0.6rem; cursor: pointer; background: rgba(0,0,0,0.3); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+                                <input type="checkbox" id="oasis_respawn_on_capture" name="oasis_respawn_on_capture" value="1" 
+                                       <?= !empty($settings['oasis_respawn_on_capture']) ? 'checked' : '' ?> style="width: 18px; height: 18px; accent-color: #16a34a;">
+                                <span style="font-size: 0.85rem; color: #fff; font-weight: 600;">
+                                    Faire éclore une nouvelle oasis sauvage lors de l'annexion d'une oasis par un joueur
+                                </span>
+                            </label>
+                        </div>
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">Maintient le réservoir d'oasis sauvages et de faune active pour les autres daimyōs du royaume.</small>
                     </div>
                 </div>
 
@@ -595,6 +647,155 @@ $humanUsers = $db->query("
         </div>
     </div>
 
+    <!-- Section 6b : 🌿 Arpentage des Oasis Naturelles & Faune Sauvage (Style Travian) -->
+    <div class="card" style="margin-bottom: 2rem; border-color: rgba(34, 197, 94, 0.4); background: rgba(17, 24, 20, 0.95);">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+                <h3 style="color: #4ade80; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                    <span>🌿</span> Écosystème des Oasis Naturelles & Faune Sauvage (Style Travian)
+                </h3>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Gestion du réseau d'oasis sauvages, de la faune hostile (Sangliers, Loups, Ours) et de la réapparition continue après capture.
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; padding: 0.35rem 0.75rem; font-size: 0.85rem; font-weight: 800;">
+                    <?= $oasisStats['total_oases'] ?> Oasis Totales
+                </span>
+                <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 0.35rem 0.75rem; font-size: 0.85rem; font-weight: 800;">
+                    <?= $oasisStats['captured_oases'] ?> Fiefs Annexés
+                </span>
+                <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; padding: 0.35rem 0.75rem; font-size: 0.85rem; font-weight: 800;">
+                    <?= $oasisStats['wild_oases'] ?> Sauvages Libres
+                </span>
+                <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; padding: 0.35rem 0.75rem; font-size: 0.85rem; font-weight: 800;">
+                    🐗 <?= number_format($oasisStats['total_wild_animals']) ?> Bêtes Sauvages
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- Panneau de contrôle et rééquilibrage de densité -->
+            <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                <h4 style="color: #86efac; font-size: 0.95rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>⚙️</span> Générateur & Rééquilibrage par Pourcentage de Couverture
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; align-items: end;">
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; color: #e2e8f0; font-weight: 700; margin-bottom: 0.35rem;">
+                            Pourcentage de Densité Cible (%) :
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="number" id="repop_density" min="0.5" max="20.0" step="0.5" 
+                                   value="<?= (float)($settings['oasis_density_percent'] ?? 2.0) ?>" class="form-control" style="width: 90px; text-align: center;">
+                            <span style="font-size: 0.85rem; color: #94a3b8;">% (ex: 2.0% &approx; 65 oasis)</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; color: #e2e8f0; font-weight: 700; margin-bottom: 0.35rem;">
+                            Rayon de Couverture Carte :
+                        </label>
+                        <input type="number" id="repop_radius" min="10" max="50" value="28" class="form-control" style="width: 90px; text-align: center;">
+                    </div>
+
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 0.5rem;">
+                            <input type="checkbox" id="repop_clear_unoccupied" value="1">
+                            <span>Remplacer uniquement les oasis sauvages existantes</span>
+                        </label>
+                        <button type="button" onclick="executeRepopulateOases()" class="btn btn-primary" style="background: #16a34a; border-color: #22c55e; font-weight: 700; width: 100%;">
+                            🌿 Appliquer & Générer les Oasis
+                        </button>
+                    </div>
+                </div>
+                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.75rem;">
+                    ℹ️ Les oasis sont automatiquement réparties de façon équitable entre les 4 quadrants géographiques (NO, NE, SO, SE) sans empiéter sur les fiefs ni les 12 donjons authentiques.
+                </div>
+            </div>
+
+            <!-- Tableau des Oasis existantes -->
+            <div style="overflow-x: auto; max-height: 420px;">
+                <table class="table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem;">
+                    <thead style="position: sticky; top: 0; background: #0f172a; z-index: 2;">
+                        <tr style="border-bottom: 1.5px solid rgba(34, 197, 94, 0.4); color: #4ade80; text-align: left;">
+                            <th style="padding: 0.5rem;">#</th>
+                            <th style="padding: 0.5rem;">Nom de l'Oasis</th>
+                            <th style="padding: 0.5rem; text-align: center;">Coords</th>
+                            <th style="padding: 0.5rem;">Bonus de Récolte</th>
+                            <th style="padding: 0.5rem;">Faune / Garnison</th>
+                            <th style="padding: 0.5rem; text-align: center;">Statut Féodal</th>
+                            <th style="padding: 0.5rem; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($allOases)): ?>
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                    Aucune oasis recensée. Utilisez le générateur ci-dessus pour peupler le royaume.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($allOases as $o): ?>
+                                <?php 
+                                    $isCaptured = !empty($o['owner_planet_id']);
+                                    $bText = '';
+                                    if ($o['bonus_rice'] > 0) $bText .= "+{$o['bonus_rice']}% 🌾 ";
+                                    if ($o['bonus_wood'] > 0) $bText .= "+{$o['bonus_wood']}% 🪵 ";
+                                    if ($o['bonus_stone'] > 0) $bText .= "+{$o['bonus_stone']}% 🪨 ";
+                                ?>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.06); background: <?= $isCaptured ? 'rgba(59, 130, 246, 0.05)' : 'transparent' ?>;">
+                                    <td style="padding: 0.5rem; color: #94a3b8; font-weight: 700;"><?= $o['id'] ?></td>
+                                    <td style="padding: 0.5rem;">
+                                        <strong style="color: #fff;"><?= htmlspecialchars($o['name']) ?></strong>
+                                        <div style="font-size: 0.72rem; color: var(--text-muted);">
+                                            🪵 <?= number_format($o['res_wood']) ?> &bull; 🪨 <?= number_format($o['res_stone']) ?> &bull; 🌾 <?= number_format($o['res_rice']) ?>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 0.5rem; text-align: center; font-weight: 700; color: #38bdf8;">
+                                        [<?= $o['coord_x'] ?> : <?= $o['coord_y'] ?>]
+                                    </td>
+                                    <td style="padding: 0.5rem;">
+                                        <span style="color: #fde047; font-weight: 700;"><?= trim($bText) ?></span>
+                                    </td>
+                                    <td style="padding: 0.5rem;">
+                                        <?php if (!empty($o['garrison'])): ?>
+                                            <div style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                                                <?php foreach ($o['garrison'] as $g): ?>
+                                                    <span style="font-size: 0.75rem; background: rgba(0,0,0,0.4); padding: 0.15rem 0.4rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08);">
+                                                        <?= $g['icon'] ?> <?= htmlspecialchars($g['unit_name']) ?> <strong style="color: #fbbf24;">x<?= $g['count'] ?></strong>
+                                                    </span>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <span style="color: #4ade80; font-size: 0.75rem;">🕊️ Pacifiée (Aucune bête)</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="padding: 0.5rem; text-align: center;">
+                                        <?php if ($isCaptured): ?>
+                                            <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+                                                🛡️ Fief de <?= htmlspecialchars($o['owner_username'] ?? 'Daimyō') ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #ef4444; padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+                                                🐗 Sauvage Libre
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="padding: 0.5rem; text-align: right;">
+                                        <a href="/?page=map&x=<?= $o['coord_x'] ?>&y=<?= $o['coord_y'] ?>" target="_blank" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; text-decoration: none;">
+                                            🗾 Carte
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Section 7 : ⚠️ Décret Suprême - Réinitialisation Complète du Monde Féodal -->
     <div class="card" style="margin-bottom: 2rem; border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(30, 10, 15, 0.75);">
         <div class="card-header" style="border-bottom: 1px solid rgba(239, 68, 68, 0.2); display: flex; justify-content: space-between; align-items: center;">
@@ -679,6 +880,8 @@ async function saveSettings(event) {
     formData.append('bot_colonize_enabled', document.getElementById('bot_colonize_enabled').value);
     formData.append('bot_max_planets', document.getElementById('bot_max_planets').value);
     formData.append('bot_aggressiveness', document.getElementById('bot_aggressiveness').value);
+    formData.append('oasis_density_percent', document.getElementById('oasis_density_percent_input').value);
+    formData.append('oasis_respawn_on_capture', document.getElementById('oasis_respawn_on_capture').checked ? '1' : '0');
 
     try {
         const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
@@ -1012,6 +1215,35 @@ async function updateCastlePosition(castleId) {
         }
     } catch (e) {
         showModalAlert('Erreur de communication.', 'error');
+    }
+}
+
+async function executeRepopulateOases() {
+    const density = parseFloat(document.getElementById('repop_density').value) || 2.0;
+    const radius = parseInt(document.getElementById('repop_radius').value, 10) || 28;
+    const clearUnoccupied = document.getElementById('repop_clear_unoccupied').checked ? '1' : '0';
+
+    if (!confirm(`Confirmer la génération d'oasis avec une densité de ${density}% sur un rayon de ${radius} ?`)) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'repopulate_oases');
+    formData.append('density_percent', density);
+    formData.append('radius', radius);
+    formData.append('clear_unoccupied', clearUnoccupied);
+
+    try {
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert("Génération d'Oasis Réussie", data.message, "success");
+            window.location.reload();
+        } else {
+            showModalAlert("Erreur", data.error || "Impossible de générer les oasis.", "danger");
+        }
+    } catch (e) {
+        showModalAlert("Erreur Réseau", "Une erreur est survenue lors de la génération.", "danger");
     }
 }
 </script>

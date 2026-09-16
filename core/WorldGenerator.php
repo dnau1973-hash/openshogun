@@ -156,6 +156,8 @@ class WorldGenerator {
             'construction_queue',
             'planet_buildings',
             'planet_fields',
+            'oasis_units',
+            'oases',
             'planets',
             'alliances',
             'users'
@@ -247,6 +249,16 @@ class WorldGenerator {
         if ($deployBots) {
             $botEngine = new BotEngine();
             $botsResult = $botEngine->generatePresetBots(3);
+        }
+
+        // 10b. Génération automatique des oasis naturelles selon la densité configurée
+        try {
+            require_once __DIR__ . '/OasisEngine.php';
+            $oasisEngine = new OasisEngine();
+            $density = (float)GameConfig::get('oasis_density_percent', 2.0);
+            $oasisEngine->spawnOasesByDensity($density, 28, true);
+        } catch (Exception $e) {
+            // Ignorer silencieusement
         }
 
         $this->db->exec("SET FOREIGN_KEY_CHECKS = 1;");

@@ -42,6 +42,9 @@ try {
                 ? $_POST['bot_aggressiveness'] 
                 : 'moderate';
 
+            $oasisDensity = max(0.5, min(20.0, (float)($_POST['oasis_density_percent'] ?? 2.0)));
+            $oasisRespawn = !empty($_POST['oasis_respawn_on_capture']) && ($_POST['oasis_respawn_on_capture'] === '1' || $_POST['oasis_respawn_on_capture'] === 'true');
+
             GameConfig::set('game_speed', $gameSpeed);
             GameConfig::set('resource_speed', $resourceSpeed);
             GameConfig::set('fleet_speed', $fleetSpeed);
@@ -49,10 +52,12 @@ try {
             GameConfig::set('bot_colonize_enabled', $botColonize);
             GameConfig::set('bot_max_planets', $botMaxPlanets);
             GameConfig::set('bot_aggressiveness', $botAggressiveness);
+            GameConfig::set('oasis_density_percent', $oasisDensity);
+            GameConfig::set('oasis_respawn_on_capture', $oasisRespawn);
 
             echo json_encode([
                 'success' => true,
-                'message' => "Variables de jeu et équilibrage sauvegardés avec succès !",
+                'message' => "Variables de jeu, équilibrage et paramètres d'oasis sauvegardés avec succès !",
                 'settings' => GameConfig::load()
             ]);
             break;
@@ -208,6 +213,32 @@ try {
             $castleEngine = new CastleEngine();
             $ok = $castleEngine->updateCastleCoords($castleId, $x, $y);
             echo json_encode(['success' => $ok, 'message' => "Coordonnées mises à jour en [$x : $y]."]);
+            break;
+
+        // Rééquilibrer / Générer les oasis selon le pourcentage de densité configuré
+        case 'repopulate_oases':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Méthode invalide.");
+            }
+            require_once __DIR__ . '/../core/OasisEngine.php';
+            $oasisEngine = new OasisEngine();
+
+            $density = max(0.5, min(20.0, (float)($_POST['density_percent'] ?? GameConfig::get('oasis_density_percent', 2.0))));
+            $radius = max(10, min(50, (int)($_POST['radius'] ?? 28)));
+            $clearUnoccupied = !empty($_POST['clear_unoccupied']) && ($_POST['clear_unoccupied'] === '1' || $_POST['clear_unoccupied'] === 'true');
+
+            GameConfig::set('oasis_density_percent', $density);
+
+            $result = $oasisEngine->spawnOasesByDensity($density, $radius, $clearUnoccupied);
+            echo json_encode($result);
+            break;
+
+        // Obtenir les statistiques globales des oasis
+        case 'get_oasis_stats':
+            require_once __DIR__ . '/../core/OasisEngine.php';
+            $oasisEngine = new OasisEngine();
+            $stats = $oasisEngine->getOasisStatistics();
+            echo json_encode(['success' => true, 'stats' => $stats]);
             break;
 
         default:

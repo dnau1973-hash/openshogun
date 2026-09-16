@@ -177,4 +177,44 @@ $db->exec("DELETE FROM oases WHERE id IN ($testOasisId, $extraOasis1, $extraOasi
 $db->exec("DELETE FROM fleet_missions WHERE target_oasis_id IN ($testOasisId, $extraOasis1, $extraOasis2, $extraOasis3)");
 echo "   [OK] Nettoyage des données de test effectué.\n\n";
 
+// 9. Test de la réapparition automatique d'une nouvelle oasis après capture (Paramètre Admin)
+echo "9. Test de l'apparition d'une nouvelle oasis après capture (oasis_respawn_on_capture)...\n";
+GameConfig::set('oasis_respawn_on_capture', true);
+
+// Créer une oasis sauvage pacifiée
+$db->exec("INSERT INTO oases (coord_x, coord_y, oasis_type, name, bonus_rice) VALUES (777, 777, 'lake_50_rice', 'Oasis du Lac Shinjuku', 50)");
+$captureTestOasisId = (int)$db->lastInsertId();
+
+$countBefore = (int)$db->query("SELECT COUNT(*) FROM oases")->fetchColumn();
+$resCapture = $oasisEngine->annexOasis($captureTestOasisId, $planetId);
+
+assert($resCapture['success'] === true, "L'annexion doit réussir.");
+assert(!empty($resCapture['respawned_oasis']), "Une nouvelle oasis sauvage doit être apparue après la capture.");
+$newSpawned = $resCapture['respawned_oasis'];
+echo "   - Oasis [{$newSpawned['name']}] a émergé en [{$newSpawned['coord_x']} : {$newSpawned['coord_y']}] !\n";
+$newGarrison = $oasisEngine->getOasisGarrison((int)$newSpawned['id']);
+assert(count($newGarrison) > 0, "La nouvelle oasis doit être peuplée d'animaux sauvages.");
+echo "   - Faune de la nouvelle oasis : " . count($newGarrison) . " espèces de bêtes sauvages présentes.\n";
+
+$countAfter = (int)$db->query("SELECT COUNT(*) FROM oases")->fetchColumn();
+assert($countAfter === $countBefore + 1, "Le nombre total d'oasis doit avoir augmenté de 1 grâce au respawn.");
+echo "   [OK] Réapparition automatique d'oasis validée.\n\n";
+
+// 10. Test du dimensionnement par pourcentage de densité (Paramètre Admin)
+echo "10. Test du générateur par pourcentage de densité (oasis_density_percent)...\n";
+GameConfig::set('oasis_density_percent', 1.5);
+$stats = $oasisEngine->getOasisStatistics();
+assert($stats['density_percent'] === 1.5, "La densité configurée doit être de 1.5%.");
+assert($stats['respawn_on_capture'] === true, "L'option respawn doit être active.");
+echo "   - Statistiques globales : {$stats['total_oases']} oasis ({$stats['wild_oases']} sauvages, {$stats['captured_oases']} capturées, {$stats['total_wild_animals']} animaux sauvages).\n";
+
+$densityGenRes = $oasisEngine->spawnOasesByDensity(1.5, 20, false);
+assert($densityGenRes['success'] === true, "La génération par densité doit réussir.");
+echo "   - {$densityGenRes['message']}\n";
+echo "   [OK] Dimensionnement par pourcentage de densité validé.\n\n";
+
+// Nettoyer l'oasis de test et son respawn
+$db->exec("DELETE FROM oases WHERE id IN ($captureTestOasisId, {$newSpawned['id']})");
+$db->exec("UPDATE oases SET owner_planet_id = NULL WHERE owner_planet_id = $planetId");
+
 echo "=== TOUS LES TESTS DU SYSTÈME D'OASIS ONT RÉUSSI AVEC SUCCÈS ! ===\n";

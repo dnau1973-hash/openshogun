@@ -45,7 +45,9 @@ class GameConfig {
                     'bots_enabled' => true,
                     'bot_colonize_enabled' => true,
                     'bot_aggressiveness' => 'moderate',
-                    'bot_max_planets' => 3
+                    'bot_max_planets' => 3,
+                    'oasis_density_percent' => 2.0,
+                    'oasis_respawn_on_capture' => true
                 ];
             }
         }

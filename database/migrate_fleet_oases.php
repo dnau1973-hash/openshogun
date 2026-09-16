@@ -42,3 +42,4 @@ try {
     echo "Erreur lors de la migration: " . $e->getMessage() . "\n";
     exit(1);
 }
+

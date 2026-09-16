@@ -172,9 +172,20 @@ class OasisEngine {
         ");
         $stmtUpdate->execute([$planetId, $oasisId]);
 
+        // Apparition d'une nouvelle oasis sauvage après capture si configuré
+        require_once __DIR__ . '/GameConfig.php';
+        $respawnOnCapture = (bool)GameConfig::get('oasis_respawn_on_capture', true);
+        $newSpawn = null;
+        if ($respawnOnCapture) {
+            $newSpawn = $this->spawnReplacementWildOasis((int)$oasis['coord_x'], (int)$oasis['coord_y']);
+        }
+
+        $extraMsg = $newSpawn ? " Une nouvelle oasis sauvage a émergé en terre libre [{$newSpawn['coord_x']} : {$newSpawn['coord_y']}]." : "";
+
         return [
             'success' => true, 
-            'message' => "L'oasis [{$oasis['name']}] a été annexée avec succès ! Les bonus de production s'appliquent à votre fief."
+            'message' => "L'oasis [{$oasis['name']}] a été annexée avec succès ! Les bonus de production s'appliquent à votre fief." . $extraMsg,
+            'respawned_oasis' => $newSpawn
         ];
     }
 
@@ -262,4 +273,275 @@ class OasisEngine {
             WHERE owner_planet_id IS NULL AND last_loot_time <= ($now - 600)
         ");
     }
+
+    /**
+     * Retourne les archétypes prédéfinis d'oasis équilibrées avec faune sauvage
+     */
+    public static function getOasisTemplates(): array {
+        return [
+            [
+                'type' => 'lake_rice_50',
+                'name' => 'Grand Lac aux Eaux Vivifiantes',
+                'wood' => 0, 'stone' => 0, 'rice' => 50,
+                'animals' => ['sanglier_sauvage' => 30, 'loup_honshu' => 20, 'ours_hokkaido' => 8]
+            ],
+            [
+                'type' => 'forest_wood_50',
+                'name' => 'Forêt Millénaire de Cèdres Géants',
+                'wood' => 50, 'stone' => 0, 'rice' => 0,
+                'animals' => ['sanglier_sauvage' => 35, 'loup_honshu' => 25, 'ours_hokkaido' => 10]
+            ],
+            [
+                'type' => 'mountain_stone_50',
+                'name' => 'Pics Escarpés aux Gisements de Fer',
+                'wood' => 0, 'stone' => 50, 'rice' => 0,
+                'animals' => ['sanglier_sauvage' => 25, 'loup_honshu' => 30, 'ours_hokkaido' => 12]
+            ],
+            [
+                'type' => 'lake_wood_rice',
+                'name' => 'Source Chaude d\'Onsen en Lisière',
+                'wood' => 25, 'stone' => 0, 'rice' => 25,
+                'animals' => ['sanglier_sauvage' => 25, 'loup_honshu' => 15, 'ours_hokkaido' => 5]
+            ],
+            [
+                'type' => 'hills_stone_wood',
+                'name' => 'Plateau Argileux & Vergers Sauvages',
+                'wood' => 25, 'stone' => 25, 'rice' => 0,
+                'animals' => ['sanglier_sauvage' => 20, 'loup_honshu' => 18, 'ours_hokkaido' => 6]
+            ],
+            [
+                'type' => 'mountain_stone_rice',
+                'name' => 'Gorge Minérale & Cascades Sacrées',
+                'wood' => 0, 'stone' => 25, 'rice' => 25,
+                'animals' => ['sanglier_sauvage' => 22, 'loup_honshu' => 20, 'ours_hokkaido' => 7]
+            ]
+        ];
+    }
+
+    /**
+     * Récupère la liste de toutes les coordonnées déjà occupées (planètes, donjons, oasis)
+     */
+    public function getOccupiedCoordinates(): array {
+        $used = [];
+        $stmtP = $this->db->query("SELECT coord_x, coord_y FROM planets");
+        while ($r = $stmtP->fetch(PDO::FETCH_ASSOC)) {
+            $used[$r['coord_x'] . ':' . $r['coord_y']] = true;
+        }
+        $stmtC = $this->db->query("SELECT coord_x, coord_y FROM authentic_castles WHERE is_spawned = 1");
+        while ($r = $stmtC->fetch(PDO::FETCH_ASSOC)) {
+            $used[$r['coord_x'] . ':' . $r['coord_y']] = true;
+        }
+        $stmtO = $this->db->query("SELECT coord_x, coord_y FROM oases");
+        while ($r = $stmtO->fetch(PDO::FETCH_ASSOC)) {
+            $used[$r['coord_x'] . ':' . $r['coord_y']] = true;
+        }
+        return $used;
+    }
+
+    /**
+     * Déploie une nouvelle oasis sauvage avec sa faune à des coordonnées données
+     */
+    public function spawnWildOasisAt(int $x, int $y, ?array $template = null): ?int {
+        if ($template === null) {
+            $templates = self::getOasisTemplates();
+            $template = $templates[array_rand($templates)];
+        }
+
+        $stmt = $this->db->prepare("
+            INSERT INTO `oases` 
+            (`coord_x`, `coord_y`, `oasis_type`, `name`, `bonus_wood`, `bonus_stone`, `bonus_rice`, `res_wood`, `res_stone`, `res_rice`, `res_max`, `last_loot_time`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 1500, 1500, 1500, 5000, UNIX_TIMESTAMP())
+        ");
+        $stmt->execute([
+            $x, $y, $template['type'], $template['name'],
+            $template['wood'], $template['stone'], $template['rice']
+        ]);
+        $oasisId = (int)$this->db->lastInsertId();
+        if ($oasisId <= 0) return null;
+
+        // Peupler avec les animaux sauvages
+        $stmtUnit = $this->db->prepare("
+            INSERT INTO `oasis_units` (`oasis_id`, `unit_code`, `count`, `is_wild`)
+            VALUES (?, ?, ?, 1)
+        ");
+        foreach ($template['animals'] as $uCode => $cnt) {
+            $stmtUnit->execute([$oasisId, $uCode, $cnt]);
+        }
+
+        return $oasisId;
+    }
+
+    /**
+     * Fait réapparaître une nouvelle oasis sauvage lors de la capture d'une oasis par un joueur
+     */
+    public function spawnReplacementWildOasis(int $nearX, int $nearY): ?array {
+        $usedCoords = $this->getOccupiedCoordinates();
+        $templates = self::getOasisTemplates();
+        $template = $templates[array_rand($templates)];
+
+        // Déterminer le quadrant d'origine pour respawn dans le même secteur
+        $minX = ($nearX >= 0) ? 4 : -28;
+        $maxX = ($nearX >= 0) ? 28 : -4;
+        $minY = ($nearY >= 0) ? 4 : -28;
+        $maxY = ($nearY >= 0) ? 28 : -4;
+
+        for ($attempt = 0; $attempt < 100; $attempt++) {
+            $x = rand($minX, $maxX);
+            $y = rand($minY, $maxY);
+            $k = $x . ':' . $y;
+
+            if (!isset($usedCoords[$k])) {
+                $oasisId = $this->spawnWildOasisAt($x, $y, $template);
+                if ($oasisId) {
+                    return $this->getOasisById($oasisId);
+                }
+            }
+        }
+
+        // Fallback large sur toute la carte
+        for ($attempt = 0; $attempt < 100; $attempt++) {
+            $x = rand(-28, 28);
+            $y = rand(-28, 28);
+            if ($x === 0 && $y === 0) continue;
+            $k = $x . ':' . $y;
+
+            if (!isset($usedCoords[$k])) {
+                $oasisId = $this->spawnWildOasisAt($x, $y, $template);
+                if ($oasisId) {
+                    return $this->getOasisById($oasisId);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Génère ou rééquilibre les oasis sauvages selon un pourcentage de densité sur la carte
+     * ex: 2.0% sur un rayon de 28 cases (~3249 cases au total => ~65 oasis)
+     */
+    public function spawnOasesByDensity(float $percent, int $radius = 28, bool $clearExistingUnoccupied = false): array {
+        $radius = max(10, min(50, $radius));
+        $percent = max(0.5, min(20.0, $percent));
+
+        if ($clearExistingUnoccupied) {
+            // Nettoie uniquement les oasis non occupées par des joueurs
+            $this->db->exec("DELETE FROM oases WHERE owner_planet_id IS NULL");
+        }
+
+        // Calcul du nombre cible d'oasis
+        $totalTiles = (int)pow(($radius * 2) + 1, 2);
+        $targetCount = max(4, min(250, (int)round($totalTiles * ($percent / 100.0))));
+
+        $currentTotal = (int)$this->db->query("SELECT COUNT(*) FROM oases")->fetchColumn();
+        $needed = max(0, $targetCount - $currentTotal);
+
+        if ($needed === 0) {
+            return [
+                'success' => true,
+                'target_count' => $targetCount,
+                'spawned' => 0,
+                'total_now' => $currentTotal,
+                'percent' => $percent,
+                'message' => "La carte contient déjà $currentTotal oasis (densité cible de $percent% atteinte)."
+            ];
+        }
+
+        $usedCoords = $this->getOccupiedCoordinates();
+        $templates = self::getOasisTemplates();
+
+        // 4 quadrants
+        $quadrants = [
+            'NO' => ['min_x' => -$radius, 'max_x' => -3, 'min_y' => 3, 'max_y' => $radius],
+            'NE' => ['min_x' => 3, 'max_x' => $radius, 'min_y' => 3, 'max_y' => $radius],
+            'SO' => ['min_x' => -$radius, 'max_x' => -3, 'min_y' => -$radius, 'max_y' => -3],
+            'SE' => ['min_x' => 3, 'max_x' => $radius, 'min_y' => -$radius, 'max_y' => -3],
+        ];
+        $qKeys = array_keys($quadrants);
+
+        $spawned = 0;
+        for ($i = 0; $i < $needed; $i++) {
+            $qKey = $qKeys[$i % 4];
+            $qRange = $quadrants[$qKey];
+            $tpl = $templates[$i % count($templates)];
+
+            $placed = false;
+            for ($attempt = 0; $attempt < 60; $attempt++) {
+                $ox = rand($qRange['min_x'], $qRange['max_x']);
+                $oy = rand($qRange['min_y'], $qRange['max_y']);
+                $k = $ox . ':' . $oy;
+
+                if (!isset($usedCoords[$k])) {
+                    $usedCoords[$k] = true;
+                    $oid = $this->spawnWildOasisAt($ox, $oy, $tpl);
+                    if ($oid) {
+                        $spawned++;
+                        $placed = true;
+                        break;
+                    }
+                }
+            }
+
+            // Fallback global si le quadrant est très dense
+            if (!$placed) {
+                for ($attempt = 0; $attempt < 60; $attempt++) {
+                    $ox = rand(-$radius, $radius);
+                    $oy = rand(-$radius, $radius);
+                    $k = $ox . ':' . $oy;
+                    if (!isset($usedCoords[$k])) {
+                        $usedCoords[$k] = true;
+                        $oid = $this->spawnWildOasisAt($ox, $oy, $tpl);
+                        if ($oid) {
+                            $spawned++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        $newTotal = (int)$this->db->query("SELECT COUNT(*) FROM oases")->fetchColumn();
+        return [
+            'success' => true,
+            'target_count' => $targetCount,
+            'spawned' => $spawned,
+            'total_now' => $newTotal,
+            'percent' => $percent,
+            'message' => "Génération terminée : $spawned nouvelles oasis créées (Total sur la carte : $newTotal)."
+        ];
+    }
+
+    /**
+     * Récupère les métriques globales sur les oasis pour l'administration
+     */
+    public function getOasisStatistics(): array {
+        require_once __DIR__ . '/GameConfig.php';
+
+        $totalOases = (int)$this->db->query("SELECT COUNT(*) FROM oases")->fetchColumn();
+        $capturedOases = (int)$this->db->query("SELECT COUNT(*) FROM oases WHERE owner_planet_id IS NOT NULL")->fetchColumn();
+        $wildOases = (int)$this->db->query("SELECT COUNT(*) FROM oases WHERE owner_planet_id IS NULL")->fetchColumn();
+        
+        // Animaux vivants
+        $stmtAnimals = $this->db->query("
+            SELECT ou.unit_code, COALESCE(SUM(ou.count), 0) as total_count 
+            FROM oasis_units ou 
+            WHERE ou.is_wild = 1 
+            GROUP BY ou.unit_code
+        ");
+        $animalsSummary = $stmtAnimals->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        $totalWildAnimals = array_sum($animalsSummary);
+
+        return [
+            'total_oases' => $totalOases,
+            'captured_oases' => $capturedOases,
+            'wild_oases' => $wildOases,
+            'animals_summary' => $animalsSummary,
+            'total_wild_animals' => $totalWildAnimals,
+            'density_percent' => (float)GameConfig::get('oasis_density_percent', 2.0),
+            'respawn_on_capture' => (bool)GameConfig::get('oasis_respawn_on_capture', true)
+        ];
+    }
 }
+
+
