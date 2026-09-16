@@ -117,3 +117,4 @@ assert(strpos($wallOutput, '+16% (+100 pts mur)') !== false, "Muraille : Calcul 
 echo "✓ Muraille féodale (Slot 34) : Bonus défensif et points de structure validés\n";
 
 echo "\n=== TOUS LES TESTS DE LA VUE BÂTIMENT (BUILDING.PHP) SONT VALIDES ! ===\n";
+

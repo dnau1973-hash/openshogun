@@ -240,3 +240,4 @@ $nextCastle = $allCastles[($currentIndex < count($allCastles) - 1) ? $currentInd
     </div>
 
 </div>
+

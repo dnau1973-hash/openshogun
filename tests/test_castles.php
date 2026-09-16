@@ -93,3 +93,4 @@ foreach ($expectedCastles as $code => $name) {
 }
 
 echo "\n=== TOUS LES TESTS DES 12 DONJONS AUTHENTIQUES ONT RÉUSSI ! ===\n";
+
