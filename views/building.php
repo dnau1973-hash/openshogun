@@ -592,3 +592,4 @@ function updateBuildingCountdowns() {
 setInterval(updateBuildingCountdowns, 1000);
 updateBuildingCountdowns();
 </script>
+

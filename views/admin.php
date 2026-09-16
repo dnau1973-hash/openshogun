@@ -17,7 +17,10 @@ if (!Auth::check() || !$auth->isAdmin()) {
     return;
 }
 
+require_once __DIR__ . '/../core/CastleEngine.php';
+
 $botEngine = new BotEngine();
+$castleEngine = new CastleEngine();
 $db = Database::getConnection();
 
 // Statistiques globales
@@ -27,6 +30,10 @@ $totalPlanets = (int)$db->query("SELECT COUNT(*) FROM planets")->fetchColumn();
 $totalColonies = (int)$db->query("SELECT COUNT(*) FROM planets WHERE user_id IS NOT NULL")->fetchColumn();
 $totalMedals = (int)$db->query("SELECT COUNT(*) FROM user_medals")->fetchColumn();
 $currentWeekCode = date('Y') . '-S' . date('W');
+
+// Châteaux authentiques (現存十二天守)
+$authenticCastles = $castleEngine->getAllCastles();
+$spawnedCastlesCount = count(array_filter($authenticCastles, fn($c) => (int)$c['is_spawned'] === 1));
 
 // Variables de configuration
 $settings = GameConfig::load();
@@ -485,7 +492,110 @@ $humanUsers = $db->query("
         </div>
     </div>
 
-    <!-- Section 6 : ⚠️ Décret Suprême - Réinitialisation Complète du Monde Féodal -->
+    <!-- Section 6 : 🏯 Sanctuaires des 12 Donjons Authentiques du Japon (現存十二天守) -->
+    <div class="card" style="margin-bottom: 2rem; border-color: rgba(245, 158, 11, 0.4); background: rgba(17, 18, 24, 0.95);">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+                <h3 style="color: #fbbf24; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                    <span>🏯</span> Les 12 Donjons Authentiques du Japon (現存十二天守) &bull; Enjeux de la Bataille Finale
+                </h3>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Forteresses historiques d'époque Sengoku-Edo préservées. Déployez-les sur la carte des provinces pour déclencher les enjeux de la conquête suprême.
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; padding: 0.35rem 0.75rem; font-size: 0.85rem; font-weight: 800;">
+                    <?= $spawnedCastlesCount ?> / 12 Déployés
+                </span>
+                <button type="button" class="btn btn-warning" onclick="spawnAllCastles()" style="background: #f59e0b; color: #18181b; font-weight: 800; font-size: 0.8rem; padding: 0.35rem 0.85rem;">
+                    ⚡ Déployer les 12 Donjons
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="despawnAllCastles()" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; color: #f87171; border-color: rgba(239, 68, 68, 0.4);">
+                    🛑 Retirer Tous
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div style="overflow-x: auto;">
+                <table class="table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                    <thead>
+                        <tr style="border-bottom: 1.5px solid rgba(245, 158, 11, 0.3); color: #fbbf24; text-align: left;">
+                            <th style="padding: 0.6rem;">#</th>
+                            <th style="padding: 0.6rem;">Donjon & Kanji</th>
+                            <th style="padding: 0.6rem;">Province & Bâtisseur</th>
+                            <th style="padding: 0.6rem; text-align: center;">Statut Carte</th>
+                            <th style="padding: 0.6rem; text-align: center;">Coordonnées [X : Y]</th>
+                            <th style="padding: 0.6rem; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($authenticCastles as $idx => $c): ?>
+                            <?php 
+                                $isSpawned = (int)$c['is_spawned'] === 1;
+                                $curX = $c['coord_x'] ?? $c['default_x'];
+                                $curY = $c['coord_y'] ?? $c['default_y'];
+                            ?>
+                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.06); background: <?= $isSpawned ? 'rgba(245, 158, 11, 0.04)' : 'transparent' ?>;">
+                                <td style="padding: 0.6rem; font-weight: 700; color: #94a3b8;"><?= $c['id'] ?></td>
+                                <td style="padding: 0.6rem;">
+                                    <div style="font-weight: 800; color: #fff; font-size: 0.9rem;">
+                                        🏯 <?= htmlspecialchars($c['name']) ?>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #fbbf24; font-family: serif;">
+                                        <?= htmlspecialchars($c['kanji']) ?> &bull; <?= htmlspecialchars($c['japanese_name']) ?>
+                                    </div>
+                                </td>
+                                <td style="padding: 0.6rem;">
+                                    <div style="color: #e2e8f0; font-size: 0.8rem;"><?= htmlspecialchars($c['province']) ?></div>
+                                    <div style="color: var(--text-muted); font-size: 0.72rem;"><?= htmlspecialchars($c['historical_builder']) ?> (<?= htmlspecialchars($c['construction_year']) ?>)</div>
+                                </td>
+                                <td style="padding: 0.6rem; text-align: center;">
+                                    <?php if ($isSpawned): ?>
+                                        <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; padding: 0.2rem 0.5rem; font-size: 0.75rem; font-weight: 700;">
+                                            🟢 En Jeu [<?= $curX ?> : <?= $curY ?>]
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid #64748b; padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+                                            ⚪ En Réserve
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                                <td style="padding: 0.6rem; text-align: center;">
+                                    <div style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                                        <input type="number" id="castle_x_<?= $c['id'] ?>" value="<?= $curX ?>" style="width: 50px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: #fff; padding: 0.2rem 0.4rem; border-radius: 4px; text-align: center; font-size: 0.8rem;">
+                                        <span style="color: var(--text-muted);">:</span>
+                                        <input type="number" id="castle_y_<?= $c['id'] ?>" value="<?= $curY ?>" style="width: 50px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: #fff; padding: 0.2rem 0.4rem; border-radius: 4px; text-align: center; font-size: 0.8rem;">
+                                        <button type="button" onclick="updateCastlePosition(<?= $c['id'] ?>)" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" title="Enregistrer les coordonnées">
+                                            📍
+                                        </button>
+                                    </div>
+                                </td>
+                                <td style="padding: 0.6rem; text-align: right; white-space: nowrap;">
+                                    <div style="display: flex; gap: 0.4rem; justify-content: flex-end; align-items: center;">
+                                        <button type="button" onclick="toggleCastleSpawn(<?= $c['id'] ?>, <?= $isSpawned ? 0 : 1 ?>)" 
+                                                class="btn <?= $isSpawned ? 'btn-danger' : 'btn-primary' ?>" 
+                                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">
+                                            <?= $isSpawned ? '🔴 Retirer' : '🟢 Poser' ?>
+                                        </button>
+                                        <a href="/?page=castle&code=<?= $c['code'] ?>" target="_blank" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; text-decoration: none;" title="Consulter la fiche historique">
+                                            📜 Fiche
+                                        </a>
+                                        <?php if ($isSpawned): ?>
+                                            <a href="/?page=galaxy&x=<?= $curX ?>&y=<?= $curY ?>" target="_blank" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; text-decoration: none;" title="Voir sur la carte">
+                                                🗾 Carte
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 7 : ⚠️ Décret Suprême - Réinitialisation Complète du Monde Féodal -->
     <div class="card" style="margin-bottom: 2rem; border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(30, 10, 15, 0.75);">
         <div class="card-header" style="border-bottom: 1px solid rgba(239, 68, 68, 0.2); display: flex; justify-content: space-between; align-items: center;">
             <h3 style="color: #ef4444; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
@@ -811,6 +921,97 @@ async function executeUniverseReset() {
         }
     } catch (e) {
         showModalAlert("Erreur Réseau", "Une erreur critique est survenue lors de la réinitialisation.", "danger");
+    }
+}
+
+// ==========================================================
+// GESTION DES 12 CHÂTEAUX AUTHENTIQUES DU JAPON (現存十二天守)
+// ==========================================================
+async function spawnAllCastles() {
+    const confirmed = await showModalConfirm('Voulez-vous déployer l\'ensemble des 12 Châteaux Authentiques du Japon sur la carte des provinces ?', 'Déploiement des 12 Trésors');
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'spawn_all_castles');
+    try {
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert(data.message || '12 Châteaux Authentiques déployés avec succès !', 'success');
+            window.location.reload();
+        } else {
+            showModalAlert(data.error || 'Erreur lors du déploiement.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication.', 'error');
+    }
+}
+
+async function despawnAllCastles() {
+    const confirmed = await showModalConfirm('Voulez-vous retirer tous les Donjons Authentiques de la carte ?', 'Rappel des Donjons');
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'despawn_all_castles');
+    try {
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert(data.message, 'info');
+            window.location.reload();
+        } else {
+            showModalAlert(data.error || 'Erreur.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication.', 'error');
+    }
+}
+
+async function toggleCastleSpawn(castleId, spawn) {
+    const x = parseInt(document.getElementById(`castle_x_${castleId}`).value, 10);
+    const y = parseInt(document.getElementById(`castle_y_${castleId}`).value, 10);
+
+    const formData = new FormData();
+    formData.append('action', 'toggle_castle');
+    formData.append('castle_id', castleId);
+    formData.append('spawn', spawn ? '1' : '0');
+    formData.append('x', x);
+    formData.append('y', y);
+
+    try {
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            showModalAlert(data.error || 'Action impossible.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication.', 'error');
+    }
+}
+
+async function updateCastlePosition(castleId) {
+    const x = parseInt(document.getElementById(`castle_x_${castleId}`).value, 10);
+    const y = parseInt(document.getElementById(`castle_y_${castleId}`).value, 10);
+
+    const formData = new FormData();
+    formData.append('action', 'update_castle_coords');
+    formData.append('castle_id', castleId);
+    formData.append('x', x);
+    formData.append('y', y);
+
+    try {
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert(data.message, 'success');
+            window.location.reload();
+        } else {
+            showModalAlert(data.error || 'Impossible de déplacer le château.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication.', 'error');
     }
 }
 </script>

@@ -1195,6 +1195,40 @@ a:hover {
     background: rgba(194, 37, 43, 0.08);
 }
 
+.galaxy-tile.authentic-castle-tile {
+    background: linear-gradient(135deg, rgba(254, 243, 199, 0.96) 0%, rgba(253, 230, 138, 0.92) 100%);
+    border: 2px solid #d97706;
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.45), inset 0 0 8px rgba(251, 191, 36, 0.3);
+    animation: castlePulse 3s infinite alternate;
+}
+
+.galaxy-tile.authentic-castle-tile:hover {
+    border-color: #b45309;
+    transform: scale(1.08);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.7);
+    z-index: 5;
+}
+
+@keyframes castlePulse {
+    0% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.35); }
+    100% { box-shadow: 0 0 18px rgba(245, 158, 11, 0.65); }
+}
+
+.tile-authentic-badge {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #d97706;
+    color: #ffffff;
+    font-size: 0.52rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
 .tile-planet-icon {
     font-size: 1.5rem;
     filter: drop-shadow(0 2px 4px rgba(194, 37, 43, 0.25));

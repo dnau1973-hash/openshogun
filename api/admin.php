@@ -10,6 +10,7 @@ require_once __DIR__ . '/../core/GameConfig.php';
 require_once __DIR__ . '/../core/BotEngine.php';
 require_once __DIR__ . '/../core/WorldGenerator.php';
 require_once __DIR__ . '/../core/HonorEngine.php';
+require_once __DIR__ . '/../core/CastleEngine.php';
 
 $auth = new Auth();
 
@@ -163,6 +164,50 @@ try {
             $worldGen = new WorldGenerator();
             $result = $worldGen->resetUniverse($adminPassword, $neutralCount, $deployBots);
             echo json_encode($result);
+            break;
+
+        // Déployer tous les 12 châteaux authentiques
+        case 'spawn_all_castles':
+            $castleEngine = new CastleEngine();
+            $res = $castleEngine->spawnAllCastles();
+            echo json_encode($res);
+            break;
+
+        // Retirer tous les 12 châteaux de la carte
+        case 'despawn_all_castles':
+            $castleEngine = new CastleEngine();
+            $res = $castleEngine->despawnAllCastles();
+            echo json_encode($res);
+            break;
+
+        // Déployer ou retirer un château individuel
+        case 'toggle_castle':
+            $castleId = (int)($_POST['castle_id'] ?? 0);
+            $spawn = !empty($_POST['spawn']) && ($_POST['spawn'] === '1' || $_POST['spawn'] === 'true');
+            $castleEngine = new CastleEngine();
+            $castle = $castleEngine->getCastle($castleId);
+            if (!$castle) throw new Exception("Château introuvable.");
+
+            if ($spawn) {
+                $x = isset($_POST['x']) ? (int)$_POST['x'] : ($castle['coord_x'] ?? $castle['default_x']);
+                $y = isset($_POST['y']) ? (int)$_POST['y'] : ($castle['coord_y'] ?? $castle['default_y']);
+                $ok = $castleEngine->spawnCastle($castleId, $x, $y);
+                $msg = "Le {$castle['name']} a été déployé en [$x : $y].";
+            } else {
+                $ok = $castleEngine->despawnCastle($castleId);
+                $msg = "Le {$castle['name']} a été retiré de la carte.";
+            }
+            echo json_encode(['success' => $ok, 'message' => $msg]);
+            break;
+
+        // Mettre à jour les coordonnées d'un château
+        case 'update_castle_coords':
+            $castleId = (int)($_POST['castle_id'] ?? 0);
+            $x = (int)($_POST['x'] ?? 0);
+            $y = (int)($_POST['y'] ?? 0);
+            $castleEngine = new CastleEngine();
+            $ok = $castleEngine->updateCastleCoords($castleId, $x, $y);
+            echo json_encode(['success' => $ok, 'message' => "Coordonnées mises à jour en [$x : $y]."]);
             break;
 
         default:

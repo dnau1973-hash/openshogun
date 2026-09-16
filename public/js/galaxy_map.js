@@ -228,16 +228,25 @@ class GalaxyMapController {
                 let tileClass = 'galaxy-tile';
                 if (isCurrent) tileClass += ' current-planet';
                 if (isCenter) tileClass += ' tile-center';
+                if (planet && planet.is_authentic_castle) tileClass += ' authentic-castle-tile';
 
                 let contentHtml = '';
                 if (planet) {
-                    const icon = planet.user_id ? '🏯' : '🌾';
-                    const ownerName = planet.username || 'Terres Vierges';
-                    const ownerColor = planet.user_id ? '#38bdf8' : '#94a3b8';
-                    contentHtml = `
-                        <span class="tile-planet-icon">${icon}</span>
-                        <span class="tile-owner" style="color:${ownerColor};">${escapeHtml(ownerName)}</span>
-                    `;
+                    if (planet.is_authentic_castle) {
+                        contentHtml = `
+                            <span class="tile-authentic-badge">TRÉSOR</span>
+                            <span class="tile-planet-icon" style="font-size:1.45rem; filter:drop-shadow(0 0 8px rgba(245,158,11,0.85));">🏯</span>
+                            <span class="tile-owner" style="color:#fbbf24; font-weight:800; font-size:0.62rem; text-shadow:0 1px 3px rgba(0,0,0,0.8);">${escapeHtml(planet.castle_name || planet.planet_name)}</span>
+                        `;
+                    } else {
+                        const icon = planet.user_id ? '🏯' : '🌾';
+                        const ownerName = planet.username || 'Terres Vierges';
+                        const ownerColor = planet.user_id ? '#38bdf8' : '#94a3b8';
+                        contentHtml = `
+                            <span class="tile-planet-icon">${icon}</span>
+                            <span class="tile-owner" style="color:${ownerColor};">${escapeHtml(ownerName)}</span>
+                        `;
+                    }
                 } else {
                     contentHtml = `<span class="tile-empty-star">・</span>`;
                 }

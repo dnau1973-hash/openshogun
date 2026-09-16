@@ -90,6 +90,45 @@ window.selectPlanetTile = function(data) {
         return;
     }
 
+    // Gestion exclusive des 12 Donjons Authentiques du Japon (現存十二天守)
+    if (data.is_authentic_castle) {
+        title.innerHTML = `🏯 <span style="color:#fbbf24;">${data.castle_name}</span> &bull; <span style="font-size:0.95rem; color:#fde047;">${data.castle_kanji || ''}</span>`;
+        body.innerHTML = `
+            <div style="background:linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(185,28,28,0.2) 100%); border:1px solid rgba(245,158,11,0.5); padding:1.1rem; border-radius:8px; margin-bottom:1.1rem; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.6rem;">
+                    <span class="badge" style="background:#f59e0b; color:#1c1917; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem; letter-spacing:0.5px;">
+                        👑 TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE DU JAPON (現存十二天守)
+                    </span>
+                    <span style="color:#fde047; font-size:0.8rem; font-weight:700;">
+                        📍 ${data.castle_province || 'Province Historique'}
+                    </span>
+                </div>
+                <p style="color:#fef3c7; font-size:0.92rem; margin:0.4rem 0 0.6rem 0; line-height:1.45;">
+                    Ce donjon d'époque Sengoku-Edo est l'une des 12 forteresses d'origine préservées du Japon. 
+                    <strong style="color:#fbbf24;">Enjeu suprême de la Bataille Finale du Shogunat :</strong> les clans qui prendront le contrôle de ces citadelles sacrées détermineront l'avènement du prochain Shogun.
+                </p>
+                <div style="font-size:0.8rem; color:#f59e0b; display:flex; gap:1.2rem; flex-wrap:wrap;">
+                    <span>Bâtisseur : <strong>${data.castle_builder || 'Maître Féodal'}</strong></span>
+                    <span>Garnison Sacrée : <strong style="color:#4ade80;">25,000 pts défense</strong></span>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                <a href="/?page=castle&code=${encodeURIComponent(data.castle_code || '')}" class="btn btn-warning" style="font-weight:800; display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.4rem; font-size:0.95rem; background:#f59e0b; color:#18181b; border:none; text-decoration:none; border-radius:6px; box-shadow:0 3px 12px rgba(245,158,11,0.4);">
+                    <span>📜</span> Découvrir l'Histoire & les Enjeux du Château &rarr;
+                </a>
+                <div style="display:flex; gap:0.5rem;">
+                    ${data.planet_id ? `
+                        <a href="?page=fleet&target_id=${data.planet_id}&mission=spy" class="btn btn-secondary">🥷 Sonder la Citadelle</a>
+                        <a href="?page=fleet&target_id=${data.planet_id}&mission=raid" class="btn btn-danger">⚔️ Assaillir</a>
+                    ` : `
+                        <span style="font-size:0.8rem; color:var(--text-muted); align-self:center;">Sanctuaire Inviolé</span>
+                    `}
+                </div>
+            </div>
+        `;
+        return;
+    }
+
     if (!data.user_id) {
         title.innerText = `Terres Neutres : ${data.planet_name}`;
         body.innerHTML = `
