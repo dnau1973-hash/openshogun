@@ -1,6 +1,7 @@
 /**
- * Moteur de Carte Galactique Interactive avec Drag-and-Drop / Pan
- * OpenGalaxy - Déplacement fluide à la souris et au toucher
+ * Moteur de Carte des Provinces et Fiefs du Japon Féodal (OpenShogun)
+ * Déplacement fluide (Drag & Drop), tuiles de terrain illustrées (plaines, forêts, montagnes, lacs, collines),
+ * donjons authentiques et navigation par quadrants (Nord-Ouest, Nord-Est, Sud-Ouest, Sud-Est).
  */
 
 class GalaxyMapController {
@@ -13,11 +14,12 @@ class GalaxyMapController {
         this.playerX = options.playerX || 0;
         this.playerY = options.playerY || 0;
         this.currentUserId = options.userId || 0;
+
         this.tileSize = 76; // pixels par case
         this.gap = 6;
         this.stepSize = this.tileSize + this.gap;
 
-        // Calcul dynamique du rayon pour occuper toute la largeur d'écran
+        // Calcul dynamique du rayon pour occuper toute la largeur d'écran disponible
         if (options.radius && options.radius > 0) {
             this.radius = options.radius;
         } else {
@@ -34,8 +36,10 @@ class GalaxyMapController {
         this.dragOffsetY = 0;
         this.totalDistanceMoved = 0;
 
-        // Cache des secteurs planétaires
+        // Cache des secteurs planétaires et paysages naturels
         this.planetsCache = {};
+        this.terrainsCache = {};
+        this.currentQuadrant = null;
         this.isLoading = false;
 
         this.initDOM();
@@ -47,9 +51,18 @@ class GalaxyMapController {
         this.container.innerHTML = `
             <div class="galaxy-hud-overlay">
                 <div class="hud-coords-badge">
-                    <span>Province / Coordonnées :</span>
+                    <span id="hudQuadrantDisplay">🧭 Provinces</span>
                     <strong id="hudCoordsDisplay">[${this.centerX} : ${this.centerY}]</strong>
                 </div>
+
+                <div class="hud-quadrants-nav">
+                    <button class="hud-btn" id="btnQuadrantNO" title="Sauter vers les Terres du Nord-Ouest [- / +]">↖️ N-O</button>
+                    <button class="hud-btn" id="btnQuadrantNE" title="Sauter vers les Terres du Nord-Est [+ / +]">↗️ N-E</button>
+                    <button class="hud-btn" id="btnQuadrantSO" title="Sauter vers les Terres du Sud-Ouest [- / -]">↙️ S-O</button>
+                    <button class="hud-btn" id="btnQuadrantSE" title="Sauter vers les Terres du Sud-Est [+ / -]">↘️ S-E</button>
+                    <button class="hud-btn" id="btnQuadrantKyoto" title="Sauter vers la Capitale Impériale [0 : 0]">⛩️ Centre</button>
+                </div>
+
                 <div class="hud-controls-group">
                     <button class="hud-btn" id="btnRecenterColony" title="Centrer sur mon fief">🏯 Mon Fief</button>
                     <button class="hud-btn" id="btnZoomIn" title="Zoom avant">+</button>
@@ -62,7 +75,7 @@ class GalaxyMapController {
                     <!-- Les tuiles seront générées dynamiquement -->
                 </div>
                 <div class="galaxy-drag-hint">
-                    <span>🖐️ Glissez (Drag & Drop) pour parcourir les provinces du Japon</span>
+                    <span>🖐️ Glissez (Drag & Drop) pour explorer le Japon féodal</span>
                 </div>
             </div>
         `;
@@ -82,13 +95,20 @@ class GalaxyMapController {
         // Empêcher le glisser d'image natif
         this.viewport.addEventListener('dragstart', (e) => e.preventDefault());
 
+        // Boutons de navigation des 4 Quadrants & Centre
+        document.getElementById('btnQuadrantNO').onclick = () => this.moveTo(-16, 16);
+        document.getElementById('btnQuadrantNE').onclick = () => this.moveTo(16, 16);
+        document.getElementById('btnQuadrantSO').onclick = () => this.moveTo(-16, -16);
+        document.getElementById('btnQuadrantSE').onclick = () => this.moveTo(16, -16);
+        document.getElementById('btnQuadrantKyoto').onclick = () => this.moveTo(0, 0);
+
         // Boutons de contrôle HUD
         document.getElementById('btnRecenterColony').onclick = () => {
             this.moveTo(this.playerX, this.playerY);
         };
 
         document.getElementById('btnZoomIn').onclick = () => {
-            if (this.tileSize < 100) {
+            if (this.tileSize < 110) {
                 this.tileSize += 12;
                 this.stepSize = this.tileSize + this.gap;
                 this.renderGrid();
@@ -106,7 +126,6 @@ class GalaxyMapController {
         // Navigation clavier (Flèches directionnelles)
         window.addEventListener('keydown', (e) => {
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                // Seulement si l'utilisateur ne tape pas dans un input
                 if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
                 e.preventDefault();
                 if (e.key === 'ArrowUp') this.moveTo(this.centerX, this.centerY + 1);
@@ -133,7 +152,6 @@ class GalaxyMapController {
     }
 
     onPointerDown(e) {
-        // Si clic gauche ou tactile
         if (e.button !== 0 && e.pointerType === 'mouse') return;
 
         this.isDragging = true;
@@ -155,10 +173,8 @@ class GalaxyMapController {
         this.dragOffsetY = dy;
         this.totalDistanceMoved += Math.hypot(e.movementX, e.movementY);
 
-        // Déplacement visuel direct et fluide du canvas
         this.canvas.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
 
-        // Si le glissement dépasse une case entière pendant le drag, on décale les coordonnées
         const coordDeltaX = -Math.trunc(dx / this.stepSize);
         const coordDeltaY = Math.trunc(dy / this.stepSize);
 
@@ -181,7 +197,6 @@ class GalaxyMapController {
         this.isDragging = false;
         this.viewport.classList.remove('grabbing');
 
-        // Animation de recentrage du canvas
         this.canvas.style.transition = 'transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1)';
         this.canvas.style.transform = 'translate3d(0, 0, 0)';
 
@@ -209,6 +224,14 @@ class GalaxyMapController {
         }
     }
 
+    updateQuadrantDisplay() {
+        const quadEl = document.getElementById('hudQuadrantDisplay');
+        if (quadEl && this.currentQuadrant) {
+            quadEl.innerHTML = `${this.currentQuadrant.symbol} <strong>${this.currentQuadrant.name}</strong>`;
+            quadEl.title = `${this.currentQuadrant.desc} (${this.currentQuadrant.coords})`;
+        }
+    }
+
     async loadSector(cx, cy) {
         if (this.isLoading) return;
         this.isLoading = true;
@@ -217,8 +240,15 @@ class GalaxyMapController {
             const res = await fetch(`/api/galaxy.php?x=${cx}&y=${cy}&radius=${this.radius}`);
             const json = await res.json();
             if (json.success && json.data) {
-                // Fusionner dans le cache
-                Object.assign(this.planetsCache, json.data.planets);
+                // Fusionner dans les caches
+                Object.assign(this.planetsCache, json.data.planets || {});
+                if (json.data.terrains) {
+                    Object.assign(this.terrainsCache, json.data.terrains);
+                }
+                if (json.data.quadrant) {
+                    this.currentQuadrant = json.data.quadrant;
+                    this.updateQuadrantDisplay();
+                }
                 this.renderGrid();
             }
         } catch (e) {
@@ -244,6 +274,11 @@ class GalaxyMapController {
             for (let x = minX; x <= maxX; x++) {
                 const key = `${x}:${y}`;
                 const planet = this.planetsCache[key] || null;
+                const terrain = this.terrainsCache[key] || {
+                    type: 'plains',
+                    name: 'Plaines Fertiles',
+                    img: '/public/assets/map/tile_plains.jpg'
+                };
                 const isCurrent = (x === this.playerX && y === this.playerY);
                 const isCenter = (x === this.centerX && y === this.centerY);
 
@@ -251,6 +286,13 @@ class GalaxyMapController {
                 if (isCurrent) tileClass += ' current-planet';
                 if (isCenter) tileClass += ' tile-center';
                 if (planet && planet.is_authentic_castle) tileClass += ' authentic-castle-tile';
+                else if (planet && planet.user_id) tileClass += ' village-tile';
+                else tileClass += ` terrain-tile-${terrain.type}`;
+
+                let bgImg = terrain.img;
+                if (planet && planet.terrain_img) {
+                    bgImg = planet.terrain_img;
+                }
 
                 let contentHtml = '';
                 if (planet) {
@@ -262,26 +304,36 @@ class GalaxyMapController {
                         `;
                     } else {
                         const icon = planet.user_id ? '🏯' : '🌾';
-                        const ownerName = planet.username || 'Terres Vierges';
-                        const ownerColor = planet.user_id ? '#38bdf8' : '#94a3b8';
+                        const ownerName = planet.username || 'Terres Libres';
+                        const ownerColor = planet.user_id ? '#38bdf8' : '#e2e8f0';
                         contentHtml = `
-                            <span class="tile-planet-icon">${icon}</span>
-                            <span class="tile-owner" style="color:${ownerColor};">${escapeHtml(ownerName)}</span>
+                            <span class="tile-planet-icon" style="filter:drop-shadow(0 0 6px rgba(0,0,0,0.85));">${icon}</span>
+                            <span class="tile-owner" style="color:${ownerColor}; background:rgba(0,0,0,0.7); padding:1px 4px; border-radius:3px; font-weight:700; font-size:0.6rem;">${escapeHtml(ownerName)}</span>
                         `;
                     }
                 } else {
-                    contentHtml = `<span class="tile-empty-star">・</span>`;
+                    // Marqueur discret de terrain
+                    contentHtml = `<span class="tile-nature-marker" title="${escapeHtml(terrain.name)}"></span>`;
                 }
 
-                const planetDataAttr = planet ? JSON.stringify(planet).replace(/"/g, '&quot;') : '';
+                const planetDataAttr = planet 
+                    ? JSON.stringify(planet).replace(/"/g, '&quot;') 
+                    : JSON.stringify({ coord_x: x, coord_y: y, empty: true, terrain_name: terrain.name, terrain_desc: terrain.desc }).replace(/"/g, '&quot;');
+
+                const tileTooltip = planet 
+                    ? (planet.castle_name || planet.planet_name) 
+                    : terrain.name;
 
                 html += `
                     <div class="${tileClass}" 
                          data-x="${x}" data-y="${y}" 
                          data-planet="${planetDataAttr}"
-                         style="width:${this.tileSize}px; height:${this.tileSize}px;">
-                        ${contentHtml}
-                        <span class="tile-coords">${x}:${y}</span>
+                         title="${escapeHtml(tileTooltip)} [${x} : ${y}]"
+                         style="width:${this.tileSize}px; height:${this.tileSize}px; background-image:url('${bgImg}'); background-size:cover; background-position:center;">
+                        <div class="tile-inner-overlay">
+                            ${contentHtml}
+                            <span class="tile-coords">${x}:${y}</span>
+                        </div>
                     </div>
                 `;
             }
@@ -309,4 +361,3 @@ class GalaxyMapController {
 function escapeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-

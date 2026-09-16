@@ -233,14 +233,28 @@ class VillageFieldGenerator {
     }
 
     /**
-     * Recherche des coordonnées (X, Y) libres de façon purement aléatoire
-     * dans un rayon donné (par défaut 35, extensible si la carte se remplit)
+     * Recherche des coordonnées (X, Y) libres dans un quadrant géographique donné
+     * Zones supportées : 'nord_ouest' (-X, +Y), 'nord_est' (+X, +Y), 'sud_ouest' (-X, -Y), 'sud_est' (+X, -Y), 'random'
      */
-    public static function findRandomFreeCoordinates(PDO $db, int $radius = 35): array {
+    public static function findRandomFreeCoordinates(PDO $db, int $radius = 35, string $zone = 'random'): array {
         $checkStmt = $db->prepare("SELECT id FROM planets WHERE coord_x = ? AND coord_y = ?");
 
         $attempts = 0;
         $curRadius = max(15, $radius);
+
+        $zone = strtolower(trim($zone));
+        if ($zone === 'random' || !in_array($zone, ['nord_ouest', 'nord_est', 'sud_ouest', 'sud_est', 'no', 'ne', 'so', 'se'])) {
+            $zones = ['nord_ouest', 'nord_est', 'sud_ouest', 'sud_est'];
+            $targetZone = $zones[array_rand($zones)];
+        } else {
+            $alias = [
+                'no' => 'nord_ouest',
+                'ne' => 'nord_est',
+                'so' => 'sud_ouest',
+                'se' => 'sud_est'
+            ];
+            $targetZone = $alias[$zone] ?? $zone;
+        }
 
         while ($attempts < 2000) {
             $attempts++;
@@ -250,8 +264,28 @@ class VillageFieldGenerator {
                 $curRadius += 10;
             }
 
-            $x = rand(-$curRadius, $curRadius);
-            $y = rand(-$curRadius, $curRadius);
+            switch ($targetZone) {
+                case 'nord_ouest':
+                    $x = rand(-$curRadius, -1);
+                    $y = rand(1, $curRadius);
+                    break;
+                case 'nord_est':
+                    $x = rand(1, $curRadius);
+                    $y = rand(1, $curRadius);
+                    break;
+                case 'sud_ouest':
+                    $x = rand(-$curRadius, -1);
+                    $y = rand(-$curRadius, -1);
+                    break;
+                case 'sud_est':
+                    $x = rand(1, $curRadius);
+                    $y = rand(-$curRadius, -1);
+                    break;
+                default:
+                    $x = rand(-$curRadius, $curRadius);
+                    $y = rand(-$curRadius, $curRadius);
+                    break;
+            }
 
             // Ne pas occuper le centre impérial absolu (0, 0)
             if ($x === 0 && $y === 0) {
@@ -260,14 +294,18 @@ class VillageFieldGenerator {
 
             $checkStmt->execute([$x, $y]);
             if (!$checkStmt->fetch()) {
-                return ['x' => $x, 'y' => $y];
+                return ['x' => $x, 'y' => $y, 'zone' => $targetZone];
             }
         }
 
-        // Secours aléatoire très large
+        // Secours aléatoire orienté selon la zone
+        $signX = ($targetZone === 'nord_ouest' || $targetZone === 'sud_ouest') ? -1 : 1;
+        $signY = ($targetZone === 'nord_ouest' || $targetZone === 'nord_est') ? 1 : -1;
+
         return [
-            'x' => rand(50, 100) * (rand(0, 1) ? 1 : -1),
-            'y' => rand(50, 100) * (rand(0, 1) ? 1 : -1)
+            'x' => rand(40, 80) * $signX,
+            'y' => rand(40, 80) * $signY,
+            'zone' => $targetZone
         ];
     }
 

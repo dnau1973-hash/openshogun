@@ -98,3 +98,4 @@ try {
 }
 
 echo "=== TOUS LES TESTS DE LA PAGE MAP PLEINE LARGEUR SONT VALIDES ! ===\n";
+

@@ -92,7 +92,7 @@ class Auth {
         return ['success' => true];
     }
 
-    public function register(string $username, string $email, string $password, string $faction): array {
+    public function register(string $username, string $email, string $password, string $faction, string $zone = 'random'): array {
         $username = trim($username);
         $email = trim($email);
 
@@ -128,8 +128,8 @@ class Auth {
             $stmtUser->execute([$username, $email, $hash, $faction]);
             $userId = (int)$this->db->lastInsertId();
 
-            // 2. Trouver un emplacement de coordonnées (X, Y) libre de manière aléatoire (Style Travian)
-            $coords = $this->findFreeCoordinates();
+            // 2. Trouver un emplacement de coordonnées (X, Y) libre dans le quadrant choisi (Style Travian)
+            $coords = $this->findFreeCoordinates($zone);
 
             // 3. Créer le domaine castral principal
             $planetName = "Château " . ucfirst($username);
@@ -199,10 +199,10 @@ class Auth {
     }
 
     /**
-     * Recherche un emplacement libre (X, Y) aléatoire (Style Travian)
+     * Recherche un emplacement libre (X, Y) dans le quadrant souhaité (Style Travian)
      */
-    private function findFreeCoordinates(): array {
-        return VillageFieldGenerator::findRandomFreeCoordinates($this->db, 35);
+    private function findFreeCoordinates(string $zone = 'random'): array {
+        return VillageFieldGenerator::findRandomFreeCoordinates($this->db, 35, $zone);
     }
 
     public static function csrfToken(): string {

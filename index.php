@@ -25,7 +25,8 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     $faction = $_POST['faction'] ?? 'terran';
-    $res = $auth->register($username, $email, $password, $faction);
+    $zone = $_POST['zone'] ?? 'random';
+    $res = $auth->register($username, $email, $password, $faction, $zone);
     if ($res['success']) {
         header('Location: /');
         exit;

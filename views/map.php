@@ -38,6 +38,29 @@ $centerY = isset($_GET['y']) ? (int)$_GET['y'] : (int)$planet['coord_y'];
         </div>
     </div>
 
+    <!-- Légende des Terroirs & Saut de Quadrants (Style Travian) -->
+    <div style="background: var(--bg-ink, #ede5d5); border-bottom: 1px solid var(--border-color); padding: 0.5rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; font-size: 0.8rem;">
+        <div style="display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap;">
+            <span style="font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">🗾 Terroirs :</span>
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_plains.jpg" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Plaines</span>
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_forest.jpg" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Forêt de Cèdres</span>
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_mountain.jpg" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Montagnes</span>
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_lake.jpg" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Lacs & Eaux</span>
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_hills.jpg" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Collines</span>
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_village.jpg" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Fief Castral</span>
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_authentic_castle.jpg" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Donjon Sacré</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <span style="font-weight: 700; color: var(--text-muted); margin-right: 0.2rem;">Saut de Zone :</span>
+            <button type="button" class="btn btn-secondary" onclick="galaxyMap.moveTo(-16, 16)" style="font-size:0.75rem; padding:0.25rem 0.55rem;" title="Nord-Ouest [- / +]">↖️ N-O</button>
+            <button type="button" class="btn btn-secondary" onclick="galaxyMap.moveTo(16, 16)" style="font-size:0.75rem; padding:0.25rem 0.55rem;" title="Nord-Est [+ / +]">↗️ N-E</button>
+            <button type="button" class="btn btn-secondary" onclick="galaxyMap.moveTo(-16, -16)" style="font-size:0.75rem; padding:0.25rem 0.55rem;" title="Sud-Ouest [- / -]">↙️ S-O</button>
+            <button type="button" class="btn btn-secondary" onclick="galaxyMap.moveTo(16, -16)" style="font-size:0.75rem; padding:0.25rem 0.55rem;" title="Sud-Est [+ / -]">↘️ S-E</button>
+            <button type="button" class="btn btn-secondary" onclick="galaxyMap.moveTo(0, 0)" style="font-size:0.75rem; padding:0.25rem 0.55rem;" title="Centre Impérial [0 : 0]">⛩️ Centre</button>
+        </div>
+    </div>
+
     <div class="card-body" style="padding: 0; position: relative;">
         <!-- Conteneur Interactif Drag-and-Drop Pleine Largeur -->
         <div class="galaxy-map-wrapper map-fullwidth-wrapper" id="galaxyMapContainer" style="width: 100%; border: none; border-radius: 0;">
@@ -193,3 +216,4 @@ window.selectPlanetTile = function(data) {
     }
 };
 </script>
+

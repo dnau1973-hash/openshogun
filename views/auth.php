@@ -84,6 +84,24 @@ $tab = $_GET['tab'] ?? 'login';
             background: rgba(194, 37, 43, 0.06);
             box-shadow: 0 0 15px rgba(194, 37, 43, 0.25);
         }
+        .zone-choice-card {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #ffffff;
+            text-align: center;
+        }
+        .zone-choice-card:hover {
+            border-color: #c2252b;
+            transform: translateY(-2px);
+        }
+        .zone-choice-card.selected {
+            border-color: #c2252b;
+            background: rgba(194, 37, 43, 0.08);
+            box-shadow: 0 0 10px rgba(194, 37, 43, 0.2);
+        }
         .form-group {
             margin-bottom: 1.25rem;
         }
@@ -196,6 +214,43 @@ $tab = $_GET['tab'] ?? 'login';
                     </div>
                 </div>
 
+                <!-- Sélection du Quadrant / Zone Géographique (Style Travian) -->
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label style="margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>🧭 Choisissez votre Province de Départ (Quadrant) :</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">Découpage en 4 zones</span>
+                    </label>
+                    <input type="hidden" name="zone" id="selectedZoneInput" value="random">
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem;">
+                        <div class="zone-choice-card selected" id="zone-card-random" onclick="selectZone('random')">
+                            <div style="font-size: 1.3rem;">🎲</div>
+                            <strong style="font-size: 0.85rem; color: #c2252b;">Aléatoire</strong>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">Équilibré</div>
+                        </div>
+                        <div class="zone-choice-card" id="zone-card-nord_ouest" onclick="selectZone('nord_ouest')">
+                            <div style="font-size: 1.3rem;">↖️</div>
+                            <strong style="font-size: 0.85rem;">Nord-Ouest</strong>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">[- / +] Monts</div>
+                        </div>
+                        <div class="zone-choice-card" id="zone-card-nord_est" onclick="selectZone('nord_est')">
+                            <div style="font-size: 1.3rem;">↗️</div>
+                            <strong style="font-size: 0.85rem;">Nord-Est</strong>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">[+ / +] Plaines</div>
+                        </div>
+                        <div class="zone-choice-card" id="zone-card-sud_ouest" onclick="selectZone('sud_ouest')">
+                            <div style="font-size: 1.3rem;">↙️</div>
+                            <strong style="font-size: 0.85rem;">Sud-Ouest</strong>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">[- / -] Shikoku</div>
+                        </div>
+                        <div class="zone-choice-card" id="zone-card-sud_est" onclick="selectZone('sud_est')">
+                            <div style="font-size: 1.3rem;">↘️</div>
+                            <strong style="font-size: 0.85rem;">Sud-Est</strong>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">[+ / -] Côtes</div>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; margin-top: 1.5rem;">
                     Fonder mon Fief Castral &rarr;
                 </button>
@@ -217,6 +272,12 @@ function selectFaction(fKey) {
     document.querySelectorAll('.faction-choice-card').forEach(c => c.classList.remove('selected'));
     document.getElementById(`faction-card-${fKey}`).classList.add('selected');
     document.getElementById('selectedFactionInput').value = fKey;
+}
+
+function selectZone(zKey) {
+    document.querySelectorAll('.zone-choice-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById(`zone-card-${zKey}`).classList.add('selected');
+    document.getElementById('selectedZoneInput').value = zKey;
 }
 </script>
 

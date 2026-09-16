@@ -1,6 +1,8 @@
 <?php
 /**
- * Moteur de Carte Galactique et Navigation Stellaire
+ * Moteur de Carte des Provinces et Navigation du Japon Féodal (OpenShogun)
+ * Gère la génération procédurale du paysage (plaines, forêts, montagnes, lacs, collines)
+ * et le découpage de l'archipel en 4 quadrants stratégiques.
  */
 require_once __DIR__ . '/Database.php';
 
@@ -12,9 +14,112 @@ class GalaxyEngine {
     }
 
     /**
-     * Récupère les secteurs de la carte spatiale autour d'un centre (cx, cy)
+     * Détermine de manière procédurale et déterministe le type de paysage naturel d'une coordonnée (X, Y)
+     * Utilise un hachage spatial 2D pour garantir la persistance mathématique sans stockage SQL lourd.
      */
-    public function getSectorMap(int $centerX, int $centerY, int $radius = 4): array {
+    public static function getTerrainType(int $x, int $y): array {
+        // Hachage spatial 2D déterministe
+        $seed = abs((int)(($x * 73856093) ^ ($y * 19349663))) % 1000;
+
+        // Répartition paysagère inspirée du Japon féodal & Travian :
+        // 0-599 (60%) : Plaines verdoyantes & rizières
+        // 600-749 (15%) : Forêt de cèdres (Sugi) & bambouseraies
+        // 750-869 (12%) : Montagnes escarpées & falaises
+        // 870-949 (8%)  : Collines & vergers en terrasse
+        // 950-999 (5%)  : Lacs paisibles & méandres de rivières
+        if ($seed < 600) {
+            return [
+                'type' => 'plains',
+                'name' => 'Plaines Fertiles',
+                'desc' => 'Prairies verdoyantes et terres arables favorables au développement agricole.',
+                'img' => '/public/assets/map/tile_plains.jpg'
+            ];
+        } elseif ($seed < 750) {
+            return [
+                'type' => 'forest',
+                'name' => 'Forêt de Cèdres (Sugi)',
+                'desc' => 'Bois denses de cèdres centenaires et bambouseraies sauvages.',
+                'img' => '/public/assets/map/tile_forest.jpg'
+            ];
+        } elseif ($seed < 870) {
+            return [
+                'type' => 'mountain',
+                'name' => 'Pics Rocheux & Montagnes',
+                'desc' => 'Crêtes granitiques escarpées et falaises abruptes des monts de l\'archipel.',
+                'img' => '/public/assets/map/tile_mountain.jpg'
+            ];
+        } elseif ($seed < 950) {
+            return [
+                'type' => 'hills',
+                'name' => 'Collines & Coteaux',
+                'desc' => 'Reliefs vallonnés parsemés de cultures en terrasses et vergers.',
+                'img' => '/public/assets/map/tile_hills.jpg'
+            ];
+        } else {
+            return [
+                'type' => 'lake',
+                'name' => 'Lac & Eaux Calmes',
+                'desc' => 'Étendue d\'eau limpide bordée de roseaux et rivières sinueuses.',
+                'img' => '/public/assets/map/tile_lake.jpg'
+            ];
+        }
+    }
+
+    /**
+     * Identifie le quadrant géographique (Nord-Ouest, Nord-Est, Sud-Ouest, Sud-Est)
+     * selon les coordonnées (X, Y)
+     */
+    public static function getQuadrant(int $x, int $y): array {
+        if ($x === 0 && $y === 0) {
+            return [
+                'code' => 'KYOTO',
+                'name' => 'Capitale Impériale (Kyoto)',
+                'symbol' => '⛩️',
+                'coords' => '[0 : 0]',
+                'desc' => 'Centre spirituel et politique de l\'archipel.'
+            ];
+        }
+
+        if ($x <= 0 && $y >= 0) {
+            return [
+                'code' => 'NO',
+                'name' => 'Provinces du Nord-Ouest',
+                'symbol' => '↖️',
+                'coords' => '[- / +]',
+                'desc' => 'Contrées montagneuses et forêts septentrionales.'
+            ];
+        } elseif ($x >= 0 && $y >= 0) {
+            return [
+                'code' => 'NE',
+                'name' => 'Provinces du Nord-Est',
+                'symbol' => '↗️',
+                'coords' => '[+ / +]',
+                'desc' => 'Plaines d\'Echigo et coteaux de Mutsu.'
+            ];
+        } elseif ($x <= 0 && $y <= 0) {
+            return [
+                'code' => 'SO',
+                'name' => 'Provinces du Sud-Ouest',
+                'symbol' => '↙️',
+                'coords' => '[- / -]',
+                'desc' => 'Fiefs côtiers du Shikoku et mers intérieures.'
+            ];
+        } else {
+            return [
+                'code' => 'SE',
+                'name' => 'Provinces du Sud-Est',
+                'symbol' => '↘️',
+                'coords' => '[+ / -]',
+                'desc' => 'Plaines du Tokaido et rivages de Mikawa.'
+            ];
+        }
+    }
+
+    /**
+     * Récupère les secteurs de la carte spatiale autour d'un centre (cx, cy)
+     * avec terrain procédural et donjons authentiques
+     */
+    public function getSectorMap(int $centerX, int $centerY, int $radius = 6): array {
         $minX = $centerX - $radius;
         $maxX = $centerX + $radius;
         $minY = $centerY - $radius;
@@ -34,6 +139,10 @@ class GalaxyEngine {
         // Indexer par "x:y"
         $gridMap = [];
         foreach ($planets as $p) {
+            $isVillage = !empty($p['user_id']);
+            $p['terrain_type'] = $isVillage ? 'village' : 'unoccupied';
+            $p['terrain_name'] = $isVillage ? ('Fief de ' . ($p['username'] ?? 'Daimyō')) : 'Terres Libres';
+            $p['terrain_img'] = $isVillage ? '/public/assets/map/tile_village.jpg' : '/public/assets/map/tile_plains.jpg';
             $gridMap[$p['coord_x'] . ':' . $p['coord_y']] = $p;
         }
 
@@ -50,17 +159,24 @@ class GalaxyEngine {
 
             foreach ($castles as $c) {
                 $k = $c['coord_x'] . ':' . $c['coord_y'];
+                $castleData = [
+                    'is_authentic_castle' => 1,
+                    'castle_code' => $c['code'],
+                    'castle_name' => $c['castle_name'],
+                    'castle_kanji' => $c['kanji'],
+                    'castle_classification' => $c['classification'],
+                    'castle_province' => $c['province'],
+                    'castle_builder' => $c['historical_builder'],
+                    'castle_icon' => $c['icon'],
+                    'terrain_type' => 'authentic_castle',
+                    'terrain_name' => $c['castle_name'],
+                    'terrain_img' => '/public/assets/map/tile_authentic_castle.jpg'
+                ];
+
                 if (isset($gridMap[$k])) {
-                    $gridMap[$k]['is_authentic_castle'] = 1;
-                    $gridMap[$k]['castle_code'] = $c['code'];
-                    $gridMap[$k]['castle_name'] = $c['castle_name'];
-                    $gridMap[$k]['castle_kanji'] = $c['kanji'];
-                    $gridMap[$k]['castle_classification'] = $c['classification'];
-                    $gridMap[$k]['castle_province'] = $c['province'];
-                    $gridMap[$k]['castle_builder'] = $c['historical_builder'];
-                    $gridMap[$k]['castle_icon'] = $c['icon'];
+                    $gridMap[$k] = array_merge($gridMap[$k], $castleData);
                 } else {
-                    $gridMap[$k] = [
+                    $gridMap[$k] = array_merge([
                         'planet_id' => null,
                         'planet_name' => $c['castle_name'],
                         'coord_x' => (int)$c['coord_x'],
@@ -71,28 +187,38 @@ class GalaxyEngine {
                         'faction' => null,
                         'points' => 25000,
                         'alliance_tag' => 'TRÉSOR',
-                        'is_authentic_castle' => 1,
-                        'castle_code' => $c['code'],
-                        'castle_name' => $c['castle_name'],
-                        'castle_kanji' => $c['kanji'],
-                        'castle_classification' => $c['classification'],
-                        'castle_province' => $c['province'],
-                        'castle_builder' => $c['historical_builder'],
-                        'castle_icon' => $c['icon'],
-                    ];
+                    ], $castleData);
                 }
             }
         } catch (Exception $e) {
-            // Table pas encore créée ou fallback silencieux
+            // Fallback silencieux
+        }
+
+        // Générer les terrains naturels pour toutes les cases du secteur
+        $terrains = [];
+        for ($y = $minY; $y <= $maxY; $y++) {
+            for ($x = $minX; $x <= $maxX; $x++) {
+                $k = $x . ':' . $y;
+                if (!isset($gridMap[$k])) {
+                    $terrains[$k] = self::getTerrainType($x, $y);
+                } else {
+                    $terrains[$k] = [
+                        'type' => $gridMap[$k]['terrain_type'],
+                        'name' => $gridMap[$k]['terrain_name'],
+                        'img' => $gridMap[$k]['terrain_img']
+                    ];
+                }
+            }
         }
 
         return [
             'center_x' => $centerX,
             'center_y' => $centerY,
             'radius' => $radius,
+            'quadrant' => self::getQuadrant($centerX, $centerY),
             'bounds' => ['min_x' => $minX, 'max_x' => $maxX, 'min_y' => $minY, 'max_y' => $maxY],
-            'planets' => $gridMap
+            'planets' => $gridMap,
+            'terrains' => $terrains
         ];
     }
 }
-

@@ -1107,6 +1107,28 @@ a:hover {
     pointer-events: auto;
 }
 
+.hud-quadrants-nav {
+    display: flex;
+    gap: 0.35rem;
+    pointer-events: auto;
+    background: rgba(253, 251, 247, 0.94);
+    padding: 3px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(60, 45, 30, 0.06);
+}
+
+.hud-quadrants-nav .hud-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    border: 1px solid transparent;
+}
+
+.hud-quadrants-nav .hud-btn:hover {
+    border-color: #c2252b;
+    background: rgba(194, 37, 43, 0.08);
+}
+
 .hud-btn {
     background: #ffffff;
     border: 1px solid var(--border-color);
@@ -1172,7 +1194,7 @@ a:hover {
 }
 
 .galaxy-tile {
-    background: rgba(253, 251, 247, 0.95);
+    background: #ede5d5;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     display: flex;
@@ -1181,46 +1203,67 @@ a:hover {
     justify-content: center;
     cursor: pointer;
     position: relative;
-    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
     font-size: 0.75rem;
     user-select: none;
-    box-shadow: 0 1px 4px rgba(60, 45, 30, 0.04);
+    box-shadow: 0 1px 4px rgba(60, 45, 30, 0.08);
+    overflow: hidden;
+}
+
+.tile-inner-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.04);
+    transition: background 0.2s;
 }
 
 .galaxy-tile:hover {
     border-color: #c2252b;
-    background: rgba(194, 37, 43, 0.08);
-    transform: scale(1.04);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(194, 37, 43, 0.25);
     z-index: 2;
+}
+
+.galaxy-tile:hover .tile-inner-overlay {
+    background: rgba(194, 37, 43, 0.12);
+}
+
+.galaxy-tile.village-tile {
+    border: 2px solid #3b82f6;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
 }
 
 .galaxy-tile.current-planet {
     border: 2px solid #c2252b;
-    box-shadow: 0 0 16px rgba(194, 37, 43, 0.35);
+    box-shadow: 0 0 16px rgba(194, 37, 43, 0.5);
 }
 
 .galaxy-tile.tile-center {
     border-color: #c2252b;
-    background: rgba(194, 37, 43, 0.08);
 }
 
 .galaxy-tile.authentic-castle-tile {
     background: linear-gradient(135deg, rgba(254, 243, 199, 0.96) 0%, rgba(253, 230, 138, 0.92) 100%);
     border: 2px solid #d97706;
-    box-shadow: 0 0 14px rgba(245, 158, 11, 0.45), inset 0 0 8px rgba(251, 191, 36, 0.3);
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.55), inset 0 0 8px rgba(251, 191, 36, 0.3);
     animation: castlePulse 3s infinite alternate;
 }
 
 .galaxy-tile.authentic-castle-tile:hover {
     border-color: #b45309;
     transform: scale(1.08);
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.7);
+    box-shadow: 0 0 22px rgba(245, 158, 11, 0.75);
     z-index: 5;
 }
 
 @keyframes castlePulse {
     0% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.35); }
-    100% { box-shadow: 0 0 18px rgba(245, 158, 11, 0.65); }
+    100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.7); }
 }
 
 .tile-authentic-badge {
@@ -1250,10 +1293,16 @@ a:hover {
 }
 
 .tile-coords {
-    color: var(--text-muted);
-    font-size: 0.65rem;
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 0.62rem;
     font-family: monospace;
-    margin-top: 0.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 2px #000;
+    pointer-events: none;
+    line-height: 1;
 }
 
 .tile-owner {
