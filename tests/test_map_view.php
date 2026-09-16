@@ -97,5 +97,17 @@ try {
     exit(1);
 }
 
+// 6. Vérifier les 3 médaillons de navigation (nav_resources.jpg, nav_colony.jpg, nav_map.jpg)
+$navAssets = ['nav_resources.jpg', 'nav_colony.jpg', 'nav_map.jpg'];
+foreach ($navAssets as $asset) {
+    $path = __DIR__ . '/../public/assets/' . $asset;
+    if (file_exists($path) && filesize($path) > 1000) {
+        echo "✓ Médaillon [{$asset}] présent (" . filesize($path) . " octets)\n";
+    } else {
+        echo "✗ ERREUR : Médaillon [{$asset}] manquant ou vide\n";
+        exit(1);
+    }
+}
+
 echo "=== TOUS LES TESTS DE LA PAGE MAP PLEINE LARGEUR SONT VALIDES ! ===\n";
 

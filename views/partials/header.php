@@ -66,19 +66,19 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
         <div class="travian-nav-medallions">
             <!-- 1. Terroir & Récoltes -->
             <a href="?page=resources" class="travian-medallion <?= ($page === 'resources' || $page === 'field') ? 'active' : '' ?>" title="Terroir & Récoltes">
-                <img src="/public/assets/nav_resources.jpg" alt="Terroir" class="travian-medallion-img">
+                <img src="/public/assets/nav_resources.jpg?v=<?= file_exists(__DIR__ . '/../../public/assets/nav_resources.jpg') ? filemtime(__DIR__ . '/../../public/assets/nav_resources.jpg') : time() ?>" alt="Terroir" class="travian-medallion-img">
                 <span class="travian-medallion-tooltip">Terroir & Récoltes</span>
             </a>
 
             <!-- 2. Cité Castrale -->
             <a href="?page=city" class="travian-medallion <?= ($page === 'city') ? 'active' : '' ?>" title="Cité Castrale">
-                <img src="/public/assets/nav_colony.jpg" alt="Cité Castrale" class="travian-medallion-img">
+                <img src="/public/assets/nav_colony.jpg?v=<?= file_exists(__DIR__ . '/../../public/assets/nav_colony.jpg') ? filemtime(__DIR__ . '/../../public/assets/nav_colony.jpg') : time() ?>" alt="Cité Castrale" class="travian-medallion-img">
                 <span class="travian-medallion-tooltip">Cité Castrale</span>
             </a>
 
             <!-- 3. Provinces du Japon (Carte) -->
             <a href="?page=map" class="travian-medallion <?= ($page === 'map' || $page === 'galaxy') ? 'active' : '' ?>" title="Provinces du Japon (Carte)">
-                <img src="/public/assets/nav_galaxy.jpg" alt="Provinces du Japon" class="travian-medallion-img">
+                <img src="/public/assets/nav_map.jpg?v=<?= file_exists(__DIR__ . '/../../public/assets/nav_map.jpg') ? filemtime(__DIR__ . '/../../public/assets/nav_map.jpg') : time() ?>" alt="Provinces du Japon" class="travian-medallion-img">
                 <span class="travian-medallion-tooltip">Provinces du Japon (Carte)</span>
             </a>
         </div>
