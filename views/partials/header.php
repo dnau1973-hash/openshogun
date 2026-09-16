@@ -102,6 +102,9 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
                     <span class="hud-unread-count"><?= $unreadMessagesCount ?></span>
                 <?php endif; ?>
             </a>
+            <a href="?page=docs" class="hud-msg-btn <?= ($page === 'docs') ? 'active' : '' ?>" title="Codex & Documentation du Jeu">
+                <span>📖</span>
+            </a>
             <?php if ($auth->isAdmin()): ?>
                 <a href="?page=admin" class="badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #eab308; padding: 0.25rem 0.5rem; text-decoration: none; font-weight: 700; margin-left: 0.25rem;" title="QG d'Administration">
                     ⚙️ ADMIN

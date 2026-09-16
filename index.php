@@ -45,8 +45,7 @@ if (!Auth::check()) {
 }
 
 // Récupérer la page demandée
-$page = $_GET['page'] ?? 'resources';
-$allowedPages = ['resources', 'field', 'building', 'city', 'galaxy', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle'];
+$allowedPages = ['resources', 'field', 'building', 'city', 'galaxy', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';
