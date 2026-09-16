@@ -1158,9 +1158,7 @@ a:hover {
     cursor: grab;
     user-select: none;
     touch-action: none;
-    background: 
-        radial-gradient(circle at center, rgba(194, 37, 43, 0.04) 0%, transparent 60%),
-        #ede5d5;
+    background: #b9d580;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1174,6 +1172,7 @@ a:hover {
     display: grid;
     will-change: transform;
     transform: translate3d(0, 0, 0);
+    background: #b9d580;
 }
 
 .galaxy-drag-hint {
@@ -1194,20 +1193,21 @@ a:hover {
 }
 
 .galaxy-tile {
-    background: #ede5d5;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    background: #b9d580;
+    border: 1px dashed rgba(135, 170, 75, 0.45);
+    border-radius: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     position: relative;
-    transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+    transition: outline 0.12s ease-in-out;
     font-size: 0.75rem;
     user-select: none;
-    box-shadow: 0 1px 4px rgba(60, 45, 30, 0.08);
+    box-shadow: none;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 .tile-inner-overlay {
@@ -1217,53 +1217,46 @@ a:hover {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    background: rgba(0, 0, 0, 0.04);
-    transition: background 0.2s;
+    background: transparent;
+    pointer-events: none;
 }
 
 .galaxy-tile:hover {
-    border-color: #c2252b;
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(194, 37, 43, 0.25);
-    z-index: 2;
+    outline: 2px solid #c2252b;
+    outline-offset: -2px;
+    z-index: 4;
 }
 
 .galaxy-tile:hover .tile-inner-overlay {
-    background: rgba(194, 37, 43, 0.12);
+    background: rgba(194, 37, 43, 0.06);
 }
 
 .galaxy-tile.village-tile {
-    border: 2px solid #3b82f6;
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+    outline: 2px solid #2563eb;
+    outline-offset: -2px;
 }
 
 .galaxy-tile.current-planet {
-    border: 2px solid #c2252b;
-    box-shadow: 0 0 16px rgba(194, 37, 43, 0.5);
+    outline: 2px solid #c2252b;
+    outline-offset: -2px;
+    z-index: 3;
 }
 
 .galaxy-tile.tile-center {
-    border-color: #c2252b;
+    outline: 2px solid rgba(194, 37, 43, 0.5);
+    outline-offset: -2px;
 }
 
 .galaxy-tile.authentic-castle-tile {
-    background: linear-gradient(135deg, rgba(254, 243, 199, 0.96) 0%, rgba(253, 230, 138, 0.92) 100%);
-    border: 2px solid #d97706;
-    box-shadow: 0 0 16px rgba(245, 158, 11, 0.55), inset 0 0 8px rgba(251, 191, 36, 0.3);
-    animation: castlePulse 3s infinite alternate;
+    outline: 2px solid #d97706;
+    outline-offset: -2px;
+    z-index: 3;
 }
 
 .galaxy-tile.authentic-castle-tile:hover {
-    border-color: #b45309;
-    transform: scale(1.08);
-    box-shadow: 0 0 22px rgba(245, 158, 11, 0.75);
+    outline: 3px solid #b45309;
+    outline-offset: -3px;
     z-index: 5;
-}
-
-@keyframes castlePulse {
-    0% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.35); }
-    100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.7); }
 }
 
 .tile-authentic-badge {
@@ -1273,17 +1266,19 @@ a:hover {
     transform: translateX(-50%);
     background: #d97706;
     color: #ffffff;
-    font-size: 0.52rem;
+    font-size: 0.5rem;
     font-weight: 900;
     letter-spacing: 0.5px;
     padding: 1px 4px;
-    border-radius: 3px;
+    border-radius: 2px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    line-height: 1.1;
 }
 
 .tile-planet-icon {
-    font-size: 1.5rem;
-    filter: drop-shadow(0 2px 4px rgba(194, 37, 43, 0.25));
+    font-size: 1.4rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .tile-empty-star {
@@ -1295,24 +1290,45 @@ a:hover {
 .tile-coords {
     position: absolute;
     bottom: 2px;
-    right: 4px;
-    font-size: 0.62rem;
+    right: 3px;
+    font-size: 0.55rem;
     font-family: monospace;
-    font-weight: 800;
-    color: #ffffff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 2px #000;
+    font-weight: 700;
+    color: rgba(55, 80, 25, 0.7);
     pointer-events: none;
     line-height: 1;
 }
 
 .tile-owner {
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
     font-weight: 700;
     color: #1c1917;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 90%;
-    font-size: 0.7rem;
+    font-size: 0.56rem;
+    background: rgba(255, 255, 255, 0.88);
+    padding: 1px 4px;
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    line-height: 1.1;
+}
+
+.tile-owner.castle-label {
+    background: rgba(217, 119, 6, 0.92);
+    color: #ffffff;
+    border-color: #b45309;
+}
+
+.tile-owner.village-label {
+    background: rgba(37, 99, 235, 0.92);
+    color: #ffffff;
+    border-color: #1d4ed8;
 }
 
 /* ==========================================================

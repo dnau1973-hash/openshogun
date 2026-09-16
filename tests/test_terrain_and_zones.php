@@ -122,3 +122,4 @@ if (isset($sectorData['quadrant']) && isset($sectorData['terrains']) && count($s
 }
 
 echo "=== TOUS LES TESTS DE TERRAINS & QUADRANTS SONT VALIDES ! ===\n";
+

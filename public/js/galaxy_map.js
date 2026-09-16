@@ -15,9 +15,9 @@ class GalaxyMapController {
         this.playerY = options.playerY || 0;
         this.currentUserId = options.userId || 0;
 
-        this.tileSize = 76; // pixels par case
-        this.gap = 6;
-        this.stepSize = this.tileSize + this.gap;
+        this.tileSize = 80; // pixels par case (Travian style)
+        this.gap = 0; // Grille continue et jointive sans coupure
+        this.stepSize = this.tileSize;
 
         // Calcul dynamique du rayon pour occuper toute la largeur d'écran disponible
         if (options.radius && options.radius > 0) {
@@ -299,21 +299,14 @@ class GalaxyMapController {
                     if (planet.is_authentic_castle) {
                         contentHtml = `
                             <span class="tile-authentic-badge">TRÉSOR</span>
-                            <span class="tile-planet-icon" style="font-size:1.45rem; filter:drop-shadow(0 0 8px rgba(245,158,11,0.85));">🏯</span>
-                            <span class="tile-owner" style="color:#fbbf24; font-weight:800; font-size:0.62rem; text-shadow:0 1px 3px rgba(0,0,0,0.8);">${escapeHtml(planet.castle_name || planet.planet_name)}</span>
+                            <span class="tile-owner castle-label">${escapeHtml(planet.castle_name || planet.planet_name)}</span>
                         `;
-                    } else {
-                        const icon = planet.user_id ? '🏯' : '🌾';
-                        const ownerName = planet.username || 'Terres Libres';
-                        const ownerColor = planet.user_id ? '#38bdf8' : '#e2e8f0';
+                    } else if (planet.user_id) {
+                        const ownerName = planet.planet_name || planet.username || 'Fief';
                         contentHtml = `
-                            <span class="tile-planet-icon" style="filter:drop-shadow(0 0 6px rgba(0,0,0,0.85));">${icon}</span>
-                            <span class="tile-owner" style="color:${ownerColor}; background:rgba(0,0,0,0.7); padding:1px 4px; border-radius:3px; font-weight:700; font-size:0.6rem;">${escapeHtml(ownerName)}</span>
+                            <span class="tile-owner village-label">${escapeHtml(ownerName)}</span>
                         `;
                     }
-                } else {
-                    // Marqueur discret de terrain
-                    contentHtml = `<span class="tile-nature-marker" title="${escapeHtml(terrain.name)}"></span>`;
                 }
 
                 const planetDataAttr = planet 
