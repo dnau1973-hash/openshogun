@@ -33,10 +33,13 @@ $stationedUnits = $stmtUnits->fetchAll();
 $stmtMissions = $db->prepare("
     SELECT fm.*, 
            p1.name as source_name, p1.coord_x as sx, p1.coord_y as sy,
-           p2.name as target_name, p2.coord_x as tx, p2.coord_y as ty
+           COALESCE(p2.name, CONCAT('Oasis ', o.name)) as target_name, 
+           COALESCE(p2.coord_x, o.coord_x) as tx, 
+           COALESCE(p2.coord_y, o.coord_y) as ty
     FROM fleet_missions fm 
     JOIN planets p1 ON fm.source_planet_id = p1.id 
-    JOIN planets p2 ON fm.target_planet_id = p2.id 
+    LEFT JOIN planets p2 ON fm.target_planet_id = p2.id 
+    LEFT JOIN oases o ON fm.target_oasis_id = o.id
     WHERE fm.user_id = ? AND fm.status IN ('en_route', 'returning') 
     ORDER BY fm.arrival_time ASC
 ");
@@ -48,6 +51,12 @@ $stmtTargets = $db->prepare("SELECT id, name, coord_x, coord_y FROM planets WHER
 $stmtTargets->execute([$planet['id']]);
 $knownPlanets = $stmtTargets->fetchAll();
 
+// Liste des oasis sauvages et naturelles
+$stmtOases = $db->prepare("SELECT id, name, coord_x, coord_y, oasis_type, bonus_wood, bonus_stone, bonus_rice, owner_planet_id FROM oases ORDER BY id ASC");
+$stmtOases->execute();
+$knownOases = $stmtOases->fetchAll();
+
+$preselectedTargetType = $_GET['target_type'] ?? 'planet';
 $preselectedTarget = isset($_GET['target_id']) ? (int)$_GET['target_id'] : 0;
 $preselectedMission = $_GET['mission'] ?? 'raid';
 ?>
@@ -124,15 +133,30 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                     <?php endif; ?>
 
                     <!-- Étape 2 : Destination -->
-                    <h3 style="font-size:0.95rem; color:#fff; margin-bottom:0.75rem;">🗾 3. Destination & Fief Provincial</h3>
+                    <h3 style="font-size:0.95rem; color:#fff; margin-bottom:0.75rem;">🗾 3. Destination (Fief Provincial ou Oasis Naturelle)</h3>
                     <div style="margin-bottom:1.5rem;">
                         <select id="targetSelect" style="width:100%; background:rgba(15,23,42,0.9); border:1px solid var(--border-color); color:#fff; padding:0.6rem; border-radius:6px; margin-bottom:0.75rem;">
-                            <option value="">-- Sélectionner un fief ou domaine connu --</option>
-                            <?php foreach ($knownPlanets as $kp): ?>
-                                <option value="<?= $kp['id'] ?>" <?= ($preselectedTarget === (int)$kp['id']) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($kp['name']) ?> [<?= $kp['coord_x'] ?> : <?= $kp['coord_y'] ?>]
-                                </option>
-                            <?php endforeach; ?>
+                            <option value="">-- Sélectionner une destination féodale ou oasis --</option>
+                            <optgroup label="🏯 Fiefs & Domaines Provinciaux">
+                                <?php foreach ($knownPlanets as $kp): ?>
+                                    <option value="planet:<?= $kp['id'] ?>" <?= ($preselectedTargetType === 'planet' && $preselectedTarget === (int)$kp['id']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($kp['name']) ?> [<?= $kp['coord_x'] ?> : <?= $kp['coord_y'] ?>]
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                            <optgroup label="🌿 Oasis Naturelles & Fiefs Sauvages (Bonus de Récoltes)">
+                                <?php foreach ($knownOases as $ko): 
+                                    $bText = '';
+                                    if ($ko['bonus_rice'] > 0) $bText .= "+{$ko['bonus_rice']}% Riz ";
+                                    if ($ko['bonus_wood'] > 0) $bText .= "+{$ko['bonus_wood']}% Bois ";
+                                    if ($ko['bonus_stone'] > 0) $bText .= "+{$ko['bonus_stone']}% Pierre ";
+                                    $statusOasis = !empty($ko['owner_planet_id']) ? ' [Occupée]' : ' [Sauvage]';
+                                ?>
+                                    <option value="oasis:<?= $ko['id'] ?>" <?= ($preselectedTargetType === 'oasis' && $preselectedTarget === (int)$ko['id']) ? 'selected' : '' ?>>
+                                        🌿 <?= htmlspecialchars($ko['name']) ?> [<?= $ko['coord_x'] ?> : <?= $ko['coord_y'] ?>] (<?= trim($bText) ?>)<?= $statusOasis ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
                         </select>
                     </div>
 
@@ -146,6 +170,10 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                         <label style="display:flex; align-items:center; gap:0.4rem; background:rgba(0,0,0,0.3); padding:0.5rem; border-radius:6px; cursor:pointer;">
                             <input type="radio" name="mission_type" value="attack" <?= ($preselectedMission === 'attack') ? 'checked' : '' ?>>
                             <span>💥 Assaut de Siège</span>
+                        </label>
+                        <label style="display:flex; align-items:center; gap:0.4rem; background:rgba(0,0,0,0.3); padding:0.5rem; border-radius:6px; cursor:pointer;">
+                            <input type="radio" name="mission_type" value="occupy" <?= ($preselectedMission === 'occupy') ? 'checked' : '' ?>>
+                            <span>🚩 Occuper / Garnison</span>
                         </label>
                         <label style="display:flex; align-items:center; gap:0.4rem; background:rgba(0,0,0,0.3); padding:0.5rem; border-radius:6px; cursor:pointer;">
                             <input type="radio" name="mission_type" value="spy" <?= ($preselectedMission === 'spy') ? 'checked' : '' ?>>
@@ -197,6 +225,7 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                             $missionLabel = match($m['mission_type']) {
                                 'raid' => '⚔️ RAID',
                                 'attack' => '💥 SIÈGE',
+                                'occupy' => '🚩 OCCUPATION',
                                 'spy' => '🥷 SHINOBI',
                                 'transport' => '🐂 CONVOI',
                                 'colonize' => '🏯 EXPANSION',
@@ -226,9 +255,9 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
 
 <script>
 async function submitFleet() {
-    const targetId = document.getElementById('targetSelect').value;
-    if (!targetId) {
-        showModalAlert('Veuillez sélectionner un fief ou domaine de destination.', 'warning');
+    const rawTarget = document.getElementById('targetSelect').value;
+    if (!rawTarget) {
+        showModalAlert('Veuillez sélectionner un fief ou une oasis de destination.', 'warning');
         return;
     }
 
@@ -236,7 +265,16 @@ async function submitFleet() {
     const missionType = missionTypeEl ? missionTypeEl.value : 'raid';
 
     const formData = new FormData();
-    formData.append('target_planet_id', targetId);
+    const parts = rawTarget.split(':');
+    if (parts.length === 2) {
+        if (parts[0] === 'oasis') {
+            formData.append('target_oasis_id', parts[1]);
+        } else {
+            formData.append('target_planet_id', parts[1]);
+        }
+    } else {
+        formData.append('target_planet_id', rawTarget);
+    }
     formData.append('mission_type', missionType);
 
     // Vaisseaux et Troupes

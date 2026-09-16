@@ -5,14 +5,19 @@
 require_once __DIR__ . '/../core/BuildingEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
 require_once __DIR__ . '/../core/VillageFieldGenerator.php';
+require_once __DIR__ . '/../core/OasisEngine.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $buildingEngine = new BuildingEngine();
 $planetEngine = new PlanetEngine();
+$oasisEngine = new OasisEngine();
 
 $fields = $planetEngine->getFields((int)$planet['id']);
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
 $hqLevel = $buildings['hq'] ?? 1;
+
+$annexedOases = $oasisEngine->getAnnexedOasesForPlanet((int)$planet['id']);
+$oasisBonuses = $oasisEngine->getTotalOasisBonusesForPlanet((int)$planet['id']);
 
 $queue = $buildingEngine->getQueue((int)$planet['id']);
 
@@ -291,15 +296,30 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
             </div>
             <div class="card-body" style="font-size:0.9rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
-                    <span>🪵 Bois de Cèdre :</span>
+                    <span>
+                        🪵 Bois de Cèdre :
+                        <?php if (!empty($oasisBonuses['wood'])): ?>
+                            <small style="color:#4ade80; font-size:0.75rem;">(+<?= $oasisBonuses['wood'] ?>% Oasis)</small>
+                        <?php endif; ?>
+                    </span>
                     <strong style="color:var(--res-metal);">+<?= number_format($planet['prod_rates']['metal']) ?> / h</strong>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
-                    <span>🪨 Pierre de Taille :</span>
+                    <span>
+                        🪨 Pierre de Taille :
+                        <?php if (!empty($oasisBonuses['stone'])): ?>
+                            <small style="color:#60a5fa; font-size:0.75rem;">(+<?= $oasisBonuses['stone'] ?>% Oasis)</small>
+                        <?php endif; ?>
+                    </span>
                     <strong style="color:var(--res-crystal);">+<?= number_format($planet['prod_rates']['crystal']) ?> / h</strong>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
-                    <span>🌾 Riz Impérial :</span>
+                    <span>
+                        🌾 Riz Impérial :
+                        <?php if (!empty($oasisBonuses['rice'])): ?>
+                            <small style="color:#fde047; font-size:0.75rem;">(+<?= $oasisBonuses['rice'] ?>% Oasis)</small>
+                        <?php endif; ?>
+                    </span>
                     <strong style="color:var(--res-deut);">+<?= number_format($planet['prod_rates']['deuterium']) ?> / h</strong>
                 </div>
                 <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:0.75rem 0;">
@@ -311,6 +331,25 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                     <p style="color:#ef4444; font-size:0.75rem; margin-top:0.4rem; font-weight:700;">
                         ⚠️ Sérénité insuffisante : Les récoltes du domaine ne fonctionnent qu'à 10%.
                     </p>
+                <?php endif; ?>
+
+                <?php if (!empty($annexedOases)): ?>
+                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:0.75rem 0;">
+                    <div style="font-size:0.8rem; color:#86efac; font-weight:700; margin-bottom:0.4rem; display:flex; justify-content:space-between; align-items:center;">
+                        <span>🌿 Oasis Annexées (<?= count($annexedOases) ?> / 3)</span>
+                        <a href="?page=map" style="color:var(--accent-color); text-decoration:none; font-size:0.75rem;">Carte Provinciale &rarr;</a>
+                    </div>
+                    <?php foreach ($annexedOases as $ao): 
+                        $bLabel = '';
+                        if ($ao['bonus_rice'] > 0) $bLabel .= "+{$ao['bonus_rice']}% 🌾 ";
+                        if ($ao['bonus_wood'] > 0) $bLabel .= "+{$ao['bonus_wood']}% 🪵 ";
+                        if ($ao['bonus_stone'] > 0) $bLabel .= "+{$ao['bonus_stone']}% 🪨 ";
+                    ?>
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border:1px solid rgba(34,197,94,0.2); padding:0.4rem 0.6rem; border-radius:6px; margin-bottom:0.4rem; font-size:0.8rem;">
+                            <span>🌿 <?= htmlspecialchars($ao['name']) ?> [<?= $ao['coord_x'] ?> : <?= $ao['coord_y'] ?>]</span>
+                            <strong style="color:#fde047;"><?= trim($bLabel) ?></strong>
+                        </div>
+                    <?php endforeach; ?>
                 <?php endif; ?>
             </div>
         </div>

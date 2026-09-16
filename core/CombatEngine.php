@@ -299,5 +299,250 @@ class CombatEngine {
             'report_id' => $this->db->lastInsertId()
         ];
     }
+
+    /**
+     * Résout un affrontement tactique contre la faune sauvage ou la garnison d'une oasis naturelle
+     */
+    public function resolveOasisBattle(array $mission, array $oasis, array $attackerUser): array {
+        $oasisId = (int)$oasis['id'];
+        $sourcePlanetId = (int)$mission['source_planet_id'];
+        $attackerFleet = json_decode($mission['fleet_data'], true) ?: [];
+
+        // 1. Récupérer les unités défendant l'oasis
+        $defenderUnits = [];
+        $stmtDef = $this->db->prepare("SELECT unit_code as code, count FROM oasis_units WHERE oasis_id = ? AND count > 0");
+        $stmtDef->execute([$oasisId]);
+        foreach ($stmtDef->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $defenderUnits[$r['code']] = (int)$r['count'];
+        }
+
+        // 2. Charger les stats de toutes les unités et engins
+        $unitDb = [];
+        $stmtShips = $this->db->query("SELECT * FROM ships");
+        while ($row = $stmtShips->fetch()) {
+            $unitDb[$row['code']] = $row;
+        }
+        $stmtUnits = $this->db->query("SELECT * FROM units");
+        while ($row = $stmtUnits->fetch()) {
+            $unitDb[$row['code']] = [
+                'code' => $row['code'],
+                'name' => $row['name'],
+                'attack' => (int)$row['attack'],
+                'shield' => 0,
+                'defense' => (int)$row['def_infantry'] + (int)$row['def_mech'],
+                'speed' => (int)$row['speed'],
+                'cargo_capacity' => (int)$row['cargo_capacity'],
+                'is_unit' => true
+            ];
+        }
+
+        // 3. Calcul des puissances initiales et de la capacité de transport
+        $attPower = 0; $attShield = 0; $attHull = 0; $cargoTotal = 0;
+        foreach ($attackerFleet as $code => $count) {
+            if ($count <= 0 || !isset($unitDb[$code])) continue;
+            $u = $unitDb[$code];
+            $attPower += $u['attack'] * $count;
+            $attShield += ($u['shield'] ?? 0) * $count;
+            $attHull += $u['defense'] * $count;
+            $cargoTotal += $u['cargo_capacity'] * $count;
+        }
+
+        $defPower = 0; $defShield = 0; $defHull = 0;
+        foreach ($defenderUnits as $code => $count) {
+            if ($count <= 0 || !isset($unitDb[$code])) continue;
+            $u = $unitDb[$code];
+            $defPower += $u['attack'] * $count;
+            $defShield += ($u['shield'] ?? 0) * $count;
+            $defHull += $u['defense'] * $count;
+        }
+
+        // 4. Simulation en 3 rounds
+        $roundLogs = [];
+        $currentAttFleet = $attackerFleet;
+        $currentDefFleet = $defenderUnits;
+
+        for ($r = 1; $r <= 3; $r++) {
+            if ($attPower <= 0 || $defPower <= 0) break;
+
+            $damageToDef = max(1, $attPower - ($defShield * 0.5));
+            $damageToAtt = max(1, $defPower - ($attShield * 0.5));
+
+            $defLossRatio = min(1.0, $damageToDef / max(1, $defHull));
+            $attLossRatio = min(1.0, $damageToAtt / max(1, $attHull));
+
+            foreach ($currentDefFleet as $code => $cnt) {
+                $lost = (int)ceil($cnt * $defLossRatio * 0.5);
+                $currentDefFleet[$code] = max(0, $cnt - $lost);
+            }
+            foreach ($currentAttFleet as $code => $cnt) {
+                $lost = (int)ceil($cnt * $attLossRatio * 0.5);
+                $currentAttFleet[$code] = max(0, $cnt - $lost);
+            }
+
+            // Recalcul des puissances
+            $attPower = 0; $attShield = 0; $attHull = 0;
+            foreach ($currentAttFleet as $code => $cnt) {
+                if ($cnt <= 0 || !isset($unitDb[$code])) continue;
+                $u = $unitDb[$code];
+                $attPower += $u['attack'] * $cnt;
+                $attShield += ($u['shield'] ?? 0) * $cnt;
+                $attHull += $u['defense'] * $cnt;
+            }
+
+            $defPower = 0; $defShield = 0; $defHull = 0;
+            foreach ($currentDefFleet as $code => $cnt) {
+                if ($cnt <= 0 || !isset($unitDb[$code])) continue;
+                $u = $unitDb[$code];
+                $defPower += $u['attack'] * $cnt;
+                $defShield += ($u['shield'] ?? 0) * $cnt;
+                $defHull += $u['defense'] * $cnt;
+            }
+
+            $roundLogs[] = [
+                'round' => $r,
+                'att_remaining' => array_sum($currentAttFleet),
+                'def_remaining' => array_sum($currentDefFleet)
+            ];
+        }
+
+        $totalAttRemaining = array_sum($currentAttFleet);
+        $totalDefRemaining = array_sum($currentDefFleet);
+
+        if ($totalAttRemaining > 0 && $totalDefRemaining === 0) {
+            $winner = 'attacker';
+        } elseif ($totalAttRemaining === 0 && $totalDefRemaining > 0) {
+            $winner = 'defender';
+        } else {
+            $winner = ($totalAttRemaining >= $totalDefRemaining) ? 'attacker' : 'defender';
+        }
+
+        // Pertes
+        $attLost = [];
+        foreach ($attackerFleet as $code => $initialCount) {
+            $rem = $currentAttFleet[$code] ?? 0;
+            $lost = $initialCount - $rem;
+            if ($lost > 0) $attLost[$code] = $lost;
+        }
+
+        $defLost = [];
+        foreach ($defenderUnits as $code => $initialCount) {
+            $rem = $currentDefFleet[$code] ?? 0;
+            $lost = $initialCount - $rem;
+            if ($lost > 0) $defLost[$code] = $lost;
+        }
+
+        // Mettre à jour les survivants de la garnison de l'oasis
+        foreach ($currentDefFleet as $code => $rem) {
+            if ($rem > 0) {
+                $this->db->prepare("UPDATE oasis_units SET count = ? WHERE oasis_id = ? AND unit_code = ?")
+                    ->execute([$rem, $oasisId, $code]);
+            } else {
+                $this->db->prepare("DELETE FROM oasis_units WHERE oasis_id = ? AND unit_code = ?")
+                    ->execute([$oasisId, $code]);
+            }
+        }
+
+        // Pillage des ressources
+        require_once __DIR__ . '/OasisEngine.php';
+        $oasisEngine = new OasisEngine();
+        $looted = ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+
+        if ($winner === 'attacker' && $totalAttRemaining > 0 && $cargoTotal > 0) {
+            $oasisLoot = $oasisEngine->lootOasis($oasisId, $cargoTotal);
+            $looted = [
+                'metal' => $oasisLoot['wood'],
+                'crystal' => $oasisLoot['stone'],
+                'deuterium' => $oasisLoot['rice'],
+            ];
+        }
+
+        $isPacified = $oasisEngine->isOasisPacified($oasisId);
+
+        // Occupation / Annexion si mission 'occupy' victorieuse sur une oasis pacifiée
+        $annexed = false;
+        $stationed = false;
+        if ($mission['mission_type'] === 'occupy' && $winner === 'attacker' && $isPacified) {
+            $annexRes = $oasisEngine->annexOasis($oasisId, $sourcePlanetId);
+            if ($annexRes['success']) {
+                $annexed = true;
+                foreach ($currentAttFleet as $code => $survCount) {
+                    if ($survCount <= 0) continue;
+                    $stmtFind = $this->db->prepare("SELECT id FROM oasis_units WHERE oasis_id = ? AND unit_code = ? AND is_wild = 0");
+                    $stmtFind->execute([$oasisId, $code]);
+                    $existingGarrison = $stmtFind->fetch();
+                    if ($existingGarrison) {
+                        $this->db->prepare("UPDATE oasis_units SET count = count + ? WHERE id = ?")->execute([$survCount, $existingGarrison['id']]);
+                    } else {
+                        $this->db->prepare("INSERT INTO oasis_units (oasis_id, unit_code, count, is_wild) VALUES (?, ?, ?, 0)")
+                            ->execute([$oasisId, $code, $survCount]);
+                    }
+                }
+                $stationed = true;
+            }
+        }
+
+        // Rapport de combat
+        $defenderName = !empty($oasis['owner_planet_id']) 
+            ? ("Garnison du Fief " . ($oasis['owner_username'] ?? 'Adverse'))
+            : "Faune Sauvage de l'Oasis";
+
+        $reportData = [
+            'attacker_name' => $attackerUser['username'],
+            'defender_name' => $defenderName,
+            'attacker_faction' => $attackerUser['faction'],
+            'defender_faction' => $oasis['owner_faction'] ?? 'sauvage',
+            'target_coords' => "({$oasis['coord_x']}, {$oasis['coord_y']})",
+            'is_oasis' => true,
+            'oasis_name' => $oasis['name'],
+            'attacker_fleet_initial' => $attackerFleet,
+            'defender_fleet_initial' => $defenderUnits,
+            'attacker_survivors' => $stationed ? [] : $currentAttFleet,
+            'defender_survivors' => $currentDefFleet,
+            'attacker_lost' => $attLost,
+            'defender_lost' => $defLost,
+            'looted' => $looted,
+            'rounds' => $roundLogs,
+            'winner' => $winner,
+            'is_pacified' => $isPacified,
+            'is_annexed' => $annexed,
+            'is_stationed' => $stationed
+        ];
+
+        $title = "Expédition à l'Oasis {$oasis['name']} ({$oasis['coord_x']}, {$oasis['coord_y']}) : " . 
+                 ($winner === 'attacker' ? "Victoire de {$attackerUser['username']}" : "Riposte de {$defenderName}");
+
+        $defenderUserId = 0;
+        if (!empty($oasis['owner_planet_id'])) {
+            $stmtOwner = $this->db->prepare("SELECT user_id FROM planets WHERE id = ?");
+            $stmtOwner->execute([$oasis['owner_planet_id']]);
+            $defenderUserId = (int)$stmtOwner->fetchColumn() ?: 0;
+        }
+
+        $stmtReport = $this->db->prepare("
+            INSERT INTO combat_reports 
+            (attacker_id, defender_id, attacker_planet_id, defender_planet_id, mission_type, title, report_data, winner, created_at) 
+            VALUES (?, ?, ?, 0, ?, ?, ?, ?, UNIX_TIMESTAMP())
+        ");
+        $stmtReport->execute([
+            $attackerUser['id'],
+            $defenderUserId,
+            $mission['source_planet_id'],
+            $mission['mission_type'],
+            $title,
+            json_encode($reportData, JSON_UNESCAPED_UNICODE),
+            $winner
+        ]);
+
+        return [
+            'winner' => $winner,
+            'survivors' => $stationed ? [] : $currentAttFleet,
+            'looted' => $looted,
+            'stationed' => $stationed,
+            'annexed' => $annexed,
+            'is_pacified' => $isPacified,
+            'report_id' => $this->db->lastInsertId()
+        ];
+    }
 }
+
 

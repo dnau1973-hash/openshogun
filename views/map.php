@@ -161,6 +161,105 @@ window.selectPlanetTile = function(data) {
         return;
     }
 
+    // Gestion exclusive des Oasis Naturelles (Style Travian)
+    if (data.is_oasis) {
+        const isOccupied = (data.is_occupied == 1);
+        const isOwn = (data.owner_planet_id && parseInt(data.owner_planet_id, 10) === <?= (int)$planet['id'] ?>);
+        const units = data.units || [];
+        const hasWildBeasts = units.some(u => u.is_wild == 1 && parseInt(u.count, 10) > 0);
+
+        let statusBadge = '';
+        if (isOwn) {
+            statusBadge = '<span class="badge" style="background:#16a34a; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🌿 VOTRE FIEF NATUREL ANNEXÉ</span>';
+        } else if (isOccupied) {
+            statusBadge = `<span class="badge" style="background:#3b82f6; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🛡️ OASIS OCCUPÉE PAR ${data.username || 'UN DAIMYŌ'}</span>`;
+        } else if (hasWildBeasts) {
+            statusBadge = '<span class="badge" style="background:#dc2626; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🐗 OASIS SAUVAGE INOCCUPÉE &bull; FAUNE HOSTILE</span>';
+        } else {
+            statusBadge = '<span class="badge" style="background:#10b981; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">✨ OASIS PACIFIÉE &bull; LIBRE D\'OCCUPATION</span>';
+        }
+
+        let bonusBadgesHtml = '';
+        if (data.bonus_rice > 0) bonusBadgesHtml += `<span style="background:rgba(234,179,8,0.2); border:1px solid #eab308; color:#fef08a; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🌾 +${data.bonus_rice}% Riz</span> `;
+        if (data.bonus_wood > 0) bonusBadgesHtml += `<span style="background:rgba(34,197,94,0.2); border:1px solid #22c55e; color:#bbf7d0; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🪵 +${data.bonus_wood}% Bois</span> `;
+        if (data.bonus_stone > 0) bonusBadgesHtml += `<span style="background:rgba(59,130,246,0.2); border:1px solid #3b82f6; color:#bfdbfe; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🪨 +${data.bonus_stone}% Pierre</span> `;
+
+        let unitsHtml = '';
+        if (units.length > 0) {
+            unitsHtml = '<div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.4rem;">';
+            units.forEach(u => {
+                const uCount = parseInt(u.count, 10);
+                if (uCount <= 0) return;
+                unitsHtml += `
+                    <div style="display:flex; align-items:center; gap:0.4rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:0.3rem 0.6rem; border-radius:6px; font-size:0.82rem;">
+                        <span style="font-size:1rem;">${u.icon || (u.is_wild == 1 ? '🐗' : '⚔️')}</span>
+                        <span style="color:#f1f5f9;">${u.unit_name || u.name}</span>
+                        <strong style="color:#f59e0b; margin-left:0.2rem;">x${uCount}</strong>
+                    </div>
+                `;
+            });
+            unitsHtml += '</div>';
+        } else {
+            unitsHtml = '<p style="color:#4ade80; font-size:0.85rem; margin:0.3rem 0;">🕊️ Aucun animal sauvage ni soldat en garnison. L\'oasis est entièrement pacifiée !</p>';
+        }
+
+        title.innerHTML = `🌿 <span style="color:#22c55e;">${data.oasis_name}</span> &bull; <span style="font-size:0.9rem; color:#86efac;">${data.bonus_label || ''}</span>`;
+        body.innerHTML = `
+            <div style="background:linear-gradient(135deg, rgba(22,101,52,0.25) 0%, rgba(15,23,42,0.6) 100%); border:1px solid rgba(34,197,94,0.4); padding:1.1rem; border-radius:8px; margin-bottom:1.1rem; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                    ${statusBadge}
+                    <div style="display:flex; gap:0.3rem;">${bonusBadgesHtml}</div>
+                </div>
+                <p style="color:#dcfce7; font-size:0.9rem; margin:0.4rem 0 0.75rem 0; line-height:1.45;">
+                    Cette oasis naturelle regorge de terres fertiles et de bois précieux. 
+                    <strong>Pillez les récoltes</strong> en terrassant la faune, ou <strong>occupez le territoire</strong> avec vos soldats pour conférer des bonus permanents de récolte à votre fief principal.
+                </p>
+                <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.6rem 0.8rem; margin-bottom:0.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; font-size:0.85rem;">
+                    <span style="color:#94a3b8;">Récoltes accumulées à piller :</span>
+                    <div style="display:flex; gap:1rem;">
+                        <span style="color:#fbbf24;">🪵 <strong>${(data.res_wood || 0).toLocaleString()}</strong> Bois</span>
+                        <span style="color:#60a5fa;">🪨 <strong>${(data.res_stone || 0).toLocaleString()}</strong> Pierre</span>
+                        <span style="color:#34d399;">🌾 <strong>${(data.res_rice || 0).toLocaleString()}</strong> Riz</span>
+                    </div>
+                </div>
+                <div style="margin-top:0.5rem;">
+                    <span style="font-size:0.8rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Faune Sauvage & Garnison Défensive :</span>
+                    ${unitsHtml}
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=raid" class="btn btn-warning" style="font-weight:700; background:#d97706; border-color:#f59e0b;">
+                        ⚔️ Piller l'Oasis
+                    </a>
+                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=attack" class="btn btn-danger" style="font-weight:700;">
+                        💥 Assaillir / Nettoyer
+                    </a>
+                </div>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    ${isOwn ? `
+                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-primary" style="background:#2563eb;">
+                            🛡️ Renforcer la Garnison
+                        </a>
+                        <button onclick="abandonOasisDirect(${data.oasis_id})" class="btn btn-secondary" style="color:#ef4444; border-color:rgba(239,68,68,0.4);">
+                            🏳️ Abandonner
+                        </button>
+                    ` : `
+                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-success" style="background:#16a34a; border-color:#22c55e; font-weight:700;">
+                            🚩 Déployer & Occuper
+                        </a>
+                        ${!hasWildBeasts ? `
+                            <button onclick="annexOasisDirect(${data.oasis_id})" class="btn btn-primary" style="background:#059669; border-color:#10b981; font-weight:700;">
+                                ✨ Annexion Directe
+                            </button>
+                        ` : ''}
+                    `}
+                </div>
+            </div>
+        `;
+        return;
+    }
+
     if (!data.user_id) {
         title.innerText = `Terres Neutres : ${data.planet_name}`;
         body.innerHTML = `
@@ -213,6 +312,47 @@ window.selectPlanetTile = function(data) {
                 </div>
             </div>
         `;
+    }
+};
+
+window.annexOasisDirect = async function(oasisId) {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'annex');
+        formData.append('oasis_id', oasisId);
+        const res = await fetch('/api/oasis.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert(data.message, 'success', 'Annexion Féodale Réussie');
+            if (galaxyMap) galaxyMap.fetchMapData();
+            document.getElementById('planetDetailsCard').style.display = 'none';
+        } else {
+            showModalAlert(data.message || data.error || 'Erreur lors de l\'annexion.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication avec le conseil féodal.', 'error');
+    }
+};
+
+window.abandonOasisDirect = async function(oasisId) {
+    if (!confirm('Êtes-vous certain de vouloir abandonner cette oasis ? Vous perdrez les bonus de récolte associés.')) {
+        return;
+    }
+    try {
+        const formData = new FormData();
+        formData.append('action', 'abandon');
+        formData.append('oasis_id', oasisId);
+        const res = await fetch('/api/oasis.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert(data.message, 'info', 'Oasis Abandonnée');
+            if (galaxyMap) galaxyMap.fetchMapData();
+            document.getElementById('planetDetailsCard').style.display = 'none';
+        } else {
+            showModalAlert(data.message || data.error || 'Erreur lors de l\'abandon.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication avec le conseil féodal.', 'error');
     }
 };
 </script>

@@ -48,9 +48,9 @@ class PlanetEngine {
         $crystalMax = (int)(15000 * pow(1.5, $storageLvl));
         $deutMax = (int)(15000 * pow(1.5, $tankLvl));
 
-        // 5. Calcul de l'énergie et des productions horaires
+        // 5. Calcul de l'énergie et des productions horaires (avec bonus d'oasis annexées)
         $fields = $this->getFields($planetId);
-        $prodRates = $this->calculateProduction($fields);
+        $prodRates = $this->calculateProduction($fields, $planetId);
 
         $now = time();
         $lastUpdate = $planet['last_resource_update'] ?: $now;
@@ -223,9 +223,9 @@ class PlanetEngine {
     }
 
     /**
-     * Calcule la production horaire selon les niveaux de mines et l'énergie
+     * Calcule la production horaire selon les niveaux de mines, l'énergie et les oasis annexées
      */
-    public function calculateProduction(array $fields): array {
+    public function calculateProduction(array $fields, ?int $planetId = null): array {
         $speed = (float)GameConfig::get('resource_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5);
         $metalBase = 20 * $speed;
         $crystalBase = 15 * $speed;
@@ -269,13 +269,30 @@ class PlanetEngine {
             $energyRatio = 0.10; // Règle stricte : 10% de production en cas de déficit énergétique
         }
 
+        // Bonus d'Oasis annexées (Style Travian : +25% ou +50% sur Bois, Pierre, Riz)
+        $oasisBonusMult = ['wood' => 1.0, 'stone' => 1.0, 'rice' => 1.0];
+        $oasisBonuses = ['wood' => 0, 'stone' => 0, 'rice' => 0];
+        if ($planetId !== null && $planetId > 0) {
+            try {
+                require_once __DIR__ . '/OasisEngine.php';
+                $oasisEngine = new OasisEngine();
+                $oasisBonuses = $oasisEngine->getTotalOasisBonusesForPlanet($planetId);
+                $oasisBonusMult['wood'] += ($oasisBonuses['wood'] / 100.0);
+                $oasisBonusMult['stone'] += ($oasisBonuses['stone'] / 100.0);
+                $oasisBonusMult['rice'] += ($oasisBonuses['rice'] / 100.0);
+            } catch (Exception $e) {
+                // Fallback silencieux
+            }
+        }
+
         return [
-            'metal' => (int)(($metalBase + ($metalMineProd * $speed)) * $energyRatio),
-            'crystal' => (int)(($crystalBase + ($crystalMineProd * $speed)) * $energyRatio),
-            'deuterium' => (int)(($deutBase + ($deutSynthProd * $speed)) * $energyRatio),
+            'metal' => (int)(($metalBase + ($metalMineProd * $speed)) * $energyRatio * $oasisBonusMult['wood']),
+            'crystal' => (int)(($crystalBase + ($crystalMineProd * $speed)) * $energyRatio * $oasisBonusMult['stone']),
+            'deuterium' => (int)(($deutBase + ($deutSynthProd * $speed)) * $energyRatio * $oasisBonusMult['rice']),
             'energy_max' => $energyMax,
             'energy_used' => $energyUsed,
-            'energy_ratio' => $energyRatio
+            'energy_ratio' => $energyRatio,
+            'oasis_bonuses' => $oasisBonuses
         ];
     }
 

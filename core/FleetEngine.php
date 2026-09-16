@@ -51,6 +51,15 @@ class FleetEngine {
         foreach ($returningMissions as $m) {
             $this->resolveReturn($m);
         }
+
+        // 3. Régénérer périodiquement les ressources des oasis sauvages
+        try {
+            require_once __DIR__ . '/OasisEngine.php';
+            $oasisEngine = new OasisEngine();
+            $oasisEngine->regenerateOases();
+        } catch (Exception $e) {
+            // Ignorer silencieusement
+        }
     }
 
     /**
@@ -58,8 +67,49 @@ class FleetEngine {
      */
     private function resolveArrival(array $mission): void {
         $sourcePlanetId = (int)$mission['source_planet_id'];
-        $targetPlanetId = (int)$mission['target_planet_id'];
+        $targetPlanetId = !empty($mission['target_planet_id']) ? (int)$mission['target_planet_id'] : null;
+        $targetOasisId = !empty($mission['target_oasis_id']) ? (int)$mission['target_oasis_id'] : null;
         $missionId = (int)$mission['id'];
+
+        // Cas d'une expédition vers une oasis naturelle ou sauvage
+        if ($targetOasisId) {
+            require_once __DIR__ . '/OasisEngine.php';
+            $oasisEngine = new OasisEngine();
+            $targetOasis = $oasisEngine->getOasisById($targetOasisId);
+            if (!$targetOasis) {
+                $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
+                return;
+            }
+
+            $stmtAttacker = $this->db->prepare("SELECT * FROM users WHERE id = ?");
+            $stmtAttacker->execute([$mission['user_id']]);
+            $attackerUser = $stmtAttacker->fetch();
+
+            $combatResult = $this->combatEngine->resolveOasisBattle($mission, $targetOasis, $attackerUser);
+            $survivors = $combatResult['survivors'];
+            $looted = $combatResult['looted'];
+            $isStationed = !empty($combatResult['stationed']);
+
+            if ($isStationed) {
+                // Guerriers stationnés dans l'oasis pacifiée pour son annexion
+                $this->db->prepare("UPDATE fleet_missions SET status = 'completed' WHERE id = ?")->execute([$missionId]);
+            } elseif (array_sum($survivors) > 0) {
+                // Les survivants retournent à la base avec le butin pillé
+                $this->db->prepare("
+                    UPDATE fleet_missions 
+                    SET status = 'returning', fleet_data = ?, cargo_data = ? 
+                    WHERE id = ?
+                ")->execute([
+                    json_encode($survivors),
+                    json_encode($looted),
+                    $missionId
+                ]);
+            } else {
+                // Garnison de raid entièrement anéantie par les bêtes sauvages
+                $this->db->prepare("UPDATE fleet_missions SET status = 'completed' WHERE id = ?")->execute([$missionId]);
+            }
+            return;
+        }
 
         $stmtTarget = $this->db->prepare("SELECT * FROM planets WHERE id = ?");
         $stmtTarget->execute([$targetPlanetId]);
@@ -290,9 +340,9 @@ class FleetEngine {
     }
 
     /**
-     * Envoie une mission spatiale
+     * Envoie une mission spatiale ou expédition féodale
      */
-    public function dispatchMission(int $userId, int $sourcePlanetId, int $targetPlanetId, string $missionType, array $fleet, array $cargo): array {
+    public function dispatchMission(int $userId, int $sourcePlanetId, ?int $targetPlanetId, string $missionType, array $fleet, array $cargo, ?int $targetOasisId = null): array {
         $this->planetEngine->updatePlanet($sourcePlanetId);
 
         // 1. Vérifier la possession de la planète source
@@ -301,14 +351,32 @@ class FleetEngine {
         $sourcePlanet = $stmtSource->fetch();
         if (!$sourcePlanet) throw new Exception("Fief source invalide.");
 
-        // 2. Vérifier la planète cible
-        $stmtTarget = $this->db->prepare("SELECT * FROM planets WHERE id = ?");
-        $stmtTarget->execute([$targetPlanetId]);
-        $targetPlanet = $stmtTarget->fetch();
-        if (!$targetPlanet) throw new Exception("Coordonnées de destination introuvables.");
+        // 2. Vérifier la destination (fief ou oasis)
+        $targetPlanet = null;
+        $targetOasis = null;
 
-        if ($sourcePlanetId === $targetPlanetId) {
-            throw new Exception("Vous ne pouvez pas envoyer une expédition sur votre propre fief.");
+        if ($targetOasisId) {
+            require_once __DIR__ . '/OasisEngine.php';
+            $oasisEngine = new OasisEngine();
+            $targetOasis = $oasisEngine->getOasisById($targetOasisId);
+            if (!$targetOasis) throw new Exception("Oasis de destination introuvable.");
+
+            $destX = (int)$targetOasis['coord_x'];
+            $destY = (int)$targetOasis['coord_y'];
+            $destName = "l'Oasis " . $targetOasis['name'];
+        } else {
+            if (!$targetPlanetId) throw new Exception("Veuillez spécifier un fief ou une oasis de destination.");
+            $stmtTarget = $this->db->prepare("SELECT * FROM planets WHERE id = ?");
+            $stmtTarget->execute([$targetPlanetId]);
+            $targetPlanet = $stmtTarget->fetch();
+            if (!$targetPlanet) throw new Exception("Coordonnées de destination introuvables.");
+
+            if ($sourcePlanetId === $targetPlanetId) {
+                throw new Exception("Vous ne pouvez pas envoyer une expédition sur votre propre fief.");
+            }
+            $destX = (int)$targetPlanet['coord_x'];
+            $destY = (int)$targetPlanet['coord_y'];
+            $destName = $targetPlanet['name'];
         }
 
         // 3. Vérifier les vaisseaux et soldats disponibles
@@ -339,7 +407,7 @@ class FleetEngine {
         }
 
         // 4. Calcul de distance et durée
-        $distance = self::calculateDistance($sourcePlanet['coord_x'], $sourcePlanet['coord_y'], $targetPlanet['coord_x'], $targetPlanet['coord_y']);
+        $distance = self::calculateDistance($sourcePlanet['coord_x'], $sourcePlanet['coord_y'], $destX, $destY);
         $duration = $this->calculateFlightDuration($cleanFleet, $distance, $sourcePlanet['faction']);
 
         // 5. Calcul des rations de riz (koku) requises pour la marche
@@ -379,13 +447,14 @@ class FleetEngine {
 
         $stmtInsert = $this->db->prepare("
             INSERT INTO fleet_missions 
-            (user_id, source_planet_id, target_planet_id, mission_type, fleet_data, cargo_data, departure_time, arrival_time, return_time, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'en_route')
+            (user_id, source_planet_id, target_planet_id, target_oasis_id, mission_type, fleet_data, cargo_data, departure_time, arrival_time, return_time, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'en_route')
         ");
         $stmtInsert->execute([
             $userId,
             $sourcePlanetId,
-            $targetPlanetId,
+            $targetPlanetId ?: null,
+            $targetOasisId ?: null,
             $missionType,
             json_encode($cleanFleet),
             json_encode(['metal' => $cargoMetal, 'crystal' => $cargoCrystal, 'deuterium' => $cargoDeut]),
@@ -398,7 +467,7 @@ class FleetEngine {
 
         return [
             'success' => true,
-            'message' => 'Expédition féodale déployée avec succès vers ' . $targetPlanet['name'] . ' !',
+            'message' => 'Expédition féodale déployée avec succès vers ' . $destName . ' !',
             'duration' => $duration,
             'arrival_time' => $arrivalTime
         ];

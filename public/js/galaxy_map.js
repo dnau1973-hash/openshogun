@@ -286,6 +286,7 @@ class GalaxyMapController {
                 if (isCurrent) tileClass += ' current-planet';
                 if (isCenter) tileClass += ' tile-center';
                 if (planet && planet.is_authentic_castle) tileClass += ' authentic-castle-tile';
+                else if (planet && planet.is_oasis) tileClass += (planet.is_occupied ? ' oasis-tile oasis-occupied' : ' oasis-tile oasis-wild');
                 else if (planet && planet.user_id) tileClass += ' village-tile';
                 else tileClass += ` terrain-tile-${terrain.type}`;
 
@@ -300,6 +301,13 @@ class GalaxyMapController {
                         contentHtml = `
                             <span class="tile-authentic-badge">TRÉSOR</span>
                             <span class="tile-owner castle-label">${escapeHtml(planet.castle_name || planet.planet_name)}</span>
+                        `;
+                    } else if (planet.is_oasis) {
+                        const oasisBadge = planet.is_occupied ? '🌿 FIEF' : '🐗 OASIS';
+                        const badgeClass = planet.is_occupied ? 'tile-oasis-badge occupied' : 'tile-oasis-badge wild';
+                        contentHtml = `
+                            <span class="${badgeClass}">${oasisBadge}</span>
+                            <span class="tile-owner oasis-label">${escapeHtml(planet.bonus_label || planet.oasis_name)}</span>
                         `;
                     } else if (planet.user_id) {
                         const ownerName = planet.planet_name || planet.username || 'Fief';

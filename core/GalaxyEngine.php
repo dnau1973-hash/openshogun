@@ -194,6 +194,72 @@ class GalaxyEngine {
             // Fallback silencieux
         }
 
+        // Récupérer les oasis sauvages / occupées dans ce secteur
+        try {
+            require_once __DIR__ . '/OasisEngine.php';
+            $oasisEngine = new OasisEngine();
+            $oases = $oasisEngine->getOasesInSector($minX, $maxX, $minY, $maxY);
+
+            foreach ($oases as $k => $o) {
+                $isOccupied = !empty($o['owner_planet_id']);
+                
+                // Déterminer l'image de terrain de l'oasis selon son type
+                $oasisImg = '/public/assets/map/tile_lake.jpg';
+                if (strpos($o['oasis_type'], 'forest') !== false) {
+                    $oasisImg = '/public/assets/map/tile_forest.jpg';
+                } elseif (strpos($o['oasis_type'], 'mountain') !== false) {
+                    $oasisImg = '/public/assets/map/tile_mountain.jpg';
+                } elseif (strpos($o['oasis_type'], 'hills') !== false) {
+                    $oasisImg = '/public/assets/map/tile_hills.jpg';
+                }
+
+                $bonusLabel = '';
+                if ($o['bonus_rice'] > 0) $bonusLabel .= "+{$o['bonus_rice']}% 🌾 ";
+                if ($o['bonus_wood'] > 0) $bonusLabel .= "+{$o['bonus_wood']}% 🪵 ";
+                if ($o['bonus_stone'] > 0) $bonusLabel .= "+{$o['bonus_stone']}% 🪨 ";
+
+                $oasisData = [
+                    'is_oasis' => 1,
+                    'oasis_id' => (int)$o['id'],
+                    'oasis_type' => $o['oasis_type'],
+                    'oasis_name' => $o['name'],
+                    'bonus_wood' => (int)$o['bonus_wood'],
+                    'bonus_stone' => (int)$o['bonus_stone'],
+                    'bonus_rice' => (int)$o['bonus_rice'],
+                    'bonus_label' => trim($bonusLabel),
+                    'res_wood' => (int)$o['res_wood'],
+                    'res_stone' => (int)$o['res_stone'],
+                    'res_rice' => (int)$o['res_rice'],
+                    'owner_planet_id' => $o['owner_planet_id'],
+                    'owner_planet_name' => $o['owner_planet_name'],
+                    'is_occupied' => $isOccupied ? 1 : 0,
+                    'units' => $o['units'],
+                    'terrain_type' => 'oasis',
+                    'terrain_name' => $o['name'] . ' (' . trim($bonusLabel) . ')',
+                    'terrain_img' => $oasisImg
+                ];
+
+                if (isset($gridMap[$k])) {
+                    $gridMap[$k] = array_merge($gridMap[$k], $oasisData);
+                } else {
+                    $gridMap[$k] = array_merge([
+                        'planet_id' => null,
+                        'planet_name' => $o['name'],
+                        'coord_x' => (int)$o['coord_x'],
+                        'coord_y' => (int)$o['coord_y'],
+                        'planet_type' => 'oasis',
+                        'user_id' => null,
+                        'username' => $isOccupied ? ($o['owner_username'] ?? 'Occupant') : 'Faune Sauvage',
+                        'faction' => $o['owner_faction'] ?? null,
+                        'points' => 0,
+                        'alliance_tag' => 'OASIS',
+                    ], $oasisData);
+                }
+            }
+        } catch (Exception $e) {
+            // Fallback silencieux
+        }
+
         // Générer les terrains naturels pour toutes les cases du secteur
         $terrains = [];
         for ($y = $minY; $y <= $maxY; $y++) {

@@ -21,7 +21,8 @@ if (!$planet) {
 
 $fleetEngine = new FleetEngine();
 
-$targetPlanetId = (int)($_POST['target_planet_id'] ?? 0);
+$targetPlanetId = !empty($_POST['target_planet_id']) ? (int)$_POST['target_planet_id'] : null;
+$targetOasisId = !empty($_POST['target_oasis_id']) ? (int)$_POST['target_oasis_id'] : null;
 $missionType = $_POST['mission_type'] ?? 'raid';
 $fleet = $_POST['fleet'] ?? [];
 $cargo = [
@@ -31,7 +32,15 @@ $cargo = [
 ];
 
 try {
-    $result = $fleetEngine->dispatchMission((int)$user['id'], (int)$planet['id'], $targetPlanetId, $missionType, $fleet, $cargo);
+    $result = $fleetEngine->dispatchMission(
+        (int)$user['id'], 
+        (int)$planet['id'], 
+        $targetPlanetId, 
+        $missionType, 
+        $fleet, 
+        $cargo, 
+        $targetOasisId
+    );
     echo json_encode($result);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
