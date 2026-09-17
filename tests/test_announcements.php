@@ -153,3 +153,4 @@ echo "✓ Annonce de test supprimée proprement du fichier JSON.\n";
 echo "\n============================================\n";
 echo "🎉 TOUS LES TESTS D'ANNONCES SONT VALIDES !\n";
 echo "============================================\n";
+

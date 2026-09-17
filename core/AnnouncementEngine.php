@@ -297,3 +297,4 @@ class AnnouncementEngine {
         file_put_contents(self::$filePath, $json, LOCK_EX);
     }
 }
+

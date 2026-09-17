@@ -1,40 +1,41 @@
 [
-    {
-        "id": "release_v1_3_hero_and_free_slots",
-        "version": "v1.3.0",
-        "title": "L'Éveil du Héros & Terroirs Libres",
-        "badge": "⭐ MISE À JOUR MAJEURE",
-        "icon": "⚔️",
-        "summary": "Déploiement du système de Héros Samouraï, libération totale des parcelles de construction et nouveaux engins militaires.",
-        "date": "2026-09-17",
-        "is_published": true,
-        "published_at": "2026-09-17 11:30:00",
-        "author": "Shogunat Admin",
-        "features": [
-            {
-                "title": "Héros Samouraï & Voie du Bushidō",
-                "icon": "🥋",
-                "category": "Héros",
-                "description": "Votre seigneur de guerre gagne des niveaux en menant vos armées. Répartissez ses points d'attributs (Force, Stratégie, Vigueur, Charisme, Sagesse) pour octroyer de puissants bonus économiques et militaires à vos fiefs."
-            },
-            {
-                "title": "Liberté Stratégique Totale (Parcelles 19 à 34)",
-                "icon": "🏯",
-                "category": "Cité & Bâtiments",
-                "description": "Tous les nouveaux fiefs disposent désormais de leurs 16 emplacements de construction entièrement libres. Bâtissez vos forteresses, casernes et marchés selon votre propre stratégie dès le premier jour."
-            },
-            {
-                "title": "Nouveaux Engins de Siège & Logistique",
-                "icon": "🛡️",
-                "category": "Armée & Siège",
-                "description": "Intégration du Bélier Blindé à Éperon d'Acier, de la Grande Tour de Siège & Baliste, des Chariots de Ravitaillement et Grands Convois de Fief pour soutenir vos offensives lointaines."
-            },
-            {
-                "title": "Parchemins Impériaux & Notifications",
-                "icon": "📜",
-                "category": "Système",
-                "description": "Un système de notification vous présente désormais les évolutions du royaume dès leur promulgation par le Shogunat. Une validation rapide vous assure de ne pas être dérangé par la suite."
-            }
-        ]
-    }
+  {
+    "id": "release_v1_3_hero_and_free_slots",
+    "version": "v1.3.0",
+    "title": "L'Éveil du Héros & Terroirs Libres",
+    "badge": "⭐ MISE À JOUR MAJEURE",
+    "icon": "⚔️",
+    "summary": "Déploiement du système de Héros Samouraï, libération totale des parcelles de construction et nouveaux engins militaires.",
+    "date": "2026-09-17",
+    "is_published": true,
+    "published_at": "2026-09-17 11:30:00",
+    "author": "Shogunat Admin",
+    "features": [
+      {
+        "title": "Héros Samouraï & Voie du Bushidō",
+        "icon": "🥋",
+        "category": "Héros",
+        "description": "Votre seigneur de guerre gagne des niveaux en menant vos armées. Répartissez ses points d'attributs (Force, Stratégie, Vigueur, Charisme, Sagesse) pour octroyer de puissants bonus économiques et militaires à vos fiefs."
+      },
+      {
+        "title": "Liberté Stratégique Totale (Parcelles 19 à 34)",
+        "icon": "🏯",
+        "category": "Cité & Bâtiments",
+        "description": "Tous les nouveaux fiefs disposent désormais de leurs 16 emplacements de construction entièrement libres. Bâtissez vos forteresses, casernes et marchés selon votre propre stratégie dès le premier jour."
+      },
+      {
+        "title": "Nouveaux Engins de Siège & Logistique",
+        "icon": "🛡️",
+        "category": "Armée & Siège",
+        "description": "Intégration du Bélier Blindé à Éperon d'Acier, de la Grande Tour de Siège & Baliste, des Chariots de Ravitaillement et Grands Convois de Fief pour soutenir vos offensives lointaines."
+      },
+      {
+        "title": "Parchemins Impériaux & Notifications",
+        "icon": "📜",
+        "category": "Système",
+        "description": "Un système de notification vous présente désormais les évolutions du royaume dès leur promulgation par le Shogunat. Une validation rapide vous assure de ne pas être dérangé par la suite."
+      }
+    ]
+  }
 ]
+

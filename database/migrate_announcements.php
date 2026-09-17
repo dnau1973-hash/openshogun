@@ -24,3 +24,4 @@ try {
     echo "✗ Erreur lors de la création de 'user_announcement_reads': " . $e->getMessage() . "\n";
     exit(1);
 }
+

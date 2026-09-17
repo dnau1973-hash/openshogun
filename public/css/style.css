@@ -762,21 +762,39 @@ a:hover {
 .hotspot-city-slot-34 { left: 17.5%; top: 56.5%; width: 13.5%; height: 20.0%; z-index: 15; }
 .hotspot-city-slot-gateway { left: 12.0%; top: 68.5%; width: 7.5%; height: 12.0%; z-index: 16; }
 
-/* Emplacements libres / Terrains disponibles */
+/* Emplacements libres / Terrains disponibles (Cité & Terroirs Ruraux) */
 .rts-hotspot.is-empty-plot {
-    border: 1.5px dashed rgba(194, 37, 43, 0.4);
+    border: 1.5px dashed rgba(194, 37, 43, 0.45);
     border-radius: 50%;
-    transition: background 0.2s, border-color 0.2s;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 .rts-hotspot.is-empty-plot:hover {
-    background: rgba(194, 37, 43, 0.08);
+    background: rgba(194, 37, 43, 0.1);
     border-color: #c2252b;
+    box-shadow: 0 0 14px rgba(194, 37, 43, 0.3);
 }
 .rts-hotspot.is-empty-plot .rts-level-bubble {
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: translate(-50%, -50%) !important;
     background: #fdfbf7;
-    border-color: #78716c;
+    border: 2px solid #78716c;
     color: #78716c;
-    font-size: 0.82rem;
+    font-size: 1.05rem;
+    font-weight: 900;
+    min-width: 28px;
+    height: 28px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.rts-hotspot.is-empty-plot:hover .rts-level-bubble {
+    transform: translate(-50%, -50%) scale(1.18) !important;
+    background: #ffffff;
+    border-color: #c2252b;
+    color: #c2252b;
+    box-shadow: 0 0 12px rgba(194, 37, 43, 0.6);
 }
 
 .rts-level-bubble.rts-gateway-bubble {

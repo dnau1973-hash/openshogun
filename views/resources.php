@@ -208,22 +208,6 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
     top: 105% !important;
 }
 
-/* Bulle et marqueur pour les emplacements agricoles libres */
-.rts-level-bubble.free-slot {
-    background: linear-gradient(135deg, #15803d, #22c55e) !important;
-    border-color: #86efac !important;
-    color: #ffffff !important;
-    font-weight: 900 !important;
-    font-size: 0.95rem !important;
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.75) !important;
-    animation: pulse-free 2s infinite ease-in-out !important;
-}
-
-@keyframes pulse-free {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 8px rgba(34, 197, 94, 0.6); }
-    50% { transform: scale(1.15); box-shadow: 0 0 16px rgba(34, 197, 94, 0.95); }
-}
-
 .rts-hotspot.is-upgrading .sprite-upgrading {
     opacity: 0.75 !important;
     filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.7)) !important;
@@ -290,19 +274,12 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         };
                     ?>
                     <?php if ($isFreeSlot): ?>
-                        <div class="rts-hotspot sector-free hotspot-slot-<?= $slot ?>" 
+                        <div class="rts-hotspot is-empty-plot sector-free hotspot-slot-<?= $slot ?>" 
                              data-sector="free"
                              data-slot="<?= $slot ?>"
                              title="🌱 Parcelle Disponible #<?= $slot ?> : Cliquer pour choisir la ressource à exploiter"
                              onclick="openFieldBuildModal(<?= $slot ?>)">
-                            
-                            <!-- Marqueur de terrain agricole vierge -->
-                            <div style="position:absolute; inset:8%; border:2px dashed rgba(34, 197, 94, 0.5); border-radius:50%; background:radial-gradient(circle, rgba(34,197,94,0.22) 0%, rgba(34,197,94,0.02) 75%); pointer-events:none; transition:all 0.2s;"></div>
-
-                            <!-- Badge minimaliste avec symbole '+' (identique à la cité) -->
-                            <div class="rts-level-bubble free-slot" title="Parcelle #<?= $slot ?> disponible : Cliquer pour fonder une exploitation">
-                                +
-                            </div>
+                            <div class="rts-level-bubble" title="Parcelle #<?= $slot ?> disponible : Cliquer pour bâtir">+</div>
                         </div>
                     <?php else: ?>
                         <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?> <?= $isUpgrading ? 'is-upgrading' : '' ?>" 
