@@ -412,7 +412,27 @@ $nextSlot = ($slot < 18) ? $slot + 1 : 1;
                 </div>
             </div>
         </div>
-    </div>
+
+    <!-- ZONE DE DÉMOLITION DE LA PARCELLE -->
+    <?php if ($lvl > 0): ?>
+        <div class="card" style="margin-top: 1.5rem; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h4 style="color: #f87171; margin: 0; font-size: 0.95rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>🗑️</span> Raser cette Exploitation
+                    </h4>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.35rem 0 0 0;">
+                        Rase définitivement cette exploitation pour réinitialiser la parcelle <strong>#<?= $slot ?></strong> en terrain vierge. Vous récupérerez <strong>30% des matériaux</strong> de ce niveau.
+                    </p>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-danger" onclick="confirmDemolishField(<?= $slot ?>, '<?= htmlspecialchars(addslashes($info['name'] ?? $type)) ?>')" style="background: linear-gradient(135deg, #991b1b, #dc2626); border: 1px solid #f87171; font-weight: 800; font-size: 0.82rem; padding: 0.55rem 1.1rem; border-radius: 8px; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); transition: transform 0.15s ease;">
+                        <span>💥</span> Raser l'Exploitation
+                    </button>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- BANDEAU DES 18 PARCELLES DU DOMAINE (NAVIGATION RAPIDE / STYLE TRAVIAN) -->
     <div class="field-strip-card">
@@ -514,6 +534,35 @@ async function cancelFieldBuild(queueId) {
     } catch (err) {
         console.error(err);
         alert('Erreur réseau lors de l\'annulation.');
+    }
+}
+
+async function confirmDemolishField(slot, fieldName) {
+    if (!confirm(`Êtes-vous certain de vouloir raser définitivement l'exploitation ${fieldName} sur la parcelle #${slot} ?\n\nL'emplacement redeviendra vierge et vous pourrez choisir une nouvelle ressource. Vous récupérerez 30% des matériaux.`)) {
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'demolish');
+        formData.append('category', 'field');
+        formData.append('target_id', slot);
+        formData.append('slot', slot);
+
+        const response = await fetch('/api/build.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = '/?page=resources';
+        } else {
+            alert(data.error || 'Impossible de raser cette exploitation.');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Erreur réseau lors de la suppression.');
     }
 }
 </script>

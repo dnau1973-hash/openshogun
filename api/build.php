@@ -36,6 +36,15 @@ try {
         $queueId = (int)($_POST['queue_id'] ?? 0);
         $ok = $buildingEngine->cancelUpgrade((int)$planet['id'], $queueId);
         echo json_encode(['success' => $ok, 'message' => $ok ? 'Construction annulée, 80% remboursé.' : 'Impossible d\'annuler.']);
+    } elseif ($action === 'demolish') {
+        $category = $_POST['category'] ?? 'building';
+        $targetId = $_POST['target_id'] ?? '';
+        $slot = isset($_POST['slot']) ? (int)$_POST['slot'] : null;
+        if (!in_array($category, ['field', 'building'])) {
+            throw new Exception("Catégorie invalide.");
+        }
+        $result = $buildingEngine->demolish((int)$planet['id'], $category, $targetId, $slot);
+        echo json_encode($result);
     } else {
         throw new Exception("Action non reconnue.");
     }

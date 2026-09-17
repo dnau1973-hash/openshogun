@@ -608,6 +608,28 @@ if (!$isEmptyPlot) {
             </div>
 
         </div>
+
+        <!-- ZONE DE DÉMANTÈLEMENT (Sauf Donjon Tenshu) -->
+        <?php if ($code !== 'hq' && $lvl > 0): ?>
+            <div class="card" style="margin-top: 1.5rem; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h4 style="color: #f87171; margin: 0; font-size: 0.95rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🗑️</span> Démanteler cette Bâtisse
+                        </h4>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.35rem 0 0 0;">
+                            Rase définitivement ce bâtiment pour libérer l'emplacement <strong>#<?= $slot ?></strong>. Vous récupérerez <strong>30% des matériaux</strong> de ce niveau.
+                        </p>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-danger" onclick="confirmDemolishBuilding('<?= $code ?>', <?= $slot ?>, '<?= htmlspecialchars(addslashes($bInfo['name'] ?? $code)) ?>')" style="background: linear-gradient(135deg, #991b1b, #dc2626); border: 1px solid #f87171; font-weight: 800; font-size: 0.82rem; padding: 0.55rem 1.1rem; border-radius: 8px; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); transition: transform 0.15s ease;">
+                            <span>💥</span> Raser le Bâtiment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
     <?php endif; ?>
 
 </div>
@@ -673,6 +695,35 @@ async function cancelBuildingBuild(queueId) {
         }
     } catch (e) {
         showModalAlert('Erreur de transmission.', 'error');
+    }
+}
+
+async function confirmDemolishBuilding(buildingCode, slot, buildingName) {
+    const confirmed = await showModalConfirm(
+        `Êtes-vous certain de vouloir démanteler définitivement ${buildingName} (Emplacement #${slot}) ?\n\nCette bâtisse sera entièrement rasée et l'emplacement redeviendra vierge. Vous récupérerez 30% des matériaux de ce niveau.`,
+        'Démantèlement du Bâtiment'
+    );
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'demolish');
+    formData.append('category', 'building');
+    formData.append('target_id', buildingCode);
+    formData.append('slot', slot);
+
+    try {
+        const res = await fetch('/api/build.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            window.location.href = '/?page=city';
+        } else {
+            showModalAlert(data.error || 'Impossible de démanteler cette bâtisse.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de transmission avec le serveur.', 'error');
     }
 }
 
