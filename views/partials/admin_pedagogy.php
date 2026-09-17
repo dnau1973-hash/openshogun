@@ -613,6 +613,30 @@
                 </table>
             </div>
         </div>
+
+        <!-- SECTION BONUS : TEASER VIDÉO IA -->
+        <div class="card" style="margin-top: 1.5rem; background: rgba(30, 27, 75, 0.4); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 10px; padding: 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+                <span style="font-size: 1.4rem;">🎬</span>
+                <div>
+                    <h4 style="margin: 0; color: #c084fc; font-size: 1.1rem;">Atelier Cinématique : Générer un Teaser Vidéo avec l'IA</h4>
+                    <span style="font-size: 0.78rem; color: #94a3b8;">Compatible avec Runway Gen-3, Kling AI, Luma Dream Machine et Sora</span>
+                </div>
+            </div>
+            <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 1rem;">
+                En vidéo, l'IA a besoin d'indications sur le <strong>mouvement de caméra</strong> (zoom avant, travelling), les <strong>effets dynamiques</strong> (flammes crachées, roues dans la boue, flèches enflammées) et le style artistique <em>ukiyo-e</em> pour garder la cohérence avec le jeu.
+            </p>
+
+            <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <strong style="color: #facc15; font-size: 0.85rem;">🎥 Prompt Teaser Ultime (Bataille Épique & Engins de Siège - 5 à 10s) :</strong>
+                    <button type="button" class="btn btn-primary" onclick="copyPromptText(this)" data-prompt="Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield. In the center, a colossal wooden dragon siege ram machine rolls forward on spiked iron wheels, its ferocious blackened-iron dragon head roaring and belching glowing sparks and smoke. Beside it, charging Takeda samurai cavalry in brilliant crimson red armor on galloping warhorses surge forward with raised spears. Above, a barrage of flaming arrows arcs across the smoky dusk sky towards a distant towering Japanese castle fortress. Flying fire embers, swirling autumn red leaves, dramatic volumetric sunset light breaking through war smoke, ukiyo-e woodblock inspired semi-realistic digital anime aesthetic, fluid motion, 8k masterpiece" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">Copier le Prompt Vidéo</button>
+                </div>
+                <div style="font-family: monospace; font-size: 0.78rem; color: #67e8f9; line-height: 1.4;">
+                    Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield. In the center, a colossal wooden dragon siege ram machine rolls forward on spiked iron wheels, its ferocious blackened-iron dragon head roaring and belching glowing sparks and smoke. Beside it, charging Takeda samurai cavalry in brilliant crimson red armor on galloping warhorses surge forward with raised spears. Above, a barrage of flaming arrows arcs across the smoky dusk sky towards a distant towering Japanese castle fortress. Flying fire embers, swirling autumn red leaves, dramatic volumetric sunset light breaking through war smoke, ukiyo-e woodblock inspired semi-realistic digital anime aesthetic, fluid motion, 8k masterpiece
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

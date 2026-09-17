@@ -322,5 +322,35 @@ Voici 4 petits défis passionnants pour expérimenter et programmer ensemble :
 - **Expérience** : Regardez les petits symboles verts `✔` s'afficher un à un. C'est ainsi que les ingénieurs logiciels s'assurent que leur jeu fonctionne parfaitement sans le moindre bug !
 
 ---
+
+## 11. Créer un Teaser Vidéo Épique avec l'IA (Animation & Cinématique)
+
+Pour donner vie aux illustrations d'**OpenShogun**, les nouveaux générateurs de vidéo IA (comme *Runway Gen-3*, *Kling AI*, *Luma Dream Machine* ou *Hailuo*) permettent d'animer des scènes de bataille complètes. 
+
+### 🎬 La Formule du Prompt Vidéo
+En vidéo, l'IA a besoin de 4 informations essentielles :
+1. **Mouvement de Caméra** : *Slow dramatic tracking shot* (suivi fluide), *low-angle push-in* (zoom avant en contre-plongée).
+2. **Mouvements & Actions** : Ce qui bouge précisément (coursier au galop, gueule de dragon crachant des flammes, roues tournant dans la boue).
+3. **Effets & Particules** : Étincelles (*flying sparks*), fumée (*smoke plumes*), feuilles de cerisier ou de bambou (*flying leaves*).
+4. **Style Artistique Continu** : Maintenir l'esprit estampe *ukiyo-e semi-realistic digital art* pour que la vidéo ressemble au jeu.
+
+---
+
+### 🎥 Le Prompt Teaser de Bataille Ultime (Scène de 5 à 10 secondes)
+
+> `Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield. In the center, a colossal wooden dragon siege ram machine rolls forward on spiked iron wheels, its ferocious blackened-iron dragon head roaring and belching glowing sparks and smoke. Beside it, charging Takeda samurai cavalry in brilliant crimson red armor on galloping warhorses surge forward with raised spears. Above, a barrage of flaming arrows arcs across the smoky dusk sky towards a distant towering Japanese castle fortress. Flying fire embers, swirling autumn red leaves, dramatic volumetric sunset light breaking through war smoke, ukiyo-e woodblock inspired semi-realistic digital anime aesthetic, fluid motion, 8k masterpiece`
+
+---
+
+### 🎞️ Le Mini-Storyboard en 3 Plans (pour monter un teaser complet)
+
+| Plan | Sujet & Action | Prompt Recommandé pour l'Outil Vidéo |
+| :--- | :--- | :--- |
+| **Plan 1 : L'Éveil** (3s) | Cavalier Éclaireur Takeda sur une falaise au lever du soleil | *« Cinematic low-angle shot of a Takeda samurai scout cavalryman on a cliff overlooking misty mountain valleys at sunrise. The horse snorts with visible breath, the back banner flutters in the morning wind, camera slowly pushes in, golden sunrays, ukiyo-e style. »* |
+| **Plan 2 : Les Titans** (4s) | Le Bélier Dragon & la Forteresse Roulante sous les flèches | *« Colossal rolling siege tower and dragon ram advancing in mud towards castle ramparts. Fiery arrows deflect off iron plates, dragon head spitting flames, massive wheels turning, intense battlefield smoke, slow motion tracking shot. »* |
+| **Plan 3 : L'Assaut Furtif** (4s) | Embuscade du Shinobi monté jaillissant des bambous | *« Midnight darkness in misty bamboo forest. A masked shinobi cavalryman bursts forward on a black horse surrounded by purple smoke, drawing gleaming steel sword towards the camera, full moon shafts through bamboo, fast dynamic camera zoom. »* |
+
+---
+
 *Document rédigé avec passion pour accompagner les jeunes créateurs dans le monde merveilleux du développement informatique et du jeu vidéo.*
 
