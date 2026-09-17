@@ -325,3 +325,4 @@ async function submitSupportTicket(event) {
     }
 }
 </script>
+

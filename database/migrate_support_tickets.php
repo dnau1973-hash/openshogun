@@ -38,3 +38,4 @@ try {
     echo "✗ Erreur lors de la création de la table support_tickets : " . $e->getMessage() . "\n";
     exit(1);
 }
+
