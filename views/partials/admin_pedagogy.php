@@ -588,6 +588,27 @@
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Monumental ancient Japanese siege catapult traction trebuchet hurling glowing fiery ceramic explosive jars (Horokubiya), heavy fortified timber frame built of thick cypress beams with blackened iron fittings and counterweights, wooden launching arm in mid-motion releasing a blazing ceramic firepot trailing golden sparks and dark smoke across the twilight sky, Tokugawa clan ashigaru siege engineers in indigo armor operating tension ropes and torches, protective bamboo tate pavise mantlets in foreground bearing the Tokugawa three-hollyhock crest (Mitsuba Aoi), distant besieged Japanese castle keep on fire, embers and smoke drifting in the wind, dramatic cinematic low-angle action shot, warm fire glow and volumetric dusk lighting, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
                             </td>
                         </tr>
+
+                        <!-- FORTERESSE ROULANTE BLINDÉE -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $fortressFile = __DIR__ . '/../../public/assets/units/forteresse_roulante_tokugawa.jpg'; ?>
+                                <img src="/public/assets/units/forteresse_roulante_tokugawa.jpg?v=<?= file_exists($fortressFile) ? filemtime($fortressFile) : 1 ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Forteresse Roulante Blindée</strong><br>
+                                <span style="font-size: 0.75rem; color: #94a3b8;">Bastion Mobile (Clan Tokugawa)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                forteresse_roulante_tokugawa.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Monumental ancient Japanese rolling armored siege fortress, colossal multi-tiered wooden mobile bastion on massive iron-studded timber wheels, heavily armored walls built of thick oak logs reinforced with bolted iron and bronze plates, multiple narrow arrow slits and triangular gun ports with Tanegashima matchlocks and yari spears protruding, curved Japanese pagoda-style tiled roof with defensive parapet, fluttering deep purple and gold war banners bearing the Tokugawa clan triple-hollyhock crest (Mitsuba Aoi), samurai commanders in ornate black and gold armor directing the advance from the upper watchtower, rolling relentlessly across a muddy battlefield toward besieged enemy fortifications at sunset, flaming enemy arrows harmlessly deflecting off the heavy iron plating, dramatic low-angle perspective emphasizing its colossal size and invulnerability, smoke plumes and golden dust in the air, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution</em>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Monumental ancient Japanese rolling armored siege fortress, colossal multi-tiered wooden mobile bastion on massive iron-studded timber wheels, heavily armored walls built of thick oak logs reinforced with bolted iron and bronze plates, multiple narrow arrow slits and triangular gun ports with Tanegashima matchlocks and yari spears protruding, curved Japanese pagoda-style tiled roof with defensive parapet, fluttering deep purple and gold war banners bearing the Tokugawa clan triple-hollyhock crest (Mitsuba Aoi), samurai commanders in ornate black and gold armor directing the advance from the upper watchtower, rolling relentlessly across a muddy battlefield toward besieged enemy fortifications at sunset, flaming enemy arrows harmlessly deflecting off the heavy iron plating, dramatic low-angle perspective emphasizing its colossal size and invulnerability, smoke plumes and golden dust in the air, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
