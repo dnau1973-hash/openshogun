@@ -575,6 +575,51 @@ foreach ($allUnits as $u) {
             </div>
         </div>
 
+        <!-- NOUVELLE ILLUSTRATION D'UNITÉ : EMBUSCADE SHINOBI MONTÉE -->
+        <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%), var(--bg-surface, #fdfbf7); border: 1px solid rgba(139, 92, 246, 0.35); border-radius: 12px; padding: 1.5rem; border-left: 6px solid #8b5cf6;">
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+                <?php 
+                    $shinobiDisk = __DIR__ . '/../public/assets/units/shinobi_monte_tokugawa.jpg';
+                    $shinobiSrc = '/public/assets/units/shinobi_monte_tokugawa.jpg' . (file_exists($shinobiDisk) ? '?v=' . filemtime($shinobiDisk) : '');
+                ?>
+                <div style="position: relative; width: 280px; max-width: 100%; height: 175px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; flex-shrink: 0;"
+                     onclick="openDocsLightbox('Embuscade Shinobi Montée', '<?= $shinobiSrc ?>', 'Troupe Furtive de Raid Nocturne & Assassinat', 'Ombres ninja montant des coursiers noirs aux sabots étouffés de feutre. Surgissant des forêts de bambous dans un nuage de fumée pour frapper l\'arrière-garde adverse.', '« Vous entendrez le souffle du destrier au moment précis où le ninjato frappera. »')">
+                    <img src="<?= $shinobiSrc ?>" alt="Embuscade Shinobi Montée" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #a78bfa; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                        ⛩️ Clan Tokugawa &bull; Écuries Furtives
+                    </span>
+                    <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                        🔍 Agrandir
+                    </span>
+                </div>
+                <div style="flex: 1; min-width: 260px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="background: #8b5cf6; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
+                            ✨ Nouvelle Illustration Intégrée
+                        </span>
+                        <span style="font-size: 0.8rem; color: #8b5cf6; font-weight: 700;">Écuries & Haras Provinciaux (Vitesse Suprême)</span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.35rem; color: var(--text-main);">
+                        Embuscade Shinobi Montée (徳川忍騎襲撃)
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 0.75rem 0;">
+                        L'arme secrète du réseau d'espionnage de Tokugawa Ieyasu. Montés sur de puissants chevaux noirs aux sabots bandés de tissu pour une approche totalement silencieuse, ces cavaliers shinobi manient le sabre <em>ninjato</em> et des fumigènes de diversion. C'est l'unité la plus rapide de tout l'archipel (vitesse 14 000), capable de contourner les lignes de front pour dévaster les convois ennemis.
+                    </p>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; background: var(--bg-ink, #ede5d5); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <span style="color: #dc2626; font-weight: 800;">⚔️ 65 Atq</span> &bull;
+                            <span style="color: #2563eb; font-weight: 700;">🛡️ 400 Blindage</span> &bull;
+                            <span style="color: #8b5cf6; font-weight: 800;">⚡ 14 000 Vitesse (Max)</span> &bull;
+                            <span style="color: #b45309; font-weight: 700;">🎒 60 Fret</span>
+                        </div>
+                        <a href="?page=docs&tab=siege" class="btn btn-primary" style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem;">
+                            🐎 Voir au Chapitre 5 (Écuries & Siège) &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- TABLEAU SYNOPTIQUE DE L'ARMEMENT FÉODAL (25 UNITÉS) -->
         <div class="card" style="background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
