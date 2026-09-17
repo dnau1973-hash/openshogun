@@ -567,6 +567,27 @@
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Dynamic cinematic illustration of a stealth Tokugawa clan shinobi assassin cavalryman mounted on a swift black warhorse with muffled hooves, wearing dark midnight indigo and obsidian shinobi robes with concealed light chainmail armor, menacing black mempo demon half-mask, drawing a razor-sharp steel ninjato blade from his back in mid-stride, smoke bomb canister releasing purple-tinted mist around the horse's legs, subtle Tokugawa triple-hollyhock crest (Mitsuba Aoi) embroidered on his dark sash, bursting out from a dense misty bamboo forest in a surprise night ambush, full moon shining through bamboo stalks casting dramatic moonlight shafts and deep shadows, flying bamboo leaves, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
                             </td>
                         </tr>
+
+                        <!-- CATAPULTE FLAMBOYANTE HOROKUBIYA -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $catapultFile = __DIR__ . '/../../public/assets/units/catapulte_horokubiya_tokugawa.jpg'; ?>
+                                <img src="/public/assets/units/catapulte_horokubiya_tokugawa.jpg?v=<?= file_exists($catapultFile) ? filemtime($catapultFile) : 1 ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Catapulte Flamboyante Horokubiya</strong><br>
+                                <span style="font-size: 0.75rem; color: #94a3b8;">Artillerie Incendiaire (Clan Tokugawa)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                catapulte_horokubiya_tokugawa.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Monumental ancient Japanese siege catapult traction trebuchet hurling glowing fiery ceramic explosive jars (Horokubiya), heavy fortified timber frame built of thick cypress beams with blackened iron fittings and counterweights, wooden launching arm in mid-motion releasing a blazing ceramic firepot trailing golden sparks and dark smoke across the twilight sky, Tokugawa clan ashigaru siege engineers in indigo armor operating tension ropes and torches, protective bamboo tate pavise mantlets in foreground bearing the Tokugawa three-hollyhock crest (Mitsuba Aoi), distant besieged Japanese castle keep on fire, embers and smoke drifting in the wind, dramatic cinematic low-angle action shot, warm fire glow and volumetric dusk lighting, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution</em>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Monumental ancient Japanese siege catapult traction trebuchet hurling glowing fiery ceramic explosive jars (Horokubiya), heavy fortified timber frame built of thick cypress beams with blackened iron fittings and counterweights, wooden launching arm in mid-motion releasing a blazing ceramic firepot trailing golden sparks and dark smoke across the twilight sky, Tokugawa clan ashigaru siege engineers in indigo armor operating tension ropes and torches, protective bamboo tate pavise mantlets in foreground bearing the Tokugawa three-hollyhock crest (Mitsuba Aoi), distant besieged Japanese castle keep on fire, embers and smoke drifting in the wind, dramatic cinematic low-angle action shot, warm fire glow and volumetric dusk lighting, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

@@ -620,6 +620,51 @@ foreach ($allUnits as $u) {
             </div>
         </div>
 
+        <!-- NOUVELLE ILLUSTRATION D'UNITÉ : CATAPULTE FLAMBOYANTE HOROKUBIYA -->
+        <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, rgba(139, 92, 246, 0.04) 100%), var(--bg-surface, #fdfbf7); border: 1px solid rgba(234, 88, 12, 0.35); border-radius: 12px; padding: 1.5rem; border-left: 6px solid #ea580c;">
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+                <?php 
+                    $catapultDisk = __DIR__ . '/../public/assets/units/catapulte_horokubiya_tokugawa.jpg';
+                    $catapultSrc = '/public/assets/units/catapulte_horokubiya_tokugawa.jpg' . (file_exists($catapultDisk) ? '?v=' . filemtime($catapultDisk) : '');
+                ?>
+                <div style="position: relative; width: 280px; max-width: 100%; height: 175px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; flex-shrink: 0;"
+                     onclick="openDocsLightbox('Catapulte Flamboyante Horokubiya', '<?= $catapultSrc ?>', 'Artillerie Incendiaire de Siège & Bombardement', 'Machine de jet projetant des jarres de grès remplies de poudre noire et de résine enflammée (Horokubiya). L\'impact embrase les toitures et les palissades en bois des citadelles.', '« Une seule jarre de feu allume le bûcher d\'une forteresse tout entière. »')">
+                    <img src="<?= $catapultSrc ?>" alt="Catapulte Flamboyante Horokubiya" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #ea580c; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                        🔥 Clan Tokugawa &bull; Atelier d'Artillerie
+                    </span>
+                    <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                        🔍 Agrandir
+                    </span>
+                </div>
+                <div style="flex: 1; min-width: 260px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="background: #ea580c; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
+                            ✨ Nouvelle Illustration Intégrée
+                        </span>
+                        <span style="font-size: 0.8rem; color: #ea580c; font-weight: 700;">Atelier de Siège Provincial (Dégâts de Zone Incendiaires)</span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.35rem; color: var(--text-main);">
+                        Catapulte Flamboyante Horokubiya (焙烙火矢投石機)
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 0.75rem 0;">
+                        L'artillerie dévastatrice des armées de Tokugawa. Construite en poutres massives de cyprès et protégée par des pavois <em>tate</em> en bambou arborant le kamon Tokugawa, cette machine de traction projette de lourdes jarres en terre cuite remplies de poudre et de résine enflammée. Les éclats de poterie et les gerbes de feu réduisent en cendres les défenses adverses.
+                    </p>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; background: var(--bg-ink, #ede5d5); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <span style="color: #dc2626; font-weight: 800;">⚔️ 450 Atq (Feu)</span> &bull;
+                            <span style="color: #2563eb; font-weight: 700;">🛡️ 2 450 Blindage</span> &bull;
+                            <span style="color: #16a34a; font-weight: 800;">⚡ 9 000 Vitesse</span> &bull;
+                            <span style="color: #b45309; font-weight: 700;">🎒 900 Fret</span>
+                        </div>
+                        <a href="?page=docs&tab=siege" class="btn btn-primary" style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem;">
+                            🏯 Voir au Chapitre 5 (Atelier de Siège) &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- TABLEAU SYNOPTIQUE DE L'ARMEMENT FÉODAL (25 UNITÉS) -->
         <div class="card" style="background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
