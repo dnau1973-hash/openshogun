@@ -60,7 +60,14 @@ assert((int)$capPlanet['coord_x'] === 1 && (int)$capPlanet['coord_y'] === 1, "Er
 // 5. Vérifier les 18 parcelles de la capitale
 $fieldsCount = (int)$db->query("SELECT COUNT(*) FROM planet_fields WHERE planet_id = {$capPlanet['id']}")->fetchColumn();
 assert($fieldsCount === 18, "Erreur: La planète capitale doit avoir exactement 18 parcelles (trouvé {$fieldsCount}).");
-echo "- 18 Parcelles de ressources vérifiées.\n";
+$fieldsLevel0Count = (int)$db->query("SELECT COUNT(*) FROM planet_fields WHERE planet_id = {$capPlanet['id']} AND level = 0")->fetchColumn();
+assert($fieldsLevel0Count === 18, "Erreur: Les 18 parcelles doivent être au niveau 0 (trouvé {$fieldsLevel0Count} au niveau 0).");
+echo "- 18 Parcelles de ressources vierges vérifiées (toutes au niveau 0).\n";
+
+// 5b. Vérifier qu'AUCUN bâtiment n'est présent dans les slots (slots 100% libres)
+$buildingsCount = (int)$db->query("SELECT COUNT(*) FROM planet_buildings WHERE planet_id = {$capPlanet['id']}")->fetchColumn();
+assert($buildingsCount === 0, "Erreur: Aucun bâtiment ne doit être présent dans les slots (trouvé {$buildingsCount}).");
+echo "- 0 Bâtiment dans les slots vérifié : Tous les emplacements urbains sont 100% libres !\n";
 
 // 6. Vérifier les troupes et vaisseaux
 $unitsCount = (int)$db->query("SELECT SUM(count) FROM planet_units WHERE planet_id = {$capPlanet['id']}")->fetchColumn();

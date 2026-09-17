@@ -163,6 +163,7 @@ class WorldGenerator {
             'oasis_units',
             'oases',
             'planets',
+            'support_tickets',
             'alliances',
             'users'
         ];
@@ -199,7 +200,7 @@ class WorldGenerator {
 
         $stmtAdmin = $this->db->prepare("
             INSERT INTO users (username, email, password_hash, faction, is_admin, is_bot, points, created_at, last_active)
-            VALUES (?, ?, ?, ?, 1, 0, 350, NOW(), NOW())
+            VALUES (?, ?, ?, ?, 1, 0, 0, NOW(), NOW())
         ");
         $stmtAdmin->execute([$adminUsername, $adminEmail, $adminHash, $adminFaction]);
         $adminId = (int)$this->db->lastInsertId();
@@ -217,19 +218,10 @@ class WorldGenerator {
         $stmtCap->execute([$adminId, $capitalName, $capitalX, $capitalY]);
         $capitalPlanetId = (int)$this->db->lastInsertId();
 
-        // 5. Initialiser les 18 Parcelles de ressources de manière procédurale (Style Travian)
-        VillageFieldGenerator::populatePlanetFields($this->db, $capitalPlanetId, 'balanced', 1, true);
+        // 5. Initialiser les 18 Parcelles de ressources vierges (Style Travian, niveau 0 = parcelles disponibles)
+        VillageFieldGenerator::populatePlanetFields($this->db, $capitalPlanetId, 'balanced', 0, false);
 
-        // 6. Bâtiments initiaux avancés pour l'Admin
-        $stmtBuild = $this->db->prepare("
-            INSERT INTO planet_buildings (planet_id, building_type, level, slot) 
-            VALUES (?, ?, ?, ?)
-        ");
-        $stmtBuild->execute([$capitalPlanetId, 'hq', 2, 19]);
-        $stmtBuild->execute([$capitalPlanetId, 'barracks', 2, 20]);
-        $stmtBuild->execute([$capitalPlanetId, 'storage', 2, 21]);
-        $stmtBuild->execute([$capitalPlanetId, 'tank', 2, 22]);
-        $stmtBuild->execute([$capitalPlanetId, 'shipyard', 1, 23]);
+        // 6. Aucun bâtiment initial dans les slots urbains (tous les slots 19 à 34 sont 100% libres pour le joueur)
 
         // 7. Garnison militaire de l'Admin
         $stmtUnit = $this->db->prepare("

@@ -141,19 +141,11 @@ class Auth {
             $stmtPlanet->execute([$userId, $planetName, $coords['x'], $coords['y']]);
             $planetId = (int)$this->db->lastInsertId();
 
-            // 4. Initialiser les 18 parcelles de ressources de façon procédurale (Style Travian)
+            // 4. Initialiser les 18 parcelles de ressources de façon procédurale (Style Travian, niveau 0 = libre)
             $capArchetype = VillageFieldGenerator::getRandomArchetypeKey(true);
-            VillageFieldGenerator::populatePlanetFields($this->db, $planetId, $capArchetype, 0, true);
+            VillageFieldGenerator::populatePlanetFields($this->db, $planetId, $capArchetype, 0, false);
 
-            // 5. Initialiser les bâtiments de base de la colonie (QG lvl 1, Stockages lvl 1, Caserne lvl 1)
-            $stmtBuild = $this->db->prepare("
-                INSERT INTO planet_buildings (planet_id, building_type, level, slot) 
-                VALUES (?, ?, 1, ?)
-            ");
-            $stmtBuild->execute([$planetId, 'hq', 19]);
-            $stmtBuild->execute([$planetId, 'storage', 20]);
-            $stmtBuild->execute([$planetId, 'tank', 21]);
-            $stmtBuild->execute([$planetId, 'barracks', 22]);
+            // 5. Aucun bâtiment initial pré-placé : tous les slots 19 à 34 sont 100% libres pour le joueur
 
             // 6. Donner 2 sondes d'espionnage et 1 transporteur léger pour démarrer
             $stmtShip = $this->db->prepare("

@@ -310,17 +310,13 @@ class FleetEngine {
             WHERE id = ?
         ")->execute([$userId, "Fief " . ucfirst($username), $planetId]);
 
-        // Initialiser ou activer les parcelles de ressources du domaine (Style Travian)
+        // Initialiser les parcelles de ressources du domaine (Style Travian, niveau 0 = libre)
         $countFields = (int)$this->db->query("SELECT COUNT(*) FROM planet_fields WHERE planet_id = {$planetId}")->fetchColumn();
         if ($countFields < 18) {
-            VillageFieldGenerator::populatePlanetFields($this->db, $planetId, null, 1, false);
-        } else {
-            $this->db->prepare("UPDATE planet_fields SET level = 1 WHERE planet_id = ? AND level = 0")->execute([$planetId]);
+            VillageFieldGenerator::populatePlanetFields($this->db, $planetId, null, 0, false);
         }
 
-        // Bâtiments de base
-        $this->db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level, slot) VALUES (?, 'hq', 1, 19)")
-            ->execute([$planetId]);
+        // Aucun bâtiment pré-placé dans les slots (slots 100% libres pour le joueur)
     }
 
     /**

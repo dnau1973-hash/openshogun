@@ -77,19 +77,10 @@ class BotEngine {
             $stmtPlanet->execute([$botId, $planetName, $coords['x'], $coords['y']]);
             $planetId = (int)$this->db->lastInsertId();
 
-            // 4. Initialiser les 18 parcelles de ressources de façon procédurale (Style Travian)
-            VillageFieldGenerator::populatePlanetFields($this->db, $planetId, null, 1, true);
+            // 4. Initialiser les 18 parcelles de ressources de façon procédurale (Style Travian, niveau 0 = libre)
+            VillageFieldGenerator::populatePlanetFields($this->db, $planetId, null, 0, false);
 
-            // 5. Initialiser les bâtiments
-            $stmtBuild = $this->db->prepare("
-                INSERT INTO planet_buildings (planet_id, building_type, level, slot) 
-                VALUES (?, ?, ?, ?)
-            ");
-            $stmtBuild->execute([$planetId, 'hq', 2, 19]);
-            $stmtBuild->execute([$planetId, 'storage', 2, 20]);
-            $stmtBuild->execute([$planetId, 'tank', 2, 21]);
-            $stmtBuild->execute([$planetId, 'barracks', 2, 22]);
-            $stmtBuild->execute([$planetId, 'shipyard', 1, 23]);
+            // 5. Aucun bâtiment initial pré-placé dans les slots (slots 100% libres)
 
             // 6. Donner une garnison initiale
             $starterUnits = [
@@ -267,12 +258,10 @@ class BotEngine {
                 $stmtNewPlanet->execute([$botId, $colonyName, $newCoords['x'], $newCoords['y']]);
                 $newPlanetId = (int)$this->db->lastInsertId();
 
-                // Initialiser les 18 parcelles de la nouvelle colonie de façon procédurale (Style Travian)
-                VillageFieldGenerator::populatePlanetFields($this->db, $newPlanetId, null, 1, false);
+                // Initialiser les 18 parcelles de la nouvelle colonie de façon procédurale (Style Travian, niveau 0 = libre)
+                VillageFieldGenerator::populatePlanetFields($this->db, $newPlanetId, null, 0, false);
 
-                // Bâtiments de base
-                $this->db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level, slot) VALUES (?, 'hq', 1, 19)")->execute([$newPlanetId]);
-                $this->db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level, slot) VALUES (?, 'barracks', 1, 20)")->execute([$newPlanetId]);
+                // Aucun bâtiment pré-placé dans les slots (slots 100% libres)
 
                 $report['colonies_founded'][] = [
                     'bot' => $bot['username'],

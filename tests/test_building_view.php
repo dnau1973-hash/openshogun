@@ -41,6 +41,17 @@ class TestPlanetEngineStub {
             'embassy' => 1
         ];
     }
+    public function getCitySlotMap(int $planetId): array {
+        $slots = [];
+        for ($s = 19; $s <= 34; $s++) {
+            $slots[$s] = [
+                'slot' => $s,
+                'code' => ($s === 19) ? 'hq' : (($s === 20) ? 'barracks' : 'free_plot'),
+                'level' => ($s === 19) ? 10 : (($s === 20) ? 6 : 0)
+            ];
+        }
+        return $slots;
+    }
 }
 
 class TestBuildingEngineStub {
