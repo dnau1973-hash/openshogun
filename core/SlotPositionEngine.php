@@ -110,14 +110,21 @@ class SlotPositionEngine {
 
         $dir = dirname(self::$filePath);
         if (!is_dir($dir)) {
-            @mkdir($dir, 0755, true);
+            @mkdir($dir, 0777, true);
         }
 
-        return (file_put_contents(
+        $res = @file_put_contents(
             self::$filePath,
             json_encode($all, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
             LOCK_EX
-        ) !== false);
+        );
+
+        if ($res !== false) {
+            @chmod(self::$filePath, 0666);
+            return true;
+        }
+
+        return false;
     }
 
     public static function resetPositions(string $view): bool {
@@ -153,3 +160,4 @@ class SlotPositionEngine {
         return $css;
     }
 }
+

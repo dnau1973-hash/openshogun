@@ -295,6 +295,7 @@ class AnnouncementEngine {
 
         $json = json_encode($announcements, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         file_put_contents(self::$filePath, $json, LOCK_EX);
+        @chmod(self::$filePath, 0666);
     }
 }
 

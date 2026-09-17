@@ -60,3 +60,4 @@ echo "✓ Réinitialisation conforme.\n";
 echo "\n============================================\n";
 echo "🎉 TOUS LES TESTS DU CALIBRATEUR SONT VALIDES !\n";
 echo "============================================\n";
+
