@@ -82,14 +82,14 @@ class BotEngine {
 
             // 5. Initialiser les bâtiments
             $stmtBuild = $this->db->prepare("
-                INSERT INTO planet_buildings (planet_id, building_type, level) 
-                VALUES (?, ?, ?)
+                INSERT INTO planet_buildings (planet_id, building_type, level, slot) 
+                VALUES (?, ?, ?, ?)
             ");
-            $stmtBuild->execute([$planetId, 'hq', 2]);
-            $stmtBuild->execute([$planetId, 'storage', 2]);
-            $stmtBuild->execute([$planetId, 'tank', 2]);
-            $stmtBuild->execute([$planetId, 'barracks', 2]);
-            $stmtBuild->execute([$planetId, 'shipyard', 1]);
+            $stmtBuild->execute([$planetId, 'hq', 2, 19]);
+            $stmtBuild->execute([$planetId, 'storage', 2, 20]);
+            $stmtBuild->execute([$planetId, 'tank', 2, 21]);
+            $stmtBuild->execute([$planetId, 'barracks', 2, 22]);
+            $stmtBuild->execute([$planetId, 'shipyard', 1, 23]);
 
             // 6. Donner une garnison initiale
             $starterUnits = [
@@ -271,8 +271,8 @@ class BotEngine {
                 VillageFieldGenerator::populatePlanetFields($this->db, $newPlanetId, null, 1, false);
 
                 // Bâtiments de base
-                $this->db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level) VALUES (?, 'hq', 1)")->execute([$newPlanetId]);
-                $this->db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level) VALUES (?, 'barracks', 1)")->execute([$newPlanetId]);
+                $this->db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level, slot) VALUES (?, 'hq', 1, 19)")->execute([$newPlanetId]);
+                $this->db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level, slot) VALUES (?, 'barracks', 1, 20)")->execute([$newPlanetId]);
 
                 $report['colonies_founded'][] = [
                     'bot' => $bot['username'],

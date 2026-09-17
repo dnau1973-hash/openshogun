@@ -319,7 +319,7 @@ class FleetEngine {
         }
 
         // Bâtiments de base
-        $this->db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level) VALUES (?, 'hq', 1)")
+        $this->db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level, slot) VALUES (?, 'hq', 1, 19)")
             ->execute([$planetId]);
     }
 

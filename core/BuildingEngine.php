@@ -71,7 +71,7 @@ class BuildingEngine {
     /**
      * Lance la construction d'une amélioration
      */
-    public function startUpgrade(int $planetId, string $category, string $targetId): array {
+    public function startUpgrade(int $planetId, string $category, string $targetId, ?int $slot = null): array {
         $planet = $this->planetEngine->updatePlanet($planetId);
         $faction = $planet['faction'] ?? 'terran';
         $buildings = $this->planetEngine->getBuildings($planetId);
@@ -79,9 +79,9 @@ class BuildingEngine {
 
         // 1. Vérification du niveau actuel
         if ($category === 'field') {
-            $slot = (int)$targetId;
+            $fieldSlot = (int)$targetId;
             $stmtField = $this->db->prepare("SELECT * FROM planet_fields WHERE planet_id = ? AND field_slot = ?");
-            $stmtField->execute([$planetId, $slot]);
+            $stmtField->execute([$planetId, $fieldSlot]);
             $field = $stmtField->fetch();
             if (!$field) throw new Exception("Parcelle introuvable.");
             $type = $field['type'];
@@ -89,6 +89,43 @@ class BuildingEngine {
         } else {
             $type = $targetId;
             $currentLevel = (int)($buildings[$type] ?? 0);
+
+            // Vérification du bâtiment existant et de son slot
+            $stmtExisting = $this->db->prepare("SELECT slot, level FROM planet_buildings WHERE planet_id = ? AND building_type = ?");
+            $stmtExisting->execute([$planetId, $type]);
+            $existingBuilding = $stmtExisting->fetch();
+
+            if ($existingBuilding && (int)$existingBuilding['level'] > 0) {
+                if ($slot !== null && !empty($existingBuilding['slot']) && (int)$existingBuilding['slot'] !== (int)$slot) {
+                    throw new Exception("Ce bâtiment est déjà érigé sur l'emplacement #" . $existingBuilding['slot'] . ".");
+                }
+            } else {
+                // Nouveau bâtiment (niveau 0) à fonder
+                if ($slot !== null) {
+                    $slot = (int)$slot;
+                    if ($slot < 19 || $slot > 34) {
+                        throw new Exception("Emplacement urbain invalide (#$slot).");
+                    }
+                    // Vérifier si le slot est déjà pris
+                    $stmtSlotTaken = $this->db->prepare("
+                        SELECT building_type FROM planet_buildings 
+                        WHERE planet_id = ? AND slot = ? AND building_type != ?
+                    ");
+                    $stmtSlotTaken->execute([$planetId, $slot, $type]);
+                    $taken = $stmtSlotTaken->fetch();
+                    if ($taken) {
+                        $occupiedName = BUILDINGS[$taken['building_type']]['name'] ?? $taken['building_type'];
+                        throw new Exception("L'emplacement #$slot est déjà occupé par $occupiedName.");
+                    }
+
+                    // Enregistrer le bâtiment au niveau 0 sur ce slot
+                    $this->db->prepare("
+                        INSERT INTO planet_buildings (planet_id, slot, building_type, level) 
+                        VALUES (?, ?, ?, 0) 
+                        ON DUPLICATE KEY UPDATE slot = VALUES(slot)
+                    ")->execute([$planetId, $slot, $type]);
+                }
+            }
         }
 
         // 2. Vérification des files existantes et du bonus racial Terran
@@ -197,6 +234,13 @@ class BuildingEngine {
         ")->execute([$refundMetal, $refundCrystal, $refundDeut, $planetId]);
 
         $this->db->prepare("DELETE FROM construction_queue WHERE id = ?")->execute([$queueId]);
+
+        // Si on annulait le niveau 1 d'un bâtiment qui était au niveau 0 en base, libérer l'emplacement
+        if ($item['build_category'] === 'building' && (int)$item['target_level'] === 1 && $curLvl === 0) {
+            $this->db->prepare("DELETE FROM planet_buildings WHERE planet_id = ? AND building_type = ? AND level = 0")
+                ->execute([$planetId, $type]);
+        }
+
         $this->db->commit();
 
         return true;

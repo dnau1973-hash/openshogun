@@ -147,13 +147,13 @@ class Auth {
 
             // 5. Initialiser les bâtiments de base de la colonie (QG lvl 1, Stockages lvl 1, Caserne lvl 1)
             $stmtBuild = $this->db->prepare("
-                INSERT INTO planet_buildings (planet_id, building_type, level) 
-                VALUES (?, ?, 1)
+                INSERT INTO planet_buildings (planet_id, building_type, level, slot) 
+                VALUES (?, ?, 1, ?)
             ");
-            $stmtBuild->execute([$planetId, 'hq']);
-            $stmtBuild->execute([$planetId, 'storage']);
-            $stmtBuild->execute([$planetId, 'tank']);
-            $stmtBuild->execute([$planetId, 'barracks']);
+            $stmtBuild->execute([$planetId, 'hq', 19]);
+            $stmtBuild->execute([$planetId, 'storage', 20]);
+            $stmtBuild->execute([$planetId, 'tank', 21]);
+            $stmtBuild->execute([$planetId, 'barracks', 22]);
 
             // 6. Donner 2 sondes d'espionnage et 1 transporteur léger pour démarrer
             $stmtShip = $this->db->prepare("

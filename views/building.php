@@ -19,13 +19,16 @@ if (!$planet) {
 $planetEngine = new PlanetEngine();
 $buildingEngine = new BuildingEngine();
 
+// Récupérer la cartographie des slots de la cité
+$citySlots = $planetEngine->getCitySlotMap((int)$planet['id']);
+
 // Récupérer le numéro de slot ou le code de bâtiment
 $slot = isset($_GET['slot']) ? (int)$_GET['slot'] : null;
 $codeParam = $_GET['code'] ?? null;
 
 if ($codeParam && !isset($_GET['slot'])) {
-    foreach (CITY_SLOT_LAYOUT as $s => $c) {
-        if ($c === $codeParam) {
+    foreach ($citySlots as $s => $sd) {
+        if ($sd['code'] === $codeParam) {
             $slot = $s;
             break;
         }
@@ -36,8 +39,9 @@ if (!$slot || $slot < 19 || $slot > 34) {
     $slot = 19;
 }
 
-$code = CITY_SLOT_LAYOUT[$slot] ?? 'free_plot';
-$isEmptyPlot = ($code === 'free_plot');
+$slotData = $citySlots[$slot] ?? ['slot' => $slot, 'code' => 'free_plot', 'level' => 0];
+$code = $slotData['code'];
+$lvl = (int)$slotData['level'];
 
 // Bâtiments de la planète
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
@@ -84,6 +88,35 @@ foreach ($queue as $q) {
 
 $isTerran = ($user['faction'] === 'terran');
 $canQueueNewBuilding = $isTerran ? ($buildingsInQueue === 0) : (count($queue) === 0);
+
+$isBuildingInQueue = ($code !== 'free_plot' && $activeJob !== null);
+$isEmptyPlot = ($code === 'free_plot' || ($lvl === 0 && !$isBuildingInQueue));
+
+// Bâtiments disponibles à la construction sur cet emplacement
+$availableBuildingsToConstruct = [];
+if ($isEmptyPlot) {
+    foreach (BUILDINGS as $bCode => $bInfo) {
+        $curLvl = (int)($buildings[$bCode] ?? 0);
+        $inQ = false;
+        foreach ($queue as $q) {
+            if ($q['build_category'] === 'building' && $q['target_id'] === $bCode) {
+                $inQ = true;
+                break;
+            }
+        }
+        if ($curLvl === 0 && !$inQ) {
+            $details = $buildingEngine->getUpgradeDetails('building', $bCode, 0, $hqLevel);
+            $cost = $details['cost'];
+            $canAfford = ($planet['metal'] >= $cost['metal'] && $planet['crystal'] >= $cost['crystal'] && $planet['deuterium'] >= $cost['deuterium']);
+            $availableBuildingsToConstruct[$bCode] = [
+                'info' => $bInfo,
+                'details' => $details,
+                'can_afford' => $canAfford,
+                'sector' => $buildingSectors[$bCode] ?? ['name' => 'Logistique', 'sec' => 'sec-logistics', 'icon' => '📦']
+            ];
+        }
+    }
+}
 
 if (!$isEmptyPlot) {
     $bInfo = BUILDINGS[$code] ?? null;
@@ -264,6 +297,74 @@ if (!$isEmptyPlot) {
                         </a>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- LISTE DES BÂTIMENTS DISPONIBLES À LA CONSTRUCTION SUR CET EMPLACEMENT -->
+        <div class="card" style="margin-top:1.5rem; background:rgba(15,23,42,0.8); border:1px solid var(--border-color); border-radius:12px; padding:1.5rem;">
+            <h2 style="font-size:1.2rem; color:#f8fafc; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+                <span>🏗️</span> Fonder une Nouvelle Structure Féodale sur l'Emplacement #<?= $slot ?>
+            </h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">
+                Sélectionnez le bâtiment féodal de votre choix à ériger sur ce terrain viabilisé de votre forteresse.
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                <?php if (empty($availableBuildingsToConstruct)): ?>
+                    <p style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:1.5rem 0;">Toutes les structures féodales uniques sont déjà érigées dans votre cité castrale.</p>
+                <?php else: ?>
+                    <?php foreach ($availableBuildingsToConstruct as $bCode => $item): 
+                        $info = $item['info'];
+                        $det = $item['details'];
+                        $c = $det['cost'];
+                        $dur = $det['duration'];
+                        $canAfford = $item['can_afford'];
+                        $durFormatted = sprintf('%02d:%02d', floor($dur / 60), $dur % 60);
+                    ?>
+                        <div style="background:rgba(30,41,59,0.5); border:1px solid #334155; border-radius:8px; padding:0.85rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                            <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:260px;">
+                                <div style="width:48px; height:48px; background:rgba(15,23,42,0.8); border:1px solid #475569; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden;">
+                                    <?php if (!empty($info['tile_img'])): ?>
+                                        <img src="/public/assets/<?= $info['tile_img'] ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:40px; height:40px; object-fit:contain;">
+                                    <?php else: ?>
+                                        <span style="font-size:1.6rem;"><?= $info['icon'] ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <div>
+                                    <h4 style="margin:0; font-size:0.95rem; color:#f8fafc;"><?= htmlspecialchars($info['name']) ?></h4>
+                                    <p style="margin:0.2rem 0 0 0; font-size:0.75rem; color:#94a3b8; line-height:1.3;">
+                                        <?= htmlspecialchars($info['description']) ?>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                                <div style="display:flex; gap:0.6rem; font-size:0.8rem; font-weight:600;">
+                                    <span style="color:<?= ($planet['metal'] >= $c['metal']) ? '#4ade80' : '#ef4444' ?>;" title="Bois de Cèdre">🪵 <?= number_format($c['metal']) ?></span>
+                                    <span style="color:<?= ($planet['crystal'] >= $c['crystal']) ? '#4ade80' : '#ef4444' ?>;" title="Pierre de Taille">🪨 <?= number_format($c['crystal']) ?></span>
+                                    <span style="color:<?= ($planet['deuterium'] >= $c['deuterium']) ? '#4ade80' : '#ef4444' ?>;" title="Koku de Riz">🌾 <?= number_format($c['deuterium']) ?></span>
+                                    <span style="color:#94a3b8;" title="Durée des travaux">⏳ <?= $durFormatted ?></span>
+                                </div>
+
+                                <div>
+                                    <?php if ($canAfford && $canQueueNewBuilding): ?>
+                                        <button type="button" class="btn btn-primary" onclick="launchBuildingUpgrade('<?= $bCode ?>', 1, <?= $slot ?>)" style="font-size:0.8rem; padding:0.4rem 0.8rem; font-weight:600; background:linear-gradient(135deg, #b91c1c, #dc2626); border-color:#ef4444;">
+                                            🔨 Bâtir (Niv. 1)
+                                        </button>
+                                    <?php elseif (!$canAfford): ?>
+                                        <button type="button" class="btn btn-secondary" disabled style="font-size:0.75rem; padding:0.4rem 0.7rem; opacity:0.6; cursor:not-allowed;">
+                                            ⚠️ Manque ressources
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn btn-secondary" disabled style="font-size:0.75rem; padding:0.4rem 0.7rem; opacity:0.6; cursor:not-allowed;">
+                                            ⏳ Chantier en cours
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -512,7 +613,7 @@ if (!$isEmptyPlot) {
 </div>
 
 <script>
-async function launchBuildingUpgrade(buildingCode, targetLevel) {
+async function launchBuildingUpgrade(buildingCode, targetLevel, slot = null) {
     const btn = document.getElementById('btnLaunchBuildingUpgrade');
     if (btn) {
         btn.disabled = true;
@@ -523,6 +624,9 @@ async function launchBuildingUpgrade(buildingCode, targetLevel) {
     formData.append('action', 'upgrade');
     formData.append('category', 'building');
     formData.append('target_id', buildingCode);
+    if (slot !== null && slot !== undefined) {
+        formData.append('slot', slot);
+    }
 
     try {
         const res = await fetch('/api/build.php', {

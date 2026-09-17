@@ -701,3 +701,4 @@ async function executeUnequip(slot) {
     }
 }
 </script>
+

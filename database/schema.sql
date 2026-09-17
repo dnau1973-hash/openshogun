@@ -83,9 +83,11 @@ CREATE TABLE `planet_fields` (
 CREATE TABLE `planet_buildings` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `planet_id` INT UNSIGNED NOT NULL,
+  `slot` TINYINT UNSIGNED NULL,
   `building_type` VARCHAR(40) NOT NULL,
   `level` TINYINT UNSIGNED NOT NULL DEFAULT 0,
   UNIQUE KEY `uniq_planet_building` (`planet_id`, `building_type`),
+  UNIQUE KEY `uniq_planet_slot` (`planet_id`, `slot`),
   CONSTRAINT `fk_buildings_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

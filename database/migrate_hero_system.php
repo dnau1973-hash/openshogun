@@ -154,3 +154,4 @@ try {
     echo "Erreur lors de la migration du système de héros: " . $e->getMessage() . "\n";
     exit(1);
 }
+

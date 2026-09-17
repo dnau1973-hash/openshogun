@@ -222,14 +222,14 @@ class WorldGenerator {
 
         // 6. Bâtiments initiaux avancés pour l'Admin
         $stmtBuild = $this->db->prepare("
-            INSERT INTO planet_buildings (planet_id, building_type, level) 
-            VALUES (?, ?, ?)
+            INSERT INTO planet_buildings (planet_id, building_type, level, slot) 
+            VALUES (?, ?, ?, ?)
         ");
-        $stmtBuild->execute([$capitalPlanetId, 'hq', 2]);
-        $stmtBuild->execute([$capitalPlanetId, 'barracks', 2]);
-        $stmtBuild->execute([$capitalPlanetId, 'storage', 2]);
-        $stmtBuild->execute([$capitalPlanetId, 'tank', 2]);
-        $stmtBuild->execute([$capitalPlanetId, 'shipyard', 1]);
+        $stmtBuild->execute([$capitalPlanetId, 'hq', 2, 19]);
+        $stmtBuild->execute([$capitalPlanetId, 'barracks', 2, 20]);
+        $stmtBuild->execute([$capitalPlanetId, 'storage', 2, 21]);
+        $stmtBuild->execute([$capitalPlanetId, 'tank', 2, 22]);
+        $stmtBuild->execute([$capitalPlanetId, 'shipyard', 1, 23]);
 
         // 7. Garnison militaire de l'Admin
         $stmtUnit = $this->db->prepare("
