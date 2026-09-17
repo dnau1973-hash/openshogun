@@ -627,9 +627,45 @@
                 En vidéo, l'IA a besoin d'indications sur le <strong>mouvement de caméra</strong> (zoom avant, travelling), les <strong>effets dynamiques</strong> (flammes crachées, roues dans la boue, flèches enflammées) et le style artistique <em>ukiyo-e</em> pour garder la cohérence avec le jeu.
             </p>
 
+            <?php 
+                $videoDisk = __DIR__ . '/../../public/assets/videos/Epic_cinematic_battle_teaser_t.mp4';
+                $videoExists = file_exists($videoDisk);
+                $videoSrc = '/public/assets/videos/Epic_cinematic_battle_teaser_t.mp4' . ($videoExists ? '?v=' . filemtime($videoDisk) : '');
+                $videoSizeMb = $videoExists ? round(filesize($videoDisk) / (1024 * 1024), 1) : 0;
+            ?>
+
+            <?php if ($videoExists): ?>
+                <!-- LECTEUR VIDÉO HTML5 -->
+                <div style="margin: 1.25rem 0; background: #0b0f19; border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.7);">
+                    <div style="background: linear-gradient(90deg, rgba(147, 51, 234, 0.25) 0%, rgba(220, 38, 38, 0.25) 100%); padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; gap: 0.5rem;">
+                        <span style="font-weight: 800; color: #f3e8ff; font-size: 0.95rem; display: flex; align-items: center; gap: 0.6rem;">
+                            <span style="font-size: 1.2rem;">▶️</span> Teaser Officiel OpenShogun &bull; Bataille Féodale & Engins de Siège
+                        </span>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="background: rgba(34, 197, 94, 0.2); color: #4ade80; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(34, 197, 94, 0.3);">
+                                🎬 MP4 &bull; <?= $videoSizeMb ?> Mo
+                            </span>
+                            <a href="<?= $videoSrc ?>" download="OpenShogun_Teaser_Sengoku.mp4" class="btn btn-secondary" style="font-size: 0.75rem; padding: 3px 10px; font-weight: 700;">
+                                ⬇️ Télécharger
+                            </a>
+                        </div>
+                    </div>
+                    <div style="position: relative; width: 100%; max-width: 950px; margin: 0 auto; background: #000;">
+                        <video controls preload="metadata" style="width: 100%; max-height: 520px; display: block; object-fit: contain; margin: 0 auto; outline: none;" poster="/public/assets/shogun_login_bg.jpg">
+                            <source src="<?= $videoSrc ?>" type="video/mp4">
+                            Votre navigateur ne prend pas en charge la lecture de vidéos HTML5.
+                        </video>
+                    </div>
+                    <div style="padding: 0.6rem 1.25rem; background: rgba(0,0,0,0.5); font-size: 0.78rem; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <span>💡 <em>Astuce père-fils :</em> Vous pouvez basculer la vidéo en plein écran en cliquant sur l'icône ⛶ en bas à droite du lecteur.</span>
+                        <span style="color: #c084fc;">Fichier : <code>Epic_cinematic_battle_teaser_t.mp4</code></span>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <strong style="color: #facc15; font-size: 0.85rem;">🎥 Prompt Teaser Ultime (Bataille Épique & Engins de Siège - 5 à 10s) :</strong>
+                    <strong style="color: #facc15; font-size: 0.85rem;">🎥 Prompt Utilisé pour Générer cette Vidéo :</strong>
                     <button type="button" class="btn btn-primary" onclick="copyPromptText(this)" data-prompt="Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield. In the center, a colossal wooden dragon siege ram machine rolls forward on spiked iron wheels, its ferocious blackened-iron dragon head roaring and belching glowing sparks and smoke. Beside it, charging Takeda samurai cavalry in brilliant crimson red armor on galloping warhorses surge forward with raised spears. Above, a barrage of flaming arrows arcs across the smoky dusk sky towards a distant towering Japanese castle fortress. Flying fire embers, swirling autumn red leaves, dramatic volumetric sunset light breaking through war smoke, ukiyo-e woodblock inspired semi-realistic digital anime aesthetic, fluid motion, 8k masterpiece" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">Copier le Prompt Vidéo</button>
                 </div>
                 <div style="font-family: monospace; font-size: 0.78rem; color: #67e8f9; line-height: 1.4;">
