@@ -460,6 +460,23 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Master swordsman samurai in mid-stance drawing sharp steel katana blade, crimson and black silk cords on lamellar armor, fierce focus, flying embers, ukiyo-e digital illustration" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                        <!-- CAVALIER ÉCLAIREUR TAKEDA -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <img src="/public/assets/units/cavalier_eclaireur_takeda.jpg" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Cavalier Éclaireur Takeda</strong><br>
+                                <span style="font-size: 0.75rem; color: #94a3b8;">Reconnaissance & Raids de Kai</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                cavalier_eclaireur_takeda.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Dynamic cinematic illustration of an agile Takeda clan samurai scout cavalryman, mounted on a swift wild Japanese mountain horse (Kiso horse), lightweight crimson red lacquered armor with vermilion cords, horned jingasa, scouting yari spear, back banner (sashimono) with Takeda four-diamond crest, rocky mountain ridge overlooking misty valleys at sunrise, ukiyo-e digital art</em>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Dynamic cinematic illustration of an agile Takeda clan samurai scout cavalryman, mounted on a swift wild Japanese mountain horse (Kiso horse), lightweight crimson red lacquered armor with vermilion cords, horned jingasa, scouting yari spear, back banner (sashimono) with Takeda four-diamond crest, rocky mountain ridge overlooking misty valleys at sunrise, ukiyo-e digital art" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
                             </td>
                         </tr>
 
@@ -617,3 +634,4 @@ function copyPromptText(btn) {
     });
 }
 </script>
+

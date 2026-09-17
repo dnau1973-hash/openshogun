@@ -287,6 +287,7 @@ Voici les prompts authentiques utilisés pour générer l'univers visuel d'**Ope
 | `piquier_ashigaru_yari.jpg` | **Piquier Ashigaru** | *« Feudal Japanese peasant ashigaru soldier holding an extremely long nagae-yari spear, black jingasa conical helmet, lacquered breastplate, determined expression, battlefield background, historical concept art »* |
 | `arquebusier_oda_tanegashima.jpg` | **Arquebusier Tanegashima** | *« Oda clan matchlock musketeer aiming a wooden Tanegashima gun, smoke curling from the muzzle, bamboo tate barricade in foreground, glowing matchcord, dynamic battle action pose »* |
 | `samourai_katana.jpg` | **Samouraï au Katana** | *« Master swordsman samurai in mid-stance drawing sharp steel katana blade, crimson and black silk cords on lamellar armor, fierce focus, flying embers, ukiyo-e digital illustration »* |
+| `cavalier_eclaireur_takeda.jpg` | **Cavalier Éclaireur Takeda** | *« Dynamic cinematic illustration of an agile Takeda clan samurai scout cavalryman, mounted on a swift wild Japanese mountain horse (Kiso horse), wearing lightweight crimson red lacquered armor with vermilion cords, horned jingasa battle hat, carrying a scouting yari spear and a katana, small back banner (sashimono) bearing the four-diamond Takeda crest (Takeda bishi) fluttering in the wind, standing on a rocky mountain ridge overlooking misty valleys and enemy army camps at sunrise, Sengoku Jidai feudal Japan, dramatic low-angle shot, golden morning light rays breaking through clouds, flying red maple leaves, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution »* |
 | `cavalier_rouge_akazonae.jpg` | **Cavalerie Rouge Takeda** | *« Fierce mounted samurai cavalryman of Takeda clan, wearing terrifying bright crimson red armor (Akazonae), charging on a powerful warhorse, holding a yari spear, flying battle flags, cinematic motion »* |
 | `ombre_shinobi_infiltree.jpg` | **Ombre Shinobi** | *« Mysterious ninja shinobi assassin perched on a temple roof under full moon, dark indigo hooded robes, ninjato blade on back, throwing kunai, mist and bamboo shadows, stealth concept art »* |
 
@@ -318,3 +319,4 @@ Voici 4 petits défis passionnants pour expérimenter et programmer ensemble :
 
 ---
 *Document rédigé avec passion pour accompagner les jeunes créateurs dans le monde merveilleux du développement informatique et du jeu vidéo.*
+
