@@ -39,11 +39,11 @@ assert(strpos($htmlDefault, 'admin-tabs-nav') !== false, "Erreur: barre de navig
 echo "[PASS] Barre de navigation 'admin-tabs-nav' présente.\n";
 
 // Vérifier tous les boutons d'onglets attendus
-$expectedTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'maintenance', 'all'];
+$expectedTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'maintenance', 'all'];
 foreach ($expectedTabs as $tabKey) {
     assert(strpos($htmlDefault, "data-tab=\"{$tabKey}\"") !== false, "Erreur: onglet '{$tabKey}' introuvable dans la barre d'onglets.");
 }
-echo "[PASS] Les 10 onglets ('" . implode("', '", $expectedTabs) . "') sont correctement définis.\n";
+echo "[PASS] Les 11 onglets ('" . implode("', '", $expectedTabs) . "') sont correctement définis.\n";
 
 // Vérifier la présence de tous les conteneurs tab-pane
 foreach ($expectedTabs as $tabKey) {
@@ -57,9 +57,10 @@ echo "[PASS] Tous les conteneurs 'admin-tab-pane-*' sont présents dans le DOM.\
 assert(strpos($htmlDefault, 'id="admin-tab-pane-game" data-tab="game" style="display: block;"') !== false, "Erreur: le panneau game devrait être affiché par défaut.");
 assert(strpos($htmlDefault, 'id="admin-tab-pane-bots" data-tab="bots" style="display: none;"') !== false, "Erreur: le panneau bots devrait être masqué par défaut.");
 assert(strpos($htmlDefault, 'id="admin-tab-pane-support" data-tab="support" style="display: none;"') !== false, "Erreur: le panneau support devrait être masqué par défaut.");
+assert(strpos($htmlDefault, 'id="admin-tab-pane-announcements" data-tab="announcements" style="display: none;"') !== false, "Erreur: le panneau announcements devrait être masqué par défaut.");
 echo "[PASS] Affichage par défaut conforme (game: block, autres: none).\n";
 
-// 4. Tester l'accès direct via ?tab=support
+// 4. Tester l'accès direct via ?tab=support et ?tab=announcements
 $_GET = ['page' => 'admin', 'tab' => 'support'];
 ob_start();
 require __DIR__ . '/../views/admin.php';
@@ -68,6 +69,15 @@ $htmlSupport = ob_get_clean();
 assert(strpos($htmlSupport, 'id="admin-tab-pane-support" data-tab="support" style="display: block;"') !== false, "Erreur: le panneau support devrait être affiché quand tab=support.");
 assert(strpos($htmlSupport, 'id="admin-tab-pane-game" data-tab="game" style="display: none;"') !== false, "Erreur: le panneau game devrait être masqué quand tab=support.");
 echo "[PASS] Sélection d'onglet via paramètre URL (?tab=support) opérationnelle.\n";
+
+$_GET = ['page' => 'admin', 'tab' => 'announcements'];
+ob_start();
+require __DIR__ . '/../views/admin.php';
+$htmlAnn = ob_get_clean();
+
+assert(strpos($htmlAnn, 'id="admin-tab-pane-announcements" data-tab="announcements" style="display: block;"') !== false, "Erreur: le panneau announcements devrait être affiché quand tab=announcements.");
+assert(strpos($htmlAnn, 'id="admin-tab-pane-game" data-tab="game" style="display: none;"') !== false, "Erreur: le panneau game devrait être masqué quand tab=announcements.");
+echo "[PASS] Sélection d'onglet via paramètre URL (?tab=announcements) opérationnelle.\n";
 
 // 5. Tester le mode ?tab=all (Tout Dérouler)
 $_GET = ['page' => 'admin', 'tab' => 'all'];

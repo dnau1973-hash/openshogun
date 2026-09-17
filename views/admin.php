@@ -20,12 +20,19 @@ if (!Auth::check() || !$auth->isAdmin()) {
 require_once __DIR__ . '/../core/CastleEngine.php';
 require_once __DIR__ . '/../core/OasisEngine.php';
 require_once __DIR__ . '/../core/SupportEngine.php';
+require_once __DIR__ . '/../core/AnnouncementEngine.php';
 
 $botEngine = new BotEngine();
 $castleEngine = new CastleEngine();
 $oasisEngine = new OasisEngine();
 $supportEngine = new SupportEngine();
 $db = Database::getConnection();
+
+// Statistiques & Données des Annonces (JSON)
+$allAnnouncements = AnnouncementEngine::getAllAnnouncements(false);
+$announcementStats = AnnouncementEngine::getReadStats();
+$publishedAnnouncementsCount = count(array_filter($allAnnouncements, fn($a) => !empty($a['is_published'])));
+$totalAnnouncementsCount = count($allAnnouncements);
 
 // Statistiques Support & Tickets
 $supportStats = $supportEngine->getStatistics();
@@ -74,7 +81,7 @@ $humanUsers = $db->query("
 ")->fetchAll();
 
 // Gestion des onglets d'administration du Shogunat
-$allowedTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'maintenance', 'all'];
+$allowedTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'maintenance', 'all'];
 $currentTab = $_GET['tab'] ?? 'game';
 if (!in_array($currentTab, $allowedTabs, true)) {
     $currentTab = 'game';
@@ -185,6 +192,19 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 | <?= $supportStats['count_in_progress'] ?> en cours
             </div>
         </div>
+
+        <div class="card kpi-card" onclick="switchAdminTab('announcements')" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #e11d48; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Cliquer pour gérer les annonces et fonctionnalités">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
+                <span>Nouveautés</span>
+                <span>📢</span>
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #fb7185; margin-top: 0.25rem;">
+                <?= $publishedAnnouncementsCount ?> / <?= $totalAnnouncementsCount ?>
+            </div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
+                <?= $publishedAnnouncementsCount ?> publiée(s) aux joueurs
+            </div>
+        </div>
     </div>
 
     <!-- Barre de Navigation par Onglets de Paramétrage Shogunat -->
@@ -232,6 +252,11 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <?php else: ?>
                 <span class="badge" style="background: rgba(0,0,0,0.3); color: #38bdf8; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= $supportStats['total'] ?></span>
             <?php endif; ?>
+        </button>
+
+        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-tab="announcements" onclick="switchAdminTab('announcements')" style="<?= ($currentTab === 'announcements') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
+            <span>📢</span> Nouveautés & Annonces
+            <span class="badge" style="background: rgba(0,0,0,0.3); color: #fb7185; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= $publishedAnnouncementsCount ?>/<?= $totalAnnouncementsCount ?></span>
         </button>
 
         <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" onclick="switchAdminTab('maintenance')" style="<?= ($currentTab === 'maintenance') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
@@ -1066,6 +1091,207 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
     </div>
 
+    <!-- Section 9 : 📢 Nouveautés & Annonces des Fonctionnalités (Stockage JSON) -->
+    <div class="admin-tab-pane" id="admin-tab-pane-announcements" data-tab="announcements" style="display: <?= $isPaneVisible('announcements') ? 'block' : 'none' ?>;">
+        <div class="card" style="margin-bottom: 2rem; border-color: rgba(225, 29, 72, 0.3);">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h3 style="color: #fb7185; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                        <span>📢</span> Annonces & Nouvelles Fonctionnalités aux Joueurs
+                    </h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem;">
+                        Toutes les annonces sont persistées dans <code>config/announcements.json</code>. Validez leur publication pour déclencher la modale d'explication aux daimyōs.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button type="button" class="btn btn-primary" onclick="openAnnouncementEditModal()" style="background: linear-gradient(135deg, #e11d48, #be123c); border-color: #f43f5e; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>➕</span> Rédiger une Annonce
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive" style="overflow-x: auto;">
+                    <table class="table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; color: var(--text-muted);">
+                                <th style="padding: 0.75rem;">Version & Titre</th>
+                                <th style="padding: 0.75rem;">Badge</th>
+                                <th style="padding: 0.75rem;">Nouveautés</th>
+                                <th style="padding: 0.75rem; text-align: center;">Statut Publication</th>
+                                <th style="padding: 0.75rem; text-align: center;">Lectures Joueurs</th>
+                                <th style="padding: 0.75rem; text-align: center;">Date</th>
+                                <th style="padding: 0.75rem; text-align: right;">Actions Administrateur</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($allAnnouncements)): ?>
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                        Aucune annonce enregistrée dans le fichier JSON.
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($allAnnouncements as $ann): ?>
+                                    <?php 
+                                        $annId = htmlspecialchars($ann['id'] ?? '');
+                                        $annJsonEscaped = htmlspecialchars(json_encode($ann), ENT_QUOTES, 'UTF-8');
+                                        $isPub = !empty($ann['is_published']);
+                                        $featuresCount = is_array($ann['features'] ?? null) ? count($ann['features']) : 0;
+                                        $readCount = $announcementStats[$ann['id'] ?? ''] ?? 0;
+                                    ?>
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 0.75rem;">
+                                            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                                <span style="font-size: 1.4rem;"><?= htmlspecialchars($ann['icon'] ?? '📜') ?></span>
+                                                <div>
+                                                    <div style="font-weight: 700; color: #fff;">
+                                                        <?= htmlspecialchars($ann['title'] ?? '') ?>
+                                                    </div>
+                                                    <div style="font-family: monospace; color: #facc15; font-size: 0.75rem;">
+                                                        <?= htmlspecialchars($ann['version'] ?? '') ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 0.75rem;">
+                                            <span class="badge" style="background: rgba(225, 29, 72, 0.2); color: #fb7185; border: 1px solid rgba(225, 29, 72, 0.4); font-size: 0.75rem;">
+                                                <?= htmlspecialchars($ann['badge'] ?? 'NOUVEAUTÉ') ?>
+                                            </span>
+                                        </td>
+                                        <td style="padding: 0.75rem;">
+                                            <span style="color: #38bdf8; font-weight: 700;">
+                                                <?= $featuresCount ?> fonctionnalité<?= $featuresCount > 1 ? 's' : '' ?>
+                                            </span>
+                                        </td>
+                                        <td style="padding: 0.75rem; text-align: center;">
+                                            <?php if ($isPub): ?>
+                                                <span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); font-weight: 700;">
+                                                    🟢 Validée & Publiée
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge" style="background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.4); font-weight: 700;">
+                                                    🟡 Brouillon (En attente)
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td style="padding: 0.75rem; text-align: center;">
+                                            <span style="font-weight: 700; color: <?= $readCount > 0 ? '#4ade80' : '#94a3b8' ?>;">
+                                                <?= $readCount ?> daimyō<?= $readCount > 1 ? 's' : '' ?>
+                                            </span>
+                                        </td>
+                                        <td style="padding: 0.75rem; text-align: center; color: var(--text-muted); font-size: 0.8rem; white-space: nowrap;">
+                                            <?= htmlspecialchars($ann['date'] ?? '') ?>
+                                        </td>
+                                        <td style="padding: 0.75rem; text-align: right; white-space: nowrap;">
+                                            <div style="display: flex; gap: 0.4rem; justify-content: flex-end;">
+                                                <!-- Bouton Valider / Dévalider -->
+                                                <button type="button" class="btn btn-secondary" onclick="toggleAnnouncementPublish('<?= $annId ?>')" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; font-weight: 700; color: <?= $isPub ? '#facc15' : '#4ade80' ?>;" title="<?= $isPub ? 'Mettre en brouillon' : 'Valider et diffuser aux joueurs' ?>">
+                                                    <?= $isPub ? '⏸️ Dépublier' : '✓ Valider' ?>
+                                                </button>
+                                                <!-- Bouton Aperçu Modal Joueur -->
+                                                <button type="button" class="btn btn-secondary" onclick='openAnnouncementPreview(<?= $annJsonEscaped ?>)' style="padding: 0.3rem 0.6rem; font-size: 0.75rem; color: #38bdf8;" title="Prévisualiser la modale joueur">
+                                                    👁️ Aperçu
+                                                </button>
+                                                <!-- Bouton Éditer -->
+                                                <button type="button" class="btn btn-secondary" onclick='openAnnouncementEditModal(<?= $annJsonEscaped ?>)' style="padding: 0.3rem 0.6rem; font-size: 0.75rem; color: #cbd5e1;" title="Modifier le contenu">
+                                                    ✏️
+                                                </button>
+                                                <!-- Bouton Supprimer -->
+                                                <button type="button" class="btn btn-secondary" onclick="deleteAnnouncement('<?= $annId ?>')" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; color: #f87171;" title="Supprimer définitivement">
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale d'Édition / Création d'une Annonce (Admin) -->
+    <div class="modal-overlay" id="announcementEditModal" style="display:none; position:fixed; inset:0; background:rgba(5,7,15,0.85); backdrop-filter:blur(8px); z-index:1060; align-items:center; justify-content:center; padding:1rem;">
+        <div class="modal-card" style="max-width:820px; width:100%; max-height:92vh; background:#11131a; border:1px solid #e11d48; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 40px rgba(225,29,72,0.3);">
+            <div class="card-header" style="background:linear-gradient(135deg, rgba(225,29,72,0.2) 0%, #11131a 100%); border-bottom:1px solid rgba(225,29,72,0.3); padding:1.25rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+                <h3 id="aem_modal_title" style="margin:0; color:#fff; font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                    <span>📢</span> Rédiger une Annonce
+                </h3>
+                <button type="button" onclick="closeAnnouncementEditModal()" style="background:transparent; border:none; color:#9ca3af; font-size:1.6rem; cursor:pointer;">&times;</button>
+            </div>
+
+            <form id="announcementEditForm" onsubmit="saveAnnouncementFromModal(event)" style="display:flex; flex-direction:column; flex:1; overflow:hidden; margin:0;">
+                <input type="hidden" id="aem_id" name="id" value="">
+                
+                <div style="padding:1.5rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:1.2rem;">
+                    <div style="display:grid; grid-template-columns: 1fr 2fr 1fr; gap:1rem;">
+                        <div>
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Version / Code</label>
+                            <input type="text" id="aem_version" name="version" class="form-control" required placeholder="v1.3.0" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Titre de l'Annonce</label>
+                            <input type="text" id="aem_title" name="title" class="form-control" required placeholder="L'Éveil du Héros & Nouveaux Bâtiments" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Date</label>
+                            <input type="date" id="aem_date" name="date" class="form-control" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr; gap:1rem;">
+                        <div>
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Badge Visuel</label>
+                            <input type="text" id="aem_badge" name="badge" class="form-control" placeholder="⭐ MISE À JOUR MAJEURE" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Icône Principale</label>
+                            <input type="text" id="aem_icon" name="icon" class="form-control" placeholder="⚔️" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Statut Publication</label>
+                            <select id="aem_is_published" name="is_published" class="form-control" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                                <option value="1">🟢 Validée & Publiée aux joueurs</option>
+                                <option value="0">🟡 Brouillon (En attente)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Résumé d'accroche pour les Daimyōs</label>
+                        <textarea id="aem_summary" name="summary" rows="2" class="form-control" placeholder="Décrivez succinctement l'importance de cette mise à jour pour vos joueurs..." style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px; line-height:1.4;"></textarea>
+                    </div>
+
+                    <!-- Liste dynamique des fonctionnalités -->
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                            <label style="font-size:0.85rem; font-weight:800; color:#facc15; margin:0; display:flex; align-items:center; gap:0.4rem;">
+                                <span>🏯</span> Fonctionnalités & Améliorations Détaillées
+                            </label>
+                            <button type="button" onclick="addFeatureRowToModal()" class="btn btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.75rem; border-color:#facc15; color:#facc15;">
+                                + Ajouter une nouveauté
+                            </button>
+                        </div>
+
+                        <div id="aem_features_container" style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <!-- Lignes de fonctionnalités injectées en JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background:rgba(0,0,0,0.4); border-top:1px solid rgba(255,255,255,0.08); padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+                    <button type="button" class="btn btn-secondary" onclick="closeAnnouncementEditModal()">Annuler</button>
+                    <button type="submit" id="aem_submit_btn" class="btn btn-primary" style="background:linear-gradient(135deg, #e11d48, #be123c); border-color:#f43f5e; font-weight:700;">
+                        💾 Sauvegarder dans le JSON
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Section 8 : ⚠️ Décret Suprême - Réinitialisation Complète du Monde Féodal -->
     <div class="admin-tab-pane" id="admin-tab-pane-maintenance" data-tab="maintenance" style="display: <?= $isPaneVisible('maintenance') ? 'block' : 'none' ?>;">
         <div class="card" style="margin-bottom: 2rem; border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(30, 10, 15, 0.75);">
@@ -1215,7 +1441,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 <script>
 // --- GESTION DU SYSTÈME D'ONGLETS DU SHOGUNAT ---
 function switchAdminTab(tabKey) {
-    const validTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'maintenance', 'all'];
+    const validTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'maintenance', 'all'];
     if (!validTabs.includes(tabKey)) tabKey = 'game';
 
     // Afficher ou masquer les panneaux correspondants
@@ -1274,6 +1500,195 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+// --- FONCTIONS DE GESTION DES ANNONCES & NOUVEAUTÉS (ADMIN) ---
+function openAnnouncementEditModal(ann = null) {
+    const modal = document.getElementById('announcementEditModal');
+    const container = document.getElementById('aem_features_container');
+    container.innerHTML = '';
+
+    if (ann) {
+        document.getElementById('aem_modal_title').innerHTML = '<span>✏️</span> Modifier l\'Annonce';
+        document.getElementById('aem_id').value = ann.id || '';
+        document.getElementById('aem_version').value = ann.version || 'v1.0';
+        document.getElementById('aem_title').value = ann.title || '';
+        document.getElementById('aem_date').value = ann.date || new Date().toISOString().split('T')[0];
+        document.getElementById('aem_badge').value = ann.badge || '⭐ NOUVEAUTÉ';
+        document.getElementById('aem_icon').value = ann.icon || '⚔️';
+        document.getElementById('aem_is_published').value = ann.is_published ? '1' : '0';
+        document.getElementById('aem_summary').value = ann.summary || '';
+
+        if (Array.isArray(ann.features) && ann.features.length > 0) {
+            ann.features.forEach(f => addFeatureRowToModal(f));
+        } else {
+            addFeatureRowToModal();
+        }
+    } else {
+        document.getElementById('aem_modal_title').innerHTML = '<span>📢</span> Rédiger une Nouvelle Annonce';
+        document.getElementById('announcementEditForm').reset();
+        document.getElementById('aem_id').value = '';
+        document.getElementById('aem_date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('aem_badge').value = '⭐ NOUVEAUTÉ';
+        document.getElementById('aem_icon').value = '⚔️';
+        document.getElementById('aem_is_published').value = '1';
+        addFeatureRowToModal();
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeAnnouncementEditModal() {
+    const modal = document.getElementById('announcementEditModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function addFeatureRowToModal(f = null) {
+    const container = document.getElementById('aem_features_container');
+    const row = document.createElement('div');
+    row.className = 'aem-feature-row';
+    row.style.cssText = 'background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:0.85rem; display:flex; flex-direction:column; gap:0.5rem;';
+
+    const iconVal = f ? (f.icon || '🔹') : '🔹';
+    const catVal = f ? (f.category || 'Général') : 'Général';
+    const titleVal = f ? (f.title || '') : '';
+    const descVal = f ? (f.description || '') : '';
+
+    row.innerHTML = `
+        <div style="display:grid; grid-template-columns: 80px 1.5fr 2fr 40px; gap:0.6rem; align-items:center;">
+            <div>
+                <input type="text" class="feature-icon-input form-control" placeholder="Icône" value="${escapeHtml(iconVal)}" style="padding:0.4rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:4px; text-align:center;">
+            </div>
+            <div>
+                <input type="text" class="feature-category-input form-control" placeholder="Catégorie (ex: Cité, Héros)" value="${escapeHtml(catVal)}" style="padding:0.4rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:4px;">
+            </div>
+            <div>
+                <input type="text" class="feature-title-input form-control" placeholder="Titre de la fonctionnalité" value="${escapeHtml(titleVal)}" required style="padding:0.4rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:4px;">
+            </div>
+            <div style="text-align:right;">
+                <button type="button" onclick="this.closest('.aem-feature-row').remove()" style="background:transparent; border:none; color:#f87171; font-size:1.2rem; cursor:pointer;" title="Supprimer cette fonctionnalité">&times;</button>
+            </div>
+        </div>
+        <div>
+            <textarea class="feature-desc-input form-control" rows="2" placeholder="Explications claires pour les joueurs sur le fonctionnement et les bénéfices..." style="width:100%; padding:0.45rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:4px; font-size:0.85rem; line-height:1.4;">${escapeHtml(descVal)}</textarea>
+        </div>
+    `;
+
+    container.appendChild(row);
+}
+
+async function saveAnnouncementFromModal(event) {
+    if (event) event.preventDefault();
+
+    const submitBtn = document.getElementById('aem_submit_btn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>⏳</span> Sauvegarde en cours...';
+
+    const id = document.getElementById('aem_id').value;
+    const version = document.getElementById('aem_version').value;
+    const title = document.getElementById('aem_title').value;
+    const date = document.getElementById('aem_date').value;
+    const badge = document.getElementById('aem_badge').value;
+    const icon = document.getElementById('aem_icon').value;
+    const isPublished = document.getElementById('aem_is_published').value;
+    const summary = document.getElementById('aem_summary').value;
+
+    const featureRows = document.querySelectorAll('.aem-feature-row');
+    const features = [];
+    featureRows.forEach(row => {
+        const fIcon = row.querySelector('.feature-icon-input').value.trim();
+        const fCat = row.querySelector('.feature-category-input').value.trim();
+        const fTitle = row.querySelector('.feature-title-input').value.trim();
+        const fDesc = row.querySelector('.feature-desc-input').value.trim();
+        if (fTitle) {
+            features.push({
+                icon: fIcon || '🔹',
+                category: fCat || 'Général',
+                title: fTitle,
+                description: fDesc
+            });
+        }
+    });
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'admin_save');
+        if (id) formData.append('id', id);
+        formData.append('version', version);
+        formData.append('title', title);
+        formData.append('date', date);
+        formData.append('badge', badge);
+        formData.append('icon', icon);
+        formData.append('is_published', isPublished);
+        formData.append('summary', summary);
+        formData.append('features', JSON.stringify(features));
+
+        const res = await fetch('/api/announcements.php', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            sessionStorage.setItem('admin_active_tab', 'announcements');
+            window.location.reload();
+        } else {
+            alert(data.error || "Erreur lors de la sauvegarde.");
+        }
+    } catch (e) {
+        console.error("Erreur sauvegarde annonce:", e);
+        alert("Erreur réseau lors de la transmission.");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+}
+
+async function toggleAnnouncementPublish(id) {
+    if (!id) return;
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'admin_toggle_publish');
+        formData.append('id', id);
+
+        const res = await fetch('/api/announcements.php', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            sessionStorage.setItem('admin_active_tab', 'announcements');
+            window.location.reload();
+        } else {
+            alert(data.error || "Impossible de changer le statut.");
+        }
+    } catch (e) {
+        console.error("Erreur publication annonce:", e);
+        alert("Erreur réseau.");
+    }
+}
+
+async function deleteAnnouncement(id) {
+    if (!id) return;
+    if (!confirm("Voulez-vous vraiment supprimer définitivement cette annonce du fichier JSON ?")) {
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'admin_delete');
+        formData.append('id', id);
+
+        const res = await fetch('/api/announcements.php', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            sessionStorage.setItem('admin_active_tab', 'announcements');
+            window.location.reload();
+        } else {
+            alert(data.error || "Impossible de supprimer l'annonce.");
+        }
+    } catch (e) {
+        console.error("Erreur suppression annonce:", e);
+        alert("Erreur réseau.");
+    }
+}
 
 // --- FONCTIONS SUPPORT & TICKETS (ADMIN) ---
 function filterAdminTickets() {

@@ -49,6 +49,9 @@
     </div>
 </div>
 
+<!-- Modale d'Annonces & Notifications des Fonctionnalités -->
+<?php require_once __DIR__ . '/announcement_modal.php'; ?>
+
 <!-- Modale Universelle de la Fiche Daimyō / Profil (Style Travian) -->
 <div class="modal-overlay" id="playerProfileModal" style="display:none; position:fixed; inset:0; background:rgba(5,7,15,0.85); backdrop-filter:blur(10px); z-index:1000; align-items:center; justify-content:center;">
     <div class="modal-card" style="max-width:750px; width:92%; max-height:90vh; background:rgba(17,18,24,0.96); border:1px solid #dc2626; border-radius:12px; box-shadow:0 0 50px rgba(220,38,38,0.25); display:flex; flex-direction:column; overflow:hidden;">
