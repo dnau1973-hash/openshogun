@@ -211,7 +211,7 @@ class QuestEngine {
                 'icon' => '📜',
                 'mentor_name' => 'Katsumoto, Maître d\'Armes',
                 'lore' => 'Tout grand chef de guerre grave sa volonté dans la mémoire des hommes. Ouvrez votre fiche officielle de Daimyō et inscrivez votre devise de clan pour proclamer vos ambitions.',
-                'action_url' => 'javascript:openPlayerProfileModal()',
+                'action_url' => 'javascript:openEditMottoModal()',
                 'action_label' => 'Modifier ma Devise',
                 'target_slot_hint' => 'Profil Daimyō en haut à droite',
                 'rewards' => [

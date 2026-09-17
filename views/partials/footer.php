@@ -95,7 +95,7 @@
                     <h3 style="color:#dc2626; font-size:1rem; font-weight:800; margin:0; display:flex; align-items:center; gap:0.4rem;">
                         <span>📜</span> Devise & Chronique du Daimyō
                     </h3>
-                    <button id="profEditBioBtn" onclick="toggleBioEdit()" style="display:none; background:transparent; border:none; color:#dc2626; font-size:0.8rem; cursor:pointer; text-decoration:underline;">
+                    <button id="profEditBioBtn" onclick="toggleBioEdit()" style="display:none; background:rgba(220,38,38,0.18); border:1px solid #dc2626; color:#fca5a5; font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:6px; cursor:pointer; transition:all 0.2s;">
                         ✏️ Modifier ma devise
                     </button>
                 </div>
@@ -216,8 +216,9 @@
 <script>
 let currentViewingProfileId = null;
 
-async function openPlayerProfileModal(userId) {
-    const uid = parseInt(userId, 10);
+async function openPlayerProfileModal(userId = null, autoEdit = false) {
+    const currentLoggedUserId = <?= (int)($user['id'] ?? 0) ?>;
+    const uid = parseInt(userId || currentLoggedUserId, 10);
     if (!uid || isNaN(uid) || uid <= 0) {
         showModalAlert("Information", "Aucun Daimyō répertorié sur ce territoire.", "info");
         return;
@@ -305,6 +306,9 @@ async function openPlayerProfileModal(userId) {
         const editBtn = document.getElementById('profEditBioBtn');
         if (p.is_self) {
             editBtn.style.display = 'inline-block';
+            if (autoEdit) {
+                toggleBioEdit(true);
+            }
         } else {
             editBtn.style.display = 'none';
         }
@@ -373,12 +377,22 @@ function closePlayerProfileModal() {
     if (modal) modal.style.display = 'none';
 }
 
-function toggleBioEdit() {
+function openEditMottoModal() {
+    openPlayerProfileModal(<?= (int)($user['id'] ?? 0) ?>, true);
+}
+
+function toggleBioEdit(forceOpen = null) {
     const view = document.getElementById('profBioView');
     const container = document.getElementById('profBioEditContainer');
-    if (container.style.display === 'none') {
+    const shouldOpen = (forceOpen !== null) ? forceOpen : (container.style.display === 'none');
+    if (shouldOpen) {
         container.style.display = 'block';
         view.style.display = 'none';
+        const input = document.getElementById('profBioInput');
+        if (input) {
+            input.focus();
+            input.select();
+        }
     } else {
         container.style.display = 'none';
         view.style.display = 'block';
@@ -397,8 +411,14 @@ async function saveBio() {
 
         if (data.success) {
             document.getElementById('profBioView').innerText = data.bio;
-            toggleBioEdit();
+            toggleBioEdit(false);
             showModalAlert("Manifeste Sauvegardé", data.message, "success");
+
+            // Synchroniser avec l'affichage éventuel du Tenshu sur la page en cours
+            const tenshuBio = document.getElementById('tenshuDaimyoBioText');
+            if (tenshuBio) {
+                tenshuBio.innerText = '« ' + (data.bio || "Fier Daimyō au service de l'honneur de son clan et de l'Empereur.") + ' »';
+            }
         } else {
             showModalAlert("Erreur", data.error || "Impossible d'enregistrer.", "danger");
         }

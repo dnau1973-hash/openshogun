@@ -630,6 +630,39 @@ if (!$isEmptyPlot) {
             </div>
         <?php endif; ?>
 
+        <!-- ZONE EXCLUSIVE DU TENSHU : PROCLAMATION & DEVISE DU DAIMYŌ -->
+        <?php if ($code === 'hq'): ?>
+            <div class="card" style="margin-top: 1.5rem; background: linear-gradient(135deg, rgba(30, 27, 75, 0.4) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(220, 38, 38, 0.45); border-radius: 12px; padding: 1.5rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <span style="font-size: 0.75rem; font-weight: 800; color: #dc2626; text-transform: uppercase; letter-spacing: 0.5px;">
+                            🏯 Résidence Suprême & Siège du Commandement
+                        </span>
+                        <h3 style="color: #fff; margin: 0.3rem 0 0 0; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📜</span> Devise & Chronique Officielle du Daimyō
+                        </h3>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.35rem 0 0 0;">
+                            C'est du haut de ce Donjon que vous proclamez la devise qui guide vos samouraïs et inspire la crainte à vos rivaux.
+                        </p>
+                    </div>
+                    <div>
+                        <button type="button" onclick="openEditMottoModal()" class="btn btn-primary" style="font-size: 0.82rem; padding: 0.5rem 1rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; background: linear-gradient(135deg, #b91c1c, #dc2626); border-color: #f87171; box-shadow: 0 3px 12px rgba(220, 38, 38, 0.35); cursor: pointer; border-radius: 8px;">
+                            <span>✏️</span> Modifier ma Devise
+                        </button>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 0, 0, 0.4); border-left: 4px solid #dc2626; border-radius: 0 8px 8px 0; padding: 1rem 1.25rem;">
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase; font-weight: 700;">
+                        Proclamation actuelle du Daimyō <?= htmlspecialchars($user['username']) ?> :
+                    </div>
+                    <div id="tenshuDaimyoBioText" style="font-size: 0.95rem; color: #f1f5f9; font-style: italic; line-height: 1.6;">
+                        &laquo; <?= htmlspecialchars(!empty($user['bio']) ? $user['bio'] : "Fier Daimyō au service de l'honneur de son clan et de l'Empereur.") ?> &raquo;
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
     <?php endif; ?>
 
 </div>

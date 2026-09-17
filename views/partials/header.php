@@ -98,6 +98,9 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
             <span style="cursor: pointer;" onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)" title="Consulter votre Fiche de Daimyō">
                 Daimyō <strong><?= htmlspecialchars($user['username']) ?></strong>
             </span>
+            <button type="button" onclick="openEditMottoModal()" class="btn btn-secondary" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; border-color: rgba(220,38,38,0.5); color: #fca5a5; display: inline-flex; align-items: center; gap: 0.3rem; border-radius: 6px; cursor: pointer;" title="Modifier ma Devise de Daimyō">
+                <span>📜</span> <span>Devise</span>
+            </button>
             <a href="?page=ranking" style="text-decoration: none; color: inherit;" title="Classement des Daimyōs & Tableau d'Honneur">
                 <span>🏆 <?= number_format($user['points']) ?> pts</span>
             </a>
