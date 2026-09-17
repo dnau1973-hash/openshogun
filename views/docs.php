@@ -665,6 +665,51 @@ foreach ($allUnits as $u) {
             </div>
         </div>
 
+        <!-- NOUVELLE ILLUSTRATION D'UNITÉ : FORTERESSE ROULANTE BLINDÉE -->
+        <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(109, 40, 217, 0.08) 0%, rgba(30, 64, 175, 0.04) 100%), var(--bg-surface, #fdfbf7); border: 1px solid rgba(109, 40, 217, 0.35); border-radius: 12px; padding: 1.5rem; border-left: 6px solid #6d28d9;">
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+                <?php 
+                    $fortressDisk = __DIR__ . '/../public/assets/units/forteresse_roulante_tokugawa.jpg';
+                    $fortressSrc = '/public/assets/units/forteresse_roulante_tokugawa.jpg' . (file_exists($fortressDisk) ? '?v=' . filemtime($fortressDisk) : '');
+                ?>
+                <div style="position: relative; width: 280px; max-width: 100%; height: 175px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; flex-shrink: 0;"
+                     onclick="openDocsLightbox('Forteresse Roulante Blindée', '<?= $fortressSrc ?>', 'Bastion Mobile Imprenable & Siège Lourd', 'Château mobile à plusieurs étages surmonté d\'un toit en pagode et blindé de plaques de fer forgé. Il abrite tireurs et officiers sous un feu nourri d\'arquebuses.', '« La patience d\'un roc, la force d\'une montagne qui marche. » — Tokugawa Ieyasu')">
+                    <img src="<?= $fortressSrc ?>" alt="Forteresse Roulante Blindée" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #c084fc; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                        ⛩️ Clan Tokugawa &bull; Bastion Suprême
+                    </span>
+                    <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                        🔍 Agrandir
+                    </span>
+                </div>
+                <div style="flex: 1; min-width: 260px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="background: #6d28d9; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
+                            ✨ Nouvelle Illustration Intégrée
+                        </span>
+                        <span style="font-size: 0.8rem; color: #6d28d9; font-weight: 700;">Atelier de Siège Provincial (Blindage Suprême du Jeu)</span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.35rem; color: var(--text-main);">
+                        Forteresse Roulante Blindée (徳川移動要塞)
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 0.75rem 0;">
+                        Le chef-d'œuvre défensif de la stratégie de Tokugawa Ieyasu. Véritable citadelle sur roues en madriers de chêne et plaques de fer forgé rivetées, ce bastion mobile fait ricocher toutes les flèches adverses. Il abrite une redoutable batterie d'arquebusiers Tanegashima tirant par des meurtrières protégées et sert de point d'appui impénétrable pour les assauts de longue durée.
+                    </p>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; background: var(--bg-ink, #ede5d5); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <span style="color: #dc2626; font-weight: 800;">⚔️ 1 300 Atq</span> &bull;
+                            <span style="color: #2563eb; font-weight: 800;">🛡️ 8 400 Blindage (Record)</span> &bull;
+                            <span style="color: #16a34a; font-weight: 800;">⚡ 6 500 Vitesse</span> &bull;
+                            <span style="color: #b45309; font-weight: 700;">🎒 2 500 Fret</span>
+                        </div>
+                        <a href="?page=docs&tab=siege" class="btn btn-primary" style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem;">
+                            🏯 Voir au Chapitre 5 (Atelier de Siège) &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- TABLEAU SYNOPTIQUE DE L'ARMEMENT FÉODAL (25 UNITÉS) -->
         <div class="card" style="background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
