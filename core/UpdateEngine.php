@@ -28,6 +28,18 @@ class UpdateEngine {
     }
 
     /**
+     * Exécute une commande Git avec bypass safe.directory systématique
+     */
+    public function git(string $subCommand, array &$output = [], int &$ret = 0): string {
+        $safeOpt = "-c safe.directory=* -c safe.directory=" . escapeshellarg($this->basePath);
+        $cmd = "cd " . escapeshellarg($this->basePath) . " && git {$safeOpt} {$subCommand} 2>&1";
+        $output = [];
+        $ret = 0;
+        exec($cmd, $output, $ret);
+        return trim(implode("\n", $output));
+    }
+
+    /**
      * Masque un token GitHub dans une chaîne pour la sécurité
      */
     public function maskToken(string $text): string {
@@ -41,22 +53,15 @@ class UpdateEngine {
      * Récupère les métadonnées Git locales du projet
      */
     public function getLocalInfo(): array {
-        $exec = function(string $cmd): string {
-            $output = [];
-            $ret = 0;
-            exec("cd {$this->basePath} && {$cmd} 2>&1", $output, $ret);
-            return trim(implode("\n", $output));
-        };
+        $branch = $this->git('rev-parse --abbrev-ref HEAD') ?: 'main';
+        $commitSha = $this->git('rev-parse HEAD') ?: 'Inconnu';
+        $shortSha = $this->git('rev-parse --short HEAD') ?: substr($commitSha, 0, 7);
+        $commitMessage = $this->git('log -1 --pretty=%B') ?: 'Aucun message';
+        $authorName = $this->git('log -1 --pretty=%an') ?: 'Auteur inconnu';
+        $authorDate = $this->git('log -1 --pretty=%ad --date=iso') ?: date('Y-m-d H:i:s');
+        $humanDate = $this->git('log -1 --pretty=%cr') ?: 'Récemment';
 
-        $branch = $exec('git rev-parse --abbrev-ref HEAD') ?: 'main';
-        $commitSha = $exec('git rev-parse HEAD') ?: 'Inconnu';
-        $shortSha = $exec('git rev-parse --short HEAD') ?: substr($commitSha, 0, 7);
-        $commitMessage = $exec('git log -1 --pretty=%B') ?: 'Aucun message';
-        $authorName = $exec('git log -1 --pretty=%an') ?: 'Auteur inconnu';
-        $authorDate = $exec('git log -1 --pretty=%ad --date=iso') ?: date('Y-m-d H:i:s');
-        $humanDate = $exec('git log -1 --pretty=%cr') ?: 'Récemment';
-
-        $statusOutput = $exec('git status --porcelain');
+        $statusOutput = $this->git('status --porcelain');
         $dirtyFiles = [];
         if (!empty($statusOutput)) {
             $lines = explode("\n", $statusOutput);
@@ -182,10 +187,10 @@ class UpdateEngine {
 
         // 3. Fallback en ligne de commande locale : git ls-remote avec token
         $repoUrl = "https://{$this->token}@github.com/{$this->owner}/{$this->repo}.git";
-        $cmd = "git ls-remote " . escapeshellarg($repoUrl) . " " . escapeshellarg("refs/heads/{$this->branch}");
+        $subCmd = "ls-remote " . escapeshellarg($repoUrl) . " " . escapeshellarg("refs/heads/{$this->branch}");
         $output = [];
         $ret = 0;
-        exec("cd {$this->basePath} && {$cmd} 2>&1", $output, $ret);
+        $this->git($subCmd, $output, $ret);
 
         if ($ret === 0 && !empty($output)) {
             $line = trim($output[0] ?? '');
@@ -232,7 +237,7 @@ class UpdateEngine {
                 $stashOutput = [];
                 $stashRet = 0;
                 $stashName = "Auto-stash-OpenShogun-" . date('Ymd-His');
-                exec("cd {$this->basePath} && git stash push -m " . escapeshellarg($stashName) . " 2>&1", $stashOutput, $stashRet);
+                $this->git("stash push -m " . escapeshellarg($stashName), $stashOutput, $stashRet);
                 $logs[] = "Stash résultat : " . trim(implode("\n", $stashOutput));
             } else {
                 return [
@@ -247,11 +252,11 @@ class UpdateEngine {
         // Commande Git Pull avec Token sécurisé
         $logs[] = "📥 [2/4] Récupération et fusion des modifications (git pull)...";
         $pullUrl = "https://{$this->token}@github.com/{$this->owner}/{$this->repo}.git";
-        $pullCmd = "git pull " . escapeshellarg($pullUrl) . " " . escapeshellarg($this->branch);
+        $pullCmd = "pull " . escapeshellarg($pullUrl) . " " . escapeshellarg($this->branch);
 
         $pullOutput = [];
         $pullRet = 0;
-        exec("cd {$this->basePath} && {$pullCmd} 2>&1", $pullOutput, $pullRet);
+        $this->git($pullCmd, $pullOutput, $pullRet);
 
         $maskedPullLog = $this->maskToken(implode("\n", $pullOutput));
         $logs[] = $maskedPullLog;
