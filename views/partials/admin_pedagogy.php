@@ -357,6 +357,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>High angle aerial RTS village view of a feudal Japanese castle town, Sengoku period, centered on a massive stone Tenshu citadel, courtyards, dojo, market streets, misty morning light, cherry blossoms, detailed isometric strategy game background</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Vue aérienne en plongée RTS d'une ville fortifiée japonaise féodale, période Sengoku, centrée sur un donjon Tenshu colossal en pierre, cours intérieures, dojo, ruelles marchandes, brume matinale, cerisiers en fleurs, arrière-plan de jeu de stratégie isométrique détaillé.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="High angle aerial RTS village view of a feudal Japanese castle town, Sengoku period, centered on a massive stone Tenshu citadel, courtyards, dojo, market streets, misty morning light, cherry blossoms, detailed isometric strategy game background" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -377,6 +380,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Top-down RTS strategic resource landscape of rural feudal Japan, terraced flooded rice paddies reflecting blue sky, lush bamboo lumber forests, stone quarry cliffs, sacred mountain shrine river, miniature tactical game surface</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Paysage stratégique de ressources en vue du dessus (RTS) du Japon féodal rural, rizières en terrasses inondées reflétant le ciel bleu, forêts denses de bambous et de cèdres, falaises de carrières de pierre, sanctuaire de montagne sacré avec rivière, plateau de jeu tactique miniature.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Top-down RTS strategic resource landscape of rural feudal Japan, terraced flooded rice paddies reflecting blue sky, lush bamboo lumber forests, stone quarry cliffs, sacred mountain shrine river, miniature tactical game surface" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -397,6 +403,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Isolated isometric sprite of a monumental multi-tiered Japanese castle keep (Tenshu), black lacquered timber, white plaster walls, curved green tiled roofs, golden ornaments, high stone foundation base, transparent background, RTS building asset</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Sprite isométrique isolé d'un monumental donjon de château japonais à plusieurs étages (Tenshu), bois laqué noir, murs de plâtre blanc, toits courbés en tuiles vertes, ornements dorés, haute base en fondation de pierre, fond transparent.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Isolated isometric sprite of a monumental multi-tiered Japanese castle keep (Tenshu), black lacquered timber, white plaster walls, curved green tiled roofs, golden ornaments, high stone foundation base, transparent background, RTS building asset" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -417,6 +426,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Isolated game tile sprite of lush green terraced flooded rice field, clean wooden irrigation sluice channels, reflective clear water, vibrant green shoots, RTS terrain asset, transparent background</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Tuile de jeu isolée d'une rizière en terrasses inondée d'un vert luxuriant, canaux d'irrigation et vannes en bois propre, eau claire réfléchissante, jeunes pousses vert vif, fond transparent.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Isolated game tile sprite of lush green terraced flooded rice field, clean wooden irrigation sluice channels, reflective clear water, vibrant green shoots, RTS terrain asset, transparent background" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -437,6 +449,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Isolated game tile sprite of a Japanese lumberjack timber camp, cut cedar logs stacked neatly, rustic wooden shed with saws and axes, sawdust ground, transparent background</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Tuile de jeu isolée d'un camp de bûcherons japonais, rondins de cèdre coupés et empilés soigneusement, abri rustique en bois avec scies et haches, sol couvert de sciure, fond transparent.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Isolated game tile sprite of a Japanese lumberjack timber camp, cut cedar logs stacked neatly, rustic wooden shed with saws and axes, sawdust ground, transparent background" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -458,6 +473,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Master swordsman samurai in mid-stance drawing sharp steel katana blade, crimson and black silk cords on lamellar armor, fierce focus, flying embers, ukiyo-e digital illustration</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Maître épéiste samouraï en posture de frappe dégainant sa lame d'acier katana tranchante, cordons de soie pourpre et noire sur armure lamellaire, regard d'une intensité féroce, braises incandescentes flottantes, illustration numérique style ukiyo-e.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Master swordsman samurai in mid-stance drawing sharp steel katana blade, crimson and black silk cords on lamellar armor, fierce focus, flying embers, ukiyo-e digital illustration" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -479,6 +497,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Dynamic cinematic illustration of an agile Takeda clan samurai scout cavalryman, mounted on a swift wild Japanese mountain horse (Kiso horse), lightweight crimson red lacquered armor with vermilion cords, horned jingasa, scouting yari spear, back banner (sashimono) with Takeda four-diamond crest, rocky mountain ridge overlooking misty valleys at sunrise, ukiyo-e digital art</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Illustration cinématographique d'un agile cavalier éclaireur samouraï Takeda, monté sur un cheval de montagne japonais rapide (cheval Kiso), armure légère laquée rouge écarlate, jingasa cornu, lance yari, bannière dorsale aux 4 losanges Takeda, crête rocheuse dominant les vallées à l'aube, art ukiyo-e.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Dynamic cinematic illustration of an agile Takeda clan samurai scout cavalryman, mounted on a swift wild Japanese mountain horse (Kiso horse), lightweight crimson red lacquered armor with vermilion cords, horned jingasa, scouting yari spear, back banner (sashimono) with Takeda four-diamond crest, rocky mountain ridge overlooking misty valleys at sunrise, ukiyo-e digital art" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -500,6 +521,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Oda clan matchlock musketeer aiming a wooden Tanegashima gun, smoke curling from the muzzle, bamboo tate barricade in foreground, glowing matchcord, dynamic battle action pose</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Mousquetaire du clan Oda visant avec une arquebuse Tanegashima en bois, volutes de fumée au canon, barricade de boucliers en bambou tate au premier plan, mèche incandescente, pose dynamique d'action de bataille.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Oda clan matchlock musketeer aiming a wooden Tanegashima gun, smoke curling from the muzzle, bamboo tate barricade in foreground, glowing matchcord, dynamic battle action pose" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -520,6 +544,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Epic heroic portrait of a venerable Sengoku Daimyo general in full ornate black and gold samurai armor, horned kabuto helmet, holding an ancient katana, wind blowing cherry blossom petals, dramatic moody lighting</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Portrait héroïque d'un général daimyō Sengoku en armure d'apparat noire et ornée, casque kabuto cornu, tenant un katana ancestral, pétales de cerisier soufflés par le vent, lumière dramatique et majestueuse.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Epic heroic portrait of a venerable Sengoku Daimyo general in full ornate black and gold samurai armor, horned kabuto helmet, holding an ancient katana, wind blowing cherry blossom petals, dramatic moody lighting" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -541,6 +568,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Monumental ancient Japanese siege ram machine, colossal battering ram shaped like a ferocious roaring dragon head sculpted from blackened iron and bronze, spitting glowing embers and smoke from its nostrils, heavy fortified wooden carriage built of giant cedar timbers with layered damp leather and reinforced iron plating, iron-rimmed massive spiked wooden wheels rolling in muddy battlefield tracks, vermilion red war banners bearing the four-diamond Takeda clan crest (Takeda-bishi) fluttering on the roof, advancing aggressively toward the colossal stone gate of a besieged Japanese castle fortress at dusk, flying sparks, fiery arrows raining from the sky, misty battlefield atmosphere, dynamic cinematic wide low-angle shot, dramatic volumetric lighting, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Bélier colossal en tête de dragon rugissant de fer et bronze crachant feu et fumée, lourd charriot blindé en poutres de cèdre et cuir humide, roues géantes hérissées de pointes dans la boue, bannières rouges Takeda, avançant vers la porte de la forteresse au crépuscule sous une pluie de flèches enflammées, style ukiyo-e 8k.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Monumental ancient Japanese siege ram machine, colossal battering ram shaped like a ferocious roaring dragon head sculpted from blackened iron and bronze, spitting glowing embers and smoke from its nostrils, heavy fortified wooden carriage built of giant cedar timbers with layered damp leather and reinforced iron plating, iron-rimmed massive spiked wooden wheels rolling in muddy battlefield tracks, vermilion red war banners bearing the four-diamond Takeda clan crest (Takeda-bishi) fluttering on the roof, advancing aggressively toward the colossal stone gate of a besieged Japanese castle fortress at dusk, flying sparks, fiery arrows raining from the sky, misty battlefield atmosphere, dynamic cinematic wide low-angle shot, dramatic volumetric lighting, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -562,6 +592,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Dynamic cinematic illustration of a stealth Tokugawa clan shinobi assassin cavalryman mounted on a swift black warhorse with muffled hooves, wearing dark midnight indigo and obsidian shinobi robes with concealed light chainmail armor, menacing black mempo demon half-mask, drawing a razor-sharp steel ninjato blade from his back in mid-stride, smoke bomb canister releasing purple-tinted mist around the horse's legs, subtle Tokugawa triple-hollyhock crest (Mitsuba Aoi) embroidered on his dark sash, bursting out from a dense misty bamboo forest in a surprise night ambush, full moon shining through bamboo stalks casting dramatic moonlight shafts and deep shadows, flying bamboo leaves, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Cavalier assassin shinobi furtif Tokugawa sur destrier noir aux sabots assourdis, tenue indigo et masque démon mempo, dégainant un ninjato acéré dans une fumée violette, surgissant d'une forêt de bambous embrumée en embuscade nocturne au clair de lune, style ukiyo-e 8k.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Dynamic cinematic illustration of a stealth Tokugawa clan shinobi assassin cavalryman mounted on a swift black warhorse with muffled hooves, wearing dark midnight indigo and obsidian shinobi robes with concealed light chainmail armor, menacing black mempo demon half-mask, drawing a razor-sharp steel ninjato blade from his back in mid-stride, smoke bomb canister releasing purple-tinted mist around the horse's legs, subtle Tokugawa triple-hollyhock crest (Mitsuba Aoi) embroidered on his dark sash, bursting out from a dense misty bamboo forest in a surprise night ambush, full moon shining through bamboo stalks casting dramatic moonlight shafts and deep shadows, flying bamboo leaves, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -583,6 +616,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Monumental ancient Japanese siege catapult traction trebuchet hurling glowing fiery ceramic explosive jars (Horokubiya), heavy fortified timber frame built of thick cypress beams with blackened iron fittings and counterweights, wooden launching arm in mid-motion releasing a blazing ceramic firepot trailing golden sparks and dark smoke across the twilight sky, Tokugawa clan ashigaru siege engineers in indigo armor operating tension ropes and torches, protective bamboo tate pavise mantlets in foreground bearing the Tokugawa three-hollyhock crest (Mitsuba Aoi), distant besieged Japanese castle keep on fire, embers and smoke drifting in the wind, dramatic cinematic low-angle action shot, warm fire glow and volumetric dusk lighting, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Trébuchet de siège monumental propulsant des bombes incendiaires explosives en céramique (Horokubiya) dans le ciel crépusculaire, ingénieurs ashigaru Tokugawa manœuvrant les cordes et torches, pavois en bambou au blason Tokugawa, forteresse en flammes au loin, style ukiyo-e 8k.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Monumental ancient Japanese siege catapult traction trebuchet hurling glowing fiery ceramic explosive jars (Horokubiya), heavy fortified timber frame built of thick cypress beams with blackened iron fittings and counterweights, wooden launching arm in mid-motion releasing a blazing ceramic firepot trailing golden sparks and dark smoke across the twilight sky, Tokugawa clan ashigaru siege engineers in indigo armor operating tension ropes and torches, protective bamboo tate pavise mantlets in foreground bearing the Tokugawa three-hollyhock crest (Mitsuba Aoi), distant besieged Japanese castle keep on fire, embers and smoke drifting in the wind, dramatic cinematic low-angle action shot, warm fire glow and volumetric dusk lighting, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -604,6 +640,9 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
                                 <em>Monumental ancient Japanese rolling armored siege fortress, colossal multi-tiered wooden mobile bastion on massive iron-studded timber wheels, heavily armored walls built of thick oak logs reinforced with bolted iron and bronze plates, multiple narrow arrow slits and triangular gun ports with Tanegashima matchlocks and yari spears protruding, curved Japanese pagoda-style tiled roof with defensive parapet, fluttering deep purple and gold war banners bearing the Tokugawa clan triple-hollyhock crest (Mitsuba Aoi), samurai commanders in ornate black and gold armor directing the advance from the upper watchtower, rolling relentlessly across a muddy battlefield toward besieged enemy fortifications at sunset, flaming enemy arrows harmlessly deflecting off the heavy iron plating, dramatic low-angle perspective emphasizing its colossal size and invulnerability, smoke plumes and golden dust in the air, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Bastion mobile géant à plusieurs étages sur roues cloutées de fer, parois de chêne blindées de plaques de fer et bronze, sabords de tir d'arquebuses et meurtrières de lances, bannières pourpres Tokugawa, commandants samouraïs au sommet, flèches enflammées ricochant, ukiyo-e 8k.</em>
+                                </div>
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Monumental ancient Japanese rolling armored siege fortress, colossal multi-tiered wooden mobile bastion on massive iron-studded timber wheels, heavily armored walls built of thick oak logs reinforced with bolted iron and bronze plates, multiple narrow arrow slits and triangular gun ports with Tanegashima matchlocks and yari spears protruding, curved Japanese pagoda-style tiled roof with defensive parapet, fluttering deep purple and gold war banners bearing the Tokugawa clan triple-hollyhock crest (Mitsuba Aoi), samurai commanders in ornate black and gold armor directing the advance from the upper watchtower, rolling relentlessly across a muddy battlefield toward besieged enemy fortifications at sunset, flaming enemy arrows harmlessly deflecting off the heavy iron plating, dramatic low-angle perspective emphasizing its colossal size and invulnerability, smoke plumes and golden dust in the air, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
@@ -677,48 +716,69 @@
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;">
                     <!-- SCÈNE 1 -->
-                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                            <strong style="color: #38bdf8; font-size: 0.8rem;">Scène 1 : L'Éveil de l'Éclaireur</strong>
-                            <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic low-angle shot of a Takeda samurai scout cavalryman on a cliff overlooking misty mountain valleys at sunrise. The horse snorts with visible breath, the back banner flutters in the morning wind, camera slowly pushes in, golden sunrays, ukiyo-e style." style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                <strong style="color: #38bdf8; font-size: 0.85rem;">🌅 Scène 1 : L'Éveil de l'Éclaireur</strong>
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic low-angle shot of a Takeda samurai scout cavalryman on a cliff overlooking misty mountain valleys at sunrise. The horse snorts with visible breath, the back banner flutters in the morning wind, camera slowly pushes in, golden sunrays, ukiyo-e style." style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                            </div>
+                            <p style="font-size: 0.76rem; color: #67e8f9; margin: 0 0 0.5rem 0; line-height: 1.4; font-family: monospace;">
+                                <em>« Cinematic low-angle shot of a Takeda samurai scout cavalryman on a cliff overlooking misty mountain valleys at sunrise. The horse snorts with visible breath, the back banner flutters in the morning wind, camera slowly pushes in, golden sunrays, ukiyo-e style. »</em>
+                            </p>
                         </div>
-                        <p style="font-size: 0.75rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
-                            <em>« Cinematic low-angle shot of a Takeda samurai scout cavalryman on a cliff overlooking misty mountain valleys at sunrise. The horse snorts with visible breath, the back banner flutters in the morning wind, camera slowly pushes in, golden sunrays, ukiyo-e style. »</em>
-                        </p>
+                        <div style="font-size: 0.76rem; color: #fde047; padding-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.15); line-height: 1.45;">
+                            <strong>🇫🇷 Traduction :</strong> <em>Plan cinématographique en contre-plongée d'un cavalier éclaireur samouraï Takeda sur une falaise dominant des vallées brumeuses au lever du soleil. Le cheval s'ébroue dans l'air frais, la bannière dorsale flotte dans le vent matinal, zoom avant lent, rayons dorés, style ukiyo-e.</em>
+                        </div>
                     </div>
 
                     <!-- SCÈNE 2 -->
-                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                            <strong style="color: #ef4444; font-size: 0.8rem;">Scène 2 : La Marche des Titans</strong>
-                            <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Slow-motion dynamic tracking shot of colossal rolling siege fortress and dragon ram advancing heavily in battlefield mud towards castle ramparts. Fiery arrows deflect off iron plates, the dragon iron head belches bursts of fire and sparks, massive spiked wheels turning, intense battlefield smoke, dramatic dusk lighting." style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                <strong style="color: #ef4444; font-size: 0.85rem;">🐎 Scène 2 : La Marche des Titans</strong>
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Slow-motion dynamic tracking shot of colossal rolling siege fortress and dragon ram advancing heavily in battlefield mud towards castle ramparts. Fiery arrows deflect off iron plates, the dragon iron head belches bursts of fire and sparks, massive spiked wheels turning, intense battlefield smoke, dramatic dusk lighting." style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                            </div>
+                            <p style="font-size: 0.76rem; color: #67e8f9; margin: 0 0 0.5rem 0; line-height: 1.4; font-family: monospace;">
+                                <em>« Slow-motion dynamic tracking shot of colossal rolling siege fortress and dragon ram advancing heavily in battlefield mud towards castle ramparts. Fiery arrows deflect off iron plates, the dragon iron head belches bursts of fire and sparks, massive spiked wheels turning, intense battlefield smoke, dramatic dusk lighting. »</em>
+                            </p>
                         </div>
-                        <p style="font-size: 0.75rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
-                            <em>« Slow-motion dynamic tracking shot of colossal rolling siege fortress and dragon ram advancing heavily in battlefield mud towards castle ramparts. Fiery arrows deflect off iron plates, the dragon iron head belches bursts of fire and sparks, massive spiked wheels turning, intense battlefield smoke, dramatic dusk lighting. »</em>
-                        </p>
+                        <div style="font-size: 0.76rem; color: #fde047; padding-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.15); line-height: 1.45;">
+                            <strong>🇫🇷 Traduction :</strong> <em>Travelling dynamique au ralenti d'une forteresse roulante colossale et d'un bélier à tête de dragon avançant pesamment dans la boue vers les remparts. Flèches enflammées ricochetant sur le fer, gueule de dragon crachant feu et étincelles, roues géantes tournant, fumée dense au crépuscule.</em>
+                        </div>
                     </div>
 
                     <!-- SCÈNE 3 -->
-                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                            <strong style="color: #a855f7; font-size: 0.8rem;">Scène 3 : L'Embuscade Shinobi</strong>
-                            <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Midnight darkness in misty bamboo forest. A masked shinobi cavalryman bursts forward on a black horse surrounded by purple smoke, drawing gleaming steel sword towards the camera, full moon shafts through bamboo, fast dynamic camera zoom." style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                <strong style="color: #a855f7; font-size: 0.85rem;">🥷 Scène 3 : L'Embuscade Shinobi</strong>
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Midnight darkness in misty bamboo forest. A masked shinobi cavalryman bursts forward on a black horse surrounded by purple smoke, drawing gleaming steel sword towards the camera, full moon shafts through bamboo, fast dynamic camera zoom." style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                            </div>
+                            <p style="font-size: 0.76rem; color: #67e8f9; margin: 0 0 0.5rem 0; line-height: 1.4; font-family: monospace;">
+                                <em>« Midnight darkness in misty bamboo forest. A masked shinobi cavalryman bursts forward on a black horse surrounded by purple smoke, drawing gleaming steel sword towards the camera, full moon shafts through bamboo, fast dynamic camera zoom. »</em>
+                            </p>
                         </div>
-                        <p style="font-size: 0.75rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
-                            <em>« Midnight darkness in misty bamboo forest. A masked shinobi cavalryman bursts forward on a black horse surrounded by purple smoke, drawing gleaming steel sword towards the camera, full moon shafts through bamboo, fast dynamic camera zoom. »</em>
-                        </p>
+                        <div style="font-size: 0.76rem; color: #fde047; padding-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.15); line-height: 1.45;">
+                            <strong>🇫🇷 Traduction :</strong> <em>Obscurité nocturne dans une forêt de bambous embrumée. Un cavalier shinobi masqué jaillit sur un cheval noir dans un nuage de fumée violette, dégainant son sabre d'acier vers la caméra, pleine lune filtrant à travers les tiges de bambou, zoom avant rapide.</em>
+                        </div>
                     </div>
 
                     <!-- SCÈNE 4 -->
-                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                            <strong style="color: #f59e0b; font-size: 0.8rem;">Scène 4 : Climax & Flèches de Feu</strong>
-                            <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield. In the center, a colossal wooden dragon siege ram machine rolls forward on spiked iron wheels, its ferocious blackened-iron dragon head roaring and belching glowing sparks and smoke. Beside it, charging Takeda samurai cavalry in brilliant crimson red armor on galloping warhorses surge forward with raised spears. Above, a barrage of flaming arrows arcs across the smoky dusk sky towards a distant towering Japanese castle fortress. Flying fire embers, swirling autumn red leaves, dramatic volumetric sunset light breaking through war smoke, ukiyo-e woodblock inspired semi-realistic digital anime aesthetic, fluid motion, 8k masterpiece" style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                <strong style="color: #f59e0b; font-size: 0.85rem;">🔥 Scène 4 : Climax & Flèches de Feu</strong>
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield. In the center, a colossal wooden dragon siege ram machine rolls forward on spiked iron wheels, its ferocious blackened-iron dragon head roaring and belching glowing sparks and smoke. Beside it, charging Takeda samurai cavalry in brilliant crimson red armor on galloping warhorses surge forward with raised spears. Above, a barrage of flaming arrows arcs across the smoky dusk sky towards a distant towering Japanese castle fortress. Flying fire embers, swirling autumn red leaves, dramatic volumetric sunset light breaking through war smoke, ukiyo-e woodblock inspired semi-realistic digital anime aesthetic, fluid motion, 8k masterpiece" style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                            </div>
+                            <p style="font-size: 0.76rem; color: #67e8f9; margin: 0 0 0.5rem 0; line-height: 1.4; font-family: monospace;">
+                                <em>« Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield... fluid motion, 8k masterpiece »</em>
+                            </p>
                         </div>
-                        <p style="font-size: 0.75rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
-                            <em>« Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield... fluid motion, 8k masterpiece »</em>
-                        </p>
+                        <div style="font-size: 0.76rem; color: #fde047; padding-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.15); line-height: 1.45;">
+                            <strong>🇫🇷 Traduction :</strong> <em>Bande-annonce épique de bataille Sengoku. Travelling en contre-plongée dans la boue. Le bélier dragon roule et crache des flammes, la cavalerie rouge Takeda charge lances dressées, barrage d'arcs de flèches enflammées vers un château en flammes au loin, feuilles rouges, lumière dorée et braises.</em>
+                        </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
