@@ -317,3 +317,4 @@ print("=== GÉNÉRATION DES 13 VISUELS DE L'ATELIER DE SIÈGE & ÉCURIES ===")
 for unit in UNITS_CONFIG:
     build_unit_illustration(unit)
 print("=== TOUTES LES ILLUSTRATIONS SONT CRÉÉES ET DÉPLOYÉES ===")
+

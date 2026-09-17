@@ -109,3 +109,4 @@ if (!$fRowFinal || (int)$fRowFinal['level'] !== 1 || $fRowFinal['type'] !== 'sol
 echo "[✓] Parcelle 18 est désormais Sanctuaire d'Inari au Niveau 1 !\n";
 
 echo "\n[✓] Tous les tests du système de choix libre de ressources sont RÉUSSIS avec succès !\n";
+

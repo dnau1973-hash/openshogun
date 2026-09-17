@@ -1,7 +1,7 @@
 <?php
 /**
  * Codex & Documentation Officielle d'OpenShogun
- * Chapitre 1 : Présentation des Troupes & Codex Militaire Féodal
+ * Manuel Stratégique, Guide du Daimyō et Art de la Guerre (Sengoku Jidai)
  */
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Database.php';
@@ -12,17 +12,23 @@ $user = $auth->getCurrentUser();
 $planet = $auth->getCurrentPlanet();
 
 $db = Database::getConnection();
+
+// Répertoire des 12 Troupes du Dojo
 $stmt = $db->query("SELECT * FROM units ORDER BY faction, tier ASC");
 $allUnits = $stmt->fetchAll();
 
-// Chapitre / Onglet actif
-$tab = $_GET['tab'] ?? 'troops';
+// Répertoire des 13 Engins de Siège, Cavaleries et Convois
+$stmtShips = $db->query("SELECT * FROM ships ORDER BY faction, metal_cost ASC");
+$allShips = $stmtShips->fetchAll();
 
-// Métadonnées enrichies des unités (rôle tactique, points forts/faibles, citations)
+// Chapitre / Onglet actif (par défaut 'overview' pour offrir le guide complet et le paragraphe du héros samouraï)
+$tab = $_GET['tab'] ?? 'overview';
+
+// Métadonnées enrichies des 12 unités du Dojo
 $unitTactics = [
     'piquier_ashigaru_yari' => [
         'role' => 'Infanterie de ligne & Anti-Cavalerie',
-        'lore_detail' => 'Formés dans la rigueur absolue des réformes militaires d\'Oda Nobunaga, ces fantassins paysans sont armés d\'une pique nagae-yari de plus de 5 mètres. Organisés en rangs serrés, ils forment une haie d\'acier infranchissable capable de briser l\'élan des charges les plus furieuses.',
+        'lore_detail' => 'Formés dans la rigueur absolue des réformes militaires d\'Oda Nobunaga, ces fantassins paysans sont armés d\'une pique nagae-yari de plus de 5 mètres. Organisés en rangs serrés, ils forment une haie d\'acier infranchissable capable de briser l\'élan des charges de cavalerie les plus furieuses.',
         'strengths' => 'Coût de recrutement très faible, excellent rapport qualité/prix contre la cavalerie, formation rapide en grand nombre.',
         'weaknesses' => 'Vulnérable face aux tirs d\'arquebuse et aux maîtres d\'armes samouraïs en duel rapproché.',
         'quote' => '« Une forêt de lances ne plie jamais devant l\'orage. »'
@@ -106,10 +112,7 @@ $unitTactics = [
     ]
 ];
 
-// Répertoire des Engins de Siège et Écuries
-$stmtShips = $db->query("SELECT * FROM ships ORDER BY faction, metal_cost ASC");
-$allShips = $stmtShips->fetchAll();
-
+// Métadonnées tactiques des 13 Engins de Siège, Cavaleries et Convois
 $shipTactics = [
     'terran_interceptor' => [
         'role' => 'Cavalerie Légère & Patrouille d\'Interception',
@@ -204,7 +207,7 @@ $shipTactics = [
     ]
 ];
 
-// Clans metadata
+// Métadonnées des Clans
 $clansMeta = [
     'terran' => [
         'id' => 'terran',
@@ -260,743 +263,814 @@ foreach ($allUnits as $u) {
 
 <div class="docs-container" style="max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem;">
 
-    <!-- En-tête Héroïque du Codex Féodal -->
+    <!-- ==============================================================
+         EN-TÊTE DU CODEX & GUIDE OFFICIEL D'OPENSHOGUN
+         ============================================================== -->
     <div class="card" style="margin-bottom: 2rem; border-top: 5px solid var(--red-primary); background: var(--bg-surface, #fdfbf7); overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.06);">
         <div style="position: relative; padding: 2.25rem 2rem; background: linear-gradient(135deg, rgba(194, 37, 43, 0.07) 0%, rgba(253, 251, 247, 0.98) 70%, rgba(245, 158, 11, 0.08) 100%);">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
-                <div style="max-width: 850px;">
-                    <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
+                <div style="max-width: 880px;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
                         <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--red-primary); background: rgba(194,37,43,0.1); padding: 3px 10px; border-radius: 4px;">
-                            📜 Codex Impérial du Shogunat
+                            📜 Documentation Officielle du Joueur
                         </span>
-                        <span style="color: var(--text-muted); font-size: 0.85rem;">&bull; Manuel Stratégique & Art de la Guerre</span>
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">&bull; Manuel Stratégique & Chroniques du Shogunat</span>
                     </div>
                     <h1 style="font-size: 2.2rem; margin: 0 0 0.75rem 0; color: var(--text-main); display: flex; align-items: center; gap: 0.75rem;">
-                        <span>📖</span> Grande Encyclopédie d'OpenShogun
+                        <span>📖</span> Grande Encyclopédie & Guide du Daimyō
                     </h1>
                     <p style="font-size: 1.05rem; line-height: 1.6; color: var(--text-muted); margin: 0;">
-                        Bienvenue, noble Daimyō, dans les archives militaires et administratives du Japon de l'époque Sengoku. 
-                        Consultez ici les chroniques complètes des <strong>12 régiments féodaux</strong>, l'architecture des cités castrales, les secrets des 18 parcelles de terroir et les règles martiales régissant la conquête du titre de Shogun.
+                        Bienvenue dans les archives impériales du Japon féodal de l'ère Sengoku. Ce codex interactif réunit l'ensemble des règles fondamentales du jeu : 
+                        l'art de la guerre du <strong>Héros Samouraï</strong>, la personnalisation libre de vos <strong>18 parcelles de ressources</strong> et de votre <strong>cité castrale</strong>, 
+                        les fiches illustrées des <strong>25 unités militaires</strong> (Dojo & Siège), la conquête des <strong>Oasis sauvages</strong> et les <strong>Quêtes féodales</strong> d'initiation.
                     </p>
                 </div>
                 
                 <div style="text-align: right; background: var(--bg-ink, #ede5d5); padding: 1rem 1.5rem; border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
                     <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Édition Impériale</div>
                     <div style="font-size: 1.25rem; font-weight: 900; color: var(--red-primary);">戦国時代 &bull; 1572</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">12 Troupes &bull; 3 Clans &bull; 12 Donjons</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">25 Unités &bull; 3 Clans &bull; 12 Donjons &bull; Oasis</div>
                 </div>
             </div>
 
             <!-- Sommaire & Navigation entre Chapitres de la Documentation -->
-            <div style="display: flex; gap: 0.6rem; margin-top: 1.75rem; overflow-x: auto; padding-bottom: 0.25rem;">
-                <a href="?page=docs&tab=troops" class="btn <?= ($tab === 'troops') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🥋</span> Ch. 1 : Troupes du Dojo
+            <div style="display: flex; gap: 0.5rem; margin-top: 1.75rem; overflow-x: auto; padding-bottom: 0.25rem; flex-wrap: wrap;">
+                <a href="?page=docs&tab=overview" class="btn <?= ($tab === 'overview') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>📜</span> Vue d'Ensemble & Nouveautés
                 </a>
-                <a href="?page=docs&tab=siege" class="btn <?= ($tab === 'siege') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🐎</span> Ch. 2 : Siège & Écuries
+                <a href="?page=docs&tab=hero" class="btn <?= ($tab === 'hero') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>⚔️</span> Ch. 1 : Héros Samouraï
                 </a>
-                <a href="?page=docs&tab=hero" class="btn <?= ($tab === 'hero') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
-                    <span>⚔️</span> Ch. 3 : Le Héros Samouraï
+                <a href="?page=docs&tab=resources" class="btn <?= ($tab === 'resources') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🌾</span> Ch. 2 : Terroir & Choix Libre (1-18)
                 </a>
-                <a href="?page=docs&tab=city" class="btn <?= ($tab === 'city') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🏯</span> Ch. 4 : Cité & Bâtiments
+                <a href="?page=docs&tab=city" class="btn <?= ($tab === 'city') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🏯</span> Ch. 3 : Cité & Silos Libres (19-34)
                 </a>
-                <a href="?page=docs&tab=resources" class="btn <?= ($tab === 'resources') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🌾</span> Ch. 5 : Terroir & Récoltes
+                <a href="?page=docs&tab=troops" class="btn <?= ($tab === 'troops') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🥋</span> Ch. 4 : Troupes du Dojo (12)
                 </a>
-                <a href="?page=docs&tab=castles" class="btn <?= ($tab === 'castles') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🏯</span> Ch. 6 : 12 Donjons
+                <a href="?page=docs&tab=siege" class="btn <?= ($tab === 'siege') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🐎</span> Ch. 5 : Siège & Écuries (13)
                 </a>
-                <a href="?page=docs&tab=combat" class="btn <?= ($tab === 'combat') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
-                    <span>⚔️</span> Ch. 7 : Combat & Sièges
+                <a href="?page=docs&tab=oasis" class="btn <?= ($tab === 'oasis') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🌴</span> Ch. 6 : Oasis Sauvages & Faune
+                </a>
+                <a href="?page=docs&tab=quests" class="btn <?= ($tab === 'quests') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🎯</span> Ch. 7 : Quêtes & Didacticiel
+                </a>
+                <a href="?page=docs&tab=map" class="btn <?= ($tab === 'map') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🗺️</span> Ch. 8 : Carte & 4 Provinces
+                </a>
+                <a href="?page=docs&tab=castles" class="btn <?= ($tab === 'castles') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🏯</span> Ch. 9 : 12 Donjons Historiques
+                </a>
+                <a href="?page=docs&tab=combat" class="btn <?= ($tab === 'combat') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>⚔️</span> Ch. 10 : Combat & Sièges
+                </a>
+                <a href="?page=docs&tab=all" class="btn <?= ($tab === 'all') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap; background: rgba(194,37,43,0.1); border-color: var(--red-primary); color: var(--red-primary);">
+                    <span>📚</span> Tout Dérouler
                 </a>
             </div>
         </div>
     </div>
 
-    <?php if ($tab === 'troops'): ?>
-        <!-- ==========================================================
-             CHAPITRE 1 : PRÉSENTATION DES TROUPES & CODEX MILITAIRE
-             ========================================================== -->
+    <?php if ($tab === 'overview'): ?>
+        <!-- ==============================================================
+             VUE D'ENSEMBLE & GUIDE STRATÉGIQUE MAJEUR DU DAIMYŌ
+             ============================================================== -->
         
-        <!-- Barre de Filtres Interactifs -->
-        <div class="card" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 1rem 1.25rem; border: 1px solid var(--border-color); border-radius: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
-                    <span style="font-weight: 800; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-right: 0.5rem;">
-                        🔍 Filtrer par Clan :
-                    </span>
-                    <button class="btn btn-primary troop-filter-btn active" onclick="filterTroopCards('all', this)" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">
-                        🌸 Tous les Clans (12)
-                    </button>
-                    <button class="btn btn-secondary troop-filter-btn" onclick="filterTroopCards('terran', this)" style="padding: 0.4rem 0.9rem; font-size: 0.85rem; border-left: 3px solid #3b82f6;">
-                        🏯 Clan Oda (4)
-                    </button>
-                    <button class="btn btn-secondary troop-filter-btn" onclick="filterTroopCards('vorash', this)" style="padding: 0.4rem 0.9rem; font-size: 0.85rem; border-left: 3px solid #ef4444;">
-                        🐎 Clan Takeda (4)
-                    </button>
-                    <button class="btn btn-secondary troop-filter-btn" onclick="filterTroopCards('aethelis', this)" style="padding: 0.4rem 0.9rem; font-size: 0.85rem; border-left: 3px solid #8b5cf6;">
-                        ⛩️ Clan Tokugawa (4)
-                    </button>
+        <!-- SECTION SPÉCIALE : LE HÉROS SAMOURAÏ (PARAGRAPHE DÉDIÉ MIS EN AVANT) -->
+        <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(220,38,38,0.05) 0%, rgba(253,251,247,0.98) 100%); border-left: 6px solid var(--red-primary); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+            <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap;">
+                <div style="font-size: 3.5rem; line-height: 1; background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 16px; border: 2px solid var(--border-color); flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                    🥋
                 </div>
-
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <a href="#table-comparative" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
-                        📊 Tableau Comparatif Complet &darr;
-                    </a>
-                    <a href="#regles-dojo" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
-                        🥋 Règles d'Entraînement au Dojo &darr;
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- PRÉSENTATION DES 3 CLANS ET LEURS 4 UNITÉS RESPECTIVES -->
-        <?php foreach ($clansMeta as $cId => $clan): ?>
-            <?php $clanTroops = $unitsByClan[$cId] ?? []; ?>
-            
-            <section class="clan-section" id="clan-section-<?= $cId ?>" style="margin-bottom: 3.5rem;">
-                
-                <!-- Bannière d'Introduction du Clan -->
-                <div class="card" style="margin-bottom: 1.5rem; border-left: 6px solid <?= $clan['color'] ?>; background: <?= $clan['bg_gradient'] ?>; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
-                    <div class="card-body" style="padding: 1.25rem 1.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <span style="font-size: 2rem;"><?= $clan['icon'] ?></span>
-                                    <div>
-                                        <h2 style="margin: 0; font-size: 1.6rem; color: var(--text-main); font-weight: 900;">
-                                            <?= htmlspecialchars($clan['name']) ?>
-                                            <span style="font-size: 0.9rem; font-weight: 600; color: <?= $clan['color'] ?>; margin-left: 0.5rem;">
-                                                — Seigneur <?= htmlspecialchars($clan['daimyo']) ?>
-                                            </span>
-                                        </h2>
-                                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 3px;">
-                                            Fief originel : <strong><?= htmlspecialchars($clan['province']) ?></strong> &bull; Blason : <strong><?= htmlspecialchars($clan['mon']) ?></strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <span style="display: inline-block; padding: 0.45rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 800; background: rgba(255,255,255,0.9); border: 1px solid <?= $clan['color'] ?>; color: <?= $clan['color'] ?>; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-                                    <?= htmlspecialchars($clan['badge']) ?>
-                                </span>
-                            </div>
-                        </div>
-                        <div style="margin-top: 0.75rem; font-size: 0.95rem; color: var(--text-main); line-height: 1.5; border-top: 1px dashed var(--border-color); padding-top: 0.75rem;">
-                            Doctrine martiale : <em><?= htmlspecialchars($clan['doctrine']) ?></em>
-                        </div>
+                <div style="flex: 1; min-width: 300px;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+                        <span style="background: var(--red-primary); color: #fff; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px;">
+                            Commandant Suprême du Fief
+                        </span>
+                        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">Système Héroïque Sengoku &bull; Travian-Style</span>
                     </div>
-                </div>
-
-                <!-- Grille des 4 Troupes du Clan -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1.5rem;">
-                    <?php foreach ($clanTroops as $u): ?>
-                        <?php 
-                            $tactics = $unitTactics[$u['code']] ?? [
-                                'role' => 'Guerrier Féodal',
-                                'lore_detail' => $u['description'],
-                                'strengths' => 'Polyvalent sur le champ de bataille.',
-                                'weaknesses' => 'Nécessite du soutien.',
-                                'quote' => '« Honneur et fidélité au clan. »'
-                            ];
-
-                            // Gestion du fichier d'illustration
-                            $imgName = !empty($u['image']) ? $u['image'] : ($u['code'] . '.jpg');
-                            $imgPath = '/public/assets/units/' . $imgName;
-                            $diskPath = __DIR__ . '/../public/assets/units/' . $imgName;
-                            $versionQuery = file_exists($diskPath) ? ('?v=' . filemtime($diskPath)) : '';
-                            $fullImgUrl = $imgPath . $versionQuery;
-
-                            $tierNames = [
-                                1 => 'Rang I &bull; Première Ligne',
-                                2 => 'Rang II &bull; Tir & Soutien',
-                                3 => 'Rang III &bull; Choc & Élite',
-                                4 => 'Rang IV &bull; Maître & Garde'
-                            ];
-                        ?>
-                        
-                        <div class="card troop-card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 14px rgba(0,0,0,0.05); transition: transform 0.25s ease, box-shadow 0.25s ease;">
-                            
-                            <!-- Vignette Portrait Grand Format -->
-                            <div style="position: relative; width: 100%; height: 260px; overflow: hidden; background: var(--bg-ink, #ede5d5); border-bottom: 1px solid var(--border-color); cursor: pointer;"
-                                 onclick="openDocsLightbox('<?= htmlspecialchars(addslashes($u['name'])) ?>', '<?= $fullImgUrl ?>', '<?= htmlspecialchars(addslashes($tactics['role'])) ?>', '<?= htmlspecialchars(addslashes($tactics['lore_detail'])) ?>', '<?= htmlspecialchars(addslashes($tactics['quote'])) ?>')"
-                                 title="Cliquer pour admirer l'illustration en haute résolution">
-                                
-                                <img src="<?= $fullImgUrl ?>" alt="<?= htmlspecialchars($u['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.4s ease;">
-                                
-                                <!-- Badge de Rang (Tier) -->
-                                <div style="position: absolute; top: 10px; left: 10px; background: rgba(253,251,247,0.94); backdrop-filter: blur(4px); border: 1px solid <?= $clan['color'] ?>; border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 800; color: <?= $clan['color'] ?>; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
-                                    <?= $tierNames[$u['tier']] ?? ('Rang ' . $u['tier']) ?>
-                                </div>
-
-                                <!-- Badge Rôle Tactique -->
-                                <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(17,18,24,0.85); backdrop-filter: blur(4px); border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
-                                    ⚔️ <?= htmlspecialchars($tactics['role']) ?>
-                                </div>
-
-                                <!-- Loupe Agrandissement -->
-                                <div style="position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(253,251,247,0.9); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
-                                    🔍
-                                </div>
-                            </div>
-
-                            <!-- Corps de la Fiche Militaire -->
-                            <div class="card-body" style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column;">
-                                
-                                <h3 style="margin: 0 0 0.4rem 0; font-size: 1.15rem; color: var(--text-main); font-weight: 800;">
-                                    <?= htmlspecialchars($u['name']) ?>
-                                </h3>
-
-                                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.9rem 0; flex: 1;">
-                                    <?= htmlspecialchars($tactics['lore_detail']) ?>
-                                </p>
-
-                                <div style="font-style: italic; font-size: 0.8rem; color: var(--red-primary); margin-bottom: 0.9rem; padding-left: 0.6rem; border-left: 2px solid var(--red-primary);">
-                                    <?= htmlspecialchars($tactics['quote']) ?>
-                                </div>
-
-                                <!-- Matrice des Caractéristiques Martiales -->
-                                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem; margin-bottom: 1rem;">
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.8rem;">
-                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 3px;">
-                                            <span style="color: var(--text-muted);">⚔️ Attaque :</span>
-                                            <strong style="color: #dc2626; font-size: 0.9rem;"><?= $u['attack'] ?></strong>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 3px;">
-                                            <span style="color: var(--text-muted);">🛡️ Déf. Infanterie :</span>
-                                            <strong style="color: #2563eb; font-size: 0.9rem;"><?= $u['def_infantry'] ?></strong>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 3px;">
-                                            <span style="color: var(--text-muted);">🐎 Déf. Cavalerie :</span>
-                                            <strong style="color: #16a34a; font-size: 0.9rem;"><?= $u['def_mech'] ?></strong>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 3px;">
-                                            <span style="color: var(--text-muted);">⚡ Vitesse de marche :</span>
-                                            <strong style="color: var(--text-main); font-size: 0.9rem;"><?= $u['speed'] ?> cases/h</strong>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between; padding-top: 2px;">
-                                            <span style="color: var(--text-muted);">🎒 Capacité butin :</span>
-                                            <strong style="color: #b45309; font-size: 0.9rem;"><?= $u['cargo_capacity'] ?> unités</strong>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between; padding-top: 2px;">
-                                            <span style="color: var(--text-muted);">⏳ Temps Dojo :</span>
-                                            <strong style="color: var(--text-main); font-size: 0.9rem;"><?= $u['base_train_time'] ?>s base</strong>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Coût de Recrutement & Ravitaillement -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(253,251,247,0.7); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem; margin-bottom: 0.9rem; font-size: 0.8rem;">
-                                    <span style="color: var(--text-muted); font-weight: 700;">Coût :</span>
-                                    <div style="display: flex; gap: 0.75rem; font-weight: 700;">
-                                        <span style="color: var(--res-metal);" title="Bois de Cèdre">🪵 <?= number_format($u['metal_cost']) ?></span>
-                                        <span style="color: var(--res-crystal);" title="Pierre de Taille">🪨 <?= number_format($u['crystal_cost']) ?></span>
-                                        <span style="color: var(--res-deut);" title="Riz Impérial (Rations)">🌾 <?= number_format($u['deuterium_cost']) ?></span>
-                                    </div>
-                                </div>
-
-                                <!-- Évaluation Tactique (Forces & Faiblesses) -->
-                                <div style="font-size: 0.75rem; line-height: 1.4; border-top: 1px solid var(--border-color); padding-top: 0.6rem;">
-                                    <div style="margin-bottom: 3px;">
-                                        <strong style="color: #15803d;">✅ Atouts :</strong> <?= htmlspecialchars($tactics['strengths']) ?>
-                                    </div>
-                                    <div>
-                                        <strong style="color: #b91c1c;">⚠️ Vigilance :</strong> <?= htmlspecialchars($tactics['weaknesses']) ?>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-
-            </section>
-        <?php endforeach; ?>
-
-        <!-- ==========================================================
-             TABLEAU COMPARATIF EXHAUSTIF DES 12 TROUPES (MATRIX)
-             ========================================================== -->
-        <div class="card" id="table-comparative" style="margin-bottom: 3rem; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.05);">
-            <div class="card-header" style="background: var(--bg-ink, #ede5d5); padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                <div>
-                    <h3 style="margin: 0; font-size: 1.2rem; color: var(--text-main); font-weight: 900; display: flex; align-items: center; gap: 0.6rem;">
-                        <span>📊</span> Matrice Comparative des 12 Unités de l'Archipel
-                    </h3>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 3px;">
-                        Vue d'ensemble synoptique pour optimiser la composition de vos régiments de guerre et vos bataillons de siège.
-                    </div>
-                </div>
-                <div style="font-size: 0.8rem; background: rgba(194,37,43,0.1); color: var(--red-primary); padding: 4px 10px; border-radius: 6px; font-weight: 700;">
-                    12 Guerriers Époque Sengoku
-                </div>
-            </div>
-
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
-                    <thead>
-                        <tr style="background: rgba(0,0,0,0.03); border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <th style="padding: 0.85rem 1rem;">Guerrier & Portrait</th>
-                            <th style="padding: 0.85rem 0.75rem;">Clan</th>
-                            <th style="padding: 0.85rem 0.75rem;">Rang</th>
-                            <th style="padding: 0.85rem 0.75rem; text-align: right; color: #dc2626;">⚔️ Attaque</th>
-                            <th style="padding: 0.85rem 0.75rem; text-align: right; color: #2563eb;">🛡️ Déf. Inf.</th>
-                            <th style="padding: 0.85rem 0.75rem; text-align: right; color: #16a34a;">🐎 Déf. Cav.</th>
-                            <th style="padding: 0.85rem 0.75rem; text-align: center;">⚡ Vitesse</th>
-                            <th style="padding: 0.85rem 0.75rem; text-align: right; color: #b45309;">🎒 Pillage</th>
-                            <th style="padding: 0.85rem 1rem; text-align: right;">🪵 Bois / 🪨 Pierre / 🌾 Riz</th>
-                            <th style="padding: 0.85rem 1rem; text-align: center;">⏳ Dojo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($allUnits as $u): ?>
-                            <?php 
-                                $clanInfo = $clansMeta[$u['faction']] ?? [
-                                    'name' => 'Féodal',
-                                    'color' => '#6b7280'
-                                ];
-                                $imgName = !empty($u['image']) ? $u['image'] : ($u['code'] . '.jpg');
-                                $thumbUrl = '/public/assets/units/' . $imgName;
-                            ?>
-                            <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.15s ease;" onmouseover="this.style.background='rgba(194,37,43,0.03)'" onmouseout="this.style.background='transparent'">
-                                <td style="padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
-                                    <div style="width: 44px; height: 44px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); flex-shrink: 0; background: var(--bg-ink);">
-                                        <img src="<?= $thumbUrl ?>" alt="<?= htmlspecialchars($u['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
-                                    </div>
-                                    <div>
-                                        <strong style="color: var(--text-main); font-size: 0.9rem;"><?= htmlspecialchars($u['name']) ?></strong>
-                                        <div style="font-size: 0.75rem; color: var(--text-muted);"><?= htmlspecialchars($unitTactics[$u['code']]['role'] ?? '') ?></div>
-                                    </div>
-                                </td>
-                                <td style="padding: 0.75rem 0.75rem;">
-                                    <span style="font-weight: 700; color: <?= $clanInfo['color'] ?>; font-size: 0.8rem; background: rgba(0,0,0,0.03); padding: 2px 8px; border-radius: 4px; border: 1px solid <?= $clanInfo['color'] ?>33;">
-                                        <?= htmlspecialchars($clanInfo['name']) ?>
-                                    </span>
-                                </td>
-                                <td style="padding: 0.75rem 0.75rem; font-weight: 700; color: var(--text-muted);">
-                                    Rang <?= $u['tier'] ?>
-                                </td>
-                                <td style="padding: 0.75rem 0.75rem; text-align: right; font-weight: 800; font-size: 0.95rem; color: #dc2626;">
-                                    <?= $u['attack'] ?>
-                                </td>
-                                <td style="padding: 0.75rem 0.75rem; text-align: right; font-weight: 700; color: #2563eb;">
-                                    <?= $u['def_infantry'] ?>
-                                </td>
-                                <td style="padding: 0.75rem 0.75rem; text-align: right; font-weight: 700; color: #16a34a;">
-                                    <?= $u['def_mech'] ?>
-                                </td>
-                                <td style="padding: 0.75rem 0.75rem; text-align: center; font-weight: 700;">
-                                    <?= $u['speed'] ?>
-                                </td>
-                                <td style="padding: 0.75rem 0.75rem; text-align: right; font-weight: 700; color: #b45309;">
-                                    <?= $u['cargo_capacity'] ?>
-                                </td>
-                                <td style="padding: 0.75rem 1rem; text-align: right; font-family: monospace; font-size: 0.8rem;">
-                                    <span style="color: var(--res-metal); font-weight: 700;"><?= $u['metal_cost'] ?></span> / 
-                                    <span style="color: var(--res-crystal); font-weight: 700;"><?= $u['crystal_cost'] ?></span> / 
-                                    <span style="color: var(--res-deut); font-weight: 700;"><?= $u['deuterium_cost'] ?></span>
-                                </td>
-                                <td style="padding: 0.75rem 1rem; text-align: center; font-weight: 700; color: var(--text-muted);">
-                                    <?= $u['base_train_time'] ?>s
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ==========================================================
-             GUIDE TACTIQUE : RÈGLES D'ENTRAÎNEMENT & SYNERGIES DOJO
-             ========================================================== -->
-        <div class="card" id="regles-dojo" style="margin-bottom: 2rem; border-left: 5px solid #2563eb; background: var(--bg-surface, #fdfbf7); padding: 1.5rem 1.75rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
-            <h3 style="margin: 0 0 1rem 0; font-size: 1.25rem; color: var(--text-main); font-weight: 900; display: flex; align-items: center; gap: 0.6rem;">
-                <span>🥋</span> Principes Martiaux du Dojo & Composition d'Armée
-            </h3>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; font-size: 0.9rem; line-height: 1.6; color: var(--text-main);">
-                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--red-primary);">
-                        🏯 1. Déblocage par Niveau de Caserne (Dojo)
-                    </h4>
-                    <p style="margin: 0 0 0.75rem 0; color: var(--text-muted);">
-                        Pour recruter des troupes avancées au Dojo, vous devez élever le niveau du bâtiment dans votre Cité Castrale :
-                    </p>
-                    <ul style="margin: 0; padding-left: 1.25rem; color: var(--text-main);">
-                        <li><strong>Rang I (Conscrits) :</strong> Dojo Niveau 1</li>
-                        <li><strong>Rang II (Tireurs & Archers) :</strong> Dojo Niveau 3</li>
-                        <li><strong>Rang III (Cavalerie & Assaut) :</strong> Dojo Niveau 5</li>
-                        <li><strong>Rang IV (Hatamoto & Maîtres) :</strong> Dojo Niveau 8</li>
-                    </ul>
-                </div>
-
-                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #2563eb;">
-                        🌾 2. Ravitaillement en Riz Impérial (Koku)
-                    </h4>
-                    <p style="margin: 0; color: var(--text-muted);">
-                        Chaque soldat exige des rations de <strong>Riz Impérial</strong> lors de sa formation au Dojo et consomme des vivres pour sa subsistance. 
-                        Veillez à développer vos <strong>4 Rizières</strong> rurales et à agrandir votre <strong>Grenier à Riz Kura (Slot 21)</strong> afin d'éviter la disette et de soutenir de vastes garnisons.
-                    </p>
-                </div>
-
-                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #16a34a;">
-                        🧱 3. Synergie avec la Muraille de Protection (Slot 34)
-                    </h4>
-                    <p style="margin: 0; color: var(--text-muted);">
-                        En cas d'assaut ennemi sur votre domaine, vos troupes stationnées en garnison bénéficient d'un <strong>bonus multiplicateur défensif</strong> conféré par la <strong>Muraille de Cité</strong> (+4% de défense par niveau). 
-                        Les archers et sentinelles retranchés derrière des remparts de niveau 20 deviennent quasiment indestructibles face aux charges directes.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-    <?php elseif ($tab === 'siege'): ?>
-        <!-- ==========================================================
-             CHAPITRE 2 : ATELIER DE SIÈGE & ÉCURIES PROVINCIALES
-             ========================================================== -->
-        <div class="card" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 1.5rem 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 5px solid #dc2626;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                <div>
-                    <h2 style="margin: 0 0 0.5rem 0; font-size: 1.7rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🐎</span> Chapitre 2 : Atelier de Siège & Écuries Provinciales
+                    <h2 style="margin: 0 0 0.75rem 0; font-size: 1.6rem; color: var(--text-main);">
+                        ⚔️ Le Héros Samouraï & la Voie du Bushidō (武士道)
                     </h2>
-                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 800px; line-height: 1.5;">
-                        Les batailles de l'époque Sengoku ne se gagnent pas seulement à pied. L'<strong>Atelier de Siège & les Écuries</strong> permettent d'entraîner la cavalerie rapide, les charges de cavalerie cuirassée, de construire des catapultes incendiaires, des béliers blindés pour abattre les portes de forteresses, ainsi que les convois logistiques pour ravitailler vos armées.
+                    <p style="font-size: 0.98rem; line-height: 1.7; color: var(--text-main); margin-bottom: 1rem; text-align: justify;">
+                        Le <strong>Héros Samouraï</strong> est l'incarnation vivante de votre lignée féodale et le cœur battant de votre puissance provinciale. 
+                        Présent à vos côtés dès la fondation de votre domaine, votre héros progresse en accumulant des points d'expérience (XP) 
+                        au fil de périlleuses <strong>Aventures en monde ouvert</strong> ou en prenant la tête de vos armées lors de sanglantes batailles de siège et d'escarmouches. 
+                        À chaque montée de niveau, il reçoit <strong>4 points d'attributs</strong> à investir dans quatre piliers complémentaires : 
+                        la <em>Force Martiale</em> (+80 puissance de combat individuelle par point pour affronter seul les bêtes sauvages des oasis), 
+                        le <em>Commandement Offensif</em> (+0.2% d'attaque à toute l'armée qui l'accompagne), 
+                        la <em>Maîtrise Défensive</em> (+0.2% de défense à la garnison du château), 
+                        et la <em>Gouvernance Féodale</em> (démultiplication de la production de ressources, avec spécialisation au choix sur le Bois, la Pierre ou le Riz).
+                    </p>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-muted); margin-bottom: 1.25rem;">
+                        Votre champion peut s'équiper de <strong>reliques et artefacts légendaires</strong> sur 6 emplacements dédiés (Arme, Bouclier, Casque Kabuto, Armure O-Yoroi, Bottes/Destrier et Amulette Omamori). 
+                        S'il tombe au combat, sa mémoire et sa progression sont éternelles : son niveau, ses points et son arsenal restent intacts, et un solennel <strong>Rituel Shintō de Résurrection</strong> peut être célébré au fief pour le réincarner dans la plénitude de sa gloire.
+                    </p>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <a href="?page=docs&tab=hero" class="btn btn-primary" style="font-size: 0.85rem; font-weight: 700; padding: 0.45rem 1rem;">
+                            📖 Découvrir le Chapitre Complet du Héros &rarr;
+                        </a>
+                        <a href="?page=hero" class="btn btn-secondary" style="font-size: 0.85rem; font-weight: 700; padding: 0.45rem 1rem;">
+                            🥋 Gérer mon Héros Samouraï
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRILLE DES 3 GRANDS PILIERS STRATÉGIQUES RÉCENTS -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+
+            <!-- PILIER 1 : CHOIX LIBRE DU TERROIR (1-18) -->
+            <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <span style="font-size: 2rem;">🌾</span>
+                        <span style="background: rgba(34,197,94,0.1); color: #15803d; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+                            Choix Libre &bull; Slots #1 à #18
+                        </span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; color: var(--text-main);">
+                        Terroir & Parcelles Modulaires
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 1rem 0;">
+                        Finie la rigidité des domaines imposés ! Sur vos <strong>18 parcelles de ressources</strong>, tout terrain vacant (niveau 0) vous permet, 
+                        d'un simple clic ouvrant la modale interactive de sélection, de choisir librement le bâtiment à ériger : 
+                        <strong>🪵 Camp de Bûcherons</strong>, <strong>🪨 Carrière de Granit</strong>, <strong>🌾 Rizières Inondées</strong> ou <strong>⛩️ Sanctuaire d'Inari</strong>.
+                        Vous pouvez ainsi spécialiser votre principauté selon votre stratégie (surplus de riz pour les grandes armées Takeda, bois massif pour le génie Oda, ou carrières pour les murailles Tokugawa).
+                    </p>
+                </div>
+                <a href="?page=docs&tab=resources" class="btn btn-secondary" style="font-size: 0.85rem; font-weight: 700; align-self: flex-start;">
+                    Consulter le Guide du Terroir &rarr;
+                </a>
+            </div>
+
+            <!-- PILIER 2 : CITÉ CASTRALE ET SILOS LIBRES (19-34) -->
+            <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <span style="font-size: 2rem;">🏯</span>
+                        <span style="background: rgba(59,130,246,0.1); color: #1d4ed8; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+                            Architecture Libre &bull; Slots #19 à #34
+                        </span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; color: var(--text-main);">
+                        Cité Castrale & Silos Modulaires
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 1rem 0;">
+                        À l'intérieur des remparts, la cité comporte 16 emplacements castraux. En cliquant sur un terrain libre (slots #19 à #33), 
+                        une fenêtre féodale vous présente la liste des édifices constructibles (Dojo, Atelier de Siège & Écuries, Académie des Savoirs, Marché, Entrepôt, Grenier Kura, Cachette Secrète, Tour de Guet Yagura, Pavillon Diplomatique). 
+                        Vous placez vos bâtiments où bon vous semble ! La Muraille scelle le slot #34 pour démultiplier votre garnison.
+                    </p>
+                </div>
+                <a href="?page=docs&tab=city" class="btn btn-secondary" style="font-size: 0.85rem; font-weight: 700; align-self: flex-start;">
+                    Consulter l'Architecture Urbaine &rarr;
+                </a>
+            </div>
+
+            <!-- PILIER 3 : OASIS SAUVAGES & QUÊTES DIDACTIELLES -->
+            <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <span style="font-size: 2rem;">🌴</span>
+                        <span style="background: rgba(245,158,11,0.1); color: #b45309; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+                            Monde Ouvert & Quêtes
+                        </span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; color: var(--text-main);">
+                        Oasis Sauvages & Didacticiel Guidé
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 1rem 0;">
+                        La Carte des Provinces abrite des <strong>Oasis sauvages</strong> peuplées de bêtes féroces (loups, sangliers, ours géants). 
+                        Les piller permet de dérober de vastes butins, et une fois pacifiées, y stationner vos troupes permet de les annexer pour remporter 
+                        des bonus permanents de récolte (+25% ou +50% en bois, pierre ou riz). 
+                        Parallèlement, les nouveaux seigneurs sont guidés par le maître Katsumoto à travers <strong>12 Quêtes didactiques</strong> généreusement récompensées.
+                    </p>
+                </div>
+                <a href="?page=docs&tab=oasis" class="btn btn-secondary" style="font-size: 0.85rem; font-weight: 700; align-self: flex-start;">
+                    Découvrir les Oasis & Quêtes &rarr;
+                </a>
+            </div>
+
+        </div>
+
+        <!-- TABLEAU SYNOPTIQUE DE L'ARMEMENT FÉODAL (25 UNITÉS) -->
+        <div class="card" style="background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.3rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                        <span>⚔️</span> Les Deux Pôles Militaires du Shogunat (25 Régiments & Engins)
+                    </h3>
+                    <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-muted);">
+                        La puissance militaire d'OpenShogun s'articule autour de deux édifices castraux complémentaires, chacun illustré en haute définition :
+                    </p>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; color: #2563eb; font-size: 1.1rem;">🥋 Le Dojo Militaire (12 Troupes)</h4>
+                        <span style="font-size: 0.75rem; font-weight: 700; background: rgba(37,99,235,0.1); color: #2563eb; padding: 2px 8px; border-radius: 4px;">Infanterie & Tir</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 1rem 0;">
+                        Forme les fantassins paysans conscrits (Piquiers Nagae-yari, conscrits légers), les corps de tireurs d'élite (Arquebusiers Tanegashima, Archers protecteurs de muraille), 
+                        les maîtres bretteurs (Samouraïs au Katana, Bretteurs Nodachi) et la garde rapprochée Hatamoto.
+                    </p>
+                    <a href="?page=docs&tab=troops" class="btn btn-secondary" style="font-size: 0.8rem; font-weight: 700;">
+                        Voir les 12 Troupes du Dojo &rarr;
+                    </a>
+                </div>
+
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; color: #dc2626; font-size: 1.1rem;">🐎 L'Atelier de Siège & Écuries (13 Engins)</h4>
+                        <span style="font-size: 0.75rem; font-weight: 700; background: rgba(220,38,38,0.1); color: #dc2626; padding: 2px 8px; border-radius: 4px;">Cavalerie & Machines</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 1rem 0;">
+                        Élève la cavalerie rapide et lourde (Cavaliers d'interception, Cavalerie rouge Akazonae de Kai, Éclaireurs montés), 
+                        fabrique les engins de démolition (Béliers d'acier, Catapultes incendiaires Horokubiya, Tours de siège balistes, Forteresses roulantes) 
+                        et arme les convois logistiques et caravanes d'établissement castral.
+                    </p>
+                    <a href="?page=docs&tab=siege" class="btn btn-secondary" style="font-size: 0.8rem; font-weight: 700;">
+                        Voir les 13 Engins & Montures &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    <?php endif; ?>
+
+    <?php if ($tab === 'hero' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 1 : LE HÉROS SAMOURAÏ & LA VOIE DU BUSHIDŌ
+             ============================================================== -->
+        <div class="card" id="chapitre-heros" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid var(--red-primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: var(--red-primary); text-transform: uppercase; letter-spacing: 1px;">Chapitre 1</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🥋</span> Le Héros Samouraï : Guide Intégral & Voie du Guerrier
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Directement inspiré des seigneurs de guerre de l'époque Sengoku et des mécaniques héroïques classiques de Travian, 
+                        votre Héros Samouraï est un champion unique qui évolue en même temps que votre dynastie.
                     </p>
                 </div>
                 <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Structure Requise</div>
-                    <div style="font-size: 1.1rem; font-weight: 800; color: #dc2626;">Atelier & Écuries Niv. 1+</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Points / Niveau</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: var(--red-primary);">+4 Points d'Attributs</div>
+                </div>
+            </div>
+
+            <!-- Les 4 Piliers d'Attributs -->
+            <h3 style="margin: 0 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                <span>📊</span> 1. Les Quatre Piliers d'Attributs Martiaux
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #dc2626;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                        <strong style="color: #dc2626; font-size: 1rem;">⚔️ Force Martiale</strong>
+                        <span style="font-size: 0.75rem; font-weight: 800; background: rgba(220,38,38,0.1); color: #dc2626; padding: 2px 6px; border-radius: 4px;">+80 Puissance / pt</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                        Puissance combative personnelle du héros. Une valeur élevée lui permet de remporter des Aventures périlleuses avec des blessures minimes, et de décimer les animaux des oasis sans dépendre d'une vaste escorte.
+                    </p>
+                </div>
+
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #ea580c;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                        <strong style="color: #ea580c; font-size: 1rem;">🚩 Commandement Offensif</strong>
+                        <span style="font-size: 0.75rem; font-weight: 800; background: rgba(234,88,12,0.1); color: #ea580c; padding: 2px 6px; border-radius: 4px;">+0.2% Attaque / pt</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                        Aura martiale qui galvanise vos armées de conquête. Lorsqu'il accompagne un détachement en raid ou en siège, toutes les troupes bénéficient de ce pourcentage de dégâts additionnel.
+                    </p>
+                </div>
+
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #2563eb;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                        <strong style="color: #2563eb; font-size: 1rem;">🛡️ Maîtrise Défensive</strong>
+                        <span style="font-size: 0.75rem; font-weight: 800; background: rgba(37,99,235,0.1); color: #2563eb; padding: 2px 6px; border-radius: 4px;">+0.2% Défense / pt</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                        Tactique de siège et défense du château. Lorsque le héros monte la garde dans le fief, toute la garnison retranchée derrière vos courtines gagne un bonus multiplicateur de résistance.
+                    </p>
+                </div>
+
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #16a34a;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                        <strong style="color: #16a34a; font-size: 1rem;">🌾 Gouvernance Féodale</strong>
+                        <span style="font-size: 0.75rem; font-weight: 800; background: rgba(22,163,74,0.1); color: #16a34a; padding: 2px 6px; border-radius: 4px;">Spécialisation Terroir</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                        Supervise les récoltes et carrières de votre domaine. Vous pouvez orienter sa gouvernance de manière équilibrée sur les trois ressources ou la concentrer à 100% sur le Bois, la Pierre ou le Riz.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Les Aventures & Expéditions -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin: 0 0 0.5rem 0; color: var(--red-primary); font-size: 1rem;">
+                        🗺️ 2. Aventures en Carte du Monde
+                    </h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.5rem 0;">
+                        Des aventures apparaissent dynamiquement sur la carte provinciale. En envoyant votre héros en expédition, il affronte des embuscades, 
+                        secourt des sanctuaires isolés et rapporte de l'<strong>expérience (XP)</strong>, des <strong>artefacts légendaires</strong>, des vivres et des troupes de ralliement.
+                    </p>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">
+                        <em>Attention : chaque aventure inflige une perte de santé calculée selon la difficulté du terrain et la Force martiale de votre samouraï !</em>
+                    </p>
+                </div>
+
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #7c3aed; font-size: 1rem;">
+                        ⛩️ 3. Arsenal, Reliques & Résurrection
+                    </h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.5rem 0;">
+                        Votre héros possède 6 emplacements d'inventaire : <strong>Arme principale</strong>, <strong>Arme secondaire / Bouclier</strong>, <strong>Casque Kabuto</strong>, <strong>Armure O-Yoroi</strong>, <strong>Bottes / Monture</strong> et <strong>Amulette Omamori</strong>.
+                    </p>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">
+                        En cas de décès au combat, vous ne perdez <strong>jamais</strong> son niveau ni ses points. Le <strong>Rituel Shinto de Résurrection</strong> célébré au fief permet de le réincarner à 100% de santé.
+                    </p>
                 </div>
             </div>
         </div>
+    <?php endif; ?>
 
-        <!-- Grille des 13 Engins de Siège, Cavaleries et Convois -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-            <?php foreach ($allShips as $s): 
-                $code = $s['code'];
-                $meta = $shipTactics[$code] ?? [
-                    'role' => 'Engin Provincial',
-                    'lore_detail' => $s['description'],
-                    'strengths' => 'Polyvalence militaire.',
-                    'weaknesses' => 'Coût de fabrication.',
-                    'quote' => '« La victoire appartient à qui sait frapper fort. »'
-                ];
-                $imgFile = !empty($s['image']) ? $s['image'] : ($code . '.jpg');
-                $diskFile = __DIR__ . '/../public/assets/units/' . $imgFile;
-                $imgSrc = file_exists($diskFile) ? ('/public/assets/units/' . $imgFile . '?v=' . filemtime($diskFile)) : '/public/assets/tile_shipyard.png';
+    <?php if ($tab === 'resources' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 2 : TERROIR & CHOIX LIBRE DES PARCELLES (1-18)
+             ============================================================== -->
+        <div class="card" id="chapitre-terroir" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #16a34a;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #16a34a; text-transform: uppercase; letter-spacing: 1px;">Chapitre 2</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🌾</span> Terroir Féodal & Choix Libre des 18 Parcelles
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Le terroir entourant votre donjon comporte 18 parcelles de production (numérotées de #1 à #18). 
+                        Vous avez désormais l'entière liberté de décider de la nature de chaque parcelle !
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Parcelles Rurales</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #16a34a;">18 Slots Modulaires</div>
+                </div>
+            </div>
 
-                $clanBadge = match($s['faction']) {
-                    'terran' => ['name' => 'Clan Oda', 'color' => '#3b82f6', 'icon' => '🏯'],
-                    'vorash' => ['name' => 'Clan Takeda', 'color' => '#ef4444', 'icon' => '🐎'],
-                    'aethelis' => ['name' => 'Clan Tokugawa', 'color' => '#8b5cf6', 'icon' => '⛩️'],
-                    default => ['name' => 'Corps Logistique', 'color' => '#16a34a', 'icon' => '📦']
-                };
+            <!-- Explication du Système de Slot Libre -->
+            <div style="background: rgba(22,163,74,0.06); border: 1px solid rgba(22,163,74,0.2); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.9rem; color: var(--text-main);">
+                <strong>🌟 Comment fonctionne la sélection libre de ressource ?</strong><br>
+                Sur la page <em>Terroir & Ressources</em>, chaque parcelle non développée (niveau 0) apparaît sous forme de terrain agricole vacant arborant une puce <code>+</code>. 
+                En cliquant sur cette parcelle, une fenêtre modale s'ouvre pour vous permettre de sélectionner le type d'édifice souhaité :
+                scierie, carrière, rizière ou sanctuaire. Une fois le chantier initié, la parcelle adopte ce type. En cas d'annulation avant le niveau 1, le terrain est immédiatement libéré !
+            </div>
+
+            <!-- Les 4 Éléments du Terroir -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-metal);">
+                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-metal);">🪵 Camp de Bûcherons (Bois de Cèdre)</h4>
+                    <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
+                        Abat et débite les cèdres centenaires. Ressource première pour ériger les charpentes de châteaux, bâtir les béliers et tailler les lances des fantassins.
+                    </p>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--res-metal);">Spécialité du Clan Oda</span>
+                </div>
+
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-crystal);">
+                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-crystal);">🪨 Carrière de Granit (Pierre de Taille)</h4>
+                    <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
+                        Extrait les blocs de roche pour monter les remparts cyclopéens (Nozura-zumi) et les fondations imprenables des donjons historiques.
+                    </p>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--res-crystal);">Spécialité du Clan Tokugawa</span>
+                </div>
+
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-deut);">
+                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-deut);">🌾 Rizières Inondées (Riz Impérial / Koku)</h4>
+                    <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
+                        Base nourricière de toute la principauté. Chaque soldat, monture et engin formé exige des rations de riz pour sa subsistance et son entraînement.
+                    </p>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--res-deut);">Spécialité du Clan Takeda</span>
+                </div>
+
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-energy);">
+                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-energy);">⛩️ Sanctuaire d'Inari (Sérénité Spirituelle)</h4>
+                    <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
+                        Diffuse la ferveur et l'énergie spirituelle sur le terroir. <em>Attention : si la consommation dépasse la production des sanctuaires, vos récoltes chutent à 10% !</em>
+                    </p>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--res-energy);">Énergie vitale pour tous les clans</span>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($tab === 'city' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 3 : CITÉ CASTRALE & SILOS MODULAIRES (19-34)
+             ============================================================== -->
+        <div class="card" id="chapitre-cite" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #2563eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 1px;">Chapitre 3</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🏯</span> Cité Castrale & Silos Modulaires Libres (Slots 19 à 34)
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Le cœur urbain de votre domaine comporte 16 emplacements castraux (numérotés de #19 à #34). 
+                        Vous disposez d'une liberté totale pour implanter vos édifices sur n'importe quel terrain libre !
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Emplacements Urbains</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #2563eb;">16 Terrains Modulaires</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.2); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.9rem; color: var(--text-main);">
+                <strong>🏗️ Comment construire librement dans la cité ?</strong><br>
+                Sur la vue de la Cité Castrale, tout terrain non construit affiche une puce <code>+</code>. 
+                En cliquant sur l'emplacement libre de votre choix (slots #19 à #33), le modal féodal vous présente tous les bâtiments disponibles à la construction. 
+                Vous pouvez bâtir plusieurs entrepôts, greniers ou ateliers de siège selon vos ambitions dynastiques ! Le slot #34 est réservé à la Muraille pour encercler la forteresse.
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: var(--red-primary);">🏯 Tenshu (Donjon Castral)</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Cœur du commandement. Réduit le temps de construction de tous les édifices urbains.</p>
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: var(--res-metal);">🪵 Entrepôt de Matériaux (Bois & Pierre)</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Stocke le bois de cèdre et les pierres de taille nécessaires aux chantiers d'envergure.</p>
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: var(--res-deut);">🌾 Grenier à Riz Fortifié (Kura)</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Préserve les récoltes de riz impérial contre les pillages et soutient les armées.</p>
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: #2563eb;">🥋 Dojo Militaire & Caserne</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Entraîne et arme vos fantassins, piquiers, archers et samouraïs d'assaut.</p>
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: #dc2626;">🐎 Atelier de Siège & Écuries</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Fabrique les catapultes, béliers de siège et destriers caparaçonnés de cavalerie.</p>
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: #b45309;">⚖️ Marché Féodal & Caravanes</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Organise les échanges commerciaux et envoie des caravanes de vivres aux alliés.</p>
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: #7c3aed;">📜 Académie des Savoirs & Forge</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Développe les technologies d'armement, métallurgie et art de la guerre.</p>
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: #0891b2;">🔭 Tour de Guet Yagura</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Détecte à l'avance les mouvements de troupes ennemies marchant vers votre fief.</p>
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: #475569;">🕳️ Cachette Secrète Sous Terre</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Met vos précieuses ressources à l'abri des pillages lors des raids ennemis.</p>
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: #059669;">⛩️ Pavillon Diplomatique</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Permet de fonder ou rejoindre une alliance entre puissants seigneurs féodaux.</p>
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.4rem 0; color: #16a34a;">🧱 Muraille & Remparts de Cité (Slot #34)</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Protège l'enceinte entière et décuple l'efficacité défensive de votre garnison (+4% par niveau).</p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($tab === 'troops' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 4 : TROUPES DU DOJO (12 RÉGIMENTS FÉODAUX)
+             ============================================================== -->
+        <div class="card" id="chapitre-troupes" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #2563eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 1px;">Chapitre 4</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🥋</span> Troupes du Dojo & Infanterie des Trois Grands Clans
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Entraînées au Dojo militaire, ces 12 unités d'infanterie et de tir constituent la ligne de front de chaque clan féodal.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Infanterie de Clan</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #2563eb;">12 Régiments Uniques</div>
+                </div>
+            </div>
+
+            <!-- Grille des 3 clans pour les troupes -->
+            <?php foreach ($clansMeta as $cKey => $clan): 
+                $cUnits = $unitsByClan[$cKey] ?? [];
             ?>
-                <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
-                    <!-- Illustration de l'Unité -->
-                    <div style="position: relative; height: 220px; overflow: hidden; background: var(--bg-ink, #ede5d5); border-bottom: 1px solid var(--border-color); cursor: pointer;"
-                         onclick="openDocsLightbox('<?= htmlspecialchars(addslashes($s['name'])) ?>', '<?= $imgSrc ?>', '<?= htmlspecialchars(addslashes($meta['role'])) ?>', '<?= htmlspecialchars(addslashes($meta['lore_detail'])) ?>', '<?= htmlspecialchars(addslashes($meta['quote'])) ?>')">
-                        <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($s['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
-                        
-                        <!-- Badge Faction -->
-                        <div style="position: absolute; top: 10px; left: 10px; background: rgba(253,251,247,0.95); border: 1px solid <?= $clanBadge['color'] ?>; border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 800; color: <?= $clanBadge['color'] ?>;">
-                            <?= $clanBadge['icon'] ?> <?= $clanBadge['name'] ?>
-                        </div>
-                    </div>
-
-                    <!-- En-tête de carte -->
-                    <div style="padding: 1rem 1.25rem 0.5rem 1.25rem;">
-                        <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 800;">
-                            <?= htmlspecialchars($s['name']) ?>
+                <div class="clan-section" id="clan-section-<?= $cKey ?>" style="margin-bottom: 2rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid <?= $clan['color'] ?>44;">
+                        <span style="font-size: 1.5rem;"><?= $clan['icon'] ?></span>
+                        <h3 style="margin: 0; font-size: 1.3rem; color: <?= $clan['color'] ?>;">
+                            <?= htmlspecialchars($clan['name']) ?> &bull; <?= htmlspecialchars($clan['daimyo']) ?>
                         </h3>
-                        <div style="font-size: 0.8rem; color: var(--red-primary, #c2252b); font-weight: 600; margin-top: 2px;">
-                            <?= htmlspecialchars($meta['role']) ?>
-                        </div>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: auto;">
+                            <?= htmlspecialchars($clan['doctrine']) ?>
+                        </span>
                     </div>
 
-                    <!-- Caractéristiques Martiales -->
-                    <div style="padding: 0.5rem 1.25rem; flex: 1;">
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; font-size: 0.75rem; background: var(--bg-ink, #ede5d5); padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 0.75rem;">
-                            <div>⚔️ Attaque : <strong><?= $s['attack'] ?></strong></div>
-                            <div>🛡️ Pavois : <strong><?= $s['shield'] ?></strong></div>
-                            <div>🧱 Blindage : <strong><?= $s['defense'] ?></strong></div>
-                            <div>🐎 Vitesse : <strong><?= $s['speed'] ?></strong></div>
-                            <div>🎒 Fret : <strong><?= $s['cargo_capacity'] ?></strong></div>
-                            <div>⏱️ Durée : <strong><?= $s['base_build_time'] ?>s</strong></div>
-                        </div>
-
-                        <!-- Coûts -->
-                        <div style="display: flex; gap: 0.75rem; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">
-                            <span style="color: var(--res-metal);">🪵 <?= number_format($s['metal_cost']) ?></span>
-                            <span style="color: var(--res-crystal);">🪨 <?= number_format($s['crystal_cost']) ?></span>
-                            <span style="color: var(--res-deut);">🌾 <?= number_format($s['deuterium_cost']) ?></span>
-                        </div>
-
-                        <!-- Lore & Tactique -->
-                        <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin: 0 0 0.5rem 0;">
-                            <?= htmlspecialchars($meta['lore_detail']) ?>
-                        </p>
-                        <div style="font-size: 0.75rem; color: #166534; background: rgba(22,101,52,0.08); padding: 4px 8px; border-radius: 4px; margin-bottom: 4px;">
-                            <strong>Points Forts :</strong> <?= htmlspecialchars($meta['strengths']) ?>
-                        </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;">
+                        <?php foreach ($cUnits as $u): 
+                            $tactics = $unitTactics[$u['code']] ?? [
+                                'role' => 'Combattant',
+                                'lore_detail' => $u['description'],
+                                'strengths' => 'Discipline martiale.',
+                                'weaknesses' => 'N/A',
+                                'quote' => '« Pour l\'honneur du clan ! »'
+                            ];
+                            $imgName = !empty($u['image']) ? $u['image'] : ($u['code'] . '.jpg');
+                            $imgSrc = '/public/assets/units/' . $imgName;
+                        ?>
+                            <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;">
+                                <div style="position: relative; height: 180px; overflow: hidden; background: var(--bg-ink); cursor: pointer;"
+                                     onclick="openDocsLightbox('<?= addslashes($u['name']) ?>', '<?= $imgSrc ?>', '<?= addslashes($tactics['role']) ?>', '<?= addslashes($tactics['lore_detail']) ?>', '<?= addslashes($tactics['quote']) ?>')">
+                                    <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($u['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                    <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                                        Rang <?= $u['tier'] ?>
+                                    </span>
+                                </div>
+                                <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div>
+                                        <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: var(--text-main);"><?= htmlspecialchars($u['name']) ?></h4>
+                                        <div style="font-size: 0.75rem; color: <?= $clan['color'] ?>; font-weight: 700; margin-bottom: 0.5rem;"><?= htmlspecialchars($tactics['role']) ?></div>
+                                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 0.75rem; text-align: center; margin-bottom: 0.75rem; background: var(--bg-ink); padding: 6px; border-radius: 6px;">
+                                            <div><span style="color:#dc2626; font-weight:800;">⚔️ <?= $u['attack'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Attaque</span></div>
+                                            <div><span style="color:#2563eb; font-weight:700;">🛡️ <?= $u['def_infantry'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Déf. Inf</span></div>
+                                            <div><span style="color:#16a34a; font-weight:700;">🐎 <?= $u['def_mech'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Déf. Cav</span></div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
+                                        <strong style="color: #15803d;">Atout :</strong> <?= htmlspecialchars($tactics['strengths']) ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
+    <?php endif; ?>
 
-    <?php elseif ($tab === 'hero'): ?>
-        <!-- ==========================================================
-             CHAPITRE 3 : LE HÉROS SAMOURAÏ & LA VOIE DU BUSHIDŌ
-             ========================================================== -->
-        <div class="card" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 5px solid #d97706; box-shadow: 0 6px 20px rgba(0,0,0,0.05);">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
-                <div style="max-width: 850px;">
-                    <div style="font-size: 0.8rem; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.35rem;">
-                        武士道 &bull; Champion Suprême du Fief Castral
-                    </div>
-                    <h2 style="margin: 0 0 0.75rem 0; font-size: 1.85rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>⚔️</span> Chapitre 3 : Le Héros Samouraï (Système Travian)
+    <?php if ($tab === 'siege' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 5 : ATELIER DE SIÈGE & ÉCURIES (13 ENGINS & CAVALERIE)
+             ============================================================== -->
+        <div class="card" id="chapitre-siege" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #dc2626;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #dc2626; text-transform: uppercase; letter-spacing: 1px;">Chapitre 5</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🐎</span> Atelier de Siège & Écuries Provinciales (13 Unités)
                     </h2>
-                    <p style="margin: 0; color: var(--text-muted); font-size: 1rem; line-height: 1.6;">
-                        Chaque Daimyō dispose d'un <strong>Héros Samouraï unique</strong>, incarnation vivante de l'honneur de sa dynastie. 
-                        Inspiré du système de héros de Travian, il gagne de l'expérience au combat et en expédition, acquiert de précieux artefacts féodaux, mène vos armées lors des raids provinciaux et stimule directement la prospérité économique de votre domaine.
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Construits à l'Atelier de Siège et aux Écuries, ces 13 engins massifs, destriers cuirassés et convois logistiques 
+                        sont indispensables pour faire tomber les murailles ennemies et acheminer les récoltes de votre principauté.
                     </p>
                 </div>
-                <a href="?page=hero" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 700; background: linear-gradient(135deg, #d97706, #b45309); border-color: #f59e0b; box-shadow: 0 4px 14px rgba(217,119,6,0.35);">
-                    🥋 Consulter Mon Héros &rarr;
-                </a>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Machines & Destriers</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #dc2626;">13 Engins Illustrés</div>
+                </div>
             </div>
-        </div>
 
-        <!-- Les 4 Piliers d'Attributs & Arbre de Compétences -->
-        <div class="card" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 1.75rem; border: 1px solid var(--border-color); border-radius: 12px;">
-            <h3 style="margin: 0 0 1.25rem 0; font-size: 1.35rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                <span>📊</span> 1. Les 4 Attributs Fondamentaux du Héros
-            </h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">
-                À chaque montée de niveau, votre héros reçoit <strong>4 points d'attributs</strong> à répartir selon votre orientation stratégique. Il récupère également instantanément <strong>+20% de santé</strong> lors du passage de niveau.
-            </p>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
-                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">⚔️</span>
-                        <h4 style="margin: 0; font-size: 1.1rem; color: #dc2626;">Force de Combat</h4>
+            <!-- Grille des 13 Engins de Siège -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+                <?php foreach ($allShips as $s): 
+                    $code = $s['code'];
+                    $meta = $shipTactics[$code] ?? [
+                        'role' => 'Engin de Siège',
+                        'lore_detail' => $s['description'],
+                        'strengths' => 'Puissance offensive.',
+                        'weaknesses' => 'Coût en matériaux.',
+                        'quote' => '« La forteresse plie sous l\'assaut. »'
+                    ];
+                    $imgFile = !empty($s['image']) ? $s['image'] : ($code . '.jpg');
+                    $imgSrc = '/public/assets/units/' . $imgFile;
+                    $clanBadge = match($s['faction']) {
+                        'terran' => ['name' => 'Clan Oda', 'color' => '#3b82f6', 'icon' => '🏯'],
+                        'vorash' => ['name' => 'Clan Takeda', 'color' => '#ef4444', 'icon' => '🐎'],
+                        'aethelis' => ['name' => 'Clan Tokugawa', 'color' => '#8b5cf6', 'icon' => '⛩️'],
+                        default => ['name' => 'Logistique & Convois', 'color' => '#16a34a', 'icon' => '📦']
+                    };
+                ?>
+                    <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
+                        <div style="position: relative; height: 200px; overflow: hidden; background: var(--bg-ink); cursor: pointer;"
+                             onclick="openDocsLightbox('<?= addslashes($s['name']) ?>', '<?= $imgSrc ?>', '<?= addslashes($meta['role']) ?>', '<?= addslashes($meta['lore_detail']) ?>', '<?= addslashes($meta['quote']) ?>')">
+                            <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($s['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                            <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.8); color: <?= $clanBadge['color'] ?>; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                                <?= $clanBadge['icon'] ?> <?= $clanBadge['name'] ?>
+                            </span>
+                        </div>
+                        <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <h4 style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--text-main);"><?= htmlspecialchars($s['name']) ?></h4>
+                                <div style="font-size: 0.8rem; color: <?= $clanBadge['color'] ?>; font-weight: 700; margin-bottom: 0.75rem;"><?= htmlspecialchars($meta['role']) ?></div>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-size: 0.8rem; text-align: center; margin-bottom: 0.75rem; background: var(--bg-ink); padding: 8px; border-radius: 6px;">
+                                    <div><span style="color:#dc2626; font-weight:800;">⚔️ <?= $s['attack'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Attaque</span></div>
+                                    <div><span style="color:#2563eb; font-weight:700;">🛡️ <?= ($s['defense'] + $s['shield']) ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Blindage</span></div>
+                                    <div><span style="color:#b45309; font-weight:700;">🎒 <?= $s['cargo_capacity'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Fret</span></div>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
+                                <strong style="color: #15803d;">Atout :</strong> <?= htmlspecialchars($meta['strengths']) ?>
+                            </div>
+                        </div>
                     </div>
-                    <div style="font-weight: 800; font-size: 0.85rem; color: #166534; margin-bottom: 0.5rem;">+80 Attaque & Défense brute / pt</div>
-                    <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
-                        Augmente la valeur martiale directe du héros. Essentiel en début de partie pour nettoyer les <strong>Oasis sauvages</strong> peuplées de loups et d'ours sans subir de pertes dans vos troupes régulières.
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($tab === 'oasis' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 6 : OASIS SAUVAGES, FAUNE HOSTILE & ANNEXIONS
+             ============================================================== -->
+        <div class="card" id="chapitre-oasis" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #b45309;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 1px;">Chapitre 6</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🌴</span> Oasis Sauvages, Faune Hostile & Conquête Économique
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Inspirées du système classique de Travian, les oasis parsèment la carte des provinces et constituent des nœuds stratégiques cruciaux.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Bonus de Récolte</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #b45309;">+25% à +50%</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #b45309;">🐾 1. Faune Sauvage Protectrice</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                        Chaque oasis inoccupée est peuplée par des bêtes sauvages (sangliers des monts, meutes de loups féroces, ours géants d'Hokkaido). 
+                        Leur puissance défensive protège les richesses naturelles de l'oasis contre les prédateurs.
                     </p>
                 </div>
 
-                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">🗡️</span>
-                        <h4 style="margin: 0; font-size: 1.1rem; color: #b45309;">Bonus Offensif</h4>
-                    </div>
-                    <div style="font-weight: 800; font-size: 0.85rem; color: #166534; margin-bottom: 0.5rem;">+0.2% Attaque d'Armée / pt (max 20%)</div>
-                    <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
-                        Galvanise toutes les escouades marchant sous la bannière du héros lors d'un raid ou d'un siège. Avec 100 points, confère un bonus dévastateur de +20% à l'ensemble de votre force d'attaque.
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #dc2626;">⚔️ 2. Raids de Pillage & Butins</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                        Tant que des animaux y subsistent, envoyer vos troupes ou votre Héros Samouraï permet d'éliminer la faune et de 
+                        dérober instantanément les ressources stockées (bois, pierre, riz). Idéal pour accélérer le développement initial.
                     </p>
                 </div>
 
-                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">🛡️</span>
-                        <h4 style="margin: 0; font-size: 1.1rem; color: #2563eb;">Bonus Défensif</h4>
-                    </div>
-                    <div style="font-weight: 800; font-size: 0.85rem; color: #166534; margin-bottom: 0.5rem;">+0.2% Défense de Garnison / pt (max 20%)</div>
-                    <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
-                        Transforme votre héros en rempart inébranlable. Lorsqu'il est présent au fief lors d'une attaque ennemie, il renforce la résilience de tous les soldats en garnison.
-                    </p>
-                </div>
-
-                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">🌾</span>
-                        <h4 style="margin: 0; font-size: 1.1rem; color: #15803d;">Production Rurale</h4>
-                    </div>
-                    <div style="font-weight: 800; font-size: 0.85rem; color: #166534; margin-bottom: 0.5rem;">Production brute horaire au fief</div>
-                    <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
-                        Le héros supervise les domaines ruraux. Vous pouvez choisir d'orienter sa production vers une ressource spécifique (100% Bois, 100% Pierre, 100% Riz) ou une répartition harmonieuse équilibrée.
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #16a34a;">🏰 3. Annexion & Bonus Permanents</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                        Une fois tous les animaux terrassés, y dépêcher une armée avec votre Héros Samouraï permet d'annexer l'oasis à votre fief. 
+                        Elle octroie alors un bonus permanent de <strong>+25% ou +50%</strong> sur la production horaire de votre domaine !
                     </p>
                 </div>
             </div>
         </div>
+    <?php endif; ?>
 
-        <!-- Aventures & Expéditions -->
-        <div class="card" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 1.75rem; border: 1px solid var(--border-color); border-radius: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
-                <h3 style="margin: 0; font-size: 1.35rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                    <span>🗺️</span> 2. Aventures & Expéditions en Provinces Lointaines
-                </h3>
-                <span style="background: rgba(245,158,11,0.15); color: #b45309; border: 1px solid rgba(245,158,11,0.3); padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">
-                    3 Aventures Actives en permanence
-                </span>
+    <?php if ($tab === 'quests' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 7 : DIDACTICIEL & QUÊTES FÉODALES
+             ============================================================== -->
+        <div class="card" id="chapitre-quetes" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #0891b2;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #0891b2; text-transform: uppercase; letter-spacing: 1px;">Chapitre 7</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🎯</span> Didacticiel & Voie des 12 Quêtes Féodales
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Pour guider les nouveaux seigneurs féodaux, le maître d'armes Katsumoto propose une série ordonnée de 12 quêtes 
+                        couvrant les aspects vitaux du jeu, assorties de dotations généreuses en vivres, matériaux et points de gloire.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Progression Guidée</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #0891b2;">12 Quêtes du Daimyō</div>
+                </div>
             </div>
-            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.25rem;">
-                Des rumeurs de sanctuaires oubliés, de nids d'embuscade et de trésors perdus apparaissent continuellement sur la carte galactique. En envoyant votre héros en aventure :
-            </p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
-                <div style="padding: 1rem; background: var(--bg-ink, #ede5d5); border-radius: 8px; border: 1px solid var(--border-color);">
-                    <strong style="color: var(--text-main);">📈 Gain d'Expérience (XP) :</strong>
-                    <p style="margin: 0.35rem 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
-                        Chaque aventure réussie rapporte entre 30 et 80 points d'XP, accélérant les montées de niveau pour obtenir de nouveaux points d'attributs.
-                    </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem;">
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>1. Premier Arpent de Cèdre :</strong> Élever un Camp de Bûcherons au Niv. 1.
                 </div>
-                <div style="padding: 1rem; background: var(--bg-ink, #ede5d5); border-radius: 8px; border: 1px solid var(--border-color);">
-                    <strong style="color: var(--text-main);">🩸 Risques & Santé du Héros :</strong>
-                    <p style="margin: 0.35rem 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
-                        Affronter des brigands et des bêtes féroces entame la santé du samouraï (-5% à -25% par aventure). Veillez à ne pas l'envoyer en mission avec une santé critique !
-                    </p>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>2. Fondations de Granit :</strong> Élever une Carrière de Pierre au Niv. 1.
                 </div>
-                <div style="padding: 1rem; background: var(--bg-ink, #ede5d5); border-radius: 8px; border: 1px solid var(--border-color);">
-                    <strong style="color: var(--text-main);">🎁 Trésors & Équipements Rares :</strong>
-                    <p style="margin: 0.35rem 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
-                        Découverte d'équipements féodaux de grand maître (Katanas ancestraux, armures de parade Nanban, montures Kiso) immédiatement équipables dans votre arsenal.
-                    </p>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>3. Rizières Nourricières :</strong> Élever une Rizière Inondée au Niv. 1.
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>4. Sanctuaire d'Inari :</strong> Élever un Sanctuaire Shintō au Niv. 1.
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>5. Grenier Kura :</strong> Construire un Grenier à Riz dans la Cité.
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>6. Entrepôt de Matériaux :</strong> Bâtir un Entrepôt de Cèdre et Pierre.
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>7. Dojo & Conscription :</strong> Élever la Caserne / Dojo au Niveau 1.
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>8. Premiers Soldats :</strong> Recruter au moins 2 guerriers de clan.
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>9. Première Aventure du Héros :</strong> Accomplir une expédition héroïque.
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>10. Muraille de Cité :</strong> Ériger les Remparts Castraux (Slot #34).
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>11. Marché Féodal :</strong> Bâtir un Marché pour échanger des denrées.
+                </div>
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border-left: 3px solid #0891b2;">
+                    <strong>12. Seigneur de Guerre :</strong> Rassembler une armée de 10 unités.
                 </div>
             </div>
         </div>
+    <?php endif; ?>
 
-        <!-- Arsenal & Résurrection -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-            <!-- Arsenal -->
-            <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;">
-                <h3 style="margin: 0 0 1rem 0; font-size: 1.2rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                    <span>🛡️</span> 3. L'Arsenal & les 6 Emplacements d'Artefacts
-                </h3>
-                <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
-                    <li><strong>Arme Principale (Weapon) :</strong> Katana (+Attaque), Naginata (+Anti-Cavalerie), Nodachi (+Puissance de Siège).</li>
-                    <li><strong>Casque (Helmet) :</strong> Kabuto ornemental (+XP et régénération de PV).</li>
-                    <li><strong>Armure (Armor) :</strong> Cuirasse Dō-maru renforcée (réduction des blessures en aventure).</li>
-                    <li><strong>Chaussures (Shoes) :</strong> Waraji tressées et jambières (vitesse de marche rapide).</li>
-                    <li><strong>Main Gauche (Left Hand) :</strong> Éventail de guerre Gunbai ou bouclier en bois Tate.</li>
-                    <li><strong>Monture (Horse) :</strong> Destrier Kiso (+20% à +40% de vitesse sur la carte).</li>
-                </ul>
+    <?php if ($tab === 'map' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 8 : CARTE DU MONDE & LES 4 PROVINCES CARDINAUX
+             ============================================================== -->
+        <div class="card" id="chapitre-carte" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #7c3aed;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px;">Chapitre 8</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🗺️</span> Carte Féodale & les Quatre Provinces Cardinaux
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        L'archipel féodal d'OpenShogun s'étend sur une grille cartographique continue divisée en 4 grandes régions géographiques.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Divisions du Monde</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #7c3aed;">4 Zones Cardinaux</div>
+                </div>
             </div>
 
-            <!-- Mort et Résurrection -->
-            <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;">
-                <h3 style="margin: 0 0 1rem 0; font-size: 1.2rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                    <span>⛩️</span> 4. Mort au Combat & Rituel de Résurrection
-                </h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem;">
-                    Si votre héros succombe lors d'une aventure périlleuse ou au cœur d'une bataille sanglante, il acquiert le statut <strong>Mort au Combat</strong>.
-                </p>
-                <div style="background: rgba(220,38,38,0.08); border-left: 4px solid #dc2626; padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.82rem; color: var(--text-main);">
-                    <strong>La Voie de la Renaissance :</strong> Vous ne perdez <em>jamais</em> le niveau, les points d'attributs ni les équipements forgés de votre héros. Un <strong>Rituel Shinto de Résurrection</strong> peut être célébré au fief castral pour le réincarner à 100% de santé après un court temps de prière.
-                </div>
-            </div>
-        </div>
-
-    <?php elseif ($tab === 'city'): ?>
-        <!-- ==========================================================
-             CHAPITRE 4 : CITÉ CASTRALE & ARCHITECTURE URBAINE
-             ========================================================== -->
-        <div class="card" style="padding: 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px;">
-            <h2 style="margin: 0 0 1rem 0; font-size: 1.5rem; color: var(--text-main);">
-                🏯 Chapitre 4 : Cité Castrale & Architecture Urbaine (16 Emplacements)
-            </h2>
-            <p style="font-size: 1rem; line-height: 1.6; color: var(--text-muted); margin-bottom: 1.5rem;">
-                La Cité Castrale (accessible via le médaillon central) constitue le centre névralgique de votre principauté. 
-                Elle comporte 15 emplacements numérotés de <strong>#19 à #34</strong>, chacun dédié à une infrastructure vitale :
-            </p>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: var(--red-primary);">🏯 Slot #19 : Tenshu (Donjon Castral)</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Cœur du commandement. Réduit le temps de construction de tous les édifices urbains.</p>
-                </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: var(--res-metal);">🪵 Slot #20 : Entrepôt de Cèdre & Pierre</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Stocke le bois de cèdre et les pierres de taille nécessaires aux chantiers.</p>
-                </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: var(--res-deut);">🌾 Slot #21 : Grenier à Riz Fortifié (Kura)</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Préserve les récoltes de riz impérial contre la pourriture et les rongeurs.</p>
-                </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #2563eb;">🥋 Slot #22 : Dojo Militaire & Garnison</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Entraîne et arme vos fantassins, piquiers, tireurs et samouraïs.</p>
-                </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #dc2626;">🐎 Slot #23 : Atelier de Siège & Écuries</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Fabrique les catapultes, béliers de siège et destriers de cavalerie.</p>
-                </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #b45309;">⚖️ Slot #24 : Marché Féodal & Caravanes</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Organise les échanges commerciaux et envoie des caravanes de vivres aux alliés.</p>
-                </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #7c3aed;">📜 Slot #25 : Académie des Savoirs & Forge</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Développe les technologies d'armement, métallurgie et art de la guerre.</p>
-                </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #0891b2;">🔭 Slot #26 : Tour de Guet Yagura</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Détecte à l'avance les mouvements de troupes ennemies marchant vers votre fief.</p>
-                </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #475569;">🕳️ Slot #27 : Cachette Secrète Sous Terre</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Met vos précieuses ressources à l'abri des pillages lors des raids ennemis.</p>
-                </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #059669;">⛩️ Slot #28 : Pavillon Diplomatique</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Permet de fonder ou rejoindre une alliance entre puissants seigneurs féodaux.</p>
-                </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #16a34a;">🧱 Slot #34 : Muraille & Remparts de Cité</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Protège l'enceinte entière et décuple l'efficacité défensive de votre garnison.</p>
-                </div>
-            </div>
-        </div>
-
-    <?php elseif ($tab === 'resources'): ?>
-        <!-- ==========================================================
-             CHAPITRE 3 : TERROIR & PARCELLES RURALES
-             ========================================================== -->
-        <div class="card" style="padding: 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px;">
-            <h2 style="margin: 0 0 1rem 0; font-size: 1.5rem; color: var(--text-main);">
-                🌾 Chapitre 3 : Terroir & Récoltes du Domaine (18 Parcelles Rurales)
-            </h2>
-            <p style="font-size: 1rem; line-height: 1.6; color: var(--text-muted); margin-bottom: 1.5rem;">
-                Le Terroir rural entoure la forteresse et alimente l'effort de guerre du clan. Il se compose de 18 parcelles agraires et minières :
-            </p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
-                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-metal);">
-                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-metal);">🪵 5 Camps de Bûcherons (Bois de Cèdre)</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Indispensable pour bâtir les charpentes de bois des châteaux, les remparts et forger les hampes de lances.</p>
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                    <h4 style="margin:0 0 0.5rem 0; color: #3b82f6;">❄️ 1. Province du Nord (Mutsu & Dewa)</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Terres boréales accidentées, forêts de résineux denses et reliefs montagneux réputés pour leurs gisements de pierre et leurs hardes d'ours sauvages.</p>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-crystal);">
-                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-crystal);">🪨 5 Carrières de Pierre (Pierre de Taille)</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Extrait les blocs de granit pour dresser les fondations cyclopéennes (Nozura-zumi) des donjons.</p>
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #ef4444;">
+                    <h4 style="margin:0 0 0.5rem 0; color: #ef4444;">🌋 2. Province du Sud (Kyūshū & Shikoku)</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Climat tempéré favorable aux rizières abondantes, proximité maritime et routes commerciales animées par les caravanes de vivres.</p>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-deut);">
-                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-deut);">🌾 4 Rizières du Fief (Riz Impérial)</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Base alimentaire de la population et ravitaillement indispensable pour entraîner des armées de guerriers.</p>
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                    <h4 style="margin:0 0 0.5rem 0; color: #8b5cf6;">🌅 3. Province de l'Est (Plaines du Kantō & Mikawa)</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Vastes plaines fertiles idéales pour déployer les charges de cavalerie et bâtir d'immenses cités castrales fortifiées.</p>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-energy);">
-                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-energy);">⛩️ 4 Sanctuaires Shintō (Sérénité & Ferveur)</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Énergie spirituelle veillant sur l'harmonie du domaine. Une sérénité insuffisante réduit vos récoltes à 10% !</p>
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #10b981;">
+                    <h4 style="margin:0 0 0.5rem 0; color: #10b981;">🏯 4. Province de l'Ouest (Kansai & Chūgoku)</h4>
+                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Cœur historique de l'archipel impérial abritant les forteresses légendaires d'Azuchi et d'Osaka, berceau des traités diplomatiques.</p>
                 </div>
             </div>
         </div>
+    <?php endif; ?>
 
-    <?php elseif ($tab === 'castles'): ?>
-        <!-- ==========================================================
-             CHAPITRE 4 : LES 12 DONJONS AUTHENTIQUES DU JAPON
-             ========================================================== -->
-        <div class="card" style="padding: 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px;">
-            <h2 style="margin: 0 0 1rem 0; font-size: 1.5rem; color: var(--text-main);">
-                🏯 Chapitre 4 : Les 12 Donjons Authentiques du Japon (現存十二天守)
-            </h2>
-            <p style="font-size: 1rem; line-height: 1.6; color: var(--text-muted); margin-bottom: 1.5rem;">
-                Disséminés sur la Carte des Provinces, les 12 donjons authentiques d'époque Sengoku et Edo sont les joyaux architecturaux de l'archipel.
-                Ces forteresses historiques sont les objectifs suprêmes de la Bataille Finale pour l'unification du Japon :
-            </p>
+    <?php if ($tab === 'castles' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 9 : LES 12 DONJONS AUTHENTIQUES DU JAPON
+             ============================================================== -->
+        <div class="card" id="chapitre-donjons" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid var(--red-primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: var(--red-primary); text-transform: uppercase; letter-spacing: 1px;">Chapitre 9</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🏯</span> Les 12 Donjons Authentiques du Japon (現存十二天守)
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Disséminés sur la Carte des Provinces, les 12 donjons authentiques ayant survécu depuis l'époque féodale 
+                        constituent les Trésors Nationaux du jeu et les objectifs ultimes de la Bataille Finale pour le titre de Shogun.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Objectif de Victoire</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: var(--red-primary);">12 Châteaux Mythiques</div>
+                </div>
+            </div>
+
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; font-size: 0.9rem;">
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
                     <strong>🏯 Château de Himeji</strong> (Harima) &bull; Le Héron Blanc
@@ -1036,18 +1110,32 @@ foreach ($allUnits as $u) {
                 </div>
             </div>
         </div>
+    <?php endif; ?>
 
-    <?php elseif ($tab === 'combat'): ?>
-        <!-- ==========================================================
-             CHAPITRE 5 : RÈGLES DU COMBAT & FORMULES DE SIÈGE
-             ========================================================== -->
-        <div class="card" style="padding: 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px;">
-            <h2 style="margin: 0 0 1rem 0; font-size: 1.5rem; color: var(--text-main);">
-                ⚔️ Chapitre 5 : Règles du Combat, Formations & Expéditions
-            </h2>
+    <?php if ($tab === 'combat' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 10 : RÈGLES DU COMBAT, MURAILLES & FORMULES
+             ============================================================== -->
+        <div class="card" id="chapitre-combat" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #475569;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 1px;">Chapitre 10</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>⚔️</span> Système de Combat, Murailles & Formules Martiales
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Comprendre les calculs d'affrontement pour mener vos sièges avec succès et défendre vos courtines.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Formules de Choc</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #475569;">Défense Pro-Rata</div>
+                </div>
+            </div>
+
             <div style="font-size: 0.95rem; line-height: 1.6; color: var(--text-muted);">
                 <p>
-                    Les affrontements militaires dans OpenShogun reposent sur la confrontation des forces offensives cumulées face aux défenses de l'adversaire (défense infanterie et défense cavalerie/méca), modulées par le bonus des fortifications de la Cité (Muraille) et les capacités spéciales de clan.
+                    Les affrontements militaires dans OpenShogun reposent sur la confrontation des forces offensives cumulées face aux défenses de l'adversaire (défense infanterie et défense cavalerie/méca), modulées par le bonus de fortification de la <strong>Muraille de Cité (+4% par niveau)</strong>, le <strong>Commandement du Héros Samouraï</strong> et les aptitudes doctrinales des clans.
                 </p>
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); margin: 1rem 0; color: var(--text-main);">
                     <h4 style="margin: 0 0 0.5rem 0; color: var(--red-primary);">Triangle Tactique Féodal :</h4>
@@ -1055,7 +1143,8 @@ foreach ($allUnits as $u) {
                         <li><strong>Piques Yari (Ashigaru) :</strong> Déciment la cavalerie rouge sous l'impact de leurs pointes acérées.</li>
                         <li><strong>Cavalerie Rouge & Archers Montés :</strong> Contournent et foudroient les tireurs et archers à découvert.</li>
                         <li><strong>Mousquets Tanegashima & Arcs :</strong> Perforent les armures lourdes et infligent des pertes sévères à distance avant le contact.</li>
-                        <li><strong>Murailles & Remparts :</strong> Multiplient la résistance de la garnison et infligent des dégâts structurels aux assaillants.</li>
+                        <li><strong>Béliers & Tours de Siège :</strong> Pulvérisent les remparts adverses pour annuler le multiplicateur défensif du défenseur.</li>
+                        <li><strong>Catapultes Horokubiya :</strong> Incendient et réduisent les niveaux des infrastructures urbaines ennemies.</li>
                     </ul>
                 </div>
             </div>
@@ -1126,4 +1215,3 @@ function closeDocsLightbox() {
     modal.style.display = 'none';
 }
 </script>
-

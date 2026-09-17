@@ -28,7 +28,7 @@ if (strpos($headerContent, '?page=docs') !== false) {
 }
 
 // 3. Simuler le rendu de chaque chapitre de docs.php
-$tabs = ['troops', 'city', 'resources', 'castles', 'combat'];
+$tabs = ['overview', 'hero', 'resources', 'city', 'troops', 'siege', 'oasis', 'quests', 'map', 'castles', 'combat', 'all'];
 
 // Mock session / auth
 $_SESSION['user_id'] = 1;
@@ -42,7 +42,7 @@ foreach ($tabs as $tab) {
         $output = ob_get_clean();
         $len = strlen($output);
         if ($len > 1000) {
-            echo "✓ Chapitre '{$tab}' rendu avec succès ({$len} octets)\n";
+            echo "✓ Chapitre/Vue '{$tab}' rendu avec succès ({$len} octets)\n";
         } else {
             echo "✗ ERREUR : Contenu trop court pour le chapitre '{$tab}' ({$len} octets)\n";
             exit(1);
@@ -54,12 +54,14 @@ foreach ($tabs as $tab) {
     }
 }
 
-// 4. Vérifier que toutes les 12 unités ont leur image physique sur le disque
+// 4. Vérifier que toutes les 12 unités du Dojo et 13 unités de siège ont leur image physique sur le disque
 require_once __DIR__ . '/../core/Database.php';
 try {
     $db = Database::getConnection();
+    
+    // 12 Troupes du Dojo
     $units = $db->query("SELECT code, name, image FROM units")->fetchAll();
-    echo "--- Vérification de l'intégrité des illustrations des 12 unités ---\n";
+    echo "--- Vérification des illustrations des 12 unités du Dojo ---\n";
     foreach ($units as $u) {
         $imgName = !empty($u['image']) ? $u['image'] : ($u['code'] . '.jpg');
         $filePath = __DIR__ . '/../public/assets/units/' . $imgName;
@@ -71,8 +73,23 @@ try {
             exit(1);
         }
     }
+
+    // 13 Engins de Siège et Écuries
+    $ships = $db->query("SELECT code, name, image FROM ships")->fetchAll();
+    echo "--- Vérification des illustrations des 13 unités de Siège & Écuries ---\n";
+    foreach ($ships as $s) {
+        $imgName = !empty($s['image']) ? $s['image'] : ($s['code'] . '.jpg');
+        $filePath = __DIR__ . '/../public/assets/units/' . $imgName;
+        if (file_exists($filePath)) {
+            $size = filesize($filePath);
+            echo "  ✓ [{$s['name']}] -> {$imgName} ({$size} octets)\n";
+        } else {
+            echo "  ✗ ERREUR : Image manquante pour {$s['name']} : {$filePath}\n";
+            exit(1);
+        }
+    }
 } catch (Exception $e) {
-    echo "Note : Connexion DB directe non testée en environnement sandboxed : " . $e->getMessage() . "\n";
+    echo "Note : Connexion DB directe non testée : " . $e->getMessage() . "\n";
 }
 
 echo "=== TOUS LES TESTS DE LA DOCUMENTATION SONT VALIDES ! ===\n";
