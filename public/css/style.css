@@ -762,6 +762,24 @@ a:hover {
 .hotspot-city-slot-34 { left: 17.5%; top: 56.5%; width: 13.5%; height: 20.0%; z-index: 15; }
 .hotspot-city-slot-gateway { left: 12.0%; top: 68.5%; width: 7.5%; height: 12.0%; z-index: 16; }
 
+/* Slot Muraille & Remparts (Slot 34) : Aucune image superposée, uniquement le badge ou le bouton '+' */
+.hotspot-city-slot-34 .rts-tile-sprite,
+.hotspot-city-slot-34 img {
+    display: none !important;
+}
+
+.hotspot-city-slot-34 .rts-level-bubble {
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: translate(-50%, -50%) !important;
+}
+
+.hotspot-city-slot-34:hover .rts-level-bubble {
+    transform: translate(-50%, -50%) scale(1.12) !important;
+}
+
 /* Emplacements libres / Terrains disponibles (Cité & Terroirs Ruraux) */
 .rts-hotspot.is-empty-plot {
     border: 1.5px dashed rgba(194, 37, 43, 0.45);

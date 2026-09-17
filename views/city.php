@@ -139,6 +139,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                     $isBuildingInQueue = ($code !== 'free_plot' && isset($activeBuildingQueue[$code]));
                     $isUnderConstruction = ($lvl === 0 && $isBuildingInQueue);
                     $isEmptySlot = ($code === 'free_plot' || ($lvl === 0 && !$isBuildingInQueue));
+                    $isWallSlot = ($code === 'wall' || (int)$slot === 34);
                 ?>
                     <?php if ($isEmptySlot): ?>
                         <!-- Emplacement Libre / Terrain disponible pour future construction -->
@@ -162,11 +163,13 @@ foreach (BUILDINGS as $code => $bInfo) {
                              title="<?= htmlspecialchars($bInfo['name'] ?? $code) ?> (Chantier en cours - Niveau 1)"
                              onclick="window.location.href='/?page=building&slot=<?= $slot ?>'">
                             
-                            <img src="/public/assets/<?= $tileImg ?>" 
-                                 class="rts-tile-sprite <?= ($code === 'hq') ? 'rts-tenshu-sprite' : '' ?>" 
-                                 style="opacity:0.65; filter:drop-shadow(0 0 8px rgba(234,179,8,0.6));"
-                                 alt="<?= htmlspecialchars($bInfo['name'] ?? $code) ?>" 
-                                 draggable="false">
+                            <?php if (!$isWallSlot): ?>
+                                <img src="/public/assets/<?= $tileImg ?>" 
+                                     class="rts-tile-sprite <?= ($code === 'hq') ? 'rts-tenshu-sprite' : '' ?>" 
+                                     style="opacity:0.65; filter:drop-shadow(0 0 8px rgba(234,179,8,0.6));"
+                                     alt="<?= htmlspecialchars($bInfo['name'] ?? $code) ?>" 
+                                     draggable="false">
+                            <?php endif; ?>
 
                             <div class="rts-level-bubble upgrading" title="Chantier de fondation en cours...">
                                 <span class="bubble-pulse">⏳</span>
@@ -187,7 +190,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                              title="<?= htmlspecialchars($bInfo['name']) ?> (Niveau <?= $lvl ?>)"
                              onclick="window.location.href='/?page=building&slot=<?= $slot ?>'">
                             
-                            <?php if ($code !== 'wall'): ?>
+                            <?php if (!$isWallSlot): ?>
                                 <!-- Sprite PNG du bâtiment féodal -->
                                 <img src="/public/assets/<?= $tileImg ?>" 
                                      class="rts-tile-sprite <?= ($code === 'hq') ? 'rts-tenshu-sprite' : '' ?>" 
