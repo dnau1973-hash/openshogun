@@ -525,6 +525,27 @@
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Epic heroic portrait of a venerable Sengoku Daimyo general in full ornate black and gold samurai armor, horned kabuto helmet, holding an ancient katana, wind blowing cherry blossom petals, dramatic moody lighting" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
                             </td>
                         </tr>
+
+                        <!-- BÉLIER TITANESQUE DU DRAGON DE KAI -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $belierFile = __DIR__ . '/../../public/assets/units/belier_dragon_kai.jpg'; ?>
+                                <img src="/public/assets/units/belier_dragon_kai.jpg?v=<?= file_exists($belierFile) ? filemtime($belierFile) : 1 ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Bélier Titanesque du Dragon de Kai</strong><br>
+                                <span style="font-size: 0.75rem; color: #94a3b8;">Atelier de Siège (Clan Takeda)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                belier_dragon_kai.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Monumental ancient Japanese siege ram machine, colossal battering ram shaped like a ferocious roaring dragon head sculpted from blackened iron and bronze, spitting glowing embers and smoke from its nostrils, heavy fortified wooden carriage built of giant cedar timbers with layered damp leather and reinforced iron plating, iron-rimmed massive spiked wooden wheels rolling in muddy battlefield tracks, vermilion red war banners bearing the four-diamond Takeda clan crest (Takeda-bishi) fluttering on the roof, advancing aggressively toward the colossal stone gate of a besieged Japanese castle fortress at dusk, flying sparks, fiery arrows raining from the sky, misty battlefield atmosphere, dynamic cinematic wide low-angle shot, dramatic volumetric lighting, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution</em>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Monumental ancient Japanese siege ram machine, colossal battering ram shaped like a ferocious roaring dragon head sculpted from blackened iron and bronze, spitting glowing embers and smoke from its nostrils, heavy fortified wooden carriage built of giant cedar timbers with layered damp leather and reinforced iron plating, iron-rimmed massive spiked wooden wheels rolling in muddy battlefield tracks, vermilion red war banners bearing the four-diamond Takeda clan crest (Takeda-bishi) fluttering on the roof, advancing aggressively toward the colossal stone gate of a besieged Japanese castle fortress at dusk, flying sparks, fiery arrows raining from the sky, misty battlefield atmosphere, dynamic cinematic wide low-angle shot, dramatic volumetric lighting, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
