@@ -546,6 +546,27 @@
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Monumental ancient Japanese siege ram machine, colossal battering ram shaped like a ferocious roaring dragon head sculpted from blackened iron and bronze, spitting glowing embers and smoke from its nostrils, heavy fortified wooden carriage built of giant cedar timbers with layered damp leather and reinforced iron plating, iron-rimmed massive spiked wooden wheels rolling in muddy battlefield tracks, vermilion red war banners bearing the four-diamond Takeda clan crest (Takeda-bishi) fluttering on the roof, advancing aggressively toward the colossal stone gate of a besieged Japanese castle fortress at dusk, flying sparks, fiery arrows raining from the sky, misty battlefield atmosphere, dynamic cinematic wide low-angle shot, dramatic volumetric lighting, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
                             </td>
                         </tr>
+
+                        <!-- EMBUSCADE SHINOBI MONTÉE (TOKUGAWA) -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $shinobiFile = __DIR__ . '/../../public/assets/units/shinobi_monte_tokugawa.jpg'; ?>
+                                <img src="/public/assets/units/shinobi_monte_tokugawa.jpg?v=<?= file_exists($shinobiFile) ? filemtime($shinobiFile) : 1 ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Embuscade Shinobi Montée</strong><br>
+                                <span style="font-size: 0.75rem; color: #94a3b8;">Cavalerie Furtive (Clan Tokugawa)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                shinobi_monte_tokugawa.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Dynamic cinematic illustration of a stealth Tokugawa clan shinobi assassin cavalryman mounted on a swift black warhorse with muffled hooves, wearing dark midnight indigo and obsidian shinobi robes with concealed light chainmail armor, menacing black mempo demon half-mask, drawing a razor-sharp steel ninjato blade from his back in mid-stride, smoke bomb canister releasing purple-tinted mist around the horse's legs, subtle Tokugawa triple-hollyhock crest (Mitsuba Aoi) embroidered on his dark sash, bursting out from a dense misty bamboo forest in a surprise night ambush, full moon shining through bamboo stalks casting dramatic moonlight shafts and deep shadows, flying bamboo leaves, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution</em>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Dynamic cinematic illustration of a stealth Tokugawa clan shinobi assassin cavalryman mounted on a swift black warhorse with muffled hooves, wearing dark midnight indigo and obsidian shinobi robes with concealed light chainmail armor, menacing black mempo demon half-mask, drawing a razor-sharp steel ninjato blade from his back in mid-stride, smoke bomb canister releasing purple-tinted mist around the horse's legs, subtle Tokugawa triple-hollyhock crest (Mitsuba Aoi) embroidered on his dark sash, bursting out from a dense misty bamboo forest in a surprise night ambush, full moon shining through bamboo stalks casting dramatic moonlight shafts and deep shadows, flying bamboo leaves, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
