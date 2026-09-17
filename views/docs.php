@@ -136,11 +136,11 @@ $shipTactics = [
         'quote' => '« Quand la tour s\'avance, l\'ombre du destin recouvre les assiégés. »'
     ],
     'vorash_drone' => [
-        'role' => 'Éclaireur Équestre Rapide de Kai',
-        'lore_detail' => 'Cavaliers légers formés dans les reliefs escarpés de la province de Kai. Évoluant en avant-garde des armées Takeda, ils cartographient les positions adverses et mènent des charges d\'opportunité sur les convois mal protégés.',
-        'strengths' => 'Vitesse de raid suprême (13), coût modeste, grande capacité de butin par rapport au coût.',
-        'weaknesses' => 'Défense légère en cas d\'engagement prolongé.',
-        'quote' => '« Rapide comme le vent, invisible jusqu\'au premier coup de lance. »'
+        'role' => 'Cavalier Éclaireur & Éclaireur Équestre de Kai (疾風)',
+        'lore_detail' => 'Cavaliers éclaireurs d\'élite formés sur les crêtes escarpées de la province de Kai. Montés sur les vifs coursiers de montagne Kiso et arborant la fière armure Akazonae aux quatre losanges Takeda, ils évoluent en avant-garde pour cartographier les fiefs ennemis, déceler les embuscades et mener des raids fulgurants.',
+        'strengths' => 'Vitesse de reconnaissance et de raid suprême (13), coût modeste en riz, grande capacité de butin par rapport au coût.',
+        'weaknesses' => 'Défense légère en cas d\'engagement prolongé contre les murs de piques.',
+        'quote' => '« Rapide comme le vent, silencieux comme la forêt, dévastateur comme le feu. » — Takeda Shingen'
     ],
     'vorash_manticore' => [
         'role' => 'Cavalerie Rouge Cuirassée (Akazonae)',
@@ -456,6 +456,33 @@ foreach ($allUnits as $u) {
                 </a>
             </div>
 
+            <!-- PILIER 4 : DÉMOLITION AVEC CHRONO & DEVISE DU DAIMYŌ -->
+            <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #ef4444;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <span style="font-size: 2rem;">🗑️</span>
+                        <span style="background: rgba(239,68,68,0.1); color: #ef4444; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+                            Stratégie & Dynastie
+                        </span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; color: var(--text-main);">
+                        Démantèlement Temporisé & Devise Officielle
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 1rem 0;">
+                        Adaptez librement votre domaine face aux crises : chaque bâtiment urbain ou parcelle rurale peut être <strong>démantelé</strong> avec un compte à rebours de démolition (50% de la durée). Durant les travaux, la bâtisse reste visible avec un badge <code>🗑️</code>, annulable à tout instant sans frais, et vous récupérez <strong>30% des matériaux</strong> à l'achèvement pour libérer l'emplacement !<br>
+                        Depuis le Donjon Tenshu, proclamez également la <strong>Devise officielle</strong> de votre dynastie qui guidera vos samouraïs sur tout l'archipel.
+                    </p>
+                </div>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <a href="?page=docs&tab=city" class="btn btn-secondary" style="font-size: 0.82rem; font-weight: 700;">
+                        Démolition en Cité &rarr;
+                    </a>
+                    <a href="?page=docs&tab=resources" class="btn btn-secondary" style="font-size: 0.82rem; font-weight: 700;">
+                        Raser une Parcelle &rarr;
+                    </a>
+                </div>
+            </div>
+
         </div>
 
         <!-- TABLEAU SYNOPTIQUE DE L'ARMEMENT FÉODAL (25 UNITÉS) -->
@@ -697,6 +724,23 @@ foreach ($allUnits as $u) {
                     <span style="font-size: 0.75rem; font-weight: 700; color: var(--res-energy);">Énergie vitale pour tous les clans</span>
                 </div>
             </div>
+
+            <!-- Démantèlement & Réinitialisation d'une Parcelle -->
+            <div style="background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; padding: 1.25rem; margin-top: 1.5rem; line-height: 1.6; font-size: 0.9rem; color: var(--text-main);">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.25rem;">🗑️</span>
+                    <strong style="color: #ef4444; font-size: 1rem;">Démanteler une Exploitation Rurale (Changement de Terroir)</strong>
+                </div>
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.88rem; color: var(--text-muted);">
+                    Vous avez besoin de plus de bois pour vos engins de siège ou de plus de rizières pour nourrir votre cavalerie ? 
+                    Chaque exploitation développée (niveau 1 ou supérieur) peut être <strong>rasée</strong> depuis sa vue détaillée.
+                </p>
+                <ul style="padding-left: 1.25rem; margin: 0; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;">
+                    <li>⏳ <strong>Compte à rebours de démolition :</strong> Les travaux prennent 50% de la durée de construction du niveau. Pendant ce temps, la parcelle affiche un badge <code>🗑️</code> et reste visible sur votre domaine.</li>
+                    <li>🛑 <strong>Annulation sans risque :</strong> Vous pouvez interrompre le démantèlement à tout instant pour préserver votre exploitation intacte.</li>
+                    <li>💰 <strong>Remboursement de 30% :</strong> Dès que le chrono expire, 30% des matériaux du niveau sont immédiatement recrédités dans vos greniers et la parcelle redevient un terrain vierge (<code>+</code>), prête à accueillir une autre ressource de votre choix !</li>
+                </ul>
+            </div>
         </div>
     <?php endif; ?>
 
@@ -773,6 +817,34 @@ foreach ($allUnits as $u) {
                 <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
                     <h4 style="margin:0 0 0.4rem 0; color: #16a34a;">🧱 Muraille & Remparts de Cité (Slot #34)</h4>
                     <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Protège l'enceinte entière et décuple l'efficacité défensive de votre garnison (+4% par niveau).</p>
+                </div>
+            </div>
+
+            <!-- Double Bandeau : Devise du Daimyō & Démantèlement Urbain -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-top: 1.5rem;">
+                <!-- Devise du Daimyō -->
+                <div style="background: linear-gradient(135deg, rgba(30, 27, 75, 0.08) 0%, rgba(253, 251, 247, 0.98) 100%); border: 1px solid rgba(220, 38, 38, 0.35); border-radius: 8px; padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.3rem;">📜</span>
+                        <h4 style="margin: 0; color: var(--red-primary); font-size: 1rem;">Devise & Chronique Officielle du Daimyō</h4>
+                    </div>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                        C'est du sommet de votre <strong>Donjon Tenshu (Slot #19)</strong> que vous proclamez la devise qui guide vos samouraïs. 
+                        D'un simple clic sur <em>« Modifier ma Devise »</em>, vous pouvez graver votre serment de guerre, visible par tous les autres daimyōs sur votre profil féodal !
+                    </p>
+                </div>
+
+                <!-- Démantèlement Urbain -->
+                <div style="background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.3rem;">🗑️</span>
+                        <h4 style="margin: 0; color: #ef4444; font-size: 1rem;">Démanteler une Bâtisse (Libérer un Slot)</h4>
+                    </div>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                        Besoin de réorganiser votre cité pour bâtir un second Dojo ou un grand marché ? 
+                        Chaque bâtiment (sauf le Tenshu protégé) peut être <strong>rasé</strong> avec un compte à rebours de démolition (50% de la durée). 
+                        Annulable à tout moment sans perte, l'achèvement des travaux vous rembourse <strong>30% des matériaux</strong> et libère l'emplacement (<code>+</code>).
+                    </p>
                 </div>
             </div>
         </div>
