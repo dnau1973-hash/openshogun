@@ -485,6 +485,51 @@ foreach ($allUnits as $u) {
 
         </div>
 
+        <!-- NOUVELLE ILLUSTRATION D'UNITÉ : CAVALIER ÉCLAIREUR TAKEDA -->
+        <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.02) 100%), var(--bg-surface, #fdfbf7); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 1.5rem; border-left: 6px solid #ef4444;">
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+                <?php 
+                    $takedaCavDisk = __DIR__ . '/../public/assets/units/cavalier_eclaireur_takeda.jpg';
+                    $takedaCavSrc = '/public/assets/units/cavalier_eclaireur_takeda.jpg' . (file_exists($takedaCavDisk) ? '?v=' . filemtime($takedaCavDisk) : '');
+                ?>
+                <div style="position: relative; width: 280px; max-width: 100%; height: 175px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; flex-shrink: 0;"
+                     onclick="openDocsLightbox('Cavalier Éclaireur Takeda', '<?= $takedaCavSrc ?>', 'Reconnaissance & Raids de Kai', 'Monté sur les agiles coursiers Kiso des montagnes escarpées de Kai, ce cavalier léger repère les positions fortifiées adverses et lance des assauts fulgurants.', '« Rapide comme le vent, silencieux comme la forêt. »')">
+                    <img src="<?= $takedaCavSrc ?>" alt="Cavalier Éclaireur Takeda" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #ef4444; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                        🐎 Clan Takeda &bull; Atelier & Écuries
+                    </span>
+                    <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                        🔍 Agrandir
+                    </span>
+                </div>
+                <div style="flex: 1; min-width: 260px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="background: #ef4444; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
+                            ✨ Nouvelle Illustration Intégrée
+                        </span>
+                        <span style="font-size: 0.8rem; color: #ef4444; font-weight: 700;">Écuries & Atelier de Siège (Rang I)</span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.35rem; color: var(--text-main);">
+                        Cavalier Éclaireur Takeda (武田偵察騎兵)
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 0.75rem 0;">
+                        Monté sur un agile coursier <em>Kiso</em> des montagnes escarpées de Kai, ce cavalier léger équipé d'une armure laquée vermillon et d'une lance <em>yari</em> de reconnaissance fonce en avant-garde de vos armées. Il est l'unité de raid la plus rapide du Shogunat (vitesse 13 000) et le fer de lance de la doctrine du vent et de la forêt de Shingen.
+                    </p>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; background: var(--bg-ink, #ede5d5); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <span style="color: #dc2626; font-weight: 800;">⚔️ 55 Atq</span> &bull;
+                            <span style="color: #2563eb; font-weight: 700;">🛡️ 310 Déf</span> &bull;
+                            <span style="color: #16a34a; font-weight: 800;">⚡ 13 000 Vitesse</span> &bull;
+                            <span style="color: #b45309; font-weight: 700;">🎒 80 Fret</span>
+                        </div>
+                        <a href="?page=docs&tab=siege" class="btn btn-primary" style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem;">
+                            🐎 Voir au Chapitre 5 (Engins & Cavalerie) &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- TABLEAU SYNOPTIQUE DE L'ARMEMENT FÉODAL (25 UNITÉS) -->
         <div class="card" style="background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
@@ -896,7 +941,8 @@ foreach ($allUnits as $u) {
                                 'quote' => '« Pour l\'honneur du clan ! »'
                             ];
                             $imgName = !empty($u['image']) ? $u['image'] : ($u['code'] . '.jpg');
-                            $imgSrc = '/public/assets/units/' . $imgName;
+                            $diskPath = __DIR__ . '/../public/assets/units/' . $imgName;
+                            $imgSrc = '/public/assets/units/' . $imgName . (file_exists($diskPath) ? '?v=' . filemtime($diskPath) : '');
                         ?>
                             <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;">
                                 <div style="position: relative; height: 180px; overflow: hidden; background: var(--bg-ink); cursor: pointer;"
@@ -962,7 +1008,8 @@ foreach ($allUnits as $u) {
                         'quote' => '« La forteresse plie sous l\'assaut. »'
                     ];
                     $imgFile = !empty($s['image']) ? $s['image'] : ($code . '.jpg');
-                    $imgSrc = '/public/assets/units/' . $imgFile;
+                    $diskPath = __DIR__ . '/../public/assets/units/' . $imgFile;
+                    $imgSrc = '/public/assets/units/' . $imgFile . (file_exists($diskPath) ? '?v=' . filemtime($diskPath) : '');
                     $clanBadge = match($s['faction']) {
                         'terran' => ['name' => 'Clan Oda', 'color' => '#3b82f6', 'icon' => '🏯'],
                         'vorash' => ['name' => 'Clan Takeda', 'color' => '#ef4444', 'icon' => '🐎'],

@@ -446,7 +446,8 @@
                         <!-- SAMOURAÏ KATANA -->
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <td style="padding: 0.75rem; vertical-align: middle;">
-                                <img src="/public/assets/units/samourai_katana.jpg" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                                <?php $samFile = __DIR__ . '/../../public/assets/units/samourai_katana.jpg'; ?>
+                                <img src="/public/assets/units/samourai_katana.jpg?v=<?= file_exists($samFile) ? filemtime($samFile) : 1 ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle;">
                                 <strong style="color: #fff;">Samouraï au Katana</strong><br>
@@ -460,10 +461,14 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Master swordsman samurai in mid-stance drawing sharp steel katana blade, crimson and black silk cords on lamellar armor, fierce focus, flying embers, ukiyo-e digital illustration" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
                         <!-- CAVALIER ÉCLAIREUR TAKEDA -->
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <td style="padding: 0.75rem; vertical-align: middle;">
-                                <img src="/public/assets/units/cavalier_eclaireur_takeda.jpg" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                                <?php $cavFile = __DIR__ . '/../../public/assets/units/cavalier_eclaireur_takeda.jpg'; ?>
+                                <img src="/public/assets/units/cavalier_eclaireur_takeda.jpg?v=<?= file_exists($cavFile) ? filemtime($cavFile) : 1 ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle;">
                                 <strong style="color: #fff;">Cavalier Éclaireur Takeda</strong><br>
@@ -483,7 +488,8 @@
                         <!-- ARQUEBUSIER TANEGASHIMA -->
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <td style="padding: 0.75rem; vertical-align: middle;">
-                                <img src="/public/assets/units/arquebusier_oda_tanegashima.jpg" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                                <?php $arqFile = __DIR__ . '/../../public/assets/units/arquebusier_oda_tanegashima.jpg'; ?>
+                                <img src="/public/assets/units/arquebusier_oda_tanegashima.jpg?v=<?= file_exists($arqFile) ? filemtime($arqFile) : 1 ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle;">
                                 <strong style="color: #fff;">Arquebusier Tanegashima</strong><br>
