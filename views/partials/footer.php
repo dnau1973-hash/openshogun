@@ -161,6 +161,49 @@
     </div>
 </div>
 
+<!-- Modale Complète Didacticiel Féodal & Voie du Daimyō (Style Maître de Quête Travian) -->
+<div class="modal-overlay" id="questModal" style="display:none; position:fixed; inset:0; background:rgba(5,7,15,0.85); backdrop-filter:blur(10px); z-index:1000; align-items:center; justify-content:center;">
+    <div class="modal-card" style="max-width:920px; width:94%; max-height:90vh; background:rgba(17,18,24,0.96); border:1px solid #dc2626; border-radius:12px; box-shadow:0 0 50px rgba(220,38,38,0.25); display:flex; flex-direction:column; overflow:hidden;">
+        <!-- En-tête -->
+        <div class="card-header" style="background:linear-gradient(135deg, rgba(185,28,28,0.3) 0%, rgba(17,18,24,0.9) 100%); border-bottom:1px solid rgba(220,38,38,0.3); padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:0.85rem;">
+                <span style="font-size:2rem; filter:drop-shadow(0 0 8px rgba(220,38,38,0.6));">🎯</span>
+                <div>
+                    <h2 style="font-size:1.3rem; font-weight:800; color:#fff; margin:0; display:flex; align-items:center; gap:0.5rem;">
+                        Codex des Quêtes & Didacticiel du Daimyō
+                    </h2>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.2rem; font-size:0.8rem; color:#94a3b8;">
+                        <span id="questModalProgressText">0/12 Quêtes Accomplies</span> &bull; 
+                        <span style="color:#facc15; font-weight:700;" id="questModalPercentText">0% Complété</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="closeQuestModal()" style="background:transparent; border:none; color:#fff; font-size:1.6rem; cursor:pointer;">&times;</button>
+        </div>
+
+        <!-- Corps de la Modale en 2 Colonnes Responsive -->
+        <div class="card-body" style="padding:0; display:flex; flex:1; overflow:hidden; min-height:480px;">
+            <!-- Colonne Gauche : Liste des 12 Quêtes -->
+            <div style="width:340px; border-right:1px solid rgba(255,255,255,0.08); background:rgba(10,12,18,0.6); overflow-y:auto; padding:0.75rem;" id="questModalList">
+                <!-- Les tuiles de quêtes seront injectées dynamiquement ici -->
+            </div>
+
+            <!-- Colonne Droite : Fiche Détaillée de la Quête Sélectionnée -->
+            <div style="flex:1; overflow-y:auto; padding:1.5rem; display:flex; flex-direction:column; justify-content:space-between;" id="questModalDetail">
+                <!-- Détail de la quête injecté dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Pied de page -->
+        <div style="background:rgba(10,15,29,0.9); border-top:1px solid rgba(255,255,255,0.06); padding:0.85rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:0.8rem; color:#94a3b8;">
+                🥋 <em>Guide de l'art de la guerre enseigné par Katsumoto, Maître d'Armes</em>
+            </div>
+            <button class="btn btn-secondary" onclick="closeQuestModal()">Fermer le Codex</button>
+        </div>
+    </div>
+</div>
+
 <footer style="text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.85rem; border-top:1px solid rgba(255,255,255,0.05); margin-top:3rem;">
     <p>OpenShogun &copy; <?= date('Y') ?> - Jeu de stratégie féodale japonaise par navigateur inspiré de Travian.</p>
     <p style="margin-top:0.35rem; color:#64748b;">Moteur féodal Sengoku PHP 8 + MariaDB + JavaScript Vanilla</p>
@@ -359,6 +402,264 @@ async function saveBio() {
     } catch (e) {
         showModalAlert("Erreur", "Une erreur est survenue lors de la sauvegarde.", "danger");
     }
+}
+
+/* ==========================================================================
+   GESTION DU DIDACTICIEL & CODEX DES QUÊTES FÉODALES (STYLE TRAVIAN)
+   ========================================================================== */
+let cachedQuestsData = null;
+let selectedQuestKey = null;
+
+async function openQuestModal(forceKey = null) {
+    const modal = document.getElementById('questModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    try {
+        const res = await fetch('/api/quests.php?action=get_status');
+        const json = await res.json();
+        if (json.success && json.data) {
+            cachedQuestsData = json.data;
+            if (forceKey) {
+                selectedQuestKey = forceKey;
+            } else if (!selectedQuestKey || !cachedQuestsData.quests.find(q => q.key === selectedQuestKey)) {
+                selectedQuestKey = cachedQuestsData.active_quest ? cachedQuestsData.active_quest.key : cachedQuestsData.quests[0].key;
+            }
+            renderQuestModal();
+        }
+    } catch (e) {
+        console.error("Erreur chargement quêtes:", e);
+    }
+}
+
+function closeQuestModal() {
+    const modal = document.getElementById('questModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function selectQuestInModal(questKey) {
+    selectedQuestKey = questKey;
+    renderQuestModal();
+}
+
+function renderQuestModal() {
+    if (!cachedQuestsData) return;
+    const { quests, active_quest, claimed_count, total_quests, overall_percent } = cachedQuestsData;
+
+    const progText = document.getElementById('questModalProgressText');
+    const pctText = document.getElementById('questModalPercentText');
+    if (progText) progText.innerText = `${claimed_count}/${total_quests} Quêtes Accomplies`;
+    if (pctText) pctText.innerText = `${overall_percent}% Complété`;
+
+    // Liste des quêtes à gauche
+    const listContainer = document.getElementById('questModalList');
+    if (listContainer) {
+        let listHtml = '';
+        quests.forEach(q => {
+            const isSelected = (q.key === selectedQuestKey);
+            const isClaimed = (q.status === 'claimed');
+            const isClaimable = (q.is_claimable);
+            
+            let statusBadge = '';
+            let borderStyle = isSelected ? 'border: 1px solid #dc2626; background: rgba(220,38,38,0.18);' : 'border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);';
+
+            if (isClaimed) {
+                statusBadge = '<span style="color:#4ade80; font-size:0.75rem; font-weight:700;">✓ Perçue</span>';
+            } else if (isClaimable) {
+                statusBadge = '<span style="color:#facc15; font-size:0.75rem; font-weight:800;">✨ Prête !</span>';
+                if (!isSelected) {
+                    borderStyle = 'border: 1px solid #22c55e; background: rgba(34,197,94,0.08);';
+                }
+            } else {
+                statusBadge = '<span style="color:#94a3b8; font-size:0.75rem;">En cours</span>';
+            }
+
+            listHtml += `
+                <div onclick="selectQuestInModal('${q.key}')" style="${borderStyle} border-radius:8px; padding:0.65rem 0.85rem; margin-bottom:0.5rem; cursor:pointer; display:flex; align-items:center; gap:0.75rem; transition:all 0.2s ease;">
+                    <div style="font-size:1.6rem; min-width:32px; text-align:center;">${q.icon}</div>
+                    <div style="flex:1; overflow:hidden;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.7rem; color:#dc2626; font-weight:800;">ÉTAPE ${q.order}</span>
+                            ${statusBadge}
+                        </div>
+                        <div style="font-size:0.85rem; font-weight:700; color:#fff; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; margin-top:2px;">
+                            ${escapeHtmlModal(q.title)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        listContainer.innerHTML = listHtml;
+    }
+
+    // Détail à droite
+    const detailContainer = document.getElementById('questModalDetail');
+    const currentQ = quests.find(q => q.key === selectedQuestKey) || active_quest || quests[0];
+    if (detailContainer && currentQ) {
+        const isClaimed = (currentQ.status === 'claimed');
+        const isClaimable = (currentQ.is_claimable);
+
+        let actionButtonHtml = '';
+        if (isClaimed) {
+            actionButtonHtml = `
+                <div style="background:rgba(34,197,94,0.1); border:1px solid #22c55e; color:#4ade80; padding:0.75rem 1.25rem; border-radius:8px; font-weight:700; display:flex; align-items:center; gap:0.6rem; justify-content:center;">
+                    <span>✓</span> Récompense perçue avec honneur le ${currentQ.claimed_at ? currentQ.claimed_at.substring(0, 16) : 'récemment'}.
+                </div>
+            `;
+        } else if (isClaimable) {
+            actionButtonHtml = `
+                <button type="button" onclick="claimQuestReward('${currentQ.key}')" class="btn btn-primary pulse-btn" style="width:100%; background:linear-gradient(135deg, #10b981 0%, #059669 100%); border-color:#047857; color:#fff; font-weight:800; font-size:1.05rem; padding:0.85rem; border-radius:8px; cursor:pointer; box-shadow:0 4px 20px rgba(16,185,129,0.5);">
+                    ✨ Réclamer ma Récompense Immédiatement
+                </button>
+            `;
+        } else {
+            if (currentQ.action_url.startsWith('javascript:')) {
+                actionButtonHtml = `
+                    <button type="button" onclick="closeQuestModal(); ${currentQ.action_url.substring(11)};" class="btn btn-primary" style="width:100%; padding:0.75rem; font-size:1rem; font-weight:700;">
+                        ${escapeHtmlModal(currentQ.action_label)} &rarr;
+                    </button>
+                `;
+            } else {
+                actionButtonHtml = `
+                    <a href="${currentQ.action_url}" class="btn btn-primary" style="display:block; text-align:center; text-decoration:none; padding:0.75rem; font-size:1rem; font-weight:700;">
+                        ${escapeHtmlModal(currentQ.action_label)} &rarr;
+                    </a>
+                `;
+            }
+        }
+
+        let rewardsHtml = '';
+        if (currentQ.rewards.metal) {
+            rewardsHtml += `<div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:0.5rem 0.8rem; text-align:center; min-width:90px;"><span style="color:var(--res-metal,#60a5fa); font-size:1.1rem;">🪵</span><div style="font-size:0.75rem; color:#94a3b8;">Bois de Cèdre</div><div style="font-size:0.95rem; font-weight:800; color:#fff;">+${Number(currentQ.rewards.metal).toLocaleString()}</div></div>`;
+        }
+        if (currentQ.rewards.crystal) {
+            rewardsHtml += `<div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:0.5rem 0.8rem; text-align:center; min-width:90px;"><span style="color:var(--res-crystal,#e2e8f0); font-size:1.1rem;">🪨</span><div style="font-size:0.75rem; color:#94a3b8;">Pierre de Taille</div><div style="font-size:0.95rem; font-weight:800; color:#fff;">+${Number(currentQ.rewards.crystal).toLocaleString()}</div></div>`;
+        }
+        if (currentQ.rewards.deuterium) {
+            rewardsHtml += `<div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:0.5rem 0.8rem; text-align:center; min-width:90px;"><span style="color:var(--res-deut,#4ade80); font-size:1.1rem;">🌾</span><div style="font-size:0.75rem; color:#94a3b8;">Riz Impérial</div><div style="font-size:0.95rem; font-weight:800; color:#fff;">+${Number(currentQ.rewards.deuterium).toLocaleString()}</div></div>`;
+        }
+        if (currentQ.rewards.points) {
+            rewardsHtml += `<div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:0.5rem 0.8rem; text-align:center; min-width:90px;"><span style="color:#facc15; font-size:1.1rem;">⛩️</span><div style="font-size:0.75rem; color:#94a3b8;">Honneur</div><div style="font-size:0.95rem; font-weight:800; color:#facc15;">+${Number(currentQ.rewards.points).toLocaleString()} pts</div></div>`;
+        }
+        if (currentQ.rewards.bonus_units) {
+            rewardsHtml += `<div style="background:rgba(220,38,38,0.12); border:1px solid #dc2626; border-radius:6px; padding:0.5rem 0.8rem; text-align:center; min-width:110px;"><span style="color:#f87171; font-size:1.1rem;">⚔️</span><div style="font-size:0.75rem; color:#fca5a5;">Garnison</div><div style="font-size:0.95rem; font-weight:800; color:#fff;">+${currentQ.rewards.bonus_units} Guerriers</div></div>`;
+        }
+
+        detailContainer.innerHTML = `
+            <div>
+                <!-- En-tête Quête -->
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+                    <div>
+                        <span style="font-size:0.75rem; font-weight:800; color:#dc2626; text-transform:uppercase;">QUÊTE ${currentQ.order} SUR ${total_quests} &bull; ${escapeHtmlModal(currentQ.category.toUpperCase())}</span>
+                        <h2 style="font-size:1.4rem; font-weight:900; color:#fff; margin:0.25rem 0 0 0;">
+                            ${currentQ.icon} ${escapeHtmlModal(currentQ.title)}
+                        </h2>
+                    </div>
+                    <span style="font-size:0.8rem; padding:0.25rem 0.65rem; border-radius:6px; font-weight:700; ${isClaimed ? 'background:rgba(34,197,94,0.15); color:#4ade80; border:1px solid #22c55e;' : (isClaimable ? 'background:rgba(250,204,21,0.2); color:#facc15; border:1px solid #eab308;' : 'background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid rgba(255,255,255,0.1);')}">
+                        ${isClaimed ? '✓ Accompli' : (isClaimable ? '✨ Prêt à réclamer' : 'En cours')}
+                    </span>
+                </div>
+
+                <!-- Dialogue du Conseiller Katsumoto -->
+                <div style="background:rgba(0,0,0,0.25); border-left:3px solid #dc2626; border-radius:0 8px 8px 0; padding:1rem; margin-bottom:1.25rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+                        <span style="font-size:1.1rem;">🥋</span>
+                        <strong style="color:#facc15; font-size:0.85rem;">${escapeHtmlModal(currentQ.mentor_name)} :</strong>
+                    </div>
+                    <p style="margin:0; font-size:0.88rem; color:#cbd5e1; line-height:1.6; font-style:italic;">
+                        &laquo; ${escapeHtmlModal(currentQ.lore)} &raquo;
+                    </p>
+                </div>
+
+                <!-- Objectif précis -->
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:0.85rem 1rem; margin-bottom:1.25rem;">
+                    <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; font-weight:700; margin-bottom:0.25rem;">Objectif à atteindre :</div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                        <span style="font-size:1rem; font-weight:800; color:${isClaimable || isClaimed ? '#4ade80' : '#fff'};">
+                            ${isClaimable || isClaimed ? '✓ ' : '🎯 '} ${escapeHtmlModal(currentQ.objective)}
+                        </span>
+                        <span style="font-size:0.75rem; color:#94a3b8; background:rgba(0,0,0,0.4); padding:0.2rem 0.5rem; border-radius:4px;">
+                            📍 ${escapeHtmlModal(currentQ.target_slot_hint || 'Fief')}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Récompenses promises -->
+                <div style="margin-bottom:1.5rem;">
+                    <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; font-weight:700; margin-bottom:0.5rem;">Récompenses accordées par le Shogunat :</div>
+                    <div style="display:flex; gap:0.65rem; flex-wrap:wrap;">
+                        ${rewardsHtml}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bouton d'action bas de panneau -->
+            <div style="margin-top:1rem;">
+                ${actionButtonHtml}
+            </div>
+        `;
+    }
+}
+
+async function claimQuestReward(questKey) {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'claim');
+        formData.append('quest_key', questKey);
+
+        const res = await fetch('/api/quests.php', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            if (data.planet) {
+                updateHudResources(data.planet);
+            }
+
+            if (data.quests_status) {
+                cachedQuestsData = data.quests_status;
+                selectedQuestKey = cachedQuestsData.active_quest ? cachedQuestsData.active_quest.key : questKey;
+                renderQuestModal();
+            }
+
+            let rewardDetailMsg = '';
+            if (data.rewards.metal) rewardDetailMsg += `+${Number(data.rewards.metal).toLocaleString()} 🪵 Bois, `;
+            if (data.rewards.crystal) rewardDetailMsg += `+${Number(data.rewards.crystal).toLocaleString()} 🪨 Pierre, `;
+            if (data.rewards.deuterium) rewardDetailMsg += `+${Number(data.rewards.deuterium).toLocaleString()} 🌾 Riz, `;
+            if (data.rewards.points) rewardDetailMsg += `+${data.rewards.points} ⛩️ Honneur, `;
+            if (data.bonus_units) rewardDetailMsg += `+${data.bonus_units} ⚔️ ${data.rewarded_unit_name}, `;
+            rewardDetailMsg = rewardDetailMsg.replace(/, $/, '');
+
+            showModalAlert("Récompense de Daimyō Perçue !", `${data.message}\n\nVos coffres reçoivent : ${rewardDetailMsg}`, "success");
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1200);
+
+        } else {
+            showModalAlert("Décret Impérial", data.error || "Impossible de réclamer la récompense.", "warning");
+        }
+    } catch (e) {
+        console.error("Erreur réclamation:", e);
+        showModalAlert("Erreur", "Une erreur est survenue lors de la réclamation de la récompense.", "danger");
+    }
+}
+
+function updateHudResources(planet) {
+    if (!planet) return;
+    const updateEl = (valId, barId, current, max) => {
+        const valEl = document.getElementById(valId);
+        const barEl = document.getElementById(barId);
+        if (valEl) {
+            valEl.setAttribute('data-current', current);
+            valEl.innerText = Math.floor(current).toLocaleString();
+        }
+        if (barEl && max > 0) {
+            barEl.style.width = Math.min(100, (current / max) * 100) + '%';
+        }
+    };
+    updateEl('res-val-metal', 'bar-metal', planet.metal, planet.metal_max);
+    updateEl('res-val-crystal', 'bar-crystal', planet.crystal, planet.crystal_max);
+    updateEl('res-val-deut', 'bar-deut', planet.deuterium, planet.deuterium_max);
 }
 </script>
 </body>

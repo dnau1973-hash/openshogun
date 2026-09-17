@@ -41,6 +41,11 @@ try {
         $cargo, 
         $targetOasisId
     );
+    if (!empty($result['success'])) {
+        require_once __DIR__ . '/../core/QuestEngine.php';
+        $questEngine = new QuestEngine();
+        $questEngine->recordAction((int)$user['id'], 'send_fleet');
+    }
     echo json_encode($result);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);

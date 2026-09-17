@@ -168,6 +168,8 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
 }
 </style>
 
+<?php require __DIR__ . '/partials/quest_banner.php'; ?>
+
 <div class="grid-main">
     <!-- Vue Principale des Parcelles -->
     <div class="card">

@@ -3,8 +3,13 @@
  * Vue de la Carte des Provinces du Japon Féodal (Plein Écran / Pleine Largeur)
  * OpenShogun - Carte interactive plein format avec déplacement fluide & donjons authentiques
  */
+require_once __DIR__ . '/../core/QuestEngine.php';
+
 $centerX = isset($_GET['x']) ? (int)$_GET['x'] : (int)$planet['coord_x'];
 $centerY = isset($_GET['y']) ? (int)$_GET['y'] : (int)$planet['coord_y'];
+
+$questEngine = new QuestEngine();
+$questEngine->recordAction((int)$user['id'], 'visit_map');
 ?>
 
 <div class="card card-map-fullwidth" style="border-top: 4px solid var(--red-primary); margin: 0 0 1.5rem 0; width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 25px rgba(0,0,0,0.06);">

@@ -156,6 +156,7 @@ class WorldGenerator {
             'construction_queue',
             'planet_buildings',
             'planet_fields',
+            'user_quests',
             'oasis_units',
             'oases',
             'planets',

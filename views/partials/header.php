@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../core/PlanetEngine.php';
 require_once __DIR__ . '/../../core/BuildingEngine.php';
 require_once __DIR__ . '/../../core/FleetEngine.php';
 require_once __DIR__ . '/../../core/MessageEngine.php';
+require_once __DIR__ . '/../../core/QuestEngine.php';
 require_once __DIR__ . '/../../config/game_constants.php';
 
 $auth = new Auth();
@@ -14,6 +15,9 @@ $user = $auth->getCurrentUser();
 $planet = $auth->getCurrentPlanet();
 $messageEngine = new MessageEngine();
 $unreadMessagesCount = $messageEngine->getUnreadCount((int)$user['id']);
+
+$questEngine = new QuestEngine();
+$questSummary = ($user && $planet) ? $questEngine->getPlayerQuestsStatus((int)$user['id'], (int)$planet['id']) : null;
 
 if ($planet) {
     $planetEngine = new PlanetEngine();
@@ -93,6 +97,16 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
             <a href="?page=ranking" style="text-decoration: none; color: inherit;" title="Classement des Daimyōs & Tableau d'Honneur">
                 <span>🏆 <?= number_format($user['points']) ?> pts</span>
             </a>
+            <?php if ($questSummary): ?>
+                <button type="button" onclick="openQuestModal()" class="hud-msg-btn <?= ($questSummary['claimable_count'] > 0) ? 'has-unread' : '' ?>" title="Didacticiel & Quêtes Féodales (<?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?>)" style="background: none; border: none; cursor: pointer;">
+                    <span>🎯</span>
+                    <?php if ($questSummary['claimable_count'] > 0): ?>
+                        <span class="hud-unread-count" style="background: #10b981; animation: pulse 1.5s infinite;"><?= $questSummary['claimable_count'] ?></span>
+                    <?php elseif (!$questSummary['all_completed']): ?>
+                        <span class="hud-unread-count" style="background: rgba(220,38,38,0.85); font-size: 0.65rem;"><?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?></span>
+                    <?php endif; ?>
+                </button>
+            <?php endif; ?>
             <a href="?page=reports" class="hud-msg-btn <?= ($page === 'reports') ? 'active' : '' ?>" title="Chroniques de Siège & d'Infiltration">
                 <span>📜</span>
             </a>

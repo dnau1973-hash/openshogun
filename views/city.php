@@ -59,6 +59,8 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg'
 }
 </style>
 
+<?php require __DIR__ . '/partials/quest_banner.php'; ?>
+
 <div class="grid-main">
     <div class="card">
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">

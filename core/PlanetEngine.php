@@ -14,6 +14,13 @@ class PlanetEngine {
     }
 
     /**
+     * Récupère une planète avec recalcul de ses files et ressources
+     */
+    public function getPlanet(int $planetId): ?array {
+        return $this->updatePlanet($planetId);
+    }
+
+    /**
      * Met à jour les files d'attente terminées et recalcule les ressources de la planète
      */
     public function updatePlanet(int $planetId): array {
