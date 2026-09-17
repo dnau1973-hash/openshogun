@@ -530,6 +530,51 @@ foreach ($allUnits as $u) {
             </div>
         </div>
 
+        <!-- NOUVELLE ILLUSTRATION D'UNITÉ : BÉLIER TITANESQUE DU DRAGON DE KAI -->
+        <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(185, 28, 28, 0.08) 0%, rgba(249, 115, 22, 0.04) 100%), var(--bg-surface, #fdfbf7); border: 1px solid rgba(185, 28, 28, 0.35); border-radius: 12px; padding: 1.5rem; border-left: 6px solid #b91c1c;">
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+                <?php 
+                    $dragonRamDisk = __DIR__ . '/../public/assets/units/belier_dragon_kai.jpg';
+                    $dragonRamSrc = '/public/assets/units/belier_dragon_kai.jpg' . (file_exists($dragonRamDisk) ? '?v=' . filemtime($dragonRamDisk) : '');
+                ?>
+                <div style="position: relative; width: 280px; max-width: 100%; height: 175px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; flex-shrink: 0;"
+                     onclick="openDocsLightbox('Bélier Titanesque du Dragon de Kai', '<?= $dragonRamSrc ?>', 'Engin de Siège Colossal & Démolition', 'Monumental bélier d\'assaut orné d\'une tête de dragon crachant braises et flammèches. Poussé sous un charriot blindé en poutres de cèdre et cuir ignifuge, il broie les portes castrales les plus massives.', '« Le rugissement du dragon fait plier la pierre et trembler les tyrans. »')">
+                    <img src="<?= $dragonRamSrc ?>" alt="Bélier Titanesque du Dragon de Kai" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #f97316; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                        🐉 Clan Takeda &bull; Atelier de Siège
+                    </span>
+                    <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                        🔍 Agrandir
+                    </span>
+                </div>
+                <div style="flex: 1; min-width: 260px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="background: #b91c1c; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
+                            ✨ Nouvelle Illustration Intégrée
+                        </span>
+                        <span style="font-size: 0.8rem; color: #b91c1c; font-weight: 700;">Atelier de Siège Provincial (Rang V &bull; Élite)</span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.35rem; color: var(--text-main);">
+                        Bélier Titanesque du Dragon de Kai (甲斐龍破城槌)
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 0.75rem 0;">
+                        Le chef-d'œuvre du génie militaire des ingénieurs de Kai. Surmonté d'une gigantesque gueule de dragon forgée en fer noirci et bronze crachant du feu, cet engin monumental est protégé par des poutres de cèdre multicouches et des peaux trempées ignifuges. Sous l'impact de son éperon répété, les herses de fer cèdent et les remparts de pierre s'effondrent.
+                    </p>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; background: var(--bg-ink, #ede5d5); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <span style="color: #dc2626; font-weight: 800;">⚔️ 1 100 Atq</span> &bull;
+                            <span style="color: #2563eb; font-weight: 700;">🛡️ 7 450 Blindage</span> &bull;
+                            <span style="color: #16a34a; font-weight: 800;">⚡ 6 000 Vitesse</span> &bull;
+                            <span style="color: #b45309; font-weight: 700;">🎒 3 000 Fret</span>
+                        </div>
+                        <a href="?page=docs&tab=siege" class="btn btn-primary" style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem;">
+                            🏯 Voir au Chapitre 5 (Atelier de Siège) &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- TABLEAU SYNOPTIQUE DE L'ARMEMENT FÉODAL (25 UNITÉS) -->
         <div class="card" style="background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
