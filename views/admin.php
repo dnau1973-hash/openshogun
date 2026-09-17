@@ -19,11 +19,17 @@ if (!Auth::check() || !$auth->isAdmin()) {
 
 require_once __DIR__ . '/../core/CastleEngine.php';
 require_once __DIR__ . '/../core/OasisEngine.php';
+require_once __DIR__ . '/../core/SupportEngine.php';
 
 $botEngine = new BotEngine();
 $castleEngine = new CastleEngine();
 $oasisEngine = new OasisEngine();
+$supportEngine = new SupportEngine();
 $db = Database::getConnection();
+
+// Statistiques Support & Tickets
+$supportStats = $supportEngine->getStatistics();
+$allSupportTickets = $supportEngine->getAllTickets();
 
 // Statistiques globales
 $totalUsers = (int)$db->query("SELECT COUNT(*) FROM users WHERE is_bot = 0")->fetchColumn();
@@ -123,6 +129,19 @@ $humanUsers = $db->query("
                 <?= $totalUsers ?> Joueurs
             </div>
             <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">Inscrits sur le serveur</div>
+        </div>
+
+        <div class="card" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #0891b2; padding: 1.25rem;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Bugs & Suggestions</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #38bdf8; margin-top: 0.25rem;">
+                <?= $supportStats['total'] ?> Demande<?= $supportStats['total'] > 1 ? 's' : '' ?>
+            </div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
+                <strong style="color: <?= $supportStats['count_pending'] > 0 ? '#ef4444' : '#4ade80' ?>;">
+                    <?= $supportStats['count_pending'] ?> en attente
+                </strong>
+                | <?= $supportStats['count_in_progress'] ?> en cours
+            </div>
         </div>
     </div>
 
@@ -796,7 +815,144 @@ $humanUsers = $db->query("
         </div>
     </div>
 
-    <!-- Section 7 : ⚠️ Décret Suprême - Réinitialisation Complète du Monde Féodal -->
+    <!-- Section 7 : 📮 Traitement des Dysfonctionnements & Suggestions des Joueurs -->
+    <div class="card" style="margin-bottom: 2rem; border-color: rgba(8, 145, 178, 0.4); background: rgba(17, 18, 24, 0.95);" id="supportAdminSection">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+                <h3 style="color: #38bdf8; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                    <span>📮</span> Traitement des Dysfonctionnements & Suggestions des Joueurs
+                </h3>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Examinez les anomalies signalées et les propositions de la communauté. Répondez officiellement et notifiez les daimyōs.
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(8, 145, 178, 0.2); color: #38bdf8; border: 1px solid #0891b2; padding: 0.35rem 0.75rem; font-size: 0.85rem; font-weight: 800;">
+                    <?= $supportStats['total'] ?> Total &bull; <?= $supportStats['total_bugs'] ?> Bugs &bull; <?= $supportStats['total_suggestions'] ?> Suggestions
+                </span>
+                <?php if ($supportStats['count_pending'] > 0): ?>
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid #ef4444; padding: 0.35rem 0.75rem; font-size: 0.85rem; font-weight: 800;">
+                        ⚠️ <?= $supportStats['count_pending'] ?> En attente
+                    </span>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- Barre de Filtres Interactifs -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; background: rgba(0,0,0,0.3); padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">Filtrer :</span>
+                    
+                    <select id="adminTicketFilterType" class="form-control" style="width: auto; padding: 0.35rem 0.75rem; font-size: 0.85rem;" onchange="filterAdminTickets()">
+                        <option value="all">Tous les Types (Bugs & Idées)</option>
+                        <option value="bug">🪲 Bugs Uniquement</option>
+                        <option value="suggestion">💡 Suggestions Uniquement</option>
+                    </select>
+
+                    <select id="adminTicketFilterStatus" class="form-control" style="width: auto; padding: 0.35rem 0.75rem; font-size: 0.85rem;" onchange="filterAdminTickets()">
+                        <option value="all">Tous les Statuts</option>
+                        <option value="pending">⏳ En attente</option>
+                        <option value="in_progress">🔍 En cours d'examen</option>
+                        <option value="resolved">✅ Résolus / Corrigés</option>
+                        <option value="planned">📌 Retenus (Futures MAJ)</option>
+                        <option value="closed">✖️ Fermés / Sans suite</option>
+                    </select>
+                </div>
+
+                <div style="flex: 1; max-width: 320px; min-width: 200px;">
+                    <input type="text" id="adminTicketSearchInput" class="form-control" placeholder="🔍 Rechercher joueur, titre..." oninput="filterAdminTickets()" style="padding: 0.4rem 0.75rem; font-size: 0.85rem; width: 100%;">
+                </div>
+            </div>
+
+            <!-- Tableau des Demandes -->
+            <div style="overflow-x: auto;">
+                <table class="table" id="adminTicketsTable" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                    <thead>
+                        <tr style="border-bottom: 1.5px solid rgba(8, 145, 178, 0.3); color: #38bdf8; text-align: left;">
+                            <th style="padding: 0.6rem;">#</th>
+                            <th style="padding: 0.6rem;">Type & Sévérité</th>
+                            <th style="padding: 0.6rem;">Secteur</th>
+                            <th style="padding: 0.6rem;">Daimyō / Joueur</th>
+                            <th style="padding: 0.6rem;">Titre du Signalement</th>
+                            <th style="padding: 0.6rem; text-align: center;">Statut</th>
+                            <th style="padding: 0.6rem; text-align: center;">Date</th>
+                            <th style="padding: 0.6rem; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($allSupportTickets)): ?>
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                    Aucun ticket de bug ou suggestion pour le moment.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($allSupportTickets as $t): 
+                                $isBug = ($t['type'] === 'bug');
+                                $catLabel = SupportEngine::CATEGORIES[$t['category']] ?? $t['category'];
+                                $sevLabel = match($t['severity']) {
+                                    'critical' => '<span style="color:#ef4444; font-weight:800;">🔴 Critique</span>',
+                                    'high' => '<span style="color:#f97316; font-weight:700;">🟠 Élevé</span>',
+                                    'medium' => '<span style="color:#eab308; font-weight:600;">🟡 Moyen</span>',
+                                    'low' => '<span style="color:#22c55e;">🟢 Faible</span>',
+                                    default => ''
+                                };
+                                $statusBadge = match($t['status']) {
+                                    'pending' => '<span class="badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #eab308;">⏳ En attente</span>',
+                                    'in_progress' => '<span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6;">🔍 En cours</span>',
+                                    'resolved' => '<span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e;">✅ Résolu</span>',
+                                    'planned' => '<span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7;">📌 Retenu</span>',
+                                    'closed' => '<span class="badge" style="background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid #64748b;">✖️ Fermé</span>',
+                                    default => $t['status']
+                                };
+                            ?>
+                                <tr class="ticket-row" data-type="<?= $t['type'] ?>" data-status="<?= $t['status'] ?>" data-search="<?= strtolower(htmlspecialchars($t['username'] . ' ' . $t['title'])) ?>" style="border-bottom: 1px solid rgba(255, 255, 255, 0.06); transition: background 0.15s ease;">
+                                    <td style="padding: 0.6rem; font-weight: 700; color: #94a3b8;">#<?= $t['id'] ?></td>
+                                    <td style="padding: 0.6rem;">
+                                        <div style="font-weight: 700; color: <?= $isBug ? '#f87171' : '#fbbf24' ?>;">
+                                            <?= $isBug ? '🪲 Bug' : '💡 Suggestion' ?>
+                                        </div>
+                                        <?php if ($isBug): ?>
+                                            <div style="font-size: 0.72rem; margin-top: 2px;"><?= $sevLabel ?></div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="padding: 0.6rem; font-size: 0.8rem; color: #cbd5e1;">
+                                        <?= htmlspecialchars($catLabel) ?>
+                                    </td>
+                                    <td style="padding: 0.6rem;">
+                                        <div style="font-weight: 700; color: #fff;"><?= htmlspecialchars($t['username']) ?></div>
+                                        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Clan <?= htmlspecialchars($t['faction']) ?></div>
+                                    </td>
+                                    <td style="padding: 0.6rem;">
+                                        <div style="font-weight: 600; color: #e2e8f0; max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?= htmlspecialchars($t['title']) ?>">
+                                            <?= htmlspecialchars($t['title']) ?>
+                                        </div>
+                                        <?php if (!empty($t['admin_response'])): ?>
+                                            <div style="font-size: 0.72rem; color: #38bdf8; margin-top: 2px;">💬 Répondu</div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="padding: 0.6rem; text-align: center;">
+                                        <?= $statusBadge ?>
+                                    </td>
+                                    <td style="padding: 0.6rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); white-space: nowrap;">
+                                        <?= date('d/m H:i', $t['created_at']) ?>
+                                    </td>
+                                    <td style="padding: 0.6rem; text-align: right;">
+                                        <button type="button" class="btn btn-primary" onclick="openAdminTicketModal(<?= $t['id'] ?>)" style="padding: 0.3rem 0.75rem; font-size: 0.78rem; font-weight: 700; background: #0891b2; border-color: #0e7490;">
+                                            🔍 Traiter
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 8 : ⚠️ Décret Suprême - Réinitialisation Complète du Monde Féodal -->
     <div class="card" style="margin-bottom: 2rem; border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(30, 10, 15, 0.75);">
         <div class="card-header" style="border-bottom: 1px solid rgba(239, 68, 68, 0.2); display: flex; justify-content: space-between; align-items: center;">
             <h3 style="color: #ef4444; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
@@ -862,7 +1018,201 @@ $humanUsers = $db->query("
     </div>
 </div>
 
+<!-- Modale d'Examen et de Traitement d'un Ticket par l'Administrateur -->
+<div class="modal-overlay" id="adminTicketModal" style="display: none; position: fixed; inset: 0; background: rgba(5, 7, 15, 0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;" onclick="closeAdminTicketModal()">
+    <div class="modal-card" style="max-width: 680px; width: 92%; max-height: 92vh; background: #111218; border: 2px solid #0891b2; border-radius: 12px; box-shadow: 0 0 50px rgba(8, 145, 178, 0.3); overflow: hidden; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
+        <div class="card-header" style="background: rgba(8, 145, 178, 0.15); border-bottom: 1px solid rgba(8, 145, 178, 0.3); padding: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 id="atm_header_title" style="color: #38bdf8; margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📮</span> Traitement du Ticket #<span id="atm_ticket_id"></span>
+                </h3>
+                <div id="atm_header_meta" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;"></div>
+            </div>
+            <button onclick="closeAdminTicketModal()" style="background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+
+        <div class="card-body" style="padding: 1.5rem; overflow-y: auto;">
+            <!-- Détails du Joueur & Fief -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; font-size: 0.82rem;">
+                <div><span style="color:var(--text-muted);">Daimyō :</span> <strong id="atm_user_name" style="color:#fff;"></strong></div>
+                <div><span style="color:var(--text-muted);">Clan :</span> <strong id="atm_user_faction" style="color:#fff; text-transform:uppercase;"></strong></div>
+                <div><span style="color:var(--text-muted);">Fief :</span> <strong id="atm_user_planet" style="color:#fff;"></strong></div>
+                <div><span style="color:var(--text-muted);">Date :</span> <strong id="atm_created_at" style="color:#fff;"></strong></div>
+            </div>
+
+            <!-- Titre & Message du Joueur -->
+            <div style="margin-bottom: 1.25rem;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Message du Joueur :</label>
+                <div id="atm_ticket_title" style="font-weight: 800; font-size: 1.05rem; color: #fff; margin: 0.25rem 0 0.5rem 0;"></div>
+                <div id="atm_ticket_desc" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 8px; font-size: 0.9rem; line-height: 1.6; color: #e2e8f0; white-space: pre-line; max-height: 200px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- Formulaire de Traitement Administrateur -->
+            <form id="adminTicketForm" onsubmit="saveAdminTicket(event)">
+                <input type="hidden" id="atm_input_ticket_id" name="ticket_id">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                    <div>
+                        <label for="atm_select_status" style="display: block; font-weight: 700; font-size: 0.85rem; color: #38bdf8; margin-bottom: 0.4rem;">
+                            Statut de la Demande :
+                        </label>
+                        <select id="atm_select_status" name="status" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: 6px; background: #1e293b; color: #fff; border: 1px solid #334155;">
+                            <option value="pending">⏳ En attente</option>
+                            <option value="in_progress">🔍 En cours d'examen</option>
+                            <option value="resolved">✅ Résolu / Corrigé</option>
+                            <option value="planned">📌 Retenu (Future MAJ)</option>
+                            <option value="closed">✖️ Fermé / Sans suite</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; align-items: flex-end; padding-bottom: 0.5rem;">
+                        <label style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: #e2e8f0; cursor: pointer;">
+                            <input type="checkbox" id="atm_notify_user" name="notify_user" value="1" checked style="accent-color: #0891b2; width: 16px; height: 16px;">
+                            Notifier le joueur par missive en jeu
+                        </label>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="atm_admin_response" style="display: block; font-weight: 700; font-size: 0.85rem; color: #38bdf8; margin-bottom: 0.4rem;">
+                        Réponse Officielle de l'Équipe (visible par le joueur) :
+                    </label>
+                    <textarea id="atm_admin_response" name="admin_response" rows="4" class="form-control" placeholder="Ex: Bonjour, l'anomalie a été identifiée et corrigée dans le dernier patch. Merci pour votre aide précieuse !" style="width: 100%; padding: 0.75rem; border-radius: 6px; background: #1e293b; color: #fff; border: 1px solid #334155; font-size: 0.88rem; line-height: 1.5;"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="deleteAdminTicketFromModal()" style="color: #f87171; border-color: rgba(239,68,68,0.3); font-size: 0.85rem;">
+                        🗑️ Supprimer
+                    </button>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeAdminTicketModal()">Annuler</button>
+                        <button type="submit" id="atm_submit_btn" class="btn btn-primary" style="background: #0891b2; border-color: #0e7490; font-weight: 700;">
+                            💾 Enregistrer & Transmettre
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
+// --- FONCTIONS SUPPORT & TICKETS (ADMIN) ---
+function filterAdminTickets() {
+    const typeVal = document.getElementById('adminTicketFilterType').value;
+    const statusVal = document.getElementById('adminTicketFilterStatus').value;
+    const searchVal = document.getElementById('adminTicketSearchInput').value.toLowerCase().trim();
+
+    const rows = document.querySelectorAll('#adminTicketsTable tbody tr.ticket-row');
+    rows.forEach(row => {
+        const rowType = row.getAttribute('data-type');
+        const rowStatus = row.getAttribute('data-status');
+        const rowSearch = row.getAttribute('data-search') || '';
+
+        const matchType = (typeVal === 'all' || rowType === typeVal);
+        const matchStatus = (statusVal === 'all' || rowStatus === statusVal);
+        const matchSearch = (searchVal === '' || rowSearch.includes(searchVal));
+
+        if (matchType && matchStatus && matchSearch) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+async function openAdminTicketModal(ticketId) {
+    try {
+        const res = await fetch(`/api/support.php?action=get_ticket&ticket_id=${ticketId}`);
+        const data = await res.json();
+        if (!data.success || !data.ticket) {
+            alert(data.error || "Impossible de charger le ticket.");
+            return;
+        }
+
+        const t = data.ticket;
+        document.getElementById('atm_ticket_id').textContent = t.id;
+        document.getElementById('atm_input_ticket_id').value = t.id;
+        document.getElementById('atm_header_meta').textContent = `${t.type === 'bug' ? '🪲 Dysfonctionnement' : '💡 Suggestion'} • ${t.category} • Sévérité : ${t.severity}`;
+
+        document.getElementById('atm_user_name').textContent = t.username;
+        document.getElementById('atm_user_faction').textContent = t.faction;
+        document.getElementById('atm_user_planet').textContent = t.planet_name ? `${t.planet_name} [${t.coord_x} : ${t.coord_y}]` : 'Non renseigné';
+        document.getElementById('atm_created_at').textContent = new Date(t.created_at * 1000).toLocaleString('fr-FR');
+
+        document.getElementById('atm_ticket_title').textContent = t.title;
+        document.getElementById('atm_ticket_desc').textContent = t.description;
+
+        document.getElementById('atm_select_status').value = t.status;
+        document.getElementById('atm_admin_response').value = t.admin_response || '';
+
+        document.getElementById('adminTicketModal').style.display = 'flex';
+    } catch (e) {
+        alert("Erreur réseau lors de la consultation du ticket.");
+    }
+}
+
+function closeAdminTicketModal() {
+    document.getElementById('adminTicketModal').style.display = 'none';
+}
+
+async function saveAdminTicket(event) {
+    event.preventDefault();
+    const btn = document.getElementById('atm_submit_btn');
+    btn.disabled = true;
+    btn.textContent = 'Enregistrement...';
+
+    const formData = new FormData(document.getElementById('adminTicketForm'));
+    formData.append('action', 'admin_update_ticket');
+
+    try {
+        const res = await fetch('/api/support.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(data.message || "Ticket mis à jour avec succès !");
+            window.location.reload();
+        } else {
+            alert("Erreur : " + (data.error || "Impossible de sauvegarder."));
+            btn.disabled = false;
+            btn.textContent = '💾 Enregistrer & Transmettre';
+        }
+    } catch (e) {
+        alert("Erreur de communication avec le serveur.");
+        btn.disabled = false;
+        btn.textContent = '💾 Enregistrer & Transmettre';
+    }
+}
+
+async function deleteAdminTicketFromModal() {
+    const ticketId = document.getElementById('atm_input_ticket_id').value;
+    if (!confirm(`Confirmer la suppression définitive du ticket #${ticketId} ?`)) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'admin_delete_ticket');
+    formData.append('ticket_id', ticketId);
+
+    try {
+        const res = await fetch('/api/support.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(data.message || "Ticket supprimé.");
+            window.location.reload();
+        } else {
+            alert("Erreur : " + (data.error || "Suppression impossible."));
+        }
+    } catch (e) {
+        alert("Erreur de communication avec le serveur.");
+    }
+}
+
 function applyPreset(gSpeed, rSpeed, fSpeed) {
     document.getElementById('game_speed_input').value = gSpeed;
     document.getElementById('game_speed_range').value = gSpeed;
