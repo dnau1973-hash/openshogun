@@ -55,8 +55,12 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
                 
                 <!-- Portrait et Blason du Champion -->
                 <div style="text-align: center; min-width: 140px;">
-                    <div style="width: 120px; height: 120px; margin: 0 auto; background: linear-gradient(135deg, rgba(220,38,38,0.2) 0%, rgba(15,23,42,0.9) 100%); border: 2px solid #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 4rem; box-shadow: 0 0 25px rgba(220,38,38,0.4); filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));">
-                        <?= $fIcon ?>
+                    <div style="width: 120px; height: 120px; margin: 0 auto; border: 3px solid #dc2626; border-radius: 50%; overflow: hidden; box-shadow: 0 0 25px rgba(220,38,38,0.5), 0 4px 15px rgba(0,0,0,0.7); position: relative; background: #0f172a; cursor: pointer;" onclick="window.open('/public/assets/hero_samurai.jpg', '_blank')" title="Cliquer pour admirer l'illustration en grand format">
+                        <img src="/public/assets/hero_samurai.jpg?v=<?= file_exists(__DIR__ . '/../public/assets/hero_samurai.jpg') ? filemtime(__DIR__ . '/../public/assets/hero_samurai.jpg') : 1 ?>" 
+                             alt="Héros Samouraï" 
+                             style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;"
+                             onmouseover="this.style.transform='scale(1.1)'"
+                             onmouseout="this.style.transform='scale(1.0)'">
                     </div>
                     <span class="faction-badge <?= htmlspecialchars($user['faction']) ?>" style="margin-top: 0.6rem; display: inline-block;">
                         <?= htmlspecialchars($hero['name']) ?>
@@ -430,53 +434,69 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
             </div>
 
             <div class="card-body">
-                <!-- 5 Emplacements d'équipements actifs -->
-                <h3 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem;">🥋 Équipement Actuel du Héros</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 2rem;">
-                    
-                    <?php 
-                        $slots = [
-                            'weapon' => ['label' => 'Arme de Poing', 'icon' => '🗡️', 'field' => 'equipped_weapon'],
-                            'helmet' => ['label' => 'Casque Kabuto', 'icon' => '🪖', 'field' => 'equipped_helmet'],
-                            'armor' => ['label' => 'Armure O-Yoroi', 'icon' => '🥋', 'field' => 'equipped_armor'],
-                            'horse' => ['label' => 'Monture & Destrier', 'icon' => '🐎', 'field' => 'equipped_horse'],
-                            'talisman' => ['label' => 'Talisman Shintō', 'icon' => '📿', 'field' => 'equipped_talisman']
-                        ];
-                    ?>
-                    <?php foreach ($slots as $slotKey => $sl): ?>
+                <!-- 5 Emplacements d'équipements actifs avec Mannequin du Héros (Style Travian) -->
+                <h3 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem;">🥋 Équipement Actuel & Mannequin du Champion</h3>
+                
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem; align-items: stretch;">
+                    <!-- Mannequin / Portrait du Héros -->
+                    <div style="width: 220px; border-radius: 12px; overflow: hidden; border: 2px solid #dc2626; box-shadow: 0 0 25px rgba(220,38,38,0.35); background: #0f172a; position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-height: 290px; flex-shrink: 0; cursor: pointer;" onclick="window.open('/public/assets/hero_samurai.jpg', '_blank')" title="Cliquer pour afficher l'illustration complète">
+                        <img src="/public/assets/hero_samurai.jpg?v=<?= file_exists(__DIR__ . '/../public/assets/hero_samurai.jpg') ? filemtime(__DIR__ . '/../public/assets/hero_samurai.jpg') : 1 ?>" 
+                             alt="Héros Samouraï" 
+                             style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.4s ease;"
+                             onmouseover="this.style.transform='scale(1.04)'"
+                             onmouseout="this.style.transform='scale(1)'">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.6) 70%, rgba(15,23,42,0) 100%); padding: 1rem 0.75rem 0.5rem 0.75rem; text-align: center;">
+                            <div style="color: #fff; font-weight: 800; font-size: 0.9rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8);"><?= htmlspecialchars($hero['name']) ?></div>
+                            <div style="color: #facc15; font-size: 0.75rem; font-weight: 700;">Niveau <?= $hero['level'] ?> • <?= number_format($hero['effective']['combat_strength']) ?> Puissance</div>
+                        </div>
+                    </div>
+
+                    <!-- 5 Emplacements d'équipements -->
+                    <div style="flex: 1; min-width: 280px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; align-content: center;">
                         <?php 
-                            $eqCode = $hero[$sl['field']];
-                            $equippedItem = null;
-                            if ($eqCode) {
-                                foreach ($inventory as $invItem) {
-                                    if ($invItem['item_code'] === $eqCode && !empty($invItem['is_equipped'])) {
-                                        $equippedItem = $invItem;
-                                        break;
+                            $slots = [
+                                'weapon' => ['label' => 'Arme de Poing', 'icon' => '🗡️', 'field' => 'equipped_weapon'],
+                                'helmet' => ['label' => 'Casque Kabuto', 'icon' => '🪖', 'field' => 'equipped_helmet'],
+                                'armor' => ['label' => 'Armure O-Yoroi', 'icon' => '🥋', 'field' => 'equipped_armor'],
+                                'horse' => ['label' => 'Monture & Destrier', 'icon' => '🐎', 'field' => 'equipped_horse'],
+                                'talisman' => ['label' => 'Talisman Shintō', 'icon' => '📿', 'field' => 'equipped_talisman']
+                            ];
+                        ?>
+                        <?php foreach ($slots as $slotKey => $sl): ?>
+                            <?php 
+                                $eqCode = $hero[$sl['field']];
+                                $equippedItem = null;
+                                if ($eqCode) {
+                                    foreach ($inventory as $invItem) {
+                                        if ($invItem['item_code'] === $eqCode && !empty($invItem['is_equipped'])) {
+                                            $equippedItem = $invItem;
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                        ?>
-                        <div style="background: rgba(0,0,0,0.3); border: 1px solid <?= $equippedItem ? '#eab308' : 'rgba(255,255,255,0.08)' ?>; border-radius: 8px; padding: 0.85rem; text-align: center;">
-                            <div style="font-size: 1.8rem; margin-bottom: 0.25rem; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));">
-                                <?= $sl['icon'] ?>
-                            </div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">
-                                <?= $sl['label'] ?>
-                            </div>
-                            <?php if ($equippedItem): ?>
-                                <div style="font-size: 0.85rem; font-weight: 800; color: #facc15; margin: 0.35rem 0;">
-                                    <?= htmlspecialchars($equippedItem['name']) ?>
+                            ?>
+                            <div style="background: rgba(0,0,0,0.3); border: 1px solid <?= $equippedItem ? '#eab308' : 'rgba(255,255,255,0.08)' ?>; border-radius: 8px; padding: 0.85rem; text-align: center;">
+                                <div style="font-size: 1.8rem; margin-bottom: 0.25rem; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));">
+                                    <?= $sl['icon'] ?>
                                 </div>
-                                <button type="button" onclick="executeUnequip('<?= $slotKey ?>')" class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.2rem 0.6rem;">
-                                    Déséquiper
-                                </button>
-                            <?php else: ?>
-                                <div style="font-size: 0.8rem; color: #64748b; font-style: italic; margin: 0.35rem 0;">
-                                    Emplacement vide
+                                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">
+                                    <?= $sl['label'] ?>
                                 </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
+                                <?php if ($equippedItem): ?>
+                                    <div style="font-size: 0.85rem; font-weight: 800; color: #facc15; margin: 0.35rem 0;">
+                                        <?= htmlspecialchars($equippedItem['name']) ?>
+                                    </div>
+                                    <button type="button" onclick="executeUnequip('<?= $slotKey ?>')" class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.2rem 0.6rem;">
+                                        Déséquiper
+                                    </button>
+                                <?php else: ?>
+                                    <div style="font-size: 0.8rem; color: #64748b; font-style: italic; margin: 0.35rem 0;">
+                                        Emplacement vide
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
 
                 <!-- Grille d'inventaire disponible -->

@@ -108,7 +108,7 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
                     $hasPoints = ((int)$heroHeader['unassigned_points'] > 0);
                 ?>
                 <a href="?page=hero" class="hud-msg-btn <?= ($page === 'hero') ? 'active' : '' ?>" title="Votre Samouraï Héros (Niveau <?= $heroHeader['level'] ?> - Santé : <?= $hHp ?>%)" style="text-decoration: none; position: relative; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; background: rgba(0,0,0,0.35); border: 1px solid <?= ($page === 'hero') ? '#dc2626' : 'rgba(255,255,255,0.12)' ?>; border-radius: 20px;">
-                    <span style="font-size: 1.1rem;">🥋</span>
+                    <img src="/public/assets/hero_samurai.jpg" alt="🥋" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; object-position: top center; border: 1px solid #dc2626;">
                     <span style="font-size: 0.75rem; font-weight: 800; color: #fff;">Nv.<?= $heroHeader['level'] ?></span>
                     <span style="font-size: 0.7rem; font-family: monospace; font-weight: 700; color: <?= $hHpCol ?>;"><?= $hHp ?>%</span>
                     <?php if ($hasPoints): ?>

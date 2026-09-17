@@ -526,6 +526,37 @@ foreach ($allUnits as $u) {
                 </div>
             </div>
 
+            <!-- Présentation Illustrée du Héros Samouraï -->
+            <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; background: var(--bg-ink); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                <div style="width: 200px; height: 260px; border-radius: 10px; overflow: hidden; border: 2px solid var(--red-primary); box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-shrink: 0; cursor: pointer; position: relative;"
+                     onclick="openDocsLightbox('Le Héros Samouraï', '/public/assets/hero_samurai.jpg', 'Champion Suprême & Général d\'Armée', 'Commandant d\'élite au Katana enflammé et au Gunbai de commandement, le Samouraï mène vos légions au combat, explore les sanctuaires oubliés et fortifie les fiefs.', '« La voie du guerrier réside dans la détermination sans faille. »')"
+                     title="Cliquer pour admirer l'illustration en grand format">
+                    <img src="/public/assets/hero_samurai.jpg" alt="Le Héros Samouraï" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                        🔍 Agrandir
+                    </span>
+                </div>
+                <div style="flex: 1; min-width: 280px;">
+                    <span style="display: inline-block; background: rgba(220,38,38,0.1); color: var(--red-primary); font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; margin-bottom: 0.5rem; border: 1px solid rgba(220,38,38,0.2);">
+                        🥋 CHAMPION DU DOMAINE CASTAL
+                    </span>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.3rem; color: var(--text-main);">
+                        Le Daimyō Champion & La Voie du Katana
+                    </h3>
+                    <p style="margin: 0 0 1rem 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+                        Paré de son armure laquée ornée d'un dragon impérial, coiffé de son kabuto flamboyant et brandissant son katana fendeur d'acier avec son éventail de guerre (<em>gunbai</em>), votre héros incarne l'âme martiale et la puissance de conquête de votre clan féodal.
+                    </p>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <div style="background: var(--bg-surface); padding: 0.5rem 0.85rem; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.8rem;">
+                            <strong style="color: #dc2626;">⚔️ Polyvalence Totale :</strong> Combats personnels, raids, sièges & bonus économiques
+                        </div>
+                        <div style="background: var(--bg-surface); padding: 0.5rem 0.85rem; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.8rem;">
+                            <strong style="color: #ea580c;">🗺️ Aventures Périlleuses :</strong> Découverte d'XP, vivres et reliques légendaires
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Les 4 Piliers d'Attributs -->
             <h3 style="margin: 0 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
                 <span>📊</span> 1. Les Quatre Piliers d'Attributs Martiaux
