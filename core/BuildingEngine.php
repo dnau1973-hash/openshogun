@@ -71,7 +71,7 @@ class BuildingEngine {
     /**
      * Lance la construction d'une amélioration
      */
-    public function startUpgrade(int $planetId, string $category, string $targetId, ?int $slot = null): array {
+    public function startUpgrade(int $planetId, string $category, string $targetId, ?int $slot = null, ?string $fieldType = null): array {
         $planet = $this->planetEngine->updatePlanet($planetId);
         $faction = $planet['faction'] ?? 'terran';
         $buildings = $this->planetEngine->getBuildings($planetId);
@@ -80,12 +80,28 @@ class BuildingEngine {
         // 1. Vérification du niveau actuel
         if ($category === 'field') {
             $fieldSlot = (int)$targetId;
+            if ($fieldSlot < 1 || $fieldSlot > 18) {
+                throw new Exception("Emplacement de parcelle invalide (#$fieldSlot).");
+            }
             $stmtField = $this->db->prepare("SELECT * FROM planet_fields WHERE planet_id = ? AND field_slot = ?");
             $stmtField->execute([$planetId, $fieldSlot]);
             $field = $stmtField->fetch();
-            if (!$field) throw new Exception("Parcelle introuvable.");
-            $type = $field['type'];
-            $currentLevel = (int)$field['level'];
+
+            if (!$field) {
+                $type = ($fieldType && isset(FIELD_TYPES[$fieldType])) ? $fieldType : 'metal_mine';
+                $currentLevel = 0;
+                $this->db->prepare("INSERT INTO planet_fields (planet_id, field_slot, type, level) VALUES (?, ?, ?, 0)")
+                    ->execute([$planetId, $fieldSlot, $type]);
+            } else {
+                $currentLevel = (int)$field['level'];
+                if ($currentLevel === 0 && $fieldType && isset(FIELD_TYPES[$fieldType])) {
+                    $type = $fieldType;
+                    $this->db->prepare("UPDATE planet_fields SET type = ? WHERE planet_id = ? AND field_slot = ?")
+                        ->execute([$type, $planetId, $fieldSlot]);
+                } else {
+                    $type = $field['type'];
+                }
+            }
         } else {
             $type = $targetId;
             $currentLevel = (int)($buildings[$type] ?? 0);

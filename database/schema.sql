@@ -109,6 +109,7 @@ CREATE TABLE `ships` (
   `code` VARCHAR(30) PRIMARY KEY,
   `name` VARCHAR(60) NOT NULL,
   `faction` ENUM('all', 'terran', 'vorash', 'aethelis') NOT NULL DEFAULT 'all',
+  `image` VARCHAR(100) NULL,
   `metal_cost` INT UNSIGNED NOT NULL,
   `crystal_cost` INT UNSIGNED NOT NULL,
   `deuterium_cost` INT UNSIGNED NOT NULL,

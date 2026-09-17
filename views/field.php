@@ -449,7 +449,7 @@ $nextSlot = ($slot < 18) ? $slot + 1 : 1;
 
 <!-- SCRIPT INTERACTIF POUR LE LANCEMENT ET L'ANNULATION DES TRAVAUX -->
 <script>
-async function launchFieldUpgrade(slot, targetLvl) {
+async function launchFieldUpgrade(slot, targetLvl, fieldType = null) {
     const btn = document.getElementById('btnLaunchUpgrade');
     if (btn) {
         btn.disabled = true;
@@ -461,6 +461,9 @@ async function launchFieldUpgrade(slot, targetLvl) {
         formData.append('action', 'upgrade');
         formData.append('category', 'field');
         formData.append('target_id', slot);
+        if (fieldType) {
+            formData.append('field_type', fieldType);
+        }
 
         const response = await fetch('/api/build.php', {
             method: 'POST',

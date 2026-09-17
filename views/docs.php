@@ -106,6 +106,104 @@ $unitTactics = [
     ]
 ];
 
+// Répertoire des Engins de Siège et Écuries
+$stmtShips = $db->query("SELECT * FROM ships ORDER BY faction, metal_cost ASC");
+$allShips = $stmtShips->fetchAll();
+
+$shipTactics = [
+    'terran_interceptor' => [
+        'role' => 'Cavalerie Légère & Patrouille d\'Interception',
+        'lore_detail' => 'Cavaliers d\'élite montés sur les vifs coursiers Kiso. Ils patrouillent le long des frontières de la province d\'Owari, repérant les colonnes d\'invasion et coupant la retraite des détachements ennemis.',
+        'strengths' => 'Vitesse foudroyante (12), faible coût en riz, intercepte les fuyards et éclaireurs.',
+        'weaknesses' => 'Faible puissance contre les murs de lances Ashigaru.',
+        'quote' => '« Nul n\'échappe aux sabots d\'Owari quand l\'alerte est sonnée. »'
+    ],
+    'terran_cruiser' => [
+        'role' => 'Bélier de Siège Lourd Blindé',
+        'lore_detail' => 'Machine monumentale munie d\'une tête de frappe en acier trempé soutenue par de grosses chaînes. Protégée par un toit en madriers de cèdre et peaux de buffle, elle est conçue pour fracasser les portails massifs des forteresses.',
+        'strengths' => 'Capacité d\'assaut destructrice (400), blindage élevé (2500 PV), ouvre des brèches dans les fortifications.',
+        'weaknesses' => 'Lenteur de déplacement, nécessite une escorte militaire rapprochée.',
+        'quote' => '« Même les portes les plus épaisses cèdent devant le battement d\'acier. »'
+    ],
+    'terran_dreadnought' => [
+        'role' => 'Grande Tour de Siège & Baliste Géante',
+        'lore_detail' => 'Véritable forteresse mobile à plusieurs étages dominant les murailles adverses. Équipée à son sommet d\'une baliste lourde décochant des javelines enflammées, elle permet aux archers et arquebusiers de balayer les chemins de ronde.',
+        'strengths' => 'Attaque colossale (1200), blindage titanesque (8000), surplombe les remparts et réduit les bonus de muraille.',
+        'weaknesses' => 'Coût colossal en matériaux, cible prioritaire des tirs incendiaires.',
+        'quote' => '« Quand la tour s\'avance, l\'ombre du destin recouvre les assiégés. »'
+    ],
+    'vorash_drone' => [
+        'role' => 'Éclaireur Équestre Rapide de Kai',
+        'lore_detail' => 'Cavaliers légers formés dans les reliefs escarpés de la province de Kai. Évoluant en avant-garde des armées Takeda, ils cartographient les positions adverses et mènent des charges d\'opportunité sur les convois mal protégés.',
+        'strengths' => 'Vitesse de raid suprême (13), coût modeste, grande capacité de butin par rapport au coût.',
+        'weaknesses' => 'Défense légère en cas d\'engagement prolongé.',
+        'quote' => '« Rapide comme le vent, invisible jusqu\'au premier coup de lance. »'
+    ],
+    'vorash_manticore' => [
+        'role' => 'Cavalerie Rouge Cuirassée (Akazonae)',
+        'lore_detail' => 'L\'illustre fer de lance de Takeda Shingen. Revêtus de somptueuses armures entièrement vermillon et chevauchant des destriers caparaçonnés, ces cavaliers lourds chargent en bloc compact, écrasant les lignes adverses par la terreur et la masse.',
+        'strengths' => 'Attaque dévastatrice (380), solide blindage (2000), bonus de pillage (+25% de ressources raflées).',
+        'weaknesses' => 'Formation exigeante et coûteuse à reconstituer.',
+        'quote' => '« Le rouge de nos armures annonce le sang des téméraires. » — Takeda Shingen'
+    ],
+    'vorash_leviathan' => [
+        'role' => 'Bélier Colossal du Dragon de Kai',
+        'lore_detail' => 'Engin de guerre mythique surmonté d\'une gigantesque effigie de dragon crachant des flammèches. Poussé par des dizaines d\'hommes et bêtes de trait, son éperon massif ébranle les fondations mêmes des châteaux féodaux.',
+        'strengths' => 'Attaque titanesque (1100), blindage extrême (7000), capacité de fret de 3000.',
+        'weaknesses' => 'Consommation importante de vivres et lenteur sur les routes de montagne.',
+        'quote' => '« Quand le Dragon frappe, la terre tremble et la pierre se fend. »'
+    ],
+    'aethelis_mirage' => [
+        'role' => 'Troupe Furtive d\'Embuscade Montée',
+        'lore_detail' => 'Ombres shinobi montant des chevaux aux sabots feutrés. Capables de contourner les lignes de front par des sentiers forestiers réputés impraticables, ils surgissent à revers des lignes ennemies pour semer la panique et assassiner les officiers.',
+        'strengths' => 'Vitesse maximale (14), esquive et dissimulation exceptionnelles, déstabilise l\'arrière-garde.',
+        'weaknesses' => 'Faible puissance frontale face aux engins blindés.',
+        'quote' => '« Vous entendrez le souffle du cheval au moment précis où le ninjato frappera. »'
+    ],
+    'aethelis_prism' => [
+        'role' => 'Catapulte Incendiaire Horokubiya',
+        'lore_detail' => 'Machine d\'artillerie projetant des jarres de grès remplies de poudre noire et de résine enflammée (Horokubiya). L\'impact provoque de gigantesques gerbes de flammes et d\'étincelles qui consument les bâtisses en bois des forteresses.',
+        'strengths' => 'Attaque incendiaire de zone (450), pavois protecteur (250), cause d\'immenses ravages sur les infrastructures.',
+        'weaknesses' => 'Risque de retour de flamme si cerné en mêlée.',
+        'quote' => '« Une seule jarre de feu allume le bûcher d\'une garnison tout entière. »'
+    ],
+    'aethelis_titan' => [
+        'role' => 'Forteresse Roulante Blindée Imprenable',
+        'lore_detail' => 'Bastion mobile cuirassé de plaques d\'acier et de madriers de chêne, hérissé de meurtrières pour tireurs et piquiers. Servant de point d\'appui inébranlable lors des sièges prolongés chers à la stratégie de patience de Tokugawa Ieyasu.',
+        'strengths' => 'Blindage suprême (7500), pavois de 900, attaque puissante (1300), protège les troupes d\'escorte.',
+        'weaknesses' => 'Lenteur extrême (6.5), fabrication complexe.',
+        'quote' => '« Notre château ne nous attend pas derrière les remparts : nous l\'amenons avec nous. » — Tokugawa Ieyasu'
+    ],
+    'transporter_light' => [
+        'role' => 'Chariot de Ravitaillement Léger',
+        'lore_detail' => 'Chariots rustiques à deux roues attelés à des bœufs dociles ou chevaux de trait. Pilotés par des paysans du domaine, ils assurent le ravitaillement constant des avant-postes en sacs de riz et poutres de bois.',
+        'strengths' => 'Très économique, capacité de fret de 5 000 ressources, indispensable pour les échanges provinciaux.',
+        'weaknesses' => 'Totalement dépourvu de capacités offensives (Attaque 5).',
+        'quote' => '« L\'armée qui mange à sa faim avance sans jamais faiblir. »'
+    ],
+    'transporter_heavy' => [
+        'role' => 'Grand Convoi Logistique de Fief',
+        'lore_detail' => 'Lourde caravane féodale protégée par des bâches renforcées et des gardes armés. Elle permet de transférer des trésors colossaux de pierre taillée, de lingots et de grains entre châteaux alliés.',
+        'strengths' => 'Capacité d\'emport gigantesque de 25 000 ressources, résistant aux embuscades mineures.',
+        'weaknesses' => 'Vitesse de déplacement modérée.',
+        'quote' => '« Les richesses de la province voyagent sous le regard attentif des intendants. »'
+    ],
+    'colony_ship' => [
+        'role' => 'Expédition d\'Établissement Castral',
+        'lore_detail' => 'Rassemblement solennel de maîtres-charpentiers, architectes, forgerons, cultivateurs et moines bénédictins. Emportant plans de construction, plants sacrés et outils précieux, cette caravane fonde un nouveau fief castral sur une terre vierge.',
+        'strengths' => 'Permet de fonder un nouveau château complet avec ses 18 parcelles de ressources et son donjon.',
+        'weaknesses' => 'Unité consommée lors de la fondation, coûteuse à préparer.',
+        'quote' => '« Planter la première poutre, c\'est faire naître un empire pour les générations futures. »'
+    ],
+    'spy_probe' => [
+        'role' => 'Éclaireur Shinobi Furtif',
+        'lore_detail' => 'Infiltrateur d\'élite agile opérant seul dans les ténèbres. Glissant le long des toitures et des douves sans éveiller l\'attention des sentinelles, il recueille des rapports secrets sur les défenses, les bâtiments et les réserves des fiefs rivaux.',
+        'strengths' => 'Vitesse absolue (20), coût dérisoire, rapporte les données stratégiques complètes sans déclarer la guerre.',
+        'weaknesses' => 'Éliminé immédiatement s\'il est intercepté par la garde d\'alerte ennemie.',
+        'quote' => '« Voir sans être vu, savoir avant que le premier tambour de guerre ne résonne. »'
+    ]
+];
+
 // Clans metadata
 $clansMeta = [
     'terran' => [
@@ -191,20 +289,26 @@ foreach ($allUnits as $u) {
 
             <!-- Sommaire & Navigation entre Chapitres de la Documentation -->
             <div style="display: flex; gap: 0.6rem; margin-top: 1.75rem; overflow-x: auto; padding-bottom: 0.25rem;">
-                <a href="?page=docs&tab=troops" class="btn <?= ($tab === 'troops') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px;">
-                    <span>🥋</span> Chapitre 1 : Présentation des Troupes
+                <a href="?page=docs&tab=troops" class="btn <?= ($tab === 'troops') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🥋</span> Ch. 1 : Troupes du Dojo
                 </a>
-                <a href="?page=docs&tab=city" class="btn <?= ($tab === 'city') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px;">
-                    <span>🏯</span> Chapitre 2 : Cité & Bâtiments
+                <a href="?page=docs&tab=siege" class="btn <?= ($tab === 'siege') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🐎</span> Ch. 2 : Siège & Écuries
                 </a>
-                <a href="?page=docs&tab=resources" class="btn <?= ($tab === 'resources') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px;">
-                    <span>🌾</span> Chapitre 3 : Terroir & Récoltes
+                <a href="?page=docs&tab=hero" class="btn <?= ($tab === 'hero') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
+                    <span>⚔️</span> Ch. 3 : Le Héros Samouraï
                 </a>
-                <a href="?page=docs&tab=castles" class="btn <?= ($tab === 'castles') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px;">
-                    <span>🏯</span> Chapitre 4 : 12 Donjons Authentiques
+                <a href="?page=docs&tab=city" class="btn <?= ($tab === 'city') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🏯</span> Ch. 4 : Cité & Bâtiments
                 </a>
-                <a href="?page=docs&tab=combat" class="btn <?= ($tab === 'combat') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px;">
-                    <span>⚔️</span> Chapitre 5 : Règles du Combat & Sièges
+                <a href="?page=docs&tab=resources" class="btn <?= ($tab === 'resources') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🌾</span> Ch. 5 : Terroir & Récoltes
+                </a>
+                <a href="?page=docs&tab=castles" class="btn <?= ($tab === 'castles') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🏯</span> Ch. 6 : 12 Donjons
+                </a>
+                <a href="?page=docs&tab=combat" class="btn <?= ($tab === 'combat') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.1rem; border-radius: 8px; white-space:nowrap;">
+                    <span>⚔️</span> Ch. 7 : Combat & Sièges
                 </a>
             </div>
         </div>
@@ -548,13 +652,254 @@ foreach ($allUnits as $u) {
             </div>
         </div>
 
+    <?php elseif ($tab === 'siege'): ?>
+        <!-- ==========================================================
+             CHAPITRE 2 : ATELIER DE SIÈGE & ÉCURIES PROVINCIALES
+             ========================================================== -->
+        <div class="card" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 1.5rem 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 5px solid #dc2626;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 style="margin: 0 0 0.5rem 0; font-size: 1.7rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🐎</span> Chapitre 2 : Atelier de Siège & Écuries Provinciales
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 800px; line-height: 1.5;">
+                        Les batailles de l'époque Sengoku ne se gagnent pas seulement à pied. L'<strong>Atelier de Siège & les Écuries</strong> permettent d'entraîner la cavalerie rapide, les charges de cavalerie cuirassée, de construire des catapultes incendiaires, des béliers blindés pour abattre les portes de forteresses, ainsi que les convois logistiques pour ravitailler vos armées.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Structure Requise</div>
+                    <div style="font-size: 1.1rem; font-weight: 800; color: #dc2626;">Atelier & Écuries Niv. 1+</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grille des 13 Engins de Siège, Cavaleries et Convois -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <?php foreach ($allShips as $s): 
+                $code = $s['code'];
+                $meta = $shipTactics[$code] ?? [
+                    'role' => 'Engin Provincial',
+                    'lore_detail' => $s['description'],
+                    'strengths' => 'Polyvalence militaire.',
+                    'weaknesses' => 'Coût de fabrication.',
+                    'quote' => '« La victoire appartient à qui sait frapper fort. »'
+                ];
+                $imgFile = !empty($s['image']) ? $s['image'] : ($code . '.jpg');
+                $diskFile = __DIR__ . '/../public/assets/units/' . $imgFile;
+                $imgSrc = file_exists($diskFile) ? ('/public/assets/units/' . $imgFile . '?v=' . filemtime($diskFile)) : '/public/assets/tile_shipyard.png';
+
+                $clanBadge = match($s['faction']) {
+                    'terran' => ['name' => 'Clan Oda', 'color' => '#3b82f6', 'icon' => '🏯'],
+                    'vorash' => ['name' => 'Clan Takeda', 'color' => '#ef4444', 'icon' => '🐎'],
+                    'aethelis' => ['name' => 'Clan Tokugawa', 'color' => '#8b5cf6', 'icon' => '⛩️'],
+                    default => ['name' => 'Corps Logistique', 'color' => '#16a34a', 'icon' => '📦']
+                };
+            ?>
+                <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
+                    <!-- Illustration de l'Unité -->
+                    <div style="position: relative; height: 220px; overflow: hidden; background: var(--bg-ink, #ede5d5); border-bottom: 1px solid var(--border-color); cursor: pointer;"
+                         onclick="openDocsLightbox('<?= htmlspecialchars(addslashes($s['name'])) ?>', '<?= $imgSrc ?>', '<?= htmlspecialchars(addslashes($meta['role'])) ?>', '<?= htmlspecialchars(addslashes($meta['lore_detail'])) ?>', '<?= htmlspecialchars(addslashes($meta['quote'])) ?>')">
+                        <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($s['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                        
+                        <!-- Badge Faction -->
+                        <div style="position: absolute; top: 10px; left: 10px; background: rgba(253,251,247,0.95); border: 1px solid <?= $clanBadge['color'] ?>; border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 800; color: <?= $clanBadge['color'] ?>;">
+                            <?= $clanBadge['icon'] ?> <?= $clanBadge['name'] ?>
+                        </div>
+                    </div>
+
+                    <!-- En-tête de carte -->
+                    <div style="padding: 1rem 1.25rem 0.5rem 1.25rem;">
+                        <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 800;">
+                            <?= htmlspecialchars($s['name']) ?>
+                        </h3>
+                        <div style="font-size: 0.8rem; color: var(--red-primary, #c2252b); font-weight: 600; margin-top: 2px;">
+                            <?= htmlspecialchars($meta['role']) ?>
+                        </div>
+                    </div>
+
+                    <!-- Caractéristiques Martiales -->
+                    <div style="padding: 0.5rem 1.25rem; flex: 1;">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; font-size: 0.75rem; background: var(--bg-ink, #ede5d5); padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 0.75rem;">
+                            <div>⚔️ Attaque : <strong><?= $s['attack'] ?></strong></div>
+                            <div>🛡️ Pavois : <strong><?= $s['shield'] ?></strong></div>
+                            <div>🧱 Blindage : <strong><?= $s['defense'] ?></strong></div>
+                            <div>🐎 Vitesse : <strong><?= $s['speed'] ?></strong></div>
+                            <div>🎒 Fret : <strong><?= $s['cargo_capacity'] ?></strong></div>
+                            <div>⏱️ Durée : <strong><?= $s['base_build_time'] ?>s</strong></div>
+                        </div>
+
+                        <!-- Coûts -->
+                        <div style="display: flex; gap: 0.75rem; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">
+                            <span style="color: var(--res-metal);">🪵 <?= number_format($s['metal_cost']) ?></span>
+                            <span style="color: var(--res-crystal);">🪨 <?= number_format($s['crystal_cost']) ?></span>
+                            <span style="color: var(--res-deut);">🌾 <?= number_format($s['deuterium_cost']) ?></span>
+                        </div>
+
+                        <!-- Lore & Tactique -->
+                        <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin: 0 0 0.5rem 0;">
+                            <?= htmlspecialchars($meta['lore_detail']) ?>
+                        </p>
+                        <div style="font-size: 0.75rem; color: #166534; background: rgba(22,101,52,0.08); padding: 4px 8px; border-radius: 4px; margin-bottom: 4px;">
+                            <strong>Points Forts :</strong> <?= htmlspecialchars($meta['strengths']) ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+    <?php elseif ($tab === 'hero'): ?>
+        <!-- ==========================================================
+             CHAPITRE 3 : LE HÉROS SAMOURAÏ & LA VOIE DU BUSHIDŌ
+             ========================================================== -->
+        <div class="card" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 5px solid #d97706; box-shadow: 0 6px 20px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+                <div style="max-width: 850px;">
+                    <div style="font-size: 0.8rem; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.35rem;">
+                        武士道 &bull; Champion Suprême du Fief Castral
+                    </div>
+                    <h2 style="margin: 0 0 0.75rem 0; font-size: 1.85rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>⚔️</span> Chapitre 3 : Le Héros Samouraï (Système Travian)
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 1rem; line-height: 1.6;">
+                        Chaque Daimyō dispose d'un <strong>Héros Samouraï unique</strong>, incarnation vivante de l'honneur de sa dynastie. 
+                        Inspiré du système de héros de Travian, il gagne de l'expérience au combat et en expédition, acquiert de précieux artefacts féodaux, mène vos armées lors des raids provinciaux et stimule directement la prospérité économique de votre domaine.
+                    </p>
+                </div>
+                <a href="?page=hero" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 700; background: linear-gradient(135deg, #d97706, #b45309); border-color: #f59e0b; box-shadow: 0 4px 14px rgba(217,119,6,0.35);">
+                    🥋 Consulter Mon Héros &rarr;
+                </a>
+            </div>
+        </div>
+
+        <!-- Les 4 Piliers d'Attributs & Arbre de Compétences -->
+        <div class="card" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 1.75rem; border: 1px solid var(--border-color); border-radius: 12px;">
+            <h3 style="margin: 0 0 1.25rem 0; font-size: 1.35rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                <span>📊</span> 1. Les 4 Attributs Fondamentaux du Héros
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">
+                À chaque montée de niveau, votre héros reçoit <strong>4 points d'attributs</strong> à répartir selon votre orientation stratégique. Il récupère également instantanément <strong>+20% de santé</strong> lors du passage de niveau.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">⚔️</span>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: #dc2626;">Force de Combat</h4>
+                    </div>
+                    <div style="font-weight: 800; font-size: 0.85rem; color: #166534; margin-bottom: 0.5rem;">+80 Attaque & Défense brute / pt</div>
+                    <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
+                        Augmente la valeur martiale directe du héros. Essentiel en début de partie pour nettoyer les <strong>Oasis sauvages</strong> peuplées de loups et d'ours sans subir de pertes dans vos troupes régulières.
+                    </p>
+                </div>
+
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">🗡️</span>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: #b45309;">Bonus Offensif</h4>
+                    </div>
+                    <div style="font-weight: 800; font-size: 0.85rem; color: #166534; margin-bottom: 0.5rem;">+0.2% Attaque d'Armée / pt (max 20%)</div>
+                    <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
+                        Galvanise toutes les escouades marchant sous la bannière du héros lors d'un raid ou d'un siège. Avec 100 points, confère un bonus dévastateur de +20% à l'ensemble de votre force d'attaque.
+                    </p>
+                </div>
+
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">🛡️</span>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: #2563eb;">Bonus Défensif</h4>
+                    </div>
+                    <div style="font-weight: 800; font-size: 0.85rem; color: #166534; margin-bottom: 0.5rem;">+0.2% Défense de Garnison / pt (max 20%)</div>
+                    <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
+                        Transforme votre héros en rempart inébranlable. Lorsqu'il est présent au fief lors d'une attaque ennemie, il renforce la résilience de tous les soldats en garnison.
+                    </p>
+                </div>
+
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">🌾</span>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: #15803d;">Production Rurale</h4>
+                    </div>
+                    <div style="font-weight: 800; font-size: 0.85rem; color: #166534; margin-bottom: 0.5rem;">Production brute horaire au fief</div>
+                    <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
+                        Le héros supervise les domaines ruraux. Vous pouvez choisir d'orienter sa production vers une ressource spécifique (100% Bois, 100% Pierre, 100% Riz) ou une répartition harmonieuse équilibrée.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aventures & Expéditions -->
+        <div class="card" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 1.75rem; border: 1px solid var(--border-color); border-radius: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                <h3 style="margin: 0; font-size: 1.35rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                    <span>🗺️</span> 2. Aventures & Expéditions en Provinces Lointaines
+                </h3>
+                <span style="background: rgba(245,158,11,0.15); color: #b45309; border: 1px solid rgba(245,158,11,0.3); padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">
+                    3 Aventures Actives en permanence
+                </span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.25rem;">
+                Des rumeurs de sanctuaires oubliés, de nids d'embuscade et de trésors perdus apparaissent continuellement sur la carte galactique. En envoyant votre héros en aventure :
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                <div style="padding: 1rem; background: var(--bg-ink, #ede5d5); border-radius: 8px; border: 1px solid var(--border-color);">
+                    <strong style="color: var(--text-main);">📈 Gain d'Expérience (XP) :</strong>
+                    <p style="margin: 0.35rem 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
+                        Chaque aventure réussie rapporte entre 30 et 80 points d'XP, accélérant les montées de niveau pour obtenir de nouveaux points d'attributs.
+                    </p>
+                </div>
+                <div style="padding: 1rem; background: var(--bg-ink, #ede5d5); border-radius: 8px; border: 1px solid var(--border-color);">
+                    <strong style="color: var(--text-main);">🩸 Risques & Santé du Héros :</strong>
+                    <p style="margin: 0.35rem 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
+                        Affronter des brigands et des bêtes féroces entame la santé du samouraï (-5% à -25% par aventure). Veillez à ne pas l'envoyer en mission avec une santé critique !
+                    </p>
+                </div>
+                <div style="padding: 1rem; background: var(--bg-ink, #ede5d5); border-radius: 8px; border: 1px solid var(--border-color);">
+                    <strong style="color: var(--text-main);">🎁 Trésors & Équipements Rares :</strong>
+                    <p style="margin: 0.35rem 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
+                        Découverte d'équipements féodaux de grand maître (Katanas ancestraux, armures de parade Nanban, montures Kiso) immédiatement équipables dans votre arsenal.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Arsenal & Résurrection -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- Arsenal -->
+            <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.2rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                    <span>🛡️</span> 3. L'Arsenal & les 6 Emplacements d'Artefacts
+                </h3>
+                <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                    <li><strong>Arme Principale (Weapon) :</strong> Katana (+Attaque), Naginata (+Anti-Cavalerie), Nodachi (+Puissance de Siège).</li>
+                    <li><strong>Casque (Helmet) :</strong> Kabuto ornemental (+XP et régénération de PV).</li>
+                    <li><strong>Armure (Armor) :</strong> Cuirasse Dō-maru renforcée (réduction des blessures en aventure).</li>
+                    <li><strong>Chaussures (Shoes) :</strong> Waraji tressées et jambières (vitesse de marche rapide).</li>
+                    <li><strong>Main Gauche (Left Hand) :</strong> Éventail de guerre Gunbai ou bouclier en bois Tate.</li>
+                    <li><strong>Monture (Horse) :</strong> Destrier Kiso (+20% à +40% de vitesse sur la carte).</li>
+                </ul>
+            </div>
+
+            <!-- Mort et Résurrection -->
+            <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.2rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                    <span>⛩️</span> 4. Mort au Combat & Rituel de Résurrection
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem;">
+                    Si votre héros succombe lors d'une aventure périlleuse ou au cœur d'une bataille sanglante, il acquiert le statut <strong>Mort au Combat</strong>.
+                </p>
+                <div style="background: rgba(220,38,38,0.08); border-left: 4px solid #dc2626; padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.82rem; color: var(--text-main);">
+                    <strong>La Voie de la Renaissance :</strong> Vous ne perdez <em>jamais</em> le niveau, les points d'attributs ni les équipements forgés de votre héros. Un <strong>Rituel Shinto de Résurrection</strong> peut être célébré au fief castral pour le réincarner à 100% de santé après un court temps de prière.
+                </div>
+            </div>
+        </div>
+
     <?php elseif ($tab === 'city'): ?>
         <!-- ==========================================================
-             CHAPITRE 2 : CITÉ CASTRALE & GESTION DES 15 EMPLACEMENTS
+             CHAPITRE 4 : CITÉ CASTRALE & ARCHITECTURE URBAINE
              ========================================================== -->
         <div class="card" style="padding: 2rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px;">
             <h2 style="margin: 0 0 1rem 0; font-size: 1.5rem; color: var(--text-main);">
-                🏯 Chapitre 2 : Cité Castrale & Architecture Urbaine (15 Emplacements)
+                🏯 Chapitre 4 : Cité Castrale & Architecture Urbaine (16 Emplacements)
             </h2>
             <p style="font-size: 1rem; line-height: 1.6; color: var(--text-muted); margin-bottom: 1.5rem;">
                 La Cité Castrale (accessible via le médaillon central) constitue le centre névralgique de votre principauté. 

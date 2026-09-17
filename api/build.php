@@ -26,10 +26,11 @@ try {
         $category = $_POST['category'] ?? '';
         $targetId = $_POST['target_id'] ?? '';
         $slot = isset($_POST['slot']) ? (int)$_POST['slot'] : null;
+        $fieldType = !empty($_POST['field_type']) ? trim($_POST['field_type']) : null;
         if (!in_array($category, ['field', 'building'])) {
             throw new Exception("Catégorie de construction invalide.");
         }
-        $result = $buildingEngine->startUpgrade((int)$planet['id'], $category, $targetId, $slot);
+        $result = $buildingEngine->startUpgrade((int)$planet['id'], $category, $targetId, $slot, $fieldType);
         echo json_encode($result);
     } elseif ($action === 'cancel') {
         $queueId = (int)($_POST['queue_id'] ?? 0);
