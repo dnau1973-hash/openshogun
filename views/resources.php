@@ -240,6 +240,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         $lvl = (int)$f['level'];
                         $info = FIELD_TYPES[$type] ?? FIELD_TYPES['metal_mine'];
                         $isUpgrading = isset($activeFieldQueue[$slot]);
+                        $isDemolishing = ($isUpgrading && (int)($activeFieldQueue[$slot]['target_level'] ?? -1) === 0);
                         $isFreeSlot = ($lvl === 0 && !$isUpgrading);
 
                         $tileImg = match($type) {
@@ -259,19 +260,21 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                             <div class="rts-level-bubble" title="Parcelle #<?= $slot ?> disponible : Cliquer pour bâtir">+</div>
                         </div>
                     <?php else: ?>
-                        <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?> <?= $isUpgrading ? 'is-upgrading' : '' ?>" 
+                        <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?> <?= $isUpgrading ? 'is-upgrading' : '' ?> <?= $isDemolishing ? 'is-demolishing' : '' ?>" 
                              data-sector="<?= $type ?>"
                              data-slot="<?= $slot ?>"
-                             title="<?= htmlspecialchars($info['name']) ?> #<?= $slot ?> (<?= $isUpgrading ? 'Chantier en cours' : 'Niveau ' . $lvl ?>)"
+                             title="<?= htmlspecialchars($info['name']) ?> #<?= $slot ?> (<?= $isDemolishing ? 'Démantèlement en cours' : ($isUpgrading ? 'Chantier en cours' : 'Niveau ' . $lvl) ?>)"
                              onclick="window.location.href='/?page=field&slot=<?= $slot ?>'">
                             
                             <!-- Image PNG transparente de la ressource -->
-                            <img src="/public/assets/<?= $tileImg ?>" class="rts-tile-sprite <?= $isUpgrading ? 'sprite-upgrading' : '' ?>" alt="<?= htmlspecialchars($info['name']) ?>" draggable="false">
+                            <img src="/public/assets/<?= $tileImg ?>" class="rts-tile-sprite <?= $isUpgrading ? 'sprite-upgrading' : '' ?>" style="<?= $isDemolishing ? 'opacity:0.65; filter:grayscale(40%) sepia(20%);' : '' ?>" alt="<?= htmlspecialchars($info['name']) ?>" draggable="false">
 
                             <!-- Badge minimaliste de niveau en hauteur et à droite du bâtiment (Style Travian) -->
-                            <div class="rts-level-bubble <?= $isUpgrading ? 'upgrading' : '' ?>" title="<?= htmlspecialchars($info['name']) ?> (Niveau <?= $lvl ?>)">
+                            <div class="rts-level-bubble <?= $isDemolishing ? 'demolishing' : ($isUpgrading ? 'upgrading' : '') ?>" title="<?= htmlspecialchars($info['name']) ?> (<?= $isDemolishing ? 'Démolition vers Niv. 0' : 'Niveau ' . $lvl ?>)">
                                 <?= $lvl > 0 ? $lvl : '1' ?>
-                                <?php if ($isUpgrading): ?>
+                                <?php if ($isDemolishing): ?>
+                                    <span class="bubble-pulse">🗑️</span>
+                                <?php elseif ($isUpgrading): ?>
                                     <span class="bubble-pulse">⏳</span>
                                 <?php endif; ?>
                             </div>
@@ -313,7 +316,11 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         <div class="queue-item">
                             <div class="queue-info">
                                 <h4><?= htmlspecialchars($name) ?></h4>
-                                <span style="font-size:0.75rem; color:var(--text-muted);">Niveau <?= $q['target_level'] ?></span>
+                                <?php if ((int)$q['target_level'] === 0): ?>
+                                    <span style="font-size:0.75rem; color:#f87171; font-weight:700;">🗑️ Démantèlement (Raser)</span>
+                                <?php else: ?>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Niveau <?= $q['target_level'] ?></span>
+                                <?php endif; ?>
                             </div>
                             <div style="text-align:right;">
                                 <div class="queue-timer" data-countdown="<?= $q['finishes_at'] ?>">Calcul...</div>

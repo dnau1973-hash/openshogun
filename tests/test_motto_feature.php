@@ -80,3 +80,4 @@ if ($testsPassed === $testsTotal) {
 } else {
     exit(1);
 }
+

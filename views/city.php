@@ -137,7 +137,8 @@ foreach (BUILDINGS as $code => $bInfo) {
                     $code = $slotData['code'];
                     $lvl = (int)$slotData['level'];
                     $isBuildingInQueue = ($code !== 'free_plot' && isset($activeBuildingQueue[$code]));
-                    $isUnderConstruction = ($lvl === 0 && $isBuildingInQueue);
+                    $isDemolishing = ($isBuildingInQueue && (int)($activeBuildingQueue[$code]['target_level'] ?? -1) === 0);
+                    $isUnderConstruction = ($lvl === 0 && $isBuildingInQueue && !$isDemolishing);
                     $isEmptySlot = ($code === 'free_plot' || ($lvl === 0 && !$isBuildingInQueue));
                     $isWallSlot = ($code === 'wall' || (int)$slot === 34);
                 ?>
@@ -180,14 +181,14 @@ foreach (BUILDINGS as $code => $bInfo) {
                         if (!$bInfo) continue;
                         $sector = $buildingSectors[$code] ?? 'logistics';
                         $tileImg = $bInfo['tile_img'] ?? 'tile_tenshu.png';
-                        $isUpgrading = $isBuildingInQueue;
+                        $isUpgrading = $isBuildingInQueue && !$isDemolishing;
                     ?>
                         <!-- Bâtiment érigé actif -->
                         <div class="rts-hotspot sector-<?= $sector ?> hotspot-city-slot-<?= $slot ?>" 
                              data-sector="<?= $sector ?>"
                              data-slot="<?= $slot ?>"
                              data-building="<?= $code ?>"
-                             title="<?= htmlspecialchars($bInfo['name']) ?> (Niveau <?= $lvl ?>)"
+                             title="<?= htmlspecialchars($bInfo['name']) ?> (<?= $isDemolishing ? 'Démantèlement en cours' : 'Niveau ' . $lvl ?>)"
                              onclick="window.location.href='/?page=building&slot=<?= $slot ?>'">
                             
                             <?php if (!$isWallSlot): ?>
@@ -195,14 +196,17 @@ foreach (BUILDINGS as $code => $bInfo) {
                                 <img src="/public/assets/<?= $tileImg ?>" 
                                      class="rts-tile-sprite <?= ($code === 'hq') ? 'rts-tenshu-sprite' : '' ?>" 
                                      alt="<?= htmlspecialchars($bInfo['name']) ?>" 
+                                     style="<?= $isDemolishing ? 'opacity:0.65; filter:grayscale(40%) sepia(20%);' : '' ?>"
                                      draggable="false">
                             <?php endif; ?>
 
                             <!-- Badge minimaliste de niveau en hauteur et à droite (Style Travian) -->
-                            <div class="rts-level-bubble <?= ($code === 'hq') ? 'rts-tenshu-bubble' : '' ?> <?= $isUpgrading ? 'upgrading' : '' ?>" 
-                                 title="<?= htmlspecialchars($bInfo['name']) ?> (Niveau <?= $lvl ?>)">
+                            <div class="rts-level-bubble <?= ($code === 'hq') ? 'rts-tenshu-bubble' : '' ?> <?= $isDemolishing ? 'demolishing' : ($isUpgrading ? 'upgrading' : '') ?>" 
+                                 title="<?= htmlspecialchars($bInfo['name']) ?> (<?= $isDemolishing ? 'Démolition vers Niv. 0' : 'Niveau ' . $lvl ?>)">
                                 <?= $lvl ?>
-                                <?php if ($isUpgrading): ?>
+                                <?php if ($isDemolishing): ?>
+                                    <span class="bubble-pulse">🗑️</span>
+                                <?php elseif ($isUpgrading): ?>
                                     <span class="bubble-pulse">⏳</span>
                                 <?php endif; ?>
                             </div>
@@ -275,10 +279,13 @@ foreach (BUILDINGS as $code => $bInfo) {
                                 $name = BUILDINGS[$q['target_id']]['name'] ?? $q['target_id'];
                             }
                         ?>
-                        <div class="queue-item">
                             <div class="queue-info">
                                 <h4><?= htmlspecialchars($name) ?></h4>
-                                <span style="font-size:0.75rem; color:var(--text-muted);">Niveau <?= $q['target_level'] ?></span>
+                                <?php if ((int)$q['target_level'] === 0): ?>
+                                    <span style="font-size:0.75rem; color:#f87171; font-weight:700;">🗑️ Démolition (Raser)</span>
+                                <?php else: ?>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Niveau <?= $q['target_level'] ?></span>
+                                <?php endif; ?>
                             </div>
                             <div style="text-align:right;">
                                 <div class="queue-timer" data-countdown="<?= $q['finishes_at'] ?>">Calcul...</div>

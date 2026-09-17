@@ -331,23 +331,32 @@ $nextSlot = ($slot < 18) ? $slot + 1 : 1;
             <div class="field-card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
 
                 <?php if ($activeJob): ?>
+                    <?php $isDemolishingJob = ((int)$activeJob['target_level'] === 0); ?>
                     <!-- Chantier en cours sur cette parcelle -->
                     <div class="field-active-job-box">
                         <div class="job-status-title">
                             <span class="job-spinner">⏳</span>
-                            <span>Travaux en cours vers le <strong>Niveau <?= $activeJob['target_level'] ?></strong></span>
+                            <?php if ($isDemolishingJob): ?>
+                                <span>Démantèlement en cours vers le <strong>Niveau 0 (Raser)</strong></span>
+                            <?php else: ?>
+                                <span>Travaux en cours vers le <strong>Niveau <?= $activeJob['target_level'] ?></strong></span>
+                            <?php endif; ?>
                         </div>
                         <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0 1rem 0;">
-                            Vos artisans et paysans s'activent sur la parcelle. Le rendement sera automatiquement accru dès la fin des travaux.
+                            <?php if ($isDemolishingJob): ?>
+                                Vos maîtres d'œuvre déconstruisent cette exploitation pour réinitialiser la parcelle. Vous récupérerez 30% des matériaux à l'achèvement des travaux.
+                            <?php else: ?>
+                                Vos artisans et paysans s'activent sur la parcelle. Le rendement sera automatiquement accru dès la fin des travaux.
+                            <?php endif; ?>
                         </p>
 
-                        <div class="job-timer-display" data-countdown="<?= $activeJob['finishes_at'] ?>">
+                        <div class="job-timer-display" data-countdown="<?= $activeJob['finishes_at'] ?>" style="<?= $isDemolishingJob ? 'color:#f87171;' : '' ?>">
                             Calcul du temps restant...
                         </div>
 
                         <div style="margin-top: 1.25rem;">
                             <button type="button" class="field-btn-cancel" onclick="cancelFieldBuild(<?= (int)$activeJob['id'] ?>)">
-                                🛑 Interrompre les travaux (80% remboursé)
+                                <?= $isDemolishingJob ? '🛑 Interrompre le démantèlement (Exploitation préservée)' : '🛑 Interrompre les travaux (80% remboursé)' ?>
                             </button>
                         </div>
                     </div>
@@ -414,7 +423,7 @@ $nextSlot = ($slot < 18) ? $slot + 1 : 1;
         </div>
 
     <!-- ZONE DE DÉMOLITION DE LA PARCELLE -->
-    <?php if ($lvl > 0): ?>
+    <?php if ($lvl > 0 && !$activeJob): ?>
         <div class="card" style="margin-top: 1.5rem; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
@@ -538,7 +547,7 @@ async function cancelFieldBuild(queueId) {
 }
 
 async function confirmDemolishField(slot, fieldName) {
-    if (!confirm(`Êtes-vous certain de vouloir raser définitivement l'exploitation ${fieldName} sur la parcelle #${slot} ?\n\nL'emplacement redeviendra vierge et vous pourrez choisir une nouvelle ressource. Vous récupérerez 30% des matériaux.`)) {
+    if (!confirm(`Êtes-vous certain de vouloir raser définitivement l'exploitation ${fieldName} sur la parcelle #${slot} ?\n\nUn ordre de démolition sera émis avec un compte à rebours. Vous récupérerez 30% des matériaux à la fin des travaux.`)) {
         return;
     }
 
@@ -556,7 +565,7 @@ async function confirmDemolishField(slot, fieldName) {
 
         const data = await response.json();
         if (data.success) {
-            window.location.href = '/?page=resources';
+            window.location.reload();
         } else {
             alert(data.error || 'Impossible de raser cette exploitation.');
         }

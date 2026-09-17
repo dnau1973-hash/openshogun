@@ -222,6 +222,12 @@ class BuildingEngine {
         $item = $stmt->fetch();
         if (!$item) return false;
 
+        // Si on annule une démolition (target_level = 0), retirer de la file sans impacter les ressources : la structure reste intacte
+        if ((int)$item['target_level'] === 0) {
+            $this->db->prepare("DELETE FROM construction_queue WHERE id = ?")->execute([$queueId]);
+            return true;
+        }
+
         $buildings = $this->planetEngine->getBuildings($planetId);
         $hqLevel = $buildings['hq'] ?? 1;
 
@@ -263,12 +269,18 @@ class BuildingEngine {
     }
 
     /**
-     * Démolit / supprime définitivement un bâtiment ou une parcelle
-     * Libère l'emplacement (devient free_plot / niveau 0) et rembourse 30% des matériaux
+     * Lance un ordre de démantèlement / démolition avec compte à rebours.
+     * La structure reste en place pendant les travaux et n'est supprimée qu'à l'achèvement,
+     * libérant ainsi le slot et créditant 30% de remboursement des matériaux.
      */
     public function demolish(int $planetId, string $category, string $targetId, ?int $slot = null): array {
         $buildings = $this->planetEngine->getBuildings($planetId);
         $hqLevel = (int)($buildings['hq'] ?? 1);
+
+        // Récupérer la faction du joueur
+        $stmtOwner = $this->db->prepare("SELECT u.faction FROM planets p JOIN users u ON p.user_id = u.id WHERE p.id = ?");
+        $stmtOwner->execute([$planetId]);
+        $faction = $stmtOwner->fetchColumn() ?: 'terran';
 
         if ($category === 'building') {
             $buildingType = $targetId;
@@ -304,6 +316,10 @@ class BuildingEngine {
             $currentLevel = (int)($bData['level'] ?? $buildings[$buildingType] ?? 0);
             $actualSlot = $bData['slot'] ?? $slot;
 
+            if ($currentLevel <= 0) {
+                throw new Exception("Ce bâtiment est déjà au niveau 0.");
+            }
+
             // Vérifications des activités dépendantes en cours
             if ($buildingType === 'research_lab') {
                 $stmtQ = $this->db->prepare("SELECT COUNT(*) FROM research_queue WHERE planet_id = ?");
@@ -325,46 +341,9 @@ class BuildingEngine {
                 }
             }
 
-            // Calcul du remboursement (30% du coût du niveau actuel)
-            $refLevel = max(1, $currentLevel);
-            $details = $this->getUpgradeDetails('building', $buildingType, $refLevel - 1, $hqLevel);
-            $refundMetal = ($currentLevel > 0) ? (int)($details['cost']['metal'] * 0.3) : 0;
-            $refundCrystal = ($currentLevel > 0) ? (int)($details['cost']['crystal'] * 0.3) : 0;
-            $refundDeut = ($currentLevel > 0) ? (int)($details['cost']['deuterium'] * 0.3) : 0;
-
-            $this->db->beginTransaction();
-
-            // Supprimer les constructions en cours pour ce bâtiment
-            $this->db->prepare("DELETE FROM construction_queue WHERE planet_id = ? AND build_category = 'building' AND target_id = ?")
-                ->execute([$planetId, $buildingType]);
-
-            // Supprimer le bâtiment de planet_buildings pour libérer le slot
-            $this->db->prepare("DELETE FROM planet_buildings WHERE planet_id = ? AND building_type = ?")
-                ->execute([$planetId, $buildingType]);
-
-            // Créditer les matériaux récupérés
-            if ($refundMetal > 0 || $refundCrystal > 0 || $refundDeut > 0) {
-                $this->db->prepare("
-                    UPDATE planets 
-                    SET metal = metal + ?, crystal = crystal + ?, deuterium = deuterium + ? 
-                    WHERE id = ?
-                ")->execute([$refundMetal, $refundCrystal, $refundDeut, $planetId]);
-            }
-
-            $this->db->commit();
-
-            $bName = BUILDINGS[$buildingType]['name'] ?? $buildingType;
+            $type = $buildingType;
+            $name = BUILDINGS[$buildingType]['name'] ?? $buildingType;
             $slotText = $actualSlot ? " (Emplacement #$actualSlot)" : "";
-
-            return [
-                'success' => true,
-                'message' => "Le bâtiment $bName$slotText a été démantelé avec succès. L'emplacement est désormais libre !",
-                'refund' => [
-                    'metal' => $refundMetal,
-                    'crystal' => $refundCrystal,
-                    'deuterium' => $refundDeut
-                ]
-            ];
         } else {
             // Parcelle rurale
             $fieldSlot = (int)$targetId;
@@ -379,57 +358,64 @@ class BuildingEngine {
             $stmtF->execute([$planetId, $fieldSlot]);
             $field = $stmtF->fetch();
 
-            if (!$field || (int)$field['level'] <= 0) {
-                $stmtQ = $this->db->prepare("SELECT id FROM construction_queue WHERE planet_id = ? AND build_category = 'field' AND target_id = ?");
-                $stmtQ->execute([$planetId, $fieldSlot]);
-                $inQ = $stmtQ->fetch();
-                if (!$inQ && (!$field || (int)$field['level'] === 0)) {
-                    throw new Exception("Cette parcelle est déjà vierge.");
-                }
-            }
-
             $currentLevel = (int)($field['level'] ?? 0);
             $fieldType = $field['type'] ?? 'metal_mine';
 
-            $refLevel = max(1, $currentLevel);
-            $details = $this->getUpgradeDetails('field', $fieldType, $refLevel - 1, $hqLevel);
-            $refundMetal = ($currentLevel > 0) ? (int)($details['cost']['metal'] * 0.3) : 0;
-            $refundCrystal = ($currentLevel > 0) ? (int)($details['cost']['crystal'] * 0.3) : 0;
-            $refundDeut = ($currentLevel > 0) ? (int)($details['cost']['deuterium'] * 0.3) : 0;
-
-            $this->db->beginTransaction();
-
-            // Supprimer de la file
-            $this->db->prepare("DELETE FROM construction_queue WHERE planet_id = ? AND build_category = 'field' AND target_id = ?")
-                ->execute([$planetId, $fieldSlot]);
-
-            // Réinitialiser la parcelle à 0
-            $this->db->prepare("DELETE FROM planet_fields WHERE planet_id = ? AND field_slot = ?")
-                ->execute([$planetId, $fieldSlot]);
-
-            // Créditer les matériaux récupérés
-            if ($refundMetal > 0 || $refundCrystal > 0 || $refundDeut > 0) {
-                $this->db->prepare("
-                    UPDATE planets 
-                    SET metal = metal + ?, crystal = crystal + ?, deuterium = deuterium + ? 
-                    WHERE id = ?
-                ")->execute([$refundMetal, $refundCrystal, $refundDeut, $planetId]);
+            if ($currentLevel <= 0) {
+                throw new Exception("Cette parcelle est déjà vierge.");
             }
 
-            $this->db->commit();
-
-            $fName = FIELD_TYPES[$fieldType]['name'] ?? $fieldType;
-
-            return [
-                'success' => true,
-                'message' => "L'exploitation $fName sur la parcelle #$fieldSlot a été rasée. L'emplacement est désormais vierge !",
-                'refund' => [
-                    'metal' => $refundMetal,
-                    'crystal' => $refundCrystal,
-                    'deuterium' => $refundDeut
-                ]
-            ];
+            $type = $fieldType;
+            $name = (FIELD_TYPES[$fieldType]['name'] ?? 'Parcelle') . " #$fieldSlot";
+            $slotText = "";
         }
+
+        // Vérification des files de construction
+        $queue = $this->getQueue($planetId);
+        $fieldsInQueue = 0;
+        $buildingsInQueue = 0;
+
+        foreach ($queue as $q) {
+            if ($q['build_category'] === 'field') $fieldsInQueue++;
+            else $buildingsInQueue++;
+
+            // Empêcher d'intervenir deux fois sur la même cible
+            if ($q['build_category'] === $category && $q['target_id'] == $targetId) {
+                throw new Exception("Cette structure a déjà un ordre de travaux ou de démantèlement en cours.");
+            }
+        }
+
+        if ($faction === 'terran') {
+            if ($category === 'field' && $fieldsInQueue >= 1) {
+                throw new Exception("Une parcelle est déjà mobilisée dans la file des chantiers.");
+            }
+            if ($category === 'building' && $buildingsInQueue >= 1) {
+                throw new Exception("Une infrastructure urbaine est déjà mobilisée dans la file des chantiers.");
+            }
+        } else {
+            if (count($queue) >= 1) {
+                throw new Exception("Vos bâtisseurs sont déjà mobilisés sur un autre chantier.");
+            }
+        }
+
+        // Durée du démantèlement : 50% de la durée de construction, min 5 secondes
+        $details = $this->getUpgradeDetails($category, $type, max(0, $currentLevel - 1), $hqLevel);
+        $duration = max(5, (int)($details['duration'] * 0.5));
+        $now = time();
+        $finishesAt = $now + $duration;
+
+        $this->db->prepare("
+            INSERT INTO construction_queue 
+            (planet_id, build_category, target_id, target_level, started_at, finishes_at)
+            VALUES (?, ?, ?, 0, ?, ?)
+        ")->execute([$planetId, $category, $targetId, $now, $finishesAt]);
+
+        return [
+            'success' => true,
+            'message' => "Ordre de démantèlement ordonné pour $name$slotText. Achèvement des travaux dans " . gmdate('i:s', $duration) . ".",
+            'duration' => $duration,
+            'finishes_at' => $finishesAt
+        ];
     }
 }
 

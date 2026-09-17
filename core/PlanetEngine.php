@@ -121,26 +121,79 @@ class PlanetEngine {
         $completed = $stmt->fetchAll();
 
         foreach ($completed as $item) {
-            if ($item['build_category'] === 'field') {
-                // Amélioration de parcelle
+            $cat = $item['build_category'];
+            $targetLevel = (int)$item['target_level'];
+
+            if ($cat === 'field') {
                 $slot = (int)$item['target_id'];
-                $lvl = (int)$item['target_level'];
-                $up = $this->db->prepare("
-                    UPDATE planet_fields 
-                    SET level = ? 
-                    WHERE planet_id = ? AND field_slot = ?
-                ");
-                $up->execute([$lvl, $planetId, $slot]);
+                if ($targetLevel === 0) {
+                    // Démolition de parcelle terminée : récupérer le type et niveau pour remboursement 30%
+                    $stmtF = $this->db->prepare("SELECT type, level FROM planet_fields WHERE planet_id = ? AND field_slot = ?");
+                    $stmtF->execute([$planetId, $slot]);
+                    $fRow = $stmtF->fetch();
+                    $fType = $fRow['type'] ?? 'metal_mine';
+                    $prevLvl = (int)($fRow['level'] ?? 1);
+
+                    require_once __DIR__ . '/BuildingEngine.php';
+                    $be = new BuildingEngine($this->db);
+                    $buildings = $this->getBuildings($planetId);
+                    $hqLvl = (int)($buildings['hq'] ?? 1);
+                    $det = $be->getUpgradeDetails('field', $fType, max(0, $prevLvl - 1), $hqLvl);
+                    $rfM = (int)($det['cost']['metal'] * 0.3);
+                    $rfC = (int)($det['cost']['crystal'] * 0.3);
+                    $rfD = (int)($det['cost']['deuterium'] * 0.3);
+
+                    // Réinitialiser la parcelle au niveau 0 (terrain vierge disponible)
+                    $this->db->prepare("UPDATE planet_fields SET level = 0 WHERE planet_id = ? AND field_slot = ?")
+                        ->execute([$planetId, $slot]);
+
+                    // Créditer les matériaux récupérés
+                    if ($rfM > 0 || $rfC > 0 || $rfD > 0) {
+                        $this->db->prepare("UPDATE planets SET metal = metal + ?, crystal = crystal + ?, deuterium = deuterium + ? WHERE id = ?")
+                            ->execute([$rfM, $rfC, $rfD, $planetId]);
+                    }
+                } else {
+                    $up = $this->db->prepare("
+                        UPDATE planet_fields 
+                        SET level = ? 
+                        WHERE planet_id = ? AND field_slot = ?
+                    ");
+                    $up->execute([$targetLevel, $planetId, $slot]);
+                }
             } else {
-                // Amélioration de bâtiment
                 $bType = $item['target_id'];
-                $lvl = (int)$item['target_level'];
-                $up = $this->db->prepare("
-                    INSERT INTO planet_buildings (planet_id, building_type, level) 
-                    VALUES (?, ?, ?) 
-                    ON DUPLICATE KEY UPDATE level = ?
-                ");
-                $up->execute([$planetId, $bType, $lvl, $lvl]);
+                if ($targetLevel === 0) {
+                    // Démantèlement de bâtiment terminé : récupérer niveau pour remboursement 30%
+                    $stmtB = $this->db->prepare("SELECT level FROM planet_buildings WHERE planet_id = ? AND building_type = ?");
+                    $stmtB->execute([$planetId, $bType]);
+                    $prevLvl = (int)$stmtB->fetchColumn();
+
+                    require_once __DIR__ . '/BuildingEngine.php';
+                    $be = new BuildingEngine($this->db);
+                    $buildings = $this->getBuildings($planetId);
+                    $hqLvl = (int)($buildings['hq'] ?? 1);
+                    $det = $be->getUpgradeDetails('building', $bType, max(0, $prevLvl - 1), $hqLvl);
+                    $rfM = (int)($det['cost']['metal'] * 0.3);
+                    $rfC = (int)($det['cost']['crystal'] * 0.3);
+                    $rfD = (int)($det['cost']['deuterium'] * 0.3);
+
+                    // Supprimer le bâtiment pour libérer définitivement le slot urbain
+                    $this->db->prepare("DELETE FROM planet_buildings WHERE planet_id = ? AND building_type = ?")
+                        ->execute([$planetId, $bType]);
+
+                    // Créditer les matériaux récupérés
+                    if ($rfM > 0 || $rfC > 0 || $rfD > 0) {
+                        $this->db->prepare("UPDATE planets SET metal = metal + ?, crystal = crystal + ?, deuterium = deuterium + ? WHERE id = ?")
+                            ->execute([$rfM, $rfC, $rfD, $planetId]);
+                    }
+                } else {
+                    $up = $this->db->prepare("
+                        INSERT INTO planet_buildings (planet_id, building_type, level) 
+                        VALUES (?, ?, ?) 
+                        ON DUPLICATE KEY UPDATE level = ?
+                    ");
+                    $up->execute([$planetId, $bType, $targetLevel, $targetLevel]);
+                }
             }
 
             // Supprimer de la file

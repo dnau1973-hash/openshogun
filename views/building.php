@@ -532,22 +532,31 @@ if (!$isEmptyPlot) {
 
                     <?php if ($activeJob): ?>
                         <!-- Chantier en cours sur ce bâtiment -->
-                        <div class="field-active-job-box">
-                            <div class="job-status-title">
+                        <?php $isDemolishingJob = ((int)$activeJob['target_level'] === 0); ?>
+                        <div class="field-active-job-box" style="<?= $isDemolishingJob ? 'border-color: rgba(239, 68, 68, 0.5); background: rgba(239, 68, 68, 0.08);' : '' ?>">
+                            <div class="job-status-title" style="<?= $isDemolishingJob ? 'color:#f87171;' : '' ?>">
                                 <span class="job-spinner">⏳</span>
-                                <span>Travaux en cours vers le <strong>Niveau <?= $activeJob['target_level'] ?></strong></span>
+                                <?php if ($isDemolishingJob): ?>
+                                    <span>Démantèlement en cours vers le <strong>Niveau 0 (Raser)</strong></span>
+                                <?php else: ?>
+                                    <span>Travaux en cours vers le <strong>Niveau <?= $activeJob['target_level'] ?></strong></span>
+                                <?php endif; ?>
                             </div>
                             <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0 1rem 0;">
-                                Vos bâtisseurs et charpentiers travaillent sur cette bâtisse. La forteresse bénéficiera de ses nouvelles capacités dès achèvement.
+                                <?php if ($isDemolishingJob): ?>
+                                    Vos maîtres d'œuvre déconstruisent cette bâtisse pour libérer l'emplacement. Vous récupérerez 30% des matériaux à l'achèvement des travaux.
+                                <?php else: ?>
+                                    Vos bâtisseurs et charpentiers travaillent sur cette bâtisse. La forteresse bénéficiera de ses nouvelles capacités dès achèvement.
+                                <?php endif; ?>
                             </p>
 
-                            <div class="job-timer-display" data-countdown="<?= $activeJob['finishes_at'] ?>">
+                            <div class="job-timer-display" data-countdown="<?= $activeJob['finishes_at'] ?>" style="<?= $isDemolishingJob ? 'color:#f87171;' : '' ?>">
                                 Calcul du temps restant...
                             </div>
 
                             <div style="margin-top: 1.25rem;">
                                 <button type="button" class="field-btn-cancel" onclick="cancelBuildingBuild(<?= (int)$activeJob['id'] ?>)">
-                                    🛑 Interrompre les travaux (80% remboursé)
+                                    <?= $isDemolishingJob ? '🛑 Interrompre le démantèlement (Bâtiment préservé)' : '🛑 Interrompre les travaux (80% remboursé)' ?>
                                 </button>
                             </div>
                         </div>
@@ -610,7 +619,7 @@ if (!$isEmptyPlot) {
         </div>
 
         <!-- ZONE DE DÉMANTÈLEMENT (Sauf Donjon Tenshu) -->
-        <?php if ($code !== 'hq' && $lvl > 0): ?>
+        <?php if ($code !== 'hq' && $lvl > 0 && !$activeJob): ?>
             <div class="card" style="margin-top: 1.5rem; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <div>
@@ -733,7 +742,7 @@ async function cancelBuildingBuild(queueId) {
 
 async function confirmDemolishBuilding(buildingCode, slot, buildingName) {
     const confirmed = await showModalConfirm(
-        `Êtes-vous certain de vouloir démanteler définitivement ${buildingName} (Emplacement #${slot}) ?\n\nCette bâtisse sera entièrement rasée et l'emplacement redeviendra vierge. Vous récupérerez 30% des matériaux de ce niveau.`,
+        `Êtes-vous certain de vouloir démanteler définitivement ${buildingName} (Emplacement #${slot}) ?\n\nUn ordre de démolition sera lancé avec un compte à rebours. Vous récupérerez 30% des matériaux à la fin des travaux.`,
         'Démantèlement du Bâtiment'
     );
     if (!confirmed) return;
@@ -751,7 +760,7 @@ async function confirmDemolishBuilding(buildingCode, slot, buildingName) {
         });
         const data = await res.json();
         if (data.success) {
-            window.location.href = '/?page=city';
+            window.location.reload();
         } else {
             showModalAlert(data.error || 'Impossible de démanteler cette bâtisse.', 'error');
         }
