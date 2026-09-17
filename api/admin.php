@@ -241,6 +241,61 @@ try {
             echo json_encode(['success' => true, 'stats' => $stats]);
             break;
 
+        // Sauvegarder les positions calibrées en Drag & Drop (Cité ou Terroir)
+        case 'save_slot_positions':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Méthode invalide.");
+            }
+            require_once __DIR__ . '/../core/SlotPositionEngine.php';
+
+            $view = $_POST['view'] ?? '';
+            if (!in_array($view, ['resources', 'city'], true)) {
+                throw new Exception("Vue invalide ('resources' ou 'city' attendu).");
+            }
+
+            $positionsRaw = $_POST['positions'] ?? null;
+            if (is_string($positionsRaw)) {
+                $positions = json_decode($positionsRaw, true);
+            } elseif (is_array($positionsRaw)) {
+                $positions = $positionsRaw;
+            } else {
+                $positions = [];
+            }
+
+            if (empty($positions) || !is_array($positions)) {
+                throw new Exception("Données de positions invalides.");
+            }
+
+            $ok = SlotPositionEngine::savePositions($view, $positions);
+            if (!$ok) {
+                throw new Exception("Échec de la sauvegarde dans config/slot_positions.json.");
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Positions calibrées sauvegardées avec succès !"
+            ]);
+            break;
+
+        // Réinitialiser les positions aux valeurs par défaut
+        case 'reset_slot_positions':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Méthode invalide.");
+            }
+            require_once __DIR__ . '/../core/SlotPositionEngine.php';
+
+            $view = $_POST['view'] ?? '';
+            if (!in_array($view, ['resources', 'city'], true)) {
+                throw new Exception("Vue invalide.");
+            }
+
+            SlotPositionEngine::resetPositions($view);
+            echo json_encode([
+                'success' => true,
+                'message' => "Positions réinitialisées aux valeurs d'origine !"
+            ]);
+            break;
+
         default:
             throw new Exception("Action inconnue.");
     }
@@ -248,4 +303,3 @@ try {
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
-

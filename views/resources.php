@@ -6,6 +6,7 @@ require_once __DIR__ . '/../core/BuildingEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
 require_once __DIR__ . '/../core/VillageFieldGenerator.php';
 require_once __DIR__ . '/../core/OasisEngine.php';
+require_once __DIR__ . '/../core/SlotPositionEngine.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $buildingEngine = new BuildingEngine();
@@ -147,34 +148,10 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
     display: none !important;
 }
 
-/* Positions calibrées sur la carte shogun_rural_terroir_bg.jpg */
-.hotspot-slot-1  { left: 12.0% !important; top: 30.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 7 !important; }
-.hotspot-slot-2  { left: 9.5%  !important; top: 40.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 8 !important; }
-.hotspot-slot-3  { left: 11.5% !important; top: 50.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 9 !important; }
-.hotspot-slot-4  { left: 20.5% !important; top: 36.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 8 !important; }
-.hotspot-slot-5  { left: 24.5% !important; top: 45.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 9 !important; }
-.hotspot-slot-6  { left: 21.5% !important; top: 64.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 12 !important; }
-.hotspot-slot-7  { left: 29.0% !important; top: 71.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 13 !important; }
-.hotspot-slot-8  { left: 31.5% !important; top: 55.6% !important; width: 11.0% !important; height: 18.6% !important; z-index: 10 !important; }
-.hotspot-slot-9  { left: 39.5% !important; top: 60.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 11 !important; }
-.hotspot-slot-10 { left: 49.5% !important; top: 58.6% !important; width: 11.0% !important; height: 18.6% !important; z-index: 11 !important; }
-.hotspot-slot-11 { left: 60.5% !important; top: 53.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 10 !important; }
-.hotspot-slot-12 { left: 59.5% !important; top: 73.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 13 !important; }
-.hotspot-slot-13 { left: 68.5% !important; top: 45.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 9 !important; }
-.hotspot-slot-14 { left: 73.0% !important; top: 36.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 8 !important; }
-.hotspot-slot-15 { left: 80.5% !important; top: 30.6% !important; width: 11.0% !important; height: 18.6% !important; z-index: 7 !important; }
-.hotspot-slot-16 { left: 73.0% !important; top: 25.1% !important; width: 11.0% !important; height: 18.6% !important; z-index: 6 !important; }
-.hotspot-slot-17 { left: 64.5% !important; top: 17.6% !important; width: 11.0% !important; height: 18.6% !important; z-index: 5 !important; }
-.hotspot-slot-18 { left: 56.5% !important; top: 10.6% !important; width: 11.0% !important; height: 18.6% !important; z-index: 4 !important; }
-
+</style>
+<?= SlotPositionEngine::renderCss('resources') ?>
+<style>
 /* Tenshu et Cœur Castral Central */
-.hotspot-bunker-hq {
-    left: 43.5% !important;
-    top: 16.0% !important;
-    width: 19.0% !important;
-    height: 34.0% !important;
-    z-index: 7 !important;
-}
 
 .hotspot-bunker-hq .rts-badge {
     bottom: -6px !important;
@@ -603,4 +580,8 @@ function filterSector(sector) {
     });
 }
 </script>
+
+<?php if ($auth->isAdmin()): ?>
+    <?php require __DIR__ . '/partials/slot_calibrator.php'; ?>
+<?php endif; ?>
 

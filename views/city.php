@@ -4,6 +4,7 @@
  */
 require_once __DIR__ . '/../core/BuildingEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
+require_once __DIR__ . '/../core/SlotPositionEngine.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $buildingEngine = new BuildingEngine();
@@ -91,6 +92,7 @@ foreach (BUILDINGS as $code => $bInfo) {
     background-image: url('/public/assets/shogun_castle_city_bg.jpg?v=<?= $bgVersion ?>') !important;
 }
 </style>
+<?= SlotPositionEngine::renderCss('city') ?>
 
 <?php require __DIR__ . '/partials/quest_banner.php'; ?>
 
@@ -530,3 +532,7 @@ function toggleCityViewMode() {
     }
 }
 </script>
+
+<?php if ($auth->isAdmin()): ?>
+    <?php require __DIR__ . '/partials/slot_calibrator.php'; ?>
+<?php endif; ?>
