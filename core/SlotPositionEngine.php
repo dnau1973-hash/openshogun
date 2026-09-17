@@ -8,6 +8,12 @@
 class SlotPositionEngine {
     private static string $filePath = __DIR__ . '/../config/slot_positions.json';
 
+    /**
+     * Rayon maximal de déplacement autorisé lors de la calibration (sécurité anti-dérive).
+     * Empêche de déplacer un bâtiment au-delà de ±10% par rapport à son emplacement d'origine.
+     */
+    public const MAX_DELTA_PERCENT = 10.0;
+
     public static function getDefaults(string $view): array {
         if ($view === 'resources') {
             return [
@@ -115,9 +121,21 @@ class SlotPositionEngine {
             }
 
             if ($p !== null) {
+                $rawLeft = (float)($p['left'] ?? $def['left']);
+                $rawTop  = (float)($p['top'] ?? $def['top']);
+
+                // Sécurité anti-dérive : limitation du déplacement à ±MAX_DELTA_PERCENT par rapport à la position d'origine
+                $minLeft = max(0.0, (float)$def['left'] - self::MAX_DELTA_PERCENT);
+                $maxLeft = min(95.0, (float)$def['left'] + self::MAX_DELTA_PERCENT);
+                $minTop  = max(0.0, (float)$def['top'] - self::MAX_DELTA_PERCENT);
+                $maxTop  = min(95.0, (float)$def['top'] + self::MAX_DELTA_PERCENT);
+
+                $clampedLeft = min($maxLeft, max($minLeft, $rawLeft));
+                $clampedTop  = min($maxTop, max($minTop, $rawTop));
+
                 $sanitized[$keyStr] = [
-                    'left' => round((float)($p['left'] ?? $def['left']), 2),
-                    'top' => round((float)($p['top'] ?? $def['top']), 2),
+                    'left' => round($clampedLeft, 2),
+                    'top' => round($clampedTop, 2),
                     'width' => round((float)($p['width'] ?? $def['width']), 2),
                     'height' => round((float)($p['height'] ?? $def['height']), 2),
                     'z' => (int)($p['z'] ?? $def['z'])

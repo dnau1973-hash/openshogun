@@ -57,6 +57,25 @@ assert($resetData['19']['left'] == 52.5, "La position réinitialisée doit être
 assert($resetData['19']['top'] == 2.4, "La position réinitialisée doit être 2.4");
 echo "✓ Réinitialisation conforme.\n";
 
+// 5. Test de sécurité anti-déplacement excessif (clamping ±10%)
+echo "\n[6] Test de la sécurité anti-dérive (plafond ±10%)...\n";
+$excessive = $cityPositions;
+// Tenter de déplacer le slot 19 (défaut 52.5, 2.4) à (90.0, 50.0) -> hors limite
+$excessive['19']['left'] = 90.0;
+$excessive['19']['top'] = 50.0;
+SlotPositionEngine::savePositions('city', $excessive);
+
+$clamped = SlotPositionEngine::getPositions('city');
+$maxExpectedLeft = round(52.5 + SlotPositionEngine::MAX_DELTA_PERCENT, 2); // 62.5
+$maxExpectedTop = round(2.4 + SlotPositionEngine::MAX_DELTA_PERCENT, 2);   // 12.4
+
+assert($clamped['19']['left'] == $maxExpectedLeft, "Le slot 19 left doit être bridé à $maxExpectedLeft (obtenu: {$clamped['19']['left']})");
+assert($clamped['19']['top'] == $maxExpectedTop, "Le slot 19 top doit être bridé à $maxExpectedTop (obtenu: {$clamped['19']['top']})");
+echo "✓ Sécurité validée : déplacement excessif bridé avec succès à ±" . SlotPositionEngine::MAX_DELTA_PERCENT . "% !\n";
+
+// Nettoyage après test
+SlotPositionEngine::resetPositions('city');
+
 echo "\n============================================\n";
 echo "🎉 TOUS LES TESTS DU CALIBRATEUR SONT VALIDES !\n";
 echo "============================================\n";

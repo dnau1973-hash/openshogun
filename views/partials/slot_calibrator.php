@@ -7,7 +7,10 @@ if (!isset($auth) || !$auth->isAdmin()) {
     return;
 }
 
+require_once __DIR__ . '/../../core/SlotPositionEngine.php';
 $calibView = ($page === 'city') ? 'city' : 'resources';
+$defaultPositions = SlotPositionEngine::getDefaults($calibView);
+$maxDelta = SlotPositionEngine::MAX_DELTA_PERCENT;
 ?>
 
 <!-- Bouton d'activation flottant du calibrateur -->
@@ -28,7 +31,7 @@ $calibView = ($page === 'city') ? 'city' : 'resources';
             <div style="font-size: 0.8rem; font-weight: 800; color: #facc15; text-transform: uppercase; letter-spacing: 0.5px;">
                 Calibration <?= ($calibView === 'city') ? 'Cité Castrale' : 'Terroirs Ruraux' ?>
             </div>
-            <div style="font-size: 0.72rem; color: #94a3b8;">Glissez les bâtiments / slots à la souris</div>
+            <div style="font-size: 0.72rem; color: #94a3b8;">Glissez les bâtiments (sécurité limitée à ±<?= $maxDelta ?>%)</div>
         </div>
     </div>
 
@@ -98,6 +101,42 @@ body.calibrator-active .rts-hotspot.calib-selected {
     box-shadow: 0 0 15px rgba(56, 189, 248, 0.7) !important;
 }
 
+/* Alerte visuelle quand le déplacement atteint la limite maximale de sécurité (±10%) */
+body.calibrator-active .rts-hotspot.calib-at-limit {
+    outline: 2.5px solid #ef4444 !important;
+    background: rgba(239, 68, 68, 0.35) !important;
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.85) !important;
+}
+
+/* Zone de sécurité autorisée pour le slot sélectionné */
+#calibratorSafetyZone {
+    position: absolute;
+    border: 2px dashed rgba(56, 189, 248, 0.85);
+    background: rgba(56, 189, 248, 0.08);
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 45;
+    transition: all 0.12s ease-out;
+    display: none;
+    box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.2);
+}
+
+#calibratorSafetyZone .safety-zone-label {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.92);
+    color: #38bdf8;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid #38bdf8;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+}
+
 /* Badge indicatif flottant sur chaque hotspot en mode édition */
 .calib-coord-pill {
     position: absolute;
@@ -116,6 +155,7 @@ body.calibrator-active .rts-hotspot.calib-selected {
     pointer-events: none;
     box-shadow: 0 2px 6px rgba(0,0,0,0.7);
     display: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 body.calibrator-active .calib-coord-pill {
@@ -126,6 +166,8 @@ body.calibrator-active .calib-coord-pill {
 <script>
 (function() {
     const VIEW_NAME = <?= json_encode($calibView) ?>;
+    const DEFAULT_POSITIONS = <?= json_encode($defaultPositions) ?>;
+    const MAX_DELTA_PCT = <?= (float)$maxDelta ?>;
     let isCalibratorActive = false;
     let selectedHotspot = null;
     let currentDragging = null;
@@ -180,8 +222,10 @@ body.calibrator-active .calib-coord-pill {
             body.classList.remove('calibrator-active');
             toolbar.style.display = 'none';
             launcherText.innerText = "Mode Calibration (Drag & Drop)";
+            removeSafetyZoneGuide();
             if (selectedHotspot) {
                 selectedHotspot.classList.remove('calib-selected');
+                selectedHotspot.classList.remove('calib-at-limit');
                 selectedHotspot = null;
             }
         }
@@ -220,19 +264,82 @@ body.calibrator-active .calib-coord-pill {
         });
     }
 
+    // Calcul des bornes autorisées pour un slot donné (sécurité anti-dérive)
+    function getSlotBounds(key) {
+        const def = DEFAULT_POSITIONS[key];
+        if (!def) {
+            return { minLeft: 0, maxLeft: 95, minTop: 0, maxTop: 95, defLeft: 50, defTop: 50, width: 11.0, height: 18.6 };
+        }
+        return {
+            defLeft: def.left,
+            defTop: def.top,
+            width: def.width,
+            height: def.height,
+            minLeft: Math.max(0, Math.round((def.left - MAX_DELTA_PCT) * 10) / 10),
+            maxLeft: Math.min(95, Math.round((def.left + MAX_DELTA_PCT) * 10) / 10),
+            minTop: Math.max(0, Math.round((def.top - MAX_DELTA_PCT) * 10) / 10),
+            maxTop: Math.min(95, Math.round((def.top + MAX_DELTA_PCT) * 10) / 10)
+        };
+    }
+
+    function renderSafetyZoneGuide(key, bounds) {
+        const viewport = getViewport();
+        if (!viewport) return;
+
+        let zoneEl = document.getElementById('calibratorSafetyZone');
+        if (!zoneEl) {
+            zoneEl = document.createElement('div');
+            zoneEl.id = 'calibratorSafetyZone';
+            zoneEl.innerHTML = '<span class="safety-zone-label">Zone autorisée (±' + MAX_DELTA_PCT + '%)</span>';
+            viewport.appendChild(zoneEl);
+        }
+
+        const zoneWidth = Math.round((bounds.maxLeft - bounds.minLeft + bounds.width) * 10) / 10;
+        const zoneHeight = Math.round((bounds.maxTop - bounds.minTop + bounds.height) * 10) / 10;
+
+        zoneEl.style.left = bounds.minLeft + '%';
+        zoneEl.style.top = bounds.minTop + '%';
+        zoneEl.style.width = zoneWidth + '%';
+        zoneEl.style.height = zoneHeight + '%';
+        zoneEl.style.display = 'block';
+    }
+
+    function removeSafetyZoneGuide() {
+        const zoneEl = document.getElementById('calibratorSafetyZone');
+        if (zoneEl) {
+            zoneEl.style.display = 'none';
+        }
+    }
+
     function selectHotspot(hs) {
-        if (selectedHotspot) {
+        if (selectedHotspot && selectedHotspot !== hs) {
             selectedHotspot.classList.remove('calib-selected');
+            selectedHotspot.classList.remove('calib-at-limit');
         }
         selectedHotspot = hs;
         if (selectedHotspot) {
             selectedHotspot.classList.add('calib-selected');
             const key = getHotspotKey(hs);
             const pos = getElementPctPos(hs);
+            const bounds = getSlotBounds(key);
+            const deltaX = Math.round((pos.left - bounds.defLeft) * 10) / 10;
+            const deltaY = Math.round((pos.top - bounds.defTop) * 10) / 10;
+            const isAtLimit = (pos.left <= bounds.minLeft || pos.left >= bounds.maxLeft || pos.top <= bounds.minTop || pos.top >= bounds.maxTop);
+
             const infoEl = document.getElementById('calibSelectedInfo');
             if (infoEl) {
-                infoEl.innerHTML = `Slot <strong>#${key}</strong> [ X: <strong>${pos.left.toFixed(1)}%</strong> | Y: <strong>${pos.top.toFixed(1)}%</strong> ]`;
+                const signX = deltaX >= 0 ? '+' : '';
+                const signY = deltaY >= 0 ? '+' : '';
+                const limitStatus = isAtLimit 
+                    ? `<span style="color: #ef4444; font-weight: bold; margin-left: 6px;">⚠️ Limite max ±${MAX_DELTA_PCT}% atteinte</span>` 
+                    : `<span style="color: #4ade80; margin-left: 6px;">(Sécurité : max ±${MAX_DELTA_PCT}%)</span>`;
+                
+                infoEl.innerHTML = `Slot <strong>#${key}</strong> [ X: <strong>${pos.left.toFixed(1)}%</strong> (${signX}${deltaX.toFixed(1)}%) | Y: <strong>${pos.top.toFixed(1)}%</strong> (${signY}${deltaY.toFixed(1)}%) ] ${limitStatus}`;
             }
+
+            renderSafetyZoneGuide(key, bounds);
+        } else {
+            removeSafetyZoneGuide();
         }
     }
 
@@ -269,7 +376,20 @@ body.calibrator-active .calib-coord-pill {
         if (!pill) return;
         const key = getHotspotKey(hs);
         const pos = getElementPctPos(hs);
-        pill.innerText = `#${key} (${pos.left.toFixed(1)}%, ${pos.top.toFixed(1)}%)`;
+        const bounds = getSlotBounds(key);
+        const isAtLimit = (pos.left <= bounds.minLeft || pos.left >= bounds.maxLeft || pos.top <= bounds.minTop || pos.top >= bounds.maxTop);
+
+        if (isAtLimit) {
+            pill.style.borderColor = '#ef4444';
+            pill.style.color = '#fca5a5';
+            pill.style.background = '#450a0a';
+            pill.innerText = `⛔ #${key} (${pos.left.toFixed(1)}%, ${pos.top.toFixed(1)}%) MAX`;
+        } else {
+            pill.style.borderColor = '#facc15';
+            pill.style.color = '#facc15';
+            pill.style.background = '#0f172a';
+            pill.innerText = `#${key} (${pos.left.toFixed(1)}%, ${pos.top.toFixed(1)}%)`;
+        }
     }
 
     function onHotspotMouseDown(e) {
@@ -301,15 +421,25 @@ body.calibrator-active .calib-coord-pill {
         const clientW = viewport.clientWidth || viewport.getBoundingClientRect().width;
         const clientH = viewport.clientHeight || viewport.getBoundingClientRect().height;
 
+        const key = getHotspotKey(currentDragging);
+        const bounds = getSlotBounds(key);
+
         const deltaXPct = ((e.clientX - dragStartX) / clientW) * 100;
         const deltaYPct = ((e.clientY - dragStartY) / clientH) * 100;
 
-        let newLeft = Math.max(0, Math.min(95, initialLeftPct + deltaXPct));
-        let newTop = Math.max(0, Math.min(95, initialTopPct + deltaYPct));
+        let targetLeft = Math.round((initialLeftPct + deltaXPct) * 10) / 10;
+        let targetTop = Math.round((initialTopPct + deltaYPct) * 10) / 10;
 
-        // Arrondi au dixième de pourcent
-        newLeft = Math.round(newLeft * 10) / 10;
-        newTop = Math.round(newTop * 10) / 10;
+        // Sécurité anti-dérive : bridage strict dans la zone autorisée (±MAX_DELTA_PCT)
+        let newLeft = Math.max(bounds.minLeft, Math.min(bounds.maxLeft, targetLeft));
+        let newTop = Math.max(bounds.minTop, Math.min(bounds.maxTop, targetTop));
+
+        const hitLimit = (targetLeft < bounds.minLeft || targetLeft > bounds.maxLeft || targetTop < bounds.minTop || targetTop > bounds.maxTop);
+        if (hitLimit) {
+            currentDragging.classList.add('calib-at-limit');
+        } else {
+            currentDragging.classList.remove('calib-at-limit');
+        }
 
         currentDragging.style.setProperty('left', newLeft + '%', 'important');
         currentDragging.style.setProperty('top', newTop + '%', 'important');
@@ -321,6 +451,7 @@ body.calibrator-active .calib-coord-pill {
     function onDocumentMouseUp(e) {
         if (currentDragging) {
             currentDragging.classList.remove('calib-dragging');
+            currentDragging.classList.remove('calib-at-limit');
             currentDragging = null;
         }
         document.removeEventListener('mousemove', onDocumentMouseMove);
@@ -334,12 +465,24 @@ body.calibrator-active .calib-coord-pill {
             return;
         }
 
+        const key = getHotspotKey(selectedHotspot);
+        const bounds = getSlotBounds(key);
         const pos = getElementPctPos(selectedHotspot);
-        let newLeft = Math.max(0, Math.min(95, pos.left + deltaX));
-        let newTop = Math.max(0, Math.min(95, pos.top + deltaY));
 
-        newLeft = Math.round(newLeft * 10) / 10;
-        newTop = Math.round(newTop * 10) / 10;
+        let targetLeft = Math.round((pos.left + deltaX) * 10) / 10;
+        let targetTop = Math.round((pos.top + deltaY) * 10) / 10;
+
+        // Sécurité anti-dérive : bridage strict
+        let newLeft = Math.max(bounds.minLeft, Math.min(bounds.maxLeft, targetLeft));
+        let newTop = Math.max(bounds.minTop, Math.min(bounds.maxTop, targetTop));
+
+        const hitLimit = (targetLeft < bounds.minLeft || targetLeft > bounds.maxLeft || targetTop < bounds.minTop || targetTop > bounds.maxTop);
+        if (hitLimit) {
+            selectedHotspot.classList.add('calib-at-limit');
+            setTimeout(() => {
+                if (selectedHotspot) selectedHotspot.classList.remove('calib-at-limit');
+            }, 600);
+        }
 
         selectedHotspot.style.setProperty('left', newLeft + '%', 'important');
         selectedHotspot.style.setProperty('top', newTop + '%', 'important');
