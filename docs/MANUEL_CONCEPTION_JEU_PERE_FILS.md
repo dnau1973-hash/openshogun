@@ -356,5 +356,23 @@ En vidéo, l'IA a besoin de 4 informations essentielles :
 
 ---
 
+## 12. Le Système de Mises à Jour Automatiques GitHub (CI/CD du Shogunat)
+
+Pour maintenir le jeu à jour sans devoir exécuter manuellement des commandes dans le terminal Linux, un moteur de déploiement continu ([`core/UpdateEngine.php`](file:///var/www/opengalaxy/core/UpdateEngine.php)) a été conçu :
+
+1. **Interrogation de l'API GitHub Compare** :
+   Le serveur compare le commit local actif (`git rev-parse HEAD`) avec la branche `main` du dépôt GitHub officiel `dnau1973-hash/openshogun`.
+2. **Détection des Nouveautés** :
+   Si un nouveau commit existe, le nombre de commits de retard et la liste des messages de commits s'affichent automatiquement dans l'administration (**Onglet 🔄 Mises à Jour GitHub**).
+3. **Déploiement Sécurisé en 1 Clic (`git pull`)** :
+   Le clic sur **« 🚀 Télécharger & Déployer la Mise à Jour »** effectue :
+   - Une sauvegarde préventive des modifications locales (`git stash`).
+   - Le téléchargement et la fusion du nouveau code (`git pull`).
+   - Le rafraîchissement immédiat du cache PHP (`opcache_reset`).
+4. **Sécurité des Clés & Jetons (Secret Protection)** :
+   Le jeton d'authentification personnel (`ghp_...`) est stocké dans un fichier local ignoré par Git ([`config/github.local.php`](file:///var/www/opengalaxy/config/github.local.php)), et masqué systématiquement dans tous les affichages et logs pour garantir une sécurité absolue.
+
+---
+
 *Document rédigé avec passion pour accompagner les jeunes créateurs dans le monde merveilleux du développement informatique et du jeu vidéo.*
 
