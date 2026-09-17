@@ -4,10 +4,21 @@
  */
 require_once __DIR__ . '/../core/FleetEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
+require_once __DIR__ . '/../core/HeroEngine.php';
 
 $fleetEngine = new FleetEngine();
 $planetEngine = new PlanetEngine();
+$heroEngine = new HeroEngine();
 $db = Database::getConnection();
+
+// Samouraï Héros Champion
+$heroData = $heroEngine->getHeroByUserId($user['id']);
+$canDeployHero = false;
+$heroEffectiveStats = null;
+if ($heroData && $heroData['status'] === 'home' && (int)$heroData['health'] > 0 && (int)$heroData['current_planet_id'] === (int)$planet['id']) {
+    $canDeployHero = true;
+    $heroEffectiveStats = $heroEngine->calculateEffectiveStats($heroData);
+}
 
 // Cavalerie, convois et engins de siège stationnés
 $stmtShips = $db->prepare("
@@ -69,9 +80,9 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
             <span style="font-size:0.85rem; color:var(--text-muted);">Fief d'attache : <?= htmlspecialchars($planet['name']) ?></span>
         </div>
         <div class="card-body">
-            <?php if (empty($stationedShips) && empty($stationedUnits)): ?>
+            <?php if (empty($stationedShips) && empty($stationedUnits) && !$canDeployHero): ?>
                 <div style="text-align:center; padding:2rem; background:rgba(255,255,255,0.02); border-radius:8px;">
-                    <p style="color:var(--text-muted); margin-bottom:1rem;">Aucun régiment de guerriers ni engin de siège n'est disponible dans votre garnison.</p>
+                    <p style="color:var(--text-muted); margin-bottom:1rem;">Aucun régiment de guerriers, engin de siège ni héros samouraï n'est disponible dans votre garnison.</p>
                     <div style="display:flex; justify-content:center; gap:1rem;">
                         <a href="?page=shipyard" class="btn btn-primary">Atelier de Siège & Écuries</a>
                         <a href="?page=barracks" class="btn btn-secondary">Dojo Militaire</a>
@@ -97,15 +108,15 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                                             Max
                                         </button>
                                         <input type="number" id="ship-<?= $s['ship_code'] ?>" name="fleet[<?= $s['ship_code'] ?>]" 
-                                               min="0" max="<?= $s['count'] ?>" value="0"
-                                               style="width:70px; background:rgba(0,0,0,0.6); border:1px solid var(--border-color); color:#fff; padding:0.3rem; border-radius:4px; text-align:center;">
+                                                min="0" max="<?= $s['count'] ?>" value="0"
+                                                style="width:70px; background:rgba(0,0,0,0.6); border:1px solid var(--border-color); color:#fff; padding:0.3rem; border-radius:4px; text-align:center;">
                                     </div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
 
-                    <!-- Étape 1b : Guerriers & Régiments du Dojo (Style Travian) -->
+                    <!-- Étape 2 : Guerriers & Régiments du Dojo (Style Travian) -->
                     <?php if (!empty($stationedUnits)): ?>
                         <h3 style="font-size:0.95rem; color:#4ade80; margin-bottom:0.75rem;">⚔️ 2. Régiments de Guerriers & Samouraïs</h3>
                         <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem;">
@@ -124,16 +135,54 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                                             Max
                                         </button>
                                         <input type="number" id="ship-<?= $u['unit_code'] ?>" name="fleet[<?= $u['unit_code'] ?>]" 
-                                               min="0" max="<?= $u['count'] ?>" value="0"
-                                               style="width:70px; background:rgba(0,0,0,0.6); border:1px solid var(--border-color); color:#fff; padding:0.3rem; border-radius:4px; text-align:center;">
+                                                min="0" max="<?= $u['count'] ?>" value="0"
+                                                style="width:70px; background:rgba(0,0,0,0.6); border:1px solid var(--border-color); color:#fff; padding:0.3rem; border-radius:4px; text-align:center;">
                                     </div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
 
-                    <!-- Étape 2 : Destination -->
-                    <h3 style="font-size:0.95rem; color:#fff; margin-bottom:0.75rem;">🗾 3. Destination (Fief Provincial ou Oasis Naturelle)</h3>
+                    <!-- Étape 3 : Héros Samouraï Champion -->
+                    <?php if ($canDeployHero): ?>
+                        <h3 style="font-size:0.95rem; color:#f59e0b; margin-bottom:0.75rem;">🥋 3. Champion Samouraï (Héros de Guerre)</h3>
+                        <div style="background:linear-gradient(135deg, rgba(234,179,8,0.12), rgba(15,23,42,0.6)); border:1px solid rgba(234,179,8,0.35); border-radius:8px; padding:0.85rem; margin-bottom:1.5rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                                <div style="display:flex; align-items:center; gap:0.75rem;">
+                                    <div style="width:44px; height:44px; border-radius:50%; border:2px solid #eab308; overflow:hidden; background:#000; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.4rem;">
+                                        🥋
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:700; color:#f8fafc; font-size:0.95rem;">
+                                            <?= htmlspecialchars($heroData['name']) ?> 
+                                            <span style="background:rgba(234,179,8,0.25); color:#fde047; padding:0.1rem 0.4rem; border-radius:4px; font-size:0.75rem; border:1px solid rgba(234,179,8,0.4);">Niv. <?= $heroData['level'] ?></span>
+                                        </div>
+                                        <div style="font-size:0.8rem; color:#94a3b8; display:flex; flex-wrap:wrap; gap:0.75rem; margin-top:0.25rem;">
+                                            <span style="color:#ef4444;">⚔️ Force : <strong><?= $heroEffectiveStats['combat_strength'] ?></strong></span>
+                                            <span style="color:#f97316;">🔥 Attaque armée : <strong>+<?= $heroEffectiveStats['offense_percent'] ?>%</strong></span>
+                                            <span style="color:#10b981;">🛡️ Défense garnison : <strong>+<?= $heroEffectiveStats['defense_percent'] ?>%</strong></span>
+                                            <span style="color:#22c55e;">❤️ Vie : <strong><?= $heroData['health'] ?>%</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <label style="display:flex; align-items:center; gap:0.55rem; cursor:pointer; background:rgba(234,179,8,0.2); padding:0.5rem 0.9rem; border-radius:6px; border:1px solid #eab308; font-weight:600; font-size:0.85rem; color:#fef08a; transition:all 0.2s;">
+                                    <input type="checkbox" id="deploy_hero" name="has_hero" value="1" style="width:18px; height:18px; cursor:pointer; accent-color:#eab308;">
+                                    Accompagner l'expédition
+                                </label>
+                            </div>
+                        </div>
+                    <?php elseif ($heroData && $heroData['status'] !== 'home'): ?>
+                        <div style="background:rgba(0,0,0,0.2); border:1px dashed rgba(255,255,255,0.1); border-radius:6px; padding:0.6rem 0.85rem; margin-bottom:1.5rem; font-size:0.8rem; color:var(--text-muted);">
+                            🥋 Samouraï Héros <strong><?= htmlspecialchars($heroData['name']) ?></strong> : Indisponible (En mission ou en aventure).
+                        </div>
+                    <?php elseif ($heroData && (int)$heroData['health'] <= 0): ?>
+                        <div style="background:rgba(220,38,38,0.1); border:1px dashed #ef4444; border-radius:6px; padding:0.6rem 0.85rem; margin-bottom:1.5rem; font-size:0.8rem; color:#fca5a5;">
+                            🥋 Samouraï Héros <strong><?= htmlspecialchars($heroData['name']) ?></strong> est tombé au combat. <a href="?page=hero" style="color:#eab308; text-decoration:underline;">Accomplir le rituel de résurrection</a>.
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Étape 4 : Destination -->
+                    <h3 style="font-size:0.95rem; color:#fff; margin-bottom:0.75rem;">🗾 4. Destination (Fief Provincial ou Oasis Naturelle)</h3>
                     <div style="margin-bottom:1.5rem;">
                         <select id="targetSelect" style="width:100%; background:rgba(15,23,42,0.9); border:1px solid var(--border-color); color:#fff; padding:0.6rem; border-radius:6px; margin-bottom:0.75rem;">
                             <option value="">-- Sélectionner une destination féodale ou oasis --</option>
@@ -160,8 +209,8 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                         </select>
                     </div>
 
-                    <!-- Étape 3 : Ordre de Mission -->
-                    <h3 style="font-size:0.95rem; color:#fff; margin-bottom:0.75rem;">⚔️ 4. Ordre Tactique de Marche</h3>
+                    <!-- Étape 5 : Ordre de Mission -->
+                    <h3 style="font-size:0.95rem; color:#fff; margin-bottom:0.75rem;">⚔️ 5. Ordre Tactique de Marche</h3>
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:0.5rem; margin-bottom:1.5rem;">
                         <label style="display:flex; align-items:center; gap:0.4rem; background:rgba(0,0,0,0.3); padding:0.5rem; border-radius:6px; cursor:pointer;">
                             <input type="radio" name="mission_type" value="raid" <?= ($preselectedMission === 'raid') ? 'checked' : '' ?>>
@@ -189,7 +238,7 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                         </label>
                     </div>
 
-                    <!-- Étape 4 : Chargement de Fret (Optionnel pour transport) -->
+                    <!-- Étape 6 : Chargement de Fret (Optionnel pour transport) -->
                     <div style="background:rgba(0,0,0,0.25); padding:0.75rem; border-radius:6px; margin-bottom:1.5rem;">
                         <h4 style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">Ressources à convoyer (pour convoi de vivres) :</h4>
                         <div style="display:flex; gap:0.75rem;">
@@ -242,8 +291,11 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                             <div style="font-size:0.8rem; color:var(--text-muted);">
                                 Destination : <?= htmlspecialchars($m['target_name']) ?> [<?= $m['tx'] ?> : <?= $m['ty'] ?>]
                             </div>
-                            <div style="font-size:0.75rem; color:#94a3b8;">
-                                Effectif : <?= array_sum($fleetData) ?> guerriers & engins
+                            <div style="font-size:0.75rem; color:#94a3b8; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                                <span>Effectif : <?= array_sum($fleetData) ?> guerriers & engins</span>
+                                <?php if (!empty($m['has_hero'])): ?>
+                                    <span style="background:rgba(234,179,8,0.2); color:#fde047; padding:0.1rem 0.4rem; border-radius:4px; font-weight:600; font-size:0.7rem; border:1px solid rgba(234,179,8,0.4);">🥋 Samouraï Héros</span>
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -287,8 +339,15 @@ async function submitFleet() {
         }
     });
 
+    // Samouraï Champion Héros
+    const heroCheckbox = document.getElementById('deploy_hero');
+    if (heroCheckbox && heroCheckbox.checked) {
+        formData.append('has_hero', '1');
+        hasForces = true;
+    }
+
     if (!hasForces) {
-        showModalAlert('Veuillez sélectionner au moins un régiment ou engin de siège à déployer.', 'warning');
+        showModalAlert('Veuillez sélectionner au moins un régiment, engin de siège ou votre héros samouraï à déployer.', 'warning');
         return;
     }
 

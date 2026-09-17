@@ -83,6 +83,38 @@ class CombatEngine {
             $defHull += $s['defense'] * $count;
         }
 
+        // Intégration du Samouraï Héros attaquant et défenseur
+        require_once __DIR__ . '/HeroEngine.php';
+        $heroEngine = new HeroEngine();
+
+        $attackerHero = null;
+        if (!empty($mission['has_hero'])) {
+            $attackerHero = $heroEngine->getHeroByUserId((int)$mission['user_id']);
+            if ($attackerHero && $attackerHero['health'] > 0) {
+                $hStrength = (int)($attackerHero['effective']['combat_strength'] ?? 150);
+                $hOffensePct = (float)($attackerHero['effective']['offense_bonus_pct'] ?? 0);
+                $attPower += $hStrength;
+                $attHull += $hStrength;
+                if ($hOffensePct > 0) {
+                    $attPower = (int)round($attPower * (1 + ($hOffensePct / 100.0)));
+                }
+            }
+        }
+
+        $defenderHero = null;
+        if ($defenderUser) {
+            $defenderHero = $heroEngine->getHeroByUserId((int)$defenderUser['id']);
+            if ($defenderHero && (int)$defenderHero['current_planet_id'] === $targetPlanetId && $defenderHero['status'] === 'home' && $defenderHero['health'] > 0) {
+                $defStrength = (int)($defenderHero['effective']['combat_strength'] ?? 150);
+                $defDefensePct = (float)($defenderHero['effective']['defense_bonus_pct'] ?? 0);
+                $defPower += $defStrength;
+                $defHull += $defStrength;
+                if ($defDefensePct > 0) {
+                    $defPower = (int)round($defPower * (1 + ($defDefensePct / 100.0)));
+                }
+            }
+        }
+
         // Récupérer le niveau des remparts / muraille féodale du village cible
         $targetBuildings = $this->planetEngine->getBuildings($targetPlanetId);
         $wallLvl = (int)($targetBuildings['wall'] ?? 0);
@@ -191,15 +223,36 @@ class CombatEngine {
         }
 
         // Mettre à jour les troupes et vaisseaux restants du défenseur sur sa planète
-        foreach ($defenderFleet as $code => $cnt) {
-            $rem = $currentDefFleet[$code] ?? 0;
-            if (!empty($shipDb[$code]['is_unit'])) {
+        // Mise à jour des troupes et vaisseaux restants chez le défenseur
+        foreach ($currentDefFleet as $code => $rem) {
+            if (isset($shipDb[$code]['is_unit'])) {
                 $this->db->prepare("UPDATE planet_units SET count = ? WHERE planet_id = ? AND unit_code = ?")
                     ->execute([$rem, $targetPlanetId, $code]);
             } else {
                 $this->db->prepare("UPDATE planet_ships SET count = ? WHERE planet_id = ? AND ship_code = ?")
                     ->execute([$rem, $targetPlanetId, $code]);
             }
+        }
+
+        // Appliquer dégâts et gains d'XP aux héros ayant combattu
+        if ($attackerHero) {
+            $initialAttTotal = max(1, array_sum($attackerFleet));
+            $lostAttTotal = array_sum($attLost);
+            $lossRatio = min(1.0, $lostAttTotal / $initialAttTotal);
+            $heroDmg = (float)round($lossRatio * 70.0);
+            $heroXp = max(20, (int)round(array_sum($defLost) * 15));
+            $heroEngine->applyDamage((int)$mission['user_id'], $heroDmg);
+            $heroEngine->addExperience((int)$mission['user_id'], $heroXp);
+        }
+
+        if ($defenderHero && $defenderUser) {
+            $initialDefTotal = max(1, array_sum($defenderFleet));
+            $lostDefTotal = array_sum($defLost);
+            $lossRatio = min(1.0, $lostDefTotal / $initialDefTotal);
+            $heroDmg = (float)round($lossRatio * 70.0);
+            $heroXp = max(20, (int)round(array_sum($attLost) * 15));
+            $heroEngine->applyDamage((int)$defenderUser['id'], $heroDmg);
+            $heroEngine->addExperience((int)$defenderUser['id'], $heroXp);
         }
 
         // Calcul du pillage si l'attaquant a vaincu
@@ -356,6 +409,21 @@ class CombatEngine {
             $defHull += $u['defense'] * $count;
         }
 
+        // Intégration du Samouraï Héros attaquant
+        $attackerHero = null;
+        if (!empty($mission['has_hero'])) {
+            $attackerHero = $heroEngine->getHeroByUserId((int)$mission['user_id']);
+            if ($attackerHero && $attackerHero['health'] > 0) {
+                $hStrength = (int)($attackerHero['effective']['combat_strength'] ?? 150);
+                $hOffensePct = (float)($attackerHero['effective']['offense_bonus_pct'] ?? 0);
+                $attPower += $hStrength;
+                $attHull += $hStrength;
+                if ($hOffensePct > 0) {
+                    $attPower = (int)round($attPower * (1 + ($hOffensePct / 100.0)));
+                }
+            }
+        }
+
         // 4. Simulation en 3 rounds
         $roundLogs = [];
         $currentAttFleet = $attackerFleet;
@@ -440,6 +508,17 @@ class CombatEngine {
                 $this->db->prepare("DELETE FROM oasis_units WHERE oasis_id = ? AND unit_code = ?")
                     ->execute([$oasisId, $code]);
             }
+        }
+
+        // Appliquer dégâts et gains d'XP au héros attaquant
+        if ($attackerHero) {
+            $initialAttTotal = max(1, array_sum($attackerFleet));
+            $lostAttTotal = array_sum($attLost);
+            $lossRatio = min(1.0, $lostAttTotal / $initialAttTotal);
+            $heroDmg = (float)round($lossRatio * 70.0);
+            $heroXp = max(35, (int)round(array_sum($defLost) * 12));
+            $heroEngine->applyDamage((int)$mission['user_id'], $heroDmg);
+            $heroEngine->addExperience((int)$mission['user_id'], $heroXp);
         }
 
         // Pillage des ressources

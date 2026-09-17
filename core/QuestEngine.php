@@ -599,3 +599,4 @@ class QuestEngine {
         return $stmt->fetch() ?: [];
     }
 }
+

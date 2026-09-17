@@ -29,3 +29,4 @@ try {
     echo "✗ Erreur lors de la création de 'user_quests': " . $e->getMessage() . "\n";
     exit(1);
 }
+

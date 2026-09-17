@@ -292,14 +292,27 @@ class PlanetEngine {
             }
         }
 
+        // Bonus de production du Samouraï Héros stationné au domaine (Style Travian)
+        $heroProdBonus = ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+        if ($planetId !== null && $planetId > 0) {
+            try {
+                require_once __DIR__ . '/HeroEngine.php';
+                $heroEngine = new HeroEngine();
+                $heroProdBonus = $heroEngine->getHeroProductionBonus($planetId);
+            } catch (Exception $e) {
+                // Fallback silencieux
+            }
+        }
+
         return [
-            'metal' => (int)(($metalBase + ($metalMineProd * $speed)) * $energyRatio * $oasisBonusMult['wood']),
-            'crystal' => (int)(($crystalBase + ($crystalMineProd * $speed)) * $energyRatio * $oasisBonusMult['stone']),
-            'deuterium' => (int)(($deutBase + ($deutSynthProd * $speed)) * $energyRatio * $oasisBonusMult['rice']),
+            'metal' => (int)(($metalBase + ($metalMineProd * $speed)) * $energyRatio * $oasisBonusMult['wood']) + $heroProdBonus['metal'],
+            'crystal' => (int)(($crystalBase + ($crystalMineProd * $speed)) * $energyRatio * $oasisBonusMult['stone']) + $heroProdBonus['crystal'],
+            'deuterium' => (int)(($deutBase + ($deutSynthProd * $speed)) * $energyRatio * $oasisBonusMult['rice']) + $heroProdBonus['deuterium'],
             'energy_max' => $energyMax,
             'energy_used' => $energyUsed,
             'energy_ratio' => $energyRatio,
-            'oasis_bonuses' => $oasisBonuses
+            'oasis_bonuses' => $oasisBonuses,
+            'hero_bonuses' => $heroProdBonus
         ];
     }
 

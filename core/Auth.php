@@ -176,6 +176,13 @@ class Auth {
             ");
             $stmtUnit->execute([$planetId, $starter['code'], $starter['count']]);
 
+            // 8. Créer le Samouraï Héros initial (Style Travian)
+            // Initialiser le Héros Samouraï et ses quêtes d'exploration
+            require_once __DIR__ . '/HeroEngine.php';
+            $heroEngine = new HeroEngine();
+            $heroName = "Samouraï " . ucfirst($username);
+            $heroEngine->createHeroForUser($userId, $heroName, $planetId, $coords['x'], $coords['y']);
+
             $this->db->commit();
 
             // Connecter le joueur

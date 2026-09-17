@@ -31,6 +31,8 @@ $cargo = [
     'deuterium' => (int)($_POST['cargo_deuterium'] ?? 0)
 ];
 
+$hasHero = !empty($_POST['has_hero']);
+
 try {
     $result = $fleetEngine->dispatchMission(
         (int)$user['id'], 
@@ -39,7 +41,8 @@ try {
         $missionType, 
         $fleet, 
         $cargo, 
-        $targetOasisId
+        $targetOasisId,
+        $hasHero
     );
     if (!empty($result['success'])) {
         require_once __DIR__ . '/../core/QuestEngine.php';

@@ -71,6 +71,14 @@ class FleetEngine {
         $targetOasisId = !empty($mission['target_oasis_id']) ? (int)$mission['target_oasis_id'] : null;
         $missionId = (int)$mission['id'];
 
+        // Cas d'une aventure féodale du Samouraï Héros
+        if ($mission['mission_type'] === 'adventure') {
+            require_once __DIR__ . '/HeroEngine.php';
+            $heroEngine = new HeroEngine();
+            $heroEngine->resolveAdventureArrival($mission);
+            return;
+        }
+
         // Cas d'une expédition vers une oasis naturelle ou sauvage
         if ($targetOasisId) {
             require_once __DIR__ . '/OasisEngine.php';
@@ -197,7 +205,7 @@ class FleetEngine {
     /**
      * Résolution du retour de la flotte sur sa base
      */
-    private function resolveReturn(array $mission): void {
+    public function resolveReturn(array $mission): void {
         $sourcePlanetId = (int)$mission['source_planet_id'];
         $fleet = json_decode($mission['fleet_data'], true) ?: [];
         $cargo = json_decode($mission['cargo_data'], true) ?: [];
@@ -234,6 +242,15 @@ class FleetEngine {
                 SET metal = metal + ?, crystal = crystal + ?, deuterium = deuterium + ? 
                 WHERE id = ?
             ")->execute([$metal, $crystal, $deut, $sourcePlanetId]);
+        }
+
+        // Réintégrer le Samouraï Héros au domaine s'il a participé
+        if (!empty($mission['has_hero'])) {
+            $this->db->prepare("
+                UPDATE heroes 
+                SET status = 'home', current_planet_id = ?, last_health_update = UNIX_TIMESTAMP() 
+                WHERE user_id = ? AND status != 'dead'
+            ")->execute([$sourcePlanetId, $mission['user_id']]);
         }
 
         // Marquer la mission terminée
@@ -342,7 +359,19 @@ class FleetEngine {
     /**
      * Envoie une mission spatiale ou expédition féodale
      */
-    public function dispatchMission(int $userId, int $sourcePlanetId, ?int $targetPlanetId, string $missionType, array $fleet, array $cargo, ?int $targetOasisId = null): array {
+    /**
+     * Envoie une mission spatiale ou expédition féodale
+     */
+    public function dispatchMission(
+        int $userId, 
+        int $sourcePlanetId, 
+        ?int $targetPlanetId, 
+        string $missionType, 
+        array $fleet, 
+        array $cargo, 
+        ?int $targetOasisId = null,
+        bool $hasHero = false
+    ): array {
         $this->planetEngine->updatePlanet($sourcePlanetId);
 
         // 1. Vérifier la possession de la planète source
@@ -402,8 +431,20 @@ class FleetEngine {
             $totalShips += $cnt;
         }
 
-        if ($totalShips === 0) {
-            throw new Exception("Veuillez sélectionner au moins un régiment ou un engin de siège.");
+        // Vérifier le héros s'il est requis
+        $heroIdToDeploy = null;
+        if ($hasHero) {
+            require_once __DIR__ . '/HeroEngine.php';
+            $heroEngine = new HeroEngine();
+            $hero = $heroEngine->getHeroByUserId($userId);
+            if (!$hero || (int)$hero['current_planet_id'] !== $sourcePlanetId || $hero['status'] !== 'home' || (float)$hero['health'] <= 0) {
+                throw new Exception("Votre Samouraï Héros n'est pas disponible pour cette expédition (statut ou santé invalide).");
+            }
+            $heroIdToDeploy = (int)$hero['id'];
+        }
+
+        if ($totalShips === 0 && !$hasHero) {
+            throw new Exception("Veuillez sélectionner au moins un régiment, un engin de siège ou votre Samouraï Héros.");
         }
 
         // 4. Calcul de distance et durée
@@ -411,7 +452,8 @@ class FleetEngine {
         $duration = $this->calculateFlightDuration($cleanFleet, $distance, $sourcePlanet['faction']);
 
         // 5. Calcul des rations de riz (koku) requises pour la marche
-        $fuelReq = max(5, (int)round($distance * $totalShips * 1.2));
+        $effectiveMarches = max(1, $totalShips + ($hasHero ? 1 : 0));
+        $fuelReq = max(5, (int)round($distance * $effectiveMarches * 1.2));
         $cargoMetal = max(0, (int)($cargo['metal'] ?? 0));
         $cargoCrystal = max(0, (int)($cargo['crystal'] ?? 0));
         $cargoDeut = max(0, (int)($cargo['deuterium'] ?? 0));
@@ -435,6 +477,10 @@ class FleetEngine {
             }
         }
 
+        if ($heroIdToDeploy) {
+            $this->db->prepare("UPDATE heroes SET status = 'mission' WHERE id = ?")->execute([$heroIdToDeploy]);
+        }
+
         $this->db->prepare("
             UPDATE planets 
             SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ? 
@@ -447,8 +493,8 @@ class FleetEngine {
 
         $stmtInsert = $this->db->prepare("
             INSERT INTO fleet_missions 
-            (user_id, source_planet_id, target_planet_id, target_oasis_id, mission_type, fleet_data, cargo_data, departure_time, arrival_time, return_time, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'en_route')
+            (user_id, source_planet_id, target_planet_id, target_oasis_id, mission_type, fleet_data, cargo_data, has_hero, departure_time, arrival_time, return_time, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'en_route')
         ");
         $stmtInsert->execute([
             $userId,
@@ -458,16 +504,19 @@ class FleetEngine {
             $missionType,
             json_encode($cleanFleet),
             json_encode(['metal' => $cargoMetal, 'crystal' => $cargoCrystal, 'deuterium' => $cargoDeut]),
+            $hasHero ? 1 : 0,
             $now,
             $arrivalTime,
             $returnTime
         ]);
+        $missionId = (int)$this->db->lastInsertId();
 
         $this->db->commit();
 
         return [
             'success' => true,
             'message' => 'Expédition féodale déployée avec succès vers ' . $destName . ' !',
+            'mission_id' => $missionId,
             'duration' => $duration,
             'arrival_time' => $arrivalTime
         ];

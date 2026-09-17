@@ -171,3 +171,4 @@ $activeQuest = $questSummary['active_quest'];
     animation: pulse 2s infinite ease-in-out;
 }
 </style>
+

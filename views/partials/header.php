@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../core/BuildingEngine.php';
 require_once __DIR__ . '/../../core/FleetEngine.php';
 require_once __DIR__ . '/../../core/MessageEngine.php';
 require_once __DIR__ . '/../../core/QuestEngine.php';
+require_once __DIR__ . '/../../core/HeroEngine.php';
 require_once __DIR__ . '/../../config/game_constants.php';
 
 $auth = new Auth();
@@ -18,6 +19,9 @@ $unreadMessagesCount = $messageEngine->getUnreadCount((int)$user['id']);
 
 $questEngine = new QuestEngine();
 $questSummary = ($user && $planet) ? $questEngine->getPlayerQuestsStatus((int)$user['id'], (int)$planet['id']) : null;
+
+$heroEngine = new HeroEngine();
+$heroHeader = $user ? $heroEngine->getHeroByUserId((int)$user['id']) : null;
 
 if ($planet) {
     $planetEngine = new PlanetEngine();
@@ -97,6 +101,23 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
             <a href="?page=ranking" style="text-decoration: none; color: inherit;" title="Classement des Daimyōs & Tableau d'Honneur">
                 <span>🏆 <?= number_format($user['points']) ?> pts</span>
             </a>
+            <?php if ($heroHeader): ?>
+                <?php 
+                    $hHp = round((float)$heroHeader['health']);
+                    $hHpCol = ($hHp >= 60) ? '#22c55e' : (($hHp >= 25) ? '#eab308' : '#ef4444');
+                    $hasPoints = ((int)$heroHeader['unassigned_points'] > 0);
+                ?>
+                <a href="?page=hero" class="hud-msg-btn <?= ($page === 'hero') ? 'active' : '' ?>" title="Votre Samouraï Héros (Niveau <?= $heroHeader['level'] ?> - Santé : <?= $hHp ?>%)" style="text-decoration: none; position: relative; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; background: rgba(0,0,0,0.35); border: 1px solid <?= ($page === 'hero') ? '#dc2626' : 'rgba(255,255,255,0.12)' ?>; border-radius: 20px;">
+                    <span style="font-size: 1.1rem;">🥋</span>
+                    <span style="font-size: 0.75rem; font-weight: 800; color: #fff;">Nv.<?= $heroHeader['level'] ?></span>
+                    <span style="font-size: 0.7rem; font-family: monospace; font-weight: 700; color: <?= $hHpCol ?>;"><?= $hHp ?>%</span>
+                    <?php if ($hasPoints): ?>
+                        <span class="hud-unread-count" style="background: #eab308; color: #000; font-weight: 900; animation: pulse 1.5s infinite; right: -5px; top: -5px;" title="<?= $heroHeader['unassigned_points'] ?> point(s) à répartir !">
+                            +<?= $heroHeader['unassigned_points'] ?>
+                        </span>
+                    <?php endif; ?>
+                </a>
+            <?php endif; ?>
             <?php if ($questSummary): ?>
                 <button type="button" onclick="openQuestModal()" class="hud-msg-btn <?= ($questSummary['claimable_count'] > 0) ? 'has-unread' : '' ?>" title="Didacticiel & Quêtes Féodales (<?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?>)" style="background: none; border: none; cursor: pointer;">
                     <span>🎯</span>
