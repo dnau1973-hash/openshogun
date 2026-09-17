@@ -39,7 +39,7 @@ assert(strpos($htmlDefault, 'admin-tabs-nav') !== false, "Erreur: barre de navig
 echo "[PASS] Barre de navigation 'admin-tabs-nav' présente.\n";
 
 // Vérifier tous les boutons d'onglets attendus
-$expectedTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'maintenance', 'all'];
+$expectedTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'updates', 'maintenance', 'all'];
 foreach ($expectedTabs as $tabKey) {
     assert(strpos($htmlDefault, "data-tab=\"{$tabKey}\"") !== false, "Erreur: onglet '{$tabKey}' introuvable dans la barre d'onglets.");
 }

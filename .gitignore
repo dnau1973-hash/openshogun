@@ -11,3 +11,7 @@ Thumbs.db
 *.swp
 *~
 
+# Secrets & Configuration Locale
+config/github.local.php
+
+

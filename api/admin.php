@@ -290,9 +290,42 @@ try {
             }
 
             SlotPositionEngine::resetPositions($view);
+        // Vérifier les mises à jour GitHub
+        case 'check_github_updates':
+            require_once __DIR__ . '/../core/UpdateEngine.php';
+            $updateEngine = new UpdateEngine();
+            $result = $updateEngine->checkRemoteUpdates();
+            echo json_encode($result);
+            break;
+
+        // Installer la mise à jour GitHub (git pull)
+        case 'install_github_update':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Méthode invalide.");
+            }
+            require_once __DIR__ . '/../core/UpdateEngine.php';
+            $updateEngine = new UpdateEngine();
+            $autoStash = !isset($_POST['auto_stash']) || $_POST['auto_stash'] === '1' || $_POST['auto_stash'] === 'true';
+            $result = $updateEngine->installUpdate($autoStash);
+            echo json_encode($result);
+            break;
+
+        // Sauvegarder les paramètres GitHub (Token, branche, etc.)
+        case 'save_github_settings':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Méthode invalide.");
+            }
+            require_once __DIR__ . '/../core/UpdateEngine.php';
+            $token = trim($_POST['github_token'] ?? '');
+            $branch = trim($_POST['github_branch'] ?? 'main');
+            $owner = trim($_POST['github_repo_owner'] ?? 'dnau1973-hash');
+            $repo = trim($_POST['github_repo_name'] ?? 'openshogun');
+
+            $updateEngine = new UpdateEngine();
+            $success = $updateEngine->saveSettings($token, $branch, $owner, $repo);
             echo json_encode([
-                'success' => true,
-                'message' => "Positions réinitialisées aux valeurs d'origine !"
+                'success' => $success,
+                'message' => "Paramètres GitHub enregistrés avec succès !"
             ]);
             break;
 

@@ -21,11 +21,14 @@ require_once __DIR__ . '/../core/CastleEngine.php';
 require_once __DIR__ . '/../core/OasisEngine.php';
 require_once __DIR__ . '/../core/SupportEngine.php';
 require_once __DIR__ . '/../core/AnnouncementEngine.php';
+require_once __DIR__ . '/../core/UpdateEngine.php';
 
 $botEngine = new BotEngine();
 $castleEngine = new CastleEngine();
 $oasisEngine = new OasisEngine();
 $supportEngine = new SupportEngine();
+$updateEngine = new UpdateEngine();
+$localGitInfo = $updateEngine->getLocalInfo();
 $db = Database::getConnection();
 
 // Statistiques & Données des Annonces (JSON)
@@ -81,7 +84,7 @@ $humanUsers = $db->query("
 ")->fetchAll();
 
 // Gestion des onglets d'administration du Shogunat
-$allowedTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'maintenance', 'all'];
+$allowedTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'updates', 'maintenance', 'all'];
 $currentTab = $_GET['tab'] ?? 'game';
 if (!in_array($currentTab, $allowedTabs, true)) {
     $currentTab = 'game';
@@ -218,6 +221,19 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 Code, Algorithmes & Prompts IA
             </div>
         </div>
+
+        <div class="card kpi-card" onclick="switchAdminTab('updates')" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #38bdf8; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Cliquer pour contrôler et déployer les mises à jour GitHub">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
+                <span>Mises à Jour Git</span>
+                <span>🔄</span>
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #38bdf8; margin-top: 0.25rem;">
+                <?= htmlspecialchars($localGitInfo['short_sha']) ?>
+            </div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
+                Branche <?= htmlspecialchars($localGitInfo['branch']) ?> | GitHub Sync
+            </div>
+        </div>
     </div>
 
     <!-- Barre de Navigation par Onglets de Paramétrage Shogunat -->
@@ -275,6 +291,11 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'pedagogy') ? 'active' : '' ?>" data-tab="pedagogy" onclick="switchAdminTab('pedagogy')" style="<?= ($currentTab === 'pedagogy') ? 'background: linear-gradient(135deg, #0891b2, #06b6d4); color: #fff; border-color: #22d3ee; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
             <span>🎓</span> Atelier & Pédagogie (Projet Père-Fils)
             <span class="badge" style="background: rgba(0,0,0,0.3); color: #67e8f9; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);">Code & Prompts</span>
+        </button>
+
+        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-tab="updates" onclick="switchAdminTab('updates')" style="<?= ($currentTab === 'updates') ? 'background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border-color: #38bdf8; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
+            <span>🔄</span> Mises à Jour GitHub
+            <span class="badge" id="admin-update-nav-badge" style="background: rgba(0,0,0,0.3); color: #38bdf8; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
         </button>
 
         <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" onclick="switchAdminTab('maintenance')" style="<?= ($currentTab === 'maintenance') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
@@ -1315,6 +1336,11 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         <?php require __DIR__ . '/partials/admin_pedagogy.php'; ?>
     </div>
 
+    <!-- Section Mises à Jour & Déploiement GitHub -->
+    <div class="admin-tab-pane" id="admin-tab-pane-updates" data-tab="updates" style="display: <?= $isPaneVisible('updates') ? 'block' : 'none' ?>;">
+        <?php require __DIR__ . '/partials/admin_updates.php'; ?>
+    </div>
+
     <!-- Section 8 : ⚠️ Décret Suprême - Réinitialisation Complète du Monde Féodal -->
     <div class="admin-tab-pane" id="admin-tab-pane-maintenance" data-tab="maintenance" style="display: <?= $isPaneVisible('maintenance') ? 'block' : 'none' ?>;">
         <div class="card" style="margin-bottom: 2rem; border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(30, 10, 15, 0.75);">
@@ -1464,7 +1490,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 <script>
 // --- GESTION DU SYSTÈME D'ONGLETS DU SHOGUNAT ---
 function switchAdminTab(tabKey) {
-    const validTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'maintenance', 'all'];
+    const validTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'updates', 'maintenance', 'all'];
     if (!validTabs.includes(tabKey)) tabKey = 'game';
 
     // Afficher ou masquer les panneaux correspondants
