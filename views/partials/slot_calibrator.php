@@ -237,12 +237,26 @@ body.calibrator-active .calib-coord-pill {
     }
 
     function getElementPctPos(el) {
+        if (el.style.left && el.style.left.includes('%') && el.style.top && el.style.top.includes('%')) {
+            const l = parseFloat(el.style.left);
+            const t = parseFloat(el.style.top);
+            if (!isNaN(l) && !isNaN(t)) {
+                return {
+                    left: Math.round(l * 10) / 10,
+                    top: Math.round(t * 10) / 10
+                };
+            }
+        }
         const viewport = getViewport();
         const vRect = viewport.getBoundingClientRect();
         const eRect = el.getBoundingClientRect();
+        const borderLeft = parseFloat(window.getComputedStyle(viewport).borderLeftWidth) || 0;
+        const borderTop = parseFloat(window.getComputedStyle(viewport).borderTopWidth) || 0;
+        const clientW = viewport.clientWidth || vRect.width;
+        const clientH = viewport.clientHeight || vRect.height;
 
-        const leftPct = ((eRect.left - vRect.left) / vRect.width) * 100;
-        const topPct = ((eRect.top - vRect.top) / vRect.height) * 100;
+        const leftPct = ((eRect.left - (vRect.left + borderLeft)) / clientW) * 100;
+        const topPct = ((eRect.top - (vRect.top + borderTop)) / clientH) * 100;
 
         return {
             left: Math.round(leftPct * 10) / 10,
@@ -269,15 +283,12 @@ body.calibrator-active .calib-coord-pill {
         selectHotspot(currentDragging);
         currentDragging.classList.add('calib-dragging');
 
-        const viewport = getViewport();
-        const vRect = viewport.getBoundingClientRect();
-        const hRect = currentDragging.getBoundingClientRect();
-
+        const pos = getElementPctPos(currentDragging);
         dragStartX = e.clientX;
         dragStartY = e.clientY;
 
-        initialLeftPct = ((hRect.left - vRect.left) / vRect.width) * 100;
-        initialTopPct = ((hRect.top - vRect.top) / vRect.height) * 100;
+        initialLeftPct = pos.left;
+        initialTopPct = pos.top;
 
         document.addEventListener('mousemove', onDocumentMouseMove);
         document.addEventListener('mouseup', onDocumentMouseUp);
@@ -287,10 +298,11 @@ body.calibrator-active .calib-coord-pill {
         if (!currentDragging) return;
 
         const viewport = getViewport();
-        const vRect = viewport.getBoundingClientRect();
+        const clientW = viewport.clientWidth || viewport.getBoundingClientRect().width;
+        const clientH = viewport.clientHeight || viewport.getBoundingClientRect().height;
 
-        const deltaXPct = ((e.clientX - dragStartX) / vRect.width) * 100;
-        const deltaYPct = ((e.clientY - dragStartY) / vRect.height) * 100;
+        const deltaXPct = ((e.clientX - dragStartX) / clientW) * 100;
+        const deltaYPct = ((e.clientY - dragStartY) / clientH) * 100;
 
         let newLeft = Math.max(0, Math.min(95, initialLeftPct + deltaXPct));
         let newTop = Math.max(0, Math.min(95, initialTopPct + deltaYPct));
@@ -379,8 +391,10 @@ body.calibrator-active .calib-coord-pill {
             // Récupérer largeur et hauteur actuelles
             const vRect = viewport.getBoundingClientRect();
             const hRect = hs.getBoundingClientRect();
-            const wPct = Math.round(((hRect.width / vRect.width) * 100) * 10) / 10;
-            const hPct = Math.round(((hRect.height / vRect.height) * 100) * 10) / 10;
+            const clientW = viewport.clientWidth || vRect.width;
+            const clientH = viewport.clientHeight || vRect.height;
+            const wPct = Math.round(((hRect.width / clientW) * 100) * 10) / 10;
+            const hPct = Math.round(((hRect.height / clientH) * 100) * 10) / 10;
             const zIndex = parseInt(window.getComputedStyle(hs).zIndex, 10) || 10;
 
             positions[key] = {
@@ -399,7 +413,15 @@ body.calibrator-active .calib-coord-pill {
             formData.append('positions', JSON.stringify(positions));
 
             const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
-            const data = await res.json();
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                console.error("Réponse serveur non JSON:", text);
+                alert("Erreur serveur lors de l'enregistrement: " + text.substring(0, 300));
+                return;
+            }
 
             if (data.success) {
                 alert("✓ " + data.message);
@@ -428,7 +450,15 @@ body.calibrator-active .calib-coord-pill {
             formData.append('view', VIEW_NAME);
 
             const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
-            const data = await res.json();
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                console.error("Réponse serveur:", text);
+                alert("Erreur serveur : " + text.substring(0, 300));
+                return;
+            }
 
             if (data.success) {
                 alert("✓ " + data.message);

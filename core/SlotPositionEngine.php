@@ -59,26 +59,40 @@ class SlotPositionEngine {
     }
 
     public static function getAll(): array {
+        $defaults = [
+            'resources' => self::getDefaults('resources'),
+            'city' => self::getDefaults('city')
+        ];
+
         if (!file_exists(self::$filePath)) {
-            return [
-                'resources' => self::getDefaults('resources'),
-                'city' => self::getDefaults('city')
-            ];
+            return $defaults;
         }
 
         $content = @file_get_contents(self::$filePath);
         $data = json_decode($content, true);
         if (!is_array($data)) {
-            return [
-                'resources' => self::getDefaults('resources'),
-                'city' => self::getDefaults('city')
-            ];
+            return $defaults;
         }
 
-        return [
-            'resources' => array_merge(self::getDefaults('resources'), $data['resources'] ?? []),
-            'city' => array_merge(self::getDefaults('city'), $data['city'] ?? [])
-        ];
+        $result = [];
+        foreach (['resources', 'city'] as $v) {
+            $result[$v] = [];
+            $vDefaults = $defaults[$v];
+            $vData = is_array($data[$v] ?? null) ? $data[$v] : [];
+
+            foreach ($vDefaults as $k => $def) {
+                $keyStr = (string)$k;
+                if (isset($vData[$keyStr]) && is_array($vData[$keyStr])) {
+                    $result[$v][$keyStr] = array_merge($def, $vData[$keyStr]);
+                } elseif (isset($vData[$k]) && is_array($vData[$k])) {
+                    $result[$v][$keyStr] = array_merge($def, $vData[$k]);
+                } else {
+                    $result[$v][$keyStr] = $def;
+                }
+            }
+        }
+
+        return $result;
     }
 
     public static function getPositions(string $view): array {
@@ -92,9 +106,16 @@ class SlotPositionEngine {
 
         $sanitized = [];
         foreach ($defaults as $key => $def) {
-            if (isset($positions[$key])) {
+            $keyStr = (string)$key;
+            $p = null;
+            if (isset($positions[$keyStr]) && is_array($positions[$keyStr])) {
+                $p = $positions[$keyStr];
+            } elseif (isset($positions[$key]) && is_array($positions[$key])) {
                 $p = $positions[$key];
-                $sanitized[$key] = [
+            }
+
+            if ($p !== null) {
+                $sanitized[$keyStr] = [
                     'left' => round((float)($p['left'] ?? $def['left']), 2),
                     'top' => round((float)($p['top'] ?? $def['top']), 2),
                     'width' => round((float)($p['width'] ?? $def['width']), 2),
@@ -102,7 +123,7 @@ class SlotPositionEngine {
                     'z' => (int)($p['z'] ?? $def['z'])
                 ];
             } else {
-                $sanitized[$key] = $def;
+                $sanitized[$keyStr] = $def;
             }
         }
 
