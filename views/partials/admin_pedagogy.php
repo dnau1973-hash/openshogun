@@ -628,9 +628,17 @@
             </p>
 
             <?php 
-                $videoDisk = __DIR__ . '/../../public/assets/videos/Epic_cinematic_battle_teaser_t.mp4';
+                $videoDir = __DIR__ . '/../../public/assets/videos/';
+                $videoDisk = $videoDir . 'Slow_motion_dynamic_tracking_s.mp4';
+                if (!file_exists($videoDisk)) {
+                    $mp4Files = glob($videoDir . '*.mp4');
+                    if (!empty($mp4Files)) {
+                        $videoDisk = $mp4Files[0];
+                    }
+                }
                 $videoExists = file_exists($videoDisk);
-                $videoSrc = '/public/assets/videos/Epic_cinematic_battle_teaser_t.mp4' . ($videoExists ? '?v=' . filemtime($videoDisk) : '');
+                $videoFilename = $videoExists ? basename($videoDisk) : '';
+                $videoSrc = $videoExists ? ('/public/assets/videos/' . $videoFilename . '?v=' . filemtime($videoDisk)) : '';
                 $videoSizeMb = $videoExists ? round(filesize($videoDisk) / (1024 * 1024), 1) : 0;
             ?>
 
@@ -639,14 +647,14 @@
                 <div style="margin: 1.25rem 0; background: #0b0f19; border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.7);">
                     <div style="background: linear-gradient(90deg, rgba(147, 51, 234, 0.25) 0%, rgba(220, 38, 38, 0.25) 100%); padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; gap: 0.5rem;">
                         <span style="font-weight: 800; color: #f3e8ff; font-size: 0.95rem; display: flex; align-items: center; gap: 0.6rem;">
-                            <span style="font-size: 1.2rem;">▶️</span> Teaser Officiel OpenShogun &bull; Bataille Féodale & Engins de Siège
+                            <span style="font-size: 1.2rem;">▶️</span> Teaser Officiel OpenShogun &bull; Séquence Complète des 4 Scènes
                         </span>
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             <span style="background: rgba(34, 197, 94, 0.2); color: #4ade80; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(34, 197, 94, 0.3);">
                                 🎬 MP4 &bull; <?= $videoSizeMb ?> Mo
                             </span>
-                            <a href="<?= $videoSrc ?>" download="OpenShogun_Teaser_Sengoku.mp4" class="btn btn-secondary" style="font-size: 0.75rem; padding: 3px 10px; font-weight: 700;">
-                                ⬇️ Télécharger
+                            <a href="<?= $videoSrc ?>" download="OpenShogun_Teaser_Complet.mp4" class="btn btn-secondary" style="font-size: 0.75rem; padding: 3px 10px; font-weight: 700;">
+                                ⬇️ Télécharger la Vidéo
                             </a>
                         </div>
                     </div>
@@ -656,20 +664,61 @@
                             Votre navigateur ne prend pas en charge la lecture de vidéos HTML5.
                         </video>
                     </div>
-                    <div style="padding: 0.6rem 1.25rem; background: rgba(0,0,0,0.5); font-size: 0.78rem; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05);">
-                        <span>💡 <em>Astuce père-fils :</em> Vous pouvez basculer la vidéo en plein écran en cliquant sur l'icône ⛶ en bas à droite du lecteur.</span>
-                        <span style="color: #c084fc;">Fichier : <code>Epic_cinematic_battle_teaser_t.mp4</code></span>
+                    <div style="padding: 0.6rem 1.25rem; background: rgba(0,0,0,0.5); font-size: 0.78rem; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; gap: 0.5rem;">
+                        <span>💡 <em>Astuce :</em> Vous pouvez basculer en plein écran avec l'icône ⛶ en bas à droite du lecteur.</span>
+                        <span style="color: #c084fc;">Fichier actif : <code><?= htmlspecialchars($videoFilename) ?></code></span>
                     </div>
                 </div>
             <?php endif; ?>
 
-            <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 1rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <strong style="color: #facc15; font-size: 0.85rem;">🎥 Prompt Utilisé pour Générer cette Vidéo :</strong>
-                    <button type="button" class="btn btn-primary" onclick="copyPromptText(this)" data-prompt="Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield. In the center, a colossal wooden dragon siege ram machine rolls forward on spiked iron wheels, its ferocious blackened-iron dragon head roaring and belching glowing sparks and smoke. Beside it, charging Takeda samurai cavalry in brilliant crimson red armor on galloping warhorses surge forward with raised spears. Above, a barrage of flaming arrows arcs across the smoky dusk sky towards a distant towering Japanese castle fortress. Flying fire embers, swirling autumn red leaves, dramatic volumetric sunset light breaking through war smoke, ukiyo-e woodblock inspired semi-realistic digital anime aesthetic, fluid motion, 8k masterpiece" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">Copier le Prompt Vidéo</button>
-                </div>
-                <div style="font-family: monospace; font-size: 0.78rem; color: #67e8f9; line-height: 1.4;">
-                    Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield. In the center, a colossal wooden dragon siege ram machine rolls forward on spiked iron wheels, its ferocious blackened-iron dragon head roaring and belching glowing sparks and smoke. Beside it, charging Takeda samurai cavalry in brilliant crimson red armor on galloping warhorses surge forward with raised spears. Above, a barrage of flaming arrows arcs across the smoky dusk sky towards a distant towering Japanese castle fortress. Flying fire embers, swirling autumn red leaves, dramatic volumetric sunset light breaking through war smoke, ukiyo-e woodblock inspired semi-realistic digital anime aesthetic, fluid motion, 8k masterpiece
+            <!-- LES 4 PROMPTS COMBINÉS DANS LE TEASER -->
+            <div style="margin-top: 1.5rem;">
+                <h5 style="color: #facc15; font-size: 0.95rem; margin-bottom: 0.75rem;">🎞️ Les 4 Prompts Successifs Utilisés pour Composer ce Teaser :</h5>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;">
+                    <!-- SCÈNE 1 -->
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                            <strong style="color: #38bdf8; font-size: 0.8rem;">Scène 1 : L'Éveil de l'Éclaireur</strong>
+                            <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic low-angle shot of a Takeda samurai scout cavalryman on a cliff overlooking misty mountain valleys at sunrise. The horse snorts with visible breath, the back banner flutters in the morning wind, camera slowly pushes in, golden sunrays, ukiyo-e style." style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                        </div>
+                        <p style="font-size: 0.75rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
+                            <em>« Cinematic low-angle shot of a Takeda samurai scout cavalryman on a cliff overlooking misty mountain valleys at sunrise. The horse snorts with visible breath, the back banner flutters in the morning wind, camera slowly pushes in, golden sunrays, ukiyo-e style. »</em>
+                        </p>
+                    </div>
+
+                    <!-- SCÈNE 2 -->
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                            <strong style="color: #ef4444; font-size: 0.8rem;">Scène 2 : La Marche des Titans</strong>
+                            <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Slow-motion dynamic tracking shot of colossal rolling siege fortress and dragon ram advancing heavily in battlefield mud towards castle ramparts. Fiery arrows deflect off iron plates, the dragon iron head belches bursts of fire and sparks, massive spiked wheels turning, intense battlefield smoke, dramatic dusk lighting." style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                        </div>
+                        <p style="font-size: 0.75rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
+                            <em>« Slow-motion dynamic tracking shot of colossal rolling siege fortress and dragon ram advancing heavily in battlefield mud towards castle ramparts. Fiery arrows deflect off iron plates, the dragon iron head belches bursts of fire and sparks, massive spiked wheels turning, intense battlefield smoke, dramatic dusk lighting. »</em>
+                        </p>
+                    </div>
+
+                    <!-- SCÈNE 3 -->
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                            <strong style="color: #a855f7; font-size: 0.8rem;">Scène 3 : L'Embuscade Shinobi</strong>
+                            <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Midnight darkness in misty bamboo forest. A masked shinobi cavalryman bursts forward on a black horse surrounded by purple smoke, drawing gleaming steel sword towards the camera, full moon shafts through bamboo, fast dynamic camera zoom." style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                        </div>
+                        <p style="font-size: 0.75rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
+                            <em>« Midnight darkness in misty bamboo forest. A masked shinobi cavalryman bursts forward on a black horse surrounded by purple smoke, drawing gleaming steel sword towards the camera, full moon shafts through bamboo, fast dynamic camera zoom. »</em>
+                        </p>
+                    </div>
+
+                    <!-- SCÈNE 4 -->
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                            <strong style="color: #f59e0b; font-size: 0.8rem;">Scène 4 : Climax & Flèches de Feu</strong>
+                            <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield. In the center, a colossal wooden dragon siege ram machine rolls forward on spiked iron wheels, its ferocious blackened-iron dragon head roaring and belching glowing sparks and smoke. Beside it, charging Takeda samurai cavalry in brilliant crimson red armor on galloping warhorses surge forward with raised spears. Above, a barrage of flaming arrows arcs across the smoky dusk sky towards a distant towering Japanese castle fortress. Flying fire embers, swirling autumn red leaves, dramatic volumetric sunset light breaking through war smoke, ukiyo-e woodblock inspired semi-realistic digital anime aesthetic, fluid motion, 8k masterpiece" style="font-size: 0.7rem; padding: 2px 6px;">Copier</button>
+                        </div>
+                        <p style="font-size: 0.75rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
+                            <em>« Epic cinematic battle teaser trailer of feudal Japan Sengoku period. Slow dynamic low-angle tracking shot moving forward through a muddy battlefield... fluid motion, 8k masterpiece »</em>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
