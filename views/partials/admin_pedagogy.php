@@ -307,7 +307,7 @@
                     <span style="font-size: 0.78rem; color: var(--text-muted);">Comment parler à une Intelligence Artificielle pour créer des graphismes de jeu vidéo</span>
                 </div>
             </div>
-            <span class="badge" style="background: rgba(244, 114, 182, 0.2); color: #f472b6; border: 1px solid rgba(244, 114, 182, 0.4); font-size: 0.75rem;">28 Assets Documentés</span>
+            <span class="badge" style="background: rgba(244, 114, 182, 0.2); color: #f472b6; border: 1px solid rgba(244, 114, 182, 0.4); font-size: 0.75rem;">43 Assets Documentés</span>
         </div>
         <div class="card-body" style="line-height: 1.6; font-size: 0.9rem; color: #cbd5e1;">
             <p>
@@ -646,6 +646,384 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Monumental ancient Japanese rolling armored siege fortress, colossal multi-tiered wooden mobile bastion on massive iron-studded timber wheels, heavily armored walls built of thick oak logs reinforced with bolted iron and bronze plates, multiple narrow arrow slits and triangular gun ports with Tanegashima matchlocks and yari spears protruding, curved Japanese pagoda-style tiled roof with defensive parapet, fluttering deep purple and gold war banners bearing the Tokugawa clan triple-hollyhock crest (Mitsuba Aoi), samurai commanders in ornate black and gold armor directing the advance from the upper watchtower, rolling relentlessly across a muddy battlefield toward besieged enemy fortifications at sunset, flaming enemy arrows harmlessly deflecting off the heavy iron plating, dramatic low-angle perspective emphasizing its colossal size and invulnerability, smoke plumes and golden dust in the air, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- ============================================================== -->
+                        <!-- SÉPARATEUR : BÊTES SAUVAGES DES OASIS                          -->
+                        <!-- ============================================================== -->
+                        <tr style="background: rgba(180, 83, 9, 0.15); border-top: 2px solid #b45309; border-bottom: 2px solid #b45309;">
+                            <td colspan="5" style="padding: 0.6rem 0.75rem; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem;">
+                                🐾 Faune Hostile & Bêtes Sauvages des Oasis (Système d'Annexions)
+                            </td>
+                        </tr>
+
+                        <!-- SANGLIER ENRAGÉ DES MONTS -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $boarFile = __DIR__ . '/../../public/assets/units/sanglier_sauvage.jpg'; ?>
+                                <img src="/public/assets/units/sanglier_sauvage.jpg?v=<?= file_exists($boarFile) ? filemtime($boarFile) : 1 ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Sanglier Enragé des Monts</strong><br>
+                                <span style="font-size: 0.75rem; color: #f59e0b;">🐗 Bête Sauvage Tier 1 (山猪)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                sanglier_sauvage.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Dynamic cinematic illustration of a colossal feral wild boar (Sanglier Enragé des Monts) charging furiously through a misty ancient Japanese mountain forest, razor-sharp elongated tusks dripping with foam, bristling dark bristly fur covered in dirt and pine needles, furious glowing amber-red eyes, muscular hunched posture, kicking up volcanic gravel and snapping bamboo under heavy hooves, full moon peeking through cedar trees casting cold moonlight and deep atmospheric shadows, subtle Japanese feudal aesthetic, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, dramatic lighting, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Illustration cinématographique d'un sanglier sauvage colossal chargeant furieusement dans une forêt de montagne japonaise embrumée, défenses acérées dégoulinantes d'écume, pelage sombre hérissé, yeux ambrés flamboyants, brisant des bambous sous ses sabots, pleine lune à travers les cèdres, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Dynamic cinematic illustration of a colossal feral wild boar (Sanglier Enragé des Monts) charging furiously through a misty ancient Japanese mountain forest, razor-sharp elongated tusks dripping with foam, bristling dark bristly fur covered in dirt and pine needles, furious glowing amber-red eyes, muscular hunched posture, kicking up volcanic gravel and snapping bamboo under heavy hooves, full moon peeking through cedar trees casting cold moonlight and deep atmospheric shadows, subtle Japanese feudal aesthetic, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed, dramatic lighting, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- LOUP VICIEUX DE HONSHU -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $wolfFile = __DIR__ . '/../../public/assets/units/loup_honshu.jpg'; ?>
+                                <img src="/public/assets/units/loup_honshu.jpg?v=<?= file_exists($wolfFile) ? filemtime($wolfFile) : 1 ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Loup Vicieux de Honshu</strong><br>
+                                <span style="font-size: 0.75rem; color: #38bdf8;">🐺 Meute Sauvage Tier 2 (本州狼)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                loup_honshu.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Menacing pack of vicious Honshu wolves emerging from dense misty bamboo forest under cold full moon, alpha male in foreground with bared fangs and intense predatory yellow eyes, lean muscular posture, breath visible in freezing air, ancient Shinto stone lanterns covered in moss in background, traditional Japanese feudal mountain wilderness, ukiyo-e woodblock inspired semi-realistic digital painting, atmospheric dark rim lighting, highly detailed, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Meute menaçante de loups vicieux de Honshu émergeant d'une dense forêt de bambous brumeuse sous une pleine lune glaciale, mâle alpha au premier plan crocs découverts et yeux jaunes de prédateur, vapeur de souffle dans l'air gelé, lanternes de pierre shinto moussues, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Menacing pack of vicious Honshu wolves emerging from dense misty bamboo forest under cold full moon, alpha male in foreground with bared fangs and intense predatory yellow eyes, lean muscular posture, breath visible in freezing air, ancient Shinto stone lanterns covered in moss in background, traditional Japanese feudal mountain wilderness, ukiyo-e woodblock inspired semi-realistic digital painting, atmospheric dark rim lighting, highly detailed, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- GRAND OURS BRUN DE HOKKAIDO -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bearFile = __DIR__ . '/../../public/assets/units/ours_hokkaido.jpg'; ?>
+                                <img src="/public/assets/units/ours_hokkaido.jpg?v=<?= file_exists($bearFile) ? filemtime($bearFile) : 1 ?>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Grand Ours Brun de Hokkaido</strong><br>
+                                <span style="font-size: 0.75rem; color: #ef4444;">🐻 Colosse d'Oasis Tier 3 (北海道羆)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                ours_hokkaido.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Dynamic cinematic illustration of a colossal feral Hokkaido brown bear (Grand Ours Brun de Hokkaido, legendary giant Higuma), towering apex predator rising on its hind legs atop a jagged snow-covered mountain cliff, massive muscular frame with battle scars across its chest and snout, thick frosted dark-brown fur matted with ice and snow, roaring furiously with razor-sharp elongated claws slashing through the freezing air, steaming breath billowing from open jaws lined with lethal teeth, fierce glowing amber eyes, background featuring rugged northern Japanese Hokkaido peaks (Ezo), wind-swept frozen ancient pine trees and swirling snow blizzard under a dramatic overcast winter twilight sky, Japanese feudal folklore aesthetic, ukiyo-e woodblock inspired semi-realistic digital painting, heavy textural detail, epic sense of scale and raw primal power, dramatic rim lighting, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Illustration cinématographique d'un gigantesque ours brun de Hokkaido (Higuma), dressé sur une falaise enneigée, cicatrices de guerre sur le poitrail, fourrure givrée, rugissement furieux dans le blizzard des sommets d'Ezo, griffes acérées et vapeur d'expiration, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Dynamic cinematic illustration of a colossal feral Hokkaido brown bear (Grand Ours Brun de Hokkaido, legendary giant Higuma), towering apex predator rising on its hind legs atop a jagged snow-covered mountain cliff, massive muscular frame with battle scars across its chest and snout, thick frosted dark-brown fur matted with ice and snow, roaring furiously with razor-sharp elongated claws slashing through the freezing air, steaming breath billowing from open jaws lined with lethal teeth, fierce glowing amber eyes, background featuring rugged northern Japanese Hokkaido peaks (Ezo), wind-swept frozen ancient pine trees and swirling snow blizzard under a dramatic overcast winter twilight sky, Japanese feudal folklore aesthetic, ukiyo-e woodblock inspired semi-realistic digital painting, heavy textural detail, epic sense of scale and raw primal power, dramatic rim lighting, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- ============================================================== -->
+                        <!-- SÉPARATEUR : LES 12 CHÂTEAUX AUTHENTIQUES DU JAPON             -->
+                        <!-- ============================================================== -->
+                        <tr style="background: rgba(220, 38, 38, 0.15); border-top: 2px solid #b91c1c; border-bottom: 2px solid #b91c1c;">
+                            <td colspan="5" style="padding: 0.6rem 0.75rem; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem;">
+                                🏯 Les 12 Donjons Authentiques Préservés du Japon (現存十二天守 - Jūni Tenshu)
+                            </td>
+                        </tr>
+
+                        <!-- BITCHU MATSUYAMA -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/bitchu_matsuyama.jpg'; ?>
+                                <img src="/public/assets/castles/bitchu_matsuyama.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Bitchū Matsuyama</strong><br>
+                                <span style="font-size: 0.75rem; color: #fbbf24;">備中松山城 (Château dans le Ciel &bull; 430m)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                bitchu_matsuyama.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Cinematic epic illustration of Bitchu Matsuyama Castle, the legendary Japanese castle in the sky, perched atop the rugged crags of Mount Gagyu at 430 meters altitude, authentic two-story white plaster and cypress wood tenshu keep standing majestically above a dramatic sea of rolling morning clouds (unkai), ancient dry-stone retaining walls seamlessly built into natural granite cliffs, autumn foliage with scarlet momiji maple leaves clinging to rocky outcrops, warm golden sunrise breaking through misty horizon casting ethereal glows on white battlements, Japanese feudal Sengoku aesthetic, ukiyo-e woodblock inspired semi-realistic digital art, breathtaking aerial view, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Donjon de Bitchū Matsuyama perché à 430 m sur les falaises du mont Gagyū au-dessus d'une mer de nuages d'automne au lever de soleil, érables rouges et remparts granitiques, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic epic illustration of Bitchu Matsuyama Castle, the legendary Japanese castle in the sky, perched atop the rugged crags of Mount Gagyu at 430 meters altitude, authentic two-story white plaster and cypress wood tenshu keep standing majestically above a dramatic sea of rolling morning clouds (unkai), ancient dry-stone retaining walls seamlessly built into natural granite cliffs, autumn foliage with scarlet momiji maple leaves clinging to rocky outcrops, warm golden sunrise breaking through misty horizon casting ethereal glows on white battlements, Japanese feudal Sengoku aesthetic, ukiyo-e woodblock inspired semi-realistic digital art, breathtaking aerial view, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- HIKONE -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/hikone.jpg'; ?>
+                                <img src="/public/assets/castles/hikone.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château de Hikone</strong><br>
+                                <span style="font-size: 0.75rem; color: #f87171;">彦根城 (Fief des Diables Rouges Ii &bull; Lac Biwa)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                hikone.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Cinematic majestic illustration of Hikone Castle, National Treasure of Japan, iconic three-story tenshu keep showcasing intricate gabled roofs combining curved karahafu and triangular irimoya-hafu architecture, white plaster walls adorned with golden crests, standing on a fortified hill overlooking the shimmering waters of Lake Biwa, red lacquered war banners (mon) of the Ii Clan 'Red Devils' fluttering in the breeze, historic stone bastions, spring cherry blossoms softly framing the fortress under a serene morning sky, subtle ukiyo-e woodblock inspired semi-realistic digital painting, highly detailed Japanese feudal craftsmanship, 8k</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Donjon de Hikone aux toitures ouvragées karahafu et irimoya-hafu, bannières rouges des Diables Rouges du clan Ii, surplombant le lac Biwa avec cerisiers en fleurs.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic majestic illustration of Hikone Castle, National Treasure of Japan, iconic three-story tenshu keep showcasing intricate gabled roofs combining curved karahafu and triangular irimoya-hafu architecture, white plaster walls adorned with golden crests, standing on a fortified hill overlooking the shimmering waters of Lake Biwa, red lacquered war banners (mon) of the Ii Clan 'Red Devils' fluttering in the breeze, historic stone bastions, spring cherry blossoms softly framing the fortress under a serene morning sky, subtle ukiyo-e woodblock inspired semi-realistic digital painting, highly detailed Japanese feudal craftsmanship, 8k" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- HIMEJI -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/himeji.jpg'; ?>
+                                <img src="/public/assets/castles/himeji.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château de Himeji</strong><br>
+                                <span style="font-size: 0.75rem; color: #e2e8f0;">姫路城 (Le Héron Blanc &bull; Shirasagi-jō)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                himeji.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Grand panoramic cinematic illustration of Himeji Castle, the magnificent White Heron Castle (Shirasagi-jo), colossal five-tiered seven-story main tenshu keep linked by fortified covered galleries to three sub-towers (renritsu-shiki style), brilliant white fireproof plaster walls gleaming brilliantly like the wings of a giant white heron taking flight, complex labyrinth of stone ramparts, curved samurai gates and triangular arrow slits, misty twilight sky with soft pastel sunset tones, Japanese feudal fortress masterpiece, ukiyo-e woodblock influenced high-end semi-realistic digital art, stunning architectural detail, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Panoramique du château de Himeji, le Héron Blanc immaculé à 5 niveaux relié à 3 donjons secondaires, labyrinthe de remparts de pierre blanche et ciel crépusculaire pastel.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Grand panoramic cinematic illustration of Himeji Castle, the magnificent White Heron Castle (Shirasagi-jo), colossal five-tiered seven-story main tenshu keep linked by fortified covered galleries to three sub-towers (renritsu-shiki style), brilliant white fireproof plaster walls gleaming brilliantly like the wings of a giant white heron taking flight, complex labyrinth of stone ramparts, curved samurai gates and triangular arrow slits, misty twilight sky with soft pastel sunset tones, Japanese feudal fortress masterpiece, ukiyo-e woodblock influenced high-end semi-realistic digital art, stunning architectural detail, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- HIROSAKI -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/hirosaki.jpg'; ?>
+                                <img src="/public/assets/castles/hirosaki.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château de Hirosaki</strong><br>
+                                <span style="font-size: 0.75rem; color: #38bdf8;">弘前城 (Donjon Boréal de Mutsu &bull; Mont Iwaki)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                hirosaki.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Atmospheric winter cinematic illustration of Hirosaki Castle, the northernmost original tenshu keep of Mutsu province, compact three-story wooden fortress dusted with crisp white snow on dark curved roof tiles, surrounded by frozen triple moats with cracked turquoise ice and snow-laden weeping pine trees, dramatic view of snow-capped volcanic peak Mount Iwaki rising in the background under cold winter daylight, subtle traditional red arched wooden bridge spanning the snowy moat, Japanese feudal northern aesthetic, ukiyo-e woodblock inspired semi-realistic art, crisp atmospheric chill, 8k</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Hirosaki sous la neige boréale, donjon poudré de givre, douves gelées à la glace turquoise, pont vermillon et pic volcanique enneigé du mont Iwaki.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Atmospheric winter cinematic illustration of Hirosaki Castle, the northernmost original tenshu keep of Mutsu province, compact three-story wooden fortress dusted with crisp white snow on dark curved roof tiles, surrounded by frozen triple moats with cracked turquoise ice and snow-laden weeping pine trees, dramatic view of snow-capped volcanic peak Mount Iwaki rising in the background under cold winter daylight, subtle traditional red arched wooden bridge spanning the snowy moat, Japanese feudal northern aesthetic, ukiyo-e woodblock inspired semi-realistic art, crisp atmospheric chill, 8k" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- INUYAMA -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/inuyama.jpg'; ?>
+                                <img src="/public/assets/castles/inuyama.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château d'Inuyama</strong><br>
+                                <span style="font-size: 0.75rem; color: #fbbf24;">犬山城 (Plus Ancien Donjon Bois 1537 &bull; Kiso-gawa)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                inuyama.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Dramatic cinematic illustration of Inuyama Castle, the oldest standing original wooden tenshu in Japan dating back to 1537, perched atop a sheer 40-meter rocky promontory directly towering over the swirling emerald rapids of the Kiso River, dark aged timber construction and traditional white walls, top-floor open-air wooden observation balcony (mawari-en) with panoramic views, mist rising from rushing river waters, flight of cormorants skimming the river surface, Oda clan feudal war banners, ukiyo-e woodblock inspired semi-realistic digital painting, dramatic low-angle composition, 8k</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Inuyama dressé sur son éperon rocheux de 40 m au-dessus des rapides de la rivière Kiso, boiseries d'origine du XVIe siècle, balcon panoramique ouvert et pêcheurs aux cormorans.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Dramatic cinematic illustration of Inuyama Castle, the oldest standing original wooden tenshu in Japan dating back to 1537, perched atop a sheer 40-meter rocky promontory directly towering over the swirling emerald rapids of the Kiso River, dark aged timber construction and traditional white walls, top-floor open-air wooden observation balcony (mawari-en) with panoramic views, mist rising from rushing river waters, flight of cormorants skimming the river surface, Oda clan feudal war banners, ukiyo-e woodblock inspired semi-realistic digital painting, dramatic low-angle composition, 8k" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- KOCHI -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/kochi.jpg'; ?>
+                                <img src="/public/assets/castles/kochi.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château de Kōchi</strong><br>
+                                <span style="font-size: 0.75rem; color: #38bdf8;">高知城 (Palais Honmaru Goten Intact &bull; Tosa)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                kochi.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Dramatic cinematic illustration of Kochi Castle in Tosa province, iconic historic complex uniquely featuring both the towering original tenshu keep and the preserved Honmaru Goten samurai residential palace, steep stone base fitted with curved iron anti-ninja climbing spikes (shinobi-gaeshi) and monumental stone water drainage gargoyles (mizu-kiri), dramatic stormy Pacific typhoon clouds brewing above, moody atmospheric lighting with wind whipping through subtropical sago cycad palms and ancient pine trees, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Kōchi avec son donjon et son palais seigneurial Honmaru Goten préservés, piques anti-shinobi sur les murailles et gargouilles de pierre sous un ciel d'orage de typhon du Pacifique.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Dramatic cinematic illustration of Kochi Castle in Tosa province, iconic historic complex uniquely featuring both the towering original tenshu keep and the preserved Honmaru Goten samurai residential palace, steep stone base fitted with curved iron anti-ninja climbing spikes (shinobi-gaeshi) and monumental stone water drainage gargoyles (mizu-kiri), dramatic stormy Pacific typhoon clouds brewing above, moody atmospheric lighting with wind whipping through subtropical sago cycad palms and ancient pine trees, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- MARUGAME -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/marugame.jpg'; ?>
+                                <img src="/public/assets/castles/marugame.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château de Marugame</strong><br>
+                                <span style="font-size: 0.75rem; color: #fbbf24;">丸亀城 (Murailles en Éventail de 60m &bull; Seto)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                marugame.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Epic wide-angle cinematic illustration of Marugame Castle, renowned for the tallest stone walls in Japan soaring over 60 meters in four sweeping stepped terraces, distinctive fan-sloped stone curvature (ogi-no-kobai) rising dramatically from the base to sheer vertical summits, compact white tenshu keep perched at the pinnacle, overlooking the tranquil sparkling Seto Inland Sea dotted with green island archipelagoes, golden hour sunlight hitting the weathered cut-stone masonry, ukiyo-e woodblock blended with epic cinematic realism, magnificent scale, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Marugame et ses 4 terrasses colossales de murailles de pierre de 60 mètres en courbure d'éventail (ōgi-no-kōbai), surmonté de son donjon blanc face aux îles de la mer intérieure de Seto.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Epic wide-angle cinematic illustration of Marugame Castle, renowned for the tallest stone walls in Japan soaring over 60 meters in four sweeping stepped terraces, distinctive fan-sloped stone curvature (ogi-no-kobai) rising dramatically from the base to sheer vertical summits, compact white tenshu keep perched at the pinnacle, overlooking the tranquil sparkling Seto Inland Sea dotted with green island archipelagoes, golden hour sunlight hitting the weathered cut-stone masonry, ukiyo-e woodblock blended with epic cinematic realism, magnificent scale, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- MARUOKA -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/maruoka.jpg'; ?>
+                                <img src="/public/assets/castles/maruoka.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château de Maruoka</strong><br>
+                                <span style="font-size: 0.75rem; color: #c084fc;">丸岡城 (Château de la Brume &bull; Tuiles de Pierre)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                maruoka.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Mystical cinematic illustration of Maruoka Castle, the legendary 'Mist Castle' (Kasumi-ga-jo) in Echizen, archaic 16th-century feudal tenshu with steep rustic stone foundations, unique heavy roof crafted entirely from 6,000 blue-gray volcanic stone tiles (shakudani-ishi), mystical swirling dense white fog billowing around the fortress evoking the legendary giant serpent's protective mist, ancient lanterns glowing through the fog, eerie Sengoku-period atmosphere, ukiyo-e woodblock inspired semi-realistic digital painting, atmospheric chiaroscuro, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Maruoka enveloppé de brume mystique (la légende du serpent géant protecteur), toiture archaïque de 6 000 tuiles en pierre volcanique d'Asuwa et fondations rocheuses.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Mystical cinematic illustration of Maruoka Castle, the legendary 'Mist Castle' (Kasumi-ga-jo) in Echizen, archaic 16th-century feudal tenshu with steep rustic stone foundations, unique heavy roof crafted entirely from 6,000 blue-gray volcanic stone tiles (shakudani-ishi), mystical swirling dense white fog billowing around the fortress evoking the legendary giant serpent's protective mist, ancient lanterns glowing through the fog, eerie Sengoku-period atmosphere, ukiyo-e woodblock inspired semi-realistic digital painting, atmospheric chiaroscuro, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- MATSUE -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/matsue.jpg'; ?>
+                                <img src="/public/assets/castles/matsue.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château de Matsue</strong><br>
+                                <span style="font-size: 0.75rem; color: #94a3b8;">松江城 (Le Château du Pluvier &bull; Bois Noirci)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                matsue.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Cinematic noble illustration of Matsue Castle, the 'Plover Castle' (Chidori-jo), striking five-tiered black fortress cladded in dark soot-treated wooden rainboards (tsumi-ita), National Treasure of Izumo province standing on a green hill overlooking the vast waters of Lake Shinji, tranquil castle moats navigable by wooden samurai boats, flock of plover birds soaring across a moody silver twilight sky, ancient stone bridges and weeping willows, ukiyo-e woodblock inspired semi-realistic digital art, rich deep black and wood textures, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Matsue, forteresse noire austère bardée de bois traité au charbon, Trésor National sur la colline d'Izumo au bord du lac Shinji avec volée d'oiseaux pluviers au crépuscule.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic noble illustration of Matsue Castle, the 'Plover Castle' (Chidori-jo), striking five-tiered black fortress cladded in dark soot-treated wooden rainboards (tsumi-ita), National Treasure of Izumo province standing on a green hill overlooking the vast waters of Lake Shinji, tranquil castle moats navigable by wooden samurai boats, flock of plover birds soaring across a moody silver twilight sky, ancient stone bridges and weeping willows, ukiyo-e woodblock inspired semi-realistic digital art, rich deep black and wood textures, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- MATSUMOTO -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/matsumoto.jpg'; ?>
+                                <img src="/public/assets/castles/matsumoto.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château de Matsumoto</strong><br>
+                                <span style="font-size: 0.75rem; color: #f87171;">松本城 (Château du Corbeau &bull; Alpes Japonaises)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                matsumoto.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Masterpiece cinematic illustration of Matsumoto Castle, the world-famous 'Crow Castle' (Karasu-jo), five-tier six-story black lacquered tenshu keep accompanied by the vermilion-lacquered Moon-Viewing Turret (Tsukimi-yagura), perfect mirror reflection cast across wide crystalline moats with swimming red koi fish, towering snow-covered Northern Japanese Alps mountain range dominating the background, clear crisp morning atmosphere, flock of black crows gliding over the castle roofs, ukiyo-e woodblock aesthetic fused with stunning cinematic clarity, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Matsumoto « Château du Corbeau », donjon d'ébène noir laqué et pavillon vermillon d'observation de la lune se reflétant dans les douves aux carpes koï, face aux Alpes japonaises.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Masterpiece cinematic illustration of Matsumoto Castle, the world-famous 'Crow Castle' (Karasu-jo), five-tier six-story black lacquered tenshu keep accompanied by the vermilion-lacquered Moon-Viewing Turret (Tsukimi-yagura), perfect mirror reflection cast across wide crystalline moats with swimming red koi fish, towering snow-covered Northern Japanese Alps mountain range dominating the background, clear crisp morning atmosphere, flock of black crows gliding over the castle roofs, ukiyo-e woodblock aesthetic fused with stunning cinematic clarity, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- MATSUYAMA -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/matsuyama.jpg'; ?>
+                                <img src="/public/assets/castles/matsuyama.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château de Matsuyama</strong><br>
+                                <span style="font-size: 0.75rem; color: #4ade80;">松山城 (Complexe Renritsu-shiki &bull; Mont Katsuyama)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                matsuyama.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Grand panoramic cinematic illustration of Matsuyama Castle in Iyo province, sprawling hilltop fortress atop Mount Katsuyama at 132 meters, intricate interconnected complex (renritsu-shiki) linking the three-story tenshu to multiple defensive watchtowers and fortified corridor gates, sweeping multi-tiered white plaster walls and grey tile roofs overlooking the historic plain of Dogo and the distant sea, lush green pine forest below, warm sunny afternoon sky with drifting clouds, ukiyo-e woodblock inspired semi-realistic digital painting, expansive vista, 8k</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Matsuyama perché sur le mont Katsuyama (132 m), complexe relié de 21 tours de guet et portes fortifiées, murailles blanches dominant la plaine de Dōgo et la mer de Seto.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Grand panoramic cinematic illustration of Matsuyama Castle in Iyo province, sprawling hilltop fortress atop Mount Katsuyama at 132 meters, intricate interconnected complex (renritsu-shiki) linking the three-story tenshu to multiple defensive watchtowers and fortified corridor gates, sweeping multi-tiered white plaster walls and grey tile roofs overlooking the historic plain of Dogo and the distant sea, lush green pine forest below, warm sunny afternoon sky with drifting clouds, ukiyo-e woodblock inspired semi-realistic digital painting, expansive vista, 8k" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- UWAJIMA -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $cFile = __DIR__ . '/../../public/assets/castles/uwajima.jpg'; ?>
+                                <img src="/public/assets/castles/uwajima.jpg?v=<?= file_exists($cFile) ? filemtime($cFile) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Château d'Uwajima</strong><br>
+                                <span style="font-size: 0.75rem; color: #f59e0b;">宇和島城 (Plan Pentagonal de Takatora &bull; Baie Côtière)</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                uwajima.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Cinematic coastal illustration of Uwajima Castle, masterwork of fortress genius Todo Takatora, elegant three-story tenshu with decorative curved shoin-style gables and dark wood accents, set within its ingenious secret pentagonal rampart layout designed to confuse besiegers, perched on a coastal hill directly overlooking the tranquil sapphire waters and fishing harbors of Uwajima Bay, seabirds gliding over the defensive walls, soft golden dusk light reflecting on the sea, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Uwajima conçu par Tōdō Takatora avec son enceinte secrète en pentagone irrégulier, donjon à 3 étages dominant la baie maritime et les ports d'Uwajima au crépuscule.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic coastal illustration of Uwajima Castle, masterwork of fortress genius Todo Takatora, elegant three-story tenshu with decorative curved shoin-style gables and dark wood accents, set within its ingenious secret pentagonal rampart layout designed to confuse besiegers, perched on a coastal hill directly overlooking the tranquil sapphire waters and fishing harbors of Uwajima Bay, seabirds gliding over the defensive walls, soft golden dusk light reflecting on the sea, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
                             </td>
                         </tr>
                     </tbody>
