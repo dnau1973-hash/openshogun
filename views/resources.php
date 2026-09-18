@@ -313,9 +313,6 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">🏗️ Chantiers du Domaine</h3>
-                <?php if ($user['faction'] === 'terran'): ?>
-                    <span title="Bonus Clan Oda" style="font-size:0.75rem; color:#93c5fd; background:rgba(59,130,246,0.2); padding:0.1rem 0.4rem; border-radius:4px;">Double Chantier (Oda)</span>
-                <?php endif; ?>
             </div>
             <div class="card-body">
                 <?php if (empty($queue)): ?>
