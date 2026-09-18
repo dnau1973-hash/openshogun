@@ -212,7 +212,7 @@
     <p style="margin-top:0.35rem; color:#64748b;">Moteur féodal Sengoku PHP 8 + MariaDB + JavaScript Vanilla</p>
 </footer>
 
-<script src="/public/js/app.js"></script>
+<script src="/public/js/app.js?v=<?= file_exists(__DIR__ . '/../../public/js/app.js') ? filemtime(__DIR__ . '/../../public/js/app.js') : time() ?>"></script>
 <script>
 let currentViewingProfileId = null;
 

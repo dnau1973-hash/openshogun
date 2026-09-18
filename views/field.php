@@ -571,8 +571,8 @@ async function cancelFieldBuild(queueId) {
 
 async function confirmDemolishField(slot, fieldName) {
     const confirmed = await showModalConfirm(
-        `Êtes-vous certain de vouloir raser définitivement l'exploitation ${fieldName} sur la parcelle #${slot} ?\n\nUn ordre de démolition sera émis avec un compte à rebours. Vous récupérerez 30% des matériaux à la fin des travaux.`,
-        'Démantèlement de l\'Exploitation'
+        `Êtes-vous certain de vouloir raser définitivement l'exploitation <strong>${fieldName}</strong> sur la parcelle <strong>#${slot}</strong> ?<br><br>Un ordre de démolition sera émis avec un compte à rebours. Vous récupérerez <strong>30% des matériaux</strong> à la fin des travaux.`,
+        'Raser l\'Exploitation'
     );
     if (!confirmed) return;
 

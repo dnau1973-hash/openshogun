@@ -197,12 +197,18 @@ function showModalConfirm(message, title = 'Ordre de Commandement', callback = n
         }
         currentConfirmResolve = resolve;
 
-        card.classList.remove('type-error', 'type-success', 'type-warning', 'type-confirm');
-        card.classList.add('type-confirm');
-
-        const isCancelAction = /interruption|annul|démant|suspend/i.test(title + ' ' + message);
-        const icon = isCancelAction ? '🛑' : '❓';
-        const confirmLabel = isCancelAction ? 'Confirmer l\'interruption' : 'Confirmer';
+        const isDemolish = /raser|démant|démol/i.test(title + ' ' + message);
+        const isCancelAction = /interruption|annul|suspend/i.test(title + ' ' + message);
+        
+        let icon = '❓';
+        let confirmLabel = 'Confirmer';
+        if (isDemolish) {
+            icon = '💥';
+            confirmLabel = /bâtiment/i.test(title + ' ' + message) ? '💥 Démanteler le bâtiment' : '💥 Raser l\'exploitation';
+        } else if (isCancelAction) {
+            icon = '🛑';
+            confirmLabel = 'Confirmer l\'interruption';
+        }
 
         titleEl.innerText = title;
         iconEl.innerText = icon;
