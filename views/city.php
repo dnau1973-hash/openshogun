@@ -97,6 +97,52 @@ foreach (BUILDINGS as $code => $bInfo) {
 .fields-viewport.rts-city-surface {
     background-image: url('/public/assets/shogun_castle_city_bg.jpg?v=<?= $bgVersion ?>') !important;
 }
+
+/* Hotspots interactifs de la Cité Castrale intégrée */
+.rts-city-surface .rts-hotspot {
+    border-radius: 8px;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    background: transparent;
+    border: 1.5px solid transparent;
+}
+
+.rts-city-surface .rts-hotspot:hover {
+    background: rgba(234, 179, 8, 0.14);
+    border: 1.5px solid rgba(234, 179, 8, 0.85);
+    box-shadow: 0 0 18px rgba(234, 179, 8, 0.5), inset 0 0 12px rgba(234, 179, 8, 0.2);
+}
+
+.rts-city-surface .rts-hotspot.highlighted {
+    background: rgba(234, 179, 8, 0.2);
+    border: 2px solid #eab308;
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.75);
+}
+
+.rts-city-surface .rts-hotspot .rts-level-bubble {
+    top: 6%;
+    right: 8%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.rts-city-surface .rts-hotspot:hover .rts-level-bubble {
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(234, 179, 8, 0.75);
+}
+
+.rts-city-surface .rts-hotspot .rts-level-bubble.level-zero {
+    background: rgba(28, 25, 23, 0.92);
+    border: 2px dashed #eab308;
+    color: #fef08a;
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+.rts-city-surface .rts-hotspot:hover .rts-level-bubble.level-zero {
+    background: #b91c1c;
+    border: 2px solid #fef08a;
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(185, 28, 28, 0.85);
+}
 </style>
 <?= SlotPositionEngine::renderCss('city') ?>
 
@@ -107,7 +153,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                 <h2 class="card-title">🏯 Cité Castrale & Palais du Daimyō - <?= htmlspecialchars($planet['name']) ?></h2>
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
                     Forteresse Principale : <strong style="color:var(--border-highlight, #c2252b);">Tenshu Niveau <?= $hqLevel ?></strong> 
-                    <span style="opacity:0.85;">(Cour intérieure fortifiée, dojos d'armes, arsenaux et greniers)</span>
+                    <span style="opacity:0.85;">(Cour intérieure fortifiée, dojos d'armes, forges et greniers)</span>
                 </div>
             </div>
             <div style="display:flex; gap:0.5rem; align-items:center;">
@@ -128,94 +174,55 @@ foreach (BUILDINGS as $code => $bInfo) {
 
             <!-- Viewport RTS de la Cité Castrale (shogun_castle_city_bg.jpg) -->
             <div class="fields-viewport rts-surface rts-city-surface" id="rts-city-viewport">
-                <!-- Porte fortifiée vers les terroirs ruraux (en bas à gauche avec pont-levis) -->
+                <!-- Porte fortifiée vers les terroirs ruraux (en bas à droite avec Mon) -->
                 <div class="rts-hotspot sector-gateway hotspot-city-slot-gateway" 
                      data-sector="gateway"
-                     title="🌾 Grande Porte Fortifiée (Retour aux Terroirs Ruraux)"
+                     title="🌾 Grande Porte Castrale (Retour aux Terroirs Ruraux)"
                      onclick="window.location.href='?page=resources'">
                     <div class="rts-level-bubble rts-gateway-bubble" title="🌾 Vers le Terroir">🌾</div>
                 </div>
 
-                <!-- Boucle sur les 16 Slots de la Cité Féodale (Slots 19 à 34) -->
+                <!-- Boucle sur les 16 Bâtiments de la Cité Féodale (Slots 19 à 34) -->
                 <?php foreach ($citySlots as $slot => $slotData): 
                     $code = $slotData['code'];
-                    $lvl = (int)$slotData['level'];
-                    $isBuildingInQueue = ($code !== 'free_plot' && isset($activeBuildingQueue[$code]));
+                    if ($code === 'free_plot' && isset(CITY_SLOT_LAYOUT[$slot])) {
+                        $code = CITY_SLOT_LAYOUT[$slot];
+                    }
+                    $lvl = (int)($slotData['level'] ?? 0);
+                    if ($lvl === 0 && isset($buildings[$code])) {
+                        $lvl = (int)$buildings[$code];
+                    }
+                    $bInfo = BUILDINGS[$code] ?? null;
+                    if (!$bInfo) continue;
+
+                    $sector = $buildingSectors[$code] ?? 'logistics';
+                    $isBuildingInQueue = isset($activeBuildingQueue[$code]);
                     $isDemolishing = ($isBuildingInQueue && (int)($activeBuildingQueue[$code]['target_level'] ?? -1) === 0);
                     $isUnderConstruction = ($lvl === 0 && $isBuildingInQueue && !$isDemolishing);
-                    $isEmptySlot = ($code === 'free_plot' || ($lvl === 0 && !$isBuildingInQueue));
-                    $isWallSlot = ($code === 'wall' || (int)$slot === 34);
+                    $isUpgrading = ($lvl > 0 && $isBuildingInQueue && !$isDemolishing);
+                    $isLevelZero = ($lvl === 0 && !$isBuildingInQueue);
                 ?>
-                    <?php if ($isEmptySlot): ?>
-                        <!-- Emplacement Libre / Terrain disponible pour future construction -->
-                        <div class="rts-hotspot is-empty-plot hotspot-city-slot-<?= $slot ?>" 
-                             data-sector="logistics"
-                             data-slot="<?= $slot ?>"
-                             title="Emplacement Libre #<?= $slot ?> (Terrain disponible - Cliquez pour ériger un bâtiment)"
-                             onclick="openBuildModal(<?= $slot ?>)">
-                            <div class="rts-level-bubble" title="Emplacement Libre #<?= $slot ?> (Cliquer pour bâtir)">+</div>
-                        </div>
-                    <?php elseif ($isUnderConstruction): 
-                        $bInfo = BUILDINGS[$code] ?? null;
-                        $sector = $buildingSectors[$code] ?? 'logistics';
-                        $tileImg = $bInfo['tile_img'] ?? 'tile_tenshu.png';
-                    ?>
-                        <!-- Bâtiment en cours de fondation (Niveau 0 -> 1) -->
-                        <div class="rts-hotspot sector-<?= $sector ?> hotspot-city-slot-<?= $slot ?>" 
-                             data-sector="<?= $sector ?>"
-                             data-slot="<?= $slot ?>"
-                             data-building="<?= $code ?>"
-                             title="<?= htmlspecialchars($bInfo['name'] ?? $code) ?> (Chantier en cours - Niveau 1)"
-                             onclick="window.location.href='/?page=building&slot=<?= $slot ?>'">
-                            
-                            <?php if (!$isWallSlot): ?>
-                                <img src="/public/assets/<?= $tileImg ?>" 
-                                     class="rts-tile-sprite <?= ($code === 'hq') ? 'rts-tenshu-sprite' : '' ?>" 
-                                     style="opacity:0.65; filter:drop-shadow(0 0 8px rgba(234,179,8,0.6));"
-                                     alt="<?= htmlspecialchars($bInfo['name'] ?? $code) ?>" 
-                                     draggable="false">
-                            <?php endif; ?>
-
-                            <div class="rts-level-bubble upgrading" title="Chantier de fondation en cours...">
+                    <div class="rts-hotspot sector-<?= $sector ?> <?= $isLevelZero ? 'is-level-zero' : '' ?> hotspot-city-slot-<?= $slot ?>" 
+                         data-sector="<?= $sector ?>"
+                         data-slot="<?= $slot ?>"
+                         data-building="<?= $code ?>"
+                         title="<?= htmlspecialchars($bInfo['name']) ?> (<?= $isLevelZero ? 'Non bâti - Cliquez pour fonder' : ($isDemolishing ? 'Démantèlement en cours' : ($isUnderConstruction ? 'Chantier en cours (Niv. 1)' : 'Niveau ' . $lvl)) ?>)"
+                         onclick="window.location.href='/?page=building&slot=<?= $slot ?>'">
+                        
+                        <!-- Badge féodal de niveau (ou marqueur de fondation) -->
+                        <div class="rts-level-bubble <?= ($code === 'hq') ? 'rts-tenshu-bubble' : '' ?> <?= $isLevelZero ? 'level-zero' : '' ?> <?= $isDemolishing ? 'demolishing' : (($isUnderConstruction || $isUpgrading) ? 'upgrading' : '') ?>" 
+                             title="<?= htmlspecialchars($bInfo['name']) ?> (<?= $isLevelZero ? 'Non bâti - Cliquer pour ériger' : 'Niveau ' . $lvl ?>)">
+                            <?php if ($isLevelZero): ?>
+                                +
+                            <?php elseif ($isUnderConstruction || $isUpgrading): ?>
                                 <span class="bubble-pulse">⏳</span>
-                            </div>
-                        </div>
-                    <?php else: 
-                        $bInfo = BUILDINGS[$code] ?? null;
-                        if (!$bInfo) continue;
-                        $sector = $buildingSectors[$code] ?? 'logistics';
-                        $tileImg = $bInfo['tile_img'] ?? 'tile_tenshu.png';
-                        $isUpgrading = $isBuildingInQueue && !$isDemolishing;
-                    ?>
-                        <!-- Bâtiment érigé actif -->
-                        <div class="rts-hotspot sector-<?= $sector ?> hotspot-city-slot-<?= $slot ?>" 
-                             data-sector="<?= $sector ?>"
-                             data-slot="<?= $slot ?>"
-                             data-building="<?= $code ?>"
-                             title="<?= htmlspecialchars($bInfo['name']) ?> (<?= $isDemolishing ? 'Démantèlement en cours' : 'Niveau ' . $lvl ?>)"
-                             onclick="window.location.href='/?page=building&slot=<?= $slot ?>'">
-                            
-                            <?php if (!$isWallSlot): ?>
-                                <!-- Sprite PNG du bâtiment féodal -->
-                                <img src="/public/assets/<?= $tileImg ?>" 
-                                     class="rts-tile-sprite <?= ($code === 'hq') ? 'rts-tenshu-sprite' : '' ?>" 
-                                     alt="<?= htmlspecialchars($bInfo['name']) ?>" 
-                                     style="<?= $isDemolishing ? 'opacity:0.65; filter:grayscale(40%) sepia(20%);' : '' ?>"
-                                     draggable="false">
-                            <?php endif; ?>
-
-                            <!-- Badge minimaliste de niveau en hauteur et à droite (Style Travian) -->
-                            <div class="rts-level-bubble <?= ($code === 'hq') ? 'rts-tenshu-bubble' : '' ?> <?= $isDemolishing ? 'demolishing' : ($isUpgrading ? 'upgrading' : '') ?>" 
-                                 title="<?= htmlspecialchars($bInfo['name']) ?> (<?= $isDemolishing ? 'Démolition vers Niv. 0' : 'Niveau ' . $lvl ?>)">
+                            <?php elseif ($isDemolishing): ?>
+                                <span class="bubble-pulse">🗑️</span>
+                            <?php else: ?>
                                 <?= $lvl ?>
-                                <?php if ($isDemolishing): ?>
-                                    <span class="bubble-pulse">🗑️</span>
-                                <?php elseif ($isUpgrading): ?>
-                                    <span class="bubble-pulse">⏳</span>
-                                <?php endif; ?>
-                            </div>
+                            <?php endif; ?>
                         </div>
-                    <?php endif; ?>
+                    </div>
                 <?php endforeach; ?>
             </div>
 

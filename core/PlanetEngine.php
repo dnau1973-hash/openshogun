@@ -295,58 +295,33 @@ class PlanetEngine {
         $stmt->execute([$planetId]);
         $rows = $stmt->fetchAll();
 
+        $buildingsByCode = [];
+        $rowsBySlot = [];
+        foreach ($rows as $r) {
+            $buildingsByCode[$r['building_type']] = $r;
+            if (!empty($r['slot'])) {
+                $rowsBySlot[(int)$r['slot']] = $r;
+            }
+        }
+
+        $defaultLayout = CITY_SLOT_LAYOUT;
         $slots = [];
         for ($s = 19; $s <= 34; $s++) {
+            $code = $defaultLayout[$s] ?? 'free_plot';
+            $level = 0;
+            if (isset($rowsBySlot[$s])) {
+                $code = $rowsBySlot[$s]['building_type'];
+                $level = (int)$rowsBySlot[$s]['level'];
+            } elseif (isset($buildingsByCode[$code])) {
+                $level = (int)$buildingsByCode[$code]['level'];
+                $this->db->prepare("UPDATE planet_buildings SET slot = ? WHERE id = ?")->execute([$s, $buildingsByCode[$code]['id']]);
+            }
+
             $slots[$s] = [
                 'slot' => $s,
-                'code' => 'free_plot',
-                'level' => 0
+                'code' => $code,
+                'level' => $level
             ];
-        }
-
-        $unslotted = [];
-        foreach ($rows as $r) {
-            $s = !empty($r['slot']) ? (int)$r['slot'] : null;
-            if ($s && $s >= 19 && $s <= 34 && $slots[$s]['code'] === 'free_plot') {
-                $slots[$s] = [
-                    'slot' => $s,
-                    'code' => $r['building_type'],
-                    'level' => (int)$r['level']
-                ];
-            } else {
-                $unslotted[] = $r;
-            }
-        }
-
-        // Pour les éventuels bâtiments sans slot, leur affecter un slot par défaut
-        if (!empty($unslotted)) {
-            $defaultLayout = CITY_SLOT_LAYOUT;
-            foreach ($unslotted as $un) {
-                $type = $un['building_type'];
-                $assignedSlot = null;
-                foreach ($defaultLayout as $ds => $dc) {
-                    if ($dc === $type && $slots[$ds]['code'] === 'free_plot') {
-                        $assignedSlot = $ds;
-                        break;
-                    }
-                }
-                if (!$assignedSlot) {
-                    for ($s = 19; $s <= 34; $s++) {
-                        if ($slots[$s]['code'] === 'free_plot') {
-                            $assignedSlot = $s;
-                            break;
-                        }
-                    }
-                }
-                if ($assignedSlot) {
-                    $slots[$assignedSlot] = [
-                        'slot' => $assignedSlot,
-                        'code' => $type,
-                        'level' => (int)$un['level']
-                    ];
-                    $this->db->prepare("UPDATE planet_buildings SET slot = ? WHERE id = ?")->execute([$assignedSlot, $un['id']]);
-                }
-            }
         }
 
         return $slots;

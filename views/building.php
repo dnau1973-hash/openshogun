@@ -39,7 +39,7 @@ if (!$slot || $slot < 19 || $slot > 34) {
     $slot = 19;
 }
 
-$slotData = $citySlots[$slot] ?? ['slot' => $slot, 'code' => 'free_plot', 'level' => 0];
+$slotData = $citySlots[$slot] ?? ['slot' => $slot, 'code' => CITY_SLOT_LAYOUT[$slot] ?? 'free_plot', 'level' => 0];
 $code = $slotData['code'];
 $lvl = (int)$slotData['level'];
 
@@ -64,6 +64,12 @@ $buildingSectors = [
     'tank' => ['name' => 'Silo à Riz Impérial', 'sec' => 'sec-logistics', 'icon' => '🌾'],
     'quantum_vault' => ['name' => 'Cachette Secrète', 'sec' => 'sec-logistics', 'icon' => '🔒'],
     'market' => ['name' => 'Marché Castral', 'sec' => 'sec-logistics', 'icon' => '⚖️'],
+    'sawmill' => ['name' => 'Charpenterie (Kizukuri)', 'sec' => 'sec-logistics', 'icon' => '🪵'],
+    'stonemason' => ['name' => 'Taille de Granit', 'sec' => 'sec-logistics', 'icon' => '🪨'],
+    'grain_mill' => ['name' => 'Meunerie de Riz', 'sec' => 'sec-logistics', 'icon' => '🍶'],
+    'blacksmith' => ['name' => 'Grande Forge Tamahagane', 'sec' => 'sec-military', 'icon' => '⚔️'],
+    'teahouse' => ['name' => 'Pavillon de Thé', 'sec' => 'sec-science', 'icon' => '🍵'],
+    'tournament_square' => ['name' => 'Place d\'Exercices', 'sec' => 'sec-military', 'icon' => '🎯'],
     'free_plot' => ['name' => 'Terrain Vierge', 'sec' => 'sec-logistics', 'icon' => '⛳'],
 ];
 
@@ -90,7 +96,7 @@ $isTerran = ($user['faction'] === 'terran');
 $canQueueNewBuilding = $isTerran ? ($buildingsInQueue === 0) : (count($queue) === 0);
 
 $isBuildingInQueue = ($code !== 'free_plot' && $activeJob !== null);
-$isEmptyPlot = ($code === 'free_plot' || ($lvl === 0 && !$isBuildingInQueue));
+$isEmptyPlot = ($code === 'free_plot');
 
 // Bâtiments disponibles à la construction sur cet emplacement
 $availableBuildingsToConstruct = [];
@@ -640,7 +646,7 @@ if (!$isEmptyPlot) {
                             </p>
 
                             <div style="margin-top: 1.5rem;">
-                                <button type="button" class="field-btn-primary" id="btnLaunchBuildingUpgrade" onclick="launchBuildingUpgrade('<?= $code ?>', <?= $targetLevel ?>)">
+                                <button type="button" class="field-btn-primary" id="btnLaunchBuildingUpgrade" onclick="launchBuildingUpgrade('<?= $code ?>', <?= $targetLevel ?>, <?= $slot ?>)">
                                     <?= ($lvl === 0) ? '🔨 Ériger au Niveau 1' : '⚡ Élever au Niveau ' . $targetLevel ?>
                                 </button>
                             </div>
