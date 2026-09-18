@@ -225,10 +225,11 @@ function showModalConfirm(message, title = 'Ordre de Commandement', callback = n
         `;
 
         const doClose = (result) => {
-            closeCustomAlert();
-            if (currentConfirmResolve) {
-                const res = currentConfirmResolve;
-                currentConfirmResolve = null;
+            const res = currentConfirmResolve;
+            currentConfirmResolve = null;
+            const modal = document.getElementById('customAlertModal');
+            if (modal) modal.style.display = 'none';
+            if (res) {
                 res(result);
             }
         };

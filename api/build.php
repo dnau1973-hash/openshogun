@@ -35,7 +35,11 @@ try {
     } elseif ($action === 'cancel') {
         $queueId = (int)($_POST['queue_id'] ?? 0);
         $ok = $buildingEngine->cancelUpgrade((int)$planet['id'], $queueId);
-        echo json_encode(['success' => $ok, 'message' => $ok ? 'Construction annulée, 80% remboursé.' : 'Impossible d\'annuler.']);
+        echo json_encode([
+            'success' => $ok, 
+            'message' => $ok ? 'Construction annulée, 80% remboursé.' : '',
+            'error' => $ok ? null : 'Impossible d\'annuler ce chantier (introuvable ou déjà achevé).'
+        ]);
     } elseif ($action === 'demolish') {
         $category = $_POST['category'] ?? 'building';
         $targetId = $_POST['target_id'] ?? '';
