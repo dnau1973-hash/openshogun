@@ -23,6 +23,37 @@ $tab = $_GET['tab'] ?? 'login';
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+        .auth-video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .auth-video-element {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%) scale(1.02);
+            object-fit: cover;
+        }
+        .auth-video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(5, 5, 8, 0.15) 0%, rgba(4, 4, 7, 0.60) 100%);
         }
         .auth-container {
             max-width: 850px;
@@ -132,6 +163,25 @@ $tab = $_GET['tab'] ?? 'login';
     </style>
 </head>
 <body>
+
+<?php
+$loopVideoMp4 = '/public/assets/shogun_login_bg_loop.mp4';
+$loopVideoWebm = '/public/assets/shogun_login_bg_loop.webm';
+$hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
+?>
+
+<?php if ($hasLoopVideo): ?>
+    <!-- Fond Vidéo Animé en Boucle (sans logo Gemini et raccord invisible) -->
+    <div class="auth-video-container">
+        <video class="auth-video-element" autoplay muted loop playsinline poster="/public/assets/shogun_login_bg.jpg">
+            <?php if (file_exists(__DIR__ . '/..' . $loopVideoWebm)): ?>
+                <source src="<?= $loopVideoWebm ?>?v=<?= filemtime(__DIR__ . '/..' . $loopVideoWebm) ?>" type="video/webm">
+            <?php endif; ?>
+            <source src="<?= $loopVideoMp4 ?>?v=<?= filemtime(__DIR__ . '/..' . $loopVideoMp4) ?>" type="video/mp4">
+        </video>
+        <div class="auth-video-overlay"></div>
+    </div>
+<?php endif; ?>
 
 <div class="auth-container">
     <div class="auth-box">
