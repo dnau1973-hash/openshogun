@@ -524,7 +524,7 @@ async function launchFieldUpgrade(slot, targetLvl, fieldType = null) {
         if (data.success) {
             window.location.reload();
         } else {
-            alert(data.error || 'Erreur lors du lancement des travaux.');
+            showModalAlert(data.error || 'Erreur lors du lancement des travaux.', 'error');
             if (btn) {
                 btn.disabled = false;
                 btn.innerText = `🔨 Lancer l'Amélioration au Niveau ${targetLvl}`;
@@ -532,7 +532,7 @@ async function launchFieldUpgrade(slot, targetLvl, fieldType = null) {
         }
     } catch (err) {
         console.error(err);
-        alert('Erreur réseau lors de la communication avec le fief.');
+        showModalAlert('Erreur réseau lors de la communication avec le fief.', 'error');
         if (btn) {
             btn.disabled = false;
             btn.innerText = `🔨 Lancer l'Amélioration au Niveau ${targetLvl}`;
@@ -541,9 +541,11 @@ async function launchFieldUpgrade(slot, targetLvl, fieldType = null) {
 }
 
 async function cancelFieldBuild(queueId) {
-    if (!confirm('Confirmez-vous l\'annulation de ce chantier ? (80% des ressources seront restituées)')) {
-        return;
-    }
+    const confirmed = await showModalConfirm(
+        'Voulez-vous vraiment suspendre ces travaux ruraux ? 80% des matériaux investis vous seront restitués.',
+        'Interruption de Chantier'
+    );
+    if (!confirmed) return;
 
     try {
         const formData = new FormData();
@@ -559,18 +561,20 @@ async function cancelFieldBuild(queueId) {
         if (data.success) {
             window.location.reload();
         } else {
-            alert(data.error || 'Impossible d\'annuler ce chantier.');
+            showModalAlert(data.error || 'Impossible d\'interrompre ce chantier.', 'error');
         }
     } catch (err) {
         console.error(err);
-        alert('Erreur réseau lors de l\'annulation.');
+        showModalAlert('Erreur réseau lors de l\'interruption.', 'error');
     }
 }
 
 async function confirmDemolishField(slot, fieldName) {
-    if (!confirm(`Êtes-vous certain de vouloir raser définitivement l'exploitation ${fieldName} sur la parcelle #${slot} ?\n\nUn ordre de démolition sera émis avec un compte à rebours. Vous récupérerez 30% des matériaux à la fin des travaux.`)) {
-        return;
-    }
+    const confirmed = await showModalConfirm(
+        `Êtes-vous certain de vouloir raser définitivement l'exploitation ${fieldName} sur la parcelle #${slot} ?\n\nUn ordre de démolition sera émis avec un compte à rebours. Vous récupérerez 30% des matériaux à la fin des travaux.`,
+        'Démantèlement de l\'Exploitation'
+    );
+    if (!confirmed) return;
 
     try {
         const formData = new FormData();
@@ -588,11 +592,11 @@ async function confirmDemolishField(slot, fieldName) {
         if (data.success) {
             window.location.reload();
         } else {
-            alert(data.error || 'Impossible de raser cette exploitation.');
+            showModalAlert(data.error || 'Impossible de raser cette exploitation.', 'error');
         }
     } catch (err) {
         console.error(err);
-        alert('Erreur réseau lors de la suppression.');
+        showModalAlert('Erreur réseau lors de la suppression.', 'error');
     }
 }
 

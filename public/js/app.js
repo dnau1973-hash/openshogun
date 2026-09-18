@@ -167,7 +167,20 @@ function showModalAlert(message, type = 'info', title = null) {
     });
 }
 
-function showModalConfirm(message, title = 'Ordre de Commandement') {
+let currentConfirmResolve = null;
+
+function showModalConfirm(message, title = 'Ordre de Commandement', callback = null) {
+    // Supporter la signature alternative (title, message, callback)
+    if (typeof callback === 'function' || (typeof arguments[1] === 'string' && typeof arguments[2] === 'function')) {
+        const actualTitle = message;
+        const actualMessage = title;
+        const cb = arguments[2];
+        return showModalConfirm(actualMessage, actualTitle).then(confirmed => {
+            if (confirmed && cb) cb();
+            return confirmed;
+        });
+    }
+
     return new Promise((resolve) => {
         const modal = document.getElementById('customAlertModal');
         const card = document.getElementById('customAlertCard');
@@ -178,26 +191,49 @@ function showModalConfirm(message, title = 'Ordre de Commandement') {
 
         if (!modal) return resolve(false);
 
+        if (currentConfirmResolve) {
+            currentConfirmResolve(false);
+            currentConfirmResolve = null;
+        }
+        currentConfirmResolve = resolve;
+
         card.classList.remove('type-error', 'type-success', 'type-warning', 'type-confirm');
         card.classList.add('type-confirm');
 
+        const isCancelAction = /interruption|annul|démant|suspend/i.test(title + ' ' + message);
+        const icon = isCancelAction ? '🛑' : '❓';
+        const confirmLabel = isCancelAction ? 'Confirmer l\'interruption' : 'Confirmer';
+
         titleEl.innerText = title;
-        iconEl.innerText = '❓';
-        textEl.innerText = message;
+        iconEl.innerText = icon;
+        textEl.innerHTML = (typeof message === 'string') ? message.replace(/\n/g, '<br>') : message;
 
         actionsEl.innerHTML = `
-            <button class="btn btn-secondary" id="customConfirmCancelBtn" style="padding:0.5rem 1rem;">Annuler</button>
-            <button class="btn btn-primary" id="customConfirmOkBtn" style="padding:0.5rem 1.25rem;">Confirmer</button>
+            <button type="button" class="btn btn-secondary" id="customConfirmCancelBtn" style="padding:0.5rem 1rem;">Annuler</button>
+            <button type="button" class="btn btn-primary" id="customConfirmOkBtn" style="padding:0.5rem 1.25rem; background: var(--red-primary, #c2252b); border-color: var(--red-deep, #991b1b); color: #ffffff; font-weight: 700;">${confirmLabel}</button>
         `;
 
-        document.getElementById('customConfirmCancelBtn').onclick = () => {
+        const doClose = (result) => {
             closeCustomAlert();
-            resolve(false);
+            if (currentConfirmResolve) {
+                const res = currentConfirmResolve;
+                currentConfirmResolve = null;
+                res(result);
+            }
         };
 
-        document.getElementById('customConfirmOkBtn').onclick = () => {
-            closeCustomAlert();
-            resolve(true);
+        document.getElementById('customConfirmCancelBtn').onclick = () => doClose(false);
+        document.getElementById('customConfirmOkBtn').onclick = () => doClose(true);
+
+        const closeBtn = card.querySelector('.modal-close-btn');
+        if (closeBtn) {
+            closeBtn.onclick = () => doClose(false);
+        }
+
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                doClose(false);
+            }
         };
 
         modal.style.display = 'flex';
@@ -207,6 +243,11 @@ function showModalConfirm(message, title = 'Ordre de Commandement') {
 function closeCustomAlert() {
     const modal = document.getElementById('customAlertModal');
     if (modal) modal.style.display = 'none';
+    if (currentConfirmResolve) {
+        const res = currentConfirmResolve;
+        currentConfirmResolve = null;
+        res(false);
+    }
 }
 
 // Remplacer globalement window.alert par la modale stylée
@@ -250,7 +291,7 @@ async function submitUpgrade(category, targetId) {
 }
 
 async function cancelBuild(queueId) {
-    const confirmed = await showModalConfirm('Voulez-vous vraiment annuler cette construction ? Vous récupérerez 80% des ressources investies.', 'Annulation de Construction');
+    const confirmed = await showModalConfirm('Voulez-vous vraiment suspendre ces travaux ? 80% des matériaux investis vous seront restitués.', 'Interruption de Chantier');
     if (!confirmed) return;
 
     const formData = new FormData();
