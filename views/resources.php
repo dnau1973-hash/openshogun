@@ -218,8 +218,6 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
 }
 </style>
 
-<?php require __DIR__ . '/partials/quest_banner.php'; ?>
-
 <div class="grid-main">
     <!-- Vue Principale des Parcelles -->
     <div class="card">
@@ -308,6 +306,9 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
 
     <!-- Sidebar : Files et Productions -->
     <div>
+        <!-- Didacticiel Féodal & Quêtes du Daimyō -->
+        <?php require __DIR__ . '/partials/quest_banner.php'; ?>
+
         <!-- File de Construction Active -->
         <div class="card">
             <div class="card-header">

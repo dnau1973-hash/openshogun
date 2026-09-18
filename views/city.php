@@ -94,8 +94,6 @@ foreach (BUILDINGS as $code => $bInfo) {
 </style>
 <?= SlotPositionEngine::renderCss('city') ?>
 
-<?php require __DIR__ . '/partials/quest_banner.php'; ?>
-
 <div class="grid-main">
     <div class="card">
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
@@ -257,6 +255,9 @@ foreach (BUILDINGS as $code => $bInfo) {
 
     <!-- Sidebar : File de Construction Urbaine & Régiments -->
     <div>
+        <!-- Didacticiel Féodal & Quêtes du Daimyō -->
+        <?php require __DIR__ . '/partials/quest_banner.php'; ?>
+
         <!-- File Urbaine -->
         <div class="card">
             <div class="card-header">
