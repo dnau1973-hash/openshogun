@@ -160,8 +160,8 @@ $fieldIllustrationUrl = ($fieldHeroFile && file_exists($fieldHeroFile))
 $fieldHeroBgUrl = $fieldIllustrationUrl ?? ('/public/assets/shogun_rural_terroir_bg.jpg?v=' . (file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg') ? filemtime(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg') : 1));
 
 // Navigation parcelles précédente / suivante
-$prevSlot = ($slot > 1) ? $slot - 1 : 18;
-$nextSlot = ($slot < 18) ? $slot + 1 : 1;
+$prevSlot = ($slot > 1) ? $slot - 1 : 19;
+$nextSlot = ($slot < 19) ? $slot + 1 : 1;
 ?>
 
 <div class="container field-view-container" style="max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem;">
@@ -178,7 +178,7 @@ $nextSlot = ($slot < 18) ? $slot + 1 : 1;
                 &larr; Parcelle #<?= $prevSlot ?>
             </a>
             <div class="field-current-indicator">
-                <span class="field-slot-badge">Parcelle #<?= $slot ?> sur 18</span>
+                <span class="field-slot-badge">Parcelle #<?= $slot ?> sur 19</span>
             </div>
             <a href="/?page=field&slot=<?= $nextSlot ?>" class="field-arrow-btn" title="Parcelle suivante">
                 Parcelle #<?= $nextSlot ?> &rarr;
