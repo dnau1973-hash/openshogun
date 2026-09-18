@@ -1271,6 +1271,245 @@ foreach ($allUnits as $u) {
                     </p>
                 </div>
             </div>
+
+            <!-- ==============================================================
+                 BESTIAIRE DES BÊTES SAUVAGES GARDIENNES D'OASIS
+                 ============================================================== -->
+            <div style="margin-top: 2.5rem; padding-top: 2rem; border-top: 1px dashed var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <span style="font-size: 0.75rem; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 1px;">Bestiaire des Provinces</span>
+                        <h3 style="margin: 0.2rem 0 0.4rem 0; font-size: 1.4rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🐾</span> Faune Hostile & Bêtes Sauvages des Oasis
+                        </h3>
+                        <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">
+                            Avant de pouvoir annexer une oasis ou récolter ses précieux tributs, tout seigneur doit purger la faune féroce qui la défend. Chaque espèce possède ses propres caractéristiques martiales et sensibilités tactiques.
+                        </p>
+                    </div>
+                </div>
+
+                <?php
+                    $sanglierDisk = __DIR__ . '/../public/assets/units/sanglier_sauvage.jpg';
+                    $sanglierSrc = '/public/assets/units/sanglier_sauvage.jpg' . (file_exists($sanglierDisk) ? '?v=' . filemtime($sanglierDisk) : '');
+
+                    $loupDisk = __DIR__ . '/../public/assets/units/loup_honshu.jpg';
+                    $loupSrc = '/public/assets/units/loup_honshu.jpg' . (file_exists($loupDisk) ? '?v=' . filemtime($loupDisk) : '');
+
+                    $oursDisk = __DIR__ . '/../public/assets/units/ours_hokkaido.jpg';
+                    $oursSrc = '/public/assets/units/ours_hokkaido.jpg' . (file_exists($oursDisk) ? '?v=' . filemtime($oursDisk) : '');
+                ?>
+
+                <!-- CARTES DES 3 BÊTES SAUVAGES -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    
+                    <!-- 1. SANGLIER ENRAGÉ DES MONTS -->
+                    <div style="background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column;">
+                        <div style="position: relative; width: 100%; height: 180px; overflow: hidden; cursor: pointer;"
+                             onclick="openDocsLightbox('Sanglier Enragé des Monts', '<?= $sanglierSrc ?>', 'Bête Sauvage & Gardien des Sources (Tier 1)', 'Bête sauvage agressive chargeant en furie quiconque s\'approche de sa tanière. Ses défenses acérées brisent les premières lignes d\'infanterie avec violence.', '« Rien ne résiste à la charge aveugle du sanglier protecteur des sources. »')">
+                            <img src="<?= $sanglierSrc ?>" alt="Sanglier Enragé des Monts" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #f59e0b; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                                🐗 Tier 1 &bull; Chargeur Brutal
+                            </span>
+                            <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                                🔍 Agrandir
+                            </span>
+                        </div>
+                        <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                    <h4 style="margin: 0; font-size: 1.15rem; color: var(--text-main);">Sanglier Enragé des Monts</h4>
+                                    <span style="font-size: 0.8rem; font-weight: 700; color: #b45309;">(山猪)</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 1rem 0;">
+                                    Bête agressive vivant près des forêts et des rizières. Il compense sa défense modérée contre les cavaliers par une excellente résistance frontale contre l'infanterie à pied.
+                                </p>
+                            </div>
+                            <div>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; font-size: 0.8rem; margin-bottom: 0.75rem;">
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #dc2626; font-weight: 800;">⚔️ Atq :</span> <strong>35</strong>
+                                    </div>
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #2563eb; font-weight: 800;">🛡️ Déf Inf :</span> <strong>40</strong>
+                                    </div>
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #0891b2; font-weight: 800;">🛡️ Déf Cav :</span> <strong>20</strong>
+                                    </div>
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #16a34a; font-weight: 800;">⚡ Vitesse :</span> <strong>7</strong>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.75rem; color: #b45309; background: rgba(180, 83, 9, 0.08); padding: 6px 10px; border-radius: 6px; border-left: 3px solid #b45309;">
+                                    💡 <em>Vulnérable face aux charges rapides de cavalerie et aux flèches d'archers montés.</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. LOUP VICIEUX DE HONSHU -->
+                    <div style="background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column;">
+                        <div style="position: relative; width: 100%; height: 180px; overflow: hidden; cursor: pointer;"
+                             onclick="openDocsLightbox('Loup Vicieux de Honshu', '<?= $loupSrc ?>', 'Prédateur Vicieux & Chasseur en Meute (Tier 2)', 'Prédateur rusé chassant en meute coordonnée dans les forêts et collines. Rapide et létal, il fond sur les flancs des colonnes militaires.', '« Leurs yeux dorés percent la brume avant que leurs crocs ne déchirent la chair. »')">
+                            <img src="<?= $loupSrc ?>" alt="Loup Vicieux de Honshu" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #38bdf8; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                                🐺 Tier 2 &bull; Traqueur Agile
+                            </span>
+                            <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                                🔍 Agrandir
+                            </span>
+                        </div>
+                        <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                    <h4 style="margin: 0; font-size: 1.15rem; color: var(--text-main);">Loup Vicieux de Honshu</h4>
+                                    <span style="font-size: 0.8rem; font-weight: 700; color: #0284c7;">(本州狼)</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 1rem 0;">
+                                    Chasseur redoutablement agile qui excelle à désarçonner les montures (haute défense contre cavalerie). Sa morsure vive cause de lourdes pertes aux troupes légères.
+                                </p>
+                            </div>
+                            <div>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; font-size: 0.8rem; margin-bottom: 0.75rem;">
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #dc2626; font-weight: 800;">⚔️ Atq :</span> <strong>60</strong>
+                                    </div>
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #2563eb; font-weight: 800;">🛡️ Déf Inf :</span> <strong>35</strong>
+                                    </div>
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #0891b2; font-weight: 800;">🛡️ Déf Cav :</span> <strong>55</strong>
+                                    </div>
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #16a34a; font-weight: 800;">⚡ Vitesse :</span> <strong>9</strong>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.75rem; color: #0284c7; background: rgba(2, 132, 199, 0.08); padding: 6px 10px; border-radius: 6px; border-left: 3px solid #0284c7;">
+                                    💡 <em>Privilégiez les lignes de lanciers Yari Ashigaru et Samouraïs d'élite pour contrer leur agilité.</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. GRAND OURS BRUN DE HOKKAIDO -->
+                    <div style="background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column;">
+                        <div style="position: relative; width: 100%; height: 180px; overflow: hidden; cursor: pointer;"
+                             onclick="openDocsLightbox('Grand Ours Brun de Hokkaido', '<?= $oursSrc ?>', 'Colosse Septentrional & Terreur des Sommets (Tier 3)', 'Colosse sauvage des contrées glacées d\'Ezo, doué d\'une force brute titanesque capable de balayer un bataillon entier d\'un coup de patte.', '« Face au maître colosse d\'Ezo, même les lances des plus braves samouraïs volent en éclats. »')">
+                            <img src="<?= $oursSrc ?>" alt="Grand Ours Brun de Hokkaido" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #ef4444; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                                🐻 Tier 3 &bull; Colosse Apex
+                            </span>
+                            <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                                🔍 Agrandir
+                            </span>
+                        </div>
+                        <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                    <h4 style="margin: 0; font-size: 1.15rem; color: var(--text-main);">Grand Ours Brun de Hokkaido</h4>
+                                    <span style="font-size: 0.8rem; font-weight: 700; color: #dc2626;">(北海道羆)</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 1rem 0;">
+                                    Le titan absolu de la faune féodale. Doté d'une résistance herculéenne (130 déf. infanterie, 110 déf. cavalerie), il requiert une armée puissante ou un Héros aguerri.
+                                </p>
+                            </div>
+                            <div>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; font-size: 0.8rem; margin-bottom: 0.75rem;">
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #dc2626; font-weight: 800;">⚔️ Atq :</span> <strong>140</strong>
+                                    </div>
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #2563eb; font-weight: 800;">🛡️ Déf Inf :</span> <strong>130</strong>
+                                    </div>
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #0891b2; font-weight: 800;">🛡️ Déf Cav :</span> <strong>110</strong>
+                                    </div>
+                                    <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span style="color: #16a34a; font-weight: 800;">⚡ Vitesse :</span> <strong>6</strong>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.75rem; color: #dc2626; background: rgba(220, 38, 38, 0.08); padding: 6px 10px; border-radius: 6px; border-left: 3px solid #dc2626;">
+                                    💡 <em>Ne jamais l'attaquer sans un Héros Samouraï doté d'une forte Puissance Martiale ou d'une armée conséquente.</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TABLEAU DES ARCHÉTYPES D'OASIS ET RÉPARTITION DE LA FAUNE -->
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem;">
+                    <h4 style="margin: 0 0 0.75rem 0; font-size: 1.05rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                        <span>📋</span> Répartition de la Faune par Archétype d'Oasis
+                    </h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem 0;">
+                        Lors de la génération de la carte du Shogunat, chaque type d'oasis abrite une garnison sauvage prédéterminée protégeant ses richesses :
+                    </p>
+                    <div style="overflow-x: auto;">
+                        <table class="table" style="margin: 0; font-size: 0.85rem; width: 100%;">
+                            <thead>
+                                <tr style="background: rgba(0,0,0,0.04);">
+                                    <th style="padding: 8px 12px;">Type d'Oasis</th>
+                                    <th style="padding: 8px 12px; text-align: center;">Bonus Économique</th>
+                                    <th style="padding: 8px 12px; text-align: center;">🐗 Sangliers</th>
+                                    <th style="padding: 8px 12px; text-align: center;">🐺 Loups</th>
+                                    <th style="padding: 8px 12px; text-align: center;">🐻 Ours</th>
+                                    <th style="padding: 8px 12px; text-align: center;">Niveau de Menace</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 8px 12px;"><strong>Grand Lac aux Eaux Vivifiantes</strong></td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-success">+50% Riz</span></td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">30</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">20</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">8</td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-danger">Élevé</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 12px;"><strong>Forêt Millénaire de Cèdres Géants</strong></td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-primary">+50% Bois</span></td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">35</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">25</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">10</td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-danger">Redoutable</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 12px;"><strong>Pics Escarpés aux Gisements de Fer</strong></td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-warning">+50% Pierre</span></td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">25</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">30</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">12</td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-danger">Extrême</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 12px;"><strong>Source Chaude d'Onsen en Lisière</strong></td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-info">+25% Bois, +25% Riz</span></td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">25</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">15</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">5</td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-warning">Modéré</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 12px;"><strong>Plateau Argileux & Vergers Sauvages</strong></td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-info">+25% Bois, +25% Pierre</span></td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">20</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">18</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">6</td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-warning">Modéré</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 12px;"><strong>Gorge Minérale & Cascades Sacrées</strong></td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-info">+25% Pierre, +25% Riz</span></td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">22</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">20</td>
+                                    <td style="padding: 8px 12px; text-align: center; font-weight: 700;">7</td>
+                                    <td style="padding: 8px 12px; text-align: center;"><span class="badge badge-warning">Modéré</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     <?php endif; ?>
 
