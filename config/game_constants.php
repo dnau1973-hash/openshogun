@@ -1,7 +1,10 @@
 <?php
 /**
- * Constantes et équilibrage de jeu OpenShogun - Époque Sengoku Jidai
+ * Constantes et équilibrage de jeu La Voie du Shogun - Époque Sengoku Jidai
  */
+
+const GAME_NAME = 'La Voie du Shogun';
+const GAME_TAGLINE = 'Chroniques Féodales du Sengoku Jidai';
 
 // Définition des 3 grands clans féodaux du Japon
 const FACTIONS = [

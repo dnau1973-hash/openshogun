@@ -50,10 +50,11 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> - Chroniques Féodales du Sengoku</title>
     <!-- Bootstrap 5 Grille & Utilitaires (Mise en page & Flexbox) -->
     <link rel="stylesheet" href="/public/css/bootstrap-grid.min.css?v=5.3.3">
     <link rel="stylesheet" href="/public/css/bootstrap-utilities.min.css?v=5.3.3">
-    <!-- Feuille de Style Féodale Sengoku OpenShogun -->
+    <!-- Feuille de Style Féodale Sengoku La Voie du Shogun -->
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../../public/css/style.css') ? filemtime(__DIR__ . '/../../public/css/style.css') : time() ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏯</text></svg>">
 </head>
@@ -64,7 +65,7 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
         <div style="display: flex; align-items: center; gap: 1.25rem;">
             <div class="brand">
                 <span class="brand-icon">🏯</span>
-                <span>OpenShogun</span>
+                <span><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?></span>
             </div>
 
             <div class="planet-selector">

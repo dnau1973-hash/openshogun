@@ -11,7 +11,7 @@ $tab = $_GET['tab'] ?? 'login';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenShogun - Chroniques Féodales du Shogunat</title>
+    <title><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> - Chroniques Féodales du Shogunat</title>
     <link rel="stylesheet" href="/public/css/bootstrap-grid.min.css?v=5.3.3">
     <link rel="stylesheet" href="/public/css/bootstrap-utilities.min.css?v=5.3.3">
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../public/css/style.css') ? filemtime(__DIR__ . '/../public/css/style.css') : time() ?>">
@@ -179,7 +179,7 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
     <div class="auth-box">
         <div class="auth-header">
             <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: 3px; color: #1c1917; text-transform: uppercase;">
-                🏯 OpenShogun
+                🏯 <?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>
             </h1>
             <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">
                 Chronique Historique de l'Ère Sengoku Jidai & Conquête du Shogunat

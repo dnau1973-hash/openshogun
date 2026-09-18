@@ -208,7 +208,7 @@
 </div>
 
 <footer style="text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.85rem; border-top:1px solid rgba(255,255,255,0.05); margin-top:3rem;">
-    <p>OpenShogun &copy; <?= date('Y') ?> - Jeu de stratégie féodale japonaise par navigateur inspiré de Travian.</p>
+    <p><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> &copy; <?= date('Y') ?> - Jeu de stratégie féodale japonaise par navigateur inspiré de Travian.</p>
     <p style="margin-top:0.35rem; color:#64748b;">Moteur féodal Sengoku PHP 8 + MariaDB + JavaScript Vanilla</p>
 </footer>
 

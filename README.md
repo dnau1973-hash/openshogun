@@ -1,4 +1,4 @@
-# 🏯 OpenShogun - Chroniques Féodales du Japon Sengoku
+# 🏯 La Voie du Shogun - Chroniques Féodales du Japon Sengoku
 
 Jeu de stratégie multijoueur en temps réel sur navigateur (style **Travian**), se déroulant dans le Japon féodal de l'époque Sengoku Jidai. Fondez votre domaine castral, développez votre terroir rural, entraînez des régiments de samouraïs et étendez votre influence à travers les provinces impériales.
 
