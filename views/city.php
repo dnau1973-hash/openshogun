@@ -262,9 +262,6 @@ foreach (BUILDINGS as $code => $bInfo) {
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">🏗️ Chantiers Urbains</h3>
-                <?php if ($user['faction'] === 'terran'): ?>
-                    <span title="Bonus Clan Oda" style="font-size:0.75rem; color:#93c5fd; background:rgba(59,130,246,0.2); padding:0.1rem 0.4rem; border-radius:4px;">Chantier Simultané (Oda)</span>
-                <?php endif; ?>
             </div>
             <div class="card-body">
                 <?php if (empty($queue)): ?>
@@ -280,6 +277,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                                 $name = BUILDINGS[$q['target_id']]['name'] ?? $q['target_id'];
                             }
                         ?>
+                        <div class="queue-item">
                             <div class="queue-info">
                                 <h4><?= htmlspecialchars($name) ?></h4>
                                 <?php if ((int)$q['target_level'] === 0): ?>
