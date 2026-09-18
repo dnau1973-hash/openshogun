@@ -506,12 +506,33 @@ a:hover {
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
 }
 
+/* Terroirs ruraux : les 19 parcelles circulaires occupent 100% de la largeur du socle */
+.fields-viewport .rts-hotspot:not(.hotspot-bunker-hq) .rts-tile-sprite {
+    width: 100%;
+    height: auto;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 .rts-tenshu-sprite {
     filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
 }
 
-.rts-hotspot.highlighted .rts-tile-sprite {
-    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)) brightness(1.08);
+.rts-hotspot.highlighted .rts-tile-sprite,
+.rts-hotspot:hover .rts-tile-sprite {
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6)) brightness(1.06);
+}
+
+/* Parcelles au niveau 0 : semi-transparentes mais présentes sur leur slot */
+.rts-hotspot.is-level-zero .rts-tile-sprite {
+    opacity: 0.82;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35)) grayscale(20%);
+}
+
+.rts-hotspot.is-level-zero:hover .rts-tile-sprite {
+    opacity: 1;
+    filter: drop-shadow(0 6px 14px rgba(22, 101, 52, 0.45)) brightness(1.08);
 }
 
 /* Badge HUD de Niveau sur la structure (Cité) */
@@ -600,6 +621,13 @@ a:hover {
     padding: 0 6px;
     min-width: 38px;
     gap: 2px;
+}
+
+.rts-level-bubble.level-zero {
+    border-color: #78716c;
+    background: #f5f5f4;
+    color: #57534e;
+    opacity: 0.9;
 }
 
 .bubble-pulse {

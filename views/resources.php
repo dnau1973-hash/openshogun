@@ -284,7 +284,8 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                          onclick="window.location.href='/?page=field&slot=<?= $slot ?>'">
                         
                         <!-- Image PNG transparente de la ressource -->
-                        <img src="/public/assets/<?= $tileImg ?>" class="rts-tile-sprite <?= $isUpgrading ? 'sprite-upgrading' : '' ?>" style="<?= $isDemolishing ? 'opacity:0.65; filter:grayscale(40%) sepia(20%);' : ($lvl === 0 ? 'opacity:0.85;' : '') ?>" alt="<?= htmlspecialchars($info['name']) ?>" draggable="false">
+                        <?php $tileFile = __DIR__ . '/../public/assets/' . $tileImg; ?>
+                        <img src="/public/assets/<?= $tileImg ?>?v=<?= file_exists($tileFile) ? filemtime($tileFile) : time() ?>" class="rts-tile-sprite <?= $isUpgrading ? 'sprite-upgrading' : '' ?>" style="<?= $isDemolishing ? 'opacity:0.65; filter:grayscale(40%) sepia(20%);' : ($lvl === 0 ? 'opacity:0.85;' : '') ?>" alt="<?= htmlspecialchars($info['name']) ?>" draggable="false">
 
                         <!-- Badge minimaliste de niveau en hauteur et à droite du bâtiment (Style Travian) -->
                         <div class="rts-level-bubble <?= $isDemolishing ? 'demolishing' : ($isUpgrading ? 'upgrading' : ($lvl === 0 ? 'level-zero' : '')) ?>" title="<?= htmlspecialchars($info['name']) ?> (<?= $isDemolishing ? 'Démolition vers Niv. 0' : 'Niveau ' . $lvl ?>)">
