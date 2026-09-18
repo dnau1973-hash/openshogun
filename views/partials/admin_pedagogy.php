@@ -307,7 +307,7 @@
                     <span style="font-size: 0.78rem; color: var(--text-muted);">Comment parler à une Intelligence Artificielle pour créer des graphismes de jeu vidéo</span>
                 </div>
             </div>
-            <span class="badge" style="background: rgba(244, 114, 182, 0.2); color: #f472b6; border: 1px solid rgba(244, 114, 182, 0.4); font-size: 0.75rem;">43 Assets Documentés</span>
+            <span class="badge" style="background: rgba(244, 114, 182, 0.2); color: #f472b6; border: 1px solid rgba(244, 114, 182, 0.4); font-size: 0.75rem;">58 Assets Documentés</span>
         </div>
         <div class="card-body" style="line-height: 1.6; font-size: 0.9rem; color: #cbd5e1;">
             <p>
@@ -1024,6 +1024,384 @@
                             </td>
                             <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
                                 <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic coastal illustration of Uwajima Castle, masterwork of fortress genius Todo Takatora, elegant three-story tenshu with decorative curved shoin-style gables and dark wood accents, set within its ingenious secret pentagonal rampart layout designed to confuse besiegers, perched on a coastal hill directly overlooking the tranquil sapphire waters and fishing harbors of Uwajima Bay, seabirds gliding over the defensive walls, soft golden dusk light reflecting on the sea, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- ============================================================== -->
+                        <!-- SÉPARATEUR : LES 4 RESSOURCES FÉODALES & TERROIRS (DORF 1)     -->
+                        <!-- ============================================================== -->
+                        <tr style="background: rgba(22, 163, 74, 0.15); border-top: 2px solid rgba(22, 163, 74, 0.4); border-bottom: 2px solid rgba(22, 163, 74, 0.4);">
+                            <td colspan="5" style="padding: 0.75rem 1rem; color: #4ade80; font-weight: 800; font-size: 0.9rem;">
+                                🌾 Terroirs Ruraux & Ressources Majeures du Shogunat (4 Matières Premières &bull; Dorf 1)
+                            </td>
+                        </tr>
+
+                        <!-- BOIS DE CÈDRE -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $resWood = __DIR__ . '/../../public/assets/resources/ressource_bois_cedre.jpg'; ?>
+                                <img src="/public/assets/resources/ressource_bois_cedre.jpg?v=<?= file_exists($resWood) ? filemtime($resWood) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Bois de Cèdre (Sugi)</strong><br>
+                                <span style="font-size: 0.75rem; color: #22c55e;">Camp de Bûcherons &bull; Charpentes</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                ressource_bois_cedre.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Cinematic feudal Japanese still life illustration of freshly harvested noble cedar wood logs (sugi) in a mountain lumber camp, stacked giant fragrant timber logs with visible raw growth rings and golden wood fibers, traditional woodsman iron axes and two-man saws resting on wooden trestles, fine cedar sawdust sparkling in warm sunbeams filtering through ancient towering cypress trees, mountain mist in background, feudal Japan Sengoku period, warm earthy tones, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed wood grain texture, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Nature morte de rondins de cèdre noble dans un camp forestier de montagne, troncs géants empilés aux fibres dorées, haches et scies de bûcherons, sciure fine sous les rayons de soleil et brume, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic feudal Japanese still life illustration of freshly harvested noble cedar wood logs (sugi) in a mountain lumber camp, stacked giant fragrant timber logs with visible raw growth rings and golden wood fibers, traditional woodsman iron axes and two-man saws resting on wooden trestles, fine cedar sawdust sparkling in warm sunbeams filtering through ancient towering cypress trees, mountain mist in background, feudal Japan Sengoku period, warm earthy tones, ukiyo-e woodblock inspired semi-realistic digital art, highly detailed wood grain texture, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- PIERRE DE TAILLE -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $resStone = __DIR__ . '/../../public/assets/resources/ressource_pierre_taille.jpg'; ?>
+                                <img src="/public/assets/resources/ressource_pierre_taille.jpg?v=<?= file_exists($resStone) ? filemtime($resStone) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Pierre de Taille (Granit)</strong><br>
+                                <span style="font-size: 0.75rem; color: #94a3b8;">Carrière de Granit &bull; Nozura-zumi</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                ressource_pierre_taille.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Cinematic atmospheric illustration of massive chiselled granite fortress stones and volcanic rock blocks in a feudal Japanese mountain quarry, master stonemasons chiselling colossal grey boulders with iron mallets and chisels, stacked heavy ashlar masonry blocks bound with thick hemp ropes on wooden skids ready for castle rampart construction, quarry dust catching dramatic side lighting, rocky cliffside at dusk, Sengoku Jidai, ukiyo-e woodblock inspired semi-realistic digital art, rugged mineral textures, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Blocs monumentaux de granit et roches volcaniques dans une carrière féodale, tailleurs de pierre burinant les rocs, lourdes pierres d'appareil cerclées de chanvre prêtes pour les murailles, lumière rasante au crépuscule, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic atmospheric illustration of massive chiselled granite fortress stones and volcanic rock blocks in a feudal Japanese mountain quarry, master stonemasons chiselling colossal grey boulders with iron mallets and chisels, stacked heavy ashlar masonry blocks bound with thick hemp ropes on wooden skids ready for castle rampart construction, quarry dust catching dramatic side lighting, rocky cliffside at dusk, Sengoku Jidai, ukiyo-e woodblock inspired semi-realistic digital art, rugged mineral textures, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- RIZ IMPÉRIAL -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $resRice = __DIR__ . '/../../public/assets/resources/ressource_riz_imperial.jpg'; ?>
+                                <img src="/public/assets/resources/ressource_riz_imperial.jpg?v=<?= file_exists($resRice) ? filemtime($resRice) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Riz Impérial (Koku)</strong><br>
+                                <span style="font-size: 0.75rem; color: #fbbf24;">Rizières Inondées &bull; Or Blanc</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                ressource_riz_imperial.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Rich cinematic feudal still life of harvested imperial rice, overflowing woven straw bales of polished golden rice grains (koku bales / komedawara), ornate black and gold lacquered masu measuring box filled with pristine white rice grains, bundles of dry golden wheat and rice stalks bound with red cords, warm golden hour sunlight reflecting off the harvest, rustic storehouse timber background, peaceful prosperity, Sengoku period Japan, ukiyo-e woodblock inspired semi-realistic digital painting, vibrant golden tones, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Nature morte de riz impérial récolté, sacs de paille tressée débordant de grains dorés (balles komedawara en koku), boîte de mesure masu laquée d'or et noir, gerbes de riz sous la lumière dorée dans un grenier en bois, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Rich cinematic feudal still life of harvested imperial rice, overflowing woven straw bales of polished golden rice grains (koku bales / komedawara), ornate black and gold lacquered masu measuring box filled with pristine white rice grains, bundles of dry golden wheat and rice stalks bound with red cords, warm golden hour sunlight reflecting off the harvest, rustic storehouse timber background, peaceful prosperity, Sengoku period Japan, ukiyo-e woodblock inspired semi-realistic digital painting, vibrant golden tones, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- FERVEUR SHINTO -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $resShinto = __DIR__ . '/../../public/assets/resources/ressource_ferveur_shinto.jpg'; ?>
+                                <img src="/public/assets/resources/ressource_ferveur_shinto.jpg?v=<?= file_exists($resShinto) ? filemtime($resShinto) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Ferveur Divine (Shintō)</strong><br>
+                                <span style="font-size: 0.75rem; color: #f43f5e;">Sanctuaire &bull; Sérénité Spirituelle</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                ressource_ferveur_shinto.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Mystical spiritual illustration of a sacred Shinto shrine grove at twilight, iconic vermilion red Torii gate hung with sacred braided rice straw rope (shimenawa) and white zigzag paper streamers (shide), gentle moss-covered stone lantern (ishidoro) glowing with a soft candlelight, bubbling crystal-clear sacred purification stream with swirling cherry blossom petals, ethereal golden fireflies floating in the dusk air, ancient cedar forest background, Sengoku period Japan, peaceful mystical lighting, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Bosquet de sanctuaire Shintō au crépuscule, porte Torii rouge vermillon ornée de corde sacrée shimenawa et bandelettes shide, lanterne de pierre moussue éclairée, ruisseau de purification et pétales de cerisier, lucioles dorées, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Mystical spiritual illustration of a sacred Shinto shrine grove at twilight, iconic vermilion red Torii gate hung with sacred braided rice straw rope (shimenawa) and white zigzag paper streamers (shide), gentle moss-covered stone lantern (ishidoro) glowing with a soft candlelight, bubbling crystal-clear sacred purification stream with swirling cherry blossom petals, ethereal golden fireflies floating in the dusk air, ancient cedar forest background, Sengoku period Japan, peaceful mystical lighting, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- ============================================================== -->
+                        <!-- SÉPARATEUR : LES 11 BÂTIMENTS DE LA CITÉ CASTRALE (DORF 2)     -->
+                        <!-- ============================================================== -->
+                        <tr style="background: rgba(37, 99, 235, 0.15); border-top: 2px solid rgba(37, 99, 235, 0.4); border-bottom: 2px solid rgba(37, 99, 235, 0.4);">
+                            <td colspan="5" style="padding: 0.75rem 1rem; color: #60a5fa; font-weight: 800; font-size: 0.9rem;">
+                                🏯 Bâtiments Majeurs de la Cité Castrale (11 Édifices Urbains &bull; Dorf 2)
+                            </td>
+                        </tr>
+
+                        <!-- TENSHU -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bHq = __DIR__ . '/../../public/assets/buildings/building_tenshu.jpg'; ?>
+                                <img src="/public/assets/buildings/building_tenshu.jpg?v=<?= file_exists($bHq) ? filemtime($bHq) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Tenshu (Donjon Castral)</strong><br>
+                                <span style="font-size: 0.75rem; color: #f87171;">QG & Palais du Daimyō &bull; Slot 19</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_tenshu.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Majestic panoramic cinematic illustration of a monumental multi-tiered Japanese feudal castle keep (Tenshu), dramatic low-angle view showing the massive sloping dry-stone foundation wall (ishigaki), brilliant white plaster walls adorned with dark timber beams and curved grey tile roofs with golden dolphin roof ornaments (shachihoko), clan war banners fluttering proudly in the breeze, courtyard with blooming pink cherry blossom trees, golden sunrise breaking over mountain mist, Sengoku period Japan, ukiyo-e woodblock inspired semi-realistic digital painting, epic composition, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Donjon castral monumental Tenshu à étages multiples sur ses murailles ishigaki, plâtre blanc immaculé, shachihoko dorés, bannières de clan et cerisiers en fleurs sous le soleil levant, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Majestic panoramic cinematic illustration of a monumental multi-tiered Japanese feudal castle keep (Tenshu), dramatic low-angle view showing the massive sloping dry-stone foundation wall (ishigaki), brilliant white plaster walls adorned with dark timber beams and curved grey tile roofs with golden dolphin roof ornaments (shachihoko), clan war banners fluttering proudly in the breeze, courtyard with blooming pink cherry blossom trees, golden sunrise breaking over mountain mist, Sengoku period Japan, ukiyo-e woodblock inspired semi-realistic digital painting, epic composition, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- DOJO MILITAIRE -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bBar = __DIR__ . '/../../public/assets/buildings/building_barracks.jpg'; ?>
+                                <img src="/public/assets/buildings/building_barracks.jpg?v=<?= file_exists($bBar) ? filemtime($bBar) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Dojo Militaire & Caserne</strong><br>
+                                <span style="font-size: 0.75rem; color: #3b82f6;">Entraînement des Troupes &bull; Slot 22</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_barracks.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Atmospheric cinematic illustration of an active feudal Japanese martial arts dojo and military training barracks, traditional wooden pavilion with sliding shoji doors opening onto a packed dirt training courtyard, wooden weapon racks holding katana swords, naginata and yari spears, straw targets pierced by arrows, ashigaru spearmen and samurai practicing forms, red and white battle standards, banners with clan mon crests, morning mist and sunbeams, Sengoku Jidai, ukiyo-e woodblock inspired semi-realistic digital art, dynamic warrior atmosphere, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Dojo militaire et caserne d'entraînement féodale, pavillon en bois ouvert sur la cour battue, râteliers de katanas, naginatas et piques yari, cibles en paille transpercées, guerriers à l'entraînement, brume matinale, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Atmospheric cinematic illustration of an active feudal Japanese martial arts dojo and military training barracks, traditional wooden pavilion with sliding shoji doors opening onto a packed dirt training courtyard, wooden weapon racks holding katana swords, naginata and yari spears, straw targets pierced by arrows, ashigaru spearmen and samurai practicing forms, red and white battle standards, banners with clan mon crests, morning mist and sunbeams, Sengoku Jidai, ukiyo-e woodblock inspired semi-realistic digital art, dynamic warrior atmosphere, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- ATELIER DE SIÈGE & ÉCURIES -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bShip = __DIR__ . '/../../public/assets/buildings/building_shipyard.jpg'; ?>
+                                <img src="/public/assets/buildings/building_shipyard.jpg?v=<?= file_exists($bShip) ? filemtime($bShip) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Atelier de Siège & Écuries</strong><br>
+                                <span style="font-size: 0.75rem; color: #ef4444;">Cavalerie & Engins &bull; Slot 23</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_shipyard.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Cinematic illustration of a bustling feudal Japanese military siege workshop and cavalry stables, open timber stables sheltering muscular Japanese warhorses (Kiso horses) with braided manes and decorated saddles, blacksmiths and carpenters assembling heavy wooden siege rams and catapult frames bound with iron brackets and damp leather, wood shavings on the earthen ground, glowing forge furnace in background, war banners bearing horse crests, late afternoon warm sunlight, Sengoku period, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Atelier de siège et écuries militaires féodales, chevaux de guerre Kiso aux crinières tressées, forgerons montant béliers et catapultes blindés de fer et cuir, forge rougeoyante et bannières équestres, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic illustration of a bustling feudal Japanese military siege workshop and cavalry stables, open timber stables sheltering muscular Japanese warhorses (Kiso horses) with braided manes and decorated saddles, blacksmiths and carpenters assembling heavy wooden siege rams and catapult frames bound with iron brackets and damp leather, wood shavings on the earthen ground, glowing forge furnace in background, war banners bearing horse crests, late afternoon warm sunlight, Sengoku period, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- ACADÉMIE & FORGE -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bLab = __DIR__ . '/../../public/assets/buildings/building_research_lab.jpg'; ?>
+                                <img src="/public/assets/buildings/building_research_lab.jpg?v=<?= file_exists($bLab) ? filemtime($bLab) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Académie des Savoirs & Forge</strong><br>
+                                <span style="font-size: 0.75rem; color: #a855f7;">Recherche & Métallurgie &bull; Slot 25</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_research_lab.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Atmospheric cinematic interior of a feudal Japanese master scholar academy and sacred sword forge, on one side venerable scholars examining ancient strategic scrolls and calligraphic tactical maps by soft lantern light, on the other side a sacred Tatara furnace and master bladesmith in white robes folding incandescent glowing steel (tamahagane) over an anvil, showers of bright golden sparks flying in the air, sacred shimenawa ropes hanging above, Sengoku Jidai, dramatic chiaroscuro contrast between firelight and shadow, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Académie de lettrés et forge sacrée : érudits étudiant cartes tactiques et rouleaux d'un côté, maître forgeron battant l'acier incandescent tamahagane de l'autre dans une pluie d'étincelles dorées, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Atmospheric cinematic interior of a feudal Japanese master scholar academy and sacred sword forge, on one side venerable scholars examining ancient strategic scrolls and calligraphic tactical maps by soft lantern light, on the other side a sacred Tatara furnace and master bladesmith in white robes folding incandescent glowing steel (tamahagane) over an anvil, showers of bright golden sparks flying in the air, sacred shimenawa ropes hanging above, Sengoku Jidai, dramatic chiaroscuro contrast between firelight and shadow, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- TOUR DE GUET YAGURA -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bRad = __DIR__ . '/../../public/assets/buildings/building_radar.jpg'; ?>
+                                <img src="/public/assets/buildings/building_radar.jpg?v=<?= file_exists($bRad) ? filemtime($bRad) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Tour de Guet Yagura & Feux</strong><br>
+                                <span style="font-size: 0.75rem; color: #06b6d4;">Vigie & Détection &bull; Slot 26</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_radar.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Dramatic cinematic illustration of a tall multi-tiered Japanese castle watchtower (Yagura) perched on a high corner stone rampart, samurai sentry in lacquered armor vigilantly scanning distant misty mountain valleys from the wooden observation balcony, a large iron brazier burning bright warning fire with thick black smoke curling toward the dusk sky, signal war drum (taiko) on the platform, dramatic sunset sky with crimson and indigo clouds, Sengoku period Japan, panoramic vista, ukiyo-e woodblock inspired semi-realistic digital painting, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Tour de guet d'angle Yagura à étages, sentinelle samouraï surveillant les vallées brumeuses depuis la galerie de bois, brasero d'alarme crachant fumée et flammes, tambour taiko sous un ciel crépusculaire, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Dramatic cinematic illustration of a tall multi-tiered Japanese castle watchtower (Yagura) perched on a high corner stone rampart, samurai sentry in lacquered armor vigilantly scanning distant misty mountain valleys from the wooden observation balcony, a large iron brazier burning bright warning fire with thick black smoke curling toward the dusk sky, signal war drum (taiko) on the platform, dramatic sunset sky with crimson and indigo clouds, Sengoku period Japan, panoramic vista, ukiyo-e woodblock inspired semi-realistic digital painting, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- ENTREPÔT DE MATÉRIAUX -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bSto = __DIR__ . '/../../public/assets/buildings/building_storage.jpg'; ?>
+                                <img src="/public/assets/buildings/building_storage.jpg?v=<?= file_exists($bSto) ? filemtime($bSto) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Entrepôt Bois & Pierre</strong><br>
+                                <span style="font-size: 0.75rem; color: #84cc16;">Stockage Matériaux &bull; Slot 20</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_storage.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Cinematic illustration of a massive fortified timber and stone warehouse courtyard in a Japanese castle district, giant stacked piles of fragrant cedar logs and dressed granite masonry stones neatly organized under wide overhanging tile roofs, heavy wooden sliding doors with iron reinforcements, draft carts and hemp ropes, clerk scribe checking inventory tallies with calligraphy brush, lantern illuminating the bustling logistics area, Sengoku Jidai, ukiyo-e woodblock inspired semi-realistic digital art, rich textural detail, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Cour d'entrepôt fortifié de matériaux, piles ordonnées de grumes de cèdre et blocs de granit sous de vastes auvents de tuiles, portes coulissantes blindées, chariots et scribe dressant l'inventaire au pinceau, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Cinematic illustration of a massive fortified timber and stone warehouse courtyard in a Japanese castle district, giant stacked piles of fragrant cedar logs and dressed granite masonry stones neatly organized under wide overhanging tile roofs, heavy wooden sliding doors with iron reinforcements, draft carts and hemp ropes, clerk scribe checking inventory tallies with calligraphy brush, lantern illuminating the bustling logistics area, Sengoku Jidai, ukiyo-e woodblock inspired semi-realistic digital art, rich textural detail, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- GRENIER À RIZ KURA -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bTan = __DIR__ . '/../../public/assets/buildings/building_tank.jpg'; ?>
+                                <img src="/public/assets/buildings/building_tank.jpg?v=<?= file_exists($bTan) ? filemtime($bTan) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Grenier à Riz Fortifié (Kura)</strong><br>
+                                <span style="font-size: 0.75rem; color: #eab308;">Silos à Grains Koku &bull; Slot 21</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_tank.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Atmospheric cinematic illustration of traditional feudal Japanese fireproof rice storehouses (kura / dozo), thick white fireproof plaster walls with distinctive black lacquered square base tiling, heavy barred wooden and iron doors, raised stone foundation to protect from dampness, open doors revealing stacks of woven straw rice bales (koku) reaching high ceiling beams, small red lacquered shrine dedicated to Inari the rice god beside the entrance, warm harvest afternoon light, Sengoku period Japan, ukiyo-e woodblock inspired semi-realistic digital painting, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Greniers à riz ignifugés kura / dōzō aux épais murs de plâtre blanc et soubassement carrelé d'ardoise noire, portes blindées protégeant les balles de riz koku, autel vermillon d'Inari, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Atmospheric cinematic illustration of traditional feudal Japanese fireproof rice storehouses (kura / dozo), thick white fireproof plaster walls with distinctive black lacquered square base tiling, heavy barred wooden and iron doors, raised stone foundation to protect from dampness, open doors revealing stacks of woven straw rice bales (koku) reaching high ceiling beams, small red lacquered shrine dedicated to Inari the rice god beside the entrance, warm harvest afternoon light, Sengoku period Japan, ukiyo-e woodblock inspired semi-realistic digital painting, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- MARCHÉ FÉODAL -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bMkt = __DIR__ . '/../../public/assets/buildings/building_market.jpg'; ?>
+                                <img src="/public/assets/buildings/building_market.jpg?v=<?= file_exists($bMkt) ? filemtime($bMkt) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Marché Féodal & Caravanes</strong><br>
+                                <span style="font-size: 0.75rem; color: #f97316;">Commerce & Échanges &bull; Slot 24</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_market.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Lively vibrant cinematic illustration of a bustling feudal Japanese town marketplace (Rakuichi-rakuza), bustling streets lined with wooden merchant stalls adorned with colorful indigo and crimson fabric banners (noren), vendors displaying pottery, bolts of silk cloth, dried seafood, rice sacks and iron tools, pack horses laden with woven wicker panniers, travelling merchants and townspeople in traditional kimono, hanging paper lanterns, lively festival atmosphere, Sengoku period, warm sunlight casting long shadows, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Marché féodal animé Rakuichi-rakuza, ruelles marchandes bordées d'échoppes aux tentures noren indigo et pourpres, soieries, poteries, outils de fer et chevaux de bât, passants et marchands sous le soleil de fin de journée, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Lively vibrant cinematic illustration of a bustling feudal Japanese town marketplace (Rakuichi-rakuza), bustling streets lined with wooden merchant stalls adorned with colorful indigo and crimson fabric banners (noren), vendors displaying pottery, bolts of silk cloth, dried seafood, rice sacks and iron tools, pack horses laden with woven wicker panniers, travelling merchants and townspeople in traditional kimono, hanging paper lanterns, lively festival atmosphere, Sengoku period, warm sunlight casting long shadows, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- PAVILLON DIPLOMATIQUE -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bEmb = __DIR__ . '/../../public/assets/buildings/building_embassy.jpg'; ?>
+                                <img src="/public/assets/buildings/building_embassy.jpg?v=<?= file_exists($bEmb) ? filemtime($bEmb) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Pavillon Diplomatique (Ambassade)</strong><br>
+                                <span style="font-size: 0.75rem; color: #10b981;">Alliances & Cérémonie &bull; Slot 28</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_embassy.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Serene yet prestigious cinematic illustration of a feudal Japanese diplomatic council pavilion and ceremonial tea house, elegant wooden architecture with wide wooden verandas (engawa) overlooking a tranquil Zen rock garden with raked white gravel and miniature pine trees, delicate silk sliding screens (fusuma) painted with golden clouds and flying cranes, solemn daimyo emissaries seated on tatami mats exchanging sealed alliance treaties bearing red wax seals, soft golden morning light, peaceful noble atmosphere, Sengoku period, ukiyo-e woodblock inspired semi-realistic digital painting, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Pavillon diplomatique et maison de thé d'apparat avec coursive engawa sur jardin zen ratissé, cloisons fusuma peintes de grues dorées, émissaires daimyōs sur tatamis scellant des traités d'alliance à la cire rouge, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Serene yet prestigious cinematic illustration of a feudal Japanese diplomatic council pavilion and ceremonial tea house, elegant wooden architecture with wide wooden verandas (engawa) overlooking a tranquil Zen rock garden with raked white gravel and miniature pine trees, delicate silk sliding screens (fusuma) painted with golden clouds and flying cranes, solemn daimyo emissaries seated on tatami mats exchanging sealed alliance treaties bearing red wax seals, soft golden morning light, peaceful noble atmosphere, Sengoku period, ukiyo-e woodblock inspired semi-realistic digital painting, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- CACHETTE SECRÈTE -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bQv = __DIR__ . '/../../public/assets/buildings/building_quantum_vault.jpg'; ?>
+                                <img src="/public/assets/buildings/building_quantum_vault.jpg?v=<?= file_exists($bQv) ? filemtime($bQv) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Cachette Secrète Sous Terre</strong><br>
+                                <span style="font-size: 0.75rem; color: #64748b;">Caveau Inviolable &bull; Slot 27</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_quantum_vault.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Mysterious cinematic illustration of a hidden underground emergency vault beneath a Japanese castle, concealed trapdoor hidden under tatami mats leading down into a secret torchlit stone cellar, wooden chests reinforced with iron bands, hidden jars filled with gold ryo coins and precious grain bags safely concealed behind false walls and tripwire counterweight traps, warm flickering torchlight casting deep dramatic shadows across mossy stone walls, secretive atmosphere, Sengoku period Tokugawa style, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Caveau secret d'urgence sous tatamis dérobés, cave en pierre éclairée à la torche dissimulant coffres cerclés de fer, jarres de pièces d'or ryō et sacs de grains précieux protégés de faux murs et pièges, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Mysterious cinematic illustration of a hidden underground emergency vault beneath a Japanese castle, concealed trapdoor hidden under tatami mats leading down into a secret torchlit stone cellar, wooden chests reinforced with iron bands, hidden jars filled with gold ryo coins and precious grain bags safely concealed behind false walls and tripwire counterweight traps, warm flickering torchlight casting deep dramatic shadows across mossy stone walls, secretive atmosphere, Sengoku period Tokugawa style, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
+                            </td>
+                        </tr>
+
+                        <!-- MURAILLE & REMPARTS -->
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <?php $bWal = __DIR__ . '/../../public/assets/buildings/building_wall.jpg'; ?>
+                                <img src="/public/assets/buildings/building_wall.jpg?v=<?= file_exists($bWal) ? filemtime($bWal) : 1 ?>" style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;">
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle;">
+                                <strong style="color: #fff;">Muraille & Remparts de Cité</strong><br>
+                                <span style="font-size: 0.75rem; color: #22c55e;">Enceinte & Douves &bull; Slot 34</span>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; font-family: monospace; font-size: 0.75rem; color: #67e8f9;">
+                                building_wall.jpg
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">
+                                <em>Colossal cinematic illustration of massive feudal Japanese castle defensive ramparts and fortified stone walls (nozura-zumi ishigaki), towering grey megalithic rock walls rising from wide deep moats filled with dark reflective water, white plastered defensive parapets along the top pierced by triangular gun embrasures and rectangular arrow slits (sama), heavy timber corner bastion, spiked wooden palisades (mokusaku) along the outer bank, dramatic stormy sky with lightning flash breaking through clouds, Sengoku period Japan, epic defensive scale, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution</em>
+                                <div style="font-size: 0.75rem; color: #fde047; margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.4;">
+                                    <strong>🇫🇷 Traduction :</strong> <em>Remparts colossaux et murailles cyclopéennes ishigaki nozura-zumi émergeant de douves profondes, parapets blancs crénelés de meurtrières sama, bastion de bois et palissades sous un ciel orageux épique, style ukiyo-e 8k.</em>
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                <button type="button" class="btn btn-secondary" onclick="copyPromptText(this)" data-prompt="Colossal cinematic illustration of massive feudal Japanese castle defensive ramparts and fortified stone walls (nozura-zumi ishigaki), towering grey megalithic rock walls rising from wide deep moats filled with dark reflective water, white plastered defensive parapets along the top pierced by triangular gun embrasures and rectangular arrow slits (sama), heavy timber corner bastion, spiked wooden palisades (mokusaku) along the outer bank, dramatic stormy sky with lightning flash breaking through clouds, Sengoku period Japan, epic defensive scale, ukiyo-e woodblock inspired semi-realistic digital art, 8k resolution" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Copier</button>
                             </td>
                         </tr>
                     </tbody>

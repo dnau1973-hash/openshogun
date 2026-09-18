@@ -917,35 +917,59 @@ foreach ($allUnits as $u) {
 
             <!-- Les 4 Éléments du Terroir -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
-                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-metal);">
-                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-metal);">🪵 Camp de Bûcherons (Bois de Cèdre)</h4>
-                    <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
-                        Abat et débite les cèdres centenaires. Ressource première pour ériger les charpentes de châteaux, bâtir les béliers et tailler les lances des fantassins.
-                    </p>
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-metal); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 130px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Camp de Bûcherons', '/public/assets/resources/ressource_bois_cedre.jpg', 'Ressource Primaire : Bois de Cèdre', 'Abat et débite les cèdres centenaires dans les forêts de montagne. Indispensable pour dresser les charpentes de vos donjons, palissades fortifiées, béliers et armes d\'hast.', '« Les cèdres millénaires portent les toits de nos châteaux. »')">
+                            <img src="/public/assets/resources/ressource_bois_cedre.jpg" alt="Bois de Cèdre" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-metal);">🪵 Camp de Bûcherons (Bois de Cèdre)</h4>
+                        <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
+                            Abat et débite les cèdres centenaires. Ressource première pour ériger les charpentes de châteaux, bâtir les béliers et tailler les lances des fantassins.
+                        </p>
+                    </div>
                     <span style="font-size: 0.75rem; font-weight: 700; color: var(--res-metal);">Spécialité du Clan Oda</span>
                 </div>
 
-                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-crystal);">
-                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-crystal);">🪨 Carrière de Granit (Pierre de Taille)</h4>
-                    <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
-                        Extrait les blocs de roche pour monter les remparts cyclopéens (Nozura-zumi) et les fondations imprenables des donjons historiques.
-                    </p>
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-crystal); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 130px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Carrière de Granit', '/public/assets/resources/ressource_pierre_taille.jpg', 'Ressource Primaire : Pierre de Taille', 'Extrait les blocs de roche et de granit pour monter les remparts cyclopéens (Nozura-zumi) et les fondations imprenables des donjons historiques.', '« Une muraille sans faille résiste à mille assauts. »')">
+                            <img src="/public/assets/resources/ressource_pierre_taille.jpg" alt="Pierre de Taille" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-crystal);">🪨 Carrière de Granit (Pierre de Taille)</h4>
+                        <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
+                            Extrait les blocs de roche pour monter les remparts cyclopéens (Nozura-zumi) et les fondations imprenables des donjons historiques.
+                        </p>
+                    </div>
                     <span style="font-size: 0.75rem; font-weight: 700; color: var(--res-crystal);">Spécialité du Clan Tokugawa</span>
                 </div>
 
-                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-deut);">
-                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-deut);">🌾 Rizières Inondées (Riz Impérial / Koku)</h4>
-                    <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
-                        Base nourricière de toute la principauté. Chaque soldat, monture et engin formé exige des rations de riz pour sa subsistance et son entraînement.
-                    </p>
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-deut); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 130px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Rizières Inondées', '/public/assets/resources/ressource_riz_imperial.jpg', 'Ressource Impériale : Riz (Koku)', 'Base nourricière de toute la principauté mesurée en koku. Chaque soldat, monture et engin formé exige des rations de riz pour sa subsistance.', '« Le koku de riz est l\'or véritable du Shogunat. »')">
+                            <img src="/public/assets/resources/ressource_riz_imperial.jpg" alt="Riz Impérial" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-deut);">🌾 Rizières Inondées (Riz Impérial / Koku)</h4>
+                        <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
+                            Base nourricière de toute la principauté. Chaque soldat, monture et engin formé exige des rations de riz pour sa subsistance et son entraînement.
+                        </p>
+                    </div>
                     <span style="font-size: 0.75rem; font-weight: 700; color: var(--res-deut);">Spécialité du Clan Takeda</span>
                 </div>
 
-                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-energy);">
-                    <h4 style="margin:0 0 0.5rem 0; color: var(--res-energy);">⛩️ Sanctuaire d'Inari (Sérénité Spirituelle)</h4>
-                    <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
-                        Diffuse la ferveur et l'énergie spirituelle sur le terroir. <em>Attention : si la consommation dépasse la production des sanctuaires, vos récoltes chutent à 10% !</em>
-                    </p>
+                <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--res-energy); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 130px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Sanctuaire Shintō & Torii', '/public/assets/resources/ressource_ferveur_shinto.jpg', 'Énergie Divine : Ferveur & Sérénité', 'Honore les esprits tutélaires Kami. Maintient l\'harmonie spirituelle et l\'énergie indispensable au rendement de toutes les parcelles du domaine.', '« La paix de l\'esprit féconde la terre des ancêtres. »')">
+                            <img src="/public/assets/resources/ressource_ferveur_shinto.jpg" alt="Sanctuaire Shinto" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-energy);">⛩️ Sanctuaire d'Inari (Sérénité Spirituelle)</h4>
+                        <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
+                            Diffuse la ferveur et l'énergie spirituelle sur le terroir. <em>Attention : si la consommation dépasse la production des sanctuaires, vos récoltes chutent à 10% !</em>
+                        </p>
+                    </div>
                     <span style="font-size: 0.75rem; font-weight: 700; color: var(--res-energy);">Énergie vitale pour tous les clans</span>
                 </div>
             </div>
@@ -998,50 +1022,137 @@ foreach ($allUnits as $u) {
                 Vous pouvez bâtir plusieurs entrepôts, greniers ou ateliers de siège selon vos ambitions dynastiques ! Le slot #34 est réservé à la Muraille pour encercler la forteresse.
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: var(--red-primary);">🏯 Tenshu (Donjon Castral)</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Cœur du commandement. Réduit le temps de construction de tous les édifices urbains.</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;">
+                <!-- Tenshu -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Tenshu (Donjon Castral)', '/public/assets/buildings/building_tenshu.jpg', 'Siège du Commandement & Palais du Daimyō', 'Le donjon fortifié et palais du Daimyō. Réduit la durée de construction de tous les bâtiments urbains et parcelles rurales du fief.', '« Du haut du Tenshu, le regard du Daimyō embrasse la province. »')">
+                            <img src="/public/assets/buildings/building_tenshu.jpg" alt="Tenshu" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: var(--red-primary);">🏯 Tenshu (Donjon Castral)</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Cœur du commandement. Réduit le temps de construction de tous les édifices urbains.</p>
+                    </div>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: var(--res-metal);">🪵 Entrepôt de Matériaux (Bois & Pierre)</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Stocke le bois de cèdre et les pierres de taille nécessaires aux chantiers d'envergure.</p>
+
+                <!-- Entrepôt -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Entrepôt de Matériaux', '/public/assets/buildings/building_storage.jpg', 'Logistique : Bois & Pierre', 'Augmente la capacité de stockage maximale de Bois de Cèdre et de Pierre de Taille pour alimenter les chantiers monumentaux.', '« Une armée sans vivres et sans bois ne peut tenir l\'hiver. »')">
+                            <img src="/public/assets/buildings/building_storage.jpg" alt="Entrepôt" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: var(--res-metal);">🪵 Entrepôt de Matériaux (Bois & Pierre)</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Stocke le bois de cèdre et les pierres de taille nécessaires aux chantiers d'envergure.</p>
+                    </div>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: var(--res-deut);">🌾 Grenier à Riz Fortifié (Kura)</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Préserve les récoltes de riz impérial contre les pillages et soutient les armées.</p>
+
+                <!-- Grenier Kura -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Grenier à Riz Fortifié (Kura)', '/public/assets/buildings/building_tank.jpg', 'Silos à Grains Ignifugés', 'Augmente la capacité de stockage maximale des récoltes de riz impérial (koku) et protège les surplus contre l\'humidité.', '« Les greniers pleins font les daimyōs puissants. »')">
+                            <img src="/public/assets/buildings/building_tank.jpg" alt="Grenier Kura" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: var(--res-deut);">🌾 Grenier à Riz Fortifié (Kura)</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Préserve les récoltes de riz impérial contre les pillages et soutient les armées.</p>
+                    </div>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #2563eb;">🥋 Dojo Militaire & Caserne</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Entraîne et arme vos fantassins, piquiers, archers et samouraïs d'assaut.</p>
+
+                <!-- Dojo Militaire -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Dojo Militaire & Caserne', '/public/assets/buildings/building_barracks.jpg', 'Caserne & Enrôlement Féodal', 'Entraîne les fantassins Ashigarus, archers Yumi, arquebusiers Tanegashima et samouraïs d\'élite pour la défense et les conquêtes.', '« La discipline forge la lame, l\'honneur guide le coup. »')">
+                            <img src="/public/assets/buildings/building_barracks.jpg" alt="Dojo Militaire" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: #2563eb;">🥋 Dojo Militaire & Caserne</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Entraîne et arme vos fantassins, piquiers, archers et samouraïs d'assaut.</p>
+                    </div>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #dc2626;">🐎 Atelier de Siège & Écuries</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Fabrique les catapultes, béliers de siège et destriers caparaçonnés de cavalerie.</p>
+
+                <!-- Atelier de Siège & Écuries -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Atelier de Siège & Écuries', '/public/assets/buildings/building_shipyard.jpg', 'Génie Militaire & Cavalerie', 'Permet d\'élever la cavalerie de guerre montées, convois de ravitaillement et de fabriquer béliers géants et catapultes de siège.', '« Le tonnerre des sabots annonce l\'effondrement des portes ennemies. »')">
+                            <img src="/public/assets/buildings/building_shipyard.jpg" alt="Atelier de Siège" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: #dc2626;">🐎 Atelier de Siège & Écuries</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Fabrique les catapultes, béliers de siège et destriers caparaçonnés de cavalerie.</p>
+                    </div>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #b45309;">⚖️ Marché Féodal & Caravanes</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Organise les échanges commerciaux et envoie des caravanes de vivres aux alliés.</p>
+
+                <!-- Marché Féodal -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Marché Féodal & Caravanes', '/public/assets/buildings/building_market.jpg', 'Commerce Provincial & Convois', 'Permet d\'échanger des ressources avec les marchands itinérants et autres daimyōs provinciaux via des convois de marchands.', '« L\'or et le riz circulent là où la paix règne. »')">
+                            <img src="/public/assets/buildings/building_market.jpg" alt="Marché Féodal" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: #b45309;">⚖️ Marché Féodal & Caravanes</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Organise les échanges commerciaux et envoie des caravanes de vivres aux alliés.</p>
+                    </div>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #7c3aed;">📜 Académie des Savoirs & Forge</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Développe les technologies d'armement, métallurgie et art de la guerre.</p>
+
+                <!-- Académie & Forge -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Académie des Savoirs & Forge', '/public/assets/buildings/building_research_lab.jpg', 'Recherche Stratégique & Tamahagane', 'Permet de perfectionner la métallurgie du tamahagane, l\'art de la guerre et les tactiques militaires secrètes.', '« Le savoir des anciens aiguise l\'acier de demain. »')">
+                            <img src="/public/assets/buildings/building_research_lab.jpg" alt="Académie des Savoirs" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: #7c3aed;">📜 Académie des Savoirs & Forge</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Développe les technologies d'armement, métallurgie et art de la guerre.</p>
+                    </div>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #0891b2;">🔭 Tour de Guet Yagura</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Détecte à l'avance les mouvements de troupes ennemies marchant vers votre fief.</p>
+
+                <!-- Tour de Guet Yagura -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Tour de Guet Yagura', '/public/assets/buildings/building_radar.jpg', 'Vigie & Feux d\'Alarme', 'Surveille les vallées et détecte à l\'avance les armées et espions ennemis en marche vers votre forteresse.', '« L\'œil qui veille au crépuscule prévient le massacre de l\'aube. »')">
+                            <img src="/public/assets/buildings/building_radar.jpg" alt="Tour de Guet" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: #0891b2;">🔭 Tour de Guet Yagura</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Détecte à l'avance les mouvements de troupes ennemies marchant vers votre fief.</p>
+                    </div>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #475569;">🕳️ Cachette Secrète Sous Terre</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Met vos précieuses ressources à l'abri des pillages lors des raids ennemis.</p>
+
+                <!-- Cachette Secrète -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Cachette Secrète Sous Terre', '/public/assets/buildings/building_quantum_vault.jpg', 'Caveau Inviolable Anti-Pillage', 'Protège une réserve secrète de vivres et matériaux contre les pillages adverses (capacité doublée pour le Clan Tokugawa).', '« Ce que l\'œil de l\'ennemi ne voit pas ne peut être dérobé. »')">
+                            <img src="/public/assets/buildings/building_quantum_vault.jpg" alt="Cachette Secrète" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: #475569;">🕳️ Cachette Secrète Sous Terre</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Met vos précieuses ressources à l'abri des pillages lors des raids ennemis.</p>
+                    </div>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #059669;">⛩️ Pavillon Diplomatique</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Permet de fonder ou rejoindre une alliance entre puissants seigneurs féodaux.</p>
+
+                <!-- Pavillon Diplomatique -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Pavillon Diplomatique des Clans', '/public/assets/buildings/building_embassy.jpg', 'Maison de Thé & Traités d\'Alliance', 'Permet de sceller ou rejoindre un pacte d\'alliance entre daimyōs sous les auspices des cérémonies du thé.', '« Une alliance scellée dans l\'honneur vaut cent divisions d\'infanterie. »')">
+                            <img src="/public/assets/buildings/building_embassy.jpg" alt="Pavillon Diplomatique" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: #059669;">⛩️ Pavillon Diplomatique</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Permet de fonder ou rejoindre une alliance entre puissants seigneurs féodaux.</p>
+                    </div>
                 </div>
-                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin:0 0 0.4rem 0; color: #16a34a;">🧱 Muraille & Remparts de Cité (Slot #34)</h4>
-                    <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Protège l'enceinte entière et décuple l'efficacité défensive de votre garnison (+4% par niveau).</p>
+
+                <!-- Muraille & Remparts -->
+                <div style="background: var(--bg-ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Muraille & Remparts de Cité', '/public/assets/buildings/building_wall.jpg', 'Enceinte Fortifiée & Douves (Slot #34)', 'Enceinte fortifiée en pierre de taille, palissades en cèdre et douves protégeant le fief (+4% défense garnison par niveau).', '« Nos remparts sont le roc où se brisent les vagues ennemies. »')">
+                            <img src="/public/assets/buildings/building_wall.jpg" alt="Muraille & Remparts" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                        </div>
+                        <h4 style="margin:0 0 0.4rem 0; color: #16a34a;">🧱 Muraille & Remparts de Cité (Slot #34)</h4>
+                        <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Protège l'enceinte entière et décuple l'efficacité défensive de votre garnison (+4% par niveau).</p>
+                    </div>
                 </div>
             </div>
 

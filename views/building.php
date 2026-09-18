@@ -118,6 +118,21 @@ if ($isEmptyPlot) {
     }
 }
 
+// Cartographie des illustrations artistiques des bâtiments castraux
+$buildingHeroImages = [
+    'hq' => 'buildings/building_tenshu.jpg',
+    'barracks' => 'buildings/building_barracks.jpg',
+    'shipyard' => 'buildings/building_shipyard.jpg',
+    'research_lab' => 'buildings/building_research_lab.jpg',
+    'radar' => 'buildings/building_radar.jpg',
+    'storage' => 'buildings/building_storage.jpg',
+    'tank' => 'buildings/building_tank.jpg',
+    'market' => 'buildings/building_market.jpg',
+    'embassy' => 'buildings/building_embassy.jpg',
+    'quantum_vault' => 'buildings/building_quantum_vault.jpg',
+    'wall' => 'buildings/building_wall.jpg',
+];
+
 if (!$isEmptyPlot) {
     $bInfo = BUILDINGS[$code] ?? null;
     $lvl = (int)($buildings[$code] ?? 0);
@@ -126,6 +141,14 @@ if (!$isEmptyPlot) {
     $cost = $upgradeDetails['cost'];
     $duration = $upgradeDetails['duration'];
     $tileImg = $bInfo['tile_img'] ?? 'tile_tenshu.png';
+
+    // Illustration dédiée haute définition
+    $heroImgRel = $buildingHeroImages[$code] ?? null;
+    $heroImgFile = $heroImgRel ? __DIR__ . '/../public/assets/' . $heroImgRel : null;
+    $buildingIllustrationUrl = ($heroImgFile && file_exists($heroImgFile))
+        ? '/public/assets/' . $heroImgRel . '?v=' . filemtime($heroImgFile)
+        : null;
+    $heroBgUrl = $buildingIllustrationUrl ?? ('/public/assets/shogun_castle_city_bg.jpg?v=' . (file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg') ? filemtime(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg') : 1));
 
     // Vérification des ressources
     $hasMetal = $planet['metal'] >= $cost['metal'];
@@ -320,14 +343,18 @@ if (!$isEmptyPlot) {
                         $dur = $det['duration'];
                         $canAfford = $item['can_afford'];
                         $durFormatted = sprintf('%02d:%02d', floor($dur / 60), $dur % 60);
+                        $bHeroImg = $buildingHeroImages[$bCode] ?? null;
+                        $bHeroFile = $bHeroImg ? __DIR__ . '/../public/assets/' . $bHeroImg : null;
                     ?>
                         <div style="background:rgba(30,41,59,0.5); border:1px solid #334155; border-radius:8px; padding:0.85rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
                             <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:260px;">
-                                <div style="width:48px; height:48px; background:rgba(15,23,42,0.8); border:1px solid #475569; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden;">
-                                    <?php if (!empty($info['tile_img'])): ?>
-                                        <img src="/public/assets/<?= $info['tile_img'] ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:40px; height:40px; object-fit:contain;">
+                                <div style="width:58px; height:44px; background:rgba(15,23,42,0.8); border:1px solid #475569; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
+                                    <?php if ($bHeroFile && file_exists($bHeroFile)): ?>
+                                        <img src="/public/assets/<?= $bHeroImg ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:100%; height:100%; object-fit:cover;">
+                                    <?php elseif (!empty($info['tile_img'])): ?>
+                                        <img src="/public/assets/<?= $info['tile_img'] ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:36px; height:36px; object-fit:contain;">
                                     <?php else: ?>
-                                        <span style="font-size:1.6rem;"><?= $info['icon'] ?></span>
+                                        <span style="font-size:1.5rem;"><?= $info['icon'] ?></span>
                                     <?php endif; ?>
                                 </div>
                                 <div>
@@ -348,16 +375,16 @@ if (!$isEmptyPlot) {
 
                                 <div>
                                     <?php if ($canAfford && $canQueueNewBuilding): ?>
-                                        <button type="button" class="btn btn-primary" onclick="launchBuildingUpgrade('<?= $bCode ?>', 1, <?= $slot ?>)" style="font-size:0.8rem; padding:0.4rem 0.8rem; font-weight:600; background:linear-gradient(135deg, #b91c1c, #dc2626); border-color:#ef4444;">
-                                            🔨 Bâtir (Niv. 1)
+                                        <button type="button" class="field-btn-primary" style="padding:0.4rem 0.9rem; font-size:0.8rem;" onclick="launchBuildingUpgrade('<?= $bCode ?>', 1, <?= $slot ?>)">
+                                            🔨 Bâtir
                                         </button>
                                     <?php elseif (!$canAfford): ?>
-                                        <button type="button" class="btn btn-secondary" disabled style="font-size:0.75rem; padding:0.4rem 0.7rem; opacity:0.6; cursor:not-allowed;">
-                                            ⚠️ Manque ressources
+                                        <button type="button" class="field-btn-primary disabled" disabled style="padding:0.4rem 0.9rem; font-size:0.8rem; opacity:0.5; cursor:not-allowed;">
+                                            Matériaux Insuffisants
                                         </button>
                                     <?php else: ?>
-                                        <button type="button" class="btn btn-secondary" disabled style="font-size:0.75rem; padding:0.4rem 0.7rem; opacity:0.6; cursor:not-allowed;">
-                                            ⏳ Chantier en cours
+                                        <button type="button" class="field-btn-primary disabled" disabled style="padding:0.4rem 0.9rem; font-size:0.8rem; opacity:0.5; cursor:not-allowed;">
+                                            Chantier Occupé
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -371,7 +398,7 @@ if (!$isEmptyPlot) {
     <?php else: ?>
         <!-- CAS : BÂTIMENT FÉODAL ACTIF / CONSTRUCTIBLE -->
         <div class="field-hero-card">
-            <div class="field-hero-bg" style="background-image: url('/public/assets/shogun_castle_city_bg.jpg?v=<?= file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg') ? filemtime(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg') : 1 ?>');"></div>
+            <div class="field-hero-bg" style="background-image: url('<?= $heroBgUrl ?>');"></div>
             <div class="field-hero-overlay"></div>
 
             <div class="field-hero-content">
@@ -398,7 +425,14 @@ if (!$isEmptyPlot) {
                                 <span><?= $bInfo['icon'] ?></span>
                                 <span><?= htmlspecialchars($sectorInfo['name']) ?></span>
                             </div>
-                            <h1 class="field-title"><?= htmlspecialchars($bInfo['name']) ?></h1>
+                            <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-top:0.25rem;">
+                                <h1 class="field-title" style="margin:0;"><?= htmlspecialchars($bInfo['name']) ?></h1>
+                                <?php if ($buildingIllustrationUrl): ?>
+                                    <button type="button" onclick="openArtworkModal('<?= $buildingIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($bInfo['name'])) ?>')" class="btn btn-secondary" style="font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:6px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#fde047; cursor:pointer;" title="Agrandir l'illustration artistique en haute définition">
+                                        🎨 Estampe HD
+                                    </button>
+                                <?php endif; ?>
+                            </div>
                             <span class="field-subtitle">Emplacement castral #<?= $slot ?> &bull; Cité de <?= htmlspecialchars($planet['name']) ?></span>
                         </div>
 
@@ -788,5 +822,37 @@ function updateBuildingCountdowns() {
 }
 setInterval(updateBuildingCountdowns, 1000);
 updateBuildingCountdowns();
+
+function openArtworkModal(imgSrc, title) {
+    const modal = document.getElementById('artworkModal');
+    const img = document.getElementById('artworkModalImg');
+    const titleEl = document.getElementById('artworkModalTitle');
+    if (modal && img && titleEl) {
+        img.src = imgSrc;
+        titleEl.innerText = title;
+        modal.style.display = 'flex';
+    }
+}
+function closeArtworkModal(e) {
+    const modal = document.getElementById('artworkModal');
+    if (modal && (!e || e.target.id === 'artworkModal')) {
+        modal.style.display = 'none';
+    }
+}
 </script>
+
+<!-- MODALE LIGHTBOX ESTAMPE HD -->
+<div id="artworkModal" class="modal-overlay" style="display:none;" onclick="closeArtworkModal(event)">
+    <div class="modal-card modal-card-lg" style="max-width: 960px; padding: 1.5rem; background: var(--bg-surface, #fdfbf7);" onclick="event.stopPropagation()">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+            <h3 id="artworkModalTitle" style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 800; display:flex; align-items:center; gap:0.5rem;">
+                <span>🎨</span> Estampe Féodale Authentique
+            </h3>
+            <button type="button" class="modal-close-btn" onclick="closeArtworkModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="text-align: center;">
+            <img id="artworkModalImg" src="" alt="Estampe" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); border: 1px solid var(--border-color);">
+        </div>
+    </div>
+</div>
 

@@ -145,6 +145,20 @@ $sectorClass = match($type) {
     default => 'sec-metal'
 };
 
+// Cartographie des illustrations artistiques des ressources féodales
+$fieldHeroImages = [
+    'metal_mine' => 'resources/ressource_bois_cedre.jpg',
+    'crystal_mine' => 'resources/ressource_pierre_taille.jpg',
+    'deuterium_synth' => 'resources/ressource_riz_imperial.jpg',
+    'solar_plant' => 'resources/ressource_ferveur_shinto.jpg',
+];
+$fieldHeroRel = $fieldHeroImages[$type] ?? null;
+$fieldHeroFile = $fieldHeroRel ? __DIR__ . '/../public/assets/' . $fieldHeroRel : null;
+$fieldIllustrationUrl = ($fieldHeroFile && file_exists($fieldHeroFile))
+    ? '/public/assets/' . $fieldHeroRel . '?v=' . filemtime($fieldHeroFile)
+    : null;
+$fieldHeroBgUrl = $fieldIllustrationUrl ?? ('/public/assets/shogun_rural_terroir_bg.jpg?v=' . (file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg') ? filemtime(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg') : 1));
+
 // Navigation parcelles précédente / suivante
 $prevSlot = ($slot > 1) ? $slot - 1 : 18;
 $nextSlot = ($slot < 18) ? $slot + 1 : 1;
@@ -175,7 +189,7 @@ $nextSlot = ($slot < 18) ? $slot + 1 : 1;
     <!-- CARTE PRINCIPALE : FOND DE CARTE DU TERROIR AVEC TILE DU CHAMP & DESCRIPTION -->
     <div class="field-hero-card">
         <!-- Fond de carte estompé du terroir féodal -->
-        <div class="field-hero-bg" style="background-image: url('/public/assets/shogun_rural_terroir_bg.jpg?v=<?= filemtime(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg') ?>');"></div>
+        <div class="field-hero-bg" style="background-image: url('<?= $fieldHeroBgUrl ?>');"></div>
         <div class="field-hero-overlay"></div>
 
         <div class="field-hero-content">
@@ -202,7 +216,14 @@ $nextSlot = ($slot < 18) ? $slot + 1 : 1;
                             <span><?= $info['icon'] ?></span>
                             <span><?= htmlspecialchars($info['res_name'] ?? 'Ressource') ?></span>
                         </div>
-                        <h1 class="field-title"><?= htmlspecialchars($info['name']) ?></h1>
+                        <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-top:0.25rem;">
+                            <h1 class="field-title" style="margin:0;"><?= htmlspecialchars($info['name']) ?></h1>
+                            <?php if ($fieldIllustrationUrl): ?>
+                                <button type="button" onclick="openArtworkModal('<?= $fieldIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($info['name'])) ?>')" class="btn btn-secondary" style="font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:6px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#fde047; cursor:pointer;" title="Agrandir l'illustration artistique en haute définition">
+                                    🎨 Estampe HD
+                                </button>
+                            <?php endif; ?>
+                        </div>
                         <span class="field-subtitle">Emplacement cadastral #<?= $slot ?> &bull; Domaine de <?= htmlspecialchars($planet['name']) ?></span>
                     </div>
 
@@ -574,5 +595,37 @@ async function confirmDemolishField(slot, fieldName) {
         alert('Erreur réseau lors de la suppression.');
     }
 }
+
+function openArtworkModal(imgSrc, title) {
+    const modal = document.getElementById('artworkModal');
+    const img = document.getElementById('artworkModalImg');
+    const titleEl = document.getElementById('artworkModalTitle');
+    if (modal && img && titleEl) {
+        img.src = imgSrc;
+        titleEl.innerText = title;
+        modal.style.display = 'flex';
+    }
+}
+function closeArtworkModal(e) {
+    const modal = document.getElementById('artworkModal');
+    if (modal && (!e || e.target.id === 'artworkModal')) {
+        modal.style.display = 'none';
+    }
+}
 </script>
+
+<!-- MODALE LIGHTBOX ESTAMPE HD -->
+<div id="artworkModal" class="modal-overlay" style="display:none;" onclick="closeArtworkModal(event)">
+    <div class="modal-card modal-card-lg" style="max-width: 960px; padding: 1.5rem; background: var(--bg-surface, #fdfbf7);" onclick="event.stopPropagation()">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+            <h3 id="artworkModalTitle" style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 800; display:flex; align-items:center; gap:0.5rem;">
+                <span>🎨</span> Estampe Féodale Authentique
+            </h3>
+            <button type="button" class="modal-close-btn" onclick="closeArtworkModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="text-align: center;">
+            <img id="artworkModalImg" src="" alt="Estampe" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); border: 1px solid var(--border-color);">
+        </div>
+    </div>
+</div>
 
