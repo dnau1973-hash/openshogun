@@ -159,30 +159,33 @@ class VillageFieldGenerator {
         return 'balanced';
     }
 
+    public const UNIVERSAL_SLOT_DISTRIBUTION = [
+        1 => 'metal_mine',
+        2 => 'metal_mine',
+        3 => 'metal_mine',
+        4 => 'metal_mine',
+        5 => 'metal_mine',
+        6 => 'crystal_mine',
+        7 => 'crystal_mine',
+        8 => 'crystal_mine',
+        9 => 'crystal_mine',
+        10 => 'crystal_mine',
+        11 => 'deuterium_synth',
+        12 => 'deuterium_synth',
+        13 => 'deuterium_synth',
+        14 => 'deuterium_synth',
+        15 => 'solar_plant',
+        16 => 'solar_plant',
+        17 => 'solar_plant',
+        18 => 'solar_plant'
+    ];
+
     /**
-     * Génère la répartition des 19 parcelles en mélangeant aléatoirement les emplacements
-     * @return array [1 => 'metal_mine', 2 => 'crystal_mine', ..., 19 => 'solar_plant']
+     * Génère la répartition des 18 parcelles selon la fresque du Terroir Féodal Universel
+     * @return array [1 => 'metal_mine', ..., 18 => 'solar_plant']
      */
-    public static function generateSlotDistribution(string $archetypeKey): array {
-        $archetype = self::ARCHETYPES[$archetypeKey] ?? self::ARCHETYPES['balanced'];
-        
-        $pool = [];
-        foreach ($archetype['counts'] as $type => $count) {
-            for ($i = 0; $i < $count; $i++) {
-                $pool[] = $type;
-            }
-        }
-
-        // Mélanger aléatoirement les 19 ressources
-        shuffle($pool);
-
-        $slots = [];
-        $totalSlots = count($pool);
-        for ($i = 0; $i < $totalSlots; $i++) {
-            $slots[$i + 1] = $pool[$i];
-        }
-
-        return $slots;
+    public static function generateSlotDistribution(?string $archetypeKey = null): array {
+        return self::UNIVERSAL_SLOT_DISTRIBUTION;
     }
 
     /**

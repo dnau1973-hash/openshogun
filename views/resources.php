@@ -118,105 +118,55 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
     user-select: none !important;
 }
 
-/* Forcer la taille et le comportement des sprites transparents */
-.rts-hotspot {
+/* Hotspots interactifs du Terroir Féodal intégré */
+.rts-surface .rts-hotspot {
     position: absolute !important;
     cursor: pointer !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease !important;
+    background: transparent !important;
+    border: 1.5px solid transparent !important;
 }
 
-.rts-hotspot .rts-tile-sprite {
-    position: absolute !important;
-    bottom: 0 !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
-    object-fit: contain !important;
-    pointer-events: none !important;
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.55)) !important;
+.rts-surface .rts-hotspot:hover {
+    background: rgba(234, 179, 8, 0.14) !important;
+    border: 1.5px solid rgba(234, 179, 8, 0.85) !important;
+    box-shadow: 0 0 18px rgba(234, 179, 8, 0.5), inset 0 0 12px rgba(234, 179, 8, 0.2) !important;
 }
 
-.rts-tenshu-sprite {
-    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65)) !important;
+.rts-surface .rts-hotspot.highlighted {
+    background: rgba(234, 179, 8, 0.2) !important;
+    border: 2px solid #eab308 !important;
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.75) !important;
 }
 
-.rts-hotspot .rts-reticle,
-.rts-hotspot .rts-reticle-alt {
-    display: none !important;
+.rts-surface .rts-hotspot .rts-level-bubble {
+    top: 6% !important;
+    right: 8% !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
 }
 
+.rts-surface .rts-hotspot:hover .rts-level-bubble {
+    transform: scale(1.15) !important;
+    box-shadow: 0 0 12px rgba(234, 179, 8, 0.75) !important;
+}
+
+.rts-surface .rts-hotspot .rts-level-bubble.level-zero {
+    background: rgba(28, 25, 23, 0.92) !important;
+    border: 2px dashed #eab308 !important;
+    color: #fef08a !important;
+    font-size: 1.1rem !important;
+    font-weight: 900 !important;
+}
+
+.rts-surface .rts-hotspot:hover .rts-level-bubble.level-zero {
+    background: #b91c1c !important;
+    border: 2px solid #fef08a !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 14px rgba(185, 28, 28, 0.85) !important;
+}
 </style>
 <?= SlotPositionEngine::renderCss('resources') ?>
-<style>
-/* Tenshu et Cœur Castral Central */
-
-.hotspot-bunker-hq .rts-badge {
-    bottom: -6px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    background: rgba(15, 23, 42, 0.95) !important;
-    border-color: #dc2626 !important;
-    box-shadow: 0 0 15px rgba(220, 38, 38, 0.5) !important;
-    font-size: 0.8rem !important;
-    padding: 3px 10px !important;
-}
-
-.hotspot-bunker-hq:hover .rts-badge {
-    box-shadow: 0 0 25px rgba(220, 38, 38, 0.9) !important;
-    transform: translateX(-50%) scale(1.08) !important;
-}
-
-/* Tooltip position par défaut pour les parcelles */
-.rts-hotspot .rts-tooltip {
-    bottom: 105% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-}
-
-.hotspot-slot-17 .rts-tooltip,
-.hotspot-slot-18 .rts-tooltip,
-.hotspot-slot-1 .rts-tooltip,
-.hotspot-slot-4 .rts-tooltip,
-.hotspot-slot-16 .rts-tooltip {
-    bottom: auto !important;
-    top: 105% !important;
-}
-
-.rts-hotspot.is-upgrading .sprite-upgrading {
-    opacity: 0.75 !important;
-    filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.7)) !important;
-}
-
-/* Parcelles de ressources au niveau 0 (prêtes à être fondées) */
-.rts-hotspot.is-level-zero .rts-tile-sprite {
-    opacity: 0.55 !important;
-    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45)) grayscale(35%) !important;
-    transition: all 0.25s ease !important;
-}
-
-.rts-hotspot.is-level-zero:hover .rts-tile-sprite {
-    opacity: 0.95 !important;
-    filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.6)) grayscale(0%) !important;
-    transform: translateX(-50%) scale(1.04) !important;
-}
-
-.rts-level-bubble.level-zero {
-    background: rgba(255, 255, 255, 0.95) !important;
-    border-color: #64748b !important;
-    color: #334155 !important;
-    font-weight: 800 !important;
-}
-
-.rts-hotspot.is-level-zero:hover .rts-level-bubble.level-zero {
-    background: #22c55e !important;
-    border-color: #15803d !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.8) !important;
-}
-</style>
 
 <div class="grid-main">
     <!-- Vue Principale des Parcelles -->
@@ -249,15 +199,12 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                      data-sector="hq"
                      title="🏯 Tenshu Donjon & Cité Castrale (Niveau <?= $hqLevel ?>)"
                      onclick="window.location.href='?page=city'">
-                    <img src="/public/assets/tile_tenshu.png" class="rts-tile-sprite rts-tenshu-sprite" alt="Tenshu Palais" draggable="false">
-                    
-                    <!-- Badge niveau simple en haut à droite -->
                     <div class="rts-level-bubble rts-tenshu-bubble" title="Tenshu (Niveau <?= $hqLevel ?>)">
                         <?= $hqLevel ?>
                     </div>
                 </div>
 
-                <!-- 19 Bâtiments de Ressources Cliquables sur le Terrain -->
+                <!-- 18 Exploitations de Ressources Cliquables sur le Terroir -->
                 <?php foreach ($fields as $f): ?>
                     <?php 
                         $slot = (int)$f['field_slot'];
@@ -266,14 +213,6 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         $info = FIELD_TYPES[$type] ?? FIELD_TYPES['metal_mine'];
                         $isUpgrading = isset($activeFieldQueue[$slot]);
                         $isDemolishing = ($isUpgrading && (int)($activeFieldQueue[$slot]['target_level'] ?? -1) === 0);
-
-                        $tileImg = match($type) {
-                            'metal_mine' => 'tile_bucheron.png',
-                            'crystal_mine' => 'tile_carriere.png',
-                            'deuterium_synth' => 'tile_riziere.png',
-                            'solar_plant' => 'tile_sanctuaire.png',
-                            default => 'tile_bucheron.png'
-                        };
                     ?>
                     <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?> <?= $isUpgrading ? 'is-upgrading' : '' ?> <?= $isDemolishing ? 'is-demolishing' : '' ?> <?= ($lvl === 0) ? 'is-level-zero' : '' ?>" 
                          data-sector="<?= $type ?>"
@@ -281,17 +220,16 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                          title="<?= htmlspecialchars($info['name']) ?> #<?= $slot ?> (<?= $isDemolishing ? 'Démantèlement en cours' : ($isUpgrading ? 'Chantier en cours' : ($lvl > 0 ? 'Niveau ' . $lvl : 'Niveau 0 - Prêt à être fondé')) ?>)"
                          onclick="window.location.href='/?page=field&slot=<?= $slot ?>'">
                         
-                        <!-- Image PNG transparente de la ressource -->
-                        <?php $tileFile = __DIR__ . '/../public/assets/' . $tileImg; ?>
-                        <img src="/public/assets/<?= $tileImg ?>?v=<?= file_exists($tileFile) ? filemtime($tileFile) : time() ?>" class="rts-tile-sprite <?= $isUpgrading ? 'sprite-upgrading' : '' ?>" style="<?= $isDemolishing ? 'opacity:0.65; filter:grayscale(40%) sepia(20%);' : ($lvl === 0 ? 'opacity:0.85;' : '') ?>" alt="<?= htmlspecialchars($info['name']) ?>" draggable="false">
-
-                        <!-- Badge minimaliste de niveau en hauteur et à droite du bâtiment (Style Travian) -->
+                        <!-- Badge féodal de niveau (Style Travian) -->
                         <div class="rts-level-bubble <?= $isDemolishing ? 'demolishing' : ($isUpgrading ? 'upgrading' : ($lvl === 0 ? 'level-zero' : '')) ?>" title="<?= htmlspecialchars($info['name']) ?> (<?= $isDemolishing ? 'Démolition vers Niv. 0' : 'Niveau ' . $lvl ?>)">
-                            <?= $lvl ?>
-                            <?php if ($isDemolishing): ?>
+                            <?php if ($lvl === 0 && !$isUpgrading && !$isDemolishing): ?>
+                                +
+                            <?php elseif ($isDemolishing): ?>
                                 <span class="bubble-pulse">🗑️</span>
                             <?php elseif ($isUpgrading): ?>
                                 <span class="bubble-pulse">⏳</span>
+                            <?php else: ?>
+                                <?= $lvl ?>
                             <?php endif; ?>
                         </div>
                     </div>
