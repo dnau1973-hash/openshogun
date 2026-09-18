@@ -30,8 +30,8 @@ echo "\n=== TEST 2 : GÉNÉRATION ET MÉLANGE ALÉATOIRE DES 18 SLOTS ===\n";
 $dist1 = VillageFieldGenerator::generateSlotDistribution('wood');
 $dist2 = VillageFieldGenerator::generateSlotDistribution('wood');
 
-assert(count($dist1) === 18, "La distribution doit contenir 18 slots");
-assert(array_keys($dist1) === range(1, 18), "Les clés doivent être exactement 1 à 18");
+assert(count($dist1) === 19, "La distribution doit contenir 19 slots");
+assert(array_keys($dist1) === range(1, 19), "Les clés doivent être exactement 1 à 19");
 
 $woodCount1 = count(array_keys($dist1, 'metal_mine'));
 assert($woodCount1 === 7, "L'archétype 'wood' doit avoir 7 bûcherons (trouvé: {$woodCount1})");
@@ -46,7 +46,7 @@ for ($try = 0; $try < 10; $try++) {
     }
 }
 assert(!$identicalSlots, "Les slots doivent être mélangés aléatoirement");
-echo "  [OK] Distribution mélangée avec succès sur les 18 emplacements (7 bois répartis dynamiquement).\n";
+echo "  [OK] Distribution mélangée avec succès sur les 19 emplacements (7 bois répartis dynamiquement).\n";
 
 echo "\n=== TEST 3 : GÉNÉRATION ALÉATOIRE DES COORDONNÉES ===\n";
 $db = Database::getConnection();

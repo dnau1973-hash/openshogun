@@ -682,26 +682,27 @@ a:hover {
 }
 
 /* ==========================================================
-   POSITIONNEMENT PRÉCIS DES 18 BÂTIMENTS SUR LE TERROIR
+   POSITIONNEMENT PRÉCIS DES 19 PARCELLES SUR LE TERROIR
    ========================================================== */
-.hotspot-slot-1  { left: 12.0%; top: 30.1%; width: 11.0%; height: 18.6%; z-index: 7; }
-.hotspot-slot-2  { left: 9.5%;  top: 40.1%; width: 11.0%; height: 18.6%; z-index: 8; }
-.hotspot-slot-3  { left: 11.5%; top: 50.1%; width: 11.0%; height: 18.6%; z-index: 9; }
-.hotspot-slot-4  { left: 20.5%; top: 36.1%; width: 11.0%; height: 18.6%; z-index: 8; }
-.hotspot-slot-5  { left: 24.5%; top: 45.1%; width: 11.0%; height: 18.6%; z-index: 9; }
-.hotspot-slot-6  { left: 21.5%; top: 64.1%; width: 11.0%; height: 18.6%; z-index: 12; }
-.hotspot-slot-7  { left: 29.0%; top: 71.1%; width: 11.0%; height: 18.6%; z-index: 13; }
-.hotspot-slot-8  { left: 31.5%; top: 55.6%; width: 11.0%; height: 18.6%; z-index: 10; }
-.hotspot-slot-9  { left: 39.5%; top: 60.1%; width: 11.0%; height: 18.6%; z-index: 11; }
-.hotspot-slot-10 { left: 49.5%; top: 58.6%; width: 11.0%; height: 18.6%; z-index: 11; }
-.hotspot-slot-11 { left: 60.5%; top: 53.1%; width: 11.0%; height: 18.6%; z-index: 10; }
-.hotspot-slot-12 { left: 59.5%; top: 73.1%; width: 11.0%; height: 18.6%; z-index: 13; }
-.hotspot-slot-13 { left: 68.5%; top: 45.1%; width: 11.0%; height: 18.6%; z-index: 9; }
-.hotspot-slot-14 { left: 73.0%; top: 36.1%; width: 11.0%; height: 18.6%; z-index: 8; }
-.hotspot-slot-15 { left: 80.5%; top: 30.6%; width: 11.0%; height: 18.6%; z-index: 7; }
-.hotspot-slot-16 { left: 73.0%; top: 25.1%; width: 11.0%; height: 18.6%; z-index: 6; }
-.hotspot-slot-17 { left: 64.5%; top: 17.6%; width: 11.0%; height: 18.6%; z-index: 5; }
-.hotspot-slot-18 { left: 56.5%; top: 10.6%; width: 11.0%; height: 18.6%; z-index: 4; }
+.hotspot-slot-1  { left: 10.5%; top: 31.5%; width: 12.0%; height: 16.0%; z-index: 43; }
+.hotspot-slot-2  { left: 9.5%;  top: 40.5%; width: 12.0%; height: 16.0%; z-index: 52; }
+.hotspot-slot-3  { left: 11.5%; top: 51.0%; width: 12.0%; height: 16.0%; z-index: 62; }
+.hotspot-slot-4  { left: 19.5%; top: 38.0%; width: 12.0%; height: 16.0%; z-index: 49; }
+.hotspot-slot-5  { left: 23.5%; top: 47.5%; width: 12.0%; height: 16.0%; z-index: 59; }
+.hotspot-slot-6  { left: 20.8%; top: 65.5%; width: 12.0%; height: 16.0%; z-index: 77; }
+.hotspot-slot-7  { left: 28.5%; top: 73.0%; width: 12.0%; height: 16.0%; z-index: 85; }
+.hotspot-slot-8  { left: 30.0%; top: 57.0%; width: 12.0%; height: 16.0%; z-index: 68; }
+.hotspot-slot-9  { left: 38.5%; top: 63.0%; width: 12.0%; height: 16.0%; z-index: 74; }
+.hotspot-slot-10 { left: 49.5%; top: 61.5%; width: 12.0%; height: 16.0%; z-index: 73; }
+.hotspot-slot-11 { left: 59.5%; top: 55.5%; width: 12.0%; height: 16.0%; z-index: 67; }
+.hotspot-slot-12 { left: 59.0%; top: 75.5%; width: 12.0%; height: 16.0%; z-index: 87; }
+.hotspot-slot-13 { left: 68.0%; top: 72.5%; width: 12.0%; height: 16.0%; z-index: 84; }
+.hotspot-slot-14 { left: 67.5%; top: 46.0%; width: 12.0%; height: 16.0%; z-index: 57; }
+.hotspot-slot-15 { left: 71.5%; top: 37.0%; width: 12.0%; height: 16.0%; z-index: 48; }
+.hotspot-slot-16 { left: 80.0%; top: 32.0%; width: 12.0%; height: 16.0%; z-index: 43; }
+.hotspot-slot-17 { left: 72.0%; top: 25.5%; width: 12.0%; height: 16.0%; z-index: 37; }
+.hotspot-slot-18 { left: 64.0%; top: 18.5%; width: 12.0%; height: 16.0%; z-index: 30; }
+.hotspot-slot-19 { left: 55.5%; top: 13.0%; width: 12.0%; height: 16.0%; z-index: 24; }
 
 /* Tooltip position par défaut pour les parcelles */
 .rts-hotspot .rts-tooltip {

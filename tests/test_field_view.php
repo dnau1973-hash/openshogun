@@ -34,12 +34,12 @@ $buildingEngine = new BuildingEngine();
 echo "Joueur test : {$testUser['username']} (ID {$testUser['id']})\n";
 echo "Fief / Planète : {$planet['name']} (ID {$planet['id']})\n";
 
-// 2. Tester les 18 slots et vérifier que la vue field.php génère les données sans erreur
+// 2. Tester les 19 slots et vérifier que la vue field.php génère les données sans erreur
 $fields = $planetEngine->getFields((int)$planet['id']);
-assert(count($fields) === 18, "La planète doit posséder 18 parcelles.");
+assert(count($fields) === 19, "La planète doit posséder 19 parcelles.");
 
-echo "\n--- Vérification des 18 parcelles & métadonnées ---\n";
-for ($slot = 1; $slot <= 18; $slot++) {
+echo "\n--- Vérification des 19 parcelles & métadonnées ---\n";
+for ($slot = 1; $slot <= 19; $slot++) {
     $_GET['page'] = 'field';
     $_GET['slot'] = $slot;
 

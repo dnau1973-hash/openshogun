@@ -218,17 +218,20 @@ La carte du monde est un damier où chaque province possède des coordonnées $(
 - La durée de marche d'une armée :
   $$\text{Durée (secondes)} = \frac{\text{Distance}}{\text{Vitesse de l'unité la plus lente}} \times 3600$$
 
-### 2. Le Système de Calibration des Slots (RTS)
+### 2. Le Système de Positionnement des 19 Slots et la Règle du Z-Index
 Plutôt que d'utiliser des pixels fixes (`left: 350px`) qui se décalent sur les écrans de smartphone ou de tablettes, nous utilisons des **pourcentages relatifs** :
 ```css
-.hotspot-city-slot-19 {
+.hotspot-slot-1 {
     position: absolute;
-    left: 48.5%; /* Position horizontale relative */
-    top: 28.2%;  /* Position verticale relative */
-    transform: translate(-50%, -50%);
+    left: 10.5%; /* Position horizontale relative */
+    top: 31.5%;  /* Position verticale relative */
+    width: 12.0%;
+    height: 16.0%;
+    z-index: 43; /* Calculé en fonction de la profondeur */
 }
 ```
-Grâce à notre outil interactif de **Calibration Drag & Drop sécurisé**, l'administrateur peut déplacer les bulles de niveau à la souris, et le serveur enregistre les coordonnées exactes dans `config/slot_positions.json` !
+**La Règle d'or de la 3D Isométrique & du Z-Index :**
+Sur le terroir féodal, les **19 parcelles de ressources** épousent les cercles de pierre dessinés sur l'estampe de fond. Pour garantir qu'aucun bâtiment situé à l'arrière ne vienne chevaucher un bâtiment placé au premier plan, nous appliquons une règle mathématique stricte : **plus un emplacement est situé bas sur l'image ($Y$ / `top%` plus élevé), plus son `z-index` est grand** (de $z=24$ au faîte nord-est jusqu'à $z=87$ sur la rive sud).
 
 ---
 

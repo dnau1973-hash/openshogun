@@ -542,7 +542,3 @@ function toggleCityViewMode() {
     }
 }
 </script>
-
-<?php if ($auth->isAdmin()): ?>
-    <?php require __DIR__ . '/partials/slot_calibrator.php'; ?>
-<?php endif; ?>

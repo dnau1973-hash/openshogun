@@ -21,7 +21,7 @@ class VillageFieldGenerator {
             'counts' => [
                 'metal_mine' => 5,       // Bûcherons
                 'crystal_mine' => 5,     // Carrières
-                'deuterium_synth' => 4,  // Rizières
+                'deuterium_synth' => 5,  // Rizières
                 'solar_plant' => 4       // Sanctuaires
             ]
         ],
@@ -34,7 +34,7 @@ class VillageFieldGenerator {
                 'metal_mine' => 7,
                 'crystal_mine' => 4,
                 'deuterium_synth' => 4,
-                'solar_plant' => 3
+                'solar_plant' => 4
             ]
         ],
         'stone' => [
@@ -46,7 +46,7 @@ class VillageFieldGenerator {
                 'metal_mine' => 4,
                 'crystal_mine' => 7,
                 'deuterium_synth' => 4,
-                'solar_plant' => 3
+                'solar_plant' => 4
             ]
         ],
         'rice' => [
@@ -57,7 +57,7 @@ class VillageFieldGenerator {
             'counts' => [
                 'metal_mine' => 3,
                 'crystal_mine' => 3,
-                'deuterium_synth' => 8,
+                'deuterium_synth' => 9,
                 'solar_plant' => 4
             ]
         ],
@@ -69,19 +69,19 @@ class VillageFieldGenerator {
             'counts' => [
                 'metal_mine' => 4,
                 'crystal_mine' => 4,
-                'deuterium_synth' => 3,
+                'deuterium_synth' => 4,
                 'solar_plant' => 7
             ]
         ],
         'super_rice' => [
             'name' => 'Grande Plaine des Rizières',
             'icon' => '🌾👑',
-            'desc' => 'Terroir rare aux 11 rizières inondées, centre névralgique de ravitaillement',
+            'desc' => 'Terroir rare aux 12 rizières inondées, centre névralgique de ravitaillement',
             'weight' => 5,
             'counts' => [
                 'metal_mine' => 2,
                 'crystal_mine' => 2,
-                'deuterium_synth' => 11,
+                'deuterium_synth' => 12,
                 'solar_plant' => 3
             ]
         ],
@@ -93,20 +93,20 @@ class VillageFieldGenerator {
             'counts' => [
                 'metal_mine' => 6,
                 'crystal_mine' => 6,
-                'deuterium_synth' => 3,
+                'deuterium_synth' => 4,
                 'solar_plant' => 3
             ]
         ],
         'sanctuary' => [
             'name' => 'Haut Sanctuaire Impérial',
             'icon' => '⛩️✨',
-            'desc' => 'Mont sacré dédié aux kamis avec 10 sanctuaires et temples érigés',
+            'desc' => 'Mont sacré dédié aux kamis avec 11 sanctuaires et temples érigés',
             'weight' => 2,
             'counts' => [
                 'metal_mine' => 2,
                 'crystal_mine' => 3,
                 'deuterium_synth' => 3,
-                'solar_plant' => 10
+                'solar_plant' => 11
             ]
         ],
     ];
@@ -160,8 +160,8 @@ class VillageFieldGenerator {
     }
 
     /**
-     * Génère la répartition des 18 parcelles en mélangeant aléatoirement les emplacements
-     * @return array [1 => 'metal_mine', 2 => 'crystal_mine', ..., 18 => 'solar_plant']
+     * Génère la répartition des 19 parcelles en mélangeant aléatoirement les emplacements
+     * @return array [1 => 'metal_mine', 2 => 'crystal_mine', ..., 19 => 'solar_plant']
      */
     public static function generateSlotDistribution(string $archetypeKey): array {
         $archetype = self::ARCHETYPES[$archetypeKey] ?? self::ARCHETYPES['balanced'];
@@ -173,11 +173,12 @@ class VillageFieldGenerator {
             }
         }
 
-        // Mélanger aléatoirement les 18 ressources
+        // Mélanger aléatoirement les 19 ressources
         shuffle($pool);
 
         $slots = [];
-        for ($i = 0; $i < 18; $i++) {
+        $totalSlots = count($pool);
+        for ($i = 0; $i < $totalSlots; $i++) {
             $slots[$i + 1] = $pool[$i];
         }
 

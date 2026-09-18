@@ -287,8 +287,8 @@
             </div>
 
             <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 8px; font-size: 0.85rem;">
-                <strong style="color: #34d399;">🧰 Notre Outil de Calibration Intégré :</strong><br>
-                Dans les pages Cité et Ressources, nous avons programmé un <strong>mode de Drag & Drop réservé à l'administrateur</strong> avec sécurité de délimitation. Il permet de déplacer les bâtiments à la souris et enregistre les coordonnées directement dans <code>config/slot_positions.json</code> !
+                <strong style="color: #34d399;">🧰 Positionnement Géométrique & Règle du Z-Index :</strong><br>
+                Sur le terroir féodal, les <strong>19 parcelles de ressources</strong> sont calées au millimètre sur les ronds de terre du fond de carte. Pour garantir une perspective 2.5D parfaite sans chevauchement, nous appliquons une règle mathématique d'or : <strong>plus un slot est bas sur l'écran (ordonnée Y / top% élevée), plus son z-index est fort</strong> (de z:24 au sommet jusqu'à z:87 en bas).
             </div>
         </div>
     </div>

@@ -189,6 +189,33 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
     opacity: 0.75 !important;
     filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.7)) !important;
 }
+
+/* Parcelles de ressources au niveau 0 (prêtes à être fondées) */
+.rts-hotspot.is-level-zero .rts-tile-sprite {
+    opacity: 0.55 !important;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45)) grayscale(35%) !important;
+    transition: all 0.25s ease !important;
+}
+
+.rts-hotspot.is-level-zero:hover .rts-tile-sprite {
+    opacity: 0.95 !important;
+    filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.6)) grayscale(0%) !important;
+    transform: translateX(-50%) scale(1.04) !important;
+}
+
+.rts-level-bubble.level-zero {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: #64748b !important;
+    color: #334155 !important;
+    font-weight: 800 !important;
+}
+
+.rts-hotspot.is-level-zero:hover .rts-level-bubble.level-zero {
+    background: #22c55e !important;
+    border-color: #15803d !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.8) !important;
+}
 </style>
 
 <?php require __DIR__ . '/partials/quest_banner.php'; ?>
@@ -232,7 +259,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                     </div>
                 </div>
 
-                <!-- 18 Bâtiments de Ressources Cliquables sur le Terrain -->
+                <!-- 19 Bâtiments de Ressources Cliquables sur le Terrain -->
                 <?php foreach ($fields as $f): ?>
                     <?php 
                         $slot = (int)$f['field_slot'];
@@ -241,7 +268,6 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         $info = FIELD_TYPES[$type] ?? FIELD_TYPES['metal_mine'];
                         $isUpgrading = isset($activeFieldQueue[$slot]);
                         $isDemolishing = ($isUpgrading && (int)($activeFieldQueue[$slot]['target_level'] ?? -1) === 0);
-                        $isFreeSlot = ($lvl === 0 && !$isUpgrading);
 
                         $tileImg = match($type) {
                             'metal_mine' => 'tile_bucheron.png',
@@ -251,40 +277,30 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                             default => 'tile_bucheron.png'
                         };
                     ?>
-                    <?php if ($isFreeSlot): ?>
-                        <div class="rts-hotspot is-empty-plot sector-free hotspot-slot-<?= $slot ?>" 
-                             data-sector="free"
-                             data-slot="<?= $slot ?>"
-                             title="🌱 Parcelle Disponible #<?= $slot ?> : Cliquer pour choisir la ressource à exploiter"
-                             onclick="openFieldBuildModal(<?= $slot ?>)">
-                            <div class="rts-level-bubble" title="Parcelle #<?= $slot ?> disponible : Cliquer pour bâtir">+</div>
-                        </div>
-                    <?php else: ?>
-                        <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?> <?= $isUpgrading ? 'is-upgrading' : '' ?> <?= $isDemolishing ? 'is-demolishing' : '' ?>" 
-                             data-sector="<?= $type ?>"
-                             data-slot="<?= $slot ?>"
-                             title="<?= htmlspecialchars($info['name']) ?> #<?= $slot ?> (<?= $isDemolishing ? 'Démantèlement en cours' : ($isUpgrading ? 'Chantier en cours' : 'Niveau ' . $lvl) ?>)"
-                             onclick="window.location.href='/?page=field&slot=<?= $slot ?>'">
-                            
-                            <!-- Image PNG transparente de la ressource -->
-                            <img src="/public/assets/<?= $tileImg ?>" class="rts-tile-sprite <?= $isUpgrading ? 'sprite-upgrading' : '' ?>" style="<?= $isDemolishing ? 'opacity:0.65; filter:grayscale(40%) sepia(20%);' : '' ?>" alt="<?= htmlspecialchars($info['name']) ?>" draggable="false">
+                    <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?> <?= $isUpgrading ? 'is-upgrading' : '' ?> <?= $isDemolishing ? 'is-demolishing' : '' ?> <?= ($lvl === 0) ? 'is-level-zero' : '' ?>" 
+                         data-sector="<?= $type ?>"
+                         data-slot="<?= $slot ?>"
+                         title="<?= htmlspecialchars($info['name']) ?> #<?= $slot ?> (<?= $isDemolishing ? 'Démantèlement en cours' : ($isUpgrading ? 'Chantier en cours' : ($lvl > 0 ? 'Niveau ' . $lvl : 'Niveau 0 - Prêt à être fondé')) ?>)"
+                         onclick="window.location.href='/?page=field&slot=<?= $slot ?>'">
+                        
+                        <!-- Image PNG transparente de la ressource -->
+                        <img src="/public/assets/<?= $tileImg ?>" class="rts-tile-sprite <?= $isUpgrading ? 'sprite-upgrading' : '' ?>" style="<?= $isDemolishing ? 'opacity:0.65; filter:grayscale(40%) sepia(20%);' : ($lvl === 0 ? 'opacity:0.85;' : '') ?>" alt="<?= htmlspecialchars($info['name']) ?>" draggable="false">
 
-                            <!-- Badge minimaliste de niveau en hauteur et à droite du bâtiment (Style Travian) -->
-                            <div class="rts-level-bubble <?= $isDemolishing ? 'demolishing' : ($isUpgrading ? 'upgrading' : '') ?>" title="<?= htmlspecialchars($info['name']) ?> (<?= $isDemolishing ? 'Démolition vers Niv. 0' : 'Niveau ' . $lvl ?>)">
-                                <?= $lvl > 0 ? $lvl : '1' ?>
-                                <?php if ($isDemolishing): ?>
-                                    <span class="bubble-pulse">🗑️</span>
-                                <?php elseif ($isUpgrading): ?>
-                                    <span class="bubble-pulse">⏳</span>
-                                <?php endif; ?>
-                            </div>
+                        <!-- Badge minimaliste de niveau en hauteur et à droite du bâtiment (Style Travian) -->
+                        <div class="rts-level-bubble <?= $isDemolishing ? 'demolishing' : ($isUpgrading ? 'upgrading' : ($lvl === 0 ? 'level-zero' : '')) ?>" title="<?= htmlspecialchars($info['name']) ?> (<?= $isDemolishing ? 'Démolition vers Niv. 0' : 'Niveau ' . $lvl ?>)">
+                            <?= $lvl ?>
+                            <?php if ($isDemolishing): ?>
+                                <span class="bubble-pulse">🗑️</span>
+                            <?php elseif ($isUpgrading): ?>
+                                <span class="bubble-pulse">⏳</span>
+                            <?php endif; ?>
                         </div>
-                    <?php endif; ?>
+                    </div>
                 <?php endforeach; ?>
             </div>
             
             <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted); text-align:center;">
-                💡 <strong>Gestion du Terroir Féodal :</strong> Cliquez sur une parcelle libre (<span style="color:#22c55e; font-weight:700;">+</span>) pour choisir librement la ressource à y implanter, sur une exploitation existante pour l'élever, ou sur le Tenshu central pour visiter votre cité castrale.
+                💡 <strong>Gestion du Terroir Féodal :</strong> Cliquez sur une exploitation existante ou un emplacement rural (Niv. 0) pour l'élever, ou sur le Tenshu central pour visiter votre cité castrale.
             </p>
         </div>
     </div>
@@ -403,173 +419,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
     </div>
 </div>
 
-<!-- ==========================================================
-     MODAL DE CHOIX LIBRE SUR PARCELLE DE RESSOURCES
-     ========================================================== -->
-<div id="freeFieldSlotModal" class="modal-backdrop" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.78); backdrop-filter:blur(5px); justify-content:center; align-items:center; padding:1rem;">
-    <div class="modal-content card" style="max-width:820px; width:100%; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; background:var(--bg-surface, #0f172a); border:1px solid #334155; box-shadow:0 25px 50px -12px rgba(0,0,0,0.85); border-radius:12px;">
-        
-        <!-- En-tête de la modale -->
-        <div class="card-header" style="background:rgba(15,23,42,0.95); border-bottom:1px solid #1e293b; padding:1.25rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <h3 style="margin:0; font-size:1.25rem; color:#f8fafc; display:flex; align-items:center; gap:0.5rem;">
-                    <span>🌱</span> Fonder une Exploitation Agricole — Parcelle #<span id="modal-field-slot-title" style="color:#22c55e;">1</span>
-                </h3>
-                <p style="margin:0.25rem 0 0 0; font-size:0.85rem; color:#94a3b8;">
-                    Sélectionnez la ressource féodale que vous souhaitez exploiter sur cet emplacement rural.
-                </p>
-            </div>
-            <button type="button" onclick="closeFieldBuildModal()" style="background:transparent; border:none; color:#94a3b8; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.5rem; line-height:1;" title="Fermer (Échap)">&times;</button>
-        </div>
-
-        <!-- Corps de la modale : Liste des 4 Bâtiments de Ressources -->
-        <div class="card-body" style="overflow-y:auto; padding:1.25rem; display:flex; flex-direction:column; gap:0.9rem;">
-            <?php foreach ($resourceBuildings as $rCode => $rItem): 
-                $det = $rItem['details'];
-                $c = $det['cost'];
-                $dur = $det['duration'];
-                $canAfford = ($planet['metal'] >= $c['metal'] && $planet['crystal'] >= $c['crystal'] && $planet['deuterium'] >= $c['deuterium']);
-                $durFormatted = sprintf('%02d:%02d', floor($dur / 60), $dur % 60);
-            ?>
-                <div class="modal-field-row" style="background:rgba(30,41,59,0.55); border:1px solid #334155; border-radius:10px; padding:1rem; display:flex; justify-content:space-between; align-items:center; gap:1.25rem; flex-wrap:wrap; transition:all 0.2s;">
-                    <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:280px;">
-                        <div style="width:60px; height:60px; background:rgba(15,23,42,0.85); border:1px solid #475569; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.4);">
-                            <img src="/public/assets/<?= $rItem['sprite'] ?>" alt="<?= htmlspecialchars($rItem['name']) ?>" style="width:50px; height:50px; object-fit:contain;">
-                        </div>
-                        <div>
-                            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-                                <h4 style="margin:0; font-size:1.05rem; color:#f8fafc; font-weight:700;">
-                                    <?= htmlspecialchars($rItem['name']) ?>
-                                </h4>
-                                <span style="font-size:0.75rem; padding:0.15rem 0.5rem; border-radius:4px; background:rgba(34,197,94,0.15); color:#86efac; border:1px solid rgba(34,197,94,0.3); font-weight:600;">
-                                    <?= htmlspecialchars($rItem['sub']) ?>
-                                </span>
-                            </div>
-                            <p style="margin:0.35rem 0 0 0; font-size:0.8rem; color:#94a3b8; line-height:1.35;">
-                                <?= htmlspecialchars($rItem['desc']) ?>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div style="display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap;">
-                        <!-- Coûts de Défrichage / Niveau 1 -->
-                        <div style="display:flex; gap:0.75rem; font-size:0.85rem; font-weight:600; background:rgba(0,0,0,0.35); padding:0.45rem 0.75rem; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
-                            <span style="color:<?= ($planet['metal'] >= $c['metal']) ? '#4ade80' : '#ef4444' ?>;" title="Bois de Cèdre">
-                                🪵 <?= number_format($c['metal']) ?>
-                            </span>
-                            <span style="color:<?= ($planet['crystal'] >= $c['crystal']) ? '#4ade80' : '#ef4444' ?>;" title="Pierre de Taille">
-                                🪨 <?= number_format($c['crystal']) ?>
-                            </span>
-                            <span style="color:<?= ($planet['deuterium'] >= $c['deuterium']) ? '#4ade80' : '#ef4444' ?>;" title="Koku de Riz">
-                                🌾 <?= number_format($c['deuterium']) ?>
-                            </span>
-                            <span style="color:#94a3b8;" title="Temps de défrichage">
-                                ⏳ <?= $durFormatted ?>
-                            </span>
-                        </div>
-
-                        <!-- Bouton Défricher / Fonder -->
-                        <div>
-                            <?php if ($canAfford && $canQueueNewField): ?>
-                                <button type="button" class="btn btn-primary" onclick="confirmFieldBuild('<?= $rCode ?>')" style="font-size:0.85rem; padding:0.5rem 1rem; font-weight:700; background:linear-gradient(135deg, #15803d, #16a34a); border-color:#22c55e; white-space:nowrap; box-shadow:0 4px 12px rgba(34,197,94,0.3);">
-                                    🌱 Fonder (Niveau 1)
-                                </button>
-                            <?php elseif (!$canAfford): ?>
-                                <button type="button" class="btn btn-secondary" disabled style="font-size:0.8rem; padding:0.5rem 0.8rem; opacity:0.6; cursor:not-allowed; white-space:nowrap;" title="Ressources insuffisantes dans vos réserves">
-                                    ⚠️ Manque de ressources
-                                </button>
-                            <?php else: ?>
-                                <button type="button" class="btn btn-secondary" disabled style="font-size:0.8rem; padding:0.5rem 0.8rem; opacity:0.6; cursor:not-allowed; white-space:nowrap;" title="Chantier agricole déjà en cours">
-                                    ⏳ Chantier en cours
-                                </button>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-
-        <!-- Pied de modale -->
-        <div style="background:rgba(15,23,42,0.95); padding:0.85rem 1.5rem; border-top:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-            <span style="font-size:0.8rem; color:#64748b;">
-                💡 Vous pouvez choisir librement le type d'exploitation agricole (Bois, Pierre, Riz, Sanctuaire) sur n'importe quel emplacement disponible de votre terroir.
-            </span>
-            <button class="btn btn-secondary" onclick="closeFieldBuildModal()" style="font-size:0.8rem; padding:0.4rem 0.9rem;">Fermer</button>
-        </div>
-    </div>
-</div>
-
 <script>
-let currentSelectedFieldSlot = null;
-
-function openFieldBuildModal(slot) {
-    currentSelectedFieldSlot = slot;
-    const titleEl = document.getElementById('modal-field-slot-title');
-    if (titleEl) titleEl.innerText = slot;
-
-    const modal = document.getElementById('freeFieldSlotModal');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
-}
-
-function closeFieldBuildModal() {
-    const modal = document.getElementById('freeFieldSlotModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    currentSelectedFieldSlot = null;
-}
-
-async function confirmFieldBuild(fieldType) {
-    if (!currentSelectedFieldSlot) {
-        showModalAlert('Aucun emplacement agricole sélectionné.', 'error');
-        return;
-    }
-
-    const modal = document.getElementById('freeFieldSlotModal');
-    if (modal) modal.style.display = 'none';
-
-    const formData = new FormData();
-    formData.append('action', 'upgrade');
-    formData.append('category', 'field');
-    formData.append('target_id', currentSelectedFieldSlot);
-    formData.append('field_type', fieldType);
-
-    try {
-        const res = await fetch('/api/build.php', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success) {
-            window.location.reload();
-        } else {
-            showModalAlert(data.error || 'Impossible de lancer ce défrichage.', 'error');
-        }
-    } catch (e) {
-        showModalAlert('Erreur de communication avec le serveur castral.', 'error');
-    }
-}
-
-// Fermeture par Échap ou clic extérieur
-window.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeFieldBuildModal();
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('freeFieldSlotModal');
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeFieldBuildModal();
-            }
-        });
-    }
-});
-
 function filterSector(sector) {
     document.querySelectorAll('.sector-btn').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById(`btn-sec-${sector}`);
@@ -587,8 +437,4 @@ function filterSector(sector) {
     });
 }
 </script>
-
-<?php if ($auth->isAdmin()): ?>
-    <?php require __DIR__ . '/partials/slot_calibrator.php'; ?>
-<?php endif; ?>
 

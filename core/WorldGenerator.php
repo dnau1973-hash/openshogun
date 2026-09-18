@@ -117,7 +117,7 @@ class WorldGenerator {
             $newPlanetId = (int)$this->db->lastInsertId();
             $occupiedMap[$x . ':' . $y] = true;
 
-            // Initialiser les 18 parcelles selon un archétype procédural (Style Travian)
+            // Initialiser les 19 parcelles selon un archétype procédural (Style Travian)
             $fieldInfo = VillageFieldGenerator::populatePlanetFields($this->db, $newPlanetId, null, 0, false);
 
             $createdPlanets[] = [

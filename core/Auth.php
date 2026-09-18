@@ -141,7 +141,7 @@ class Auth {
             $stmtPlanet->execute([$userId, $planetName, $coords['x'], $coords['y']]);
             $planetId = (int)$this->db->lastInsertId();
 
-            // 4. Initialiser les 18 parcelles de ressources de façon procédurale (Style Travian, niveau 0 = libre)
+            // 4. Initialiser les 19 parcelles de ressources de façon procédurale (Style Travian)
             $capArchetype = VillageFieldGenerator::getRandomArchetypeKey(true);
             VillageFieldGenerator::populatePlanetFields($this->db, $planetId, $capArchetype, 0, false);
 

@@ -13,5 +13,7 @@ Thumbs.db
 
 # Secrets & Configuration Locale
 config/github.local.php
+tmp/
+
 
 
