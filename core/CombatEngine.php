@@ -5,6 +5,7 @@
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/PlanetEngine.php';
 require_once __DIR__ . '/HonorEngine.php';
+require_once __DIR__ . '/HeroEngine.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 class CombatEngine {
@@ -410,6 +411,8 @@ class CombatEngine {
         }
 
         // Intégration du Samouraï Héros attaquant
+        require_once __DIR__ . '/HeroEngine.php';
+        $heroEngine = new HeroEngine();
         $attackerHero = null;
         if (!empty($mission['has_hero'])) {
             $attackerHero = $heroEngine->getHeroByUserId((int)$mission['user_id']);

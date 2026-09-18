@@ -98,11 +98,28 @@ class FleetEngine {
             $looted = $combatResult['looted'];
             $isStationed = !empty($combatResult['stationed']);
 
+            $heroAlive = false;
+            if (!empty($mission['has_hero'])) {
+                require_once __DIR__ . '/HeroEngine.php';
+                $heroEngine = new HeroEngine();
+                $hero = $heroEngine->getHeroByUserId((int)$mission['user_id']);
+                if ($hero && $hero['status'] !== 'dead' && (float)$hero['health'] > 0) {
+                    $heroAlive = true;
+                }
+            }
+
             if ($isStationed) {
                 // Guerriers stationnés dans l'oasis pacifiée pour son annexion
+                if (!empty($mission['has_hero'])) {
+                    $this->db->prepare("
+                        UPDATE heroes 
+                        SET status = 'home', current_planet_id = ?, last_health_update = UNIX_TIMESTAMP() 
+                        WHERE user_id = ? AND status != 'dead'
+                    ")->execute([$mission['source_planet_id'], $mission['user_id']]);
+                }
                 $this->db->prepare("UPDATE fleet_missions SET status = 'completed' WHERE id = ?")->execute([$missionId]);
-            } elseif (array_sum($survivors) > 0) {
-                // Les survivants retournent à la base avec le butin pillé
+            } elseif (array_sum($survivors) > 0 || $heroAlive) {
+                // Les survivants (troupes ou héros vivant) retournent à la base avec le butin pillé
                 $this->db->prepare("
                     UPDATE fleet_missions 
                     SET status = 'returning', fleet_data = ?, cargo_data = ? 
@@ -114,6 +131,9 @@ class FleetEngine {
                 ]);
             } else {
                 // Garnison de raid entièrement anéantie par les bêtes sauvages
+                if (!empty($mission['has_hero'])) {
+                    $this->db->prepare("UPDATE heroes SET status = 'dead', health = 0.0 WHERE user_id = ? AND status != 'dead'")->execute([$mission['user_id']]);
+                }
                 $this->db->prepare("UPDATE fleet_missions SET status = 'completed' WHERE id = ?")->execute([$missionId]);
             }
             return;
@@ -146,7 +166,17 @@ class FleetEngine {
             $survivors = $combatResult['survivors'];
             $looted = $combatResult['looted'];
 
-            if (array_sum($survivors) > 0) {
+            $heroAlive = false;
+            if (!empty($mission['has_hero'])) {
+                require_once __DIR__ . '/HeroEngine.php';
+                $heroEngine = new HeroEngine();
+                $hero = $heroEngine->getHeroByUserId((int)$mission['user_id']);
+                if ($hero && $hero['status'] !== 'dead' && (float)$hero['health'] > 0) {
+                    $heroAlive = true;
+                }
+            }
+
+            if (array_sum($survivors) > 0 || $heroAlive) {
                 // Les survivants retournent avec le butin
                 $this->db->prepare("
                     UPDATE fleet_missions 
@@ -159,6 +189,9 @@ class FleetEngine {
                 ]);
             } else {
                 // Flotte entièrement anéantie
+                if (!empty($mission['has_hero'])) {
+                    $this->db->prepare("UPDATE heroes SET status = 'dead', health = 0.0 WHERE user_id = ? AND status != 'dead'")->execute([$mission['user_id']]);
+                }
                 $this->db->prepare("UPDATE fleet_missions SET status = 'completed' WHERE id = ?")->execute([$missionId]);
             }
         } elseif ($missionType === 'spy') {
