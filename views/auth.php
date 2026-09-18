@@ -12,6 +12,8 @@ $tab = $_GET['tab'] ?? 'login';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenShogun - Chroniques Féodales du Shogunat</title>
+    <link rel="stylesheet" href="/public/css/bootstrap-grid.min.css?v=5.3.3">
+    <link rel="stylesheet" href="/public/css/bootstrap-utilities.min.css?v=5.3.3">
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../public/css/style.css') ? filemtime(__DIR__ . '/../public/css/style.css') : time() ?>">
     <style>
         body {

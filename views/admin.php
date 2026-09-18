@@ -132,105 +132,105 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
     </div>
 
-    <!-- 5 Cartes Métriques Rapides Cliquables (Raccourcis vers Onglets) -->
+    <!-- Cartes Métriques Rapides Cliquables (Raccourcis vers Onglets) -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
-        <div class="card kpi-card" onclick="switchAdminTab('game')" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #dc2626; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Cliquer pour configurer les constantes & vitesses">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
+        <div class="card kpi-card" onclick="switchAdminTab('game')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #b91c1c; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour configurer les constantes & vitesses">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
                 <span>Vitesse Active</span>
                 <span>⚡</span>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #dc2626; margin-top: 0.25rem;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #b91c1c; margin-top: 0.25rem;">
                 x<?= (int)($settings['game_speed'] ?? 5) ?>
             </div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">Production: x<?= (int)($settings['resource_speed'] ?? 5) ?> | Marche: x<?= (int)($settings['fleet_speed'] ?? 5) ?></div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">Production: x<?= (int)($settings['resource_speed'] ?? 5) ?> | Marche: x<?= (int)($settings['fleet_speed'] ?? 5) ?></div>
         </div>
 
-        <div class="card kpi-card" onclick="switchAdminTab('bots')" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #a855f7; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Cliquer pour gérer les bots et l'IA">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
+        <div class="card kpi-card" onclick="switchAdminTab('bots')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #7e22ce; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour gérer les bots et l'IA">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
                 <span>Clans IA</span>
                 <span>🤖</span>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #c084fc; margin-top: 0.25rem;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #7e22ce; margin-top: 0.25rem;">
                 <?= $totalBots ?> PNJ
             </div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
-                Statut IA : <strong style="color: <?= !empty($settings['bots_enabled']) ? '#4ade80' : '#f87171' ?>;"><?= !empty($settings['bots_enabled']) ? 'Actif' : 'En sommeil' ?></strong>
+            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
+                Statut IA : <strong style="color: <?= !empty($settings['bots_enabled']) ? '#15803d' : '#b91c1c' ?>;"><?= !empty($settings['bots_enabled']) ? 'Actif' : 'En sommeil' ?></strong>
             </div>
         </div>
 
-        <div class="card kpi-card" onclick="switchAdminTab('world')" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #34d399; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Cliquer pour l'arpentage et l'expansion provinciale">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
+        <div class="card kpi-card" onclick="switchAdminTab('world')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #15803d; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour l'arpentage et l'expansion provinciale">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
                 <span>Fiefs & Domaines</span>
                 <span>🗾</span>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #34d399; margin-top: 0.25rem;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #15803d; margin-top: 0.25rem;">
                 <?= $totalColonies ?> / <?= $totalPlanets ?>
             </div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">Châteaux sous contrôle des clans</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">Châteaux sous contrôle des clans</div>
         </div>
 
-        <div class="card kpi-card" onclick="switchAdminTab('users')" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #f59e0b; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Cliquer pour gérer les daimyōs joueurs et privilèges">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
+        <div class="card kpi-card" onclick="switchAdminTab('users')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #b45309; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour gérer les daimyōs joueurs et privilèges">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
                 <span>Daimyōs Joueurs</span>
                 <span>👥</span>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #fbbf24; margin-top: 0.25rem;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #b45309; margin-top: 0.25rem;">
                 <?= $totalUsers ?> Joueurs
             </div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">Inscrits sur le serveur</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">Inscrits sur le serveur</div>
         </div>
 
-        <div class="card kpi-card" onclick="switchAdminTab('support')" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #0891b2; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Cliquer pour traiter les bugs & suggestions">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
+        <div class="card kpi-card" onclick="switchAdminTab('support')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #0369a1; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour traiter les bugs & suggestions">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
                 <span>Bugs & Idées</span>
                 <span>📮</span>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #38bdf8; margin-top: 0.25rem;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #0369a1; margin-top: 0.25rem;">
                 <?= $supportStats['total'] ?> Demande<?= $supportStats['total'] > 1 ? 's' : '' ?>
             </div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
-                <strong style="color: <?= $supportStats['count_pending'] > 0 ? '#ef4444' : '#4ade80' ?>;">
+            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
+                <strong style="color: <?= $supportStats['count_pending'] > 0 ? '#b91c1c' : '#15803d' ?>;">
                     <?= $supportStats['count_pending'] ?> en attente
                 </strong>
                 | <?= $supportStats['count_in_progress'] ?> en cours
             </div>
         </div>
 
-        <div class="card kpi-card" onclick="switchAdminTab('announcements')" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #e11d48; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Cliquer pour gérer les annonces et fonctionnalités">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
+        <div class="card kpi-card" onclick="switchAdminTab('announcements')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #e11d48; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour gérer les annonces et fonctionnalités">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
                 <span>Nouveautés</span>
                 <span>📢</span>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #fb7185; margin-top: 0.25rem;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #e11d48; margin-top: 0.25rem;">
                 <?= $publishedAnnouncementsCount ?> / <?= $totalAnnouncementsCount ?>
             </div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
+            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
                 <?= $publishedAnnouncementsCount ?> publiée(s) aux joueurs
             </div>
         </div>
 
-        <div class="card kpi-card" onclick="switchAdminTab('pedagogy')" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #06b6d4; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Cliquer pour ouvrir le manuel de conception et les prompts du jeu">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
+        <div class="card kpi-card" onclick="switchAdminTab('pedagogy')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #0891b2; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour ouvrir le manuel de conception et les prompts du jeu">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
                 <span>Projet Père-Fils</span>
                 <span>🎓</span>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #67e8f9; margin-top: 0.25rem;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #0891b2; margin-top: 0.25rem;">
                 7 Modules
             </div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
+            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
                 Code, Algorithmes & Prompts IA
             </div>
         </div>
 
-        <div class="card kpi-card" onclick="switchAdminTab('updates')" style="background: rgba(17, 18, 24, 0.85); border-left: 4px solid #38bdf8; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Cliquer pour contrôler et déployer les mises à jour GitHub">
-            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
+        <div class="card kpi-card" onclick="switchAdminTab('updates')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #0284c7; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour contrôler et déployer les mises à jour GitHub">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
                 <span>Mises à Jour Git</span>
                 <span>🔄</span>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #38bdf8; margin-top: 0.25rem;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #0284c7; margin-top: 0.25rem;">
                 <?= htmlspecialchars($localGitInfo['short_sha']) ?>
             </div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
+            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
                 Branche <?= htmlspecialchars($localGitInfo['branch']) ?> | GitHub Sync
             </div>
         </div>
@@ -1252,47 +1252,47 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
     </div>
 
-    <!-- Modale d'Édition / Création d'une Annonce (Admin) -->
-    <div class="modal-overlay" id="announcementEditModal" style="display:none; position:fixed; inset:0; background:rgba(5,7,15,0.85); backdrop-filter:blur(8px); z-index:1060; align-items:center; justify-content:center; padding:1rem;">
-        <div class="modal-card" style="max-width:820px; width:100%; max-height:92vh; background:#11131a; border:1px solid #e11d48; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 40px rgba(225,29,72,0.3);">
-            <div class="card-header" style="background:linear-gradient(135deg, rgba(225,29,72,0.2) 0%, #11131a 100%); border-bottom:1px solid rgba(225,29,72,0.3); padding:1.25rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
-                <h3 id="aem_modal_title" style="margin:0; color:#fff; font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+    <!-- Modale d'Édition / Création d'une Annonce (Admin Washi) -->
+    <div class="modal-overlay" id="announcementEditModal">
+        <div class="modal-card modal-card-lg">
+            <div class="modal-header">
+                <h3 id="aem_modal_title" class="modal-title">
                     <span>📢</span> Rédiger une Annonce
                 </h3>
-                <button type="button" onclick="closeAnnouncementEditModal()" style="background:transparent; border:none; color:#9ca3af; font-size:1.6rem; cursor:pointer;">&times;</button>
+                <button type="button" onclick="closeAnnouncementEditModal()" class="modal-close-btn">&times;</button>
             </div>
 
             <form id="announcementEditForm" onsubmit="saveAnnouncementFromModal(event)" style="display:flex; flex-direction:column; flex:1; overflow:hidden; margin:0;">
                 <input type="hidden" id="aem_id" name="id" value="">
                 
-                <div style="padding:1.5rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:1.2rem;">
+                <div class="modal-body d-flex flex-column gap-3">
                     <div style="display:grid; grid-template-columns: 1fr 2fr 1fr; gap:1rem;">
                         <div>
-                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Version / Code</label>
-                            <input type="text" id="aem_version" name="version" class="form-control" required placeholder="v1.3.0" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                            <label class="form-label">Version / Code</label>
+                            <input type="text" id="aem_version" name="version" class="form-control" required placeholder="v1.3.0">
                         </div>
                         <div>
-                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Titre de l'Annonce</label>
-                            <input type="text" id="aem_title" name="title" class="form-control" required placeholder="L'Éveil du Héros & Nouveaux Bâtiments" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                            <label class="form-label">Titre de l'Annonce</label>
+                            <input type="text" id="aem_title" name="title" class="form-control" required placeholder="L'Éveil du Héros & Nouveaux Bâtiments">
                         </div>
                         <div>
-                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Date</label>
-                            <input type="date" id="aem_date" name="date" class="form-control" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                            <label class="form-label">Date</label>
+                            <input type="date" id="aem_date" name="date" class="form-control">
                         </div>
                     </div>
 
                     <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr; gap:1rem;">
                         <div>
-                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Badge Visuel</label>
-                            <input type="text" id="aem_badge" name="badge" class="form-control" placeholder="⭐ MISE À JOUR MAJEURE" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                            <label class="form-label">Badge Visuel</label>
+                            <input type="text" id="aem_badge" name="badge" class="form-control" placeholder="⭐ MISE À JOUR MAJEURE">
                         </div>
                         <div>
-                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Icône Principale</label>
-                            <input type="text" id="aem_icon" name="icon" class="form-control" placeholder="⚔️" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                            <label class="form-label">Icône Principale</label>
+                            <input type="text" id="aem_icon" name="icon" class="form-control" placeholder="⚔️">
                         </div>
                         <div>
-                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Statut Publication</label>
-                            <select id="aem_is_published" name="is_published" class="form-control" style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px;">
+                            <label class="form-label">Statut Publication</label>
+                            <select id="aem_is_published" name="is_published" class="form-control">
                                 <option value="1">🟢 Validée & Publiée aux joueurs</option>
                                 <option value="0">🟡 Brouillon (En attente)</option>
                             </select>
@@ -1300,30 +1300,30 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </div>
 
                     <div>
-                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">Résumé d'accroche pour les Daimyōs</label>
-                        <textarea id="aem_summary" name="summary" rows="2" class="form-control" placeholder="Décrivez succinctement l'importance de cette mise à jour pour vos joueurs..." style="width:100%; padding:0.55rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:6px; line-height:1.4;"></textarea>
+                        <label class="form-label">Résumé d'accroche pour les Daimyōs</label>
+                        <textarea id="aem_summary" name="summary" rows="2" class="form-control" placeholder="Décrivez succinctement l'importance de cette mise à jour pour vos joueurs..."></textarea>
                     </div>
 
                     <!-- Liste dynamique des fonctionnalités -->
                     <div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-                            <label style="font-size:0.85rem; font-weight:800; color:#facc15; margin:0; display:flex; align-items:center; gap:0.4rem;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label style="font-size:0.9rem; font-weight:800; color:#b45309; margin:0; display:flex; align-items:center; gap:0.4rem;">
                                 <span>🏯</span> Fonctionnalités & Améliorations Détaillées
                             </label>
-                            <button type="button" onclick="addFeatureRowToModal()" class="btn btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.75rem; border-color:#facc15; color:#facc15;">
+                            <button type="button" onclick="addFeatureRowToModal()" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.75rem; border-color:#b45309; color:#b45309;">
                                 + Ajouter une nouveauté
                             </button>
                         </div>
 
-                        <div id="aem_features_container" style="display:flex; flex-direction:column; gap:0.75rem;">
+                        <div id="aem_features_container" class="d-flex flex-column gap-2">
                             <!-- Lignes de fonctionnalités injectées en JS -->
                         </div>
                     </div>
                 </div>
 
-                <div style="background:rgba(0,0,0,0.4); border-top:1px solid rgba(255,255,255,0.08); padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeAnnouncementEditModal()">Annuler</button>
-                    <button type="submit" id="aem_submit_btn" class="btn btn-primary" style="background:linear-gradient(135deg, #e11d48, #be123c); border-color:#f43f5e; font-weight:700;">
+                    <button type="submit" id="aem_submit_btn" class="btn btn-primary">
                         💾 Sauvegarder dans le JSON
                     </button>
                 </div>
@@ -1378,76 +1378,75 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     </div>
 </div>
 
-<!-- Modale de Confirmation de Réinitialisation Complète -->
-<div class="modal-overlay" id="resetUniverseModal" style="display: none; position: fixed; inset: 0; background: rgba(5, 7, 15, 0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;">
-    <div class="modal-card" style="max-width: 520px; width: 90%; background: rgba(20, 10, 15, 0.95); border: 2px solid #ef4444; border-radius: 12px; box-shadow: 0 0 50px rgba(239, 68, 68, 0.4); overflow: hidden;">
-        <div class="card-header" style="background: rgba(239, 68, 68, 0.15); border-bottom: 1px solid rgba(239, 68, 68, 0.3); padding: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="color: #ef4444; margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
-                <span>💥</span> CONFIRMATION DESTRUCTIVE : RESET
+<!-- Modale de Confirmation de Réinitialisation Complète (Admin Washi) -->
+<div class="modal-overlay" id="resetUniverseModal">
+    <div class="modal-card modal-card-sm" style="border-color:#b91c1c;">
+        <div class="modal-header" style="background:#fee2e2; border-bottom:2px solid #b91c1c;">
+            <h3 class="modal-title" style="color:#b91c1c;">
+                <span>💥</span> CONFIRMATION : RESET UNIVERS
             </h3>
-            <button onclick="closeResetModal()" style="background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            <button onclick="closeResetModal()" class="modal-close-btn" title="Fermer">&times;</button>
         </div>
-        <div class="card-body" style="padding: 1.5rem;">
-            <p style="color: #fca5a5; font-size: 0.9rem; margin-bottom: 1rem;">
-                Attention ! Toutes les parties en cours et données de jeu seront <strong>irréversiblement effacées</strong>. Le compte administrateur <strong>nezzar</strong> sera recréé avec le mot de passe <strong>Gabriel125#</strong>.
-            </p>
+        <div class="modal-body">
+            <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:0.85rem 1rem; color:#b91c1c; font-size:0.88rem; line-height:1.5; margin-bottom:1.25rem;">
+                ⚠️ <strong>Attention !</strong> Toutes les parties en cours et données de jeu seront <strong>irréversiblement effacées</strong>. Le compte administrateur <strong>nezzar</strong> sera recréé avec le mot de passe <strong>Gabriel125#</strong>.
+            </div>
 
-            <div class="form-group" style="margin-bottom: 1.25rem;">
-                <label style="display: block; font-weight: 700; color: #e2e8f0; font-size: 0.85rem; margin-bottom: 0.4rem;">
-                    Pour confirmer, tapez le mot <strong style="color: #ef4444;">RESET</strong> en majuscules :
+            <div class="form-group mb-3">
+                <label class="form-label">
+                    Pour confirmer, tapez le mot <strong style="color: #b91c1c;">RESET</strong> en majuscules :
                 </label>
-                <input type="text" id="resetKeywordInput" class="form-control" placeholder="RESET" style="border-color: #ef4444; font-family: monospace; font-size: 1.1rem; text-align: center; letter-spacing: 2px;">
+                <input type="text" id="resetKeywordInput" class="form-control" placeholder="RESET" style="border-color:#b91c1c; font-family:monospace; font-size:1.1rem; text-align:center; letter-spacing:2px; font-weight:800;">
             </div>
-
-            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
-                <button type="button" class="btn btn-secondary" onclick="closeResetModal()">Annuler</button>
-                <button type="button" class="btn" onclick="executeUniverseReset()" style="background: #ef4444; color: #fff; font-weight: 700; padding: 0.6rem 1.5rem; border: none; border-radius: 6px; cursor: pointer;">
-                    💥 Exécuter le Reset Immédiat
-                </button>
-            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeResetModal()">Annuler</button>
+            <button type="button" class="btn btn-primary" onclick="executeUniverseReset()" style="background:#b91c1c; border-color:#991b1b;">
+                💥 Exécuter le Reset
+            </button>
         </div>
     </div>
 </div>
 
-<!-- Modale d'Examen et de Traitement d'un Ticket par l'Administrateur -->
-<div class="modal-overlay" id="adminTicketModal" style="display: none; position: fixed; inset: 0; background: rgba(5, 7, 15, 0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;" onclick="closeAdminTicketModal()">
-    <div class="modal-card" style="max-width: 680px; width: 92%; max-height: 92vh; background: #111218; border: 2px solid #0891b2; border-radius: 12px; box-shadow: 0 0 50px rgba(8, 145, 178, 0.3); overflow: hidden; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
-        <div class="card-header" style="background: rgba(8, 145, 178, 0.15); border-bottom: 1px solid rgba(8, 145, 178, 0.3); padding: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+<!-- Modale d'Examen et de Traitement d'un Ticket par l'Administrateur (Admin Washi) -->
+<div class="modal-overlay" id="adminTicketModal" onclick="closeAdminTicketModal()">
+    <div class="modal-card modal-card-md" onclick="event.stopPropagation()">
+        <div class="modal-header">
             <div>
-                <h3 id="atm_header_title" style="color: #38bdf8; margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                <h3 id="atm_header_title" class="modal-title">
                     <span>📮</span> Traitement du Ticket #<span id="atm_ticket_id"></span>
                 </h3>
-                <div id="atm_header_meta" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;"></div>
+                <div id="atm_header_meta" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; font-weight:600;"></div>
             </div>
-            <button onclick="closeAdminTicketModal()" style="background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            <button onclick="closeAdminTicketModal()" class="modal-close-btn" title="Fermer">&times;</button>
         </div>
 
-        <div class="card-body" style="padding: 1.5rem; overflow-y: auto;">
+        <div class="modal-body">
             <!-- Détails du Joueur & Fief -->
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; font-size: 0.82rem;">
-                <div><span style="color:var(--text-muted);">Daimyō :</span> <strong id="atm_user_name" style="color:#fff;"></strong></div>
-                <div><span style="color:var(--text-muted);">Clan :</span> <strong id="atm_user_faction" style="color:#fff; text-transform:uppercase;"></strong></div>
-                <div><span style="color:var(--text-muted);">Fief :</span> <strong id="atm_user_planet" style="color:#fff;"></strong></div>
-                <div><span style="color:var(--text-muted);">Date :</span> <strong id="atm_created_at" style="color:#fff;"></strong></div>
+            <div style="background:#ffffff; border:1px solid var(--border-color); padding:0.85rem 1rem; border-radius:8px; margin-bottom:1.25rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:0.5rem; font-size:0.85rem; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
+                <div><span style="color:var(--text-muted); font-weight:600;">Daimyō :</span> <strong id="atm_user_name" style="color:#1c1917;"></strong></div>
+                <div><span style="color:var(--text-muted); font-weight:600;">Clan :</span> <strong id="atm_user_faction" style="color:#b91c1c; text-transform:uppercase;"></strong></div>
+                <div><span style="color:var(--text-muted); font-weight:600;">Fief :</span> <strong id="atm_user_planet" style="color:#1c1917;"></strong></div>
+                <div><span style="color:var(--text-muted); font-weight:600;">Date :</span> <strong id="atm_created_at" style="color:#1c1917;"></strong></div>
             </div>
 
             <!-- Titre & Message du Joueur -->
-            <div style="margin-bottom: 1.25rem;">
-                <label style="font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Message du Joueur :</label>
-                <div id="atm_ticket_title" style="font-weight: 800; font-size: 1.05rem; color: #fff; margin: 0.25rem 0 0.5rem 0;"></div>
-                <div id="atm_ticket_desc" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 8px; font-size: 0.9rem; line-height: 1.6; color: #e2e8f0; white-space: pre-line; max-height: 200px; overflow-y: auto;"></div>
+            <div class="mb-3">
+                <label class="form-label" style="text-transform:uppercase;">Message du Joueur :</label>
+                <div id="atm_ticket_title" style="font-weight:800; font-size:1.05rem; color:#1c1917; margin:0.25rem 0 0.5rem 0;"></div>
+                <div id="atm_ticket_desc" style="background:#ffffff; border:1px solid var(--border-color); padding:1rem; border-radius:8px; font-size:0.9rem; line-height:1.6; color:#1c1917; white-space:pre-line; max-height:200px; overflow-y:auto; box-shadow:0 1px 3px rgba(60,45,30,0.04);"></div>
             </div>
 
             <!-- Formulaire de Traitement Administrateur -->
             <form id="adminTicketForm" onsubmit="saveAdminTicket(event)">
                 <input type="hidden" id="atm_input_ticket_id" name="ticket_id">
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
                     <div>
-                        <label for="atm_select_status" style="display: block; font-weight: 700; font-size: 0.85rem; color: #38bdf8; margin-bottom: 0.4rem;">
+                        <label for="atm_select_status" class="form-label">
                             Statut de la Demande :
                         </label>
-                        <select id="atm_select_status" name="status" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: 6px; background: #1e293b; color: #fff; border: 1px solid #334155;">
+                        <select id="atm_select_status" name="status" class="form-control">
                             <option value="pending">⏳ En attente</option>
                             <option value="in_progress">🔍 En cours d'examen</option>
                             <option value="resolved">✅ Résolu / Corrigé</option>
@@ -1456,28 +1455,28 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </select>
                     </div>
 
-                    <div style="display: flex; align-items: flex-end; padding-bottom: 0.5rem;">
-                        <label style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: #e2e8f0; cursor: pointer;">
-                            <input type="checkbox" id="atm_notify_user" name="notify_user" value="1" checked style="accent-color: #0891b2; width: 16px; height: 16px;">
+                    <div class="d-flex align-items-center pt-3">
+                        <label style="display:inline-flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:#1c1917; cursor:pointer; font-weight:600;">
+                            <input type="checkbox" id="atm_notify_user" name="notify_user" value="1" checked style="accent-color:#b91c1c; width:16px; height:16px;">
                             Notifier le joueur par missive en jeu
                         </label>
                     </div>
                 </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    <label for="atm_admin_response" style="display: block; font-weight: 700; font-size: 0.85rem; color: #38bdf8; margin-bottom: 0.4rem;">
+                <div class="mb-3">
+                    <label for="atm_admin_response" class="form-label">
                         Réponse Officielle de l'Équipe (visible par le joueur) :
                     </label>
-                    <textarea id="atm_admin_response" name="admin_response" rows="4" class="form-control" placeholder="Ex: Bonjour, l'anomalie a été identifiée et corrigée dans le dernier patch. Merci pour votre aide précieuse !" style="width: 100%; padding: 0.75rem; border-radius: 6px; background: #1e293b; color: #fff; border: 1px solid #334155; font-size: 0.88rem; line-height: 1.5;"></textarea>
+                    <textarea id="atm_admin_response" name="admin_response" rows="4" class="form-control" placeholder="Ex: Bonjour, l'anomalie a été identifiée et corrigée dans le dernier patch. Merci pour votre aide précieuse !"></textarea>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem;">
-                    <button type="button" class="btn btn-secondary" onclick="deleteAdminTicketFromModal()" style="color: #f87171; border-color: rgba(239,68,68,0.3); font-size: 0.85rem;">
+                <div class="modal-footer px-0 pb-0" style="background:transparent; border-top:1px solid var(--border-color); margin-top:1rem; padding-top:1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="deleteAdminTicketFromModal()" style="color:#b91c1c; border-color:#fca5a5; font-size:0.85rem;">
                         🗑️ Supprimer
                     </button>
-                    <div style="display: flex; gap: 0.75rem;">
+                    <div class="d-flex gap-2">
                         <button type="button" class="btn btn-secondary" onclick="closeAdminTicketModal()">Annuler</button>
-                        <button type="submit" id="atm_submit_btn" class="btn btn-primary" style="background: #0891b2; border-color: #0e7490; font-weight: 700;">
+                        <button type="submit" id="atm_submit_btn" class="btn btn-primary">
                             💾 Enregistrer & Transmettre
                         </button>
                     </div>
@@ -1595,7 +1594,7 @@ function addFeatureRowToModal(f = null) {
     const container = document.getElementById('aem_features_container');
     const row = document.createElement('div');
     row.className = 'aem-feature-row';
-    row.style.cssText = 'background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:0.85rem; display:flex; flex-direction:column; gap:0.5rem;';
+    row.style.cssText = 'background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; display:flex; flex-direction:column; gap:0.5rem; box-shadow:0 1px 3px rgba(60,45,30,0.04);';
 
     const iconVal = f ? (f.icon || '🔹') : '🔹';
     const catVal = f ? (f.category || 'Général') : 'Général';
@@ -1603,22 +1602,22 @@ function addFeatureRowToModal(f = null) {
     const descVal = f ? (f.description || '') : '';
 
     row.innerHTML = `
-        <div style="display:grid; grid-template-columns: 80px 1.5fr 2fr 40px; gap:0.6rem; align-items:center;">
+        <div style="display:grid; grid-template-columns: 70px 1.5fr 2fr 36px; gap:0.6rem; align-items:center;">
             <div>
-                <input type="text" class="feature-icon-input form-control" placeholder="Icône" value="${escapeHtml(iconVal)}" style="padding:0.4rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:4px; text-align:center;">
+                <input type="text" class="feature-icon-input form-control" placeholder="Icône" value="${escapeHtml(iconVal)}" style="text-align:center;">
             </div>
             <div>
-                <input type="text" class="feature-category-input form-control" placeholder="Catégorie (ex: Cité, Héros)" value="${escapeHtml(catVal)}" style="padding:0.4rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:4px;">
+                <input type="text" class="feature-category-input form-control" placeholder="Catégorie (ex: Cité, Héros)" value="${escapeHtml(catVal)}">
             </div>
             <div>
-                <input type="text" class="feature-title-input form-control" placeholder="Titre de la fonctionnalité" value="${escapeHtml(titleVal)}" required style="padding:0.4rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:4px;">
+                <input type="text" class="feature-title-input form-control" placeholder="Titre de la fonctionnalité" value="${escapeHtml(titleVal)}" required>
             </div>
             <div style="text-align:right;">
-                <button type="button" onclick="this.closest('.aem-feature-row').remove()" style="background:transparent; border:none; color:#f87171; font-size:1.2rem; cursor:pointer;" title="Supprimer cette fonctionnalité">&times;</button>
+                <button type="button" onclick="this.closest('.aem-feature-row').remove()" style="background:transparent; border:none; color:#b91c1c; font-size:1.4rem; cursor:pointer;" title="Supprimer cette fonctionnalité">&times;</button>
             </div>
         </div>
         <div>
-            <textarea class="feature-desc-input form-control" rows="2" placeholder="Explications claires pour les joueurs sur le fonctionnement et les bénéfices..." style="width:100%; padding:0.45rem; background:#1e222e; color:#fff; border:1px solid #334155; border-radius:4px; font-size:0.85rem; line-height:1.4;">${escapeHtml(descVal)}</textarea>
+            <textarea class="feature-desc-input form-control" rows="2" placeholder="Explications claires pour les joueurs sur le fonctionnement et les bénéfices..." style="font-size:0.85rem; line-height:1.4;">${escapeHtml(descVal)}</textarea>
         </div>
     `;
 

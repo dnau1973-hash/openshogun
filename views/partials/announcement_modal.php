@@ -1,53 +1,53 @@
-<!-- Modale d'Annonce des Nouvelles Fonctionnalités (Style Parchemin Impérial Sengoku) -->
-<div class="modal-overlay" id="announcementModal" style="display:none; position:fixed; inset:0; background:rgba(5,7,15,0.88); backdrop-filter:blur(10px); z-index:1050; align-items:center; justify-content:center; padding:1rem;">
-    <div class="modal-card announcement-modal-card" style="max-width:760px; width:100%; max-height:90vh; background:linear-gradient(160deg, #141620 0%, #0d0e15 100%); border:2px solid #b91c1c; border-radius:14px; box-shadow:0 0 50px rgba(185,28,28,0.35), inset 0 0 20px rgba(0,0,0,0.6); display:flex; flex-direction:column; overflow:hidden; animation: modalEntrance 0.35s ease-out;">
+<!-- Modale d'Annonce des Nouvelles Fonctionnalités (Style Décret Impérial Washi) -->
+<div class="modal-overlay" id="announcementModal">
+    <div class="modal-card modal-card-lg announcement-modal-card">
         
-        <!-- En-tête Impérial -->
-        <div style="background:linear-gradient(135deg, rgba(185,28,28,0.35) 0%, rgba(30,15,15,0.85) 100%); border-bottom:1px solid rgba(220,38,38,0.4); padding:1.25rem 1.75rem; display:flex; justify-content:space-between; align-items:center; position:relative;">
-            <div style="display:flex; align-items:center; gap:1rem;">
-                <div id="announcementIconBox" style="font-size:2.2rem; background:rgba(0,0,0,0.4); width:54px; height:54px; border-radius:10px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(250,204,21,0.4); box-shadow:0 0 15px rgba(250,204,21,0.2);">
+        <!-- En-tête Impérial Washi -->
+        <div class="modal-header">
+            <div class="d-flex align-items-center gap-3">
+                <div id="announcementIconBox" style="font-size:2.2rem; background:#ffffff; width:52px; height:52px; border-radius:10px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border-color); box-shadow:0 2px 6px rgba(60,45,30,0.06);">
                     📜
                 </div>
                 <div>
-                    <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
-                        <span id="announcementBadge" style="background:#b91c1c; color:#fff; font-size:0.75rem; font-weight:800; padding:0.2rem 0.6rem; border-radius:4px; letter-spacing:0.5px; border:1px solid rgba(255,255,255,0.2);">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span id="announcementBadge" class="badge badge-danger">
                             ⭐ NOUVEAUTÉ
                         </span>
-                        <span id="announcementVersion" style="color:#facc15; font-size:0.85rem; font-weight:700; font-family:monospace;">
+                        <span id="announcementVersion" style="color:#b45309; font-size:0.85rem; font-weight:800; font-family:monospace;">
                             v1.0.0
                         </span>
-                        <span id="announcementDate" style="color:var(--text-muted); font-size:0.8rem;">
+                        <span id="announcementDate" style="color:var(--text-muted); font-size:0.8rem; font-weight:600;">
                             17/09/2026
                         </span>
                     </div>
-                    <h2 id="announcementTitle" style="font-size:1.35rem; font-weight:800; color:#fff; margin:0.35rem 0 0 0; text-shadow:0 2px 4px rgba(0,0,0,0.6);">
+                    <h2 id="announcementTitle" class="modal-title mt-1" style="font-size:1.3rem;">
                         Décret du Shogunat : Nouvelles Fonctionnalités
                     </h2>
                 </div>
             </div>
-            <button type="button" onclick="closeAnnouncementModalSilently()" id="announcementCloseBtn" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#9ca3af; width:34px; height:34px; border-radius:8px; font-size:1.4rem; line-height:1; cursor:pointer; transition:all 0.2s;" title="Fermer provisoirement">
+            <button type="button" onclick="closeAnnouncementModalSilently()" id="announcementCloseBtn" class="modal-close-btn" title="Fermer provisoirement">
                 &times;
             </button>
         </div>
 
         <!-- Corps avec Scroll -->
-        <div style="padding:1.5rem 1.75rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:1.25rem;">
+        <div class="modal-body d-flex flex-column gap-3">
             
             <!-- Résumé / Message du Shogun -->
-            <div id="announcementSummaryBox" style="background:rgba(220,38,38,0.08); border-left:4px solid #dc2626; padding:0.9rem 1.2rem; border-radius:0 8px 8px 0; color:#e2e8f0; font-size:0.95rem; line-height:1.55;">
+            <div id="announcementSummaryBox" style="background:#ffffff; border:1px solid var(--border-color); border-left:4px solid #b91c1c; padding:1rem 1.25rem; border-radius:0 8px 8px 0; color:#1c1917; font-size:0.95rem; line-height:1.6; box-shadow:0 1px 4px rgba(60,45,30,0.04);">
                 <p id="announcementSummary" style="margin:0;"></p>
             </div>
 
             <!-- Liste détaillée des nouveautés -->
             <div>
-                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.85rem;">
-                    <span style="font-size:1.1rem;">🏯</span>
-                    <h3 style="margin:0; font-size:1rem; font-weight:700; color:#facc15; text-transform:uppercase; letter-spacing:0.5px;">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span style="font-size:1.2rem;">🏯</span>
+                    <h3 style="margin:0; font-size:1rem; font-weight:800; color:#b45309; text-transform:uppercase; letter-spacing:0.5px;">
                         Détails & Bénéfices Stratégiques
                     </h3>
                 </div>
 
-                <div id="announcementFeaturesList" style="display:flex; flex-direction:column; gap:0.85rem;">
+                <div id="announcementFeaturesList" class="d-flex flex-column gap-3">
                     <!-- Injecté en JS -->
                 </div>
             </div>
@@ -55,12 +55,12 @@
         </div>
 
         <!-- Pied de la modale avec bouton d'acquittement obligatoire -->
-        <div style="background:rgba(10,12,18,0.95); border-top:1px solid rgba(255,255,255,0.08); padding:1.1rem 1.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-            <div style="font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem;">
+        <div class="modal-footer">
+            <div style="font-size:0.82rem; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem; font-weight:600;">
                 <span>ℹ️</span> Valider la lecture évite la réapparition de cette annonce.
             </div>
-            <div style="display:flex; gap:0.75rem;">
-                <button type="button" id="btnAcknowledgeAnnouncement" onclick="acknowledgeCurrentAnnouncement()" class="btn btn-primary" style="background:linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); border:1px solid #ef4444; padding:0.65rem 1.4rem; font-weight:700; font-size:0.95rem; display:flex; align-items:center; gap:0.5rem; border-radius:8px; cursor:pointer; box-shadow:0 0 15px rgba(220,38,38,0.4);">
+            <div class="d-flex gap-2">
+                <button type="button" id="btnAcknowledgeAnnouncement" onclick="acknowledgeCurrentAnnouncement()" class="btn btn-primary" style="padding:0.65rem 1.5rem; font-weight:800; font-size:0.92rem;">
                     <span>✓</span> J'ai pris connaissance de ces nouveautés
                 </button>
             </div>
@@ -70,42 +70,39 @@
 </div>
 
 <style>
-@keyframes modalEntrance {
-    from { opacity: 0; transform: scale(0.92) translateY(15px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-}
 .announcement-feature-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 1rem 1.15rem;
+    padding: 1rem 1.25rem;
     display: flex;
     gap: 1rem;
     align-items: flex-start;
-    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    box-shadow: 0 1px 4px rgba(60, 45, 30, 0.04);
 }
 .announcement-feature-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(220, 38, 38, 0.3);
+    border-color: #b91c1c;
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.1);
     transform: translateY(-2px);
 }
 .announcement-feature-icon {
     font-size: 1.6rem;
     line-height: 1;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--bg-ink);
     padding: 0.6rem;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     flex-shrink: 0;
 }
 .announcement-category-pill {
-    background: rgba(250, 204, 21, 0.12);
-    color: #facc15;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.15rem 0.45rem;
+    background: #fef3c7;
+    color: #b45309;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.15rem 0.5rem;
     border-radius: 4px;
-    border: 1px solid rgba(250, 204, 21, 0.25);
+    border: 1px solid #fde68a;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -171,9 +168,9 @@ function displayAnnouncementModal(announcement, isPreview = false) {
                 <div style="flex:1;">
                     <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem; flex-wrap:wrap;">
                         <span class="announcement-category-pill">${escapeHtml(f.category || 'Général')}</span>
-                        <strong style="color:#fff; font-size:0.95rem;">${escapeHtml(f.title || '')}</strong>
+                        <strong style="color:#1c1917; font-size:0.95rem; font-weight:800;">${escapeHtml(f.title || '')}</strong>
                     </div>
-                    <div style="color:var(--text-muted, #9ca3af); font-size:0.875rem; line-height:1.5;">
+                    <div style="color:var(--text-muted); font-size:0.875rem; line-height:1.55;">
                         ${escapeHtml(f.description || '')}
                     </div>
                 </div>

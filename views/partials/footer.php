@@ -52,98 +52,98 @@
 <!-- Modale d'Annonces & Notifications des Fonctionnalités -->
 <?php require_once __DIR__ . '/announcement_modal.php'; ?>
 
-<!-- Modale Universelle de la Fiche Daimyō / Profil (Style Travian) -->
-<div class="modal-overlay" id="playerProfileModal" style="display:none; position:fixed; inset:0; background:rgba(5,7,15,0.85); backdrop-filter:blur(10px); z-index:1000; align-items:center; justify-content:center;">
-    <div class="modal-card" style="max-width:750px; width:92%; max-height:90vh; background:rgba(17,18,24,0.96); border:1px solid #dc2626; border-radius:12px; box-shadow:0 0 50px rgba(220,38,38,0.25); display:flex; flex-direction:column; overflow:hidden;">
+<!-- Modale Universelle de la Fiche Daimyō / Profil (Style Washi Féodal) -->
+<div class="modal-overlay" id="playerProfileModal">
+    <div class="modal-card modal-card-lg">
         <!-- En-tête Profil -->
-        <div class="card-header" style="background:linear-gradient(135deg, rgba(185,28,28,0.3) 0%, rgba(17,18,24,0.9) 100%); border-bottom:1px solid rgba(220,38,38,0.3); padding:1.25rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:1rem;">
-                <span id="profAvatar" style="font-size:2.5rem; filter:drop-shadow(0 0 10px rgba(220,38,38,0.5));">🏯</span>
+        <div class="modal-header">
+            <div class="d-flex align-items-center gap-3">
+                <span id="profAvatar" style="font-size:2.5rem; filter:drop-shadow(0 2px 6px rgba(185,28,28,0.3));">🏯</span>
                 <div>
-                    <div style="display:flex; align-items:center; gap:0.5rem;">
-                        <h2 id="profUsername" style="font-size:1.4rem; font-weight:800; color:#fff; margin:0;">Daimyō</h2>
-                        <span id="profOnlineBadge" style="font-size:0.7rem; padding:0.15rem 0.4rem; border-radius:4px; font-weight:700;"></span>
+                    <div class="d-flex align-items-center gap-2">
+                        <h2 id="profUsername" style="font-size:1.35rem; font-weight:800; color:#1c1917; margin:0;">Daimyō</h2>
+                        <span id="profOnlineBadge" style="font-size:0.7rem; padding:0.15rem 0.45rem; border-radius:4px; font-weight:700;"></span>
                     </div>
-                    <div style="display:flex; gap:0.75rem; align-items:center; margin-top:0.25rem; font-size:0.8rem;">
+                    <div class="d-flex align-items-center gap-3 mt-1" style="font-size:0.82rem;">
                         <span id="profFactionBadge" class="faction-badge"></span>
-                        <span id="profAlliance" style="color:var(--text-muted);"></span>
-                        <span style="color:#facc15; font-weight:700;" id="profRank">Rang #1</span>
+                        <span id="profAlliance" style="color:var(--text-muted); font-weight:600;"></span>
+                        <span style="color:#b45309; font-weight:800;" id="profRank">Rang #1</span>
                     </div>
                 </div>
             </div>
-            <button onclick="closePlayerProfileModal()" style="background:transparent; border:none; color:#fff; font-size:1.6rem; cursor:pointer;">&times;</button>
+            <button onclick="closePlayerProfileModal()" class="modal-close-btn" title="Fermer">&times;</button>
         </div>
 
         <!-- Corps Scrollable du Profil -->
-        <div class="card-body" style="padding:1.5rem; overflow-y:auto; flex:1;">
+        <div class="modal-body">
             <!-- Vitrine des Médailles de Prestige (Style Travian) -->
-            <div style="margin-bottom:1.5rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-                    <h3 style="color:#facc15; font-size:1rem; font-weight:800; margin:0; display:flex; align-items:center; gap:0.4rem;">
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 style="color:#b45309; font-size:1rem; font-weight:800; margin:0; display:flex; align-items:center; gap:0.4rem;">
                         <span>🎖️</span> Vitrine des Médailles d'Honneur
                     </h3>
-                    <span id="profMedalsCount" style="font-size:0.75rem; color:var(--text-muted);">0 distinction(s)</span>
+                    <span id="profMedalsCount" style="font-size:0.78rem; color:var(--text-muted); font-weight:600;">0 distinction(s)</span>
                 </div>
-                <div id="profMedalsList" style="display:flex; gap:0.75rem; flex-wrap:wrap; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); padding:1rem; border-radius:8px; min-height:60px; align-items:center;">
+                <div id="profMedalsList" style="display:flex; gap:0.75rem; flex-wrap:wrap; background:#ffffff; border:1px solid var(--border-color); padding:1rem; border-radius:8px; min-height:60px; align-items:center; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
                     <!-- Les médailles s'injecteront ici -->
                 </div>
             </div>
 
             <!-- Devise / Chronique du Daimyō -->
-            <div style="margin-bottom:1.5rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-                    <h3 style="color:#dc2626; font-size:1rem; font-weight:800; margin:0; display:flex; align-items:center; gap:0.4rem;">
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 style="color:#b91c1c; font-size:1rem; font-weight:800; margin:0; display:flex; align-items:center; gap:0.4rem;">
                         <span>📜</span> Devise & Chronique du Daimyō
                     </h3>
-                    <button id="profEditBioBtn" onclick="toggleBioEdit()" style="display:none; background:rgba(220,38,38,0.18); border:1px solid #dc2626; color:#fca5a5; font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:6px; cursor:pointer; transition:all 0.2s;">
+                    <button id="profEditBioBtn" onclick="toggleBioEdit()" class="btn btn-secondary" style="display:none; font-size:0.75rem; padding:0.25rem 0.65rem; border-color:#b91c1c; color:#b91c1c;">
                         ✏️ Modifier ma devise
                     </button>
                 </div>
-                <div id="profBioView" style="background:rgba(0,0,0,0.2); border-left:3px solid #dc2626; padding:0.85rem 1rem; border-radius:0 6px 6px 0; color:#e2e8f0; font-size:0.85rem; line-height:1.6; font-style:italic;">
+                <div id="profBioView" style="background:#ffffff; border:1px solid var(--border-color); border-left:4px solid #b91c1c; padding:0.85rem 1rem; border-radius:0 8px 8px 0; color:#1c1917; font-size:0.9rem; line-height:1.6; font-style:italic; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
                     <!-- Bio texte -->
                 </div>
                 <div id="profBioEditContainer" style="display:none; margin-top:0.5rem;">
-                    <textarea id="profBioInput" class="form-control" rows="3" maxlength="1000" style="width:100%; font-size:0.85rem;"></textarea>
-                    <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
-                        <button onclick="toggleBioEdit()" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem;">Annuler</button>
-                        <button onclick="saveBio()" class="btn btn-primary" style="font-size:0.75rem; padding:0.25rem 0.6rem;">Enregistrer</button>
+                    <textarea id="profBioInput" class="form-control" rows="3" maxlength="1000" style="font-size:0.85rem;"></textarea>
+                    <div class="d-flex justify-content-end gap-2 mt-2">
+                        <button onclick="toggleBioEdit()" class="btn btn-secondary" style="font-size:0.75rem; padding:0.35rem 0.75rem;">Annuler</button>
+                        <button onclick="saveBio()" class="btn btn-primary" style="font-size:0.75rem; padding:0.35rem 0.75rem;">Enregistrer</button>
                     </div>
                 </div>
             </div>
 
             <!-- Statistiques de Guerre de la Semaine -->
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:0.75rem; margin-bottom:1.5rem;">
-                <div style="background:rgba(220,38,38,0.08); border:1px solid rgba(220,38,38,0.2); border-radius:6px; padding:0.75rem; text-align:center;">
-                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Progression Semaine</div>
-                    <div id="profStatProg" style="font-size:1.1rem; font-weight:800; color:#dc2626; margin-top:0.2rem;">+0 pts</div>
+                <div style="background:#ffffff; border:1px solid var(--border-color); border-top:3px solid #b91c1c; border-radius:8px; padding:0.75rem; text-align:center; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
+                    <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Progression Semaine</div>
+                    <div id="profStatProg" style="font-size:1.15rem; font-weight:800; color:#b91c1c; margin-top:0.2rem;">+0 pts</div>
                 </div>
-                <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:6px; padding:0.75rem; text-align:center;">
-                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Points Conquête</div>
-                    <div id="profStatAtt" style="font-size:1.1rem; font-weight:800; color:#f87171; margin-top:0.2rem;">0 pts</div>
+                <div style="background:#ffffff; border:1px solid var(--border-color); border-top:3px solid #dc2626; border-radius:8px; padding:0.75rem; text-align:center; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
+                    <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Points Conquête</div>
+                    <div id="profStatAtt" style="font-size:1.15rem; font-weight:800; color:#dc2626; margin-top:0.2rem;">0 pts</div>
                 </div>
-                <div style="background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.2); border-radius:6px; padding:0.75rem; text-align:center;">
-                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Points Défense</div>
-                    <div id="profStatDef" style="font-size:1.1rem; font-weight:800; color:#34d399; margin-top:0.2rem;">0 pts</div>
+                <div style="background:#ffffff; border:1px solid var(--border-color); border-top:3px solid #15803d; border-radius:8px; padding:0.75rem; text-align:center; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
+                    <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Points Défense</div>
+                    <div id="profStatDef" style="font-size:1.15rem; font-weight:800; color:#15803d; margin-top:0.2rem;">0 pts</div>
                 </div>
-                <div style="background:rgba(168,85,247,0.08); border:1px solid rgba(168,85,247,0.2); border-radius:6px; padding:0.75rem; text-align:center;">
-                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Riz Pillé Hebdo</div>
-                    <div id="profStatRaid" style="font-size:1.1rem; font-weight:800; color:#c084fc; margin-top:0.2rem;">0</div>
+                <div style="background:#ffffff; border:1px solid var(--border-color); border-top:3px solid #7e22ce; border-radius:8px; padding:0.75rem; text-align:center; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
+                    <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Riz Pillé Hebdo</div>
+                    <div id="profStatRaid" style="font-size:1.15rem; font-weight:800; color:#7e22ce; margin-top:0.2rem;">0</div>
                 </div>
             </div>
 
             <!-- Territoire & Fiefs Recensés -->
             <div>
-                <h3 style="color:#fff; font-size:1rem; font-weight:800; margin:0 0 0.75rem 0; display:flex; align-items:center; gap:0.4rem;">
+                <h3 style="color:#1c1917; font-size:1rem; font-weight:800; margin:0 0 0.75rem 0; display:flex; align-items:center; gap:0.4rem;">
                     <span>🏯</span> Fiefs & Domaines Provinciaux
                 </h3>
-                <div style="max-height:180px; overflow-y:auto; border:1px solid rgba(255,255,255,0.08); border-radius:6px;">
-                    <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:left;">
+                <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px; background:#ffffff;">
+                    <table class="table" style="margin:0;">
                         <thead>
-                            <tr style="background:rgba(255,255,255,0.04); color:var(--text-muted); border-bottom:1px solid rgba(255,255,255,0.08);">
-                                <th style="padding:0.5rem 0.75rem;">Fief</th>
-                                <th style="padding:0.5rem 0.75rem;">Province</th>
-                                <th style="padding:0.5rem 0.75rem;">Coordonnées</th>
-                                <th style="padding:0.5rem 0.75rem; text-align:right;">Actions</th>
+                            <tr>
+                                <th>Fief</th>
+                                <th>Province</th>
+                                <th>Coordonnées</th>
+                                <th style="text-align:right;">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="profPlanetsList">
@@ -155,7 +155,7 @@
         </div>
 
         <!-- Pied de page Profil Actions -->
-        <div style="background:rgba(10,15,29,0.9); border-top:1px solid rgba(255,255,255,0.06); padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-footer">
             <div id="profFooterLeft">
                 <!-- Actions contextuelles comme Contacter -->
             </div>
@@ -165,41 +165,41 @@
 </div>
 
 <!-- Modale Complète Didacticiel Féodal & Voie du Daimyō (Style Maître de Quête Travian) -->
-<div class="modal-overlay" id="questModal" style="display:none; position:fixed; inset:0; background:rgba(5,7,15,0.85); backdrop-filter:blur(10px); z-index:1000; align-items:center; justify-content:center;">
-    <div class="modal-card" style="max-width:920px; width:94%; max-height:90vh; background:rgba(17,18,24,0.96); border:1px solid #dc2626; border-radius:12px; box-shadow:0 0 50px rgba(220,38,38,0.25); display:flex; flex-direction:column; overflow:hidden;">
+<div class="modal-overlay" id="questModal">
+    <div class="modal-card modal-card-xl">
         <!-- En-tête -->
-        <div class="card-header" style="background:linear-gradient(135deg, rgba(185,28,28,0.3) 0%, rgba(17,18,24,0.9) 100%); border-bottom:1px solid rgba(220,38,38,0.3); padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:0.85rem;">
-                <span style="font-size:2rem; filter:drop-shadow(0 0 8px rgba(220,38,38,0.6));">🎯</span>
+        <div class="modal-header">
+            <div class="d-flex align-items-center gap-3">
+                <span style="font-size:2rem; filter:drop-shadow(0 2px 6px rgba(185,28,28,0.3));">🎯</span>
                 <div>
-                    <h2 style="font-size:1.3rem; font-weight:800; color:#fff; margin:0; display:flex; align-items:center; gap:0.5rem;">
+                    <h2 class="modal-title">
                         Codex des Quêtes & Didacticiel du Daimyō
                     </h2>
-                    <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.2rem; font-size:0.8rem; color:#94a3b8;">
-                        <span id="questModalProgressText">0/12 Quêtes Accomplies</span> &bull; 
-                        <span style="color:#facc15; font-weight:700;" id="questModalPercentText">0% Complété</span>
+                    <div class="d-flex align-items-center gap-3 mt-1" style="font-size:0.85rem; color:var(--text-muted);">
+                        <span id="questModalProgressText" style="font-weight:700; color:#1c1917;">0/12 Quêtes Accomplies</span> &bull; 
+                        <span style="color:#b45309; font-weight:800;" id="questModalPercentText">0% Complété</span>
                     </div>
                 </div>
             </div>
-            <button onclick="closeQuestModal()" style="background:transparent; border:none; color:#fff; font-size:1.6rem; cursor:pointer;">&times;</button>
+            <button onclick="closeQuestModal()" class="modal-close-btn" title="Fermer le Codex">&times;</button>
         </div>
 
         <!-- Corps de la Modale en 2 Colonnes Responsive -->
-        <div class="card-body" style="padding:0; display:flex; flex:1; overflow:hidden; min-height:480px;">
+        <div class="modal-body p-0 d-flex flex-column flex-md-row" style="min-height:500px;">
             <!-- Colonne Gauche : Liste des 12 Quêtes -->
-            <div style="width:340px; border-right:1px solid rgba(255,255,255,0.08); background:rgba(10,12,18,0.6); overflow-y:auto; padding:0.75rem;" id="questModalList">
+            <div style="width:340px; border-right:1px solid var(--border-color); background:var(--bg-ink); overflow-y:auto; padding:0.85rem;" id="questModalList">
                 <!-- Les tuiles de quêtes seront injectées dynamiquement ici -->
             </div>
 
             <!-- Colonne Droite : Fiche Détaillée de la Quête Sélectionnée -->
-            <div style="flex:1; overflow-y:auto; padding:1.5rem; display:flex; flex-direction:column; justify-content:space-between;" id="questModalDetail">
+            <div style="flex:1; overflow-y:auto; padding:1.5rem; display:flex; flex-direction:column; justify-content:space-between; background:#ffffff;" id="questModalDetail">
                 <!-- Détail de la quête injecté dynamiquement -->
             </div>
         </div>
 
         <!-- Pied de page -->
-        <div style="background:rgba(10,15,29,0.9); border-top:1px solid rgba(255,255,255,0.06); padding:0.85rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-size:0.8rem; color:#94a3b8;">
+        <div class="modal-footer">
+            <div style="font-size:0.85rem; color:var(--text-muted);">
                 🥋 <em>Guide de l'art de la guerre enseigné par Katsumoto, Maître d'Armes</em>
             </div>
             <button class="btn btn-secondary" onclick="closeQuestModal()">Fermer le Codex</button>
@@ -261,12 +261,14 @@ async function openPlayerProfileModal(userId = null, autoEdit = false) {
         const onlineBadge = document.getElementById('profOnlineBadge');
         if (p.is_online) {
             onlineBadge.innerText = "🟢 En ligne";
-            onlineBadge.style.background = "rgba(74, 222, 128, 0.2)";
-            onlineBadge.style.color = "#4ade80";
+            onlineBadge.style.background = "#dcfce7";
+            onlineBadge.style.color = "#15803d";
+            onlineBadge.style.border = "1px solid #86efac";
         } else {
             onlineBadge.innerText = "⚪ Hors-ligne";
-            onlineBadge.style.background = "rgba(148, 163, 184, 0.2)";
-            onlineBadge.style.color = "#94a3b8";
+            onlineBadge.style.background = "#f5f5f4";
+            onlineBadge.style.color = "#57534e";
+            onlineBadge.style.border = "1px solid #e7e5e4";
         }
 
         const fBadge = document.getElementById('profFactionBadge');
@@ -284,13 +286,13 @@ async function openPlayerProfileModal(userId = null, autoEdit = false) {
             medalsList.innerHTML = "<span style='color:var(--text-muted); font-size:0.85rem;'>Aucune médaille d'honneur décernée pour le moment.</span>";
         } else {
             medalsList.innerHTML = medals.map(m => `
-                <div style="background: rgba(255,255,255,0.05); border: 1px solid ${m.color || '#facc15'}; border-radius: 8px; padding: 0.5rem 0.75rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: transform 0.2s;"
+                <div style="background: #ffffff; border: 1px solid var(--border-color); border-top: 3px solid ${m.color || '#b45309'}; border-radius: 8px; padding: 0.5rem 0.75rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(60,45,30,0.04);"
                      title="${escapeHtmlModal(m.description || '')} (${m.week_code || ''}) - Décerné le ${m.awarded_at || ''}"
                      onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="font-size: 1.5rem;">${m.icon || '🎖️'}</span>
                     <div>
-                        <div style="font-size: 0.8rem; font-weight: 700; color: ${m.color || '#facc15'};">${m.category_label || 'Honneur'} #${m.rank || 1}</div>
-                        <div style="font-size: 0.7rem; color: var(--text-muted);">${m.week_code || ''}</div>
+                        <div style="font-size: 0.8rem; font-weight: 700; color: ${m.color || '#b45309'};">${m.category_label || 'Honneur'} #${m.rank || 1}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">${m.week_code || ''}</div>
                     </div>
                 </div>
             `).join('');
@@ -327,14 +329,14 @@ async function openPlayerProfileModal(userId = null, autoEdit = false) {
             planetsTbody.innerHTML = "<tr><td colspan='4' style='padding:0.75rem; text-align:center; color:var(--text-muted);'>Aucun fief recensé.</td></tr>";
         } else {
             planetsTbody.innerHTML = colonies.map(pl => `
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
-                    <td style="padding: 0.5rem 0.75rem; font-weight: 700; color: #fff;">
+                <tr>
+                    <td style="padding: 0.6rem 0.75rem; font-weight: 700; color: #1c1917;">
                         ${pl.is_capital ? '⭐ ' : '🏯 '} ${escapeHtmlModal(pl.name || 'Fief')}
                     </td>
-                    <td style="padding: 0.5rem 0.75rem; color: var(--text-muted);">${pl.planet_type || 'Fief Castral'}</td>
-                    <td style="padding: 0.5rem 0.75rem; font-family: monospace; color: #dc2626;">[${pl.coord_x} : ${pl.coord_y}]</td>
-                    <td style="padding: 0.5rem 0.75rem; text-align: right;">
-                        <a href="?page=map&x=${pl.coord_x}&y=${pl.coord_y}" class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;" title="Voir sur la carte">
+                    <td style="padding: 0.6rem 0.75rem; color: var(--text-muted); font-weight: 500;">${pl.planet_type || 'Fief Castral'}</td>
+                    <td style="padding: 0.6rem 0.75rem; font-family: monospace; font-weight: 700; color: #b91c1c;">[${pl.coord_x} : ${pl.coord_y}]</td>
+                    <td style="padding: 0.6rem 0.75rem; text-align: right;">
+                        <a href="?page=map&x=${pl.coord_x}&y=${pl.coord_y}" class="btn btn-secondary" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;" title="Voir sur la carte">
                             🗾 Provinces
                         </a>
                         ${!p.is_self ? `
@@ -484,17 +486,17 @@ function renderQuestModal() {
             const isClaimable = (q.is_claimable);
             
             let statusBadge = '';
-            let borderStyle = isSelected ? 'border: 1px solid #dc2626; background: rgba(220,38,38,0.18);' : 'border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);';
+            let borderStyle = isSelected ? 'border: 2px solid #b91c1c; background: #fee2e2; box-shadow: 0 2px 8px rgba(185,28,28,0.12);' : 'border: 1px solid var(--border-color); background: #ffffff;';
 
             if (isClaimed) {
-                statusBadge = '<span style="color:#4ade80; font-size:0.75rem; font-weight:700;">✓ Perçue</span>';
+                statusBadge = '<span class="badge badge-success">✓ Perçue</span>';
             } else if (isClaimable) {
-                statusBadge = '<span style="color:#facc15; font-size:0.75rem; font-weight:800;">✨ Prête !</span>';
+                statusBadge = '<span class="badge badge-warning">✨ Prête !</span>';
                 if (!isSelected) {
-                    borderStyle = 'border: 1px solid #22c55e; background: rgba(34,197,94,0.08);';
+                    borderStyle = 'border: 1px solid #15803d; background: #dcfce7;';
                 }
             } else {
-                statusBadge = '<span style="color:#94a3b8; font-size:0.75rem;">En cours</span>';
+                statusBadge = '<span class="badge" style="background:#f5f5f4; color:#57534e; border-color:#e7e5e4;">En cours</span>';
             }
 
             listHtml += `
@@ -502,10 +504,10 @@ function renderQuestModal() {
                     <div style="font-size:1.6rem; min-width:32px; text-align:center;">${q.icon}</div>
                     <div style="flex:1; overflow:hidden;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:0.7rem; color:#dc2626; font-weight:800;">ÉTAPE ${q.order}</span>
+                            <span style="font-size:0.7rem; color:#b91c1c; font-weight:800;">ÉTAPE ${q.order}</span>
                             ${statusBadge}
                         </div>
-                        <div style="font-size:0.85rem; font-weight:700; color:#fff; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; margin-top:2px;">
+                        <div style="font-size:0.875rem; font-weight:700; color:#1c1917; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; margin-top:2px;">
                             ${escapeHtmlModal(q.title)}
                         </div>
                     </div>
@@ -525,13 +527,13 @@ function renderQuestModal() {
         let actionButtonHtml = '';
         if (isClaimed) {
             actionButtonHtml = `
-                <div style="background:rgba(34,197,94,0.1); border:1px solid #22c55e; color:#4ade80; padding:0.75rem 1.25rem; border-radius:8px; font-weight:700; display:flex; align-items:center; gap:0.6rem; justify-content:center;">
+                <div style="background:#dcfce7; border:1px solid #86efac; color:#15803d; padding:0.75rem 1.25rem; border-radius:8px; font-weight:700; display:flex; align-items:center; gap:0.6rem; justify-content:center;">
                     <span>✓</span> Récompense perçue avec honneur le ${currentQ.claimed_at ? currentQ.claimed_at.substring(0, 16) : 'récemment'}.
                 </div>
             `;
         } else if (isClaimable) {
             actionButtonHtml = `
-                <button type="button" onclick="claimQuestReward('${currentQ.key}')" class="btn btn-primary pulse-btn" style="width:100%; background:linear-gradient(135deg, #10b981 0%, #059669 100%); border-color:#047857; color:#fff; font-weight:800; font-size:1.05rem; padding:0.85rem; border-radius:8px; cursor:pointer; box-shadow:0 4px 20px rgba(16,185,129,0.5);">
+                <button type="button" onclick="claimQuestReward('${currentQ.key}')" class="btn btn-primary pulse-btn" style="width:100%; background:linear-gradient(135deg, #15803d 0%, #166534 100%); border-color:#14532d; color:#fff; font-weight:800; font-size:1.05rem; padding:0.85rem; border-radius:8px; cursor:pointer; box-shadow:0 4px 20px rgba(21,128,61,0.35);">
                     ✨ Réclamer ma Récompense Immédiatement
                 </button>
             `;
@@ -553,55 +555,55 @@ function renderQuestModal() {
 
         let rewardsHtml = '';
         if (currentQ.rewards.metal) {
-            rewardsHtml += `<div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:0.5rem 0.8rem; text-align:center; min-width:90px;"><span style="color:var(--res-metal,#60a5fa); font-size:1.1rem;">🪵</span><div style="font-size:0.75rem; color:#94a3b8;">Bois de Cèdre</div><div style="font-size:0.95rem; font-weight:800; color:#fff;">+${Number(currentQ.rewards.metal).toLocaleString()}</div></div>`;
+            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:var(--res-metal,#78350f); font-size:1.2rem;">🪵</span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Bois de Cèdre</div><div style="font-size:0.95rem; font-weight:800; color:#1c1917;">+${Number(currentQ.rewards.metal).toLocaleString()}</div></div>`;
         }
         if (currentQ.rewards.crystal) {
-            rewardsHtml += `<div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:0.5rem 0.8rem; text-align:center; min-width:90px;"><span style="color:var(--res-crystal,#e2e8f0); font-size:1.1rem;">🪨</span><div style="font-size:0.75rem; color:#94a3b8;">Pierre de Taille</div><div style="font-size:0.95rem; font-weight:800; color:#fff;">+${Number(currentQ.rewards.crystal).toLocaleString()}</div></div>`;
+            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:var(--res-crystal,#334155); font-size:1.2rem;">🪨</span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Pierre de Taille</div><div style="font-size:0.95rem; font-weight:800; color:#1c1917;">+${Number(currentQ.rewards.crystal).toLocaleString()}</div></div>`;
         }
         if (currentQ.rewards.deuterium) {
-            rewardsHtml += `<div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:0.5rem 0.8rem; text-align:center; min-width:90px;"><span style="color:var(--res-deut,#4ade80); font-size:1.1rem;">🌾</span><div style="font-size:0.75rem; color:#94a3b8;">Riz Impérial</div><div style="font-size:0.95rem; font-weight:800; color:#fff;">+${Number(currentQ.rewards.deuterium).toLocaleString()}</div></div>`;
+            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:var(--res-deut,#b45309); font-size:1.2rem;">🌾</span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Riz Impérial</div><div style="font-size:0.95rem; font-weight:800; color:#1c1917;">+${Number(currentQ.rewards.deuterium).toLocaleString()}</div></div>`;
         }
         if (currentQ.rewards.points) {
-            rewardsHtml += `<div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:0.5rem 0.8rem; text-align:center; min-width:90px;"><span style="color:#facc15; font-size:1.1rem;">⛩️</span><div style="font-size:0.75rem; color:#94a3b8;">Honneur</div><div style="font-size:0.95rem; font-weight:800; color:#facc15;">+${Number(currentQ.rewards.points).toLocaleString()} pts</div></div>`;
+            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:#b45309; font-size:1.2rem;">⛩️</span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Honneur</div><div style="font-size:0.95rem; font-weight:800; color:#b45309;">+${Number(currentQ.rewards.points).toLocaleString()} pts</div></div>`;
         }
         if (currentQ.rewards.bonus_units) {
-            rewardsHtml += `<div style="background:rgba(220,38,38,0.12); border:1px solid #dc2626; border-radius:6px; padding:0.5rem 0.8rem; text-align:center; min-width:110px;"><span style="color:#f87171; font-size:1.1rem;">⚔️</span><div style="font-size:0.75rem; color:#fca5a5;">Garnison</div><div style="font-size:0.95rem; font-weight:800; color:#fff;">+${currentQ.rewards.bonus_units} Guerriers</div></div>`;
+            rewardsHtml += `<div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:115px;"><span style="color:#b91c1c; font-size:1.2rem;">⚔️</span><div style="font-size:0.72rem; color:#b91c1c; font-weight:700;">Garnison</div><div style="font-size:0.95rem; font-weight:800; color:#b91c1c;">+${currentQ.rewards.bonus_units} Guerriers</div></div>`;
         }
 
         detailContainer.innerHTML = `
             <div>
                 <!-- En-tête Quête -->
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem;">
                     <div>
-                        <span style="font-size:0.75rem; font-weight:800; color:#dc2626; text-transform:uppercase;">QUÊTE ${currentQ.order} SUR ${total_quests} &bull; ${escapeHtmlModal(currentQ.category.toUpperCase())}</span>
-                        <h2 style="font-size:1.4rem; font-weight:900; color:#fff; margin:0.25rem 0 0 0;">
+                        <span style="font-size:0.75rem; font-weight:800; color:#b91c1c; text-transform:uppercase;">QUÊTE ${currentQ.order} SUR ${total_quests} &bull; ${escapeHtmlModal(currentQ.category.toUpperCase())}</span>
+                        <h2 style="font-size:1.4rem; font-weight:900; color:#1c1917; margin:0.25rem 0 0 0;">
                             ${currentQ.icon} ${escapeHtmlModal(currentQ.title)}
                         </h2>
                     </div>
-                    <span style="font-size:0.8rem; padding:0.25rem 0.65rem; border-radius:6px; font-weight:700; ${isClaimed ? 'background:rgba(34,197,94,0.15); color:#4ade80; border:1px solid #22c55e;' : (isClaimable ? 'background:rgba(250,204,21,0.2); color:#facc15; border:1px solid #eab308;' : 'background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid rgba(255,255,255,0.1);')}">
+                    <span class="badge ${isClaimed ? 'badge-success' : (isClaimable ? 'badge-warning' : '')}" style="${!isClaimed && !isClaimable ? 'background:#f5f5f4; color:#57534e; border-color:#e7e5e4;' : ''}; font-size:0.85rem; padding:0.35rem 0.75rem;">
                         ${isClaimed ? '✓ Accompli' : (isClaimable ? '✨ Prêt à réclamer' : 'En cours')}
                     </span>
                 </div>
 
                 <!-- Dialogue du Conseiller Katsumoto -->
-                <div style="background:rgba(0,0,0,0.25); border-left:3px solid #dc2626; border-radius:0 8px 8px 0; padding:1rem; margin-bottom:1.25rem;">
+                <div style="background:#fdfbf7; border:1px solid var(--border-color); border-left:4px solid #b91c1c; border-radius:0 8px 8px 0; padding:1.1rem; margin-bottom:1.25rem; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
                     <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
-                        <span style="font-size:1.1rem;">🥋</span>
-                        <strong style="color:#facc15; font-size:0.85rem;">${escapeHtmlModal(currentQ.mentor_name)} :</strong>
+                        <span style="font-size:1.2rem;">🥋</span>
+                        <strong style="color:#b45309; font-size:0.9rem;">${escapeHtmlModal(currentQ.mentor_name)} :</strong>
                     </div>
-                    <p style="margin:0; font-size:0.88rem; color:#cbd5e1; line-height:1.6; font-style:italic;">
+                    <p style="margin:0; font-size:0.92rem; color:#292524; line-height:1.6; font-style:italic;">
                         &laquo; ${escapeHtmlModal(currentQ.lore)} &raquo;
                     </p>
                 </div>
 
                 <!-- Objectif précis -->
-                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:0.85rem 1rem; margin-bottom:1.25rem;">
-                    <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; font-weight:700; margin-bottom:0.25rem;">Objectif à atteindre :</div>
+                <div style="background:#f6f2e8; border:1px solid var(--border-color); border-radius:8px; padding:0.9rem 1.1rem; margin-bottom:1.25rem;">
+                    <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:0.25rem;">Objectif à atteindre :</div>
                     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                        <span style="font-size:1rem; font-weight:800; color:${isClaimable || isClaimed ? '#4ade80' : '#fff'};">
+                        <span style="font-size:1.05rem; font-weight:800; color:${isClaimable || isClaimed ? '#15803d' : '#1c1917'};">
                             ${isClaimable || isClaimed ? '✓ ' : '🎯 '} ${escapeHtmlModal(currentQ.objective)}
                         </span>
-                        <span style="font-size:0.75rem; color:#94a3b8; background:rgba(0,0,0,0.4); padding:0.2rem 0.5rem; border-radius:4px;">
+                        <span style="font-size:0.75rem; color:#44403c; background:#ffffff; border:1px solid var(--border-color); padding:0.25rem 0.6rem; border-radius:4px; font-weight:600;">
                             📍 ${escapeHtmlModal(currentQ.target_slot_hint || 'Fief')}
                         </span>
                     </div>
@@ -609,8 +611,8 @@ function renderQuestModal() {
 
                 <!-- Récompenses promises -->
                 <div style="margin-bottom:1.5rem;">
-                    <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; font-weight:700; margin-bottom:0.5rem;">Récompenses accordées par le Shogunat :</div>
-                    <div style="display:flex; gap:0.65rem; flex-wrap:wrap;">
+                    <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:0.6rem;">Récompenses accordées par le Shogunat :</div>
+                    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
                         ${rewardsHtml}
                     </div>
                 </div>

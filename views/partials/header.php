@@ -50,7 +50,10 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenShogun - Époque Sengoku Jidai & Stratégie des Daimyōs</title>
+    <!-- Bootstrap 5 Grille & Utilitaires (Mise en page & Flexbox) -->
+    <link rel="stylesheet" href="/public/css/bootstrap-grid.min.css?v=5.3.3">
+    <link rel="stylesheet" href="/public/css/bootstrap-utilities.min.css?v=5.3.3">
+    <!-- Feuille de Style Féodale Sengoku OpenShogun -->
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../../public/css/style.css') ? filemtime(__DIR__ . '/../../public/css/style.css') : time() ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏯</text></svg>">
 </head>
@@ -98,24 +101,24 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
             <span style="cursor: pointer;" onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)" title="Consulter votre Fiche de Daimyō">
                 Daimyō <strong><?= htmlspecialchars($user['username']) ?></strong>
             </span>
-            <button type="button" onclick="openEditMottoModal()" class="btn btn-secondary" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; border-color: rgba(220,38,38,0.5); color: #fca5a5; display: inline-flex; align-items: center; gap: 0.3rem; border-radius: 6px; cursor: pointer;" title="Modifier ma Devise de Daimyō">
+            <button type="button" onclick="openEditMottoModal()" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-color: rgba(185,28,28,0.4); color: #b91c1c; font-weight:700; display: inline-flex; align-items: center; gap: 0.3rem; border-radius: 6px; cursor: pointer;" title="Modifier ma Devise de Daimyō">
                 <span>📜</span> <span>Devise</span>
             </button>
-            <a href="?page=ranking" style="text-decoration: none; color: inherit;" title="Classement des Daimyōs & Tableau d'Honneur">
+            <a href="?page=ranking" style="text-decoration: none; color: #1c1917; font-weight:700;" title="Classement des Daimyōs & Tableau d'Honneur">
                 <span>🏆 <?= number_format($user['points']) ?> pts</span>
             </a>
             <?php if ($heroHeader): ?>
                 <?php 
                     $hHp = round((float)$heroHeader['health']);
-                    $hHpCol = ($hHp >= 60) ? '#22c55e' : (($hHp >= 25) ? '#eab308' : '#ef4444');
+                    $hHpCol = ($hHp >= 60) ? '#15803d' : (($hHp >= 25) ? '#b45309' : '#b91c1c');
                     $hasPoints = ((int)$heroHeader['unassigned_points'] > 0);
                 ?>
-                <a href="?page=hero" class="hud-msg-btn <?= ($page === 'hero') ? 'active' : '' ?>" title="Votre Samouraï Héros (Niveau <?= $heroHeader['level'] ?> - Santé : <?= $hHp ?>%)" style="text-decoration: none; position: relative; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; background: rgba(0,0,0,0.35); border: 1px solid <?= ($page === 'hero') ? '#dc2626' : 'rgba(255,255,255,0.12)' ?>; border-radius: 20px;">
-                    <img src="/public/assets/hero_samurai.jpg" alt="🥋" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; object-position: top center; border: 1px solid #dc2626;">
-                    <span style="font-size: 0.75rem; font-weight: 800; color: #fff;">Nv.<?= $heroHeader['level'] ?></span>
-                    <span style="font-size: 0.7rem; font-family: monospace; font-weight: 700; color: <?= $hHpCol ?>;"><?= $hHp ?>%</span>
+                <a href="?page=hero" class="hud-msg-btn <?= ($page === 'hero') ? 'active' : '' ?>" title="Votre Samouraï Héros (Niveau <?= $heroHeader['level'] ?> - Santé : <?= $hHp ?>%)" style="text-decoration: none; position: relative; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.65rem; background: #ffffff; border: 1px solid <?= ($page === 'hero') ? '#b91c1c' : 'var(--border-color)' ?>; border-radius: 20px; box-shadow: 0 1px 3px rgba(60,45,30,0.05);">
+                    <img src="/public/assets/hero_samurai.jpg" alt="🥋" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; object-position: top center; border: 1px solid #b91c1c;">
+                    <span style="font-size: 0.75rem; font-weight: 800; color: #1c1917;">Nv.<?= $heroHeader['level'] ?></span>
+                    <span style="font-size: 0.7rem; font-family: monospace; font-weight: 800; color: <?= $hHpCol ?>;"><?= $hHp ?>%</span>
                     <?php if ($hasPoints): ?>
-                        <span class="hud-unread-count" style="background: #eab308; color: #000; font-weight: 900; animation: pulse 1.5s infinite; right: -5px; top: -5px;" title="<?= $heroHeader['unassigned_points'] ?> point(s) à répartir !">
+                        <span class="hud-unread-count" style="background: #b45309; color: #fff; font-weight: 900; animation: pulse 1.5s infinite; right: -5px; top: -5px;" title="<?= $heroHeader['unassigned_points'] ?> point(s) à répartir !">
                             +<?= $heroHeader['unassigned_points'] ?>
                         </span>
                     <?php endif; ?>
@@ -125,9 +128,9 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
                 <button type="button" onclick="openQuestModal()" class="hud-msg-btn <?= ($questSummary['claimable_count'] > 0) ? 'has-unread' : '' ?>" title="Didacticiel & Quêtes Féodales (<?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?>)" style="background: none; border: none; cursor: pointer;">
                     <span>🎯</span>
                     <?php if ($questSummary['claimable_count'] > 0): ?>
-                        <span class="hud-unread-count" style="background: #10b981; animation: pulse 1.5s infinite;"><?= $questSummary['claimable_count'] ?></span>
+                        <span class="hud-unread-count" style="background: #15803d; animation: pulse 1.5s infinite;"><?= $questSummary['claimable_count'] ?></span>
                     <?php elseif (!$questSummary['all_completed']): ?>
-                        <span class="hud-unread-count" style="background: rgba(220,38,38,0.85); font-size: 0.65rem;"><?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?></span>
+                        <span class="hud-unread-count" style="background: #b91c1c; font-size: 0.65rem;"><?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?></span>
                     <?php endif; ?>
                 </button>
             <?php endif; ?>
@@ -147,11 +150,11 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
                 <span>📮</span>
             </a>
             <?php if ($auth->isAdmin()): ?>
-                <a href="?page=admin" class="badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #eab308; padding: 0.25rem 0.5rem; text-decoration: none; font-weight: 700; margin-left: 0.25rem;" title="QG d'Administration">
+                <a href="?page=admin" class="badge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; padding: 0.25rem 0.55rem; text-decoration: none; font-weight: 800; margin-left: 0.25rem;" title="QG d'Administration">
                     ⚙️ ADMIN
                 </a>
             <?php endif; ?>
-            <a href="?action=logout" style="color: #ef4444; font-size: 0.85rem; margin-left: 0.5rem;">[Quitter]</a>
+            <a href="?action=logout" style="color: #b91c1c; font-size: 0.85rem; font-weight: 700; margin-left: 0.5rem;">[Quitter]</a>
         </div>
     </div>
 
