@@ -34,12 +34,12 @@ class ShipyardEngine {
         $ships = $stmt->fetchAll();
 
         // Calculer le temps de construction réel avec les bonus
-        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
+        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
         $vorashBonus = ($faction === 'vorash') ? 0.8 : 1.0; // Vorash produisent 20% plus vite
 
         foreach ($ships as &$ship) {
             $ship['can_build'] = ($shipyardLvl >= 1);
-            $effectiveTime = max(2, (int)(($ship['base_build_time'] / (1 + ($shipyardLvl * 0.4))) * $vorashBonus / $speed));
+            $effectiveTime = max(10, (int)(($ship['base_build_time'] / (1 + ($shipyardLvl * 0.15))) * $vorashBonus / $speed));
             $ship['effective_build_time'] = $effectiveTime;
         }
 
@@ -92,9 +92,9 @@ class ShipyardEngine {
             throw new Exception("Ressources insuffisantes pour cette commande.");
         }
 
-        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
+        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
         $vorashBonus = ($faction === 'vorash') ? 0.8 : 1.0;
-        $unitTime = max(2, (int)(($ship['base_build_time'] / (1 + ($shipyardLvl * 0.4))) * $vorashBonus / $speed));
+        $unitTime = max(10, (int)(($ship['base_build_time'] / (1 + ($shipyardLvl * 0.15))) * $vorashBonus / $speed));
         $totalTime = $unitTime * $count;
 
         // Déduire les ressources

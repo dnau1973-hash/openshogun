@@ -53,9 +53,10 @@ class BuildingEngine {
             $baseTime = $bConf['base_time'];
         }
 
-        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
-        // Facteur de réduction par le QG et vitesse de jeu
-        $duration = max(2, (int)(($baseTime * $targetLevel * 2) / ((1 + ($hqLevel * 0.25)) * $speed)));
+        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
+        // Facteur d'équilibrage féodal (serveur 12 mois) : croissance exponentielle avec réduction par le Tenshu
+        $hqBonus = 1 + ($hqLevel * 0.08);
+        $duration = max(10, (int)(($baseTime * pow(1.35, $currentLevel) * pow($targetLevel, 0.9)) / ($hqBonus * $speed)));
 
         return [
             'target_level' => $targetLevel,
@@ -398,9 +399,9 @@ class BuildingEngine {
             }
         }
 
-        // Durée du démantèlement : 50% de la durée de construction, min 5 secondes
+        // Durée du démantèlement : 50% de la durée de construction, min 10 secondes
         $details = $this->getUpgradeDetails($category, $type, max(0, $currentLevel - 1), $hqLevel);
-        $duration = max(5, (int)($details['duration'] * 0.5));
+        $duration = max(10, (int)($details['duration'] * 0.5));
         $now = time();
         $finishesAt = $now + $duration;
 

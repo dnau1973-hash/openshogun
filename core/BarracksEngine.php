@@ -40,7 +40,7 @@ class BarracksEngine {
 
         $units = $this->getStationedUnits($planetId, $faction);
 
-        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
+        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
         $vorashBonus = ($faction === 'vorash') ? 0.8 : 1.0;
 
         // Prérequis de niveau de caserne par palier (Tier)
@@ -52,7 +52,7 @@ class BarracksEngine {
             $u['required_barracks_level'] = $requiredLvl;
             $u['can_train'] = ($barracksLvl >= $requiredLvl);
 
-            $effectiveTime = max(1, (int)(($u['base_train_time'] / (1 + ($barracksLvl * 0.35))) * $vorashBonus / $speed));
+            $effectiveTime = max(5, (int)(($u['base_train_time'] / (1 + ($barracksLvl * 0.15))) * $vorashBonus / $speed));
             $u['effective_train_time'] = $effectiveTime;
         }
 
@@ -107,9 +107,9 @@ class BarracksEngine {
             throw new Exception("Ressources insuffisantes pour équiper et entraîner cette troupe.");
         }
 
-        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
+        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
         $vorashBonus = ($faction === 'vorash') ? 0.8 : 1.0;
-        $unitTime = max(1, (int)(($unit['base_train_time'] / (1 + ($barracksLvl * 0.35))) * $vorashBonus / $speed));
+        $unitTime = max(5, (int)(($unit['base_train_time'] / (1 + ($barracksLvl * 0.15))) * $vorashBonus / $speed));
         $totalTime = $unitTime * $count;
 
         $this->db->beginTransaction();

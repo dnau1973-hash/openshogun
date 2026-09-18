@@ -31,7 +31,7 @@ class ResearchEngine {
         $stmt->execute([$userId]);
         $researches = $stmt->fetchAll();
 
-        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
+        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
 
         foreach ($researches as &$res) {
             $curLvl = (int)$res['current_level'];
@@ -41,7 +41,7 @@ class ResearchEngine {
             $res['cost_metal'] = (int)($res['metal_cost'] * $mult);
             $res['cost_crystal'] = (int)($res['crystal_cost'] * $mult);
             $res['cost_deuterium'] = (int)($res['deuterium_cost'] * $mult);
-            $res['duration'] = max(2, (int)(($res['base_time'] * $nextLvl * 2) / ((1 + ($labLvl * 0.3)) * $speed)));
+            $res['duration'] = max(30, (int)(($res['base_time'] * pow(1.38, $curLvl) * $nextLvl) / ((1 + ($labLvl * 0.15)) * $speed)));
             $res['can_research'] = ($labLvl >= 1);
         }
 
@@ -96,8 +96,8 @@ class ResearchEngine {
             throw new Exception("Ressources insuffisantes pour cette technologie.");
         }
 
-        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
-        $duration = max(2, (int)(($res['base_time'] * $nextLvl * 2) / ((1 + ($labLvl * 0.3)) * $speed)));
+        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
+        $duration = max(30, (int)(($res['base_time'] * pow(1.38, $curLvl) * $nextLvl) / ((1 + ($labLvl * 0.15)) * $speed)));
 
         $now = time();
         $finishesAt = $now + $duration;

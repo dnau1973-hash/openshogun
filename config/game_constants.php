@@ -90,7 +90,7 @@ const FIELD_TYPES = [
         'description' => 'Exploitation forestière taillant les nobles cèdres des forêts montagneuses du fief. Le bois est la matière première indispensable pour dresser les charpentes de vos donjons, vos palissades fortifiées et fabriquer les arcs et armes d\'hast de vos bataillons.',
         'base_cost' => ['metal' => 60, 'crystal' => 15, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
-        'base_time' => 15,
+        'base_time' => 75,
         'base_prod' => 30, // Bois de Cèdre par heure
         'base_energy_cons' => 10,
     ],
@@ -101,7 +101,7 @@ const FIELD_TYPES = [
         'description' => 'Carrière à ciel ouvert extrayant les blocs de granit et roches volcaniques des coteaux. Les pierres taillées permettent d\'édifier les fondations cyclopéennes (Nozura-zumi) de vos remparts, vos fossés et vos forteresses imprenables.',
         'base_cost' => ['metal' => 48, 'crystal' => 24, 'deuterium' => 0],
         'cost_multiplier' => 1.6,
-        'base_time' => 20,
+        'base_time' => 90,
         'base_prod' => 20, // Pierre de Taille par heure
         'base_energy_cons' => 12,
     ],
@@ -112,7 +112,7 @@ const FIELD_TYPES = [
         'description' => 'Vastes rizières aménagées en terrasses irriguées par les canaux fluviaux. Le riz est la véritable monnaie du Japon féodal (mesurée en Koku) : il nourrit votre population, entretient vos garnisons samouraïs et finance vos campagnes militaires.',
         'base_cost' => ['metal' => 225, 'crystal' => 75, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
-        'base_time' => 25,
+        'base_time' => 110,
         'base_prod' => 12, // Koku de Riz par heure
         'base_energy_cons' => 20,
     ],
@@ -123,7 +123,7 @@ const FIELD_TYPES = [
         'description' => 'Lieu sacré érigé sous les pins ancestraux avec torii vermillon et roue à aubes fluviale. Il honore les esprits tutélaires (Kami), maintenant l\'harmonie spirituelle et l\'énergie indispensable au rendement de toutes les parcelles du domaine.',
         'base_cost' => ['metal' => 75, 'crystal' => 30, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
-        'base_time' => 15,
+        'base_time' => 80,
         'base_prod' => 25, // Ferveur & Honneur
         'base_energy_cons' => 0,
     ]
@@ -138,7 +138,7 @@ const BUILDINGS = [
         'description' => 'Le donjon fortifié et palais du Daimyō. Réduit la durée de construction de tous les bâtiments urbains et parcelles rurales du fief.',
         'base_cost' => ['metal' => 100, 'crystal' => 80, 'deuterium' => 40],
         'cost_multiplier' => 1.5,
-        'base_time' => 30,
+        'base_time' => 160,
         'max_level' => 20
     ],
     'storage' => [
@@ -148,7 +148,7 @@ const BUILDINGS = [
         'description' => 'Augmente la capacité de stockage maximale de Bois de Cèdre et de Pierre de Taille.',
         'base_cost' => ['metal' => 120, 'crystal' => 60, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
-        'base_time' => 25,
+        'base_time' => 120,
         'max_level' => 20
     ],
     'tank' => [
@@ -158,7 +158,7 @@ const BUILDINGS = [
         'description' => 'Augmente la capacité de stockage maximale des récoltes de riz (Koku).',
         'base_cost' => ['metal' => 100, 'crystal' => 100, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
-        'base_time' => 25,
+        'base_time' => 120,
         'max_level' => 20
     ],
     'shipyard' => [
@@ -168,7 +168,7 @@ const BUILDINGS = [
         'description' => 'Permet d\'élever la cavalerie de guerre, les convois de transport et de fabriquer béliers et trébuchets.',
         'base_cost' => ['metal' => 400, 'crystal' => 200, 'deuterium' => 100],
         'cost_multiplier' => 1.6,
-        'base_time' => 60,
+        'base_time' => 240,
         'max_level' => 20
     ],
     'research_lab' => [
@@ -178,7 +178,7 @@ const BUILDINGS = [
         'description' => 'Permet de perfectionner la métallurgie du tamahagane, l\'art de la guerre et les tactiques militaires.',
         'base_cost' => ['metal' => 200, 'crystal' => 400, 'deuterium' => 200],
         'cost_multiplier' => 1.6,
-        'base_time' => 50,
+        'base_time' => 220,
         'max_level' => 20
     ],
     'radar' => [
@@ -188,7 +188,7 @@ const BUILDINGS = [
         'description' => 'Surveille les vallées et détecte les armées et espions ennemis en marche vers votre fief.',
         'base_cost' => ['metal' => 150, 'crystal' => 250, 'deuterium' => 100],
         'cost_multiplier' => 1.5,
-        'base_time' => 40,
+        'base_time' => 160,
         'max_level' => 15
     ],
     'quantum_vault' => [
@@ -198,7 +198,7 @@ const BUILDINGS = [
         'description' => 'Protège une réserve secrète de vivres et matériaux contre les pillages adverses (capacité doublée pour le Clan Tokugawa).',
         'base_cost' => ['metal' => 100, 'crystal' => 100, 'deuterium' => 50],
         'cost_multiplier' => 1.4,
-        'base_time' => 30,
+        'base_time' => 100,
         'max_level' => 15
     ],
     'market' => [
@@ -208,7 +208,7 @@ const BUILDINGS = [
         'description' => 'Permet d\'échanger des ressources avec les marchands itinérants et autres daimyōs provinciaux.',
         'base_cost' => ['metal' => 300, 'crystal' => 200, 'deuterium' => 150],
         'cost_multiplier' => 1.5,
-        'base_time' => 45,
+        'base_time' => 160,
         'max_level' => 15
     ],
     'embassy' => [
@@ -218,7 +218,7 @@ const BUILDINGS = [
         'description' => 'Permet de sceller ou rejoindre un pacte d\'alliance entre daimyōs.',
         'base_cost' => ['metal' => 180, 'crystal' => 130, 'deuterium' => 70],
         'cost_multiplier' => 1.5,
-        'base_time' => 35,
+        'base_time' => 180,
         'max_level' => 10
     ],
     'barracks' => [
@@ -228,7 +228,7 @@ const BUILDINGS = [
         'description' => 'Entraîne les fantassins Ashigarus, archers Yumi, arquebusiers et samouraïs d\'élite pour la défense et les conquêtes.',
         'base_cost' => ['metal' => 200, 'crystal' => 150, 'deuterium' => 50],
         'cost_multiplier' => 1.5,
-        'base_time' => 35,
+        'base_time' => 180,
         'max_level' => 20
     ],
     'wall' => [
@@ -238,7 +238,7 @@ const BUILDINGS = [
         'description' => 'Enceinte fortifiée en pierre de taille, palissades en cèdre et douves protégeant le fief. Confère une défense structurelle de base et un puissant bonus défensif multiplicateur (+4% par niveau) à l\'ensemble des guerriers stationnés en garnison face aux assauts ennemis.',
         'base_cost' => ['metal' => 110, 'crystal' => 160, 'deuterium' => 90],
         'cost_multiplier' => 1.45,
-        'base_time' => 30,
+        'base_time' => 130,
         'max_level' => 20
     ]
 ];

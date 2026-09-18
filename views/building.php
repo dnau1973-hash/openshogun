@@ -813,10 +813,14 @@ function updateBuildingCountdowns() {
             el.innerText = 'Travaux achevés ! Actualisation...';
             setTimeout(() => window.location.reload(), 1500);
         } else {
-            const h = Math.floor(diff / 3600);
+            const d = Math.floor(diff / 86400);
+            const h = Math.floor((diff % 86400) / 3600);
             const m = Math.floor((diff % 3600) / 60);
             const s = diff % 60;
-            el.innerText = `⏳ Temps restant : ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            const timeStr = (d > 0) 
+                ? `${d}j ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+                : `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            el.innerText = `⏳ Temps restant : ${timeStr}`;
         }
     });
 }
