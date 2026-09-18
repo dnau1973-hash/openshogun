@@ -33,6 +33,12 @@ foreach ($allCastles as $idx => $c) {
 }
 $prevCastle = $allCastles[($currentIndex > 0) ? $currentIndex - 1 : count($allCastles) - 1];
 $nextCastle = $allCastles[($currentIndex < count($allCastles) - 1) ? $currentIndex + 1 : 0];
+
+// Résolution de l'illustration authentique du château
+$castleImgFile = !empty($castle['image']) ? $castle['image'] : ($castle['code'] . '.jpg');
+$castleImgDisk = __DIR__ . '/../public/assets/castles/' . $castleImgFile;
+$hasCastleImg = file_exists($castleImgDisk);
+$castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?v=' . filemtime($castleImgDisk)) : '/public/assets/shogun_castle_city_bg.jpg';
 ?>
 
 <div class="container castle-view-container" style="max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem;">
@@ -62,14 +68,18 @@ $nextCastle = $allCastles[($currentIndex < count($allCastles) - 1) ? $currentInd
     <!-- CARTE PRINCIPALE DU CHÂTEAU AUTHENTIQUE -->
     <div class="field-hero-card" style="border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 10px 35px rgba(245, 158, 11, 0.15);">
         <!-- Fond de carte estompé -->
-        <div class="field-hero-bg" style="background-image: url('/public/assets/shogun_castle_city_bg.jpg'); filter: blur(2px) brightness(0.65) saturate(1.2);"></div>
+        <div class="field-hero-bg" style="background-image: url('<?= $castleImgSrc ?>'); filter: blur(2px) brightness(0.65) saturate(1.2);"></div>
         <div class="field-hero-overlay" style="background: linear-gradient(135deg, rgba(253, 251, 247, 0.94) 0%, rgba(254, 243, 199, 0.9) 60%, rgba(254, 215, 170, 0.94) 100%);"></div>
 
         <div class="field-hero-content">
             <!-- Piédestal de l'Emblème du Château -->
             <div class="field-tile-stage">
-                <div class="field-tile-pedestal" style="background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, rgba(254, 243, 199, 0.95) 75%); border: 3px solid #d97706; box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);">
-                    <span style="font-size: 5rem; filter: drop-shadow(0 6px 12px rgba(180, 83, 9, 0.5));">🏯</span>
+                <div class="field-tile-pedestal" style="background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, rgba(254, 243, 199, 0.95) 75%); border: 3px solid #d97706; box-shadow: 0 0 25px rgba(245, 158, 11, 0.35); overflow: hidden; padding: 0;">
+                    <?php if ($hasCastleImg): ?>
+                        <img src="<?= $castleImgSrc ?>" alt="<?= htmlspecialchars($castle['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
+                    <?php else: ?>
+                        <span style="font-size: 5rem; filter: drop-shadow(0 6px 12px rgba(180, 83, 9, 0.5));">🏯</span>
+                    <?php endif; ?>
                 </div>
                 <div class="field-level-emblem" style="background: linear-gradient(135deg, #d97706, #b45309); border-color: #fde68a;">
                     <span class="emblem-lvl-text" style="color: #fef3c7;">DONJON</span>
@@ -130,6 +140,28 @@ $nextCastle = $allCastles[($currentIndex < count($allCastles) - 1) ? $currentInd
             </div>
         </div>
     </div>
+
+    <?php if ($hasCastleImg): ?>
+        <!-- ILLUSTRATION PANORAMIQUE UKIYO-E DE LA FORTERESSE -->
+        <div class="card" style="margin-bottom: 2rem; border-color: rgba(245, 158, 11, 0.4); background: var(--bg-surface, #fdfbf7); overflow: hidden; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.08);">
+            <div style="position: relative; width: 100%; max-height: 520px; overflow: hidden; background: #1c1917;">
+                <img src="<?= $castleImgSrc ?>" alt="<?= htmlspecialchars($castle['name']) ?>" style="width: 100%; max-height: 520px; object-fit: cover; object-position: center; display: block; transition: transform 0.4s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(28, 25, 23, 0.9) 0%, rgba(28, 25, 23, 0) 100%); padding: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 0.75rem;">
+                    <div style="text-align: left;">
+                        <span style="background: #f59e0b; color: #1c1917; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+                            Estampe Authentique &bull; <?= htmlspecialchars($castle['kanji']) ?>
+                        </span>
+                        <h2 style="color: #fff; margin: 0.4rem 0 0 0; font-size: 1.6rem; text-shadow: 0 2px 4px rgba(0,0,0,0.9);">
+                            <?= htmlspecialchars($castle['name']) ?>
+                        </h2>
+                    </div>
+                    <span style="color: #fef3c7; font-size: 0.85rem; font-style: italic; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(254, 243, 199, 0.3);">
+                        📍 <?= htmlspecialchars($castle['province']) ?>
+                    </span>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- GRILLE DÉTAILLÉE : HISTOIRE & BATAILLE FINALE -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
@@ -209,28 +241,39 @@ $nextCastle = $allCastles[($currentIndex < count($allCastles) - 1) ? $currentInd
             <span style="font-size: 0.8rem; color: var(--text-muted);">Cliquez sur une forteresse pour consulter sa fiche historique</span>
         </div>
         <div class="card-body" style="padding: 1.25rem;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.85rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.85rem;">
                 <?php foreach ($allCastles as $idx => $c): ?>
                     <?php 
                         $isSelected = ($c['id'] === $castle['id']);
+                        $cImgFile = !empty($c['image']) ? $c['image'] : ($c['code'] . '.jpg');
+                        $cImgDisk = __DIR__ . '/../public/assets/castles/' . $cImgFile;
+                        $cHasImg = file_exists($cImgDisk);
+                        $cImgSrc = $cHasImg ? ('/public/assets/castles/' . $cImgFile . '?v=' . filemtime($cImgDisk)) : null;
                     ?>
                     <a href="/?page=castle&code=<?= $c['code'] ?>" 
                        style="text-decoration: none; color: inherit; display: block;"
                        title="Consulter <?= htmlspecialchars($c['name']) ?>">
-                        <div style="padding: 0.75rem; border-radius: 6px; border: 1.5px solid <?= $isSelected ? '#b91c1c' : 'var(--border-color)' ?>; background: <?= $isSelected ? 'rgba(185, 28, 28, 0.08)' : 'var(--bg-surface, #fdfbf7)' ?>; transition: all 0.2s ease;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                                <span style="font-size: 0.85rem; font-weight: 700; color: <?= $isSelected ? '#b91c1c' : '#1c1917' ?>;">
-                                    <?= ($idx + 1) ?>. <?= htmlspecialchars($c['name']) ?>
-                                </span>
-                                <span style="font-size: 0.8rem; color: #b45309; font-weight: 700; font-family: serif;">
-                                    <?= htmlspecialchars($c['kanji']) ?>
-                                </span>
-                            </div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-                                <span><?= htmlspecialchars(explode('(', $c['province'])[0]) ?></span>
-                                <span style="color: <?= $c['is_spawned'] ? '#166534' : '#64748b' ?>; font-weight: 600;">
-                                    <?= $c['is_spawned'] ? ('[' . $c['coord_x'] . ' : ' . $c['coord_y'] . ']') : 'En réserve' ?>
-                                </span>
+                        <div style="padding: 0.75rem; border-radius: 8px; border: 1.5px solid <?= $isSelected ? '#b91c1c' : 'var(--border-color)' ?>; background: <?= $isSelected ? 'rgba(185, 28, 28, 0.08)' : 'var(--bg-surface, #fdfbf7)' ?>; transition: all 0.2s ease; display: flex; gap: 0.75rem; align-items: center;">
+                            <?php if ($cHasImg): ?>
+                                <img src="<?= $cImgSrc ?>" alt="<?= htmlspecialchars($c['name']) ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); flex-shrink: 0;">
+                            <?php else: ?>
+                                <div style="width: 50px; height: 50px; border-radius: 6px; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; border: 1px solid var(--border-color);">🏯</div>
+                            <?php endif; ?>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                    <span style="font-size: 0.85rem; font-weight: 700; color: <?= $isSelected ? '#b91c1c' : '#1c1917' ?>; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        <?= ($idx + 1) ?>. <?= htmlspecialchars($c['name']) ?>
+                                    </span>
+                                    <span style="font-size: 0.8rem; color: #b45309; font-weight: 700; font-family: serif; margin-left: 0.35rem;">
+                                        <?= htmlspecialchars($c['kanji']) ?>
+                                    </span>
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars(explode('(', $c['province'])[0]) ?></span>
+                                    <span style="color: <?= $c['is_spawned'] ? '#166534' : '#64748b' ?>; font-weight: 600; flex-shrink: 0; margin-left: 0.35rem;">
+                                        <?= $c['is_spawned'] ? ('[' . $c['coord_x'] . ' : ' . $c['coord_y'] . ']') : 'En réserve' ?>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </a>
