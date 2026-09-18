@@ -362,7 +362,7 @@ class FleetEngine {
     /**
      * Calcule la durée de trajet selon la flotte, la distance et les bonus
      */
-    public function calculateFlightDuration(array $fleet, float $distance, string $faction): int {
+    public function calculateFlightDuration(array $fleet, float $distance, string $faction, ?int $sourcePlanetId = null): int {
         $stmt = $this->db->query("SELECT code, speed FROM ships");
         $speeds = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
         $stmtU = $this->db->query("SELECT code, speed FROM units");
@@ -379,6 +379,20 @@ class FleetEngine {
         // Bonus Aethelis : +20% vitesse de flotte
         if ($faction === 'aethelis') {
             $minSpeed = (int)($minSpeed * 1.20);
+        }
+
+        // Bonus Place d'Exercices & Relais (tournament_square) : Style Travian
+        // +10% de vitesse de déplacement par niveau lors des marches à longue distance (> 20 provinces)
+        if ($sourcePlanetId !== null && $sourcePlanetId > 0 && $distance >= 20.0) {
+            try {
+                $buildings = $this->planetEngine->getBuildings($sourcePlanetId);
+                $tsLvl = (int)($buildings['tournament_square'] ?? 0);
+                if ($tsLvl > 0) {
+                    $minSpeed = (int)round($minSpeed * (1.0 + ($tsLvl * 0.10)));
+                }
+            } catch (Exception $e) {
+                // Fallback silencieux
+            }
         }
 
         $gameSpeed = max(1, (float)GameConfig::get('fleet_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
@@ -478,7 +492,7 @@ class FleetEngine {
 
         // 4. Calcul de distance et durée
         $distance = self::calculateDistance($sourcePlanet['coord_x'], $sourcePlanet['coord_y'], $destX, $destY);
-        $duration = $this->calculateFlightDuration($cleanFleet, $distance, $sourcePlanet['faction']);
+        $duration = $this->calculateFlightDuration($cleanFleet, $distance, $sourcePlanet['faction'], $sourcePlanetId);
 
         // 5. Calcul des rations de riz (koku) requises pour la marche
         $effectiveMarches = max(1, $totalShips + ($hasHero ? 1 : 0));

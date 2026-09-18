@@ -391,6 +391,28 @@ class PlanetEngine {
             }
         }
 
+        // Bonus des édifices urbains de spécialisation (Style Travian : Scierie, Briqueterie, Moulin, Pavillon de Thé)
+        $sawmillMult = 1.0;
+        $stonemasonMult = 1.0;
+        $grainMillMult = 1.0;
+        $teahouseLvl = 0;
+        if ($planetId !== null && $planetId > 0) {
+            try {
+                $buildings = $this->getBuildings($planetId);
+                $sawmillLvl = (int)($buildings['sawmill'] ?? 0);
+                $stonemasonLvl = (int)($buildings['stonemason'] ?? 0);
+                $grainMillLvl = (int)($buildings['grain_mill'] ?? 0);
+                $teahouseLvl = (int)($buildings['teahouse'] ?? 0);
+
+                if ($sawmillLvl > 0) $sawmillMult += ($sawmillLvl * 0.05);
+                if ($stonemasonLvl > 0) $stonemasonMult += ($stonemasonLvl * 0.05);
+                if ($grainMillLvl > 0) $grainMillMult += ($grainMillLvl * 0.05);
+                if ($teahouseLvl > 0) $energyMax = (int)($energyMax * (1.0 + ($teahouseLvl * 0.05)));
+            } catch (Exception $e) {
+                // Fallback silencieux
+            }
+        }
+
         // Ratio énergétique :
         // Si l'énergie disponible est négative (consommation > production disponible),
         // la production de ressources ne fonctionne qu'à 10% (0.10)
@@ -428,14 +450,20 @@ class PlanetEngine {
         }
 
         return [
-            'metal' => (int)(($metalBase + ($metalMineProd * $speed)) * $energyRatio * $oasisBonusMult['wood']) + $heroProdBonus['metal'],
-            'crystal' => (int)(($crystalBase + ($crystalMineProd * $speed)) * $energyRatio * $oasisBonusMult['stone']) + $heroProdBonus['crystal'],
-            'deuterium' => (int)(($deutBase + ($deutSynthProd * $speed)) * $energyRatio * $oasisBonusMult['rice']) + $heroProdBonus['deuterium'],
+            'metal' => (int)(($metalBase + ($metalMineProd * $speed)) * $energyRatio * $oasisBonusMult['wood'] * $sawmillMult) + $heroProdBonus['metal'],
+            'crystal' => (int)(($crystalBase + ($crystalMineProd * $speed)) * $energyRatio * $oasisBonusMult['stone'] * $stonemasonMult) + $heroProdBonus['crystal'],
+            'deuterium' => (int)(($deutBase + ($deutSynthProd * $speed)) * $energyRatio * $oasisBonusMult['rice'] * $grainMillMult) + $heroProdBonus['deuterium'],
             'energy_max' => $energyMax,
             'energy_used' => $energyUsed,
             'energy_ratio' => $energyRatio,
             'oasis_bonuses' => $oasisBonuses,
-            'hero_bonuses' => $heroProdBonus
+            'hero_bonuses' => $heroProdBonus,
+            'building_bonuses' => [
+                'sawmill' => (int)round(($sawmillMult - 1.0) * 100),
+                'stonemason' => (int)round(($stonemasonMult - 1.0) * 100),
+                'grain_mill' => (int)round(($grainMillMult - 1.0) * 100),
+                'teahouse' => (int)($teahouseLvl * 5)
+            ]
         ];
     }
 

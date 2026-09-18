@@ -40,6 +40,12 @@ $buildingSectors = [
     'tank' => 'logistics',
     'quantum_vault' => 'logistics',
     'market' => 'logistics',
+    'sawmill' => 'logistics',
+    'stonemason' => 'logistics',
+    'grain_mill' => 'logistics',
+    'blacksmith' => 'military',
+    'teahouse' => 'science',
+    'tournament_square' => 'military',
     'free_plot' => 'logistics',
 ];
 

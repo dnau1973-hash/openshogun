@@ -73,12 +73,12 @@ const CITY_SLOT_LAYOUT = [
     26 => 'radar',         // Tour de Guet Yagura (octogonale centrale)
     27 => 'quantum_vault', // Cachette Secrète Sous Terre
     28 => 'embassy',       // Pavillon Diplomatique des Clans
-    29 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
-    30 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
-    31 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
-    32 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
-    33 => 'free_plot',     // Emplacement Libre / Terrain à Bâtir
-    34 => 'wall',          // Muraille & Remparts de Cité (Enceinte fortifiée)
+    29 => 'sawmill',           // Atelier de Charpenterie (Kizukuri)
+    30 => 'stonemason',        // Taille de Granit & Maçonnerie (Ishizukuri)
+    31 => 'grain_mill',        // Meunerie & Brasserie de Riz (Sakagura)
+    32 => 'blacksmith',        // Grande Forge du Tamahagane (Kaji-ba)
+    33 => 'teahouse',          // Pavillon de Thé & Sérénité (Chashitsu)
+    34 => 'wall',              // Muraille & Remparts de Cité (Enceinte fortifiée)
 ];
 
 // Métadonnées des parcelles rurales du domaine
@@ -239,6 +239,66 @@ const BUILDINGS = [
         'base_cost' => ['metal' => 110, 'crystal' => 160, 'deuterium' => 90],
         'cost_multiplier' => 1.45,
         'base_time' => 130,
+        'max_level' => 20
+    ],
+    'sawmill' => [
+        'name' => 'Atelier de Charpenterie (Kizukuri)',
+        'icon' => '🪚',
+        'tile_img' => 'tile_sawmill.png',
+        'description' => 'Atelier des maîtres charpentiers façonnant poutres et madriers. Augmente la production de Bois de Cèdre de votre fief de +5% par niveau.',
+        'base_cost' => ['metal' => 180, 'crystal' => 140, 'deuterium' => 60],
+        'cost_multiplier' => 1.5,
+        'base_time' => 150,
+        'max_level' => 20
+    ],
+    'stonemason' => [
+        'name' => 'Taille de Granit & Maçonnerie (Ishizukuri)',
+        'icon' => '⛏️',
+        'tile_img' => 'tile_stonemason.png',
+        'description' => 'Atelier des tailleurs de pierre taillant les blocs cyclopéens. Augmente la production de Pierre de Taille de +5% par niveau et renforce la résistance des édifices.',
+        'base_cost' => ['metal' => 130, 'crystal' => 190, 'deuterium' => 70],
+        'cost_multiplier' => 1.5,
+        'base_time' => 160,
+        'max_level' => 20
+    ],
+    'grain_mill' => [
+        'name' => 'Meunerie & Brasserie de Riz (Sakagura)',
+        'icon' => '🍶',
+        'tile_img' => 'tile_grain_mill.png',
+        'description' => 'Brasserie et meunerie artisanale traitant les récoltes de riz. Augmente la production de Koku de Riz de +5% par niveau.',
+        'base_cost' => ['metal' => 160, 'crystal' => 150, 'deuterium' => 100],
+        'cost_multiplier' => 1.5,
+        'base_time' => 170,
+        'max_level' => 20
+    ],
+    'blacksmith' => [
+        'name' => 'Grande Forge du Tamahagane (Kaji-ba)',
+        'icon' => '⚔️',
+        'tile_img' => 'tile_blacksmith.png',
+        'description' => 'Forge des maîtres armuriers façonnant le tamahagane. Confère un bonus de +2% en puissance martiale et résistance d\'armure à toutes vos troupes par niveau.',
+        'base_cost' => ['metal' => 220, 'crystal' => 180, 'deuterium' => 90],
+        'cost_multiplier' => 1.55,
+        'base_time' => 190,
+        'max_level' => 20
+    ],
+    'teahouse' => [
+        'name' => 'Pavillon de Thé & Sérénité (Chashitsu)',
+        'icon' => '🍵',
+        'tile_img' => 'tile_teahouse.png',
+        'description' => 'Pavillon de méditation et cérémonie du thé entouré d\'un jardin zen. Augmente la Sérénité & Ferveur de votre domaine de +5% par niveau.',
+        'base_cost' => ['metal' => 140, 'crystal' => 120, 'deuterium' => 80],
+        'cost_multiplier' => 1.5,
+        'base_time' => 140,
+        'max_level' => 20
+    ],
+    'tournament_square' => [
+        'name' => 'Place d\'Exercices & Relais (Shurenjo)',
+        'icon' => '🎯',
+        'tile_img' => 'tile_tournament_square.png',
+        'description' => 'Terrain de manœuvres et relais de cavalerie. Augmente la vitesse de déplacement des armées de +10% par niveau lors des marches à longue distance (> 20 provinces).',
+        'base_cost' => ['metal' => 250, 'crystal' => 200, 'deuterium' => 150],
+        'cost_multiplier' => 1.55,
+        'base_time' => 200,
         'max_level' => 20
     ]
 ];

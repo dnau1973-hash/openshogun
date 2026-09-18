@@ -136,11 +136,32 @@ class CombatEngine {
             $defShield = (int)($defShield * 1.15);
         }
 
+        // Bonus Forge du Tamahagane de l'attaquant (+2% puissance et protection par niveau)
+        if (!empty($mission['source_planet_id'])) {
+            $attBuildings = $this->planetEngine->getBuildings((int)$mission['source_planet_id']);
+            $attForgeLvl = (int)($attBuildings['blacksmith'] ?? 0);
+            if ($attForgeLvl > 0) {
+                $attForgeMult = 1.0 + ($attForgeLvl * 0.02);
+                $attPower = (int)round($attPower * $attForgeMult);
+                $attShield = (int)round($attShield * $attForgeMult);
+                $attHull = (int)round($attHull * $attForgeMult);
+            }
+        }
+
         // Application des bonus de la muraille féodale
         if ($wallLvl > 0) {
             $defShield = (int)($defShield * $wallDefenseMultiplier);
             $defHull = (int)($defHull * $wallDefenseMultiplier) + $wallStructuralDefense;
             $defPower += $wallRipostePower;
+        }
+
+        // Bonus Forge du Tamahagane du défenseur (+2% défense et riposte par niveau)
+        $defForgeLvl = (int)($targetBuildings['blacksmith'] ?? 0);
+        if ($defForgeLvl > 0) {
+            $defForgeMult = 1.0 + ($defForgeLvl * 0.02);
+            $defPower = (int)round($defPower * $defForgeMult);
+            $defShield = (int)round($defShield * $defForgeMult);
+            $defHull = (int)round($defHull * $defForgeMult);
         }
 
         // Simulation de 3 rounds de combat

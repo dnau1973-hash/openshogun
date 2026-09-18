@@ -42,7 +42,7 @@ class SlotPositionEngine {
 
         if ($view === 'city') {
             return [
-                "19" => [ "left" => 52.5, "top" => 2.4,  "width" => 18.0, "height" => 27.0, "z" => 10 ],
+                "19" => [ "left" => 51.0, "top" => 4.0,  "width" => 23.0, "height" => 40.0, "z" => 10 ],
                 "20" => [ "left" => 36.2, "top" => 11.4, "width" => 12.5, "height" => 20.0, "z" => 6 ],
                 "21" => [ "left" => 27.0, "top" => 19.1, "width" => 12.0, "height" => 21.0, "z" => 7 ],
                 "22" => [ "left" => 19.0, "top" => 25.9, "width" => 13.0, "height" => 20.0, "z" => 8 ],
