@@ -17,8 +17,7 @@ $tab = $_GET['tab'] ?? 'login';
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../public/css/style.css') ? filemtime(__DIR__ . '/../public/css/style.css') : time() ?>">
     <style>
         body {
-            background: radial-gradient(circle at 50% 50%, rgba(5, 5, 8, 0.15) 0%, rgba(4, 4, 7, 0.65) 100%),
-                        url('/public/assets/shogun_login_bg.jpg?v=<?= file_exists(__DIR__ . '/../public/assets/shogun_login_bg.jpg') ? filemtime(__DIR__ . '/../public/assets/shogun_login_bg.jpg') : time() ?>') center center / cover no-repeat fixed !important;
+            background: url('/public/assets/shogun_login_bg.jpg?v=<?= file_exists(__DIR__ . '/../public/assets/shogun_login_bg.jpg') ? filemtime(__DIR__ . '/../public/assets/shogun_login_bg.jpg') : time() ?>') center center / cover no-repeat fixed !important;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -46,14 +45,8 @@ $tab = $_GET['tab'] ?? 'login';
             height: auto;
             transform: translate(-50%, -50%) scale(1.02);
             object-fit: cover;
-        }
-        .auth-video-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(5, 5, 8, 0.15) 0%, rgba(4, 4, 7, 0.60) 100%);
+            opacity: 1 !important;
+            filter: none !important;
         }
         .auth-container {
             max-width: 850px;
@@ -179,7 +172,6 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
             <?php endif; ?>
             <source src="<?= $loopVideoMp4 ?>?v=<?= filemtime(__DIR__ . '/..' . $loopVideoMp4) ?>" type="video/mp4">
         </video>
-        <div class="auth-video-overlay"></div>
     </div>
 <?php endif; ?>
 
