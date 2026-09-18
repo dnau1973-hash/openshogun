@@ -295,12 +295,14 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
 
 <div class="auth-container">
     <div class="auth-box">
-        <div class="auth-header">
-            <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: 3px; color: #1c1917; text-transform: uppercase;">
-                🏯 <?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>
-            </h1>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">
-                Chronique Historique de l'Ère Sengoku Jidai & Conquête du Shogunat
+        <div class="auth-header" style="text-align: center; padding: 2rem 1rem 1.25rem;">
+            <div style="margin-bottom: 0.5rem;">
+                <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../public/assets/logo_transparent.png') : 1 ?>" 
+                     alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
+                     style="max-width: 420px; width: 90%; height: auto; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(60, 45, 30, 0.2));">
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0.25rem 0 0 0; font-weight: 600;">
+                Chronique Historique de l'Ère Sengoku Jidai &bull; Conquête du Shogunat
             </p>
         </div>
 

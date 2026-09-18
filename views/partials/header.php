@@ -63,10 +63,11 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
 <header class="hud-header">
     <div class="hud-top">
         <div style="display: flex; align-items: center; gap: 1.25rem;">
-            <div class="brand">
-                <span class="brand-icon">🏯</span>
-                <span><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?></span>
-            </div>
+            <a href="?page=resources" class="brand" style="text-decoration: none; display: flex; align-items: center;" title="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>">
+                <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../../public/assets/logo_transparent.png') : 1 ?>" 
+                     alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
+                     style="height: 38px; max-height: 38px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(60, 45, 30, 0.12));">
+            </a>
 
             <div class="planet-selector">
                 <span>🏯 <strong><?= htmlspecialchars($planet['name']) ?></strong></span>
