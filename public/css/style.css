@@ -94,277 +94,1004 @@ a:hover {
 }
 
 /* ==========================================================
-   TOPBAR HUD & RESSOURCES
+   TOPBAR HUD & NAVIGATION (STYLE TRAVIAN & LAQUE SENGOKU)
    ========================================================== */
 .hud-header {
-    background: rgba(253, 251, 247, 0.96);
-    backdrop-filter: blur(12px);
-    border-bottom: 2px solid #b91c1c;
-    box-shadow: 0 4px 20px rgba(60, 45, 30, 0.08);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.hud-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    background: transparent;
     position: relative;
+    z-index: 100;
 }
 
-.hud-top > div:first-child {
-    flex: 1 1 0;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-}
-
-.hud-top > .user-profile {
-    flex: 1 1 0;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 1.25rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: #1c1917;
-    text-transform: uppercase;
-}
-
-.brand-icon {
-    font-size: 1.5rem;
-    filter: drop-shadow(0 2px 4px rgba(194, 37, 43, 0.3));
-}
-
-.planet-selector {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #ffffff;
-    padding: 0.35rem 0.85rem;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    font-size: 0.9rem;
-    color: #1c1917;
-    box-shadow: 0 2px 5px rgba(60, 45, 30, 0.04);
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: 0.9rem;
-}
-
-.faction-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 9999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.faction-badge.terran { background: rgba(194, 37, 43, 0.1); color: #b91c1c; border: 1px solid #c2252b; }
-.faction-badge.vorash { background: rgba(153, 27, 27, 0.1); color: #991b1b; border: 1px solid #991b1b; }
-.faction-badge.aethelis { background: rgba(180, 83, 9, 0.1); color: #b45309; border: 1px solid #b45309; }
-
-/* Barre des Ressources Travian-Style */
-.resources-bar {
+/* Bannière Logo Centré Haut & Agrandie */
+.hud-brand-header {
     display: flex;
     justify-content: center;
-    gap: 1.5rem;
-    padding: 0.5rem 1rem;
-    flex-wrap: wrap;
-    background: rgba(246, 242, 232, 0.9);
-    border-top: 1px solid rgba(220, 203, 179, 0.5);
-}
-
-.res-item {
-    display: flex;
     align-items: center;
-    gap: 0.6rem;
-    background: #ffffff;
-    border: 1px solid var(--border-color);
-    padding: 0.4rem 0.85rem;
-    border-radius: 6px;
-    min-width: 150px;
-    box-shadow: 0 2px 6px rgba(60, 45, 30, 0.04);
+    padding: 1.1rem 1.5rem 0.85rem 1.5rem;
+    border-bottom: 1px solid rgba(220, 203, 179, 0.5);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(246, 242, 232, 0.55) 100%);
 }
 
-.res-icon {
-    font-size: 1.25rem;
+.brand-logo-link {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    transition: transform 0.25s ease, filter 0.25s ease;
 }
 
-.res-data {
-    display: flex;
-    flex-direction: column;
+.brand-logo-link:hover {
+    transform: scale(1.03);
 }
 
-.res-value {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #1c1917;
-    font-variant-numeric: tabular-nums;
+.brand-logo-img {
+    height: 140px;
+    max-height: 155px;
+    width: auto;
+    max-width: 92vw;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 14px rgba(60, 45, 30, 0.18));
 }
 
-.res-prod {
-    font-size: 0.75rem;
-    color: var(--text-muted);
+@media (max-width: 768px) {
+    .brand-logo-img {
+        height: 90px;
+        max-height: 95px;
+    }
 }
 
-.res-bar-cont {
-    width: 100%;
-    height: 3px;
-    background: rgba(0, 0, 0, 0.08);
-    border-radius: 2px;
-    margin-top: 3px;
-    overflow: hidden;
+@media (max-width: 480px) {
+    .brand-logo-img {
+        height: 70px;
+        max-height: 75px;
+    }
 }
-
-.res-bar-fill {
-    height: 100%;
-    transition: width 0.3s ease;
-}
-
-.res-bar-fill.metal { background: var(--res-metal); }
-.res-bar-fill.crystal { background: var(--res-crystal); }
-.res-bar-fill.deut { background: var(--res-deut); }
-.res-bar-fill.energy { background: var(--res-energy); }
 
 /* ==========================================================
-   MÉDAILLONS CIRCULAIRES DE NAVIGATION (STYLE TRAVIAN)
+   BARRE DE COMMANDE TRAVIAN SENGOKU (PLAQUE FÉODALE CENTRÉE)
    ========================================================== */
-.travian-nav-medallions {
+.travian-hud-console {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0.35rem 1rem 0.5rem 1rem;
+    position: relative;
+    z-index: 100;
+}
+
+.travian-bar-wrapper {
+    width: 100%;
+    max-width: 1368px;
+    margin: 0 auto;
+    background: url('/public/assets/shogun_hud_ultraslim_1368.png') center / 100% 100% no-repeat;
+    padding: 6.5% 6.5% 5.5% 6.5%;
+    position: relative;
+    z-index: 100;
+    filter: drop-shadow(0 6px 20px rgba(25, 12, 6, 0.28));
+    box-sizing: border-box;
+}
+
+.travian-bar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    z-index: 5;
+}
+
+/* 🥋 HÉROS SAMOURAÏ (MÉDAILLON GAUCHE STYLE TRAVIAN) */
+.travian-hero-pod {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    margin-bottom: -10px;
+    flex-shrink: 0;
     position: relative;
-    z-index: 50;
+    z-index: 10;
 }
 
-.travian-medallion {
+.travian-hero-disc {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    border: 3px solid #dccbb3;
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(60, 45, 30, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.8);
-    cursor: pointer;
+    border: 2.5px solid #765e46;
+    background: #fdfbf7;
+    box-shadow: 0 3px 8px rgba(45, 30, 15, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.25);
     text-decoration: none;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s;
 }
 
-.travian-medallion-img {
+.travian-hero-disc:hover {
+    transform: scale(1.08);
+    border-color: #c2252b;
+}
+
+.travian-hero-disc.active {
+    border-color: #c2252b;
+    box-shadow: 0 0 14px rgba(194, 37, 43, 0.55);
+}
+
+.travian-hero-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+}
+
+.travian-hero-hp-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid #16a34a;
+    pointer-events: none;
+}
+
+.travian-hero-lvl-tag {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #5b8731 0%, #3f6212 100%);
+    border: 1.5px solid #ffffff;
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 0.68rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+}
+
+.travian-hero-bonus {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: linear-gradient(180deg, #d97706 0%, #92400e 100%);
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 0.6rem;
+    border-radius: 9999px;
+    padding: 1px 5px;
+    border: 1.5px solid #ffffff;
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+}
+
+/* 🏛️ PILE CENTRALE : COMMANDES & RESSOURCES */
+.travian-center-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    align-items: center;
+}
+
+/* Rangée 1 : Boutons Circulaires & Domaine */
+.travian-nav-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.travian-circle-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid #7a6248;
+    background: radial-gradient(circle, #fffefb 0%, #ded3be 100%);
+    box-shadow: 0 2px 5px rgba(45, 30, 15, 0.25), inset 0 1px 1.5px rgba(255, 255, 255, 0.95), inset 0 -1px 1.5px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    text-decoration: none;
+    color: #1c1917;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.travian-circle-btn:hover {
+    transform: translateY(-2px) scale(1.09);
+    border-color: #c2252b;
+    box-shadow: 0 4px 10px rgba(194, 37, 43, 0.4), inset 0 1px 1.5px #ffffff;
+}
+
+.travian-circle-btn.active {
+    border-color: #c2252b;
+    border-width: 2.5px;
+    box-shadow: 0 0 10px rgba(194, 37, 43, 0.55), inset 0 0 3px rgba(194, 37, 43, 0.25);
+}
+
+.travian-circle-img {
     width: 100%;
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
     display: block;
-    filter: brightness(0.95) contrast(1.05);
-    transition: all 0.25s ease;
 }
 
-/* État Survol (Hover) */
-.travian-medallion:hover {
-    transform: translateY(-4px) scale(1.15);
-    border-color: #c2252b;
-    box-shadow: 0 8px 22px rgba(194, 37, 43, 0.4), inset 0 2px 6px rgba(255, 255, 255, 0.9);
-    z-index: 60;
+.travian-icon-badge {
+    font-size: 1.15rem;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
-.travian-medallion:hover .travian-medallion-img {
-    filter: brightness(1.05) contrast(1.1);
-}
-
-/* État Actif (Vue Courante comme dans Travian) */
-.travian-medallion.active {
-    width: 62px;
-    height: 62px;
-    border: 3.5px solid #c2252b;
-    box-shadow: 0 0 16px rgba(194, 37, 43, 0.45), 0 6px 14px rgba(60, 45, 30, 0.2), inset 0 2px 6px rgba(255, 255, 255, 0.9);
-    z-index: 55;
-}
-
-.travian-medallion.active .travian-medallion-img {
-    filter: brightness(1.02) contrast(1.1);
-}
-
-/* Infobulle de Texte au Survol UNIQUEMENT */
-.travian-medallion-tooltip {
+/* Cachet de Cire Rouge Féodal (Sceau Hanko / Travian Wax Badge) */
+.travian-wax-badge {
     position: absolute;
-    top: calc(100% + 8px);
+    top: -4px;
+    right: -4px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 2px;
+    border-radius: 9999px;
+    background: radial-gradient(circle, #dc2626 0%, #991b1b 100%);
+    border: 1.5px solid #ffffff;
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
+}
+
+.travian-wax-badge.claimable {
+    background: radial-gradient(circle, #22c55e 0%, #15803d 100%);
+    animation: pulse 1.5s infinite;
+}
+
+/* Infobulle Travian */
+.travian-tooltip {
+    position: absolute;
+    top: calc(100% + 6px);
     left: 50%;
     transform: translateX(-50%) translateY(4px);
-    background: #1c1917;
-    border: 1px solid #c2252b;
-    color: #fdfbf7;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 0.35rem 0.75rem;
-    border-radius: 5px;
-    box-shadow: 0 8px 24px rgba(60, 45, 30, 0.35), 0 0 12px rgba(194, 37, 43, 0.3);
-    pointer-events: none;
+    background: #2b2014;
+    border: 1.5px solid #c2252b;
+    color: #fffdfa;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.22rem 0.55rem;
+    border-radius: 4px;
     white-space: nowrap;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 100;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 120;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.travian-medallion-tooltip::before {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 5px solid #c2252b;
-}
-
-.travian-medallion:hover .travian-medallion-tooltip {
+.travian-circle-btn:hover .travian-tooltip {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
 }
 
-@media (max-width: 900px) {
-    .hud-top {
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        justify-content: center;
+/* Plaque du Domaine / Coordonnées Cadastrales */
+.travian-domain-plaque {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: linear-gradient(180deg, #503c29 0%, #3b2a1a 100%);
+    border: 1.5px solid #82664a;
+    border-radius: 4px;
+    padding: 0.16rem 0.5rem;
+    color: #ffffff;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(45, 30, 15, 0.2);
+    margin-left: 0.25rem;
+}
+
+.domain-crest {
+    font-size: 0.88rem;
+}
+
+.domain-name {
+    color: #fef08a;
+    font-weight: 800;
+    font-size: 0.82rem;
+    letter-spacing: 0.2px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.domain-coords {
+    color: #e2d2ba;
+    font-family: monospace;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+/* 🪙 Grand Médaillon Mon Shōgun (Inspiré de la pièce dorée Travian) */
+.travian-shogun-mon-pod {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    margin-left: 0.2rem;
+    position: relative;
+}
+
+.travian-shogun-mon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid #dfb74a;
+    background: radial-gradient(circle, #fde047 0%, #ca8a04 55%, #78350f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 7px rgba(45, 30, 15, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.8), inset 0 -1.5px 2px rgba(0, 0, 0, 0.4);
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+}
+
+.travian-shogun-mon:hover {
+    transform: scale(1.1) rotate(6deg);
+    box-shadow: 0 4px 12px rgba(223, 183, 74, 0.65), inset 0 2px 3px rgba(255, 255, 255, 0.95);
+}
+
+.shogun-mon-symbol {
+    font-size: 1.12rem;
+    font-weight: 900;
+    color: #581c1c;
+    text-shadow: 0 1px 1px rgba(254, 240, 138, 0.8);
+}
+
+/* Rangée 2 : Les 2 Cartouches de Ressources Travian */
+.travian-res-deck {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+}
+
+.travian-cartridge {
+    display: flex;
+    align-items: stretch;
+    background: #fbf8f2;
+    border: 1.5px solid #644d36;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(45, 30, 15, 0.16), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+.t-cap-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: linear-gradient(180deg, #533e2b 0%, #3e2d1d 100%);
+    border-right: 1.5px solid #644d36;
+    padding: 0.16rem 0.5rem;
+    font-weight: 800;
+    font-size: 0.78rem;
+    color: #fef08a;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.t-cap-ico {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.t-res-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.16rem 0.52rem;
+    border-right: 1px solid #dfd3bf;
+    background: #fdfbf7;
+}
+
+.t-res-cell:last-child {
+    border-right: none;
+}
+
+.t-res-ico {
+    font-size: 1.05rem;
+    line-height: 1;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12));
+}
+
+.t-res-core {
+    display: flex;
+    flex-direction: column;
+    min-width: 44px;
+}
+
+.t-res-val {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #1a1614;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.12;
+}
+
+.t-res-meter {
+    width: 100%;
+    height: 3px;
+    background: #d6cbbe;
+    border-radius: 1.5px;
+    margin-top: 1.5px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+
+/* Jauge de progression rouge signature de Travian */
+.t-meter-bar {
+    height: 100%;
+    background: #c2252b;
+    transition: width 0.3s ease;
+    border-radius: 1.5px;
+}
+
+.t-meter-bar.wood { background: #c2252b; }
+.t-meter-bar.stone { background: #c2252b; }
+.t-meter-bar.crop { background: #c2252b; }
+.t-meter-bar.shinto { background: #16a34a; }
+
+/* ⚙️ FLANC DROIT : DAIMYŌ & OUTILS SYSTÈME */
+.travian-right-flank {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+.travian-daimyo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #fbf8f2;
+    border: 1.5px solid #7c6248;
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.8rem;
+    box-shadow: 0 1px 3px rgba(45, 30, 15, 0.12);
+}
+
+.faction-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 4px currentColor;
+}
+
+.faction-dot.terran { background: #c2252b; color: #c2252b; }
+.faction-dot.vorash { background: #991b1b; color: #991b1b; }
+.faction-dot.aethelis { background: #b45309; color: #b45309; }
+
+.daimyo-name {
+    cursor: pointer;
+    color: #1c1917;
+    font-weight: 700;
+}
+
+.daimyo-name:hover {
+    color: #c2252b;
+}
+
+.motto-chip {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0;
+    line-height: 1;
+    transition: transform 0.15s ease;
+}
+
+.motto-chip:hover {
+    transform: scale(1.2);
+}
+
+.travian-sys-cluster {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.travian-sys-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid #7c6248;
+    background: radial-gradient(circle, #ffffff 0%, #dfd5c4 100%);
+    text-decoration: none;
+    font-size: 0.82rem;
+    color: #1c1917;
+    box-shadow: 0 1px 3px rgba(45, 30, 15, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.18s;
+}
+
+.travian-sys-btn:hover {
+    transform: scale(1.14);
+    border-color: #c2252b;
+    box-shadow: 0 3px 8px rgba(194, 37, 43, 0.35);
+}
+
+.travian-sys-btn.admin {
+    background: radial-gradient(circle, #fef3c7 0%, #fde68a 100%);
+    border-color: #b45309;
+}
+
+.travian-sys-btn.exit:hover {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+/* ==========================================================
+   BANNIÈRE D'ALERTE MILITAIRE & TOUR DE GUET (STYLE SENGOKU)
+   ========================================================== */
+.travian-alert-banner {
+    max-width: 1368px;
+    width: 100%;
+    margin: 0.4rem auto 0.65rem auto;
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.88rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    overflow: hidden;
+    color: #ffffff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    user-select: none;
+}
+
+.travian-alert-banner:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+}
+
+.travian-alert-banner.alert-threat {
+    background: linear-gradient(90deg, #7f1d1d 0%, #991b1b 50%, #7f1d1d 100%);
+    border: 1px solid #ef4444;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    animation: alertPulseThreat 2.5s infinite;
+}
+
+.travian-alert-banner.alert-spy {
+    background: linear-gradient(90deg, #4c1d95 0%, #6b21a8 50%, #4c1d95 100%);
+    border: 1px solid #c084fc;
+    box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    animation: alertPulseSpy 3s infinite;
+}
+
+.travian-alert-banner.alert-info {
+    background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+    border: 1px solid #64748b;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.alert-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.alert-status-badge {
+    padding: 0.25rem 0.65rem;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.alert-status-badge.threat {
+    background: #dc2626;
+    color: #ffffff;
+    border: 1px solid #f87171;
+}
+
+.alert-status-badge.spy {
+    background: #9333ea;
+    color: #ffffff;
+    border: 1px solid #d8b4fe;
+}
+
+.alert-status-badge.info {
+    background: #0284c7;
+    color: #ffffff;
+    border: 1px solid #7dd3fc;
+}
+
+.alert-headline {
+    color: #ffffff;
+    font-size: 0.88rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.alert-countdown-chip {
+    background: rgba(0, 0, 0, 0.45);
+    padding: 0.22rem 0.65rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.82rem;
+    color: #fef08a;
+    font-family: monospace;
+    letter-spacing: 0.3px;
+}
+
+.alert-banner-right {
+    display: flex;
+    align-items: center;
+}
+
+.alert-cta-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.travian-alert-banner:hover .alert-cta-btn {
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateX(2px);
+}
+
+@keyframes alertPulseThreat {
+    0%, 100% {
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
     }
-    .travian-nav-medallions {
-        order: 2;
-        margin-bottom: 0;
+    50% {
+        box-shadow: 0 4px 22px rgba(239, 68, 68, 0.75);
     }
 }
+
+@keyframes alertPulseSpy {
+    0%, 100% {
+        box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
+    }
+    50% {
+        box-shadow: 0 4px 22px rgba(192, 132, 252, 0.7);
+    }
+}
+
+/* 🏯 Modale Tour de Guet */
+.watchtower-modal-card {
+    max-width: 860px;
+    width: 95%;
+}
+
+.badge-threat-pulse {
+    background: #dc2626;
+    color: #fff;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border: 1px solid #ef4444;
+    animation: alertPulseThreat 2s infinite;
+}
+
+.watchtower-kpi-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+
+.watchtower-kpi-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 1px 3px rgba(60, 45, 30, 0.04);
+}
+
+.watchtower-kpi-item.threat {
+    border-top: 3px solid #dc2626;
+}
+
+.watchtower-kpi-item.spy {
+    border-top: 3px solid #9333ea;
+}
+
+.watchtower-kpi-item.info {
+    border-top: 3px solid #0284c7;
+}
+
+.watchtower-kpi-item .kpi-icon {
+    font-size: 1.6rem;
+}
+
+.watchtower-kpi-item .kpi-num {
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #1c1917;
+}
+
+.watchtower-kpi-item.threat .kpi-num {
+    color: #dc2626;
+}
+
+.watchtower-kpi-item.spy .kpi-num {
+    color: #9333ea;
+}
+
+.watchtower-kpi-item.info .kpi-num {
+    color: #0284c7;
+}
+
+.watchtower-kpi-item .kpi-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+}
+
+.watchtower-section {
+    margin-bottom: 1.5rem;
+}
+
+.watchtower-section-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 2px solid;
+}
+
+.watchtower-section-title.threat {
+    color: #dc2626;
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
+.watchtower-section-title.spy {
+    color: #9333ea;
+    border-color: rgba(147, 51, 234, 0.3);
+}
+
+.watchtower-section-title.info {
+    color: #0284c7;
+    border-color: rgba(2, 132, 199, 0.3);
+}
+
+.watchtower-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.watchtower-mission-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(60, 45, 30, 0.05);
+}
+
+.watchtower-mission-card.threat {
+    border-left: 4px solid #dc2626;
+}
+
+.watchtower-mission-card.spy {
+    border-left: 4px solid #9333ea;
+}
+
+.watchtower-mission-card.info {
+    border-left: 4px solid #0284c7;
+}
+
+.wt-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 1rem;
+    background: #faf8f5;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.wt-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.88rem;
+}
+
+.wt-type-badge {
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 0.72rem;
+    letter-spacing: 0.4px;
+}
+
+.wt-type-badge.threat {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.wt-type-badge.spy {
+    background: #f3e8ff;
+    color: #6b21a8;
+    border: 1px solid #d8b4fe;
+}
+
+.wt-type-badge.info {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #7dd3fc;
+}
+
+.wt-card-timer {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+}
+
+.wt-card-timer .timer-label {
+    color: var(--text-muted);
+}
+
+.wt-card-timer .timer-val {
+    font-family: monospace;
+    font-weight: 800;
+    color: #dc2626;
+    background: #fee2e2;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #fca5a5;
+    font-size: 0.85rem;
+}
+
+.watchtower-mission-card.spy .wt-card-timer .timer-val {
+    color: #7e22ce;
+    background: #f3e8ff;
+    border-color: #d8b4fe;
+}
+
+.watchtower-mission-card.info .wt-card-timer .timer-val {
+    color: #0369a1;
+    background: #e0f2fe;
+    border-color: #7dd3fc;
+}
+
+.wt-card-body {
+    padding: 0.85rem 1rem;
+}
+
+.wt-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.wt-detail-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+}
+
+.wt-col-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.wt-col-val {
+    color: #1c1917;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.wt-col-sub {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-top: 0.15rem;
+}
+
+.wt-hero-tag {
+    background: #fef08a;
+    color: #854d0e;
+    border: 1px solid #fde047;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.wt-units-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.45rem;
+}
+
+.wt-unit-badge {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: #334155;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+@media (max-width: 1050px) {
+    .travian-bar-inner {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .travian-right-flank {
+        align-items: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .travian-hud-console {
+        padding: 0.35rem 0.25rem;
+    }
+    .travian-bar-wrapper {
+        width: 100%;
+        padding: 0.5rem 0.5rem;
+        border-radius: 6px;
+    }
+    .travian-nav-row {
+        justify-content: center;
+    }
+    .travian-res-deck {
+        justify-content: center;
+    }
+}
+
+
 
 /* ==========================================================
    LAYOUT CONTENU
    ========================================================== */
 .container {
-    max-width: 1850px;
-    width: 98%;
+    max-width: 1850px !important;
+    width: 98% !important;
     margin: 1rem auto;
     padding: 0 1rem;
 }
@@ -725,12 +1452,13 @@ a:hover {
 .hotspot-slot-11 { left: 59.5%; top: 55.5%; width: 12.0%; height: 16.0%; z-index: 67; }
 .hotspot-slot-12 { left: 59.0%; top: 75.5%; width: 12.0%; height: 16.0%; z-index: 87; }
 .hotspot-slot-13 { left: 68.0%; top: 72.5%; width: 12.0%; height: 16.0%; z-index: 84; }
-.hotspot-slot-14 { left: 67.5%; top: 46.0%; width: 12.0%; height: 16.0%; z-index: 57; }
+.hotspot-slot-14 { left: 57.0%; top: 64.0%; width: 18.0%; height: 13.5%; z-index: 65; }
 .hotspot-slot-15 { left: 71.5%; top: 37.0%; width: 12.0%; height: 16.0%; z-index: 48; }
 .hotspot-slot-16 { left: 80.0%; top: 32.0%; width: 12.0%; height: 16.0%; z-index: 43; }
 .hotspot-slot-17 { left: 72.0%; top: 25.5%; width: 12.0%; height: 16.0%; z-index: 37; }
 .hotspot-slot-18 { left: 64.0%; top: 18.5%; width: 12.0%; height: 16.0%; z-index: 30; }
-.hotspot-slot-19 { left: 55.5%; top: 13.0%; width: 12.0%; height: 16.0%; z-index: 24; }
+.hotspot-slot-19 { left: 65.5%; top: 73.0%; width: 17.5%; height: 13.0%; z-index: 75; }
+.hotspot-slot-20 { left: 83.5%; top: 41.5%; width: 12.5%; height: 17.5%; z-index: 45; }
 
 /* Tooltip position par défaut pour les parcelles */
 .rts-hotspot .rts-tooltip {
@@ -1663,38 +2391,9 @@ a:hover {
 /* ==========================================================
    CENTRE DE COMMUNICATIONS (MESSAGERIE INTERNE)
    ========================================================== */
-.hud-msg-btn {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #ffffff;
-    border: 1px solid var(--border-color);
-    padding: 0.2rem 0.6rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    margin-left: 0.5rem;
-    text-decoration: none;
-    color: #1c1917;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(60, 45, 30, 0.04);
-}
-
-.hud-msg-btn:hover {
-    color: #c2252b;
-    border-color: #c2252b;
-    box-shadow: 0 0 10px rgba(194, 37, 43, 0.25);
-}
-
-.hud-msg-btn.has-unread {
-    color: #c2252b;
-    border-color: #c2252b;
-    animation: msgPulse 2s infinite;
-}
-
 @keyframes msgPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(194, 37, 43, 0.35); }
-    50% { box-shadow: 0 0 0 6px rgba(194, 37, 43, 0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+    50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
 }
 
 .hud-unread-count {
@@ -1859,6 +2558,94 @@ a:hover {
     background: #fdfbf7;
 }
 
+/* NOUVELLE MISE EN PAGE : RECTANGLE D'INFORMATIONS AU-DESSUS & ESTAMPE SANS COUCHE ALPHA */
+.field-info-card {
+    position: relative;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 25px rgba(60, 45, 30, 0.08);
+    margin-bottom: 1.5rem;
+    background: #fdfbf7;
+    padding: 2rem 2.2rem;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.field-info-card .field-meta-pane {
+    flex: 1;
+    min-width: 300px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.field-artwork-card {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 30px rgba(60, 45, 30, 0.12);
+    margin-bottom: 1.5rem;
+    background: #0f172a;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.field-artwork-card:hover {
+    box-shadow: 0 12px 35px rgba(194, 37, 43, 0.2);
+    border-color: rgba(194, 37, 43, 0.4);
+}
+
+.field-artwork-img {
+    width: 100%;
+    height: 380px;
+    object-fit: cover;
+    object-position: center 35%;
+    display: block;
+    filter: brightness(1) saturate(1.05);
+    transition: transform 0.4s ease, filter 0.3s ease;
+}
+
+.field-artwork-card:hover .field-artwork-img {
+    transform: scale(1.015);
+    filter: brightness(1.03) saturate(1.08);
+}
+
+.field-artwork-badge {
+    position: absolute;
+    bottom: 14px;
+    right: 16px;
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    padding: 0.4rem 0.95rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .field-info-card {
+        padding: 1.25rem 1rem;
+        gap: 1.5rem;
+    }
+    .field-artwork-img {
+        height: 240px;
+    }
+}
+
 .field-hero-bg {
     position: absolute;
     top: 0;
@@ -1896,33 +2683,35 @@ a:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     flex-shrink: 0;
 }
 
-.field-tile-pedestal {
+.field-tile-container {
     position: relative;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(194, 37, 43, 0.12) 0%, rgba(246, 242, 232, 0.95) 75%);
-    border: 2px solid rgba(194, 37, 43, 0.4);
-    box-shadow: 0 4px 20px rgba(60, 45, 30, 0.12), inset 0 0 25px rgba(246, 242, 232, 0.8);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
 .field-tile-img {
-    width: 175px;
-    height: 175px;
+    width: 260px;
+    height: 260px;
+    max-width: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 10px 16px rgba(60, 45, 30, 0.35));
+    filter: none;
     user-select: none;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.field-tile-img:hover {
+    transform: scale(1.05);
 }
 
 .field-level-emblem {
     position: absolute;
-    bottom: -10px;
+    bottom: -6px;
     background: linear-gradient(135deg, #c2252b, #991b1b);
     border: 2px solid #ffffff;
     border-radius: 20px;
@@ -1931,6 +2720,49 @@ a:hover {
     align-items: center;
     gap: 0.35rem;
     box-shadow: 0 4px 12px rgba(60, 45, 30, 0.25);
+    z-index: 3;
+}
+
+.field-demolish-rect {
+    margin-top: 1.25rem;
+    width: 100%;
+    max-width: 240px;
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px dashed rgba(239, 68, 68, 0.35);
+    border-radius: 8px;
+    padding: 0.4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.field-demolish-rect:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.6);
+}
+
+.field-demolish-btn {
+    background: linear-gradient(135deg, #991b1b, #dc2626);
+    border: 1px solid #f87171;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.8rem;
+    padding: 0.45rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    width: 100%;
+    box-shadow: 0 3px 10px rgba(220, 38, 38, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field-demolish-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(220, 38, 38, 0.4);
 }
 
 .emblem-lvl-text {
@@ -2325,13 +3157,16 @@ a:hover {
     display: inline-block;
 }
 
-/* BANDEAU DES 18 PARCELLES DU DOMAINE (STYLE TRAVIAN) */
+/* BANDEAU DES 20 PARCELLES DU DOMAINE (STYLE TRAVIAN - PLEINE LARGEUR) */
 .field-strip-card {
     background: #fdfbf7;
     border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 1rem 1.25rem;
     box-shadow: 0 4px 16px rgba(60, 45, 30, 0.05);
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 1.5rem;
 }
 
 .field-strip-header {
@@ -2352,19 +3187,26 @@ a:hover {
 
 .field-strip-grid {
     display: grid;
-    grid-template-columns: repeat(18, 1fr);
+    grid-template-columns: repeat(20, 1fr);
     gap: 0.4rem;
+    width: 100%;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
     .field-strip-grid {
-        grid-template-columns: repeat(9, 1fr);
+        grid-template-columns: repeat(10, 1fr);
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 680px) {
     .field-strip-grid {
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 440px) {
+    .field-strip-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 

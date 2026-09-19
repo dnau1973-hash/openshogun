@@ -46,7 +46,16 @@ $statusLabels = [
 $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3b8', 'icon' => '❓'];
 ?>
 
-<div class="grid-main" style="max-width: 1300px; margin: 0 auto;">
+<style>
+/* Forcer la largeur maximale comme sur la page ressources */
+.container {
+    max-width: 1850px !important;
+    width: 98% !important;
+    margin: 1rem auto !important;
+}
+</style>
+
+<div class="hero-view-container" style="width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem;">
 
     <!-- Carte d'Identité & Tableau de Bord du Samouraï Héros -->
     <div class="card" style="border-top: 4px solid var(--red-primary, #dc2626); margin-bottom: 1.5rem;">

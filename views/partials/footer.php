@@ -207,6 +207,255 @@
     </div>
 </div>
 
+<!-- 🏯 Modale de la Tour de Guet (Registre Détaillé des Raids et Mouvements Tactiques) -->
+<div class="modal-overlay" id="watchtowerModal" style="display:none;" onclick="if(event.target===this)closeWatchtowerModal()">
+    <div class="modal-card modal-card-lg watchtower-modal-card">
+        <!-- En-tête -->
+        <div class="modal-header">
+            <div class="d-flex align-items-center gap-3">
+                <span style="font-size:2rem; filter:drop-shadow(0 2px 5px rgba(185,28,28,0.4));">🏯</span>
+                <div>
+                    <h2 style="font-size:1.25rem; font-weight:800; color:#1c1917; margin:0; display:flex; align-items:center; gap:0.5rem;">
+                        <span>Tour de Guet &bull; Registre Stratégique</span>
+                        <?php if (!empty($incomingHostile)): ?>
+                            <span class="badge-threat-pulse">🚨 Incursions en Approche</span>
+                        <?php endif; ?>
+                    </h2>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">
+                        Surveillance des mouvements militaires aux abords de <strong><?= htmlspecialchars($planet['name'] ?? 'votre domaine') ?></strong> [<?= $planet['coord_x'] ?? 0 ?>|<?= $planet['coord_y'] ?? 0 ?>]
+                    </div>
+                </div>
+            </div>
+            <button onclick="closeWatchtowerModal()" class="modal-close-btn" title="Fermer le Registre">&times;</button>
+        </div>
+
+        <!-- Corps de la Modale -->
+        <div class="modal-body" style="max-height:600px; overflow-y:auto; padding:1.25rem;">
+            <!-- Barre KPI Synthétique -->
+            <div class="watchtower-kpi-bar">
+                <div class="watchtower-kpi-item <?= !empty($incomingHostile) ? 'threat' : '' ?>">
+                    <span class="kpi-icon">🚨</span>
+                    <div class="kpi-data">
+                        <span class="kpi-num"><?= count($incomingHostile ?? []) ?></span>
+                        <span class="kpi-label">Incursions Armées</span>
+                    </div>
+                </div>
+                <div class="watchtower-kpi-item <?= !empty($incomingSpy) ? 'spy' : '' ?>">
+                    <span class="kpi-icon">🥷</span>
+                    <div class="kpi-data">
+                        <span class="kpi-num"><?= count($incomingSpy ?? []) ?></span>
+                        <span class="kpi-label">Missions Shinobi</span>
+                    </div>
+                </div>
+                <div class="watchtower-kpi-item info">
+                    <span class="kpi-icon">🐎</span>
+                    <div class="kpi-data">
+                        <span class="kpi-num"><?= count($outgoingMissions ?? []) ?></span>
+                        <span class="kpi-label">Expéditions du Clan</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 1 : INCURSIONS & RAIDS ENNEMIS EN APPROCHE -->
+            <?php if (!empty($incomingHostile)): ?>
+                <div class="watchtower-section">
+                    <div class="watchtower-section-title threat">
+                        <span>⚔️ Incursions et Raids Ennemis en Approche (<?= count($incomingHostile) ?>)</span>
+                    </div>
+                    <div class="watchtower-cards-list">
+                        <?php foreach ($incomingHostile as $m): ?>
+                            <?php 
+                                $fleetData = json_decode($m['fleet_data'] ?? '{}', true) ?: [];
+                                $totalWarriors = array_sum($fleetData);
+                                $missionLabel = ($m['mission_type'] === 'raid') ? 'Raid Éclair de Pillage' : (($m['mission_type'] === 'attack') ? 'Siège et Destruction Castrale' : strtoupper($m['mission_type']));
+                            ?>
+                            <div class="watchtower-mission-card threat">
+                                <div class="wt-card-header">
+                                    <div class="wt-card-title">
+                                        <span class="wt-type-badge threat">🚨 <?= $missionLabel ?></span>
+                                        <span class="wt-impact-target">Cible : <strong><?= htmlspecialchars($m['target_planet_name'] ?? $planet['name']) ?></strong> [<?= $m['target_coord_x'] ?>|<?= $m['target_coord_y'] ?>]</span>
+                                    </div>
+                                    <div class="wt-card-timer">
+                                        <span class="timer-label">Impact dans</span>
+                                        <span class="timer-val" data-countdown="<?= $m['arrival_time'] ?>">Calcul...</span>
+                                    </div>
+                                </div>
+                                <div class="wt-card-body">
+                                    <div class="wt-detail-grid">
+                                        <div class="wt-detail-col">
+                                            <div class="wt-col-label">👤 Aggresseur Détecté :</div>
+                                            <div class="wt-col-val">
+                                                <strong><?= htmlspecialchars($m['sender_username'] ?? 'Daimyō Inconnu') ?></strong>
+                                                <?php if (!empty($m['sender_faction'])): ?>
+                                                    <span class="faction-chip <?= htmlspecialchars($m['sender_faction']) ?>">Clan <?= ucfirst(htmlspecialchars($m['sender_faction'])) ?></span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="wt-col-sub">
+                                                Provenance : <?= htmlspecialchars($m['source_planet_name'] ?? 'Fief Ennemi') ?> [<?= $m['source_coord_x'] ?>|<?= $m['source_coord_y'] ?>]
+                                            </div>
+                                        </div>
+
+                                        <div class="wt-detail-col">
+                                            <div class="wt-col-label">⚔️ Forces Repérées :</div>
+                                            <div class="wt-col-val">
+                                                <strong>~<?= number_format($totalWarriors) ?></strong> combattants & engins
+                                                <?php if (!empty($m['has_hero'])): ?>
+                                                    <span class="wt-hero-tag">🥋 Samouraï Héros</span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <?php if (!empty($fleetData)): ?>
+                                                <div class="wt-units-breakdown">
+                                                    <?php foreach ($fleetData as $uCode => $uCount): ?>
+                                                        <?php 
+                                                            $uName = $unitsMap[$uCode]['name'] ?? ($shipsMap[$uCode]['name'] ?? $uCode);
+                                                            $uIco = $unitsMap[$uCode]['icon'] ?? '🛡️';
+                                                        ?>
+                                                        <span class="wt-unit-badge" title="<?= htmlspecialchars($uName) ?>">
+                                                            <?= $uIco ?> <?= $uCount ?> <?= htmlspecialchars($uName) ?>
+                                                        </span>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- SECTION 2 : MISSIONS SHINOBI & INFILTRATION -->
+            <?php if (!empty($incomingSpy)): ?>
+                <div class="watchtower-section">
+                    <div class="watchtower-section-title spy">
+                        <span>🥷 Infiltrations Shinobi & Espionnage Détectés (<?= count($incomingSpy) ?>)</span>
+                    </div>
+                    <div class="watchtower-cards-list">
+                        <?php foreach ($incomingSpy as $m): ?>
+                            <div class="watchtower-mission-card spy">
+                                <div class="wt-card-header">
+                                    <div class="wt-card-title">
+                                        <span class="wt-type-badge spy">🥷 RECONNAISSANCE FURTIVE</span>
+                                        <span class="wt-impact-target">Cible : <strong><?= htmlspecialchars($m['target_planet_name'] ?? $planet['name']) ?></strong></span>
+                                    </div>
+                                    <div class="wt-card-timer">
+                                        <span class="timer-label">Arrivée dans</span>
+                                        <span class="timer-val" data-countdown="<?= $m['arrival_time'] ?>">Calcul...</span>
+                                    </div>
+                                </div>
+                                <div class="wt-card-body">
+                                    <div class="wt-detail-grid">
+                                        <div class="wt-detail-col">
+                                            <div class="wt-col-label">👤 Commanditaire :</div>
+                                            <div class="wt-col-val">
+                                                <strong><?= htmlspecialchars($m['sender_username'] ?? 'Ombre Inconnue') ?></strong>
+                                            </div>
+                                            <div class="wt-col-sub">
+                                                Départ : <?= htmlspecialchars($m['source_planet_name'] ?? 'Domaine Inconnu') ?> [<?= $m['source_coord_x'] ?>|<?= $m['source_coord_y'] ?>]
+                                            </div>
+                                        </div>
+                                        <div class="wt-detail-col">
+                                            <div class="wt-col-label">🔍 Rapport Vigies :</div>
+                                            <div class="wt-col-val" style="color:var(--text-muted); font-size:0.85rem;">
+                                                Des éclaireurs et espions shinobi tentent de sonder vos entrepôts et garnisons.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- SECTION 3 : VOS EXPÉDITIONS & TROUPES EN DÉPLACEMENT -->
+            <?php if (!empty($outgoingMissions)): ?>
+                <div class="watchtower-section">
+                    <div class="watchtower-section-title info">
+                        <span>🐎 Expéditions et Marches de Vos Troupes (<?= count($outgoingMissions) ?>)</span>
+                    </div>
+                    <div class="watchtower-cards-list">
+                        <?php foreach ($outgoingMissions as $m): ?>
+                            <?php 
+                                $isOutbound = ($m['status'] === 'en_route');
+                                $targetTime = $isOutbound ? $m['arrival_time'] : $m['return_time'];
+                                $fleetData = json_decode($m['fleet_data'] ?? '{}', true) ?: [];
+                                $totalWarriors = array_sum($fleetData);
+                                $missionTypeLabel = match($m['mission_type']) {
+                                    'raid' => 'Raid Féodal',
+                                    'attack' => 'Siège de Forteresse',
+                                    'spy' => 'Infiltration Shinobi',
+                                    'transport' => 'Convoi de Ravitaillement',
+                                    'colonize' => 'Fief Colonial',
+                                    'adventure' => 'Aventure Provinciale',
+                                    default => ucfirst($m['mission_type'])
+                                };
+                            ?>
+                            <div class="watchtower-mission-card info">
+                                <div class="wt-card-header">
+                                    <div class="wt-card-title">
+                                        <span class="wt-type-badge info"><?= $isOutbound ? '↗️ ' : '↙️ ' ?><?= $missionTypeLabel ?></span>
+                                        <span class="wt-impact-target">
+                                            <?= $isOutbound ? 'Vers : ' : 'Retour vers : ' ?>
+                                            <strong><?= htmlspecialchars($m['target_planet_name'] ?? 'Fief') ?></strong> [<?= $m['target_coord_x'] ?>|<?= $m['target_coord_y'] ?>]
+                                        </span>
+                                    </div>
+                                    <div class="wt-card-timer">
+                                        <span class="timer-label"><?= $isOutbound ? 'Arrivée dans' : 'Retour dans' ?></span>
+                                        <span class="timer-val" data-countdown="<?= $targetTime ?>">Calcul...</span>
+                                    </div>
+                                </div>
+                                <div class="wt-card-body">
+                                    <div class="wt-detail-grid">
+                                        <div class="wt-detail-col">
+                                            <div class="wt-col-label">📍 Itinéraire :</div>
+                                            <div class="wt-col-sub">
+                                                <?= htmlspecialchars($m['source_planet_name'] ?? 'Votre Fief') ?> &rarr; <?= htmlspecialchars($m['target_planet_name'] ?? 'Destination') ?>
+                                            </div>
+                                        </div>
+                                        <div class="wt-detail-col">
+                                            <div class="wt-col-label">⚔️ Effectifs mobilisés :</div>
+                                            <div class="wt-col-val">
+                                                <strong><?= number_format($totalWarriors) ?></strong> combattants
+                                                <?php if (!empty($m['has_hero'])): ?>
+                                                    <span class="wt-hero-tag">🥋 Samouraï Héros</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (empty($incomingHostile) && empty($incomingSpy) && empty($outgoingMissions)): ?>
+                <div style="text-align:center; padding:3rem 1.5rem; background:#faf8f5; border:1px dashed var(--border-color); border-radius:8px;">
+                    <div style="font-size:3rem; margin-bottom:1rem;">⛩️</div>
+                    <h3 style="color:#1c1917; font-weight:800; font-size:1.1rem; margin-bottom:0.4rem;">Paix sur vos Terres</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem; max-width:450px; margin:0 auto;">
+                        Les vigies et éclaireurs ne signalent aucun mouvement militaire en approche ni armée en marche. Votre domaine est pour l'heure en sécurité.
+                    </p>
+                </div>
+            <?php endif; ?>
+
+        </div>
+
+        <!-- Pied de page de la modale -->
+        <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:0.8rem; color:var(--text-muted);">
+                💡 <em>Astuce : Renforcez votre Muraille d'Enceinte pour accroître la valeur défensive de vos troupes.</em>
+            </div>
+            <div style="display:flex; gap:0.5rem;">
+                <a href="?page=fleet" class="btn btn-primary" style="font-size:0.85rem; padding:0.4rem 1rem;">🏇 Gérer les Troupes</a>
+                <button class="btn btn-secondary" onclick="closeWatchtowerModal()" style="font-size:0.85rem; padding:0.4rem 1rem;">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer style="text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.85rem; border-top:1px solid rgba(255,255,255,0.05); margin-top:3rem;">
     <p><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> &copy; <?= date('Y') ?> - Jeu de stratégie féodale japonaise par navigateur inspiré de Travian.</p>
     <p style="margin-top:0.35rem; color:#64748b;">Moteur féodal Sengoku PHP 8 + MariaDB + JavaScript Vanilla</p>
@@ -214,6 +463,16 @@
 
 <script src="/public/js/app.js?v=<?= file_exists(__DIR__ . '/../../public/js/app.js') ? filemtime(__DIR__ . '/../../public/js/app.js') : time() ?>"></script>
 <script>
+function openWatchtowerModal() {
+    const modal = document.getElementById('watchtowerModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeWatchtowerModal() {
+    const modal = document.getElementById('watchtowerModal');
+    if (modal) modal.style.display = 'none';
+}
+
 let currentViewingProfileId = null;
 
 async function openPlayerProfileModal(userId = null, autoEdit = false) {

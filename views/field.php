@@ -19,13 +19,13 @@ if (!$planet) {
 $planetEngine = new PlanetEngine();
 $buildingEngine = new BuildingEngine();
 
-// Récupérer le numéro de slot demandé (entre 1 et 19)
+// Récupérer le numéro de slot demandé (entre 1 et 20)
 $slot = (int)($_GET['slot'] ?? 1);
-if ($slot >= 20 && $slot <= 34) {
+if ($slot > 20 && $slot <= 34) {
     header("Location: /?page=building&slot=$slot");
     exit;
 }
-if ($slot < 1 || $slot > 19) {
+if ($slot < 1 || $slot > 20) {
     $slot = 1;
 }
 
@@ -137,6 +137,10 @@ $tileImg = match($type) {
     default => 'tile_bucheron.png'
 };
 
+$tileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $tileImg)
+    ? '/public/assets/tiles/' . $tileImg
+    : '/public/assets/' . $tileImg;
+
 $sectorClass = match($type) {
     'metal_mine' => 'sec-metal',
     'crystal_mine' => 'sec-crystal',
@@ -160,11 +164,20 @@ $fieldIllustrationUrl = ($fieldHeroFile && file_exists($fieldHeroFile))
 $fieldHeroBgUrl = $fieldIllustrationUrl ?? ('/public/assets/shogun_rural_terroir_bg.jpg?v=' . (file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg') ? filemtime(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg') : 1));
 
 // Navigation parcelles précédente / suivante
-$prevSlot = ($slot > 1) ? $slot - 1 : 19;
-$nextSlot = ($slot < 19) ? $slot + 1 : 1;
+$prevSlot = ($slot > 1) ? $slot - 1 : 20;
+$nextSlot = ($slot < 20) ? $slot + 1 : 1;
 ?>
 
-<div class="container field-view-container" style="max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem;">
+<style>
+/* Forcer la largeur maximale comme sur la page ressources */
+.container {
+    max-width: 1850px !important;
+    width: 98% !important;
+    margin: 1rem auto !important;
+}
+</style>
+
+<div class="field-view-container" style="width: 100%; margin: 0 auto; padding: 1rem 0;">
 
     <!-- Barre de Navigation Supérieure (Retour au Domaine + Sélecteur de Parcelle) -->
     <div class="field-nav-bar">
@@ -178,7 +191,7 @@ $nextSlot = ($slot < 19) ? $slot + 1 : 1;
                 &larr; Parcelle #<?= $prevSlot ?>
             </a>
             <div class="field-current-indicator">
-                <span class="field-slot-badge">Parcelle #<?= $slot ?> sur 19</span>
+                <span class="field-slot-badge">Parcelle #<?= $slot ?> sur 20</span>
             </div>
             <a href="/?page=field&slot=<?= $nextSlot ?>" class="field-arrow-btn" title="Parcelle suivante">
                 Parcelle #<?= $nextSlot ?> &rarr;
@@ -186,84 +199,99 @@ $nextSlot = ($slot < 19) ? $slot + 1 : 1;
         </div>
     </div>
 
-    <!-- CARTE PRINCIPALE : FOND DE CARTE DU TERROIR AVEC TILE DU CHAMP & DESCRIPTION -->
-    <div class="field-hero-card">
-        <!-- Fond de carte estompé du terroir féodal -->
-        <div class="field-hero-bg" style="background-image: url('<?= $fieldHeroBgUrl ?>');"></div>
-        <div class="field-hero-overlay"></div>
-
-        <div class="field-hero-content">
-            <!-- Emplacement Mis en Valeur : TILE DU CHAMP -->
-            <div class="field-tile-stage">
-                <div class="field-tile-pedestal">
-                    <img src="/public/assets/<?= $tileImg ?>" 
-                         class="field-tile-img" 
-                         alt="<?= htmlspecialchars($info['name']) ?>" 
-                         draggable="false">
-                    <div class="field-tile-glow"></div>
-                </div>
+    <!-- RECTANGLE D'INFORMATIONS DU CHAMP (REMONTÉ AU-DESSUS) -->
+    <div class="field-info-card">
+        <!-- Emplacement Mis en Valeur : TILE DU CHAMP SANS ROND ROUGE (AGRANDIE) -->
+        <div class="field-tile-stage">
+            <div class="field-tile-container">
+                <img src="<?= $tileUrl ?>" 
+                     class="field-tile-img" 
+                     alt="<?= htmlspecialchars($info['name']) ?>" 
+                     draggable="false">
                 <div class="field-level-emblem">
                     <span class="emblem-lvl-text">NIVEAU</span>
                     <span class="emblem-lvl-number"><?= $lvl ?></span>
                 </div>
             </div>
 
-            <!-- Identité & Description Thématique du Bâtiment -->
-            <div class="field-meta-pane">
-                <div class="field-header-row">
-                    <div>
-                        <div class="field-type-pill <?= $sectorClass ?>">
-                            <span><?= $info['icon'] ?></span>
-                            <span><?= htmlspecialchars($info['res_name'] ?? 'Ressource') ?></span>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-top:0.25rem;">
-                            <h1 class="field-title" style="margin:0;"><?= htmlspecialchars($info['name']) ?></h1>
-                            <?php if ($fieldIllustrationUrl): ?>
-                                <button type="button" onclick="openArtworkModal('<?= $fieldIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($info['name'])) ?>')" class="btn btn-secondary" style="font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:6px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#fde047; cursor:pointer;" title="Agrandir l'illustration artistique en haute définition">
-                                    🎨 Estampe HD
-                                </button>
-                            <?php endif; ?>
-                        </div>
-                        <span class="field-subtitle">Emplacement cadastral #<?= $slot ?> &bull; Domaine de <?= htmlspecialchars($planet['name']) ?></span>
-                    </div>
+            <!-- BOUTON RASER L'EXPLOITATION DANS UN RECTANGLE DÉDIÉ -->
+            <?php if ($lvl > 0 && !$activeJob): ?>
+                <div class="field-demolish-rect">
+                    <button type="button" 
+                            class="field-demolish-btn" 
+                            onclick="confirmDemolishField(<?= $slot ?>, '<?= htmlspecialchars(addslashes($info['name'] ?? $type)) ?>')"
+                            title="Raser définitivement cette exploitation (récupère 30% des matériaux)">
+                        <span>💥</span>
+                        <span>Raser l'Exploitation</span>
+                    </button>
+                </div>
+            <?php endif; ?>
+        </div>
 
-                    <?php if ($activeJob): ?>
-                        <div class="field-status-badge upgrading">
-                            <span class="pulse-dot"></span>
-                            <span>Chantier en cours : Niveau <?= $activeJob['target_level'] ?></span>
-                        </div>
-                    <?php else: ?>
-                        <div class="field-status-badge ready">
-                            <span>Statut : Opérationnel</span>
-                        </div>
-                    <?php endif; ?>
+        <!-- Identité & Description Thématique du Champ -->
+        <div class="field-meta-pane">
+            <div class="field-header-row">
+                <div>
+                    <div class="field-type-pill <?= $sectorClass ?>">
+                        <span><?= $info['icon'] ?></span>
+                        <span><?= htmlspecialchars($info['res_name'] ?? 'Ressource') ?></span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-top:0.25rem;">
+                        <h1 class="field-title" style="margin:0;"><?= htmlspecialchars($info['name']) ?></h1>
+                    </div>
+                    <span class="field-subtitle">Emplacement cadastral #<?= $slot ?> &bull; Domaine de <?= htmlspecialchars($planet['name']) ?></span>
                 </div>
 
-                <p class="field-description">
-                    <?= htmlspecialchars($info['description']) ?>
-                </p>
+                <?php if ($activeJob): ?>
+                    <div class="field-status-badge upgrading">
+                        <span class="pulse-dot"></span>
+                        <span>Chantier en cours : Niveau <?= $activeJob['target_level'] ?></span>
+                    </div>
+                <?php else: ?>
+                    <div class="field-status-badge ready">
+                        <span>Statut : Opérationnel</span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-                <!-- Bandeau récapitulatif rapide de rendement -->
-                <div class="field-quick-stats">
+            <p class="field-description">
+                <?= htmlspecialchars($info['description']) ?>
+            </p>
+
+            <!-- Bandeau récapitulatif rapide de rendement -->
+            <div class="field-quick-stats">
+                <div class="quick-stat-box">
+                    <span class="stat-label">Production actuelle</span>
+                    <span class="stat-value">+<?= number_format($curProd) ?> <small><?= $unitLabel ?></small></span>
+                </div>
+                <div class="quick-stat-box highlight">
+                    <span class="stat-label">Au Niveau <?= $targetLevel ?></span>
+                    <span class="stat-value">+<?= number_format($nextProd) ?> <small><?= $unitLabel ?></small></span>
+                    <span class="stat-gain">(+<?= number_format($diffProd) ?> / h)</span>
+                </div>
+                <?php if ($type !== 'solar_plant' && $info['base_energy_cons'] > 0): ?>
                     <div class="quick-stat-box">
-                        <span class="stat-label">Production actuelle</span>
-                        <span class="stat-value">+<?= number_format($curProd) ?> <small><?= $unitLabel ?></small></span>
+                        <span class="stat-label">Sérénité requise</span>
+                        <span class="stat-value" style="color:#fbbf24;">⛩️ <?= $curEnergy ?> &rarr; <?= $nextEnergy ?></span>
                     </div>
-                    <div class="quick-stat-box highlight">
-                        <span class="stat-label">Au Niveau <?= $targetLevel ?></span>
-                        <span class="stat-value">+<?= number_format($nextProd) ?> <small><?= $unitLabel ?></small></span>
-                        <span class="stat-gain">(+<?= number_format($diffProd) ?> / h)</span>
-                    </div>
-                    <?php if ($type !== 'solar_plant' && $info['base_energy_cons'] > 0): ?>
-                        <div class="quick-stat-box">
-                            <span class="stat-label">Sérénité requise</span>
-                            <span class="stat-value" style="color:#fbbf24;">⛩️ <?= $curEnergy ?> &rarr; <?= $nextEnergy ?></span>
-                        </div>
-                    <?php endif; ?>
-                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
+
+    <!-- ESTAMPE ARTISTIQUE DU TERROIR FÉODAL (PLEINE LARGEUR, SANS COUCHE ALPHA) -->
+    <?php if ($fieldIllustrationUrl): ?>
+        <div class="field-artwork-card" onclick="openArtworkModal('<?= $fieldIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($info['name'])) ?>')" title="Cliquer pour admirer l'estampe en plein écran">
+            <img src="<?= $fieldIllustrationUrl ?>" 
+                 alt="<?= htmlspecialchars($info['name']) ?>" 
+                 class="field-artwork-img" 
+                 loading="lazy">
+            <div class="field-artwork-badge">
+                <span>🎨 Estampe Féodale &bull; <?= htmlspecialchars($info['name']) ?></span>
+                <span style="font-size: 0.75rem; opacity: 0.85;">(Agrandir en HD 🔍)</span>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- SECTION DES TRAVAUX & DÉTAILS DU NIVEAU SUIVANT -->
     <div class="field-upgrade-grid">
@@ -437,41 +465,21 @@ $nextSlot = ($slot < 19) ? $slot + 1 : 1;
                 <!-- Raccourci vers la Cité & Autres Parcelles -->
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
                     <a href="/?page=resources" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: underline;">
-                        &larr; Revenir à la vue générale des 18 parcelles
+                        &larr; Revenir à la vue générale des 20 parcelles
                     </a>
                 </div>
             </div>
         </div>
+    </div>
 
-    <!-- ZONE DE DÉMOLITION DE LA PARCELLE -->
-    <?php if ($lvl > 0 && !$activeJob): ?>
-        <div class="card" style="margin-top: 1.5rem; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                <div>
-                    <h4 style="color: #f87171; margin: 0; font-size: 0.95rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🗑️</span> Raser cette Exploitation
-                    </h4>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.35rem 0 0 0;">
-                        Rase définitivement cette exploitation pour réinitialiser la parcelle <strong>#<?= $slot ?></strong> en terrain vierge. Vous récupérerez <strong>30% des matériaux</strong> de ce niveau.
-                    </p>
-                </div>
-                <div>
-                    <button type="button" class="btn btn-danger" onclick="confirmDemolishField(<?= $slot ?>, '<?= htmlspecialchars(addslashes($info['name'] ?? $type)) ?>')" style="background: linear-gradient(135deg, #991b1b, #dc2626); border: 1px solid #f87171; font-weight: 800; font-size: 0.82rem; padding: 0.55rem 1.1rem; border-radius: 8px; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); transition: transform 0.15s ease;">
-                        <span>💥</span> Raser l'Exploitation
-                    </button>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <!-- BANDEAU DES 18 PARCELLES DU DOMAINE (NAVIGATION RAPIDE / STYLE TRAVIAN) -->
-    <div class="field-strip-card">
+    <!-- BANDEAU DES 20 PARCELLES DU DOMAINE (NAVIGATION RAPIDE / STYLE TRAVIAN - PLEINE LARGEUR) -->
+    <div class="field-strip-card" style="width: 100%; box-sizing: border-box; margin-top: 1.5rem;">
         <div class="field-strip-header">
             <h4>🗺️ Toutes les Parcelles du Terroir (<?= htmlspecialchars($planet['name']) ?>)</h4>
             <span style="font-size: 0.8rem; color: var(--text-muted);">Cliquez sur une parcelle pour y accéder directement</span>
         </div>
         <div class="field-strip-grid">
-            <?php for ($i = 1; $i <= 18; $i++): ?>
+            <?php for ($i = 1; $i <= 20; $i++): ?>
                 <?php 
                     $f = $fieldsBySlot[$i] ?? ['type' => 'metal_mine', 'level' => 0];
                     $fType = $f['type'];
@@ -485,9 +493,10 @@ $nextSlot = ($slot < 19) ? $slot + 1 : 1;
                         'solar_plant' => 'tile_sanctuaire.png',
                         default => 'tile_bucheron.png'
                     };
+                    $fTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $fTile) ? '/public/assets/tiles/' . $fTile : '/public/assets/' . $fTile;
                 ?>
                 <a href="/?page=field&slot=<?= $i ?>" class="field-strip-item <?= $isCurrent ? 'active' : '' ?>" title="<?= htmlspecialchars($fInfo['name']) ?> #<?= $i ?> (Niveau <?= $fLvl ?>)">
-                    <img src="/public/assets/<?= $fTile ?>" class="strip-item-img" alt="">
+                    <img src="<?= $fTileUrl ?>" class="strip-item-img" alt="">
                     <span class="strip-item-num">#<?= $i ?></span>
                     <span class="strip-item-lvl">Nv.<?= $fLvl ?></span>
                 </a>

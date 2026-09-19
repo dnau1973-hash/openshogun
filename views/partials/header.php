@@ -21,6 +21,9 @@ $questEngine = new QuestEngine();
 $questSummary = ($user && $planet) ? $questEngine->getPlayerQuestsStatus((int)$user['id'], (int)$planet['id']) : null;
 
 $heroEngine = new HeroEngine();
+if ($user) {
+    $heroEngine->ensureAvailableAdventures((int)$user['id'], 3);
+}
 $heroHeader = $user ? $heroEngine->getHeroByUserId((int)$user['id']) : null;
 
 if ($planet) {
@@ -31,15 +34,56 @@ if ($planet) {
     $fleetEngine->processFleetMissions();
     $planet = $planetEngine->updatePlanet((int)$planet['id']);
     
-    // Vérifier les flottes en mouvement pour l'alerte HUD
+    // ⚔️ Simulation autonome des PNJ / Bots (espionnage, raids, chantiers)
+    require_once __DIR__ . '/../../core/BotEngine.php';
+    $botEngine = new BotEngine();
+    $botEngine->tickPeriodicSimulation();
+    
+    // Vérifier les flottes en mouvement pour l'alerte HUD (avec détails des fiefs et clans)
     $db = Database::getConnection();
     $stmtMissions = $db->prepare("
-        SELECT * FROM fleet_missions 
-        WHERE (user_id = ? OR target_planet_id = ?) AND status IN ('en_route', 'returning') 
-        ORDER BY arrival_time ASC
+        SELECT m.*, 
+               u_sender.username as sender_username, u_sender.faction as sender_faction,
+               p_src.name as source_planet_name, p_src.coord_x as source_coord_x, p_src.coord_y as source_coord_y,
+               COALESCE(p_tgt.name, CONCAT('Oasis ', o.name), 'Province Sauvage') as target_planet_name,
+               COALESCE(p_tgt.coord_x, o.coord_x, 0) as target_coord_x,
+               COALESCE(p_tgt.coord_y, o.coord_y, 0) as target_coord_y
+        FROM fleet_missions m
+        LEFT JOIN users u_sender ON m.user_id = u_sender.id
+        LEFT JOIN planets p_src ON m.source_planet_id = p_src.id
+        LEFT JOIN planets p_tgt ON m.target_planet_id = p_tgt.id
+        LEFT JOIN oases o ON m.target_oasis_id = o.id
+        WHERE (m.user_id = ? OR m.target_planet_id = ?) AND m.status IN ('en_route', 'returning') 
+        ORDER BY m.arrival_time ASC
     ");
     $stmtMissions->execute([$user['id'], $planet['id']]);
     $activeMissions = $stmtMissions->fetchAll();
+
+    $uRows = $db->query("SELECT code, name, icon FROM units")->fetchAll(PDO::FETCH_ASSOC);
+    $unitsMap = [];
+    foreach ($uRows as $ur) {
+        $unitsMap[$ur['code']] = $ur;
+    }
+    $sRows = $db->query("SELECT code, name FROM ships")->fetchAll(PDO::FETCH_ASSOC);
+    $shipsMap = [];
+    foreach ($sRows as $sr) {
+        $shipsMap[$sr['code']] = $sr;
+    }
+
+    $incomingHostile = [];
+    $incomingSpy = [];
+    $outgoingMissions = [];
+    foreach ($activeMissions as $m) {
+        if ($m['target_planet_id'] == $planet['id'] && $m['status'] === 'en_route') {
+            if ($m['mission_type'] === 'spy') {
+                $incomingSpy[] = $m;
+            } else {
+                $incomingHostile[] = $m;
+            }
+        } else {
+            $outgoingMissions[] = $m;
+        }
+    }
 }
 
 $page = $_GET['page'] ?? 'resources';
@@ -61,205 +105,251 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
 <body>
 
 <header class="hud-header">
-    <div class="hud-top">
-        <div style="display: flex; align-items: center; gap: 1.25rem;">
-            <a href="?page=resources" class="brand" style="text-decoration: none; display: flex; align-items: center;" title="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>">
-                <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../../public/assets/logo_transparent.png') : 1 ?>" 
-                     alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
-                     style="height: 38px; max-height: 38px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(60, 45, 30, 0.12));">
-            </a>
+    <!-- 🏯 LOGO TOUT EN HAUT CENTRÉ ET PLUS GROS -->
+    <div class="hud-brand-header">
+        <a href="?page=resources" class="brand-logo-link" title="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>">
+            <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../../public/assets/logo_transparent.png') : 1 ?>" 
+                 alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
+                 class="brand-logo-img">
+        </a>
+    </div>
 
-            <div class="planet-selector">
-                <span>🏯 <strong><?= htmlspecialchars($planet['name']) ?></strong></span>
-                <span style="color: var(--border-highlight);">[<?= $planet['coord_x'] ?> : <?= $planet['coord_y'] ?>]</span>
-            </div>
-        </div>
-
-        <!-- 🧭 3 Médaillons Circulaires de Navigation Féodale Travian (Terroir, Cité, Provinces) -->
-        <div class="travian-nav-medallions">
-            <!-- 1. Terroir & Récoltes -->
-            <a href="?page=resources" class="travian-medallion <?= ($page === 'resources' || $page === 'field') ? 'active' : '' ?>" title="Terroir & Récoltes">
-                <img src="/public/assets/nav_resources.jpg?v=<?= file_exists(__DIR__ . '/../../public/assets/nav_resources.jpg') ? filemtime(__DIR__ . '/../../public/assets/nav_resources.jpg') : time() ?>" alt="Terroir" class="travian-medallion-img">
-                <span class="travian-medallion-tooltip">Terroir & Récoltes</span>
-            </a>
-
-            <!-- 2. Cité Castrale -->
-            <a href="?page=city" class="travian-medallion <?= ($page === 'city') ? 'active' : '' ?>" title="Cité Castrale">
-                <img src="/public/assets/nav_colony.jpg?v=<?= file_exists(__DIR__ . '/../../public/assets/nav_colony.jpg') ? filemtime(__DIR__ . '/../../public/assets/nav_colony.jpg') : time() ?>" alt="Cité Castrale" class="travian-medallion-img">
-                <span class="travian-medallion-tooltip">Cité Castrale</span>
-            </a>
-
-            <!-- 3. Provinces du Japon (Carte) -->
-            <a href="?page=map" class="travian-medallion <?= ($page === 'map' || $page === 'galaxy') ? 'active' : '' ?>" title="Provinces du Japon (Carte)">
-                <img src="/public/assets/nav_map.jpg?v=<?= file_exists(__DIR__ . '/../../public/assets/nav_map.jpg') ? filemtime(__DIR__ . '/../../public/assets/nav_map.jpg') : time() ?>" alt="Provinces du Japon" class="travian-medallion-img">
-                <span class="travian-medallion-tooltip">Provinces du Japon (Carte)</span>
-            </a>
-        </div>
-
-        <div class="user-profile">
-            <span class="faction-badge <?= htmlspecialchars($user['faction']) ?>">
-                <?= $factionInfo['icon'] ?> <?= htmlspecialchars($factionInfo['name']) ?>
-            </span>
-            <span style="cursor: pointer;" onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)" title="Consulter votre Fiche de Daimyō">
-                Daimyō <strong><?= htmlspecialchars($user['username']) ?></strong>
-            </span>
-            <button type="button" onclick="openEditMottoModal()" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-color: rgba(185,28,28,0.4); color: #b91c1c; font-weight:700; display: inline-flex; align-items: center; gap: 0.3rem; border-radius: 6px; cursor: pointer;" title="Modifier ma Devise de Daimyō">
-                <span>📜</span> <span>Devise</span>
-            </button>
-            <a href="?page=ranking" style="text-decoration: none; color: #1c1917; font-weight:700;" title="Classement des Daimyōs & Tableau d'Honneur">
-                <span>🏆 <?= number_format($user['points']) ?> pts</span>
-            </a>
-            <?php if ($heroHeader): ?>
-                <?php 
-                    $hHp = round((float)$heroHeader['health']);
-                    $hHpCol = ($hHp >= 60) ? '#15803d' : (($hHp >= 25) ? '#b45309' : '#b91c1c');
-                    $hasPoints = ((int)$heroHeader['unassigned_points'] > 0);
-                ?>
-                <a href="?page=hero" class="hud-msg-btn <?= ($page === 'hero') ? 'active' : '' ?>" title="Votre Samouraï Héros (Niveau <?= $heroHeader['level'] ?> - Santé : <?= $hHp ?>%)" style="text-decoration: none; position: relative; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.65rem; background: #ffffff; border: 1px solid <?= ($page === 'hero') ? '#b91c1c' : 'var(--border-color)' ?>; border-radius: 20px; box-shadow: 0 1px 3px rgba(60,45,30,0.05);">
-                    <img src="/public/assets/hero_samurai.jpg" alt="🥋" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; object-position: top center; border: 1px solid #b91c1c;">
-                    <span style="font-size: 0.75rem; font-weight: 800; color: #1c1917;">Nv.<?= $heroHeader['level'] ?></span>
-                    <span style="font-size: 0.7rem; font-family: monospace; font-weight: 800; color: <?= $hHpCol ?>;"><?= $hHp ?>%</span>
+    <!-- 🧭 BARRE DE COMMANDE TRAVIAN SENGOKU -->
+    <?php 
+        $hHp = $heroHeader ? round((float)$heroHeader['health']) : 100;
+        $hHpCol = ($hHp >= 60) ? '#16a34a' : (($hHp >= 25) ? '#d97706' : '#dc2626');
+        $hasPoints = ($heroHeader && (int)$heroHeader['unassigned_points'] > 0);
+        $hLvl = $heroHeader ? (int)$heroHeader['level'] : 1;
+    ?>
+    <div class="travian-hud-console">
+        <div class="travian-bar-wrapper">
+            <div class="travian-bar-inner">
+            
+            <!-- 🥋 GAUCHE : MÉDAILLON DU HÉROS SAMOURAÏ (STYLE TRAVIAN) -->
+            <div class="travian-hero-pod">
+                <a href="?page=hero" class="travian-hero-disc <?= ($page === 'hero') ? 'active' : '' ?>" title="Votre Samouraï Héros (Niveau <?= $hLvl ?> - Vitalité : <?= $hHp ?>%)">
+                    <img src="/public/assets/hero_samurai.jpg" alt="🥋" class="travian-hero-img">
+                    <span class="travian-hero-lvl-tag"><?= $hLvl ?></span>
+                    <span class="travian-hero-hp-ring" style="border-color: <?= $hHpCol ?>;"></span>
                     <?php if ($hasPoints): ?>
-                        <span class="hud-unread-count" style="background: #b45309; color: #fff; font-weight: 900; animation: pulse 1.5s infinite; right: -5px; top: -5px;" title="<?= $heroHeader['unassigned_points'] ?> point(s) à répartir !">
-                            +<?= $heroHeader['unassigned_points'] ?>
-                        </span>
+                        <span class="travian-hero-bonus" title="<?= $heroHeader['unassigned_points'] ?> point(s) d'attributs à répartir !">+<?= $heroHeader['unassigned_points'] ?></span>
                     <?php endif; ?>
                 </a>
-            <?php endif; ?>
-            <?php if ($questSummary): ?>
-                <button type="button" onclick="openQuestModal()" class="hud-msg-btn <?= ($questSummary['claimable_count'] > 0) ? 'has-unread' : '' ?>" title="Didacticiel & Quêtes Féodales (<?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?>)" style="background: none; border: none; cursor: pointer;">
-                    <span>🎯</span>
-                    <?php if ($questSummary['claimable_count'] > 0): ?>
-                        <span class="hud-unread-count" style="background: #15803d; animation: pulse 1.5s infinite;"><?= $questSummary['claimable_count'] ?></span>
-                    <?php elseif (!$questSummary['all_completed']): ?>
-                        <span class="hud-unread-count" style="background: #b91c1c; font-size: 0.65rem;"><?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?></span>
+            </div>
+
+            <!-- 🏛️ CENTRE : COMMANDES TRAVIAN & CARTOUCHES DE RESSOURCES -->
+            <div class="travian-center-stack">
+                
+                <!-- RANGÉE 1 : BOUTONS CIRCULAIRES & FIEF -->
+                <div class="travian-nav-row">
+                    <!-- 1. Terroir (Champs / Dorf 1) -->
+                    <a href="?page=resources" class="travian-circle-btn <?= ($page === 'resources' || $page === 'field') ? 'active' : '' ?>" title="Terroir & Récoltes (Parcelles Rurales)">
+                        <img src="/public/assets/nav_resources.jpg" alt="Terroir" class="travian-circle-img">
+                        <span class="travian-tooltip">Terroir Féodal</span>
+                    </a>
+
+                    <!-- 2. Cité Castrale (Bâtiments / Dorf 2) -->
+                    <a href="?page=city" class="travian-circle-btn <?= ($page === 'city') ? 'active' : '' ?>" title="Cité Castrale (Bâtiments & Châteaux)">
+                        <img src="/public/assets/nav_colony.jpg" alt="Cité" class="travian-circle-img">
+                        <span class="travian-tooltip">Cité Castrale</span>
+                    </a>
+
+                    <!-- 3. Provinces du Japon (Carte) -->
+                    <a href="?page=map" class="travian-circle-btn <?= ($page === 'map' || $page === 'galaxy') ? 'active' : '' ?>" title="Carte des Provinces Féodales">
+                        <img src="/public/assets/nav_map.jpg" alt="Carte" class="travian-circle-img">
+                        <span class="travian-tooltip">Carte des Provinces</span>
+                    </a>
+
+                    <!-- 4. Tableau d'Honneur / Classement -->
+                    <a href="?page=ranking" class="travian-circle-btn <?= ($page === 'ranking') ? 'active' : '' ?>" title="Classement des Daimyōs (<?= number_format($user['points']) ?> pts)">
+                        <span class="travian-icon-badge">🏆</span>
+                        <span class="travian-tooltip">Classement</span>
+                    </a>
+
+                    <!-- 5. Chroniques & Rapports de Guerre -->
+                    <a href="?page=reports" class="travian-circle-btn <?= ($page === 'reports') ? 'active' : '' ?>" title="Chroniques de Siège & Rapports d'Infiltration">
+                        <span class="travian-icon-badge">📜</span>
+                        <span class="travian-tooltip">Rapports de Bataille</span>
+                    </a>
+
+                    <!-- 6. Missives des Clans -->
+                    <a href="?page=messages" class="travian-circle-btn <?= ($unreadMessagesCount > 0) ? 'has-unread' : '' ?> <?= ($page === 'messages') ? 'active' : '' ?>" title="Missives & Correspondance des Clans">
+                        <span class="travian-icon-badge">✉️</span>
+                        <?php if ($unreadMessagesCount > 0): ?>
+                            <span class="travian-wax-badge"><?= $unreadMessagesCount ?></span>
+                        <?php endif; ?>
+                        <span class="travian-tooltip">Missives (<?= $unreadMessagesCount ?>)</span>
+                    </a>
+
+                    <!-- 7. Didacticiel & Quêtes Féodales -->
+                    <?php if ($questSummary): ?>
+                        <button type="button" onclick="openQuestModal()" class="travian-circle-btn quest-btn <?= ($questSummary['claimable_count'] > 0) ? 'has-unread' : '' ?>" title="Didacticiel & Quêtes Féodales (<?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?>)">
+                            <span class="travian-icon-badge">🎯</span>
+                            <?php if ($questSummary['claimable_count'] > 0): ?>
+                                <span class="travian-wax-badge claimable"><?= $questSummary['claimable_count'] ?></span>
+                            <?php elseif (!$questSummary['all_completed']): ?>
+                                <span class="travian-wax-badge progress-badge"><?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?></span>
+                            <?php endif; ?>
+                            <span class="travian-tooltip">Quêtes Féodales</span>
+                        </button>
                     <?php endif; ?>
-                </button>
-            <?php endif; ?>
-            <a href="?page=reports" class="hud-msg-btn <?= ($page === 'reports') ? 'active' : '' ?>" title="Chroniques de Siège & d'Infiltration">
-                <span>📜</span>
-            </a>
-            <a href="?page=messages" class="hud-msg-btn <?= ($unreadMessagesCount > 0) ? 'has-unread' : '' ?> <?= ($page === 'messages') ? 'active' : '' ?>" title="Missives & Correspondance des Clans">
-                <span>✉️</span>
-                <?php if ($unreadMessagesCount > 0): ?>
-                    <span class="hud-unread-count"><?= $unreadMessagesCount ?></span>
-                <?php endif; ?>
-            </a>
-            <a href="?page=docs" class="hud-msg-btn <?= ($page === 'docs') ? 'active' : '' ?>" title="Codex & Documentation du Jeu">
-                <span>📖</span>
-            </a>
-            <a href="?page=support" class="hud-msg-btn <?= ($page === 'support') ? 'active' : '' ?>" title="Assistance, Signalement de Bugs & Suggestions">
-                <span>📮</span>
-            </a>
-            <?php if ($auth->isAdmin()): ?>
-                <a href="?page=admin" class="badge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; padding: 0.25rem 0.55rem; text-decoration: none; font-weight: 800; margin-left: 0.25rem;" title="QG d'Administration">
-                    ⚙️ ADMIN
-                </a>
-            <?php endif; ?>
-            <a href="?action=logout" style="color: #b91c1c; font-size: 0.85rem; font-weight: 700; margin-left: 0.5rem;">[Quitter]</a>
-        </div>
-    </div>
 
-    <!-- Barre des Ressources Féodales Travian-Style -->
-    <div class="resources-bar">
-        <!-- Bois de Cèdre -->
-        <div class="res-item">
-            <span class="res-icon">🪵</span>
-            <div class="res-data" style="flex:1;">
-                <div style="display:flex; justify-content:space-between;">
-                    <span style="color: var(--res-metal); font-size: 0.75rem; font-weight:700;">BOIS DE CÈDRE</span>
-                    <span class="res-prod">+<?= number_format($planet['prod_rates']['metal']) ?>/h</span>
+                    <!-- Plaque du Fief / Domaine & Coordonnées -->
+                    <div class="travian-domain-plaque" title="Domaine Actuel & Coordonnées Cadastrales">
+                        <span class="domain-crest">🏯</span>
+                        <span class="domain-name"><?= htmlspecialchars($planet['name']) ?></span>
+                        <span class="domain-coords">[<?= $planet['coord_x'] ?>|<?= $planet['coord_y'] ?>]</span>
+                    </div>
+
+                    <!-- 🪙 Médaillon Mon Impérial Shogun (Style Médaillon Doré Travian) -->
+                    <a href="?page=ranking" class="travian-shogun-mon-pod" title="Ordre Impérial & Honneur du Shōgun (<?= number_format($user['points']) ?> points)">
+                        <div class="travian-shogun-mon">
+                            <span class="shogun-mon-symbol">将</span>
+                        </div>
+                    </a>
                 </div>
-                <div class="res-value" id="res-val-metal" 
-                     data-current="<?= $planet['metal'] ?>" 
-                     data-max="<?= $planet['metal_max'] ?>" 
-                     data-prod="<?= $planet['prod_rates']['metal'] ?>">
-                    <?= number_format((int)$planet['metal']) ?>
+
+                <!-- RANGÉE 2 : LES 2 CARTOUCHES DE RESSOURCES TRAVIAN -->
+                <div class="travian-res-deck">
+                    <!-- Cartouche 1 : Bois de Cèdre & Pierre de Taille + Entrepôt -->
+                    <div class="travian-cartridge">
+                        <div class="t-cap-cell" title="Capacité Maximale des Entrepôts : <?= number_format($planet['metal_max']) ?>">
+                            <span class="t-cap-ico">🏛️</span>
+                            <span class="t-cap-num"><?= number_format($planet['metal_max']) ?></span>
+                        </div>
+
+                        <!-- Bois de Cèdre -->
+                        <div class="t-res-cell" title="Bois de Cèdre : <?= number_format((int)$planet['metal']) ?> / <?= number_format($planet['metal_max']) ?> (+<?= number_format($planet['prod_rates']['metal']) ?>/h)">
+                            <span class="t-res-ico">🪵</span>
+                            <div class="t-res-core">
+                                <span class="t-res-val" id="res-val-metal" data-current="<?= $planet['metal'] ?>" data-max="<?= $planet['metal_max'] ?>" data-prod="<?= $planet['prod_rates']['metal'] ?>">
+                                    <?= number_format((int)$planet['metal']) ?>
+                                </span>
+                                <div class="t-res-meter">
+                                    <div class="t-meter-bar wood" id="bar-metal" style="width: <?= min(100, ($planet['metal'] / $planet['metal_max']) * 100) ?>%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pierre de Taille -->
+                        <div class="t-res-cell" title="Pierre de Taille : <?= number_format((int)$planet['crystal']) ?> / <?= number_format($planet['crystal_max']) ?> (+<?= number_format($planet['prod_rates']['crystal']) ?>/h)">
+                            <span class="t-res-ico">🪨</span>
+                            <div class="t-res-core">
+                                <span class="t-res-val" id="res-val-crystal" data-current="<?= $planet['crystal'] ?>" data-max="<?= $planet['crystal_max'] ?>" data-prod="<?= $planet['prod_rates']['crystal'] ?>">
+                                    <?= number_format((int)$planet['crystal']) ?>
+                                </span>
+                                <div class="t-res-meter">
+                                    <div class="t-meter-bar stone" id="bar-crystal" style="width: <?= min(100, ($planet['crystal'] / $planet['crystal_max']) * 100) ?>%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cartouche 2 : Riz Impérial & Sérénité + Grenier -->
+                    <div class="travian-cartridge">
+                        <div class="t-cap-cell" title="Capacité Maximale du Grenier à Riz : <?= number_format($planet['deuterium_max']) ?>">
+                            <span class="t-cap-ico">🏯</span>
+                            <span class="t-cap-num"><?= number_format($planet['deuterium_max']) ?></span>
+                        </div>
+
+                        <!-- Riz Impérial -->
+                        <div class="t-res-cell" title="Riz Impérial : <?= number_format((int)$planet['deuterium']) ?> / <?= number_format($planet['deuterium_max']) ?> (+<?= number_format($planet['prod_rates']['deuterium']) ?>/h)">
+                            <span class="t-res-ico">🌾</span>
+                            <div class="t-res-core">
+                                <span class="t-res-val" id="res-val-deut" data-current="<?= $planet['deuterium'] ?>" data-max="<?= $planet['deuterium_max'] ?>" data-prod="<?= $planet['prod_rates']['deuterium'] ?>">
+                                    <?= number_format((int)$planet['deuterium']) ?>
+                                </span>
+                                <div class="t-res-meter">
+                                    <div class="t-meter-bar crop" id="bar-deut" style="width: <?= min(100, ($planet['deuterium'] / $planet['deuterium_max']) * 100) ?>%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ferveur & Sérénité Shinto -->
+                        <div class="t-res-cell" title="Sérénité & Ferveur du Sanctuaire (<?= $planet['energy_used'] ?> / <?= $planet['energy_max'] ?>)">
+                            <span class="t-res-ico">⛩️</span>
+                            <div class="t-res-core">
+                                <span class="t-res-val" style="color: <?= ($planet['energy_max'] >= $planet['energy_used']) ? '#15803d' : '#b91c1c' ?>;">
+                                    <?= ($planet['energy_max'] - $planet['energy_used']) ?>
+                                </span>
+                                <div class="t-res-meter">
+                                    <div class="t-meter-bar shinto" style="width: <?= min(100, ($planet['energy_used'] / max(1, $planet['energy_max'])) * 100) ?>%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="res-bar-cont">
-                    <div class="res-bar-fill metal" id="bar-metal" style="width: <?= min(100, ($planet['metal'] / $planet['metal_max']) * 100) ?>%;"></div>
-                </div>
+
             </div>
-        </div>
 
-        <!-- Pierre de Taille -->
-        <div class="res-item">
-            <span class="res-icon">🪨</span>
-            <div class="res-data" style="flex:1;">
-                <div style="display:flex; justify-content:space-between;">
-                    <span style="color: var(--res-crystal); font-size: 0.75rem; font-weight:700;">PIERRE DE TAILLE</span>
-                    <span class="res-prod">+<?= number_format($planet['prod_rates']['crystal']) ?>/h</span>
-                </div>
-                <div class="res-value" id="res-val-crystal" 
-                     data-current="<?= $planet['crystal'] ?>" 
-                     data-max="<?= $planet['crystal_max'] ?>" 
-                     data-prod="<?= $planet['prod_rates']['crystal'] ?>">
-                    <?= number_format((int)$planet['crystal']) ?>
-                </div>
-                <div class="res-bar-cont">
-                    <div class="res-bar-fill crystal" id="bar-crystal" style="width: <?= min(100, ($planet['crystal'] / $planet['crystal_max']) * 100) ?>%;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Riz Impérial -->
-        <div class="res-item">
-            <span class="res-icon">🌾</span>
-            <div class="res-data" style="flex:1;">
-                <div style="display:flex; justify-content:space-between;">
-                    <span style="color: var(--res-deut); font-size: 0.75rem; font-weight:700;">RIZ IMPÉRIAL</span>
-                    <span class="res-prod">+<?= number_format($planet['prod_rates']['deuterium']) ?>/h</span>
-                </div>
-                <div class="res-value" id="res-val-deut" 
-                     data-current="<?= $planet['deuterium'] ?>" 
-                     data-max="<?= $planet['deuterium_max'] ?>" 
-                     data-prod="<?= $planet['prod_rates']['deuterium'] ?>">
-                    <?= number_format((int)$planet['deuterium']) ?>
-                </div>
-                <div class="res-bar-cont">
-                    <div class="res-bar-fill deut" id="bar-deut" style="width: <?= min(100, ($planet['deuterium'] / $planet['deuterium_max']) * 100) ?>%;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Honneur & Sérénité -->
-        <div class="res-item">
-            <span class="res-icon">⛩️</span>
-            <div class="res-data" style="flex:1;">
-                <div style="display:flex; justify-content:space-between;">
-                    <span style="color: var(--res-energy); font-size: 0.75rem; font-weight:700;">SÉRÉNITÉ & FERVEUR</span>
-                    <span class="res-prod"><?= $planet['energy_used'] ?> / <?= $planet['energy_max'] ?></span>
-                </div>
-                <div class="res-value" style="color: <?= ($planet['energy_max'] >= $planet['energy_used']) ? '#4ade80' : '#f87171' ?>;" title="<?= ($planet['energy_max'] < $planet['energy_used']) ? 'Sérénité insuffisante : récoltes ralenties à 10%' : 'Sérénité optimale dans le domaine' ?>">
-                    <?= ($planet['energy_max'] - $planet['energy_used']) ?> disp.
-                    <?php if ($planet['energy_max'] < $planet['energy_used']): ?>
-                        <span style="font-size: 0.65rem; background: #ef4444; color: #fff; padding: 1px 4px; border-radius: 3px; font-weight: 700;">10%</span>
-                    <?php endif; ?>
-                </div>
-                <div class="res-bar-cont">
-                    <div class="res-bar-fill energy" style="width: <?= min(100, ($planet['energy_used'] / max(1, $planet['energy_max'])) * 100) ?>%;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alertes de Guet & Mouvements d'Armées -->
-    <?php if (!empty($activeMissions)): ?>
-        <div style="background: rgba(185, 28, 28, 0.4); border-bottom: 1px solid #dc2626; padding: 0.35rem 1.5rem; font-size: 0.85rem; display: flex; gap: 1.5rem; overflow-x: auto;">
-            <?php foreach ($activeMissions as $m): ?>
-                <?php 
-                    $isIncoming = ($m['target_planet_id'] == $planet['id'] && $m['status'] === 'en_route');
-                    $badgeColor = $isIncoming ? '#ef4444' : '#dc2626';
-                    $targetTime = ($m['status'] === 'en_route') ? $m['arrival_time'] : $m['return_time'];
-                ?>
-                <div style="display: flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
-                    <span style="color: <?= $badgeColor ?>; font-weight: 800;">
-                        <?= $isIncoming ? '⚠️ TOUR DE GUET : ARMÉE EN APPROCHE :' : '🐎 EXPÉDITION EN MARCHE :' ?>
+            <!-- ⚙️ DROITE : PROFIL DU DAIMYŌ & OUTILS SYSTÈME (STYLE TRAVIAN) -->
+            <div class="travian-right-flank">
+                <div class="travian-daimyo-badge">
+                    <span class="faction-dot <?= htmlspecialchars($user['faction']) ?>" title="Clan <?= htmlspecialchars($factionInfo['name']) ?>"></span>
+                    <span class="daimyo-name" onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)" title="Consulter votre Fiche de Daimyō">
+                        <?= htmlspecialchars($user['username']) ?>
                     </span>
-                    <span><?= strtoupper($m['mission_type']) ?></span>
-                    <span style="font-family: monospace; font-weight: 700; color: #fff;" data-countdown="<?= $targetTime ?>">Calcul...</span>
+                    <button type="button" onclick="openEditMottoModal()" class="motto-chip" title="Modifier ma Devise">📜</button>
                 </div>
-            <?php endforeach; ?>
+
+                <div class="travian-sys-cluster">
+                    <a href="?page=docs" class="travian-sys-btn" title="Codex & Manuel du Jeu">📖</a>
+                    <a href="?page=support" class="travian-sys-btn" title="Assistance & Signalements">📮</a>
+                    <?php if ($auth->isAdmin()): ?>
+                        <a href="?page=admin" class="travian-sys-btn admin" title="QG d'Administration">⚙️</a>
+                    <?php endif; ?>
+                    <a href="?action=logout" class="travian-sys-btn exit" title="Se déconnecter">❌</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div> <!-- Fin .travian-hud-console -->
+
+    <!-- ⚠️ Tour de Guet Féodale : Message d'alerte Unique Interactif (Sans scroll) -->
+    <?php if (!empty($activeMissions)): ?>
+        <?php 
+            $hasHostile = count($incomingHostile) > 0;
+            $hasSpy = count($incomingSpy) > 0;
+            $alertClass = $hasHostile ? 'alert-threat' : ($hasSpy ? 'alert-spy' : 'alert-info');
+            $closest = !empty($incomingHostile) ? $incomingHostile[0] : (!empty($incomingSpy) ? $incomingSpy[0] : $outgoingMissions[0]);
+            $closestTime = ($closest['status'] === 'en_route') ? $closest['arrival_time'] : $closest['return_time'];
+        ?>
+        <div class="travian-alert-banner <?= $alertClass ?>" onclick="openWatchtowerModal()" title="Cliquer pour afficher le registre détaillé de la Tour de Guet (<?= count($activeMissions) ?> mouvements)">
+            <div class="alert-banner-left">
+                <?php if ($hasHostile): ?>
+                    <span class="alert-status-badge threat">🚨 TOUR DE GUET</span>
+                    <span class="alert-headline">
+                        <strong><?= count($incomingHostile) ?> incursion(s) armée(s)</strong> en approche de votre fief !
+                    </span>
+                    <span class="alert-countdown-chip">
+                        Impact dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong>
+                    </span>
+                <?php elseif ($hasSpy): ?>
+                    <span class="alert-status-badge spy">🥷 TOUR DE GUET</span>
+                    <span class="alert-headline">
+                        <strong>Infiltration Shinobi détectée</strong> en direction de votre domaine !
+                    </span>
+                    <span class="alert-countdown-chip">
+                        Arrivée dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong>
+                    </span>
+                <?php else: ?>
+                    <span class="alert-status-badge info">🐎 EXPÉDITIONS</span>
+                    <span class="alert-headline">
+                        <strong><?= count($outgoingMissions) ?> troupe(s) du clan</strong> en marche sur les provinces.
+                    </span>
+                    <span class="alert-countdown-chip">
+                        Retour dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong>
+                    </span>
+                <?php endif; ?>
+            </div>
+
+            <div class="alert-banner-right">
+                <span class="alert-cta-btn">
+                    <span>📜 Voir les détails (<?= count($activeMissions) ?>)</span>
+                    <span class="alert-cta-arrow">&rarr;</span>
+                </span>
+            </div>
         </div>
     <?php endif; ?>
 

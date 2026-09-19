@@ -151,23 +151,62 @@ class BotEngine {
     }
 
     /**
-     * Exécute un cycle de simulation autonome pour tous les bots
+     * Déclencheur périodique autonome pour la simulation vivante des bots
+     * Exécuté en arrière-plan à chaque requête si le délai est écoulé
+     */
+    public function tickPeriodicSimulation(): ?array {
+        if (!GameConfig::get('bots_enabled', true)) {
+            return null;
+        }
+
+        $now = time();
+        $lastTick = (int)GameConfig::get('bot_last_tick_time', 0);
+        $fleetSpeed = max(1, (float)GameConfig::get('fleet_speed', 5));
+        
+        // Intervalle : 60 à 90 secondes en vitesse standard, ajusté par la vitesse de jeu
+        $interval = max(25, (int)round(75 / $fleetSpeed));
+
+        if (($now - $lastTick) < $interval) {
+            return null;
+        }
+
+        // Mettre à jour l'horodatage du dernier cycle
+        GameConfig::set('bot_last_tick_time', $now);
+
+        return $this->executeBotCycle();
+    }
+
+    /**
+     * Exécute un cycle complet de simulation autonome pour tous les bots
+     * (Économie, armées, infiltration shinobi & raids territoriaux)
      */
     public function executeBotCycle(): array {
         if (!GameConfig::get('bots_enabled', true)) {
             return ['success' => false, 'message' => "Le système de bots est actuellement désactivé."];
         }
 
+        require_once __DIR__ . '/FleetEngine.php';
+
         $bots = $this->db->query("SELECT * FROM users WHERE is_bot = 1")->fetchAll();
         $autoColonize = GameConfig::get('bot_colonize_enabled', true);
         $maxPlanets = (int)GameConfig::get('bot_max_planets', 3);
+        $aggressiveness = (string)GameConfig::get('bot_aggressiveness', 'aggressive');
+
+        // Récupérer toutes les cibles potentielles sur la carte (joueurs et rivaux)
+        $allTargets = $this->db->query("
+            SELECT p.id as planet_id, p.name as planet_name, p.user_id, p.coord_x, p.coord_y, u.username, u.is_bot, u.faction 
+            FROM planets p 
+            JOIN users u ON p.user_id = u.id
+        ")->fetchAll();
 
         $report = [
             'bots_processed' => count($bots),
             'mines_upgraded' => 0,
             'buildings_upgraded' => 0,
             'troops_trained' => 0,
-            'colonies_founded' => []
+            'colonies_founded' => [],
+            'spies_dispatched' => [],
+            'raids_dispatched' => []
         ];
 
         foreach ($bots as $bot) {
@@ -187,7 +226,6 @@ class BotEngine {
 
                 // 1. Amélioration de parcelle de ressource (Mines / Centrales)
                 $fields = $this->planetEngine->getFields($planetId);
-                // Trouver la mine de plus bas niveau
                 usort($fields, function($a, $b) {
                     return $a['level'] <=> $b['level'];
                 });
@@ -240,16 +278,26 @@ class BotEngine {
                     ON DUPLICATE KEY UPDATE count = count + VALUES(count)
                 ")->execute([$planetId, $chosenUnit, $recruitCount]);
                 $report['troops_trained'] += $recruitCount;
+
+                // 4. Infiltration Shinobi & Espionnage (Reconnaissance)
+                $spyRes = $this->launchBotEspionage($bot, $planet, $allTargets, $aggressiveness);
+                if ($spyRes) {
+                    $report['spies_dispatched'][] = $spyRes;
+                }
+
+                // 5. Raids et Incursions Militaires
+                $raidRes = $this->launchBotRaid($bot, $planet, $allTargets, $aggressiveness);
+                if ($raidRes) {
+                    $report['raids_dispatched'][] = $raidRes;
+                }
             }
 
-            // 4. COLONISATION AUTOMATIQUE D'UNE NOUVELLE PLANÈTE
-            if ($autoColonize && count($botPlanets) < $maxPlanets) {
-                // Trouver des coordonnées libres
+            // 6. COLONISATION AUTOMATIQUE D'UNE NOUVELLE PLANÈTE
+            if ($autoColonize && count($botPlanets) < $maxPlanets && rand(1, 100) <= 25) {
                 $newCoords = $this->findFreeCoordinates();
                 $colonyNum = count($botPlanets) + 1;
                 $colonyName = "Fief " . ucfirst($bot['username']) . " " . $colonyNum;
 
-                // Créer le nouveau fief du bot
                 $stmtNewPlanet = $this->db->prepare("
                     INSERT INTO planets 
                     (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, last_resource_update, is_capital) 
@@ -258,10 +306,7 @@ class BotEngine {
                 $stmtNewPlanet->execute([$botId, $colonyName, $newCoords['x'], $newCoords['y']]);
                 $newPlanetId = (int)$this->db->lastInsertId();
 
-                // Initialiser les 18 parcelles de la nouvelle colonie de façon procédurale (Style Travian, niveau 0 = libre)
                 VillageFieldGenerator::populatePlanetFields($this->db, $newPlanetId, null, 0, false);
-
-                // Aucun bâtiment pré-placé dans les slots (slots 100% libres)
 
                 $report['colonies_founded'][] = [
                     'bot' => $bot['username'],
@@ -270,13 +315,238 @@ class BotEngine {
                 ];
             }
 
-            // 5. Mettre à jour les points de classement du bot
+            // 7. Mettre à jour les points de classement du bot
             $this->updateBotPoints($botId);
         }
 
         return [
             'success' => true,
             'report' => $report
+        ];
+    }
+
+    /**
+     * Lance une mission d'infiltration et d'espionnage Shinobi par un bot
+     */
+    private function launchBotEspionage(array $bot, array $botPlanet, array $candidateTargets, string $aggressiveness): ?array {
+        if ($aggressiveness === 'peaceful') return null;
+
+        $chance = ($aggressiveness === 'aggressive') ? 45 : 20;
+        if (rand(1, 100) > $chance) return null;
+
+        $planetId = (int)$botPlanet['id'];
+        $botId = (int)$bot['id'];
+
+        // S'assurer que le bot a au moins 1 éclaireur shinobi
+        $stmtProbe = $this->db->prepare("SELECT count FROM planet_ships WHERE planet_id = ? AND ship_code = 'spy_probe'");
+        $stmtProbe->execute([$planetId]);
+        $probeCount = (int)$stmtProbe->fetchColumn();
+
+        if ($probeCount < 1) {
+            $this->db->prepare("
+                INSERT INTO planet_ships (planet_id, ship_code, count) 
+                VALUES (?, 'spy_probe', 3) 
+                ON DUPLICATE KEY UPDATE count = count + 3
+            ")->execute([$planetId]);
+            $probeCount = 3;
+        }
+
+        // Filtrer les cibles valides dans un rayon de 45 lieues
+        $validTargets = [];
+        foreach ($candidateTargets as $t) {
+            if ((int)$t['user_id'] === $botId) continue;
+            $dist = FleetEngine::calculateDistance(
+                (int)$botPlanet['coord_x'], 
+                (int)$botPlanet['coord_y'], 
+                (int)$t['coord_x'], 
+                (int)$t['coord_y']
+            );
+            if ($dist <= 45.0) {
+                $t['distance'] = $dist;
+                $validTargets[] = $t;
+            }
+        }
+
+        if (empty($validTargets)) return null;
+
+        // Trier pour privilégier les joueurs humains et les plus proches
+        usort($validTargets, function($a, $b) {
+            if ($a['is_bot'] != $b['is_bot']) {
+                return $a['is_bot'] <=> $b['is_bot']; // Humains d'abord
+            }
+            return $a['distance'] <=> $b['distance'];
+        });
+
+        $pool = array_slice($validTargets, 0, 4);
+        $target = $pool[array_rand($pool)];
+        $targetPlanetId = (int)$target['planet_id'];
+
+        // Vérifier qu'il n'y a pas déjà une mission en vol entre ce bot et cette cible
+        $stmtActive = $this->db->prepare("
+            SELECT COUNT(*) FROM fleet_missions 
+            WHERE user_id = ? AND target_planet_id = ? AND status IN ('en_route', 'returning')
+        ");
+        $stmtActive->execute([$botId, $targetPlanetId]);
+        if ((int)$stmtActive->fetchColumn() > 0) return null;
+
+        // Cooldown d'espionnage (pas plus d'une infiltration toutes les 8 min en agressif, 15 min en modéré)
+        $cooldown = ($aggressiveness === 'aggressive') ? 480 : 900;
+        $stmtCool = $this->db->prepare("
+            SELECT COUNT(*) FROM combat_reports 
+            WHERE attacker_id = ? AND defender_planet_id = ? AND mission_type = 'spy' AND created_at >= ?
+        ");
+        $stmtCool->execute([$botId, $targetPlanetId, time() - $cooldown]);
+        if ((int)$stmtCool->fetchColumn() > 0) return null;
+
+        // Déduire 1 éclaireur shinobi
+        $this->db->prepare("UPDATE planet_ships SET count = count - 1 WHERE planet_id = ? AND ship_code = 'spy_probe'")
+            ->execute([$planetId]);
+
+        // Calcul de la durée de vol
+        $fleetEngine = new FleetEngine();
+        $fleetData = ['spy_probe' => 1];
+        $flightDuration = max(35, $fleetEngine->calculateFlightDuration($fleetData, $target['distance'], $bot['faction'], $planetId));
+
+        $now = time();
+        $arrivalTime = $now + $flightDuration;
+        $returnTime = $arrivalTime + $flightDuration;
+
+        $stmtMission = $this->db->prepare("
+            INSERT INTO fleet_missions 
+            (user_id, source_planet_id, target_planet_id, mission_type, fleet_data, cargo_data, has_hero, departure_time, arrival_time, return_time, status)
+            VALUES (?, ?, ?, 'spy', ?, '{}', 0, ?, ?, ?, 'en_route')
+        ");
+        $stmtMission->execute([
+            $botId,
+            $planetId,
+            $targetPlanetId,
+            json_encode($fleetData),
+            $now,
+            $arrivalTime,
+            $returnTime
+        ]);
+
+        return [
+            'bot' => $bot['username'],
+            'target' => $target['planet_name'],
+            'target_user' => $target['username'],
+            'distance' => $target['distance'],
+            'duration' => $flightDuration
+        ];
+    }
+
+    /**
+     * Lance un raid ou une expédition militaire par un bot
+     */
+    private function launchBotRaid(array $bot, array $botPlanet, array $candidateTargets, string $aggressiveness): ?array {
+        if ($aggressiveness === 'peaceful') return null;
+
+        $chance = ($aggressiveness === 'aggressive') ? 35 : 15;
+        if (rand(1, 100) > $chance) return null;
+
+        $planetId = (int)$botPlanet['id'];
+        $botId = (int)$bot['id'];
+
+        // Vérifier les troupes disponibles sur le fief du bot
+        $stmtUnits = $this->db->prepare("SELECT unit_code, count FROM planet_units WHERE planet_id = ? AND count > 0");
+        $stmtUnits->execute([$planetId]);
+        $units = $stmtUnits->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        $totalTroops = array_sum($units);
+        if ($totalTroops < 15) return null; // Préserver la garnison minimale du fief
+
+        // Filtrer les cibles valides dans un rayon de 35 lieues
+        $validTargets = [];
+        foreach ($candidateTargets as $t) {
+            if ((int)$t['user_id'] === $botId) continue;
+            $dist = FleetEngine::calculateDistance(
+                (int)$botPlanet['coord_x'], 
+                (int)$botPlanet['coord_y'], 
+                (int)$t['coord_x'], 
+                (int)$t['coord_y']
+            );
+            if ($dist <= 35.0) {
+                $t['distance'] = $dist;
+                $validTargets[] = $t;
+            }
+        }
+
+        if (empty($validTargets)) return null;
+
+        // Priorité aux humains et rivaux
+        usort($validTargets, function($a, $b) {
+            if ($a['is_bot'] != $b['is_bot']) {
+                return $a['is_bot'] <=> $b['is_bot'];
+            }
+            return $a['distance'] <=> $b['distance'];
+        });
+
+        $pool = array_slice($validTargets, 0, 3);
+        $target = $pool[array_rand($pool)];
+        $targetPlanetId = (int)$target['planet_id'];
+
+        // Vérifier qu'il n'y a pas déjà une mission militaire active vers cette cible
+        $stmtActive = $this->db->prepare("
+            SELECT COUNT(*) FROM fleet_missions 
+            WHERE user_id = ? AND target_planet_id = ? AND status IN ('en_route', 'returning')
+        ");
+        $stmtActive->execute([$botId, $targetPlanetId]);
+        if ((int)$stmtActive->fetchColumn() > 0) return null;
+
+        // Cooldown des raids (15 min en agressif, 30 min en modéré)
+        $cooldown = ($aggressiveness === 'aggressive') ? 900 : 1800;
+        $stmtCool = $this->db->prepare("
+            SELECT COUNT(*) FROM combat_reports 
+            WHERE attacker_id = ? AND defender_planet_id = ? AND mission_type IN ('raid', 'attack') AND created_at >= ?
+        ");
+        $stmtCool->execute([$botId, $targetPlanetId, time() - $cooldown]);
+        if ((int)$stmtCool->fetchColumn() > 0) return null;
+
+        // Sélectionner un contingent d'assaut (environ 40% des effectifs)
+        $raidFleet = [];
+        $totalSent = 0;
+        foreach ($units as $code => $cnt) {
+            $toSend = min($cnt, max(2, (int)round($cnt * 0.45)));
+            if ($toSend > 0) {
+                $raidFleet[$code] = $toSend;
+                $totalSent += $toSend;
+                $this->db->prepare("UPDATE planet_units SET count = count - ? WHERE planet_id = ? AND unit_code = ?")
+                    ->execute([$toSend, $planetId, $code]);
+            }
+        }
+
+        if ($totalSent < 5) return null;
+
+        // Calculer la durée de vol
+        $fleetEngine = new FleetEngine();
+        $flightDuration = max(60, $fleetEngine->calculateFlightDuration($raidFleet, $target['distance'], $bot['faction'], $planetId));
+
+        $now = time();
+        $arrivalTime = $now + $flightDuration;
+        $returnTime = $arrivalTime + $flightDuration;
+
+        $stmtMission = $this->db->prepare("
+            INSERT INTO fleet_missions 
+            (user_id, source_planet_id, target_planet_id, mission_type, fleet_data, cargo_data, has_hero, departure_time, arrival_time, return_time, status)
+            VALUES (?, ?, ?, 'raid', ?, '{}', 0, ?, ?, ?, 'en_route')
+        ");
+        $stmtMission->execute([
+            $botId,
+            $planetId,
+            $targetPlanetId,
+            json_encode($raidFleet),
+            $now,
+            $arrivalTime,
+            $returnTime
+        ]);
+
+        return [
+            'bot' => $bot['username'],
+            'target' => $target['planet_name'],
+            'target_user' => $target['username'],
+            'troops_sent' => $totalSent,
+            'distance' => $target['distance'],
+            'duration' => $flightDuration
         ];
     }
 

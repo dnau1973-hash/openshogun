@@ -433,11 +433,81 @@ class HeroEngine {
     }
 
     /**
+     * Garantit qu'un joueur a toujours un nombre minimal d'aventures provinciales disponibles
+     */
+    public function ensureAvailableAdventures(int $userId, int $targetCount = 3): int {
+        $hero = $this->getHeroByUserId($userId);
+        if (!$hero) return 0;
+
+        $stmtCount = $this->db->prepare("
+            SELECT COUNT(*) FROM hero_adventures 
+            WHERE user_id = ? AND status = 'available'
+        ");
+        $stmtCount->execute([$userId]);
+        $currentCount = (int)$stmtCount->fetchColumn();
+
+        if ($currentCount >= $targetCount) {
+            return 0;
+        }
+
+        $needed = $targetCount - $currentCount;
+        $centerX = (int)($hero['coord_x'] ?? 1);
+        $centerY = (int)($hero['coord_y'] ?? 1);
+
+        $templates = [
+            ['name' => 'Sanctuaire Shintō Abandonné dans la Forêt', 'diff' => 'easy'],
+            ['name' => 'Ruines d\'un Vieux Donjon Fief Noir', 'diff' => 'easy'],
+            ['name' => 'Gorge Brumeuse et Repaire de Ronins', 'diff' => 'medium'],
+            ['name' => 'Temple Antique Caché sous les Bambous', 'diff' => 'easy'],
+            ['name' => 'Campement de Ronins Hors-la-loi', 'diff' => 'medium'],
+            ['name' => 'Cimetière des Guerriers Oubliés', 'diff' => 'easy'],
+            ['name' => 'Grotte du Dragon Fluvial', 'diff' => 'hard'],
+            ['name' => 'Pagode Oubliée des Maîtres d\'Armes', 'diff' => 'medium'],
+            ['name' => 'Défilé des Shinobis de l\'Ombre', 'diff' => 'hard'],
+            ['name' => 'Vallée des Cerisiers Ancestraux', 'diff' => 'easy'],
+            ['name' => 'Fortin Délaissé du Clan Déchu', 'diff' => 'medium'],
+            ['name' => 'Montagne Sacrée du Dieu Tonnerre Raiden', 'diff' => 'hard']
+        ];
+
+        shuffle($templates);
+        $created = 0;
+
+        $stmtInsert = $this->db->prepare("
+            INSERT INTO hero_adventures (user_id, coord_x, coord_y, name, difficulty, status) 
+            VALUES (?, ?, ?, ?, ?, 'available')
+        ");
+
+        for ($i = 0; $i < $needed; $i++) {
+            $t = $templates[$i % count($templates)];
+            $dx = rand(-7, 7);
+            $dy = rand(-7, 7);
+            if ($dx === 0 && $dy === 0) {
+                $dx = ($i % 2 === 0) ? 3 : -3;
+                $dy = ($i % 2 === 0) ? 2 : -2;
+            }
+
+            $stmtInsert->execute([
+                $userId,
+                $centerX + $dx,
+                $centerY + $dy,
+                $t['name'],
+                $t['diff']
+            ]);
+            $created++;
+        }
+
+        return $created;
+    }
+
+    /**
      * Récupère la liste des aventures disponibles pour un joueur
      */
     public function getAdventures(int $userId): array {
         $hero = $this->getHeroByUserId($userId);
         if (!$hero) return [];
+
+        // Garantir qu'il y a toujours au moins 3 aventures provinciales actives
+        $this->ensureAvailableAdventures($userId, 3);
 
         $stmt = $this->db->prepare("
             SELECT * FROM hero_adventures 

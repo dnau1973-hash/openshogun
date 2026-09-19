@@ -22,7 +22,7 @@ class VillageFieldGenerator {
                 'metal_mine' => 5,       // Bûcherons
                 'crystal_mine' => 5,     // Carrières
                 'deuterium_synth' => 5,  // Rizières
-                'solar_plant' => 4       // Sanctuaires
+                'solar_plant' => 5       // Sanctuaires
             ]
         ],
         'wood' => [
@@ -177,7 +177,9 @@ class VillageFieldGenerator {
         15 => 'solar_plant',
         16 => 'solar_plant',
         17 => 'solar_plant',
-        18 => 'solar_plant'
+        18 => 'solar_plant',
+        19 => 'deuterium_synth',
+        20 => 'solar_plant'
     ];
 
     /**

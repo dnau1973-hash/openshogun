@@ -358,8 +358,10 @@ foreach (BUILDINGS as $code => $bInfo) {
                     <div class="modal-building-row" data-sector="<?= $sec ?>" style="background:rgba(30,41,59,0.5); border:1px solid #334155; border-radius:8px; padding:0.85rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; transition:border-color 0.2s;">
                         <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:280px;">
                             <div style="width:52px; height:52px; background:rgba(15,23,42,0.8); border:1px solid #475569; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden;">
-                                <?php if (!empty($info['tile_img'])): ?>
-                                    <img src="/public/assets/<?= $info['tile_img'] ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:44px; height:44px; object-fit:contain;">
+                                <?php if (!empty($info['tile_img'])): 
+                                    $cityTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $info['tile_img']) ? '/public/assets/tiles/' . $info['tile_img'] : '/public/assets/' . $info['tile_img'];
+                                ?>
+                                    <img src="<?= $cityTileUrl ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:44px; height:44px; object-fit:contain;">
                                 <?php else: ?>
                                     <span style="font-size:1.8rem;"><?= $info['icon'] ?></span>
                                 <?php endif; ?>

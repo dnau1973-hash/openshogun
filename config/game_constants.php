@@ -59,6 +59,7 @@ const FIELD_LAYOUT = [
     17 => 'solar_plant',
     18 => 'solar_plant',
     19 => 'deuterium_synth',
+    20 => 'solar_plant',
 ];
 
 // Configuration des emplacements urbains de la Cité Castrale (Slots 19 à 33, style Travian Dorf 2)
