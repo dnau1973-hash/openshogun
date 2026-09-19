@@ -1,7 +1,12 @@
 <?php
 /**
- * Point d'entrée principal et Routeur de l'application OpenGalaxy
+ * Point d'entrée principal et Routeur de l'application OpenShogun
  */
+if (!file_exists(__DIR__ . '/config/installed.lock') || !file_exists(__DIR__ . '/config/database.php')) {
+    header('Location: /install.php');
+    exit;
+}
+
 require_once __DIR__ . '/core/Auth.php';
 
 $auth = new Auth();

@@ -13,6 +13,7 @@ Thumbs.db
 
 # Secrets & Configuration Locale
 config/github.local.php
+config/installed.lock
 tmp/
 
 
