@@ -293,6 +293,9 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
                 </div>
 
                 <div class="travian-sys-cluster">
+                    <button type="button" id="shogun-audio-btn" class="travian-sys-btn audio-btn" onclick="window.shogunAudio && window.shogunAudio.toggle()" title="Ambiance Sonore Féodale">
+                        <span id="shogun-audio-icon">🔇</span>
+                    </button>
                     <a href="?page=docs" class="travian-sys-btn" title="Codex & Manuel du Jeu">📖</a>
                     <a href="?page=support" class="travian-sys-btn" title="Assistance & Signalements">📮</a>
                     <?php if ($auth->isAdmin()): ?>

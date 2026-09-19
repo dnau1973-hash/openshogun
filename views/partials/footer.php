@@ -946,6 +946,7 @@ function updateHudResources(planet) {
     updateEl('res-val-deut', 'bar-deut', planet.deuterium, planet.deuterium_max);
 }
 </script>
+<script src="/public/js/audio_manager.js"></script>
 </body>
 </html>
 

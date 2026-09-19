@@ -637,6 +637,27 @@ a:hover {
     border-color: #ef4444;
 }
 
+.travian-sys-btn.audio-btn {
+    cursor: pointer;
+    border: 1.5px solid #7c6248;
+}
+
+.travian-sys-btn.audio-btn.active {
+    background: radial-gradient(circle, #fef9c3 0%, #fef08a 100%);
+    border-color: #ca8a04;
+    box-shadow: 0 0 8px rgba(234, 179, 8, 0.45);
+}
+
+.audio-playing {
+    display: inline-block;
+    animation: pulseAudio 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseAudio {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+}
+
 /* ==========================================================
    BANNIÈRE D'ALERTE MILITAIRE & TOUR DE GUET (STYLE SENGOKU)
    ========================================================== */
