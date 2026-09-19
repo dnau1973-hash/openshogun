@@ -345,3 +345,4 @@ class InstallEngine {
         @file_put_contents(self::LOCK_FILE, json_encode($meta, JSON_PRETTY_PRINT));
     }
 }
+

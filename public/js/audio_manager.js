@@ -1,5 +1,5 @@
 /**
- * ShogunAudioManager — Gestionnaire d'ambiances sonores immersives féodales
+ * ShogunAudioManager — Gestionnaire d'ambiances sonores immersives féodales pour OpenShogun
  */
 class ShogunAudioManager {
     constructor() {
@@ -13,33 +13,49 @@ class ShogunAudioManager {
         const params = new URLSearchParams(window.location.search);
         this.currentPage = params.get('page') || 'resources';
 
-        // Association des pistes d'ambiance selon la page
+        // Cartographie complète des 5 ambiances sonores selon la page active
         this.pageTracks = {
-            'city': '/public/assets/audio/ambient_city.mp3',
-            'building': '/public/assets/audio/ambient_city.mp3',
-            // Extensions futures :
-            // 'resources': '/public/assets/audio/ambient_terroir.mp3',
-            // 'map': '/public/assets/audio/ambient_map.mp3',
+            // 🏯 Cité Castrale & Bâtiments
+            'city': { url: '/public/assets/audio/ambient_city.mp3', title: 'Cité Castrale' },
+            'building': { url: '/public/assets/audio/ambient_city.mp3', title: 'Chantier Urbain' },
+
+            // 🌾 Terroir, Parcelles & Vue Générale
+            'resources': { url: '/public/assets/audio/ambient_terroir.mp3', title: 'Terroir & Rizières' },
+            'field': { url: '/public/assets/audio/ambient_terroir.mp3', title: 'Parcelles du Domaine' },
+
+            // 🗾 Carte Stratégique de l'Archipel
+            'map': { url: '/public/assets/audio/ambient_map.mp3', title: 'Carte des Provinces' },
+            'galaxy': { url: '/public/assets/audio/ambient_map.mp3', title: 'Carte des Provinces' },
+
+            // ⚔️ Dojos Militaires, Engins & Flottes
+            'barracks': { url: '/public/assets/audio/ambient_martial.mp3', title: 'Dojo & Caserne' },
+            'shipyard': { url: '/public/assets/audio/ambient_martial.mp3', title: 'Atelier de Siège' },
+            'fleet': { url: '/public/assets/audio/ambient_martial.mp3', title: 'Marche Militaire' },
+
+            // ⛩️ Sanctuaire, Recherches, Donjon & Pavillon du Héros
+            'research': { url: '/public/assets/audio/ambient_sanctuary.mp3', title: 'Sanctuaire Shintō' },
+            'castle': { url: '/public/assets/audio/ambient_sanctuary.mp3', title: 'Donjon Sacré' },
+            'hero': { url: '/public/assets/audio/ambient_sanctuary.mp3', title: 'Pavillon du Héros' },
         };
 
         this.init();
     }
 
-    init() {
-        const trackUrl = this.pageTracks[this.currentPage];
-        if (!trackUrl) {
-            this.updateUi();
-            return;
-        }
+    getCurrentTrackInfo() {
+        return this.pageTracks[this.currentPage] || { url: '/public/assets/audio/ambient_terroir.mp3', title: 'Chronique Féodale' };
+    }
 
-        this.currentTrack = trackUrl;
-        this.audio = new Audio(trackUrl);
+    init() {
+        const trackInfo = this.getCurrentTrackInfo();
+        this.currentTrack = trackInfo.url;
+
+        this.audio = new Audio(trackInfo.url);
         this.audio.loop = true;
         this.audio.volume = this.isEnabled ? this.volume : 0;
         this.audio.preload = 'auto';
 
-        // Si l'utilisateur avait activé l'audio lors d'une visite précédente,
-        // les navigateurs bloquent l'autoplay tant qu'il n'y a pas eu un premier clic.
+        // Si le son était activé lors de sessions précédentes,
+        // respecter la politique du navigateur en déclenchant au premier geste utilisateur
         if (this.isEnabled) {
             const startOnInteraction = () => {
                 this.play(true);
@@ -55,10 +71,9 @@ class ShogunAudioManager {
 
     toggle() {
         if (!this.audio) {
-            // Si pas de piste sur cette page, initialiser la piste par défaut
-            const trackUrl = this.pageTracks[this.currentPage] || '/public/assets/audio/ambient_city.mp3';
-            this.currentTrack = trackUrl;
-            this.audio = new Audio(trackUrl);
+            const trackInfo = this.getCurrentTrackInfo();
+            this.currentTrack = trackInfo.url;
+            this.audio = new Audio(trackInfo.url);
             this.audio.loop = true;
             this.audio.volume = this.volume;
         }
@@ -76,7 +91,7 @@ class ShogunAudioManager {
         this.isEnabled = true;
         localStorage.setItem('shogun_audio_enabled', 'true');
 
-        // Fondu sonore à l'entrée
+        // Démarrage progressif (fade in)
         this.audio.volume = 0;
         const playPromise = this.audio.play();
 
@@ -85,8 +100,8 @@ class ShogunAudioManager {
                 this.fadeIn();
                 this.updateUi();
             }).catch(err => {
-                console.log("Lecture audio en attente d'interaction utilisateur :", err);
                 if (!isAuto) {
+                    console.log("Audio en attente d'interaction utilisateur :", err);
                     this.updateUi();
                 }
             });
@@ -112,14 +127,6 @@ class ShogunAudioManager {
             this.audio.volume = this.volume;
         }
 
-        const volText = document.getElementById('shogun-audio-vol-text');
-        if (volText) {
-            volText.textContent = Math.round(this.volume * 100) + '%';
-        }
-        const volSlider = document.getElementById('shogun-audio-vol');
-        if (volSlider) {
-            volSlider.value = Math.round(this.volume * 100);
-        }
         this.updateUi();
     }
 
@@ -165,8 +172,8 @@ class ShogunAudioManager {
     updateUi() {
         const iconEl = document.getElementById('shogun-audio-icon');
         const btnEl = document.getElementById('shogun-audio-btn');
-        const volIcon = document.getElementById('audio-vol-icon');
         const isPlaying = this.audio && !this.audio.paused && this.isEnabled;
+        const trackInfo = this.getCurrentTrackInfo();
 
         if (iconEl) {
             if (isPlaying) {
@@ -180,13 +187,9 @@ class ShogunAudioManager {
 
         if (btnEl) {
             btnEl.title = isPlaying 
-                ? `Ambiance Féodale Active (${Math.round(this.volume * 100)}%) — Cliquer pour couper` 
-                : 'Ambiance Féodale Coupée — Cliquer pour activer';
+                ? `Ambiance « ${trackInfo.title} » active (${Math.round(this.volume * 100)}%) — Cliquer pour couper` 
+                : `Ambiance « ${trackInfo.title} » coupée — Cliquer pour activer`;
             btnEl.classList.toggle('active', isPlaying);
-        }
-
-        if (volIcon) {
-            volIcon.textContent = this.volume > 0.5 ? '🔊' : (this.volume > 0 ? '🔉' : '🔇');
         }
     }
 }
