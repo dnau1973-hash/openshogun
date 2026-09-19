@@ -81,7 +81,7 @@ class BuildingEngine {
         // 1. Vérification du niveau actuel
         if ($category === 'field') {
             $fieldSlot = (int)$targetId;
-            if ($fieldSlot < 1 || $fieldSlot > 19) {
+            if ($fieldSlot < 1 || $fieldSlot > 20) {
                 throw new Exception("Emplacement de parcelle invalide (#$fieldSlot).");
             }
             $stmtField = $this->db->prepare("SELECT * FROM planet_fields WHERE planet_id = ? AND field_slot = ?");
@@ -348,10 +348,10 @@ class BuildingEngine {
         } else {
             // Parcelle rurale
             $fieldSlot = (int)$targetId;
-            if ($fieldSlot < 1 || $fieldSlot > 18) {
+            if ($fieldSlot < 1 || $fieldSlot > 20) {
                 $fieldSlot = (int)($slot ?? 0);
             }
-            if ($fieldSlot < 1 || $fieldSlot > 18) {
+            if ($fieldSlot < 1 || $fieldSlot > 20) {
                 throw new Exception("Emplacement de parcelle invalide (#$fieldSlot).");
             }
 
