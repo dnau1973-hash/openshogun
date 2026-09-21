@@ -136,7 +136,7 @@ class HonorEngine {
 
         $awarded = [];
         $stmtInsertMedal = $this->db->prepare("
-            INSERT INTO user_medals (user_id, category, rank, week_code, description, awarded_at)
+            INSERT INTO user_medals (user_id, category, `rank`, week_code, description, awarded_at)
             VALUES (?, ?, ?, ?, ?, NOW())
         ");
 
@@ -254,7 +254,7 @@ class HonorEngine {
         $stmtMedals = $this->db->prepare("
             SELECT * FROM user_medals 
             WHERE user_id = ? 
-            ORDER BY rank ASC, awarded_at DESC
+            ORDER BY `rank` ASC, awarded_at DESC
         ");
         $stmtMedals->execute([$userId]);
         $rawMedals = $stmtMedals->fetchAll();

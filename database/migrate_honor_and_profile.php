@@ -63,12 +63,12 @@ echo "- Statistiques hebdomadaires initialisées pour " . count($users) . " util
 // 5. Attribuer une médaille d'honneur de bienvenue à l'Administrateur nezzar s'il existe
 $nezzar = $db->query("SELECT id FROM users WHERE username = 'nezzar'")->fetch();
 if ($nezzar) {
-    $checkMedal = $db->prepare("SELECT id FROM user_medals WHERE user_id = ? AND category = 'progression' AND rank = 1");
+    $checkMedal = $db->prepare("SELECT id FROM user_medals WHERE user_id = ? AND category = 'progression' AND `rank` = 1");
     $checkMedal->execute([$nezzar['id']]);
     if (!$checkMedal->fetch()) {
         $weekCode = date('Y') . "-S" . date('W');
         $db->prepare("
-            INSERT INTO user_medals (user_id, category, rank, week_code, description)
+            INSERT INTO user_medals (user_id, category, `rank`, week_code, description)
             VALUES (?, 'progression', 1, ?, 'Pionnier Suprême - Fondateur de l\'Empire Spatial OpenGalaxy')
         ")->execute([$nezzar['id'], $weekCode]);
         echo "- Médaille d'Or d'Honneur inaugurale attribuée à 'nezzar'.\n";

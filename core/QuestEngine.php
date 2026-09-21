@@ -473,7 +473,7 @@ class QuestEngine {
                 try {
                     $weekCode = date('Y') . "-S" . date('W');
                     $stmtMedal = $this->db->prepare("
-                        INSERT INTO user_medals (user_id, category, rank, week_code, description, awarded_at) 
+                        INSERT INTO user_medals (user_id, category, `rank`, week_code, description, awarded_at) 
                         VALUES (?, 'progression', 1, ?, 'Diplôme Impérial du Shogunat : Didacticiel de Daimyō accompli avec honneur', NOW())
                     ");
                     $stmtMedal->execute([$userId, $weekCode]);
