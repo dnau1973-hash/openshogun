@@ -2370,6 +2370,68 @@ a:hover {
     border-color: #1d4ed8;
 }
 
+.tile-oasis-res-group {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 2px;
+    justify-content: center;
+    align-items: center;
+    max-width: 96%;
+    z-index: 2;
+}
+
+.tile-res-badge {
+    background: rgba(15, 23, 42, 0.9);
+    color: #ffffff;
+    font-size: 0.52rem;
+    font-weight: 800;
+    padding: 1px 3px;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    white-space: nowrap;
+    line-height: 1.15;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+}
+
+.tile-res-badge.res-rice {
+    background: rgba(161, 98, 7, 0.95);
+    border-color: #facc15;
+    color: #fef08a;
+}
+
+.tile-res-badge.res-wood {
+    background: rgba(22, 101, 52, 0.95);
+    border-color: #4ade80;
+    color: #bbf7d0;
+}
+
+.tile-res-badge.res-stone {
+    background: rgba(51, 65, 85, 0.95);
+    border-color: #cbd5e1;
+    color: #f8fafc;
+}
+
+.galaxy-tile.oasis-tile {
+    outline: 1.5px solid rgba(34, 197, 94, 0.6);
+    outline-offset: -1.5px;
+}
+
+.galaxy-tile.oasis-tile.oasis-occupied {
+    outline: 2px solid #16a34a;
+    outline-offset: -2px;
+}
+
+.galaxy-tile.oasis-tile.oasis-wild {
+    outline: 1.5px dashed rgba(234, 179, 8, 0.7);
+    outline-offset: -1.5px;
+}
+
 /* ==========================================================
    CARTES DE SOLDATS & TROUPES (CASERNE MILITAIRE)
    ========================================================== */

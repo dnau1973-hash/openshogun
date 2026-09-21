@@ -54,6 +54,7 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
             <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_hills.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Collines</span>
             <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_village.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Fief Castral</span>
             <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_authentic_castle.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Donjon Sacré</span>
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span class="tile-res-badge res-rice" style="font-size:0.68rem; padding:1px 4px; box-shadow:none;">🌾+25%</span> Oasis</span>
         </div>
 
         <div style="display: flex; align-items: center; gap: 0.4rem;">

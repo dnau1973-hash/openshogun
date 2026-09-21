@@ -303,11 +303,26 @@ class GalaxyMapController {
                             <span class="tile-owner castle-label">${escapeHtml(planet.castle_name || planet.planet_name)}</span>
                         `;
                     } else if (planet.is_oasis) {
-                        const oasisBadge = planet.is_occupied ? '🌿 FIEF' : '🐗 OASIS';
-                        const badgeClass = planet.is_occupied ? 'tile-oasis-badge occupied' : 'tile-oasis-badge wild';
+                        let resBadges = '';
+                        if (planet.bonus_rice > 0) {
+                            resBadges += `<span class="tile-res-badge res-rice" title="Riz +${planet.bonus_rice}%">🌾+${planet.bonus_rice}%</span>`;
+                        }
+                        if (planet.bonus_wood > 0) {
+                            resBadges += `<span class="tile-res-badge res-wood" title="Bois +${planet.bonus_wood}%">🪵+${planet.bonus_wood}%</span>`;
+                        }
+                        if (planet.bonus_stone > 0) {
+                            resBadges += `<span class="tile-res-badge res-stone" title="Pierre +${planet.bonus_stone}%">🪨+${planet.bonus_stone}%</span>`;
+                        }
+
+                        const ownerHtml = (planet.is_occupied && planet.owner_planet_name)
+                            ? `<span class="tile-owner village-label">${escapeHtml(planet.owner_planet_name)}</span>`
+                            : '';
+
                         contentHtml = `
-                            <span class="${badgeClass}">${oasisBadge}</span>
-                            <span class="tile-owner oasis-label">${escapeHtml(planet.bonus_label || planet.oasis_name)}</span>
+                            <div class="tile-oasis-res-group">
+                                ${resBadges}
+                            </div>
+                            ${ownerHtml}
                         `;
                     } else if (planet.user_id) {
                         const ownerName = planet.planet_name || planet.username || 'Fief';
@@ -321,9 +336,16 @@ class GalaxyMapController {
                     ? JSON.stringify(planet).replace(/"/g, '&quot;') 
                     : JSON.stringify({ coord_x: x, coord_y: y, empty: true, terrain_name: terrain.name, terrain_desc: terrain.desc }).replace(/"/g, '&quot;');
 
-                const tileTooltip = planet 
-                    ? (planet.castle_name || planet.planet_name) 
-                    : terrain.name;
+                let tileTooltip = terrain.name;
+                if (planet) {
+                    if (planet.is_authentic_castle) {
+                        tileTooltip = planet.castle_name || planet.planet_name;
+                    } else if (planet.is_oasis) {
+                        tileTooltip = `${planet.bonus_label || 'Oasis'} ${planet.is_occupied ? '(Occupée par ' + (planet.owner_planet_name || 'Fief') + ')' : '(Sauvage)'}`;
+                    } else {
+                        tileTooltip = planet.planet_name || 'Fief';
+                    }
+                }
 
                 html += `
                     <div class="${tileClass}" 
