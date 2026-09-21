@@ -233,12 +233,12 @@ class UpdateEngine {
         // Gestion de l'arbre de travail
         if (!$localBefore['is_clean']) {
             if ($stashIfDirty) {
-                $logs[] = "⚠️ Fichiers locaux modifiés détectés (" . count($localBefore['dirty_files']) . "). Sauvegarde automatique (git stash)...";
+                $logs[] = "⚠️ Fichiers locaux modifiés/non suivis détectés (" . count($localBefore['dirty_files']) . "). Sauvegarde automatique (git stash push -u)...";
                 $stashOutput = [];
                 $stashRet = 0;
                 $stashName = "Auto-stash-OpenShogun-" . date('Ymd-His');
-                $this->git("stash push -m " . escapeshellarg($stashName), $stashOutput, $stashRet);
-                $logs[] = "Stash résultat : " . trim(implode("\n", $stashOutput));
+                $this->git("stash push -u -m " . escapeshellarg($stashName), $stashOutput, $stashRet);
+                $logs[] = "Stash résultat : " . (trim(implode("\n", $stashOutput)) ?: 'OK');
             } else {
                 return [
                     'success' => false,
@@ -260,6 +260,24 @@ class UpdateEngine {
 
         $maskedPullLog = $this->maskToken(implode("\n", $pullOutput));
         $logs[] = $maskedPullLog;
+
+        // Si échec à cause de fichiers non suivis résiduels, tentative de mise en réserve forcée
+        if ($pullRet !== 0 && $stashIfDirty && (
+            stripos($maskedPullLog, 'untracked') !== false ||
+            stripos($maskedPullLog, 'overwritten by merge') !== false ||
+            stripos($maskedPullLog, 'local changes') !== false
+        )) {
+            $logs[] = "⚠️ Conflit détecté avec des fichiers locaux non suivis. Tentative de mise en réserve d'urgence (stash -u)...";
+            $recoveryOutput = [];
+            $this->git("stash push -u -m " . escapeshellarg("Auto-stash-recovery-" . date('Ymd-His')), $recoveryOutput);
+            $logs[] = "Stash d'urgence : " . (trim(implode("\n", $recoveryOutput)) ?: 'OK');
+
+            $pullOutput = [];
+            $pullRet = 0;
+            $this->git($pullCmd, $pullOutput, $pullRet);
+            $maskedPullLog = $this->maskToken(implode("\n", $pullOutput));
+            $logs[] = $maskedPullLog;
+        }
 
         if ($pullRet !== 0) {
             $logs[] = "❌ Échec de la commande git pull (Code retour: {$pullRet}).";

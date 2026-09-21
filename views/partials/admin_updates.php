@@ -210,6 +210,55 @@ $localInfo = $updateEngine->getLocalInfo();
 <script>
 // --- LOGIQUE CLIENT DU CENTRE DE MISES À JOUR ---
 
+function showToast(message, type = 'info') {
+    let container = document.getElementById('admin-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'admin-toast-container';
+        container.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; max-width: 420px;';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.style.cssText = 'padding: 12px 18px; border-radius: 8px; color: #fff; font-size: 0.9rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); pointer-events: auto; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; transform: translateY(16px) scale(0.95); display: flex; align-items: center; gap: 10px;';
+
+    let icon = 'ℹ️';
+    let bg = 'rgba(15, 23, 42, 0.95)';
+    let borderColor = 'rgba(56, 189, 248, 0.4)';
+
+    if (type === 'success') {
+        icon = '✅';
+        bg = 'rgba(6, 44, 33, 0.95)';
+        borderColor = 'rgba(34, 197, 94, 0.5)';
+    } else if (type === 'warning') {
+        icon = '⚠️';
+        bg = 'rgba(69, 26, 3, 0.95)';
+        borderColor = 'rgba(245, 158, 11, 0.5)';
+    } else if (type === 'error' || type === 'danger') {
+        icon = '❌';
+        bg = 'rgba(69, 10, 10, 0.95)';
+        borderColor = 'rgba(239, 68, 68, 0.5)';
+    }
+
+    toast.style.background = bg;
+    toast.style.borderColor = borderColor;
+    toast.innerHTML = `<span style="font-size: 1.1rem; flex-shrink: 0;">${icon}</span><span style="flex-grow: 1; line-height: 1.4;">${escapeHtml(message)}</span>`;
+
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0) scale(1)';
+    });
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px) scale(0.95)';
+        setTimeout(() => toast.remove(), 350);
+    }, 4500);
+}
+window.showToast = showToast;
+
 function logToConsole(message, type = 'info') {
     const consoleEl = document.getElementById('update-console-log');
     if (!consoleEl) return;
