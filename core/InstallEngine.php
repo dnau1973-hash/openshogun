@@ -167,7 +167,7 @@ class InstallEngine {
         string $user,
         string $pass,
         string $siteUrl = 'http://opengalaxy.local',
-        int $speedFactor = 5
+        int $speedFactor = 1
     ): bool {
         $content = "<?php\n"
             . "/**\n"

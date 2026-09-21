@@ -54,9 +54,10 @@ class BuildingEngine {
         }
 
         $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
-        // Facteur d'équilibrage féodal (serveur 12 mois) : croissance exponentielle avec réduction par le Tenshu
-        $hqBonus = 1 + ($hqLevel * 0.08);
-        $duration = max(10, (int)(($baseTime * pow(1.35, $currentLevel) * pow($targetLevel, 0.9)) / ($hqBonus * $speed)));
+        // Échelle de temps authentique Travian : réduction par le Tenshu (0.964^(hq-1)) et progression exponentielle
+        $hqFactor = pow(0.964, max(0, $hqLevel - 1));
+        $lvlFactor = pow(1.28, $currentLevel) * pow($targetLevel, 0.85);
+        $duration = max(15, (int)(($baseTime * $lvlFactor * $hqFactor) / $speed));
 
         return [
             'target_level' => $targetLevel,
