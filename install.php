@@ -45,6 +45,28 @@ $canProceed = $reqs['all_passed'];
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
 $autoHost = $_SERVER['HTTP_HOST'] ?? 'opengalaxy.local';
 $detectedUrl = $protocol . $autoHost;
+
+// Lecture de la configuration existante si présente pour préserver les identifiants
+$defaultHost = '127.0.0.1';
+$defaultPort = '3306';
+$defaultDbName = 'openshogun';
+$defaultUser = 'root';
+$defaultPass = '';
+$defaultSiteUrl = $detectedUrl;
+$defaultSpeedFactor = 5;
+
+if (file_exists(__DIR__ . '/config/database.php')) {
+    $dbFileContent = @file_get_contents(__DIR__ . '/config/database.php');
+    if ($dbFileContent) {
+        if (preg_match("/define\('DB_HOST',\s*'([^']+)'\)/", $dbFileContent, $m)) $defaultHost = $m[1];
+        if (preg_match("/define\('DB_PORT',\s*'([^']+)'\)/", $dbFileContent, $m)) $defaultPort = $m[1];
+        if (preg_match("/define\('DB_NAME',\s*'([^']+)'\)/", $dbFileContent, $m)) $defaultDbName = $m[1];
+        if (preg_match("/define\('DB_USER',\s*'([^']+)'\)/", $dbFileContent, $m)) $defaultUser = $m[1];
+        if (preg_match("/define\('DB_PASS',\s*'([^']*)'\)/", $dbFileContent, $m)) $defaultPass = $m[1];
+        if (preg_match("/define\('SITE_URL',\s*'([^']+)'\)/", $dbFileContent, $m)) $defaultSiteUrl = $m[1];
+        if (preg_match("/define\('SPEED_FACTOR',\s*([0-9]+)\)/", $dbFileContent, $m)) $defaultSpeedFactor = (int)$m[1];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -568,31 +590,31 @@ $detectedUrl = $protocol . $autoHost;
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="db_host">Hôte du serveur MySQL :</label>
-                        <input type="text" id="db_host" name="db_host" value="127.0.0.1" required>
+                        <input type="text" id="db_host" name="db_host" value="<?= htmlspecialchars($defaultHost) ?>" required>
                         <span class="helper-text">Généralement <code>127.0.0.1</code> ou <code>localhost</code>.</span>
                     </div>
 
                     <div class="form-group">
                         <label for="db_port">Port MySQL :</label>
-                        <input type="number" id="db_port" name="db_port" value="3306" required>
+                        <input type="number" id="db_port" name="db_port" value="<?= htmlspecialchars($defaultPort) ?>" required>
                         <span class="helper-text">Le port par défaut est <code>3306</code>.</span>
                     </div>
 
                     <div class="form-group">
                         <label for="db_name">Nom de la base de données :</label>
-                        <input type="text" id="db_name" name="db_name" value="opengalaxy" required>
+                        <input type="text" id="db_name" name="db_name" value="<?= htmlspecialchars($defaultDbName) ?>" required>
                         <span class="helper-text">Ex: <code>openshogun</code> ou <code>opengalaxy</code>.</span>
                     </div>
 
                     <div class="form-group">
                         <label for="db_user">Utilisateur MySQL :</label>
-                        <input type="text" id="db_user" name="db_user" value="root" required>
+                        <input type="text" id="db_user" name="db_user" value="<?= htmlspecialchars($defaultUser) ?>" required>
                         <span class="helper-text">Utilisateur ayant les privilèges de création de tables.</span>
                     </div>
 
                     <div class="form-group col-span-2">
                         <label for="db_pass">Mot de passe MySQL :</label>
-                        <input type="password" id="db_pass" name="db_pass" placeholder="Laisser vide si aucun mot de passe">
+                        <input type="password" id="db_pass" name="db_pass" value="<?= htmlspecialchars($defaultPass) ?>" placeholder="Laisser vide si aucun mot de passe">
                     </div>
 
                     <div class="form-group col-span-2">

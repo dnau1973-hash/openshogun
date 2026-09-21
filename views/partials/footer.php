@@ -639,6 +639,7 @@ function closePlayerProfileModal() {
 }
 
 function openEditMottoModal() {
+    closeQuestModal();
     openPlayerProfileModal(<?= (int)($user['id'] ?? 0) ?>, true);
 }
 
@@ -661,7 +662,8 @@ function toggleBioEdit(forceOpen = null) {
 }
 
 async function saveBio() {
-    const bioText = document.getElementById('profBioInput').value;
+    const bioInput = document.getElementById('profBioInput');
+    const bioText = bioInput ? bioInput.value : '';
     try {
         const formData = new FormData();
         formData.append('action', 'update_bio');
@@ -671,20 +673,31 @@ async function saveBio() {
         const data = await res.json();
 
         if (data.success) {
-            document.getElementById('profBioView').innerText = data.bio;
+            const bioView = document.getElementById('profBioView');
+            if (bioView) bioView.innerText = data.bio || bioText;
             toggleBioEdit(false);
-            showModalAlert("Manifeste Sauvegardé", data.message, "success");
+            showModalAlert("Votre devise de Daimyō a été proclamée avec succès !", "success", "Manifeste Sauvegardé");
 
             // Synchroniser avec l'affichage éventuel du Tenshu sur la page en cours
             const tenshuBio = document.getElementById('tenshuDaimyoBioText');
             if (tenshuBio) {
-                tenshuBio.innerText = '« ' + (data.bio || "Fier Daimyō au service de l'honneur de son clan et de l'Empereur.") + ' »';
+                tenshuBio.innerText = data.bio;
+            }
+            // Synchroniser le chip dans le header
+            const headerMotto = document.getElementById('headerDaimyoMotto');
+            if (headerMotto) {
+                headerMotto.innerText = data.bio ? `« ${data.bio} »` : 'Proclamer ma devise...';
+            }
+            // Recharger si nécessaire pour valider la quête du didactiel
+            const qBanner = document.getElementById('questBannerContainer');
+            if (qBanner) {
+                setTimeout(() => window.location.reload(), 1200);
             }
         } else {
-            showModalAlert("Erreur", data.error || "Impossible d'enregistrer.", "danger");
+            showModalAlert(data.error || "Impossible d'enregistrer votre devise.", "error", "Erreur");
         }
     } catch (e) {
-        showModalAlert("Erreur", "Une erreur est survenue lors de la sauvegarde.", "danger");
+        showModalAlert("Une erreur est survenue lors de l'enregistrement : " + (e.message || e), "error", "Erreur Réseau");
     }
 }
 

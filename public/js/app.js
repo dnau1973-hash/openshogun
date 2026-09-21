@@ -121,8 +121,25 @@ function closeUpgradeModal() {
 // ==========================================================
 let customAlertResolver = null;
 
-function showModalAlert(message, type = 'info', title = null) {
+function showModalAlert(param1, param2 = 'info', param3 = null) {
     return new Promise((resolve) => {
+        let message = param1 || '';
+        let type = param2 || 'info';
+        let title = param3 || null;
+
+        const validTypes = ['info', 'error', 'danger', 'warning', 'success'];
+        if (typeof param2 === 'string' && typeof param3 === 'string' && validTypes.includes(param3.toLowerCase())) {
+            title = param1;
+            message = param2;
+            type = param3.toLowerCase();
+        } else if (typeof param1 === 'string' && typeof param2 === 'string' && validTypes.includes(param2.toLowerCase())) {
+            message = param1;
+            type = param2.toLowerCase();
+            title = param3;
+        }
+
+        if (type === 'danger') type = 'error';
+
         const modal = document.getElementById('customAlertModal');
         const card = document.getElementById('customAlertCard');
         const titleEl = document.getElementById('customAlertTitle');

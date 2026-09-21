@@ -230,6 +230,16 @@ class UpdateEngine {
         $logs[] = "Branche cible : {$this->branch} | Dépôt : {$this->owner}/{$this->repo}";
         $logs[] = "Commit actuel : {$localBefore['short_sha']} ({$localBefore['commit_message']})";
 
+        // Sauvegarde préventive en mémoire des configurations critiques (database, token, lock)
+        $configDbPath = __DIR__ . '/../config/database.php';
+        $configDbBackup = file_exists($configDbPath) ? file_get_contents($configDbPath) : null;
+
+        $githubLocalPath = __DIR__ . '/../config/github.local.php';
+        $githubLocalBackup = file_exists($githubLocalPath) ? file_get_contents($githubLocalPath) : null;
+
+        $installedLockPath = __DIR__ . '/../config/installed.lock';
+        $installedLockBackup = file_exists($installedLockPath) ? file_get_contents($installedLockPath) : null;
+
         // Gestion de l'arbre de travail
         if (!$localBefore['is_clean']) {
             if ($stashIfDirty) {
@@ -277,6 +287,24 @@ class UpdateEngine {
             $this->git($pullCmd, $pullOutput, $pullRet);
             $maskedPullLog = $this->maskToken(implode("\n", $pullOutput));
             $logs[] = $maskedPullLog;
+        }
+
+        // Restauration prioritaire et inviolable des configurations locales
+        if ($configDbBackup !== null) {
+            if (!file_exists($configDbPath) || file_get_contents($configDbPath) !== $configDbBackup) {
+                @file_put_contents($configDbPath, $configDbBackup);
+                $logs[] = "🔒 Configuration base de données (config/database.php) préservée et restaurée.";
+            }
+        }
+        if ($githubLocalBackup !== null) {
+            if (!file_exists($githubLocalPath) || file_get_contents($githubLocalPath) !== $githubLocalBackup) {
+                @file_put_contents($githubLocalPath, $githubLocalBackup);
+            }
+        }
+        if ($installedLockBackup !== null) {
+            if (!file_exists($installedLockPath)) {
+                @file_put_contents($installedLockPath, $installedLockBackup);
+            }
         }
 
         if ($pullRet !== 0) {
