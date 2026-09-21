@@ -8,9 +8,57 @@ require_once __DIR__ . '/../config/game_constants.php';
 
 class HonorEngine {
     private PDO $db;
+    private static bool $schemaChecked = false;
 
     public function __construct() {
         $this->db = Database::getConnection();
+        $this->ensureSchema();
+    }
+
+    /**
+     * Garantit automatiquement la présence de la colonne bio et des tables d'honneur
+     */
+    public function ensureSchema(): void {
+        if (self::$schemaChecked) return;
+        self::$schemaChecked = true;
+
+        try {
+            // 1. Colonne bio dans users
+            $userCols = $this->db->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('bio', $userCols)) {
+                $this->db->exec("ALTER TABLE users ADD COLUMN bio TEXT NULL AFTER alliance_id");
+            }
+
+            // 2. Table user_weekly_stats
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS `user_weekly_stats` (
+                    `user_id` INT UNSIGNED PRIMARY KEY,
+                    `attack_points` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `defense_points` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `raid_resources` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+                    `start_week_points` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    CONSTRAINT `fk_uws_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+
+            // 3. Table user_medals
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS `user_medals` (
+                    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    `user_id` INT UNSIGNED NOT NULL,
+                    `category` ENUM('progression', 'attack', 'defense', 'raid') NOT NULL,
+                    `rank` TINYINT UNSIGNED NOT NULL,
+                    `week_code` VARCHAR(20) NOT NULL,
+                    `description` VARCHAR(255) NULL,
+                    `awarded_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    KEY `idx_um_user` (`user_id`),
+                    CONSTRAINT `fk_um_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+        } catch (Exception $e) {
+            // Ignorer silencieusement si tables déjà créées
+        }
     }
 
     /**

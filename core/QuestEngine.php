@@ -10,10 +10,39 @@ require_once __DIR__ . '/../config/game_constants.php';
 class QuestEngine {
     private PDO $db;
     private PlanetEngine $planetEngine;
+    private static bool $schemaChecked = false;
 
     public function __construct() {
         $this->db = Database::getConnection();
         $this->planetEngine = new PlanetEngine();
+        $this->ensureSchema();
+    }
+
+    /**
+     * Garantit automatiquement la présence de la table user_quests
+     */
+    public function ensureSchema(): void {
+        if (self::$schemaChecked) return;
+        self::$schemaChecked = true;
+
+        try {
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS `user_quests` (
+                    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    `user_id` INT UNSIGNED NOT NULL,
+                    `quest_key` VARCHAR(50) NOT NULL,
+                    `status` ENUM('in_progress', 'completed', 'claimed') NOT NULL DEFAULT 'in_progress',
+                    `progress` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `completed_at` DATETIME NULL,
+                    `claimed_at` DATETIME NULL,
+                    UNIQUE KEY `uniq_user_quest` (`user_id`, `quest_key`),
+                    KEY `idx_uq_user` (`user_id`),
+                    KEY `idx_uq_status` (`status`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+        } catch (Exception $e) {
+            // Ignorer si déjà existant
+        }
     }
 
     /**
