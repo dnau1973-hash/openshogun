@@ -159,8 +159,8 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                                         </div>
                                         <div style="font-size:0.8rem; color:#94a3b8; display:flex; flex-wrap:wrap; gap:0.75rem; margin-top:0.25rem;">
                                             <span style="color:#ef4444;">⚔️ Force : <strong><?= $heroEffectiveStats['combat_strength'] ?></strong></span>
-                                            <span style="color:#f97316;">🔥 Attaque armée : <strong>+<?= $heroEffectiveStats['offense_percent'] ?>%</strong></span>
-                                            <span style="color:#10b981;">🛡️ Défense garnison : <strong>+<?= $heroEffectiveStats['defense_percent'] ?>%</strong></span>
+                                            <span style="color:#f97316;">🔥 Attaque armée : <strong>+<?= $heroEffectiveStats['offense_bonus_pct'] ?? 0 ?>%</strong></span>
+                                            <span style="color:#10b981;">🛡️ Défense garnison : <strong>+<?= $heroEffectiveStats['defense_bonus_pct'] ?? 0 ?>%</strong></span>
                                             <span style="color:#22c55e;">❤️ Vie : <strong><?= $heroData['health'] ?>%</strong></span>
                                         </div>
                                     </div>
