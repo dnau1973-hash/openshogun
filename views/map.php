@@ -67,24 +67,71 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
         </div>
     </div>
 
-    <div class="card-body" style="padding: 0; position: relative;">
         <!-- Conteneur Interactif Drag-and-Drop Pleine Largeur -->
         <div class="galaxy-map-wrapper map-fullwidth-wrapper" id="galaxyMapContainer" style="width: 100%; border: none; border-radius: 0;">
             <!-- Rendu interactif via GalaxyMapController -->
         </div>
+    </div>
+</div>
 
-        <!-- Panneau de Renseignements Planétaires / Fief Sélectionné -->
-        <div id="planetDetailsCard" class="card" style="margin: 1.25rem; display: none; border: 1px solid #dc2626; background: rgba(17,18,24,0.96); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);">
-            <div class="card-header" style="background: linear-gradient(135deg, rgba(185,28,28,0.25) 0%, rgba(17,18,24,0.9) 100%); border-bottom: 1px solid rgba(220,38,38,0.3); padding: 0.9rem 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-                <h3 class="card-title" id="selectedPlanetTitle" style="margin: 0; font-size: 1.15rem; color: #fff;">Détails du Domaine Castral</h3>
-                <span id="selectedPlanetCoords" style="color: #facc15; font-family: monospace; font-size: 1rem; font-weight: 800;"></span>
+<!-- =====================================================
+     MODAL CARTE — Informations de la Zone Sélectionnée
+     ===================================================== -->
+<div id="mapTileModal" style="
+    display: none;
+    position: fixed; inset: 0; z-index: 9000;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(3px);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+" onclick="if(event.target===this) closeMapModal();">
+
+    <div style="
+        background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 100%);
+        border: 1px solid rgba(220,38,38,0.5);
+        border-radius: 14px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+        width: 100%; max-width: 640px;
+        max-height: 85vh; overflow-y: auto;
+        position: relative;
+        animation: mapModalIn 0.2s ease;
+    ">
+        <!-- En-tête -->
+        <div style="
+            background: linear-gradient(135deg, rgba(185,28,28,0.3) 0%, rgba(30,27,75,0.8) 100%);
+            border-bottom: 1px solid rgba(220,38,38,0.3);
+            padding: 1rem 1.25rem;
+            display: flex; justify-content: space-between; align-items: center;
+            border-radius: 14px 14px 0 0;
+            gap: 0.75rem;
+        ">
+            <div style="display:flex; align-items:center; gap:0.75rem; flex:1; min-width:0;">
+                <h3 id="mapModalTitle" style="margin:0; font-size:1.1rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Informations</h3>
+                <span id="mapModalCoords" style="color:#facc15; font-family:monospace; font-size:0.95rem; font-weight:800; flex-shrink:0;"></span>
             </div>
-            <div class="card-body" id="selectedPlanetBody" style="padding: 1.25rem; color: #e4e4e7;">
-                <!-- Rempli dynamiquement par JavaScript -->
-            </div>
+            <button onclick="closeMapModal()" style="
+                background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+                color:#94a3b8; border-radius:8px; width:32px; height:32px; cursor:pointer;
+                font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+                flex-shrink:0; transition:all 0.15s;
+            " onmouseover="this.style.background='rgba(239,68,68,0.2)';this.style.color='#f87171'"
+               onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='#94a3b8'">✕</button>
+        </div>
+
+        <!-- Corps -->
+        <div id="mapModalBody" style="padding:1.25rem; color:#e4e4e7;">
+            <!-- Rempli dynamiquement par JavaScript -->
         </div>
     </div>
 </div>
+
+<style>
+@keyframes mapModalIn {
+    from { opacity:0; transform: scale(0.95) translateY(8px); }
+    to   { opacity:1; transform: scale(1)   translateY(0); }
+}
+</style>
 
 <script src="/public/js/galaxy_map.js?v=<?= file_exists(__DIR__ . '/../public/js/galaxy_map.js') ? filemtime(__DIR__ . '/../public/js/galaxy_map.js') : time() ?>"></script>
 <script>
@@ -109,86 +156,102 @@ function jumpToCoords() {
     }
 }
 
-// Fonction appelée lors du clic sur un fief de la carte
-window.selectPlanetTile = function(data) {
-    const card = document.getElementById('planetDetailsCard');
-    const title = document.getElementById('selectedPlanetTitle');
-    const coords = document.getElementById('selectedPlanetCoords');
-    const body = document.getElementById('selectedPlanetBody');
+function openMapModal() {
+    const modal = document.getElementById('mapTileModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
 
-    card.style.display = 'block';
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function closeMapModal() {
+    document.getElementById('mapTileModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Fermeture avec Echap
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeMapModal();
+});
+
+// Fonction appelée lors du clic sur une tuile de la carte
+window.selectPlanetTile = function(data) {
+    const title  = document.getElementById('mapModalTitle');
+    const coords = document.getElementById('mapModalCoords');
+    const body   = document.getElementById('mapModalBody');
+
     coords.innerText = `[${data.coord_x} : ${data.coord_y}]`;
 
+    // ── Terres vides ────────────────────────────────────────────
     if (data.empty) {
-        title.innerText = 'Terres Inexplorées';
+        title.innerText = '🌑 Terres Inexplorées';
         body.innerHTML = `
-            <p style="color:var(--text-muted); margin-bottom:0.5rem;">Ces terres lointaines ne contiennent actuellement aucun domaine castral recensé.</p>
+            <div style="text-align:center; padding:2rem 1rem;">
+                <div style="font-size:3rem; margin-bottom:0.75rem;">🌑</div>
+                <p style="color:#94a3b8; margin-bottom:0;">Ces terres lointaines ne contiennent actuellement aucun domaine castral recensé.</p>
+            </div>
         `;
+        openMapModal();
         return;
     }
 
-    // Gestion exclusive des 12 Donjons Authentiques du Japon (現存十二天守)
+    // ── Donjons Authentiques (現存十二天守) ─────────────────────
     if (data.is_authentic_castle) {
-        title.innerHTML = `🏯 <span style="color:#fbbf24;">${data.castle_name}</span> &bull; <span style="font-size:0.95rem; color:#fde047;">${data.castle_kanji || ''}</span>`;
+        title.innerHTML = `🏯 <span style="color:#fbbf24;">${data.castle_name}</span> <span style="font-size:0.9rem;color:#fde047;">${data.castle_kanji || ''}</span>`;
         body.innerHTML = `
-            <div style="background:linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(185,28,28,0.2) 100%); border:1px solid rgba(245,158,11,0.5); padding:1.1rem; border-radius:8px; margin-bottom:1.1rem; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+            <div style="background:linear-gradient(135deg,rgba(245,158,11,0.18),rgba(185,28,28,0.2)); border:1px solid rgba(245,158,11,0.5); padding:1.1rem; border-radius:8px; margin-bottom:1.1rem; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.6rem;">
-                    <span class="badge" style="background:#f59e0b; color:#1c1917; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem; letter-spacing:0.5px;">
-                        👑 TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE DU JAPON (現存十二天守)
+                    <span class="badge" style="background:#f59e0b; color:#1c1917; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">
+                        👑 TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE (現存十二天守)
                     </span>
-                    <span style="color:#fde047; font-size:0.8rem; font-weight:700;">
-                        📍 ${data.castle_province || 'Province Historique'}
-                    </span>
+                    <span style="color:#fde047; font-size:0.8rem; font-weight:700;">📍 ${data.castle_province || 'Province Historique'}</span>
                 </div>
-                <p style="color:#fef3c7; font-size:0.92rem; margin:0.4rem 0 0.6rem 0; line-height:1.45;">
-                    Ce donjon d'époque Sengoku-Edo est l'une des 12 forteresses d'origine préservées du Japon. 
-                    <strong style="color:#fbbf24;">Enjeu suprême de la Bataille Finale du Shogunat :</strong> les clans qui prendront le contrôle de ces citadelles sacrées détermineront l'avènement du prochain Shogun.
+                <p style="color:#fef3c7; font-size:0.9rem; margin:0.4rem 0 0.6rem 0; line-height:1.5;">
+                    Ce donjon d'époque Sengoku-Edo est l'une des 12 forteresses d'origine préservées du Japon.
+                    <strong style="color:#fbbf24;">Enjeu suprême de la Bataille Finale du Shogunat.</strong>
                 </p>
                 <div style="font-size:0.8rem; color:#f59e0b; display:flex; gap:1.2rem; flex-wrap:wrap;">
                     <span>Bâtisseur : <strong>${data.castle_builder || 'Maître Féodal'}</strong></span>
-                    <span>Garnison Sacrée : <strong style="color:#4ade80;">25,000 pts défense</strong></span>
+                    <span>Garnison : <strong style="color:#4ade80;">25 000 pts défense</strong></span>
                 </div>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
-                <a href="/?page=castle&code=${encodeURIComponent(data.castle_code || '')}" class="btn btn-warning" style="font-weight:800; display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.4rem; font-size:0.95rem; background:#f59e0b; color:#18181b; border:none; text-decoration:none; border-radius:6px; box-shadow:0 3px 12px rgba(245,158,11,0.4);">
-                    <span>📜</span> Découvrir l'Histoire & les Enjeux du Château &rarr;
+                <a href="/?page=castle&code=${encodeURIComponent(data.castle_code || '')}"
+                   class="btn btn-warning" style="font-weight:800; background:#f59e0b; color:#18181b; border:none; text-decoration:none;">
+                    📜 Découvrir l'Histoire &rarr;
                 </a>
                 <div style="display:flex; gap:0.5rem;">
                     ${data.planet_id ? `
-                        <a href="?page=fleet&target_id=${data.planet_id}&mission=spy" class="btn btn-secondary">🥷 Sonder la Citadelle</a>
+                        <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"  class="btn btn-secondary">🥷 Sonder</a>
                         <a href="?page=fleet&target_id=${data.planet_id}&mission=raid" class="btn btn-danger">⚔️ Assaillir</a>
-                    ` : `
-                        <span style="font-size:0.8rem; color:var(--text-muted); align-self:center;">Sanctuaire Inviolé</span>
-                    `}
+                    ` : `<span style="font-size:0.8rem; color:#94a3b8;">Sanctuaire Inviolé</span>`}
                 </div>
             </div>
         `;
+        openMapModal();
         return;
     }
 
-    // Gestion exclusive des Oasis Naturelles (Style Travian)
+    // ── Oasis Naturelle ─────────────────────────────────────────
     if (data.is_oasis) {
-        const isOccupied = (data.is_occupied == 1);
-        const isOwn = (data.owner_planet_id && parseInt(data.owner_planet_id, 10) === <?= (int)$planet['id'] ?>);
-        const units = data.units || [];
+        const isOccupied   = (data.is_occupied == 1);
+        const isOwn        = (data.owner_planet_id && parseInt(data.owner_planet_id, 10) === <?= (int)$planet['id'] ?>);
+        const units        = data.units || [];
         const hasWildBeasts = units.some(u => u.is_wild == 1 && parseInt(u.count, 10) > 0);
 
         let statusBadge = '';
         if (isOwn) {
             statusBadge = '<span class="badge" style="background:#16a34a; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🌿 VOTRE FIEF NATUREL ANNEXÉ</span>';
         } else if (isOccupied) {
-            statusBadge = `<span class="badge" style="background:#3b82f6; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🛡️ OASIS OCCUPÉE PAR ${data.username || 'UN DAIMYŌ'}</span>`;
+            statusBadge = `<span class="badge" style="background:#3b82f6; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🛡️ OCCUPÉE PAR ${data.username || 'UN DAIMYŌ'}</span>`;
         } else if (hasWildBeasts) {
-            statusBadge = '<span class="badge" style="background:#dc2626; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🐗 OASIS SAUVAGE INOCCUPÉE &bull; FAUNE HOSTILE</span>';
+            statusBadge = '<span class="badge" style="background:#dc2626; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🐗 OASIS SAUVAGE — FAUNE HOSTILE</span>';
         } else {
-            statusBadge = '<span class="badge" style="background:#10b981; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">✨ OASIS PACIFIÉE &bull; LIBRE D\'OCCUPATION</span>';
+            statusBadge = '<span class="badge" style="background:#10b981; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">✨ OASIS LIBRE D\'OCCUPATION</span>';
         }
 
         let bonusBadgesHtml = '';
-        if (data.bonus_rice > 0) bonusBadgesHtml += `<span style="background:rgba(234,179,8,0.2); border:1px solid #eab308; color:#fef08a; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🌾 +${data.bonus_rice}% Riz</span> `;
-        if (data.bonus_wood > 0) bonusBadgesHtml += `<span style="background:rgba(34,197,94,0.2); border:1px solid #22c55e; color:#bbf7d0; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🪵 +${data.bonus_wood}% Bois</span> `;
-        if (data.bonus_stone > 0) bonusBadgesHtml += `<span style="background:rgba(59,130,246,0.2); border:1px solid #3b82f6; color:#bfdbfe; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🪨 +${data.bonus_stone}% Pierre</span> `;
+        if (data.bonus_rice  > 0) bonusBadgesHtml += `<span style="background:rgba(234,179,8,0.2); border:1px solid #eab308; color:#fef08a; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🌾 +${data.bonus_rice}% Riz</span>`;
+        if (data.bonus_wood  > 0) bonusBadgesHtml += `<span style="background:rgba(34,197,94,0.2); border:1px solid #22c55e; color:#bbf7d0; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🪵 +${data.bonus_wood}% Bois</span>`;
+        if (data.bonus_stone > 0) bonusBadgesHtml += `<span style="background:rgba(59,130,246,0.2); border:1px solid #3b82f6; color:#bfdbfe; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🪨 +${data.bonus_stone}% Pierre</span>`;
 
         let unitsHtml = '';
         if (units.length > 0) {
@@ -209,116 +272,115 @@ window.selectPlanetTile = function(data) {
             unitsHtml = '<p style="color:#4ade80; font-size:0.85rem; margin:0.3rem 0;">🕊️ Aucun animal sauvage ni soldat en garnison. L\'oasis est entièrement pacifiée !</p>';
         }
 
-        title.innerHTML = `🌿 <span style="color:#22c55e;">${data.oasis_name}</span> &bull; <span style="font-size:0.9rem; color:#86efac;">${data.bonus_label || ''}</span>`;
+        title.innerHTML = `🌿 <span style="color:#22c55e;">${data.oasis_name}</span> <span style="font-size:0.85rem; color:#86efac;">${data.bonus_label || ''}</span>`;
         body.innerHTML = `
-            <div style="background:linear-gradient(135deg, rgba(22,101,52,0.25) 0%, rgba(15,23,42,0.6) 100%); border:1px solid rgba(34,197,94,0.4); padding:1.1rem; border-radius:8px; margin-bottom:1.1rem; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+            <div style="background:linear-gradient(135deg,rgba(22,101,52,0.25),rgba(15,23,42,0.6)); border:1px solid rgba(34,197,94,0.4); padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
                     ${statusBadge}
-                    <div style="display:flex; gap:0.3rem;">${bonusBadgesHtml}</div>
+                    <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">${bonusBadgesHtml}</div>
                 </div>
                 <p style="color:#dcfce7; font-size:0.9rem; margin:0.4rem 0 0.75rem 0; line-height:1.45;">
-                    Cette oasis naturelle regorge de terres fertiles et de bois précieux. 
-                    <strong>Pillez les récoltes</strong> en terrassant la faune, ou <strong>occupez le territoire</strong> avec vos soldats pour conférer des bonus permanents de récolte à votre fief principal.
+                    Cette oasis naturelle regorge de terres fertiles et de ressources précieuses.
+                    <strong>Pillez les récoltes</strong> en terrassant la faune, ou <strong>occupez le territoire</strong> pour conférer des bonus permanents à votre fief.
                 </p>
                 <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.6rem 0.8rem; margin-bottom:0.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; font-size:0.85rem;">
-                    <span style="color:#94a3b8;">Récoltes accumulées à piller :</span>
+                    <span style="color:#94a3b8;">Récoltes accumulées :</span>
                     <div style="display:flex; gap:1rem;">
-                        <span style="color:#fbbf24;">🪵 <strong>${(data.res_wood || 0).toLocaleString()}</strong> Bois</span>
-                        <span style="color:#60a5fa;">🪨 <strong>${(data.res_stone || 0).toLocaleString()}</strong> Pierre</span>
-                        <span style="color:#34d399;">🌾 <strong>${(data.res_rice || 0).toLocaleString()}</strong> Riz</span>
+                        <span style="color:#fbbf24;">🪵 <strong>${(data.res_wood  || 0).toLocaleString()}</strong></span>
+                        <span style="color:#60a5fa;">🪨 <strong>${(data.res_stone || 0).toLocaleString()}</strong></span>
+                        <span style="color:#34d399;">🌾 <strong>${(data.res_rice  || 0).toLocaleString()}</strong></span>
                     </div>
                 </div>
                 <div style="margin-top:0.5rem;">
-                    <span style="font-size:0.8rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Faune Sauvage & Garnison Défensive :</span>
+                    <span style="font-size:0.78rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Faune &amp; Garnison :</span>
                     ${unitsHtml}
                 </div>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
                 <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=raid" class="btn btn-warning" style="font-weight:700; background:#d97706; border-color:#f59e0b;">
-                        ⚔️ Piller l'Oasis
-                    </a>
-                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=attack" class="btn btn-danger" style="font-weight:700;">
-                        💥 Assaillir / Nettoyer
-                    </a>
+                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=raid"   class="btn btn-warning" style="font-weight:700; background:#d97706; border-color:#f59e0b;">⚔️ Piller l'Oasis</a>
+                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=attack" class="btn btn-danger"  style="font-weight:700;">💥 Nettoyer</a>
                 </div>
                 <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
                     ${isOwn ? `
-                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-primary" style="background:#2563eb;">
-                            🛡️ Renforcer la Garnison
-                        </a>
-                        <button onclick="abandonOasisDirect(${data.oasis_id})" class="btn btn-secondary" style="color:#ef4444; border-color:rgba(239,68,68,0.4);">
-                            🏳️ Abandonner
-                        </button>
+                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-primary" style="background:#2563eb;">🛡️ Renforcer</a>
+                        <button onclick="abandonOasisDirect(${data.oasis_id})" class="btn btn-secondary" style="color:#ef4444; border-color:rgba(239,68,68,0.4);">🏳️ Abandonner</button>
                     ` : `
-                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-success" style="background:#16a34a; border-color:#22c55e; font-weight:700;">
-                            🚩 Déployer & Occuper
-                        </a>
-                        ${!hasWildBeasts ? `
-                            <button onclick="annexOasisDirect(${data.oasis_id})" class="btn btn-primary" style="background:#059669; border-color:#10b981; font-weight:700;">
-                                ✨ Annexion Directe
-                            </button>
-                        ` : ''}
+                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-success" style="background:#16a34a; border-color:#22c55e; font-weight:700;">🚩 Occuper</a>
+                        ${!hasWildBeasts ? `<button onclick="annexOasisDirect(${data.oasis_id})" class="btn btn-primary" style="background:#059669; border-color:#10b981; font-weight:700;">✨ Annexion Directe</button>` : ''}
                     `}
                 </div>
             </div>
         `;
+        openMapModal();
         return;
     }
 
+    // ── Terres Neutres (planète sans joueur) ────────────────────
     if (!data.user_id) {
-        title.innerText = `Terres Neutres : ${data.planet_name}`;
+        title.innerText = `🏞️ Terres Neutres`;
         body.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                 <div>
-                    <p style="margin-bottom:0.3rem;">Nature du terrain : <strong>${data.planet_type}</strong></p>
-                    <p style="color:#4ade80; font-weight:600;">✨ Terres fertiles libres pour l'établissement d'un nouveau fief !</p>
+                    <p style="margin-bottom:0.3rem; font-size:0.95rem;"><strong style="color:#fff;">${data.planet_name || 'Domaine inconnu'}</strong></p>
+                    <p style="margin-bottom:0.3rem; color:#94a3b8;">Terrain : <strong style="color:#e2e8f0;">${data.planet_type || '—'}</strong></p>
+                    <p style="color:#4ade80; font-weight:600; font-size:0.9rem;">✨ Terres fertiles libres pour un nouveau fief !</p>
                 </div>
-                <div style="display:flex; gap:0.5rem;">
-                    <a href="?page=fleet&target_id=${data.planet_id}&mission=colonize" class="btn btn-primary">Établir un Fief</a>
-                    <a href="?page=fleet&target_id=${data.planet_id}&mission=raid" class="btn btn-danger">Piller le Domaine</a>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <a href="?page=fleet&target_id=${data.planet_id}&mission=colonize" class="btn btn-primary">🏯 Établir un Fief</a>
+                    <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"     class="btn btn-danger">⚔️ Piller</a>
                 </div>
             </div>
         `;
-    } else {
-        const isOwn = (parseInt(data.user_id, 10) === <?= (int)$user['id'] ?>);
-        const fKey = (data.faction || 'terran').toLowerCase();
-        const fName = (data.faction || 'Terran').toUpperCase();
-        const pts = (data.points != null) ? Number(data.points).toLocaleString() : '0';
-        const targetUserId = parseInt(data.user_id, 10) || 0;
+        openMapModal();
+        return;
+    }
 
-        title.innerText = `${data.planet_name} (Fief de ${data.username || 'Daimyō'})`;
-        body.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+    // ── Fief d'un joueur ────────────────────────────────────────
+    const isOwn = (parseInt(data.user_id, 10) === <?= (int)$user['id'] ?>);
+    const fKey  = (data.faction || 'terran').toLowerCase();
+    const fName = (data.faction || 'Terran').toUpperCase();
+    const pts   = (data.points != null) ? Number(data.points).toLocaleString() : '0';
+    const targetUserId = parseInt(data.user_id, 10) || 0;
+
+    title.innerText = `🏯 ${data.planet_name} — ${data.username || 'Daimyō'}`;
+    body.innerHTML = `
+        <div style="background:linear-gradient(135deg,rgba(185,28,28,0.15),rgba(15,23,42,0.6)); border:1px solid rgba(220,38,38,0.3); padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.85rem;">
+                <div style="width:42px; height:42px; border-radius:50%; background:rgba(220,38,38,0.2); border:2px solid rgba(220,38,38,0.5); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;">🏯</div>
                 <div>
-                    <p style="margin-bottom:0.3rem;">Daimyō : 
-                        <a href="javascript:void(0)" onclick="openPlayerProfileModal(${targetUserId})" 
-                           style="color:#dc2626; font-weight:700; text-decoration:none;" title="Consulter la fiche du Daimyō">
+                    <div style="font-weight:800; color:#fff; font-size:1rem;">${data.planet_name}</div>
+                    <div style="font-size:0.82rem; color:#94a3b8;">Fief du Daimyō
+                        <a href="javascript:void(0)" onclick="openPlayerProfileModal(${targetUserId})"
+                           style="color:#dc2626; font-weight:700; text-decoration:none; margin-left:0.3rem;">
                             👤 ${data.username || 'Daimyō'}
                         </a>
-                        ${data.alliance_tag ? `[${data.alliance_tag}]` : ''}
-                    </p>
-                    <p style="margin-bottom:0.3rem;">Clan : <span class="faction-badge ${fKey}">${fName}</span></p>
-                    <p>Puissance du Domaine : <strong>${pts} pts</strong></p>
-                </div>
-                <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
-                    <button type="button" onclick="openPlayerProfileModal(${targetUserId})" class="btn btn-secondary" style="border-color:#dc2626; color:#dc2626;">
-                        👤 Fiche du Daimyō
-                    </button>
-                    ${!isOwn ? `
-                        <a href="?page=fleet&target_id=${data.planet_id}&mission=spy" class="btn btn-secondary">🥷 Infiltration Shinobi</a>
-                        <a href="?page=fleet&target_id=${data.planet_id}&mission=raid" class="btn btn-primary" style="background:#b91c1c;">⚔️ Lancer un Raid</a>
-                        <a href="?page=fleet&target_id=${data.planet_id}&mission=transport" class="btn btn-secondary">🐂 Convoi</a>
-                        <a href="?page=messages&tab=compose&to=${encodeURIComponent(data.username || '')}" class="btn btn-secondary">✉️ Missive</a>
-                    ` : `
-                        <span style="color:#4ade80; font-size:0.85rem; font-weight:700; padding:0.4rem 0.6rem; background:rgba(74,222,128,0.1); border-radius:4px;">
-                            🏯 Votre propre domaine castral
-                        </span>
-                    `}
+                        ${data.alliance_tag ? `<span style="color:#f59e0b; margin-left:0.3rem;">[${data.alliance_tag}]</span>` : ''}
+                    </div>
                 </div>
             </div>
-        `;
-    }
+            <div style="display:flex; gap:1.5rem; flex-wrap:wrap; font-size:0.88rem;">
+                <span>Clan : <span class="faction-badge ${fKey}">${fName}</span></span>
+                <span>Puissance : <strong style="color:#f59e0b;">${pts} pts</strong></span>
+            </div>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
+            <button type="button" onclick="openPlayerProfileModal(${targetUserId})" class="btn btn-secondary" style="border-color:#dc2626; color:#dc2626;">
+                👤 Fiche Daimyō
+            </button>
+            ${!isOwn ? `
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"       class="btn btn-secondary">🥷 Espionner</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"      class="btn btn-danger" style="background:#b91c1c;">⚔️ Raid</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=transport" class="btn btn-secondary">🐂 Convoi</a>
+                <a href="?page=messages&tab=compose&to=${encodeURIComponent(data.username || '')}" class="btn btn-secondary">✉️ Missive</a>
+            ` : `
+                <span style="color:#4ade80; font-size:0.85rem; font-weight:700; padding:0.4rem 0.6rem; background:rgba(74,222,128,0.1); border-radius:4px; align-self:center;">
+                    🏯 Votre propre domaine castral
+                </span>
+            `}
+        </div>
+    `;
+    openMapModal();
 };
 
 window.annexOasisDirect = async function(oasisId) {
@@ -326,12 +388,12 @@ window.annexOasisDirect = async function(oasisId) {
         const formData = new FormData();
         formData.append('action', 'annex');
         formData.append('oasis_id', oasisId);
-        const res = await fetch('/api/oasis.php', { method: 'POST', body: formData });
+        const res  = await fetch('/api/oasis.php', { method: 'POST', body: formData });
         const data = await res.json();
+        closeMapModal();
         if (data.success) {
             await showModalAlert(data.message, 'success', 'Annexion Féodale Réussie');
             if (galaxyMap) galaxyMap.fetchMapData();
-            document.getElementById('planetDetailsCard').style.display = 'none';
         } else {
             showModalAlert(data.message || data.error || 'Erreur lors de l\'annexion.', 'error');
         }
@@ -341,19 +403,17 @@ window.annexOasisDirect = async function(oasisId) {
 };
 
 window.abandonOasisDirect = async function(oasisId) {
-    if (!confirm('Êtes-vous certain de vouloir abandonner cette oasis ? Vous perdrez les bonus de récolte associés.')) {
-        return;
-    }
+    if (!confirm('Êtes-vous certain de vouloir abandonner cette oasis ? Vous perdrez les bonus de récolte associés.')) return;
     try {
         const formData = new FormData();
         formData.append('action', 'abandon');
         formData.append('oasis_id', oasisId);
-        const res = await fetch('/api/oasis.php', { method: 'POST', body: formData });
+        const res  = await fetch('/api/oasis.php', { method: 'POST', body: formData });
         const data = await res.json();
+        closeMapModal();
         if (data.success) {
             await showModalAlert(data.message, 'info', 'Oasis Abandonnée');
             if (galaxyMap) galaxyMap.fetchMapData();
-            document.getElementById('planetDetailsCard').style.display = 'none';
         } else {
             showModalAlert(data.message || data.error || 'Erreur lors de l\'abandon.', 'error');
         }
