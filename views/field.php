@@ -168,477 +168,389 @@ $prevSlot = ($slot > 1) ? $slot - 1 : 20;
 $nextSlot = ($slot < 20) ? $slot + 1 : 1;
 ?>
 
-<style>
-/* Forcer la largeur maximale comme sur la page ressources */
-.container {
-    max-width: 1850px !important;
-    width: 98% !important;
-    margin: 1rem auto !important;
-}
-</style>
-
-<div class="field-view-container" style="width: 100%; margin: 0 auto; padding: 1rem 0;">
-
-    <!-- Barre de Navigation Supérieure (Retour au Domaine + Sélecteur de Parcelle) -->
-    <div class="field-nav-bar">
-        <a href="/?page=resources" class="field-back-btn">
-            <span>&larr;</span>
-            <span>Retour au Terroir Féodal</span>
-        </a>
-
-        <div class="field-slot-switcher">
-            <a href="/?page=field&slot=<?= $prevSlot ?>" class="field-arrow-btn" title="Parcelle précédente">
-                &larr; Parcelle #<?= $prevSlot ?>
-            </a>
-            <div class="field-current-indicator">
-                <span class="field-slot-badge">Parcelle #<?= $slot ?> sur 20</span>
-            </div>
-            <a href="/?page=field&slot=<?= $nextSlot ?>" class="field-arrow-btn" title="Parcelle suivante">
-                Parcelle #<?= $nextSlot ?> &rarr;
-            </a>
-        </div>
-    </div>
-
-    <!-- RECTANGLE D'INFORMATIONS DU CHAMP (REMONTÉ AU-DESSUS) -->
-    <div class="field-info-card">
-        <!-- Emplacement Mis en Valeur : TILE DU CHAMP SANS ROND ROUGE (AGRANDIE) -->
-        <div class="field-tile-stage">
-            <div class="field-tile-container">
-                <img src="<?= $tileUrl ?>" 
-                     class="field-tile-img" 
-                     alt="<?= htmlspecialchars($info['name']) ?>" 
-                     draggable="false">
-                <div class="field-level-emblem">
-                    <span class="emblem-lvl-text">NIVEAU</span>
-                    <span class="emblem-lvl-number"><?= $lvl ?></span>
-                </div>
-            </div>
-
-            <!-- BOUTON RASER L'EXPLOITATION DANS UN RECTANGLE DÉDIÉ -->
-            <?php if ($lvl > 0 && !$activeJob): ?>
-                <div class="field-demolish-rect">
-                    <button type="button" 
-                            class="field-demolish-btn" 
-                            onclick="confirmDemolishField(<?= $slot ?>, '<?= htmlspecialchars(addslashes($info['name'] ?? $type)) ?>')"
-                            title="Raser définitivement cette exploitation (récupère 30% des matériaux)">
-                        <span>💥</span>
-                        <span>Raser l'Exploitation</span>
-                    </button>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- Identité & Description Thématique du Champ -->
-        <div class="field-meta-pane">
-            <div class="field-header-row">
-                <div>
-                    <div class="field-type-pill <?= $sectorClass ?>">
-                        <span><?= $info['icon'] ?></span>
-                        <span><?= htmlspecialchars($info['res_name'] ?? 'Ressource') ?></span>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-top:0.25rem;">
-                        <h1 class="field-title" style="margin:0;"><?= htmlspecialchars($info['name']) ?></h1>
-                    </div>
-                    <span class="field-subtitle">Emplacement cadastral #<?= $slot ?> &bull; Domaine de <?= htmlspecialchars($planet['name']) ?></span>
-                </div>
-
+<!-- Navigation breadcrumb Tabler -->
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <div class="page-pretitle">Terroir de <?= htmlspecialchars($planet['name']) ?></div>
+            <h2 class="page-title">
+                <?= $info['icon'] ?? '🌾' ?> <?= htmlspecialchars($info['name']) ?>
+                <span class="badge bg-secondary ms-2" style="font-size:0.65rem; vertical-align:middle;">Parcelle #<?= $slot ?></span>
                 <?php if ($activeJob): ?>
-                    <div class="field-status-badge upgrading">
-                        <span class="pulse-dot"></span>
-                        <span>Chantier en cours : Niveau <?= $activeJob['target_level'] ?></span>
+                    <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem; vertical-align:middle;">⏳ Chantier en cours</span>
+                <?php endif; ?>
+            </h2>
+        </div>
+        <div class="col-auto ms-auto d-print-none">
+            <div class="btn-list">
+                <a href="/?page=field&slot=<?= $prevSlot ?>" class="btn btn-outline-secondary">
+                    ← Parcelle #<?= $prevSlot ?>
+                </a>
+                <a href="/?page=resources" class="btn btn-secondary">
+                    🌾 Vue Terroir
+                </a>
+                <a href="/?page=field&slot=<?= $nextSlot ?>" class="btn btn-outline-secondary">
+                    Parcelle #<?= $nextSlot ?> →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stat Cards : production actuelle / prochaine -->
+<div class="row row-cards mb-3">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto"><span class="avatar rounded" style="background:rgba(146,64,14,0.12); font-size:1.3rem;"><?= $info['icon'] ?? '🪵' ?></span></div>
+                    <div class="col">
+                        <div class="font-weight-medium">Production actuelle</div>
+                        <div class="text-secondary"><?= number_format($curProd) ?> <small><?= $unitLabel ?></small></div>
                     </div>
-                <?php else: ?>
-                    <div class="field-status-badge ready">
-                        <span>Statut : Opérationnel</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;">📈</span></div>
+                    <div class="col">
+                        <div class="font-weight-medium">Niveau <?= $targetLevel ?> → production</div>
+                        <div class="text-success"><?= number_format($nextProd) ?> <small><?= $unitLabel ?></small> <span class="text-muted">(+<?= number_format($diffProd) ?>)</span></div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;">⏱️</span></div>
+                    <div class="col">
+                        <div class="font-weight-medium">Temps de construction</div>
+                        <div class="text-info font-monospace"><?= gmdate('H:i:s', $duration) ?></div>
+                        <div class="text-muted" style="font-size:0.72rem;">Tenshu Niv.<?= $hqLevel ?> · Vitesse ×<?= (int)$speed ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;">⛩️</span></div>
+                    <div class="col">
+                        <div class="font-weight-medium">Sérénité requise (Niv.<?= $targetLevel ?>)</div>
+                        <div><?php if ($type !== 'solar_plant' && $info['base_energy_cons'] > 0): ?>
+                            <span class="text-warning"><?= $curEnergy ?> → <strong><?= $nextEnergy ?></strong></span>
+                        <?php else: ?><span class="text-muted">— Sanctuaire producteur</span><?php endif; ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row row-cards">
+
+    <!-- Colonne gauche : info + illustration -->
+    <div class="col-lg-5">
+
+        <!-- Card identité du champ -->
+        <div class="card mb-3">
+            <?php if ($fieldIllustrationUrl): ?>
+            <div class="card-img-top" style="cursor:pointer; overflow:hidden; max-height:220px;" onclick="openArtworkModal('<?= $fieldIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($info['name'])) ?>')" title="Agrandir l'estampe">
+                <img src="<?= $fieldIllustrationUrl ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:100%; height:220px; object-fit:cover;">
+                <div style="position:absolute; bottom:8px; right:10px; background:rgba(0,0,0,0.55); color:#fff; font-size:0.72rem; padding:2px 8px; border-radius:4px; backdrop-filter:blur(2px);">🔍 Agrandir</div>
+            </div>
+            <?php else: ?>
+            <div style="height:120px; background:linear-gradient(135deg,rgba(146,64,14,0.15),rgba(22,101,52,0.1)); display:flex; align-items:center; justify-content:center; font-size:3rem;">
+                <?= $info['icon'] ?? '🌾' ?>
+            </div>
+            <?php endif; ?>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <img src="<?= $tileUrl ?>" alt="" style="width:52px; height:52px; border-radius:8px; object-fit:cover; border:2px solid var(--tblr-border-color); margin-right:0.75rem;">
+                    <div>
+                        <h3 class="card-title mb-0"><?= htmlspecialchars($info['name']) ?></h3>
+                        <div class="text-muted" style="font-size:0.8rem;">Parcelle #<?= $slot ?> sur 20 · Niveau actuel : <strong><?= $lvl ?></strong></div>
+                    </div>
+                </div>
+                <p class="text-muted mb-3" style="font-size:0.875rem;"><?= htmlspecialchars($info['description']) ?></p>
+
+                <?php if ($lvl > 0 && !$activeJob): ?>
+                <button type="button" class="btn btn-outline-danger btn-sm w-100"
+                        onclick="confirmDemolishField(<?= $slot ?>, '<?= htmlspecialchars(addslashes($info['name'] ?? $type)) ?>')">
+                    💥 Raser l'Exploitation (récupère 30%)
+                </button>
                 <?php endif; ?>
             </div>
+        </div>
 
-            <p class="field-description">
-                <?= htmlspecialchars($info['description']) ?>
-            </p>
-
-            <!-- Bandeau récapitulatif rapide de rendement -->
-            <div class="field-quick-stats">
-                <div class="quick-stat-box">
-                    <span class="stat-label">Production actuelle</span>
-                    <span class="stat-value">+<?= number_format($curProd) ?> <small><?= $unitLabel ?></small></span>
-                </div>
-                <div class="quick-stat-box highlight">
-                    <span class="stat-label">Au Niveau <?= $targetLevel ?></span>
-                    <span class="stat-value">+<?= number_format($nextProd) ?> <small><?= $unitLabel ?></small></span>
-                    <span class="stat-gain">(+<?= number_format($diffProd) ?> / h)</span>
-                </div>
-                <?php if ($type !== 'solar_plant' && $info['base_energy_cons'] > 0): ?>
-                    <div class="quick-stat-box">
-                        <span class="stat-label">Sérénité requise</span>
-                        <span class="stat-value" style="color:#fbbf24;">⛩️ <?= $curEnergy ?> &rarr; <?= $nextEnergy ?></span>
+        <!-- Sélecteur rapide de toutes les parcelles -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🗺️ Toutes les Parcelles</h3>
+                <div class="card-options text-muted" style="font-size:0.78rem;">Cliquez pour naviguer</div>
+            </div>
+            <div class="card-body p-2">
+                <div class="row g-1">
+                    <?php for ($i = 1; $i <= 20; $i++):
+                        $f     = $fieldsBySlot[$i] ?? ['type' => 'metal_mine', 'level' => 0];
+                        $fType = $f['type'];
+                        $fLvl  = (int)$f['level'];
+                        $fInfo = FIELD_TYPES[$fType] ?? FIELD_TYPES['metal_mine'];
+                        $isCurrent = ($i === $slot);
+                        $fTile = match($fType) {
+                            'metal_mine'      => 'tile_bucheron.png',
+                            'crystal_mine'    => 'tile_carriere.png',
+                            'deuterium_synth' => 'tile_riziere.png',
+                            'solar_plant'     => 'tile_sanctuaire.png',
+                            default           => 'tile_bucheron.png'
+                        };
+                        $fTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $fTile)
+                            ? '/public/assets/tiles/' . $fTile
+                            : '/public/assets/' . $fTile;
+                    ?>
+                    <div class="col-auto">
+                        <a href="/?page=field&slot=<?= $i ?>"
+                           title="<?= htmlspecialchars($fInfo['name']) ?> #<?= $i ?> — Niv.<?= $fLvl ?>"
+                           style="display:block; text-align:center; width:44px; text-decoration:none;">
+                            <img src="<?= $fTileUrl ?>" alt=""
+                                 style="width:40px; height:40px; border-radius:6px; object-fit:cover;
+                                        border:2px solid <?= $isCurrent ? '#dc2626' : 'var(--tblr-border-color)' ?>;
+                                        opacity:<?= $isCurrent ? '1' : '0.75' ?>;
+                                        box-shadow:<?= $isCurrent ? '0 0 0 2px rgba(220,38,38,0.3)' : 'none' ?>;">
+                            <div style="font-size:0.6rem; color:<?= $isCurrent ? '#dc2626' : 'var(--tblr-text-muted)' ?>; font-weight:<?= $isCurrent ? '800' : '400' ?>; line-height:1.4;">#<?= $i ?> N<?= $fLvl ?></div>
+                        </a>
                     </div>
-                <?php endif; ?>
+                    <?php endfor; ?>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ESTAMPE ARTISTIQUE DU TERROIR FÉODAL (PLEINE LARGEUR, SANS COUCHE ALPHA) -->
-    <?php if ($fieldIllustrationUrl): ?>
-        <div class="field-artwork-card" onclick="openArtworkModal('<?= $fieldIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($info['name'])) ?>')" title="Cliquer pour admirer l'estampe en plein écran">
-            <img src="<?= $fieldIllustrationUrl ?>" 
-                 alt="<?= htmlspecialchars($info['name']) ?>" 
-                 class="field-artwork-img" 
-                 loading="lazy">
-            <div class="field-artwork-badge">
-                <span>🎨 Estampe Féodale &bull; <?= htmlspecialchars($info['name']) ?></span>
-                <span style="font-size: 0.75rem; opacity: 0.85;">(Agrandir en HD 🔍)</span>
+    <!-- Colonne droite : coûts + action -->
+    <div class="col-lg-7">
+
+        <!-- Coûts d'amélioration -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3 class="card-title">🪵 Coûts d'Amélioration — Niveau <?= $targetLevel ?></h3>
+                <div class="card-options text-muted" style="font-size:0.78rem;">Stock disponible dans vos greniers</div>
             </div>
-        </div>
-    <?php endif; ?>
-
-    <!-- SECTION DES TRAVAUX & DÉTAILS DU NIVEAU SUIVANT -->
-    <div class="field-upgrade-grid">
-        
-        <!-- Colonne Gauche : Conditions & Coûts pour le Niveau Suivant -->
-        <div class="field-card">
-            <div class="field-card-header">
-                <h3>🪵 Coûts d'Amélioration &bull; Niveau <?= $targetLevel ?></h3>
-                <span style="font-size:0.8rem; color:var(--text-muted);">Stock disponible dans vos greniers</span>
-            </div>
-            <div class="field-card-body">
-                <div class="cost-grid">
-                    <!-- Bois -->
-                    <div class="cost-item <?= $hasMetal ? 'cost-ok' : 'cost-missing' ?>">
-                        <div class="cost-icon">🪵</div>
-                        <div class="cost-details">
-                            <span class="cost-name">Bois de Cèdre</span>
-                            <span class="cost-req"><?= number_format($cost['metal']) ?></span>
-                            <span class="cost-stock">Stock : <?= number_format($planet['metal']) ?></span>
+            <div class="card-body">
+                <?php
+                $resources = [
+                    ['icon'=>'🪵', 'name'=>'Bois de Cèdre',   'req'=>$cost['metal'],     'stock'=>$planet['metal'],     'ok'=>$hasMetal],
+                    ['icon'=>'🪨', 'name'=>'Pierre de Taille', 'req'=>$cost['crystal'],   'stock'=>$planet['crystal'],   'ok'=>$hasCrystal],
+                    ['icon'=>'🌾', 'name'=>'Riz Impérial',     'req'=>$cost['deuterium'], 'stock'=>$planet['deuterium'], 'ok'=>$hasDeut],
+                ];
+                foreach ($resources as $r):
+                    $pct = ($r['req'] > 0) ? min(100, ($r['stock'] / $r['req']) * 100) : 100;
+                ?>
+                <div class="d-flex align-items-center mb-3">
+                    <span style="font-size:1.3rem; min-width:2rem;"><?= $r['icon'] ?></span>
+                    <div class="flex-fill mx-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="fw-medium" style="font-size:0.875rem;"><?= $r['name'] ?></span>
+                            <span class="text-muted" style="font-size:0.8rem;">
+                                <?= number_format($r['stock']) ?> / <strong class="<?= $r['ok'] ? 'text-success' : 'text-danger' ?>"><?= number_format($r['req']) ?></strong> requis
+                            </span>
                         </div>
-                        <div class="cost-check"><?= $hasMetal ? '✓' : '✗' ?></div>
+                        <div class="progress" style="height:6px;">
+                            <div class="progress-bar <?= $r['ok'] ? 'bg-success' : 'bg-danger' ?>" style="width:<?= $pct ?>%;"></div>
+                        </div>
                     </div>
-
-                    <!-- Pierre -->
-                    <div class="cost-item <?= $hasCrystal ? 'cost-ok' : 'cost-missing' ?>">
-                        <div class="cost-icon">🪨</div>
-                        <div class="cost-details">
-                            <span class="cost-name">Pierre de Taille</span>
-                            <span class="cost-req"><?= number_format($cost['crystal']) ?></span>
-                            <span class="cost-stock">Stock : <?= number_format($planet['crystal']) ?></span>
-                        </div>
-                        <div class="cost-check"><?= $hasCrystal ? '✓' : '✗' ?></div>
-                    </div>
-
-                    <!-- Riz -->
-                    <div class="cost-item <?= $hasDeut ? 'cost-ok' : 'cost-missing' ?>">
-                        <div class="cost-icon">🌾</div>
-                        <div class="cost-details">
-                            <span class="cost-name">Riz Impérial</span>
-                            <span class="cost-req"><?= number_format($cost['deuterium']) ?></span>
-                            <span class="cost-stock">Stock : <?= number_format($planet['deuterium']) ?></span>
-                        </div>
-                        <div class="cost-check"><?= $hasDeut ? '✓' : '✗' ?></div>
-                    </div>
-
-                    <!-- Sérénité / Ferveur -->
-                    <?php if ($type !== 'solar_plant'): ?>
-                        <div class="cost-item cost-ok">
-                            <div class="cost-icon">⛩️</div>
-                            <div class="cost-details">
-                                <span class="cost-name">Ferveur / Sérénité</span>
-                                <span class="cost-req"><?= $nextEnergy ?></span>
-                                <span class="cost-stock">Dispo : <?= $planet['energy_max'] - $planet['energy_used'] ?></span>
-                            </div>
-                            <div class="cost-check">✓</div>
-                        </div>
-                    <?php endif; ?>
+                    <span class="badge <?= $r['ok'] ? 'bg-success' : 'bg-danger' ?>" style="min-width:1.5rem;">
+                        <?= $r['ok'] ? '✓' : '✗' ?>
+                    </span>
                 </div>
+                <?php endforeach; ?>
 
-                <!-- Durée des Travaux (Temps de construction pour le niveau suivant) -->
-                <div class="construction-time-banner">
-                    <div class="time-label-group">
-                        <span class="time-icon">⏱️</span>
-                        <div>
-                            <strong>Temps de construction pour le Niveau <?= $targetLevel ?> :</strong>
-                            <div style="font-size:0.75rem; color:var(--text-muted);">
-                                Réduit grâce au Tenshu (Donjon Castral Niv. <?= $hqLevel ?>) &bull; Vitesse x<?= (int)$speed ?>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="time-value-display">
-                        <?= gmdate('H:i:s', $duration) ?>
+                <!-- Durée -->
+                <div class="alert alert-info mt-3 mb-0" style="padding:0.6rem 0.85rem;">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span>⏱️ Durée des travaux :</span>
+                        <strong class="font-monospace"><?= gmdate('H:i:s', $duration) ?></strong>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Colonne Droite : Lancement des Travaux / État du Chantier -->
-        <div class="field-card">
-            <div class="field-card-header">
-                <h3>🔨 Ordre de Construction Féodal</h3>
+        <!-- Zone d'action : lancer / bloqié / en cours -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🔨 Ordre de Construction</h3>
                 <?php if ($isTerran): ?>
-                    <span title="Bonus Clan Oda" style="font-size:0.75rem; color:#93c5fd; background:rgba(59,130,246,0.2); padding:0.15rem 0.45rem; border-radius:4px;">Clan Oda (Double Chantier)</span>
+                    <div class="card-options"><span class="badge bg-blue-lt">Clan Oda — Double Chantier</span></div>
                 <?php endif; ?>
             </div>
-            <div class="field-card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="card-body">
 
                 <?php if ($activeJob): ?>
                     <?php $isDemolishingJob = ((int)$activeJob['target_level'] === 0); ?>
-                    <!-- Chantier en cours sur cette parcelle -->
-                    <div class="field-active-job-box">
-                        <div class="job-status-title">
-                            <span class="job-spinner">⏳</span>
-                            <?php if ($isDemolishingJob): ?>
-                                <span>Démantèlement en cours vers le <strong>Niveau 0 (Raser)</strong></span>
-                            <?php else: ?>
-                                <span>Travaux en cours vers le <strong>Niveau <?= $activeJob['target_level'] ?></strong></span>
-                            <?php endif; ?>
+                    <div class="alert alert-<?= $isDemolishingJob ? 'danger' : 'warning' ?> mb-3">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span style="font-size:1.3rem;">⏳</span>
+                            <div>
+                                <strong><?= $isDemolishingJob ? 'Démantèlement en cours' : 'Travaux en cours' ?></strong> →
+                                <?= $isDemolishingJob ? 'Niveau 0 (Raser)' : 'Niveau ' . $activeJob['target_level'] ?>
+                            </div>
                         </div>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0 1rem 0;">
-                            <?php if ($isDemolishingJob): ?>
-                                Vos maîtres d'œuvre déconstruisent cette exploitation pour réinitialiser la parcelle. Vous récupérerez 30% des matériaux à l'achèvement des travaux.
-                            <?php else: ?>
-                                Vos artisans et paysans s'activent sur la parcelle. Le rendement sera automatiquement accru dès la fin des travaux.
-                            <?php endif; ?>
+                        <p class="text-muted mb-2" style="font-size:0.85rem;">
+                            <?= $isDemolishingJob
+                                ? 'Vos maîtres d\'œuvre déconstruisent cette exploitation. Vous récupérerez 30% des matériaux.'
+                                : 'Vos artisans s\'activent sur la parcelle. Le rendement sera accru dès la fin des travaux.' ?>
                         </p>
-
-                        <div class="job-timer-display" data-countdown="<?= $activeJob['finishes_at'] ?>" style="<?= $isDemolishingJob ? 'color:#f87171;' : '' ?>">
-                            Calcul du temps restant...
-                        </div>
-
-                        <div style="margin-top: 1.25rem;">
-                            <button type="button" class="field-btn-cancel" onclick="cancelFieldBuild(<?= (int)$activeJob['id'] ?>)">
-                                <?= $isDemolishingJob ? '🛑 Interrompre le démantèlement (Exploitation préservée)' : '🛑 Interrompre les travaux (80% remboursé)' ?>
-                            </button>
+                        <div class="font-monospace fw-bold fs-4 text-center py-2 job-timer-display" data-countdown="<?= $activeJob['finishes_at'] ?>">
+                            Calcul...
                         </div>
                     </div>
+                    <button type="button" class="btn btn-outline-danger w-100"
+                            onclick="cancelFieldBuild(<?= (int)$activeJob['id'] ?>)">
+                        🛑 <?= $isDemolishingJob ? 'Interrompre le démantèlement' : 'Interrompre les travaux (80% remboursé)' ?>
+                    </button>
 
                 <?php elseif (!$canQueueNewField): ?>
-                    <!-- File de construction saturée -->
-                    <div class="field-blocked-box">
-                        <div style="font-size: 1.75rem; margin-bottom: 0.5rem;">🏗️</div>
-                        <h4>Maîtres d'œuvre déjà mobilisés</h4>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.4rem;">
+                    <div class="alert alert-secondary mb-3">
+                        <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">🏗️</div>
+                        <h4 class="alert-title">Maîtres d'œuvre déjà mobilisés</h4>
+                        <p class="text-muted mb-0" style="font-size:0.85rem;">
                             <?php if ($isTerran): ?>
-                                Une autre parcelle rurale est déjà en cours de développement. Le Clan Oda permet 1 parcelle rurale et 1 bâtiment urbain en simultané.
+                                Une autre parcelle rurale est déjà en développement. Le Clan Oda permet 1 parcelle rurale et 1 bâtiment simultanément.
                             <?php else: ?>
-                                Vos équipes de bâtisseurs travaillent déjà sur un autre chantier du domaine. Attendez la fin des travaux pour lancer cette parcelle.
+                                Vos bâtisseurs travaillent sur un autre chantier. Attendez la fin pour lancer cette parcelle.
                             <?php endif; ?>
                         </p>
-                        <a href="/?page=resources" class="field-btn-secondary" style="margin-top:1rem; display:inline-block;">
-                            Voir les chantiers en cours &rarr;
-                        </a>
                     </div>
+                    <a href="/?page=resources" class="btn btn-secondary w-100">← Voir les chantiers en cours</a>
 
                 <?php elseif (!$canAfford): ?>
-                    <!-- Ressources insuffisantes -->
-                    <div class="field-blocked-box">
-                        <div style="font-size: 1.75rem; margin-bottom: 0.5rem;">⚠️</div>
-                        <h4>Ressources Insuffisantes</h4>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.4rem;">
-                            Vos greniers ne disposent pas encore des matériaux nécessaires pour lancer les travaux de cette parcelle.
+                    <div class="alert alert-warning mb-3">
+                        <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">⚠️</div>
+                        <h4 class="alert-title">Ressources Insuffisantes</h4>
+                        <p class="text-muted mb-0" style="font-size:0.85rem;">
+                            Vos greniers ne disposent pas des matériaux nécessaires.
                         </p>
                         <?php if ($missingWaitSeconds > 0): ?>
-                            <div class="time-to-afford">
-                                ⏳ Ressources réunies dans environ : <strong><?= gmdate('H:i:s', $missingWaitSeconds) ?></strong>
-                            </div>
+                        <div class="mt-2 text-center">
+                            <span class="badge bg-warning text-dark">⏳ Ressources réunies dans : <?= gmdate('H:i:s', $missingWaitSeconds) ?></span>
+                        </div>
                         <?php endif; ?>
-                        <button type="button" class="field-btn-primary disabled" disabled style="margin-top:1rem; opacity:0.5; cursor:not-allowed;">
-                            🔨 Améliorer au Niveau <?= $targetLevel ?>
-                        </button>
                     </div>
+                    <button class="btn btn-primary w-100" disabled>
+                        🔨 Améliorer au Niveau <?= $targetLevel ?>
+                    </button>
 
                 <?php else: ?>
-                    <!-- Prêt pour lancer les travaux -->
-                    <div class="field-ready-box">
-                        <div style="font-size: 1.75rem; margin-bottom: 0.5rem;">✨</div>
-                        <h4>Ordre de Travaux Prêt</h4>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.4rem;">
-                            Les matériaux sont prêts et vos maîtres-charpentiers attendent votre décret pour ériger le <strong>Niveau <?= $targetLevel ?></strong>.
+                    <div class="alert alert-success mb-3">
+                        <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">✨</div>
+                        <h4 class="alert-title">Ordre de Travaux Prêt</h4>
+                        <p class="text-muted mb-0" style="font-size:0.85rem;">
+                            Matériaux prêts. Vos maîtres-charpentiers attendent votre décret pour ériger le <strong>Niveau <?= $targetLevel ?></strong>.
                         </p>
-
-                        <div style="margin-top: 1.5rem;">
-                            <button type="button" class="field-btn-primary" id="btnLaunchUpgrade" onclick="launchFieldUpgrade(<?= $slot ?>, <?= $targetLevel ?>)">
-                                🔨 Lancer l'Amélioration au Niveau <?= $targetLevel ?>
-                            </button>
-                        </div>
                     </div>
+                    <button type="button" class="btn btn-primary btn-lg w-100" id="btnLaunchUpgrade"
+                            onclick="launchFieldUpgrade(<?= $slot ?>, <?= $targetLevel ?>)">
+                        🔨 Lancer l'Amélioration au Niveau <?= $targetLevel ?>
+                    </button>
                 <?php endif; ?>
 
-                <!-- Raccourci vers la Cité & Autres Parcelles -->
-                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
-                    <a href="/?page=resources" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: underline;">
-                        &larr; Revenir à la vue générale des 20 parcelles
-                    </a>
+                <div class="mt-3 text-center">
+                    <a href="/?page=resources" class="text-muted" style="font-size:0.8rem;">← Revenir à la vue générale des 20 parcelles</a>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- BANDEAU DES 20 PARCELLES DU DOMAINE (NAVIGATION RAPIDE / STYLE TRAVIAN - PLEINE LARGEUR) -->
-    <div class="field-strip-card" style="width: 100%; box-sizing: border-box; margin-top: 1.5rem;">
-        <div class="field-strip-header">
-            <h4>🗺️ Toutes les Parcelles du Terroir (<?= htmlspecialchars($planet['name']) ?>)</h4>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">Cliquez sur une parcelle pour y accéder directement</span>
-        </div>
-        <div class="field-strip-grid">
-            <?php for ($i = 1; $i <= 20; $i++): ?>
-                <?php 
-                    $f = $fieldsBySlot[$i] ?? ['type' => 'metal_mine', 'level' => 0];
-                    $fType = $f['type'];
-                    $fLvl = (int)$f['level'];
-                    $fInfo = FIELD_TYPES[$fType] ?? FIELD_TYPES['metal_mine'];
-                    $isCurrent = ($i === $slot);
-                    $fTile = match($fType) {
-                        'metal_mine' => 'tile_bucheron.png',
-                        'crystal_mine' => 'tile_carriere.png',
-                        'deuterium_synth' => 'tile_riziere.png',
-                        'solar_plant' => 'tile_sanctuaire.png',
-                        default => 'tile_bucheron.png'
-                    };
-                    $fTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $fTile) ? '/public/assets/tiles/' . $fTile : '/public/assets/' . $fTile;
-                ?>
-                <a href="/?page=field&slot=<?= $i ?>" class="field-strip-item <?= $isCurrent ? 'active' : '' ?>" title="<?= htmlspecialchars($fInfo['name']) ?> #<?= $i ?> (Niveau <?= $fLvl ?>)">
-                    <img src="<?= $fTileUrl ?>" class="strip-item-img" alt="">
-                    <span class="strip-item-num">#<?= $i ?></span>
-                    <span class="strip-item-lvl">Nv.<?= $fLvl ?></span>
-                </a>
-            <?php endfor; ?>
-        </div>
-    </div>
-
 </div>
 
-<!-- SCRIPT INTERACTIF POUR LE LANCEMENT ET L'ANNULATION DES TRAVAUX -->
+<!-- SCRIPT INTERACTIF (inchangé) -->
 <script>
 async function launchFieldUpgrade(slot, targetLvl, fieldType = null) {
     const btn = document.getElementById('btnLaunchUpgrade');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerText = 'Transmissions des ordres...';
-    }
-
+    if (btn) { btn.disabled = true; btn.innerText = 'Transmission des ordres...'; }
     try {
         const formData = new FormData();
         formData.append('action', 'upgrade');
         formData.append('category', 'field');
         formData.append('target_id', slot);
-        if (fieldType) {
-            formData.append('field_type', fieldType);
-        }
-
-        const response = await fetch('/api/build.php', {
-            method: 'POST',
-            body: formData
-        });
-
+        if (fieldType) formData.append('field_type', fieldType);
+        const response = await fetch('/api/build.php', { method: 'POST', body: formData });
         const data = await response.json();
         if (data.success) {
             window.location.reload();
         } else {
             showModalAlert(data.error || 'Erreur lors du lancement des travaux.', 'error');
-            if (btn) {
-                btn.disabled = false;
-                btn.innerText = `🔨 Lancer l'Amélioration au Niveau ${targetLvl}`;
-            }
+            if (btn) { btn.disabled = false; btn.innerText = `🔨 Lancer l'Amélioration au Niveau ${targetLvl}`; }
         }
     } catch (err) {
-        console.error(err);
         showModalAlert('Erreur réseau lors de la communication avec le fief.', 'error');
-        if (btn) {
-            btn.disabled = false;
-            btn.innerText = `🔨 Lancer l'Amélioration au Niveau ${targetLvl}`;
-        }
+        if (btn) { btn.disabled = false; btn.innerText = `🔨 Lancer l'Amélioration au Niveau ${targetLvl}`; }
     }
 }
 
 async function cancelFieldBuild(queueId) {
-    const confirmed = await showModalConfirm(
-        'Voulez-vous vraiment suspendre ces travaux ruraux ? 80% des matériaux investis vous seront restitués.',
-        'Interruption de Chantier'
-    );
+    const confirmed = await showModalConfirm('Voulez-vous vraiment suspendre ces travaux ruraux ? 80% des matériaux investis vous seront restitués.', 'Interruption de Chantier');
     if (!confirmed) return;
-
     try {
         const formData = new FormData();
         formData.append('action', 'cancel');
         formData.append('queue_id', queueId);
-
-        const response = await fetch('/api/build.php', {
-            method: 'POST',
-            body: formData
-        });
-
+        const response = await fetch('/api/build.php', { method: 'POST', body: formData });
         const data = await response.json();
-        if (data.success) {
-            window.location.reload();
-        } else {
-            showModalAlert(data.error || 'Impossible d\'interrompre ce chantier.', 'error');
-        }
-    } catch (err) {
-        console.error(err);
-        showModalAlert('Erreur réseau lors de l\'interruption.', 'error');
-    }
+        if (data.success) { window.location.reload(); }
+        else { showModalAlert(data.error || 'Impossible d\'interrompre ce chantier.', 'error'); }
+    } catch (err) { showModalAlert('Erreur réseau lors de l\'interruption.', 'error'); }
 }
 
 async function confirmDemolishField(slot, fieldName) {
     const confirmed = await showModalConfirm(
-        `Êtes-vous certain de vouloir raser définitivement l'exploitation <strong>${fieldName}</strong> sur la parcelle <strong>#${slot}</strong> ?<br><br>Un ordre de démolition sera émis avec un compte à rebours. Vous récupérerez <strong>30% des matériaux</strong> à la fin des travaux.`,
+        `Êtes-vous certain de vouloir raser <strong>${fieldName}</strong> sur la parcelle <strong>#${slot}</strong> ?<br><br>Vous récupérerez <strong>30% des matériaux</strong> à la fin des travaux.`,
         'Raser l\'Exploitation'
     );
     if (!confirmed) return;
-
     try {
         const formData = new FormData();
         formData.append('action', 'demolish');
         formData.append('category', 'field');
         formData.append('target_id', slot);
         formData.append('slot', slot);
-
-        const response = await fetch('/api/build.php', {
-            method: 'POST',
-            body: formData
-        });
-
+        const response = await fetch('/api/build.php', { method: 'POST', body: formData });
         const data = await response.json();
-        if (data.success) {
-            window.location.reload();
-        } else {
-            showModalAlert(data.error || 'Impossible de raser cette exploitation.', 'error');
-        }
-    } catch (err) {
-        console.error(err);
-        showModalAlert('Erreur réseau lors de la suppression.', 'error');
-    }
+        if (data.success) { window.location.reload(); }
+        else { showModalAlert(data.error || 'Impossible de raser cette exploitation.', 'error'); }
+    } catch (err) { showModalAlert('Erreur réseau lors de la suppression.', 'error'); }
 }
 
 function openArtworkModal(imgSrc, title) {
     const modal = document.getElementById('artworkModal');
-    const img = document.getElementById('artworkModalImg');
+    const img   = document.getElementById('artworkModalImg');
     const titleEl = document.getElementById('artworkModalTitle');
-    if (modal && img && titleEl) {
-        img.src = imgSrc;
-        titleEl.innerText = title;
-        modal.style.display = 'flex';
-    }
+    if (modal && img && titleEl) { img.src = imgSrc; titleEl.innerText = title; modal.style.display = 'flex'; }
 }
 function closeArtworkModal(e) {
     const modal = document.getElementById('artworkModal');
-    if (modal && (!e || e.target.id === 'artworkModal')) {
-        modal.style.display = 'none';
-    }
+    if (modal && (!e || e.target.id === 'artworkModal')) modal.style.display = 'none';
 }
 </script>
 
 <!-- MODALE LIGHTBOX ESTAMPE HD -->
 <div id="artworkModal" class="modal-overlay" style="display:none;" onclick="closeArtworkModal(event)">
-    <div class="modal-card modal-card-lg" style="max-width: 960px; padding: 1.5rem; background: var(--bg-surface, #fdfbf7);" onclick="event.stopPropagation()">
-        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-            <h3 id="artworkModalTitle" style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 800; display:flex; align-items:center; gap:0.5rem;">
-                <span>🎨</span> Estampe Féodale Authentique
-            </h3>
-            <button type="button" class="modal-close-btn" onclick="closeArtworkModal()">&times;</button>
+    <div class="modal-card modal-card-lg" style="max-width:960px; padding:1.5rem;" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--tblr-border-color); padding-bottom:0.75rem; margin-bottom:1rem;">
+            <h3 id="artworkModalTitle" style="margin:0; font-size:1.1rem; font-weight:800;">🎨 Estampe Féodale</h3>
+            <button type="button" class="btn-close" onclick="closeArtworkModal()"></button>
         </div>
-        <div class="modal-body" style="text-align: center;">
-            <img id="artworkModalImg" src="" alt="Estampe" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); border: 1px solid var(--border-color);">
+        <div style="text-align:center;">
+            <img id="artworkModalImg" src="" alt="Estampe" style="width:100%; height:auto; max-height:75vh; object-fit:contain; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,0.2);">
         </div>
     </div>
 </div>
+
 

@@ -90,19 +90,19 @@ $page = $_GET['page'] ?? 'resources';
 $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> - Chroniques Féodales du Sengoku</title>
-    <!-- Bootstrap 5 Grille & Utilitaires (Mise en page & Flexbox) -->
-    <link rel="stylesheet" href="/public/css/bootstrap-grid.min.css?v=5.3.3">
-    <link rel="stylesheet" href="/public/css/bootstrap-utilities.min.css?v=5.3.3">
-    <!-- Feuille de Style Féodale Sengoku La Voie du Shogun -->
+    <!-- Tabler UI Framework (local) -->
+    <link rel="stylesheet" href="/public/css/tabler/tabler.min.css?v=1.0.0-beta21">
+    <!-- HUD Travian Féodal (header circulaire, barres de ressources, alertes) -->
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../../public/css/style.css') ? filemtime(__DIR__ . '/../../public/css/style.css') : time() ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏯</text></svg>">
 </head>
-<body>
+<body class="antialiased">
+
 
 <header class="hud-header">
     <!-- 🏯 LOGO TOUT EN HAUT CENTRÉ ET PLUS GROS -->
@@ -358,5 +358,230 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
 
 </header>
 
-<div class="container <?= ($page === 'map' || $page === 'galaxy') ? 'container-fullwidth' : '' ?>">
+<?php
+$navItems = [
+    ['page' => 'resources', 'match' => ['resources','field'], 'icon' => '🌾', 'label' => 'Terroir Féodal',    'title' => 'Terroir & Récoltes'],
+    ['page' => 'city',      'match' => ['city','building'],   'icon' => '🏯', 'label' => 'Cité Castrale',     'title' => 'Bâtiments & Châteaux'],
+    ['page' => 'map',       'match' => ['map','galaxy'],      'icon' => '🗾', 'label' => 'Carte des Provinces','title' => 'Carte Féodale'],
+    ['page' => 'fleet',     'match' => ['fleet'],             'icon' => '⚔️', 'label' => 'Armées & Flottes',  'title' => 'Expéditions militaires'],
+    ['page' => 'hero',      'match' => ['hero'],              'icon' => '🥋', 'label' => 'Samouraï Héros',    'title' => 'Votre héros'],
+    ['page' => 'ranking',   'match' => ['ranking'],           'icon' => '🏆', 'label' => 'Classement',        'title' => 'Tableau d\'honneur'],
+    ['page' => 'reports',   'match' => ['reports'],           'icon' => '📜', 'label' => 'Chroniques',        'title' => 'Rapports de bataille'],
+    ['page' => 'messages',  'match' => ['messages'],          'icon' => '✉️', 'label' => 'Missives',          'title' => 'Correspondance des clans', 'badge' => $unreadMessagesCount > 0 ? $unreadMessagesCount : null],
+];
+?>
+<!-- ===== WRAPPER TABLER ===== -->
+<div class="page">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark" style="background:linear-gradient(180deg,#1a0a00 0%,#2d1200 40%,#1a0a00 100%); border-right:1px solid rgba(194,37,43,0.3);">
+        <div class="container-fluid">
+
+            <!-- Logo / Brand -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <h1 class="navbar-brand navbar-brand-autodark" style="padding:0.75rem 0;">
+                <a href="?page=resources" style="display:flex; align-items:center; gap:0.6rem; text-decoration:none;">
+                    <img src="/public/assets/logo_transparent.png" alt="OpenShogun" style="height:36px; width:auto; object-fit:contain;">
+                </a>
+            </h1>
+
+            <!-- Profil daimyō condensé -->
+            <div class="navbar-nav flex-row d-lg-none">
+                <div class="nav-item">
+                    <span style="color:#fbbf24; font-size:0.85rem; font-weight:700;"><?= htmlspecialchars($user['username']) ?></span>
+                </div>
+            </div>
+
+            <div class="collapse navbar-collapse" id="sidebarMenu">
+                <ul class="navbar-nav pt-lg-3">
+                    <?php foreach ($navItems as $nav):
+                        $isActive = in_array($page, $nav['match']);
+                        $hasBadge = !empty($nav['badge']);
+                    ?>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $isActive ? 'active' : '' ?>"
+                           href="?page=<?= $nav['page'] ?>"
+                           title="<?= $nav['title'] ?>">
+                            <span class="nav-link-icon" style="font-size:1.1rem; min-width:1.5rem;"><?= $nav['icon'] ?></span>
+                            <span class="nav-link-title"><?= $nav['label'] ?></span>
+                            <?php if ($hasBadge): ?>
+                                <span class="badge bg-danger ms-auto"><?= $nav['badge'] ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </li>
+                    <?php endforeach; ?>
+
+                    <?php if ($questSummary): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" onclick="openQuestModal()" title="Didacticiel & Quêtes Féodales">
+                            <span class="nav-link-icon" style="font-size:1.1rem; min-width:1.5rem;">🎯</span>
+                            <span class="nav-link-title">Quêtes Féodales</span>
+                            <?php if ($questSummary['claimable_count'] > 0): ?>
+                                <span class="badge bg-success ms-auto"><?= $questSummary['claimable_count'] ?></span>
+                            <?php elseif (!$questSummary['all_completed']): ?>
+                                <span class="badge bg-secondary ms-auto" style="font-size:0.65rem;"><?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+                </ul>
+
+                <!-- Séparateur + Outils système en bas -->
+                <div class="mt-auto pt-3 pb-2" style="border-top:1px solid rgba(255,255,255,0.1);">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="?page=docs" title="Codex & Manuel">
+                                <span class="nav-link-icon" style="font-size:1rem; min-width:1.5rem;">📖</span>
+                                <span class="nav-link-title">Codex du Sengoku</span>
+                            </a>
+                        </li>
+                        <?php if ($auth->isAdmin()): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="?page=admin" title="Administration">
+                                <span class="nav-link-icon" style="font-size:1rem; min-width:1.5rem;">⚙️</span>
+                                <span class="nav-link-title">Administration</span>
+                            </a>
+                        </li>
+                        <?php endif; ?>
+                        <li class="nav-item">
+                            <a class="nav-link text-danger" href="?action=logout" title="Déconnexion">
+                                <span class="nav-link-icon" style="font-size:1rem; min-width:1.5rem;">🚪</span>
+                                <span class="nav-link-title">Déconnexion</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTENU PRINCIPAL -->
+    <div class="page-wrapper">
+
+        <!-- TOPBAR : HUD Ressources + Profil Daimyō (conservé de l'ancien header) -->
+        <header class="navbar navbar-expand-md navbar-light d-print-none" style="border-bottom:1px solid rgba(194,37,43,0.2); background:linear-gradient(135deg,rgba(194,37,43,0.04) 0%,#fff 100%); padding:0;">
+            <div class="container-fluid px-3">
+
+                <!-- Fief & coordonnées -->
+                <div class="d-flex align-items-center gap-2 me-3">
+                    <span style="font-size:1.1rem;">🏯</span>
+                    <div>
+                        <div style="font-weight:800; font-size:0.9rem; color:#1e293b; line-height:1.1;"><?= htmlspecialchars($planet['name']) ?></div>
+                        <div style="font-size:0.72rem; color:#dc2626; font-family:monospace; font-weight:700;">[<?= $planet['coord_x'] ?>|<?= $planet['coord_y'] ?>]</div>
+                    </div>
+                </div>
+
+                <!-- Barres de ressources -->
+                <div class="d-none d-md-flex align-items-center gap-3 flex-fill" style="min-width:0;">
+                    <?php
+                    $resItems = [
+                        ['id'=>'metal',   'icon'=>'🪵', 'label'=>'Bois',   'cur'=>$planet['metal'],     'max'=>$planet['metal_max'],     'prod'=>$planet['prod_rates']['metal'],     'color'=>'#92400e', 'bar'=>'bg-warning'],
+                        ['id'=>'crystal', 'icon'=>'🪨', 'label'=>'Pierre', 'cur'=>$planet['crystal'],   'max'=>$planet['crystal_max'],   'prod'=>$planet['prod_rates']['crystal'],   'color'=>'#1e40af', 'bar'=>'bg-primary'],
+                        ['id'=>'deut',    'icon'=>'🌾', 'label'=>'Riz',    'cur'=>$planet['deuterium'], 'max'=>$planet['deuterium_max'], 'prod'=>$planet['prod_rates']['deuterium'], 'color'=>'#166534', 'bar'=>'bg-success'],
+                    ];
+                    foreach ($resItems as $r):
+                        $pct = min(100, ($r['cur'] / max(1, $r['max'])) * 100);
+                    ?>
+                    <div class="d-flex align-items-center gap-1" style="min-width:120px; max-width:200px; flex:1;" title="<?= $r['label'] ?> : <?= number_format((int)$r['cur']) ?> / <?= number_format($r['max']) ?> (+<?= number_format($r['prod']) ?>/h)">
+                        <span style="font-size:0.95rem;"><?= $r['icon'] ?></span>
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:0.72rem; font-weight:700; color:<?= $r['color'] ?>; white-space:nowrap;">
+                                <span id="res-val-<?= $r['id'] ?>"
+                                      data-current="<?= $r['cur'] ?>"
+                                      data-max="<?= $r['max'] ?>"
+                                      data-prod="<?= $r['prod'] ?>"><?= number_format((int)$r['cur']) ?></span>
+                                <span style="opacity:0.6; font-weight:400;">/ <?= number_format($r['max']) ?></span>
+                            </div>
+                            <div class="progress" style="height:4px; border-radius:2px; margin-top:2px;">
+                                <div class="progress-bar <?= $r['bar'] ?>" id="bar-<?= $r['id'] ?>" style="width:<?= $pct ?>%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+
+                    <!-- Sérénité / Énergie -->
+                    <?php $eBalance = $planet['energy_max'] - $planet['energy_used']; $eOk = ($eBalance >= 0); ?>
+                    <div class="d-flex align-items-center gap-1" style="min-width:80px;" title="Sérénité Shinto : <?= $planet['energy_used'] ?> / <?= $planet['energy_max'] ?>">
+                        <span style="font-size:0.95rem;">⛩️</span>
+                        <span style="font-size:0.8rem; font-weight:800; color:<?= $eOk ? '#166534' : '#dc2626' ?>;"><?= $eBalance ?></span>
+                    </div>
+                </div>
+
+                <!-- Héros + Profil daimyō -->
+                <div class="d-flex align-items-center gap-2 ms-3">
+                    <?php
+                    $hHp = $heroHeader ? round((float)$heroHeader['health']) : 100;
+                    $hHpCol = ($hHp >= 60) ? '#16a34a' : (($hHp >= 25) ? '#d97706' : '#dc2626');
+                    $hLvl = $heroHeader ? (int)$heroHeader['level'] : 1;
+                    $hasPoints = ($heroHeader && (int)$heroHeader['unassigned_points'] > 0);
+                    ?>
+                    <a href="?page=hero" class="position-relative" title="Samouraï Héros Niv.<?= $hLvl ?> — Vitalité <?= $hHp ?>%">
+                        <img src="/public/assets/hero_samurai.jpg" alt="Héros"
+                             style="width:36px; height:36px; border-radius:50%; border:2px solid <?= $hHpCol ?>; object-fit:cover;">
+                        <span class="badge bg-dark text-white position-absolute" style="bottom:-4px; right:-4px; font-size:0.6rem; padding:1px 4px; border-radius:3px;"><?= $hLvl ?></span>
+                        <?php if ($hasPoints): ?>
+                            <span class="badge bg-danger position-absolute" style="top:-4px; right:-4px; font-size:0.6rem; padding:1px 4px; border-radius:50%;">+</span>
+                        <?php endif; ?>
+                    </a>
+
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center gap-2 text-decoration-none" data-bs-toggle="dropdown">
+                            <span class="faction-dot <?= htmlspecialchars($user['faction']) ?>" style="width:8px; height:8px; border-radius:50%; display:inline-block; background:<?= $factionInfo['color'] ?? '#dc2626' ?>;"></span>
+                            <span style="font-weight:700; font-size:0.85rem; color:#1e293b;"><?= htmlspecialchars($user['username']) ?></span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">👤 Ma Fiche Daimyō</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="openEditMottoModal()">📜 Ma Devise</a>
+                            <a href="?page=support" class="dropdown-item">📮 Support</a>
+                            <div class="dropdown-divider"></div>
+                            <button type="button" class="dropdown-item" id="shogun-audio-btn" onclick="window.shogunAudio && window.shogunAudio.toggle()">
+                                <span id="shogun-audio-icon">🔇</span> Ambiance sonore
+                            </button>
+                            <button type="button" class="dropdown-item" onclick="toggleTheme()">🌓 Thème clair / sombre</button>
+                            <div class="dropdown-divider"></div>
+                            <a href="?action=logout" class="dropdown-item text-danger">🚪 Déconnexion</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Bannière d'alerte Tour de Guet (conservée intacte) -->
+        <?php if (!empty($activeMissions)): ?>
+        <?php
+            $hasHostile = count($incomingHostile) > 0;
+            $hasSpy = count($incomingSpy) > 0;
+            $alertClass = $hasHostile ? 'alert-threat' : ($hasSpy ? 'alert-spy' : 'alert-info');
+            $closest = !empty($incomingHostile) ? $incomingHostile[0] : (!empty($incomingSpy) ? $incomingSpy[0] : $outgoingMissions[0]);
+            $closestTime = ($closest['status'] === 'en_route') ? $closest['arrival_time'] : $closest['return_time'];
+        ?>
+        <div class="travian-alert-banner <?= $alertClass ?>" onclick="openWatchtowerModal()" title="Cliquer pour afficher le registre détaillé de la Tour de Guet (<?= count($activeMissions) ?> mouvements)">
+            <div class="alert-banner-left">
+                <?php if ($hasHostile): ?>
+                    <span class="alert-status-badge threat">🚨 TOUR DE GUET</span>
+                    <span class="alert-headline"><strong><?= count($incomingHostile) ?> incursion(s) armée(s)</strong> en approche de votre fief !</span>
+                    <span class="alert-countdown-chip">Impact dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
+                <?php elseif ($hasSpy): ?>
+                    <span class="alert-status-badge spy">🥷 TOUR DE GUET</span>
+                    <span class="alert-headline"><strong>Infiltration Shinobi détectée</strong> en direction de votre domaine !</span>
+                    <span class="alert-countdown-chip">Arrivée dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
+                <?php else: ?>
+                    <span class="alert-status-badge info">🐎 EXPÉDITIONS</span>
+                    <span class="alert-headline"><strong><?= count($outgoingMissions) ?> troupe(s) du clan</strong> en marche sur les provinces.</span>
+                    <span class="alert-countdown-chip">Retour dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
+                <?php endif; ?>
+            </div>
+            <div class="alert-banner-right">
+                <span class="alert-cta-btn"><span>📜 Voir les détails (<?= count($activeMissions) ?>)</span><span class="alert-cta-arrow">&rarr;</span></span>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- CORPS DE PAGE -->
+        <div class="page-body">
+            <div class="container-xl <?= ($page === 'map' || $page === 'galaxy') ? 'container-fluid px-0' : '' ?>">
+
 

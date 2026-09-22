@@ -1,4 +1,7 @@
-</div> <!-- Fin .container -->
+            </div><!-- /container-xl -->
+        </div><!-- /page-body -->
+    </div><!-- /page-wrapper -->
+</div><!-- /page -->
 
 <!-- Modale Universelle d'Amélioration (Bâtiments et Parcelles) -->
 <div class="modal-overlay" id="upgradeModal">
@@ -960,6 +963,27 @@ function updateHudResources(planet) {
 }
 </script>
 <script src="/public/js/audio_manager.js"></script>
+<!-- Tabler JS -->
+<script src="/public/js/tabler/tabler.min.js"></script>
+<script>
+// Toggle thème clair / sombre
+function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-bs-theme');
+    const next = (current === 'dark') ? 'light' : 'dark';
+    html.setAttribute('data-bs-theme', next);
+    try { localStorage.setItem('shogun-theme', next); } catch(e) {}
+}
+// Restaurer le thème sauvegardé
+(function() {
+    try {
+        const saved = localStorage.getItem('shogun-theme');
+        if (saved === 'dark' || saved === 'light') {
+            document.documentElement.setAttribute('data-bs-theme', saved);
+        }
+    } catch(e) {}
+})();
+</script>
 </body>
 </html>
 
