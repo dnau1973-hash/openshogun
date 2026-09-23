@@ -146,6 +146,17 @@ echo "\n--- TEST 7 : ARSENAL ET ARTEFACTS FÉODAUX ---\n";
 $grantedItem = $heroEngine->grantRandomEquipment($testUserId);
 assertTest("Un artefact légendaire a été forgé", !empty($grantedItem['item_code']), $testsPassed, $testsTotal);
 
+// Vérification de la règle de non-duplication des reliques
+$allGrantedCodes = [$grantedItem['item_code']];
+for ($i = 0; $i < 15; $i++) {
+    $nextItem = $heroEngine->grantRandomEquipment($testUserId);
+    if ($nextItem) {
+        $allGrantedCodes[] = $nextItem['item_code'];
+    }
+}
+$uniqueCodes = array_unique($allGrantedCodes);
+assertTest("Règle des reliques : aucun doublon n'a été attribué (" . count($uniqueCodes) . " uniques)", count($allGrantedCodes) === count($uniqueCodes), $testsPassed, $testsTotal);
+
 $inventory = $heroEngine->getInventory($testUserId);
 assertTest("L'inventaire contient l'équipement", count($inventory) >= 1, $testsPassed, $testsTotal);
 
@@ -261,6 +272,7 @@ assertTest("Statut passé à 'dead'", $deadHero['status'] === 'dead', $testsPass
 // Lancer la résurrection
 $reviveRes = $heroEngine->reviveHero($testUserId, $testPlanetId);
 assertTest("Le rituel de résurrection est initié", $reviveRes['success'] === true, $testsPassed, $testsTotal);
+assertTest("La durée de régénération post-mortem est de 24 heures (86400s)", $reviveRes['duration'] === 86400, $testsPassed, $testsTotal);
 
 $revivingHero = $heroEngine->getHeroByUserId($testUserId);
 assertTest("Statut passé à 'reviving'", $revivingHero['status'] === 'reviving', $testsPassed, $testsTotal);

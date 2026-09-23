@@ -399,9 +399,9 @@ class HeroEngine {
             ];
         }
 
-        // Durée de réanimation
-        $gameSpeed = max(1, (float)GameConfig::get('game_speed', 5));
-        $duration = max(30, (int)((300 + ($lvl * 60)) / $gameSpeed));
+        // Durée de régénération du héros après sa mort : 24 heures (86400s)
+        $gameSpeed = max(1, (float)GameConfig::get('game_speed', 1));
+        $duration = max(60, (int)(86400 / $gameSpeed));
         $finishTime = time() + $duration;
 
         $this->db->beginTransaction();
@@ -425,13 +425,13 @@ class HeroEngine {
 
             return [
                 'success' => true,
-                'message' => "Le rituel sacré de résurrection a débuté au donjon ! Votre Samouraï recouvrera ses forces sous peu.",
+                'message' => "Le rituel sacré de régénération a débuté au donjon ! Votre Samouraï recouvrera l'intégralité de ses forces dans 24 heures.",
                 'finish_time' => $finishTime,
                 'duration' => $duration
             ];
         } catch (Exception $e) {
             $this->db->rollBack();
-            return ['success' => false, 'error' => 'Erreur lors de la résurrection : ' . $e->getMessage()];
+            return ['success' => false, 'error' => 'Erreur lors de la régénération : ' . $e->getMessage()];
         }
     }
 
@@ -693,9 +693,18 @@ class HeroEngine {
             $cargoData['deuterium'] = (int)round($mult * 0.6);
             $lootMsg = "Des coffres de guerre dissimulés contenant {$cargoData['metal']} 🪵 Bois, {$cargoData['crystal']} 🪨 Pierre et {$cargoData['deuterium']} 🌾 Koku de Riz ont été découverts !";
         } elseif ($lootRoll <= 80) {
-            // Équipement / Arsenal
+            // Équipement / Arsenal (Relique unique - jamais de doublon)
             $rewardedItem = $this->grantRandomEquipment($userId);
-            $lootMsg = "Une relique légendaire a été exhumée : « {$rewardedItem['name']} » ({$rewardedItem['description']}) !";
+            if ($rewardedItem) {
+                $lootMsg = "Une relique légendaire sacrée et inédite a été exhumée : « {$rewardedItem['name']} » ({$rewardedItem['description']}) !";
+            } else {
+                // Si toutes les reliques sont déjà possédées par le joueur, récompense en abondance de ressources
+                $mult = rand(15, 25) * 100;
+                $cargoData['metal'] = $mult;
+                $cargoData['crystal'] = (int)round($mult * 0.8);
+                $cargoData['deuterium'] = (int)round($mult * 0.6);
+                $lootMsg = "Possédant déjà toutes les reliques sacrées de l'archipel, votre Samouraï découvre à la place un opulent trésor féodal : {$cargoData['metal']} 🪵 Bois, {$cargoData['crystal']} 🪨 Pierre et {$cargoData['deuterium']} 🌾 Koku de Riz !";
+            }
         } else {
             // Ralliement de guerriers conscrits
             $faction = $hero['faction'] ?? 'terran';
@@ -749,9 +758,9 @@ class HeroEngine {
     }
 
     /**
-     * Attribue un équipement de samouraï aléatoire
+     * Attribue un équipement de samouraï aléatoire (Relique unique : jamais de doublon)
      */
-    public function grantRandomEquipment(int $userId): array {
+    public function grantRandomEquipment(int $userId): ?array {
         $pool = [
             [
                 'code' => 'katana_tamahagane',
@@ -768,11 +777,25 @@ class HeroEngine {
                 'bonus' => ['strength' => 250, 'defense_bonus' => 2.0]
             ],
             [
+                'code' => 'gunbai_commandement',
+                'type' => 'weapon',
+                'name' => 'Gunbai de Commandement Impérial',
+                'desc' => 'Éventail de guerre en fer et cuir guidant les formations martiales.',
+                'bonus' => ['strength' => 200, 'offense_bonus' => 2.5]
+            ],
+            [
                 'code' => 'kabuto_cornes_or',
                 'type' => 'helmet',
                 'name' => 'Kabuto aux Cornes d\'Or',
                 'desc' => 'Casque orné inspirant le respect et stimulant l\'apprentissage tactique.',
                 'bonus' => ['strength' => 150, 'exp_bonus' => 15]
+            ],
+            [
+                'code' => 'kabuto_croissant_lune',
+                'type' => 'helmet',
+                'name' => 'Kabuto au Croissant de Lune',
+                'desc' => 'Casque de guerre emblématique renforçant la détermination au combat.',
+                'bonus' => ['strength' => 180, 'defense_bonus' => 1.0]
             ],
             [
                 'code' => 'cuirasse_oyoroi',
@@ -782,6 +805,13 @@ class HeroEngine {
                 'bonus' => ['strength' => 350, 'defense_bonus' => 1.5]
             ],
             [
+                'code' => 'armure_do_maru',
+                'type' => 'armor',
+                'name' => 'Armure Dō-maru des Gardes d\'Élite',
+                'desc' => 'Armure composite offrant une grande mobilité tout en parant les coups.',
+                'bonus' => ['strength' => 280, 'offense_bonus' => 1.0, 'defense_bonus' => 1.0]
+            ],
+            [
                 'code' => 'etalon_kai',
                 'type' => 'horse',
                 'name' => 'Pur-Sang Écarlate de Kai',
@@ -789,22 +819,49 @@ class HeroEngine {
                 'bonus' => ['speed' => 35, 'strength' => 100]
             ],
             [
+                'code' => 'destrier_noir_kiso',
+                'type' => 'horse',
+                'name' => 'Destrier Noir des Monts Kiso',
+                'desc' => 'Cheval robuste habitué aux sentiers escarpés des provinces montagneuses.',
+                'bonus' => ['speed' => 25, 'strength' => 150]
+            ],
+            [
                 'code' => 'omamori_sacree',
                 'type' => 'talisman',
                 'name' => 'Omamori Sacrée d\'Inari',
                 'desc' => 'Amulette de soie bénie assurant la prospérité des récoltes du domaine.',
                 'bonus' => ['production_rice' => 40, 'strength' => 80]
+            ],
+            [
+                'code' => 'miroir_yata_bronze',
+                'type' => 'talisman',
+                'name' => 'Miroir Sacré en Bronze Shintō',
+                'desc' => 'Relique sanctifiée reflétant la sagesse des kami et stimulant la force du champion.',
+                'bonus' => ['strength' => 220, 'exp_bonus' => 10]
             ]
         ];
 
-        $chosen = $pool[array_rand($pool)];
+        // RÈGLE : Ne peut pas obtenir deux fois la même relique
+        $stmt = $this->db->prepare("SELECT item_code FROM hero_inventory WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $ownedCodes = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
 
-        $stmt = $this->db->prepare("
+        $availablePool = array_values(array_filter($pool, function($item) use ($ownedCodes) {
+            return !in_array($item['code'], $ownedCodes);
+        }));
+
+        if (empty($availablePool)) {
+            return null; // Toutes les reliques uniques sont déjà possédées par le joueur
+        }
+
+        $chosen = $availablePool[array_rand($availablePool)];
+
+        $stmtInsert = $this->db->prepare("
             INSERT INTO hero_inventory 
             (user_id, item_code, item_type, name, description, bonus_data, is_equipped) 
             VALUES (?, ?, ?, ?, ?, ?, 0)
         ");
-        $stmt->execute([$userId, $chosen['code'], $chosen['type'], $chosen['name'], $chosen['desc'], json_encode($chosen['bonus'])]);
+        $stmtInsert->execute([$userId, $chosen['code'], $chosen['type'], $chosen['name'], $chosen['desc'], json_encode($chosen['bonus'])]);
 
         $chosen['id'] = (int)$this->db->lastInsertId();
         $chosen['item_code'] = $chosen['code'];

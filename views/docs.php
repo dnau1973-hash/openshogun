@@ -878,10 +878,13 @@ foreach ($allUnits as $u) {
                         ⛩️ 3. Arsenal, Reliques & Résurrection
                     </h4>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.5rem 0;">
-                        Votre héros possède 6 emplacements d'inventaire : <strong>Arme principale</strong>, <strong>Arme secondaire / Bouclier</strong>, <strong>Casque Kabuto</strong>, <strong>Armure O-Yoroi</strong>, <strong>Bottes / Monture</strong> et <strong>Amulette Omamori</strong>.
+                        Votre héros possède 5 emplacements d'inventaire : <strong>Arme de poing</strong>, <strong>Casque Kabuto</strong>, <strong>Cuirasse &amp; Armure</strong>, <strong>Monture &amp; Destrier</strong> et <strong>Talisman Shintō</strong>.
                     </p>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">
-                        En cas de décès au combat, vous ne perdez <strong>jamais</strong> son niveau ni ses points. Le <strong>Rituel Shinto de Résurrection</strong> célébré au fief permet de le réincarner à 100% de santé.
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.4rem 0;">
+                        ⛩️ <strong>Règle des Reliques Uniques :</strong> Chaque relique du Japon féodal est unique. <strong>Vous ne pouvez jamais obtenir deux fois la même relique</strong> dans vos aventures.
+                    </p>
+                    <p style="font-size: 0.82rem; color: #dc2626; margin: 0; font-weight: 600;">
+                        💀 <strong>Régénération Post-Mortem :</strong> En cas de décès au combat, vous ne perdez <strong>jamais</strong> son niveau ni ses points. La <strong>régénération du héros après sa mort dure 24 heures</strong>, à l'issue desquelles il recouvrira l'intégralité de ses points de vie (100% PV).
                     </p>
                 </div>
             </div>

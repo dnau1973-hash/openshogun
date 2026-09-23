@@ -1,6 +1,8 @@
 <?php
 /**
- * Vue du Samouraï Héros Champion (OpenShogun - Style Travian)
+ * Vue du Samouraï Héros Champion (OpenShogun - Thème Tabler.io)
+ * Système complet inspiré des mécaniques emblématiques féodales :
+ * Progression, points d'attributs, aventures féodales (max 3/j), vitalité, régénération post-mortem (24h) et reliques uniques.
  */
 require_once __DIR__ . '/../core/HeroEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
@@ -11,13 +13,12 @@ $planetEngine = new PlanetEngine();
 
 $hero = $heroEngine->getHeroByUserId((int)$user['id']);
 if (!$hero) {
-    // Si pour une raison quelconque le héros n'est pas encore initialisé
     $heroName = "Samouraï " . ucfirst($user['username']);
     $db = Database::getConnection();
     $db->prepare("
         INSERT IGNORE INTO heroes 
         (user_id, current_planet_id, name, level, experience, health, status, last_health_update, unassigned_points) 
-        VALUES (?, ?, ?, 0, 0, 100.0, 'home', UNIX_TIMESTAMP(), 4)
+        VALUES (?, ?, ?, 1, 0, 100.0, 'home', UNIX_TIMESTAMP(), 4)
     ")->execute([(int)$user['id'], (int)$planet['id'], $heroName]);
     $hero = $heroEngine->getHeroByUserId((int)$user['id']);
 }
@@ -35,425 +36,478 @@ $factionIcons = [
 $fIcon = $factionIcons[$user['faction']] ?? '⚔️';
 
 $health = round((float)$hero['health']);
-$healthColor = ($health >= 60) ? '#22c55e' : (($health >= 25) ? '#eab308' : '#ef4444');
+$healthBadgeClass = ($health >= 60) ? 'bg-success' : (($health >= 25) ? 'bg-warning' : 'bg-danger');
 
 $statusLabels = [
-    'home' => ['label' => 'Au Domaine (Garnison)', 'color' => '#22c55e', 'icon' => '🏯'],
-    'mission' => ['label' => 'En Marche Militaire', 'color' => '#3b82f6', 'icon' => '🚩'],
-    'adventure' => ['label' => 'En Aventure Féodale', 'color' => '#a855f7', 'icon' => '🗺️'],
-    'dead' => ['label' => 'Tombé au Champ d\'Honneur', 'color' => '#ef4444', 'icon' => '💀'],
-    'reviving' => ['label' => 'Rituel de Réanimation en cours', 'color' => '#facc15', 'icon' => '✨']
+    'home' => ['label' => 'Au Domaine (Garnison)', 'color' => '#22c55e', 'badge_class' => 'bg-success text-white', 'icon' => '🏯'],
+    'mission' => ['label' => 'En Marche Militaire', 'color' => '#3b82f6', 'badge_class' => 'bg-info text-white', 'icon' => '🚩'],
+    'adventure' => ['label' => 'En Aventure Féodale', 'color' => '#a855f7', 'badge_class' => 'bg-purple text-white', 'icon' => '🗺️'],
+    'dead' => ['label' => 'Tombé au Combat', 'color' => '#ef4444', 'badge_class' => 'bg-danger text-white', 'icon' => '💀'],
+    'reviving' => ['label' => 'Régénération en cours (24h)', 'color' => '#f59e0b', 'badge_class' => 'bg-warning text-dark', 'icon' => '✨']
 ];
-$st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3b8', 'icon' => '❓'];
+$st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3b8', 'badge_class' => 'bg-secondary text-white', 'icon' => '❓'];
 ?>
 
-<style>
-/* Forcer la largeur maximale comme sur la page ressources */
-.container {
-    max-width: 1850px !important;
-    width: 98% !important;
-    margin: 1rem auto !important;
-}
-</style>
-
-<div class="hero-view-container" style="width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem;">
-
-    <!-- Carte d'Identité & Tableau de Bord du Samouraï Héros -->
-    <div class="card" style="border-top: 4px solid var(--red-primary, #dc2626); margin-bottom: 1.5rem;">
-        <div class="card-body" style="padding: 1.5rem;">
-            <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
-                
-                <!-- Portrait et Blason du Champion -->
-                <div style="text-align: center; min-width: 140px;">
-                    <div style="width: 120px; height: 120px; margin: 0 auto; border: 3px solid #dc2626; border-radius: 50%; overflow: hidden; box-shadow: 0 0 25px rgba(220,38,38,0.5), 0 4px 15px rgba(0,0,0,0.7); position: relative; background: #0f172a; cursor: pointer;" onclick="window.open('/public/assets/hero_samurai.jpg', '_blank')" title="Cliquer pour admirer l'illustration en grand format">
-                        <img src="/public/assets/hero_samurai.jpg?v=<?= file_exists(__DIR__ . '/../public/assets/hero_samurai.jpg') ? filemtime(__DIR__ . '/../public/assets/hero_samurai.jpg') : 1 ?>" 
-                             alt="Héros Samouraï" 
-                             style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;"
-                             onmouseover="this.style.transform='scale(1.1)'"
-                             onmouseout="this.style.transform='scale(1.0)'">
-                    </div>
-                    <span class="faction-badge <?= htmlspecialchars($user['faction']) ?>" style="margin-top: 0.6rem; display: inline-block;">
-                        <?= htmlspecialchars($hero['name']) ?>
-                    </span>
-                </div>
-
-                <!-- Informations, Vitalité & Progression -->
-                <div style="flex: 1; min-width: 300px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <div>
-                            <h1 style="margin: 0; font-size: 1.6rem; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
-                                <?= htmlspecialchars($hero['name']) ?>
-                                <span style="font-size: 0.9rem; color: #facc15; font-weight: 700; background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; padding: 2px 8px; border-radius: 6px;">
-                                    Niveau <?= $hero['level'] ?>
-                                </span>
-                            </h1>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
-                                Fief d'attache : <strong><?= htmlspecialchars($hero['planet_name']) ?></strong> [<?= $hero['coord_x'] ?> : <?= $hero['coord_y'] ?>]
-                            </div>
-                        </div>
-
-                        <!-- Badge de Statut Dynamique -->
-                        <div>
-                            <span class="badge" style="background: rgba(0,0,0,0.5); border: 1px solid <?= $st['color'] ?>; color: <?= $st['color'] ?>; font-size: 0.85rem; padding: 0.35rem 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                <span><?= $st['icon'] ?></span> <?= $st['label'] ?>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Barre de Santé (Vitalité) -->
-                    <div style="margin: 0.75rem 0;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.25rem;">
-                            <span style="color: #cbd5e1;">❤️ Vitalité & Santé du Samouraï :</span>
-                            <span style="color: <?= $healthColor ?>; font-family: monospace; font-size: 0.9rem;"><?= $health ?>%</span>
-                        </div>
-                        <div style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15);">
-                            <div style="height: 100%; width: <?= $health ?>%; background: <?= $healthColor ?>; transition: width 0.4s ease; box-shadow: 0 0 10px <?= $healthColor ?>;"></div>
-                        </div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem; display: flex; justify-content: space-between;">
-                            <span>Régénération passive : +15% / 24h</span>
-                            <?php if ($hero['status'] === 'dead'): ?>
-                                <span style="color: #ef4444; font-weight: 700;">⚠️ Le héros est tombé au combat. Accomplissez le rituel de réanimation.</span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <!-- Barre d'Expérience (XP) -->
-                    <div style="margin: 0.75rem 0 0 0;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.25rem;">
-                            <span style="color: #facc15;">⭐ Progression vers Niveau <?= $hero['level'] + 1 ?> :</span>
-                            <span style="color: #facc15; font-family: monospace; font-size: 0.85rem;">
-                                <?= number_format($hero['experience']) ?> / <?= number_format($hero['xp_next_level']) ?> XP (<?= $hero['xp_progress_percent'] ?>%)
-                            </span>
-                        </div>
-                        <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                            <div style="height: 100%; width: <?= $hero['xp_progress_percent'] ?>%; background: linear-gradient(90deg, #eab308 0%, #ca8a04 100%); transition: width 0.4s ease;"></div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Bouton de Résurrection si le Héros est mort -->
-                <?php if ($hero['status'] === 'dead'): ?>
-                    <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid #ef4444; border-radius: 8px; padding: 1rem; text-align: center; min-width: 220px;">
-                        <div style="font-size: 0.85rem; color: #fca5a5; font-weight: 700; margin-bottom: 0.5rem;">
-                            💀 Samouraï Tombé
-                        </div>
-                        <p style="font-size: 0.75rem; color: #cbd5e1; margin-bottom: 0.75rem;">
-                            Invoquez les esprits protecteurs pour rappeler votre champion à la vie.
-                        </p>
-                        <button type="button" onclick="executeReviveHero(<?= (int)$planet['id'] ?>)" class="btn btn-primary" style="background: #dc2626; border-color: #b91c1c; font-size: 0.85rem; font-weight: 800; width: 100%;">
-                            ✨ Rituel de Résurrection
-                        </button>
-                    </div>
-                <?php elseif ($hero['status'] === 'reviving'): ?>
-                    <div style="background: rgba(234, 179, 8, 0.12); border: 1px solid #eab308; border-radius: 8px; padding: 1rem; text-align: center; min-width: 220px;">
-                        <div style="font-size: 0.85rem; color: #facc15; font-weight: 700; margin-bottom: 0.5rem;">
-                            ✨ Réanimation en cours
-                        </div>
-                        <div style="font-family: monospace; font-size: 1.1rem; font-weight: 800; color: #fff;" data-countdown="<?= $hero['revive_finish_time'] ?>">
-                            Calcul...
-                        </div>
-                    </div>
-                <?php endif; ?>
-
+<!-- En-tête de navigation Tabler -->
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <div class="page-pretitle">Général &amp; Champion du Fief</div>
+            <h2 class="page-title d-flex align-items-center gap-2">
+                <span><?= $fIcon ?></span>
+                <span>Samouraï <?= htmlspecialchars($hero['name']) ?></span>
+                <span class="badge bg-primary text-white ms-2" style="font-size:0.75rem;">Niveau <?= $hero['level'] ?></span>
+                <span class="badge <?= $st['badge_class'] ?> ms-1" style="font-size:0.75rem;"><?= $st['icon'] ?> <?= $st['label'] ?></span>
+            </h2>
+        </div>
+        <div class="col-auto ms-auto d-print-none">
+            <div class="btn-list">
+                <a href="/?page=resources" class="btn btn-secondary">🌾 Terroir</a>
+                <a href="/?page=station" class="btn btn-secondary">🏯 Cité Castrale</a>
+                <a href="/?page=fleet" class="btn btn-secondary">🚩 Flottes</a>
+                <a href="/?page=map" class="btn btn-secondary">🗺️ Carte</a>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Navigation par Onglets (Caractéristiques, Aventures, Arsenal) -->
-        <div class="card-header" style="background: rgba(10, 15, 29, 0.95); border-top: 1px solid rgba(255,255,255,0.06); padding: 0.5rem 1.5rem; display: flex; gap: 0.5rem;">
-            <a href="?page=hero&tab=attributes" class="btn <?= ($activeTab === 'attributes') ? 'btn-primary' : 'btn-secondary' ?>" style="font-size: 0.85rem; padding: 0.4rem 1rem;">
-                🥋 Compétences & Attributs
-            </a>
-            <a href="?page=hero&tab=adventures" class="btn <?= ($activeTab === 'adventures') ? 'btn-primary' : 'btn-secondary' ?>" style="font-size: 0.85rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.4rem;">
-                🗺️ Aventures Provinciales
-                <span class="badge" style="background: <?= ($dailyQuota['remaining'] > 0) ? '#a855f7' : '#64748b' ?>; color: #fff; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px;" title="<?= $dailyQuota['count'] ?>/<?= $dailyQuota['max'] ?> aventures aujourd'hui">
-                    <?= $dailyQuota['count'] ?>/<?= $dailyQuota['max'] ?>
-                </span>
-            </a>
-            <a href="?page=hero&tab=inventory" class="btn <?= ($activeTab === 'inventory') ? 'btn-primary' : 'btn-secondary' ?>" style="font-size: 0.85rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.4rem;">
-                🗡️ Arsenal & Reliques
-                <?php if (count($inventory) > 0): ?>
-                    <span class="badge" style="background: #eab308; color: #000; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; font-weight: 800;"><?= count($inventory) ?></span>
-                <?php endif; ?>
-            </a>
+<!-- 4 Stat Cards Tabler : Vitalité, Niveau/XP, Puissance, Quota Aventures -->
+<div class="row row-cards mb-3">
+    <!-- Stat 1 : Vitalité -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm h-100">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar rounded <?= ($health >= 60) ? 'bg-success-lt text-success' : (($health >= 25) ? 'bg-warning-lt text-warning' : 'bg-danger-lt text-danger') ?>" style="font-size:1.3rem;">
+                            ❤️
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">Santé &amp; Vitalité</div>
+                        <div class="text-secondary font-weight-bold" style="font-size: 1.15rem;">
+                            <?= $health ?>%
+                        </div>
+                    </div>
+                </div>
+                <div class="progress progress-xs mt-2">
+                    <div class="progress-bar <?= ($health >= 60) ? 'bg-success' : (($health >= 25) ? 'bg-warning' : 'bg-danger') ?>" style="width: <?= $health ?>%"></div>
+                </div>
+                <div class="text-secondary small mt-1 d-flex justify-content-between">
+                    <span><?= ($hero['status'] === 'dead') ? '💀 Héros tombé' : (($hero['status'] === 'reviving') ? '⏳ En régénération' : 'Régénération +15%/j') ?></span>
+                    <span>Max 100%</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- CONTENU ONGLET 1 : ATTRIBUTS & COMPÉTENCES (STYLE TRAVIAN) -->
+    <!-- Stat 2 : Niveau & XP -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm h-100">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar rounded bg-primary-lt text-primary" style="font-size:1.3rem;">
+                            🥋
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">Niveau <?= $hero['level'] ?></div>
+                        <div class="text-secondary font-weight-bold" style="font-size: 1.05rem;">
+                            <?= number_format($hero['experience']) ?> <small class="text-muted">/ <?= number_format($hero['xp_next_level']) ?> XP</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress progress-xs mt-2">
+                    <div class="progress-bar bg-primary" style="width: <?= $hero['xp_progress_percent'] ?>%"></div>
+                </div>
+                <div class="text-secondary small mt-1 d-flex justify-content-between">
+                    <span>Niv. <?= $hero['level'] ?></span>
+                    <span><?= $hero['xp_progress_percent'] ?>% &bull; Vers Niv. <?= $hero['level'] + 1 ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat 3 : Puissance de Combat -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm h-100">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar rounded bg-danger-lt text-danger" style="font-size:1.3rem;">
+                            ⚔️
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">Force Martiale</div>
+                        <div class="text-secondary font-weight-bold" style="font-size: 1.15rem;">
+                            <?= number_format($hero['effective']['combat_strength']) ?> <small class="text-muted">pts</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-secondary small mt-2">
+                    Attaque armée : <strong class="text-danger">+<?= $hero['effective']['offense_bonus_pct'] ?>%</strong> &bull; Défense : <strong class="text-success">+<?= $hero['effective']['defense_bonus_pct'] ?>%</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat 4 : Quota Aventures Quotidiennes (Max 3/j) -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm h-100">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar rounded bg-purple-lt text-purple" style="font-size:1.3rem;">
+                            🗺️
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">Aventures du jour</div>
+                        <div class="text-secondary font-weight-bold" style="font-size: 1.15rem;">
+                            <span class="<?= ($dailyQuota['remaining'] > 0) ? 'text-success' : 'text-danger' ?>">
+                                <?= $dailyQuota['count'] ?> / <?= $dailyQuota['max'] ?>
+                            </span>
+                            <small class="text-muted">(<?= $dailyQuota['remaining'] ?> libre<?= $dailyQuota['remaining'] > 1 ? 's' : '' ?>)</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress progress-xs mt-2">
+                    <div class="progress-bar bg-purple" style="width: <?= round(($dailyQuota['count'] / $dailyQuota['max']) * 100) ?>%"></div>
+                </div>
+                <div class="text-secondary small mt-1 d-flex justify-content-between">
+                    <span>3 maxi par jour</span>
+                    <span>Reset à minuit</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alertes d'État : Héros Tombé ou Régénération en cours (24h) -->
+<?php if ($hero['status'] === 'dead'): ?>
+    <div class="alert alert-danger d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <span style="font-size: 1.8rem;">💀</span>
+            <div>
+                <h4 class="alert-title m-0">Votre Samouraï est tombé au champ d'honneur !</h4>
+                <div class="text-secondary small mt-1">
+                    La régénération du héros après sa mort dure <strong>24 heures</strong>. Invoquez les esprits tutélaires au sanctuaire pour commencer la régénération.
+                </div>
+            </div>
+        </div>
+        <div>
+            <button type="button" onclick="executeReviveHero(<?= (int)$planet['id'] ?>)" class="btn btn-danger font-weight-bold">
+                ✨ Lancer la Régénération (24h)
+            </button>
+        </div>
+    </div>
+<?php elseif ($hero['status'] === 'reviving'): ?>
+    <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <span style="font-size: 1.8rem;">⏳</span>
+            <div>
+                <h4 class="alert-title m-0">Régénération sacrée en cours (durée : 24 heures)</h4>
+                <div class="text-secondary small mt-1">
+                    Votre Samouraï est en communion spirituelle au donjon. Il recouvrera 100% de sa vitalité dès la fin du rituel.
+                </div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="small text-secondary font-weight-bold">Fin dans :</span>
+            <span class="badge bg-warning text-dark font-monospace py-2 px-3 fs-5" data-countdown="<?= $hero['revive_finish_time'] ?>">
+                Calcul...
+            </span>
+        </div>
+    </div>
+<?php endif; ?>
+
+<!-- Panneau Principal Tabler avec Onglets -->
+<div class="card mb-3">
+    <!-- Onglets Tabler -->
+    <div class="card-header border-bottom">
+        <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
+            <li class="nav-item">
+                <a href="?page=hero&tab=attributes" class="nav-link <?= ($activeTab === 'attributes') ? 'active' : '' ?>">
+                    <span class="me-1">🥋</span> Compétences &amp; Attributs
+                    <?php if ($hero['unassigned_points'] > 0): ?>
+                        <span class="badge bg-warning text-dark ms-2">+<?= $hero['unassigned_points'] ?></span>
+                    <?php endif; ?>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="?page=hero&tab=adventures" class="nav-link <?= ($activeTab === 'adventures') ? 'active' : '' ?>">
+                    <span class="me-1">🗺️</span> Aventures Provinciales
+                    <span class="badge bg-purple-lt ms-2"><?= $dailyQuota['count'] ?>/<?= $dailyQuota['max'] ?></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="?page=hero&tab=inventory" class="nav-link <?= ($activeTab === 'inventory') ? 'active' : '' ?>">
+                    <span class="me-1">🗡️</span> Arsenal &amp; Reliques
+                    <?php if (count($inventory) > 0): ?>
+                        <span class="badge bg-secondary-lt ms-2"><?= count($inventory) ?></span>
+                    <?php endif; ?>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- CONTENU ONGLET 1 : ATTRIBUTS & COMPÉTENCES -->
     <?php if ($activeTab === 'attributes'): ?>
-        <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
                 <div>
-                    <h2 class="card-title" style="margin: 0; font-size: 1.15rem;">
-                        ⚡ Points de Compétences Féodales
-                    </h2>
-                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                    <h3 class="card-title m-0">Points de Compétences Féodales</h3>
+                    <div class="text-secondary small mt-1">
                         Répartissez vos 4 points gagnés à chaque niveau entre les 4 vertus de commandement du Samouraï.
                     </div>
                 </div>
-
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div style="background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 800; color: #facc15;">
-                        Points disponibles : <span id="unassignedDisplay"><?= $hero['unassigned_points'] ?></span>
-                    </div>
+                <div class="badge bg-warning-lt border border-warning fs-6 py-2 px-3">
+                    Points disponibles : <strong id="unassignedDisplay" class="ms-1"><?= $hero['unassigned_points'] ?></strong>
                 </div>
             </div>
 
-            <div class="card-body">
-                <form id="heroAttributesForm" onsubmit="event.preventDefault(); submitAttributes();">
-                    
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        
-                        <!-- 1. Force de Combat -->
-                        <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                            <div style="flex: 1; min-width: 260px;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span style="font-size: 1.5rem;">⚔️</span>
-                                    <strong style="color: #fff; font-size: 1rem;">Force de Combat Personnelle</strong>
-                                </div>
-                                <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #94a3b8; line-height: 1.4;">
-                                    Augmente la puissance d'attaque et de défense pure du Samouraï en personne (+80 pts de puissance par point d'attribut).
-                                </p>
-                                <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #60a5fa; font-weight: 700;">
-                                    Puissance actuelle : <span id="effectiveStrength"><?= number_format($hero['effective']['combat_strength']) ?></span>
-                                    <?php if ($hero['effective']['equipment_strength'] > 0): ?>
-                                        <span style="color: #facc15; font-size: 0.75rem;">(+<?= $hero['effective']['equipment_strength'] ?> via armes)</span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span style="font-size: 1.1rem; font-weight: 800; color: #fff; min-width: 40px; text-align: center;" id="baseStrengthPts">
-                                    <?= $hero['stat_strength'] ?>
-                                </span>
-                                <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-weight: 800;" onclick="adjustPoint('strength', -1)">-</button>
-                                    <span style="font-family: monospace; font-size: 1.1rem; font-weight: 800; color: #4ade80; min-width: 30px; text-align: center;" id="add-strength">0</span>
-                                    <button type="button" class="btn btn-primary" style="padding: 0.2rem 0.6rem; font-weight: 800;" onclick="adjustPoint('strength', 1)">+</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 2. Bonus d'Attaque (Offense %) -->
-                        <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                            <div style="flex: 1; min-width: 260px;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span style="font-size: 1.5rem;">🏹</span>
-                                    <strong style="color: #fff; font-size: 1rem;">Bonus Offensif de l'Armée</strong>
-                                </div>
-                                <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #94a3b8; line-height: 1.4;">
-                                    Augmente la force d'attaque de TOUTES les troupes qui accompagnent le héros au combat (+0.2% par point, maximum +20%).
-                                </p>
-                                <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #f87171; font-weight: 700;">
-                                    Bonus offensif actuel : <span id="effectiveOffense">+<?= $hero['effective']['offense_bonus_pct'] ?>%</span>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span style="font-size: 1.1rem; font-weight: 800; color: #fff; min-width: 40px; text-align: center;" id="baseOffensePts">
-                                    <?= $hero['stat_offense_bonus'] ?>
-                                </span>
-                                <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-weight: 800;" onclick="adjustPoint('offense', -1)">-</button>
-                                    <span style="font-family: monospace; font-size: 1.1rem; font-weight: 800; color: #4ade80; min-width: 30px; text-align: center;" id="add-offense">0</span>
-                                    <button type="button" class="btn btn-primary" style="padding: 0.2rem 0.6rem; font-weight: 800;" onclick="adjustPoint('offense', 1)">+</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3. Bonus de Défense (Défense %) -->
-                        <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                            <div style="flex: 1; min-width: 260px;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span style="font-size: 1.5rem;">🛡️</span>
-                                    <strong style="color: #fff; font-size: 1rem;">Bonus Défensif de la Garnison</strong>
-                                </div>
-                                <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #94a3b8; line-height: 1.4;">
-                                    Augmente la force de défense de toutes les troupes stationnées dans le domaine où réside le héros (+0.2% par point, maximum +20%).
-                                </p>
-                                <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #34d399; font-weight: 700;">
-                                    Bonus défensif actuel : <span id="effectiveDefense">+<?= $hero['effective']['defense_bonus_pct'] ?>%</span>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span style="font-size: 1.1rem; font-weight: 800; color: #fff; min-width: 40px; text-align: center;" id="baseDefensePts">
-                                    <?= $hero['stat_defense_bonus'] ?>
-                                </span>
-                                <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-weight: 800;" onclick="adjustPoint('defense', -1)">-</button>
-                                    <span style="font-family: monospace; font-size: 1.1rem; font-weight: 800; color: #4ade80; min-width: 30px; text-align: center;" id="add-defense">0</span>
-                                    <button type="button" class="btn btn-primary" style="padding: 0.2rem 0.6rem; font-weight: 800;" onclick="adjustPoint('defense', 1)">+</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 4. Production Féodale du Domaine -->
-                        <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-                                <div style="flex: 1; min-width: 260px;">
-                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                        <span style="font-size: 1.5rem;">🌾</span>
-                                        <strong style="color: #fff; font-size: 1rem;">Ressources & Prospérité du Fief</strong>
+            <form id="heroAttributesForm" onsubmit="event.preventDefault(); submitAttributes();">
+                <div class="row g-3">
+                    <!-- 1. Force de Combat -->
+                    <div class="col-md-6">
+                        <div class="card card-sm h-100 border">
+                            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div style="flex:1; min-width: 200px;">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fs-3">⚔️</span>
+                                        <strong class="fs-5">Force Personnelle</strong>
                                     </div>
-                                    <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #94a3b8; line-height: 1.4;">
-                                        Le Samouraï veille sur les récoltes et artisans du fief. Augmente la production horaire du domaine.
+                                    <p class="text-secondary small mb-1">
+                                        Augmente la puissance pure du Samouraï (+80 pts de puissance par point).
                                     </p>
-                                    <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #facc15; font-weight: 700;">
-                                        Apport actuel : 
-                                        +<?= $hero['effective']['hourly_production']['metal'] ?> 🪵 Bois, 
-                                        +<?= $hero['effective']['hourly_production']['crystal'] ?> 🪨 Pierre, 
-                                        +<?= $hero['effective']['hourly_production']['deuterium'] ?> 🌾 Riz / h
+                                    <div class="text-primary small font-weight-bold">
+                                        Puissance actuelle : <span id="effectiveStrength"><?= number_format($hero['effective']['combat_strength']) ?></span>
+                                        <?php if ($hero['effective']['equipment_strength'] > 0): ?>
+                                            <span class="text-warning small">(+<?= $hero['effective']['equipment_strength'] ?> via armes)</span>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
-
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <span style="font-size: 1.1rem; font-weight: 800; color: #fff; min-width: 40px; text-align: center;" id="baseProdPts">
-                                        <?= $hero['stat_production'] ?>
-                                    </span>
-                                    <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                        <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-weight: 800;" onclick="adjustPoint('production', -1)">-</button>
-                                        <span style="font-family: monospace; font-size: 1.1rem; font-weight: 800; color: #4ade80; min-width: 30px; text-align: center;" id="add-production">0</span>
-                                        <button type="button" class="btn btn-primary" style="padding: 0.2rem 0.6rem; font-weight: 800;" onclick="adjustPoint('production', 1)">+</button>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="font-weight-bold fs-5 px-2" id="baseStrengthPts"><?= $hero['stat_strength'] ?></span>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="adjustPoint('strength', -1)">-</button>
+                                        <span class="btn btn-sm btn-light font-monospace font-weight-bold text-success px-2" id="add-strength">0</span>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="adjustPoint('strength', 1)">+</button>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Choix de l'orientation de production -->
-                            <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.75rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
-                                <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 700;">Orientation de récolte :</span>
-                                
-                                <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer;">
-                                    <input type="radio" name="prod_type" value="balanced" <?= ($hero['production_type'] === 'balanced') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
-                                    <span>⚖️ Équilibrée (Tous)</span>
-                                </label>
-                                <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer;">
-                                    <input type="radio" name="prod_type" value="metal" <?= ($hero['production_type'] === 'metal') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
-                                    <span style="color: var(--res-metal);">🪵 Bois de Cèdre pur</span>
-                                </label>
-                                <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer;">
-                                    <input type="radio" name="prod_type" value="crystal" <?= ($hero['production_type'] === 'crystal') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
-                                    <span style="color: var(--res-crystal);">🪨 Pierre de Taille pure</span>
-                                </label>
-                                <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer;">
-                                    <input type="radio" name="prod_type" value="deuterium" <?= ($hero['production_type'] === 'deuterium') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
-                                    <span style="color: var(--res-deut);">🌾 Riz Impérial pur</span>
-                                </label>
                             </div>
                         </div>
-
                     </div>
 
-                    <!-- Bouton de confirmation des points -->
-                    <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; align-items: center;">
-                        <button type="button" class="btn btn-secondary" onclick="resetPoints()">Réinitialiser</button>
-                        <button type="submit" class="btn btn-primary" id="savePointsBtn" style="padding: 0.6rem 1.5rem; font-weight: 800;">
-                            ✨ Enregistrer les Attributs du Samouraï
-                        </button>
+                    <!-- 2. Bonus d'Attaque (Offense %) -->
+                    <div class="col-md-6">
+                        <div class="card card-sm h-100 border">
+                            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div style="flex:1; min-width: 200px;">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fs-3">🏹</span>
+                                        <strong class="fs-5">Bonus Offensif d'Armée</strong>
+                                    </div>
+                                    <p class="text-secondary small mb-1">
+                                        Augmente la force d'attaque de TOUTES les troupes qui accompagnent le héros (+0.2%/point, max 20%).
+                                    </p>
+                                    <div class="text-danger small font-weight-bold">
+                                        Bonus offensif : <span id="effectiveOffense">+<?= $hero['effective']['offense_bonus_pct'] ?>%</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="font-weight-bold fs-5 px-2" id="baseOffensePts"><?= $hero['stat_offense_bonus'] ?></span>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="adjustPoint('offense', -1)">-</button>
+                                        <span class="btn btn-sm btn-light font-monospace font-weight-bold text-success px-2" id="add-offense">0</span>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="adjustPoint('offense', 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                </form>
-            </div>
+                    <!-- 3. Bonus de Défense (Défense %) -->
+                    <div class="col-md-6">
+                        <div class="card card-sm h-100 border">
+                            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div style="flex:1; min-width: 200px;">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fs-3">🛡️</span>
+                                        <strong class="fs-5">Bonus Défensif d'Armée</strong>
+                                    </div>
+                                    <p class="text-secondary small mb-1">
+                                        Augmente la défense de TOUTES les troupes du fief lorsqu'il est présent (+0.2%/point, max 20%).
+                                    </p>
+                                    <div class="text-success small font-weight-bold">
+                                        Bonus défensif : <span id="effectiveDefense">+<?= $hero['effective']['defense_bonus_pct'] ?>%</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="font-weight-bold fs-5 px-2" id="baseDefensePts"><?= $hero['stat_defense_bonus'] ?></span>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="adjustPoint('defense', -1)">-</button>
+                                        <span class="btn btn-sm btn-light font-monospace font-weight-bold text-success px-2" id="add-defense">0</span>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="adjustPoint('defense', 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Production du Domaine -->
+                    <div class="col-md-6">
+                        <div class="card card-sm h-100 border">
+                            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div style="flex:1; min-width: 200px;">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fs-3">🌾</span>
+                                        <strong class="fs-5">Bénédiction de Récolte</strong>
+                                    </div>
+                                    <p class="text-secondary small mb-1">
+                                        Accroît la production horaire de ressources du fief où réside le héros (+120 res/h par point).
+                                    </p>
+                                    <div class="text-warning small font-weight-bold">
+                                        Production bonus : <span id="effectiveProd">+<?= number_format($hero['stat_production'] * 120) ?> res/h</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="font-weight-bold fs-5 px-2" id="baseProdPts"><?= $hero['stat_production'] ?></span>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="adjustPoint('production', -1)">-</button>
+                                        <span class="btn btn-sm btn-light font-monospace font-weight-bold text-success px-2" id="add-production">0</span>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="adjustPoint('production', 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orientation de production -->
+                <div class="card card-sm border mt-3 bg-surface-secondary">
+                    <div class="card-body py-2 px-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <span class="text-secondary small font-weight-bold text-uppercase" style="letter-spacing:0.5px;">Orientation des Récoltes :</span>
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <label class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="prod_type" value="balanced" <?= ($hero['production_type'] === 'balanced') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
+                                <span class="form-check-label">⚖️ Équilibrée (Tous)</span>
+                            </label>
+                            <label class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="prod_type" value="metal" <?= ($hero['production_type'] === 'metal') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
+                                <span class="form-check-label" style="color:var(--tblr-warning-emphasis, #b45309);">🪵 Bois de Cèdre pur</span>
+                            </label>
+                            <label class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="prod_type" value="crystal" <?= ($hero['production_type'] === 'crystal') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
+                                <span class="form-check-label" style="color:var(--tblr-primary, #2563eb);">🪨 Pierre de Taille pure</span>
+                            </label>
+                            <label class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="radio" name="prod_type" value="deuterium" <?= ($hero['production_type'] === 'deuterium') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
+                                <span class="form-check-label" style="color:var(--tblr-success, #16a34a);">🌾 Riz Impérial pur</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boutons d'enregistrement -->
+                <div class="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+                    <button type="button" class="btn btn-secondary" onclick="resetPoints()">Réinitialiser</button>
+                    <button type="submit" class="btn btn-primary" id="savePointsBtn">
+                        ✨ Enregistrer les Attributs
+                    </button>
+                </div>
+            </form>
         </div>
 
-    <!-- CONTENU ONGLET 2 : AVENTURES FÉODALES (STYLE TRAVIAN - MAX 3/JOUR) -->
+    <!-- CONTENU ONGLET 2 : AVENTURES FÉODALES (MAX 3 PAR JOUR) -->
     <?php elseif ($activeTab === 'adventures'): ?>
-        <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
                 <div>
-                    <h2 class="card-title" style="margin: 0; font-size: 1.15rem;">
-                        🗺️ Expéditions &amp; Aventures du Samouraï
-                    </h2>
-                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                        Envoyez votre Samouraï explorer les sanctuaires oubliés et ruines antiques pour acquérir de l'XP, du butin et des reliques (3 aventures par jour maxi).
+                    <h3 class="card-title m-0">🗺️ Expéditions &amp; Aventures Provinciales</h3>
+                    <div class="text-secondary small mt-1">
+                        Envoyez votre Samouraï explorer les sanctuaires oubliés et ruines antiques pour acquérir de l'XP, du butin et des reliques uniques.
                     </div>
                 </div>
 
                 <!-- Badge Quota Journalier -->
-                <div style="display: flex; align-items: center; gap: 0.6rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 0.35rem 0.85rem; border-radius: 8px;">
-                    <span style="font-size: 0.8rem; color: #94a3b8;">Quota du jour :</span>
-                    <strong style="color: <?= ($dailyQuota['remaining'] > 0) ? '#4ade80' : '#f87171' ?>; font-size: 0.95rem;">
-                        <?= $dailyQuota['count'] ?> / <?= $dailyQuota['max'] ?>
-                    </strong>
-                    <span style="font-size: 0.75rem; color: #cbd5e1;">(<?= $dailyQuota['remaining'] ?> restante<?= $dailyQuota['remaining'] > 1 ? 's' : '' ?>)</span>
+                <div class="badge <?= ($dailyQuota['remaining'] > 0) ? 'bg-success-lt border border-success' : 'bg-danger-lt border border-danger' ?> py-2 px-3 fs-6">
+                    Quota du jour : <strong class="ms-1"><?= $dailyQuota['count'] ?> / <?= $dailyQuota['max'] ?></strong>
+                    <span class="small ms-1">(<?= $dailyQuota['remaining'] ?> restante<?= $dailyQuota['remaining'] > 1 ? 's' : '' ?>)</span>
                 </div>
             </div>
 
-            <div class="card-body">
-                <!-- Encart d'information sur le quota de 3 aventures par jour -->
-                <div style="background: <?= ($dailyQuota['remaining'] > 0) ? 'rgba(168, 85, 247, 0.08)' : 'rgba(239, 68, 68, 0.1)' ?>; border: 1px solid <?= ($dailyQuota['remaining'] > 0) ? 'rgba(168, 85, 247, 0.25)' : 'rgba(239, 68, 68, 0.3)' ?>; border-radius: 8px; padding: 0.9rem 1.25rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <!-- Encart d'information sur la règle des 3 aventures par jour -->
+            <div class="card card-sm mb-3 border <?= ($dailyQuota['remaining'] > 0) ? 'border-purple-subtle bg-purple-lt' : 'border-danger-subtle bg-danger-lt' ?>">
+                <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
                     <div>
-                        <div style="font-weight: 700; color: <?= ($dailyQuota['remaining'] > 0) ? '#d8b4fe' : '#fca5a5' ?>; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
-                            <?= ($dailyQuota['remaining'] > 0) ? '⏳ Quota féodal : 3 aventures par jour maximum' : '🔒 Quota quotidien atteint (3 / 3 aventures)' ?>
+                        <div class="font-weight-bold <?= ($dailyQuota['remaining'] > 0) ? 'text-purple' : 'text-danger' ?>">
+                            <?= ($dailyQuota['remaining'] > 0) ? '⏳ Règle Féodale : 3 aventures par jour maximum' : '🔒 Quota quotidien épuisé (3 / 3 aventures)' ?>
                         </div>
-                        <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.2rem;">
+                        <div class="small text-secondary mt-1">
                             <?php if ($dailyQuota['remaining'] > 0): ?>
                                 Votre héros peut encore accomplir <strong><?= $dailyQuota['remaining'] ?> aventure<?= $dailyQuota['remaining'] > 1 ? 's' : '' ?></strong> aujourd'hui. Réinitialisation chaque nuit à minuit.
                             <?php else: ?>
-                                Votre Samouraï a accompli ses 3 aventures du jour. Il médite au fief pour reprendre des forces jusqu'à minuit avant de reprendre la route des sanctuaires.
+                                Votre Samouraï a accompli ses 3 aventures du jour. Il médite au dojo pour reprendre des forces jusqu'à minuit avant de repartir en quête.
                             <?php endif; ?>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 0.4rem; align-items: center;">
+                    <div class="d-flex gap-2 align-items-center">
                         <?php for ($i = 1; $i <= $dailyQuota['max']; $i++): ?>
                             <?php if ($i <= $dailyQuota['count']): ?>
-                                <span class="badge" style="background: #22c55e; color: #fff; padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.75rem;">
-                                    ✓ Aventure <?= $i ?>
-                                </span>
+                                <span class="badge bg-success text-white py-1 px-2">✓ Aventure <?= $i ?></span>
                             <?php else: ?>
-                                <span class="badge" style="background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.25); color: #94a3b8; padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.75rem;">
-                                    ○ Aventure <?= $i ?>
-                                </span>
+                                <span class="badge bg-surface border text-secondary py-1 px-2">○ Aventure <?= $i ?></span>
                             <?php endif; ?>
                         <?php endfor; ?>
                     </div>
                 </div>
+            </div>
 
-                <?php if (empty($adventures)): ?>
-                    <div style="text-align: center; padding: 2.5rem 1rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
-                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📜</div>
-                        <h3 style="color: #fff; font-size: 1.1rem; margin: 0 0 0.5rem 0;">Aucune aventure n'est disponible pour l'instant</h3>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; max-width: 480px; margin: 0 auto;">
-                            De nouvelles rumeurs et pistes d'aventures apparaissent régulièrement à mesure que votre clan s'étend et que vos éclaireurs sillonnent les provinces.
-                        </p>
-                    </div>
-                <?php else: ?>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1rem;">
-                        <?php foreach ($adventures as $adv): ?>
-                            <?php 
-                                $diffBadges = [
-                                    'easy' => ['label' => 'Difficulté : Faible', 'color' => '#22c55e', 'bg' => 'rgba(34, 197, 94, 0.1)'],
-                                    'medium' => ['label' => 'Difficulté : Moyenne', 'color' => '#eab308', 'bg' => 'rgba(234, 179, 8, 0.1)'],
-                                    'hard' => ['label' => 'Difficulté : Périlleuse', 'color' => '#ef4444', 'bg' => 'rgba(239, 68, 68, 0.1)']
-                                ];
-                                $dbdg = $diffBadges[$adv['difficulty']] ?? $diffBadges['easy'];
-                                $canStart = ($hero['status'] === 'home' && $hero['health'] >= 15.0 && $dailyQuota['can_adventure']);
-                            ?>
-                            <div class="card" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
-                                <div style="padding: 1.25rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                                        <span class="badge" style="background: <?= $dbdg['bg'] ?>; border: 1px solid <?= $dbdg['color'] ?>; color: <?= $dbdg['color'] ?>; font-size: 0.75rem; padding: 0.2rem 0.5rem; font-weight: 700;">
-                                            <?= $dbdg['label'] ?>
-                                        </span>
-                                        <span style="font-family: monospace; font-size: 0.8rem; color: #facc15; font-weight: 700;">
-                                            [<?= $adv['coord_x'] ?> : <?= $adv['coord_y'] ?>]
-                                        </span>
+            <?php if (empty($adventures)): ?>
+                <div class="text-center py-5 border rounded bg-surface">
+                    <div class="fs-1 mb-2">📜</div>
+                    <h4 class="font-weight-bold">Aucune aventure n'est disponible pour l'instant</h4>
+                    <p class="text-secondary small max-w-sm mx-auto mb-0">
+                        De nouvelles rumeurs et pistes d'aventures apparaissent régulièrement à mesure que vos éclaireurs sillonnent les provinces.
+                    </p>
+                </div>
+            <?php else: ?>
+                <div class="row g-3">
+                    <?php foreach ($adventures as $adv): ?>
+                        <?php 
+                            $diffBadges = [
+                                'easy' => ['label' => 'Difficulté : Faible', 'class' => 'bg-success-lt text-success border border-success'],
+                                'medium' => ['label' => 'Difficulté : Moyenne', 'class' => 'bg-warning-lt text-warning border border-warning'],
+                                'hard' => ['label' => 'Difficulté : Périlleuse', 'class' => 'bg-danger-lt text-danger border border-danger']
+                            ];
+                            $dbdg = $diffBadges[$adv['difficulty']] ?? $diffBadges['easy'];
+                            $canStart = ($hero['status'] === 'home' && $hero['health'] >= 15.0 && $dailyQuota['can_adventure']);
+                        ?>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge <?= $dbdg['class'] ?>"><?= $dbdg['label'] ?></span>
+                                        <span class="badge bg-secondary-lt font-monospace">[<?= $adv['coord_x'] ?> : <?= $adv['coord_y'] ?>]</span>
                                     </div>
-
-                                    <h3 style="color: #fff; font-size: 1.05rem; font-weight: 800; margin: 0 0 0.5rem 0;">
+                                    <h4 class="card-title font-weight-bold mb-2">
                                         ⛩️ <?= htmlspecialchars($adv['name']) ?>
-                                    </h3>
-
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; margin-top: 0.75rem; background: rgba(0,0,0,0.3); padding: 0.5rem 0.75rem; border-radius: 6px;">
+                                    </h4>
+                                    <div class="bg-surface-secondary border rounded p-2 small text-secondary d-flex justify-content-between mb-2">
                                         <span>Distance : <strong><?= $adv['distance'] ?></strong> lieues</span>
                                         <span>Marche : <strong><?= gmdate('H:i:s', $adv['duration']) ?></strong></span>
                                     </div>
+                                    <div class="small text-muted">
+                                        Gains potentiels : XP, Vivres, Troupes ou Relique unique
+                                    </div>
                                 </div>
-
-                                <div style="background: rgba(10, 15, 29, 0.9); border-top: 1px solid rgba(255,255,255,0.05); padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 0.75rem; color: #cbd5e1;">Gains : XP, Vivres ou Reliques</span>
+                                <div class="card-footer bg-surface d-flex justify-content-between align-items-center py-2 px-3 border-top">
+                                    <span class="small text-secondary">Statut : <?= $canStart ? '<span class="text-success font-weight-bold">Prêt</span>' : '<span class="text-muted">Bloqué</span>' ?></span>
                                     <?php if ($canStart): ?>
-                                        <button type="button" onclick="executeStartAdventure(<?= (int)$adv['id'] ?>)" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.35rem 0.9rem; font-weight: 800;">
+                                        <button type="button" onclick="executeStartAdventure(<?= (int)$adv['id'] ?>)" class="btn btn-sm btn-primary font-weight-bold">
                                             Partir en Aventure &rarr;
                                         </button>
                                     <?php else: ?>
@@ -464,57 +518,67 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
                                                 $btnReason = '🔒 Quota atteint (3/3)';
                                                 $btnTitle = 'Quota quotidien de 3 aventures atteint. Réinitialisation à minuit.';
                                             } elseif ($hero['status'] !== 'home') {
-                                                $btnReason = 'Indisponible';
+                                                $btnReason = 'Indisponible (En route)';
                                                 $btnTitle = 'Le Samouraï doit être au domaine pour partir en aventure.';
                                             } elseif ($hero['health'] < 15.0) {
-                                                $btnReason = 'Blessé (< 15%)';
+                                                $btnReason = 'Blessé (< 15% PV)';
                                                 $btnTitle = 'Santé insuffisante. Laissez votre Samouraï récupérer ses PV.';
                                             }
                                         ?>
-                                        <button type="button" disabled class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; opacity: 0.6;" title="<?= htmlspecialchars($btnTitle) ?>">
+                                        <button type="button" disabled class="btn btn-sm btn-secondary opacity-75" title="<?= htmlspecialchars($btnTitle) ?>">
                                             <?= $btnReason ?>
                                         </button>
                                     <?php endif; ?>
                                 </div>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
     <!-- CONTENU ONGLET 3 : ARSENAL & RELIQUES (INVENTAIRE) -->
     <?php elseif ($activeTab === 'inventory'): ?>
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title" style="margin: 0; font-size: 1.15rem;">
-                    🗡️ Arsenal & Reliques Ancestrales
-                </h2>
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                    Équipez votre Samouraï des armes légendaires et talismans découverts au cours de ses explorations.
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
+                <div>
+                    <h3 class="card-title m-0">🗡️ Arsenal &amp; Reliques Ancestrales</h3>
+                    <div class="text-secondary small mt-1">
+                        Équipez votre Samouraï des armes légendaires et trésors sacrés découverts lors de ses expéditions.
+                    </div>
+                </div>
+                <div class="badge bg-warning-lt border border-warning fs-6 py-2 px-3">
+                    Reliques possédées : <strong class="ms-1"><?= count($inventory) ?></strong>
                 </div>
             </div>
 
-            <div class="card-body">
-                <!-- 5 Emplacements d'équipements actifs avec Mannequin du Héros (Style Travian) -->
-                <h3 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem;">🥋 Équipement Actuel & Mannequin du Champion</h3>
-                
-                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem; align-items: stretch;">
-                    <!-- Mannequin / Portrait du Héros -->
-                    <div style="width: 220px; border-radius: 12px; overflow: hidden; border: 2px solid #dc2626; box-shadow: 0 0 25px rgba(220,38,38,0.35); background: #0f172a; position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-height: 290px; flex-shrink: 0; cursor: pointer;" onclick="window.open('/public/assets/hero_samurai.jpg', '_blank')" title="Cliquer pour afficher l'illustration complète">
+            <!-- Règle des Reliques Uniques -->
+            <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center gap-2">
+                <span class="fs-4">⛩️</span>
+                <div class="small">
+                    <strong>Règle Féodale des Reliques :</strong> Chaque relique du Japon féodal est unique. <strong>Vous ne pouvez jamais obtenir deux fois la même relique</strong> au cours de vos aventures.
+                </div>
+            </div>
+
+            <!-- Mannequin du Héros & 5 Emplacements d'Équipement -->
+            <h4 class="font-weight-bold mb-2">🥋 Équipement Actuel du Champion</h4>
+            <div class="row g-3 mb-4 align-items-stretch">
+                <!-- Portrait / Mannequin -->
+                <div class="col-md-4 col-lg-3">
+                    <div class="card h-100 border overflow-hidden shadow-sm text-center bg-dark" style="position:relative; min-height:280px; cursor:pointer;" onclick="window.open('/public/assets/hero_samurai.jpg', '_blank')" title="Agrandir le portrait">
                         <img src="/public/assets/hero_samurai.jpg?v=<?= file_exists(__DIR__ . '/../public/assets/hero_samurai.jpg') ? filemtime(__DIR__ . '/../public/assets/hero_samurai.jpg') : 1 ?>" 
                              alt="Héros Samouraï" 
-                             style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.4s ease;"
-                             onmouseover="this.style.transform='scale(1.04)'"
-                             onmouseout="this.style.transform='scale(1)'">
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.6) 70%, rgba(15,23,42,0) 100%); padding: 1rem 0.75rem 0.5rem 0.75rem; text-align: center;">
-                            <div style="color: #fff; font-weight: 800; font-size: 0.9rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8);"><?= htmlspecialchars($hero['name']) ?></div>
-                            <div style="color: #facc15; font-size: 0.75rem; font-weight: 700;">Niveau <?= $hero['level'] ?> • <?= number_format($hero['effective']['combat_strength']) ?> Puissance</div>
+                             style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.5) 70%, rgba(15,23,42,0) 100%); padding: 0.75rem 0.5rem; text-align: center;">
+                            <div class="text-white font-weight-bold fs-5"><?= htmlspecialchars($hero['name']) ?></div>
+                            <div class="text-warning small font-weight-bold">Niveau <?= $hero['level'] ?> &bull; <?= number_format($hero['effective']['combat_strength']) ?> pts</div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- 5 Emplacements d'équipements -->
-                    <div style="flex: 1; min-width: 280px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; align-content: center;">
+                <!-- 5 Slots d'Équipement -->
+                <div class="col-md-8 col-lg-9">
+                    <div class="row g-2 h-100">
                         <?php 
                             $slots = [
                                 'weapon' => ['label' => 'Arme de Poing', 'icon' => '🗡️', 'field' => 'equipped_weapon'],
@@ -537,67 +601,69 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
                                     }
                                 }
                             ?>
-                            <div style="background: rgba(0,0,0,0.3); border: 1px solid <?= $equippedItem ? '#eab308' : 'rgba(255,255,255,0.08)' ?>; border-radius: 8px; padding: 0.85rem; text-align: center;">
-                                <div style="font-size: 1.8rem; margin-bottom: 0.25rem; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));">
-                                    <?= $sl['icon'] ?>
-                                </div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">
-                                    <?= $sl['label'] ?>
-                                </div>
-                                <?php if ($equippedItem): ?>
-                                    <div style="font-size: 0.85rem; font-weight: 800; color: #facc15; margin: 0.35rem 0;">
-                                        <?= htmlspecialchars($equippedItem['name']) ?>
-                                    </div>
-                                    <button type="button" onclick="executeUnequip('<?= $slotKey ?>')" class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.2rem 0.6rem;">
-                                        Déséquiper
-                                    </button>
-                                <?php else: ?>
-                                    <div style="font-size: 0.8rem; color: #64748b; font-style: italic; margin: 0.35rem 0;">
-                                        Emplacement vide
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-                <!-- Grille d'inventaire disponible -->
-                <h3 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem;">📦 Coffre & Reliques Collectées</h3>
-                <?php if (empty($inventory)): ?>
-                    <div style="text-align: center; padding: 1.5rem; background: rgba(0,0,0,0.2); border-radius: 8px; color: var(--text-muted); font-size: 0.85rem;">
-                        Votre coffre de reliques est vide. Envoyez votre Samouraï en aventure pour découvrir des katanas légendaires et des cuirasses impériales !
-                    </div>
-                <?php else: ?>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem;">
-                        <?php foreach ($inventory as $it): ?>
-                            <div style="background: rgba(15,23,42,0.6); border: 1px solid <?= !empty($it['is_equipped']) ? '#22c55e' : 'rgba(255,255,255,0.08)' ?>; border-radius: 8px; padding: 0.85rem; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;">
-                                <div>
-                                    <div style="display: flex; align-items: center; gap: 0.4rem;">
-                                        <strong style="color: #fff; font-size: 0.88rem;"><?= htmlspecialchars($it['name']) ?></strong>
-                                        <?php if (!empty($it['is_equipped'])): ?>
-                                            <span style="background: #22c55e; color: #fff; font-size: 0.65rem; padding: 1px 4px; border-radius: 3px; font-weight: 800;">ÉQUIPÉ</span>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">
-                                        <?= htmlspecialchars($it['description']) ?>
-                                    </div>
-                                </div>
-                                <div>
-                                    <?php if (empty($it['is_equipped'])): ?>
-                                        <button type="button" onclick="executeEquip(<?= (int)$it['id'] ?>)" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; font-weight: 700;">
-                                            Équiper
+                            <div class="col-sm-6 col-md-4">
+                                <div class="card h-100 border p-2 text-center <?= $equippedItem ? 'border-warning bg-warning-lt' : 'bg-surface' ?>">
+                                    <div class="fs-2 mb-1"><?= $sl['icon'] ?></div>
+                                    <div class="text-secondary small font-weight-bold text-uppercase"><?= $sl['label'] ?></div>
+                                    <?php if ($equippedItem): ?>
+                                        <div class="font-weight-bold text-dark small my-1">
+                                            <?= htmlspecialchars($equippedItem['name']) ?>
+                                        </div>
+                                        <button type="button" onclick="executeUnequip('<?= $slotKey ?>')" class="btn btn-sm btn-outline-danger py-0 px-2 mt-auto" style="font-size:0.75rem;">
+                                            Déséquiper
                                         </button>
+                                    <?php else: ?>
+                                        <div class="text-muted small fst-italic my-1">Emplacement vide</div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                <?php endif; ?>
-
+                </div>
             </div>
+
+            <!-- Grille d'Inventaire / Coffre de Reliques -->
+            <h4 class="font-weight-bold mb-2">📦 Coffre &amp; Reliques Collectées</h4>
+            <?php if (empty($inventory)): ?>
+                <div class="text-center py-4 border rounded bg-surface">
+                    <p class="text-secondary mb-0">
+                        Votre coffre de reliques est vide. Envoyez votre Samouraï en aventure pour découvrir des katanas légendaires et des cuirasses impériales !
+                    </p>
+                </div>
+            <?php else: ?>
+                <div class="row g-3">
+                    <?php foreach ($inventory as $it): ?>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border <?= !empty($it['is_equipped']) ? 'border-success' : '' ?>">
+                                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <strong class="text-dark"><?= htmlspecialchars($it['name']) ?></strong>
+                                            <?php if (!empty($it['is_equipped'])): ?>
+                                                <span class="badge bg-success text-white">Équipé</span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="text-secondary small mb-2">
+                                            <?= htmlspecialchars($it['description']) ?>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-end pt-2 border-top mt-2">
+                                        <?php if (empty($it['is_equipped'])): ?>
+                                            <button type="button" onclick="executeEquip(<?= (int)$it['id'] ?>)" class="btn btn-sm btn-primary">
+                                                Équiper
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="text-success small font-weight-bold">✓ En service</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
-
 </div>
 
 <script>
@@ -633,11 +699,20 @@ function resetPoints() {
 }
 
 function updatePointsUI() {
-    document.getElementById('unassignedDisplay').innerText = unassignedAvailable;
-    document.getElementById('add-strength').innerText = pointsToAdd.strength;
-    document.getElementById('add-offense').innerText = pointsToAdd.offense;
-    document.getElementById('add-defense').innerText = pointsToAdd.defense;
-    document.getElementById('add-production').innerText = pointsToAdd.production;
+    const unDisp = document.getElementById('unassignedDisplay');
+    if (unDisp) unDisp.innerText = unassignedAvailable;
+    
+    const addStr = document.getElementById('add-strength');
+    if (addStr) addStr.innerText = pointsToAdd.strength;
+    
+    const addOff = document.getElementById('add-offense');
+    if (addOff) addOff.innerText = pointsToAdd.offense;
+    
+    const addDef = document.getElementById('add-defense');
+    if (addDef) addDef.innerText = pointsToAdd.defense;
+    
+    const addProd = document.getElementById('add-production');
+    if (addProd) addProd.innerText = pointsToAdd.production;
 
     // Prévisualisation des stats
     const baseStr = <?= (int)$hero['stat_strength'] ?>;
@@ -649,15 +724,20 @@ function updatePointsUI() {
     const newOffPct = Math.min(20, (baseOff + pointsToAdd.offense) * 0.2).toFixed(1);
     const newDefPct = Math.min(20, (baseDef + pointsToAdd.defense) * 0.2).toFixed(1);
 
-    document.getElementById('effectiveStrength').innerText = newCombatStr.toLocaleString();
-    document.getElementById('effectiveOffense').innerText = '+' + newOffPct + '%';
-    document.getElementById('effectiveDefense').innerText = '+' + newDefPct + '%';
+    const effStr = document.getElementById('effectiveStrength');
+    if (effStr) effStr.innerText = newCombatStr.toLocaleString();
+    
+    const effOff = document.getElementById('effectiveOffense');
+    if (effOff) effOff.innerText = '+' + newOffPct + '%';
+    
+    const effDef = document.getElementById('effectiveDefense');
+    if (effDef) effDef.innerText = '+' + newDefPct + '%';
 }
 
 async function submitAttributes() {
     const total = pointsToAdd.strength + pointsToAdd.offense + pointsToAdd.defense + pointsToAdd.production;
     if (total <= 0) {
-        showModalAlert("Attributs", "Veuillez attribuer au moins un point d'attribut à votre Samouraï.", "warning");
+        showModalAlert("Veuillez attribuer au moins un point d'attribut à votre Samouraï.", "warning", "Attributs");
         return;
     }
 
@@ -673,13 +753,13 @@ async function submitAttributes() {
         const data = await res.json();
 
         if (data.success) {
-            showModalAlert("Points de Samouraï Attribués", data.message, "success");
+            showModalAlert(data.message, "success", "Points de Samouraï Attribués");
             setTimeout(() => window.location.reload(), 1200);
         } else {
-            showModalAlert("Erreur", data.error || "Impossible d'enregistrer les attributs.", "danger");
+            showModalAlert(data.error || "Impossible d'enregistrer les attributs.", "danger", "Erreur");
         }
     } catch (e) {
-        showModalAlert("Erreur", "Une erreur est survenue lors de l'enregistrement.", "danger");
+        showModalAlert("Une erreur est survenue lors de l'enregistrement.", "danger", "Erreur");
     }
 }
 
@@ -693,10 +773,10 @@ async function changeProductionType(type) {
         const data = await res.json();
 
         if (data.success) {
-            showModalAlert("Orientation Modifiée", data.message, "success");
+            showModalAlert(data.message, "success", "Orientation Modifiée");
             setTimeout(() => window.location.reload(), 1000);
         } else {
-            showModalAlert("Erreur", data.error || "Impossible de modifier la production.", "danger");
+            showModalAlert(data.error || "Impossible de modifier la production.", "danger", "Erreur");
         }
     } catch (e) {
         console.error("Erreur orientation:", e);
@@ -713,13 +793,13 @@ async function executeStartAdventure(advId) {
         const data = await res.json();
 
         if (data.success) {
-            showModalAlert("Départ en Aventure Féodale", data.message, "success");
+            showModalAlert(data.message, "success", "Départ en Aventure Féodale");
             setTimeout(() => window.location.reload(), 1200);
         } else {
-            showModalAlert("Aventure Impossible", data.error || "Le Samouraï ne peut pas partir.", "warning");
+            showModalAlert(data.error || "Le Samouraï ne peut pas partir.", "warning", "Aventure Impossible");
         }
     } catch (e) {
-        showModalAlert("Erreur", "Une erreur est survenue lors du départ.", "danger");
+        showModalAlert("Une erreur est survenue lors du départ.", "danger", "Erreur");
     }
 }
 
@@ -733,13 +813,13 @@ async function executeReviveHero(planetId) {
         const data = await res.json();
 
         if (data.success) {
-            showModalAlert("Rituel Sacré Lancé", data.message, "success");
+            showModalAlert(data.message, "success", "Régénération Sacrée Lancée");
             setTimeout(() => window.location.reload(), 1200);
         } else {
-            showModalAlert("Rituel Impossible", data.error || "Impossible de ressusciter le héros.", "danger");
+            showModalAlert(data.error || "Impossible de régénérer le héros.", "danger", "Régénération Impossible");
         }
     } catch (e) {
-        showModalAlert("Erreur", "Une erreur est survenue lors du rituel.", "danger");
+        showModalAlert("Une erreur est survenue lors du rituel.", "danger", "Erreur");
     }
 }
 
@@ -753,13 +833,13 @@ async function executeEquip(itemId) {
         const data = await res.json();
 
         if (data.success) {
-            showModalAlert("Arsenal Modifié", data.message, "success");
+            showModalAlert(data.message, "success", "Arsenal Modifié");
             setTimeout(() => window.location.reload(), 1000);
         } else {
-            showModalAlert("Erreur", data.error || "Impossible d'équiper cet objet.", "danger");
+            showModalAlert(data.error || "Impossible d'équiper cet objet.", "danger", "Erreur");
         }
     } catch (e) {
-        showModalAlert("Erreur", "Erreur lors de l'équipement.", "danger");
+        showModalAlert("Erreur lors de l'équipement.", "danger", "Erreur");
     }
 }
 
@@ -773,14 +853,13 @@ async function executeUnequip(slot) {
         const data = await res.json();
 
         if (data.success) {
-            showModalAlert("Arsenal Modifié", data.message, "success");
+            showModalAlert(data.message, "success", "Arsenal Modifié");
             setTimeout(() => window.location.reload(), 1000);
         } else {
-            showModalAlert("Erreur", data.error || "Impossible de déséquiper.", "danger");
+            showModalAlert(data.error || "Impossible de déséquiper.", "danger", "Erreur");
         }
     } catch (e) {
-        showModalAlert("Erreur", "Erreur lors du déséquipement.", "danger");
+        showModalAlert("Erreur lors du déséquipement.", "danger", "Erreur");
     }
 }
 </script>
-
