@@ -200,9 +200,9 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
 <!-- Stat Cards : production actuelle / prochaine -->
 <div class="row row-cards mb-3">
     <div class="col-sm-6 col-lg-3">
-        <div class="card card-sm">
-            <div class="card-body">
-                <div class="row align-items-center">
+        <div class="card card-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="row align-items-center w-100 g-2">
                     <div class="col-auto"><span class="avatar rounded" style="background:rgba(146,64,14,0.12); font-size:1.3rem;"><?= $info['icon'] ?? '🪵' ?></span></div>
                     <div class="col">
                         <div class="font-weight-medium">Production actuelle</div>
@@ -213,22 +213,22 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="card card-sm">
-            <div class="card-body">
-                <div class="row align-items-center">
+        <div class="card card-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="row align-items-center w-100 g-2">
                     <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;">📈</span></div>
                     <div class="col">
                         <div class="font-weight-medium">Niveau <?= $targetLevel ?> → production</div>
-                        <div class="text-success"><?= number_format($nextProd) ?> <small><?= $unitLabel ?></small> <span class="text-muted">(+<?= number_format($diffProd) ?>)</span></div>
+                        <div class="text-success"><?= number_format($nextProd) ?> <small><?= $unitLabel ?></small> <span class="text-muted" style="font-size:0.75rem;">(+<?= number_format($diffProd) ?>)</span></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="card card-sm">
-            <div class="card-body">
-                <div class="row align-items-center">
+        <div class="card card-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="row align-items-center w-100 g-2">
                     <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;">⏱️</span></div>
                     <div class="col">
                         <div class="font-weight-medium">Temps de construction</div>
@@ -240,9 +240,9 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="card card-sm">
-            <div class="card-body">
-                <div class="row align-items-center">
+        <div class="card card-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="row align-items-center w-100 g-2">
                     <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;">⛩️</span></div>
                     <div class="col">
                         <div class="font-weight-medium">Sérénité requise (Niv.<?= $targetLevel ?>)</div>
@@ -264,9 +264,11 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         <!-- Card identité du champ -->
         <div class="card mb-3">
             <?php if ($fieldIllustrationUrl): ?>
-            <div class="card-img-top" style="cursor:pointer; overflow:hidden; max-height:220px;" onclick="openArtworkModal('<?= $fieldIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($info['name'])) ?>')" title="Agrandir l'estampe">
-                <img src="<?= $fieldIllustrationUrl ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:100%; height:220px; object-fit:cover;">
-                <div style="position:absolute; bottom:8px; right:10px; background:rgba(0,0,0,0.55); color:#fff; font-size:0.72rem; padding:2px 8px; border-radius:4px; backdrop-filter:blur(2px);">🔍 Agrandir</div>
+            <div class="card-img-top position-relative" style="position:relative; cursor:pointer; overflow:hidden; max-height:220px;" onclick="openArtworkModal('<?= $fieldIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($info['name'])) ?>')" title="Agrandir l'estampe">
+                <img src="<?= $fieldIllustrationUrl ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:100%; height:220px; object-fit:cover; display:block;">
+                <span class="badge bg-dark text-white" style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.75) !important; font-size:0.75rem; padding:4px 8px; border-radius:4px; backdrop-filter:blur(3px); border:1px solid rgba(255,255,255,0.3); z-index:2; display:inline-flex; align-items:center; gap:4px;">
+                    🔍 Agrandir
+                </span>
             </div>
             <?php else: ?>
             <div style="height:120px; background:linear-gradient(135deg,rgba(146,64,14,0.15),rgba(22,101,52,0.1)); display:flex; align-items:center; justify-content:center; font-size:3rem;">
@@ -275,7 +277,12 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
             <?php endif; ?>
             <div class="card-body">
                 <div class="d-flex align-items-center mb-2">
-                    <img src="<?= $tileUrl ?>" alt="" style="width:52px; height:52px; border-radius:8px; object-fit:cover; border:2px solid var(--tblr-border-color); margin-right:0.75rem;">
+                    <div class="position-relative me-3" style="cursor:pointer; display:inline-block;" onclick="openArtworkModal('<?= $tileUrl ?>', '<?= htmlspecialchars(addslashes($info['name'])) ?> &bull; Parcelle')" title="Agrandir la tuile">
+                        <img src="<?= $tileUrl ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:52px; height:52px; border-radius:8px; object-fit:cover; border:2px solid var(--tblr-border-color); display:block;">
+                        <span class="badge bg-dark text-white position-absolute" style="bottom:-4px; right:-4px; font-size:0.6rem; padding:2px 4px; border-radius:4px; box-shadow:0 2px 4px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.3); pointer-events:none;" title="Agrandir">
+                            🔍
+                        </span>
+                    </div>
                     <div>
                         <h3 class="card-title mb-0"><?= htmlspecialchars($info['name']) ?></h3>
                         <div class="text-muted" style="font-size:0.8rem;">Parcelle #<?= $slot ?> sur 20 · Niveau actuel : <strong><?= $lvl ?></strong></div>
