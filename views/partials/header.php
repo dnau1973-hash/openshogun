@@ -114,12 +114,6 @@ $navItems = [
     ['page' => 'fleet',     'match' => ['fleet'],             'icon' => '⚔️', 'label' => 'Armées',             'title' => 'Expéditions militaires'],
     ['page' => 'hero',      'match' => ['hero'],              'icon' => '🥋', 'label' => 'Héros',              'title' => 'Votre Samouraï Héros'],
     ['page' => 'alliance',  'match' => ['alliance'],          'icon' => '🎌', 'label' => 'Alliance',           'title' => 'Pacte Féodal & Ambassade'],
-    ['page' => 'forum',     'match' => ['forum'],             'icon' => '💬', 'label' => 'Forum',              'title' => 'Forum Féodal & Décrets du Shogunat'],
-    ['page' => 'ranking',   'match' => ['ranking'],           'icon' => '🏆', 'label' => 'Classement',         'title' => 'Tableau d\'honneur'],
-    ['page' => 'reports',   'match' => ['reports'],           'icon' => '📜', 'label' => 'Chroniques',         'title' => 'Rapports de bataille'],
-    ['page' => 'messages',  'match' => ['messages'],          'icon' => '✉️', 'label' => 'Missives',           'title' => 'Correspondance des clans',
-     'badge' => $unreadMessagesCount > 0 ? $unreadMessagesCount : null],
-    ['page' => 'chat',      'match' => ['chat'],              'icon' => '🏮', 'label' => 'Chat',               'title' => 'Taverne & Salon de discussion en direct'],
 ];
 ?>
 
@@ -199,9 +193,6 @@ $navItems = [
                                           border-radius:0;">
                                     <span><?= $nav['icon'] ?></span>
                                     <span><?= $nav['label'] ?></span>
-                                    <?php if (!empty($nav['badge'])): ?>
-                                        <span class="badge bg-danger ms-1" style="font-size:0.6rem;"><?= $nav['badge'] ?></span>
-                                    <?php endif; ?>
                                 </a>
                             </li>
                             <?php endforeach; ?>
@@ -227,19 +218,6 @@ $navItems = [
 
                         <!-- Outils à droite + Bouton Menu Utilisateur (sans redondance) -->
                         <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
-                            <ul class="navbar-nav d-flex flex-row align-items-center gap-1">
-                                <li class="nav-item">
-                                    <a class="nav-link px-2 py-1" href="?page=docs"
-                                       title="Codex du Sengoku" style="color:#e2d9c8; font-size:0.82rem;">📖</a>
-                                </li>
-                                <?php if ($auth->isAdmin()): ?>
-                                <li class="nav-item">
-                                    <a class="nav-link px-2 py-1" href="?page=admin"
-                                       title="Administration" style="color:#fbbf24; font-size:0.82rem;">⚙️ Admin</a>
-                                </li>
-                                <?php endif; ?>
-                            </ul>
-
                             <?php if ($isUserProtected): ?>
                                 <span class="badge bg-success-lt text-success d-none d-xl-inline-flex align-items-center gap-1"
                                       style="font-size:0.72rem; padding:0.25rem 0.55rem; cursor:help; border: 1px solid rgba(22, 163, 74, 0.45); border-radius:6px;"
@@ -249,7 +227,7 @@ $navItems = [
                                 </span>
                             <?php endif; ?>
 
-                            <!-- Menu Déroulant Utilisateur (Daimyō) : Actions du profil exclusivement -->
+                            <!-- Menu Déroulant Utilisateur (Daimyō) : Profil, Communications, Codex, Admin, Déconnexion -->
                             <div class="dropdown">
                                 <a href="#" class="btn btn-sm btn-dark d-flex align-items-center gap-2 text-decoration-none px-2 py-1"
                                    data-bs-toggle="dropdown" aria-expanded="false"
@@ -257,6 +235,9 @@ $navItems = [
                                     <span style="width:8px; height:8px; border-radius:50%; display:inline-block;
                                                  background:<?= $factionInfo['color'] ?? '#dc2626' ?>;"></span>
                                     <span style="font-weight:700; font-size:0.82rem; color:#fef3c7;"><?= htmlspecialchars($user['username']) ?></span>
+                                    <?php if ($unreadMessagesCount > 0): ?>
+                                        <span class="badge bg-danger rounded-pill" style="font-size:0.6rem; padding:2px 5px;" title="<?= $unreadMessagesCount ?> missive(s) non lue(s)"><?= $unreadMessagesCount ?></span>
+                                    <?php endif; ?>
                                     <?php if ($isUserProtected): ?>
                                         <span class="d-sm-none" title="Immunité active">🔰</span>
                                     <?php endif; ?>
@@ -265,7 +246,7 @@ $navItems = [
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-end shadow-lg" style="min-width:220px; z-index:1060;">
+                                <div class="dropdown-menu dropdown-menu-end shadow-lg" style="min-width:230px; z-index:1060;">
                                     <?php if ($isUserProtected): ?>
                                         <div class="dropdown-item-text small" style="background: rgba(22, 163, 74, 0.08); border-left: 3px solid #16a34a; padding: 0.5rem 0.75rem; margin-bottom: 0.25rem;">
                                             <div style="font-weight: 700; color: #15803d; display:flex; align-items:center; gap:0.3rem;">
@@ -277,11 +258,37 @@ $navItems = [
                                         </div>
                                         <div class="dropdown-divider"></div>
                                     <?php endif; ?>
+
+                                    <!-- Profil Daimyō -->
                                     <a href="javascript:void(0)" class="dropdown-item"
                                        onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">👤 Ma Fiche Daimyō</a>
                                     <a href="javascript:void(0)" class="dropdown-item"
                                        onclick="openEditMottoModal()">📜 Ma Devise</a>
-                                    <a href="?page=support" class="dropdown-item">📮 Support &amp; Aide</a>
+
+                                    <!-- Communications & Décrets -->
+                                    <div class="dropdown-divider"></div>
+                                    <div class="dropdown-header text-uppercase small text-muted" style="font-size:0.65rem;">Communications & Décrets</div>
+                                    <a href="?page=messages" class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'messages' ? 'active' : '' ?>">
+                                        <span>✉️ Missives</span>
+                                        <?php if ($unreadMessagesCount > 0): ?>
+                                            <span class="badge bg-danger rounded-pill" style="font-size:0.65rem;"><?= $unreadMessagesCount ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                    <a href="?page=chat" class="dropdown-item <?= $page === 'chat' ? 'active' : '' ?>">🏮 Chat Féodal</a>
+                                    <a href="?page=forum" class="dropdown-item <?= $page === 'forum' ? 'active' : '' ?>">💬 Forum Féodal</a>
+                                    <a href="?page=reports" class="dropdown-item <?= $page === 'reports' ? 'active' : '' ?>">📜 Chroniques</a>
+                                    <a href="?page=ranking" class="dropdown-item <?= $page === 'ranking' ? 'active' : '' ?>">🏆 Classement</a>
+
+                                    <!-- Savoir & Administration -->
+                                    <div class="dropdown-divider"></div>
+                                    <div class="dropdown-header text-uppercase small text-muted" style="font-size:0.65rem;">Savoir & Shogunat</div>
+                                    <a href="?page=docs" class="dropdown-item <?= $page === 'docs' ? 'active' : '' ?>">📖 Codex du Sengoku</a>
+                                    <?php if ($auth->isAdmin()): ?>
+                                        <a href="?page=admin" class="dropdown-item text-warning fw-bold <?= $page === 'admin' ? 'active' : '' ?>">⚙️ Administration</a>
+                                    <?php endif; ?>
+                                    <a href="?page=support" class="dropdown-item <?= $page === 'support' ? 'active' : '' ?>">📮 Support &amp; Aide</a>
+
+                                    <!-- Préférences & Déconnexion -->
                                     <div class="dropdown-divider"></div>
                                     <button type="button" class="dropdown-item" id="shogun-audio-btn"
                                             onclick="window.shogunAudio && window.shogunAudio.toggle()">
