@@ -224,7 +224,7 @@ class HonorEngine {
     public function getUserProfile(int $userId): ?array {
         // 1. Informations de base
         $stmtUser = $this->db->prepare("
-            SELECT u.id, u.username, u.email, u.faction, u.points, u.bio, u.is_admin, u.is_bot, u.created_at, u.last_active, u.protection_until,
+            SELECT u.id, u.username, u.email, u.faction, u.points, u.bio, u.is_admin, u.is_moderator, u.is_bot, u.created_at, u.last_active, u.protection_until,
                    a.name as alliance_name, a.tag as alliance_tag
             FROM users u
             LEFT JOIN alliances a ON u.alliance_id = a.id
@@ -327,6 +327,7 @@ class HonorEngine {
             'alliance_tag' => $user['alliance_tag'],
             'bio' => $user['bio'] ?: "Fier Daimyō au service de l'honneur de son clan et de l'Empereur.",
             'is_admin' => (int)$user['is_admin'] === 1,
+            'is_moderator' => (int)($user['is_moderator'] ?? 0) === 1,
             'is_bot' => (int)$user['is_bot'] === 1,
             'created_at' => $user['created_at'],
             'last_active' => $user['last_active'],

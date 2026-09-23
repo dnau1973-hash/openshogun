@@ -23,6 +23,10 @@ require_once __DIR__ . '/../core/SupportEngine.php';
 require_once __DIR__ . '/../core/AnnouncementEngine.php';
 require_once __DIR__ . '/../core/UpdateEngine.php';
 require_once __DIR__ . '/../core/HeroEngine.php';
+require_once __DIR__ . '/../core/ForumEngine.php';
+
+$forumEngine = new ForumEngine();
+$adminForumCategories = $forumEngine->getCategories();
 
 $botEngine = new BotEngine();
 $castleEngine = new CastleEngine();
@@ -92,7 +96,7 @@ $botsList = $botEngine->getBots();
 
 // Liste des joueurs humains
 $humanUsers = $db->query("
-    SELECT u.id, u.username, u.email, u.faction, u.points, u.is_admin, u.created_at, u.protection_until,
+    SELECT u.id, u.username, u.email, u.faction, u.points, u.is_admin, u.is_moderator, u.created_at, u.protection_until,
            COUNT(p.id) as colony_count
     FROM users u
     LEFT JOIN planets p ON p.user_id = u.id
@@ -102,7 +106,7 @@ $humanUsers = $db->query("
 ")->fetchAll();
 
 // Gestion des onglets d'administration du Shogunat
-$allowedTabs = ['game', 'heroes', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'updates', 'maintenance', 'all'];
+$allowedTabs = ['game', 'heroes', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all'];
 $currentTab = $_GET['tab'] ?? 'game';
 if (!in_array($currentTab, $allowedTabs, true)) {
     $currentTab = 'game';
@@ -390,6 +394,11 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-tab="announcements" onclick="switchAdminTab('announcements')">
                         <span class="me-1">📢</span> Nouveautés
                         <span class="badge bg-pink-lt ms-2"><?= $publishedAnnouncementsCount ?>/<?= $totalAnnouncementsCount ?></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'forum') ? 'active' : '' ?>" data-tab="forum" onclick="switchAdminTab('forum')">
+                        <span class="me-1">💬</span> Forum Féodal
                     </a>
                 </li>
                 <li class="nav-item">
@@ -909,6 +918,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                         <span class="badge bg-danger text-white">
                                             ⭐ ADMINISTRATEUR
                                         </span>
+                                    <?php elseif ((int)($hUser['is_moderator'] ?? 0) === 1): ?>
+                                        <span class="badge bg-info text-white">
+                                            🛡️ MODÉRATEUR
+                                        </span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary-lt">
                                             Daimyō Joueur
@@ -939,6 +952,13 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                             </button>
                                         <?php endif; ?>
                                         <?php if ((int)$hUser['id'] !== (int)Auth::id()): ?>
+                                            <?php if ((int)$hUser['is_admin'] !== 1): ?>
+                                                <button onclick="toggleModerator(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', <?= (int)($hUser['is_moderator'] ?? 0) ?>)"
+                                                        class="btn btn-sm <?= ((int)($hUser['is_moderator'] ?? 0) === 1) ? 'btn-outline-info' : 'btn-outline-secondary' ?>"
+                                                        title="Nommer ou révoquer le rôle de modérateur">
+                                                    <?= ((int)($hUser['is_moderator'] ?? 0) === 1) ? '🛡️ Dé-modérer' : '🛡️ Modo' ?>
+                                                </button>
+                                            <?php endif; ?>
                                             <button onclick="toggleAdmin(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', <?= (int)$hUser['is_admin'] ?>)"
                                                     class="btn btn-sm btn-outline-secondary">
                                                 <?= ((int)$hUser['is_admin'] === 1) ? 'Rétrograder' : 'Promouvoir' ?>
@@ -1661,6 +1681,122 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Section Forum Féodal : Salons & Administration des Débats -->
+    <div class="admin-tab-pane" id="admin-tab-pane-forum" data-tab="forum" style="display: <?= $isPaneVisible('forum') ? 'block' : 'none' ?>;">
+        <div class="card mb-4 border-info">
+            <div class="card-header bg-info-lt d-flex justify-content-between align-items-center">
+                <h3 class="card-title text-info-emphasis d-flex align-items-center gap-2">
+                    <span>💬</span> Gestion des Salons du Forum Féodal
+                </h3>
+                <a href="/?page=forum" target="_blank" class="btn btn-sm btn-outline-info">
+                    Ouvrir le Forum ↗
+                </a>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">
+                    Administrez les catégories de discussion féodale. Les salons verrouillés (🔒) sont en lecture seule pour les Daimyōs ordinaires : seuls les Administrateurs et Modérateurs peuvent y proclamer des décrets.
+                </p>
+
+                <!-- Tableau des catégories -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-vcenter table-hover">
+                        <thead>
+                            <tr class="bg-light">
+                                <th style="width: 50px;">Icône</th>
+                                <th>Nom du Salon</th>
+                                <th>Description</th>
+                                <th class="text-center" style="width: 80px;">Ordre</th>
+                                <th class="text-center" style="width: 140px;">Statut d'Accès</th>
+                                <th class="text-center" style="width: 100px;">Sujets / Msg</th>
+                                <th class="text-end" style="width: 140px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($adminForumCategories)): ?>
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">
+                                        Aucun salon configuré. Utilisez le formulaire ci-dessous pour en créer un.
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($adminForumCategories as $fCat): ?>
+                                    <tr>
+                                        <td class="text-center fs-3"><?= htmlspecialchars($fCat['icon']) ?></td>
+                                        <td class="fw-bold">
+                                            <a href="/?page=forum&cat=<?= $fCat['id'] ?>" target="_blank" class="text-reset">
+                                                <?= htmlspecialchars($fCat['name']) ?>
+                                            </a>
+                                        </td>
+                                        <td class="small text-muted"><?= htmlspecialchars($fCat['description'] ?? '') ?></td>
+                                        <td class="text-center fw-bold"><?= $fCat['display_order'] ?></td>
+                                        <td class="text-center">
+                                            <?php if ((int)$fCat['is_locked'] === 1): ?>
+                                                <span class="badge bg-secondary-lt">🔒 Staff Uniquement</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-success-lt">💬 Ouvert à Tous</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-center small">
+                                            <strong><?= $fCat['topic_count'] ?></strong> suj. / <?= $fCat['post_count'] ?> msg
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="openEditForumCategoryModal(<?= $fCat['id'] ?>, '<?= htmlspecialchars(addslashes($fCat['name'])) ?>', '<?= htmlspecialchars(addslashes($fCat['description'] ?? '')) ?>', '<?= htmlspecialchars(addslashes($fCat['icon'])) ?>', <?= $fCat['display_order'] ?>, <?= $fCat['is_locked'] ?>)">
+                                                ✏️
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" 
+                                                    onclick="deleteForumCategory(<?= $fCat['id'] ?>, '<?= htmlspecialchars(addslashes($fCat['name'])) ?>')">
+                                                🗑️
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Formulaire de création de catégorie -->
+                <div class="card bg-light">
+                    <div class="card-header">
+                        <h4 class="card-title">➕ Fonder un Nouveau Salon de Discussion</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="formAdminCreateCategory" onsubmit="submitAdminCreateCategory(event)">
+                            <div class="row">
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label required">Icône (Emoji)</label>
+                                    <input type="text" id="afc_icon" class="form-control text-center" value="💬" required>
+                                </div>
+                                <div class="col-md-5 mb-3">
+                                    <label class="form-label required">Titre du Salon</label>
+                                    <input type="text" id="afc_name" class="form-control" placeholder="Ex: Maison de Thé & Sérénité" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Ordre d'Affichage</label>
+                                    <input type="number" id="afc_order" class="form-control" value="10">
+                                </div>
+                                <div class="col-md-2 mb-3 d-flex align-items-center pt-3">
+                                    <label class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="afc_locked">
+                                        <span class="form-check-label small fw-bold">🔒 Décrets Staff</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description d'Accompagnement</label>
+                                <input type="text" id="afc_desc" class="form-control" placeholder="Brève explication de la thématique du salon...">
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="btnAdminCreateCat">
+                                ➕ Créer le Salon
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2684,5 +2820,161 @@ async function executeRepopulateOases() {
         showModalAlert("Erreur Réseau", "Une erreur est survenue lors de la génération.", "danger");
     }
 }
+
+// ── Modération & Forum Féodal ──
+async function toggleModerator(userId, username, currentStatus) {
+    const actionText = currentStatus === 1 ? 'retirer du corps des modérateurs' : 'promouvoir au rang de Modérateur Féodal 🛡️';
+    if (!confirm(`Voulez-vous ${actionText} le joueur ${username} ?`)) return;
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'toggle_moderator');
+        formData.append('user_id', userId);
+
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            await showModalAlert("Mise à Jour Modérateur", data.message, "success");
+            window.location.reload();
+        } else {
+            showModalAlert("Erreur", data.error || "Impossible de modifier le rôle.", "danger");
+        }
+    } catch (err) {
+        showModalAlert("Erreur Réseau", "Erreur lors de l'opération.", "danger");
+    }
+}
+
+async function submitAdminCreateCategory(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnAdminCreateCat');
+    btn.disabled = true;
+
+    try {
+        const formData = new FormData();
+        formData.append('icon', document.getElementById('afc_icon').value.trim() || '💬');
+        formData.append('name', document.getElementById('afc_name').value.trim());
+        formData.append('description', document.getElementById('afc_desc').value.trim());
+        formData.append('display_order', document.getElementById('afc_order').value || 0);
+        formData.append('is_locked', document.getElementById('afc_locked').checked ? '1' : '0');
+
+        const res = await fetch('/api/forum.php?action=admin_create_category', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            await showModalAlert("Salon Créé", data.message, "success");
+            window.location.reload();
+        } else {
+            showModalAlert("Erreur", data.error || "Impossible de créer le salon.", "danger");
+            btn.disabled = false;
+        }
+    } catch (err) {
+        showModalAlert("Erreur Réseau", "Erreur lors de la création.", "danger");
+        btn.disabled = false;
+    }
+}
+
+function openEditForumCategoryModal(id, name, desc, icon, order, isLocked) {
+    document.getElementById('edit_afc_id').value = id;
+    document.getElementById('edit_afc_name').value = name;
+    document.getElementById('edit_afc_desc').value = desc;
+    document.getElementById('edit_afc_icon').value = icon;
+    document.getElementById('edit_afc_order').value = order;
+    document.getElementById('edit_afc_locked').checked = (parseInt(isLocked, 10) === 1);
+
+    const modal = new bootstrap.Modal(document.getElementById('modalEditAdminForumCategory'));
+    modal.show();
+}
+
+async function submitAdminEditCategory(e) {
+    e.preventDefault();
+    try {
+        const formData = new FormData();
+        formData.append('category_id', document.getElementById('edit_afc_id').value);
+        formData.append('name', document.getElementById('edit_afc_name').value.trim());
+        formData.append('description', document.getElementById('edit_afc_desc').value.trim());
+        formData.append('icon', document.getElementById('edit_afc_icon').value.trim() || '💬');
+        formData.append('display_order', document.getElementById('edit_afc_order').value || 0);
+        formData.append('is_locked', document.getElementById('edit_afc_locked').checked ? '1' : '0');
+
+        const res = await fetch('/api/forum.php?action=admin_edit_category', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.error || "Erreur de modification.");
+        }
+    } catch (err) {
+        alert("Erreur réseau.");
+    }
+}
+
+async function deleteForumCategory(catId, name) {
+    if (!confirm(`ATTENTION : Supprimer définitivement le salon '${name}' et TOUS ses sujets et messages ?`)) return;
+
+    try {
+        const formData = new FormData();
+        formData.append('category_id', catId);
+
+        const res = await fetch('/api/forum.php?action=admin_delete_category', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.error || "Erreur lors de la suppression.");
+        }
+    } catch (err) {
+        alert("Erreur réseau.");
+    }
+}
 </script>
+
+<!-- Modale d'Édition de Catégorie de Forum -->
+<div class="modal modal-blur fade" id="modalEditAdminForumCategory" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form onsubmit="submitAdminEditCategory(event)">
+                <div class="modal-header">
+                    <h5 class="modal-title">✏️ Édition du Salon Féodal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit_afc_id" value="">
+                    <div class="row">
+                        <div class="col-3 mb-3">
+                            <label class="form-label required">Icône</label>
+                            <input type="text" id="edit_afc_icon" class="form-control text-center" required>
+                        </div>
+                        <div class="col-9 mb-3">
+                            <label class="form-label required">Titre du Salon</label>
+                            <input type="text" id="edit_afc_name" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <input type="text" id="edit_afc_desc" class="form-control">
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Ordre d'Affichage</label>
+                            <input type="number" id="edit_afc_order" class="form-control">
+                        </div>
+                        <div class="col-6 mb-3 d-flex align-items-center pt-3">
+                            <label class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" id="edit_afc_locked">
+                                <span class="form-check-label small fw-bold">🔒 Décrets Staff</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer les Modifications</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 

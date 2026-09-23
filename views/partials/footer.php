@@ -65,6 +65,7 @@
                 <div>
                     <div class="d-flex align-items-center gap-2">
                         <h2 id="profUsername" style="font-size:1.35rem; font-weight:800; color:#1c1917; margin:0;">Daimyō</h2>
+                        <span id="profRoleBadge" style="display:none; font-size:0.7rem; padding:0.15rem 0.45rem; border-radius:4px; font-weight:700;"></span>
                         <span id="profOnlineBadge" style="font-size:0.7rem; padding:0.15rem 0.45rem; border-radius:4px; font-weight:700;"></span>
                         <span id="profProtectionBadge" style="display:none; font-size:0.7rem; padding:0.15rem 0.45rem; border-radius:4px; font-weight:700; background:#dcfce7; color:#15803d; border:1px solid #86efac;" title="Protection Débutant active"></span>
                     </div>
@@ -532,6 +533,25 @@ async function openPlayerProfileModal(userId = null, autoEdit = false) {
             onlineBadge.style.background = "#f5f5f4";
             onlineBadge.style.color = "#57534e";
             onlineBadge.style.border = "1px solid #e7e5e4";
+        }
+
+        const roleBadge = document.getElementById('profRoleBadge');
+        if (roleBadge) {
+            if (p.is_admin) {
+                roleBadge.style.display = "inline-block";
+                roleBadge.innerText = "⭐ Administrateur";
+                roleBadge.style.background = "#fef3c7";
+                roleBadge.style.color = "#b45309";
+                roleBadge.style.border = "1px solid #fde68a";
+            } else if (p.is_moderator) {
+                roleBadge.style.display = "inline-block";
+                roleBadge.innerText = "🛡️ Modérateur";
+                roleBadge.style.background = "#eff6ff";
+                roleBadge.style.color = "#1d4ed8";
+                roleBadge.style.border = "1px solid #bfdbfe";
+            } else {
+                roleBadge.style.display = "none";
+            }
         }
 
         const protBadge = document.getElementById('profProtectionBadge');

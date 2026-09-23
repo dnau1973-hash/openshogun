@@ -114,6 +114,7 @@ $navItems = [
     ['page' => 'fleet',     'match' => ['fleet'],             'icon' => '⚔️', 'label' => 'Armées',             'title' => 'Expéditions militaires'],
     ['page' => 'hero',      'match' => ['hero'],              'icon' => '🥋', 'label' => 'Héros',              'title' => 'Votre Samouraï Héros'],
     ['page' => 'alliance',  'match' => ['alliance'],          'icon' => '🎌', 'label' => 'Alliance',           'title' => 'Pacte Féodal & Ambassade'],
+    ['page' => 'forum',     'match' => ['forum'],             'icon' => '💬', 'label' => 'Forum',              'title' => 'Forum Féodal & Décrets du Shogunat'],
     ['page' => 'ranking',   'match' => ['ranking'],           'icon' => '🏆', 'label' => 'Classement',         'title' => 'Tableau d\'honneur'],
     ['page' => 'reports',   'match' => ['reports'],           'icon' => '📜', 'label' => 'Chroniques',         'title' => 'Rapports de bataille'],
     ['page' => 'messages',  'match' => ['messages'],          'icon' => '✉️', 'label' => 'Missives',           'title' => 'Correspondance des clans',
@@ -248,6 +249,7 @@ $navItems = [
                             <a href="javascript:void(0)" class="dropdown-item"
                                onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">👤 Ma Fiche Daimyō</a>
                             <a href="?page=alliance" class="dropdown-item">🎌 Mon Alliance</a>
+                            <a href="?page=forum" class="dropdown-item">💬 Forum Féodal</a>
                             <a href="javascript:void(0)" class="dropdown-item"
                                onclick="openEditMottoModal()">📜 Ma Devise</a>
                             <a href="?page=support" class="dropdown-item">📮 Support</a>

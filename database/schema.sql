@@ -3,6 +3,9 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `forum_posts`;
+DROP TABLE IF EXISTS `forum_topics`;
+DROP TABLE IF EXISTS `forum_categories`;
 DROP TABLE IF EXISTS `alliance_invitations`;
 DROP TABLE IF EXISTS `combat_reports`;
 DROP TABLE IF EXISTS `messages`;
@@ -29,10 +32,14 @@ CREATE TABLE `users` (
   `faction` ENUM('terran', 'vorash', 'aethelis') NOT NULL DEFAULT 'terran',
   `alliance_id` INT UNSIGNED NULL DEFAULT NULL,
   `points` INT UNSIGNED NOT NULL DEFAULT 0,
+  `is_admin` TINYINT(1) NOT NULL DEFAULT 0,
+  `is_moderator` TINYINT(1) NOT NULL DEFAULT 0,
+  `is_bot` TINYINT(1) NOT NULL DEFAULT 0,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_active` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `protection_until` DATETIME NULL DEFAULT NULL,
-  KEY `idx_users_protection` (`protection_until`)
+  KEY `idx_users_protection` (`protection_until`),
+  KEY `idx_users_role` (`is_admin`, `is_moderator`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Alliances
@@ -276,6 +283,50 @@ CREATE TABLE `support_tickets` (
   KEY `idx_support_status` (`status`),
   KEY `idx_support_type` (`type`),
   CONSTRAINT `fk_support_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Catégories du Forum Féodal
+CREATE TABLE `forum_categories` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `description` VARCHAR(255) NULL,
+  `icon` VARCHAR(20) NOT NULL DEFAULT '💬',
+  `display_order` INT NOT NULL DEFAULT 0,
+  `is_locked` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Sujets du Forum
+CREATE TABLE `forum_topics` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `category_id` INT UNSIGNED NOT NULL,
+  `user_id` INT UNSIGNED NOT NULL,
+  `title` VARCHAR(150) NOT NULL,
+  `is_pinned` TINYINT(1) NOT NULL DEFAULT 0,
+  `is_locked` TINYINT(1) NOT NULL DEFAULT 0,
+  `views_count` INT UNSIGNED NOT NULL DEFAULT 0,
+  `last_post_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_topic_cat` (`category_id`, `is_pinned`, `last_post_at`),
+  KEY `idx_topic_user` (`user_id`),
+  CONSTRAINT `fk_topic_category` FOREIGN KEY (`category_id`) REFERENCES `forum_categories` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_topic_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Messages du Forum
+CREATE TABLE `forum_posts` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `topic_id` INT UNSIGNED NOT NULL,
+  `user_id` INT UNSIGNED NOT NULL,
+  `content` TEXT NOT NULL,
+  `is_first_post` TINYINT(1) NOT NULL DEFAULT 0,
+  `edited_at` DATETIME NULL DEFAULT NULL,
+  `edited_by_user_id` INT UNSIGNED NULL DEFAULT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_post_topic` (`topic_id`, `created_at`),
+  KEY `idx_post_user` (`user_id`),
+  CONSTRAINT `fk_post_topic` FOREIGN KEY (`topic_id`) REFERENCES `forum_topics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

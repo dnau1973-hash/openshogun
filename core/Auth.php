@@ -48,6 +48,13 @@ class Auth {
                       AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
                 ");
             }
+
+            if (!in_array('is_moderator', $cols)) {
+                try {
+                    $db->exec("ALTER TABLE users ADD COLUMN is_moderator TINYINT(1) NOT NULL DEFAULT 0 AFTER is_admin");
+                    $db->exec("ALTER TABLE users ADD INDEX idx_user_moderator (is_moderator)");
+                } catch (Exception $e) {}
+            }
         } catch (Exception $e) {
             // Ignorer silencieusement si la table n'est pas encore créée
         }
@@ -198,7 +205,7 @@ class Auth {
 
     public function getCurrentUser(): ?array {
         if (!self::check()) return null;
-        $stmt = $this->db->prepare("SELECT id, username, email, faction, alliance_id, points, is_admin, is_bot, created_at, protection_until FROM users WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id, username, email, faction, alliance_id, points, is_admin, is_moderator, is_bot, created_at, protection_until FROM users WHERE id = ?");
         $stmt->execute([self::id()]);
         return $stmt->fetch() ?: null;
     }
@@ -206,6 +213,32 @@ class Auth {
     public function isAdmin(): bool {
         $user = $this->getCurrentUser();
         return !empty($user) && (int)$user['is_admin'] === 1;
+    }
+
+    public function isModerator(): bool {
+        $user = $this->getCurrentUser();
+        return !empty($user) && ((int)($user['is_moderator'] ?? 0) === 1 || (int)($user['is_admin'] ?? 0) === 1);
+    }
+
+    public function isStaff(): bool {
+        $user = $this->getCurrentUser();
+        return !empty($user) && ((int)($user['is_admin'] ?? 0) === 1 || (int)($user['is_moderator'] ?? 0) === 1);
+    }
+
+    public static function isUserModerator(int|array $userOrUserId): bool {
+        if (is_array($userOrUserId)) {
+            return !empty($userOrUserId['is_moderator']) || !empty($userOrUserId['is_admin']);
+        }
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT is_admin, is_moderator FROM users WHERE id = ?");
+        $stmt->execute([(int)$userOrUserId]);
+        $row = $stmt->fetch();
+        return !empty($row) && (!empty($row['is_moderator']) || !empty($row['is_admin']));
+    }
+
+    public function setModerator(int $userId, bool $status): bool {
+        $stmt = $this->db->prepare("UPDATE users SET is_moderator = ? WHERE id = ?");
+        return $stmt->execute([$status ? 1 : 0, $userId]);
     }
 
     public function getCurrentPlanet(): ?array {

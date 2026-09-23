@@ -122,6 +122,35 @@ try {
             ]);
             break;
 
+        // Promouvoir ou révoquer le rôle Modérateur
+        case 'toggle_moderator':
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            $currentUserId = (int)Auth::id();
+
+            if ($targetUserId <= 0) {
+                throw new Exception("Utilisateur invalide.");
+            }
+
+            $db = Database::getConnection();
+            $stmt = $db->prepare("SELECT is_moderator, username FROM users WHERE id = ?");
+            $stmt->execute([$targetUserId]);
+            $targetUser = $stmt->fetch();
+
+            if (!$targetUser) {
+                throw new Exception("Utilisateur non trouvé.");
+            }
+
+            $newStatus = (int)($targetUser['is_moderator'] ?? 0) === 1 ? 0 : 1;
+            $db->prepare("UPDATE users SET is_moderator = ? WHERE id = ?")->execute([$newStatus, $targetUserId]);
+
+            $statusText = $newStatus === 1 ? "investi du rôle de Modérateur Féodal 🛡️" : "retiré du corps de Modération";
+            echo json_encode([
+                'success' => true,
+                'message' => "Le Daimyō {$targetUser['username']} a été {$statusText}.",
+                'is_moderator' => $newStatus
+            ]);
+            break;
+
         // Prolonger l'immunité d'un joueur
         case 'extend_protection':
             $targetUserId = (int)($_POST['user_id'] ?? 0);
