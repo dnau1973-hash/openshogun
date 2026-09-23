@@ -320,3 +320,4 @@ Quand vous aurez généré les illustrations :
 1. **Dossier de destination conseillé** : `public/img/items/`
 2. **Nommage recommandé** : `<item_code>.png` ou `<item_code>.webp` (ex: `katana_tamahagane.webp`, `kabuto_croissant_lune.webp`, `omamori_sacree.webp`).
 3. **Format & Poids** : Carré `512x512` compressé en WebP (~30-60 Ko par image) pour des temps de chargement instantanés sur la grille d'inventaire et les modales.
+

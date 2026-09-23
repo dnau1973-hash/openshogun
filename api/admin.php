@@ -329,6 +329,65 @@ try {
             ]);
             break;
 
+        // Soigner un Samouraï Héros à 100%
+        case 'admin_heal_hero':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            if ($targetUserId <= 0) throw new Exception("Utilisateur invalide.");
+            require_once __DIR__ . '/../core/HeroEngine.php';
+            $heroEngine = new HeroEngine();
+            $hero = $heroEngine->getHeroByUserId($targetUserId);
+            if (!$hero) throw new Exception("Héros introuvable.");
+            $db = Database::getConnection();
+            $db->prepare("UPDATE heroes SET health = 100.0, status = IF(status IN ('dead', 'reviving'), 'home', status), last_health_update = UNIX_TIMESTAMP() WHERE id = ?")->execute([$hero['id']]);
+            echo json_encode(['success' => true, 'message' => "Le Samouraï {$hero['name']} a été soigné à 100% avec succès !"]);
+            break;
+
+        // Ressusciter instantanément un héros tombé au combat (sans attendre 24h)
+        case 'admin_revive_hero':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            if ($targetUserId <= 0) throw new Exception("Utilisateur invalide.");
+            require_once __DIR__ . '/../core/HeroEngine.php';
+            $heroEngine = new HeroEngine();
+            $hero = $heroEngine->getHeroByUserId($targetUserId);
+            if (!$hero) throw new Exception("Héros introuvable.");
+            $db = Database::getConnection();
+            $db->prepare("UPDATE fleet_missions SET status = 'completed' WHERE user_id = ? AND mission_type = 'revive'")->execute([$targetUserId]);
+            $db->prepare("UPDATE heroes SET status = 'home', health = 100.0, last_health_update = UNIX_TIMESTAMP() WHERE id = ?")->execute([$hero['id']]);
+            echo json_encode(['success' => true, 'message' => "Le Samouraï {$hero['name']} a été ressuscité immédiatement par décret du Shōgun !"]);
+            break;
+
+        // Réinitialiser le quota quotidien de 3 aventures féodales
+        case 'admin_reset_hero_quota':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            if ($targetUserId <= 0) throw new Exception("Utilisateur invalide.");
+            $db = Database::getConnection();
+            $startOfDay = strtotime('today midnight');
+            $db->prepare("DELETE FROM fleet_missions WHERE user_id = ? AND mission_type = 'adventure' AND departure_time >= ?")->execute([$targetUserId, $startOfDay]);
+            echo json_encode(['success' => true, 'message' => "Le quota d'aventures quotidiennes a été réinitialisé à 0/3 pour ce joueur."]);
+            break;
+
+        // Octroyer une relique féodale aléatoire inédite au joueur
+        case 'admin_grant_relic':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            if ($targetUserId <= 0) throw new Exception("Utilisateur invalide.");
+            require_once __DIR__ . '/../core/HeroEngine.php';
+            $heroEngine = new HeroEngine();
+            $item = $heroEngine->grantRandomEquipment($targetUserId);
+            if (!$item) {
+                echo json_encode(['success' => false, 'error' => "Ce joueur possède déjà l'intégralité des 35 reliques uniques du panthéon !"]);
+            } else {
+                echo json_encode([
+                    'success' => true,
+                    'message' => "La relique « {$item['name']} » ({$item['type']}) a été octroyée au joueur !",
+                    'item' => $item
+                ]);
+            }
+            break;
+
         default:
             throw new Exception("Action inconnue.");
     }

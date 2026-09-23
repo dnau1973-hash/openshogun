@@ -22,12 +22,14 @@ require_once __DIR__ . '/../core/OasisEngine.php';
 require_once __DIR__ . '/../core/SupportEngine.php';
 require_once __DIR__ . '/../core/AnnouncementEngine.php';
 require_once __DIR__ . '/../core/UpdateEngine.php';
+require_once __DIR__ . '/../core/HeroEngine.php';
 
 $botEngine = new BotEngine();
 $castleEngine = new CastleEngine();
 $oasisEngine = new OasisEngine();
 $supportEngine = new SupportEngine();
 $updateEngine = new UpdateEngine();
+$heroEngine = new HeroEngine();
 $localGitInfo = $updateEngine->getLocalInfo();
 $db = Database::getConnection();
 
@@ -48,6 +50,22 @@ $totalPlanets = (int)$db->query("SELECT COUNT(*) FROM planets")->fetchColumn();
 $totalColonies = (int)$db->query("SELECT COUNT(*) FROM planets WHERE user_id IS NOT NULL")->fetchColumn();
 $totalMedals = (int)$db->query("SELECT COUNT(*) FROM user_medals")->fetchColumn();
 $currentWeekCode = date('Y') . '-S' . date('W');
+
+// Statistiques & Registre des Samouraïs Héros & Reliques
+$totalHeroes = (int)$db->query("SELECT COUNT(*) FROM heroes")->fetchColumn();
+$heroesDead = (int)$db->query("SELECT COUNT(*) FROM heroes WHERE status = 'dead'")->fetchColumn();
+$heroesReviving = (int)$db->query("SELECT COUNT(*) FROM heroes WHERE status = 'reviving'")->fetchColumn();
+$totalRelicsFound = (int)$db->query("SELECT COUNT(*) FROM hero_inventory")->fetchColumn();
+
+$allHeroes = $db->query("
+    SELECT h.*, u.username, u.faction, u.points,
+           (SELECT COUNT(*) FROM hero_inventory hi WHERE hi.user_id = h.user_id) as relic_count,
+           (SELECT COUNT(*) FROM hero_inventory hi WHERE hi.user_id = h.user_id AND hi.is_equipped = 1) as equipped_count,
+           (SELECT COUNT(*) FROM fleet_missions fm WHERE fm.user_id = h.user_id AND fm.mission_type = 'adventure' AND fm.departure_time >= UNIX_TIMESTAMP(CURDATE())) as daily_adv_count
+    FROM heroes h
+    JOIN users u ON h.user_id = u.id
+    ORDER BY h.level DESC, h.experience DESC
+")->fetchAll(PDO::FETCH_ASSOC);
 
 // Châteaux authentiques (現存十二天守)
 $authenticCastles = $castleEngine->getAllCastles();
@@ -84,7 +102,7 @@ $humanUsers = $db->query("
 ")->fetchAll();
 
 // Gestion des onglets d'administration du Shogunat
-$allowedTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'updates', 'maintenance', 'all'];
+$allowedTabs = ['game', 'heroes', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'updates', 'maintenance', 'all'];
 $currentTab = $_GET['tab'] ?? 'game';
 if (!in_array($currentTab, $allowedTabs, true)) {
     $currentTab = 'game';
@@ -92,219 +110,312 @@ if (!in_array($currentTab, $allowedTabs, true)) {
 $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab === $tabKey);
 ?>
 
-<style>
-.kpi-card {
-    user-select: none;
-}
-.kpi-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.2);
-}
-.admin-tab-btn {
-    transition: all 0.2s ease;
-}
-.admin-tab-btn:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.09) !important;
-    color: #fff !important;
-    border-color: rgba(255, 255, 255, 0.25) !important;
-}
-</style>
-
-<div class="admin-panel" style="max-width: 1200px; margin: 0 auto; padding-bottom: 3rem;">
-    <!-- En-tête Terminal de Commandement Féodal -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid rgba(220, 38, 38, 0.3); padding-bottom: 1rem;">
-        <div>
-            <h1 style="font-size: 1.8rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.75rem;">
-                <span style="color: #dc2626;">🏯</span> CONSEIL DU SHOGUNAT - ADMINISTRATION DU ROYAUME
-            </h1>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">
-                Pilotage central des constantes du Japon féodal, équilibrage des vitesses et orchestration des clans autonomes (Bots).
-            </p>
-        </div>
-        <div style="display: flex; gap: 0.75rem;">
-            <button onclick="runBotCycle()" class="btn btn-warning" style="display: flex; align-items: center; gap: 0.5rem;">
-                <span>⚔️</span> Exécuter un Cycle IA
-            </button>
-            <button onclick="generatePresetBots()" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem;">
-                <span>➕</span> Générer 3 Daimyōs IA
-            </button>
-        </div>
-    </div>
-
-    <!-- Cartes Métriques Rapides Cliquables (Raccourcis vers Onglets) -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
-        <div class="card kpi-card" onclick="switchAdminTab('game')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #b91c1c; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour configurer les constantes & vitesses">
-            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
-                <span>Vitesse Active</span>
-                <span>⚡</span>
+<div class="admin-panel mb-5">
+    <!-- En-tête Terminal de Commandement Tabler.io -->
+    <div class="page-header d-print-none mb-3">
+        <div class="row align-items-center">
+            <div class="col">
+                <div class="page-pretitle">Console d'Administration du Shōgunat</div>
+                <h2 class="page-title d-flex align-items-center gap-2">
+                    <span>🏯</span>
+                    <span>Conseil du Shōgunat — Haute Administration</span>
+                    <span class="badge bg-danger text-white ms-2" style="font-size:0.75rem;">Accès Maître</span>
+                </h2>
+                <div class="text-secondary small mt-1">
+                    Pilotage central des constantes de l'archipel, équilibrage des vitesses, régulation des Samouraïs Héros et supervision des clans autonomes (Bots).
+                </div>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #b91c1c; margin-top: 0.25rem;">
-                x<?= (int)($settings['game_speed'] ?? 5) ?>
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">Production: x<?= (int)($settings['resource_speed'] ?? 5) ?> | Marche: x<?= (int)($settings['fleet_speed'] ?? 5) ?></div>
-        </div>
-
-        <div class="card kpi-card" onclick="switchAdminTab('bots')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #7e22ce; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour gérer les bots et l'IA">
-            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
-                <span>Clans IA</span>
-                <span>🤖</span>
-            </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #7e22ce; margin-top: 0.25rem;">
-                <?= $totalBots ?> PNJ
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
-                Statut IA : <strong style="color: <?= !empty($settings['bots_enabled']) ? '#15803d' : '#b91c1c' ?>;"><?= !empty($settings['bots_enabled']) ? 'Actif' : 'En sommeil' ?></strong>
-            </div>
-        </div>
-
-        <div class="card kpi-card" onclick="switchAdminTab('world')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #15803d; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour l'arpentage et l'expansion provinciale">
-            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
-                <span>Fiefs & Domaines</span>
-                <span>🗾</span>
-            </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #15803d; margin-top: 0.25rem;">
-                <?= $totalColonies ?> / <?= $totalPlanets ?>
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">Châteaux sous contrôle des clans</div>
-        </div>
-
-        <div class="card kpi-card" onclick="switchAdminTab('users')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #b45309; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour gérer les daimyōs joueurs et privilèges">
-            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
-                <span>Daimyōs Joueurs</span>
-                <span>👥</span>
-            </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #b45309; margin-top: 0.25rem;">
-                <?= $totalUsers ?> Joueurs
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">Inscrits sur le serveur</div>
-        </div>
-
-        <div class="card kpi-card" onclick="switchAdminTab('support')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #0369a1; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour traiter les bugs & suggestions">
-            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
-                <span>Bugs & Idées</span>
-                <span>📮</span>
-            </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #0369a1; margin-top: 0.25rem;">
-                <?= $supportStats['total'] ?> Demande<?= $supportStats['total'] > 1 ? 's' : '' ?>
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
-                <strong style="color: <?= $supportStats['count_pending'] > 0 ? '#b91c1c' : '#15803d' ?>;">
-                    <?= $supportStats['count_pending'] ?> en attente
-                </strong>
-                | <?= $supportStats['count_in_progress'] ?> en cours
-            </div>
-        </div>
-
-        <div class="card kpi-card" onclick="switchAdminTab('announcements')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #e11d48; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour gérer les annonces et fonctionnalités">
-            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
-                <span>Nouveautés</span>
-                <span>📢</span>
-            </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #e11d48; margin-top: 0.25rem;">
-                <?= $publishedAnnouncementsCount ?> / <?= $totalAnnouncementsCount ?>
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
-                <?= $publishedAnnouncementsCount ?> publiée(s) aux joueurs
-            </div>
-        </div>
-
-        <div class="card kpi-card" onclick="switchAdminTab('pedagogy')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #0891b2; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour ouvrir le manuel de conception et les prompts du jeu">
-            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
-                <span>Projet Père-Fils</span>
-                <span>🎓</span>
-            </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #0891b2; margin-top: 0.25rem;">
-                7 Modules
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
-                Code, Algorithmes & Prompts IA
-            </div>
-        </div>
-
-        <div class="card kpi-card" onclick="switchAdminTab('updates')" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid #0284c7; padding: 1.25rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.05);" title="Cliquer pour contrôler et déployer les mises à jour GitHub">
-            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;">
-                <span>Mises à Jour Git</span>
-                <span>🔄</span>
-            </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #0284c7; margin-top: 0.25rem;">
-                <?= htmlspecialchars($localGitInfo['short_sha']) ?>
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
-                Branche <?= htmlspecialchars($localGitInfo['branch']) ?> | GitHub Sync
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <button type="button" onclick="runBotCycle()" class="btn btn-warning d-flex align-items-center gap-2">
+                        <span>⚔️</span> Exécuter un Cycle IA
+                    </button>
+                    <button type="button" onclick="generatePresetBots()" class="btn btn-primary d-flex align-items-center gap-2">
+                        <span>➕</span> Générer 3 Daimyōs IA
+                    </button>
+                    <a href="/?page=resources" class="btn btn-secondary">
+                        &larr; Retour au Fief
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Barre de Navigation par Onglets de Paramétrage Shogunat -->
-    <div class="admin-tabs-nav" style="display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; overflow-x: auto; flex-wrap: wrap;">
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'game') ? 'active' : '' ?>" data-tab="game" onclick="switchAdminTab('game')" style="<?= ($currentTab === 'game') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>⚡</span> Vitesses & Jeu
-            <span class="badge" style="background: rgba(0,0,0,0.3); color: #fca5a5; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);">x<?= (int)($settings['game_speed'] ?? 5) ?></span>
-        </button>
+    <!-- Cartes Métriques Rapides Cliquables (Tabler Stat Cards unifiées) -->
+    <div class="row row-cards mb-3">
+        <!-- Vitesse Active -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('game')" title="Configurer les constantes & vitesses">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="avatar rounded bg-danger-lt text-danger" style="font-size:1.3rem;">⚡</span>
+                        </div>
+                        <div class="col">
+                            <div class="font-weight-medium">Vitesse Active</div>
+                            <div class="text-danger font-weight-bold" style="font-size:1.25rem;">
+                                x<?= (int)($settings['game_speed'] ?? 5) ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-secondary small mt-2">
+                        Prod: x<?= (int)($settings['resource_speed'] ?? 5) ?> | Marche: x<?= (int)($settings['fleet_speed'] ?? 5) ?>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'bots') ? 'active' : '' ?>" data-tab="bots" onclick="switchAdminTab('bots')" style="<?= ($currentTab === 'bots') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>🤖</span> Clans IA (Bots)
-            <span class="badge" style="background: rgba(0,0,0,0.3); color: #c084fc; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= $totalBots ?></span>
-        </button>
+        <!-- Samouraïs Héros -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('heroes')" title="Gérer les Samouraïs Héros et Reliques">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="avatar rounded bg-purple-lt text-purple" style="font-size:1.3rem;">🥋</span>
+                        </div>
+                        <div class="col">
+                            <div class="font-weight-medium">Samouraïs Héros</div>
+                            <div class="text-purple font-weight-bold" style="font-size:1.25rem;">
+                                <?= $totalHeroes ?> Héros
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-secondary small mt-2">
+                        <span class="<?= ($heroesDead + $heroesReviving > 0) ? 'text-danger font-weight-bold' : '' ?>">
+                            <?= $heroesDead + $heroesReviving ?> en péril
+                        </span>
+                        | 🛡️ <?= $totalRelicsFound ?> reliques
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'users') ? 'active' : '' ?>" data-tab="users" onclick="switchAdminTab('users')" style="<?= ($currentTab === 'users') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>👥</span> Daimyōs Joueurs
-            <span class="badge" style="background: rgba(0,0,0,0.3); color: #fbbf24; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= $totalUsers ?></span>
-        </button>
+        <!-- Clans IA (Bots) -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('bots')" title="Gérer les Daimyōs IA et bots">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="avatar rounded bg-indigo-lt text-indigo" style="font-size:1.3rem;">🤖</span>
+                        </div>
+                        <div class="col">
+                            <div class="font-weight-medium">Clans IA (Bots)</div>
+                            <div class="text-indigo font-weight-bold" style="font-size:1.25rem;">
+                                <?= $totalBots ?> PNJ
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-secondary small mt-2">
+                        Statut IA : <strong class="<?= !empty($settings['bots_enabled']) ? 'text-success' : 'text-danger' ?>"><?= !empty($settings['bots_enabled']) ? 'Actif' : 'En sommeil' ?></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'oases') ? 'active' : '' ?>" data-tab="oases" onclick="switchAdminTab('oases')" style="<?= ($currentTab === 'oases') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>🌿</span> Oasis & Faune
-            <span class="badge" style="background: rgba(0,0,0,0.3); color: #4ade80; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= $oasisStats['total_oases'] ?></span>
-        </button>
+        <!-- Fiefs & Domaines -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('world')" title="Arpentage et expansion provinciale">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="avatar rounded bg-success-lt text-success" style="font-size:1.3rem;">🗾</span>
+                        </div>
+                        <div class="col">
+                            <div class="font-weight-medium">Fiefs &amp; Domaines</div>
+                            <div class="text-success font-weight-bold" style="font-size:1.25rem;">
+                                <?= $totalColonies ?> / <?= $totalPlanets ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-secondary small mt-2">
+                        Châteaux sous contrôle de clans
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'castles') ? 'active' : '' ?>" data-tab="castles" onclick="switchAdminTab('castles')" style="<?= ($currentTab === 'castles') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>🏯</span> 12 Donjons
-            <span class="badge" style="background: rgba(0,0,0,0.3); color: #f59e0b; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= $spawnedCastlesCount ?>/12</span>
-        </button>
+        <!-- Daimyōs Joueurs -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('users')" title="Gérer les joueurs et privilèges">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="avatar rounded bg-warning-lt text-warning" style="font-size:1.3rem;">👥</span>
+                        </div>
+                        <div class="col">
+                            <div class="font-weight-medium">Daimyōs Joueurs</div>
+                            <div class="text-warning font-weight-bold" style="font-size:1.25rem;">
+                                <?= $totalUsers ?> Joueurs
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-secondary small mt-2">
+                        Comptes inscrits sur le serveur
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'world') ? 'active' : '' ?>" data-tab="world" onclick="switchAdminTab('world')" style="<?= ($currentTab === 'world') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>🗾</span> Provinces & Terres
-        </button>
+        <!-- Support & Requêtes -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('support')" title="Traiter les bugs & suggestions">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="avatar rounded bg-azure-lt text-azure" style="font-size:1.3rem;">📮</span>
+                        </div>
+                        <div class="col">
+                            <div class="font-weight-medium">Bugs &amp; Idées</div>
+                            <div class="text-azure font-weight-bold" style="font-size:1.25rem;">
+                                <?= $supportStats['total'] ?> Demandes
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-secondary small mt-2">
+                        <strong class="<?= $supportStats['count_pending'] > 0 ? 'text-danger' : 'text-success' ?>">
+                            <?= $supportStats['count_pending'] ?> en attente
+                        </strong> | <?= $supportStats['count_in_progress'] ?> en cours
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'medals') ? 'active' : '' ?>" data-tab="medals" onclick="switchAdminTab('medals')" style="<?= ($currentTab === 'medals') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>🎖️</span> Médailles & Honneur
-            <span class="badge" style="background: rgba(0,0,0,0.3); color: #facc15; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= htmlspecialchars($currentWeekCode) ?></span>
-        </button>
+        <!-- Nouveautés -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('announcements')" title="Gérer les annonces du jeu">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="avatar rounded bg-pink-lt text-pink" style="font-size:1.3rem;">📢</span>
+                        </div>
+                        <div class="col">
+                            <div class="font-weight-medium">Nouveautés</div>
+                            <div class="text-pink font-weight-bold" style="font-size:1.25rem;">
+                                <?= $publishedAnnouncementsCount ?> / <?= $totalAnnouncementsCount ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-secondary small mt-2">
+                        <?= $publishedAnnouncementsCount ?> publiée(s) aux daimyōs
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'support') ? 'active' : '' ?>" data-tab="support" onclick="switchAdminTab('support')" style="<?= ($currentTab === 'support') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>📮</span> Support & Suggestions
-            <?php if ($supportStats['count_pending'] > 0): ?>
-                <span class="badge" style="background: #ef4444; color: #fff; font-size: 0.72rem; font-weight: 800; border: 1px solid #f87171;">
-                    ⚠️ <?= $supportStats['count_pending'] ?>
-                </span>
-            <?php else: ?>
-                <span class="badge" style="background: rgba(0,0,0,0.3); color: #38bdf8; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= $supportStats['total'] ?></span>
-            <?php endif; ?>
-        </button>
+        <!-- Mises à Jour Git -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('updates')" title="Contrôler et déployer les mises à jour GitHub">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="avatar rounded bg-teal-lt text-teal" style="font-size:1.3rem;">🔄</span>
+                        </div>
+                        <div class="col">
+                            <div class="font-weight-medium">Mises à Jour Git</div>
+                            <div class="text-teal font-weight-bold" style="font-size:1.25rem;">
+                                <?= htmlspecialchars($localGitInfo['short_sha']) ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-secondary small mt-2">
+                        Branche <?= htmlspecialchars($localGitInfo['branch']) ?> | Sync
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-tab="announcements" onclick="switchAdminTab('announcements')" style="<?= ($currentTab === 'announcements') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>📢</span> Nouveautés & Annonces
-            <span class="badge" style="background: rgba(0,0,0,0.3); color: #fb7185; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= $publishedAnnouncementsCount ?>/<?= $totalAnnouncementsCount ?></span>
-        </button>
-
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'pedagogy') ? 'active' : '' ?>" data-tab="pedagogy" onclick="switchAdminTab('pedagogy')" style="<?= ($currentTab === 'pedagogy') ? 'background: linear-gradient(135deg, #0891b2, #06b6d4); color: #fff; border-color: #22d3ee; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>🎓</span> Atelier & Pédagogie (Projet Père-Fils)
-            <span class="badge" style="background: rgba(0,0,0,0.3); color: #67e8f9; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);">Code & Prompts</span>
-        </button>
-
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-tab="updates" onclick="switchAdminTab('updates')" style="<?= ($currentTab === 'updates') ? 'background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border-color: #38bdf8; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>🔄</span> Mises à Jour GitHub
-            <span class="badge" id="admin-update-nav-badge" style="background: rgba(0,0,0,0.3); color: #38bdf8; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1);"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
-        </button>
-
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" onclick="switchAdminTab('maintenance')" style="<?= ($currentTab === 'maintenance') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>⚠️</span> Maintenance & Reset
-        </button>
-
-        <button type="button" class="btn admin-tab-btn <?= ($currentTab === 'all') ? 'active' : '' ?>" data-tab="all" onclick="switchAdminTab('all')" style="<?= ($currentTab === 'all') ? 'background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; border-color: #ef4444; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); font-weight: 800;' : 'background: rgba(255,255,255,0.04); color: #cbd5e1; border-color: rgba(255,255,255,0.1); font-weight: 600;' ?> display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; white-space: nowrap;">
-            <span>📚</span> Tout Dérouler
-        </button>
+    <!-- Barre de Navigation par Onglets Tabler.io -->
+    <div class="card mb-3">
+        <div class="card-header border-bottom-0 pb-0">
+            <ul class="nav nav-tabs card-header-tabs flex-wrap" id="adminTabsNav">
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'game') ? 'active' : '' ?>" data-tab="game" onclick="switchAdminTab('game')">
+                        <span class="me-1">⚡</span> Vitesses &amp; Jeu
+                        <span class="badge bg-secondary-lt ms-2">x<?= (int)($settings['game_speed'] ?? 5) ?></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'heroes') ? 'active' : '' ?>" data-tab="heroes" onclick="switchAdminTab('heroes')">
+                        <span class="me-1">🥋</span> Samouraïs &amp; Reliques
+                        <span class="badge bg-purple-lt ms-2"><?= $totalHeroes ?></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'bots') ? 'active' : '' ?>" data-tab="bots" onclick="switchAdminTab('bots')">
+                        <span class="me-1">🤖</span> Clans IA
+                        <span class="badge bg-indigo-lt ms-2"><?= $totalBots ?></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'users') ? 'active' : '' ?>" data-tab="users" onclick="switchAdminTab('users')">
+                        <span class="me-1">👥</span> Joueurs
+                        <span class="badge bg-warning-lt ms-2"><?= $totalUsers ?></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'oases') ? 'active' : '' ?>" data-tab="oases" onclick="switchAdminTab('oases')">
+                        <span class="me-1">🌿</span> Oasis &amp; Faune
+                        <span class="badge bg-green-lt ms-2"><?= $oasisStats['total_oases'] ?></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'castles') ? 'active' : '' ?>" data-tab="castles" onclick="switchAdminTab('castles')">
+                        <span class="me-1">🏯</span> 12 Donjons
+                        <span class="badge bg-orange-lt ms-2"><?= $spawnedCastlesCount ?>/12</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'world') ? 'active' : '' ?>" data-tab="world" onclick="switchAdminTab('world')">
+                        <span class="me-1">🗾</span> Provinces &amp; Terres
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'medals') ? 'active' : '' ?>" data-tab="medals" onclick="switchAdminTab('medals')">
+                        <span class="me-1">🎖️</span> Médailles
+                        <span class="badge bg-yellow-lt ms-2"><?= htmlspecialchars($currentWeekCode) ?></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'support') ? 'active' : '' ?>" data-tab="support" onclick="switchAdminTab('support')">
+                        <span class="me-1">📮</span> Support &amp; Bugs
+                        <?php if ($supportStats['count_pending'] > 0): ?>
+                            <span class="badge bg-danger text-white ms-2">⚠️ <?= $supportStats['count_pending'] ?></span>
+                        <?php else: ?>
+                            <span class="badge bg-azure-lt ms-2"><?= $supportStats['total'] ?></span>
+                        <?php endif; ?>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-tab="announcements" onclick="switchAdminTab('announcements')">
+                        <span class="me-1">📢</span> Nouveautés
+                        <span class="badge bg-pink-lt ms-2"><?= $publishedAnnouncementsCount ?>/<?= $totalAnnouncementsCount ?></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'pedagogy') ? 'active' : '' ?>" data-tab="pedagogy" onclick="switchAdminTab('pedagogy')">
+                        <span class="me-1">🎓</span> Atelier Pédagogique
+                        <span class="badge bg-cyan-lt ms-2">Père-Fils</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-tab="updates" onclick="switchAdminTab('updates')">
+                        <span class="me-1">🔄</span> GitHub Sync
+                        <span class="badge bg-teal-lt ms-2"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" onclick="switchAdminTab('maintenance')">
+                        <span class="me-1">⚠️</span> Maintenance
+                    </a>
+                </li>
+                <li class="nav-item ms-auto">
+                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'all') ? 'active' : '' ?>" data-tab="all" onclick="switchAdminTab('all')" title="Afficher tous les onglets en continu">
+                        <span class="me-1">📚</span> Tout Dérouler
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <!-- Section 1 : Variables de Jeu & Vitesses -->
@@ -326,7 +437,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
                         <div>
                             <label style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; color: #fff;">
-                                🏗️ Vitesse Globale (Constructions, Navires, Caserne, Recherche)
+                                🏗️ Vitesse Globale (Bâtiments, Dojos, Chantiers Féodaux)
                             </label>
                             <div style="display: flex; align-items: center; gap: 1rem;">
                                 <input type="range" id="game_speed_range" min="1" max="100" value="<?= (int)($settings['game_speed'] ?? 5) ?>" 
@@ -335,12 +446,12 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                        value="<?= (int)($settings['game_speed'] ?? 5) ?>" class="form-control" style="width: 80px; text-align: center;"
                                        oninput="document.getElementById('game_speed_range').value = this.value">
                             </div>
-                            <small style="color: var(--text-muted); font-size: 0.75rem;">Divise le temps nécessaire aux chantiers, bâtiments et académies militaires.</small>
+                            <small style="color: var(--text-muted); font-size: 0.75rem;">Divise le temps nécessaire aux chantiers, Tenshu, académies et entraînements.</small>
                         </div>
 
                         <div>
                             <label style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; color: #fff;">
-                                ⛏️ Vitesse de Production des Ressources (Mines & Synthétiseurs)
+                                ⛏️ Vitesse de Production des Ressources (Rizières, Scieries &amp; Carrières)
                             </label>
                             <div style="display: flex; align-items: center; gap: 1rem;">
                                 <input type="range" id="resource_speed_range" min="1" max="100" value="<?= (int)($settings['resource_speed'] ?? 5) ?>" 
@@ -349,12 +460,12 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                        value="<?= (int)($settings['resource_speed'] ?? 5) ?>" class="form-control" style="width: 80px; text-align: center;"
                                        oninput="document.getElementById('resource_speed_range').value = this.value">
                             </div>
-                            <small style="color: var(--text-muted); font-size: 0.75rem;">Multiplie la production horaire de Titanium, Silicate et Hydrogène.</small>
+                            <small style="color: var(--text-muted); font-size: 0.75rem;">Multiplie la production horaire de Bois de Cèdre 🪵, Pierre 🪨 et Koku de Riz 🌾.</small>
                         </div>
 
                         <div>
                             <label style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; color: #fff;">
-                                🚀 Vitesse de Déplacement des Flottes Interstellaires
+                                🐎 Vitesse de Marche des Troupes &amp; Expéditions Féodales
                             </label>
                             <div style="display: flex; align-items: center; gap: 1rem;">
                                 <input type="range" id="fleet_speed_range" min="1" max="50" value="<?= (int)($settings['fleet_speed'] ?? 5) ?>" 
@@ -363,7 +474,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                        value="<?= (int)($settings['fleet_speed'] ?? 5) ?>" class="form-control" style="width: 80px; text-align: center;"
                                        oninput="document.getElementById('fleet_speed_range').value = this.value">
                             </div>
-                            <small style="color: var(--text-muted); font-size: 0.75rem;">Accélère la durée des trajets aller-retour pour raids, transports et colonisations.</small>
+                            <small style="color: var(--text-muted); font-size: 0.75rem;">Accélère les trajets des régiments pour les assauts, convois de tributs et fondations de fiefs.</small>
                         </div>
                     </div>
 
@@ -412,7 +523,181 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
     </div>
 
-    <!-- Section 2 : Système d'IA & Colonisation des Bots -->
+    <!-- Section 2 NOUVELLE : Samouraïs Héros & Reliques Légendaires de l'Archipel -->
+    <div class="admin-tab-pane" id="admin-tab-pane-heroes" data-tab="heroes" style="display: <?= $isPaneVisible('heroes') ? 'block' : 'none' ?>;">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h3 class="card-title d-flex align-items-center gap-2 m-0 text-purple">
+                        <span>🥋</span> Registre des Samouraïs Héros &amp; Reliques Légendaires
+                    </h3>
+                    <div class="text-secondary small mt-1">
+                        Surveillance de la santé, des quêtes quotidiennes (max 3/j), des reliques uniques (panthéon de 35) et décrets d'urgence shogunaux.
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="badge bg-purple-lt"><?= count($allHeroes) ?> Héros Enregistrés</span>
+                    <?php if ($heroesDead > 0): ?>
+                        <span class="badge bg-danger-lt">💀 <?= $heroesDead ?> Tombé(s)</span>
+                    <?php endif; ?>
+                    <?php if ($heroesReviving > 0): ?>
+                        <span class="badge bg-warning-lt">⏳ <?= $heroesReviving ?> En Régénération (24h)</span>
+                    <?php endif; ?>
+                    <span class="badge bg-teal-lt">🏆 <?= $totalRelicsFound ?> Reliques Trouvées</span>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter table-nowrap card-table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Daimyō</th>
+                            <th>Samouraï Champion</th>
+                            <th>Niveau &amp; Progression</th>
+                            <th>Vitalité</th>
+                            <th>Statut Martiale</th>
+                            <th>Aventures du Jour</th>
+                            <th>Reliques (Équipées/Total)</th>
+                            <th class="text-end">Commandes Shogunales</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($allHeroes)): ?>
+                            <tr>
+                                <td colspan="8" class="text-center text-secondary py-4">
+                                    Aucun Samouraï Héros n'est encore initié dans le royaume.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($allHeroes as $hRow): 
+                                $hHp = round((float)$hRow['health']);
+                                $hHpClass = ($hHp >= 60) ? 'bg-success' : (($hHp >= 25) ? 'bg-warning' : 'bg-danger');
+                                $hLvl = (int)$hRow['level'];
+                                $hXp = (int)$hRow['experience'];
+                                $hXpPct = HeroEngine::calculateXpPercent($hLvl, $hXp);
+                                $hStatus = $hRow['status'];
+                                $hStatusLabels = [
+                                    'home' => ['label' => 'Au Domaine', 'badge' => 'bg-success-lt text-success', 'icon' => '🏯'],
+                                    'mission' => ['label' => 'En Marche', 'badge' => 'bg-info-lt text-info', 'icon' => '🚩'],
+                                    'adventure' => ['label' => 'En Aventure', 'badge' => 'bg-purple-lt text-purple', 'icon' => '🗺️'],
+                                    'dead' => ['label' => 'Tombé au Combat', 'badge' => 'bg-danger-lt text-danger', 'icon' => '💀'],
+                                    'reviving' => ['label' => 'Régénération (24h)', 'badge' => 'bg-warning-lt text-warning', 'icon' => '⏳']
+                                ];
+                                $hStInfo = $hStatusLabels[$hStatus] ?? ['label' => $hStatus, 'badge' => 'bg-secondary-lt', 'icon' => '❓'];
+                                $dailyAdv = (int)($hRow['daily_adv_count'] ?? 0);
+                            ?>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="avatar avatar-xs rounded bg-primary-lt">
+                                                <?= strtoupper(substr($hRow['username'], 0, 1)) ?>
+                                            </span>
+                                            <div>
+                                                <div class="font-weight-medium"><?= htmlspecialchars($hRow['username']) ?></div>
+                                                <div class="text-secondary small"><?= strtoupper($hRow['faction']) ?> • #<?= $hRow['user_id'] ?></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="font-weight-bold text-dark d-flex align-items-center gap-1">
+                                            <span>⚔️</span>
+                                            <span><?= htmlspecialchars($hRow['name']) ?></span>
+                                        </div>
+                                        <div class="text-secondary small">
+                                            Force: <?= 150 + ((int)$hRow['stat_strength'] * 80) ?> | Att: +<?= round((int)$hRow['stat_offense_bonus'] * 0.2, 1) ?>% | Déf: +<?= round((int)$hRow['stat_defense_bonus'] * 0.2, 1) ?>%
+                                        </div>
+                                    </td>
+                                    <td style="min-width: 140px;">
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <strong>Niv. <?= $hLvl ?></strong>
+                                            <span class="text-secondary"><?= $hXpPct ?>%</span>
+                                        </div>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar bg-primary" style="width: <?= $hXpPct ?>%"></div>
+                                        </div>
+                                        <div class="text-secondary small mt-1"><?= $hXp ?> XP au total</div>
+                                    </td>
+                                    <td style="min-width: 120px;">
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <strong class="<?= ($hHp < 25) ? 'text-danger' : '' ?>"><?= $hHp ?>%</strong>
+                                            <span class="text-secondary"><?= ($hHp <= 0) ? 'Mort' : 'PV' ?></span>
+                                        </div>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar <?= $hHpClass ?>" style="width: <?= $hHp ?>%"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge <?= $hStInfo['badge'] ?> d-inline-flex align-items-center gap-1">
+                                            <span><?= $hStInfo['icon'] ?></span>
+                                            <span><?= $hStInfo['label'] ?></span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="badge <?= ($dailyAdv >= 3) ? 'bg-danger-lt text-danger' : 'bg-success-lt text-success' ?>">
+                                                <?= $dailyAdv ?> / 3
+                                            </span>
+                                            <?php if ($dailyAdv >= 3): ?>
+                                                <span class="text-secondary small" title="Quota quotidien atteint">Max</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-teal-lt" title="Reliques équipées / possédées">
+                                                🛡️ <?= (int)$hRow['equipped_count'] ?> / <?= (int)$hRow['relic_count'] ?>
+                                            </span>
+                                            <span class="text-secondary small">/ 35 uniques</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-list justify-content-end">
+                                            <!-- Soigner 100% -->
+                                            <button type="button" class="btn btn-sm btn-outline-success" 
+                                                    onclick="adminHealHero(<?= (int)$hRow['user_id'] ?>, '<?= htmlspecialchars(addslashes($hRow['name'])) ?>')"
+                                                    title="Restaure immédiatement la santé à 100%">
+                                                🩺 Soigner
+                                            </button>
+
+                                            <!-- Ressusciter instantanément -->
+                                            <?php if ($hStatus === 'dead' || $hStatus === 'reviving' || $hHp <= 0): ?>
+                                                <button type="button" class="btn btn-sm btn-warning" 
+                                                        onclick="adminReviveHero(<?= (int)$hRow['user_id'] ?>, '<?= htmlspecialchars(addslashes($hRow['name'])) ?>')"
+                                                        title="Réincarnation immédiate sans attendre la fin des 24h">
+                                                    ⛩️ Ressusciter
+                                                </button>
+                                            <?php endif; ?>
+
+                                            <!-- Reset Quota Aventures -->
+                                            <?php if ($dailyAdv > 0): ?>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                        onclick="adminResetHeroQuota(<?= (int)$hRow['user_id'] ?>, '<?= htmlspecialchars(addslashes($hRow['name'])) ?>')"
+                                                        title="Réinitialise le quota quotidien d'aventures à 0/3">
+                                                    🔄 Reset Quota
+                                                </button>
+                                            <?php endif; ?>
+
+                                            <!-- Octroyer Relique Aléatoire -->
+                                            <button type="button" class="btn btn-sm btn-outline-purple" 
+                                                    onclick="adminGrantRelic(<?= (int)$hRow['user_id'] ?>, '<?= htmlspecialchars(addslashes($hRow['name'])) ?>')"
+                                                    title="Octroie une relique aléatoire inédite (jamais de doublon)">
+                                                🎁 Donner Relique
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center text-secondary small flex-wrap gap-2">
+                <span>Le panthéon compte <strong>35 reliques sacrées</strong> (7 Armes, 7 Casques, 7 Armures, 7 Montures, 7 Talismans). Règle d'or : aucun doublon.</span>
+                <span>Régénération standard post-mortem : <strong>24 heures</strong> | Quota d'aventures : <strong>3 / jour</strong>.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3 : Système d'IA & Colonisation des Bots -->
     <div class="admin-tab-pane" id="admin-tab-pane-bots" data-tab="bots" style="display: <?= $isPaneVisible('bots') ? 'block' : 'none' ?>;">
         <div class="card" style="margin-bottom: 2rem; border-color: rgba(168, 85, 247, 0.3);">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -439,22 +724,22 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
                         <div>
                             <label style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; color: #fff;">
-                                🪐 Colonisation Automatique de Nouvelles Planètes
+                                🏯 Fondation Automatique de Nouveaux Fiefs
                             </label>
                             <select name="bot_colonize_enabled" class="form-control" id="bot_colonize_enabled">
-                                <option value="1" <?= !empty($settings['bot_colonize_enabled']) ? 'selected' : '' ?>>🟢 Autorisée (Les bots fondent des colonies)</option>
-                                <option value="0" <?= empty($settings['bot_colonize_enabled']) ? 'selected' : '' ?>>🔴 Désactivée (Planète capitale uniquement)</option>
+                                <option value="1" <?= !empty($settings['bot_colonize_enabled']) ? 'selected' : '' ?>>🟢 Autorisée (Les clans IA conquièrent de nouveaux fiefs)</option>
+                                <option value="0" <?= empty($settings['bot_colonize_enabled']) ? 'selected' : '' ?>>🔴 Désactivée (Domaine seigneurial initial uniquement)</option>
                             </select>
-                            <small style="color: var(--text-muted); font-size: 0.75rem;">Déclenche l'expansion galactique des bots vers de nouvelles coordonnées.</small>
+                            <small style="color: var(--text-muted); font-size: 0.75rem;">Déclenche l'expansion territoriale des clans IA vers de nouvelles coordonnées de la carte.</small>
                         </div>
 
                         <div>
                             <label style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; color: #fff;">
-                                Nombre Max de Planètes par Bot
+                                Nombre Max de Fiefs par Clan IA
                             </label>
                             <input type="number" name="bot_max_planets" id="bot_max_planets" min="1" max="10" 
                                    value="<?= (int)($settings['bot_max_planets'] ?? 3) ?>" class="form-control">
-                            <small style="color: var(--text-muted); font-size: 0.75rem;">Plafond d'expansion territoriale par IA (Capitale + Avant-postes).</small>
+                            <small style="color: var(--text-muted); font-size: 0.75rem;">Plafond d'expansion territoriale par Daimyō IA (Fief Principal + Domaines vassaux).</small>
                         </div>
 
                         <div>
@@ -480,56 +765,60 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <hr style="border-color: rgba(255,255,255,0.08); margin: 1.5rem 0;">
 
                 <!-- Tableau des Bots Actifs -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h4 style="color: #fff; font-size: 1.1rem; margin: 0;">📋 Registre des Commandants Bots en Activité</h4>
-                    <button onclick="generatePresetBots()" class="btn btn-secondary" style="font-size: 0.85rem;">
-                        <span>➕</span> Ajouter 3 Bots Multi-Factions
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="m-0 font-weight-bold">📋 Registre des Daimyōs IA en Activité</h4>
+                    <button onclick="generatePresetBots()" class="btn btn-sm btn-outline-primary">
+                        <span>➕</span> Ajouter 3 Daimyōs Multi-Clans
                     </button>
                 </div>
 
                 <?php if (empty($botsList)): ?>
-                    <div style="text-align: center; padding: 2rem; background: rgba(0,0,0,0.2); border-radius: 8px; color: var(--text-muted);">
-                        Aucun Bot PNJ actuellement déployé dans l'univers. Cliquez sur le bouton ci-dessus pour peupler la galaxie !
+                    <div class="text-center p-4 text-secondary">
+                        Aucun Daimyō IA n'est actuellement déployé dans l'archipel. Cliquez sur le bouton ci-dessus pour peupler le royaume !
                     </div>
                 <?php else: ?>
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <div class="table-responsive">
+                        <table class="table table-vcenter table-nowrap card-table table-hover">
                             <thead>
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
-                                    <th style="padding: 0.75rem;">Commandant PNJ</th>
-                                    <th style="padding: 0.75rem;">Civilisation</th>
-                                    <th style="padding: 0.75rem;">Capitale (X:Y)</th>
-                                    <th style="padding: 0.75rem; text-align: center;">Colonies</th>
-                                    <th style="padding: 0.75rem; text-align: right;">Points d'Empire</th>
-                                    <th style="padding: 0.75rem; text-align: center;">Actions</th>
+                                <tr>
+                                    <th>Daimyō IA</th>
+                                    <th>Clan Féodal</th>
+                                    <th>Fief Capitale</th>
+                                    <th class="text-center">Fiefs Annexes</th>
+                                    <th class="text-end">Puissance Militaire</th>
+                                    <th class="text-end">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($botsList as $bot): ?>
                                     <?php $fInfo = FACTIONS[$bot['faction']] ?? FACTIONS['terran']; ?>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td style="padding: 0.75rem; font-weight: 700; color: #fff;">
-                                            🤖 <?= htmlspecialchars($bot['username']) ?>
+                                    <tr>
+                                        <td>
+                                            <div class="font-weight-medium">
+                                                🤖 <?= htmlspecialchars($bot['username']) ?>
+                                            </div>
                                         </td>
-                                        <td style="padding: 0.75rem;">
-                                            <span class="faction-badge <?= $bot['faction'] ?>" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">
+                                        <td>
+                                            <span class="badge bg-secondary-lt">
                                                 <?= $fInfo['icon'] ?> <?= htmlspecialchars($fInfo['name']) ?>
                                             </span>
                                         </td>
-                                        <td style="padding: 0.75rem; font-family: monospace; color: #dc2626;">
-                                            [<?= $bot['capital_x'] ?> : <?= $bot['capital_y'] ?>]
+                                        <td>
+                                            <span class="badge bg-danger-lt font-monospace">
+                                                [<?= $bot['capital_x'] ?> : <?= $bot['capital_y'] ?>]
+                                            </span>
                                         </td>
-                                        <td style="padding: 0.75rem; text-align: center;">
-                                            <span style="background: rgba(52, 211, 153, 0.15); color: #34d399; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 700; font-size: 0.85rem;">
+                                        <td class="text-center">
+                                            <span class="badge bg-success-lt font-weight-bold">
                                                 <?= $bot['planet_count'] ?> fief(s)
                                             </span>
                                         </td>
-                                        <td style="padding: 0.75rem; text-align: right; font-weight: 700; color: #fbbf24;">
+                                        <td class="text-end font-weight-bold text-warning">
                                             🏆 <?= number_format($bot['points']) ?>
                                         </td>
-                                        <td style="padding: 0.75rem; text-align: center;">
+                                        <td class="text-end">
                                             <button onclick="deleteBot(<?= $bot['id'] ?>, '<?= htmlspecialchars(addslashes($bot['username'])) ?>')" 
-                                                    class="btn btn-secondary" style="font-size: 0.75rem; color: #f87171; border-color: rgba(239, 68, 68, 0.3); padding: 0.25rem 0.5rem;">
+                                                    class="btn btn-sm btn-outline-danger">
                                                 🗑️ Purger
                                             </button>
                                         </td>
@@ -543,80 +832,81 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
     </div>
 
-    <!-- Section 3 : Gestion des Daimyōs Joueurs -->
+    <!-- Section 4 : Gestion des Daimyōs Joueurs -->
     <div class="admin-tab-pane" id="admin-tab-pane-users" data-tab="users" style="display: <?= $isPaneVisible('users') ? 'block' : 'none' ?>;">
-        <div class="card" style="margin-bottom: 2rem; border-color: rgba(220, 38, 38, 0.2);">
-            <div class="card-header">
-                <h3 style="color: #dc2626; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                    <span>👥</span> Gestion des Daimyōs Joueurs & Privilèges
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title d-flex align-items-center gap-2 m-0 text-warning">
+                    <span>👥</span> Gestion des Daimyōs Joueurs &amp; Privilèges
                 </h3>
+                <span class="badge bg-warning-lt"><?= count($humanUsers) ?> Daimyōs Inscrits</span>
             </div>
-            <div class="card-body">
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
-                                <th style="padding: 0.75rem;">ID</th>
-                                <th style="padding: 0.75rem;">Commandant</th>
-                                <th style="padding: 0.75rem;">Email</th>
-                                <th style="padding: 0.75rem;">Civilisation</th>
-                                <th style="padding: 0.75rem; text-align: center;">Colonies</th>
-                                <th style="padding: 0.75rem; text-align: right;">Points</th>
-                                <th style="padding: 0.75rem; text-align: center;">Rôle</th>
-                                <th style="padding: 0.75rem; text-align: center;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($humanUsers as $hUser): ?>
-                                <?php $hfInfo = FACTIONS[$hUser['faction']] ?? FACTIONS['terran']; ?>
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                    <td style="padding: 0.75rem; color: var(--text-muted);">#<?= $hUser['id'] ?></td>
-                                    <td style="padding: 0.75rem; font-weight: 700; color: #fff;">
+            <div class="table-responsive">
+                <table class="table table-vcenter table-nowrap card-table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Daimyō</th>
+                            <th>Courriel</th>
+                            <th>Clan &amp; Faction</th>
+                            <th class="text-center">Fiefs Contrôlés</th>
+                            <th class="text-end">Honneur &amp; Points</th>
+                            <th class="text-center">Rang Shogunal</th>
+                            <th class="text-end">Commandes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($humanUsers as $hUser): ?>
+                            <?php $hfInfo = FACTIONS[$hUser['faction']] ?? FACTIONS['terran']; ?>
+                            <tr>
+                                <td class="text-secondary small">#<?= $hUser['id'] ?></td>
+                                <td>
+                                    <div class="font-weight-medium">
                                         <?= htmlspecialchars($hUser['username']) ?>
                                         <?php if ((int)$hUser['id'] === (int)Auth::id()): ?>
-                                            <span style="font-size: 0.75rem; color: #dc2626;">(Vous)</span>
+                                            <span class="badge bg-primary-lt ms-1">Vous</span>
                                         <?php endif; ?>
-                                    </td>
-                                    <td style="padding: 0.75rem; color: #94a3b8; font-size: 0.85rem;"><?= htmlspecialchars($hUser['email']) ?></td>
-                                    <td style="padding: 0.75rem;">
-                                        <span class="faction-badge <?= $hUser['faction'] ?>" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">
-                                            <?= $hfInfo['icon'] ?> <?= htmlspecialchars($hfInfo['name']) ?>
+                                    </div>
+                                </td>
+                                <td class="text-secondary small"><?= htmlspecialchars($hUser['email']) ?></td>
+                                <td>
+                                    <span class="badge bg-secondary-lt">
+                                        <?= $hfInfo['icon'] ?> <?= htmlspecialchars($hfInfo['name']) ?>
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-success-lt font-weight-bold">
+                                        <?= $hUser['colony_count'] ?> fief(s)
+                                    </span>
+                                </td>
+                                <td class="text-end font-weight-bold text-warning">
+                                    🏆 <?= number_format($hUser['points']) ?>
+                                </td>
+                                <td class="text-center">
+                                    <?php if ((int)$hUser['is_admin'] === 1): ?>
+                                        <span class="badge bg-danger text-white">
+                                            ⭐ ADMINISTRATEUR
                                         </span>
-                                    </td>
-                                    <td style="padding: 0.75rem; text-align: center;">
-                                        <span style="background: rgba(220, 38, 38, 0.15); color: #dc2626; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 700; font-size: 0.85rem;">
-                                            <?= $hUser['colony_count'] ?>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary-lt">
+                                            Daimyō Joueur
                                         </span>
-                                    </td>
-                                    <td style="padding: 0.75rem; text-align: right; font-weight: 700; color: #fbbf24;">
-                                        🏆 <?= number_format($hUser['points']) ?>
-                                    </td>
-                                    <td style="padding: 0.75rem; text-align: center;">
-                                        <?php if ((int)$hUser['is_admin'] === 1): ?>
-                                            <span style="background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #eab308; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">
-                                                ⭐ ADMINISTRATEUR
-                                            </span>
-                                        <?php else: ?>
-                                            <span style="background: rgba(255, 255, 255, 0.05); color: var(--text-muted); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">
-                                                JOUEUR
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td style="padding: 0.75rem; text-align: center;">
-                                        <?php if ((int)$hUser['id'] !== (int)Auth::id()): ?>
-                                            <button onclick="toggleAdmin(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', <?= (int)$hUser['is_admin'] ?>)"
-                                                    class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                                <?= ((int)$hUser['is_admin'] === 1) ? 'Rétrograder' : 'Promouvoir Admin' ?>
-                                            </button>
-                                        <?php else: ?>
-                                            <span style="color: var(--text-muted); font-size: 0.75rem;">-</span>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-end">
+                                    <?php if ((int)$hUser['id'] !== (int)Auth::id()): ?>
+                                        <button onclick="toggleAdmin(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', <?= (int)$hUser['is_admin'] ?>)"
+                                                class="btn btn-sm btn-outline-secondary">
+                                            <?= ((int)$hUser['is_admin'] === 1) ? 'Rétrograder Joueur' : 'Promouvoir Admin' ?>
+                                        </button>
+                                    <?php else: ?>
+                                        <span class="text-secondary small">-</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -1378,30 +1668,35 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     </div>
 </div>
 
-<!-- Modale de Confirmation de Réinitialisation Complète (Admin Washi) -->
+<!-- Modale de Confirmation de Réinitialisation Complète -->
 <div class="modal-overlay" id="resetUniverseModal">
-    <div class="modal-card modal-card-sm" style="border-color:#b91c1c;">
-        <div class="modal-header" style="background:#fee2e2; border-bottom:2px solid #b91c1c;">
-            <h3 class="modal-title" style="color:#b91c1c;">
-                <span>💥</span> CONFIRMATION : RESET UNIVERS
+    <div class="modal-card modal-card-sm">
+        <div class="modal-header">
+            <h3 class="modal-title d-flex align-items-center gap-2 text-danger">
+                <span>💥</span> Réinitialisation Complète de l'Univers
             </h3>
             <button onclick="closeResetModal()" class="modal-close-btn" title="Fermer">&times;</button>
         </div>
         <div class="modal-body">
-            <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:0.85rem 1rem; color:#b91c1c; font-size:0.88rem; line-height:1.5; margin-bottom:1.25rem;">
-                ⚠️ <strong>Attention !</strong> Toutes les parties en cours et données de jeu seront <strong>irréversiblement effacées</strong>. Le compte administrateur <strong>nezzar</strong> sera recréé avec le mot de passe <strong>Gabriel125#</strong>.
+            <div class="alert alert-danger mb-3">
+                <div class="d-flex">
+                    <div>⚠️</div>
+                    <div class="ms-2">
+                        <strong>Attention irréversible !</strong> Toutes les parties, colonies, héros et données seront effacés. Le compte administrateur <strong>nezzar</strong> sera recréé avec son mot de passe initial.
+                    </div>
+                </div>
             </div>
 
             <div class="form-group mb-3">
-                <label class="form-label">
-                    Pour confirmer, tapez le mot <strong style="color: #b91c1c;">RESET</strong> en majuscules :
+                <label class="form-label font-weight-medium">
+                    Pour confirmer l'opération, tapez <code>RESET</code> en majuscules :
                 </label>
-                <input type="text" id="resetKeywordInput" class="form-control" placeholder="RESET" style="border-color:#b91c1c; font-family:monospace; font-size:1.1rem; text-align:center; letter-spacing:2px; font-weight:800;">
+                <input type="text" id="resetKeywordInput" class="form-control text-center font-monospace" placeholder="RESET" style="font-size:1.1rem; letter-spacing:2px; font-weight:800;">
             </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeResetModal()">Annuler</button>
-            <button type="button" class="btn btn-primary" onclick="executeUniverseReset()" style="background:#b91c1c; border-color:#991b1b;">
+            <button type="button" class="btn btn-danger" onclick="executeUniverseReset()">
                 💥 Exécuter le Reset
             </button>
         </div>
@@ -1489,7 +1784,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 <script>
 // --- GESTION DU SYSTÈME D'ONGLETS DU SHOGUNAT ---
 function switchAdminTab(tabKey) {
-    const validTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'updates', 'maintenance', 'all'];
+    const validTabs = ['game', 'heroes', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'updates', 'maintenance', 'all'];
     if (!validTabs.includes(tabKey)) tabKey = 'game';
 
     // Afficher ou masquer les panneaux correspondants
@@ -1503,25 +1798,16 @@ function switchAdminTab(tabKey) {
         }
     });
 
-    // Mettre à jour l'apparence des boutons d'onglets
+    // Mettre à jour l'apparence des boutons d'onglets (Tabler nav-link active)
     const tabBtns = document.querySelectorAll('.admin-tab-btn');
     tabBtns.forEach(btn => {
         const bTab = btn.getAttribute('data-tab');
-        if (bTab === tabKey) {
-            btn.classList.add('active');
-            btn.style.background = 'linear-gradient(135deg, #b91c1c, #dc2626)';
-            btn.style.color = '#fff';
-            btn.style.borderColor = '#ef4444';
-            btn.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.35)';
-            btn.style.fontWeight = '800';
-        } else {
-            btn.classList.remove('active');
-            btn.style.background = 'rgba(255,255,255,0.04)';
-            btn.style.color = '#cbd5e1';
-            btn.style.borderColor = 'rgba(255,255,255,0.1)';
-            btn.style.boxShadow = 'none';
-            btn.style.fontWeight = '600';
-        }
+        const isActive = (bTab === tabKey);
+        btn.classList.toggle('active', isActive);
+        btn.style.boxShadow = '';
+        btn.style.borderColor = '';
+        btn.style.background = '';
+        btn.style.color = '';
     });
 
     // Synchroniser l'URL sans rechargement de page et mémoriser l'onglet actif
@@ -1532,6 +1818,83 @@ function switchAdminTab(tabKey) {
         sessionStorage.setItem('admin_active_tab', tabKey);
     } catch (e) {
         // En cas de restriction d'historique
+    }
+}
+
+// --- FONCTIONS ADMINISTRATIVES DES SAMOURAÏS HÉROS & RELIQUES ---
+async function adminHealHero(userId, heroName) {
+    if (!confirm(`Soigner immédiatement le Samouraï « ${heroName} » à 100% de sa vitalité ?`)) return;
+    const formData = new FormData();
+    formData.append('action', 'admin_heal_hero');
+    formData.append('user_id', userId);
+    try {
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert("Soin Accordé", data.message, "success");
+            window.location.reload();
+        } else {
+            showModalAlert("Erreur", data.error || "Impossible de soigner le héros.", "danger");
+        }
+    } catch (e) {
+        showModalAlert("Erreur Réseau", "Une erreur est survenue lors de la communication.", "danger");
+    }
+}
+
+async function adminReviveHero(userId, heroName) {
+    if (!confirm(`Ressusciter immédiatement le Samouraï « ${heroName} » sans attendre la fin du délai de régénération de 24 heures ?`)) return;
+    const formData = new FormData();
+    formData.append('action', 'admin_revive_hero');
+    formData.append('user_id', userId);
+    try {
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert("Réincarnation Divine", data.message, "success");
+            window.location.reload();
+        } else {
+            showModalAlert("Erreur", data.error || "Impossible de ressusciter le héros.", "danger");
+        }
+    } catch (e) {
+        showModalAlert("Erreur Réseau", "Une erreur est survenue lors de la communication.", "danger");
+    }
+}
+
+async function adminResetHeroQuota(userId, heroName) {
+    if (!confirm(`Réinitialiser le quota d'aventures quotidiennes à 0/3 pour le Samouraï « ${heroName} » ?`)) return;
+    const formData = new FormData();
+    formData.append('action', 'admin_reset_hero_quota');
+    formData.append('user_id', userId);
+    try {
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert("Quota Réinitialisé", data.message, "success");
+            window.location.reload();
+        } else {
+            showModalAlert("Erreur", data.error || "Impossible de réinitialiser le quota.", "danger");
+        }
+    } catch (e) {
+        showModalAlert("Erreur Réseau", "Une erreur est survenue lors de la communication.", "danger");
+    }
+}
+
+async function adminGrantRelic(userId, heroName) {
+    if (!confirm(`Octroyer une nouvelle relique féodale inédite au Samouraï « ${heroName} » ?`)) return;
+    const formData = new FormData();
+    formData.append('action', 'admin_grant_relic');
+    formData.append('user_id', userId);
+    try {
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert("Relique Sacrée Attribuée", data.message, "success");
+            window.location.reload();
+        } else {
+            showModalAlert("Erreur", data.error || "Impossible d'octroyer la relique.", "danger");
+        }
+    } catch (e) {
+        showModalAlert("Erreur Réseau", "Une erreur est survenue lors de la communication.", "danger");
     }
 }
 
