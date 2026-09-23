@@ -8,18 +8,18 @@ $updateEngine = new UpdateEngine();
 $localInfo = $updateEngine->getLocalInfo();
 ?>
 
-<div class="card" style="margin-bottom: 2rem; border-color: rgba(56, 189, 248, 0.3);">
-    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid rgba(56, 189, 248, 0.2);">
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <span style="font-size: 1.6rem;">🔄</span>
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <span class="avatar bg-teal-lt text-teal">🔄</span>
             <div>
-                <h3 style="margin: 0; color: #38bdf8; font-size: 1.2rem;">Centre de Mises à Jour & Déploiement GitHub</h3>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Contrôle des versions, inspection des commits et synchronisation en un clic</span>
+                <h3 class="card-title text-teal m-0">Centre de Mises à Jour &amp; Déploiement GitHub</h3>
+                <div class="text-secondary small">Contrôle des versions, inspection des commits et synchronisation en un clic</div>
             </div>
         </div>
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <button type="button" class="btn btn-secondary" onclick="checkGitHubUpdates(true)" id="btn-check-updates" style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.84rem; padding: 0.45rem 0.9rem;">
-                <span id="spinner-check" style="display: none;" class="spinner-border spinner-border-sm">⏳</span>
+        <div class="d-flex gap-2 align-items-center">
+            <button type="button" class="btn btn-outline-teal" onclick="checkGitHubUpdates(true)" id="btn-check-updates">
+                <span id="spinner-check" style="display: none;" class="spinner-border spinner-border-sm me-1">⏳</span>
                 <span>🔍 Contrôler les Mises à Jour</span>
             </button>
         </div>
@@ -27,134 +27,142 @@ $localInfo = $updateEngine->getLocalInfo();
 
     <div class="card-body">
         <!-- BANNIÈRE DYNAMIQUE DE STATUT -->
-        <div id="update-status-banner" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-            <div style="display: flex; align-items: center; gap: 0.85rem;">
+        <div id="update-status-banner" class="alert alert-info d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+            <div class="d-flex align-items-center gap-3">
                 <div id="banner-icon" style="font-size: 1.8rem;">📡</div>
                 <div>
-                    <div id="banner-title" style="font-weight: 700; color: #fff; font-size: 1rem;">
-                        Version Locale Actuelle : <code style="color: #38bdf8;"><?= htmlspecialchars($localInfo['short_sha']) ?></code>
+                    <div id="banner-title" class="fw-bold">
+                        Version Locale Actuelle : <code class="text-teal"><?= htmlspecialchars($localInfo['short_sha']) ?></code>
                     </div>
-                    <div id="banner-desc" style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.2rem;">
+                    <div id="banner-desc" class="small text-secondary mt-1">
                         Dernier commit : <?= htmlspecialchars($localInfo['commit_message']) ?> (<?= htmlspecialchars($localInfo['human_date']) ?>)
                     </div>
                 </div>
             </div>
             <div id="banner-action">
-                <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.8rem; padding: 0.4rem 0.75rem;">
+                <span class="badge bg-teal-lt">
                     Branche <?= htmlspecialchars($localInfo['branch']) ?>
                 </span>
             </div>
         </div>
 
         <!-- GRILLE COMPARATIVE LOCAL VS GITHUB -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem;">
+        <div class="row row-cards mb-4">
             <!-- FIEF LOCAL -->
-            <div style="background: rgba(17, 18, 24, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.25rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
-                    <strong style="color: #cbd5e1; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
-                        <span>🏯</span> Serveur Local (Fief)
-                    </strong>
-                    <span class="badge" style="background: #1e293b; color: #94a3b8; font-size: 0.75rem;">
-                        <?= htmlspecialchars($localInfo['branch']) ?>
-                    </span>
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.85rem;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-muted);">Commit Actif :</span>
-                        <strong style="color: #67e8f9; font-family: monospace;"><?= htmlspecialchars($localInfo['short_sha']) ?></strong>
+            <div class="col-md-6">
+                <div class="card card-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong class="d-flex align-items-center gap-2">
+                            <span>🏯</span> Serveur Local (Fief)
+                        </strong>
+                        <span class="badge bg-secondary-lt">
+                            <?= htmlspecialchars($localInfo['branch']) ?>
+                        </span>
                     </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-muted);">Auteur :</span>
-                        <span style="color: #fff;"><?= htmlspecialchars($localInfo['author_name']) ?></span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-muted);">Horodatage :</span>
-                        <span style="color: #cbd5e1;"><?= htmlspecialchars($localInfo['human_date']) ?></span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: var(--text-muted);">Arbre de Travail :</span>
-                        <?php if ($localInfo['is_clean']): ?>
-                            <span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3);">
-                                ✔ Propre (Clean)
-                            </span>
-                        <?php else: ?>
-                            <span class="badge" style="background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3);" title="<?= htmlspecialchars(implode(', ', $localInfo['dirty_files'])) ?>">
-                                ⚠️ Modifié (<?= count($localInfo['dirty_files']) ?>)
-                            </span>
-                        <?php endif; ?>
+                    <div class="card-body">
+                        <div class="d-flex flex-column gap-2 small">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary">Commit Actif :</span>
+                                <strong class="font-monospace text-teal"><?= htmlspecialchars($localInfo['short_sha']) ?></strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary">Auteur :</span>
+                                <span class="fw-medium"><?= htmlspecialchars($localInfo['author_name']) ?></span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary">Horodatage :</span>
+                                <span><?= htmlspecialchars($localInfo['human_date']) ?></span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-secondary">Arbre de Travail :</span>
+                                <?php if ($localInfo['is_clean']): ?>
+                                    <span class="badge bg-success-lt">
+                                        ✔ Propre (Clean)
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge bg-warning-lt" title="<?= htmlspecialchars(implode(', ', $localInfo['dirty_files'])) ?>">
+                                        ⚠️ Modifié (<?= count($localInfo['dirty_files']) ?>)
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- DÉPÔT GITHUB DISTANT -->
-            <div style="background: rgba(17, 18, 24, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.25rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
-                    <strong style="color: #cbd5e1; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
-                        <span>🐙</span> Dépôt GitHub Officiel
-                    </strong>
-                    <a href="https://github.com/<?= htmlspecialchars($localInfo['repo_owner'] . '/' . $localInfo['repo_name']) ?>" target="_blank" rel="noopener" style="color: #38bdf8; font-size: 0.75rem; text-decoration: none;">
-                        Ouvrir sur GitHub &nearr;
-                    </a>
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.85rem;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-muted);">Dépôt :</span>
-                        <strong style="color: #fff;"><?= htmlspecialchars($localInfo['repo_owner'] . '/' . $localInfo['repo_name']) ?></strong>
+            <div class="col-md-6">
+                <div class="card card-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong class="d-flex align-items-center gap-2">
+                            <span>🐙</span> Dépôt GitHub Officiel
+                        </strong>
+                        <a href="https://github.com/<?= htmlspecialchars($localInfo['repo_owner'] . '/' . $localInfo['repo_name']) ?>" target="_blank" rel="noopener" class="small text-decoration-none">
+                            Ouvrir sur GitHub &nearr;
+                        </a>
                     </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-muted);">Branche Cible :</span>
-                        <strong style="color: #a855f7;"><?= htmlspecialchars($localInfo['target_branch']) ?></strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-muted);">Clé Token :</span>
-                        <span style="color: #94a3b8; font-family: monospace;"><?= htmlspecialchars($localInfo['masked_token']) ?></span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: var(--text-muted);">Statut Distant :</span>
-                        <span id="remote-status-pill" class="badge" style="background: rgba(255,255,255,0.05); color: #94a3b8;">
-                            Contrôle en attente...
-                        </span>
+                    <div class="card-body">
+                        <div class="d-flex flex-column gap-2 small">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary">Dépôt :</span>
+                                <strong><?= htmlspecialchars($localInfo['repo_owner'] . '/' . $localInfo['repo_name']) ?></strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary">Branche Cible :</span>
+                                <strong class="text-purple"><?= htmlspecialchars($localInfo['target_branch']) ?></strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary">Clé Token :</span>
+                                <span class="font-monospace text-secondary"><?= htmlspecialchars($localInfo['masked_token']) ?></span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-secondary">Statut Distant :</span>
+                                <span id="remote-status-pill" class="badge bg-secondary-lt">
+                                    Contrôle en attente...
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- ZONE DÉDIÉE : NOUVELLE MISE À JOUR DISPONIBLE (Affichée dynamiquement) -->
-        <div id="update-action-box" style="display: none; background: rgba(30, 27, 75, 0.4); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.75rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div id="update-action-box" class="card card-body bg-light border-purple mb-4" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
-                    <h4 style="margin: 0; color: #c084fc; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <h4 class="text-purple card-title d-flex align-items-center gap-2 m-0">
                         <span>✨</span> Nouveaux Commits Disponibles sur GitHub
                     </h4>
-                    <span id="update-behind-text" style="font-size: 0.82rem; color: #e2e8f0;">
+                    <div id="update-behind-text" class="text-secondary small mt-1">
                         Votre version locale a des commits de retard par rapport à la branche principale.
-                    </span>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-primary" onclick="installGitHubUpdate()" id="btn-install-update" style="background: linear-gradient(135deg, #7c3aed, #9333ea); border-color: #a855f7; font-weight: 700; padding: 0.6rem 1.4rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 0 15px rgba(147, 51, 234, 0.4);">
-                    <span id="spinner-install" style="display: none;" class="spinner-border spinner-border-sm">⏳</span>
-                    <span>🚀 Télécharger & Déployer la Mise à Jour</span>
+                <button type="button" class="btn btn-primary fw-bold" onclick="installGitHubUpdate()" id="btn-install-update">
+                    <span id="spinner-install" style="display: none;" class="spinner-border spinner-border-sm me-1">⏳</span>
+                    <span>🚀 Télécharger &amp; Déployer la Mise à Jour</span>
                 </button>
             </div>
 
             <!-- OPTIONS AVANT INSTALLATION -->
-            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; font-size: 0.82rem; color: #cbd5e1;">
-                <input type="checkbox" id="auto-stash-check" checked style="cursor: pointer;">
-                <label for="auto-stash-check" style="cursor: pointer; margin: 0;">
-                    Sauvegarder automatiquement mes modifications locales avec <code>git stash</code> avant la mise à jour (Recommandé)
+            <div class="mb-3">
+                <label class="form-check form-switch m-0" for="auto-stash-check">
+                    <input class="form-check-input" type="checkbox" id="auto-stash-check" checked>
+                    <span class="form-check-label small">
+                        Sauvegarder automatiquement mes modifications locales avec <code>git stash</code> avant la mise à jour (Recommandé)
+                    </span>
                 </label>
             </div>
 
             <!-- LISTE DES COMMITS À INSTALLER -->
-            <div style="max-height: 240px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
-                <table class="table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0;">
+            <div class="table-responsive border rounded" style="max-height: 240px; overflow-y: auto;">
+                <table class="table table-vcenter table-nowrap card-table table-hover">
                     <thead>
-                        <tr style="background: rgba(255,255,255,0.04); color: #c084fc; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08);">
-                            <th style="padding: 0.5rem 0.75rem;">SHA</th>
-                            <th style="padding: 0.5rem 0.75rem;">Message du Commit</th>
-                            <th style="padding: 0.5rem 0.75rem;">Auteur</th>
-                            <th style="padding: 0.5rem 0.75rem; text-align: right;">Lien</th>
+                        <tr>
+                            <th>SHA</th>
+                            <th>Message du Commit</th>
+                            <th>Auteur</th>
+                            <th class="text-end">Lien</th>
                         </tr>
                     </thead>
                     <tbody id="update-commits-tbody">
@@ -165,45 +173,49 @@ $localInfo = $updateEngine->getLocalInfo();
         </div>
 
         <!-- CONSOLE D'EXÉCUTION TERMINAL EN DIRECT -->
-        <div style="margin-bottom: 1.75rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <strong style="color: #94a3b8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
-                    <span>💻</span> Console d'Exécution & Journal Système
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong class="d-flex align-items-center gap-2 text-secondary small">
+                    <span>💻</span> Console d'Exécution &amp; Journal Système
                 </strong>
-                <button type="button" onclick="clearUpdateLogs()" class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">Effacer la console</button>
+                <button type="button" onclick="clearUpdateLogs()" class="btn btn-sm btn-outline-secondary">Effacer la console</button>
             </div>
-            <pre id="update-console-log" style="background: #090d16; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 0.85rem 1rem; font-family: monospace; font-size: 0.78rem; min-height: 80px; max-height: 220px; overflow-y: auto; white-space: pre-wrap; line-height: 1.5; margin: 0;">Console d'administration prête. Cliquez sur "Contrôler les Mises à Jour" pour interroger GitHub.</pre>
+            <pre id="update-console-log" class="form-control font-monospace bg-dark text-cyan p-3 m-0" style="min-height: 80px; max-height: 220px; overflow-y: auto; white-space: pre-wrap; font-size: 0.8rem; line-height: 1.5;">Console d'administration prête. Cliquez sur "Contrôler les Mises à Jour" pour interroger GitHub.</pre>
         </div>
 
         <!-- FORMULAIRE DE CONFIGURATION GITHUB -->
-        <div style="background: rgba(17, 18, 24, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1.25rem;">
-            <h4 style="margin: 0 0 1rem 0; color: #facc15; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+        <div class="card card-body bg-light border">
+            <h4 class="card-title d-flex align-items-center gap-2 mb-3">
                 <span>⚙️</span> Paramètres de Connexion GitHub
             </h4>
-            <form id="github-settings-form" onsubmit="saveGitHubSettings(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
-                <div>
-                    <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Propriétaire / Organisation GitHub</label>
-                    <input type="text" name="github_repo_owner" value="<?= htmlspecialchars($localInfo['repo_owner']) ?>" required style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 0.45rem 0.75rem; border-radius: 6px; font-size: 0.84rem;">
-                </div>
-                <div>
-                    <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Nom du Dépôt</label>
-                    <input type="text" name="github_repo_name" value="<?= htmlspecialchars($localInfo['repo_name']) ?>" required style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 0.45rem 0.75rem; border-radius: 6px; font-size: 0.84rem;">
-                </div>
-                <div>
-                    <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Branche Cible</label>
-                    <input type="text" name="github_branch" value="<?= htmlspecialchars($localInfo['target_branch']) ?>" required style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 0.45rem 0.75rem; border-radius: 6px; font-size: 0.84rem;">
-                </div>
-                <div>
-                    <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Clé Token GitHub (Personnel Access Token)</label>
-                    <input type="password" name="github_token" placeholder="Laisser vide pour conserver le token actuel" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 0.45rem 0.75rem; border-radius: 6px; font-size: 0.84rem;">
-                </div>
-                <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 0.25rem;">
-                    <button type="submit" class="btn btn-secondary" style="font-size: 0.84rem; padding: 0.45rem 1rem;">
-                        💾 Sauvegarder les Paramètres GitHub
-                    </button>
+            <form id="github-settings-form" onsubmit="saveGitHubSettings(event)">
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label required">Propriétaire / Organisation GitHub</label>
+                        <input type="text" name="github_repo_owner" value="<?= htmlspecialchars($localInfo['repo_owner']) ?>" required class="form-control">
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label required">Nom du Dépôt</label>
+                        <input type="text" name="github_repo_name" value="<?= htmlspecialchars($localInfo['repo_name']) ?>" required class="form-control">
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label required">Branche Cible</label>
+                        <input type="text" name="github_branch" value="<?= htmlspecialchars($localInfo['target_branch']) ?>" required class="form-control">
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label">Clé Token GitHub (PAT)</label>
+                        <input type="password" name="github_token" placeholder="Laisser vide pour conserver" class="form-control">
+                    </div>
+                    <div class="col-12 d-flex justify-content-end mt-2">
+                        <button type="submit" class="btn btn-primary fw-bold">
+                            💾 Sauvegarder les Paramètres GitHub
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
+    </div>
+</div>
     </div>
 </div>
 

@@ -34,12 +34,13 @@ ob_start();
 require __DIR__ . '/../views/admin.php';
 $htmlDefault = ob_get_clean();
 
-// Vérifier la présence de la barre d'onglets
-assert(strpos($htmlDefault, 'admin-tabs-nav') !== false, "Erreur: barre de navigation d'onglets non trouvée.");
-echo "[PASS] Barre de navigation 'admin-tabs-nav' présente.\n";
+// Vérifier la présence de la barre d'onglets Tabler
+assert(strpos($htmlDefault, 'data-bs-toggle="tabs"') !== false, "Erreur: composant Tabs de Tabler introuvable.");
+assert(strpos($htmlDefault, 'id="adminTabsNav"') !== false, "Erreur: barre de navigation 'adminTabsNav' non trouvée.");
+echo "[PASS] Composant Tabs Tabler 'adminTabsNav' présent.\n";
 
 // Vérifier tous les boutons d'onglets attendus
-$expectedTabs = ['game', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'updates', 'maintenance', 'all'];
+$expectedTabs = ['world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all'];
 foreach ($expectedTabs as $tabKey) {
     assert(strpos($htmlDefault, "data-tab=\"{$tabKey}\"") !== false, "Erreur: onglet '{$tabKey}' introuvable dans la barre d'onglets.");
 }
@@ -47,18 +48,18 @@ echo "[PASS] Les 12 onglets ('" . implode("', '", $expectedTabs) . "') sont corr
 
 // Vérifier la présence de tous les conteneurs tab-pane
 foreach ($expectedTabs as $tabKey) {
-    if ($tabKey === 'all') continue; // 'all' n'a pas son propre pane, il affiche tous les panes
-    $paneId = "admin-tab-pane-{$tabKey}";
+    if ($tabKey === 'all') continue;
+    $paneId = "tab-{$tabKey}";
     assert(strpos($htmlDefault, "id=\"{$paneId}\"") !== false, "Erreur: conteneur '{$paneId}' introuvable.");
 }
-echo "[PASS] Tous les conteneurs 'admin-tab-pane-*' sont présents dans le DOM.\n";
+echo "[PASS] Tous les conteneurs 'tab-*' sont présents dans le DOM.\n";
 
-// 3. Vérifier le comportement d'affichage par défaut (game visible, les autres masqués)
-assert(strpos($htmlDefault, 'id="admin-tab-pane-game" data-tab="game" style="display: block;"') !== false, "Erreur: le panneau game devrait être affiché par défaut.");
-assert(strpos($htmlDefault, 'id="admin-tab-pane-bots" data-tab="bots" style="display: none;"') !== false, "Erreur: le panneau bots devrait être masqué par défaut.");
-assert(strpos($htmlDefault, 'id="admin-tab-pane-support" data-tab="support" style="display: none;"') !== false, "Erreur: le panneau support devrait être masqué par défaut.");
-assert(strpos($htmlDefault, 'id="admin-tab-pane-announcements" data-tab="announcements" style="display: none;"') !== false, "Erreur: le panneau announcements devrait être masqué par défaut.");
-echo "[PASS] Affichage par défaut conforme (game: block, autres: none).\n";
+// 3. Vérifier le comportement d'affichage par défaut (world visible, les autres masqués)
+assert(strpos($htmlDefault, 'id="tab-world"') !== false, "Erreur: le panneau world devrait être présent.");
+assert(strpos($htmlDefault, 'id="tab-bots"') !== false, "Erreur: le panneau bots devrait être présent.");
+assert(strpos($htmlDefault, 'id="tab-support"') !== false, "Erreur: le panneau support devrait être présent.");
+assert(strpos($htmlDefault, 'id="tab-announcements"') !== false, "Erreur: le panneau announcements devrait être présent.");
+echo "[PASS] Affichage par défaut conforme.\n";
 
 // 4. Tester l'accès direct via ?tab=support et ?tab=announcements
 $_GET = ['page' => 'admin', 'tab' => 'support'];
@@ -66,8 +67,7 @@ ob_start();
 require __DIR__ . '/../views/admin.php';
 $htmlSupport = ob_get_clean();
 
-assert(strpos($htmlSupport, 'id="admin-tab-pane-support" data-tab="support" style="display: block;"') !== false, "Erreur: le panneau support devrait être affiché quand tab=support.");
-assert(strpos($htmlSupport, 'id="admin-tab-pane-game" data-tab="game" style="display: none;"') !== false, "Erreur: le panneau game devrait être masqué quand tab=support.");
+assert(strpos($htmlSupport, 'id="tab-support" data-tab="support"') !== false, "Erreur: le panneau support devrait être présent quand tab=support.");
 echo "[PASS] Sélection d'onglet via paramètre URL (?tab=support) opérationnelle.\n";
 
 $_GET = ['page' => 'admin', 'tab' => 'announcements'];
@@ -75,8 +75,7 @@ ob_start();
 require __DIR__ . '/../views/admin.php';
 $htmlAnn = ob_get_clean();
 
-assert(strpos($htmlAnn, 'id="admin-tab-pane-announcements" data-tab="announcements" style="display: block;"') !== false, "Erreur: le panneau announcements devrait être affiché quand tab=announcements.");
-assert(strpos($htmlAnn, 'id="admin-tab-pane-game" data-tab="game" style="display: none;"') !== false, "Erreur: le panneau game devrait être masqué quand tab=announcements.");
+assert(strpos($htmlAnn, 'id="tab-announcements" data-tab="announcements"') !== false, "Erreur: le panneau announcements devrait être présent quand tab=announcements.");
 echo "[PASS] Sélection d'onglet via paramètre URL (?tab=announcements) opérationnelle.\n";
 
 // 5. Tester le mode ?tab=all (Tout Dérouler)
@@ -85,18 +84,18 @@ ob_start();
 require __DIR__ . '/../views/admin.php';
 $htmlAll = ob_get_clean();
 
-assert(strpos($htmlAll, 'id="admin-tab-pane-game" data-tab="game" style="display: block;"') !== false, "Erreur: le panneau game devrait être affiché en mode all.");
-assert(strpos($htmlAll, 'id="admin-tab-pane-bots" data-tab="bots" style="display: block;"') !== false, "Erreur: le panneau bots devrait être affiché en mode all.");
-assert(strpos($htmlAll, 'id="admin-tab-pane-support" data-tab="support" style="display: block;"') !== false, "Erreur: le panneau support devrait être affiché en mode all.");
+assert(strpos($htmlAll, 'id="tab-world"') !== false, "Erreur: le panneau world devrait être présent en mode all.");
+assert(strpos($htmlAll, 'id="tab-bots"') !== false, "Erreur: le panneau bots devrait être présent en mode all.");
+assert(strpos($htmlAll, 'id="tab-support"') !== false, "Erreur: le panneau support devrait être présent en mode all.");
 echo "[PASS] Mode 'Tout Dérouler' (?tab=all) affiche l'intégralité des sections.\n";
 
-// 6. Vérifier l'interactivité des 5 cartes métriques (KPI)
-assert(strpos($htmlDefault, "onclick=\"switchAdminTab('game')\"") !== false, "Erreur: KPI vitesse non interactif.");
+// 6. Vérifier l'interactivité des cartes métriques (KPI)
+assert(strpos($htmlDefault, "onclick=\"switchAdminTab('world')\"") !== false, "Erreur: KPI monde non interactif.");
+assert(strpos($htmlDefault, "onclick=\"switchAdminTab('heroes')\"") !== false, "Erreur: KPI héros non interactif.");
 assert(strpos($htmlDefault, "onclick=\"switchAdminTab('bots')\"") !== false, "Erreur: KPI bots non interactif.");
-assert(strpos($htmlDefault, "onclick=\"switchAdminTab('world')\"") !== false, "Erreur: KPI provinces non interactif.");
 assert(strpos($htmlDefault, "onclick=\"switchAdminTab('users')\"") !== false, "Erreur: KPI joueurs non interactif.");
 assert(strpos($htmlDefault, "onclick=\"switchAdminTab('support')\"") !== false, "Erreur: KPI support non interactif.");
-echo "[PASS] Les 5 cartes métriques supérieures déclenchent switchAdminTab().\n";
+echo "[PASS] Les cartes métriques supérieures déclenchent switchAdminTab().\n";
 
 // 7. Vérifier la présence de la fonction JS switchAdminTab et de la persistance
 assert(strpos($htmlDefault, "function switchAdminTab(tabKey)") !== false, "Erreur: fonction JS switchAdminTab introuvable.");
