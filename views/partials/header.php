@@ -121,6 +121,16 @@ $navItems = [
 <div class="page">
     <div class="page-wrapper">
 
+        <!-- 🏯 LOGO EN HAUT AU MILIEU EN GRAND -->
+        <div class="text-center py-3 d-print-none" style="display:flex; justify-content:center; align-items:center;">
+            <a href="?page=resources" class="brand-logo-link" title="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>">
+                <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../../public/assets/logo_transparent.png') : 1 ?>" 
+                     alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
+                     class="brand-logo-img"
+                     style="height: 130px; max-height: 145px; width: auto; max-width: 90vw; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.2)); transition: transform 0.2s ease;">
+            </a>
+        </div>
+
         <!-- ── BARRE 1 : Ressources + Héros + Profil Daimyō ── -->
         <header class="navbar navbar-expand-md d-print-none"
                 style="border-bottom:1px solid rgba(194,37,43,0.2);
@@ -128,14 +138,9 @@ $navItems = [
                        padding:0; min-height:52px;">
             <div class="container-fluid px-3">
 
-                <!-- Logo -->
-                <a href="?page=resources" class="navbar-brand me-3 p-0" title="Accueil">
-                    <img src="/public/assets/logo_transparent.png" alt="OpenShogun"
-                         style="height:36px; width:auto; object-fit:contain;">
-                </a>
-
                 <!-- Fief & coordonnées -->
                 <div class="d-flex align-items-center gap-2 me-4">
+                    <span style="font-size:1.25rem;">🏯</span>
                     <div>
                         <div style="font-weight:800; font-size:0.88rem; color:#1e293b; line-height:1.1;"><?= htmlspecialchars($planet['name']) ?></div>
                         <div style="font-size:0.7rem; color:#dc2626; font-family:monospace; font-weight:700;">[<?= $planet['coord_x'] ?>|<?= $planet['coord_y'] ?>]</div>
