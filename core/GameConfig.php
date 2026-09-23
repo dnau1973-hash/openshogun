@@ -47,7 +47,10 @@ class GameConfig {
                     'bot_aggressiveness' => 'moderate',
                     'bot_max_planets' => 3,
                     'oasis_density_percent' => 2.0,
-                    'oasis_respawn_on_capture' => true
+                    'oasis_respawn_on_capture' => true,
+                    'famine_enabled' => false,
+                    'famine_rate' => 3.0,
+                    'famine_flour_consumption' => 1.0
                 ];
             }
         }

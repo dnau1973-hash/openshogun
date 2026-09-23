@@ -1075,6 +1075,70 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </div>
                     </div>
 
+                    <!-- Section Famine & Vivres Féodaux (Optionnel) -->
+                    <div class="row g-3 mb-3 border-top pt-3" style="background: #fef2f2; border-radius: 8px; padding: 1rem; border: 1px solid #fecaca;">
+                        <div class="col-12">
+                            <h4 class="m-0 fw-bold text-danger d-flex align-items-center gap-2">
+                                <span>🌾</span> Mécanisme de Famine &amp; Vivres Féodaux (Optionnel)
+                            </h4>
+                            <div class="text-secondary small mt-1">
+                                Si activé, les régiments d'élite (Tier 2, 3 et 4) exigent un entretien régulier en farine de riz. En cas de pénurie totale (stock de farine à 0), une famine s'abat sur le fief et décime progressivement les troupes d'élite.
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark mb-1">
+                                ⚠️ Activer la Famine (Disette de Farine)
+                            </label>
+                            <div class="d-flex align-items-center" style="min-height: 38px;">
+                                <label class="form-check form-switch m-0">
+                                    <input class="form-check-input" type="checkbox" id="famine_enabled" name="famine_enabled" value="1" 
+                                           <?= !empty($settings['famine_enabled']) ? 'checked' : '' ?>>
+                                    <span class="form-check-label fw-bold text-danger">
+                                        Activer le péril de la famine
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="form-hint">Désactivé par défaut. Les troupes d'élite ne meurent pas si décoché.</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
+                                <span>💀 Taux de Pertes Horaire en Famine (%)</span>
+                                <span class="badge bg-danger text-white" id="badge_famine_rate"><?= (float)($settings['famine_rate'] ?? 3.0) ?> %</span>
+                            </label>
+                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
+                                <input type="range" id="famine_rate_range" min="0.5" max="25.0" step="0.5" value="<?= (float)($settings['famine_rate'] ?? 3.0) ?>" class="form-range flex-grow-1" 
+                                       oninput="document.getElementById('famine_rate_input').value = this.value; document.getElementById('badge_famine_rate').textContent = this.value + ' %';">
+                                <div class="input-group" style="width: 95px;">
+                                    <input type="number" id="famine_rate_input" name="famine_rate" min="0.5" max="50" step="0.5" 
+                                           value="<?= (float)($settings['famine_rate'] ?? 3.0) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
+                                           oninput="document.getElementById('famine_rate_range').value = this.value; document.getElementById('badge_famine_rate').textContent = this.value + ' %';">
+                                    <span class="input-group-text px-1 text-muted">%</span>
+                                </div>
+                            </div>
+                            <div class="form-hint">Pourcentage de soldats d'élite mourant de faim ou désertant par heure de rupture de farine.</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
+                                <span>🍚 Rations Requises (Farine / 100 soldats / h)</span>
+                                <span class="badge bg-warning text-dark" id="badge_famine_flour"><?= (float)($settings['famine_flour_consumption'] ?? 1.0) ?></span>
+                            </label>
+                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
+                                <input type="range" id="famine_flour_range" min="0.1" max="10.0" step="0.1" value="<?= (float)($settings['famine_flour_consumption'] ?? 1.0) ?>" class="form-range flex-grow-1" 
+                                       oninput="document.getElementById('famine_flour_consumption_input').value = this.value; document.getElementById('badge_famine_flour').textContent = this.value;">
+                                <div class="input-group" style="width: 95px;">
+                                    <input type="number" id="famine_flour_consumption_input" name="famine_flour_consumption" min="0.1" max="20" step="0.1" 
+                                           value="<?= (float)($settings['famine_flour_consumption'] ?? 1.0) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
+                                           oninput="document.getElementById('famine_flour_range').value = this.value; document.getElementById('badge_famine_flour').textContent = this.value;">
+                                    <span class="input-group-text px-1 text-muted">🍚</span>
+                                </div>
+                            </div>
+                            <div class="form-hint">Unités de farine consommées par heure pour maintenir 100 troupes d'élite rassasiées.</div>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary px-4 fw-bold">
                             💾 Enregistrer les Constantes de Jeu
@@ -2514,6 +2578,9 @@ async function saveSettings(event) {
     formData.append('bot_aggressiveness', document.getElementById('bot_aggressiveness').value);
     formData.append('oasis_density_percent', document.getElementById('oasis_density_percent_input').value);
     formData.append('oasis_respawn_on_capture', document.getElementById('oasis_respawn_on_capture').checked ? '1' : '0');
+    formData.append('famine_enabled', document.getElementById('famine_enabled').checked ? '1' : '0');
+    formData.append('famine_rate', document.getElementById('famine_rate_input').value);
+    formData.append('famine_flour_consumption', document.getElementById('famine_flour_consumption_input').value);
 
     try {
         const res = await fetch('/api/admin.php', { method: 'POST', body: formData });

@@ -166,6 +166,23 @@ foreach (BUILDINGS as $code => $bInfo) {
             </div>
         </div>
         <div class="card-body">
+            <?php if (!empty($planet['famine_active']) && !empty($planet['famine_enabled'])): ?>
+                <div style="background:#fef2f2; border:2px solid #ef4444; border-radius:8px; padding:0.6rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; animation: pulse 2s infinite;">
+                    <div style="display:flex; align-items:center; gap:0.6rem; color:#991b1b; font-size:0.85rem; font-weight:700;">
+                        <span style="font-size:1.4rem;">⚠️</span>
+                        <div>
+                            <span>Disette Féodale : Vos greniers sont à sec de Farine de Riz 🍚 !</span>
+                            <div style="font-size:0.75rem; font-weight:400; color:#b91c1c;">
+                                Vos régiments d'élite meurent de faim ou désertent (-<?= (float)GameConfig::get('famine_rate', 3.0) ?>%/heure). Approvisionnez d'urgence votre Meunerie !
+                            </div>
+                        </div>
+                    </div>
+                    <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-sm btn-danger fw-bold" style="font-size:0.75rem; padding:0.3rem 0.8rem;">
+                        🍚 Moudre de la Farine d'Urgence &rarr;
+                    </a>
+                </div>
+            <?php endif; ?>
+
             <?php if ($activeFeast): ?>
                 <?php 
                     $feastLabels = [

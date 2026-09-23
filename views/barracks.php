@@ -14,6 +14,7 @@ $barracksLvl = $buildings['barracks'] ?? 0;
 $availableUnits = $barracksEngine->getAvailableUnits((int)$planet['id'], $user['faction']);
 $queue = $barracksEngine->getQueue((int)$planet['id']);
 $activeFeast = $planetEngine->getActiveFeast((int)$planet['id']);
+$famineUpkeep = $planetEngine->getEliteUnitsUpkeep((int)$planet['id']);
 
 $factionNames = [
     'terran' => 'Clan Oda',
@@ -43,6 +44,12 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
         </div>
 
         <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <?php if ($famineUpkeep['famine_enabled']): ?>
+                <span style="font-size:0.8rem; font-weight:700; color:<?= !empty($planet['famine_active']) ? '#b91c1c' : '#854d0e' ?>; background:<?= !empty($planet['famine_active']) ? '#fee2e2' : '#fef3c7' ?>; border:1px solid <?= !empty($planet['famine_active']) ? '#ef4444' : '#f59e0b' ?>; padding:0.35rem 0.75rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem;">
+                    <?= !empty($planet['famine_active']) ? '💀 Famine Active (-' . $famineUpkeep['famine_rate'] . '%/h)' : '🍚 Vivres Élite : ' . $famineUpkeep['flour_consumption_per_hour'] . ' farine/h' ?>
+                </span>
+            <?php endif; ?>
+
             <?php if ($activeFeast && $activeFeast['feast_type'] === 'warriors'): ?>
                 <span style="font-size:0.8rem; font-weight:700; color:#854d0e; background:#fef9c3; border:1px solid #facc15; padding:0.35rem 0.75rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem; box-shadow:0 2px 6px rgba(234,179,8,0.2);">
                     🍶 Banquet des Guerriers Actif &bull; Entraînement -<?= 10 + (int)$activeFeast['tenshu_level'] ?>%
@@ -58,6 +65,24 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
     </div>
 
     <div class="card-body" style="padding:1.25rem;">
+        <?php if ($famineUpkeep['famine_enabled'] && !empty($planet['famine_active'])): ?>
+            <div class="alert alert-danger mb-3 p-3 border-danger shadow-sm" style="border-left: 5px solid #dc2626; background: #fef2f2; border-radius:8px;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="fs-1">💀</span>
+                        <div>
+                            <h4 class="m-0 fw-bold text-danger">⚠️ Alerte Stratégique : Famine Féodale au Dojo !</h4>
+                            <div class="text-dark small mt-1">
+                                Vos stocks de Farine de Riz 🍚 sont réduits à néant. Sans vivres d'élite, vos <strong><?= $famineUpkeep['elite_units_count'] ?> soldats d'élite</strong> meurent de faim ou désertent (<strong>-<?= $famineUpkeep['famine_rate'] ?>% par heure</strong>).
+                            </div>
+                        </div>
+                    </div>
+                    <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-sm btn-danger fw-bold" style="padding:0.4rem 0.9rem;">
+                        🍚 Moudre de la Farine à la Meunerie &rarr;
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
         <?php if ($barracksLvl < 1): ?>
             <div style="text-align:center; padding:2.5rem; background:rgba(239,68,68,0.06); border:1px dashed var(--red-primary, #c2252b); border-radius:10px;">
                 <div style="font-size:2.5rem; margin-bottom:0.5rem;">🏯</div>

@@ -393,6 +393,8 @@ CREATE TABLE `planets` (
   `sake_max` int(10) unsigned NOT NULL DEFAULT 10000,
   `rice_flour_max` int(10) unsigned NOT NULL DEFAULT 10000,
   `population` int(10) unsigned NOT NULL DEFAULT 100,
+  `famine_active` tinyint(1) NOT NULL DEFAULT 0,
+  `last_famine_losses` int(10) unsigned NOT NULL DEFAULT 0,
   `last_resource_update` int(10) unsigned NOT NULL DEFAULT 0,
   `is_capital` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),

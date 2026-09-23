@@ -91,6 +91,9 @@ class PlanetEngine {
                 $curFlour = max(0, $curFlour - $flourNeeded);
             }
 
+            // Entretien des troupes d'élite & Famine féodale (si activée)
+            $famineResult = $this->processFamine($planetId, $hours, $curFlour);
+
             try {
                 $stmtUpdate = $this->db->prepare("
                     UPDATE planets 
@@ -187,6 +190,9 @@ class PlanetEngine {
         $planet['rice_flour_max'] = (int)($planet['rice_flour_max'] ?? $flourMax);
         $planet['population'] = (int)$curPop;
         $planet['population_max'] = (int)$maxPopulation;
+        $planet['famine_active'] = !empty($famineResult['famine']) || (!empty($planet['famine_active']));
+        $planet['last_famine_losses'] = (int)($famineResult['casualties'] ?? ($planet['last_famine_losses'] ?? 0));
+        $planet['famine_enabled'] = (bool)GameConfig::get('famine_enabled', false);
 
         $planet['prod_rates'] = $prodRates;
         return $planet;
@@ -406,6 +412,141 @@ class PlanetEngine {
             return $queue;
         } catch (Exception $e) {
             return [];
+        }
+    }
+
+    /**
+     * Traite l'entretien en farine des troupes d'élite et le mécanisme de famine si activé
+     * 
+     * @param int $planetId
+     * @param float $hours Heures écoulées depuis la dernière actualisation
+     * @param float &$curFlour Référence au stock de farine de riz actuel
+     * @return array Détails de l'entretien et des pertes de famine le cas échéant
+     */
+    public function processFamine(int $planetId, float $hours, float &$curFlour): array {
+        $famineEnabled = (bool)GameConfig::get('famine_enabled', false);
+        if (!$famineEnabled || $hours <= 0) {
+            return ['famine' => false, 'casualties' => 0, 'flour_consumed' => 0];
+        }
+
+        try {
+            // Récupérer les troupes d'élite présentes sur le fief (Tier >= 2)
+            $stmtUnits = $this->db->prepare("
+                SELECT pu.id, pu.unit_code, pu.count, u.name, u.tier 
+                FROM planet_units pu 
+                JOIN units u ON pu.unit_code = u.code 
+                WHERE pu.planet_id = ? AND pu.count > 0 AND u.tier >= 2
+            ");
+            $stmtUnits->execute([$planetId]);
+            $eliteUnits = $stmtUnits->fetchAll();
+
+            if (empty($eliteUnits)) {
+                $this->db->prepare("UPDATE planets SET famine_active = 0, last_famine_losses = 0 WHERE id = ?")->execute([$planetId]);
+                return ['famine' => false, 'casualties' => 0, 'flour_consumed' => 0];
+            }
+
+            $totalEliteCount = 0;
+            foreach ($eliteUnits as $u) {
+                $totalEliteCount += (int)$u['count'];
+            }
+
+            if ($totalEliteCount <= 0) {
+                $this->db->prepare("UPDATE planets SET famine_active = 0, last_famine_losses = 0 WHERE id = ?")->execute([$planetId]);
+                return ['famine' => false, 'casualties' => 0, 'flour_consumed' => 0];
+            }
+
+            // Ration requise : famine_flour_consumption par tranche de 100 soldats par heure
+            $ratePer100 = (float)GameConfig::get('famine_flour_consumption', 1.0);
+            $flourNeeded = ($totalEliteCount / 100.0) * $ratePer100 * $hours;
+
+            // Cas 1 : Assez de farine pour nourrir les troupes
+            if ($curFlour >= $flourNeeded) {
+                $curFlour = max(0, $curFlour - $flourNeeded);
+                $this->db->prepare("UPDATE planets SET famine_active = 0, last_famine_losses = 0 WHERE id = ?")->execute([$planetId]);
+                return ['famine' => false, 'casualties' => 0, 'flour_consumed' => $flourNeeded];
+            }
+
+            // Cas 2 : Pénurie de farine -> Déclenchement de la Famine !
+            $curFlour = 0;
+            $hourlyLossRate = (float)GameConfig::get('famine_rate', 3.0) / 100.0;
+            $lossFactor = min(1.0, max(0.01, $hourlyLossRate * $hours));
+
+            $totalCasualties = 0;
+            $this->db->beginTransaction();
+            try {
+                foreach ($eliteUnits as $u) {
+                    $count = (int)$u['count'];
+                    $lost = max(1, (int)round($count * $lossFactor));
+                    $lost = min($count, $lost);
+                    $remaining = $count - $lost;
+                    $totalCasualties += $lost;
+
+                    if ($remaining <= 0) {
+                        $this->db->prepare("DELETE FROM planet_units WHERE id = ?")->execute([$u['id']]);
+                    } else {
+                        $this->db->prepare("UPDATE planet_units SET count = ? WHERE id = ?")->execute([$remaining, $u['id']]);
+                    }
+                }
+
+                $this->db->prepare("
+                    UPDATE planets 
+                    SET famine_active = 1, last_famine_losses = last_famine_losses + ? 
+                    WHERE id = ?
+                ")->execute([$totalCasualties, $planetId]);
+
+                $this->db->commit();
+            } catch (Exception $e) {
+                $this->db->rollBack();
+            }
+
+            return [
+                'famine' => true,
+                'casualties' => $totalCasualties,
+                'flour_consumed' => 0
+            ];
+        } catch (Exception $e) {
+            return ['famine' => false, 'casualties' => 0, 'flour_consumed' => 0];
+        }
+    }
+
+    /**
+     * Calcule l'effectif des troupes d'élite et le besoin horaire en farine pour un fief
+     */
+    public function getEliteUnitsUpkeep(int $planetId): array {
+        try {
+            $stmtUnits = $this->db->prepare("
+                SELECT pu.count, u.tier, u.name, u.icon 
+                FROM planet_units pu 
+                JOIN units u ON pu.unit_code = u.code 
+                WHERE pu.planet_id = ? AND pu.count > 0 AND u.tier >= 2
+            ");
+            $stmtUnits->execute([$planetId]);
+            $rows = $stmtUnits->fetchAll();
+
+            $totalElite = 0;
+            foreach ($rows as $r) {
+                $totalElite += (int)$r['count'];
+            }
+
+            $famineEnabled = (bool)GameConfig::get('famine_enabled', false);
+            $ratePer100 = (float)GameConfig::get('famine_flour_consumption', 1.0);
+            $flourPerHour = ($totalElite / 100.0) * $ratePer100;
+
+            return [
+                'famine_enabled' => $famineEnabled,
+                'elite_units_count' => $totalElite,
+                'flour_consumption_per_hour' => round($flourPerHour, 2),
+                'famine_rate' => (float)GameConfig::get('famine_rate', 3.0),
+                'units' => $rows
+            ];
+        } catch (Exception $e) {
+            return [
+                'famine_enabled' => false,
+                'elite_units_count' => 0,
+                'flour_consumption_per_hour' => 0,
+                'famine_rate' => 3.0,
+                'units' => []
+            ];
         }
     }
 
@@ -697,6 +838,22 @@ class PlanetEngine {
                 INDEX `idx_cq_finishes` (`finishes_at`),
                 CONSTRAINT `fk_cq_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+            // 5. Colonnes famine sur planets
+            $stmtFamine = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'famine_active'");
+            if ($stmtFamine && $stmtFamine->rowCount() === 0) {
+                $this->db->exec("ALTER TABLE `planets` 
+                    ADD COLUMN `famine_active` TINYINT(1) NOT NULL DEFAULT 0,
+                    ADD COLUMN `last_famine_losses` INT UNSIGNED NOT NULL DEFAULT 0
+                ");
+            }
+
+            // 6. Initialisation des paramètres de famine dans game_settings si absents
+            $this->db->exec("INSERT IGNORE INTO `game_settings` (`setting_key`, `setting_value`, `setting_type`, `description`) VALUES
+                ('famine_enabled', '0', 'boolean', 'Active ou désactive la famine féodale si le stock de farine est épuisé'),
+                ('famine_rate', '3.0', 'float', 'Pourcentage horaire de pertes/désertion des troupes d\'élite en famine'),
+                ('famine_flour_consumption', '1.0', 'float', 'Farine nécessaire par heure pour 100 soldats d\'élite')
+            ");
         } catch (Exception $e) {
             // Ignorer silencieusement si déjà en cours ou permissions limitées
         }

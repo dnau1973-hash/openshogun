@@ -914,6 +914,7 @@ if (!$isEmptyPlot) {
             $planetEngine->processCraftQueue((int)$planet['id']);
             $craftQueue = $planetEngine->getCraftQueue((int)$planet['id']);
             $activeCraft = !empty($craftQueue) ? $craftQueue[0] : null;
+            $famineUpkeep = $planetEngine->getEliteUnitsUpkeep((int)$planet['id']);
             ?>
             <!-- ========================================================
                  ATELIER DE RAFFINAGE : MOUTURE DE FARINE & BRASSERIE DE SAKÉ
@@ -935,9 +936,37 @@ if (!$isEmptyPlot) {
                         <span class="badge bg-info-lt fw-bold">
                             Vitesse : +<?= (int)($lvl * 15) ?>%
                         </span>
+                        <?php if ($famineUpkeep['famine_enabled']): ?>
+                            <span class="badge bg-danger-lt fw-bold" title="Rations horaires requises pour maintenir vos troupes d'élite">
+                                🍚 Rations Élite : <?= $famineUpkeep['flour_consumption_per_hour'] ?> farine/h
+                            </span>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="card-body">
+                    <?php if ($famineUpkeep['famine_enabled'] && !empty($planet['famine_active'])): ?>
+                    <div class="alert alert-danger mb-3 p-3 border-danger shadow-sm" style="border-left: 5px solid #dc2626; background: #fef2f2;">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="fs-1">💀</span>
+                            <div>
+                                <h4 class="m-0 fw-bold text-danger">⚠️ Famine Déclarée : Rations Épuisées !</h4>
+                                <div class="text-dark small mt-1">
+                                    Vos réserves de farine de riz sont tombées à zéro. Vos <strong><?= $famineUpkeep['elite_units_count'] ?> soldats d'élite</strong> subissent actuellement <strong>-<?= $famineUpkeep['famine_rate'] ?>% de pertes par heure</strong> (morts de faim et désertions).
+                                    Lancez sans attendre une mouture de farine pour rétablir les vivres !
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php elseif ($famineUpkeep['famine_enabled'] && $famineUpkeep['elite_units_count'] > 0): ?>
+                    <div class="alert alert-light mb-3 p-2 border small d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2 text-dark">
+                            <span>🛡️</span>
+                            <span><strong>Régiments d'élite en garnison :</strong> <?= $famineUpkeep['elite_units_count'] ?> guerriers (consommation : <strong><?= $famineUpkeep['flour_consumption_per_hour'] ?> farine 🍚 / heure</strong>).</span>
+                        </div>
+                        <span class="badge bg-warning text-dark">Péril de Famine Actif</span>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Lot en cours de raffinage (si actif) -->
                     <?php if ($activeCraft): ?>
                     <div class="alert alert-primary mb-3 p-3 border-primary shadow-sm" style="border-left: 5px solid #206bc4; background: #f0f7ff;">
