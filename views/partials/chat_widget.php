@@ -254,6 +254,8 @@ class FeudalChatClient {
         this.allianceId = <?= $userAllianceId ?>;
         this.renderedMsgIds = new Set();
         this.unreadCount = 0;
+        this.isInitialFetch = true;
+        this.lastReadId = parseInt(localStorage.getItem('feudal_chat_last_read_id') || '0', 10);
         this.soundEnabled = localStorage.getItem('feudal_chat_sound') !== '0';
         this.threadsData = null;
         this.originalDocumentTitle = document.title;
@@ -290,7 +292,7 @@ class FeudalChatClient {
         if (this.isOpen) {
             win.classList.remove('d-none');
             btn.classList.add('d-none');
-            this.clearUnread();
+            this.markAsRead();
             if (this.currentView === 'thread') {
                 this.scrollToBottom();
                 const inp = document.getElementById('feudalChatInput');
@@ -334,6 +336,9 @@ class FeudalChatClient {
         this.scrollToBottom();
         const inp = document.getElementById('feudalChatInput');
         if (inp) inp.focus();
+        if (this.isOpen) {
+            this.markAsRead();
+        }
     }
 
     toggleQueueView() {
@@ -418,6 +423,9 @@ class FeudalChatClient {
     openThread(channel, targetId = null, targetName = '') {
         this.setChannel(channel, targetId, targetName);
         this.showThreadView();
+        if (this.isOpen) {
+            this.markAsRead();
+        }
     }
 
     whisperToUser(userId, username) {
@@ -454,27 +462,58 @@ class FeudalChatClient {
             if (data.success) {
                 // 1. Mettre à jour les messages de la conversation active
                 if (data.messages && data.messages.length > 0) {
-                    let hasIncomingOthers = false;
+                    let hasNewIncomingFromOthers = false;
+                    let newIncomingCount = 0;
+                    let maxBatchId = 0;
+
                     data.messages.forEach(m => {
-                        if (!m.is_self) hasIncomingOthers = true;
+                        if (m.id > maxBatchId) maxBatchId = m.id;
+                        // Message considéré nouveau uniquement si id > lastReadId et non envoyé par soi-même
+                        if (!m.is_self && m.id > this.lastReadId) {
+                            hasNewIncomingFromOthers = true;
+                            newIncomingCount++;
+                        }
                     });
 
                     this.renderMessages(data.messages);
-                    this.lastIds[this.channel] = data.last_id;
+                    this.lastIds[this.channel] = Math.max(this.lastIds[this.channel] || 0, data.last_id);
 
-                    if (hasIncomingOthers) {
-                        this.playChime();
-                        if (!this.isOpen) {
-                            this.addUnread(data.messages.length);
+                    if (this.isOpen) {
+                        // Le chat est ouvert : la lecture est immédiate
+                        this.markAsRead(maxBatchId);
+                        // Sonner uniquement si c'est un nouveau message reçu pendant qu'on consulte le chat (pas au 1er chargement)
+                        if (!this.isInitialFetch && hasNewIncomingFromOthers) {
+                            this.playChime();
                         }
-                        if (document.hidden) {
-                            this.notifyDocumentTitle();
+                    } else {
+                        // Le chat est fermé
+                        if (this.isInitialFetch) {
+                            // Au tout premier chargement de la page :
+                            // Si le joueur n'a jamais ouvert le chat (0), on initialise sur l'actuel pour éviter un faux affichage de 60 non lus
+                            if (this.lastReadId === 0 && maxBatchId > 0) {
+                                this.lastReadId = maxBatchId;
+                                localStorage.setItem('feudal_chat_last_read_id', String(this.lastReadId));
+                            } else if (newIncomingCount > 0) {
+                                this.addUnread(newIncomingCount);
+                            }
+                            // Pas de carillon sonore au chargement initial
+                        } else {
+                            // En cours de session via polling
+                            if (hasNewIncomingFromOthers) {
+                                this.playChime();
+                                this.addUnread(newIncomingCount);
+                                if (document.hidden) {
+                                    this.notifyDocumentTitle();
+                                }
+                            }
                         }
                     }
                 } else if (lastId === 0 && this.renderedMsgIds.size === 0 && this.channel !== 'whisper') {
                     const c = document.getElementById('feudalChatMessages');
                     if (c) c.innerHTML = '<div class="text-center py-4 text-muted small"><span>Aucun message récent dans ce salon. Soyez le premier à proclamer !</span></div>';
                 }
+
+                this.isInitialFetch = false;
 
                 // 2. Mettre à jour la file des discussions (threads)
                 if (data.threads) {
@@ -813,6 +852,25 @@ class FeudalChatClient {
         const b = document.getElementById('feudalChatUnreadBadge');
         if (b) {
             b.classList.add('d-none');
+        }
+    }
+
+    markAsRead(hintMaxId = 0) {
+        let maxId = Math.max(this.lastReadId, hintMaxId);
+        this.renderedMsgIds.forEach(id => {
+            if (id > maxId) maxId = id;
+        });
+        if (this.lastIds && this.lastIds[this.channel] > maxId) {
+            maxId = this.lastIds[this.channel];
+        }
+        if (maxId > this.lastReadId) {
+            this.lastReadId = maxId;
+            localStorage.setItem('feudal_chat_last_read_id', String(this.lastReadId));
+        }
+        this.clearUnread();
+        if (this.unreadTitleActive) {
+            document.title = this.originalDocumentTitle;
+            this.unreadTitleActive = false;
         }
     }
 

@@ -423,8 +423,12 @@ async function fetchFullMessages() {
         if (data.success) {
             // 1. Mettre à jour le fil de messages
             if (data.messages && data.messages.length > 0) {
+                const wasFirstFetch = (fullLastId === 0);
                 let hasIncomingOthers = false;
+                let maxBatchId = fullLastId;
+
                 data.messages.forEach(m => {
+                    if (m.id > maxBatchId) maxBatchId = m.id;
                     if (!m.is_self) hasIncomingOthers = true;
                 });
 
@@ -433,7 +437,16 @@ async function fetchFullMessages() {
                     fullLastId = data.last_id;
                 }
 
-                if (hasIncomingOthers) {
+                // Sur la page de chat dédiée, la lecture est effective en temps réel
+                try {
+                    const currentRead = parseInt(localStorage.getItem('feudal_chat_last_read_id') || '0', 10);
+                    if (maxBatchId > currentRead) {
+                        localStorage.setItem('feudal_chat_last_read_id', String(maxBatchId));
+                    }
+                } catch (e) {}
+
+                // Ne sonner que lors des messages arrivant en direct (pas au chargement initial de l'historique)
+                if (!wasFirstFetch && hasIncomingOthers) {
                     playFullChatChime();
                     if (document.hidden) {
                         fullUnreadTitleActive = true;

@@ -106,8 +106,11 @@ $humanUsers = $db->query("
 ")->fetchAll();
 
 // Gestion des onglets d'administration du Shogunat
-$allowedTabs = ['game', 'heroes', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all'];
+$allowedTabs = ['game', 'heroes', 'bots', 'users', 'world', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all', 'oases', 'castles'];
 $currentTab = $_GET['tab'] ?? 'game';
+if ($currentTab === 'oases' || $currentTab === 'castles') {
+    $currentTab = 'world';
+}
 if (!in_array($currentTab, $allowedTabs, true)) {
     $currentTab = 'game';
 }
@@ -216,23 +219,23 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             </div>
         </div>
 
-        <!-- Fiefs & Domaines -->
+        <!-- Paramétrage du Monde -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('world')" title="Arpentage et expansion provinciale">
+            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('world')" title="Arpentage, Oasis et 12 Donjons du Monde Féodal">
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-auto">
                             <span class="avatar rounded bg-success-lt text-success" style="font-size:1.3rem;">🗾</span>
                         </div>
                         <div class="col">
-                            <div class="font-weight-medium">Fiefs &amp; Domaines</div>
+                            <div class="font-weight-medium">Paramétrage du Monde</div>
                             <div class="text-success font-weight-bold" style="font-size:1.25rem;">
-                                <?= $totalColonies ?> / <?= $totalPlanets ?>
+                                <?= $totalColonies ?> / <?= $totalPlanets ?> Fiefs
                             </div>
                         </div>
                     </div>
                     <div class="text-secondary small mt-2">
-                        Châteaux sous contrôle de clans
+                        <?= $spawnedCastlesCount ?>/12 Donjons | <?= $oasisStats['total_oases'] ?> Oasis
                     </div>
                 </div>
             </div>
@@ -358,20 +361,9 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'oases') ? 'active' : '' ?>" data-tab="oases" onclick="switchAdminTab('oases')">
-                        <span class="me-1">🌿</span> Oasis &amp; Faune
-                        <span class="badge bg-green-lt ms-2"><?= $oasisStats['total_oases'] ?></span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'castles') ? 'active' : '' ?>" data-tab="castles" onclick="switchAdminTab('castles')">
-                        <span class="me-1">🏯</span> 12 Donjons
-                        <span class="badge bg-orange-lt ms-2"><?= $spawnedCastlesCount ?>/12</span>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'world') ? 'active' : '' ?>" data-tab="world" onclick="switchAdminTab('world')">
-                        <span class="me-1">🗾</span> Provinces &amp; Terres
+                        <span class="me-1">🗾</span> Paramétrage du Monde
+                        <span class="badge bg-success-lt ms-2"><?= $totalPlanets ?> fiefs</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -1026,9 +1018,62 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
     </div>
 
-    <!-- Section 5 : 🗾 Arpenteur du Shogunat & Expansion des Provinces -->
+    <!-- ═════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION UNIFIÉE : 🗾 PARAMÉTRAGE DU MONDE FÉODAL & PROVINCES      -->
+    <!-- ═════════════════════════════════════════════════════════════════ -->
     <div class="admin-tab-pane" id="admin-tab-pane-world" data-tab="world" style="display: <?= $isPaneVisible('world') ? 'block' : 'none' ?>;">
-        <div class="card" style="margin-bottom: 2rem; border-color: rgba(52, 211, 153, 0.3);">
+        
+        <!-- En-tête Unifié & Navigation Interne Rapide -->
+        <div class="card mb-3" style="border-color: rgba(52, 211, 153, 0.3); background: rgba(17, 24, 20, 0.95);">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <div>
+                        <h3 class="m-0 d-flex align-items-center gap-2" style="color: #34d399;">
+                            <span>🗾</span>
+                            <span>Paramétrage Intégral du Monde Féodal &amp; Provinces</span>
+                        </h3>
+                        <div class="text-secondary small mt-1">
+                            Contrôle centralisé de l'archipel : création et arpentage des fiefs libres, déploiement des 12 donjons authentiques, et écosystème des oasis naturelles &amp; faune sauvage.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge bg-success-lt text-success" style="font-size:0.8rem; padding:0.35rem 0.65rem;">
+                            🗾 <?= $totalColonies ?> / <?= $totalPlanets ?> Fiefs Occupés
+                        </span>
+                        <span class="badge bg-warning-lt text-warning" style="font-size:0.8rem; padding:0.35rem 0.65rem;">
+                            🏯 <?= $spawnedCastlesCount ?> / 12 Donjons Déployés
+                        </span>
+                        <span class="badge bg-green-lt text-green" style="font-size:0.8rem; padding:0.35rem 0.65rem;">
+                            🌿 <?= $oasisStats['total_oases'] ?> Oasis (<?= $oasisStats['wild_oases'] ?> Sauvages)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Pilules de sous-navigation interne -->
+                <ul class="nav nav-pills nav-fill" id="worldSubTabsNav">
+                    <li class="nav-item">
+                        <a href="#worldSection_gen" class="nav-link active py-2" onclick="switchWorldSubSection('gen', event)" id="worldSubTab_gen">
+                            <span>🗾 1. Arpentage &amp; Fiefs Libres</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#worldSection_castles" class="nav-link py-2" onclick="switchWorldSubSection('castles', event)" id="worldSubTab_castles">
+                            <span>🏯 2. Les 12 Donjons Authentiques</span>
+                            <span class="badge bg-warning-lt ms-1"><?= $spawnedCastlesCount ?>/12</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#worldSection_oases" class="nav-link py-2" onclick="switchWorldSubSection('oases', event)" id="worldSubTab_oases">
+                            <span>🌿 3. Oasis &amp; Faune Sauvage</span>
+                            <span class="badge bg-green-lt ms-1"><?= $oasisStats['total_oases'] ?></span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 1. Arpenteur du Shogunat & Expansion des Provinces -->
+        <div class="card mb-4" id="worldSection_gen" style="border-color: rgba(52, 211, 153, 0.3);">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="color: #34d399; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
                     <span>🗾</span> Arpenteur du Shogunat & Expansion des Provinces
@@ -1086,11 +1131,9 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 </form>
             </div>
         </div>
-    </div>
 
-    <!-- Section 6 : 🏯 Sanctuaires des 12 Donjons Authentiques du Japon (現存十二天守) -->
-    <div class="admin-tab-pane" id="admin-tab-pane-castles" data-tab="castles" style="display: <?= $isPaneVisible('castles') ? 'block' : 'none' ?>;">
-        <div class="card" style="margin-bottom: 2rem; border-color: rgba(245, 158, 11, 0.4); background: rgba(17, 18, 24, 0.95);">
+        <!-- 2. Sanctuaires des 12 Donjons Authentiques du Japon (現存十二天守) -->
+        <div class="card mb-4" id="worldSection_castles" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(17, 18, 24, 0.95);">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
                 <div>
                     <h3 style="color: #fbbf24; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
@@ -1191,11 +1234,9 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Section 6b : 🌿 Arpentage des Oasis Naturelles & Faune Sauvage (Style Travian) -->
-    <div class="admin-tab-pane" id="admin-tab-pane-oases" data-tab="oases" style="display: <?= $isPaneVisible('oases') ? 'block' : 'none' ?>;">
-    <div class="card" style="margin-bottom: 2rem; border-color: rgba(34, 197, 94, 0.4); background: rgba(17, 24, 20, 0.95);">
+        <!-- 3. Arpentage des Oasis Naturelles & Faune Sauvage (Style Travian) -->
+        <div class="card mb-4" id="worldSection_oases" style="border-color: rgba(34, 197, 94, 0.4); background: rgba(17, 24, 20, 0.95);">
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
             <div>
                 <h3 style="color: #4ade80; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
@@ -1962,8 +2003,30 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
 <script>
 // --- GESTION DU SYSTÈME D'ONGLETS DU SHOGUNAT ---
+function switchWorldSubSection(subKey, event) {
+    if (event) event.preventDefault();
+    const el = document.getElementById(`worldSection_${subKey}`);
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    document.querySelectorAll('#worldSubTabsNav .nav-link').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`worldSubTab_${subKey}`);
+    if (activeBtn) activeBtn.classList.add('active');
+}
+
 function switchAdminTab(tabKey) {
-    const validTabs = ['game', 'heroes', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all'];
+    if (tabKey === 'oases') {
+        switchAdminTab('world');
+        setTimeout(() => switchWorldSubSection('oases'), 60);
+        return;
+    }
+    if (tabKey === 'castles') {
+        switchAdminTab('world');
+        setTimeout(() => switchWorldSubSection('castles'), 60);
+        return;
+    }
+
+    const validTabs = ['game', 'heroes', 'bots', 'users', 'world', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all'];
     if (!validTabs.includes(tabKey)) tabKey = 'game';
 
     // Afficher ou masquer les panneaux correspondants
