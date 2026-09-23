@@ -61,3 +61,4 @@ try {
     // Si la base MySQL est éteinte, on affiche l'information calmement
     echo "Note : Si le serveur de base de données MySQL est arrêté, les moteurs de jeu intègrent un mode de repli défensif.\n";
 }
+
