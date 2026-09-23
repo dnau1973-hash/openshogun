@@ -220,7 +220,7 @@ const BUILDINGS = [
         'base_cost' => ['metal' => 180, 'crystal' => 130, 'deuterium' => 70],
         'cost_multiplier' => 1.5,
         'base_time' => 480,
-        'max_level' => 10
+        'max_level' => 20
     ],
     'barracks' => [
         'name' => 'Dojo & Quartier Militaire',
@@ -303,3 +303,10 @@ const BUILDINGS = [
         'max_level' => 20
     ]
 ];
+
+// Configuration du Système d'Alliances Féodales
+const ALLIANCE_CREATION_MIN_EMBASSY_LEVEL = 3; // Niveau minimum du Pavillon Diplomatique pour fonder une alliance
+const ALLIANCE_JOIN_MIN_EMBASSY_LEVEL = 1;     // Niveau minimum du Pavillon Diplomatique pour rejoindre une alliance
+const ALLIANCE_SLOTS_PER_EMBASSY_LEVEL = 3;    // Nombre de places débloquées par niveau de Pavillon Diplomatique
+const ALLIANCE_MAX_MEMBERS = 60;               // Capacité maximale absolue d'une alliance féodale
+

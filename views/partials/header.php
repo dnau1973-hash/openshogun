@@ -113,6 +113,7 @@ $navItems = [
     ['page' => 'map',       'match' => ['map','galaxy'],      'icon' => '🗾', 'label' => 'Carte',               'title' => 'Carte des Provinces'],
     ['page' => 'fleet',     'match' => ['fleet'],             'icon' => '⚔️', 'label' => 'Armées',             'title' => 'Expéditions militaires'],
     ['page' => 'hero',      'match' => ['hero'],              'icon' => '🥋', 'label' => 'Héros',              'title' => 'Votre Samouraï Héros'],
+    ['page' => 'alliance',  'match' => ['alliance'],          'icon' => '🎌', 'label' => 'Alliance',           'title' => 'Pacte Féodal & Ambassade'],
     ['page' => 'ranking',   'match' => ['ranking'],           'icon' => '🏆', 'label' => 'Classement',         'title' => 'Tableau d\'honneur'],
     ['page' => 'reports',   'match' => ['reports'],           'icon' => '📜', 'label' => 'Chroniques',         'title' => 'Rapports de bataille'],
     ['page' => 'messages',  'match' => ['messages'],          'icon' => '✉️', 'label' => 'Missives',           'title' => 'Correspondance des clans',
@@ -246,6 +247,7 @@ $navItems = [
                             <?php endif; ?>
                             <a href="javascript:void(0)" class="dropdown-item"
                                onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">👤 Ma Fiche Daimyō</a>
+                            <a href="?page=alliance" class="dropdown-item">🎌 Mon Alliance</a>
                             <a href="javascript:void(0)" class="dropdown-item"
                                onclick="openEditMottoModal()">📜 Ma Devise</a>
                             <a href="?page=support" class="dropdown-item">📮 Support</a>

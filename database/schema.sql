@@ -3,6 +3,7 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `alliance_invitations`;
 DROP TABLE IF EXISTS `combat_reports`;
 DROP TABLE IF EXISTS `messages`;
 DROP TABLE IF EXISTS `fleet_missions`;
@@ -43,6 +44,24 @@ CREATE TABLE `alliances` (
   `description` TEXT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `fk_alliance_leader` FOREIGN KEY (`leader_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Invitations d'Alliance
+CREATE TABLE `alliance_invitations` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `alliance_id` INT UNSIGNED NOT NULL,
+  `user_id` INT UNSIGNED NOT NULL,
+  `sender_id` INT UNSIGNED NOT NULL,
+  `type` ENUM('invitation', 'application') NOT NULL DEFAULT 'invitation',
+  `message` VARCHAR(255) NULL,
+  `status` ENUM('pending', 'accepted', 'rejected', 'canceled') NOT NULL DEFAULT 'pending',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_inv_alliance` (`alliance_id`),
+  KEY `idx_inv_user` (`user_id`),
+  KEY `idx_inv_status` (`status`),
+  CONSTRAINT `fk_inv_alliance` FOREIGN KEY (`alliance_id`) REFERENCES `alliances` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_inv_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Planètes

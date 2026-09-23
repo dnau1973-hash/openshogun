@@ -474,6 +474,20 @@ class FleetEngine {
                     throw new Exception("Ce seigneur bénéficie de la protection féodale des nouveaux joueurs (immunité active jusqu'au {$untilText}{$remText}). Ce domaine ne peut être ni attaqué ni espionné.");
                 }
 
+                // Règle d'Alliance Féodale : Interdiction formelle d'attaquer ou d'espionner un allié
+                $stmtAlly = $this->db->prepare("
+                    SELECT u1.alliance_id as source_alliance, u2.alliance_id as target_alliance, a.name as alliance_name, a.tag as alliance_tag
+                    FROM users u1
+                    JOIN users u2 ON u2.id = ?
+                    LEFT JOIN alliances a ON a.id = u1.alliance_id
+                    WHERE u1.id = ?
+                ");
+                $stmtAlly->execute([$targetUserId, $userId]);
+                $allyCheck = $stmtAlly->fetch();
+                if ($allyCheck && !empty($allyCheck['source_alliance']) && $allyCheck['source_alliance'] === $allyCheck['target_alliance']) {
+                    throw new Exception("Ce fief appartient à un Daimyō de votre propre alliance [{$allyCheck['alliance_tag']}] {$allyCheck['alliance_name']}. Le code d'honneur féodal interdit formellement d'attaquer ou d'espionner un allié.");
+                }
+
                 // Règle du Sengoku : Si l'attaquant bénéficiait lui-même de l'immunité, attaquer un autre seigneur la révoque immédiatement
                 if (Auth::isUserProtected($userId)) {
                     Auth::revokeProtection($userId);
@@ -491,6 +505,21 @@ class FleetEngine {
                     $untilText = $rem['until_formatted'] ?? '7 jours';
                     throw new Exception("Cette oasis est rattachée à un seigneur sous protection des nouveaux joueurs (immunité active jusqu'au {$untilText}).");
                 }
+
+                // Vérification alliance sur l'oasis occupée
+                $stmtAllyOasis = $this->db->prepare("
+                    SELECT u1.alliance_id as source_alliance, u2.alliance_id as target_alliance, a.name as alliance_name, a.tag as alliance_tag
+                    FROM users u1
+                    JOIN users u2 ON u2.id = ?
+                    LEFT JOIN alliances a ON a.id = u1.alliance_id
+                    WHERE u1.id = ?
+                ");
+                $stmtAllyOasis->execute([$oasisOwnerId, $userId]);
+                $allyOasis = $stmtAllyOasis->fetch();
+                if ($allyOasis && !empty($allyOasis['source_alliance']) && $allyOasis['source_alliance'] === $allyOasis['target_alliance']) {
+                    throw new Exception("Cette oasis appartient à un Daimyō de votre alliance [{$allyOasis['alliance_tag']}]. Vous ne pouvez pas attaquer un frère d'armes.");
+                }
+
                 if (Auth::isUserProtected($userId)) {
                     Auth::revokeProtection($userId);
                     $protectionRevoked = true;

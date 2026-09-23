@@ -250,10 +250,10 @@ if (!$isEmptyPlot) {
             'gain' => '+3 lieues de vigilance'
         ],
         'embassy' => [
-            'label' => 'Prestige Diplomatique',
-            'cur' => 'Rang ' . $lvl,
-            'next' => 'Rang ' . $targetLevel,
-            'gain' => '+1 rang de clan féodal'
+            'label' => 'Prestige Diplomatique & Capacité',
+            'cur' => ($lvl >= 3) ? 'Alliance débloquée (' . min(60, $lvl * 3) . ' membres)' : (($lvl >= 1) ? 'Pacte accessible (Niv. 1-2)' : 'Non Bâti'),
+            'next' => ($targetLevel >= 3) ? 'Alliance débloquée (' . min(60, $targetLevel * 3) . ' membres)' : 'Pacte accessible',
+            'gain' => ($targetLevel === 3) ? 'Déblocage de la création d\'alliance' : '+3 places d\'alliance'
         ],
         'market' => [
             'label' => 'Marchands & Convois',
@@ -630,6 +630,10 @@ if (!$isEmptyPlot) {
                             <?php elseif ($code === 'research_lab'): ?>
                                 <a href="/?page=research" class="btn btn-primary">
                                     📜 Consulter l'Académie & Savoirs Féodaux &rarr;
+                                </a>
+                            <?php elseif ($code === 'embassy'): ?>
+                                <a href="/?page=alliance" class="btn btn-primary">
+                                    🎌 Ouvrir le Pavillon des Alliances Féodales &rarr;
                                 </a>
                             <?php endif; ?>
                         </div>

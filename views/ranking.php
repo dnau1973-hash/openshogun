@@ -3,11 +3,13 @@
  * Vue du Classement Galactique, Alliances & Tableau d'Honneur (Style Travian)
  */
 require_once __DIR__ . '/../core/HonorEngine.php';
+require_once __DIR__ . '/../core/AllianceEngine.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $db = Database::getConnection();
 $honorEngine = new HonorEngine();
+$allianceEngine = new AllianceEngine();
 
 $tab = $_GET['tab'] ?? 'general';
 
@@ -28,14 +30,24 @@ $players = $stmt->fetchAll();
 $honorRoll = $honorEngine->getFullHonorRoll(10);
 $currentWeek = date('W');
 $currentYear = date('Y');
+
+// 3. Classement des Alliances Féodales
+$alliancesRanking = $allianceEngine->getAlliancesRanking(50);
 ?>
 
 <div class="ranking-container">
     <!-- Sélecteur d'Onglets de Prestige -->
-    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; flex-wrap: wrap;">
         <button class="btn <?= ($tab === 'general') ? 'btn-primary' : 'btn-secondary' ?>" 
                 id="tabBtnGeneral" onclick="switchRankingTab('general')" style="font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
             <span>🏆</span> Classement Général
+        </button>
+        <button class="btn <?= ($tab === 'alliances') ? 'btn-primary' : 'btn-secondary' ?>" 
+                id="tabBtnAlliances" onclick="switchRankingTab('alliances')" style="font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <span>🎌</span> Alliances Féodales
+            <span class="badge bg-danger-lt" style="font-size: 0.75rem;">
+                <?= count($alliancesRanking) ?>
+            </span>
         </button>
         <button class="btn <?= ($tab === 'honor') ? 'btn-primary' : 'btn-secondary' ?>" 
                 id="tabBtnHonor" onclick="switchRankingTab('honor')" style="font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
@@ -126,7 +138,83 @@ $currentYear = date('Y');
         </div>
     </div>
 
-    <!-- ONGLET 2 : Tableau d'Honneur Hebdomadaire (Style Travian) -->
+    <!-- ONGLET ALLIANCES : Classement des Alliances Féodales -->
+    <div id="sectionAlliances" style="display: <?= ($tab === 'alliances') ? 'block' : 'none' ?>;">
+        <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                    <span>🎌</span> Grand Livre des Alliances & Ligues Féodales
+                </h2>
+                <a href="/?page=alliance" class="btn btn-sm btn-outline-danger">
+                    🏛️ Ouvrir le Pavillon des Alliances
+                </a>
+            </div>
+            <div class="card-body" style="padding:0; overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                    <thead>
+                        <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-muted);">
+                            <th style="padding:0.75rem 1rem; width: 60px;">Rang</th>
+                            <th style="padding:0.75rem 1rem;">Alliance</th>
+                            <th style="padding:0.75rem 1rem;">Chef Suprême</th>
+                            <th style="padding:0.75rem 1rem; text-align:center;">Membres / Capacité</th>
+                            <th style="padding:0.75rem 1rem; text-align:center;">Fiefs</th>
+                            <th style="padding:0.75rem 1rem; text-align:right;">Moyenne / Daimyō</th>
+                            <th style="padding:0.75rem 1rem; text-align:right;">Puissance Globale</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($alliancesRanking)): ?>
+                            <tr>
+                                <td colspan="7" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                                    Aucune alliance n'a encore été proclamée. Rendez-vous au Pavillon Diplomatique pour fonder la première ligue du Japon !
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php $aRank = 1; foreach ($alliancesRanking as $a): ?>
+                                <?php
+                                $isMyAlly = (!empty($user['alliance_id']) && (int)$user['alliance_id'] === (int)$a['id']);
+                                ?>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05); background:<?= $isMyAlly ? 'rgba(220,38,38,0.1)' : 'transparent' ?>;">
+                                    <td style="padding:0.75rem 1rem; font-weight:700; color:<?= ($aRank === 1) ? '#facc15' : (($aRank === 2) ? '#cbd5e1' : (($aRank === 3) ? '#d97706' : 'inherit')) ?>;">
+                                        <?= ($aRank === 1) ? '🥇 #1' : (($aRank === 2) ? '🥈 #2' : (($aRank === 3) ? '🥉 #3' : '#' . $aRank)) ?>
+                                        <?php $aRank++; ?>
+                                    </td>
+                                    <td style="padding:0.75rem 1rem; font-weight:700;">
+                                        <span class="badge bg-danger text-white me-1">[<?= htmlspecialchars($a['tag']) ?>]</span>
+                                        <span style="color: #fff;"><?= htmlspecialchars($a['name']) ?></span>
+                                        <?= $isMyAlly ? '<span style="color:#dc2626; font-size:0.75rem; margin-left:0.5rem;">(Votre Clan)</span>' : '' ?>
+                                    </td>
+                                    <td style="padding:0.75rem 1rem;">
+                                        <a href="javascript:void(0)" onclick="openPlayerProfileModal(<?= $a['leader_id'] ?>)" 
+                                           style="color: inherit; text-decoration: none;" class="profile-link-hover">
+                                            👑 <?= htmlspecialchars($a['leader_name']) ?>
+                                        </a>
+                                    </td>
+                                    <td style="padding:0.75rem 1rem; text-align:center;">
+                                        <?= $a['member_count'] ?> / <?= $a['capacity'] ?>
+                                        <?php if ($a['member_count'] >= $a['capacity']): ?>
+                                            <span class="badge bg-secondary ms-1" style="font-size:0.68rem;">Plein</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="padding:0.75rem 1rem; text-align:center; font-weight:700;">
+                                        <?= number_format($a['total_planets']) ?>
+                                    </td>
+                                    <td style="padding:0.75rem 1rem; text-align:right; color:var(--text-muted);">
+                                        <?= number_format($a['avg_points']) ?>
+                                    </td>
+                                    <td style="padding:0.75rem 1rem; text-align:right; font-weight:700; color:#dc2626;">
+                                        <?= number_format($a['total_points']) ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ONGLET 3 : Tableau d'Honneur Hebdomadaire (Style Travian) -->
     <div id="sectionHonor" style="display: <?= ($tab === 'honor') ? 'block' : 'none' ?>;">
         <!-- Bannière d'Honneur -->
         <div style="background: linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(17, 18, 24, 0.95) 100%); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
@@ -250,9 +338,11 @@ function renderHonorColumn(array $list, string $unitLabel): void {
 <script>
 function switchRankingTab(tabName) {
     document.getElementById('sectionGeneral').style.display = (tabName === 'general') ? 'block' : 'none';
+    document.getElementById('sectionAlliances').style.display = (tabName === 'alliances') ? 'block' : 'none';
     document.getElementById('sectionHonor').style.display = (tabName === 'honor') ? 'block' : 'none';
     
     document.getElementById('tabBtnGeneral').className = (tabName === 'general') ? 'btn btn-primary' : 'btn btn-secondary';
+    document.getElementById('tabBtnAlliances').className = (tabName === 'alliances') ? 'btn btn-primary' : 'btn btn-secondary';
     document.getElementById('tabBtnHonor').className = (tabName === 'honor') ? 'btn btn-primary' : 'btn btn-secondary';
 }
 </script>

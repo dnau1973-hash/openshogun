@@ -27,6 +27,28 @@ CREATE TABLE `alliances` (
   CONSTRAINT `fk_alliance_leader` FOREIGN KEY (`leader_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+DROP TABLE IF EXISTS `alliance_invitations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `alliance_invitations` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `alliance_id` int(10) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
+  `sender_id` int(10) unsigned NOT NULL,
+  `type` enum('invitation','application') NOT NULL DEFAULT 'invitation',
+  `message` varchar(255) DEFAULT NULL,
+  `status` enum('pending','accepted','rejected','canceled') NOT NULL DEFAULT 'pending',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_inv_alliance` (`alliance_id`),
+  KEY `idx_inv_user` (`user_id`),
+  KEY `idx_inv_status` (`status`),
+  CONSTRAINT `fk_inv_alliance` FOREIGN KEY (`alliance_id`) REFERENCES `alliances` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_inv_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `authentic_castles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
