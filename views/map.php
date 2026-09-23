@@ -12,115 +12,124 @@ $questEngine = new QuestEngine();
 $questEngine->recordAction((int)$user['id'], 'visit_map');
 ?>
 
-<div class="card card-map-fullwidth" style="border-top: 4px solid var(--red-primary); margin: 0 0 1.5rem 0; width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 25px rgba(0,0,0,0.06);">
-    <div class="card-header" style="background: linear-gradient(135deg, rgba(194,37,43,0.06) 0%, rgba(253,251,247,0.98) 100%); padding: 0.9rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <span style="font-size: 1.6rem;">🗾</span>
+<!-- Navigation breadcrumb Tabler -->
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <div class="page-pretitle">Exploration panoramique & Provinces</div>
+            <h2 class="page-title">
+                🗾 Carte des Provinces &amp; Fiefs
+                <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">[<?= (int)$planet['coord_x'] ?> : <?= (int)$planet['coord_y'] ?>]</span>
+            </h2>
+        </div>
+        <div class="col-auto ms-auto d-print-none">
+            <div class="btn-list">
+                <a href="/?page=resources" class="btn btn-secondary">
+                    🌾 Terroir
+                </a>
+                <a href="/?page=station" class="btn btn-secondary">
+                    🏯 Cité Castrale
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-map-fullwidth mb-3" style="width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 18px rgba(0,0,0,0.05);">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
+        <div class="d-flex align-items-center gap-2">
+            <span style="font-size: 1.5rem;">🗾</span>
             <div>
-                <h2 class="card-title" style="margin: 0; font-size: 1.25rem; color: var(--text-main); font-weight: 900;">
-                    Carte des Provinces & Fiefs du Japon Féodal
-                </h2>
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                    Fief d'attache : <strong><?= htmlspecialchars($planet['name']) ?></strong> <span style="color: var(--red-primary); font-family: monospace;">[<?= $planet['coord_x'] ?> : <?= $planet['coord_y'] ?>]</span> &bull; Exploration panoramique pleine largeur
+                <h3 class="card-title m-0 font-weight-bold" style="font-size: 1.15rem;">
+                    Provinces &amp; Fiefs du Japon Féodal
+                </h3>
+                <div class="text-secondary small">
+                    Fief d'attache : <strong><?= htmlspecialchars($planet['name']) ?></strong> <span class="badge bg-secondary-lt font-monospace">[<?= $planet['coord_x'] ?> : <?= $planet['coord_y'] ?>]</span> &bull; Exploration panoramique pleine largeur
                 </div>
             </div>
         </div>
 
         <!-- Barre de saut rapide et d'instructions -->
-        <div class="galaxy-nav-bar" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin: 0;">
-            <form id="jumpCoordsForm" onsubmit="event.preventDefault(); jumpToCoords();" style="display: flex; align-items: center; gap: 0.4rem; background: var(--bg-ink, #ede5d5); padding: 0.3rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Aller en :</label>
-                <span style="font-size: 0.8rem; font-weight: 700;">X</span>
-                <input type="number" id="inputCoordX" value="<?= $centerX ?>" style="width: 60px; background: #fff; border: 1px solid var(--border-color); color: var(--text-main); padding: 0.25rem 0.4rem; border-radius: 4px; text-align: center; font-weight: 700;">
-                <span style="font-size: 0.8rem; font-weight: 700;">Y</span>
-                <input type="number" id="inputCoordY" value="<?= $centerY ?>" style="width: 60px; background: #fff; border: 1px solid var(--border-color); color: var(--text-main); padding: 0.25rem 0.4rem; border-radius: 4px; text-align: center; font-weight: 700;">
-                <button type="submit" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.3rem 0.8rem; font-weight: 700;">Marcher</button>
+        <div class="galaxy-nav-bar d-flex align-items-center gap-2 flex-wrap m-0">
+            <form id="jumpCoordsForm" onsubmit="event.preventDefault(); jumpToCoords();" class="d-flex align-items-center gap-1 bg-surface border rounded px-2 py-1">
+                <span class="text-secondary small font-weight-bold">Aller en :</span>
+                <span class="small font-weight-bold">X</span>
+                <input type="number" id="inputCoordX" value="<?= $centerX ?>" class="form-control form-control-sm text-center font-weight-bold" style="width: 60px;">
+                <span class="small font-weight-bold">Y</span>
+                <input type="number" id="inputCoordY" value="<?= $centerY ?>" class="form-control form-control-sm text-center font-weight-bold" style="width: 60px;">
+                <button type="submit" class="btn btn-sm btn-primary">Marcher</button>
             </form>
 
-            <div style="font-size: 0.8rem; color: var(--red-primary); background: rgba(194,37,43,0.07); padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid rgba(194,37,43,0.2);">
-                🖐️ <em>Glissez la carte (Drag & Drop) ou utilisez les flèches du clavier.</em>
+            <div class="badge bg-danger-lt border border-danger-subtle py-2 px-2 text-danger">
+                🖐️ <em>Glissez la carte (Drag &amp; Drop) ou flèches clavier.</em>
             </div>
         </div>
     </div>
 
     <!-- Légende des Terroirs & Saut de Quadrants (Style Travian) -->
-    <div style="background: var(--bg-ink, #ede5d5); border-bottom: 1px solid var(--border-color); padding: 0.5rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; font-size: 0.8rem;">
-        <div style="display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap;">
-            <span style="font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">🗾 Terroirs :</span>
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_plains.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Plaines</span>
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_forest.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Forêt de Cèdres</span>
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_mountain.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Montagnes</span>
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_lake.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Lacs & Eaux</span>
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_hills.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Collines</span>
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_village.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Fief Castral</span>
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><img src="/public/assets/map/tile_authentic_castle.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Donjon Sacré</span>
-            <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span class="tile-res-badge res-rice" style="font-size:0.68rem; padding:1px 4px; box-shadow:none;">🌾+25%</span> Oasis</span>
+    <div class="card-body bg-surface-secondary border-bottom py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <span class="font-weight-bold text-secondary text-uppercase" style="letter-spacing: 0.5px;">🗾 Terroirs :</span>
+            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_plains.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Plaines</span>
+            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_forest.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Forêt de Cèdres</span>
+            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_mountain.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Montagnes</span>
+            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_lake.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Lacs &amp; Eaux</span>
+            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_hills.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Collines</span>
+            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_village.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Fief Castral</span>
+            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_authentic_castle.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Donjon Sacré</span>
+            <span class="d-inline-flex align-items-center gap-1"><span class="badge bg-success-lt" style="font-size:0.68rem; padding:2px 4px;">🌾+25%</span> Oasis</span>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 0.4rem;">
-            <span style="font-weight: 700; color: var(--text-muted); margin-right: 0.2rem;">Saut de Zone :</span>
-            <button type="button" class="btn btn-secondary" onclick="galaxyMap.moveTo(-16, 16)" style="font-size:0.75rem; padding:0.25rem 0.55rem;" title="Nord-Ouest [- / +]">↖️ N-O</button>
-            <button type="button" class="btn btn-secondary" onclick="galaxyMap.moveTo(16, 16)" style="font-size:0.75rem; padding:0.25rem 0.55rem;" title="Nord-Est [+ / +]">↗️ N-E</button>
-            <button type="button" class="btn btn-secondary" onclick="galaxyMap.moveTo(-16, -16)" style="font-size:0.75rem; padding:0.25rem 0.55rem;" title="Sud-Ouest [- / -]">↙️ S-O</button>
-            <button type="button" class="btn btn-secondary" onclick="galaxyMap.moveTo(16, -16)" style="font-size:0.75rem; padding:0.25rem 0.55rem;" title="Sud-Est [+ / -]">↘️ S-E</button>
-            <button type="button" class="btn btn-secondary" onclick="galaxyMap.moveTo(0, 0)" style="font-size:0.75rem; padding:0.25rem 0.55rem;" title="Centre Impérial [0 : 0]">⛩️ Centre</button>
+        <div class="d-flex align-items-center gap-1">
+            <span class="font-weight-bold text-secondary me-1">Saut de Zone :</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, 16)" title="Nord-Ouest [- / +]">↖️ N-O</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, 16)" title="Nord-Est [+ / +]">↗️ N-E</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, -16)" title="Sud-Ouest [- / -]">↙️ S-O</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, -16)" title="Sud-Est [+ / -]">↘️ S-E</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(0, 0)" title="Centre Impérial [0 : 0]">⛩️ Centre</button>
         </div>
     </div>
 
-        <!-- Conteneur Interactif Drag-and-Drop Pleine Largeur -->
-        <div class="galaxy-map-wrapper map-fullwidth-wrapper" id="galaxyMapContainer" style="width: 100%; border: none; border-radius: 0;">
-            <!-- Rendu interactif via GalaxyMapController -->
-        </div>
+    <!-- Conteneur Interactif Drag-and-Drop Pleine Largeur -->
+    <div class="galaxy-map-wrapper map-fullwidth-wrapper" id="galaxyMapContainer" style="width: 100%; border: none; border-radius: 0;">
+        <!-- Rendu interactif via GalaxyMapController -->
     </div>
 </div>
 
 <!-- =====================================================
-     MODAL CARTE — Informations de la Zone Sélectionnée
+     MODAL CARTE — Informations de la Zone Sélectionnée (Modal Blanc Simple)
      ===================================================== -->
 <div id="mapTileModal" style="
     display: none;
     position: fixed; inset: 0; z-index: 9000;
-    background: rgba(0,0,0,0.65);
-    backdrop-filter: blur(3px);
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
     align-items: center;
     justify-content: center;
     padding: 1rem;
 " onclick="if(event.target===this) closeMapModal();">
 
-    <div style="
-        background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 100%);
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 14px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
-        width: 100%; max-width: 640px;
+    <div class="card shadow-lg" style="
+        background: #ffffff;
+        border: 1px solid var(--tblr-border-color, #e6e7e9);
+        border-radius: 12px;
+        width: 100%; max-width: 600px;
         max-height: 85vh; overflow-y: auto;
         position: relative;
         animation: mapModalIn 0.2s ease;
+        color: var(--tblr-body-color, #1e293b);
     ">
         <!-- En-tête -->
-        <div style="
-            background: linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.95) 100%);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding: 1rem 1.25rem;
-            display: flex; justify-content: space-between; align-items: center;
-            border-radius: 14px 14px 0 0;
-            gap: 0.75rem;
-        ">
-            <div style="display:flex; align-items:center; gap:0.75rem; flex:1; min-width:0;">
-                <h3 id="mapModalTitle" style="margin:0; font-size:1.1rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Informations</h3>
-                <span id="mapModalCoords" style="color:#facc15; font-family:monospace; font-size:0.95rem; font-weight:800; flex-shrink:0;"></span>
+        <div class="card-header d-flex justify-content-between align-items-center py-3 px-3 border-bottom bg-white" style="border-radius: 12px 12px 0 0;">
+            <div class="d-flex align-items-center gap-2 flex-fill min-w-0">
+                <h3 id="mapModalTitle" class="card-title m-0 text-truncate font-weight-bold" style="font-size: 1.1rem; color: #1e293b;">Informations</h3>
+                <span id="mapModalCoords" class="badge bg-secondary text-white font-monospace" style="color: #fff !important;"></span>
             </div>
-            <button onclick="closeMapModal()" style="
-                background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-                color:#94a3b8; border-radius:8px; width:32px; height:32px; cursor:pointer;
-                font-size:1.1rem; display:flex; align-items:center; justify-content:center;
-                flex-shrink:0; transition:all 0.15s;
-            " onmouseover="this.style.background='rgba(239,68,68,0.2)';this.style.color='#f87171'"
-               onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='#94a3b8'">✕</button>
+            <button type="button" class="btn-close ms-2" onclick="closeMapModal()" aria-label="Fermer"></button>
         </div>
 
         <!-- Corps -->
-        <div id="mapModalBody" style="padding:1.25rem; color:#e4e4e7;">
+        <div id="mapModalBody" class="card-body p-3" style="color: #334155;">
             <!-- Rempli dynamiquement par JavaScript -->
         </div>
     </div>
@@ -128,7 +137,7 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
 
 <style>
 @keyframes mapModalIn {
-    from { opacity:0; transform: scale(0.95) translateY(8px); }
+    from { opacity:0; transform: scale(0.96) translateY(6px); }
     to   { opacity:1; transform: scale(1)   translateY(0); }
 }
 </style>
@@ -184,9 +193,10 @@ window.selectPlanetTile = function(data) {
     if (data.empty) {
         title.innerText = '🌑 Terres Inexplorées';
         body.innerHTML = `
-            <div style="text-align:center; padding:2rem 1rem;">
+            <div class="text-center py-4 px-2">
                 <div style="font-size:3rem; margin-bottom:0.75rem;">🌑</div>
-                <p style="color:#94a3b8; margin-bottom:0;">Ces terres lointaines ne contiennent actuellement aucun domaine castral recensé.</p>
+                <h4 class="font-weight-bold mb-1" style="color:#1e293b;">Terres Inexplorées</h4>
+                <p class="text-secondary mb-0">Ces terres lointaines ne contiennent actuellement aucun domaine castral recensé.</p>
             </div>
         `;
         openMapModal();
@@ -195,34 +205,34 @@ window.selectPlanetTile = function(data) {
 
     // ── Donjons Authentiques (現存十二天守) ─────────────────────
     if (data.is_authentic_castle) {
-        title.innerHTML = `🏯 <span style="color:#fbbf24;">${data.castle_name}</span> <span style="font-size:0.9rem;color:#fde047;">${data.castle_kanji || ''}</span>`;
+        title.innerHTML = `🏯 <span style="color:#b45309;">${data.castle_name}</span> <span class="text-secondary small">${data.castle_kanji || ''}</span>`;
         body.innerHTML = `
-            <div style="background:linear-gradient(135deg,rgba(245,158,11,0.18),rgba(185,28,28,0.2)); border:1px solid rgba(245,158,11,0.5); padding:1.1rem; border-radius:8px; margin-bottom:1.1rem; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.6rem;">
-                    <span class="badge" style="background:#f59e0b; color:#1c1917; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">
+            <div style="background:#fffbeb; border:1px solid #fde68a; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                    <span class="badge bg-warning text-dark font-weight-bold" style="font-size:0.75rem;">
                         👑 TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE (現存十二天守)
                     </span>
-                    <span style="color:#fde047; font-size:0.8rem; font-weight:700;">📍 ${data.castle_province || 'Province Historique'}</span>
+                    <span class="text-secondary font-weight-bold small">📍 ${data.castle_province || 'Province Historique'}</span>
                 </div>
-                <p style="color:#fef3c7; font-size:0.9rem; margin:0.4rem 0 0.6rem 0; line-height:1.5;">
+                <p style="color:#78350f; font-size:0.9rem; margin:0.4rem 0 0.6rem 0; line-height:1.5;">
                     Ce donjon d'époque Sengoku-Edo est l'une des 12 forteresses d'origine préservées du Japon.
-                    <strong style="color:#fbbf24;">Enjeu suprême de la Bataille Finale du Shogunat.</strong>
+                    <strong style="color:#92400e;">Enjeu suprême de la Bataille Finale du Shogunat.</strong>
                 </p>
-                <div style="font-size:0.8rem; color:#f59e0b; display:flex; gap:1.2rem; flex-wrap:wrap;">
+                <div class="small d-flex gap-3 flex-wrap" style="color:#92400e;">
                     <span>Bâtisseur : <strong>${data.castle_builder || 'Maître Féodal'}</strong></span>
-                    <span>Garnison : <strong style="color:#4ade80;">25 000 pts défense</strong></span>
+                    <span>Garnison : <strong class="text-success">25 000 pts défense</strong></span>
                 </div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <a href="/?page=castle&code=${encodeURIComponent(data.castle_code || '')}"
-                   class="btn btn-warning" style="font-weight:800; background:#f59e0b; color:#18181b; border:none; text-decoration:none;">
+                   class="btn btn-warning text-dark font-weight-bold">
                     📜 Découvrir l'Histoire &rarr;
                 </a>
-                <div style="display:flex; gap:0.5rem;">
+                <div class="d-flex gap-2">
                     ${data.planet_id ? `
-                        <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"  class="btn btn-secondary">🥷 Sonder</a>
+                        <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"  class="btn btn-outline-secondary">🥷 Sonder</a>
                         <a href="?page=fleet&target_id=${data.planet_id}&mission=raid" class="btn btn-danger">⚔️ Assaillir</a>
-                    ` : `<span style="font-size:0.8rem; color:#94a3b8;">Sanctuaire Inviolé</span>`}
+                    ` : `<span class="text-secondary small align-self-center">Sanctuaire Inviolé</span>`}
                 </div>
             </div>
         `;
@@ -239,75 +249,75 @@ window.selectPlanetTile = function(data) {
 
         let statusBadge = '';
         if (isOwn) {
-            statusBadge = '<span class="badge" style="background:#16a34a; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🌿 VOTRE FIEF NATUREL ANNEXÉ</span>';
+            statusBadge = '<span class="badge bg-success text-white font-weight-bold" style="font-size:0.75rem;">🌿 VOTRE FIEF NATUREL ANNEXÉ</span>';
         } else if (isOccupied) {
-            statusBadge = `<span class="badge" style="background:#3b82f6; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🛡️ OCCUPÉE PAR ${data.username || 'UN DAIMYŌ'}</span>`;
+            statusBadge = `<span class="badge bg-primary text-white font-weight-bold" style="font-size:0.75rem;">🛡️ OCCUPÉE PAR ${data.username || 'UN DAIMYŌ'}</span>`;
         } else if (hasWildBeasts) {
-            statusBadge = '<span class="badge" style="background:#dc2626; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">🐗 OASIS SAUVAGE — FAUNE HOSTILE</span>';
+            statusBadge = '<span class="badge bg-danger text-white font-weight-bold" style="font-size:0.75rem;">🐗 OASIS SAUVAGE — FAUNE HOSTILE</span>';
         } else {
-            statusBadge = '<span class="badge" style="background:#10b981; color:#fff; font-weight:800; padding:0.25rem 0.65rem; border-radius:4px; font-size:0.75rem;">✨ OASIS LIBRE D\'OCCUPATION</span>';
+            statusBadge = '<span class="badge bg-teal text-white font-weight-bold" style="font-size:0.75rem;">✨ OASIS LIBRE D\'OCCUPATION</span>';
         }
 
         let bonusBadgesHtml = '';
-        if (data.bonus_rice  > 0) bonusBadgesHtml += `<span style="background:rgba(234,179,8,0.2); border:1px solid #eab308; color:#fef08a; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🌾 +${data.bonus_rice}% Riz</span>`;
-        if (data.bonus_wood  > 0) bonusBadgesHtml += `<span style="background:rgba(34,197,94,0.2); border:1px solid #22c55e; color:#bbf7d0; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🪵 +${data.bonus_wood}% Bois</span>`;
-        if (data.bonus_stone > 0) bonusBadgesHtml += `<span style="background:rgba(59,130,246,0.2); border:1px solid #3b82f6; color:#bfdbfe; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:700;">🪨 +${data.bonus_stone}% Pierre</span>`;
+        if (data.bonus_rice  > 0) bonusBadgesHtml += `<span class="badge bg-warning-lt border border-warning" style="font-size:0.78rem;">🌾 +${data.bonus_rice}% Riz</span>`;
+        if (data.bonus_wood  > 0) bonusBadgesHtml += `<span class="badge bg-success-lt border border-success" style="font-size:0.78rem;">🪵 +${data.bonus_wood}% Bois</span>`;
+        if (data.bonus_stone > 0) bonusBadgesHtml += `<span class="badge bg-primary-lt border border-primary" style="font-size:0.78rem;">🪨 +${data.bonus_stone}% Pierre</span>`;
 
         let unitsHtml = '';
         if (units.length > 0) {
-            unitsHtml = '<div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.4rem;">';
+            unitsHtml = '<div class="d-flex flex-wrap gap-2 mt-2">';
             units.forEach(u => {
                 const uCount = parseInt(u.count, 10);
                 if (uCount <= 0) return;
                 unitsHtml += `
-                    <div style="display:flex; align-items:center; gap:0.4rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:0.3rem 0.6rem; border-radius:6px; font-size:0.82rem;">
-                        <span style="font-size:1rem;">${u.icon || (u.is_wild == 1 ? '🐗' : '⚔️')}</span>
-                        <span style="color:#f1f5f9;">${u.unit_name || u.name}</span>
-                        <strong style="color:#f59e0b; margin-left:0.2rem;">x${uCount}</strong>
+                    <div class="d-flex align-items-center gap-2 bg-white border rounded px-2 py-1 small">
+                        <span style="font-size:1.1rem;">${u.icon || (u.is_wild == 1 ? '🐗' : '⚔️')}</span>
+                        <span class="font-weight-medium" style="color:#1e293b;">${u.unit_name || u.name}</span>
+                        <strong class="text-danger ms-1">x${uCount}</strong>
                     </div>
                 `;
             });
             unitsHtml += '</div>';
         } else {
-            unitsHtml = '<p style="color:#4ade80; font-size:0.85rem; margin:0.3rem 0;">🕊️ Aucun animal sauvage ni soldat en garnison. L\'oasis est entièrement pacifiée !</p>';
+            unitsHtml = '<p class="text-success small my-2">🕊️ Aucun animal sauvage ni soldat en garnison. L\'oasis est entièrement pacifiée !</p>';
         }
 
-        title.innerHTML = `🌿 <span style="color:#22c55e;">${data.oasis_name}</span> <span style="font-size:0.85rem; color:#86efac;">${data.bonus_label || ''}</span>`;
+        title.innerHTML = `🌿 <span style="color:#15803d;">${data.oasis_name}</span> <span class="text-secondary small">${data.bonus_label || ''}</span>`;
         body.innerHTML = `
-            <div style="background:linear-gradient(135deg,rgba(22,101,52,0.25),rgba(15,23,42,0.6)); border:1px solid rgba(34,197,94,0.4); padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                     ${statusBadge}
-                    <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">${bonusBadgesHtml}</div>
+                    <div class="d-flex gap-1 flex-wrap">${bonusBadgesHtml}</div>
                 </div>
-                <p style="color:#dcfce7; font-size:0.9rem; margin:0.4rem 0 0.75rem 0; line-height:1.45;">
+                <p style="color:#166534; font-size:0.9rem; margin:0.4rem 0 0.75rem 0; line-height:1.45;">
                     Cette oasis naturelle regorge de terres fertiles et de ressources précieuses.
                     <strong>Pillez les récoltes</strong> en terrassant la faune, ou <strong>occupez le territoire</strong> pour conférer des bonus permanents à votre fief.
                 </p>
-                <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.6rem 0.8rem; margin-bottom:0.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; font-size:0.85rem;">
-                    <span style="color:#94a3b8;">Récoltes accumulées :</span>
-                    <div style="display:flex; gap:1rem;">
-                        <span style="color:#fbbf24;">🪵 <strong>${(data.res_wood  || 0).toLocaleString()}</strong></span>
-                        <span style="color:#60a5fa;">🪨 <strong>${(data.res_stone || 0).toLocaleString()}</strong></span>
-                        <span style="color:#34d399;">🌾 <strong>${(data.res_rice  || 0).toLocaleString()}</strong></span>
+                <div class="bg-white border rounded p-2 mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
+                    <span class="text-secondary font-weight-medium">Récoltes accumulées :</span>
+                    <div class="d-flex gap-3">
+                        <span style="color:#b45309;">🪵 <strong>${(data.res_wood  || 0).toLocaleString()}</strong></span>
+                        <span style="color:#2563eb;">🪨 <strong>${(data.res_stone || 0).toLocaleString()}</strong></span>
+                        <span style="color:#15803d;">🌾 <strong>${(data.res_rice  || 0).toLocaleString()}</strong></span>
                     </div>
                 </div>
-                <div style="margin-top:0.5rem;">
-                    <span style="font-size:0.78rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Faune &amp; Garnison :</span>
+                <div class="mt-2">
+                    <span class="text-secondary font-weight-bold text-uppercase small" style="letter-spacing:0.5px; font-size:0.75rem;">Faune &amp; Garnison :</span>
                     ${unitsHtml}
                 </div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
-                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=raid"   class="btn btn-warning" style="font-weight:700; background:#d97706; border-color:#f59e0b;">⚔️ Piller l'Oasis</a>
-                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=attack" class="btn btn-danger"  style="font-weight:700;">💥 Nettoyer</a>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=raid"   class="btn btn-warning font-weight-bold">⚔️ Piller l'Oasis</a>
+                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=attack" class="btn btn-danger font-weight-bold">💥 Nettoyer</a>
                 </div>
-                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <div class="d-flex gap-2 flex-wrap">
                     ${isOwn ? `
-                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-primary" style="background:#2563eb;">🛡️ Renforcer</a>
-                        <button onclick="abandonOasisDirect(${data.oasis_id})" class="btn btn-secondary" style="color:#ef4444; border-color:rgba(239,68,68,0.4);">🏳️ Abandonner</button>
+                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-primary">🛡️ Renforcer</a>
+                        <button onclick="abandonOasisDirect(${data.oasis_id})" class="btn btn-outline-danger">🏳️ Abandonner</button>
                     ` : `
-                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-success" style="background:#16a34a; border-color:#22c55e; font-weight:700;">🚩 Occuper</a>
-                        ${!hasWildBeasts ? `<button onclick="annexOasisDirect(${data.oasis_id})" class="btn btn-primary" style="background:#059669; border-color:#10b981; font-weight:700;">✨ Annexion Directe</button>` : ''}
+                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-success font-weight-bold">🚩 Occuper</a>
+                        ${!hasWildBeasts ? `<button onclick="annexOasisDirect(${data.oasis_id})" class="btn btn-primary font-weight-bold">✨ Annexion Directe</button>` : ''}
                     `}
                 </div>
             </div>
@@ -320,16 +330,14 @@ window.selectPlanetTile = function(data) {
     if (!data.user_id) {
         title.innerText = `🏞️ Terres Neutres`;
         body.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-                <div>
-                    <p style="margin-bottom:0.3rem; font-size:0.95rem;"><strong style="color:#fff;">${data.planet_name || 'Domaine inconnu'}</strong></p>
-                    <p style="margin-bottom:0.3rem; color:#94a3b8;">Terrain : <strong style="color:#e2e8f0;">${data.planet_type || '—'}</strong></p>
-                    <p style="color:#4ade80; font-weight:600; font-size:0.9rem;">✨ Terres fertiles libres pour un nouveau fief !</p>
-                </div>
-                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                    <a href="?page=fleet&target_id=${data.planet_id}&mission=colonize" class="btn btn-primary">🏯 Établir un Fief</a>
-                    <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"     class="btn btn-danger">⚔️ Piller</a>
-                </div>
+            <div class="border rounded p-3 bg-surface mb-3">
+                <h4 class="font-weight-bold mb-1" style="color:#1e293b;">${data.planet_name || 'Domaine inconnu'}</h4>
+                <p class="text-secondary mb-1">Terrain : <strong style="color:#1e293b;">${data.planet_type || '—'}</strong></p>
+                <p class="text-success font-weight-medium mb-0">✨ Terres fertiles libres pour un nouveau fief !</p>
+            </div>
+            <div class="d-flex justify-content-end gap-2 flex-wrap">
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=colonize" class="btn btn-primary">🏯 Établir un Fief</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"     class="btn btn-outline-danger">⚔️ Piller</a>
             </div>
         `;
         openMapModal();
@@ -345,36 +353,36 @@ window.selectPlanetTile = function(data) {
 
     title.innerText = `🏯 ${data.planet_name} — ${data.username || 'Daimyō'}`;
     body.innerHTML = `
-        <div style="background:linear-gradient(135deg,rgba(185,28,28,0.15),rgba(15,23,42,0.6)); border:1px solid rgba(220,38,38,0.3); padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
-            <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.85rem;">
-                <div style="width:42px; height:42px; border-radius:50%; background:rgba(220,38,38,0.2); border:2px solid rgba(220,38,38,0.5); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;">🏯</div>
+        <div style="background:#fef2f2; border:1px solid #fecaca; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div style="width:44px; height:44px; border-radius:50%; background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.25); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">🏯</div>
                 <div>
-                    <div style="font-weight:800; color:#fff; font-size:1rem;">${data.planet_name}</div>
-                    <div style="font-size:0.82rem; color:#94a3b8;">Fief du Daimyō
+                    <div style="font-weight:700; color:#1e293b; font-size:1.05rem;">${data.planet_name}</div>
+                    <div class="small text-secondary">Fief du Daimyō
                         <a href="javascript:void(0)" onclick="openPlayerProfileModal(${targetUserId})"
-                           style="color:#dc2626; font-weight:700; text-decoration:none; margin-left:0.3rem;">
+                           class="font-weight-bold text-danger text-decoration-none ms-1">
                             👤 ${data.username || 'Daimyō'}
                         </a>
-                        ${data.alliance_tag ? `<span style="color:#f59e0b; margin-left:0.3rem;">[${data.alliance_tag}]</span>` : ''}
+                        ${data.alliance_tag ? `<span class="badge bg-warning-lt ms-1">[${data.alliance_tag}]</span>` : ''}
                     </div>
                 </div>
             </div>
-            <div style="display:flex; gap:1.5rem; flex-wrap:wrap; font-size:0.88rem;">
-                <span>Clan : <span class="faction-badge ${fKey}">${fName}</span></span>
-                <span>Puissance : <strong style="color:#f59e0b;">${pts} pts</strong></span>
+            <div class="d-flex gap-4 flex-wrap small">
+                <span>Clan : <span class="badge bg-secondary-lt font-weight-bold">${fName}</span></span>
+                <span>Puissance : <strong class="text-danger">${pts} pts</strong></span>
             </div>
         </div>
-        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
-            <button type="button" onclick="openPlayerProfileModal(${targetUserId})" class="btn btn-secondary" style="border-color:#dc2626; color:#dc2626;">
+        <div class="d-flex gap-2 flex-wrap justify-content-end align-items-center">
+            <button type="button" onclick="openPlayerProfileModal(${targetUserId})" class="btn btn-outline-danger">
                 👤 Fiche Daimyō
             </button>
             ${!isOwn ? `
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"       class="btn btn-secondary">🥷 Espionner</a>
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"      class="btn btn-danger" style="background:#b91c1c;">⚔️ Raid</a>
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=transport" class="btn btn-secondary">🐂 Convoi</a>
-                <a href="?page=messages&tab=compose&to=${encodeURIComponent(data.username || '')}" class="btn btn-secondary">✉️ Missive</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"       class="btn btn-outline-secondary">🥷 Espionner</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"      class="btn btn-danger">⚔️ Raid</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=transport" class="btn btn-outline-secondary">🐂 Convoi</a>
+                <a href="?page=messages&tab=compose&to=${encodeURIComponent(data.username || '')}" class="btn btn-outline-secondary">✉️ Missive</a>
             ` : `
-                <span style="color:#4ade80; font-size:0.85rem; font-weight:700; padding:0.4rem 0.6rem; background:rgba(74,222,128,0.1); border-radius:4px; align-self:center;">
+                <span class="badge bg-success-lt font-weight-bold py-2 px-3">
                     🏯 Votre propre domaine castral
                 </span>
             `}
