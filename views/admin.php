@@ -1963,7 +1963,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 <script>
 // --- GESTION DU SYSTÈME D'ONGLETS DU SHOGUNAT ---
 function switchAdminTab(tabKey) {
-    const validTabs = ['game', 'heroes', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'pedagogy', 'updates', 'maintenance', 'all'];
+    const validTabs = ['game', 'heroes', 'bots', 'users', 'oases', 'castles', 'world', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all'];
     if (!validTabs.includes(tabKey)) tabKey = 'game';
 
     // Afficher ou masquer les panneaux correspondants
@@ -2862,6 +2862,7 @@ async function submitAdminCreateCategory(e) {
         const data = await res.json();
 
         if (data.success) {
+            sessionStorage.setItem('admin_active_tab', 'forum');
             await showModalAlert("Salon Créé", data.message, "success");
             window.location.reload();
         } else {
@@ -2901,6 +2902,7 @@ async function submitAdminEditCategory(e) {
         const data = await res.json();
 
         if (data.success) {
+            sessionStorage.setItem('admin_active_tab', 'forum');
             window.location.reload();
         } else {
             alert(data.error || "Erreur de modification.");
@@ -2921,6 +2923,7 @@ async function deleteForumCategory(catId, name) {
         const data = await res.json();
 
         if (data.success) {
+            sessionStorage.setItem('admin_active_tab', 'forum');
             window.location.reload();
         } else {
             alert(data.error || "Erreur lors de la suppression.");
