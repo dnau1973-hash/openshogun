@@ -1071,6 +1071,8 @@ class HeroEngine {
         $chosen['id'] = (int)$this->db->lastInsertId();
         $chosen['item_code'] = $chosen['code'];
         $chosen['description'] = $chosen['desc'];
+        $chosen['bonus_data'] = $chosen['bonus'];
+        $chosen['image_url'] = self::getItemImageUrl($chosen['code']);
         return $chosen;
     }
 
@@ -1098,14 +1100,29 @@ class HeroEngine {
     }
 
     /**
+     * Retourne l'URL de l'illustration d'une relique féodale
+     */
+    public static function getItemImageUrl(string $itemCode): string {
+        $extensions = ['jpeg', 'jpg', 'webp', 'png'];
+        $baseDir = __DIR__ . '/../public/assets/items/';
+        foreach ($extensions as $ext) {
+            if (file_exists($baseDir . $itemCode . '.' . $ext)) {
+                return '/public/assets/items/' . $itemCode . '.' . $ext;
+            }
+        }
+        return '/public/assets/hero_samurai.jpg';
+    }
+
+    /**
      * Récupère l'inventaire du joueur
      */
     public function getInventory(int $userId): array {
-        $stmt = $this->db->prepare("SELECT * FROM hero_inventory WHERE user_id = ? ORDER BY id DESC");
+        $stmt = $this->db->prepare("SELECT * FROM hero_inventory WHERE user_id = ? ORDER BY is_equipped DESC, id DESC");
         $stmt->execute([$userId]);
-        $items = $stmt->fetchAll();
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($items as &$it) {
-            $it['bonus_data'] = json_decode($it['bonus_data'], true) ?: [];
+            $it['bonus_data'] = is_array($it['bonus_data']) ? $it['bonus_data'] : (json_decode($it['bonus_data'], true) ?: []);
+            $it['image_url'] = self::getItemImageUrl($it['item_code']);
         }
         return $items;
     }

@@ -16,6 +16,7 @@ config/database.php
 config/github.local.php
 config/installed.lock
 tmp/
+networks:.yaml
 
 
 

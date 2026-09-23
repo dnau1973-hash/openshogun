@@ -46,6 +46,45 @@ $statusLabels = [
     'reviving' => ['label' => 'Régénération en cours (24h)', 'color' => '#f59e0b', 'badge_class' => 'bg-warning text-dark', 'icon' => '✨']
 ];
 $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3b8', 'badge_class' => 'bg-secondary text-white', 'icon' => '❓'];
+
+if (!function_exists('renderRelicBonusesHtml')) {
+    function renderRelicBonusesHtml(array $bonusData): string {
+        if (empty($bonusData)) return '';
+        $badges = [];
+        foreach ($bonusData as $k => $v) {
+            switch ($k) {
+                case 'strength':
+                    $badges[] = '<span class="badge bg-red-lt text-red border border-red-lt">+' . (int)$v . ' Force</span>';
+                    break;
+                case 'offense_bonus':
+                    $badges[] = '<span class="badge bg-orange-lt text-orange border border-orange-lt">+' . (float)$v . '% Attaque</span>';
+                    break;
+                case 'defense_bonus':
+                    $badges[] = '<span class="badge bg-blue-lt text-blue border border-blue-lt">+' . (float)$v . '% Défense</span>';
+                    break;
+                case 'speed':
+                    $badges[] = '<span class="badge bg-cyan-lt text-cyan border border-cyan-lt">+' . (int)$v . '% Vitesse</span>';
+                    break;
+                case 'exp_bonus':
+                    $badges[] = '<span class="badge bg-purple-lt text-purple border border-purple-lt">+' . (int)$v . '% Exp</span>';
+                    break;
+                case 'production_rice':
+                    $badges[] = '<span class="badge bg-green-lt text-green border border-green-lt">+' . (int)$v . ' Riz/h</span>';
+                    break;
+                case 'production_wood':
+                    $badges[] = '<span class="badge bg-teal-lt text-teal border border-teal-lt">+' . (int)$v . ' Bois/h</span>';
+                    break;
+                case 'production_stone':
+                    $badges[] = '<span class="badge bg-secondary-lt text-secondary border border-secondary-lt">+' . (int)$v . ' Pierre/h</span>';
+                    break;
+                default:
+                    $badges[] = '<span class="badge bg-secondary-lt">+' . htmlspecialchars((string)$v) . ' ' . htmlspecialchars($k) . '</span>';
+                    break;
+            }
+        }
+        return implode(' ', $badges);
+    }
+}
 ?>
 
 <!-- En-tête de navigation Tabler -->
@@ -548,7 +587,7 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
                     </div>
                 </div>
                 <div class="badge bg-warning-lt border border-warning fs-6 py-2 px-3">
-                    Reliques possédées : <strong class="ms-1"><?= count($inventory) ?></strong>
+                    Reliques possédées : <strong class="ms-1"><?= count($inventory) ?> / 35</strong>
                 </div>
             </div>
 
@@ -602,18 +641,42 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
                                 }
                             ?>
                             <div class="col-sm-6 col-md-4">
-                                <div class="card h-100 border p-2 text-center <?= $equippedItem ? 'border-warning bg-warning-lt' : 'bg-surface' ?>">
-                                    <div class="fs-2 mb-1"><?= $sl['icon'] ?></div>
-                                    <div class="text-secondary small font-weight-bold text-uppercase"><?= $sl['label'] ?></div>
+                                <div class="card h-100 border p-2 text-center <?= $equippedItem ? 'border-primary bg-primary-lt' : 'bg-surface' ?>" style="min-height: 130px; border-style: <?= $equippedItem ? 'solid' : 'dashed' ?> !important;">
                                     <?php if ($equippedItem): ?>
-                                        <div class="font-weight-bold text-dark small my-1">
-                                            <?= htmlspecialchars($equippedItem['name']) ?>
+                                        <div class="d-flex align-items-center gap-2 mb-2 text-start">
+                                            <div class="position-relative flex-shrink-0" style="width: 52px; height: 52px;">
+                                                <img src="<?= htmlspecialchars($equippedItem['image_url']) ?>" 
+                                                     alt="<?= htmlspecialchars($equippedItem['name']) ?>" 
+                                                     class="rounded border shadow-sm w-100 h-100" 
+                                                     style="object-fit: cover; cursor: pointer;"
+                                                     onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($equippedItem), ENT_QUOTES, 'UTF-8') ?>)"
+                                                     title="Examiner la relique">
+                                                <span class="position-absolute bottom-0 end-0 badge bg-dark p-1 rounded-circle" style="transform: translate(20%, 20%); font-size: 8px; line-height: 1;">🔍</span>
+                                            </div>
+                                            <div class="overflow-hidden">
+                                                <div class="text-secondary text-uppercase fw-bold" style="font-size: 0.65rem;"><?= $sl['icon'] ?> <?= $sl['label'] ?></div>
+                                                <div class="fw-bold text-dark text-truncate small" style="cursor: pointer;" onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($equippedItem), ENT_QUOTES, 'UTF-8') ?>)">
+                                                    <?= htmlspecialchars($equippedItem['name']) ?>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <button type="button" onclick="executeUnequip('<?= $slotKey ?>')" class="btn btn-sm btn-outline-danger py-0 px-2 mt-auto" style="font-size:0.75rem;">
-                                            Déséquiper
-                                        </button>
+                                        <div class="d-flex flex-wrap gap-1 mb-2 justify-content-start">
+                                            <?= renderRelicBonusesHtml($equippedItem['bonus_data'] ?? []) ?>
+                                        </div>
+                                        <div class="mt-auto d-flex justify-content-between align-items-center pt-1 border-top">
+                                            <button type="button" onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($equippedItem), ENT_QUOTES, 'UTF-8') ?>)" class="btn btn-sm btn-ghost-secondary py-0 px-2" style="font-size: 0.72rem;">
+                                                Détails
+                                            </button>
+                                            <button type="button" onclick="executeUnequip('<?= $slotKey ?>')" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.72rem;">
+                                                Déséquiper
+                                            </button>
+                                        </div>
                                     <?php else: ?>
-                                        <div class="text-muted small fst-italic my-1">Emplacement vide</div>
+                                        <div class="d-flex flex-column align-items-center justify-content-center h-100 py-3">
+                                            <div class="fs-2 mb-1 opacity-50"><?= $sl['icon'] ?></div>
+                                            <div class="text-secondary small font-weight-bold text-uppercase"><?= $sl['label'] ?></div>
+                                            <div class="text-muted small fst-italic mt-1" style="font-size:0.75rem;">Emplacement libre</div>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -623,38 +686,100 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
             </div>
 
             <!-- Grille d'Inventaire / Coffre de Reliques -->
-            <h4 class="font-weight-bold mb-2">📦 Coffre &amp; Reliques Collectées</h4>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h4 class="font-weight-bold mb-0">📦 Coffre &amp; Reliques Féodales Collectées (<?= count($inventory) ?>/35)</h4>
+                <div class="text-secondary small">
+                    Cliquez sur une illustration pour l'admirer en grand format.
+                </div>
+            </div>
+
             <?php if (empty($inventory)): ?>
-                <div class="text-center py-4 border rounded bg-surface">
-                    <p class="text-secondary mb-0">
-                        Votre coffre de reliques est vide. Envoyez votre Samouraï en aventure pour découvrir des katanas légendaires et des cuirasses impériales !
+                <div class="text-center py-5 border rounded bg-surface">
+                    <div class="fs-1 mb-2">⛩️</div>
+                    <h4 class="text-dark fw-bold">Votre coffre de reliques est vide</h4>
+                    <p class="text-secondary mb-0 max-w-md mx-auto small">
+                        Envoyez votre Samouraï en aventure féodale chaque jour (jusqu'à 3 expéditions quotidiennes) pour exhumer des katanas mythiques, des kabutos ornés et des trésors sacrés !
                     </p>
                 </div>
             <?php else: ?>
                 <div class="row g-3">
                     <?php foreach ($inventory as $it): ?>
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border <?= !empty($it['is_equipped']) ? 'border-success' : '' ?>">
+                        <?php 
+                            $isEq = !empty($it['is_equipped']);
+                            $slotLabels = [
+                                'weapon' => ['label' => 'Arme', 'icon' => '🗡️'],
+                                'helmet' => ['label' => 'Casque', 'icon' => '🪖'],
+                                'armor' => ['label' => 'Armure', 'icon' => '🥋'],
+                                'horse' => ['label' => 'Monture', 'icon' => '🐎'],
+                                'talisman' => ['label' => 'Talisman', 'icon' => '📿']
+                            ];
+                            $slInfo = $slotLabels[$it['slot']] ?? ['label' => ucfirst($it['slot']), 'icon' => '🛡️'];
+                        ?>
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card h-100 border <?= $isEq ? 'border-primary bg-primary-lt' : 'bg-surface' ?> shadow-sm">
                                 <div class="card-body p-3 d-flex flex-column justify-content-between">
                                     <div>
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <strong class="text-dark"><?= htmlspecialchars($it['name']) ?></strong>
-                                            <?php if (!empty($it['is_equipped'])): ?>
-                                                <span class="badge bg-success text-white">Équipé</span>
-                                            <?php endif; ?>
+                                        <div class="d-flex gap-3 align-items-start mb-2">
+                                            <!-- Vignette Estampe -->
+                                            <div class="position-relative flex-shrink-0" style="width: 78px; height: 78px;">
+                                                <img src="<?= htmlspecialchars($it['image_url']) ?>" 
+                                                     alt="<?= htmlspecialchars($it['name']) ?>" 
+                                                     class="rounded border shadow-sm w-100 h-100" 
+                                                     style="object-fit: cover; cursor: pointer; transition: transform 0.15s ease-in-out;"
+                                                     onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($it), ENT_QUOTES, 'UTF-8') ?>)"
+                                                     onmouseover="this.style.transform='scale(1.04)'"
+                                                     onmouseout="this.style.transform='scale(1)'"
+                                                     title="Examiner en grand format">
+                                                <button type="button" 
+                                                        class="btn btn-icon btn-sm btn-dark position-absolute bottom-0 end-0 m-1 rounded-circle opacity-75" 
+                                                        style="width: 20px; height: 20px; font-size: 9px; padding: 0;"
+                                                        onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($it), ENT_QUOTES, 'UTF-8') ?>)"
+                                                        title="Agrandir">
+                                                    🔍
+                                                </button>
+                                            </div>
+
+                                            <!-- Informations Relique -->
+                                            <div class="overflow-hidden flex-grow-1">
+                                                <div class="d-flex justify-content-between align-items-center gap-1 mb-1">
+                                                    <span class="badge bg-secondary-lt text-secondary" style="font-size: 0.7rem;">
+                                                        <?= $slInfo['icon'] ?> <?= $slInfo['label'] ?>
+                                                    </span>
+                                                    <?php if ($isEq): ?>
+                                                        <span class="badge bg-primary text-white" style="font-size: 0.7rem;">✓ Équipé</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <strong class="text-dark d-block text-truncate fs-4" style="cursor: pointer;" onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($it), ENT_QUOTES, 'UTF-8') ?>)">
+                                                    <?= htmlspecialchars($it['name']) ?>
+                                                </strong>
+                                                <div class="text-secondary small mt-1" style="font-size: 0.78rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                                    <?= htmlspecialchars($it['description']) ?>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="text-secondary small mb-2">
-                                            <?= htmlspecialchars($it['description']) ?>
+
+                                        <!-- Badges de Bonus -->
+                                        <div class="d-flex flex-wrap gap-1 mb-3 pt-1">
+                                            <?= renderRelicBonusesHtml($it['bonus_data'] ?? []) ?>
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-end pt-2 border-top mt-2">
-                                        <?php if (empty($it['is_equipped'])): ?>
-                                            <button type="button" onclick="executeEquip(<?= (int)$it['id'] ?>)" class="btn btn-sm btn-primary">
-                                                Équiper
-                                            </button>
-                                        <?php else: ?>
-                                            <span class="text-success small font-weight-bold">✓ En service</span>
-                                        <?php endif; ?>
+
+                                    <!-- Pied de Carte / Actions -->
+                                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                        <button type="button" class="btn btn-sm btn-ghost-secondary px-2" onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($it), ENT_QUOTES, 'UTF-8') ?>)">
+                                            🔍 Examiner
+                                        </button>
+                                        <div>
+                                            <?php if ($isEq): ?>
+                                                <button type="button" onclick="executeUnequip('<?= htmlspecialchars($it['slot']) ?>')" class="btn btn-sm btn-outline-danger">
+                                                    Déséquiper
+                                                </button>
+                                            <?php else: ?>
+                                                <button type="button" onclick="executeEquip(<?= (int)$it['id'] ?>)" class="btn btn-sm btn-primary">
+                                                    Équiper
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -664,6 +789,43 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
             <?php endif; ?>
         </div>
     <?php endif; ?>
+</div>
+
+<!-- MODALE LIGHTBOX RELIQUE HD -->
+<div id="itemDetailModal" class="modal-overlay" style="display:none;" onclick="closeItemDetailModal(event)">
+    <div class="modal-card modal-card-lg" style="max-width: 820px; padding: 1.5rem;" onclick="event.stopPropagation()">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <div>
+                <h3 id="itemModalTitle" class="m-0 fs-2 font-weight-bold text-dark"></h3>
+                <div id="itemModalSubtitle" class="text-secondary small mt-1"></div>
+            </div>
+            <button type="button" class="btn-close" onclick="closeItemDetailModal()"></button>
+        </div>
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6 text-center">
+                <div class="position-relative d-inline-block w-100">
+                    <img id="itemModalImg" src="" alt="Relique" 
+                         class="rounded shadow border w-100" 
+                         style="max-height: 420px; object-fit: contain; background: #000;">
+                </div>
+            </div>
+            <div class="col-md-6 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted text-uppercase small font-weight-bold mb-1">📜 Récit &amp; Origine Féodale</label>
+                        <p id="itemModalDesc" class="text-secondary fs-4 fst-italic bg-surface p-3 rounded border" style="line-height: 1.5;"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted text-uppercase small font-weight-bold mb-1">⚡ Pouvoirs &amp; Bénédictions</label>
+                        <div id="itemModalBonuses" class="d-flex flex-wrap gap-1"></div>
+                    </div>
+                </div>
+                <div class="pt-3 border-top d-flex justify-content-between align-items-center mt-3" id="itemModalActions">
+                    <!-- Boutons équipement / fermeture dynamiques -->
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -860,6 +1022,81 @@ async function executeUnequip(slot) {
         }
     } catch (e) {
         showModalAlert("Erreur lors du déséquipement.", "danger", "Erreur");
+    }
+}
+
+function openItemDetailModal(item) {
+    const modal = document.getElementById('itemDetailModal');
+    if (!modal || !item) return;
+
+    document.getElementById('itemModalTitle').innerText = item.name || 'Relique Féodale';
+    document.getElementById('itemModalImg').src = item.image_url || '/public/assets/hero_samurai.jpg';
+    document.getElementById('itemModalDesc').innerText = item.description || '';
+
+    const slotLabels = {
+        'weapon': '🗡️ Arme de Poing',
+        'helmet': '🪖 Casque Kabuto',
+        'armor': '🥋 Armure O-Yoroi',
+        'horse': '🐎 Monture & Destrier',
+        'talisman': '📿 Talisman Shintō'
+    };
+    const slotName = slotLabels[item.slot] || item.slot || 'Relique';
+    const isEquipped = item.is_equipped == 1 || item.is_equipped === true;
+
+    document.getElementById('itemModalSubtitle').innerHTML = `
+        <span class="badge bg-secondary-lt me-2">${slotName}</span>
+        ${isEquipped ? '<span class="badge bg-primary text-white">✓ Équipé sur votre Samouraï</span>' : '<span class="badge bg-light text-muted">Dans le coffre</span>'}
+    `;
+
+    const bonusesContainer = document.getElementById('itemModalBonuses');
+    bonusesContainer.innerHTML = '';
+    const bData = item.bonus_data || {};
+    if (typeof bData === 'object' && Object.keys(bData).length > 0) {
+        for (const [k, v] of Object.entries(bData)) {
+            let badgeHtml = '';
+            if (k === 'strength') badgeHtml = `<span class="badge bg-red-lt text-red border border-red-lt fs-5 px-2 py-1">+${v} Force</span>`;
+            else if (k === 'offense_bonus') badgeHtml = `<span class="badge bg-orange-lt text-orange border border-orange-lt fs-5 px-2 py-1">+${v}% Attaque</span>`;
+            else if (k === 'defense_bonus') badgeHtml = `<span class="badge bg-blue-lt text-blue border border-blue-lt fs-5 px-2 py-1">+${v}% Défense</span>`;
+            else if (k === 'speed') badgeHtml = `<span class="badge bg-cyan-lt text-cyan border border-cyan-lt fs-5 px-2 py-1">+${v}% Vitesse</span>`;
+            else if (k === 'exp_bonus') badgeHtml = `<span class="badge bg-purple-lt text-purple border border-purple-lt fs-5 px-2 py-1">+${v}% Exp</span>`;
+            else if (k === 'production_rice') badgeHtml = `<span class="badge bg-green-lt text-green border border-green-lt fs-5 px-2 py-1">+${v} Riz/h</span>`;
+            else if (k === 'production_wood') badgeHtml = `<span class="badge bg-teal-lt text-teal border border-teal-lt fs-5 px-2 py-1">+${v} Bois/h</span>`;
+            else if (k === 'production_stone') badgeHtml = `<span class="badge bg-secondary-lt text-secondary border border-secondary-lt fs-5 px-2 py-1">+${v} Pierre/h</span>`;
+            else badgeHtml = `<span class="badge bg-secondary-lt fs-5 px-2 py-1">+${v} ${k}</span>`;
+            bonusesContainer.innerHTML += badgeHtml;
+        }
+    } else {
+        bonusesContainer.innerHTML = '<span class="text-muted small fst-italic">Aucun attribut passif</span>';
+    }
+
+    const actionsContainer = document.getElementById('itemModalActions');
+    if (isEquipped) {
+        actionsContainer.innerHTML = `
+            <button type="button" class="btn btn-outline-danger" onclick="executeUnequip('${item.slot}')">
+                Déséquiper
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="closeItemDetailModal()">
+                Fermer
+            </button>
+        `;
+    } else {
+        actionsContainer.innerHTML = `
+            <button type="button" class="btn btn-primary" onclick="executeEquip(${item.id})">
+                🗡️ Équiper cette Relique
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="closeItemDetailModal()">
+                Fermer
+            </button>
+        `;
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeItemDetailModal(e) {
+    const modal = document.getElementById('itemDetailModal');
+    if (modal && (!e || e.target.id === 'itemDetailModal')) {
+        modal.style.display = 'none';
     }
 }
 </script>
