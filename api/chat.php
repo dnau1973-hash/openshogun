@@ -49,12 +49,23 @@ try {
                 }
             }
 
+            $threads = $chatEngine->getThreadSummary($userId);
+
             echo json_encode([
                 'success' => true,
                 'channel_type' => $channelType,
                 'messages' => $messages,
                 'last_id' => $maxId,
+                'threads' => $threads,
                 'count' => count($messages)
+            ]);
+            break;
+
+        case 'threads':
+            $threads = $chatEngine->getThreadSummary($userId);
+            echo json_encode([
+                'success' => true,
+                'threads' => $threads
             ]);
             break;
 

@@ -309,11 +309,13 @@ class ChatEngine {
             $lastMsg = $stmtLast->fetch(PDO::FETCH_ASSOC);
 
             $isOnline = (time() - strtotime($userInfo['last_active'] ?? '2000-01-01')) < 300;
+            $factionData = FACTIONS[$userInfo['faction'] ?? ''] ?? ['name' => ucfirst($userInfo['faction'] ?? 'terran'), 'icon' => '🏯'];
 
             $results[] = [
                 'user_id' => $otherId,
                 'username' => $userInfo['username'],
                 'faction' => $userInfo['faction'],
+                'faction_icon' => $factionData['icon'],
                 'alliance_tag' => $userInfo['alliance_tag'],
                 'points' => (int)$userInfo['points'],
                 'is_admin' => (int)$userInfo['is_admin'] === 1,
@@ -394,6 +396,83 @@ class ChatEngine {
         }
 
         return $list;
+    }
+
+    /**
+     * Récupère le résumé complet de la file des discussions pour un joueur
+     * (Canal Général, Canal d'Alliance, et conversations privées avec dernier message)
+     */
+    public function getThreadSummary(int $userId): array {
+        $stmtUser = $this->db->prepare("
+            SELECT u.id, u.alliance_id, a.name as alliance_name, a.tag as alliance_tag
+            FROM users u
+            LEFT JOIN alliances a ON u.alliance_id = a.id
+            WHERE u.id = ?
+        ");
+        $stmtUser->execute([$userId]);
+        $u = $stmtUser->fetch(PDO::FETCH_ASSOC);
+        $allianceId = $u && $u['alliance_id'] ? (int)$u['alliance_id'] : null;
+
+        // 1. Dernier message Général
+        $stmtGlob = $this->db->query("
+            SELECT m.id, m.message, m.created_at, m.is_deleted, u.username as sender_username
+            FROM chat_messages m
+            INNER JOIN users u ON m.sender_id = u.id
+            WHERE m.channel_type = 'global'
+            ORDER BY m.id DESC LIMIT 1
+        ");
+        $lastGlob = $stmtGlob ? $stmtGlob->fetch(PDO::FETCH_ASSOC) : null;
+
+        $globalThread = [
+            'type' => 'global',
+            'title' => 'Canal Général',
+            'subtitle' => 'Tout le Shōgunat',
+            'icon' => '🏯',
+            'last_id' => $lastGlob ? (int)$lastGlob['id'] : 0,
+            'last_message' => $lastGlob ? ((int)$lastGlob['is_deleted'] === 1 ? 'Message retiré' : mb_substr($lastGlob['message'], 0, 45)) : 'Aucun échange récent',
+            'last_sender' => $lastGlob['sender_username'] ?? '',
+            'last_time' => $lastGlob ? date('H:i', strtotime($lastGlob['created_at'])) : ''
+        ];
+
+        // 2. Dernier message Alliance
+        $allianceThread = null;
+        if ($allianceId) {
+            $stmtAlli = $this->db->prepare("
+                SELECT m.id, m.message, m.created_at, m.is_deleted, u.username as sender_username
+                FROM chat_messages m
+                INNER JOIN users u ON m.sender_id = u.id
+                WHERE m.channel_type = 'alliance' AND m.channel_target_id = ?
+                ORDER BY m.id DESC LIMIT 1
+            ");
+            $stmtAlli->execute([$allianceId]);
+            $lastAlli = $stmtAlli->fetch(PDO::FETCH_ASSOC);
+
+            $allianceThread = [
+                'type' => 'alliance',
+                'title' => 'Clan [' . ($u['alliance_tag'] ?? '') . ']',
+                'subtitle' => $u['alliance_name'] ?? 'Alliance',
+                'icon' => '🎌',
+                'alliance_id' => $allianceId,
+                'last_id' => $lastAlli ? (int)$lastAlli['id'] : 0,
+                'last_message' => $lastAlli ? ((int)$lastAlli['is_deleted'] === 1 ? 'Message retiré' : mb_substr($lastAlli['message'], 0, 45)) : 'Aucun échange de clan',
+                'last_sender' => $lastAlli['sender_username'] ?? '',
+                'last_time' => $lastAlli ? date('H:i', strtotime($lastAlli['created_at'])) : ''
+            ];
+        }
+
+        // 3. Conversations privées
+        $whispers = $this->getRecentConversations($userId);
+
+        // 4. Joueurs en ligne
+        $online = $this->getOnlineChatters(10);
+
+        return [
+            'global' => $globalThread,
+            'alliance' => $allianceThread,
+            'whispers' => $whispers,
+            'online_users' => $online,
+            'has_alliance' => (bool)$allianceId
+        ];
     }
 }
 
