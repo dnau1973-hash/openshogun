@@ -137,144 +137,40 @@ $navItems = [
             </a>
         </div>
 
-        <!-- ── BARRE 1 : Ressources + Héros + Profil Daimyō ── -->
-        <header class="navbar navbar-expand-md d-print-none"
-                style="border-bottom:1px solid rgba(194,37,43,0.2);
-                       background:linear-gradient(135deg,rgba(194,37,43,0.04) 0%,rgba(255,255,255,0.98) 100%);
-                       padding:0; min-height:52px;">
+        <!-- ── BARRE DE NAVIGATION PRINCIPALE (Rationalisée & Pleine Largeur) ── -->
+        <nav class="navbar navbar-expand-lg d-print-none"
+             style="background:linear-gradient(135deg,#1a0a00 0%,#2d1200 60%,#1a0a00 100%);
+                    border-bottom:2px solid rgba(194,37,43,0.5);
+                    min-height:48px; padding:0.2rem 0;">
             <div class="container-fluid px-3">
 
-                <!-- Fief & coordonnées -->
-                <div class="d-flex align-items-center gap-2 me-4">
-                    <span style="font-size:1.25rem;">🏯</span>
-                    <div>
-                        <div style="font-weight:800; font-size:0.88rem; color:#1e293b; line-height:1.1;"><?= htmlspecialchars($planet['name']) ?></div>
-                        <div style="font-size:0.7rem; color:#dc2626; font-family:monospace; font-weight:700;">[<?= $planet['coord_x'] ?>|<?= $planet['coord_y'] ?>]</div>
-                    </div>
-                </div>
-
-                <!-- Barres de ressources (masquées sur mobile) -->
-                <div class="d-none d-md-flex align-items-center gap-3 flex-fill" style="min-width:0;">
-                    <?php
-                    $resItems = [
-                        ['id'=>'metal',   'icon'=>'🪵', 'label'=>'Bois',   'cur'=>$planet['metal'],     'max'=>$planet['metal_max'],     'prod'=>$planet['prod_rates']['metal'],     'color'=>'#92400e', 'bar'=>'bg-warning'],
-                        ['id'=>'crystal', 'icon'=>'🪨', 'label'=>'Pierre', 'cur'=>$planet['crystal'],   'max'=>$planet['crystal_max'],   'prod'=>$planet['prod_rates']['crystal'],   'color'=>'#1e40af', 'bar'=>'bg-primary'],
-                        ['id'=>'deut',    'icon'=>'🌾', 'label'=>'Riz',    'cur'=>$planet['deuterium'], 'max'=>$planet['deuterium_max'], 'prod'=>$planet['prod_rates']['deuterium'], 'color'=>'#166534', 'bar'=>'bg-success'],
-                    ];
-                    foreach ($resItems as $r):
-                        $pct = min(100, ($r['cur'] / max(1, $r['max'])) * 100);
-                    ?>
-                    <div class="d-flex align-items-center gap-1"
-                         style="min-width:110px; max-width:190px; flex:1;"
-                         title="<?= $r['label'] ?> : <?= number_format((int)$r['cur']) ?> / <?= number_format($r['max']) ?> (+<?= number_format($r['prod']) ?>/h)">
-                        <span style="font-size:0.9rem;"><?= $r['icon'] ?></span>
-                        <div style="flex:1; min-width:0;">
-                            <div style="font-size:0.7rem; font-weight:700; color:<?= $r['color'] ?>; white-space:nowrap;">
-                                <span id="res-val-<?= $r['id'] ?>"
-                                      data-current="<?= $r['cur'] ?>"
-                                      data-max="<?= $r['max'] ?>"
-                                      data-prod="<?= $r['prod'] ?>"><?= number_format((int)$r['cur']) ?></span>
-                                <span style="opacity:0.55; font-weight:400;">/ <?= number_format($r['max']) ?></span>
-                            </div>
-                            <div class="progress" style="height:4px; border-radius:2px; margin-top:2px;">
-                                <div class="progress-bar <?= $r['bar'] ?>" id="bar-<?= $r['id'] ?>" style="width:<?= $pct ?>%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-
-                    <!-- Sérénité -->
-                    <?php $eBalance = $planet['energy_max'] - $planet['energy_used']; $eOk = ($eBalance >= 0); ?>
-                    <div class="d-flex align-items-center gap-1"
-                         title="Sérénité Shinto : <?= $planet['energy_used'] ?> / <?= $planet['energy_max'] ?>">
-                        <span style="font-size:0.9rem;">⛩️</span>
-                        <span style="font-size:0.8rem; font-weight:800; color:<?= $eOk ? '#166534' : '#dc2626' ?>;"><?= $eBalance ?></span>
-                    </div>
-                </div>
-
-                <!-- Héros + Profil -->
-                <div class="d-flex align-items-center gap-2 ms-3">
+                <!-- Gauche : Fief & Héros -->
+                <div class="d-flex align-items-center gap-2 me-3">
                     <?php
                     $hHp = $heroHeader ? round((float)$heroHeader['health']) : 100;
                     $hHpCol = ($hHp >= 60) ? '#16a34a' : (($hHp >= 25) ? '#d97706' : '#dc2626');
                     $hLvl = $heroHeader ? (int)$heroHeader['level'] : 1;
                     $hasPoints = ($heroHeader && (int)$heroHeader['unassigned_points'] > 0);
                     ?>
-                    <a href="?page=hero" class="position-relative"
+                    <a href="?page=hero" class="position-relative d-inline-flex align-items-center"
                        title="Samouraï Héros Niv.<?= $hLvl ?> — Vitalité <?= $hHp ?>%">
                         <img src="/public/assets/hero_samurai.jpg" alt="Héros"
-                             style="width:34px; height:34px; border-radius:50%; border:2px solid <?= $hHpCol ?>; object-fit:cover;">
+                             style="width:32px; height:32px; border-radius:50%; border:2px solid <?= $hHpCol ?>; object-fit:cover;">
                         <span class="badge bg-dark text-white position-absolute"
-                              style="bottom:-3px; right:-3px; font-size:0.58rem; padding:1px 3px; border-radius:3px;"><?= $hLvl ?></span>
+                              style="bottom:-3px; right:-3px; font-size:0.55rem; padding:1px 3px; border-radius:3px;"><?= $hLvl ?></span>
                         <?php if ($hasPoints): ?>
                             <span class="badge bg-danger position-absolute"
-                                  style="top:-3px; right:-3px; font-size:0.58rem; padding:1px 4px; border-radius:50%;">+</span>
+                                  style="top:-3px; right:-3px; font-size:0.55rem; padding:1px 4px; border-radius:50%;">+</span>
                         <?php endif; ?>
                     </a>
 
-                    <?php if ($isUserProtected): ?>
-                        <span class="badge bg-success-lt text-success d-none d-sm-inline-flex align-items-center gap-1"
-                              style="font-size:0.72rem; padding:0.25rem 0.55rem; cursor:help; border: 1px solid rgba(22, 163, 74, 0.35); border-radius:6px;"
-                              title="🔰 Immunité Féodale des Nouveaux Joueurs active jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?> (aucun assaut ni espionnage possible sur vos fiefs)">
-                            <span>🔰</span>
-                            <span>Immunité <?= htmlspecialchars($userProtection['formatted']) ?></span>
-                        </span>
-                    <?php endif; ?>
-
-                    <div class="dropdown">
-                        <a href="#" class="d-flex align-items-center gap-2 text-decoration-none"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <span style="width:8px; height:8px; border-radius:50%; display:inline-block;
-                                         background:<?= $factionInfo['color'] ?? '#dc2626' ?>;"></span>
-                            <span style="font-weight:700; font-size:0.85rem; color:#1e293b;"><?= htmlspecialchars($user['username']) ?></span>
-                            <?php if ($isUserProtected): ?>
-                                <span class="d-sm-none" title="Immunité active">🔰</span>
-                            <?php endif; ?>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="6 9 12 15 18 9"></polyline>
-                            </svg>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <?php if ($isUserProtected): ?>
-                                <div class="dropdown-item-text small" style="background: rgba(22, 163, 74, 0.08); border-left: 3px solid #16a34a; padding: 0.5rem 0.75rem; margin-bottom: 0.25rem;">
-                                    <div style="font-weight: 700; color: #15803d; display:flex; align-items:center; gap:0.3rem;">
-                                        <span>🔰</span> Immunité Débutant Active
-                                    </div>
-                                    <div class="text-secondary" style="font-size: 0.75rem; margin-top:0.2rem;">
-                                        Jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?> (encore <?= htmlspecialchars($userProtection['formatted']) ?>)
-                                    </div>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                            <?php endif; ?>
-                            <a href="javascript:void(0)" class="dropdown-item"
-                               onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">👤 Ma Fiche Daimyō</a>
-                            <a href="?page=alliance" class="dropdown-item">🎌 Mon Alliance</a>
-                            <a href="?page=forum" class="dropdown-item">💬 Forum Féodal</a>
-                            <a href="?page=chat" class="dropdown-item">🏮 Chat Féodal</a>
-                            <a href="javascript:void(0)" class="dropdown-item"
-                               onclick="openEditMottoModal()">📜 Ma Devise</a>
-                            <a href="?page=support" class="dropdown-item">📮 Support</a>
-                            <div class="dropdown-divider"></div>
-                            <button type="button" class="dropdown-item" id="shogun-audio-btn"
-                                    onclick="window.shogunAudio && window.shogunAudio.toggle()">
-                                <span id="shogun-audio-icon">🔇</span> Ambiance sonore
-                            </button>
-                            <button type="button" class="dropdown-item" onclick="toggleTheme()">🌓 Thème clair / sombre</button>
-                            <div class="dropdown-divider"></div>
-                            <a href="?action=logout" class="dropdown-item text-danger">🚪 Déconnexion</a>
-                        </div>
+                    <?php if ($planet): ?>
+                    <div class="d-none d-sm-block">
+                        <div style="font-weight:800; font-size:0.84rem; color:#fef3c7; line-height:1.1; white-space:nowrap;"><?= htmlspecialchars($planet['name']) ?></div>
+                        <div style="font-size:0.68rem; color:#f87171; font-family:monospace; font-weight:700;">[<?= $planet['coord_x'] ?>|<?= $planet['coord_y'] ?>]</div>
                     </div>
+                    <?php endif; ?>
                 </div>
-            </div>
-        </header>
-
-        <!-- ── BARRE 2 : Navigation principale ── -->
-        <nav class="navbar navbar-expand-md d-print-none"
-             style="background:linear-gradient(135deg,#1a0a00 0%,#2d1200 60%,#1a0a00 100%);
-                    border-bottom:2px solid rgba(194,37,43,0.5);
-                    min-height:44px; padding:0;">
-            <div class="container-fluid px-3">
 
                 <!-- Toggler mobile -->
                 <button class="navbar-toggler border-0" type="button"
@@ -283,13 +179,14 @@ $navItems = [
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
+                <!-- Navigation centrale + Menu Utilisateur descendu à droite -->
                 <div class="collapse navbar-collapse" id="mainNavBar">
                     <ul class="navbar-nav me-auto">
                         <?php foreach ($navItems as $nav):
                             $isActive = in_array($page, $nav['match']);
                         ?>
                         <li class="nav-item">
-                            <a class="nav-link px-3 py-2 d-flex align-items-center gap-1 position-relative
+                            <a class="nav-link px-2 py-2 d-flex align-items-center gap-1 position-relative
                                        <?= $isActive ? 'active fw-bold' : '' ?>"
                                href="?page=<?= $nav['page'] ?>"
                                title="<?= htmlspecialchars($nav['title']) ?>"
@@ -308,7 +205,7 @@ $navItems = [
 
                         <?php if ($questSummary): ?>
                         <li class="nav-item">
-                            <a class="nav-link px-3 py-2 d-flex align-items-center gap-1 position-relative"
+                            <a class="nav-link px-2 py-2 d-flex align-items-center gap-1 position-relative"
                                href="javascript:void(0)" onclick="openQuestModal()"
                                title="Didacticiel & Quêtes Féodales"
                                style="color:#e2d9c8; font-size:0.82rem; white-space:nowrap;
@@ -325,22 +222,213 @@ $navItems = [
                         <?php endif; ?>
                     </ul>
 
-                    <!-- Outils à droite -->
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link px-2 py-2" href="?page=docs"
-                               title="Codex du Sengoku" style="color:#e2d9c8; font-size:0.82rem;">📖</a>
-                        </li>
-                        <?php if ($auth->isAdmin()): ?>
-                        <li class="nav-item">
-                            <a class="nav-link px-2 py-2" href="?page=admin"
-                               title="Administration" style="color:#fbbf24; font-size:0.82rem;">⚙️ Admin</a>
-                        </li>
+                    <!-- Outils à droite + Bouton Menu Utilisateur (descendu dans la barre) -->
+                    <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+                        <ul class="navbar-nav d-flex flex-row align-items-center gap-1">
+                            <li class="nav-item">
+                                <a class="nav-link px-2 py-1" href="?page=docs"
+                                   title="Codex du Sengoku" style="color:#e2d9c8; font-size:0.82rem;">📖</a>
+                            </li>
+                            <?php if ($auth->isAdmin()): ?>
+                            <li class="nav-item">
+                                <a class="nav-link px-2 py-1" href="?page=admin"
+                                   title="Administration" style="color:#fbbf24; font-size:0.82rem;">⚙️ Admin</a>
+                            </li>
+                            <?php endif; ?>
+                        </ul>
+
+                        <?php if ($isUserProtected): ?>
+                            <span class="badge bg-success-lt text-success d-none d-xl-inline-flex align-items-center gap-1"
+                                  style="font-size:0.72rem; padding:0.25rem 0.55rem; cursor:help; border: 1px solid rgba(22, 163, 74, 0.45); border-radius:6px;"
+                                  title="🔰 Immunité Féodale active jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?> (aucun assaut ni espionnage possible sur vos fiefs)">
+                                <span>🔰</span>
+                                <span><?= htmlspecialchars($userProtection['formatted']) ?></span>
+                            </span>
                         <?php endif; ?>
-                    </ul>
+
+                        <!-- Menu Déroulant Utilisateur (Daimyō) -->
+                        <div class="dropdown">
+                            <a href="#" class="btn btn-sm btn-dark d-flex align-items-center gap-2 text-decoration-none px-2 py-1"
+                               data-bs-toggle="dropdown" aria-expanded="false"
+                               style="background:rgba(255,255,255,0.08); border:1px solid rgba(251,191,36,0.35); border-radius:6px;">
+                                <span style="width:8px; height:8px; border-radius:50%; display:inline-block;
+                                             background:<?= $factionInfo['color'] ?? '#dc2626' ?>;"></span>
+                                <span style="font-weight:700; font-size:0.82rem; color:#fef3c7;"><?= htmlspecialchars($user['username']) ?></span>
+                                <?php if ($isUserProtected): ?>
+                                    <span class="d-sm-none" title="Immunité active">🔰</span>
+                                <?php endif; ?>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#fbbf24;">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end shadow-lg" style="min-width:220px; z-index:1060;">
+                                <?php if ($isUserProtected): ?>
+                                    <div class="dropdown-item-text small" style="background: rgba(22, 163, 74, 0.08); border-left: 3px solid #16a34a; padding: 0.5rem 0.75rem; margin-bottom: 0.25rem;">
+                                        <div style="font-weight: 700; color: #15803d; display:flex; align-items:center; gap:0.3rem;">
+                                            <span>🔰</span> Immunité Débutant Active
+                                        </div>
+                                        <div class="text-secondary" style="font-size: 0.75rem; margin-top:0.2rem;">
+                                            Jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?> (encore <?= htmlspecialchars($userProtection['formatted']) ?>)
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                <?php endif; ?>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                   onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">👤 Ma Fiche Daimyō</a>
+                                <a href="?page=alliance" class="dropdown-item">🎌 Mon Alliance</a>
+                                <a href="?page=forum" class="dropdown-item">💬 Forum Féodal</a>
+                                <a href="?page=chat" class="dropdown-item">🏮 Chat Féodal</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                   onclick="openEditMottoModal()">📜 Ma Devise</a>
+                                <a href="?page=support" class="dropdown-item">📮 Support</a>
+                                <div class="dropdown-divider"></div>
+                                <button type="button" class="dropdown-item" id="shogun-audio-btn"
+                                        onclick="window.shogunAudio && window.shogunAudio.toggle()">
+                                    <span id="shogun-audio-icon">🔇</span> Ambiance sonore
+                                </button>
+                                <button type="button" class="dropdown-item" onclick="toggleTheme()">🌓 Thème clair / sombre</button>
+                                <div class="dropdown-divider"></div>
+                                <a href="?action=logout" class="dropdown-item text-danger">🚪 Déconnexion</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </nav>
+
+        <?php if ($planet): ?>
+        <!-- ── 4 CARRÉS DE RESSOURCES CENTRÉS (Largeur de la frame centrale container-xl) ── -->
+        <div class="container-xl d-print-none my-2">
+            <div class="row g-2 justify-content-center">
+                <?php
+                $pctMetal = min(100, ($planet['metal'] / max(1, $planet['metal_max'])) * 100);
+                $pctCrystal = min(100, ($planet['crystal'] / max(1, $planet['crystal_max'])) * 100);
+                $pctDeut = min(100, ($planet['deuterium'] / max(1, $planet['deuterium_max'])) * 100);
+
+                $eBalance = $planet['energy_max'] - $planet['energy_used'];
+                $eOk = ($eBalance >= 0);
+                $pctEnergy = ($planet['energy_max'] > 0) ? min(100, ($planet['energy_used'] / $planet['energy_max']) * 100) : 0;
+                ?>
+
+                <!-- Carré 1 : Bois de Cèdre -->
+                <div class="col-6 col-md-3">
+                    <div class="card h-100 shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:8px; border-left:4px solid #92400e !important;">
+                        <div class="card-body p-2 d-flex flex-column justify-content-between">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <div class="d-flex align-items-center gap-1">
+                                    <span style="font-size:1.15rem;">🪵</span>
+                                    <strong style="font-size:0.82rem; color:#92400e;">Bois</strong>
+                                </div>
+                                <span class="badge bg-warning-lt text-dark" style="font-size:0.65rem;" title="Production horaire de Bois">
+                                    +<?= number_format($planet['prod_rates']['metal']) ?>/h
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between my-1" style="font-variant-numeric:tabular-nums;">
+                                <span class="fw-bold" style="font-size:0.92rem; color:#1c1917;"
+                                      id="res-val-metal"
+                                      data-current="<?= $planet['metal'] ?>"
+                                      data-max="<?= $planet['metal_max'] ?>"
+                                      data-prod="<?= $planet['prod_rates']['metal'] ?>">
+                                    <?= number_format((int)$planet['metal']) ?>
+                                </span>
+                                <span class="text-muted small" style="font-size:0.68rem;">/ <?= number_format($planet['metal_max']) ?></span>
+                            </div>
+                            <div class="progress" style="height:5px; border-radius:3px; background:#e7e5e4;">
+                                <div class="progress-bar bg-warning" id="bar-metal" style="width:<?= $pctMetal ?>%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carré 2 : Pierre de Taille -->
+                <div class="col-6 col-md-3">
+                    <div class="card h-100 shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:8px; border-left:4px solid #1e40af !important;">
+                        <div class="card-body p-2 d-flex flex-column justify-content-between">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <div class="d-flex align-items-center gap-1">
+                                    <span style="font-size:1.15rem;">🪨</span>
+                                    <strong style="font-size:0.82rem; color:#1e40af;">Pierre</strong>
+                                </div>
+                                <span class="badge bg-primary-lt text-primary" style="font-size:0.65rem;" title="Production horaire de Pierre">
+                                    +<?= number_format($planet['prod_rates']['crystal']) ?>/h
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between my-1" style="font-variant-numeric:tabular-nums;">
+                                <span class="fw-bold" style="font-size:0.92rem; color:#1c1917;"
+                                      id="res-val-crystal"
+                                      data-current="<?= $planet['crystal'] ?>"
+                                      data-max="<?= $planet['crystal_max'] ?>"
+                                      data-prod="<?= $planet['prod_rates']['crystal'] ?>">
+                                    <?= number_format((int)$planet['crystal']) ?>
+                                </span>
+                                <span class="text-muted small" style="font-size:0.68rem;">/ <?= number_format($planet['crystal_max']) ?></span>
+                            </div>
+                            <div class="progress" style="height:5px; border-radius:3px; background:#e7e5e4;">
+                                <div class="progress-bar bg-primary" id="bar-crystal" style="width:<?= $pctCrystal ?>%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carré 3 : Riz Impérial -->
+                <div class="col-6 col-md-3">
+                    <div class="card h-100 shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:8px; border-left:4px solid #166534 !important;">
+                        <div class="card-body p-2 d-flex flex-column justify-content-between">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <div class="d-flex align-items-center gap-1">
+                                    <span style="font-size:1.15rem;">🌾</span>
+                                    <strong style="font-size:0.82rem; color:#166534;">Riz</strong>
+                                </div>
+                                <span class="badge bg-success-lt text-success" style="font-size:0.65rem;" title="Production horaire de Riz (Koku)">
+                                    +<?= number_format($planet['prod_rates']['deuterium']) ?>/h
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between my-1" style="font-variant-numeric:tabular-nums;">
+                                <span class="fw-bold" style="font-size:0.92rem; color:#1c1917;"
+                                      id="res-val-deut"
+                                      data-current="<?= $planet['deuterium'] ?>"
+                                      data-max="<?= $planet['deuterium_max'] ?>"
+                                      data-prod="<?= $planet['prod_rates']['deuterium'] ?>">
+                                    <?= number_format((int)$planet['deuterium']) ?>
+                                </span>
+                                <span class="text-muted small" style="font-size:0.68rem;">/ <?= number_format($planet['deuterium_max']) ?></span>
+                            </div>
+                            <div class="progress" style="height:5px; border-radius:3px; background:#e7e5e4;">
+                                <div class="progress-bar bg-success" id="bar-deut" style="width:<?= $pctDeut ?>%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carré 4 : Sérénité Shinto -->
+                <div class="col-6 col-md-3">
+                    <div class="card h-100 shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:8px; border-left:4px solid <?= $eOk ? '#166534' : '#dc2626' ?> !important;">
+                        <div class="card-body p-2 d-flex flex-column justify-content-between">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <div class="d-flex align-items-center gap-1">
+                                    <span style="font-size:1.15rem;">⛩️</span>
+                                    <strong style="font-size:0.82rem; color:<?= $eOk ? '#166534' : '#dc2626' ?>;">Sérénité</strong>
+                                </div>
+                                <span class="badge <?= $eOk ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger' ?>" style="font-size:0.65rem;" title="Énergie et Sérénité du Fief">
+                                    <?= $eOk ? 'Équilibre' : 'Déficit' ?>
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between my-1" style="font-variant-numeric:tabular-nums;">
+                                <span class="fw-bold" style="font-size:0.92rem; color:<?= $eOk ? '#166534' : '#dc2626' ?>;">
+                                    <?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?>
+                                </span>
+                                <span class="text-muted small" style="font-size:0.68rem;"><?= number_format($planet['energy_used']) ?> / <?= number_format($planet['energy_max']) ?></span>
+                            </div>
+                            <div class="progress" style="height:5px; border-radius:3px; background:#e7e5e4;">
+                                <div class="progress-bar <?= $eOk ? 'bg-success' : 'bg-danger' ?>" style="width:<?= $pctEnergy ?>%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Bannière d'alerte Tour de Guet -->
         <?php if (!empty($activeMissions)): ?>
