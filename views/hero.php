@@ -117,6 +117,9 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 case 'production_stone':
                     $badges[] = '<span class="badge bg-secondary-lt text-secondary border border-secondary-lt">+' . (int)$v . ' Pierre/h</span>';
                     break;
+                case 'cages_count':
+                    $badges[] = '<span class="badge bg-success-lt text-success border border-success-lt fw-bold">🎋 ' . (int)$v . ' Cages de capture</span>';
+                    break;
                 default:
                     $badges[] = '<span class="badge bg-secondary-lt">+' . htmlspecialchars((string)$v) . ' ' . htmlspecialchars($k) . '</span>';
                     break;
@@ -815,7 +818,12 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                             🔍 Examiner
                                         </button>
                                         <div>
-                                            <?php if ($isEq): ?>
+                                            <?php if ($it['item_type'] === 'consumable'): ?>
+                                                <?php $cCount = (int)($it['bonus_data']['cages_count'] ?? 0); ?>
+                                                <span class="badge bg-success-lt text-success fw-bold" style="font-size:0.75rem;">
+                                                    🎋 En réserve : <?= $cCount ?>
+                                                </span>
+                                            <?php elseif ($isEq): ?>
                                                 <button type="button" onclick="executeUnequip('<?= htmlspecialchars($itemSlot) ?>')" class="btn btn-sm btn-outline-danger">
                                                     Déséquiper
                                                 </button>
@@ -1083,7 +1091,8 @@ function openItemDetailModal(item) {
         'helmet': '🪖 Casque Kabuto',
         'armor': '🥋 Armure O-Yoroi',
         'horse': '🐎 Monture & Destrier',
-        'talisman': '📿 Talisman Shintō'
+        'talisman': '📿 Talisman Shintō',
+        'consumable': '🎋 Consommable Féodal'
     };
     const slotCode = item.slot || item.item_type || 'weapon';
     const slotName = slotLabels[slotCode] || slotCode || 'Relique';
@@ -1111,6 +1120,7 @@ function openItemDetailModal(item) {
             else if (k === 'production_rice') badgeHtml = `<span class="badge bg-green-lt text-green border border-green-lt fs-5 px-2 py-1">+${v} Riz/h</span>`;
             else if (k === 'production_wood') badgeHtml = `<span class="badge bg-teal-lt text-teal border border-teal-lt fs-5 px-2 py-1">+${v} Bois/h</span>`;
             else if (k === 'production_stone') badgeHtml = `<span class="badge bg-secondary-lt text-secondary border border-secondary-lt fs-5 px-2 py-1">+${v} Pierre/h</span>`;
+            else if (k === 'cages_count') badgeHtml = `<span class="badge bg-success-lt text-success border border-success-lt fs-5 px-2 py-1 fw-bold">🎋 ${v} Cages disponibles</span>`;
             else badgeHtml = `<span class="badge bg-secondary-lt fs-5 px-2 py-1">+${v} ${k}</span>`;
             bonusesContainer.innerHTML += badgeHtml;
         }
@@ -1119,7 +1129,15 @@ function openItemDetailModal(item) {
     }
 
     const actionsContainer = document.getElementById('itemModalActions');
-    if (isEquipped) {
+    if (slotCode === 'consumable' || item.item_type === 'consumable') {
+        const cCount = (bData && bData.cages_count) ? bData.cages_count : 0;
+        actionsContainer.innerHTML = `
+            <div class="small text-muted">🎋 Consommable automatique lors des raids et attaques d'oasis (Stock : <strong>${cCount}</strong>)</div>
+            <button type="button" class="btn btn-secondary" onclick="closeItemDetailModal()">
+                Fermer
+            </button>
+        `;
+    } else if (isEquipped) {
         actionsContainer.innerHTML = `
             <button type="button" class="btn btn-outline-danger" onclick="executeUnequip('${slotCode}')">
                 Déséquiper

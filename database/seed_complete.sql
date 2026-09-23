@@ -59,7 +59,8 @@ INSERT INTO `units` VALUES
 ('piquier_ashigaru_yari','Piquier Ashigaru (Yari)','terran',1,'🎋','piquier_ashigaru_yari.jpg',120,100,30,40,35,20,7,50,90,'Fantassin de base discipliné de l\'armée Oda, maniant la longue lance yari avec rigueur.'),
 ('samourai_katana','Samouraï au Katana','terran',3,'⚔️','samourai_katana.jpg',250,180,80,85,45,30,8,70,480,'Noble bretteur d\'élite au moral d\'acier, expert dans le combat rapproché au fil tranchant.'),
 ('sanglier_sauvage','Sanglier Enragé des Monts','all',1,'🐗','sanglier_sauvage.jpg',0,0,0,35,40,20,7,0,0,'Bête sauvage agressive chargeant en furie quiconque s\'approche de sa tanière.'),
-('sentinelle_yari_tokugawa','Sentinelle Yari Tokugawa','aethelis',1,'🛡️','sentinelle_yari_tokugawa.jpg',110,120,40,42,38,25,8,45,95,'Garde défensif dévoué à la protection imprenable du domaine castral.');
+('sentinelle_yari_tokugawa','Sentinelle Yari Tokugawa','aethelis',1,'🛡️','sentinelle_yari_tokugawa.jpg',110,120,40,42,38,25,8,45,95,'Garde défensif dévoué à la protection imprenable du domaine castral.'),
+('colonizer','Pionnier Féodal (Colon)','all',3,'⛩️','expedition_etablissement_castral.jpg',4500,4000,4500,10,30,20,4,3000,7200,'Troupe de pionniers et maîtres charpentiers équipés pour fonder un nouveau village castral indépendant.');
 /*!40000 ALTER TABLE `units` ENABLE KEYS */;
 UNLOCK TABLES;
 

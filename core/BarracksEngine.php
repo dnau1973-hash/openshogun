@@ -61,7 +61,13 @@ class BarracksEngine {
         $tierReqs = [1 => 1, 2 => 3, 3 => 5, 4 => 8];
         $tierFlour = [1 => 0, 2 => 15, 3 => 35, 4 => 75];
 
+        $filteredUnits = [];
+        $excludedCodes = ['sanglier_sauvage', 'loup_honshu', 'ours_hokkaido', 'colonizer'];
+
         foreach ($units as &$u) {
+            if (in_array($u['code'], $excludedCodes)) {
+                continue; // Les animaux ne sont plus entraînables (capturés via cages) et les colons se forment au Tenshu
+            }
             $requiredLvl = $tierReqs[$u['tier']] ?? 1;
             $u['required_barracks_level'] = $requiredLvl;
             $u['can_train'] = ($barracksLvl >= $requiredLvl);
@@ -74,9 +80,10 @@ class BarracksEngine {
 
             $effectiveTime = max(5, (int)(($u['base_train_time'] / (1 + ($barracksLvl * 0.15))) * $vorashBonus * $feastSpeedBonus / $speed));
             $u['effective_train_time'] = $effectiveTime;
+            $filteredUnits[] = $u;
         }
 
-        return $units;
+        return $filteredUnits;
     }
 
     /**
@@ -100,6 +107,13 @@ class BarracksEngine {
     public function trainUnits(int $planetId, string $unitCode, int $count, string $faction): array {
         if ($count <= 0) {
             throw new Exception("Effectif de recrues invalide.");
+        }
+
+        if (in_array($unitCode, ['sanglier_sauvage', 'loup_honshu', 'ours_hokkaido'])) {
+            throw new Exception("Les animaux sauvages ne peuvent plus être formés au Dojo. Utilisez les Cages du Héros pour les capturer lors de vos expéditions !");
+        }
+        if ($unitCode === 'colonizer') {
+            throw new Exception("Les Colons Pionniers doivent être formés au Tenshu (Palais Castral).");
         }
 
         $planet = $this->planetEngine->updatePlanet($planetId);

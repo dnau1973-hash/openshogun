@@ -226,10 +226,26 @@ class FleetEngine {
         } elseif ($missionType === 'colonize') {
             // Colonisation si la planète est libre
             if ($targetPlanet['user_id'] === null) {
-                $this->colonizePlanet($targetPlanetId, (int)$attackerUser['id'], $attackerUser['username']);
-                // Le vaisseau colonial est consommé, les escortes rentrent
+                $this->colonizePlanet($targetPlanetId, (int)$attackerUser['id'], $attackerUser['username'], $sourcePlanetId);
+                // Le colon est consommé, les escortes éventuelles rentrent
                 $fleet = json_decode($mission['fleet_data'], true) ?: [];
-                unset($fleet['colony_ship']);
+                if (isset($fleet['colonizer'])) {
+                    $fleet['colonizer']--;
+                    if ($fleet['colonizer'] <= 0) unset($fleet['colonizer']);
+                } elseif (isset($fleet['colony_ship'])) {
+                    $fleet['colony_ship']--;
+                    if ($fleet['colony_ship'] <= 0) unset($fleet['colony_ship']);
+                }
+
+                // Notifier le Daimyo fondateur
+                require_once __DIR__ . '/MessageEngine.php';
+                $msgEngine = new MessageEngine();
+                $msgEngine->sendSystemMessage(
+                    (int)$attackerUser['id'],
+                    "Expansion Féodale : Nouveau Fief Établi !",
+                    "Félicitations noble Daimyō ! Vos Pionniers Féodaux ont établi avec succès les fondations d'un nouveau domaine à l'emplacement [{$targetPlanet['coord_x']}|{$targetPlanet['coord_y']}]. Ses 18 parcelles de ressources et ses 16 emplacements castraux sont prêts à être développés sous votre commandement."
+                );
+
                 if (array_sum($fleet) > 0) {
                     $this->db->prepare("UPDATE fleet_missions SET status = 'returning', fleet_data = ? WHERE id = ?")
                         ->execute([json_encode($fleet), $missionId]);
@@ -344,12 +360,18 @@ class FleetEngine {
     /**
      * Établissement d'un nouveau fief sur une terre libre
      */
-    private function colonizePlanet(int $planetId, int $userId, string $username): void {
+    private function colonizePlanet(int $planetId, int $userId, string $username, ?int $founderPlanetId = null): void {
+        // Déterminer le numéro séquentiel du fief pour le Daimyo
+        $stmtCount = $this->db->prepare("SELECT COUNT(*) FROM planets WHERE user_id = ?");
+        $stmtCount->execute([$userId]);
+        $villageNum = (int)$stmtCount->fetchColumn() + 1;
+        $defaultName = "Fief de " . ucfirst($username) . " #" . $villageNum;
+
         $this->db->prepare("
             UPDATE planets 
-            SET user_id = ?, name = ?, is_capital = 0, last_resource_update = UNIX_TIMESTAMP() 
+            SET user_id = ?, name = ?, is_capital = 0, founder_planet_id = ?, last_resource_update = UNIX_TIMESTAMP() 
             WHERE id = ?
-        ")->execute([$userId, "Fief " . ucfirst($username), $planetId]);
+        ")->execute([$userId, $defaultName, $founderPlanetId, $planetId]);
 
         // Initialiser les parcelles de ressources du domaine (Style Travian, niveau 0 = libre)
         $countFields = (int)$this->db->query("SELECT COUNT(*) FROM planet_fields WHERE planet_id = {$planetId}")->fetchColumn();
@@ -357,7 +379,7 @@ class FleetEngine {
             VillageFieldGenerator::populatePlanetFields($this->db, $planetId, null, 0, false);
         }
 
-        // Aucun bâtiment pré-placé dans les slots (slots 100% libres pour le joueur)
+        // Emplacements urbains 100% libres pour le joueur
     }
 
     /**
@@ -564,6 +586,19 @@ class FleetEngine {
 
         if ($totalShips === 0 && !$hasHero) {
             throw new Exception("Veuillez sélectionner au moins un régiment, un engin de siège ou votre Samouraï Héros.");
+        }
+
+        // Règle spécifique à la colonisation / fondation de fief
+        if ($missionType === 'colonize') {
+            if ($targetOasisId || !$targetPlanet) {
+                throw new Exception("Une expédition de colonisation doit cibler un territoire de village libre, pas une oasis.");
+            }
+            if ($targetPlanet['user_id'] !== null) {
+                throw new Exception("Ce territoire est déjà gouverné par un autre seigneur féodal. Impossible d'y fonder un fief.");
+            }
+            if (empty($cleanFleet['colonizer']) && empty($cleanFleet['colony_ship'])) {
+                throw new Exception("Une expédition de colonisation nécessite au moins 1 Pionnier Féodal (Colon ⛩️) pour ériger le nouveau fief.");
+            }
         }
 
         // 4. Calcul de distance et durée

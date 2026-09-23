@@ -12,8 +12,18 @@ require_once __DIR__ . '/../../core/HeroEngine.php';
 require_once __DIR__ . '/../../config/game_constants.php';
 
 $auth = new Auth();
+if (!empty($_GET['switch_planet'])) {
+    $auth->setCurrentPlanet((int)$_GET['switch_planet']);
+    $cleanUri = preg_replace('/([&?])switch_planet=\d+(&|$)/', '$1', $_SERVER['REQUEST_URI'] ?? '');
+    $cleanUri = rtrim($cleanUri, '?&');
+    if (empty($cleanUri)) $cleanUri = 'index.php';
+    header("Location: $cleanUri");
+    exit;
+}
 $user = $auth->getCurrentUser();
 $planet = $auth->getCurrentPlanet();
+$planetEngine = new PlanetEngine();
+$allUserPlanets = ($user && $planet) ? $planetEngine->getUserPlanets((int)$user['id']) : [];
 $messageEngine = new MessageEngine();
 $unreadMessagesCount = $messageEngine->getUnreadCount((int)$user['id']);
 
@@ -162,9 +172,40 @@ $navItems = [
                         </a>
 
                         <?php if ($planet): ?>
-                        <div class="d-none d-sm-block">
-                            <div style="font-weight:800; font-size:0.84rem; color:#fef3c7; line-height:1.1; white-space:nowrap;"><?= htmlspecialchars($planet['name']) ?></div>
-                            <div style="font-size:0.68rem; color:#f87171; font-family:monospace; font-weight:700;">[<?= $planet['coord_x'] ?>|<?= $planet['coord_y'] ?>]</div>
+                        <div class="dropdown ms-1">
+                            <button class="btn btn-sm dropdown-toggle d-flex flex-column text-start p-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background:rgba(255,255,255,0.07); border:1px solid rgba(245,158,11,0.25); border-radius:6px; max-width:170px;">
+                                <div style="font-weight:800; font-size:0.82rem; color:#fef3c7; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    <?= !empty($planet['is_capital']) ? '👑 ' : '🏯 ' ?><?= htmlspecialchars($planet['name']) ?>
+                                </div>
+                                <div style="font-size:0.67rem; color:#f87171; font-family:monospace; font-weight:700;">
+                                    [<?= $planet['coord_x'] ?>|<?= $planet['coord_y'] ?>] <?= !empty($planet['is_capital']) ? '<span style="color:#fbbf24; font-size:0.60rem;">(Capitale)</span>' : '' ?>
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark shadow" style="background:#1e293b; border:1px solid rgba(245,158,11,0.3); min-width:220px; z-index:1050;">
+                                <li class="dropdown-header text-uppercase text-warning fw-bold d-flex justify-content-between align-items-center" style="font-size:0.68rem; letter-spacing:0.5px;">
+                                    <span>Vos Fiefs Féodaux</span>
+                                    <span class="badge bg-secondary"><?= count($allUserPlanets) ?></span>
+                                </li>
+                                <?php foreach ($allUserPlanets as $p): 
+                                    $isCurrent = ((int)$p['id'] === (int)$planet['id']);
+                                ?>
+                                    <li>
+                                        <a class="dropdown-item d-flex justify-content-between align-items-center py-2 <?= $isCurrent ? 'active fw-bold' : '' ?>" href="?switch_planet=<?= (int)$p['id'] ?>" style="<?= $isCurrent ? 'background:rgba(245,158,11,0.2); color:#fbbf24;' : '' ?>">
+                                            <div>
+                                                <div style="font-size:0.84rem; line-height:1.2;">
+                                                    <?= !empty($p['is_capital']) ? '👑' : '🏯' ?> <?= htmlspecialchars($p['name']) ?>
+                                                </div>
+                                                <div style="font-size:0.7rem; color:#94a3b8; font-family:monospace;">
+                                                    [<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>] <?= !empty($p['is_capital']) ? '<span class="text-warning">Capitale</span>' : '' ?>
+                                                </div>
+                                            </div>
+                                            <?php if ($isCurrent): ?>
+                                                <span class="badge bg-warning text-dark" style="font-size:0.65rem;">Actif</span>
+                                            <?php endif; ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
                         </div>
                         <?php endif; ?>
                     </div>

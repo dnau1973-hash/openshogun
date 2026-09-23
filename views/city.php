@@ -154,7 +154,15 @@ foreach (BUILDINGS as $code => $bInfo) {
     <div class="card">
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
             <div>
-                <h2 class="card-title">🏯 Cité Castrale & Palais du Daimyō - <?= htmlspecialchars($planet['name']) ?></h2>
+                <h2 class="card-title d-flex align-items-center gap-2">
+                    <span>🏯 Cité Castrale & Palais du Daimyō - <?= htmlspecialchars($planet['name']) ?></span>
+                    <?php if (!empty($planet['is_capital'])): ?>
+                        <span class="badge bg-warning text-dark fw-bold" style="font-size:0.72rem;">👑 Capitale</span>
+                    <?php endif; ?>
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" title="Renommer ce fief" onclick="openCityRenamePrompt()" style="font-size:0.75rem;">
+                        ✏️ Renommer
+                    </button>
+                </h2>
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
                     Forteresse Principale : <strong style="color:var(--border-highlight, #c2252b);">Tenshu Niveau <?= $hqLevel ?></strong> 
                     <span style="opacity:0.85;">&bull; 👥 <strong><?= number_format($pop) ?></strong>/<?= number_format($popMax) ?> Habitants (<span class="text-success">+<?= $popBonus ?>% vitesse chantiers</span>)</span>
@@ -608,4 +616,28 @@ function toggleCityViewMode() {
         toggleBtn.innerText = '📋 Fiches Détaillées';
     }
 }
+
+async function openCityRenamePrompt() {
+    const currentName = <?= json_encode($planet['name']) ?>;
+    const newName = prompt("Entrez le nouveau nom de ce village :", currentName);
+    if (!newName || newName.trim() === '' || newName.trim() === currentName) return;
+
+    const formData = new FormData();
+    formData.append('action', 'rename');
+    formData.append('name', newName.trim());
+
+    try {
+        const res = await fetch('/api/planet.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert(data.error || 'Erreur lors du renommage.');
+        }
+    } catch (e) {
+        alert('Erreur réseau avec le serveur.');
+    }
+}
 </script>
+

@@ -827,14 +827,14 @@ class HeroEngine {
         $rewardedItem = null;
         $ralliedTroops = null;
 
-        if ($lootRoll <= 50) {
+        if ($lootRoll <= 40) {
             // Ressources
             $mult = rand(5, 15) * 100;
             $cargoData['metal'] = $mult;
             $cargoData['crystal'] = (int)round($mult * 0.8);
             $cargoData['deuterium'] = (int)round($mult * 0.6);
             $lootMsg = "Des coffres de guerre dissimulés contenant {$cargoData['metal']} 🪵 Bois, {$cargoData['crystal']} 🪨 Pierre et {$cargoData['deuterium']} 🌾 Koku de Riz ont été découverts !";
-        } elseif ($lootRoll <= 80) {
+        } elseif ($lootRoll <= 65) {
             // Équipement / Arsenal (Relique unique - jamais de doublon)
             $rewardedItem = $this->grantRandomEquipment($userId);
             if ($rewardedItem) {
@@ -847,6 +847,12 @@ class HeroEngine {
                 $cargoData['deuterium'] = (int)round($mult * 0.6);
                 $lootMsg = "Possédant déjà toutes les reliques sacrées de l'archipel, votre Samouraï découvre à la place un opulent trésor féodal : {$cargoData['metal']} 🪵 Bois, {$cargoData['crystal']} 🪨 Pierre et {$cargoData['deuterium']} 🌾 Koku de Riz !";
             }
+        } elseif ($lootRoll <= 80) {
+            // Cages de Capture Féodales (Kago 🎋) pour capturer les bêtes sauvages dans les oasis
+            $cagesFound = rand(4, 10);
+            $this->addCages($userId, $cagesFound);
+            $totalCages = $this->getCagesCount($userId);
+            $lootMsg = "Un lot de <strong>{$cagesFound} Cages Féodales de Chasse aux Fauves (Kago 🎋)</strong> en bambou armé a été récupéré (Stock total : {$totalCages}) ! Votre Samouraï pourra s'en servir pour capturer vivantes les bêtes sauvages des oasis sans combat.";
         } else {
             // Ralliement de guerriers conscrits
             $faction = $hero['faction'] ?? 'terran';
@@ -1345,4 +1351,73 @@ class HeroEngine {
             return ['success' => false, 'error' => 'Erreur lors du déséquipement : ' . $e->getMessage()];
         }
     }
+
+    /**
+     * Récupère le nombre de Cages Féodales (Kago 🎋) en stock pour le joueur
+     */
+    public function getCagesCount(int $userId): int {
+        $this->ensureSchema();
+        $stmt = $this->db->prepare("SELECT id, bonus_data FROM hero_inventory WHERE user_id = ? AND item_code = 'cages_capture' LIMIT 1");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        if (!$row) return 0;
+        $data = is_string($row['bonus_data']) ? json_decode($row['bonus_data'], true) : $row['bonus_data'];
+        return (int)($data['cages_count'] ?? 0);
+    }
+
+    /**
+     * Ajoute des Cages Féodales à l'inventaire du joueur
+     */
+    public function addCages(int $userId, int $count): void {
+        $this->ensureSchema();
+        if ($count <= 0) return;
+
+        $stmt = $this->db->prepare("SELECT id, bonus_data FROM hero_inventory WHERE user_id = ? AND item_code = 'cages_capture' LIMIT 1");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+
+        if ($row) {
+            $data = is_string($row['bonus_data']) ? json_decode($row['bonus_data'], true) : $row['bonus_data'];
+            $newCount = max(0, (int)($data['cages_count'] ?? 0) + $count);
+            $data['cages_count'] = $newCount;
+            $this->db->prepare("UPDATE hero_inventory SET bonus_data = ? WHERE id = ?")
+                ->execute([json_encode($data), $row['id']]);
+        } else {
+            $data = ['cages_count' => $count];
+            $stmtIns = $this->db->prepare("
+                INSERT INTO hero_inventory (user_id, item_code, item_type, name, description, bonus_data, is_equipped)
+                VALUES (?, 'cages_capture', 'consumable', 'Cages Féodales de Chasse (Kago 🎋)', 'Grandes cages de bambou armé permettant au Samouraï de capturer des bêtes sauvages (sangliers, loups, ours) dans les oasis sans combat pour protéger vos fiefs.', ?, 0)
+            ");
+            $stmtIns->execute([$userId, json_encode($data)]);
+        }
+    }
+
+    /**
+     * Consomme jusqu'à $count Cages Féodales et retourne le nombre effectivement consommé
+     */
+    public function consumeCages(int $userId, int $count): int {
+        $this->ensureSchema();
+        if ($count <= 0) return 0;
+
+        $current = $this->getCagesCount($userId);
+        $used = min($current, $count);
+        if ($used > 0) {
+            $stmt = $this->db->prepare("SELECT id, bonus_data FROM hero_inventory WHERE user_id = ? AND item_code = 'cages_capture' LIMIT 1");
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch();
+            if ($row) {
+                $data = is_string($row['bonus_data']) ? json_decode($row['bonus_data'], true) : $row['bonus_data'];
+                $newCount = max(0, (int)($data['cages_count'] ?? 0) - $used);
+                $data['cages_count'] = $newCount;
+                if ($newCount <= 0) {
+                    $this->db->prepare("DELETE FROM hero_inventory WHERE id = ?")->execute([$row['id']]);
+                } else {
+                    $this->db->prepare("UPDATE hero_inventory SET bonus_data = ? WHERE id = ?")
+                        ->execute([json_encode($data), $row['id']]);
+                }
+            }
+        }
+        return $used;
+    }
 }
+

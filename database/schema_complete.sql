@@ -397,10 +397,12 @@ CREATE TABLE `planets` (
   `last_famine_losses` int(10) unsigned NOT NULL DEFAULT 0,
   `last_resource_update` int(10) unsigned NOT NULL DEFAULT 0,
   `is_capital` tinyint(1) NOT NULL DEFAULT 1,
+  `founder_planet_id` int(10) unsigned DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_coordinates` (`coord_x`,`coord_y`),
   KEY `idx_user_planet` (`user_id`),
+  KEY `idx_founder_planet` (`founder_planet_id`),
   CONSTRAINT `fk_planets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

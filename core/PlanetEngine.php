@@ -24,6 +24,9 @@ class PlanetEngine {
      * Met à jour les files d'attente terminées et recalcule les ressources de la planète
      */
     public function updatePlanet(int $planetId): array {
+        // 0. Auto-migration du schéma si nécessaire
+        $this->ensureSchemaMigration();
+
         // 1. Résolution des constructions terminées
         $this->processConstructionQueue($planetId);
 
@@ -854,6 +857,36 @@ class PlanetEngine {
                 ('famine_rate', '3.0', 'float', 'Pourcentage horaire de pertes/désertion des troupes d\'élite en famine'),
                 ('famine_flour_consumption', '1.0', 'float', 'Farine nécessaire par heure pour 100 soldats d\'élite')
             ");
+
+            // 7. Colonne founder_planet_id sur planets pour tracer le village d'origine des colons
+            $stmtFounder = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'founder_planet_id'");
+            if ($stmtFounder && $stmtFounder->rowCount() === 0) {
+                $this->db->exec("ALTER TABLE `planets` ADD COLUMN `founder_planet_id` INT UNSIGNED DEFAULT NULL, ADD INDEX `idx_founder_planet` (`founder_planet_id`)");
+            }
+
+            // 8. Unité colonizer dans la table units
+            $stmtCol = $this->db->query("SELECT code FROM `units` WHERE `code` = 'colonizer'");
+            if ($stmtCol && $stmtCol->rowCount() === 0) {
+                $this->db->exec("INSERT INTO `units` 
+                    (`code`, `name`, `faction`, `tier`, `icon`, `image`, `metal_cost`, `crystal_cost`, `deuterium_cost`, `rice_flour_cost`, `attack`, `def_infantry`, `def_mech`, `speed`, `cargo_capacity`, `base_train_time`, `description`) 
+                    VALUES 
+                    ('colonizer', 'Pionnier Féodal (Colon)', 'all', 3, '⛩️', 'expedition_etablissement_castral.jpg', 4500, 4000, 4500, 150, 10, 30, 20, 4, 3000, 7200, 'Troupe de pionniers et maîtres charpentiers équipés pour fonder un nouveau village castral indépendant.')
+                ");
+            }
+
+            // 9. Assurer qu'au moins un village par joueur possède is_capital = 1 (le premier créé)
+            $this->db->exec("
+                UPDATE planets p
+                JOIN (
+                    SELECT user_id, MIN(id) as first_id 
+                    FROM planets 
+                    WHERE user_id IS NOT NULL 
+                    GROUP BY user_id
+                ) fp ON p.id = fp.first_id
+                SET p.is_capital = 1
+                WHERE p.user_id IS NOT NULL 
+                  AND p.user_id NOT IN (SELECT DISTINCT user_id FROM (SELECT user_id FROM planets WHERE is_capital = 1) existing_cap)
+            ");
         } catch (Exception $e) {
             // Ignorer silencieusement si déjà en cours ou permissions limitées
         }
@@ -1248,6 +1281,237 @@ class PlanetEngine {
             'finishes_at' => $finishesAt
         ];
     }
+
+    /**
+     * Récupère tous les fiefs/villages d'un joueur avec métadonnées utiles
+     */
+    public function getUserPlanets(int $userId): array {
+        $this->ensureSchemaMigration();
+        $stmt = $this->db->prepare("
+            SELECT p.*, 
+                   (SELECT COUNT(*) FROM planet_fields WHERE planet_id = p.id) as fields_count,
+                   (SELECT level FROM planet_buildings WHERE planet_id = p.id AND building_type = 'hq') as hq_level
+            FROM planets p
+            WHERE p.user_id = ?
+            ORDER BY p.is_capital DESC, p.id ASC
+        ");
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Renomme un village du joueur
+     */
+    public function renamePlanet(int $planetId, int $userId, string $newName): array {
+        $newName = trim(strip_tags($newName));
+        if (mb_strlen($newName) < 2 || mb_strlen($newName) > 40) {
+            return ['success' => false, 'error' => "Le nom du village doit contenir entre 2 et 40 caractères."];
+        }
+
+        $stmt = $this->db->prepare("SELECT id FROM planets WHERE id = ? AND user_id = ?");
+        $stmt->execute([$planetId, $userId]);
+        if (!$stmt->fetch()) {
+            return ['success' => false, 'error' => "Ce village ne vous appartient pas."];
+        }
+
+        $up = $this->db->prepare("UPDATE planets SET name = ? WHERE id = ? AND user_id = ?");
+        $up->execute([$newName, $planetId, $userId]);
+
+        return [
+            'success' => true, 
+            'message' => "Le village a été renommé en « " . htmlspecialchars($newName) . " » avec succès.",
+            'name' => $newName
+        ];
+    }
+
+    /**
+     * Proclame un village comme Capitale officielle du clan
+     */
+    public function setCapital(int $planetId, int $userId): array {
+        $stmt = $this->db->prepare("SELECT id, name, is_capital FROM planets WHERE id = ? AND user_id = ?");
+        $stmt->execute([$planetId, $userId]);
+        $planet = $stmt->fetch();
+        if (!$planet) {
+            return ['success' => false, 'error' => "Ce village ne vous appartient pas."];
+        }
+
+        if (!empty($planet['is_capital'])) {
+            return ['success' => false, 'error' => "Ce village est déjà la capitale de votre domaine."];
+        }
+
+        $this->db->beginTransaction();
+        try {
+            // Retirer le statut de capitale des autres fiefs
+            $this->db->prepare("UPDATE planets SET is_capital = 0 WHERE user_id = ?")->execute([$userId]);
+            // Attribuer la capitale au fief sélectionné
+            $this->db->prepare("UPDATE planets SET is_capital = 1 WHERE id = ? AND user_id = ?")->execute([$planetId, $userId]);
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'error' => "Erreur lors de la proclamation de la capitale : " . $e->getMessage()];
+        }
+
+        return [
+            'success' => true, 
+            'message' => "Le village « " . htmlspecialchars($planet['name']) . " » est désormais proclamé Capitale officielle de votre clan !",
+            'planet_id' => $planetId
+        ];
+    }
+
+    /**
+     * Récupère le statut des slots de colons et d'expansion du Tenshu
+     * Niveaux requis : 5 (Slot 1), 10 (Slot 2), 15 (Slot 3)
+     */
+    public function getTenshuColonizerStatus(int $planetId): array {
+        $this->ensureSchemaMigration();
+        $buildings = $this->getBuildings($planetId);
+        $hqLvl = (int)($buildings['hq'] ?? 1);
+
+        // Slots débloqués selon niveau du Tenshu
+        $maxSlots = 0;
+        if ($hqLvl >= 15) {
+            $maxSlots = 3;
+        } elseif ($hqLvl >= 10) {
+            $maxSlots = 2;
+        } elseif ($hqLvl >= 5) {
+            $maxSlots = 1;
+        }
+
+        // Fiefs annexés fondés par ce Tenshu
+        $stmtFounded = $this->db->prepare("SELECT id, name, coord_x, coord_y, is_capital FROM planets WHERE founder_planet_id = ? AND id != ?");
+        $stmtFounded->execute([$planetId, $planetId]);
+        $foundedColonies = $stmtFounded->fetchAll(PDO::FETCH_ASSOC);
+        $coloniesCount = count($foundedColonies);
+
+        // Colons en stationnement dans ce village
+        $stmtUnits = $this->db->prepare("SELECT count FROM planet_units WHERE planet_id = ? AND unit_code = 'colonizer'");
+        $stmtUnits->execute([$planetId]);
+        $stationedColons = (int)$stmtUnits->fetchColumn();
+
+        // Colons en file de recrutement dans ce village
+        $stmtQueue = $this->db->prepare("SELECT SUM(count) FROM barracks_queue WHERE planet_id = ? AND unit_code = 'colonizer'");
+        $stmtQueue->execute([$planetId]);
+        $queuedColons = (int)$stmtQueue->fetchColumn();
+
+        // Colons actuellement en mission depuis ce village
+        $stmtMissions = $this->db->prepare("
+            SELECT fleet_data FROM fleet_missions 
+            WHERE source_planet_id = ? AND status IN ('en_route', 'returning')
+        ");
+        $stmtMissions->execute([$planetId]);
+        $inMissionColons = 0;
+        while ($m = $stmtMissions->fetch(PDO::FETCH_ASSOC)) {
+            $fdata = json_decode($m['fleet_data'], true) ?: [];
+            $inMissionColons += (int)($fdata['colonizer'] ?? $fdata['colony_ship'] ?? 0);
+        }
+
+        $totalUsed = $coloniesCount + $stationedColons + $queuedColons + $inMissionColons;
+        $availableSlots = max(0, $maxSlots - $totalUsed);
+
+        // Coûts de recrutement d'un colon
+        $stmtUnit = $this->db->query("SELECT * FROM units WHERE code = 'colonizer'");
+        $unitInfo = $stmtUnit ? $stmtUnit->fetch(PDO::FETCH_ASSOC) : null;
+        $costs = [
+            'metal' => (int)($unitInfo['metal_cost'] ?? 4500),
+            'crystal' => (int)($unitInfo['crystal_cost'] ?? 4000),
+            'deuterium' => (int)($unitInfo['deuterium_cost'] ?? 4500),
+            'rice_flour' => (int)($unitInfo['rice_flour_cost'] ?? 150),
+            'base_train_time' => (int)($unitInfo['base_train_time'] ?? 7200)
+        ];
+
+        $gameSpeed = max(1, (float)GameConfig::get('fleet_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
+        $trainTime = max(10, (int)round($costs['base_train_time'] / ((1 + ($hqLvl * 0.15)) * $gameSpeed)));
+
+        return [
+            'hq_level' => $hqLvl,
+            'max_slots' => $maxSlots,
+            'colonies_count' => $coloniesCount,
+            'founded_colonies' => $foundedColonies,
+            'stationed_colons' => $stationedColons,
+            'queued_colons' => $queuedColons,
+            'in_mission_colons' => $inMissionColons,
+            'total_used' => $totalUsed,
+            'available_slots' => $availableSlots,
+            'costs' => $costs,
+            'train_time' => $trainTime,
+            'next_threshold' => ($hqLvl < 5) ? 5 : (($hqLvl < 10) ? 10 : (($hqLvl < 15) ? 15 : null))
+        ];
+    }
+
+    /**
+     * Lance le recrutement de Colons (Pionniers Féodaux) au Tenshu
+     */
+    public function trainColonizer(int $planetId, int $userId, int $count = 1): array {
+        $count = max(1, (int)$count);
+        $status = $this->getTenshuColonizerStatus($planetId);
+
+        if ($count > $status['available_slots']) {
+            return [
+                'success' => false,
+                'error' => "Emplacements insuffisants au Tenshu. Vous pouvez recruter au maximum {$status['available_slots']} Pionnier(s) Féodal(s) actuellement."
+            ];
+        }
+
+        $planet = $this->getPlanet($planetId);
+        if (!$planet || (int)$planet['user_id'] !== $userId) {
+            return ['success' => false, 'error' => "Ce village ne vous appartient pas."];
+        }
+
+        $totalWood = $status['costs']['metal'] * $count;
+        $totalStone = $status['costs']['crystal'] * $count;
+        $totalRice = $status['costs']['deuterium'] * $count;
+        $totalFlour = $status['costs']['rice_flour'] * $count;
+
+        if ($planet['metal'] < $totalWood || $planet['crystal'] < $totalStone || $planet['deuterium'] < $totalRice || ($planet['rice_flour'] ?? 0) < $totalFlour) {
+            return [
+                'success' => false,
+                'error' => "Ressources insuffisantes pour équiper {$count} Pionnier(s) Féodal(s) (Requis : {$totalWood} Bois, {$totalStone} Pierre, {$totalRice} Riz, {$totalFlour} Farine de Riz)."
+            ];
+        }
+
+        $duration = $status['train_time'] * $count;
+        $now = time();
+
+        // Déterminer la fin après les files déjà en cours
+        $stmtLast = $this->db->prepare("SELECT MAX(finishes_at) FROM barracks_queue WHERE planet_id = ?");
+        $stmtLast->execute([$planetId]);
+        $lastFinish = (int)$stmtLast->fetchColumn();
+        $startTime = max($now, $lastFinish);
+        $finishesAt = $startTime + $duration;
+
+        $this->db->beginTransaction();
+        try {
+            $stmtDeduct = $this->db->prepare("
+                UPDATE planets 
+                SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ?, rice_flour = GREATEST(0, rice_flour - ?) 
+                WHERE id = ? AND metal >= ? AND crystal >= ? AND deuterium >= ? AND rice_flour >= ?
+            ");
+            $stmtDeduct->execute([$totalWood, $totalStone, $totalRice, $totalFlour, $planetId, $totalWood, $totalStone, $totalRice, $totalFlour]);
+            if ($stmtDeduct->rowCount() === 0) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => "Ressources insuffisantes ou modifiées entretemps."];
+            }
+
+            $stmtQueue = $this->db->prepare("
+                INSERT INTO barracks_queue (planet_id, unit_code, count, started_at, finishes_at, unit_train_time)
+                VALUES (?, 'colonizer', ?, ?, ?, ?)
+            ");
+            $stmtQueue->execute([$planetId, $count, $startTime, $finishesAt, $status['train_time']]);
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'error' => "Erreur lors du recrutement du colon : " . $e->getMessage()];
+        }
+
+        return [
+            'success' => true,
+            'message' => "La formation de {$count} Pionnier(s) Féodal(s) (Colon ⛩️) a débuté au Tenshu !",
+            'finishes_at' => $finishesAt,
+            'count' => $count
+        ];
+    }
 }
+
 
 

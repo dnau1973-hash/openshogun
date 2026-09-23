@@ -1297,6 +1297,155 @@ if (!$isEmptyPlot) {
                         </blockquote>
                     </div>
                 </div>
+
+                <!-- ZONE EXCLUSIVE DU TENSHU : EXPANSION FÉODALE & COLONS -->
+                <?php 
+                    $colonStatus = $planetEngine->getTenshuColonizerStatus((int)$planet['id']);
+                    $cCosts = $colonStatus['costs'];
+                    $canAffordColon = ($planet['metal'] >= $cCosts['metal'] && $planet['crystal'] >= $cCosts['crystal'] && $planet['deuterium'] >= $cCosts['deuterium'] && ($planet['rice_flour'] ?? 0) >= $cCosts['rice_flour']);
+                ?>
+                <div class="card mb-3" style="border-top: 3px solid #10b981;">
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
+                        <div>
+                            <h3 class="card-title text-success d-flex align-items-center gap-2 m-0">
+                                <span>⛩️</span> Expansion Coloniale : Pionniers Féodaux (Colons)
+                            </h3>
+                            <div class="text-secondary small mt-1">
+                                Le Tenshu permet de former des <strong>Pionniers Féodaux</strong> aux paliers de niveau <strong>5, 10 et 15</strong> pour annexer de nouveaux villages.
+                            </div>
+                        </div>
+                        <span class="badge <?= ($colonStatus['available_slots'] > 0) ? 'bg-success' : 'bg-secondary' ?> fs-5">
+                            <?= $colonStatus['available_slots'] ?> Emplacement(s) libre(s)
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Paliers de déblocage -->
+                        <div class="row g-2 mb-3 text-center">
+                            <div class="col-4">
+                                <div class="p-2 rounded border <?= ($tenshuLvl >= 5) ? 'border-success bg-success-lt' : 'bg-light text-muted' ?>">
+                                    <div class="fw-bold" style="font-size:0.8rem;">1er Fief</div>
+                                    <div class="small"><?= ($tenshuLvl >= 5) ? '🔓 Débloqué (Niv. 5)' : '🔒 Tenshu Niv. 5' ?></div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 rounded border <?= ($tenshuLvl >= 10) ? 'border-success bg-success-lt' : 'bg-light text-muted' ?>">
+                                    <div class="fw-bold" style="font-size:0.8rem;">2e Fief</div>
+                                    <div class="small"><?= ($tenshuLvl >= 10) ? '🔓 Débloqué (Niv. 10)' : '🔒 Tenshu Niv. 10' ?></div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 rounded border <?= ($tenshuLvl >= 15) ? 'border-success bg-success-lt' : 'bg-light text-muted' ?>">
+                                    <div class="fw-bold" style="font-size:0.8rem;">3e Fief</div>
+                                    <div class="small"><?= ($tenshuLvl >= 15) ? '🔓 Débloqué (Niv. 15)' : '🔒 Tenshu Niv. 15' ?></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Récapitulatif d'utilisation -->
+                        <div class="bg-surface p-3 rounded border mb-3 small">
+                            <div class="row g-2">
+                                <div class="col-sm-6">
+                                    <div>🏯 Fiefs annexés par ce Tenshu : <strong><?= $colonStatus['colonies_count'] ?></strong></div>
+                                    <?php if (!empty($colonStatus['founded_colonies'])): ?>
+                                        <ul class="mb-0 ps-3 mt-1 text-muted" style="font-size:0.75rem;">
+                                            <?php foreach ($colonStatus['founded_colonies'] as $fc): ?>
+                                                <li><?= htmlspecialchars($fc['name']) ?> [<?= $fc['coord_x'] ?>|<?= $fc['coord_y'] ?>]</li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div>⛩️ Colons en garnison dans ce fief : <strong><?= $colonStatus['stationed_colons'] ?></strong></div>
+                                    <div>🏇 Colons en marche / expédition : <strong><?= $colonStatus['in_mission_colons'] ?></strong></div>
+                                    <?php if ($colonStatus['queued_colons'] > 0): ?>
+                                        <div>⏳ Colons en cours de formation : <strong><?= $colonStatus['queued_colons'] ?></strong></div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recrutement -->
+                        <?php if ($colonStatus['available_slots'] > 0): ?>
+                            <div class="border rounded p-3 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong class="text-dark">Équiper 1 Pionnier Féodal</strong>
+                                    <span class="text-muted small">⏳ <?= gmdate("H:i:s", $colonStatus['train_time']) ?> de préparation</span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2 mb-3" style="font-size:0.8rem;">
+                                    <span class="badge bg-secondary-lt">🪵 <?= number_format($cCosts['metal']) ?> Bois</span>
+                                    <span class="badge bg-secondary-lt">🪨 <?= number_format($cCosts['crystal']) ?> Pierre</span>
+                                    <span class="badge bg-secondary-lt">🌾 <?= number_format($cCosts['deuterium']) ?> Riz</span>
+                                    <span class="badge bg-secondary-lt">🌾 <?= number_format($cCosts['rice_flour']) ?> Farine de Riz</span>
+                                </div>
+                                <button type="button" class="btn btn-success w-100 fw-bold" onclick="trainColonizer()" <?= !$canAffordColon ? 'disabled' : '' ?>>
+                                    ⛩️ Former 1 Pionnier Féodal (Colon)
+                                </button>
+                                <?php if (!$canAffordColon): ?>
+                                    <div class="text-danger small mt-1 text-center">Ressources ou farine de riz insuffisantes dans vos réserves.</div>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="alert alert-warning mb-0 small">
+                                Tous les emplacements d'expansion de ce Tenshu sont actuellement pourvus (<?= $colonStatus['max_slots'] ?>/<?= $colonStatus['max_slots'] ?>).
+                                <?php if ($colonStatus['next_threshold']): ?>
+                                    <br>Élevez votre Tenshu au <strong>Niveau <?= $colonStatus['next_threshold'] ?></strong> pour débloquer un nouvel emplacement colonial !
+                                <?php else: ?>
+                                    <br>Ce Tenshu a atteint son apogée maximale d'expansion (3/3). Vous pouvez développer le Tenshu de vos autres fiefs pour continuer votre expansion.
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- ZONE EXCLUSIVE DU TENSHU : ADMINISTRATION & STATUT DU FIEF -->
+                <div class="card mb-3" style="border-top: 3px solid #f59e0b;">
+                    <div class="card-header d-flex justify-content-between align-items-center py-2">
+                        <h3 class="card-title text-warning d-flex align-items-center gap-2 m-0">
+                            <span>👑</span> Statut &amp; Souveraineté du Fief
+                        </h3>
+                        <?php if (!empty($planet['is_capital'])): ?>
+                            <span class="badge bg-warning text-dark fw-bold">👑 Capitale Officielle</span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary">Fief Secondaire</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Renommer le village -->
+                            <div class="col-md-6 border-end">
+                                <label class="form-label small fw-bold text-muted">Nom du Fief :</label>
+                                <div class="input-group">
+                                    <input type="text" id="villageNewName" class="form-control form-control-sm" value="<?= htmlspecialchars($planet['name']) ?>" maxlength="40">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="renameVillage()">
+                                        ✏️ Renommer
+                                    </button>
+                                </div>
+                                <div class="form-text small" style="font-size:0.72rem;">Entre 2 et 40 caractères. Visible sur la carte du monde.</div>
+                            </div>
+
+                            <!-- Proclamer Capitale -->
+                            <div class="col-md-6 d-flex flex-column justify-content-between">
+                                <div>
+                                    <label class="form-label small fw-bold text-muted">Capitale du Clan :</label>
+                                    <p class="small text-muted mb-2" style="font-size:0.75rem;">
+                                        La Capitale est le siège suprême de votre souveraineté. Elle est sélectionnée par défaut lors de vos connexions et ne peut être prise.
+                                    </p>
+                                </div>
+                                <div>
+                                    <?php if (!empty($planet['is_capital'])): ?>
+                                        <button type="button" class="btn btn-sm btn-success w-100" disabled>
+                                            ✓ Ce fief est votre Capitale
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold" onclick="proclaimCapital()">
+                                            👑 Définir comme Capitale Officielle
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             <?php endif; ?>
 
         </div>
@@ -1638,6 +1787,86 @@ async function submitTenshuFeast(feastType) {
         }
     } catch (e) {
         showModalAlert('Erreur de transmission avec le Tenshu.', 'error');
+    }
+}
+
+async function trainColonizer() {
+    const confirmed = await showModalConfirm(
+        "⛩️ Mobilisation de Pionniers Féodaux",
+        "Voulez-vous mobiliser vos maîtres bâtisseurs et artisans pour équiper un Pionnier Féodal (Colon) ? Il permettra d'aller annexer un nouveau territoire vierge sur la carte.",
+        "⛩️ Former le Colon",
+        "Annuler"
+    );
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'train_colonizer');
+    formData.append('count', 1);
+
+    try {
+        const res = await fetch('/api/planet.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Impossible de recruter le colon.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de transmission avec le Tenshu.', 'error');
+    }
+}
+
+async function renameVillage() {
+    const input = document.getElementById('villageNewName');
+    if (!input) return;
+    const newName = input.value.trim();
+    if (newName.length < 2) {
+        showModalAlert('Veuillez indiquer un nom d\'au moins 2 caractères.', 'warning');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'rename');
+    formData.append('name', newName);
+
+    try {
+        const res = await fetch('/api/planet.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showModalAlert(data.error || 'Erreur lors du renommage.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de connexion au serveur.', 'error');
+    }
+}
+
+async function proclaimCapital() {
+    const confirmed = await showModalConfirm(
+        "👑 Proclamation de la Capitale",
+        "Êtes-vous certain de vouloir déplacer la Capitale officielle de votre clan vers ce fief ? L'ancien fief capitale deviendra un fief secondaire.",
+        "👑 Déclarer Capitale",
+        "Annuler"
+    );
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'set_capital');
+
+    try {
+        const res = await fetch('/api/planet.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Erreur lors de la proclamation.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de connexion au serveur.', 'error');
     }
 }
 

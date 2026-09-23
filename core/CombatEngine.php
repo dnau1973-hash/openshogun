@@ -391,6 +391,49 @@ class CombatEngine {
             $defenderUnits[$r['code']] = (int)$r['count'];
         }
 
+        // 1b. Capture des bêtes sauvages au Kago 🎋 si le Samouraï Héros accompagne la troupe
+        $capturedAnimals = [];
+        $totalCaptured = 0;
+        if (!empty($mission['has_hero'])) {
+            require_once __DIR__ . '/HeroEngine.php';
+            $heroEngine = new HeroEngine();
+            $availableCages = $heroEngine->getCagesCount((int)$mission['user_id']);
+
+            if ($availableCages > 0) {
+                // Ordre de priorité de capture des fauves
+                $wildAnimalCodes = ['ours_hokkaido', 'loup_honshu', 'sanglier_sauvage'];
+                foreach ($wildAnimalCodes as $animCode) {
+                    if ($availableCages <= 0) break;
+                    if (!empty($defenderUnits[$animCode]) && $defenderUnits[$animCode] > 0) {
+                        $toCapture = min($availableCages, $defenderUnits[$animCode]);
+                        $defenderUnits[$animCode] -= $toCapture;
+                        if ($defenderUnits[$animCode] <= 0) {
+                            unset($defenderUnits[$animCode]);
+                        }
+                        $capturedAnimals[$animCode] = ($capturedAnimals[$animCode] ?? 0) + $toCapture;
+                        $availableCages -= $toCapture;
+                        $totalCaptured += $toCapture;
+
+                        // Mettre à jour l'oasis en base immédiatement
+                        $this->db->prepare("UPDATE oasis_units SET count = GREATEST(0, count - ?) WHERE oasis_id = ? AND unit_code = ?")
+                            ->execute([$toCapture, $oasisId, $animCode]);
+
+                        // Transférer les bêtes capturées vers le fief d'origine pour garnison défensive
+                        $this->db->prepare("
+                            INSERT INTO planet_units (planet_id, unit_code, count) 
+                            VALUES (?, ?, ?) 
+                            ON DUPLICATE KEY UPDATE count = count + VALUES(count)
+                        ")->execute([$sourcePlanetId, $animCode, $toCapture]);
+                    }
+                }
+
+                // Consommer les cages utilisées
+                if ($totalCaptured > 0) {
+                    $heroEngine->consumeCages((int)$mission['user_id'], $totalCaptured);
+                }
+            }
+        }
+
         // 2. Charger les stats de toutes les unités et engins
         $unitDb = [];
         $stmtShips = $this->db->query("SELECT * FROM ships");
@@ -608,11 +651,20 @@ class CombatEngine {
             'winner' => $winner,
             'is_pacified' => $isPacified,
             'is_annexed' => $annexed,
-            'is_stationed' => $stationed
+            'is_stationed' => $stationed,
+            'captured_animals' => $capturedAnimals,
+            'cages_used' => $totalCaptured
         ];
 
-        $title = "Expédition à l'Oasis {$oasis['name']} ({$oasis['coord_x']}, {$oasis['coord_y']}) : " . 
-                 ($winner === 'attacker' ? "Victoire de {$attackerUser['username']}" : "Riposte de {$defenderName}");
+        $title = "Expédition à l'Oasis {$oasis['name']} ({$oasis['coord_x']}, {$oasis['coord_y']}) : ";
+        if ($totalCaptured > 0 && empty($defLost)) {
+            $title .= "🎋 {$totalCaptured} fauve(s) capturé(s) vivant(s) au Kago !";
+        } elseif ($winner === 'attacker') {
+            $title .= "Victoire de {$attackerUser['username']}";
+            if ($totalCaptured > 0) $title .= " (+{$totalCaptured} fauve(s) capturé(s) 🎋)";
+        } else {
+            $title .= "Riposte de {$defenderName}";
+        }
 
         $defenderUserId = 0;
         if (!empty($oasis['owner_planet_id'])) {
