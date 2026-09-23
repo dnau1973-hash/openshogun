@@ -13,29 +13,65 @@ $planetEngine = new PlanetEngine();
 
 $hero = $heroEngine->getHeroByUserId((int)$user['id']);
 if (!$hero) {
-    $heroName = "Samouraï " . ucfirst($user['username']);
+    $heroName = "Samouraï " . ucfirst($user['username'] ?? 'Champion');
+    $pId = (int)($planet['id'] ?? 0);
+    if ($pId <= 0) {
+        $db = Database::getConnection();
+        $stmtP = $db->prepare("SELECT id FROM planets WHERE user_id = ? ORDER BY id ASC LIMIT 1");
+        $stmtP->execute([(int)$user['id']]);
+        $pId = (int)$stmtP->fetchColumn() ?: 1;
+    }
     $db = Database::getConnection();
     $db->prepare("
-        INSERT IGNORE INTO heroes 
+        INSERT INTO heroes 
         (user_id, current_planet_id, name, level, experience, health, status, last_health_update, unassigned_points) 
         VALUES (?, ?, ?, 1, 0, 100.0, 'home', UNIX_TIMESTAMP(), 4)
-    ")->execute([(int)$user['id'], (int)$planet['id'], $heroName]);
+        ON DUPLICATE KEY UPDATE current_planet_id = VALUES(current_planet_id)
+    ")->execute([(int)$user['id'], $pId, $heroName]);
     $hero = $heroEngine->getHeroByUserId((int)$user['id']);
+}
+
+if (!$hero) {
+    echo '<div class="alert alert-danger m-3">Impossible de charger le Samouraï Héros pour ce compte. Veuillez vérifier que votre fief est initialisé.</div>';
+    return;
+}
+
+if (empty($hero['effective']) || !is_array($hero['effective'])) {
+    $hero['effective'] = [
+        'combat_strength' => 150 + (((int)($hero['stat_strength'] ?? 0)) * 80),
+        'base_strength' => 150,
+        'equipment_strength' => 0,
+        'offense_bonus_pct' => 0,
+        'defense_bonus_pct' => 0,
+        'hourly_production' => ['metal' => 0, 'crystal' => 0, 'deuterium' => 0],
+        'equipment_speed_bonus' => 0,
+        'exp_bonus_pct' => 0
+    ];
 }
 
 $adventures = $heroEngine->getAdventures((int)$user['id']);
 $inventory = $heroEngine->getInventory((int)$user['id']);
 $activeTab = $_GET['tab'] ?? 'attributes';
 $dailyQuota = $hero['daily_adventures'] ?? $heroEngine->getDailyAdventureQuota((int)$user['id']);
+if (!is_array($dailyQuota)) {
+    $dailyQuota = [
+        'count' => 0,
+        'max' => 3,
+        'remaining' => 3,
+        'can_adventure' => true,
+        'reset_timestamp' => strtotime('tomorrow midnight'),
+        'seconds_until_reset' => 86400
+    ];
+}
 
 $factionIcons = [
     'terran' => '🏯',
     'vorash' => '🐎',
     'aethelis' => '⛩️'
 ];
-$fIcon = $factionIcons[$user['faction']] ?? '⚔️';
+$fIcon = $factionIcons[$user['faction'] ?? 'terran'] ?? '⚔️';
 
-$health = round((float)$hero['health']);
+$health = round((float)($hero['health'] ?? 100));
 $healthBadgeClass = ($health >= 60) ? 'bg-success' : (($health >= 25) ? 'bg-warning' : 'bg-danger');
 
 $statusLabels = [
@@ -45,11 +81,15 @@ $statusLabels = [
     'dead' => ['label' => 'Tombé au Combat', 'color' => '#ef4444', 'badge_class' => 'bg-danger text-white', 'icon' => '💀'],
     'reviving' => ['label' => 'Régénération en cours (24h)', 'color' => '#f59e0b', 'badge_class' => 'bg-warning text-dark', 'icon' => '✨']
 ];
-$st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3b8', 'badge_class' => 'bg-secondary text-white', 'icon' => '❓'];
+$st = $statusLabels[$hero['status'] ?? 'home'] ?? ['label' => 'Inconnu', 'color' => '#94a3b8', 'badge_class' => 'bg-secondary text-white', 'icon' => '❓'];
 
 if (!function_exists('renderRelicBonusesHtml')) {
-    function renderRelicBonusesHtml(array $bonusData): string {
+    function renderRelicBonusesHtml($bonusData): string {
         if (empty($bonusData)) return '';
+        if (is_string($bonusData)) {
+            $bonusData = json_decode($bonusData, true) ?: [];
+        }
+        if (!is_array($bonusData) || empty($bonusData)) return '';
         $badges = [];
         foreach ($bonusData as $k => $v) {
             switch ($k) {
@@ -629,12 +669,17 @@ if (!function_exists('renderRelicBonusesHtml')) {
                         ?>
                         <?php foreach ($slots as $slotKey => $sl): ?>
                             <?php 
-                                $eqCode = $hero[$sl['field']];
+                                $eqCode = $hero[$sl['field']] ?? null;
                                 $equippedItem = null;
                                 if ($eqCode) {
                                     foreach ($inventory as $invItem) {
-                                        if ($invItem['item_code'] === $eqCode && !empty($invItem['is_equipped'])) {
+                                        if (($invItem['item_code'] ?? '') === $eqCode && !empty($invItem['is_equipped'])) {
                                             $equippedItem = $invItem;
+                                            if (empty($equippedItem['bonus_data'])) {
+                                                $equippedItem['bonus_data'] = [];
+                                            } elseif (is_string($equippedItem['bonus_data'])) {
+                                                $equippedItem['bonus_data'] = json_decode($equippedItem['bonus_data'], true) ?: [];
+                                            }
                                             break;
                                         }
                                     }
@@ -706,6 +751,14 @@ if (!function_exists('renderRelicBonusesHtml')) {
                     <?php foreach ($inventory as $it): ?>
                         <?php 
                             $isEq = !empty($it['is_equipped']);
+                            $itemSlot = $it['slot'] ?? ($it['item_type'] ?? 'weapon');
+                            $it['slot'] = $itemSlot;
+                            $it['item_type'] = $itemSlot;
+                            if (empty($it['bonus_data'])) {
+                                $it['bonus_data'] = [];
+                            } elseif (is_string($it['bonus_data'])) {
+                                $it['bonus_data'] = json_decode($it['bonus_data'], true) ?: [];
+                            }
                             $slotLabels = [
                                 'weapon' => ['label' => 'Arme', 'icon' => '🗡️'],
                                 'helmet' => ['label' => 'Casque', 'icon' => '🪖'],
@@ -713,7 +766,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                 'horse' => ['label' => 'Monture', 'icon' => '🐎'],
                                 'talisman' => ['label' => 'Talisman', 'icon' => '📿']
                             ];
-                            $slInfo = $slotLabels[$it['slot']] ?? ['label' => ucfirst($it['slot']), 'icon' => '🛡️'];
+                            $slInfo = $slotLabels[$itemSlot] ?? ['label' => ucfirst((string)$itemSlot), 'icon' => '🛡️'];
                         ?>
                         <div class="col-md-6 col-xl-4">
                             <div class="card h-100 border <?= $isEq ? 'border-primary bg-primary-lt' : 'bg-surface' ?> shadow-sm">
@@ -771,7 +824,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                         </button>
                                         <div>
                                             <?php if ($isEq): ?>
-                                                <button type="button" onclick="executeUnequip('<?= htmlspecialchars($it['slot']) ?>')" class="btn btn-sm btn-outline-danger">
+                                                <button type="button" onclick="executeUnequip('<?= htmlspecialchars($itemSlot) ?>')" class="btn btn-sm btn-outline-danger">
                                                     Déséquiper
                                                 </button>
                                             <?php else: ?>
@@ -1040,7 +1093,8 @@ function openItemDetailModal(item) {
         'horse': '🐎 Monture & Destrier',
         'talisman': '📿 Talisman Shintō'
     };
-    const slotName = slotLabels[item.slot] || item.slot || 'Relique';
+    const slotCode = item.slot || item.item_type || 'weapon';
+    const slotName = slotLabels[slotCode] || slotCode || 'Relique';
     const isEquipped = item.is_equipped == 1 || item.is_equipped === true;
 
     document.getElementById('itemModalSubtitle').innerHTML = `
@@ -1050,8 +1104,11 @@ function openItemDetailModal(item) {
 
     const bonusesContainer = document.getElementById('itemModalBonuses');
     bonusesContainer.innerHTML = '';
-    const bData = item.bonus_data || {};
-    if (typeof bData === 'object' && Object.keys(bData).length > 0) {
+    let bData = item.bonus_data || {};
+    if (typeof bData === 'string') {
+        try { bData = JSON.parse(bData); } catch (e) { bData = {}; }
+    }
+    if (typeof bData === 'object' && bData !== null && Object.keys(bData).length > 0) {
         for (const [k, v] of Object.entries(bData)) {
             let badgeHtml = '';
             if (k === 'strength') badgeHtml = `<span class="badge bg-red-lt text-red border border-red-lt fs-5 px-2 py-1">+${v} Force</span>`;
@@ -1072,7 +1129,7 @@ function openItemDetailModal(item) {
     const actionsContainer = document.getElementById('itemModalActions');
     if (isEquipped) {
         actionsContainer.innerHTML = `
-            <button type="button" class="btn btn-outline-danger" onclick="executeUnequip('${item.slot}')">
+            <button type="button" class="btn btn-outline-danger" onclick="executeUnequip('${slotCode}')">
                 Déséquiper
             </button>
             <button type="button" class="btn btn-secondary" onclick="closeItemDetailModal()">

@@ -13,9 +13,113 @@ class HeroEngine {
     public const MAX_DAILY_ADVENTURES = 3;
 
     private PDO $db;
+    private static bool $schemaChecked = false;
 
     public function __construct() {
         $this->db = Database::getConnection();
+        $this->ensureSchema();
+    }
+
+    /**
+     * Garantit automatiquement la présence et la conformité des tables du système de Héros
+     */
+    public function ensureSchema(): void {
+        if (self::$schemaChecked) return;
+        self::$schemaChecked = true;
+
+        try {
+            // 1. Table `heroes`
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS `heroes` (
+                    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    `user_id` INT UNSIGNED NOT NULL UNIQUE,
+                    `current_planet_id` INT UNSIGNED NOT NULL,
+                    `name` VARCHAR(60) NOT NULL DEFAULT 'Samouraï Champion',
+                    `level` INT UNSIGNED NOT NULL DEFAULT 1,
+                    `experience` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `health` FLOAT NOT NULL DEFAULT 100.0,
+                    `status` ENUM('home', 'mission', 'adventure', 'dead', 'reviving') NOT NULL DEFAULT 'home',
+                    `revive_finish_time` INT UNSIGNED NULL DEFAULT NULL,
+                    `last_health_update` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `unassigned_points` INT UNSIGNED NOT NULL DEFAULT 4,
+                    `stat_strength` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `stat_offense_bonus` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `stat_defense_bonus` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `stat_production` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `production_type` ENUM('balanced', 'metal', 'crystal', 'deuterium') NOT NULL DEFAULT 'balanced',
+                    `equipped_weapon` VARCHAR(50) NULL DEFAULT NULL,
+                    `equipped_helmet` VARCHAR(50) NULL DEFAULT NULL,
+                    `equipped_armor` VARCHAR(50) NULL DEFAULT NULL,
+                    `equipped_horse` VARCHAR(50) NULL DEFAULT NULL,
+                    `equipped_talisman` VARCHAR(50) NULL DEFAULT NULL,
+                    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    KEY `idx_heroes_user` (`user_id`),
+                    KEY `idx_heroes_planet` (`current_planet_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+
+            // 2. Table `hero_adventures`
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS `hero_adventures` (
+                    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    `user_id` INT UNSIGNED NOT NULL,
+                    `coord_x` INT NOT NULL,
+                    `coord_y` INT NOT NULL,
+                    `name` VARCHAR(100) NOT NULL,
+                    `difficulty` ENUM('easy', 'medium', 'hard') NOT NULL DEFAULT 'easy',
+                    `status` ENUM('available', 'in_progress', 'completed', 'expired') NOT NULL DEFAULT 'available',
+                    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `expires_at` INT UNSIGNED NULL DEFAULT NULL,
+                    KEY `idx_ha_user` (`user_id`),
+                    KEY `idx_ha_status` (`status`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+
+            // 3. Table `hero_inventory`
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS `hero_inventory` (
+                    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    `user_id` INT UNSIGNED NOT NULL,
+                    `item_code` VARCHAR(50) NOT NULL,
+                    `item_type` ENUM('weapon', 'helmet', 'armor', 'horse', 'talisman', 'consumable') NOT NULL,
+                    `name` VARCHAR(100) NOT NULL,
+                    `description` VARCHAR(255) NOT NULL,
+                    `bonus_data` JSON NOT NULL,
+                    `is_equipped` TINYINT(1) NOT NULL DEFAULT 0,
+                    `acquired_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    KEY `idx_hi_user` (`user_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+
+            // 4. Colonnes fleet_missions
+            try {
+                $cols = $this->db->query("SHOW COLUMNS FROM `fleet_missions` LIKE 'has_hero'")->fetchAll();
+                if (empty($cols)) {
+                    $this->db->exec("ALTER TABLE `fleet_missions` ADD COLUMN `has_hero` TINYINT(1) NOT NULL DEFAULT 0 AFTER `cargo_data`");
+                }
+            } catch (Exception $e) {}
+
+            try {
+                $colsAdv = $this->db->query("SHOW COLUMNS FROM `fleet_missions` LIKE 'adventure_id'")->fetchAll();
+                if (empty($colsAdv)) {
+                    $this->db->exec("ALTER TABLE `fleet_missions` ADD COLUMN `adventure_id` INT UNSIGNED NULL DEFAULT NULL AFTER `target_oasis_id`");
+                }
+            } catch (Exception $e) {}
+
+            // 5. Colonnes d'équipements dans heroes
+            $eqCols = ['equipped_weapon', 'equipped_helmet', 'equipped_armor', 'equipped_horse', 'equipped_talisman'];
+            foreach ($eqCols as $ec) {
+                try {
+                    $ch = $this->db->query("SHOW COLUMNS FROM `heroes` LIKE '{$ec}'")->fetchAll();
+                    if (empty($ch)) {
+                        $this->db->exec("ALTER TABLE `heroes` ADD COLUMN `{$ec}` VARCHAR(50) NULL DEFAULT NULL");
+                    }
+                } catch (Exception $e) {}
+            }
+        } catch (Exception $e) {
+            // Ignorer silencieusement si déjà conforme
+        }
     }
 
     /**
@@ -26,6 +130,7 @@ class HeroEngine {
             INSERT INTO heroes 
             (user_id, current_planet_id, name, level, experience, health, status, last_health_update, unassigned_points) 
             VALUES (?, ?, ?, 1, 0, 100.0, 'home', UNIX_TIMESTAMP(), 4)
+            ON DUPLICATE KEY UPDATE current_planet_id = VALUES(current_planet_id)
         ");
         $stmt->execute([$userId, $planetId, $name]);
 
@@ -59,17 +164,36 @@ class HeroEngine {
      */
     public function getHeroByUserId(int $userId): ?array {
         $stmt = $this->db->prepare("
-            SELECT h.*, p.name as planet_name, p.coord_x, p.coord_y, u.faction, u.username
+            SELECT h.*, 
+                   COALESCE(p.name, 'Fief Principal') as planet_name, 
+                   COALESCE(p.coord_x, 1) as coord_x, 
+                   COALESCE(p.coord_y, 1) as coord_y, 
+                   COALESCE(u.faction, 'terran') as faction, 
+                   COALESCE(u.username, 'Daimyo') as username
             FROM heroes h 
-            JOIN planets p ON p.id = h.current_planet_id 
-            JOIN users u ON u.id = h.user_id 
+            LEFT JOIN planets p ON p.id = h.current_planet_id 
+            LEFT JOIN users u ON u.id = h.user_id 
             WHERE h.user_id = ?
         ");
         $stmt->execute([$userId]);
-        $hero = $stmt->fetch();
+        $hero = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$hero) {
             return null;
+        }
+
+        // Si la planète liée n'existe pas ou est invalide, relier au premier fief du joueur
+        if (empty($hero['current_planet_id']) || $hero['planet_name'] === 'Fief Principal') {
+            $stmtP = $this->db->prepare("SELECT id, name, coord_x, coord_y FROM planets WHERE user_id = ? ORDER BY id ASC LIMIT 1");
+            $stmtP->execute([$userId]);
+            $p = $stmtP->fetch(PDO::FETCH_ASSOC);
+            if ($p) {
+                $this->db->prepare("UPDATE heroes SET current_planet_id = ? WHERE id = ?")->execute([$p['id'], $hero['id']]);
+                $hero['current_planet_id'] = (int)$p['id'];
+                $hero['planet_name'] = $p['name'];
+                $hero['coord_x'] = (int)$p['coord_x'];
+                $hero['coord_y'] = (int)$p['coord_y'];
+            }
         }
 
         $now = time();
@@ -1102,7 +1226,10 @@ class HeroEngine {
     /**
      * Retourne l'URL de l'illustration d'une relique féodale
      */
-    public static function getItemImageUrl(string $itemCode): string {
+    public static function getItemImageUrl(?string $itemCode): string {
+        if (empty($itemCode)) {
+            return '/public/assets/hero_samurai.jpg';
+        }
         $extensions = ['jpeg', 'jpg', 'webp', 'png'];
         $baseDir = __DIR__ . '/../public/assets/items/';
         foreach ($extensions as $ext) {
@@ -1117,12 +1244,21 @@ class HeroEngine {
      * Récupère l'inventaire du joueur
      */
     public function getInventory(int $userId): array {
+        $this->ensureSchema();
         $stmt = $this->db->prepare("SELECT * FROM hero_inventory WHERE user_id = ? ORDER BY is_equipped DESC, id DESC");
         $stmt->execute([$userId]);
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($items as &$it) {
-            $it['bonus_data'] = is_array($it['bonus_data']) ? $it['bonus_data'] : (json_decode($it['bonus_data'], true) ?: []);
-            $it['image_url'] = self::getItemImageUrl($it['item_code']);
+            if (empty($it['bonus_data'])) {
+                $it['bonus_data'] = [];
+            } elseif (is_string($it['bonus_data'])) {
+                $it['bonus_data'] = json_decode($it['bonus_data'], true) ?: [];
+            } elseif (!is_array($it['bonus_data'])) {
+                $it['bonus_data'] = [];
+            }
+            $it['slot'] = $it['slot'] ?? ($it['item_type'] ?? 'weapon');
+            $it['item_type'] = $it['slot'];
+            $it['image_url'] = self::getItemImageUrl($it['item_code'] ?? '');
         }
         return $items;
     }
