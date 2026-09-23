@@ -43,16 +43,36 @@ class BarracksEngine {
         $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
         $vorashBonus = ($faction === 'vorash') ? 0.8 : 1.0;
 
+        // Bonus du Banquet des Guerriers (Kanpai aux Samouraïs au Tenshu)
+        $feastSpeedBonus = 1.0;
+        try {
+            $activeFeast = $this->planetEngine->getActiveFeast($planetId);
+            if ($activeFeast && $activeFeast['feast_type'] === 'warriors') {
+                $tLvl = (int)($activeFeast['tenshu_level'] ?? 1);
+                $reduction = 0.10 + ($tLvl * 0.01);
+                $feastSpeedBonus = 1.0 - min(0.35, $reduction);
+            }
+        } catch (Exception $e) {
+            // Silencieux
+        }
+
         // Prérequis de niveau de caserne par palier (Tier)
         // Tier 1: Caserne niv 1 | Tier 2: Caserne niv 3 | Tier 3: Caserne niv 5 | Tier 4: Caserne niv 8
         $tierReqs = [1 => 1, 2 => 3, 3 => 5, 4 => 8];
+        $tierFlour = [1 => 0, 2 => 15, 3 => 35, 4 => 75];
 
         foreach ($units as &$u) {
             $requiredLvl = $tierReqs[$u['tier']] ?? 1;
             $u['required_barracks_level'] = $requiredLvl;
             $u['can_train'] = ($barracksLvl >= $requiredLvl);
 
-            $effectiveTime = max(5, (int)(($u['base_train_time'] / (1 + ($barracksLvl * 0.15))) * $vorashBonus / $speed));
+            $flourCost = isset($u['rice_flour_cost']) ? (int)$u['rice_flour_cost'] : 0;
+            if ($flourCost === 0 && ($tierFlour[$u['tier']] ?? 0) > 0 && ($u['faction'] ?? 'all') !== 'all') {
+                $flourCost = $tierFlour[$u['tier']];
+            }
+            $u['rice_flour_cost'] = $flourCost;
+
+            $effectiveTime = max(5, (int)(($u['base_train_time'] / (1 + ($barracksLvl * 0.15))) * $vorashBonus * $feastSpeedBonus / $speed));
             $u['effective_train_time'] = $effectiveTime;
         }
 
@@ -99,25 +119,58 @@ class BarracksEngine {
             throw new Exception("Caserne niveau $reqLvl requise pour recruter cette unité.");
         }
 
+        $tierFlour = [1 => 0, 2 => 15, 3 => 35, 4 => 75];
+        $flourPerUnit = isset($unit['rice_flour_cost']) ? (int)$unit['rice_flour_cost'] : 0;
+        if ($flourPerUnit === 0 && ($tierFlour[$unit['tier']] ?? 0) > 0 && ($unit['faction'] ?? 'all') !== 'all') {
+            $flourPerUnit = $tierFlour[$unit['tier']];
+        }
+
         $totalMetal = $unit['metal_cost'] * $count;
         $totalCrystal = $unit['crystal_cost'] * $count;
         $totalDeut = $unit['deuterium_cost'] * $count;
+        $totalFlour = $flourPerUnit * $count;
 
         if ($planet['metal'] < $totalMetal || $planet['crystal'] < $totalCrystal || $planet['deuterium'] < $totalDeut) {
             throw new Exception("Ressources insuffisantes pour équiper et entraîner cette troupe.");
         }
 
+        if ($totalFlour > 0 && ($planet['rice_flour'] ?? 0) < $totalFlour) {
+            throw new Exception("Stock de Farine de Riz insuffisant (" . number_format((int)($planet['rice_flour'] ?? 0)) . " disponible, " . number_format($totalFlour) . " requis pour les rations d'élite).");
+        }
+
         $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
         $vorashBonus = ($faction === 'vorash') ? 0.8 : 1.0;
-        $unitTime = max(5, (int)(($unit['base_train_time'] / (1 + ($barracksLvl * 0.15))) * $vorashBonus / $speed));
+
+        // Bonus du Banquet des Guerriers
+        $feastSpeedBonus = 1.0;
+        try {
+            $activeFeast = $this->planetEngine->getActiveFeast($planetId);
+            if ($activeFeast && $activeFeast['feast_type'] === 'warriors') {
+                $tLvl = (int)($activeFeast['tenshu_level'] ?? 1);
+                $reduction = 0.10 + ($tLvl * 0.01);
+                $feastSpeedBonus = 1.0 - min(0.35, $reduction);
+            }
+        } catch (Exception $e) {
+            // Silencieux
+        }
+
+        $unitTime = max(5, (int)(($unit['base_train_time'] / (1 + ($barracksLvl * 0.15))) * $vorashBonus * $feastSpeedBonus / $speed));
         $totalTime = $unitTime * $count;
 
         $this->db->beginTransaction();
-        $this->db->prepare("
-            UPDATE planets 
-            SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ? 
-            WHERE id = ?
-        ")->execute([$totalMetal, $totalCrystal, $totalDeut, $planetId]);
+        try {
+            $this->db->prepare("
+                UPDATE planets 
+                SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ?, rice_flour = GREATEST(0, rice_flour - ?) 
+                WHERE id = ?
+            ")->execute([$totalMetal, $totalCrystal, $totalDeut, $totalFlour, $planetId]);
+        } catch (Exception $e) {
+            $this->db->prepare("
+                UPDATE planets 
+                SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ? 
+                WHERE id = ?
+            ")->execute([$totalMetal, $totalCrystal, $totalDeut, $planetId]);
+        }
 
         $now = time();
         $finishesAt = $now + $totalTime;

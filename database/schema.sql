@@ -92,6 +92,7 @@ CREATE TABLE `planets` (
   `deuterium_max` INT UNSIGNED NOT NULL DEFAULT 15000,
   `sake_max` INT UNSIGNED NOT NULL DEFAULT 10000,
   `rice_flour_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+  `population` INT UNSIGNED NOT NULL DEFAULT 100,
   `last_resource_update` INT UNSIGNED NOT NULL DEFAULT 0,
   `is_capital` TINYINT(1) NOT NULL DEFAULT 1,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -350,6 +351,19 @@ CREATE TABLE `chat_messages` (
   KEY `idx_chat_whisper` (`sender_id`, `recipient_id`, `id`),
   KEY `idx_chat_recipient` (`recipient_id`, `id`),
   CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Banquets & Célébrations Féodales du Tenshu
+CREATE TABLE `planet_feasts` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `planet_id` INT UNSIGNED NOT NULL,
+  `feast_type` VARCHAR(40) NOT NULL,
+  `tenshu_level` INT UNSIGNED NOT NULL DEFAULT 1,
+  `started_at` INT UNSIGNED NOT NULL,
+  `finishes_at` INT UNSIGNED NOT NULL,
+  KEY `idx_pf_planet` (`planet_id`),
+  KEY `idx_pf_finishes` (`finishes_at`),
+  CONSTRAINT `fk_pf_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

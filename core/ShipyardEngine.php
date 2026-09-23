@@ -37,9 +37,22 @@ class ShipyardEngine {
         $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
         $vorashBonus = ($faction === 'vorash') ? 0.8 : 1.0; // Vorash produisent 20% plus vite
 
+        // Bonus du Banquet des Guerriers (Tenshu)
+        $feastSpeedBonus = 1.0;
+        try {
+            $activeFeast = $this->planetEngine->getActiveFeast($planetId);
+            if ($activeFeast && $activeFeast['feast_type'] === 'warriors') {
+                $tLvl = (int)($activeFeast['tenshu_level'] ?? 1);
+                $reduction = 0.10 + ($tLvl * 0.01);
+                $feastSpeedBonus = 1.0 - min(0.35, $reduction);
+            }
+        } catch (Exception $e) {
+            // Silencieux
+        }
+
         foreach ($ships as &$ship) {
             $ship['can_build'] = ($shipyardLvl >= 1);
-            $effectiveTime = max(10, (int)(($ship['base_build_time'] / (1 + ($shipyardLvl * 0.15))) * $vorashBonus / $speed));
+            $effectiveTime = max(10, (int)(($ship['base_build_time'] / (1 + ($shipyardLvl * 0.15))) * $vorashBonus * $feastSpeedBonus / $speed));
             $ship['effective_build_time'] = $effectiveTime;
         }
 
@@ -94,7 +107,21 @@ class ShipyardEngine {
 
         $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
         $vorashBonus = ($faction === 'vorash') ? 0.8 : 1.0;
-        $unitTime = max(10, (int)(($ship['base_build_time'] / (1 + ($shipyardLvl * 0.15))) * $vorashBonus / $speed));
+
+        // Bonus du Banquet des Guerriers (Tenshu)
+        $feastSpeedBonus = 1.0;
+        try {
+            $activeFeast = $this->planetEngine->getActiveFeast($planetId);
+            if ($activeFeast && $activeFeast['feast_type'] === 'warriors') {
+                $tLvl = (int)($activeFeast['tenshu_level'] ?? 1);
+                $reduction = 0.10 + ($tLvl * 0.01);
+                $feastSpeedBonus = 1.0 - min(0.35, $reduction);
+            }
+        } catch (Exception $e) {
+            // Silencieux
+        }
+
+        $unitTime = max(10, (int)(($ship['base_build_time'] / (1 + ($shipyardLvl * 0.15))) * $vorashBonus * $feastSpeedBonus / $speed));
         $totalTime = $unitTime * $count;
 
         // Déduire les ressources

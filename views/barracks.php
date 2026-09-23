@@ -13,6 +13,7 @@ $barracksLvl = $buildings['barracks'] ?? 0;
 
 $availableUnits = $barracksEngine->getAvailableUnits((int)$planet['id'], $user['faction']);
 $queue = $barracksEngine->getQueue((int)$planet['id']);
+$activeFeast = $planetEngine->getActiveFeast((int)$planet['id']);
 
 $factionNames = [
     'terran' => 'Clan Oda',
@@ -41,11 +42,19 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
             </div>
         </div>
 
-        <?php if ($user['faction'] === 'vorash'): ?>
-            <span style="font-size:0.8rem; font-weight:700; color:#991b1b; background:rgba(153,27,27,0.1); border:1px solid rgba(153,27,27,0.3); padding:0.35rem 0.75rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem;">
-                ⚡ Bonus Takeda : Vitesse d'entraînement +20%
-            </span>
-        <?php endif; ?>
+        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <?php if ($activeFeast && $activeFeast['feast_type'] === 'warriors'): ?>
+                <span style="font-size:0.8rem; font-weight:700; color:#854d0e; background:#fef9c3; border:1px solid #facc15; padding:0.35rem 0.75rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem; box-shadow:0 2px 6px rgba(234,179,8,0.2);">
+                    🍶 Banquet des Guerriers Actif &bull; Entraînement -<?= 10 + (int)$activeFeast['tenshu_level'] ?>%
+                </span>
+            <?php endif; ?>
+
+            <?php if ($user['faction'] === 'vorash'): ?>
+                <span style="font-size:0.8rem; font-weight:700; color:#991b1b; background:rgba(153,27,27,0.1); border:1px solid rgba(153,27,27,0.3); padding:0.35rem 0.75rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem;">
+                    ⚡ Bonus Takeda : Vitesse d'entraînement +20%
+                </span>
+            <?php endif; ?>
+        </div>
     </div>
 
     <div class="card-body" style="padding:1.25rem;">
@@ -172,10 +181,17 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                             </div>
 
                             <!-- Coût de Recrutement -->
-                            <div class="cost-row" style="margin:0.25rem 0 0.85rem 0; display:flex; gap:0.75rem; font-size:0.85rem; font-weight:600;">
+                            <div class="cost-row" style="margin:0.25rem 0 0.85rem 0; display:flex; gap:0.75rem; font-size:0.85rem; font-weight:600; flex-wrap:wrap;">
                                 <div class="cost-item" title="Bois de Cèdre"><span style="color:var(--res-metal);">🪵</span> <?= number_format($u['metal_cost']) ?></div>
                                 <div class="cost-item" title="Pierre de Taille"><span style="color:var(--res-crystal);">🪨</span> <?= number_format($u['crystal_cost']) ?></div>
                                 <div class="cost-item" title="Riz Impérial"><span style="color:var(--res-deut);">🌾</span> <?= number_format($u['deuterium_cost']) ?></div>
+                                <?php if (!empty($u['rice_flour_cost'])): 
+                                    $hasEnoughFlour = (($planet['rice_flour'] ?? 0) >= $u['rice_flour_cost']);
+                                ?>
+                                    <div class="cost-item <?= !$hasEnoughFlour ? 'text-danger' : '' ?>" title="Farine de Riz (Rations de campagne)">
+                                        <span style="color:#0284c7;">🍚</span> <?= number_format($u['rice_flour_cost']) ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
 
                             <!-- Formulaire de Recrutement -->

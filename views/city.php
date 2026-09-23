@@ -18,6 +18,10 @@ foreach ($fields as $f) {
 }
 $hqLevel = $buildings['hq'] ?? 1;
 $queue = $buildingEngine->getQueue((int)$planet['id']);
+$activeFeast = $planetEngine->getActiveFeast((int)$planet['id']);
+$pop = (int)($planet['population'] ?? 100);
+$popMax = (int)($planet['population_max'] ?? 100);
+$popBonus = min(25, (int)round($pop / 100));
 
 // Indexer la file active pour repérer les bâtiments en cours d'amélioration
 $activeBuildingQueue = [];
@@ -153,7 +157,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                 <h2 class="card-title">🏯 Cité Castrale & Palais du Daimyō - <?= htmlspecialchars($planet['name']) ?></h2>
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
                     Forteresse Principale : <strong style="color:var(--border-highlight, #c2252b);">Tenshu Niveau <?= $hqLevel ?></strong> 
-                    <span style="opacity:0.85;">(Cour intérieure fortifiée, dojos d'armes, forges et greniers)</span>
+                    <span style="opacity:0.85;">&bull; 👥 <strong><?= number_format($pop) ?></strong>/<?= number_format($popMax) ?> Habitants (<span class="text-success">+<?= $popBonus ?>% vitesse chantiers</span>)</span>
                 </div>
             </div>
             <div style="display:flex; gap:0.5rem; align-items:center;">
@@ -162,6 +166,26 @@ foreach (BUILDINGS as $code => $bInfo) {
             </div>
         </div>
         <div class="card-body">
+            <?php if ($activeFeast): ?>
+                <?php 
+                    $feastLabels = [
+                        'matsuri' => ['Matsuri Populaire des Saisons', '🏮', '#fef9c3', '#ca8a04'],
+                        'warriors' => ['Banquet des Guerriers (Kanpai)', '⚔️', '#fee2e2', '#dc2626'],
+                        'imperial' => ['Grand Banquet Impérial', '👑', '#ede9fe', '#7c3aed']
+                    ];
+                    $fData = $feastLabels[$activeFeast['feast_type']] ?? ['Célébration', '🎉', '#fef9c3', '#ca8a04'];
+                ?>
+                <div style="background:<?= $fData[2] ?>; border:1px solid <?= $fData[3] ?>; border-radius:8px; padding:0.5rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                    <div style="display:flex; align-items:center; gap:0.6rem; color:#1f2937; font-size:0.85rem; font-weight:600;">
+                        <span style="font-size:1.3rem;"><?= $fData[1] ?></span>
+                        <span>Célébration au Tenshu en cours : <strong style="color:<?= $fData[3] ?>;"><?= $fData[0] ?></strong> (Tenshu Niv. <?= (int)$activeFeast['tenshu_level'] ?>)</span>
+                    </div>
+                    <a href="/?page=building&code=hq#feastSection" class="btn btn-sm btn-outline-dark" style="font-size:0.75rem; padding:0.2rem 0.6rem;">
+                        Accéder au Banquet &rarr;
+                    </a>
+                </div>
+            <?php endif; ?>
+
             <!-- Barre de Filtres Tactiques de la Cité -->
             <div class="rts-sector-bar">
                 <button class="sector-btn active" id="btn-city-all" onclick="filterCitySector('all')">🌐 Vue Globale Cité</button>

@@ -639,6 +639,10 @@ if (!$isEmptyPlot) {
                                 <a href="#craftSection" class="btn btn-success text-white">
                                     🍶 Accéder à la Minoterie &amp; Cuves de Saké &darr;
                                 </a>
+                            <?php elseif ($code === 'hq'): ?>
+                                <a href="#feastSection" class="btn btn-warning text-dark fw-bold">
+                                    🍶 Salle des Banquets &amp; Célébrations &darr;
+                                </a>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
@@ -700,6 +704,210 @@ if (!$isEmptyPlot) {
 
         <!-- Colonne Droite : Coûts, Chantier & Zone Tenshu -->
         <div class="col-lg-7">
+
+            <?php if ($code === 'hq'): 
+                $activeFeast = $planetEngine->getActiveFeast((int)$planet['id']);
+                $tenshuLvl = max(1, $lvl);
+                $matsuriCost = 100 * $tenshuLvl;
+                $warriorsCost = 200 * $tenshuLvl;
+                $imperialCost = 350 * $tenshuLvl;
+                $currentSake = (float)($planet['sake'] ?? 0);
+
+                $pop = (int)($planet['population'] ?? 100);
+                $popMax = (int)($planet['population_max'] ?? 100);
+                $popPct = ($popMax > 0) ? min(100, round(($pop / $popMax) * 100)) : 100;
+                $popBonus = min(25, (int)round($pop / 100));
+            ?>
+            <!-- ========================================================
+                 ZONE DU TENSHU : DÉMOGRAPHIE DU DOMAINE & SALLE DES BANQUETS
+                 ======================================================== -->
+            <!-- Carte 1 : Démographie & Main-d'Œuvre -->
+            <div class="card mb-3" style="border-top: 3px solid #3b82f6;">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
+                    <div>
+                        <h3 class="card-title text-primary d-flex align-items-center gap-2 m-0">
+                            <span>👥</span> Démographie &amp; Ouvriers du Domaine Castral
+                        </h3>
+                        <div class="text-secondary small mt-1">
+                            La population d'artisans, bûcherons et fermiers est logée par vos édifices et soutenue par la farine de riz.
+                        </div>
+                    </div>
+                    <span class="badge bg-blue-lt fw-bold">
+                        Bonus Chantiers : +<?= $popBonus ?>% vitesse
+                    </span>
+                </div>
+                <div class="card-body py-3">
+                    <div class="row align-items-center g-3 mb-2">
+                        <div class="col-sm-4 text-center border-end">
+                            <div class="text-secondary small">Habitants Actuels</div>
+                            <div class="fs-3 fw-bold text-primary"><?= number_format($pop) ?></div>
+                            <div class="text-muted small">/ <?= number_format($popMax) ?> logements</div>
+                        </div>
+                        <div class="col-sm-4 text-center border-end">
+                            <div class="text-secondary small">⚡ Bonus Bâtisseurs</div>
+                            <div class="fs-3 fw-bold text-success">+<?= $popBonus ?>%</div>
+                            <div class="text-muted small">vitesse de construction</div>
+                        </div>
+                        <div class="col-sm-4 text-center">
+                            <div class="text-secondary small">🍚 Rations de Farine</div>
+                            <div class="fs-3 fw-bold text-dark"><?= number_format((int)($planet['rice_flour'] ?? 0)) ?></div>
+                            <div class="text-muted small">subsistance assurée</div>
+                        </div>
+                    </div>
+                    <div class="progress progress-sm">
+                        <div class="progress-bar bg-primary" style="width: <?= $popPct ?>%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte 2 : Salle des Banquets & Célébrations Féodales -->
+            <div class="card mb-3" id="feastSection" style="border-top: 3px solid #f59e0b;">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h3 class="card-title text-warning d-flex align-items-center gap-2 m-0">
+                            <span>🍶</span> Salle des Banquets &amp; Célébrations Féodales du Tenshu
+                        </h3>
+                        <div class="text-secondary small mt-1">
+                            Organisez des réceptions et fêtes grâce à vos réserves de Saké. Les festivités et leurs bienfaits sont intimement corrélés à l'élévation de votre Tenshu (Niveau <?= $tenshuLvl ?>).
+                        </div>
+                    </div>
+                    <span class="badge bg-warning-lt fw-bold">
+                        Stock Saké : <?= number_format((int)$currentSake) ?> 🍶
+                    </span>
+                </div>
+                <div class="card-body">
+
+                    <?php if ($activeFeast): ?>
+                        <?php 
+                            $feastNames = [
+                                'matsuri' => ['Matsuri Populaire des Saisons', '🏮', 'bg-warning-lt text-warning'],
+                                'warriors' => ['Banquet des Guerriers (Kanpai)', '⚔️', 'bg-danger-lt text-danger'],
+                                'imperial' => ['Grand Banquet Impérial & Diplomatique', '👑', 'bg-purple-lt text-purple']
+                            ];
+                            $fInfo = $feastNames[$activeFeast['feast_type']] ?? ['Festivités en cours', '🎉', 'bg-warning-lt text-warning'];
+                        ?>
+                        <div class="alert alert-warning border border-warning shadow-sm mb-3">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span style="font-size:1.8rem;"><?= $fInfo[1] ?></span>
+                                    <div>
+                                        <div class="fw-bold fs-4 text-warning">Célébration Active : <?= $fInfo[0] ?></div>
+                                        <div class="small text-secondary">
+                                            Tenshu Niveau <?= (int)$activeFeast['tenshu_level'] ?> &bull; Tous les vassaux et gens du fief célèbrent sous l'égide du Daimyō !
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-warning text-dark font-monospace fs-5 py-2 px-3" data-countdown="<?= $activeFeast['finishes_at'] ?>">
+                                        Calcul du temps...
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Les 3 Festivités Corrélées au Tenshu -->
+                    <div class="row g-3">
+                        <!-- Fête 1 : Matsuri Populaire -->
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
+                                            <span>🏮</span> Matsuri Saisonnier
+                                        </h4>
+                                        <span class="badge bg-success-lt">Niv. 1+</span>
+                                    </div>
+                                    <p class="text-secondary small mb-2">
+                                        Ferveur populaire, danses et offrandes aux Kamis pour la prospérité des récoltes.
+                                    </p>
+                                    <div class="bg-white p-2 rounded border small mb-2">
+                                        <div>🪵🪨🌾 Prod : <strong class="text-success">+<?= 5 + $tenshuLvl ?>%</strong></div>
+                                        <div>⛩️ Sérénité : <strong class="text-info">+<?= 10 + ($tenshuLvl * 2) ?></strong></div>
+                                        <div>⏱️ Durée : <strong>8 heures</strong></div>
+                                    </div>
+                                    <div class="text-muted small mb-3">
+                                        Coût : <strong class="<?= ($currentSake >= $matsuriCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($matsuriCost) ?> Saké 🍶</strong>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-warning w-100 text-dark fw-bold btn-sm"
+                                        onclick="submitTenshuFeast('matsuri')"
+                                        <?= ($activeFeast || $currentSake < $matsuriCost) ? 'disabled' : '' ?>>
+                                    🏮 Célébrer le Matsuri
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Fête 2 : Banquet des Guerriers -->
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
+                                            <span>⚔️</span> Banquet Guerriers
+                                        </h4>
+                                        <span class="badge <?= ($tenshuLvl >= 5) ? 'bg-danger-lt text-danger' : 'bg-secondary text-white' ?>">
+                                            <?= ($tenshuLvl >= 5) ? 'Niv. 5+' : '🔒 Niv. 5 requis' ?>
+                                        </span>
+                                    </div>
+                                    <p class="text-secondary small mb-2">
+                                        Toast d'honneur (Kanpai) aux samouraïs et vétérans pour galvaniser le moral des troupes.
+                                    </p>
+                                    <div class="bg-white p-2 rounded border small mb-2">
+                                        <div>🥋 Dojo &amp; Écuries : <strong class="text-danger">-<?= 10 + $tenshuLvl ?>% durée</strong></div>
+                                        <div>⚔️ Attaque Garnison : <strong class="text-danger">+5%</strong></div>
+                                        <div>⏱️ Durée : <strong>6 heures</strong></div>
+                                    </div>
+                                    <div class="text-muted small mb-3">
+                                        Coût : <strong class="<?= ($currentSake >= $warriorsCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($warriorsCost) ?> Saké 🍶</strong>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-danger w-100 fw-bold btn-sm"
+                                        onclick="submitTenshuFeast('warriors')"
+                                        <?= ($activeFeast || $tenshuLvl < 5 || $currentSake < $warriorsCost) ? 'disabled' : '' ?>>
+                                    ⚔️ Lever le Kanpai
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Fête 3 : Banquet Impérial -->
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
+                                            <span>👑</span> Banquet Impérial
+                                        </h4>
+                                        <span class="badge <?= ($tenshuLvl >= 10) ? 'bg-purple-lt' : 'bg-secondary text-white' ?>">
+                                            <?= ($tenshuLvl >= 10) ? 'Niv. 10+' : '🔒 Niv. 10 requis' ?>
+                                        </span>
+                                    </div>
+                                    <p class="text-secondary small mb-2">
+                                        Réception somptueuse pour les émissaires impériaux et dignitaires des clans alliés.
+                                    </p>
+                                    <div class="bg-white p-2 rounded border small mb-2">
+                                        <div>🎌 Prestige : <strong class="text-purple">+<?= 50 + ($tenshuLvl * 5) ?> Honneur</strong></div>
+                                        <div>📜 Savoirs &amp; Alliances : <strong>Éclat suprême</strong></div>
+                                        <div>⏱️ Durée : <strong>12 heures</strong></div>
+                                    </div>
+                                    <div class="text-muted small mb-3">
+                                        Coût : <strong class="<?= ($currentSake >= $imperialCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($imperialCost) ?> Saké 🍶</strong>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-purple w-100 text-white fw-bold btn-sm" style="background:#7c3aed;"
+                                        onclick="submitTenshuFeast('imperial')"
+                                        <?= ($activeFeast || $tenshuLvl < 10 || $currentSake < $imperialCost) ? 'disabled' : '' ?>>
+                                    👑 Décréter le Banquet
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <?php if ($code === 'grain_mill' && $lvl > 0): ?>
             <!-- ========================================================
@@ -1219,6 +1427,43 @@ async function submitRiceCraft(product) {
         }
     } catch (e) {
         showModalAlert('Erreur de transmission avec le moulin.', 'error');
+    }
+}
+
+// ==========================================
+// CÉLÉBRATIONS DU TENSHU : BANQUETS DE SAKÉ
+// ==========================================
+async function submitTenshuFeast(feastType) {
+    const names = {
+        'matsuri': 'le Matsuri Populaire des Saisons',
+        'warriors': 'le Banquet des Guerriers (Kanpai aux Samouraïs)',
+        'imperial': 'le Grand Banquet Impérial & Diplomatique'
+    };
+    const feastName = names[feastType] || 'cette célébration';
+    const confirmed = await showModalConfirm(
+        `Voulez-vous ouvrir les fûts de Saké et proclamer ${feastName} au sein du Tenshu ?`,
+        'Célébration Féodale du Daimyō'
+    );
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'start_feast');
+    formData.append('feast_type', feastType);
+
+    try {
+        const res = await fetch('/api/feast.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Impossible de lancer les festivités.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de transmission avec le Tenshu.', 'error');
     }
 }
 

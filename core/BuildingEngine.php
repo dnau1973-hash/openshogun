@@ -32,7 +32,7 @@ class BuildingEngine {
     /**
      * Calcule le coût et le temps pour améliorer une parcelle ou un bâtiment
      */
-    public function getUpgradeDetails(string $category, string $targetId, int $currentLevel, int $hqLevel): array {
+    public function getUpgradeDetails(string $category, string $targetId, int $currentLevel, int $hqLevel, int $population = 0): array {
         if ($category === 'field') {
             $fieldConf = FIELD_TYPES[$targetId] ?? null;
             if (!$fieldConf) throw new Exception("Type de parcelle inconnu.");
@@ -57,7 +57,12 @@ class BuildingEngine {
         // Échelle de temps authentique Travian : réduction par le Tenshu (0.964^(hq-1)) et progression exponentielle
         $hqFactor = pow(0.964, max(0, $hqLevel - 1));
         $lvlFactor = pow(1.28, $currentLevel) * pow($targetLevel, 0.85);
-        $duration = max(15, (int)(($baseTime * $lvlFactor * $hqFactor) / $speed));
+
+        // Bonus démographique de main-d'œuvre : +1% de vitesse de construction tous les 100 habitants (plafonné à 25%)
+        $popBonus = min(0.25, max(0, $population / 100) * 0.01);
+        $popFactor = 1.0 / (1.0 + $popBonus);
+
+        $duration = max(15, (int)(($baseTime * $lvlFactor * $hqFactor * $popFactor) / $speed));
 
         return [
             'target_level' => $targetLevel,
@@ -176,8 +181,9 @@ class BuildingEngine {
             }
         }
 
-        // 3. Calcul du coût et de la durée
-        $details = $this->getUpgradeDetails($category, $type, $currentLevel, $hqLevel);
+        // 3. Calcul du coût et de la durée (avec prise en compte de la population)
+        $population = (int)($planet['population'] ?? 100);
+        $details = $this->getUpgradeDetails($category, $type, $currentLevel, $hqLevel, $population);
         $cost = $details['cost'];
         $duration = $details['duration'];
 

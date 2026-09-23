@@ -392,6 +392,7 @@ CREATE TABLE `planets` (
   `deuterium_max` int(10) unsigned NOT NULL DEFAULT 15000,
   `sake_max` int(10) unsigned NOT NULL DEFAULT 10000,
   `rice_flour_max` int(10) unsigned NOT NULL DEFAULT 10000,
+  `population` int(10) unsigned NOT NULL DEFAULT 100,
   `last_resource_update` int(10) unsigned NOT NULL DEFAULT 0,
   `is_capital` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
@@ -506,6 +507,7 @@ CREATE TABLE `units` (
   `metal_cost` int(10) unsigned NOT NULL,
   `crystal_cost` int(10) unsigned NOT NULL,
   `deuterium_cost` int(10) unsigned NOT NULL,
+  `rice_flour_cost` int(10) unsigned NOT NULL DEFAULT 0,
   `attack` int(10) unsigned NOT NULL,
   `def_infantry` int(10) unsigned NOT NULL,
   `def_mech` int(10) unsigned NOT NULL,
@@ -692,6 +694,23 @@ CREATE TABLE `chat_messages` (
   KEY `idx_chat_whisper` (`sender_id`,`recipient_id`,`id`),
   KEY `idx_chat_recipient` (`recipient_id`,`id`),
   CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+DROP TABLE IF EXISTS `planet_feasts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `planet_feasts` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `planet_id` int(10) unsigned NOT NULL,
+  `feast_type` varchar(40) NOT NULL,
+  `tenshu_level` int(10) unsigned NOT NULL DEFAULT 1,
+  `started_at` int(10) unsigned NOT NULL,
+  `finishes_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_pf_planet` (`planet_id`),
+  KEY `idx_pf_finishes` (`finishes_at`),
+  CONSTRAINT `fk_pf_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

@@ -62,6 +62,11 @@ class PlanetEngine {
         $fields = $this->getFields($planetId);
         $prodRates = $this->calculateProduction($fields, $planetId);
 
+        // 6. Calcul démographique (capacité d'habitants et croissance)
+        $maxPopulation = $this->calculateMaxPopulation($buildings, $fields);
+        $curPop = (int)($planet['population'] ?? 100);
+        $curFlour = (float)($planet['rice_flour'] ?? 0);
+
         $now = time();
         $lastUpdate = $planet['last_resource_update'] ?: $now;
         $elapsed = max(0, $now - $lastUpdate);
@@ -74,10 +79,20 @@ class PlanetEngine {
             $newCrystal = min($crystalMax, $planet['crystal'] + ($prodRates['crystal'] * $hours));
             $newDeut = min($deutMax, $planet['deuterium'] + ($prodRates['deuterium'] * $hours));
 
+            // Croissance démographique soutenue par la farine de riz
+            if ($curPop < $maxPopulation && $curFlour > 0) {
+                $growthCap = (int)ceil(25 * $hours);
+                $growth = min($maxPopulation - $curPop, $growthCap);
+                $flourNeeded = max(0, min($curFlour, ceil($growth * 0.05)));
+                $curPop += $growth;
+                $curFlour = max(0, $curFlour - $flourNeeded);
+            }
+
             try {
                 $stmtUpdate = $this->db->prepare("
                     UPDATE planets 
                     SET metal = ?, crystal = ?, deuterium = ?, 
+                        rice_flour = ?, population = ?,
                         energy_used = ?, energy_max = ?, 
                         metal_max = ?, crystal_max = ?, deuterium_max = ?, 
                         sake_max = ?, rice_flour_max = ?,
@@ -88,6 +103,8 @@ class PlanetEngine {
                     $newMetal,
                     $newCrystal,
                     $newDeut,
+                    $curFlour,
+                    $curPop,
                     $prodRates['energy_used'],
                     $prodRates['energy_max'],
                     $metalMax,
@@ -99,27 +116,54 @@ class PlanetEngine {
                     $planetId
                 ]);
             } catch (Exception $e) {
-                // Fallback si la migration des colonnes sake_max n'est pas encore appliquée
-                $stmtUpdate = $this->db->prepare("
-                    UPDATE planets 
-                    SET metal = ?, crystal = ?, deuterium = ?, 
-                        energy_used = ?, energy_max = ?, 
-                        metal_max = ?, crystal_max = ?, deuterium_max = ?, 
-                        last_resource_update = ?
-                    WHERE id = ?
-                ");
-                $stmtUpdate->execute([
-                    $newMetal,
-                    $newCrystal,
-                    $newDeut,
-                    $prodRates['energy_used'],
-                    $prodRates['energy_max'],
-                    $metalMax,
-                    $crystalMax,
-                    $deutMax,
-                    $now,
-                    $planetId
-                ]);
+                try {
+                    // Fallback si la colonne population n'existe pas encore
+                    $stmtUpdate = $this->db->prepare("
+                        UPDATE planets 
+                        SET metal = ?, crystal = ?, deuterium = ?, 
+                            energy_used = ?, energy_max = ?, 
+                            metal_max = ?, crystal_max = ?, deuterium_max = ?, 
+                            sake_max = ?, rice_flour_max = ?,
+                            last_resource_update = ?
+                        WHERE id = ?
+                    ");
+                    $stmtUpdate->execute([
+                        $newMetal,
+                        $newCrystal,
+                        $newDeut,
+                        $prodRates['energy_used'],
+                        $prodRates['energy_max'],
+                        $metalMax,
+                        $crystalMax,
+                        $deutMax,
+                        $sakeMax,
+                        $flourMax,
+                        $now,
+                        $planetId
+                    ]);
+                } catch (Exception $e2) {
+                    // Fallback initial
+                    $stmtUpdate = $this->db->prepare("
+                        UPDATE planets 
+                        SET metal = ?, crystal = ?, deuterium = ?, 
+                            energy_used = ?, energy_max = ?, 
+                            metal_max = ?, crystal_max = ?, deuterium_max = ?, 
+                            last_resource_update = ?
+                        WHERE id = ?
+                    ");
+                    $stmtUpdate->execute([
+                        $newMetal,
+                        $newCrystal,
+                        $newDeut,
+                        $prodRates['energy_used'],
+                        $prodRates['energy_max'],
+                        $metalMax,
+                        $crystalMax,
+                        $deutMax,
+                        $now,
+                        $planetId
+                    ]);
+                }
             }
 
             $planet['metal'] = $newMetal;
@@ -133,11 +177,13 @@ class PlanetEngine {
             $planet['last_resource_update'] = $now;
         }
 
-        // Valeurs garanties pour les ressources raffinées
+        // Valeurs garanties pour les ressources raffinées et la démographie
         $planet['sake'] = (float)($planet['sake'] ?? 0);
-        $planet['rice_flour'] = (float)($planet['rice_flour'] ?? 0);
+        $planet['rice_flour'] = (float)$curFlour;
         $planet['sake_max'] = (int)($planet['sake_max'] ?? $sakeMax);
         $planet['rice_flour_max'] = (int)($planet['rice_flour_max'] ?? $flourMax);
+        $planet['population'] = (int)$curPop;
+        $planet['population_max'] = (int)$maxPopulation;
 
         $planet['prod_rates'] = $prodRates;
         return $planet;
@@ -460,15 +506,33 @@ class PlanetEngine {
             }
         }
 
+        // Bonus du Matsuri Populaire (Célébration au Tenshu alimentée par le Saké)
+        $matsuriBonusMult = 1.0;
+        $matsuriBonusPct = 0;
+        if ($planetId !== null && $planetId > 0) {
+            try {
+                $activeFeast = $this->getActiveFeast($planetId);
+                if ($activeFeast && $activeFeast['feast_type'] === 'matsuri') {
+                    $tLvl = (int)($activeFeast['tenshu_level'] ?? 1);
+                    $matsuriBonusMult = 1.0 + 0.05 + ($tLvl * 0.01);
+                    $matsuriBonusPct = (int)round(($matsuriBonusMult - 1.0) * 100);
+                    $energyMax += (10 + ($tLvl * 2));
+                }
+            } catch (Exception $e) {
+                // Fallback silencieux
+            }
+        }
+
         return [
-            'metal' => (int)(($metalBase + ($metalMineProd * $speed)) * $energyRatio * $oasisBonusMult['wood'] * $sawmillMult) + $heroProdBonus['metal'],
-            'crystal' => (int)(($crystalBase + ($crystalMineProd * $speed)) * $energyRatio * $oasisBonusMult['stone'] * $stonemasonMult) + $heroProdBonus['crystal'],
-            'deuterium' => (int)(($deutBase + ($deutSynthProd * $speed)) * $energyRatio * $oasisBonusMult['rice'] * $grainMillMult) + $heroProdBonus['deuterium'],
+            'metal' => (int)((($metalBase + ($metalMineProd * $speed)) * $energyRatio * $oasisBonusMult['wood'] * $sawmillMult) * $matsuriBonusMult) + $heroProdBonus['metal'],
+            'crystal' => (int)((($crystalBase + ($crystalMineProd * $speed)) * $energyRatio * $oasisBonusMult['stone'] * $stonemasonMult) * $matsuriBonusMult) + $heroProdBonus['crystal'],
+            'deuterium' => (int)((($deutBase + ($deutSynthProd * $speed)) * $energyRatio * $oasisBonusMult['rice'] * $grainMillMult) * $matsuriBonusMult) + $heroProdBonus['deuterium'],
             'energy_max' => $energyMax,
             'energy_used' => $energyUsed,
             'energy_ratio' => $energyRatio,
             'oasis_bonuses' => $oasisBonuses,
             'hero_bonuses' => $heroProdBonus,
+            'matsuri_bonus' => $matsuriBonusPct,
             'building_bonuses' => [
                 'sawmill' => (int)round(($sawmillMult - 1.0) * 100),
                 'stonemason' => (int)round(($stonemasonMult - 1.0) * 100),
@@ -608,5 +672,165 @@ class PlanetEngine {
             'planet' => $updatedPlanet
         ];
     }
+
+    /**
+     * Calcule la capacité maximale de population (logements) selon les édifices et parcelles
+     */
+    public function calculateMaxPopulation(array $buildings, array $fields): int {
+        // Hameau de base
+        $capacity = 100;
+
+        // Tenshu (palais castral) : 50 habitants par niveau
+        $capacity += ((int)($buildings['hq'] ?? 1)) * 50;
+
+        // Bâtiments urbains : 20 habitants par niveau
+        $urbanKeys = [
+            'storage', 'tank', 'barracks', 'shipyard', 'market', 'research_lab',
+            'radar', 'quantum_vault', 'embassy', 'sawmill', 'stonemason',
+            'grain_mill', 'blacksmith', 'teahouse', 'tournament_square', 'wall'
+        ];
+        foreach ($urbanKeys as $k) {
+            $capacity += ((int)($buildings[$k] ?? 0)) * 20;
+        }
+
+        // Parcelles rurales du terroir : 10 habitants par niveau
+        foreach ($fields as $f) {
+            $capacity += ((int)($f['level'] ?? 0)) * 10;
+        }
+
+        return $capacity;
+    }
+
+    /**
+     * Récupère la célébration féodale active au Tenshu (si en cours)
+     */
+    public function getActiveFeast(int $planetId): ?array {
+        try {
+            $now = time();
+            $stmt = $this->db->prepare("
+                SELECT * FROM planet_feasts 
+                WHERE planet_id = ? AND finishes_at > ? 
+                ORDER BY id DESC LIMIT 1
+            ");
+            $stmt->execute([$planetId, $now]);
+            $row = $stmt->fetch();
+            if ($row) {
+                $row['time_remaining'] = max(0, (int)$row['finishes_at'] - $now);
+                return $row;
+            }
+        } catch (Exception $e) {
+            // Table pas encore créée ou base en cours de mise à jour
+        }
+        return null;
+    }
+
+    /**
+     * Déclenche une fête ou un banquet au Tenshu alimenté par le Saké
+     */
+    public function startFeast(int $planetId, string $feastType): array {
+        if (!in_array($feastType, ['matsuri', 'warriors', 'imperial'])) {
+            return ['success' => false, 'error' => "Type de banquet ou célébration inconnu."];
+        }
+
+        // 1. Vérifier si un banquet est déjà actif
+        $active = $this->getActiveFeast($planetId);
+        if ($active) {
+            $remaining = gmdate('H:i:s', $active['time_remaining']);
+            return ['success' => false, 'error' => "Une célébration féodale est déjà en cours au Tenshu (temps restant : {$remaining})."];
+        }
+
+        // 2. Niveau du Tenshu
+        $buildings = $this->getBuildings($planetId);
+        $tenshuLvl = (int)($buildings['hq'] ?? 1);
+
+        $configs = [
+            'matsuri' => [
+                'name' => 'Matsuri Populaire des Saisons',
+                'icon' => '🏮',
+                'min_tenshu' => 1,
+                'sake_cost_per_lvl' => 100,
+                'duration' => 8 * 3600,
+                'desc' => 'Boost de production et sérénité populaire'
+            ],
+            'warriors' => [
+                'name' => 'Banquet des Guerriers (Kanpai aux Samouraïs)',
+                'icon' => '⚔️',
+                'min_tenshu' => 5,
+                'sake_cost_per_lvl' => 200,
+                'duration' => 6 * 3600,
+                'desc' => 'Accélération massive du recrutement des troupes'
+            ],
+            'imperial' => [
+                'name' => 'Grand Banquet Impérial & Diplomatique',
+                'icon' => '👑',
+                'min_tenshu' => 10,
+                'sake_cost_per_lvl' => 350,
+                'duration' => 12 * 3600,
+                'desc' => 'Prestige suprême et points d\'honneur féodal'
+            ]
+        ];
+
+        $cfg = $configs[$feastType];
+        if ($tenshuLvl < $cfg['min_tenshu']) {
+            return [
+                'success' => false, 
+                'error' => "Votre Tenshu doit atteindre le Niveau {$cfg['min_tenshu']} pour organiser le {$cfg['name']} (actuellement Niveau {$tenshuLvl})."
+            ];
+        }
+
+        $sakeCost = $cfg['sake_cost_per_lvl'] * $tenshuLvl;
+        $planet = $this->updatePlanet($planetId);
+        if (($planet['sake'] ?? 0) < $sakeCost) {
+            return [
+                'success' => false,
+                'error' => "Stock de Saké insuffisant dans vos cuves (" . number_format((int)($planet['sake'] ?? 0)) . " disponible, " . number_format($sakeCost) . " requis pour un Tenshu Niv. {$tenshuLvl})."
+            ];
+        }
+
+        $now = time();
+        $finishesAt = $now + $cfg['duration'];
+
+        $this->db->beginTransaction();
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE planets 
+                SET sake = GREATEST(0, sake - ?) 
+                WHERE id = ? AND sake >= ?
+            ");
+            $stmt->execute([$sakeCost, $planetId, $sakeCost]);
+            if ($stmt->rowCount() === 0) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => "Échec : stock de saké modifié entretemps."];
+            }
+
+            $stmtFeast = $this->db->prepare("
+                INSERT INTO planet_feasts (planet_id, feast_type, tenshu_level, started_at, finishes_at) 
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $stmtFeast->execute([$planetId, $feastType, $tenshuLvl, $now, $finishesAt]);
+
+            // Si banquet impérial, attribuer des points de prestige / honneur
+            if ($feastType === 'imperial' && !empty($planet['user_id'])) {
+                $honorGain = 50 + ($tenshuLvl * 5);
+                $this->db->prepare("UPDATE users SET points = points + ? WHERE id = ?")
+                    ->execute([$honorGain, $planet['user_id']]);
+            }
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'error' => "Erreur lors du lancement de la fête : " . $e->getMessage()];
+        }
+
+        return [
+            'success' => true,
+            'message' => "Le <strong>{$cfg['name']} {$cfg['icon']}</strong> a débuté au Tenshu ! Les festivités battront leur plein pendant " . ($cfg['duration'] / 3600) . " heures.",
+            'feast_type' => $feastType,
+            'tenshu_level' => $tenshuLvl,
+            'sake_consumed' => $sakeCost,
+            'finishes_at' => $finishesAt
+        ];
+    }
 }
+
 
