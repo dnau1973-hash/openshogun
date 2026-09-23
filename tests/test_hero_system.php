@@ -193,6 +193,35 @@ $fleetEngine->resolveReturn($mReturnData);
 $heroReturned = $heroEngine->getHeroByUserId($testUserId);
 assertTest("Le héros est rentré au domaine castral ('home')", $heroReturned['status'] === 'home', $testsPassed, $testsTotal);
 
+// Vérification du quota après la 1ère aventure
+$quota1 = $heroEngine->getDailyAdventureQuota($testUserId);
+assertTest("Quota après 1 aventure : 1/3 (2 restantes)", $quota1['count'] === 1 && $quota1['remaining'] === 2 && $quota1['can_adventure'] === true, $testsPassed, $testsTotal);
+
+// Lancer et résoudre la 2ème aventure
+$advs2 = $heroEngine->getAdventures($testUserId);
+$missionAdv2 = $heroEngine->startAdventure($testUserId, (int)$advs2[0]['id']);
+assertTest("2ème aventure lancée avec succès", !empty($missionAdv2['mission_id']), $testsPassed, $testsTotal);
+$mRow2 = $db->query("SELECT * FROM fleet_missions WHERE id = " . (int)$missionAdv2['mission_id'])->fetch();
+$heroEngine->resolveAdventureArrival($mRow2);
+$fleetEngine->resolveReturn($db->query("SELECT * FROM fleet_missions WHERE id = " . (int)$missionAdv2['mission_id'])->fetch());
+
+// Lancer et résoudre la 3ème aventure
+$advs3 = $heroEngine->getAdventures($testUserId);
+$missionAdv3 = $heroEngine->startAdventure($testUserId, (int)$advs3[0]['id']);
+assertTest("3ème aventure lancée avec succès", !empty($missionAdv3['mission_id']), $testsPassed, $testsTotal);
+$mRow3 = $db->query("SELECT * FROM fleet_missions WHERE id = " . (int)$missionAdv3['mission_id'])->fetch();
+$heroEngine->resolveAdventureArrival($mRow3);
+$fleetEngine->resolveReturn($db->query("SELECT * FROM fleet_missions WHERE id = " . (int)$missionAdv3['mission_id'])->fetch());
+
+// Vérification du quota après 3 aventures : 3/3 atteint
+$quota3 = $heroEngine->getDailyAdventureQuota($testUserId);
+assertTest("Quota après 3 aventures : 3/3 (0 restante, can_adventure=false)", $quota3['count'] === 3 && $quota3['remaining'] === 0 && $quota3['can_adventure'] === false, $testsPassed, $testsTotal);
+
+// TENTATIVE DE 4ÈME AVENTURE : DOIT ÊTRE BLOQUÉE
+$advs4 = $heroEngine->getAdventures($testUserId);
+$missionAdv4 = $heroEngine->startAdventure($testUserId, (int)$advs4[0]['id']);
+assertTest("La 4ème aventure est refusée (limite quotidienne atteinte)", $missionAdv4['success'] === false && strpos($missionAdv4['error'], 'Limite quotidienne') !== false, $testsPassed, $testsTotal);
+
 // TEST 9 : Déploiement en Expédition Militaire Féodale
 echo "\n--- TEST 9 : EXPÉDITIONS MILITAIRES AVEC LE HÉROS ---\n";
 // Placer quelques troupes dans le fief

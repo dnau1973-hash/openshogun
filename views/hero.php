@@ -25,6 +25,7 @@ if (!$hero) {
 $adventures = $heroEngine->getAdventures((int)$user['id']);
 $inventory = $heroEngine->getInventory((int)$user['id']);
 $activeTab = $_GET['tab'] ?? 'attributes';
+$dailyQuota = $hero['daily_adventures'] ?? $heroEngine->getDailyAdventureQuota((int)$user['id']);
 
 $factionIcons = [
     'terran' => '🏯',
@@ -165,9 +166,9 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
             </a>
             <a href="?page=hero&tab=adventures" class="btn <?= ($activeTab === 'adventures') ? 'btn-primary' : 'btn-secondary' ?>" style="font-size: 0.85rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.4rem;">
                 🗺️ Aventures Provinciales
-                <?php if (count($adventures) > 0): ?>
-                    <span class="badge" style="background: #a855f7; color: #fff; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px;"><?= count($adventures) ?></span>
-                <?php endif; ?>
+                <span class="badge" style="background: <?= ($dailyQuota['remaining'] > 0) ? '#a855f7' : '#64748b' ?>; color: #fff; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px;" title="<?= $dailyQuota['count'] ?>/<?= $dailyQuota['max'] ?> aventures aujourd'hui">
+                    <?= $dailyQuota['count'] ?>/<?= $dailyQuota['max'] ?>
+                </span>
             </a>
             <a href="?page=hero&tab=inventory" class="btn <?= ($activeTab === 'inventory') ? 'btn-primary' : 'btn-secondary' ?>" style="font-size: 0.85rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.4rem;">
                 🗡️ Arsenal & Reliques
@@ -355,21 +356,59 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
             </div>
         </div>
 
-    <!-- CONTENU ONGLET 2 : AVENTURES FÉODALES (STYLE TRAVIAN) -->
+    <!-- CONTENU ONGLET 2 : AVENTURES FÉODALES (STYLE TRAVIAN - MAX 3/JOUR) -->
     <?php elseif ($activeTab === 'adventures'): ?>
         <div class="card">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h2 class="card-title" style="margin: 0; font-size: 1.15rem;">
-                        🗺️ Expéditions & Aventures du Samouraï
+                        🗺️ Expéditions &amp; Aventures du Samouraï
                     </h2>
                     <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                        Envoyez votre Samouraï explorer les sanctuaires oubliés et ruines antiques pour acquérir de l'XP, du butin et des reliques.
+                        Envoyez votre Samouraï explorer les sanctuaires oubliés et ruines antiques pour acquérir de l'XP, du butin et des reliques (3 aventures par jour maxi).
                     </div>
+                </div>
+
+                <!-- Badge Quota Journalier -->
+                <div style="display: flex; align-items: center; gap: 0.6rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 0.35rem 0.85rem; border-radius: 8px;">
+                    <span style="font-size: 0.8rem; color: #94a3b8;">Quota du jour :</span>
+                    <strong style="color: <?= ($dailyQuota['remaining'] > 0) ? '#4ade80' : '#f87171' ?>; font-size: 0.95rem;">
+                        <?= $dailyQuota['count'] ?> / <?= $dailyQuota['max'] ?>
+                    </strong>
+                    <span style="font-size: 0.75rem; color: #cbd5e1;">(<?= $dailyQuota['remaining'] ?> restante<?= $dailyQuota['remaining'] > 1 ? 's' : '' ?>)</span>
                 </div>
             </div>
 
             <div class="card-body">
+                <!-- Encart d'information sur le quota de 3 aventures par jour -->
+                <div style="background: <?= ($dailyQuota['remaining'] > 0) ? 'rgba(168, 85, 247, 0.08)' : 'rgba(239, 68, 68, 0.1)' ?>; border: 1px solid <?= ($dailyQuota['remaining'] > 0) ? 'rgba(168, 85, 247, 0.25)' : 'rgba(239, 68, 68, 0.3)' ?>; border-radius: 8px; padding: 0.9rem 1.25rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 700; color: <?= ($dailyQuota['remaining'] > 0) ? '#d8b4fe' : '#fca5a5' ?>; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+                            <?= ($dailyQuota['remaining'] > 0) ? '⏳ Quota féodal : 3 aventures par jour maximum' : '🔒 Quota quotidien atteint (3 / 3 aventures)' ?>
+                        </div>
+                        <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.2rem;">
+                            <?php if ($dailyQuota['remaining'] > 0): ?>
+                                Votre héros peut encore accomplir <strong><?= $dailyQuota['remaining'] ?> aventure<?= $dailyQuota['remaining'] > 1 ? 's' : '' ?></strong> aujourd'hui. Réinitialisation chaque nuit à minuit.
+                            <?php else: ?>
+                                Votre Samouraï a accompli ses 3 aventures du jour. Il médite au fief pour reprendre des forces jusqu'à minuit avant de reprendre la route des sanctuaires.
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.4rem; align-items: center;">
+                        <?php for ($i = 1; $i <= $dailyQuota['max']; $i++): ?>
+                            <?php if ($i <= $dailyQuota['count']): ?>
+                                <span class="badge" style="background: #22c55e; color: #fff; padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.75rem;">
+                                    ✓ Aventure <?= $i ?>
+                                </span>
+                            <?php else: ?>
+                                <span class="badge" style="background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.25); color: #94a3b8; padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.75rem;">
+                                    ○ Aventure <?= $i ?>
+                                </span>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+
                 <?php if (empty($adventures)): ?>
                     <div style="text-align: center; padding: 2.5rem 1rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
                         <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📜</div>
@@ -388,7 +427,7 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
                                     'hard' => ['label' => 'Difficulté : Périlleuse', 'color' => '#ef4444', 'bg' => 'rgba(239, 68, 68, 0.1)']
                                 ];
                                 $dbdg = $diffBadges[$adv['difficulty']] ?? $diffBadges['easy'];
-                                $canStart = ($hero['status'] === 'home' && $hero['health'] >= 15.0);
+                                $canStart = ($hero['status'] === 'home' && $hero['health'] >= 15.0 && $dailyQuota['can_adventure']);
                             ?>
                             <div class="card" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
                                 <div style="padding: 1.25rem;">
@@ -418,8 +457,22 @@ $st = $statusLabels[$hero['status']] ?? ['label' => 'Inconnu', 'color' => '#94a3
                                             Partir en Aventure &rarr;
                                         </button>
                                     <?php else: ?>
-                                        <button type="button" disabled class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; opacity: 0.6;" title="Le Samouraï doit être au domaine avec au moins 15% de santé">
-                                            Indisponible
+                                        <?php
+                                            $btnReason = 'Indisponible';
+                                            $btnTitle = '';
+                                            if (!$dailyQuota['can_adventure']) {
+                                                $btnReason = '🔒 Quota atteint (3/3)';
+                                                $btnTitle = 'Quota quotidien de 3 aventures atteint. Réinitialisation à minuit.';
+                                            } elseif ($hero['status'] !== 'home') {
+                                                $btnReason = 'Indisponible';
+                                                $btnTitle = 'Le Samouraï doit être au domaine pour partir en aventure.';
+                                            } elseif ($hero['health'] < 15.0) {
+                                                $btnReason = 'Blessé (< 15%)';
+                                                $btnTitle = 'Santé insuffisante. Laissez votre Samouraï récupérer ses PV.';
+                                            }
+                                        ?>
+                                        <button type="button" disabled class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; opacity: 0.6;" title="<?= htmlspecialchars($btnTitle) ?>">
+                                            <?= $btnReason ?>
                                         </button>
                                     <?php endif; ?>
                                 </div>

@@ -10,6 +10,8 @@ require_once __DIR__ . '/PlanetEngine.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 class HeroEngine {
+    public const MAX_DAILY_ADVENTURES = 3;
+
     private PDO $db;
 
     public function __construct() {
@@ -115,6 +117,7 @@ class HeroEngine {
         $hero['xp_next_level'] = self::getXpForNextLevel((int)$hero['level']);
         $hero['xp_current_level_base'] = self::getXpForLevel((int)$hero['level']);
         $hero['xp_progress_percent'] = self::calculateXpPercent((int)$hero['level'], (int)$hero['experience']);
+        $hero['daily_adventures'] = $this->getDailyAdventureQuota($userId);
 
         return $hero;
     }
@@ -537,7 +540,41 @@ class HeroEngine {
     }
 
     /**
-     * Lance le héros en aventure féodale
+     * Nombre d'aventures entreprises par le héros aujourd'hui (depuis minuit)
+     */
+    public function getDailyAdventuresCount(int $userId): int {
+        $startOfDay = strtotime('today midnight');
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) FROM fleet_missions 
+            WHERE user_id = ? 
+              AND mission_type = 'adventure' 
+              AND departure_time >= ?
+        ");
+        $stmt->execute([$userId, $startOfDay]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Retourne les informations complètes sur le quota d'aventures quotidiennes (max 3/jour)
+     */
+    public function getDailyAdventureQuota(int $userId): array {
+        $count = $this->getDailyAdventuresCount($userId);
+        $max = self::MAX_DAILY_ADVENTURES;
+        $remaining = max(0, $max - $count);
+        $resetTimestamp = strtotime('tomorrow midnight');
+
+        return [
+            'count' => $count,
+            'max' => $max,
+            'remaining' => $remaining,
+            'can_adventure' => ($remaining > 0),
+            'reset_timestamp' => $resetTimestamp,
+            'seconds_until_reset' => max(0, $resetTimestamp - time())
+        ];
+    }
+
+    /**
+     * Lance le héros en aventure féodale (limité à 3 par jour)
      */
     public function startAdventure(int $userId, int $adventureId): array {
         $hero = $this->getHeroByUserId($userId);
@@ -549,6 +586,15 @@ class HeroEngine {
 
         if ($hero['health'] < 15.0) {
             return ['success' => false, 'error' => 'La santé de votre Samouraï est trop faible (< 15%). Laissez-le panser ses blessures.'];
+        }
+
+        // Vérification de la limite quotidienne : 3 aventures par jour maxi
+        $dailyQuota = $this->getDailyAdventureQuota($userId);
+        if (!$dailyQuota['can_adventure']) {
+            return [
+                'success' => false,
+                'error' => "Limite quotidienne atteinte : votre Samouraï ne peut accomplir que " . self::MAX_DAILY_ADVENTURES . " aventures par jour (" . $dailyQuota['count'] . "/" . self::MAX_DAILY_ADVENTURES . " effectuées). Il doit se reposer au fief jusqu'à minuit."
+            ];
         }
 
         $stmtAdv = $this->db->prepare("SELECT * FROM hero_adventures WHERE id = ? AND user_id = ? AND status = 'available'");

@@ -865,8 +865,11 @@ foreach ($allUnits as $u) {
                         Des aventures apparaissent dynamiquement sur la carte provinciale. En envoyant votre héros en expédition, il affronte des embuscades, 
                         secourt des sanctuaires isolés et rapporte de l'<strong>expérience (XP)</strong>, des <strong>artefacts légendaires</strong>, des vivres et des troupes de ralliement.
                     </p>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.4rem 0;">
                         <em>Attention : chaque aventure inflige une perte de santé calculée selon la difficulté du terrain et la Force martiale de votre samouraï !</em>
+                    </p>
+                    <p style="font-size: 0.82rem; color: #d97706; margin: 0; font-weight: 600;">
+                        ⏳ <strong>Quota féodal :</strong> Votre Samouraï peut accomplir <strong>au maximum 3 aventures par jour</strong>. Le quota se réinitialise chaque nuit à minuit.
                     </p>
                 </div>
 

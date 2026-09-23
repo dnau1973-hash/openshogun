@@ -44,7 +44,8 @@ try {
                 'success' => true,
                 'hero' => $hero,
                 'adventures' => $adventures,
-                'inventory' => $inventory
+                'inventory' => $inventory,
+                'daily_adventures' => $hero['daily_adventures'] ?? $heroEngine->getDailyAdventureQuota($userId)
             ]);
             break;
 
