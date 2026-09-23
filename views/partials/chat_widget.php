@@ -395,7 +395,16 @@ class FeudalChatClient {
 
         try {
             const res = await fetch('/api/chat.php?action=send', { method: 'POST', body: formData });
-            const data = await res.json();
+            const textResp = await res.text();
+            let data;
+            try {
+                data = JSON.parse(textResp);
+            } catch (jsonErr) {
+                console.error("Réponse serveur:", textResp);
+                alert("Erreur serveur : " + textResp.substring(0, 300));
+                return;
+            }
+
             if (data.success) {
                 inp.value = '';
                 this.fetchMessages();
@@ -403,7 +412,8 @@ class FeudalChatClient {
                 alert(data.error || "Erreur lors de l'envoi du message.");
             }
         } catch (err) {
-            alert("Erreur de connexion au serveur de chat.");
+            console.error("Erreur réseau chat:", err);
+            alert("Erreur de connexion : " + (err.message || "Impossible de joindre le serveur."));
         } finally {
             btn.disabled = false;
             inp.focus();

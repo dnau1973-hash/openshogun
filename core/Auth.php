@@ -203,9 +203,10 @@ class Auth {
         return $_SESSION['user_id'] ?? null;
     }
 
-    public function getCurrentUser(): ?array {
+    public static function getCurrentUser(): ?array {
         if (!self::check()) return null;
-        $stmt = $this->db->prepare("SELECT id, username, email, faction, alliance_id, points, is_admin, is_moderator, is_bot, created_at, protection_until FROM users WHERE id = ?");
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT id, username, email, faction, alliance_id, points, is_admin, is_moderator, is_bot, created_at, protection_until FROM users WHERE id = ?");
         $stmt->execute([self::id()]);
         return $stmt->fetch() ?: null;
     }

@@ -45,11 +45,11 @@ class ChatEngine {
                     KEY `idx_chat_alliance` (`channel_type`, `channel_target_id`, `id`),
                     KEY `idx_chat_whisper` (`sender_id`, `recipient_id`, `id`),
                     KEY `idx_chat_recipient` (`recipient_id`, `id`),
-                    CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+                    KEY `idx_chat_sender` (`sender_id`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             ");
-        } catch (Exception $e) {
-            // Ignorer si déjà existant
+        } catch (Throwable $e) {
+            error_log("ChatEngine::ensureChatTables - " . $e->getMessage());
         }
     }
 
@@ -76,68 +76,73 @@ class ChatEngine {
             return ['success' => false, 'error' => 'Canal de discussion invalide.'];
         }
 
-        // Anti-spam léger : 1 message par seconde par joueur
-        $stmtRate = $this->db->prepare("
-            SELECT id FROM chat_messages 
-            WHERE sender_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 1 SECOND)
-            LIMIT 1
-        ");
-        $stmtRate->execute([$senderId]);
-        if ($stmtRate->fetch()) {
-            return ['success' => false, 'error' => 'Veuillez patienter un instant avant d\'envoyer un nouveau message.'];
-        }
-
-        // Récupérer le joueur expéditeur et son alliance
-        $stmtUser = $this->db->prepare("SELECT id, username, alliance_id, faction, is_admin, is_moderator FROM users WHERE id = ?");
-        $stmtUser->execute([$senderId]);
-        $sender = $stmtUser->fetch();
-        if (!$sender) {
-            return ['success' => false, 'error' => 'Joueur introuvable.'];
-        }
-
-        $userAllianceId = $sender['alliance_id'] ? (int)$sender['alliance_id'] : null;
-
-        // Validation selon le type de canal
-        if ($channelType === 'alliance') {
-            if (!$userAllianceId) {
-                return ['success' => false, 'error' => 'Vous devez appartenir à une alliance pour échanger sur ce canal.'];
+        try {
+            // Anti-spam léger : 1 message par seconde par joueur
+            $stmtRate = $this->db->prepare("
+                SELECT id FROM chat_messages 
+                WHERE sender_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 1 SECOND)
+                LIMIT 1
+            ");
+            $stmtRate->execute([$senderId]);
+            if ($stmtRate->fetch()) {
+                return ['success' => false, 'error' => 'Veuillez patienter un instant avant d\'envoyer un nouveau message.'];
             }
-            $targetId = $userAllianceId;
-            $recipientId = null;
-        } elseif ($channelType === 'whisper') {
-            if (!$recipientId || $recipientId === $senderId) {
-                return ['success' => false, 'error' => 'Destinataire du chuchotement invalide.'];
+
+            // Récupérer le joueur expéditeur et son alliance
+            $stmtUser = $this->db->prepare("SELECT id, username, alliance_id, faction, is_admin, is_moderator FROM users WHERE id = ?");
+            $stmtUser->execute([$senderId]);
+            $sender = $stmtUser->fetch();
+            if (!$sender) {
+                return ['success' => false, 'error' => 'Joueur introuvable.'];
             }
-            // Vérifier que le destinataire existe
-            $stmtRecip = $this->db->prepare("SELECT id, username FROM users WHERE id = ?");
-            $stmtRecip->execute([$recipientId]);
-            if (!$stmtRecip->fetch()) {
-                return ['success' => false, 'error' => 'Le Daimyō destinataire n\'existe pas.'];
+
+            $userAllianceId = $sender['alliance_id'] ? (int)$sender['alliance_id'] : null;
+
+            // Validation selon le type de canal
+            if ($channelType === 'alliance') {
+                if (!$userAllianceId) {
+                    return ['success' => false, 'error' => 'Vous devez appartenir à une alliance pour échanger sur ce canal.'];
+                }
+                $targetId = $userAllianceId;
+                $recipientId = null;
+            } elseif ($channelType === 'whisper') {
+                if (!$recipientId || $recipientId === $senderId) {
+                    return ['success' => false, 'error' => 'Destinataire du chuchotement invalide.'];
+                }
+                // Vérifier que le destinataire existe
+                $stmtRecip = $this->db->prepare("SELECT id, username FROM users WHERE id = ?");
+                $stmtRecip->execute([$recipientId]);
+                if (!$stmtRecip->fetch()) {
+                    return ['success' => false, 'error' => 'Le Daimyō destinataire n\'existe pas.'];
+                }
+                $targetId = null;
+            } else {
+                // Canal global
+                $targetId = null;
+                $recipientId = null;
             }
-            $targetId = null;
-        } else {
-            // Canal global
-            $targetId = null;
-            $recipientId = null;
+
+            // Insertion du message
+            $stmt = $this->db->prepare("
+                INSERT INTO chat_messages 
+                (channel_type, channel_target_id, sender_id, recipient_id, message, created_at)
+                VALUES (?, ?, ?, ?, ?, NOW())
+            ");
+            $stmt->execute([$channelType, $targetId, $senderId, $recipientId, $content]);
+            $newMsgId = (int)$this->db->lastInsertId();
+
+            // Mettre à jour l'activité du joueur
+            $this->db->prepare("UPDATE users SET last_active = NOW() WHERE id = ?")->execute([$senderId]);
+
+            return [
+                'success' => true,
+                'message_id' => $newMsgId,
+                'message' => 'Message transmis avec honneur.'
+            ];
+        } catch (Throwable $e) {
+            error_log("ChatEngine::sendMessage error: " . $e->getMessage());
+            return ['success' => false, 'error' => 'Erreur d\'enregistrement : ' . $e->getMessage()];
         }
-
-        // Insertion du message
-        $stmt = $this->db->prepare("
-            INSERT INTO chat_messages 
-            (channel_type, channel_target_id, sender_id, recipient_id, message, created_at)
-            VALUES (?, ?, ?, ?, ?, NOW())
-        ");
-        $stmt->execute([$channelType, $targetId, $senderId, $recipientId, $content]);
-        $newMsgId = (int)$this->db->lastInsertId();
-
-        // Mettre à jour l'activité du joueur
-        $this->db->prepare("UPDATE users SET last_active = NOW() WHERE id = ?")->execute([$senderId]);
-
-        return [
-            'success' => true,
-            'message_id' => $newMsgId,
-            'message' => 'Message transmis avec honneur.'
-        ];
     }
 
     /**
