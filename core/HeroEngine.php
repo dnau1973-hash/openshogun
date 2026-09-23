@@ -184,6 +184,7 @@ class HeroEngine {
 
         $equipmentStrength = 0;
         $equipmentSpeedBonus = 0;
+        $equipmentExpBonus = 0;
 
         foreach ($equippedItems as $it) {
             $bData = json_decode($it['bonus_data'], true) ?: [];
@@ -203,6 +204,15 @@ class HeroEngine {
             if (!empty($bData['production_rice'])) {
                 $hourlyProd['deuterium'] += (int)$bData['production_rice'];
             }
+            if (!empty($bData['production_wood'])) {
+                $hourlyProd['metal'] += (int)$bData['production_wood'];
+            }
+            if (!empty($bData['production_stone'])) {
+                $hourlyProd['crystal'] += (int)$bData['production_stone'];
+            }
+            if (!empty($bData['exp_bonus'])) {
+                $equipmentExpBonus += (int)$bData['exp_bonus'];
+            }
         }
 
         return [
@@ -212,7 +222,8 @@ class HeroEngine {
             'offense_bonus_pct' => round($offenseBonusPct, 1),
             'defense_bonus_pct' => round($defenseBonusPct, 1),
             'hourly_production' => $hourlyProd,
-            'equipment_speed_bonus' => $equipmentSpeedBonus
+            'equipment_speed_bonus' => $equipmentSpeedBonus,
+            'exp_bonus_pct' => $equipmentExpBonus
         ];
     }
 
@@ -676,6 +687,13 @@ class HeroEngine {
         $xpRanges = ['easy' => [80, 140], 'medium' => [140, 220], 'hard' => [220, 350]];
         $xpRng = $xpRanges[$diff] ?? [100, 150];
         $xpGain = rand($xpRng[0], $xpRng[1]);
+
+        // Bonus d'XP issu des reliques équipées (Miroir de Yata, Parchemins secrets, Kabutos dorés, etc.)
+        $expBonusPct = (float)($hero['effective']['exp_bonus_pct'] ?? 0);
+        if ($expBonusPct > 0) {
+            $xpGain = (int)round($xpGain * (1.0 + ($expBonusPct / 100.0)));
+        }
+
         $xpRes = $this->addExperience($userId, $xpGain);
 
         // 3. Déterminer le trésor / butin trouvé
@@ -762,82 +780,269 @@ class HeroEngine {
      */
     public function grantRandomEquipment(int $userId): ?array {
         $pool = [
+            // ==========================================
+            // 1. ARMES DU SAMOURAÏ (weapon) - 7 reliques
+            // ==========================================
             [
                 'code' => 'katana_tamahagane',
                 'type' => 'weapon',
                 'name' => 'Katana Forgé en Tamahagane',
-                'desc' => 'Lame d\'exception forgée dans le meilleur acier japonais.',
-                'bonus' => ['strength' => 300, 'offense_bonus' => 1.5]
+                'desc' => 'Lame d\'exception forgée dans le meilleur acier plié selon les secrets des maîtres forgerons de Bizen.',
+                'bonus' => ['strength' => 320, 'offense_bonus' => 1.5]
             ],
             [
                 'code' => 'yari_ancestrale',
                 'type' => 'weapon',
                 'name' => 'Yari Ancestrale des Clans',
-                'desc' => 'Longue lance d\'hast redoutable contre les cavaliers et les bêtes.',
-                'bonus' => ['strength' => 250, 'defense_bonus' => 2.0]
+                'desc' => 'Longue lance d\'hast redoutable capable de repousser les charges de cavalerie et d\'éventrer les rangs ennemis.',
+                'bonus' => ['strength' => 260, 'defense_bonus' => 2.0]
             ],
             [
                 'code' => 'gunbai_commandement',
                 'type' => 'weapon',
                 'name' => 'Gunbai de Commandement Impérial',
-                'desc' => 'Éventail de guerre en fer et cuir guidant les formations martiales.',
+                'desc' => 'Éventail de guerre massif en fer et laque, brandi pour ordonner des manœuvres offensives dévastatrices.',
                 'bonus' => ['strength' => 200, 'offense_bonus' => 2.5]
             ],
             [
+                'code' => 'nodachi_tempete',
+                'type' => 'weapon',
+                'name' => 'Nodachi Faucheur de Tempête',
+                'desc' => 'Épée colossale à deux mains nécessitant une vigueur surhumaine pour faucher des lignes entières de fantassins.',
+                'bonus' => ['strength' => 450, 'offense_bonus' => 1.0]
+            ],
+            [
+                'code' => 'naginata_bugeisha',
+                'type' => 'weapon',
+                'name' => 'Naginata de la Noble Guerrière',
+                'desc' => 'Arme d\'hast élégante à lame courbe, tournoyant avec une précision gracieuse et mortelle.',
+                'bonus' => ['strength' => 240, 'offense_bonus' => 1.2, 'defense_bonus' => 1.2]
+            ],
+            [
+                'code' => 'yumi_asagao',
+                'type' => 'weapon',
+                'name' => 'Grand Arc Yumi en Bambou Laqué',
+                'desc' => 'Arc asymétrique d\'archer d\'élite, dont les flèches sifflantes percent les armures à grande distance.',
+                'bonus' => ['strength' => 280, 'offense_bonus' => 2.0]
+            ],
+            [
+                'code' => 'tanto_masamune',
+                'type' => 'weapon',
+                'name' => 'Tantō Céleste de Masamune',
+                'desc' => 'Dague de maître dotée d\'une ligne de trempe hamon mystique, réputée ne couper que le mal.',
+                'bonus' => ['strength' => 380, 'defense_bonus' => 1.5]
+            ],
+
+            // ==========================================
+            // 2. CASQUES ET MASQUES (helmet) - 7 reliques
+            // ==========================================
+            [
                 'code' => 'kabuto_cornes_or',
                 'type' => 'helmet',
-                'name' => 'Kabuto aux Cornes d\'Or',
-                'desc' => 'Casque orné inspirant le respect et stimulant l\'apprentissage tactique.',
-                'bonus' => ['strength' => 150, 'exp_bonus' => 15]
+                'name' => 'Kabuto aux Cornes d\'Or du Shōgun',
+                'desc' => 'Casque orné de bois dorés étincelants, inspirant le courage et stimulant l\'apprentissage tactique.',
+                'bonus' => ['strength' => 150, 'exp_bonus' => 20]
             ],
             [
                 'code' => 'kabuto_croissant_lune',
                 'type' => 'helmet',
-                'name' => 'Kabuto au Croissant de Lune',
-                'desc' => 'Casque de guerre emblématique renforçant la détermination au combat.',
-                'bonus' => ['strength' => 180, 'defense_bonus' => 1.0]
+                'name' => 'Kabuto au Croissant de Lune de Sendai',
+                'desc' => 'Casque spectaculaire surmonté d\'un fin croissant lunaire en laiton poli, symbole de fierté et de résilience.',
+                'bonus' => ['strength' => 200, 'defense_bonus' => 1.8]
             ],
+            [
+                'code' => 'menpo_oni',
+                'type' => 'helmet',
+                'name' => 'Masque de Guerre Menpō du Démon Oni',
+                'desc' => 'Masque facial en fer forgé aux crocs menaçants et moustaches de crin, pétrifiant d\'effroi les assaillants.',
+                'bonus' => ['strength' => 250, 'offense_bonus' => 1.5]
+            ],
+            [
+                'code' => 'kabuto_dragon_kai',
+                'type' => 'helmet',
+                'name' => 'Kabuto au Dragon Suprême de Kai',
+                'desc' => 'Casque lourd orné d\'un dragon sculpté protégeant la tête du guerrier des impacts les plus violents.',
+                'bonus' => ['strength' => 220, 'defense_bonus' => 2.2]
+            ],
+            [
+                'code' => 'kasa_acier_shinobi',
+                'type' => 'helmet',
+                'name' => 'Jingasa en Acier Trempé de l\'Ombre',
+                'desc' => 'Chapeau conique en plaques d\'acier trempé permettant une vision panoramique et une protection contre les flèches.',
+                'bonus' => ['strength' => 180, 'defense_bonus' => 1.2, 'exp_bonus' => 10]
+            ],
+            [
+                'code' => 'kabuto_soleil_levant',
+                'type' => 'helmet',
+                'name' => 'Kabuto de l\'Astre Solaire Radieux',
+                'desc' => 'Chef-d\'œuvre d\'armurerie dont le maedate représente l\'aurore impériale, galvanisant la ferveur des troupes.',
+                'bonus' => ['strength' => 160, 'offense_bonus' => 1.8, 'exp_bonus' => 10]
+            ],
+            [
+                'code' => 'kabuto_cerf_sanada',
+                'type' => 'helmet',
+                'name' => 'Kabuto aux Cornes de Cerf et Six Pièces',
+                'desc' => 'Casque écarlate légendaire flanqué de ramures de cerf et de l\'emblème Rokumonsen des guerriers sans peur.',
+                'bonus' => ['strength' => 270, 'offense_bonus' => 2.0]
+            ],
+
+            // ==========================================
+            // 3. ARMURES ET TENUES (armor) - 7 reliques
+            // ==========================================
             [
                 'code' => 'cuirasse_oyoroi',
                 'type' => 'armor',
-                'name' => 'Cuirasse O-Yoroi Laquée',
-                'desc' => 'Armure laquée lourde protégeant le samouraï contre les traits mortels.',
-                'bonus' => ['strength' => 350, 'defense_bonus' => 1.5]
+                'name' => 'Cuirasse Ō-Yoroi des Grands Seigneurs',
+                'desc' => 'Armure seigneuriale laquée à plaques kozane tressées de soie pourpre, forteresse imprenable pour le champion.',
+                'bonus' => ['strength' => 380, 'defense_bonus' => 2.0]
             ],
             [
                 'code' => 'armure_do_maru',
                 'type' => 'armor',
-                'name' => 'Armure Dō-maru des Gardes d\'Élite',
-                'desc' => 'Armure composite offrant une grande mobilité tout en parant les coups.',
-                'bonus' => ['strength' => 280, 'offense_bonus' => 1.0, 'defense_bonus' => 1.0]
+                'name' => 'Armure Dō-Maru des Gardes d\'Élite',
+                'desc' => 'Armure composite enveloppante favorisant le combat au corps à corps et la vélocité tactique.',
+                'bonus' => ['strength' => 280, 'offense_bonus' => 1.2, 'defense_bonus' => 1.2]
             ],
+            [
+                'code' => 'plastron_nanban',
+                'type' => 'armor',
+                'name' => 'Plastron Nanban d\'Acier Étranger',
+                'desc' => 'Cuirasse renforcée d\'inspiration occidentale forgée pour dévier les balles d\'arquebuse et les piques.',
+                'bonus' => ['strength' => 350, 'defense_bonus' => 2.5]
+            ],
+            [
+                'code' => 'armure_rouge_iinao',
+                'type' => 'armor',
+                'name' => 'Armure Écarlate des Diables Rouges',
+                'desc' => 'Ensemble d\'armure intégralement laqué de vermillon vif, semant la panique dans les rangs adverses lors des charges.',
+                'bonus' => ['strength' => 320, 'offense_bonus' => 2.2]
+            ],
+            [
+                'code' => 'jimbaori_armoiries',
+                'type' => 'armor',
+                'name' => 'Jimbaori Brodé aux Armoiries du Clan',
+                'desc' => 'Manteau d\'apparat en soie damassée et fils d\'or, conférant une autorité royale et un moral inébranlable.',
+                'bonus' => ['strength' => 200, 'offense_bonus' => 1.5, 'defense_bonus' => 1.5]
+            ],
+            [
+                'code' => 'haramaki_champions',
+                'type' => 'armor',
+                'name' => 'Haramaki Léger des Maîtres d\'Escrime',
+                'desc' => 'Plastron dorsal léger permettant des esquives fulgurantes et un enchaînement ininterrompu de frappes.',
+                'bonus' => ['strength' => 260, 'offense_bonus' => 1.8, 'speed' => 10]
+            ],
+            [
+                'code' => 'armure_ebene_takeda',
+                'type' => 'armor',
+                'name' => 'Armure d\'Ébène et d\'Or de Kōfu',
+                'desc' => 'Armure cérémoniale et guerrière noire aux ferrures dorées, symbole de puissance immuable sur le champ de bataille.',
+                'bonus' => ['strength' => 420, 'defense_bonus' => 1.8]
+            ],
+
+            // ==========================================
+            // 4. MONTURES ET DESTRIERS (horse) - 7 reliques
+            // ==========================================
             [
                 'code' => 'etalon_kai',
                 'type' => 'horse',
-                'name' => 'Pur-Sang Écarlate de Kai',
-                'desc' => 'Fier destrier de la cavalerie de Takeda augmentant la rapidité de marche.',
-                'bonus' => ['speed' => 35, 'strength' => 100]
+                'name' => 'Pur-Sang Écarlate des Plaines de Kai',
+                'desc' => 'Fier étalon de guerre issu des haras réputés de Takeda, doué d\'une vitesse et d\'une endurance prodigieuses.',
+                'bonus' => ['speed' => 40, 'strength' => 120]
             ],
             [
                 'code' => 'destrier_noir_kiso',
                 'type' => 'horse',
-                'name' => 'Destrier Noir des Monts Kiso',
-                'desc' => 'Cheval robuste habitué aux sentiers escarpés des provinces montagneuses.',
-                'bonus' => ['speed' => 25, 'strength' => 150]
+                'name' => 'Destrier Noir des Gorges de Kiso',
+                'desc' => 'Cheval trapu et vigoureux des montagnes nippones, habitué à franchir les cols escarpés sous la neige.',
+                'bonus' => ['speed' => 30, 'strength' => 180]
             ],
+            [
+                'code' => 'destrier_cuirasse_bamen',
+                'type' => 'horse',
+                'name' => 'Destrier Cuirassé au Bamen de Fer',
+                'desc' => 'Colosse équestre protégé par un caparaçon laqué et un chanfrein de fer fendant sans faiblir les volées de traits.',
+                'bonus' => ['speed' => 25, 'strength' => 220, 'defense_bonus' => 1.0]
+            ],
+            [
+                'code' => 'cheval_bai_musashi',
+                'type' => 'horse',
+                'name' => 'Cheval Bai du Vagabond Invaincu',
+                'desc' => 'Monture agile et attentive, capable de voyager sur de longues distances sans jamais faiblir.',
+                'bonus' => ['speed' => 35, 'strength' => 140, 'exp_bonus' => 10]
+            ],
+            [
+                'code' => 'etalon_blanc_benten',
+                'type' => 'horse',
+                'name' => 'Étalon Blanc Sanctifié de Benzaiten',
+                'desc' => 'Cheval immaculé consacré aux divinités fluviales, dont le pas léger semble survoler fondrières et rizières.',
+                'bonus' => ['speed' => 45, 'strength' => 90]
+            ],
+            [
+                'code' => 'pur_sang_date',
+                'type' => 'horse',
+                'name' => 'Pur-Sang d\'Ōshū aux Sabots d\'Éclair',
+                'desc' => 'Étalon fougueux élevé dans les pâturages du nord, réputé pour ses charges fulgurantes à la tête de la cavalerie.',
+                'bonus' => ['speed' => 38, 'strength' => 150, 'offense_bonus' => 1.0]
+            ],
+            [
+                'code' => 'destrier_ambre_kyoto',
+                'type' => 'horse',
+                'name' => 'Destrier Ambré de la Garde Impériale',
+                'desc' => 'Monture majestueuse à la robe dorée sélectionnée parmi les étalons d\'élite de la capitale impériale.',
+                'bonus' => ['speed' => 32, 'strength' => 160, 'defense_bonus' => 0.8]
+            ],
+
+            // ==========================================
+            // 5. TALISMANS ET TRÉSORS SACRÉS (talisman) - 7 reliques
+            // ==========================================
             [
                 'code' => 'omamori_sacree',
                 'type' => 'talisman',
-                'name' => 'Omamori Sacrée d\'Inari',
-                'desc' => 'Amulette de soie bénie assurant la prospérité des récoltes du domaine.',
-                'bonus' => ['production_rice' => 40, 'strength' => 80]
+                'name' => 'Omamori Sacrée des Moissons d\'Inari',
+                'desc' => 'Amulette protectrice en brocart blanc et rouge bénie par les prêtresses renardes, abondant les réserves de riz.',
+                'bonus' => ['production_rice' => 50, 'strength' => 90]
             ],
             [
                 'code' => 'miroir_yata_bronze',
                 'type' => 'talisman',
-                'name' => 'Miroir Sacré en Bronze Shintō',
-                'desc' => 'Relique sanctifiée reflétant la sagesse des kami et stimulant la force du champion.',
-                'bonus' => ['strength' => 220, 'exp_bonus' => 10]
+                'name' => 'Miroir Sacré de Yata en Bronze Poli',
+                'desc' => 'Relique shintō millénaire reflétant la pureté de l\'âme du guerrier et éclairant les chemins de l\'illumination martiale.',
+                'bonus' => ['strength' => 240, 'exp_bonus' => 20]
+            ],
+            [
+                'code' => 'magatama_jade',
+                'type' => 'talisman',
+                'name' => 'Magatama en Jade Céleste de Yasakani',
+                'desc' => 'Joyau incurvé taillé dans le jade le plus pur, dynamisant l\'exploitation forestière du domaine.',
+                'bonus' => ['production_wood' => 50, 'strength' => 100]
+            ],
+            [
+                'code' => 'clochette_kagura',
+                'type' => 'talisman',
+                'name' => 'Clochette Kagura des Rituels Miko',
+                'desc' => 'Sonnaille cérémonielle en laiton chassant les esprits néfastes et favorisant la prospérité des carrières de pierre.',
+                'bonus' => ['production_stone' => 50, 'strength' => 100]
+            ],
+            [
+                'code' => 'parchemin_art_guerre',
+                'type' => 'talisman',
+                'name' => 'Parchemin Secret du Dokkōdō',
+                'desc' => 'Traité philosophique et tactique manuscrit, instruisant le héros sur la voie de la solitude victorieuse.',
+                'bonus' => ['strength' => 180, 'exp_bonus' => 25]
+            ],
+            [
+                'code' => 'perle_ryujin',
+                'type' => 'talisman',
+                'name' => 'Perle de Marée du Dieu Dragon Ryūjin',
+                'desc' => 'Gemme marine mystique contrôlant les flux des eaux, procurant une abondance harmonieuse au domaine.',
+                'bonus' => ['production_rice' => 40, 'production_wood' => 30, 'production_stone' => 30]
+            ],
+            [
+                'code' => 'sceau_chrysantheme',
+                'type' => 'talisman',
+                'name' => 'Sceau Impérial en Bois de Santal',
+                'desc' => 'Sceau d\'autorité suprême gravé aux armoiries du chrysanthème, octroyant un prestige inouï et une influence souveraine.',
+                'bonus' => ['strength' => 150, 'offense_bonus' => 1.5, 'defense_bonus' => 1.5]
             ]
         ];
 
