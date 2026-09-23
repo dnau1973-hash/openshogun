@@ -278,10 +278,10 @@ if (!$isEmptyPlot) {
             <h2 class="page-title">
                 <?php if ($isEmptyPlot): ?>
                     ⛳ Terrain Castral #<?= $slot ?>
-                    <span class="badge bg-secondary ms-2" style="font-size:0.65rem; vertical-align:middle;">Terrain Libre</span>
+                    <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">Terrain Libre</span>
                 <?php else: ?>
                     <?= $bInfo['icon'] ?? '🏯' ?> <?= htmlspecialchars($bInfo['name']) ?>
-                    <span class="badge bg-secondary ms-2" style="font-size:0.65rem; vertical-align:middle;">Slot #<?= $slot ?> · Niv.<?= $lvl ?></span>
+                    <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">Slot #<?= $slot ?> · Niv.<?= $lvl ?></span>
                     <?php if ($activeJob): ?>
                         <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem; vertical-align:middle;">⏳ Chantier en cours</span>
                     <?php elseif ($lvl > 0): ?>

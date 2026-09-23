@@ -175,7 +175,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
             <div class="page-pretitle">Terroir de <?= htmlspecialchars($planet['name']) ?></div>
             <h2 class="page-title">
                 <?= $info['icon'] ?? '🌾' ?> <?= htmlspecialchars($info['name']) ?>
-                <span class="badge bg-secondary ms-2" style="font-size:0.65rem; vertical-align:middle;">Parcelle #<?= $slot ?></span>
+                <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">Parcelle #<?= $slot ?></span>
                 <?php if ($activeJob): ?>
                     <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem; vertical-align:middle;">⏳ Chantier en cours</span>
                 <?php endif; ?>

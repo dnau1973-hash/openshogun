@@ -1788,8 +1788,8 @@ a:hover {
 
 .modal-card {
     background: #fdfbf7;
-    border: 2px solid #b91c1c;
-    box-shadow: 0 16px 50px rgba(40, 30, 20, 0.25), 0 0 0 1px rgba(185, 28, 28, 0.15);
+    border: 1px solid var(--tblr-border-color, rgba(0, 0, 0, 0.12));
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.25);
     border-radius: 12px;
     width: 94%;
     max-width: 520px;
@@ -1812,8 +1812,8 @@ a:hover {
 }
 
 .modal-header, .modal-card > .card-header {
-    background: linear-gradient(135deg, rgba(185, 28, 28, 0.08) 0%, rgba(253, 251, 247, 0.98) 100%);
-    border-bottom: 2px solid #b91c1c;
+    background: var(--tblr-bg-surface, #ffffff);
+    border-bottom: 1px solid var(--tblr-border-color, rgba(0, 0, 0, 0.08));
     padding: 1.1rem 1.5rem;
     display: flex;
     justify-content: space-between;
@@ -1859,9 +1859,9 @@ a:hover {
 }
 
 .modal-close-btn {
-    background: rgba(185, 28, 28, 0.08);
-    border: 1px solid rgba(185, 28, 28, 0.2);
-    color: #b91c1c;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #64748b;
     width: 34px;
     height: 34px;
     border-radius: 8px;
@@ -1875,31 +1875,32 @@ a:hover {
 }
 
 .modal-close-btn:hover {
-    background: #b91c1c;
-    color: #ffffff;
-    border-color: #b91c1c;
+    background: rgba(0, 0, 0, 0.1);
+    color: #0f172a;
+    border-color: rgba(0, 0, 0, 0.2);
     transform: rotate(90deg);
 }
 
 /* Modales d'alerte et de confirmation */
 .alert-modal-card {
     max-width: 460px;
+    border: 1px solid var(--tblr-border-color, rgba(0, 0, 0, 0.12));
 }
 .alert-modal-card.type-error {
-    border-color: #b91c1c;
-    box-shadow: 0 10px 40px rgba(185, 28, 28, 0.25);
+    border-color: #ef4444;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 .alert-modal-card.type-success {
     border-color: #15803d;
-    box-shadow: 0 10px 40px rgba(21, 128, 61, 0.25);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 .alert-modal-card.type-warning {
     border-color: #b45309;
-    box-shadow: 0 10px 40px rgba(180, 83, 9, 0.25);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 .alert-modal-card.type-confirm {
-    border-color: #b91c1c;
-    box-shadow: 0 10px 40px rgba(185, 28, 28, 0.25);
+    border-color: var(--tblr-border-color, rgba(0, 0, 0, 0.12));
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
 .alert-modal-content {

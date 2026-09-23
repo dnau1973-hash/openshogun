@@ -1835,7 +1835,7 @@ foreach ($allUnits as $u) {
 
 <!-- MODALE LIGHTBOX EN HAUTE DÉFINITION POUR LES ILLUSTRATIONS DU CODEX -->
 <div class="modal-overlay" id="docsLightboxModal" style="display: none; position: fixed; inset: 0; background: rgba(5,7,15,0.9); backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center;" onclick="closeDocsLightbox()">
-    <div class="modal-card" style="max-width: 850px; width: 92%; max-height: 92vh; background: var(--bg-surface, #fdfbf7); border: 2px solid var(--red-primary); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(194,37,43,0.3);" onclick="event.stopPropagation()">
+    <div class="modal-card" style="max-width: 850px; width: 92%; max-height: 92vh; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.5);" onclick="event.stopPropagation()">
         <div class="card-header" style="padding: 1rem 1.25rem; background: var(--bg-ink, #ede5d5); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <h3 id="lightboxUnitName" style="margin: 0; font-size: 1.25rem; color: var(--text-main); font-weight: 900;">Nom du Guerrier</h3>

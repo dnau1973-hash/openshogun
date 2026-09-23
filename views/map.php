@@ -89,7 +89,7 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
 
     <div style="
         background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 100%);
-        border: 1px solid rgba(220,38,38,0.5);
+        border: 1px solid rgba(255,255,255,0.15);
         border-radius: 14px;
         box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
         width: 100%; max-width: 640px;
@@ -99,8 +99,8 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
     ">
         <!-- En-tête -->
         <div style="
-            background: linear-gradient(135deg, rgba(185,28,28,0.3) 0%, rgba(30,27,75,0.8) 100%);
-            border-bottom: 1px solid rgba(220,38,38,0.3);
+            background: linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.95) 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             padding: 1rem 1.25rem;
             display: flex; justify-content: space-between; align-items: center;
             border-radius: 14px 14px 0 0;
