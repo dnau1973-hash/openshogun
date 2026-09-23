@@ -238,9 +238,19 @@ foreach (BUILDINGS as $code => $bInfo) {
                         $details = $buildingEngine->getUpgradeDetails('building', $code, $lvl, $hqLevel);
                         $cost = $details['cost'];
                         $duration = $details['duration'];
+                        $tileImg = $bInfo['tile_img'] ?? null;
+                        $tileUrl = ($tileImg && file_exists(__DIR__ . '/../public/assets/tiles/' . $tileImg))
+                            ? '/public/assets/tiles/' . $tileImg
+                            : (($tileImg && file_exists(__DIR__ . '/../public/assets/' . $tileImg)) ? '/public/assets/' . $tileImg : null);
                     ?>
                     <div class="building-card">
-                        <div class="building-avatar"><?= $bInfo['icon'] ?></div>
+                        <div class="building-avatar" style="overflow:hidden; width:72px; height:72px; padding:4px; border-radius:12px; background:rgba(0,0,0,0.03); border:1px solid rgba(194, 37, 43, 0.2); display:flex; align-items:center; justify-content:center; margin-bottom:0.75rem;">
+                            <?php if ($tileUrl): ?>
+                                <img src="<?= $tileUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:100%; height:100%; object-fit:contain;" loading="lazy">
+                            <?php else: ?>
+                                <span style="font-size:2rem;"><?= $bInfo['icon'] ?></span>
+                            <?php endif; ?>
+                        </div>
                         <h3 class="building-title"><?= htmlspecialchars($bInfo['name']) ?></h3>
                         <span class="building-lvl-badge"><?= ($lvl > 0) ? "Niveau $lvl" : "Non bâti" ?></span>
                         <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem; flex:1;">
@@ -257,7 +267,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                             <?php endif; ?>
 
                             <a href="/?page=building&code=<?= $code ?>" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">
-                                <?= ($lvl === 0) ? '🔨 Construire' : '⚡ Consulter & Améliorer (Niv ' . ($lvl + 1) . ')' ?>
+                                <?= ($lvl === 0) ? '🔨 Construire' : '⚡ Améliorer le niveau' ?>
                             </a>
                         </div>
                     </div>
