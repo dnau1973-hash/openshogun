@@ -1410,8 +1410,10 @@ async function submitRiceCraft(product) {
     }
 
     const formData = new FormData();
+    formData.append('action', 'craft_rice');
     formData.append('product', product);
     formData.append('rice_amount', amount);
+    formData.append('amount', amount);
 
     try {
         const res = await fetch('/api/craft.php', {

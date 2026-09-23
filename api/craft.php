@@ -21,7 +21,7 @@ if (!$planet) {
 
 $action = $_POST['action'] ?? 'craft_rice';
 $product = trim($_POST['product'] ?? '');
-$amount = (float)($_POST['amount'] ?? 0);
+$amount = (float)($_POST['rice_amount'] ?? $_POST['amount'] ?? 0);
 
 if ($action !== 'craft_rice') {
     echo json_encode(['success' => false, 'error' => 'Action inconnue.']);
