@@ -22,16 +22,24 @@ if (!$planet) {
 $action = $_POST['action'] ?? 'craft_rice';
 $product = trim($_POST['product'] ?? '');
 $amount = (float)($_POST['rice_amount'] ?? $_POST['amount'] ?? 0);
-
-if ($action !== 'craft_rice') {
-    echo json_encode(['success' => false, 'error' => 'Action inconnue.']);
-    exit;
-}
+$craftId = (int)($_POST['craft_id'] ?? 0);
 
 try {
     $planetEngine = new PlanetEngine();
-    $result = $planetEngine->craftRiceProduct((int)$planet['id'], $product, $amount);
-    echo json_encode($result);
+
+    if ($action === 'craft_rice' || $action === 'start_craft') {
+        $result = $planetEngine->craftRiceProduct((int)$planet['id'], $product, $amount);
+        echo json_encode($result);
+    } elseif ($action === 'cancel_craft') {
+        $result = $planetEngine->cancelRiceCraft((int)$planet['id'], $craftId);
+        echo json_encode($result);
+    } elseif ($action === 'get_queue') {
+        $planetEngine->processCraftQueue((int)$planet['id']);
+        $queue = $planetEngine->getCraftQueue((int)$planet['id']);
+        echo json_encode(['success' => true, 'queue' => $queue]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Action inconnue.']);
+    }
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }

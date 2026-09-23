@@ -910,6 +910,11 @@ if (!$isEmptyPlot) {
             <?php endif; ?>
 
             <?php if ($code === 'grain_mill' && $lvl > 0): ?>
+            <?php
+            $planetEngine->processCraftQueue((int)$planet['id']);
+            $craftQueue = $planetEngine->getCraftQueue((int)$planet['id']);
+            $activeCraft = !empty($craftQueue) ? $craftQueue[0] : null;
+            ?>
             <!-- ========================================================
                  ATELIER DE RAFFINAGE : MOUTURE DE FARINE & BRASSERIE DE SAKÉ
                  ======================================================== -->
@@ -927,9 +932,50 @@ if (!$isEmptyPlot) {
                         <span class="badge bg-success-lt fw-bold">
                             Rendement : +<?= (int)($lvl * 2) ?>% (Niveau <?= $lvl ?>)
                         </span>
+                        <span class="badge bg-info-lt fw-bold">
+                            Vitesse : +<?= (int)($lvl * 15) ?>%
+                        </span>
                     </div>
                 </div>
                 <div class="card-body">
+                    <!-- Lot en cours de raffinage (si actif) -->
+                    <?php if ($activeCraft): ?>
+                    <div class="alert alert-primary mb-3 p-3 border-primary shadow-sm" style="border-left: 5px solid #206bc4; background: #f0f7ff;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="fs-1"><?= $activeCraft['product'] === 'sake' ? '🍶' : '🍚' ?></span>
+                                <div>
+                                    <h4 class="m-0 fw-bold text-dark">
+                                        <?= $activeCraft['product'] === 'sake' ? 'Brassage de Saké en cuve...' : 'Mouture de Farine de Riz en cours...' ?>
+                                    </h4>
+                                    <div class="text-secondary small mt-1">
+                                        Production prévue : <strong class="text-primary">+<?= number_format((int)$activeCraft['produced_amount']) ?> <?= $activeCraft['product'] === 'sake' ? 'Saké 🍶' : 'Farine 🍚' ?></strong>
+                                        &bull; Riz engagé : <strong><?= number_format((int)$activeCraft['rice_amount']) ?> 🌾</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-end d-flex flex-column align-items-end gap-1">
+                                <span class="badge bg-primary text-white font-monospace fs-5 py-2 px-3 shadow-sm" data-countdown="<?= $activeCraft['finishes_at'] ?>">
+                                    ⏳ En cours...
+                                </span>
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="cancelRiceCraft(<?= (int)$activeCraft['id'] ?>)">
+                                    ✕ Annuler (Récupérer 80% riz)
+                                </button>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 10px; background-color: #dbeafe;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                 role="progressbar" 
+                                 style="width: <?= $activeCraft['progress'] ?>%;" 
+                                 aria-valuenow="<?= $activeCraft['progress'] ?>" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100"
+                                 id="craftProgressBar">
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Résumé des stocks actuels -->
                     <div class="row g-2 mb-3">
                         <div class="col-4">
@@ -973,30 +1019,40 @@ if (!$isEmptyPlot) {
                                     <div class="mb-2">
                                         <label class="form-label fw-bold text-dark small mb-1">Quantité de Riz à moudre :</label>
                                         <div class="input-group">
-                                            <input type="number" id="rice_amount_flour" min="5" step="5" value="100" class="form-control fw-bold text-center" oninput="calcFlourPreview()">
+                                            <input type="number" id="rice_amount_flour" min="5" step="5" value="100" class="form-control fw-bold text-center" oninput="calcFlourPreview()" <?= $activeCraft ? 'disabled' : '' ?>>
                                             <span class="input-group-text small">Riz</span>
                                         </div>
                                     </div>
 
                                     <!-- Boutons raccourcis -->
                                     <div class="btn-group btn-group-sm w-100 mb-3">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(50)">50</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(200)">200</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(1000)">1 000</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount('max')">Max</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(50)" <?= $activeCraft ? 'disabled' : '' ?>>50</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(200)" <?= $activeCraft ? 'disabled' : '' ?>>200</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(1000)" <?= $activeCraft ? 'disabled' : '' ?>>1 000</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount('max')" <?= $activeCraft ? 'disabled' : '' ?>>Max</button>
                                     </div>
 
                                     <div class="alert alert-info py-2 px-3 small mb-3">
-                                        <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span>Production estimée :</span>
                                             <strong class="text-primary fs-5" id="preview_flour_gain">+20 🍚</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.8rem;">
+                                            <span>Durée de mouture :</span>
+                                            <span class="fw-bold font-monospace" id="preview_flour_time">⏱️ --</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <button type="button" class="btn btn-success w-100 fw-bold" onclick="submitRiceCraft('rice_flour')">
-                                    🍚 Moudre la Farine de Riz
+                                <?php if ($activeCraft): ?>
+                                <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
+                                    ⏳ Atelier occupé (lot en cours)
                                 </button>
+                                <?php else: ?>
+                                <button type="button" class="btn btn-success w-100 fw-bold" onclick="submitRiceCraft('rice_flour')">
+                                    🍚 Lancer la Mouture de Farine
+                                </button>
+                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -1017,30 +1073,40 @@ if (!$isEmptyPlot) {
                                     <div class="mb-2">
                                         <label class="form-label fw-bold text-dark small mb-1">Quantité de Riz à brasser :</label>
                                         <div class="input-group">
-                                            <input type="number" id="rice_amount_sake" min="10" step="10" value="100" class="form-control fw-bold text-center" oninput="calcSakePreview()">
+                                            <input type="number" id="rice_amount_sake" min="10" step="10" value="100" class="form-control fw-bold text-center" oninput="calcSakePreview()" <?= $activeCraft ? 'disabled' : '' ?>>
                                             <span class="input-group-text small">Riz</span>
                                         </div>
                                     </div>
 
                                     <!-- Boutons raccourcis -->
                                     <div class="btn-group btn-group-sm w-100 mb-3">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(50)">50</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(200)">200</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(1000)">1 000</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount('max')">Max</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(50)" <?= $activeCraft ? 'disabled' : '' ?>>50</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(200)" <?= $activeCraft ? 'disabled' : '' ?>>200</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(1000)" <?= $activeCraft ? 'disabled' : '' ?>>1 000</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount('max')" <?= $activeCraft ? 'disabled' : '' ?>>Max</button>
                                     </div>
 
                                     <div class="alert alert-warning py-2 px-3 small mb-3">
-                                        <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span>Production estimée :</span>
                                             <strong class="text-warning fs-5" id="preview_sake_gain">+10 🍶</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.8rem;">
+                                            <span>Durée de fermentation :</span>
+                                            <span class="fw-bold font-monospace" id="preview_sake_time">⏱️ --</span>
                                         </div>
                                     </div>
                                 </div>
 
+                                <?php if ($activeCraft): ?>
+                                <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
+                                    ⏳ Atelier occupé (lot en cours)
+                                </button>
+                                <?php else: ?>
                                 <button type="button" class="btn btn-warning w-100 fw-bold text-dark" onclick="submitRiceCraft('sake')">
                                     🍶 Déclencher le Brassage du Saké
                                 </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -1349,25 +1415,56 @@ function closeArtworkModal(e) {
 // ==========================================
 const grainMillLevel = <?= (int)($lvl ?? 0) ?>;
 const availableRiceStock = <?= (float)($planet['deuterium'] ?? 0) ?>;
+const gameSpeed = <?= (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1) ?>;
+
+function formatCraftDuration(sec) {
+    if (sec <= 0) return '0s';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    if (m > 0) {
+        return `${m}m ${String(s).padStart(2, '0')}s`;
+    }
+    return `${s}s`;
+}
 
 function calcFlourPreview() {
     const input = document.getElementById('rice_amount_flour');
-    const preview = document.getElementById('preview_flour_gain');
-    if (!input || !preview) return;
+    const previewGain = document.getElementById('preview_flour_gain');
+    const previewTime = document.getElementById('preview_flour_time');
+    if (!input) return;
     const rice = Math.max(0, parseFloat(input.value) || 0);
     const efficiency = 1 + (grainMillLevel * 0.02);
     const gain = Math.floor((rice / 5) * efficiency);
-    preview.textContent = '+' + gain.toLocaleString('fr-FR') + ' 🍚';
+    if (previewGain) previewGain.textContent = '+' + gain.toLocaleString('fr-FR') + ' 🍚';
+
+    if (previewTime) {
+        if (rice <= 0) {
+            previewTime.textContent = '⏱️ --';
+        } else {
+            const duration = Math.max(10, Math.round((rice * 0.4) / (1 + (grainMillLevel * 0.15)) / (gameSpeed || 1)));
+            previewTime.textContent = '⏱️ ' + formatCraftDuration(duration);
+        }
+    }
 }
 
 function calcSakePreview() {
     const input = document.getElementById('rice_amount_sake');
-    const preview = document.getElementById('preview_sake_gain');
-    if (!input || !preview) return;
+    const previewGain = document.getElementById('preview_sake_gain');
+    const previewTime = document.getElementById('preview_sake_time');
+    if (!input) return;
     const rice = Math.max(0, parseFloat(input.value) || 0);
     const efficiency = 1 + (grainMillLevel * 0.02);
     const gain = Math.floor((rice / 10) * efficiency);
-    preview.textContent = '+' + gain.toLocaleString('fr-FR') + ' 🍶';
+    if (previewGain) previewGain.textContent = '+' + gain.toLocaleString('fr-FR') + ' 🍶';
+
+    if (previewTime) {
+        if (rice <= 0) {
+            previewTime.textContent = '⏱️ --';
+        } else {
+            const duration = Math.max(15, Math.round((rice * 0.8) / (1 + (grainMillLevel * 0.15)) / (gameSpeed || 1)));
+            previewTime.textContent = '⏱️ ' + formatCraftDuration(duration);
+        }
+    }
 }
 
 function setRiceFlourAmount(val) {
@@ -1391,6 +1488,52 @@ function setRiceSakeAmount(val) {
     }
     calcSakePreview();
 }
+
+async function cancelRiceCraft(craftId) {
+    const confirmed = await showModalConfirm(
+        'Voulez-vous annuler ce raffinage en cours ? 80% du riz engagé sera restitué dans vos greniers.',
+        'Annulation du raffinage'
+    );
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'cancel_craft');
+    formData.append('craft_id', craftId);
+
+    try {
+        const res = await fetch('/api/craft.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showModalAlert(data.error || "Impossible d'annuler le raffinage.", 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication avec les ateliers.', 'error');
+    }
+}
+
+<?php if (!empty($activeCraft)): ?>
+function updateCraftProgressBar() {
+    const started = <?= (int)$activeCraft['started_at'] ?>;
+    const finishes = <?= (int)$activeCraft['finishes_at'] ?>;
+    const now = Math.floor(Date.now() / 1000);
+    const total = Math.max(1, finishes - started);
+    const elapsed = Math.max(0, now - started);
+    const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+    const pbar = document.getElementById('craftProgressBar');
+    if (pbar) {
+        pbar.style.width = pct.toFixed(1) + '%';
+        pbar.setAttribute('aria-valuenow', pct.toFixed(1));
+    }
+}
+setInterval(updateCraftProgressBar, 1000);
+updateCraftProgressBar();
+<?php endif; ?>
 
 async function submitRiceCraft(product) {
     const inputId = (product === 'rice_flour') ? 'rice_amount_flour' : 'rice_amount_sake';

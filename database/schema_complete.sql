@@ -713,6 +713,24 @@ CREATE TABLE `planet_feasts` (
   CONSTRAINT `fk_pf_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+DROP TABLE IF EXISTS `craft_queue`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `craft_queue` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `planet_id` int(10) unsigned NOT NULL,
+  `product` varchar(30) NOT NULL,
+  `rice_amount` double NOT NULL,
+  `produced_amount` int(10) unsigned NOT NULL,
+  `started_at` int(10) unsigned NOT NULL,
+  `finishes_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_cq_planet` (`planet_id`),
+  KEY `idx_cq_finishes` (`finishes_at`),
+  CONSTRAINT `fk_cq_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

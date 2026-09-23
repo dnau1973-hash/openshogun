@@ -366,5 +366,19 @@ CREATE TABLE `planet_feasts` (
   CONSTRAINT `fk_pf_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- File de Raffinage : Meunerie & Brasserie (Farine & Saké)
+CREATE TABLE `craft_queue` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `planet_id` INT UNSIGNED NOT NULL,
+  `product` VARCHAR(30) NOT NULL,
+  `rice_amount` DOUBLE NOT NULL,
+  `produced_amount` INT UNSIGNED NOT NULL,
+  `started_at` INT UNSIGNED NOT NULL,
+  `finishes_at` INT UNSIGNED NOT NULL,
+  KEY `idx_cq_planet` (`planet_id`),
+  KEY `idx_cq_finishes` (`finishes_at`),
+  CONSTRAINT `fk_cq_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 

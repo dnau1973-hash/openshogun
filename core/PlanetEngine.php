@@ -33,7 +33,10 @@ class PlanetEngine {
         // 3. Résolution de la caserne militaire
         $this->processBarracksQueue($planetId);
 
-        // 4. Récupération de la planète
+        // 4. Résolution de la file de raffinage de la meunerie (Farine & Saké)
+        $this->processCraftQueue($planetId);
+
+        // 5. Récupération de la planète
         $stmt = $this->db->prepare("
             SELECT p.*, u.faction, u.username 
             FROM planets p 
@@ -335,6 +338,78 @@ class PlanetEngine {
     }
 
     /**
+     * Traite les lots de raffinage terminés dans la Meunerie & Brasserie (Sakagura)
+     */
+    public function processCraftQueue(int $planetId): void {
+        $now = time();
+        try {
+            $stmt = $this->db->prepare("
+                SELECT * FROM craft_queue 
+                WHERE planet_id = ? AND finishes_at <= ?
+                ORDER BY finishes_at ASC
+            ");
+            $stmt->execute([$planetId, $now]);
+            $completed = $stmt->fetchAll();
+
+            foreach ($completed as $item) {
+                $product = $item['product'];
+                if (!in_array($product, ['sake', 'rice_flour'])) {
+                    $this->db->prepare("DELETE FROM craft_queue WHERE id = ?")->execute([$item['id']]);
+                    continue;
+                }
+
+                $amount = (float)$item['produced_amount'];
+
+                $this->db->beginTransaction();
+                try {
+                    $up = $this->db->prepare("
+                        UPDATE planets 
+                        SET {$product} = {$product} + ? 
+                        WHERE id = ?
+                    ");
+                    $up->execute([$amount, $planetId]);
+
+                    $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
+                    $del->execute([$item['id']]);
+
+                    $this->db->commit();
+                } catch (Exception $e) {
+                    $this->db->rollBack();
+                }
+            }
+        } catch (Exception $e) {
+            // Table pas encore créée ou en migration
+        }
+    }
+
+    /**
+     * Récupère la file active de raffinage pour une planète
+     */
+    public function getCraftQueue(int $planetId): array {
+        $now = time();
+        try {
+            $stmt = $this->db->prepare("
+                SELECT * FROM craft_queue 
+                WHERE planet_id = ? 
+                ORDER BY started_at ASC
+            ");
+            $stmt->execute([$planetId]);
+            $queue = $stmt->fetchAll();
+
+            foreach ($queue as &$item) {
+                $item['time_remaining'] = max(0, (int)$item['finishes_at'] - $now);
+                $totalDuration = max(1, (int)$item['finishes_at'] - (int)$item['started_at']);
+                $elapsed = $totalDuration - $item['time_remaining'];
+                $item['progress'] = min(100, max(0, round(($elapsed / $totalDuration) * 100, 1)));
+            }
+            unset($item);
+            return $queue;
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
      * Récupère les 18 parcelles d'une planète
      */
     public function getFields(int $planetId): array {
@@ -608,6 +683,20 @@ class PlanetEngine {
                 INDEX `idx_pf_finishes` (`finishes_at`),
                 CONSTRAINT `fk_pf_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+            // 4. Table craft_queue (file de raffinage de la meunerie)
+            $this->db->exec("CREATE TABLE IF NOT EXISTS `craft_queue` (
+                `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                `planet_id` INT UNSIGNED NOT NULL,
+                `product` VARCHAR(30) NOT NULL,
+                `rice_amount` DOUBLE NOT NULL,
+                `produced_amount` INT UNSIGNED NOT NULL,
+                `started_at` INT UNSIGNED NOT NULL,
+                `finishes_at` INT UNSIGNED NOT NULL,
+                INDEX `idx_cq_planet` (`planet_id`),
+                INDEX `idx_cq_finishes` (`finishes_at`),
+                CONSTRAINT `fk_cq_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         } catch (Exception $e) {
             // Ignorer silencieusement si déjà en cours ou permissions limitées
         }
@@ -619,6 +708,74 @@ class PlanetEngine {
      * @param int $planetId Identifiant du fief / planète
      * @param string $product 'sake' ou 'rice_flour'
      * @param float $riceAmount Quantité de riz brut (deuterium) à raffiner
+     * @return array Résultat de l'opération
+     */
+    public function calculateCraftDetails(int $planetId, string $product, float $riceAmount): array {
+        $buildings = $this->getBuildings($planetId);
+        $millLvl = (int)($buildings['grain_mill'] ?? 1);
+        $planet = $this->getPlanet($planetId);
+
+        $efficiencyMultiplier = 1.0 + ($millLvl * 0.02);
+
+        if ($product === 'rice_flour') {
+            $baseCostPerUnit = 5;
+            $rawProduced = floor(($riceAmount / $baseCostPerUnit) * $efficiencyMultiplier);
+            $productName = "Farine de Riz (Komeko)";
+            $productIcon = "🍚";
+            $currentStock = (float)($planet['rice_flour'] ?? 0);
+            $maxStock = (int)($planet['rice_flour_max'] ?? (10000 * pow(1.4, $millLvl)));
+            $durationFactor = 0.4;
+            $minDuration = 10;
+        } else {
+            $baseCostPerUnit = 10;
+            $rawProduced = floor(($riceAmount / $baseCostPerUnit) * $efficiencyMultiplier);
+            $productName = "Saké Féodal";
+            $productIcon = "🍶";
+            $currentStock = (float)($planet['sake'] ?? 0);
+            $maxStock = (int)($planet['sake_max'] ?? (10000 * pow(1.4, $millLvl)));
+            $durationFactor = 0.8;
+            $minDuration = 15;
+        }
+
+        $availableSpace = max(0, $maxStock - $currentStock);
+        $actualProduced = min($rawProduced, $availableSpace);
+
+        // Si la réserve limite la production, on n'utilise que le riz proportionnel
+        $actualRiceEngaged = $riceAmount;
+        if ($actualProduced < $rawProduced && $actualProduced > 0) {
+            $actualRiceEngaged = ceil(($actualProduced / $efficiencyMultiplier) * $baseCostPerUnit);
+        }
+
+        // Vitesse du jeu
+        $gameSpeed = (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1);
+        if ($gameSpeed <= 0) $gameSpeed = 1;
+
+        // Vitesse accélérée de 15% par niveau de meunerie
+        $durationSeconds = max($minDuration, (int)round(($actualRiceEngaged * $durationFactor) / (1 + ($millLvl * 0.15)) / $gameSpeed));
+
+        return [
+            'product' => $product,
+            'product_name' => $productName,
+            'product_icon' => $productIcon,
+            'mill_level' => $millLvl,
+            'efficiency_multiplier' => $efficiencyMultiplier,
+            'base_cost_per_unit' => $baseCostPerUnit,
+            'raw_produced' => $rawProduced,
+            'actual_produced' => $actualProduced,
+            'current_stock' => $currentStock,
+            'max_stock' => $maxStock,
+            'available_space' => $availableSpace,
+            'actual_rice_engaged' => $actualRiceEngaged,
+            'duration_seconds' => $durationSeconds
+        ];
+    }
+
+    /**
+     * Lance le raffinage de riz en Farine ou Saké avec durée de préparation
+     * 
+     * @param int $planetId
+     * @param string $product 'sake' ou 'rice_flour'
+     * @param float $riceAmount Quantité de riz brut (deuterium) à engager
      * @return array Résultat de l'opération
      */
     public function craftRiceProduct(int $planetId, string $product, float $riceAmount): array {
@@ -639,138 +796,138 @@ class PlanetEngine {
             return ['success' => false, 'error' => "La Meunerie & Brasserie de riz (Sakagura) doit être érigée au Niveau 1 minimum pour raffiner le riz."];
         }
 
-        // 2. Mettre à jour les ressources de la planète
+        // 2. Traiter les productions terminées et vérifier si une tâche est déjà en cours
+        $this->processCraftQueue($planetId);
+        $activeQueue = $this->getCraftQueue($planetId);
+        if (!empty($activeQueue)) {
+            $active = $activeQueue[0];
+            $remaining = gmdate('i\m s\s', $active['time_remaining']);
+            return [
+                'success' => false, 
+                'error' => "Une cuvée ou mouture de raffinage est déjà en cours dans la Meunerie (temps restant : {$remaining}). Attendez sa finalisation ou annulez-la."
+            ];
+        }
+
+        // 3. Calculer les détails de production
+        $details = $this->calculateCraftDetails($planetId, $product, $riceAmount);
+
+        if ($details['actual_produced'] < 1) {
+            return [
+                'success' => false, 
+                'error' => "Quantité de riz insuffisante pour produire au moins 1 unité de {$details['product_name']} (minimum {$details['base_cost_per_unit']} Riz requis)."
+            ];
+        }
+
+        if ($details['available_space'] <= 0) {
+            return [
+                'success' => false, 
+                'error' => "Vos réserves de {$details['product_name']} sont saturées (" . number_format($details['current_stock']) . "/" . number_format($details['max_stock']) . "). Augmentez le niveau de votre Meunerie ou consommez vos stocks."
+            ];
+        }
+
+        // 4. Mettre à jour les ressources de la planète et vérifier le stock de riz
         $planet = $this->updatePlanet($planetId);
-        if ($planet['deuterium'] < $riceAmount) {
+        $engagedRice = $details['actual_rice_engaged'];
+        if ($planet['deuterium'] < $engagedRice) {
             return [
                 'success' => false, 
-                'error' => "Stock de Riz insuffisant (" . number_format((int)$planet['deuterium']) . " disponible, " . number_format($riceAmount) . " requis)."
+                'error' => "Stock de Riz insuffisant (" . number_format((int)$planet['deuterium']) . " disponible, " . number_format($engagedRice) . " requis)."
             ];
         }
 
-        // 3. Ratios de conversion et bonus de niveau
-        // Farine : 5 Riz -> 1 Farine
-        // Saké   : 10 Riz -> 1 Saké
-        // Bonus Meunerie : +2% de rendement par niveau
-        $efficiencyMultiplier = 1.0 + ($millLvl * 0.02);
+        // 5. Engager les ressources et placer dans la file de raffinage
+        $now = time();
+        $finishesAt = $now + $details['duration_seconds'];
 
-        if ($product === 'rice_flour') {
-            $baseCostPerUnit = 5;
-            $rawProduced = floor(($riceAmount / $baseCostPerUnit) * $efficiencyMultiplier);
-            $productName = "Farine de Riz (Komeko)";
-            $productIcon = "🍚";
-            $currentStock = (float)($planet['rice_flour'] ?? 0);
-            $maxStock = (int)($planet['rice_flour_max'] ?? (10000 * pow(1.4, $millLvl)));
-        } else {
-            $baseCostPerUnit = 10;
-            $rawProduced = floor(($riceAmount / $baseCostPerUnit) * $efficiencyMultiplier);
-            $productName = "Saké Féodal";
-            $productIcon = "🍶";
-            $currentStock = (float)($planet['sake'] ?? 0);
-            $maxStock = (int)($planet['sake_max'] ?? (10000 * pow(1.4, $millLvl)));
-        }
-
-        if ($rawProduced < 1) {
-            return [
-                'success' => false, 
-                'error' => "Quantité de riz insuffisante pour produire au moins 1 unité de {$productName} (minimum {$baseCostPerUnit} Riz requis)."
-            ];
-        }
-
-        // 4. Vérifier la capacité de stockage
-        $availableSpace = max(0, $maxStock - $currentStock);
-        if ($availableSpace <= 0) {
-            return [
-                'success' => false, 
-                'error' => "Vos réserves de {$productName} sont saturées (" . number_format($currentStock) . "/" . number_format($maxStock) . "). Augmentez le niveau de votre Meunerie ou consommez vos stocks."
-            ];
-        }
-
-        $actualProduced = min($rawProduced, $availableSpace);
-        // Si la réserve limite la production, on n'utilise que le riz proportionnel
-        if ($actualProduced < $rawProduced) {
-            $riceAmount = ceil(($actualProduced / $efficiencyMultiplier) * $baseCostPerUnit);
-        }
-
-        // 5. Transaction atomique en base
         $this->db->beginTransaction();
         try {
             $stmt = $this->db->prepare("
                 UPDATE planets 
-                SET deuterium = GREATEST(0, deuterium - ?),
-                    {$product} = {$product} + ?
+                SET deuterium = GREATEST(0, deuterium - ?) 
                 WHERE id = ? AND deuterium >= ?
             ");
-            $stmt->execute([$riceAmount, $actualProduced, $planetId, $riceAmount]);
+            $stmt->execute([$engagedRice, $planetId, $engagedRice]);
 
             if ($stmt->rowCount() === 0) {
                 $this->db->rollBack();
                 return ['success' => false, 'error' => "Échec de l'opération : stock de riz modifié entretemps."];
             }
 
+            $stmtQueue = $this->db->prepare("
+                INSERT INTO craft_queue (planet_id, product, rice_amount, produced_amount, started_at, finishes_at) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
+            $stmtQueue->execute([
+                $planetId,
+                $product,
+                $engagedRice,
+                $details['actual_produced'],
+                $now,
+                $finishesAt
+            ]);
+
             $this->db->commit();
         } catch (Exception $e) {
             $this->db->rollBack();
-            if (strpos($e->getMessage(), '1054') !== false || strpos($e->getMessage(), 'Unknown column') !== false || strpos($e->getMessage(), '42S22') !== false) {
-                // Forcer la création des colonnes manquantes
-                try {
-                    $this->db->exec("ALTER TABLE `planets` 
-                        ADD COLUMN `sake` DOUBLE NOT NULL DEFAULT 0,
-                        ADD COLUMN `rice_flour` DOUBLE NOT NULL DEFAULT 0,
-                        ADD COLUMN `sake_max` INT UNSIGNED NOT NULL DEFAULT 10000,
-                        ADD COLUMN `rice_flour_max` INT UNSIGNED NOT NULL DEFAULT 10000,
-                        ADD COLUMN `population` INT UNSIGNED NOT NULL DEFAULT 100
-                    ");
-                } catch (Exception $eAlter) {
-                    // Silencieux si déjà partielles
-                }
-
-                // Réessayer la transaction une fois
-                try {
-                    $this->db->beginTransaction();
-                    $stmt = $this->db->prepare("
-                        UPDATE planets 
-                        SET deuterium = GREATEST(0, deuterium - ?),
-                            {$product} = {$product} + ?
-                        WHERE id = ? AND deuterium >= ?
-                    ");
-                    $stmt->execute([$riceAmount, $actualProduced, $planetId, $riceAmount]);
-                    $this->db->commit();
-
-                    $updatedPlanet = $this->getPlanet($planetId);
-                    return [
-                        'success' => true,
-                        'message' => "Raffinage accompli avec succès ! <strong>+{$actualProduced} {$productName} {$productIcon}</strong> produits (consommé : <strong>-{$riceAmount} Riz 🌾</strong>).",
-                        'product' => $product,
-                        'product_name' => $productName,
-                        'product_icon' => $productIcon,
-                        'produced' => $actualProduced,
-                        'consumed_rice' => $riceAmount,
-                        'new_deuterium' => $updatedPlanet['deuterium'],
-                        'new_product_stock' => $updatedPlanet[$product] ?? 0,
-                        'planet' => $updatedPlanet
-                    ];
-                } catch (Exception $eRetry) {
-                    $this->db->rollBack();
-                    return ['success' => false, 'error' => "Erreur lors du raffinage : " . $eRetry->getMessage()];
-                }
-            }
-            return ['success' => false, 'error' => "Erreur lors du raffinage : " . $e->getMessage()];
+            return ['success' => false, 'error' => "Erreur lors du lancement du raffinage : " . $e->getMessage()];
         }
 
-        // Récupérer le nouvel état
         $updatedPlanet = $this->getPlanet($planetId);
+        $activeQueue = $this->getCraftQueue($planetId);
 
+        $durationFmt = gmdate('i\m s\s', $details['duration_seconds']);
         return [
             'success' => true,
-            'message' => "Raffinage accompli avec succès ! <strong>+{$actualProduced} {$productName} {$productIcon}</strong> produits (consommé : <strong>-{$riceAmount} Riz 🌾</strong>).",
+            'message' => "Le raffinage de <strong>+" . number_format($details['actual_produced']) . " {$details['product_name']} {$details['product_icon']}</strong> a débuté ! Durée de préparation : <strong>{$durationFmt}</strong> (consommé : -{$engagedRice} Riz 🌾).",
             'product' => $product,
-            'product_name' => $productName,
-            'product_icon' => $productIcon,
-            'produced' => $actualProduced,
-            'consumed_rice' => $riceAmount,
+            'product_name' => $details['product_name'],
+            'product_icon' => $details['product_icon'],
+            'produced' => $details['actual_produced'],
+            'consumed_rice' => $engagedRice,
+            'duration_seconds' => $details['duration_seconds'],
+            'craft' => $activeQueue[0] ?? null,
             'new_deuterium' => $updatedPlanet['deuterium'],
             'new_product_stock' => $updatedPlanet[$product] ?? 0,
+            'planet' => $updatedPlanet
+        ];
+    }
+
+    /**
+     * Annule un lot de raffinage en cours et rembourse 80% du riz engagé
+     */
+    public function cancelRiceCraft(int $planetId, int $craftId): array {
+        $stmt = $this->db->prepare("SELECT * FROM craft_queue WHERE id = ? AND planet_id = ?");
+        $stmt->execute([$craftId, $planetId]);
+        $craft = $stmt->fetch();
+
+        if (!$craft) {
+            return ['success' => false, 'error' => "Ce lot de raffinage est introuvable ou déjà terminé."];
+        }
+
+        $refundRice = (float)floor($craft['rice_amount'] * 0.8);
+
+        $this->db->beginTransaction();
+        try {
+            $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
+            $del->execute([$craftId]);
+
+            if ($refundRice > 0) {
+                $up = $this->db->prepare("UPDATE planets SET deuterium = deuterium + ? WHERE id = ?");
+                $up->execute([$refundRice, $planetId]);
+            }
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'error' => "Erreur lors de l'annulation : " . $e->getMessage()];
+        }
+
+        $updatedPlanet = $this->getPlanet($planetId);
+        return [
+            'success' => true,
+            'message' => "Raffinage annulé. <strong>+" . number_format($refundRice) . " Riz 🌾</strong> (80% du stock engagé) ont été restitués à vos réserves.",
+            'refunded_rice' => $refundRice,
+            'new_deuterium' => $updatedPlanet['deuterium'],
             'planet' => $updatedPlanet
         ];
     }
