@@ -557,6 +557,63 @@ class PlanetEngine {
     }
 
     /**
+     * Assure la présence des colonnes sake, rice_flour, population et des tables requises
+     * Auto-migration transparente au runtime si les colonnes manquent dans la base MySQL
+     */
+    public function ensureSchemaMigration(): void {
+        static $executed = false;
+        if ($executed) return;
+        $executed = true;
+
+        try {
+            // 1. Colonne sake et rice_flour sur planets
+            $stmt = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'sake'");
+            if ($stmt && $stmt->rowCount() === 0) {
+                $this->db->exec("ALTER TABLE `planets` 
+                    ADD COLUMN `sake` DOUBLE NOT NULL DEFAULT 0,
+                    ADD COLUMN `rice_flour` DOUBLE NOT NULL DEFAULT 0,
+                    ADD COLUMN `sake_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+                    ADD COLUMN `rice_flour_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+                    ADD COLUMN `population` INT UNSIGNED NOT NULL DEFAULT 100
+                ");
+            } else {
+                $stmtFlour = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'rice_flour'");
+                if ($stmtFlour && $stmtFlour->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets` ADD COLUMN `rice_flour` DOUBLE NOT NULL DEFAULT 0");
+                }
+                $stmtPop = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'population'");
+                if ($stmtPop && $stmtPop->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets` ADD COLUMN `population` INT UNSIGNED NOT NULL DEFAULT 100");
+                }
+            }
+
+            // 2. Colonne de units
+            $stmtUnits = $this->db->query("SHOW COLUMNS FROM `units` LIKE 'rice_flour_cost'");
+            if ($stmtUnits && $stmtUnits->rowCount() === 0) {
+                $this->db->exec("ALTER TABLE `units` ADD COLUMN `rice_flour_cost` INT UNSIGNED NOT NULL DEFAULT 0");
+                $this->db->exec("UPDATE `units` SET `rice_flour_cost` = 15 WHERE `tier` = 2 AND `faction` != 'all'");
+                $this->db->exec("UPDATE `units` SET `rice_flour_cost` = 35 WHERE `tier` = 3 AND `faction` != 'all'");
+                $this->db->exec("UPDATE `units` SET `rice_flour_cost` = 75 WHERE `tier` = 4 AND `faction` != 'all'");
+            }
+
+            // 3. Table planet_feasts
+            $this->db->exec("CREATE TABLE IF NOT EXISTS `planet_feasts` (
+                `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                `planet_id` INT UNSIGNED NOT NULL,
+                `feast_type` VARCHAR(40) NOT NULL,
+                `tenshu_level` INT UNSIGNED NOT NULL DEFAULT 1,
+                `started_at` INT UNSIGNED NOT NULL,
+                `finishes_at` INT UNSIGNED NOT NULL,
+                INDEX `idx_pf_planet` (`planet_id`),
+                INDEX `idx_pf_finishes` (`finishes_at`),
+                CONSTRAINT `fk_pf_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        } catch (Exception $e) {
+            // Ignorer silencieusement si déjà en cours ou permissions limitées
+        }
+    }
+
+    /**
      * Transformation / Raffinage du Riz en Saké ou Farine de Riz (Meunerie & Brasserie Sakagura)
      *
      * @param int $planetId Identifiant du fief / planète
@@ -565,6 +622,7 @@ class PlanetEngine {
      * @return array Résultat de l'opération
      */
     public function craftRiceProduct(int $planetId, string $product, float $riceAmount): array {
+        $this->ensureSchemaMigration();
         if (!in_array($product, ['sake', 'rice_flour'])) {
             return ['success' => false, 'error' => "Produit de raffinage invalide (Saké ou Farine uniquement)."];
         }
@@ -653,6 +711,50 @@ class PlanetEngine {
             $this->db->commit();
         } catch (Exception $e) {
             $this->db->rollBack();
+            if (strpos($e->getMessage(), '1054') !== false || strpos($e->getMessage(), 'Unknown column') !== false || strpos($e->getMessage(), '42S22') !== false) {
+                // Forcer la création des colonnes manquantes
+                try {
+                    $this->db->exec("ALTER TABLE `planets` 
+                        ADD COLUMN `sake` DOUBLE NOT NULL DEFAULT 0,
+                        ADD COLUMN `rice_flour` DOUBLE NOT NULL DEFAULT 0,
+                        ADD COLUMN `sake_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+                        ADD COLUMN `rice_flour_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+                        ADD COLUMN `population` INT UNSIGNED NOT NULL DEFAULT 100
+                    ");
+                } catch (Exception $eAlter) {
+                    // Silencieux si déjà partielles
+                }
+
+                // Réessayer la transaction une fois
+                try {
+                    $this->db->beginTransaction();
+                    $stmt = $this->db->prepare("
+                        UPDATE planets 
+                        SET deuterium = GREATEST(0, deuterium - ?),
+                            {$product} = {$product} + ?
+                        WHERE id = ? AND deuterium >= ?
+                    ");
+                    $stmt->execute([$riceAmount, $actualProduced, $planetId, $riceAmount]);
+                    $this->db->commit();
+
+                    $updatedPlanet = $this->getPlanet($planetId);
+                    return [
+                        'success' => true,
+                        'message' => "Raffinage accompli avec succès ! <strong>+{$actualProduced} {$productName} {$productIcon}</strong> produits (consommé : <strong>-{$riceAmount} Riz 🌾</strong>).",
+                        'product' => $product,
+                        'product_name' => $productName,
+                        'product_icon' => $productIcon,
+                        'produced' => $actualProduced,
+                        'consumed_rice' => $riceAmount,
+                        'new_deuterium' => $updatedPlanet['deuterium'],
+                        'new_product_stock' => $updatedPlanet[$product] ?? 0,
+                        'planet' => $updatedPlanet
+                    ];
+                } catch (Exception $eRetry) {
+                    $this->db->rollBack();
+                    return ['success' => false, 'error' => "Erreur lors du raffinage : " . $eRetry->getMessage()];
+                }
+            }
             return ['success' => false, 'error' => "Erreur lors du raffinage : " . $e->getMessage()];
         }
 
@@ -728,6 +830,7 @@ class PlanetEngine {
      * Déclenche une fête ou un banquet au Tenshu alimenté par le Saké
      */
     public function startFeast(int $planetId, string $feastType): array {
+        $this->ensureSchemaMigration();
         if (!in_array($feastType, ['matsuri', 'warriors', 'imperial'])) {
             return ['success' => false, 'error' => "Type de banquet ou célébration inconnu."];
         }

@@ -1,0 +1,8 @@
+# Normalisation automatique des fins de ligne pour Git et GitHub Desktop
+* text=auto eol=lf
+*.php text eol=lf
+*.sql text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.md text eol=lf
