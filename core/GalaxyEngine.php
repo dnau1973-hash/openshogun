@@ -5,6 +5,7 @@
  * et le découpage de l'archipel en 4 quadrants stratégiques.
  */
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Auth.php';
 
 class GalaxyEngine {
     private PDO $db;
@@ -127,7 +128,7 @@ class GalaxyEngine {
 
         $stmt = $this->db->prepare("
             SELECT p.id as planet_id, p.name as planet_name, p.coord_x, p.coord_y, p.planet_type, 
-                   p.user_id, u.username, u.faction, u.points, a.tag as alliance_tag
+                   p.user_id, u.username, u.faction, u.points, u.created_at, u.protection_until, u.is_bot, a.tag as alliance_tag
             FROM planets p
             LEFT JOIN users u ON p.user_id = u.id
             LEFT JOIN alliances a ON u.alliance_id = a.id
@@ -143,6 +144,24 @@ class GalaxyEngine {
             $p['terrain_type'] = $isVillage ? 'village' : 'unoccupied';
             $p['terrain_name'] = $isVillage ? ('Fief de ' . ($p['username'] ?? 'Daimyō')) : 'Terres Libres';
             $p['terrain_img'] = $isVillage ? '/public/assets/map/tile_village.jpg?v=2' : '/public/assets/map/tile_plains.jpg?v=2';
+            
+            if ($isVillage) {
+                $isProt = Auth::isUserProtected($p);
+                $p['is_protected'] = $isProt ? 1 : 0;
+                if ($isProt) {
+                    $rem = Auth::getProtectionRemaining($p);
+                    $p['protection_until'] = $rem['until_formatted'] ?? null;
+                    $p['protection_remaining'] = $rem['formatted'] ?? null;
+                } else {
+                    $p['protection_until'] = null;
+                    $p['protection_remaining'] = null;
+                }
+            } else {
+                $p['is_protected'] = 0;
+                $p['protection_until'] = null;
+                $p['protection_remaining'] = null;
+            }
+
             $gridMap[$p['coord_x'] . ':' . $p['coord_y']] = $p;
         }
 

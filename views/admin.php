@@ -92,7 +92,7 @@ $botsList = $botEngine->getBots();
 
 // Liste des joueurs humains
 $humanUsers = $db->query("
-    SELECT u.id, u.username, u.email, u.faction, u.points, u.is_admin, u.created_at,
+    SELECT u.id, u.username, u.email, u.faction, u.points, u.is_admin, u.created_at, u.protection_until,
            COUNT(p.id) as colony_count
     FROM users u
     LEFT JOIN planets p ON p.user_id = u.id
@@ -476,6 +476,23 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                             </div>
                             <small style="color: var(--text-muted); font-size: 0.75rem;">Accélère les trajets des régiments pour les assauts, convois de tributs et fondations de fiefs.</small>
                         </div>
+
+                        <div>
+                            <label style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; color: #38bdf8;">
+                                🔰 Durée de l'Immunité Débutant (Protection des Nouveaux Joueurs en Jours)
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <input type="range" id="beginner_protection_days_range" min="0" max="30" value="<?= (int)($settings['beginner_protection_days'] ?? 7) ?>" 
+                                       style="flex: 1;" oninput="document.getElementById('beginner_protection_days_input').value = this.value">
+                                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                    <input type="number" id="beginner_protection_days_input" name="beginner_protection_days" min="0" max="60" 
+                                           value="<?= (int)($settings['beginner_protection_days'] ?? 7) ?>" class="form-control" style="width: 70px; text-align: center;"
+                                           oninput="document.getElementById('beginner_protection_days_range').value = this.value">
+                                    <span style="color: #94a3b8; font-weight: 700;">j</span>
+                                </div>
+                            </div>
+                            <small style="color: var(--text-muted); font-size: 0.75rem;">Durée en jours accordée automatiquement lors de l'inscription (7 jours par défaut, 0 pour désactiver).</small>
+                        </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.25rem;">
@@ -852,12 +869,17 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                             <th class="text-center">Fiefs Contrôlés</th>
                             <th class="text-end">Honneur &amp; Points</th>
                             <th class="text-center">Rang Shogunal</th>
+                            <th class="text-center">Immunité Débutant</th>
                             <th class="text-end">Commandes</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($humanUsers as $hUser): ?>
-                            <?php $hfInfo = FACTIONS[$hUser['faction']] ?? FACTIONS['terran']; ?>
+                            <?php 
+                                $hfInfo = FACTIONS[$hUser['faction']] ?? FACTIONS['terran'];
+                                $hProt = Auth::getProtectionRemaining($hUser);
+                                $hIsProt = $hProt && !empty($hProt['is_protected']);
+                            ?>
                             <tr>
                                 <td class="text-secondary small">#<?= $hUser['id'] ?></td>
                                 <td>
@@ -893,15 +915,36 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                         </span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="text-end">
-                                    <?php if ((int)$hUser['id'] !== (int)Auth::id()): ?>
-                                        <button onclick="toggleAdmin(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', <?= (int)$hUser['is_admin'] ?>)"
-                                                class="btn btn-sm btn-outline-secondary">
-                                            <?= ((int)$hUser['is_admin'] === 1) ? 'Rétrograder Joueur' : 'Promouvoir Admin' ?>
-                                        </button>
+                                <td class="text-center" id="user-prot-cell-<?= $hUser['id'] ?>">
+                                    <?php if ($hIsProt): ?>
+                                        <span class="badge bg-success-lt font-weight-bold" title="Immunisé jusqu'au <?= htmlspecialchars($hProt['until_formatted']) ?>">
+                                            🔰 <?= htmlspecialchars($hProt['formatted']) ?>
+                                        </span>
                                     <?php else: ?>
-                                        <span class="text-secondary small">-</span>
+                                        <span class="badge bg-secondary-lt">
+                                            Expirée
+                                        </span>
                                     <?php endif; ?>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-list justify-content-end">
+                                        <button onclick="extendProtection(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', 7)"
+                                                class="btn btn-sm btn-outline-success" title="Accorder ou prolonger de 7 jours d'immunité">
+                                            +7j 🔰
+                                        </button>
+                                        <?php if ($hIsProt): ?>
+                                            <button onclick="revokeProtection(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>')"
+                                                    class="btn btn-sm btn-outline-danger" title="Lever immédiatement l'immunité">
+                                                Lever
+                                            </button>
+                                        <?php endif; ?>
+                                        <?php if ((int)$hUser['id'] !== (int)Auth::id()): ?>
+                                            <button onclick="toggleAdmin(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', <?= (int)$hUser['is_admin'] ?>)"
+                                                    class="btn btn-sm btn-outline-secondary">
+                                                <?= ((int)$hUser['is_admin'] === 1) ? 'Rétrograder' : 'Promouvoir' ?>
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -2352,6 +2395,47 @@ async function toggleAdmin(userId, username, currentStatus) {
             }
         } catch (e) {
             showModalAlert("Erreur", "Une erreur est survenue.", "danger");
+        }
+    });
+}
+
+async function extendProtection(userId, username, days = 7) {
+    showModalConfirm("Prolonger l'Immunité Débutant", `Accorder ou prolonger de <strong>${days} jours</strong> l'immunité féodale du Daimyō <strong>${username}</strong> ?`, async () => {
+        try {
+            const formData = new FormData();
+            formData.append('action', 'extend_protection');
+            formData.append('user_id', userId);
+            formData.append('days', days);
+            const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                showModalAlert("Immunité Féodale", data.message, "success");
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showModalAlert("Erreur", data.error || "Impossible de prolonger l'immunité.", "danger");
+            }
+        } catch (e) {
+            showModalAlert("Erreur", "Une erreur réseau est survenue.", "danger");
+        }
+    });
+}
+
+async function revokeProtection(userId, username) {
+    showModalConfirm("Lever l'Immunité Débutant", `Voulez-vous vraiment <strong>lever immédiatement</strong> l'immunité féodale du Daimyō <strong>${username}</strong> ? Ses fiefs pourront être attaqués et pillés.`, async () => {
+        try {
+            const formData = new FormData();
+            formData.append('action', 'revoke_protection');
+            formData.append('user_id', userId);
+            const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                showModalAlert("Immunité Féodale", data.message, "success");
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showModalAlert("Erreur", data.error || "Impossible de lever l'immunité.", "danger");
+            }
+        } catch (e) {
+            showModalAlert("Erreur", "Une erreur réseau est survenue.", "danger");
         }
     });
 }

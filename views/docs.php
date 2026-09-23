@@ -1833,6 +1833,21 @@ foreach ($allUnits as $u) {
                         <li><strong>Catapultes Horokubiya :</strong> Incendient et réduisent les niveaux des infrastructures urbaines ennemies.</li>
                     </ul>
                 </div>
+
+                <div style="background: rgba(22, 163, 74, 0.06); padding: 1.25rem; border-radius: 8px; border: 1px solid rgba(22, 163, 74, 0.35); margin: 1.5rem 0; color: var(--text-main);">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #15803d; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>🔰</span> Immunité Féodale des Nouveaux Joueurs (Protection de 7 Jours)
+                    </h4>
+                    <p style="margin-bottom: 0.75rem; font-size: 0.92rem; line-height: 1.55;">
+                        Afin de permettre à chaque jeune Daimyō de bâtir ses rizières, d'élever ses remparts et de recruter ses premiers bataillons sans craindre les incursions dévastatrices de seigneurs plus aguerris ou des armées de bots, le Shogunat octroie une <strong>immunité inviolable de 7 jours</strong> dès la création du domaine castral.
+                    </p>
+                    <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Inviolabilité Territoriale :</strong> Aucun autre seigneur (humain ou bot) ne peut lancer de raid de pillage, d'assaut de siège, d'occupation territoriale ni d'infiltration shinobi sur vos provinces.</li>
+                        <li><strong>Convois d'Entraide Autorisés :</strong> Les convois de ressources et de vivres demeurent possibles pour permettre à vos alliés de vous soutenir.</li>
+                        <li><strong>Exploration &amp; Chasse Libre :</strong> Vous pouvez librement envoyer votre Samouraï Héros accomplir des aventures féodales et pacifier les oasis sauvages pour vous emparer de leurs richesses.</li>
+                        <li><strong>Rupture Martiale de l'Immunité :</strong> Si vous décidez de rompre le pacte de paix en lançant un raid, un assaut ou un espionnage contre le fief d'un <em>autre seigneur joueur</em>, votre protection de 7 jours sera <strong>immédiatement et irrévocablement levée</strong>.</li>
+                    </ul>
+                </div>
             </div>
         </div>
     <?php endif; ?>

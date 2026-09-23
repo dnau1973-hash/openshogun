@@ -66,6 +66,7 @@ UNLOCK TABLES;
 LOCK TABLES `game_settings` WRITE;
 /*!40000 ALTER TABLE `game_settings` DISABLE KEYS */;
 INSERT INTO `game_settings` VALUES
+('beginner_protection_days','7','int','Durée de l\'immunité féodale des nouveaux joueurs en jours (0 pour désactiver)','2026-09-23 12:00:00'),
 ('bot_aggressiveness','aggressive','string','Comportement des bots (peaceful, moderate, aggressive)','2026-09-19 08:08:06'),
 ('bot_colonize_enabled','1','boolean','Autoriser les bots à coloniser de nouvelles planètes','2026-09-19 08:08:06'),
 ('bot_last_tick_time','1789823017','string',NULL,'2026-09-19 15:03:37'),

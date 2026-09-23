@@ -29,7 +29,9 @@ CREATE TABLE `users` (
   `alliance_id` INT UNSIGNED NULL DEFAULT NULL,
   `points` INT UNSIGNED NOT NULL DEFAULT 0,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `last_active` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `last_active` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `protection_until` DATETIME NULL DEFAULT NULL,
+  KEY `idx_users_protection` (`protection_until`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Alliances

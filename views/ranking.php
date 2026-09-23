@@ -3,6 +3,7 @@
  * Vue du Classement Galactique, Alliances & Tableau d'Honneur (Style Travian)
  */
 require_once __DIR__ . '/../core/HonorEngine.php';
+require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $db = Database::getConnection();
@@ -12,7 +13,7 @@ $tab = $_GET['tab'] ?? 'general';
 
 // 1. Classement Général
 $stmt = $db->query("
-    SELECT u.id, u.username, u.faction, u.points, u.created_at,
+    SELECT u.id, u.username, u.faction, u.points, u.created_at, u.protection_until, u.is_bot,
            COUNT(p.id) as planet_count, a.name as alliance_name, a.tag as alliance_tag
     FROM users u 
     LEFT JOIN planets p ON p.user_id = u.id 
@@ -84,6 +85,9 @@ $currentYear = date('Y');
                                        class="profile-link-hover" title="Consulter la fiche du Daimyō">
                                         <span>👤</span> <?= htmlspecialchars($p['username']) ?>
                                     </a>
+                                    <?php if (Auth::isUserProtected($p)): ?>
+                                        <span class="badge bg-success-lt ms-1" style="font-size:0.68rem; padding:0.15rem 0.35rem;" title="Immunité Féodale des Nouveaux Joueurs Active">🔰</span>
+                                    <?php endif; ?>
                                     <?= $isCurrent ? '<span style="color:#dc2626; font-size:0.75rem; margin-left:0.5rem;">(Vous)</span>' : '' ?>
                                 </td>
                                 <td style="padding:0.75rem 1rem;">

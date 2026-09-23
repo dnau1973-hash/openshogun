@@ -57,10 +57,24 @@ $stmtMissions = $db->prepare("
 $stmtMissions->execute([$user['id']]);
 $activeMissions = $stmtMissions->fetchAll();
 
-// Liste des fiefs et domaines connus pour cible rapide
-$stmtTargets = $db->prepare("SELECT id, name, coord_x, coord_y FROM planets WHERE id != ? ORDER BY id ASC LIMIT 20");
+// Liste des fiefs et domaines connus pour cible rapide avec statut d'immunité
+$stmtTargets = $db->prepare("
+    SELECT p.id, p.name, p.coord_x, p.coord_y, p.user_id, u.username, u.protection_until, u.created_at, u.is_bot
+    FROM planets p 
+    LEFT JOIN users u ON p.user_id = u.id
+    WHERE p.id != ? 
+    ORDER BY p.id ASC LIMIT 30
+");
 $stmtTargets->execute([$planet['id']]);
 $knownPlanets = $stmtTargets->fetchAll();
+foreach ($knownPlanets as &$kp) {
+    $kp['is_protected'] = !empty($kp['user_id']) ? Auth::isUserProtected($kp) : false;
+}
+unset($kp);
+
+// Immunité du joueur connecté
+$myProtection = Auth::getProtectionRemaining($user);
+$isMyProtectionActive = $myProtection && !empty($myProtection['is_protected']);
 
 // Liste des oasis sauvages et naturelles
 $stmtOases = $db->prepare("SELECT id, name, coord_x, coord_y, oasis_type, bonus_wood, bonus_stone, bonus_rice, owner_planet_id FROM oases ORDER BY id ASC");
@@ -80,6 +94,17 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
             <span style="font-size:0.85rem; color:var(--text-muted);">Fief d'attache : <?= htmlspecialchars($planet['name']) ?></span>
         </div>
         <div class="card-body">
+            <?php if ($isMyProtectionActive): ?>
+                <div class="alert alert-success d-flex align-items-center gap-3 mb-3" style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.4); border-radius: 8px; padding: 0.85rem 1.1rem; color: #166534;">
+                    <span style="font-size: 1.8rem; flex-shrink: 0;">🔰</span>
+                    <div style="font-size: 0.88rem; line-height: 1.45;">
+                        <strong style="color: #15803d; font-size: 0.95rem;">Immunité Féodale des Nouveaux Joueurs Active (Jusqu'au <?= htmlspecialchars($myProtection['until_formatted']) ?> — encore <?= htmlspecialchars($myProtection['formatted']) ?>)</strong><br>
+                        Vos domaines et fiefs sont protégés contre tout raid de pillage, assaut de siège et infiltration shinobi adverse.<br>
+                        <span style="color: #b45309; font-weight: 600;">⚔️ Règle martiale :</span> Vous pouvez librement explorer les aventures du Héros et pacifier les oasis sauvages. En revanche, si vous lancez un raid, un assaut ou un espionnage contre un <strong>autre seigneur joueur</strong>, votre immunité sera <strong>définitivement levée</strong>.
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <?php if (empty($stationedShips) && empty($stationedUnits) && !$canDeployHero): ?>
                 <div style="text-align:center; padding:2rem; background:rgba(255,255,255,0.02); border-radius:8px;">
                     <p style="color:var(--text-muted); margin-bottom:1rem;">Aucun régiment de guerriers, engin de siège ni héros samouraï n'est disponible dans votre garnison.</p>
@@ -188,8 +213,9 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                             <option value="">-- Sélectionner une destination féodale ou oasis --</option>
                             <optgroup label="🏯 Fiefs & Domaines Provinciaux">
                                 <?php foreach ($knownPlanets as $kp): ?>
-                                    <option value="planet:<?= $kp['id'] ?>" <?= ($preselectedTargetType === 'planet' && $preselectedTarget === (int)$kp['id']) ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($kp['name']) ?> [<?= $kp['coord_x'] ?> : <?= $kp['coord_y'] ?>]
+                                    <?php $protLabel = !empty($kp['is_protected']) ? ' [🔰 Protégé]' : ''; ?>
+                                    <option value="planet:<?= $kp['id'] ?>" data-protected="<?= !empty($kp['is_protected']) ? '1' : '0' ?>" <?= ($preselectedTargetType === 'planet' && $preselectedTarget === (int)$kp['id']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($kp['name']) ?> [<?= $kp['coord_x'] ?> : <?= $kp['coord_y'] ?>]<?= $protLabel ?>
                                     </option>
                                 <?php endforeach; ?>
                             </optgroup>
@@ -315,6 +341,16 @@ async function submitFleet() {
 
     const missionTypeEl = document.querySelector('input[name="mission_type"]:checked');
     const missionType = missionTypeEl ? missionTypeEl.value : 'raid';
+
+    // Contrôle d'immunité féodale de la cible
+    const targetSelect = document.getElementById('targetSelect');
+    const selectedOpt = targetSelect.options[targetSelect.selectedIndex];
+    const isTargetProtected = selectedOpt && selectedOpt.dataset.protected === '1';
+    const hostileMissions = ['raid', 'attack', 'occupy', 'spy'];
+    if (isTargetProtected && hostileMissions.includes(missionType)) {
+        showModalAlert("Ce seigneur bénéficie de l'immunité féodale des nouveaux joueurs (protection active). Cette province ne peut être ni attaquée ni espionnée.", "warning");
+        return;
+    }
 
     const formData = new FormData();
     const parts = rawTarget.split(':');

@@ -326,7 +326,11 @@ class GalaxyMapController {
                         `;
                     } else if (planet.user_id) {
                         const ownerName = planet.planet_name || planet.username || 'Fief';
+                        const protectedBadge = (planet.is_protected == 1)
+                            ? `<span class="tile-authentic-badge" style="background:rgba(22,163,74,0.9); color:#fff; border-color:#86efac;" title="Fief sous immunité féodale débutant">🔰 PROTÉGÉ</span>` 
+                            : '';
                         contentHtml = `
+                            ${protectedBadge}
                             <span class="tile-owner village-label">${escapeHtml(ownerName)}</span>
                         `;
                     }
@@ -343,7 +347,7 @@ class GalaxyMapController {
                     } else if (planet.is_oasis) {
                         tileTooltip = `${planet.bonus_label || 'Oasis'} ${planet.is_occupied ? '(Occupée par ' + (planet.owner_planet_name || 'Fief') + ')' : '(Sauvage)'}`;
                     } else {
-                        tileTooltip = planet.planet_name || 'Fief';
+                        tileTooltip = (planet.planet_name || 'Fief') + (planet.is_protected == 1 ? ' [🔰 Immunité active]' : '');
                     }
                 }
 

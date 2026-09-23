@@ -6,6 +6,7 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/VillageFieldGenerator.php';
 require_once __DIR__ . '/GameConfig.php';
 require_once __DIR__ . '/PlanetEngine.php';
+require_once __DIR__ . '/Auth.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 class BotEngine {
@@ -193,10 +194,12 @@ class BotEngine {
         $aggressiveness = (string)GameConfig::get('bot_aggressiveness', 'aggressive');
 
         // Récupérer toutes les cibles potentielles sur la carte (joueurs et rivaux)
+        // Les nouveaux seigneurs sous immunité débutant sont exclus de toute agression
         $allTargets = $this->db->query("
-            SELECT p.id as planet_id, p.name as planet_name, p.user_id, p.coord_x, p.coord_y, u.username, u.is_bot, u.faction 
+            SELECT p.id as planet_id, p.name as planet_name, p.user_id, p.coord_x, p.coord_y, u.username, u.is_bot, u.faction, u.protection_until 
             FROM planets p 
             JOIN users u ON p.user_id = u.id
+            WHERE (u.protection_until IS NULL OR u.protection_until <= NOW())
         ")->fetchAll();
 
         $report = [
@@ -351,10 +354,10 @@ class BotEngine {
             $probeCount = 3;
         }
 
-        // Filtrer les cibles valides dans un rayon de 45 lieues
+        // Filtrer les cibles valides dans un rayon de 45 lieues (en excluant les seigneurs sous immunité)
         $validTargets = [];
         foreach ($candidateTargets as $t) {
-            if ((int)$t['user_id'] === $botId) continue;
+            if ((int)$t['user_id'] === $botId || Auth::isUserProtected($t)) continue;
             $dist = FleetEngine::calculateDistance(
                 (int)$botPlanet['coord_x'], 
                 (int)$botPlanet['coord_y'], 
@@ -455,10 +458,10 @@ class BotEngine {
         $totalTroops = array_sum($units);
         if ($totalTroops < 15) return null; // Préserver la garnison minimale du fief
 
-        // Filtrer les cibles valides dans un rayon de 35 lieues
+        // Filtrer les cibles valides dans un rayon de 35 lieues (en excluant les seigneurs sous immunité)
         $validTargets = [];
         foreach ($candidateTargets as $t) {
-            if ((int)$t['user_id'] === $botId) continue;
+            if ((int)$t['user_id'] === $botId || Auth::isUserProtected($t)) continue;
             $dist = FleetEngine::calculateDistance(
                 (int)$botPlanet['coord_x'], 
                 (int)$botPlanet['coord_y'], 

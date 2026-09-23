@@ -17,6 +17,9 @@ $planet = $auth->getCurrentPlanet();
 $messageEngine = new MessageEngine();
 $unreadMessagesCount = $messageEngine->getUnreadCount((int)$user['id']);
 
+$userProtection = ($user && !empty($user['id'])) ? Auth::getProtectionRemaining($user) : null;
+$isUserProtected = $userProtection && !empty($userProtection['is_protected']);
+
 $questEngine = new QuestEngine();
 $questSummary = ($user && $planet) ? $questEngine->getPlayerQuestsStatus((int)$user['id'], (int)$planet['id']) : null;
 
@@ -206,18 +209,41 @@ $navItems = [
                         <?php endif; ?>
                     </a>
 
+                    <?php if ($isUserProtected): ?>
+                        <span class="badge bg-success-lt text-success d-none d-sm-inline-flex align-items-center gap-1"
+                              style="font-size:0.72rem; padding:0.25rem 0.55rem; cursor:help; border: 1px solid rgba(22, 163, 74, 0.35); border-radius:6px;"
+                              title="🔰 Immunité Féodale des Nouveaux Joueurs active jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?> (aucun assaut ni espionnage possible sur vos fiefs)">
+                            <span>🔰</span>
+                            <span>Immunité <?= htmlspecialchars($userProtection['formatted']) ?></span>
+                        </span>
+                    <?php endif; ?>
+
                     <div class="dropdown">
                         <a href="#" class="d-flex align-items-center gap-2 text-decoration-none"
                            data-bs-toggle="dropdown" aria-expanded="false">
                             <span style="width:8px; height:8px; border-radius:50%; display:inline-block;
                                          background:<?= $factionInfo['color'] ?? '#dc2626' ?>;"></span>
                             <span style="font-weight:700; font-size:0.85rem; color:#1e293b;"><?= htmlspecialchars($user['username']) ?></span>
+                            <?php if ($isUserProtected): ?>
+                                <span class="d-sm-none" title="Immunité active">🔰</span>
+                            <?php endif; ?>
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
                                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
+                            <?php if ($isUserProtected): ?>
+                                <div class="dropdown-item-text small" style="background: rgba(22, 163, 74, 0.08); border-left: 3px solid #16a34a; padding: 0.5rem 0.75rem; margin-bottom: 0.25rem;">
+                                    <div style="font-weight: 700; color: #15803d; display:flex; align-items:center; gap:0.3rem;">
+                                        <span>🔰</span> Immunité Débutant Active
+                                    </div>
+                                    <div class="text-secondary" style="font-size: 0.75rem; margin-top:0.2rem;">
+                                        Jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?> (encore <?= htmlspecialchars($userProtection['formatted']) ?>)
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                            <?php endif; ?>
                             <a href="javascript:void(0)" class="dropdown-item"
                                onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">👤 Ma Fiche Daimyō</a>
                             <a href="javascript:void(0)" class="dropdown-item"

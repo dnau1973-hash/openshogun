@@ -44,6 +44,7 @@ try {
 
             $oasisDensity = max(0.5, min(20.0, (float)($_POST['oasis_density_percent'] ?? 2.0)));
             $oasisRespawn = !empty($_POST['oasis_respawn_on_capture']) && ($_POST['oasis_respawn_on_capture'] === '1' || $_POST['oasis_respawn_on_capture'] === 'true');
+            $beginnerProtectionDays = max(0, min(365, (int)($_POST['beginner_protection_days'] ?? 7)));
 
             GameConfig::set('game_speed', $gameSpeed);
             GameConfig::set('resource_speed', $resourceSpeed);
@@ -54,10 +55,11 @@ try {
             GameConfig::set('bot_aggressiveness', $botAggressiveness);
             GameConfig::set('oasis_density_percent', $oasisDensity);
             GameConfig::set('oasis_respawn_on_capture', $oasisRespawn);
+            GameConfig::set('beginner_protection_days', $beginnerProtectionDays);
 
             echo json_encode([
                 'success' => true,
-                'message' => "Variables de jeu, équilibrage et paramètres d'oasis sauvegardés avec succès !",
+                'message' => "Variables de jeu, équilibrage, oasis et immunité débutant sauvegardés avec succès !",
                 'settings' => GameConfig::load()
             ]);
             break;
@@ -117,6 +119,36 @@ try {
                 'success' => true,
                 'message' => "Le Daimyō {$targetUser['username']} a été {$statusText}.",
                 'is_admin' => $newStatus
+            ]);
+            break;
+
+        // Prolonger l'immunité d'un joueur
+        case 'extend_protection':
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            $days = max(1, min(90, (int)($_POST['days'] ?? 7)));
+            if ($targetUserId <= 0) {
+                throw new Exception("Utilisateur invalide.");
+            }
+            Auth::extendProtection($targetUserId, $days);
+            $rem = Auth::getProtectionRemaining($targetUserId);
+            echo json_encode([
+                'success' => true,
+                'message' => "L'immunité du joueur a été prolongée de {$days} jours avec succès !",
+                'protection_until' => $rem['until_formatted'] ?? '',
+                'protection_remaining' => $rem['formatted'] ?? ''
+            ]);
+            break;
+
+        // Révoquer l'immunité d'un joueur
+        case 'revoke_protection':
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            if ($targetUserId <= 0) {
+                throw new Exception("Utilisateur invalide.");
+            }
+            Auth::revokeProtection($targetUserId);
+            echo json_encode([
+                'success' => true,
+                'message' => "L'immunité du joueur a été levée avec succès !"
             ]);
             break;
 

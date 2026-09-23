@@ -4,10 +4,12 @@
  */
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/VillageFieldGenerator.php';
+require_once __DIR__ . '/GameConfig.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 class Auth {
     private PDO $db;
+    private static bool $protectionSchemaChecked = false;
 
     public static function initSession(): void {
         if (!headers_sent() && session_status() === PHP_SESSION_NONE) {
@@ -18,6 +20,170 @@ class Auth {
     public function __construct() {
         self::initSession();
         $this->db = Database::getConnection();
+        self::ensureProtectionSchema($this->db);
+    }
+
+    /**
+     * Garantit automatiquement la présence de la colonne protection_until dans users
+     */
+    public static function ensureProtectionSchema(?PDO $db = null): void {
+        if (self::$protectionSchemaChecked) return;
+        self::$protectionSchemaChecked = true;
+
+        try {
+            $db = $db ?: Database::getConnection();
+            $cols = $db->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('protection_until', $cols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN protection_until DATETIME NULL DEFAULT NULL AFTER last_active");
+                try {
+                    $db->exec("ALTER TABLE users ADD INDEX idx_protection (protection_until)");
+                } catch (Exception $e) {}
+                
+                // Rétro-protection des utilisateurs créés il y a moins de 7 jours
+                $db->exec("
+                    UPDATE users 
+                    SET protection_until = DATE_ADD(created_at, INTERVAL 7 DAY) 
+                    WHERE is_bot = 0 
+                      AND protection_until IS NULL 
+                      AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                ");
+            }
+        } catch (Exception $e) {
+            // Ignorer silencieusement si la table n'est pas encore créée
+        }
+    }
+
+    /**
+     * Vérifie si un joueur bénéficie de la protection / immunité des nouveaux joueurs
+     */
+    public static function isUserProtected(int|array $userOrUserId): bool {
+        $db = Database::getConnection();
+        self::ensureProtectionSchema($db);
+
+        $userData = null;
+        if (is_array($userOrUserId)) {
+            $userData = $userOrUserId;
+        } else {
+            $stmt = $db->prepare("SELECT id, is_bot, created_at, protection_until FROM users WHERE id = ?");
+            $stmt->execute([(int)$userOrUserId]);
+            $userData = $stmt->fetch();
+        }
+
+        if (!$userData) return false;
+        if (!empty($userData['is_bot'])) return false; // Les bots ne bénéficient pas d'immunité
+
+        if (isset($userData['protection_until'])) {
+            if ($userData['protection_until'] === null) {
+                return false;
+            }
+            return strtotime($userData['protection_until']) > time();
+        }
+
+        // Fallback si la colonne protection_until n'était pas sélectionnée
+        if (!empty($userData['id'])) {
+            $stmt = $db->prepare("SELECT protection_until, created_at, is_bot FROM users WHERE id = ?");
+            $stmt->execute([(int)$userData['id']]);
+            $u = $stmt->fetch();
+            if (!$u || !empty($u['is_bot'])) return false;
+            if ($u['protection_until'] !== null) {
+                return strtotime($u['protection_until']) > time();
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Calcule le temps de protection restant et retourne les métadonnées formatées
+     */
+    public static function getProtectionRemaining(int|array $userOrUserId): ?array {
+        $db = Database::getConnection();
+        self::ensureProtectionSchema($db);
+
+        $userData = null;
+        if (is_array($userOrUserId) && array_key_exists('protection_until', $userOrUserId)) {
+            $userData = $userOrUserId;
+        } else {
+            $uid = is_array($userOrUserId) ? (int)($userOrUserId['id'] ?? 0) : (int)$userOrUserId;
+            $stmt = $db->prepare("SELECT id, username, is_bot, created_at, protection_until FROM users WHERE id = ?");
+            $stmt->execute([$uid]);
+            $userData = $stmt->fetch();
+        }
+
+        if (!$userData || !empty($userData['is_bot'])) {
+            return null;
+        }
+
+        $untilStr = $userData['protection_until'] ?? null;
+        if (!$untilStr) {
+            return null;
+        }
+
+        $untilTs = strtotime($untilStr);
+        $now = time();
+        $diff = $untilTs - $now;
+
+        if ($diff <= 0) {
+            return [
+                'is_protected' => false,
+                'remaining_seconds' => 0,
+                'days' => 0,
+                'hours' => 0,
+                'minutes' => 0,
+                'formatted' => 'Expirée',
+                'until_datetime' => $untilStr,
+                'until_timestamp' => $untilTs,
+                'until_formatted' => date('d/m/Y H:i', $untilTs)
+            ];
+        }
+
+        $days = (int)floor($diff / 86400);
+        $hours = (int)floor(($diff % 86400) / 3600);
+        $minutes = (int)floor(($diff % 3600) / 60);
+
+        $formatted = ($days > 0) ? "{$days}j {$hours}h" : (($hours > 0) ? "{$hours}h {$minutes}m" : "{$minutes}m");
+
+        return [
+            'is_protected' => true,
+            'remaining_seconds' => $diff,
+            'days' => $days,
+            'hours' => $hours,
+            'minutes' => $minutes,
+            'formatted' => $formatted,
+            'until_datetime' => $untilStr,
+            'until_timestamp' => $untilTs,
+            'until_formatted' => date('d/m/Y à H:i', $untilTs)
+        ];
+    }
+
+    /**
+     * Révoque l'immunité d'un joueur (ex: lorsqu'il lance une attaque sur un autre seigneur)
+     */
+    public static function revokeProtection(int $userId): bool {
+        try {
+            $db = Database::getConnection();
+            $stmt = $db->prepare("UPDATE users SET protection_until = NOW() WHERE id = ?");
+            return $stmt->execute([$userId]);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Prolonge ou réactive l'immunité d'un joueur pour un nombre de jours donné
+     */
+    public static function extendProtection(int $userId, int $days = 7): bool {
+        try {
+            $db = Database::getConnection();
+            $stmt = $db->prepare("
+                UPDATE users 
+                SET protection_until = DATE_ADD(GREATEST(NOW(), COALESCE(protection_until, NOW())), INTERVAL ? DAY)
+                WHERE id = ?
+            ");
+            return $stmt->execute([$days, $userId]);
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     public static function check(): bool {
@@ -32,7 +198,7 @@ class Auth {
 
     public function getCurrentUser(): ?array {
         if (!self::check()) return null;
-        $stmt = $this->db->prepare("SELECT id, username, email, faction, alliance_id, points, is_admin, is_bot, created_at FROM users WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id, username, email, faction, alliance_id, points, is_admin, is_bot, created_at, protection_until FROM users WHERE id = ?");
         $stmt->execute([self::id()]);
         return $stmt->fetch() ?: null;
     }
@@ -120,12 +286,16 @@ class Auth {
 
         $this->db->beginTransaction();
         try {
-            // 1. Créer l'utilisateur
+            // Durée de protection des nouveaux joueurs en jours (7 jours par défaut)
+            $protectionDays = (int)GameConfig::get('beginner_protection_days', 7);
+            $protectionUntil = ($protectionDays > 0) ? date('Y-m-d H:i:s', time() + ($protectionDays * 86400)) : null;
+
+            // 1. Créer l'utilisateur avec son immunité féodale de départ
             $stmtUser = $this->db->prepare("
-                INSERT INTO users (username, email, password_hash, faction, created_at, last_active) 
-                VALUES (?, ?, ?, ?, NOW(), NOW())
+                INSERT INTO users (username, email, password_hash, faction, created_at, last_active, protection_until) 
+                VALUES (?, ?, ?, ?, NOW(), NOW(), ?)
             ");
-            $stmtUser->execute([$username, $email, $hash, $faction]);
+            $stmtUser->execute([$username, $email, $hash, $faction, $protectionUntil]);
             $userId = (int)$this->db->lastInsertId();
 
             // 2. Trouver un emplacement de coordonnées (X, Y) libre dans le quadrant choisi (Style Travian)

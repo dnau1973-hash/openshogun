@@ -7,6 +7,7 @@ require_once __DIR__ . '/VillageFieldGenerator.php';
 require_once __DIR__ . '/GameConfig.php';
 require_once __DIR__ . '/PlanetEngine.php';
 require_once __DIR__ . '/CombatEngine.php';
+require_once __DIR__ . '/Auth.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 class FleetEngine {
@@ -160,6 +161,13 @@ class FleetEngine {
         }
 
         $missionType = $mission['mission_type'];
+        $hostileMissions = ['attack', 'raid', 'spy', 'occupy'];
+
+        // Protection Débutant : Si le fief défenseur est sous immunité féodale et que la mission est hostile, repli pacifique immédiat
+        if ($targetPlanet['user_id'] && in_array($missionType, $hostileMissions) && Auth::isUserProtected((int)$targetPlanet['user_id'])) {
+            $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
+            return;
+        }
 
         if ($missionType === 'attack' || $missionType === 'raid') {
             $combatResult = $this->combatEngine->resolveBattle($mission, $targetPlanet, $attackerUser, $defenderUser);
@@ -451,6 +459,45 @@ class FleetEngine {
             $destName = $targetPlanet['name'];
         }
 
+        // 2b. Vérification de l'Immunité des Nouveaux Joueurs (Protection Débutant)
+        $hostileMissions = ['raid', 'attack', 'occupy', 'spy'];
+        $protectionRevoked = false;
+
+        if ($targetPlanet && !empty($targetPlanet['user_id'])) {
+            $targetUserId = (int)$targetPlanet['user_id'];
+            if ($targetUserId !== $userId && in_array($missionType, $hostileMissions)) {
+                // Vérifier si le joueur cible bénéficie de l'immunité
+                if (Auth::isUserProtected($targetUserId)) {
+                    $rem = Auth::getProtectionRemaining($targetUserId);
+                    $untilText = $rem['until_formatted'] ?? '7 jours';
+                    $remText = !empty($rem['formatted']) ? " (encore {$rem['formatted']})" : "";
+                    throw new Exception("Ce seigneur bénéficie de la protection féodale des nouveaux joueurs (immunité active jusqu'au {$untilText}{$remText}). Ce domaine ne peut être ni attaqué ni espionné.");
+                }
+
+                // Règle du Sengoku : Si l'attaquant bénéficiait lui-même de l'immunité, attaquer un autre seigneur la révoque immédiatement
+                if (Auth::isUserProtected($userId)) {
+                    Auth::revokeProtection($userId);
+                    $protectionRevoked = true;
+                }
+            }
+        } elseif ($targetOasis && !empty($targetOasis['owner_planet_id'])) {
+            // Oasis occupée par un autre seigneur
+            $stmtOasisOwner = $this->db->prepare("SELECT user_id FROM planets WHERE id = ?");
+            $stmtOasisOwner->execute([$targetOasis['owner_planet_id']]);
+            $oasisOwnerId = (int)$stmtOasisOwner->fetchColumn();
+            if ($oasisOwnerId && $oasisOwnerId !== $userId && in_array($missionType, $hostileMissions)) {
+                if (Auth::isUserProtected($oasisOwnerId)) {
+                    $rem = Auth::getProtectionRemaining($oasisOwnerId);
+                    $untilText = $rem['until_formatted'] ?? '7 jours';
+                    throw new Exception("Cette oasis est rattachée à un seigneur sous protection des nouveaux joueurs (immunité active jusqu'au {$untilText}).");
+                }
+                if (Auth::isUserProtected($userId)) {
+                    Auth::revokeProtection($userId);
+                    $protectionRevoked = true;
+                }
+            }
+        }
+
         // 3. Vérifier les vaisseaux et soldats disponibles
         $stmtShips = $this->db->prepare("SELECT ship_code, count FROM planet_ships WHERE planet_id = ?");
         $stmtShips->execute([$sourcePlanetId]);
@@ -556,12 +603,18 @@ class FleetEngine {
 
         $this->db->commit();
 
+        $deployMsg = 'Expédition féodale déployée avec succès vers ' . $destName . ' !';
+        if ($protectionRevoked) {
+            $deployMsg .= ' (⚠️ Votre immunité de nouveau joueur a été levée car vous avez engagé les hostilités contre un autre seigneur).';
+        }
+
         return [
             'success' => true,
-            'message' => 'Expédition féodale déployée avec succès vers ' . $destName . ' !',
+            'message' => $deployMsg,
             'mission_id' => $missionId,
             'duration' => $duration,
-            'arrival_time' => $arrivalTime
+            'arrival_time' => $arrivalTime,
+            'protection_revoked' => $protectionRevoked
         ];
     }
 }

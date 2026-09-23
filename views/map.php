@@ -353,11 +353,23 @@ window.selectPlanetTile = function(data) {
 
     title.innerText = `🏯 ${data.planet_name} — ${data.username || 'Daimyō'}`;
     body.innerHTML = `
+        ${data.is_protected ? `
+            <div style="background:#f0fdf4; border:1px solid #86efac; padding:0.75rem 1rem; border-radius:8px; margin-bottom:1.1rem; display:flex; align-items:center; gap:0.75rem;">
+                <span style="font-size:1.6rem; flex-shrink:0;">🔰</span>
+                <div>
+                    <strong style="color:#15803d; font-size:0.9rem;">Immunité Féodale des Nouveaux Joueurs</strong>
+                    <div style="color:#166534; font-size:0.8rem; margin-top:0.15rem;">Ce daimyō est protégé jusqu'au ${data.protection_until || '7 jours'}${data.protection_remaining ? ' (encore ' + data.protection_remaining + ')' : ''}. Les assauts, pillages et espionnages shinobi sont neutralisés.</div>
+                </div>
+            </div>
+        ` : ''}
         <div style="background:#fef2f2; border:1px solid #fecaca; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
             <div class="d-flex align-items-center gap-3 mb-3">
                 <div style="width:44px; height:44px; border-radius:50%; background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.25); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">🏯</div>
                 <div>
-                    <div style="font-weight:700; color:#1e293b; font-size:1.05rem;">${data.planet_name}</div>
+                    <div style="font-weight:700; color:#1e293b; font-size:1.05rem;">
+                        ${data.planet_name}
+                        ${data.is_protected ? '<span class="badge bg-success-lt ms-2" style="font-size:0.7rem;">🔰 Protégé</span>' : ''}
+                    </div>
                     <div class="small text-secondary">Fief du Daimyō
                         <a href="javascript:void(0)" onclick="openPlayerProfileModal(${targetUserId})"
                            class="font-weight-bold text-danger text-decoration-none ms-1">
@@ -376,12 +388,18 @@ window.selectPlanetTile = function(data) {
             <button type="button" onclick="openPlayerProfileModal(${targetUserId})" class="btn btn-outline-danger">
                 👤 Fiche Daimyō
             </button>
-            ${!isOwn ? `
+            ${!isOwn ? (data.is_protected ? `
+                <span class="badge bg-success-lt font-weight-bold py-2 px-3" title="Ce fief est inviolable sous immunité débutant">
+                    🔰 Fief sous Immunité
+                </span>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=transport" class="btn btn-outline-secondary">🐂 Convoi</a>
+                <a href="?page=messages&tab=compose&to=${encodeURIComponent(data.username || '')}" class="btn btn-outline-secondary">✉️ Missive</a>
+            ` : `
                 <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"       class="btn btn-outline-secondary">🥷 Espionner</a>
                 <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"      class="btn btn-danger">⚔️ Raid</a>
                 <a href="?page=fleet&target_id=${data.planet_id}&mission=transport" class="btn btn-outline-secondary">🐂 Convoi</a>
                 <a href="?page=messages&tab=compose&to=${encodeURIComponent(data.username || '')}" class="btn btn-outline-secondary">✉️ Missive</a>
-            ` : `
+            `) : `
                 <span class="badge bg-success-lt font-weight-bold py-2 px-3">
                     🏯 Votre propre domaine castral
                 </span>

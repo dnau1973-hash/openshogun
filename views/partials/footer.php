@@ -66,6 +66,7 @@
                     <div class="d-flex align-items-center gap-2">
                         <h2 id="profUsername" style="font-size:1.35rem; font-weight:800; color:#1c1917; margin:0;">Daimyō</h2>
                         <span id="profOnlineBadge" style="font-size:0.7rem; padding:0.15rem 0.45rem; border-radius:4px; font-weight:700;"></span>
+                        <span id="profProtectionBadge" style="display:none; font-size:0.7rem; padding:0.15rem 0.45rem; border-radius:4px; font-weight:700; background:#dcfce7; color:#15803d; border:1px solid #86efac;" title="Protection Débutant active"></span>
                     </div>
                     <div class="d-flex align-items-center gap-3 mt-1" style="font-size:0.82rem;">
                         <span id="profFactionBadge" class="faction-badge"></span>
@@ -531,6 +532,17 @@ async function openPlayerProfileModal(userId = null, autoEdit = false) {
             onlineBadge.style.background = "#f5f5f4";
             onlineBadge.style.color = "#57534e";
             onlineBadge.style.border = "1px solid #e7e5e4";
+        }
+
+        const protBadge = document.getElementById('profProtectionBadge');
+        if (protBadge) {
+            if (p.is_protected && p.protection_info && p.protection_info.is_protected) {
+                protBadge.style.display = "inline-block";
+                protBadge.innerText = `🔰 Immunité (${p.protection_info.formatted || 'Active'})`;
+                protBadge.title = `Immunité active jusqu'au ${p.protection_info.until_formatted || ''}`;
+            } else {
+                protBadge.style.display = "none";
+            }
         }
 
         const fBadge = document.getElementById('profFactionBadge');

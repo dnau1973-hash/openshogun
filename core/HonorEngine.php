@@ -4,6 +4,7 @@
  */
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/MessageEngine.php';
+require_once __DIR__ . '/Auth.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 class HonorEngine {
@@ -223,7 +224,7 @@ class HonorEngine {
     public function getUserProfile(int $userId): ?array {
         // 1. Informations de base
         $stmtUser = $this->db->prepare("
-            SELECT u.id, u.username, u.email, u.faction, u.points, u.bio, u.is_admin, u.is_bot, u.created_at, u.last_active,
+            SELECT u.id, u.username, u.email, u.faction, u.points, u.bio, u.is_admin, u.is_bot, u.created_at, u.last_active, u.protection_until,
                    a.name as alliance_name, a.tag as alliance_tag
             FROM users u
             LEFT JOIN alliances a ON u.alliance_id = a.id
@@ -232,6 +233,9 @@ class HonorEngine {
         $stmtUser->execute([$userId]);
         $user = $stmtUser->fetch();
         if (!$user) return null;
+
+        $user['is_protected'] = Auth::isUserProtected($user);
+        $user['protection_info'] = Auth::getProtectionRemaining($user);
 
         // 2. Rang général au classement
         $stmtRank = $this->db->prepare("
