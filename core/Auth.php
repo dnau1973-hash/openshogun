@@ -317,6 +317,10 @@ class Auth {
 
         $hash = password_hash($password, PASSWORD_BCRYPT);
 
+        // Pré-initialiser le HeroEngine hors transaction pour exécuter les DDL (ensureSchema)
+        require_once __DIR__ . '/HeroEngine.php';
+        $heroEngine = new HeroEngine($this->db);
+
         $this->db->beginTransaction();
         try {
             // Durée de protection des nouveaux joueurs en jours (7 jours par défaut)
@@ -372,9 +376,6 @@ class Auth {
             $stmtUnit->execute([$planetId, $starter['code'], $starter['count']]);
 
             // 8. Créer le Samouraï Héros initial (Style Travian)
-            // Initialiser le Héros Samouraï et ses quêtes d'exploration
-            require_once __DIR__ . '/HeroEngine.php';
-            $heroEngine = new HeroEngine();
             $heroName = "Samouraï " . ucfirst($username);
             $heroEngine->createHeroForUser($userId, $heroName, $planetId, $coords['x'], $coords['y']);
 
@@ -387,8 +388,14 @@ class Auth {
             $_SESSION['current_planet_id'] = $planetId;
 
             return ['success' => true];
-        } catch (Exception $e) {
-            $this->db->rollBack();
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                try {
+                    $this->db->rollBack();
+                } catch (Throwable $re) {
+                    // Ignorer si la transaction a déjà été terminée
+                }
+            }
             return ['success' => false, 'error' => 'Erreur lors de la création du compte : ' . $e->getMessage()];
         }
     }
