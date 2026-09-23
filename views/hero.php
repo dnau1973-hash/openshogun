@@ -139,14 +139,6 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 <span class="badge <?= $st['badge_class'] ?> ms-1" style="font-size:0.75rem;"><?= $st['icon'] ?> <?= $st['label'] ?></span>
             </h2>
         </div>
-        <div class="col-auto ms-auto d-print-none">
-            <div class="btn-list">
-                <a href="/?page=resources" class="btn btn-secondary">🌾 Terroir</a>
-                <a href="/?page=station" class="btn btn-secondary">🏯 Cité Castrale</a>
-                <a href="/?page=fleet" class="btn btn-secondary">🚩 Flottes</a>
-                <a href="/?page=map" class="btn btn-secondary">🗺️ Carte</a>
-            </div>
-        </div>
     </div>
 </div>
 

@@ -50,10 +50,13 @@ class PlanetEngine {
         $buildings = $this->getBuildings($planetId);
         $storageLvl = $buildings['storage'] ?? 0;
         $tankLvl = $buildings['tank'] ?? 0;
+        $grainMillLvl = $buildings['grain_mill'] ?? 0;
 
         $metalMax = (int)(15000 * pow(1.5, $storageLvl));
         $crystalMax = (int)(15000 * pow(1.5, $storageLvl));
         $deutMax = (int)(15000 * pow(1.5, $tankLvl));
+        $sakeMax = (int)(10000 * pow(1.4, $grainMillLvl));
+        $flourMax = (int)(10000 * pow(1.4, $grainMillLvl));
 
         // 5. Calcul de l'énergie et des productions horaires (avec bonus d'oasis annexées)
         $fields = $this->getFields($planetId);
@@ -71,26 +74,53 @@ class PlanetEngine {
             $newCrystal = min($crystalMax, $planet['crystal'] + ($prodRates['crystal'] * $hours));
             $newDeut = min($deutMax, $planet['deuterium'] + ($prodRates['deuterium'] * $hours));
 
-            $stmtUpdate = $this->db->prepare("
-                UPDATE planets 
-                SET metal = ?, crystal = ?, deuterium = ?, 
-                    energy_used = ?, energy_max = ?, 
-                    metal_max = ?, crystal_max = ?, deuterium_max = ?, 
-                    last_resource_update = ?
-                WHERE id = ?
-            ");
-            $stmtUpdate->execute([
-                $newMetal,
-                $newCrystal,
-                $newDeut,
-                $prodRates['energy_used'],
-                $prodRates['energy_max'],
-                $metalMax,
-                $crystalMax,
-                $deutMax,
-                $now,
-                $planetId
-            ]);
+            try {
+                $stmtUpdate = $this->db->prepare("
+                    UPDATE planets 
+                    SET metal = ?, crystal = ?, deuterium = ?, 
+                        energy_used = ?, energy_max = ?, 
+                        metal_max = ?, crystal_max = ?, deuterium_max = ?, 
+                        sake_max = ?, rice_flour_max = ?,
+                        last_resource_update = ?
+                    WHERE id = ?
+                ");
+                $stmtUpdate->execute([
+                    $newMetal,
+                    $newCrystal,
+                    $newDeut,
+                    $prodRates['energy_used'],
+                    $prodRates['energy_max'],
+                    $metalMax,
+                    $crystalMax,
+                    $deutMax,
+                    $sakeMax,
+                    $flourMax,
+                    $now,
+                    $planetId
+                ]);
+            } catch (Exception $e) {
+                // Fallback si la migration des colonnes sake_max n'est pas encore appliquée
+                $stmtUpdate = $this->db->prepare("
+                    UPDATE planets 
+                    SET metal = ?, crystal = ?, deuterium = ?, 
+                        energy_used = ?, energy_max = ?, 
+                        metal_max = ?, crystal_max = ?, deuterium_max = ?, 
+                        last_resource_update = ?
+                    WHERE id = ?
+                ");
+                $stmtUpdate->execute([
+                    $newMetal,
+                    $newCrystal,
+                    $newDeut,
+                    $prodRates['energy_used'],
+                    $prodRates['energy_max'],
+                    $metalMax,
+                    $crystalMax,
+                    $deutMax,
+                    $now,
+                    $planetId
+                ]);
+            }
 
             $planet['metal'] = $newMetal;
             $planet['crystal'] = $newCrystal;
@@ -102,6 +132,12 @@ class PlanetEngine {
             $planet['deuterium_max'] = $deutMax;
             $planet['last_resource_update'] = $now;
         }
+
+        // Valeurs garanties pour les ressources raffinées
+        $planet['sake'] = (float)($planet['sake'] ?? 0);
+        $planet['rice_flour'] = (float)($planet['rice_flour'] ?? 0);
+        $planet['sake_max'] = (int)($planet['sake_max'] ?? $sakeMax);
+        $planet['rice_flour_max'] = (int)($planet['rice_flour_max'] ?? $flourMax);
 
         $planet['prod_rates'] = $prodRates;
         return $planet;
@@ -454,6 +490,123 @@ class PlanetEngine {
             $capacity *= 2; // Bonus racial Aethelis
         }
         return $capacity;
+    }
+
+    /**
+     * Transformation / Raffinage du Riz en Saké ou Farine de Riz (Meunerie & Brasserie Sakagura)
+     *
+     * @param int $planetId Identifiant du fief / planète
+     * @param string $product 'sake' ou 'rice_flour'
+     * @param float $riceAmount Quantité de riz brut (deuterium) à raffiner
+     * @return array Résultat de l'opération
+     */
+    public function craftRiceProduct(int $planetId, string $product, float $riceAmount): array {
+        if (!in_array($product, ['sake', 'rice_flour'])) {
+            return ['success' => false, 'error' => "Produit de raffinage invalide (Saké ou Farine uniquement)."];
+        }
+
+        $riceAmount = floor($riceAmount);
+        if ($riceAmount <= 0) {
+            return ['success' => false, 'error' => "Veuillez indiquer une quantité de riz valide supérieure à zéro."];
+        }
+
+        // 1. Vérifier le bâtiment Meunerie & Brasserie
+        $buildings = $this->getBuildings($planetId);
+        $millLvl = (int)($buildings['grain_mill'] ?? 0);
+        if ($millLvl < 1) {
+            return ['success' => false, 'error' => "La Meunerie & Brasserie de riz (Sakagura) doit être érigée au Niveau 1 minimum pour raffiner le riz."];
+        }
+
+        // 2. Mettre à jour les ressources de la planète
+        $planet = $this->updatePlanet($planetId);
+        if ($planet['deuterium'] < $riceAmount) {
+            return [
+                'success' => false, 
+                'error' => "Stock de Riz insuffisant (" . number_format((int)$planet['deuterium']) . " disponible, " . number_format($riceAmount) . " requis)."
+            ];
+        }
+
+        // 3. Ratios de conversion et bonus de niveau
+        // Farine : 5 Riz -> 1 Farine
+        // Saké   : 10 Riz -> 1 Saké
+        // Bonus Meunerie : +2% de rendement par niveau
+        $efficiencyMultiplier = 1.0 + ($millLvl * 0.02);
+
+        if ($product === 'rice_flour') {
+            $baseCostPerUnit = 5;
+            $rawProduced = floor(($riceAmount / $baseCostPerUnit) * $efficiencyMultiplier);
+            $productName = "Farine de Riz (Komeko)";
+            $productIcon = "🍚";
+            $currentStock = (float)($planet['rice_flour'] ?? 0);
+            $maxStock = (int)($planet['rice_flour_max'] ?? (10000 * pow(1.4, $millLvl)));
+        } else {
+            $baseCostPerUnit = 10;
+            $rawProduced = floor(($riceAmount / $baseCostPerUnit) * $efficiencyMultiplier);
+            $productName = "Saké Féodal";
+            $productIcon = "🍶";
+            $currentStock = (float)($planet['sake'] ?? 0);
+            $maxStock = (int)($planet['sake_max'] ?? (10000 * pow(1.4, $millLvl)));
+        }
+
+        if ($rawProduced < 1) {
+            return [
+                'success' => false, 
+                'error' => "Quantité de riz insuffisante pour produire au moins 1 unité de {$productName} (minimum {$baseCostPerUnit} Riz requis)."
+            ];
+        }
+
+        // 4. Vérifier la capacité de stockage
+        $availableSpace = max(0, $maxStock - $currentStock);
+        if ($availableSpace <= 0) {
+            return [
+                'success' => false, 
+                'error' => "Vos réserves de {$productName} sont saturées (" . number_format($currentStock) . "/" . number_format($maxStock) . "). Augmentez le niveau de votre Meunerie ou consommez vos stocks."
+            ];
+        }
+
+        $actualProduced = min($rawProduced, $availableSpace);
+        // Si la réserve limite la production, on n'utilise que le riz proportionnel
+        if ($actualProduced < $rawProduced) {
+            $riceAmount = ceil(($actualProduced / $efficiencyMultiplier) * $baseCostPerUnit);
+        }
+
+        // 5. Transaction atomique en base
+        $this->db->beginTransaction();
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE planets 
+                SET deuterium = GREATEST(0, deuterium - ?),
+                    {$product} = {$product} + ?
+                WHERE id = ? AND deuterium >= ?
+            ");
+            $stmt->execute([$riceAmount, $actualProduced, $planetId, $riceAmount]);
+
+            if ($stmt->rowCount() === 0) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => "Échec de l'opération : stock de riz modifié entretemps."];
+            }
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'error' => "Erreur lors du raffinage : " . $e->getMessage()];
+        }
+
+        // Récupérer le nouvel état
+        $updatedPlanet = $this->getPlanet($planetId);
+
+        return [
+            'success' => true,
+            'message' => "Raffinage accompli avec succès ! <strong>+{$actualProduced} {$productName} {$productIcon}</strong> produits (consommé : <strong>-{$riceAmount} Riz 🌾</strong>).",
+            'product' => $product,
+            'product_name' => $productName,
+            'product_icon' => $productIcon,
+            'produced' => $actualProduced,
+            'consumed_rice' => $riceAmount,
+            'new_deuterium' => $updatedPlanet['deuterium'],
+            'new_product_stock' => $updatedPlanet[$product] ?? 0,
+            'planet' => $updatedPlanet
+        ];
     }
 }
 

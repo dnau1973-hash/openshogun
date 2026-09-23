@@ -306,7 +306,7 @@ $navItems = [
         </div>
 
         <?php if ($planet): ?>
-        <!-- ── 4 CARRÉS DE RESSOURCES CENTRÉS (Ultra-compacts, largeur frame centrale container-xl) ── -->
+        <!-- ── 6 CARRÉS DE RESSOURCES CENTRÉS (Ultra-compacts, largeur frame centrale container-xl) ── -->
         <div class="container-xl d-print-none mt-3 mb-2 px-3 px-xl-0">
             <div class="row g-2 justify-content-center">
                 <?php
@@ -314,13 +314,21 @@ $navItems = [
                 $pctCrystal = min(100, ($planet['crystal'] / max(1, $planet['crystal_max'])) * 100);
                 $pctDeut = min(100, ($planet['deuterium'] / max(1, $planet['deuterium_max'])) * 100);
 
+                $flourStock = (float)($planet['rice_flour'] ?? 0);
+                $flourMax = max(1, (int)($planet['rice_flour_max'] ?? 10000));
+                $pctFlour = min(100, ($flourStock / $flourMax) * 100);
+
+                $sakeStock = (float)($planet['sake'] ?? 0);
+                $sakeMax = max(1, (int)($planet['sake_max'] ?? 10000));
+                $pctSake = min(100, ($sakeStock / $sakeMax) * 100);
+
                 $eBalance = $planet['energy_max'] - $planet['energy_used'];
                 $eOk = ($eBalance >= 0);
                 $pctEnergy = ($planet['energy_max'] > 0) ? min(100, ($planet['energy_used'] / $planet['energy_max']) * 100) : 0;
                 ?>
 
                 <!-- 1. Bois de Cèdre -->
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-4 col-lg-2">
                     <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid #92400e !important; padding:0.35rem 0.65rem;">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-1 text-truncate">
@@ -346,7 +354,7 @@ $navItems = [
                 </div>
 
                 <!-- 2. Pierre de Taille -->
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-4 col-lg-2">
                     <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid #1e40af !important; padding:0.35rem 0.65rem;">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-1 text-truncate">
@@ -372,7 +380,7 @@ $navItems = [
                 </div>
 
                 <!-- 3. Riz Impérial -->
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-4 col-lg-2">
                     <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid #166534 !important; padding:0.35rem 0.65rem;">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-1 text-truncate">
@@ -397,8 +405,56 @@ $navItems = [
                     </div>
                 </div>
 
-                <!-- 4. Sérénité Shinto -->
-                <div class="col-6 col-md-3">
+                <!-- 4. Farine de Riz (Komeko) -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid #64748b !important; padding:0.35rem 0.65rem;" title="Farine de Riz (Raffinée en Meunerie)">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-1 text-truncate">
+                                <span style="font-size:0.95rem;">🍚</span>
+                                <strong style="font-size:0.78rem; color:#475569;">Farine</strong>
+                            </div>
+                            <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
+                                <span class="fw-bold" style="font-size:0.82rem; color:#1c1917;"
+                                      id="res-val-rice-flour"
+                                      data-current="<?= $flourStock ?>"
+                                      data-max="<?= $flourMax ?>">
+                                    <?= number_format((int)$flourStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($flourMax) ?></span>
+                            </div>
+                        </div>
+                        <div class="progress" style="height:3px; border-radius:2px; background:#f0eeeb; margin-top:4px;">
+                            <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Saké Féodal (Sakagura) -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid #d97706 !important; padding:0.35rem 0.65rem;" title="Saké Impérial (Brassé en Meunerie / Sakagura)">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-1 text-truncate">
+                                <span style="font-size:0.95rem;">🍶</span>
+                                <strong style="font-size:0.78rem; color:#b45309;">Saké</strong>
+                            </div>
+                            <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
+                                <span class="fw-bold" style="font-size:0.82rem; color:#1c1917;"
+                                      id="res-val-sake"
+                                      data-current="<?= $sakeStock ?>"
+                                      data-max="<?= $sakeMax ?>">
+                                    <?= number_format((int)$sakeStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($sakeMax) ?></span>
+                            </div>
+                        </div>
+                        <div class="progress" style="height:3px; border-radius:2px; background:#f0eeeb; margin-top:4px;">
+                            <div class="progress-bar bg-warning" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Sérénité Shinto -->
+                <div class="col-6 col-md-4 col-lg-2">
                     <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid <?= $eOk ? '#166534' : '#dc2626' ?> !important; padding:0.35rem 0.65rem;">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-1 text-truncate">

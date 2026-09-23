@@ -635,6 +635,10 @@ if (!$isEmptyPlot) {
                                 <a href="/?page=alliance" class="btn btn-primary">
                                     🎌 Ouvrir le Pavillon des Alliances Féodales &rarr;
                                 </a>
+                            <?php elseif ($code === 'grain_mill'): ?>
+                                <a href="#craftSection" class="btn btn-success text-white">
+                                    🍶 Accéder à la Minoterie &amp; Cuves de Saké &darr;
+                                </a>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
@@ -696,6 +700,145 @@ if (!$isEmptyPlot) {
 
         <!-- Colonne Droite : Coûts, Chantier & Zone Tenshu -->
         <div class="col-lg-7">
+
+            <?php if ($code === 'grain_mill' && $lvl > 0): ?>
+            <!-- ========================================================
+                 ATELIER DE RAFFINAGE : MOUTURE DE FARINE & BRASSERIE DE SAKÉ
+                 ======================================================== -->
+            <div class="card mb-3" id="craftSection" style="border-top: 3px solid #166534;">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h3 class="card-title text-success d-flex align-items-center gap-2 m-0">
+                            <span>🍶</span> Minoterie &amp; Brasserie Féodale (Sakagura)
+                        </h3>
+                        <div class="text-secondary small mt-1">
+                            Raffinez le riz brut récolté dans vos rizières pour élaborer de la farine fine et du saké traditionnel d'exception.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-success-lt fw-bold">
+                            Rendement : +<?= (int)($lvl * 2) ?>% (Niveau <?= $lvl ?>)
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Résumé des stocks actuels -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-light">
+                                <div class="text-secondary small">🌾 Riz Brut Disponible</div>
+                                <div class="fs-4 fw-bold text-success" id="craft_avail_rice"><?= number_format((int)$planet['deuterium']) ?></div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-light">
+                                <div class="text-secondary small">🍚 Farine en Réserve</div>
+                                <div class="fs-4 fw-bold text-dark" id="craft_avail_flour"><?= number_format((int)($planet['rice_flour'] ?? 0)) ?></div>
+                                <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['rice_flour_max'] ?? 10000)) ?> max</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-light">
+                                <div class="text-secondary small">🍶 Saké en Réserve</div>
+                                <div class="fs-4 fw-bold text-warning" id="craft_avail_sake"><?= number_format((int)($planet['sake'] ?? 0)) ?></div>
+                                <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['sake_max'] ?? 10000)) ?> max</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deux colonnes d'ateliers : Farine & Saké -->
+                    <div class="row g-3">
+                        <!-- Atelier 1 : Farine de Riz -->
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9;">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
+                                            <span>🍚</span> Mouture de Farine
+                                        </h4>
+                                        <span class="badge bg-secondary-lt">5 Riz &rarr; 1 Farine</span>
+                                    </div>
+                                    <p class="text-secondary small mb-3">
+                                        Broyage des grains de riz en farine fine (Komeko) pour les vivres et rations du domaine.
+                                    </p>
+
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold text-dark small mb-1">Quantité de Riz à moudre :</label>
+                                        <div class="input-group">
+                                            <input type="number" id="rice_amount_flour" min="5" step="5" value="100" class="form-control fw-bold text-center" oninput="calcFlourPreview()">
+                                            <span class="input-group-text small">Riz</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Boutons raccourcis -->
+                                    <div class="btn-group btn-group-sm w-100 mb-3">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(50)">50</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(200)">200</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(1000)">1 000</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount('max')">Max</button>
+                                    </div>
+
+                                    <div class="alert alert-info py-2 px-3 small mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>Production estimée :</span>
+                                            <strong class="text-primary fs-5" id="preview_flour_gain">+20 🍚</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-success w-100 fw-bold" onclick="submitRiceCraft('rice_flour')">
+                                    🍚 Moudre la Farine de Riz
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Atelier 2 : Saké Féodal -->
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9;">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
+                                            <span>🍶</span> Cuves de Saké (Sakagura)
+                                        </h4>
+                                        <span class="badge bg-warning-lt text-warning">10 Riz &rarr; 1 Saké</span>
+                                    </div>
+                                    <p class="text-secondary small mb-3">
+                                        Fermentation traditionnelle en fûts de cèdre. Breuvage d'honneur pour réceptions et banquets.
+                                    </p>
+
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold text-dark small mb-1">Quantité de Riz à brasser :</label>
+                                        <div class="input-group">
+                                            <input type="number" id="rice_amount_sake" min="10" step="10" value="100" class="form-control fw-bold text-center" oninput="calcSakePreview()">
+                                            <span class="input-group-text small">Riz</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Boutons raccourcis -->
+                                    <div class="btn-group btn-group-sm w-100 mb-3">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(50)">50</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(200)">200</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(1000)">1 000</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount('max')">Max</button>
+                                    </div>
+
+                                    <div class="alert alert-warning py-2 px-3 small mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>Production estimée :</span>
+                                            <strong class="text-warning fs-5" id="preview_sake_gain">+10 🍶</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-warning w-100 fw-bold text-dark" onclick="submitRiceCraft('sake')">
+                                    🍶 Déclencher le Brassage du Saké
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- Coûts d'amélioration -->
             <div class="card mb-3">
@@ -992,6 +1135,97 @@ function closeArtworkModal(e) {
         modal.style.display = 'none';
     }
 }
+
+// ==========================================
+// ATELIER DE RAFFINAGE : SAKÉ & FARINE DE RIZ
+// ==========================================
+const grainMillLevel = <?= (int)($lvl ?? 0) ?>;
+const availableRiceStock = <?= (float)($planet['deuterium'] ?? 0) ?>;
+
+function calcFlourPreview() {
+    const input = document.getElementById('rice_amount_flour');
+    const preview = document.getElementById('preview_flour_gain');
+    if (!input || !preview) return;
+    const rice = Math.max(0, parseFloat(input.value) || 0);
+    const efficiency = 1 + (grainMillLevel * 0.02);
+    const gain = Math.floor((rice / 5) * efficiency);
+    preview.textContent = '+' + gain.toLocaleString('fr-FR') + ' 🍚';
+}
+
+function calcSakePreview() {
+    const input = document.getElementById('rice_amount_sake');
+    const preview = document.getElementById('preview_sake_gain');
+    if (!input || !preview) return;
+    const rice = Math.max(0, parseFloat(input.value) || 0);
+    const efficiency = 1 + (grainMillLevel * 0.02);
+    const gain = Math.floor((rice / 10) * efficiency);
+    preview.textContent = '+' + gain.toLocaleString('fr-FR') + ' 🍶';
+}
+
+function setRiceFlourAmount(val) {
+    const input = document.getElementById('rice_amount_flour');
+    if (!input) return;
+    if (val === 'max') {
+        input.value = Math.floor(availableRiceStock);
+    } else {
+        input.value = val;
+    }
+    calcFlourPreview();
+}
+
+function setRiceSakeAmount(val) {
+    const input = document.getElementById('rice_amount_sake');
+    if (!input) return;
+    if (val === 'max') {
+        input.value = Math.floor(availableRiceStock);
+    } else {
+        input.value = val;
+    }
+    calcSakePreview();
+}
+
+async function submitRiceCraft(product) {
+    const inputId = (product === 'rice_flour') ? 'rice_amount_flour' : 'rice_amount_sake';
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const amount = parseFloat(input.value) || 0;
+    const minAmount = (product === 'rice_flour') ? 5 : 10;
+
+    if (amount < minAmount) {
+        showModalAlert(`La quantité minimale de riz requise est de ${minAmount} sacs de riz.`, 'warning');
+        return;
+    }
+
+    if (amount > availableRiceStock) {
+        showModalAlert(`Vos greniers ne disposent que de ${Math.floor(availableRiceStock).toLocaleString('fr-FR')} unités de riz.`, 'warning');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('product', product);
+    formData.append('rice_amount', amount);
+
+    try {
+        const res = await fetch('/api/craft.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Erreur lors du raffinage.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de transmission avec le moulin.', 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    calcFlourPreview();
+    calcSakePreview();
+});
 </script>
 
 <!-- MODALE LIGHTBOX ESTAMPE HD -->

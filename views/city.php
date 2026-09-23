@@ -264,6 +264,8 @@ foreach (BUILDINGS as $code => $bInfo) {
                                 <a href="?page=barracks" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🥋 Entraîner Soldats (Dojo)</a>
                             <?php elseif ($code === 'research_lab' && $lvl > 0): ?>
                                 <a href="?page=research" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">📜 Académie des Savoirs</a>
+                            <?php elseif ($code === 'grain_mill' && $lvl > 0): ?>
+                                <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🍶 Raffiner Saké &amp; Farine</a>
                             <?php endif; ?>
 
                             <a href="/?page=building&code=<?= $code ?>" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">
