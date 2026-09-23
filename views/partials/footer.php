@@ -647,9 +647,12 @@ async function openPlayerProfileModal(userId = null, autoEdit = false) {
         const footerLeft = document.getElementById('profFooterLeft');
         if (!p.is_self) {
             footerLeft.innerHTML = `
-                <a href="?page=messages&tab=compose&to=${encodeURIComponent(p.username || '')}" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem;">
+                <a href="?page=messages&tab=compose&to=${encodeURIComponent(p.username || '')}" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem;">
                     <span>✉️</span> Dépêcher une Missive
                 </a>
+                <button type="button" class="btn btn-primary" style="background:#b45309; border-color:#92400e; display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem;" onclick="closePlayerProfileModal(); window.feudalChat && window.feudalChat.whisperToUser(${p.id}, '${escapeHtmlModal(p.username || '')}');">
+                    <span>🏮</span> Chuchoter en Direct
+                </button>
             `;
         } else {
             footerLeft.innerHTML = `
@@ -1016,6 +1019,7 @@ function toggleTheme() {
     } catch(e) {}
 })();
 </script>
+<?php require_once __DIR__ . '/chat_widget.php'; ?>
 </body>
 </html>
 

@@ -3,6 +3,7 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `chat_messages`;
 DROP TABLE IF EXISTS `forum_posts`;
 DROP TABLE IF EXISTS `forum_topics`;
 DROP TABLE IF EXISTS `forum_categories`;
@@ -327,6 +328,24 @@ CREATE TABLE `forum_posts` (
   KEY `idx_post_user` (`user_id`),
   CONSTRAINT `fk_post_topic` FOREIGN KEY (`topic_id`) REFERENCES `forum_topics` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Système de Chat Instantané entre Joueurs
+CREATE TABLE `chat_messages` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `channel_type` ENUM('global', 'alliance', 'whisper') NOT NULL DEFAULT 'global',
+  `channel_target_id` INT UNSIGNED NULL DEFAULT NULL,
+  `sender_id` INT UNSIGNED NOT NULL,
+  `recipient_id` INT UNSIGNED NULL DEFAULT NULL,
+  `message` VARCHAR(1000) NOT NULL,
+  `is_deleted` TINYINT(1) NOT NULL DEFAULT 0,
+  `deleted_by` INT UNSIGNED NULL DEFAULT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_chat_global` (`channel_type`, `id`),
+  KEY `idx_chat_alliance` (`channel_type`, `channel_target_id`, `id`),
+  KEY `idx_chat_whisper` (`sender_id`, `recipient_id`, `id`),
+  KEY `idx_chat_recipient` (`recipient_id`, `id`),
+  CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

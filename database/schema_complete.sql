@@ -668,6 +668,28 @@ CREATE TABLE `forum_posts` (
   CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+DROP TABLE IF EXISTS `chat_messages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `chat_messages` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `channel_type` enum('global','alliance','whisper') NOT NULL DEFAULT 'global',
+  `channel_target_id` int(10) unsigned DEFAULT NULL,
+  `sender_id` int(10) unsigned NOT NULL,
+  `recipient_id` int(10) unsigned DEFAULT NULL,
+  `message` varchar(1000) NOT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `deleted_by` int(10) unsigned DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_chat_global` (`channel_type`,`id`),
+  KEY `idx_chat_alliance` (`channel_type`,`channel_target_id`,`id`),
+  KEY `idx_chat_whisper` (`sender_id`,`recipient_id`,`id`),
+  KEY `idx_chat_recipient` (`recipient_id`,`id`),
+  CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

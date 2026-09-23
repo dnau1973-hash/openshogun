@@ -119,6 +119,7 @@ $navItems = [
     ['page' => 'reports',   'match' => ['reports'],           'icon' => '📜', 'label' => 'Chroniques',         'title' => 'Rapports de bataille'],
     ['page' => 'messages',  'match' => ['messages'],          'icon' => '✉️', 'label' => 'Missives',           'title' => 'Correspondance des clans',
      'badge' => $unreadMessagesCount > 0 ? $unreadMessagesCount : null],
+    ['page' => 'chat',      'match' => ['chat'],              'icon' => '🏮', 'label' => 'Chat',               'title' => 'Taverne & Salon de discussion en direct'],
 ];
 ?>
 
@@ -250,6 +251,7 @@ $navItems = [
                                onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">👤 Ma Fiche Daimyō</a>
                             <a href="?page=alliance" class="dropdown-item">🎌 Mon Alliance</a>
                             <a href="?page=forum" class="dropdown-item">💬 Forum Féodal</a>
+                            <a href="?page=chat" class="dropdown-item">🏮 Chat Féodal</a>
                             <a href="javascript:void(0)" class="dropdown-item"
                                onclick="openEditMottoModal()">📜 Ma Devise</a>
                             <a href="?page=support" class="dropdown-item">📮 Support</a>
