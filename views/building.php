@@ -270,464 +270,584 @@ if (!$isEmptyPlot) {
     };
 }
 ?>
-
-<style>
-/* Forcer la largeur maximale comme sur la page ressources */
-.container {
-    max-width: 1850px !important;
-    width: 98% !important;
-    margin: 1rem auto !important;
-}
-</style>
-
-<div class="field-view-container" style="width: 100%; margin: 0 auto; padding: 1rem 0;">
-
-    <!-- Barre de Navigation Supérieure (Retour à la Cité + Sélecteur de Slot Urbain) -->
-    <div class="field-nav-bar">
-        <a href="/?page=city" class="field-back-btn">
-            <span>&larr;</span>
-            <span>Retour à la Cité Castrale</span>
-        </a>
-
-        <div class="field-slot-switcher">
-            <a href="/?page=building&slot=<?= $prevSlot ?>" class="field-arrow-btn" title="Bâtiment précédent">
-                &larr; Slot #<?= $prevSlot ?>
-            </a>
-            <div class="field-current-indicator">
-                <span class="field-slot-badge">Slot Castral #<?= $slot ?> sur 34</span>
+<!-- Navigation breadcrumb Tabler -->
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <div class="page-pretitle">Cité Castrale de <?= htmlspecialchars($planet['name']) ?></div>
+            <h2 class="page-title">
+                <?php if ($isEmptyPlot): ?>
+                    ⛳ Terrain Castral #<?= $slot ?>
+                    <span class="badge bg-secondary ms-2" style="font-size:0.65rem; vertical-align:middle;">Terrain Libre</span>
+                <?php else: ?>
+                    <?= $bInfo['icon'] ?? '🏯' ?> <?= htmlspecialchars($bInfo['name']) ?>
+                    <span class="badge bg-secondary ms-2" style="font-size:0.65rem; vertical-align:middle;">Slot #<?= $slot ?> · Niv.<?= $lvl ?></span>
+                    <?php if ($activeJob): ?>
+                        <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem; vertical-align:middle;">⏳ Chantier en cours</span>
+                    <?php elseif ($lvl > 0): ?>
+                        <span class="badge bg-success ms-1" style="font-size:0.65rem; vertical-align:middle;">Opérationnel</span>
+                    <?php else: ?>
+                        <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem; vertical-align:middle;">Non Bâti</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </h2>
+        </div>
+        <div class="col-auto ms-auto d-print-none">
+            <div class="btn-list">
+                <a href="/?page=building&slot=<?= $prevSlot ?>" class="btn btn-outline-secondary">
+                    ← Slot #<?= $prevSlot ?>
+                </a>
+                <a href="/?page=city" class="btn btn-secondary">
+                    🏯 Vue Cité
+                </a>
+                <a href="/?page=building&slot=<?= $nextSlot ?>" class="btn btn-outline-secondary">
+                    Slot #<?= $nextSlot ?> →
+                </a>
             </div>
-            <a href="/?page=building&slot=<?= $nextSlot ?>" class="field-arrow-btn" title="Bâtiment suivant">
-                Slot #<?= $nextSlot ?> &rarr;
-            </a>
         </div>
     </div>
+</div>
+
+<!-- Stat Cards : résumé rapide -->
+<div class="row row-cards mb-3">
+    <?php if ($isEmptyPlot): ?>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto"><span class="avatar rounded bg-blue-lt" style="font-size:1.3rem;">⛳</span></div>
+                        <div class="col">
+                            <div class="font-weight-medium">Emplacement</div>
+                            <div class="text-secondary">Slot Castral #<?= $slot ?> sur 34</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;">✨</span></div>
+                        <div class="col">
+                            <div class="font-weight-medium">État du Terrain</div>
+                            <div class="text-success">Prêt à bâtir</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;">🏯</span></div>
+                        <div class="col">
+                            <div class="font-weight-medium">Tenshu Donjon</div>
+                            <div class="text-warning">Niveau <?= $hqLevel ?></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;">🏗️</span></div>
+                        <div class="col">
+                            <div class="font-weight-medium">Édifices Éligibles</div>
+                            <div class="text-info"><?= count($availableBuildingsToConstruct) ?> constructibles</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php else: ?>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto"><span class="avatar rounded" style="background:rgba(220,38,38,0.12); font-size:1.3rem;"><?= $bInfo['icon'] ?? '🏯' ?></span></div>
+                        <div class="col">
+                            <div class="font-weight-medium"><?= htmlspecialchars($statData['label']) ?></div>
+                            <div class="text-secondary"><?= $statData['cur'] ?></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;">📈</span></div>
+                        <div class="col">
+                            <div class="font-weight-medium">Niveau <?= $targetLevel ?> → Rendement</div>
+                            <div class="text-success"><?= $statData['next'] ?> <span class="text-muted" style="font-size:0.75rem;">(<?= $statData['gain'] ?>)</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;">⏱️</span></div>
+                        <div class="col">
+                            <div class="font-weight-medium">Temps de construction</div>
+                            <div class="text-info font-monospace"><?= gmdate('H:i:s', $duration) ?></div>
+                            <div class="text-muted" style="font-size:0.72rem;">Tenshu Niv.<?= $hqLevel ?> &bull; Bâtisseurs du clan</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;"><?= $sectorInfo['icon'] ?? '🏯' ?></span></div>
+                        <div class="col">
+                            <div class="font-weight-medium">Secteur Castral</div>
+                            <div class="text-warning"><?= htmlspecialchars($sectorInfo['name']) ?></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+
+<div class="row row-cards">
 
     <?php if ($isEmptyPlot): ?>
-        <!-- CAS : EMPLACEMENT LIBRE / TERRAIN DISPONIBLE -->
-        <div class="field-info-card">
-            <div class="field-tile-stage">
-                <div class="field-tile-container" style="width: 220px; height: 220px; border: 2px dashed rgba(100, 116, 139, 0.4); border-radius: 12px; background: rgba(241, 245, 249, 0.6); display:flex; align-items:center; justify-content:center;">
-                    <span style="font-size: 4.5rem; opacity: 0.75;">🏗️</span>
-                    <div class="field-level-emblem" style="background: linear-gradient(135deg, #475569, #334155);">
-                        <span class="emblem-lvl-text">TERRAIN</span>
-                        <span class="emblem-lvl-number">LIBRE</span>
-                    </div>
+        <!-- ==========================================
+             CAS A : TERRAIN LIBRE / EMPLACEMENT VIERGE
+             ========================================== -->
+        <!-- Colonne Gauche : Information Terrain & Mini-Grille -->
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div style="height:140px; background:linear-gradient(135deg,rgba(71,85,105,0.15),rgba(30,41,59,0.08)); display:flex; align-items:center; justify-content:center; font-size:3.5rem;">
+                    ⛳
                 </div>
-            </div>
-
-                <div class="field-meta-pane">
-                    <div class="field-header-row">
-                        <div>
-                            <div class="field-type-pill sec-logistics">
-                                <span>⛳</span>
-                                <span>Emplacement Disponible</span>
-                            </div>
-                            <h1 class="field-title">Terrain Castral #<?= $slot ?></h1>
-                            <span class="field-subtitle">Cour intérieure &bull; Domaine de <?= htmlspecialchars($planet['name']) ?></span>
-                        </div>
-                        <div class="field-status-badge ready">
-                            <span>Terrain prêt à bâtir</span>
-                        </div>
-                    </div>
-
-                    <p class="field-description">
-                        Cet emplacement est viabilisé au sein de l'enceinte de votre forteresse. Au fur et à mesure de l'élévation de votre Tenshu (Donjon Castral), de nouvelles structures féodales pourront y être fondées.
+                <div class="card-body">
+                    <h3 class="card-title mb-1">Emplacement Castral #<?= $slot ?></h3>
+                    <div class="text-muted mb-3" style="font-size:0.8rem;">Cour intérieure &bull; Domaine de <?= htmlspecialchars($planet['name']) ?></div>
+                    <p class="text-muted" style="font-size:0.875rem;">
+                        Cet emplacement est viabilisé au sein de l'enceinte de votre forteresse. Au fur et à mesure de l'élévation de votre Tenshu, de nouvelles structures féodales pourront y être fondées.
                     </p>
-
-                    <div style="margin-top:1.5rem;">
-                        <a href="/?page=city" class="btn btn-secondary">
-                            &larr; Explorer les autres édifices de la Cité
-                        </a>
-                    </div>
+                    <a href="/?page=city" class="btn btn-outline-secondary w-100 mt-2">
+                        ← Revenir à la Cité Castrale
+                    </a>
                 </div>
             </div>
 
-        <!-- LISTE DES BÂTIMENTS DISPONIBLES À LA CONSTRUCTION SUR CET EMPLACEMENT -->
-        <div class="card" style="margin-top:1.5rem; background:rgba(15,23,42,0.8); border:1px solid var(--border-color); border-radius:12px; padding:1.5rem;">
-            <h2 style="font-size:1.2rem; color:#f8fafc; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
-                <span>🏗️</span> Fonder une Nouvelle Structure Féodale sur l'Emplacement #<?= $slot ?>
-            </h2>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">
-                Sélectionnez le bâtiment féodal de votre choix à ériger sur ce terrain viabilisé de votre forteresse.
-            </p>
-
-            <div style="display:flex; flex-direction:column; gap:0.75rem;">
-                <?php if (empty($availableBuildingsToConstruct)): ?>
-                    <p style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:1.5rem 0;">Toutes les structures féodales uniques sont déjà érigées dans votre cité castrale.</p>
-                <?php else: ?>
-                    <?php foreach ($availableBuildingsToConstruct as $bCode => $item): 
-                        $info = $item['info'];
-                        $det = $item['details'];
-                        $c = $det['cost'];
-                        $dur = $det['duration'];
-                        $canAfford = $item['can_afford'];
-                        $durFormatted = sprintf('%02d:%02d', floor($dur / 60), $dur % 60);
-                        $bHeroImg = $buildingHeroImages[$bCode] ?? null;
-                        $bHeroFile = $bHeroImg ? __DIR__ . '/../public/assets/' . $bHeroImg : null;
-                    ?>
-                        <div style="background:rgba(30,41,59,0.5); border:1px solid #334155; border-radius:8px; padding:0.85rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
-                            <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:260px;">
-                                <div style="width:58px; height:44px; background:rgba(15,23,42,0.8); border:1px solid #475569; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
-                                    <?php if ($bHeroFile && file_exists($bHeroFile)): ?>
-                                        <img src="/public/assets/<?= $bHeroImg ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:100%; height:100%; object-fit:cover;">
-                                    <?php elseif (!empty($info['tile_img'])): 
-                                        $constructTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $info['tile_img']) ? '/public/assets/tiles/' . $info['tile_img'] : '/public/assets/' . $info['tile_img'];
-                                    ?>
-                                        <img src="<?= $constructTileUrl ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:36px; height:36px; object-fit:contain;">
+            <!-- Mini-grille des emplacements de la cité -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🗺️ Emplacements de la Cité</h3>
+                    <div class="card-options text-muted" style="font-size:0.78rem;">Slots #19 à #34</div>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row g-1">
+                        <?php for ($s = 19; $s <= 34; $s++):
+                            $sData = $citySlots[$s] ?? ['slot' => $s, 'code' => 'free_plot', 'level' => 0];
+                            $sCode = $sData['code'];
+                            $sLvl  = (int)$sData['level'];
+                            $isCurrent = ($s === $slot);
+                            $sInfo = BUILDINGS[$sCode] ?? null;
+                            $sTile = $sInfo['tile_img'] ?? 'tile_tenshu.png';
+                            $sTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $sTile)
+                                ? '/public/assets/tiles/' . $sTile
+                                : '/public/assets/' . $sTile;
+                            $sName = $sInfo['name'] ?? ($sCode === 'free_plot' ? 'Terrain Libre' : $sCode);
+                        ?>
+                        <div class="col-auto">
+                            <a href="/?page=building&slot=<?= $s ?>"
+                               title="<?= htmlspecialchars($sName) ?> #<?= $s ?><?= ($sCode !== 'free_plot') ? ' (Niv.' . $sLvl . ')' : '' ?>"
+                               style="display:block; text-align:center; width:44px; text-decoration:none;">
+                                <div style="width:40px; height:40px; border-radius:6px; overflow:hidden; margin:0 auto;
+                                            border:2px solid <?= $isCurrent ? '#dc2626' : 'var(--tblr-border-color)' ?>;
+                                            box-shadow:<?= $isCurrent ? '0 0 0 2px rgba(220,38,38,0.3)' : 'none' ?>;
+                                            background:rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:center;">
+                                    <?php if ($sCode === 'free_plot'): ?>
+                                        <span style="font-size:1.1rem; opacity:0.6;">🏗️</span>
                                     <?php else: ?>
-                                        <span style="font-size:1.5rem;"><?= $info['icon'] ?></span>
+                                        <img src="<?= $sTileUrl ?>" alt="" style="width:100%; height:100%; object-fit:cover; opacity:<?= $isCurrent ? '1' : '0.85' ?>;">
                                     <?php endif; ?>
                                 </div>
-                                <div>
-                                    <h4 style="margin:0; font-size:0.95rem; color:#f8fafc;"><?= htmlspecialchars($info['name']) ?></h4>
-                                    <p style="margin:0.2rem 0 0 0; font-size:0.75rem; color:#94a3b8; line-height:1.3;">
-                                        <?= htmlspecialchars($info['description']) ?>
-                                    </p>
+                                <div style="font-size:0.6rem; color:<?= $isCurrent ? '#dc2626' : 'var(--tblr-text-muted)' ?>; font-weight:<?= $isCurrent ? '800' : '400' ?>; line-height:1.4;">
+                                    #<?= $s ?> <?= ($sCode !== 'free_plot') ? 'N' . $sLvl : '—' ?>
                                 </div>
-                            </div>
-
-                            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-                                <div style="display:flex; gap:0.6rem; font-size:0.8rem; font-weight:600;">
-                                    <span style="color:<?= ($planet['metal'] >= $c['metal']) ? '#4ade80' : '#ef4444' ?>;" title="Bois de Cèdre">🪵 <?= number_format($c['metal']) ?></span>
-                                    <span style="color:<?= ($planet['crystal'] >= $c['crystal']) ? '#4ade80' : '#ef4444' ?>;" title="Pierre de Taille">🪨 <?= number_format($c['crystal']) ?></span>
-                                    <span style="color:<?= ($planet['deuterium'] >= $c['deuterium']) ? '#4ade80' : '#ef4444' ?>;" title="Koku de Riz">🌾 <?= number_format($c['deuterium']) ?></span>
-                                    <span style="color:#94a3b8;" title="Durée des travaux">⏳ <?= $durFormatted ?></span>
-                                </div>
-
-                                <div>
-                                    <?php if ($canAfford && $canQueueNewBuilding): ?>
-                                        <button type="button" class="field-btn-primary" style="padding:0.4rem 0.9rem; font-size:0.8rem;" onclick="launchBuildingUpgrade('<?= $bCode ?>', 1, <?= $slot ?>)">
-                                            🔨 Bâtir
-                                        </button>
-                                    <?php elseif (!$canAfford): ?>
-                                        <button type="button" class="field-btn-primary disabled" disabled style="padding:0.4rem 0.9rem; font-size:0.8rem; opacity:0.5; cursor:not-allowed;">
-                                            Matériaux Insuffisants
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="button" class="field-btn-primary disabled" disabled style="padding:0.4rem 0.9rem; font-size:0.8rem; opacity:0.5; cursor:not-allowed;">
-                                            Chantier Occupé
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
+                            </a>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne Droite : Catalogue des Bâtiments Constructibles -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">🏗️ Fonder une Nouvelle Structure Féodale</h3>
+                        <div class="text-muted" style="font-size:0.8rem;">Sélectionnez l'édifice à ériger sur l'emplacement #<?= $slot ?></div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <?php if (empty($availableBuildingsToConstruct)): ?>
+                        <div class="text-center py-4 text-muted">
+                            <span style="font-size:2rem;">🏯</span>
+                            <p class="mt-2 mb-0">Toutes les structures féodales uniques sont déjà érigées dans votre cité castrale.</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="list-group list-group-flush">
+                            <?php foreach ($availableBuildingsToConstruct as $bCode => $item):
+                                $info = $item['info'];
+                                $det = $item['details'];
+                                $c = $det['cost'];
+                                $dur = $det['duration'];
+                                $canAfford = $item['can_afford'];
+                                $durFormatted = sprintf('%02d:%02d', floor($dur / 60), $dur % 60);
+                                $bHeroImg = $buildingHeroImages[$bCode] ?? null;
+                                $bHeroFile = $bHeroImg ? __DIR__ . '/../public/assets/' . $bHeroImg : null;
+                                $constructTileUrl = !empty($info['tile_img'])
+                                    ? (file_exists(__DIR__ . '/../public/assets/tiles/' . $info['tile_img']) ? '/public/assets/tiles/' . $info['tile_img'] : '/public/assets/' . $info['tile_img'])
+                                    : null;
+                            ?>
+                                <div class="list-group-item p-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <div style="width:56px; height:56px; border-radius:8px; overflow:hidden; border:1px solid var(--tblr-border-color); display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.04);">
+                                                <?php if ($bHeroFile && file_exists($bHeroFile)): ?>
+                                                    <img src="/public/assets/<?= $bHeroImg ?>" alt="" style="width:100%; height:100%; object-fit:cover;">
+                                                <?php elseif ($constructTileUrl): ?>
+                                                    <img src="<?= $constructTileUrl ?>" alt="" style="width:40px; height:40px; object-fit:contain;">
+                                                <?php else: ?>
+                                                    <span style="font-size:1.8rem;"><?= $info['icon'] ?? '🏯' ?></span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <h4 class="mb-0 fw-bold"><?= htmlspecialchars($info['name']) ?></h4>
+                                                <span class="badge bg-secondary-lt" style="font-size:0.68rem;"><?= htmlspecialchars($item['sector']['name'] ?? 'Castral') ?></span>
+                                            </div>
+                                            <p class="text-muted mb-2 mt-1" style="font-size:0.8rem; line-height:1.35;">
+                                                <?= htmlspecialchars($info['description']) ?>
+                                            </p>
+                                            <div class="d-flex gap-3 flex-wrap align-items-center" style="font-size:0.8rem;">
+                                                <span class="<?= ($planet['metal'] >= $c['metal']) ? 'text-success' : 'text-danger' ?>">
+                                                    🪵 <?= number_format($c['metal']) ?>
+                                                </span>
+                                                <span class="<?= ($planet['crystal'] >= $c['crystal']) ? 'text-success' : 'text-danger' ?>">
+                                                    🪨 <?= number_format($c['crystal']) ?>
+                                                </span>
+                                                <span class="<?= ($planet['deuterium'] >= $c['deuterium']) ? 'text-success' : 'text-danger' ?>">
+                                                    🌾 <?= number_format($c['deuterium']) ?>
+                                                </span>
+                                                <span class="text-muted">
+                                                    ⏱️ <?= $durFormatted ?>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <?php if ($canAfford && $canQueueNewBuilding): ?>
+                                                <button type="button" class="btn btn-primary" onclick="launchBuildingUpgrade('<?= $bCode ?>', 1, <?= $slot ?>)">
+                                                    🔨 Bâtir
+                                                </button>
+                                            <?php elseif (!$canAfford): ?>
+                                                <button type="button" class="btn btn-secondary disabled" disabled>
+                                                    Matériaux Insuffisants
+                                                </button>
+                                            <?php else: ?>
+                                                <button type="button" class="btn btn-secondary disabled" disabled>
+                                                    Chantier Occupé
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 
     <?php else: ?>
-        <!-- CAS : BÂTIMENT FÉODAL ACTIF / CONSTRUCTIBLE -->
+        <!-- ==========================================
+             CAS B : BÂTIMENT FÉODAL ACTIF
+             ========================================== -->
+        <!-- Colonne Gauche : Identité Bâtiment & Mini-Grille -->
+        <div class="col-lg-5">
 
-        <!-- RECTANGLE D'INFORMATIONS DU BÂTIMENT (REMONTÉ AU-DESSUS) -->
-        <div class="field-info-card">
-            <!-- TILE DU BÂTIMENT SANS ROND ROUGE (AGRANDIE) -->
-            <div class="field-tile-stage">
-                <div class="field-tile-container">
-                    <img src="<?= $tileUrl ?>" 
-                         class="field-tile-img" 
-                         alt="<?= htmlspecialchars($bInfo['name']) ?>" 
-                         draggable="false">
-                    <div class="field-level-emblem">
-                        <span class="emblem-lvl-text">NIVEAU</span>
-                        <span class="emblem-lvl-number"><?= $lvl ?></span>
+            <!-- Card identité du bâtiment -->
+            <div class="card mb-3">
+                <?php if ($buildingIllustrationUrl): ?>
+                    <div class="card-img-top" style="cursor:pointer; overflow:hidden; max-height:220px;" onclick="openArtworkModal('<?= $buildingIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($bInfo['name'])) ?>')" title="Agrandir l'estampe">
+                        <img src="<?= $buildingIllustrationUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:100%; height:220px; object-fit:cover;">
+                        <div style="position:absolute; bottom:8px; right:10px; background:rgba(0,0,0,0.55); color:#fff; font-size:0.72rem; padding:2px 8px; border-radius:4px; backdrop-filter:blur(2px);">🔍 Agrandir</div>
                     </div>
-                </div>
-
-                <!-- BOUTON RASER LE BÂTIMENT DANS UN RECTANGLE DÉDIÉ (SAUF TENSHU) -->
-                <?php if ($code !== 'hq' && $lvl > 0 && !$activeJob): ?>
-                    <div class="field-demolish-rect">
-                        <button type="button" 
-                                class="field-demolish-btn" 
-                                onclick="confirmDemolishBuilding('<?= $code ?>', <?= $slot ?>, '<?= htmlspecialchars(addslashes($bInfo['name'] ?? $code)) ?>')"
-                                title="Démanteler définitivement ce bâtiment (récupère 30% des matériaux)">
-                            <span>💥</span>
-                            <span>Raser le Bâtiment</span>
-                        </button>
+                <?php else: ?>
+                    <div style="height:120px; background:linear-gradient(135deg,rgba(185,28,28,0.15),rgba(30,41,59,0.1)); display:flex; align-items:center; justify-content:center; font-size:3rem;">
+                        <?= $bInfo['icon'] ?? '🏯' ?>
                     </div>
                 <?php endif; ?>
-            </div>
 
-            <!-- IDENTITÉ ET DÉTAILS DU BÂTIMENT -->
-            <div class="field-meta-pane">
-                <div class="field-header-row">
-                    <div>
-                        <div class="field-type-pill <?= $sectorInfo['sec'] ?>">
-                            <span><?= $bInfo['icon'] ?></span>
-                            <span><?= htmlspecialchars($sectorInfo['name']) ?></span>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="<?= $tileUrl ?>" alt="" style="width:52px; height:52px; border-radius:8px; object-fit:cover; border:2px solid var(--tblr-border-color); margin-right:0.75rem;">
+                        <div>
+                            <h3 class="card-title mb-0"><?= htmlspecialchars($bInfo['name']) ?></h3>
+                            <div class="text-muted" style="font-size:0.8rem;">Emplacement #<?= $slot ?> &bull; Niveau actuel : <strong><?= $lvl ?></strong></div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-top:0.25rem;">
-                            <h1 class="field-title" style="margin:0;"><?= htmlspecialchars($bInfo['name']) ?></h1>
-                        </div>
-                        <span class="field-subtitle">Emplacement castral #<?= $slot ?> &bull; Cité de <?= htmlspecialchars($planet['name']) ?></span>
                     </div>
+                    <p class="text-muted mb-3" style="font-size:0.875rem;"><?= htmlspecialchars($bInfo['description']) ?></p>
 
-                    <?php if ($activeJob): ?>
-                        <div class="field-status-badge upgrading">
-                            <span class="pulse-dot"></span>
-                            <span>Chantier en cours : Niveau <?= $activeJob['target_level'] ?></span>
-                        </div>
-                    <?php elseif ($lvl > 0): ?>
-                        <div class="field-status-badge ready">
-                            <span>Statut : Fortifié & Opérationnel</span>
-                        </div>
-                    <?php else: ?>
-                        <div class="field-status-badge ready" style="background:rgba(234, 179, 8, 0.12); color:#b45309; border-color:rgba(234, 179, 8, 0.3);">
-                            <span>Statut : Non Bâti</span>
+                    <!-- Raccourcis opérationnels directs -->
+                    <?php if ($lvl > 0): ?>
+                        <div class="d-flex flex-column gap-2 mb-2">
+                            <?php if ($code === 'barracks'): ?>
+                                <a href="/?page=barracks" class="btn btn-primary">
+                                    🥋 Ouvrir le Dojo d'Entraînement des Troupes &rarr;
+                                </a>
+                            <?php elseif ($code === 'shipyard'): ?>
+                                <a href="/?page=shipyard" class="btn btn-primary">
+                                    🐎 Accéder aux Écuries de Cavalerie & Machines &rarr;
+                                </a>
+                            <?php elseif ($code === 'research_lab'): ?>
+                                <a href="/?page=research" class="btn btn-primary">
+                                    📜 Consulter l'Académie & Savoirs Féodaux &rarr;
+                                </a>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
+
+                    <!-- Bouton Raser (sauf Tenshu) -->
+                    <?php if ($code !== 'hq' && $lvl > 0 && !$activeJob): ?>
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100"
+                                onclick="confirmDemolishBuilding('<?= $code ?>', <?= $slot ?>, '<?= htmlspecialchars(addslashes($bInfo['name'] ?? $code)) ?>')">
+                            💥 Démanteler le Bâtiment (récupère 30%)
+                        </button>
+                    <?php endif; ?>
                 </div>
+            </div>
 
-                <p class="field-description">
-                    <?= htmlspecialchars($bInfo['description']) ?>
-                </p>
-
-                <!-- BANDEAU DE RENDEMENT & EFFETS -->
-                <div class="field-quick-stats">
-                    <div class="quick-stat-box">
-                        <span class="stat-label">Effet Actuel (Niveau <?= $lvl ?>)</span>
-                        <span class="stat-value"><?= $statData['cur'] ?></span>
-                    </div>
-                    <div class="quick-stat-box highlight">
-                        <span class="stat-label">Au Niveau <?= $targetLevel ?></span>
-                        <span class="stat-value"><?= $statData['next'] ?></span>
-                        <span class="stat-gain">(<?= $statData['gain'] ?>)</span>
+            <!-- Mini-grille des emplacements de la cité -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🗺️ Emplacements de la Cité</h3>
+                    <div class="card-options text-muted" style="font-size:0.78rem;">Slots #19 à #34</div>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row g-1">
+                        <?php for ($s = 19; $s <= 34; $s++):
+                            $sData = $citySlots[$s] ?? ['slot' => $s, 'code' => 'free_plot', 'level' => 0];
+                            $sCode = $sData['code'];
+                            $sLvl  = (int)$sData['level'];
+                            $isCurrent = ($s === $slot);
+                            $sInfo = BUILDINGS[$sCode] ?? null;
+                            $sTile = $sInfo['tile_img'] ?? 'tile_tenshu.png';
+                            $sTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $sTile)
+                                ? '/public/assets/tiles/' . $sTile
+                                : '/public/assets/' . $sTile;
+                            $sName = $sInfo['name'] ?? ($sCode === 'free_plot' ? 'Terrain Libre' : $sCode);
+                        ?>
+                        <div class="col-auto">
+                            <a href="/?page=building&slot=<?= $s ?>"
+                               title="<?= htmlspecialchars($sName) ?> #<?= $s ?><?= ($sCode !== 'free_plot') ? ' (Niv.' . $sLvl . ')' : '' ?>"
+                               style="display:block; text-align:center; width:44px; text-decoration:none;">
+                                <div style="width:40px; height:40px; border-radius:6px; overflow:hidden; margin:0 auto;
+                                            border:2px solid <?= $isCurrent ? '#dc2626' : 'var(--tblr-border-color)' ?>;
+                                            box-shadow:<?= $isCurrent ? '0 0 0 2px rgba(220,38,38,0.3)' : 'none' ?>;
+                                            background:rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:center;">
+                                    <?php if ($sCode === 'free_plot'): ?>
+                                        <span style="font-size:1.1rem; opacity:0.6;">🏗️</span>
+                                    <?php else: ?>
+                                        <img src="<?= $sTileUrl ?>" alt="" style="width:100%; height:100%; object-fit:cover; opacity:<?= $isCurrent ? '1' : '0.85' ?>;">
+                                    <?php endif; ?>
+                                </div>
+                                <div style="font-size:0.6rem; color:<?= $isCurrent ? '#dc2626' : 'var(--tblr-text-muted)' ?>; font-weight:<?= $isCurrent ? '800' : '400' ?>; line-height:1.4;">
+                                    #<?= $s ?> <?= ($sCode !== 'free_plot') ? 'N' . $sLvl : '—' ?>
+                                </div>
+                            </a>
+                        </div>
+                        <?php endfor; ?>
                     </div>
                 </div>
-
-                <!-- SHORTCUTS OPÉRATIONNELS DIRECTS -->
-                <?php if ($lvl > 0): ?>
-                    <div style="margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                        <?php if ($code === 'barracks'): ?>
-                            <a href="/?page=barracks" class="btn btn-primary" style="font-size:0.85rem; padding:0.45rem 1rem;">
-                                🥋 Ouvrir le Dojo d'Entraînement des Troupes &rarr;
-                            </a>
-                        <?php elseif ($code === 'shipyard'): ?>
-                            <a href="/?page=shipyard" class="btn btn-primary" style="font-size:0.85rem; padding:0.45rem 1rem;">
-                                🐎 Accéder aux Écuries de Cavalerie & Machines &rarr;
-                            </a>
-                        <?php elseif ($code === 'research_lab'): ?>
-                            <a href="/?page=research" class="btn btn-primary" style="font-size:0.85rem; padding:0.45rem 1rem;">
-                                📜 Consulter l'Académie & Savoirs Féodaux &rarr;
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
 
-        <!-- ESTAMPE ARTISTIQUE DU BÂTIMENT CASTRAL (PLEINE LARGEUR, SANS COUCHE ALPHA) -->
-        <?php if ($buildingIllustrationUrl): ?>
-            <div class="field-artwork-card" onclick="openArtworkModal('<?= $buildingIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($bInfo['name'])) ?>')" title="Cliquer pour admirer l'estampe en plein écran">
-                <img src="<?= $buildingIllustrationUrl ?>" 
-                     alt="<?= htmlspecialchars($bInfo['name']) ?>" 
-                     class="field-artwork-img" 
-                     loading="lazy">
-                <div class="field-artwork-badge">
-                    <span>🎨 Estampe Castrale &bull; <?= htmlspecialchars($bInfo['name']) ?></span>
-                    <span style="font-size: 0.75rem; opacity: 0.85;">(Agrandir en HD 🔍)</span>
+        <!-- Colonne Droite : Coûts, Chantier & Zone Tenshu -->
+        <div class="col-lg-7">
+
+            <!-- Coûts d'amélioration -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3 class="card-title">🧱 Coûts d'Amélioration &bull; Niveau <?= $targetLevel ?></h3>
+                    <div class="card-options text-muted" style="font-size:0.78rem;">Stock disponible dans vos greniers</div>
                 </div>
-            </div>
-        <?php endif; ?>
-
-        <!-- SECTION D'AMÉLIORATION & COÛTS -->
-        <div class="field-upgrade-grid">
-            
-            <!-- Colonne Gauche : Coûts pour le Niveau Suivant -->
-            <div class="field-card">
-                <div class="field-card-header">
-                    <h3>🧱 Coûts d'Amélioration &bull; Niveau <?= $targetLevel ?></h3>
-                    <span style="font-size:0.8rem; color:var(--text-muted);">Stock disponible dans vos greniers</span>
-                </div>
-                <div class="field-card-body">
-                    <div class="cost-grid">
-                        <!-- Bois -->
-                        <div class="cost-item <?= $hasMetal ? 'cost-ok' : 'cost-missing' ?>">
-                            <div class="cost-icon">🪵</div>
-                            <div class="cost-details">
-                                <span class="cost-name">Bois de Cèdre</span>
-                                <span class="cost-req"><?= number_format($cost['metal']) ?></span>
-                                <span class="cost-stock">Stock : <?= number_format($planet['metal']) ?></span>
+                <div class="card-body">
+                    <?php
+                    $resources = [
+                        ['icon'=>'🪵', 'name'=>'Bois de Cèdre',   'req'=>$cost['metal'],     'stock'=>$planet['metal'],     'ok'=>$hasMetal],
+                        ['icon'=>'🪨', 'name'=>'Pierre de Taille', 'req'=>$cost['crystal'],   'stock'=>$planet['crystal'],   'ok'=>$hasCrystal],
+                        ['icon'=>'🌾', 'name'=>'Riz Impérial',     'req'=>$cost['deuterium'], 'stock'=>$planet['deuterium'], 'ok'=>$hasDeut],
+                    ];
+                    foreach ($resources as $r):
+                        $pct = ($r['req'] > 0) ? min(100, ($r['stock'] / $r['req']) * 100) : 100;
+                    ?>
+                    <div class="d-flex align-items-center mb-3">
+                        <span style="font-size:1.3rem; min-width:2rem;"><?= $r['icon'] ?></span>
+                        <div class="flex-fill mx-2">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-medium" style="font-size:0.875rem;"><?= $r['name'] ?></span>
+                                <span class="text-muted" style="font-size:0.8rem;">
+                                    <?= number_format($r['stock']) ?> / <strong class="<?= $r['ok'] ? 'text-success' : 'text-danger' ?>"><?= number_format($r['req']) ?></strong> requis
+                                </span>
                             </div>
-                            <div class="cost-check"><?= $hasMetal ? '✓' : '✗' ?></div>
-                        </div>
-
-                        <!-- Pierre -->
-                        <div class="cost-item <?= $hasCrystal ? 'cost-ok' : 'cost-missing' ?>">
-                            <div class="cost-icon">🪨</div>
-                            <div class="cost-details">
-                                <span class="cost-name">Pierre de Taille</span>
-                                <span class="cost-req"><?= number_format($cost['crystal']) ?></span>
-                                <span class="cost-stock">Stock : <?= number_format($planet['crystal']) ?></span>
+                            <div class="progress" style="height:6px;">
+                                <div class="progress-bar <?= $r['ok'] ? 'bg-success' : 'bg-danger' ?>" style="width:<?= $pct ?>%;"></div>
                             </div>
-                            <div class="cost-check"><?= $hasCrystal ? '✓' : '✗' ?></div>
                         </div>
-
-                        <!-- Riz -->
-                        <div class="cost-item <?= $hasDeut ? 'cost-ok' : 'cost-missing' ?>">
-                            <div class="cost-icon">🌾</div>
-                            <div class="cost-details">
-                                <span class="cost-name">Riz Impérial</span>
-                                <span class="cost-req"><?= number_format($cost['deuterium']) ?></span>
-                                <span class="cost-stock">Stock : <?= number_format($planet['deuterium']) ?></span>
-                            </div>
-                            <div class="cost-check"><?= $hasDeut ? '✓' : '✗' ?></div>
-                        </div>
+                        <span class="badge <?= $r['ok'] ? 'bg-success' : 'bg-danger' ?>" style="min-width:1.5rem;">
+                            <?= $r['ok'] ? '✓' : '✗' ?>
+                        </span>
                     </div>
+                    <?php endforeach; ?>
 
-                    <!-- Durée des Travaux -->
-                    <div class="construction-time-banner">
-                        <div class="time-label-group">
-                            <span class="time-icon">⏱️</span>
-                            <div>
-                                <strong>Temps de construction pour le Niveau <?= $targetLevel ?> :</strong>
-                                <div style="font-size:0.75rem; color:var(--text-muted);">
-                                    Réduit par le Tenshu (Donjon Castral Niv. <?= $hqLevel ?>) &bull; Maîtres-bâtisseurs féodaux
-                                </div>
-                            </div>
-                        </div>
-                        <div class="time-value-display">
-                            <?= gmdate('H:i:s', $duration) ?>
+                    <!-- Durée -->
+                    <div class="alert alert-info mt-3 mb-0" style="padding:0.6rem 0.85rem;">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span>⏱️ Durée des travaux :</span>
+                            <strong class="font-monospace"><?= gmdate('H:i:s', $duration) ?></strong>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Colonne Droite : Lancement des Travaux / Chantier -->
-            <div class="field-card">
-                <div class="field-card-header">
-                    <h3>🔨 Décret de Construction Castral</h3>
+            <!-- Décret de Construction -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 Décret de Construction Castral</h3>
                     <?php if ($isTerran): ?>
-                        <span title="Bonus Clan Oda" style="font-size:0.75rem; color:#93c5fd; background:rgba(59,130,246,0.2); padding:0.15rem 0.45rem; border-radius:4px;">Clan Oda (Double Chantier)</span>
+                        <div class="card-options"><span class="badge bg-blue-lt">Clan Oda &bull; Double Chantier</span></div>
                     <?php endif; ?>
                 </div>
-                <div class="field-card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div class="card-body">
 
                     <?php if ($activeJob): ?>
-                        <!-- Chantier en cours sur ce bâtiment -->
                         <?php $isDemolishingJob = ((int)$activeJob['target_level'] === 0); ?>
-                        <div class="field-active-job-box" style="<?= $isDemolishingJob ? 'border-color: rgba(239, 68, 68, 0.5); background: rgba(239, 68, 68, 0.08);' : '' ?>">
-                            <div class="job-status-title" style="<?= $isDemolishingJob ? 'color:#f87171;' : '' ?>">
-                                <span class="job-spinner">⏳</span>
-                                <?php if ($isDemolishingJob): ?>
-                                    <span>Démantèlement en cours vers le <strong>Niveau 0 (Raser)</strong></span>
-                                <?php else: ?>
-                                    <span>Travaux en cours vers le <strong>Niveau <?= $activeJob['target_level'] ?></strong></span>
-                                <?php endif; ?>
+                        <div class="alert alert-<?= $isDemolishingJob ? 'danger' : 'warning' ?> mb-3">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span style="font-size:1.3rem;">⏳</span>
+                                <div>
+                                    <strong><?= $isDemolishingJob ? 'Démantèlement en cours' : 'Travaux en cours' ?></strong> &rarr;
+                                    <?= $isDemolishingJob ? 'Niveau 0 (Raser)' : 'Niveau ' . $activeJob['target_level'] ?>
+                                </div>
                             </div>
-                            <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0 1rem 0;">
-                                <?php if ($isDemolishingJob): ?>
-                                    Vos maîtres d'œuvre déconstruisent cette bâtisse pour libérer l'emplacement. Vous récupérerez 30% des matériaux à l'achèvement des travaux.
-                                <?php else: ?>
-                                    Vos bâtisseurs et charpentiers travaillent sur cette bâtisse. La forteresse bénéficiera de ses nouvelles capacités dès achèvement.
-                                <?php endif; ?>
+                            <p class="text-muted mb-2" style="font-size:0.85rem;">
+                                <?= $isDemolishingJob
+                                    ? 'Vos maîtres d\'œuvre déconstruisent cette bâtisse pour libérer l\'emplacement. Vous récupérerez 30% des matériaux.'
+                                    : 'Vos bâtisseurs et charpentiers travaillent sur cette bâtisse. La forteresse bénéficiera de ses nouvelles capacités dès achèvement.' ?>
                             </p>
-
-                            <div class="job-timer-display" data-countdown="<?= $activeJob['finishes_at'] ?>" style="<?= $isDemolishingJob ? 'color:#f87171;' : '' ?>">
-                                Calcul du temps restant...
-                            </div>
-
-                            <div style="margin-top: 1.25rem;">
-                                <button type="button" class="field-btn-cancel" onclick="cancelBuildingBuild(<?= (int)$activeJob['id'] ?>)">
-                                    <?= $isDemolishingJob ? '🛑 Interrompre le démantèlement (Bâtiment préservé)' : '🛑 Interrompre les travaux (80% remboursé)' ?>
-                                </button>
+                            <div class="font-monospace fw-bold fs-4 text-center py-2 job-timer-display" data-countdown="<?= $activeJob['finishes_at'] ?>">
+                                Calcul...
                             </div>
                         </div>
+                        <button type="button" class="btn btn-outline-danger w-100" onclick="cancelBuildingBuild(<?= (int)$activeJob['id'] ?>)">
+                            🛑 <?= $isDemolishingJob ? 'Interrompre le démantèlement' : 'Interrompre les travaux (80% remboursé)' ?>
+                        </button>
 
                     <?php elseif (!$canQueueNewBuilding): ?>
-                        <!-- File de construction saturée -->
-                        <div class="field-blocked-box">
-                            <div style="font-size: 1.75rem; margin-bottom: 0.5rem;">🏗️</div>
-                            <h4>Chantier Castral Déjà Mobilisé</h4>
-                            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.4rem;">
+                        <div class="alert alert-secondary mb-3">
+                            <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">🏗️</div>
+                            <h4 class="alert-title">Chantier Castral Déjà Mobilisé</h4>
+                            <p class="text-muted mb-0" style="font-size:0.85rem;">
                                 <?php if ($isTerran): ?>
                                     Une autre bâtisse urbaine est déjà en construction dans votre cité. Le Clan Oda permet 1 bâtiment urbain et 1 parcelle rurale en simultané.
                                 <?php else: ?>
                                     Vos équipes de bâtisseurs travaillent déjà sur un autre chantier du domaine. Attendez la fin des travaux en cours.
                                 <?php endif; ?>
                             </p>
-                            <a href="/?page=city" class="field-btn-secondary" style="margin-top:1rem; display:inline-block;">
-                                Voir les chantiers de la Cité &rarr;
-                            </a>
                         </div>
+                        <a href="/?page=city" class="btn btn-secondary w-100">&larr; Voir les chantiers de la Cité</a>
 
                     <?php elseif (!$canAfford): ?>
-                        <!-- Ressources insuffisantes -->
-                        <div class="field-blocked-box">
-                            <div style="font-size: 1.75rem; margin-bottom: 0.5rem;">⚠️</div>
-                            <h4>Matériaux Insuffisants</h4>
-                            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.4rem;">
+                        <div class="alert alert-warning mb-3">
+                            <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">⚠️</div>
+                            <h4 class="alert-title">Matériaux Insuffisants</h4>
+                            <p class="text-muted mb-0" style="font-size:0.85rem;">
                                 Vos greniers ne disposent pas encore de la quantité requise de bois, de pierre ou de riz pour ce chantier castral.
                             </p>
                             <?php if ($missingWaitSeconds > 0): ?>
-                                <div class="time-to-afford">
-                                    ⏳ Matériaux réunis dans environ : <strong><?= gmdate('H:i:s', $missingWaitSeconds) ?></strong>
+                                <div class="mt-2 text-center">
+                                    <span class="badge bg-warning text-dark">⏳ Matériaux réunis dans : <?= gmdate('H:i:s', $missingWaitSeconds) ?></span>
                                 </div>
                             <?php endif; ?>
-                            <button type="button" class="field-btn-primary disabled" disabled style="margin-top:1rem; opacity:0.5; cursor:not-allowed;">
-                                <?= ($lvl === 0) ? '🔨 Construire au Niveau 1' : '⚡ Améliorer au Niveau ' . $targetLevel ?>
-                            </button>
                         </div>
+                        <button type="button" class="btn btn-primary w-100" disabled style="opacity:0.5; cursor:not-allowed;">
+                            <?= ($lvl === 0) ? '🔨 Construire au Niveau 1' : '⚡ Améliorer au Niveau ' . $targetLevel ?>
+                        </button>
 
                     <?php else: ?>
-                        <!-- Prêt pour lancer les travaux -->
-                        <div class="field-ready-box">
-                            <div style="font-size: 1.75rem; margin-bottom: 0.5rem;">🏯</div>
-                            <h4>Ordre de Travaux Prêt</h4>
-                            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.4rem;">
+                        <div class="alert alert-success mb-3">
+                            <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">🏯</div>
+                            <h4 class="alert-title">Ordre de Travaux Prêt</h4>
+                            <p class="text-muted mb-0" style="font-size:0.85rem;">
                                 Les maîtres-artisans ont dressé les plans. Vous pouvez ordonner l'élévation du <strong>Niveau <?= $targetLevel ?></strong>.
                             </p>
-
-                            <div style="margin-top: 1.5rem;">
-                                <button type="button" class="field-btn-primary" id="btnLaunchBuildingUpgrade" onclick="launchBuildingUpgrade('<?= $code ?>', <?= $targetLevel ?>, <?= $slot ?>)">
-                                    <?= ($lvl === 0) ? '🔨 Ériger au Niveau 1' : '⚡ Élever au Niveau ' . $targetLevel ?>
-                                </button>
-                            </div>
                         </div>
+                        <button type="button" class="btn btn-primary btn-lg w-100" id="btnLaunchBuildingUpgrade" onclick="launchBuildingUpgrade('<?= $code ?>', <?= $targetLevel ?>, <?= $slot ?>)">
+                            <?= ($lvl === 0) ? '🔨 Ériger au Niveau 1' : '⚡ Élever au Niveau ' . $targetLevel ?>
+                        </button>
                     <?php endif; ?>
 
+                    <div class="mt-3 text-center">
+                        <a href="/?page=city" class="text-muted" style="font-size:0.8rem;">&larr; Revenir à la vue générale de la Cité</a>
+                    </div>
                 </div>
             </div>
 
-        </div>
-
-        <!-- ZONE EXCLUSIVE DU TENSHU : PROCLAMATION & DEVISE DU DAIMYŌ -->
-        <?php if ($code === 'hq'): ?>
-            <div class="card" style="margin-top: 1.5rem; background: linear-gradient(135deg, rgba(30, 27, 75, 0.4) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(220, 38, 38, 0.45); border-radius: 12px; padding: 1.5rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
-                    <div>
-                        <span style="font-size: 0.75rem; font-weight: 800; color: #dc2626; text-transform: uppercase; letter-spacing: 0.5px;">
-                            🏯 Résidence Suprême & Siège du Commandement
-                        </span>
-                        <h3 style="color: #fff; margin: 0.3rem 0 0 0; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
-                            <span>📜</span> Devise & Chronique Officielle du Daimyō
-                        </h3>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.35rem 0 0 0;">
-                            C'est du haut de ce Donjon que vous proclamez la devise qui guide vos samouraïs et inspire la crainte à vos rivaux.
-                        </p>
-                    </div>
-                    <div>
-                        <button type="button" onclick="openEditMottoModal()" class="btn btn-primary" style="font-size: 0.82rem; padding: 0.5rem 1rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; background: linear-gradient(135deg, #b91c1c, #dc2626); border-color: #f87171; box-shadow: 0 3px 12px rgba(220, 38, 38, 0.35); cursor: pointer; border-radius: 8px;">
-                            <span>✏️</span> Modifier ma Devise
+            <!-- ZONE EXCLUSIVE DU TENSHU : PROCLAMATION & DEVISE DU DAIMYŌ -->
+            <?php if ($code === 'hq'): ?>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-danger fw-bold" style="font-size:0.75rem; text-transform:uppercase;">🏯 Siège du Commandement</div>
+                            <h3 class="card-title mb-0">📜 Devise & Chronique du Daimyō</h3>
+                        </div>
+                        <button type="button" onclick="openEditMottoModal()" class="btn btn-danger btn-sm">
+                            ✏️ Modifier ma Devise
                         </button>
                     </div>
-                </div>
-
-                <div style="background: rgba(0, 0, 0, 0.4); border-left: 4px solid #dc2626; border-radius: 0 8px 8px 0; padding: 1rem 1.25rem;">
-                    <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase; font-weight: 700;">
-                        Proclamation actuelle du Daimyō <?= htmlspecialchars($user['username']) ?> :
+                    <div class="card-body">
+                        <p class="text-muted mb-3" style="font-size:0.85rem;">
+                            C'est du haut de ce Donjon que vous proclamez la devise qui guide vos samouraïs et inspire la crainte à vos rivaux.
+                        </p>
+                        <blockquote class="blockquote mb-0 ps-3 border-start border-3 border-danger" style="background:rgba(220,38,38,0.04); padding:0.75rem 1rem; border-radius:0 6px 6px 0;">
+                            <div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; font-weight:700;">
+                                Proclamation actuelle du Daimyō <?= htmlspecialchars($user['username']) ?> :
+                            </div>
+                            <div id="tenshuDaimyoBioText" style="font-size:0.95rem; font-style:italic;">
+                                &laquo; <?= htmlspecialchars(!empty($user['bio']) ? $user['bio'] : "Fier Daimyō au service de l'honneur de son clan et de l'Empereur.") ?> &raquo;
+                            </div>
+                        </blockquote>
                     </div>
-                    <div id="tenshuDaimyoBioText" style="font-size: 0.95rem; color: #f1f5f9; font-style: italic; line-height: 1.6;">
-                        &laquo; <?= htmlspecialchars(!empty($user['bio']) ? $user['bio'] : "Fier Daimyō au service de l'honneur de son clan et de l'Empereur.") ?> &raquo;
-                    </div>
                 </div>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
 
+        </div>
     <?php endif; ?>
 
 </div>
 
+<!-- SCRIPT INTERACTIF -->
 <script>
 async function launchBuildingUpgrade(buildingCode, targetLevel, slot = null) {
     const btn = document.getElementById('btnLaunchBuildingUpgrade');
@@ -756,14 +876,14 @@ async function launchBuildingUpgrade(buildingCode, targetLevel, slot = null) {
             showModalAlert(data.error || 'Impossible d\'ordonner ce chantier.', 'error');
             if (btn) {
                 btn.disabled = false;
-                btn.innerText = '⚡ Élever au Niveau ' + targetLevel;
+                btn.innerText = (targetLevel === 1 ? '🔨 Ériger au Niveau 1' : '⚡ Élever au Niveau ' + targetLevel);
             }
         }
     } catch (e) {
         showModalAlert('Erreur de communication avec le serveur castral.', 'error');
         if (btn) {
             btn.disabled = false;
-            btn.innerText = '⚡ Élever au Niveau ' + targetLevel;
+            btn.innerText = (targetLevel === 1 ? '🔨 Ériger au Niveau 1' : '⚡ Élever au Niveau ' + targetLevel);
         }
     }
 }
@@ -865,16 +985,15 @@ function closeArtworkModal(e) {
 
 <!-- MODALE LIGHTBOX ESTAMPE HD -->
 <div id="artworkModal" class="modal-overlay" style="display:none;" onclick="closeArtworkModal(event)">
-    <div class="modal-card modal-card-lg" style="max-width: 960px; padding: 1.5rem; background: var(--bg-surface, #fdfbf7);" onclick="event.stopPropagation()">
-        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-            <h3 id="artworkModalTitle" style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 800; display:flex; align-items:center; gap:0.5rem;">
-                <span>🎨</span> Estampe Féodale Authentique
-            </h3>
-            <button type="button" class="modal-close-btn" onclick="closeArtworkModal()">&times;</button>
+    <div class="modal-card modal-card-lg" style="max-width:960px; padding:1.5rem;" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--tblr-border-color); padding-bottom:0.75rem; margin-bottom:1rem;">
+            <h3 id="artworkModalTitle" style="margin:0; font-size:1.1rem; font-weight:800;">🎨 Estampe Féodale Authentique</h3>
+            <button type="button" class="btn-close" onclick="closeArtworkModal()"></button>
         </div>
-        <div class="modal-body" style="text-align: center;">
-            <img id="artworkModalImg" src="" alt="Estampe" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); border: 1px solid var(--border-color);">
+        <div style="text-align:center;">
+            <img id="artworkModalImg" src="" alt="Estampe" style="width:100%; height:auto; max-height:75vh; object-fit:contain; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,0.2);">
         </div>
     </div>
 </div>
+
 
