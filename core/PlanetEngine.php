@@ -1242,11 +1242,11 @@ class PlanetEngine {
             return ['success' => false, 'error' => "Veuillez indiquer une quantité de bois valide supérieure à zéro."];
         }
 
-        // 1. Vérifier le bâtiment Atelier de Charpenterie
+        // 1. Vérifier le bâtiment Atelier de Charpenterie (Niveau 10 minimum pour les poutres)
         $buildings = $this->getBuildings($planetId);
         $sawmillLvl = (int)($buildings['sawmill'] ?? 0);
-        if ($sawmillLvl < 1) {
-            return ['success' => false, 'error' => "L'Atelier de Charpenterie (Kizukuri) doit être érigé au Niveau 1 minimum pour façonner des poutres en bois."];
+        if ($sawmillLvl < 10) {
+            return ['success' => false, 'error' => "L'Atelier de Charpenterie (Kizukuri) doit être érigé au Niveau 10 minimum pour façonner des poutres en bois (Niveau actuel : {$sawmillLvl}/10)."];
         }
 
         // 2. Traiter les productions terminées et vérifier la limite de la file

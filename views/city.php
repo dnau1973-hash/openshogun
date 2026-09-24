@@ -315,7 +315,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                                 <a href="?page=research" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">📜 Académie des Savoirs</a>
                             <?php elseif ($code === 'grain_mill' && $lvl > 0): ?>
                                 <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🍶 Raffiner Saké &amp; Farine</a>
-                            <?php elseif ($code === 'sawmill' && $lvl > 0): ?>
+                            <?php elseif ($code === 'sawmill' && $lvl >= 10): ?>
                                 <a href="/?page=building&code=sawmill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🪚 Façonner Poutres</a>
                             <?php endif; ?>
 

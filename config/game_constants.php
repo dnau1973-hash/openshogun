@@ -246,7 +246,7 @@ const BUILDINGS = [
         'name' => 'Atelier de Charpenterie (Kizukuri)',
         'icon' => '🪚',
         'tile_img' => 'tile_sawmill.png',
-        'description' => 'Atelier des maîtres charpentiers façonnant poutres et madriers. Augmente la production de Bois de Cèdre de votre fief de +5% par niveau.',
+        'description' => 'Atelier des maîtres charpentiers. Augmente la production de Bois de Cèdre de votre fief de +5% par niveau. Débloque au Niveau 10 le façonnage de Poutres en bois pour les chantiers monumentaux.',
         'base_cost' => ['metal' => 180, 'crystal' => 140, 'deuterium' => 60],
         'cost_multiplier' => 1.5,
         'base_time' => 540,

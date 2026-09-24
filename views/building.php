@@ -645,6 +645,10 @@ if (!$isEmptyPlot) {
                                 <a href="#craftSection" class="btn btn-success text-white">
                                     🍶 Accéder à la Minoterie &amp; Cuves de Saké &darr;
                                 </a>
+                            <?php elseif ($code === 'sawmill' && $lvl >= 10): ?>
+                                <a href="#craftSection" class="btn btn-warning text-dark fw-bold">
+                                    🪚 Accéder au Façonnage de Poutres &darr;
+                                </a>
                             <?php elseif ($code === 'hq'): ?>
                                 <a href="#feastSection" class="btn btn-warning text-dark fw-bold">
                                     🍶 Salle des Banquets &amp; Célébrations &darr;
@@ -1240,6 +1244,15 @@ if (!$isEmptyPlot) {
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <?php if ($lvl < 10): ?>
+                            <span class="badge bg-secondary text-white fw-bold">
+                                🔒 Poutres : Niveau 10 requis (<?= $lvl ?>/10)
+                            </span>
+                        <?php else: ?>
+                            <span class="badge bg-success-lt fw-bold">
+                                ✓ Façonnage de Poutres Actif
+                            </span>
+                        <?php endif; ?>
                         <?php if ($isSealActive): ?>
                             <span class="badge bg-warning text-dark fw-bold shadow-sm" title="File de tâches automatique active grâce au Sceau Impérial">
                                 👑 Sceau Impérial : File de charpente (<?= count($woodCraftQueue) ?>/4)
@@ -1358,7 +1371,31 @@ if (!$isEmptyPlot) {
                         </div>
                     </div>
 
-                    <!-- Atelier de Façonnage des Poutres -->
+                    <?php if ($lvl < 10): ?>
+                    <!-- Atelier Verrouillé : Niveau 10 requis -->
+                    <div class="card card-sm border-dashed bg-light-lt text-center p-4">
+                        <div class="empty">
+                            <div class="empty-icon text-muted mb-2" style="font-size:2.5rem;">
+                                🔒 🪚
+                            </div>
+                            <h3 class="fw-bold text-dark mb-1">
+                                Façonnage de Poutres en bois Verrouillé
+                            </h3>
+                            <p class="text-secondary small mb-3" style="max-width: 520px; margin: 0 auto;">
+                                L'équarrissage et le rabotage des troncs de cèdre en poutres maîtresses nécessitent un outillage et un savoir-faire avancé. 
+                                Améliorez votre <strong>Atelier de Charpenterie au Niveau 10</strong> pour débloquer la production de poutres.
+                            </p>
+                            <div class="d-inline-flex align-items-center gap-2 px-3 py-2 bg-white rounded border shadow-sm">
+                                <span class="text-muted small">Niveau requis :</span>
+                                <div class="progress" style="width: 140px; height: 8px;">
+                                    <div class="progress-bar bg-warning" style="width: <?= min(100, ($lvl / 10) * 100) ?>%;"></div>
+                                </div>
+                                <span class="badge bg-warning-lt text-dark fw-bold"><?= $lvl ?> / 10</span>
+                            </div>
+                        </div>
+                    </div>
+                    <?php else: ?>
+                    <!-- Atelier de Façonnage des Poutres (Débloqué Niveau 10) -->
                     <div class="border rounded p-3" style="background:#fafaf9;">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
@@ -1408,6 +1445,7 @@ if (!$isEmptyPlot) {
                             </div>
                         </div>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php endif; ?>
@@ -2450,6 +2488,10 @@ function setWoodBeamsAmount(val) {
 }
 
 async function submitWoodCraft(product) {
+    if (sawmillLevel < 10) {
+        showModalAlert("Le façonnage de poutres en bois n'est accessible qu'à partir du Niveau 10 de l'Atelier de Charpenterie.", 'warning');
+        return;
+    }
     const input = document.getElementById('wood_amount_beams');
     if (!input) return;
     const amount = parseFloat(input.value) || 0;
