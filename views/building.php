@@ -649,6 +649,10 @@ if (!$isEmptyPlot) {
                                 <a href="#feastSection" class="btn btn-warning text-dark fw-bold">
                                     🍶 Salle des Banquets &amp; Célébrations &darr;
                                 </a>
+                            <?php elseif ($code === 'market'): ?>
+                                <a href="#marketSection" class="btn btn-warning text-dark fw-bold">
+                                    ⚖️ Accéder au Marché &amp; Convois de Marchandises &darr;
+                                </a>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
@@ -1202,6 +1206,379 @@ if (!$isEmptyPlot) {
                                     <?= empty($craftQueue) ? '🍶 Déclencher le Brassage du Saké' : '➕ Ajouter à la File (#'.(count($craftQueue)+1).'/'.$maxCraftQueue.')' ?>
                                 </button>
                                 <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($code === 'market' && $lvl > 0): ?>
+            <?php
+            // Données opérationnelles du Marché Féodal (Bazar Castral)
+            $myVillages = $planetEngine->getUserPlanets((int)$user['id']);
+            $otherVillages = array_filter($myVillages, function($v) use ($planet) {
+                return (int)$v['id'] !== (int)$planet['id'];
+            });
+
+            $stmtShips = Database::getConnection()->prepare("SELECT ship_code, count FROM planet_ships WHERE planet_id = ?");
+            $stmtShips->execute([(int)$planet['id']]);
+            $marketShips = $stmtShips->fetchAll(PDO::FETCH_KEY_PAIR);
+            $availLight = (int)($marketShips['transporter_light'] ?? 0);
+            $availHeavy = (int)($marketShips['transporter_heavy'] ?? 0);
+            $totalCargoCapacity = ($availLight * 5000) + ($availHeavy * 25000);
+            $merchantsCount = (int)($lvl * 2);
+
+            require_once __DIR__ . '/../core/ImperialSealEngine.php';
+            $sealEngine = new ImperialSealEngine();
+            $isSealActive = $sealEngine->isSealActive((int)$user['id']);
+            $allTradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
+            $marketRoutes = array_filter($allTradeRoutes, function($tr) use ($planet) {
+                return (int)$tr['source_planet_id'] === (int)$planet['id'] || (int)$tr['target_planet_id'] === (int)$planet['id'];
+            });
+            ?>
+            <!-- ========================================================
+                 SECTION MARCHÉ FÉODAL : CONVOIS DE MARCHANDISES & TROC
+                 ======================================================== -->
+            <div class="card mb-3" id="marketSection" style="border-top: 3px solid #f59e0b;">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h3 class="card-title text-warning-emphasis d-flex align-items-center gap-2 m-0">
+                            <span>⚖️</span> Marché Féodal &amp; Caravanes de Marchandises
+                        </h3>
+                        <div class="text-secondary small mt-1">
+                            Affrétez des convois logistiques pour ravitailler vos autres fiefs ou vos alliés, gérez vos routes commerciales et effectuez du troc.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge bg-warning text-dark fw-bold">
+                            Niveau <?= $lvl ?> (<?= $merchantsCount ?> caravanes)
+                        </span>
+                        <span class="badge bg-info-lt fw-bold" title="Chariots Légers (capacité 5 000)">
+                            Chariots Légers : <?= number_format($availLight) ?>
+                        </span>
+                        <span class="badge bg-purple-lt fw-bold" title="Grands Convois (capacité 25 000)">
+                            Grands Convois : <?= number_format($availHeavy) ?>
+                        </span>
+                        <span class="badge bg-success-lt fw-bold" title="Capacité d'emport totale disponible immédiatement sur ce fief">
+                            Capacité Fret : <?= number_format($totalCargoCapacity) ?>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs card-header-tabs px-3" data-bs-toggle="tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-market-dispatch" class="nav-link active fw-bold text-dark d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="true" role="tab">
+                                <span>📦</span> Expédier des Marchandises
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-market-routes" class="nav-link fw-bold text-cyan d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="false" role="tab">
+                                <span>🛣️</span> Routes Commerciales
+                                <span class="badge bg-cyan text-white ms-1"><?= count($marketRoutes) ?></span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-market-npc" class="nav-link fw-bold text-purple d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="false" role="tab">
+                                <span>⚖️</span> Intendant du Marché (Troc 1:1:1)
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- ONGLET 1 : EXPÉDIER DES MARCHANDISES -->
+                        <div class="tab-pane active show" id="tab-market-dispatch" role="tabpanel">
+                            <?php if ($totalCargoCapacity <= 0): ?>
+                            <div class="alert alert-warning mb-3 p-3 border-warning shadow-sm">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="fs-1">🐎</span>
+                                        <div>
+                                            <h4 class="m-0 fw-bold text-dark">Aucun chariot de ravitaillement disponible</h4>
+                                            <div class="text-secondary small mt-1">
+                                                Pour acheminer des denrées vers un autre domaine, vous devez disposer de <strong>Chariots Légers (5k fret)</strong> ou de <strong>Grands Convois Logistiques (25k fret)</strong> dans vos écuries.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="/?page=shipyard" class="btn btn-warning text-dark fw-bold">
+                                        🐎 Forger des Convois aux Écuries &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+
+                            <div class="row g-3">
+                                <!-- Colonne Gauche : Destination & Ressources -->
+                                <div class="col-lg-7">
+                                    <div class="border rounded p-3 bg-light mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <label class="form-label fw-bold text-dark m-0">🏯 Fief Destinataire :</label>
+                                            <div class="form-check form-switch m-0">
+                                                <input class="form-check-input" type="checkbox" id="mkt_manual_coords_toggle" onchange="toggleMarketDestMode()">
+                                                <label class="form-check-label small text-muted" for="mkt_manual_coords_toggle">Saisir coordonnées [X|Y]</label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Mode 1 : Sélection parmi mes fiefs -->
+                                        <div id="mkt_select_village_box">
+                                            <?php if (!empty($otherVillages)): ?>
+                                                <select id="mkt_target_planet_select" class="form-select fw-bold" onchange="updateMarketCalculations()">
+                                                    <?php foreach ($otherVillages as $v): ?>
+                                                        <option value="<?= $v['id'] ?>" data-x="<?= $v['coord_x'] ?>" data-y="<?= $v['coord_y'] ?>">
+                                                            🏯 <?= htmlspecialchars($v['name']) ?> &bull; Coordonnées [<?= $v['coord_x'] ?>|<?= $v['coord_y'] ?>]
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            <?php else: ?>
+                                                <div class="text-muted small italic p-2 border rounded bg-white">
+                                                    Vous ne possédez pour l'instant qu'un seul fief. Utilisez le mode coordonnées pour ravitailler un domaine allié ou voisin.
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <!-- Mode 2 : Saisie manuelle de coordonnées -->
+                                        <div id="mkt_manual_coords_box" class="d-none">
+                                            <div class="row g-2">
+                                                <div class="col-6">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text small">X</span>
+                                                        <input type="number" id="mkt_target_x" class="form-control text-center fw-bold" placeholder="0" oninput="updateMarketCalculations()">
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text small">Y</span>
+                                                        <input type="number" id="mkt_target_y" class="form-control text-center fw-bold" placeholder="0" oninput="updateMarketCalculations()">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-muted small mt-1" style="font-size:0.75rem;">
+                                                Entrez les coordonnées féodales de la cité ou du domaine à ravitailler.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Saisie des cargaisons -->
+                                    <div class="border rounded p-3 bg-white">
+                                        <h4 class="fw-bold text-dark mb-3">📦 Chargement des Marchandises</h4>
+
+                                        <!-- Bois -->
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <label class="form-label fw-bold text-dark small m-0">🪵 Bois de Cèdre</label>
+                                                <span class="text-muted small">Disponible : <strong class="text-success" id="mkt_max_wood_label"><?= number_format((int)$planet['metal']) ?></strong></span>
+                                            </div>
+                                            <div class="input-group mb-1">
+                                                <input type="number" id="mkt_wood" class="form-control fw-bold text-center" value="0" min="0" max="<?= (int)$planet['metal'] ?>" step="500" oninput="updateMarketCalculations()">
+                                                <span class="input-group-text small">Bois</span>
+                                            </div>
+                                            <div class="btn-group btn-group-sm w-100">
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('wood', 0)">0</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('wood', 1000)">+1k</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('wood', 5000)">+5k</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('wood', 'max')">Max</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Pierre -->
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <label class="form-label fw-bold text-dark small m-0">🪨 Pierre de Taille</label>
+                                                <span class="text-muted small">Disponible : <strong class="text-success" id="mkt_max_stone_label"><?= number_format((int)$planet['crystal']) ?></strong></span>
+                                            </div>
+                                            <div class="input-group mb-1">
+                                                <input type="number" id="mkt_stone" class="form-control fw-bold text-center" value="0" min="0" max="<?= (int)$planet['crystal'] ?>" step="500" oninput="updateMarketCalculations()">
+                                                <span class="input-group-text small">Pierre</span>
+                                            </div>
+                                            <div class="btn-group btn-group-sm w-100">
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('stone', 0)">0</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('stone', 1000)">+1k</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('stone', 5000)">+5k</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('stone', 'max')">Max</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Riz -->
+                                        <div>
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <label class="form-label fw-bold text-dark small m-0">🌾 Riz Impérial</label>
+                                                <span class="text-muted small">Disponible : <strong class="text-success" id="mkt_max_rice_label"><?= number_format((int)$planet['deuterium']) ?></strong></span>
+                                            </div>
+                                            <div class="input-group mb-1">
+                                                <input type="number" id="mkt_rice" class="form-control fw-bold text-center" value="0" min="0" max="<?= (int)$planet['deuterium'] ?>" step="500" oninput="updateMarketCalculations()">
+                                                <span class="input-group-text small">Riz</span>
+                                            </div>
+                                            <div class="btn-group btn-group-sm w-100">
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('rice', 0)">0</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('rice', 1000)">+1k</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('rice', 5000)">+5k</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setMarketResAmount('rice', 'max')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Colonne Droite : Bilan logistique & Déploiement -->
+                                <div class="col-lg-5">
+                                    <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light">
+                                        <div>
+                                            <h4 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                                                <span>📋</span> Feuille de Route du Convoi
+                                            </h4>
+
+                                            <div class="list-group list-group-flush border rounded mb-3 bg-white" style="font-size:0.875rem;">
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                                    <span class="text-muted">Fret total engagé :</span>
+                                                    <strong class="fs-4 text-primary" id="mkt_total_cargo_display">0</strong>
+                                                </div>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                                    <span class="text-muted">Chariots mobilisés :</span>
+                                                    <span class="fw-bold text-dark" id="mkt_vehicles_needed">Aucun</span>
+                                                </div>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                                    <span class="text-muted">Capacité totale convoi :</span>
+                                                    <span class="fw-bold text-success" id="mkt_cap_mobilized_display">0</span>
+                                                </div>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                                    <span class="text-muted">Ravitaillement de marche :</span>
+                                                    <span class="fw-bold text-warning" id="mkt_fuel_needed_display">~5 Koku 🌾</span>
+                                                </div>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                                    <span class="text-muted">Durée estimée aller :</span>
+                                                    <span class="fw-bold font-monospace text-dark" id="mkt_duration_display">⏱️ ~calcul...</span>
+                                                </div>
+                                            </div>
+
+                                            <div id="mkt_alert_status" class="alert alert-info py-2 px-3 small mb-3">
+                                                Sélectionnez un fief de destination et indiquez les quantités de ressources à convoyer.
+                                            </div>
+                                        </div>
+
+                                        <button type="button" class="btn btn-warning text-dark fw-bold w-100 py-3 shadow-sm" id="btnDispatchMarketCargo" onclick="submitMarketCargoDispatch()">
+                                            🚀 Affréter et Expédier le Convoi
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ONGLET 2 : ROUTES COMMERCIALES -->
+                        <div class="tab-pane" id="tab-market-routes" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                <div>
+                                    <h4 class="m-0 fw-bold text-dark">🛣️ Routes Commerciales liées à ce Marché</h4>
+                                    <div class="text-muted small">Convois de ravitaillement programmés au départ ou à destination de ce fief.</div>
+                                </div>
+                                <?php if ($isSealActive): ?>
+                                    <a href="/?page=privilege#sectionTradeRoutes" class="btn btn-cyan text-white fw-bold btn-sm">
+                                        ➕ Gérer les Routes dans la Cour du Shōgun &rarr;
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+
+                            <?php if (!$isSealActive): ?>
+                                <div class="alert alert-warning p-3 border-warning">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="fs-1">👑</span>
+                                        <div>
+                                            <h4 class="m-0 fw-bold text-dark">Privilège du Sceau Impérial Requis</h4>
+                                            <div class="text-secondary small mt-1">
+                                                L'automatisation des routes commerciales permet de programmer des convois logistiques récurrents toutes les 1h, 2h, 4h, 8h, etc. sans aucune action manuelle requise.
+                                            </div>
+                                            <a href="/?page=privilege" class="btn btn-warning text-dark fw-bold btn-sm mt-2">
+                                                👑 Décréter le Sceau Impérial &rarr;
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php elseif (empty($marketRoutes)): ?>
+                                <div class="text-center py-4 text-muted bg-light rounded border">
+                                    <div class="fs-1 mb-1">🛣️</div>
+                                    <div class="fw-bold text-dark">Aucune route commerciale active sur ce fief</div>
+                                    <div class="small mb-3">Définissez des livraisons récurrentes pour alimenter automatiquement vos provinces.</div>
+                                    <a href="/?page=privilege#sectionTradeRoutes" class="btn btn-outline-cyan btn-sm fw-bold">
+                                        ➕ Établir une Route Commerciale
+                                    </a>
+                                </div>
+                            <?php else: ?>
+                                <div class="table-responsive">
+                                    <table class="table table-vcenter card-table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Sens &amp; Fiefs</th>
+                                                <th>Cargaison par Passage</th>
+                                                <th>Fréquence</th>
+                                                <th>Prochain Envoi</th>
+                                                <th>Statut</th>
+                                                <th class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($marketRoutes as $tr): ?>
+                                            <?php $isDepart = ((int)$tr['source_planet_id'] === (int)$planet['id']); ?>
+                                            <tr>
+                                                <td>
+                                                    <span class="badge <?= $isDepart ? 'bg-primary-lt' : 'bg-success-lt' ?> me-1">
+                                                        <?= $isDepart ? 'Départ 🛫' : 'Arrivée 🛬' ?>
+                                                    </span>
+                                                    <strong><?= htmlspecialchars($tr['source_name']) ?></strong> &rarr; <strong><?= htmlspecialchars($tr['target_name']) ?></strong>
+                                                </td>
+                                                <td>
+                                                    <span class="small">
+                                                        <?php if ($tr['wood'] > 0): ?>🪵 <?= number_format($tr['wood']) ?> <?php endif; ?>
+                                                        <?php if ($tr['stone'] > 0): ?>🪨 <?= number_format($tr['stone']) ?> <?php endif; ?>
+                                                        <?php if ($tr['rice'] > 0): ?>🌾 <?= number_format($tr['rice']) ?> <?php endif; ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-cyan-lt">Toutes les <?= $tr['interval_hours'] ?>h</span>
+                                                </td>
+                                                <td>
+                                                    <span class="font-monospace small fw-bold" data-countdown="<?= strtotime($tr['next_run_at']) ?>">
+                                                        <?= htmlspecialchars($tr['next_run_at']) ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge <?= $tr['is_active'] ? 'bg-success-lt' : 'bg-secondary-lt' ?>">
+                                                        <?= $tr['is_active'] ? 'Active' : 'En pause' ?>
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <a href="/?page=privilege#sectionTradeRoutes" class="btn btn-outline-secondary btn-sm">
+                                                        ⚙️ Gérer &rarr;
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- ONGLET 3 : INTENDANT DU MARCHÉ (TROC 1:1:1) -->
+                        <div class="tab-pane" id="tab-market-npc" role="tabpanel">
+                            <div class="p-3 border rounded bg-light">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="fs-1">⚖️</span>
+                                        <div>
+                                            <h4 class="m-0 fw-bold text-dark">Intendant du Marché Castral (Troc 1:1:1)</h4>
+                                            <div class="text-secondary small mt-1" style="max-width:600px;">
+                                                L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au ratio parfait de <strong>1:1:1</strong> sans aucune taxe de déperdition pour un tribut de <strong>3 Koban 🪙</strong>.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-purple text-white fw-bold shadow-sm" style="background:#7c3aed;"
+                                                onclick="openNpcExchangeModal(<?= $planet['id'] ?>, '<?= htmlspecialchars(addslashes($planet['name'])) ?>', <?= (int)$planet['metal'] ?>, <?= (int)$planet['crystal'] ?>, <?= (int)$planet['deuterium'] ?>, <?= (int)$planet['metal_max'] ?>, <?= (int)$planet['crystal_max'] ?>, <?= (int)$planet['deuterium_max'] ?>)">
+                                            ⚖️ Procéder au Troc 1:1:1 de ce Fief &rarr;
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1936,11 +2313,442 @@ async function proclaimCapital() {
     }
 }
 
+// ==========================================
+// MARCHÉ FÉODAL : CONVOIS DE MARCHANDISES
+// ==========================================
+let currentPlanetCoords = {
+    x: <?= (int)$planet['coord_x'] ?>,
+    y: <?= (int)$planet['coord_y'] ?>
+};
+let availableCargoStocks = {
+    wood: <?= (int)$planet['metal'] ?>,
+    stone: <?= (int)$planet['crystal'] ?>,
+    rice: <?= (int)$planet['deuterium'] ?>
+};
+let availableTransporters = {
+    light: <?= (int)($availLight ?? 0) ?>,
+    heavy: <?= (int)($availHeavy ?? 0) ?>,
+    totalCap: <?= (int)($totalCargoCapacity ?? 0) ?>
+};
+
+function toggleMarketDestMode() {
+    const isManual = document.getElementById('mkt_manual_coords_toggle')?.checked;
+    const selectBox = document.getElementById('mkt_select_village_box');
+    const manualBox = document.getElementById('mkt_manual_coords_box');
+    if (isManual) {
+        selectBox?.classList.add('d-none');
+        manualBox?.classList.remove('d-none');
+    } else {
+        selectBox?.classList.remove('d-none');
+        manualBox?.classList.add('d-none');
+    }
+    updateMarketCalculations();
+}
+
+function setMarketResAmount(res, amount) {
+    const input = document.getElementById(`mkt_${res}`);
+    if (!input) return;
+    const maxVal = availableCargoStocks[res] || 0;
+    if (amount === 'max') {
+        input.value = maxVal;
+    } else if (typeof amount === 'number') {
+        if (amount === 0) {
+            input.value = 0;
+        } else {
+            const current = parseInt(input.value || 0, 10);
+            input.value = Math.min(maxVal, current + amount);
+        }
+    }
+    updateMarketCalculations();
+}
+
+function updateMarketCalculations() {
+    const wood = Math.max(0, parseInt(document.getElementById('mkt_wood')?.value || 0, 10));
+    const stone = Math.max(0, parseInt(document.getElementById('mkt_stone')?.value || 0, 10));
+    const rice = Math.max(0, parseInt(document.getElementById('mkt_rice')?.value || 0, 10));
+    const totalCargo = wood + stone + rice;
+
+    const totalCargoDisplay = document.getElementById('mkt_total_cargo_display');
+    const vehiclesNeededDisplay = document.getElementById('mkt_vehicles_needed');
+    const capMobilizedDisplay = document.getElementById('mkt_cap_mobilized_display');
+    const fuelNeededDisplay = document.getElementById('mkt_fuel_needed_display');
+    const durationDisplay = document.getElementById('mkt_duration_display');
+    const alertStatus = document.getElementById('mkt_alert_status');
+    const btnDispatch = document.getElementById('btnDispatchMarketCargo');
+
+    if (!totalCargoDisplay) return;
+
+    totalCargoDisplay.innerText = totalCargo.toLocaleString('fr-FR');
+
+    // Récupérer les coordonnées cibles
+    let targetX = null;
+    let targetY = null;
+    const isManual = document.getElementById('mkt_manual_coords_toggle')?.checked;
+
+    if (isManual) {
+        const inpX = document.getElementById('mkt_target_x')?.value;
+        const inpY = document.getElementById('mkt_target_y')?.value;
+        if (inpX !== '' && inpY !== '' && !isNaN(inpX) && !isNaN(inpY)) {
+            targetX = parseInt(inpX, 10);
+            targetY = parseInt(inpY, 10);
+        }
+    } else {
+        const sel = document.getElementById('mkt_target_planet_select');
+        if (sel && sel.selectedIndex >= 0) {
+            const opt = sel.options[sel.selectedIndex];
+            targetX = parseInt(opt.getAttribute('data-x'), 10);
+            targetY = parseInt(opt.getAttribute('data-y'), 10);
+        }
+    }
+
+    // Calcul de la distance
+    let distance = 5.0;
+    if (targetX !== null && targetY !== null) {
+        distance = Math.max(1.0, Math.round(Math.sqrt(Math.pow(targetX - currentPlanetCoords.x, 2) + Math.pow(targetY - currentPlanetCoords.y, 2)) * 100) / 100);
+    }
+
+    // Calcul des transporteurs requis
+    let needHeavy = 0;
+    let needLight = 0;
+    let hasEnoughVehicles = false;
+
+    if (totalCargo > 0) {
+        needHeavy = Math.min(availableTransporters.heavy, Math.floor(totalCargo / 25000));
+        let rem = totalCargo - (needHeavy * 25000);
+        if (rem > 0) {
+            if (availableTransporters.light * 5000 >= rem) {
+                needLight = Math.ceil(rem / 5000);
+            } else if (availableTransporters.heavy > needHeavy) {
+                needHeavy++;
+                needLight = 0;
+            } else {
+                needLight = Math.ceil(rem / 5000);
+            }
+        }
+        const mobilizedCap = (needHeavy * 25000) + (needLight * 5000);
+        hasEnoughVehicles = (mobilizedCap >= totalCargo && needHeavy <= availableTransporters.heavy && needLight <= availableTransporters.light);
+    }
+
+    const mobilizedCap = (needHeavy * 25000) + (needLight * 5000);
+    capMobilizedDisplay.innerText = mobilizedCap.toLocaleString('fr-FR');
+
+    let vehicleText = [];
+    if (needHeavy > 0) vehicleText.push(`${needHeavy} Grand Convoi (25k)`);
+    if (needLight > 0) vehicleText.push(`${needLight} Chariot Léger (5k)`);
+    vehiclesNeededDisplay.innerText = vehicleText.length > 0 ? vehicleText.join(' + ') : 'Aucun';
+
+    // Rations de marche requises
+    const totalShips = needHeavy + needLight;
+    const effectiveMarches = Math.max(1, totalShips);
+    const fuelReq = Math.max(5, Math.round(distance * effectiveMarches * 1.2));
+    fuelNeededDisplay.innerText = `~${fuelReq.toLocaleString('fr-FR')} Koku 🌾`;
+
+    // Durée estimée (vitesse de base convoi = 4000)
+    const speed = 4000;
+    const durSec = Math.max(3, Math.round((3500 * distance) / (speed * 5)));
+    const mins = Math.floor(durSec / 60);
+    const secs = durSec % 60;
+    durationDisplay.innerText = `⏱️ ~${mins}m ${secs < 10 ? '0' : ''}${secs}s (Dist. ${distance})`;
+
+    // Validation du bouton
+    if (totalCargo <= 0) {
+        alertStatus.className = 'alert alert-info py-2 px-3 small mb-3';
+        alertStatus.innerText = 'Indiquez au moins une quantité de ressources à acheminer.';
+        if (btnDispatch) btnDispatch.disabled = true;
+    } else if (targetX === null || targetY === null || (targetX === currentPlanetCoords.x && targetY === currentPlanetCoords.y)) {
+        alertStatus.className = 'alert alert-warning py-2 px-3 small mb-3';
+        alertStatus.innerText = 'Veuillez sélectionner un fief destinataire distinct de ce fief.';
+        if (btnDispatch) btnDispatch.disabled = true;
+    } else if (!hasEnoughVehicles) {
+        alertStatus.className = 'alert alert-danger py-2 px-3 small mb-3';
+        alertStatus.innerText = `Capacité de transport insuffisante sur ce fief (${availableTransporters.totalCap.toLocaleString('fr-FR')} disponible / ${totalCargo.toLocaleString('fr-FR')} requis).`;
+        if (btnDispatch) btnDispatch.disabled = true;
+    } else if (wood > availableCargoStocks.wood || stone > availableCargoStocks.stone || (rice + fuelReq) > availableCargoStocks.rice) {
+        alertStatus.className = 'alert alert-danger py-2 px-3 small mb-3';
+        alertStatus.innerText = `Ressources ou rations de riz insuffisantes dans vos greniers (Ravitaillement de marche : ${fuelReq} Riz requis).`;
+        if (btnDispatch) btnDispatch.disabled = true;
+    } else {
+        alertStatus.className = 'alert alert-success py-2 px-3 small mb-3';
+        alertStatus.innerText = `Convoi prêt : ${totalCargo.toLocaleString('fr-FR')} fret acheminé vers [${targetX}|${targetY}] via ${vehicleText.join(' + ')}.`;
+        if (btnDispatch) btnDispatch.disabled = false;
+    }
+}
+
+async function submitMarketCargoDispatch() {
+    const wood = Math.max(0, parseInt(document.getElementById('mkt_wood')?.value || 0, 10));
+    const stone = Math.max(0, parseInt(document.getElementById('mkt_stone')?.value || 0, 10));
+    const rice = Math.max(0, parseInt(document.getElementById('mkt_rice')?.value || 0, 10));
+    const totalCargo = wood + stone + rice;
+
+    if (totalCargo <= 0) {
+        showModalAlert('Veuillez spécifier au moins une quantité de ressources.', 'warning');
+        return;
+    }
+
+    const isManual = document.getElementById('mkt_manual_coords_toggle')?.checked;
+    let targetPlanetId = null;
+    let targetX = null;
+    let targetY = null;
+
+    if (isManual) {
+        targetX = document.getElementById('mkt_target_x')?.value;
+        targetY = document.getElementById('mkt_target_y')?.value;
+        if (!targetX || !targetY) {
+            showModalAlert('Veuillez entrer les coordonnées féodales de destination [X|Y].', 'warning');
+            return;
+        }
+    } else {
+        const sel = document.getElementById('mkt_target_planet_select');
+        if (!sel || !sel.value) {
+            showModalAlert('Veuillez choisir un fief destinataire.', 'warning');
+            return;
+        }
+        targetPlanetId = sel.value;
+    }
+
+    const confirmed = await showModalConfirm(
+        `Confirmez-vous l'affrètement du convoi logistique de ${totalCargo.toLocaleString('fr-FR')} ressources ?`,
+        'Expédition de Marchandises'
+    );
+    if (!confirmed) return;
+
+    const fd = new FormData();
+    fd.append('mission_type', 'transport');
+    if (targetPlanetId) fd.append('target_planet_id', targetPlanetId);
+    if (targetX !== null) fd.append('target_x', targetX);
+    if (targetY !== null) fd.append('target_y', targetY);
+    fd.append('cargo_metal', wood);
+    fd.append('cargo_crystal', stone);
+    fd.append('cargo_deuterium', rice);
+
+    const btn = document.getElementById('btnDispatchMarketCargo');
+    if (btn) btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/fleet.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message || 'Le convoi de marchandises a quitté les portes du fief avec succès !', 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Erreur lors de l\'envoi du convoi.', 'error');
+            if (btn) btn.disabled = false;
+        }
+    } catch (e) {
+        showModalAlert('Erreur de transmission avec les intendants du marché.', 'error');
+        if (btn) btn.disabled = false;
+    }
+}
+
+// ==========================================
+// INTENDANT DU MARCHÉ (TROC NPC 1:1:1)
+// ==========================================
+let currentNpcPlanetId = <?= (int)$planet['id'] ?>;
+let currentNpcTotal = 0;
+let currentNpcMax = { wood: 0, stone: 0, rice: 0 };
+
+function openNpcExchangeModal(planetId, planetName, wood, stone, rice, maxW, maxS, maxR) {
+    currentNpcPlanetId = planetId;
+    currentNpcTotal = Math.floor(wood + stone + rice);
+    currentNpcMax = { wood: maxW, stone: maxS, rice: maxR };
+
+    const nameEl = document.getElementById('npc_planet_name');
+    if (nameEl) nameEl.innerText = planetName;
+    const totEl = document.getElementById('npc_total_amount');
+    if (totEl) totEl.innerText = currentNpcTotal.toLocaleString('fr-FR');
+
+    ['wood', 'stone', 'rice'].forEach(res => {
+        const r = document.getElementById(`npc_range_${res}`);
+        const inp = document.getElementById(`npc_input_${res}`);
+        const val = (res === 'wood') ? wood : ((res === 'stone') ? stone : rice);
+
+        if (r) {
+            r.max = Math.min(currentNpcTotal, currentNpcMax[res]);
+            r.value = val;
+        }
+        if (inp) {
+            inp.max = currentNpcMax[res];
+            inp.value = val;
+        }
+        const valSpan = document.getElementById(`npc_val_${res}`);
+        if (valSpan) valSpan.innerText = val.toLocaleString('fr-FR');
+    });
+
+    updateNpcDisplay();
+    const modalEl = document.getElementById('modalNpcExchange');
+    if (modalEl) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+}
+
+function distributeEvenly() {
+    const part = Math.floor(currentNpcTotal / 3);
+    const rest = currentNpcTotal - (part * 2);
+
+    ['wood', 'stone'].forEach(res => {
+        const inp = document.getElementById(`npc_input_${res}`);
+        const r = document.getElementById(`npc_range_${res}`);
+        if (inp) inp.value = part;
+        if (r) r.value = part;
+    });
+    const inpR = document.getElementById('npc_input_rice');
+    const rR = document.getElementById('npc_range_rice');
+    if (inpR) inpR.value = rest;
+    if (rR) rR.value = rest;
+
+    updateNpcDisplay();
+}
+
+function onNpcRangeChange(type) {
+    const r = document.getElementById(`npc_range_${type}`);
+    const inp = document.getElementById(`npc_input_${type}`);
+    if (r && inp) inp.value = r.value;
+    updateNpcDisplay();
+}
+
+function onNpcInputChange(type) {
+    const inp = document.getElementById(`npc_input_${type}`);
+    const r = document.getElementById(`npc_range_${type}`);
+    if (inp && r) r.value = inp.value;
+    updateNpcDisplay();
+}
+
+function updateNpcDisplay() {
+    const w = parseInt(document.getElementById('npc_input_wood')?.value || 0, 10);
+    const s = parseInt(document.getElementById('npc_input_stone')?.value || 0, 10);
+    const r = parseInt(document.getElementById('npc_input_rice')?.value || 0, 10);
+
+    const wVal = document.getElementById('npc_wood_val');
+    const sVal = document.getElementById('npc_stone_val');
+    const rVal = document.getElementById('npc_rice_val');
+    if (wVal) wVal.innerText = w.toLocaleString('fr-FR');
+    if (sVal) sVal.innerText = s.toLocaleString('fr-FR');
+    if (rVal) rVal.innerText = r.toLocaleString('fr-FR');
+
+    const sum = w + s + r;
+    const diff = currentNpcTotal - sum;
+    const alertEl = document.getElementById('npc_diff_alert');
+    const submitBtn = document.getElementById('btnSubmitNpcExchange');
+
+    if (alertEl && submitBtn) {
+        if (diff !== 0) {
+            alertEl.classList.remove('d-none');
+            alertEl.innerText = diff > 0 ? `Il reste ${diff.toLocaleString('fr-FR')} ressources à assigner.` : `Excédent de ${Math.abs(diff).toLocaleString('fr-FR')} ressources réparties en trop.`;
+            submitBtn.disabled = true;
+        } else {
+            alertEl.classList.add('d-none');
+            submitBtn.disabled = false;
+        }
+    }
+}
+
+async function submitNpcExchange() {
+    const w = parseInt(document.getElementById('npc_input_wood')?.value || 0, 10);
+    const s = parseInt(document.getElementById('npc_input_stone')?.value || 0, 10);
+    const r = parseInt(document.getElementById('npc_input_rice')?.value || 0, 10);
+
+    const fd = new FormData();
+    fd.append('action', 'npc_exchange');
+    fd.append('planet_id', currentNpcPlanetId);
+    fd.append('wood', w);
+    fd.append('stone', s);
+    fd.append('rice', r);
+
+    try {
+        const res = await fetch('/api/seal.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Erreur lors du troc.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication.', 'error');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     calcFlourPreview();
     calcSakePreview();
+    updateMarketCalculations();
 });
 </script>
+
+<!-- MODALE INTERACTIVE DU MARCHAND NPC -->
+<div class="modal modal-blur fade" id="modalNpcExchange" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning-subtle">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                    <span>⚖️</span> Intendant du Marché Castral (Troc 1:1:1)
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-secondary small mb-3">
+                    L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au taux parfait de <strong>1:1:1</strong> pour un tribut de <strong>3 Koban 🪙</strong>.
+                </div>
+
+                <div class="p-2 bg-light border rounded mb-3 text-center">
+                    <span class="text-muted small">Fief sélectionné : </span>
+                    <strong id="npc_planet_name" class="text-dark">Fief</strong>
+                    <div class="fs-4 fw-bold text-primary mt-1">
+                        Total à répartir : <span id="npc_total_amount">0</span>
+                    </div>
+                    <div class="small text-muted">La somme totale doit être conservée au grain près.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label d-flex justify-content-between small fw-bold">
+                        <span>🪵 Bois de Cèdre :</span>
+                        <span id="npc_wood_val" class="font-monospace text-primary">0</span>
+                    </label>
+                    <input type="range" class="form-range" id="npc_range_wood" oninput="onNpcRangeChange('wood')">
+                    <input type="number" class="form-control form-control-sm mt-1" id="npc_input_wood" oninput="onNpcInputChange('wood')">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label d-flex justify-content-between small fw-bold">
+                        <span>🪨 Pierre de Taille :</span>
+                        <span id="npc_stone_val" class="font-monospace text-primary">0</span>
+                    </label>
+                    <input type="range" class="form-range" id="npc_range_stone" oninput="onNpcRangeChange('stone')">
+                    <input type="number" class="form-control form-control-sm mt-1" id="npc_input_stone" oninput="onNpcInputChange('stone')">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label d-flex justify-content-between small fw-bold">
+                        <span>🌾 Riz Impérial :</span>
+                        <span id="npc_rice_val" class="font-monospace text-primary">0</span>
+                    </label>
+                    <input type="range" class="form-range" id="npc_range_rice" oninput="onNpcRangeChange('rice')">
+                    <input type="number" class="form-control form-control-sm mt-1" id="npc_input_rice" oninput="onNpcInputChange('rice')">
+                </div>
+
+                <div class="d-flex gap-2 mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="distributeEvenly()">
+                        ⚖️ Répartir Équitablement (1/3 chacun)
+                    </button>
+                </div>
+
+                <div id="npc_diff_alert" class="alert alert-danger p-2 small d-none">
+                    La somme répartie ne correspond pas au total disponible.
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <span class="small text-muted">Coût : <strong class="text-warning">3 Koban</strong></span>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-warning fw-bold" id="btnSubmitNpcExchange" onclick="submitNpcExchange()">
+                        🪙 Sceller le Troc (3 Koban)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- MODALE LIGHTBOX ESTAMPE HD -->
 <div id="artworkModal" class="modal-overlay" style="display:none;" onclick="closeArtworkModal(event)">
