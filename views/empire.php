@@ -73,7 +73,7 @@ $unitsDb = $empireData['units_db'];
         </div>
         <div>
             <a href="/?page=privilege" class="btn btn-warning fw-bold px-3 py-2 shadow-sm">
-                👑 Investir dans le Sceau (dès 50 Koban)
+                👑 Investir dans le Sceau (dès 200 Koban)
             </a>
         </div>
     </div>

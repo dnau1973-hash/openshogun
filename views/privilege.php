@@ -147,8 +147,8 @@ $goldCoins = (int)$sealStatus['gold'];
                         <div class="fs-2 mb-2">⛩️</div>
                         <div class="text-secondary small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Découverte</div>
                         <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">7 Jours</div>
-                        <div class="fs-2 fw-bold text-warning mb-1">50 Koban</div>
-                        <div class="text-muted small mb-3">soit ~7,1 Koban / jour</div>
+                        <div class="fs-2 fw-bold text-warning mb-1">200 Koban</div>
+                        <div class="text-muted small mb-3">soit ~28,6 Koban / jour</div>
 
                         <p class="text-secondary small mb-3" style="line-height:1.6;">
                             Parfait pour un démarrage rapide, accélérer l'annexion d'un second fief ou soutenir une guerre de frontière.
@@ -194,8 +194,8 @@ $goldCoins = (int)$sealStatus['gold'];
                         <div class="fs-2 mb-2 mt-1">🏯</div>
                         <div class="text-warning small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Royale</div>
                         <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">14 Jours</div>
-                        <div class="fs-2 fw-bold text-warning mb-1">90 Koban</div>
-                        <div class="text-muted small mb-3">soit ~6,4 Koban / jour</div>
+                        <div class="fs-2 fw-bold text-warning mb-1">360 Koban</div>
+                        <div class="text-muted small mb-3">soit ~25,7 Koban / jour</div>
 
                         <p class="text-secondary small mb-3" style="line-height:1.6;">
                             La formule recommandée par les conseillers du Shōgun pour fortifier vos cités et planifier vos chantiers sur deux semaines.
@@ -241,8 +241,8 @@ $goldCoins = (int)$sealStatus['gold'];
                         <div class="fs-2 mb-2 mt-1">👑</div>
                         <div class="text-purple small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Mensuelle</div>
                         <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">30 Jours</div>
-                        <div class="fs-2 fw-bold text-warning mb-1">150 Koban</div>
-                        <div class="text-muted small mb-3">soit 5,0 Koban / jour seulement</div>
+                        <div class="fs-2 fw-bold text-warning mb-1">600 Koban</div>
+                        <div class="text-muted small mb-3">soit 20,0 Koban / jour seulement</div>
 
                         <p class="text-secondary small mb-3" style="line-height:1.6;">
                             La tranquillité absolue pour régner un mois complet avec la plénitude de tous les privilèges et le carnet de raids illimité.

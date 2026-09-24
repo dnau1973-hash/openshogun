@@ -2500,7 +2500,7 @@ foreach ($allUnits as $u) {
                         <h3 style="margin: 0; font-size: 1.1rem; color: #b45309; font-weight: 800;">6. Trésor en Koban &amp; Économie Équitable</h3>
                     </div>
                     <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
-                        Le Koban est la pièce d'or ovale officielle du Shogunat. Les formules d'investiture du Sceau Impérial sont accessibles à tous les seigneurs : <strong>7 jours (50 Koban)</strong>, <strong>14 jours (90 Koban, -10%)</strong> ou <strong>30 jours (150 Koban, -25%)</strong>.
+                        Le Koban est la pièce d'or ovale officielle du Shogunat. Les formules d'investiture du Sceau Impérial sont accessibles à tous les seigneurs : <strong>7 jours (200 Koban)</strong>, <strong>14 jours (360 Koban, -10%)</strong> ou <strong>30 jours (600 Koban, -25%)</strong>.
                     </p>
                     <div style="font-size: 0.78rem; font-weight: 700; color: #78350f;">
                         🎁 100 Koban offerts à la création &bull; +5 Koban offerts chaque jour de fidélité.

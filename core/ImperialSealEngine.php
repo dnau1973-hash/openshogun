@@ -175,9 +175,9 @@ class ImperialSealEngine {
      */
     public function activateSeal(int $userId, int $days): array {
         $pricing = [
-            7 => 50,    // 7 jours pour 50 Koban
-            14 => 90,   // 14 jours pour 90 Koban (remise 10%)
-            30 => 150   // 30 jours pour 150 Koban (remise 25%)
+            7 => 200,   // 7 jours pour 200 Koban
+            14 => 360,  // 14 jours pour 360 Koban (remise 10%)
+            30 => 600   // 30 jours pour 600 Koban (remise 25%)
         ];
 
         if (!isset($pricing[$days])) {

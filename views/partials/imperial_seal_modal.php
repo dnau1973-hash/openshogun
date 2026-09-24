@@ -96,7 +96,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                             <div class="card h-100 border text-center p-3 hover-shadow" style="transition: transform 0.15s ease;">
                                 <div class="text-secondary small fw-bold text-uppercase">Investiture Rapide</div>
                                 <div class="fs-2 fw-bold text-dark my-1">7 Jours</div>
-                                <div class="fs-4 fw-bold text-warning mb-2">50 Koban</div>
+                                <div class="fs-4 fw-bold text-warning mb-2">200 Koban</div>
                                 <p class="text-muted small mb-3">Idéal pour un sprint stratégique ou fonder vos premières colonies.</p>
                                 <button type="button" class="btn btn-outline-warning w-100 fw-bold" onclick="activateSeal(7)">
                                     👑 Décréter (7j)
@@ -112,7 +112,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                                 </span>
                                 <div class="text-secondary small fw-bold text-uppercase mt-1">Investiture Royale</div>
                                 <div class="fs-2 fw-bold text-dark my-1">14 Jours</div>
-                                <div class="fs-4 fw-bold text-warning mb-2">90 Koban</div>
+                                <div class="fs-4 fw-bold text-warning mb-2">360 Koban</div>
                                 <p class="text-muted small mb-3">Le meilleur équilibre pour orchestrer la consolidation de vos domaines.</p>
                                 <button type="button" class="btn btn-warning w-100 fw-bold shadow-sm" onclick="activateSeal(14)">
                                     👑 Décréter (14j)
@@ -128,7 +128,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                                 </span>
                                 <div class="text-secondary small fw-bold text-uppercase mt-1">Investiture Mensuelle</div>
                                 <div class="fs-2 fw-bold text-dark my-1">30 Jours</div>
-                                <div class="fs-4 fw-bold text-warning mb-2">150 Koban</div>
+                                <div class="fs-4 fw-bold text-warning mb-2">600 Koban</div>
                                 <p class="text-muted small mb-3">La paix royale pour tout un mois de conquête et de développement continu.</p>
                                 <button type="button" class="btn btn-outline-warning w-100 fw-bold" onclick="activateSeal(30)">
                                     👑 Décréter (30j)
