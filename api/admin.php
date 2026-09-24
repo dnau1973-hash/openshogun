@@ -21,6 +21,7 @@ if (!Auth::check() || !$auth->isAdmin()) {
     exit;
 }
 
+$db = Database::getConnection();
 $botEngine = new BotEngine();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
@@ -191,6 +192,7 @@ try {
         // Octroyer des Koban (Pièces d'Or) à un joueur
         case 'give_koban':
             require_once __DIR__ . '/../core/ImperialSealEngine.php';
+            $db = Database::getConnection();
             $sealEngine = new ImperialSealEngine($db);
 
             $targetUserId = (int)($_POST['user_id'] ?? 0);

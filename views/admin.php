@@ -2802,7 +2802,13 @@ async function submitAdminGiveKoban(e) {
         formData.append('user_id', userId);
         formData.append('amount', amount);
         const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
-        const data = await res.json();
+        let data;
+        try {
+            data = await res.json();
+        } catch (jsonErr) {
+            const raw = await res.text().catch(() => '');
+            throw new Error(raw ? raw.substring(0, 300) : `Erreur serveur (HTTP ${res.status})`);
+        }
 
         if (data.success) {
             const modalEl = document.getElementById('modalAdminGiveKoban');
@@ -2820,7 +2826,7 @@ async function submitAdminGiveKoban(e) {
             showModalAlert("Erreur", data.error || "Impossible d'attribuer les Koban.", "danger");
         }
     } catch (e) {
-        showModalAlert("Erreur", "Une erreur réseau est survenue.", "danger");
+        showModalAlert("Erreur", e.message || "Une erreur réseau est survenue.", "danger");
     } finally {
         if (btn) {
             btn.disabled = false;
