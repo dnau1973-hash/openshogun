@@ -209,22 +209,21 @@ $conversations = $chatEngine->getRecentConversations((int)$chatUser['id']);
         <div class="col-lg-8 col-xl-9">
             <div class="card shadow-sm border-0 h-100 d-flex flex-column" style="min-height:680px;">
                 <!-- En-tête du Fil de Discussion -->
-                <div class="card-header py-3 d-flex align-items-center justify-content-between"
-                     style="background:linear-gradient(135deg, #1c1917 0%, #292524 100%); color:#ffffff; border-radius:8px 8px 0 0; border-bottom:2px solid #78350f;">
+                <div class="card-header py-3 d-flex align-items-center justify-content-between bg-primary text-white">
                     <div class="d-flex align-items-center gap-3">
                         <span id="fullChatChannelIcon" style="font-size:1.8rem;">🏯</span>
                         <div>
-                            <h3 class="m-0 font-weight-bold" id="fullChatChannelTitle" style="color:#fbbf24; font-size:1.15rem;">
+                            <h3 class="m-0 fw-bold text-white" id="fullChatChannelTitle" style="font-size:1.15rem;">
                                 Canal Général du Shōgunat
                             </h3>
-                            <div class="text-muted small mt-1" id="fullChatChannelSubtitle" style="color:#d6d3d1 !important; font-size:0.78rem;">
+                            <div class="small mt-1 text-white-50" id="fullChatChannelSubtitle" style="font-size:0.78rem;">
                                 Salon public ouvert à tous les Daimyōs de l'archipel &bull; Rafraîchissement automatique toutes les 2.5s
                             </div>
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="status-dot status-dot-animated bg-success me-1"></span>
-                        <span class="text-muted small d-none d-sm-inline" style="color:#d6d3d1 !important; font-size:0.75rem;">En direct</span>
+                        <span class="small d-none d-sm-inline text-white-50" style="font-size:0.75rem;">En direct</span>
                         <button type="button" class="btn btn-sm btn-outline-light d-flex align-items-center gap-1 ms-2"
                                 onclick="fetchFullMessages()" title="Actualiser instantanément">
                             <span>🔄</span> Rafraîchir
@@ -234,7 +233,7 @@ $conversations = $chatEngine->getRecentConversations((int)$chatUser['id']);
 
                 <!-- Fil des Messages -->
                 <div id="fullChatMessagesContainer" class="card-body p-3 flex-grow-1"
-                     style="background:#fcfbf9; overflow-y:auto; max-height:520px; display:flex; flex-direction:column; gap:0.65rem;">
+                     style="overflow-y:auto; max-height:520px; display:flex; flex-direction:column; gap:0.65rem;">
                     <div class="text-center py-5 text-muted">
                         <span>🏮 Connexion au salon féodal...</span>
                     </div>
@@ -260,9 +259,9 @@ $conversations = $chatEngine->getRecentConversations((int)$chatUser['id']);
                     <form id="fullChatForm" onsubmit="handleFullSend(event)" class="d-flex gap-2 m-0">
                         <textarea id="fullChatInput" class="form-control" rows="2" maxlength="1000"
                                   placeholder="Rédigez votre proclamation aux Daimyōs... (Appuyez sur Entrée pour envoyer, Maj+Entrée pour un saut de ligne)"
-                                  style="font-size:0.88rem; resize:none; border-color:#d6d3d1;"></textarea>
+                                  style="font-size:0.88rem; resize:none;"></textarea>
                         <button type="submit" id="fullChatSubmitBtn" class="btn btn-primary px-4 d-flex flex-column align-items-center justify-content-center"
-                                style="background:#b45309; border-color:#92400e; font-weight:800; min-width:115px;">
+                                style="font-weight:700; min-width:115px;">
                             <span>Envoyer</span>
                             <span style="font-size:0.7rem; font-weight:400; opacity:0.85;">(Entrée)</span>
                         </button>

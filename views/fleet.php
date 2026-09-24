@@ -219,11 +219,11 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
             <?php else: ?>
                 <form id="fleetForm" onsubmit="event.preventDefault(); submitFleet();">
                     <?php if ($preselectedMission === 'colonize' && !$hasColonistAvailable): ?>
-                        <div class="alert alert-warning d-flex align-items-center gap-3 mb-4" style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:1rem 1.25rem;">
+                        <div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
                             <span style="font-size:2rem; flex-shrink:0;">⛩️</span>
                             <div style="flex:1;">
-                                <strong style="color:#b45309; font-size:1rem;">Aucun Pionnier Féodal (Colon ⛩️) en garnison !</strong>
-                                <p style="color:#78350f; font-size:0.88rem; margin:0.25rem 0 0.75rem 0; line-height:1.5;">
+                                <strong class="d-block mb-1">Aucun Pionnier Féodal (Colon ⛩️) en garnison !</strong>
+                                <p class="mb-2 small">
                                     Pour ériger votre nouveau fief, vous devez d'abord former un <strong>Pionnier Féodal</strong>. Il est disponible au <strong>Donjon Tenshu</strong> (déblocage aux paliers de niveau 5, 10 et 15) ou à l'<strong>Atelier de Siège</strong>.
                                 </p>
                                 <div class="d-flex gap-2 flex-wrap align-items-center">

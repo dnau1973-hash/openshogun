@@ -232,19 +232,19 @@ window.selectPlanetTile = function(data) {
     if (data.is_authentic_castle) {
         title.innerHTML = `🏯 <span style="color:#b45309;">${data.castle_name}</span> <span class="text-secondary small">${data.castle_kanji || ''}</span>`;
         body.innerHTML = `
-            <div style="background:#fffbeb; border:1px solid #fde68a; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
+            <div class="card card-sm bg-warning-lt p-3 mb-3 border border-warning">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                    <span class="badge bg-warning text-dark font-weight-bold" style="font-size:0.75rem;">
+                    <span class="badge bg-warning text-warning-fg fw-bold">
                         👑 TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE (現存十二天守)
                     </span>
-                    <span class="text-secondary font-weight-bold small">📍 ${data.castle_province || 'Province Historique'}</span>
+                    <span class="fw-bold small text-muted">📍 ${data.castle_province || 'Province Historique'}</span>
                 </div>
-                <p style="color:#78350f; font-size:0.9rem; margin:0.4rem 0 0.6rem 0; line-height:1.5;">
+                <p class="small mb-2">
                     Ce donjon d'époque Sengoku-Edo est l'une des 12 forteresses d'origine préservées du Japon.
-                    <strong style="color:#92400e;">Enjeu suprême de la Bataille Finale du Shogunat.</strong>
+                    <strong class="text-warning">Enjeu suprême de la Bataille Finale du Shogunat.</strong>
                 </p>
-                <div class="small d-flex gap-3 flex-wrap" style="color:#92400e;">
-                    <span>Bâtisseur : <strong>${data.castle_builder || 'Maître Féodal'}</strong></span>
+                <div class="small d-flex gap-3 flex-wrap text-muted">
+                    <span>Bâtisseur : <strong class="text-dark">${data.castle_builder || 'Maître Féodal'}</strong></span>
                     <span>Garnison : <strong class="text-success">25 000 pts défense</strong></span>
                 </div>
             </div>

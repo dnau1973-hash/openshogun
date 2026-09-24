@@ -1,96 +1,35 @@
 /* ==========================================================
-   OPENSHOGUN - THEME FEODAL : WASHI (PAPIER DE RIZ) & ENCRE (SUMI-E)
+   OPENSHOGUN - STYLE TABLER NATIF
    ========================================================== */
 
 :root {
-    /* 📜 Papier de Riz Naturel (Washi) & Fonds Lumineux */
-    --bg-dark: #f6f2e8;          /* Fond dominant : papier de riz naturel */
-    --bg-surface: #fdfbf7;       /* Cartes & Panneaux : blanc de riz pur */
-    --bg-card: #fdfbf7;          /* Fond des cartes de jeu */
+    --bg-dark: var(--tblr-body-bg, #f6f8fb);
+    --bg-surface: #ffffff;
+    --bg-card: #ffffff;
     --bg-card-solid: #ffffff;
-    --bg-ink: #ede5d5;           /* Fond secondaire lin / ivoire d'époque */
+    --bg-ink: #f8fafc;
     
-    /* Nuances de Papier de Riz */
-    --rice-paper: #f6f2e8;
-    --rice-paper-light: #ffffff;
-    --rice-paper-warm: #ede4d3;
-    --rice-paper-dim: #dfd4c0;
-    --rice-paper-ink: #1c1917;
+    /* Bordures & Ombres Tabler */
+    --border-color: rgba(98, 105, 118, 0.16);
+    --border-highlight: var(--tblr-primary, #206bc4);
     
-    /* 🔴 Rouge Impérial, Vermillon Torii & Sceau Hanko */
-    --red-primary: #c2252b;
-    --red-hover: #dc2626;
-    --red-deep: #991b1b;
-    --red-dark: #7f1d1d;
-    --red-glow: 0 0 12px rgba(194, 37, 43, 0.25);
-    --red-soft: rgba(194, 37, 43, 0.08);
+    /* Typographie Tabler */
+    --text-main: var(--tblr-body-color, #1e293b);
+    --text-muted: var(--tblr-muted, #64748b);
+    --text-secondary: #475569;
+    --text-subtle: #64748b;
+    --text-bright: #0f172a;
     
-    /* 🪵 Bordures Parchemin, Cèdre & Laque */
-    --border-color: #dccbb3;
-    --border-highlight: #c2252b;
-    --border-rice: #e5d8c5;
+    /* Couleurs de factions */
+    --color-terran: #d63939;
+    --color-vorash: #d63939;
+    --color-aethelis: #f59f00;
     
-    /* ✒️ Typographie : Encre de Chine profonde (Sumi-e) & Contraste Élevé (WCAG AAA) */
-    --text-main: #1c1917;        /* Encre de Chine sur papier de riz (Noir chaud profond) */
-    --text-muted: #524d45;       /* Encre cendre de cèdre soutenue (WCAG AAA > 7:1) */
-    --text-secondary: #292524;   /* Texte secondaire net */
-    --text-subtle: #44403c;      /* Explications & sous-titres nets */
-    --text-bright: #0c0a09;
-    --text-ink-dark: #1c1917;
-
-    /* 🎨 Accents & Statuts à Contraste Garanti sur Fond Clair */
-    --accent-amber: #b45309;     /* Ambre Impérial */
-    --accent-amber-dark: #92400e;
-    --accent-amber-light: #fef3c7;
-    --accent-green: #15803d;     /* Vert Jade Impérial */
-    --accent-green-light: #dcfce7;
-    --accent-red: #b91c1c;       /* Rouge Torii / Sceau */
-    --accent-red-light: #fee2e2;
-    --accent-blue: #0369a1;      /* Indigo Samouraï */
-    --accent-blue-light: #e0f2fe;
-    
-    /* Factions Féodales */
-    --color-terran: #c2252b;     /* Clan Oda : Rouge Écarlate */
-    --color-vorash: #991b1b;     /* Clan Takeda : Rouge Carmin */
-    --color-aethelis: #b45309;   /* Clan Tokugawa : Ambre & Or */
-    
-    /* Ressources Féodales */
-    --res-metal: #78350f;        /* Bois de Cèdre */
-    --res-crystal: #334155;      /* Pierre de Taille */
-    --res-deut: #b45309;         /* Riz Impérial (Koku Doré) */
-    --res-energy: #c2252b;       /* Sérénité & Ferveur Torii */
-    
-    --glow-cyan: 0 4px 15px rgba(194, 37, 43, 0.15);
-    --glow-card: 0 4px 20px rgba(60, 45, 30, 0.07);
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    background-color: var(--bg-dark);
-    background-image: 
-        radial-gradient(ellipse at 15% 20%, rgba(194, 37, 43, 0.04) 0%, transparent 50%),
-        radial-gradient(ellipse at 85% 80%, rgba(180, 83, 9, 0.04) 0%, transparent 50%),
-        linear-gradient(180deg, #f7f3e8 0%, #f2ebdd 100%);
-    background-attachment: fixed;
-    color: var(--text-main);
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    line-height: 1.5;
-    min-height: 100vh;
-}
-
-a {
-    color: var(--border-highlight);
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-a:hover {
-    color: #991b1b;
+    /* Ressources */
+    --res-metal: #f59f00;
+    --res-crystal: #206bc4;
+    --res-deut: #2fb344;
+    --res-energy: #d63939;
 }
 
 /* ==========================================================
@@ -1136,36 +1075,7 @@ a:hover {
     }
 }
 
-.card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(60, 45, 30, 0.06);
-    overflow: hidden;
-    margin-bottom: 1.5rem;
-}
 
-.card-header {
-    padding: 1rem 1.25rem;
-    background: rgba(246, 242, 232, 0.7);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #1c1917;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.card-body {
-    padding: 1.25rem;
-}
 
 /* ==========================================================
    VUE 1 : INTERFACE RTS SOL PLANÉTAIRE & COMPLEXE MINIER
@@ -1724,61 +1634,13 @@ a:hover {
 }
 
 /* ==========================================================
-   BOUTONS ET MODALES
-   ========================================================== */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1.25rem;
-    border-radius: 6px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #c2252b 0%, #991b1b 100%);
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(194, 37, 43, 0.3);
-    border: 1px solid #c2252b;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    box-shadow: 0 6px 20px rgba(194, 37, 43, 0.45);
-    color: #ffffff;
-}
-
-.btn-danger {
-    background: #c2252b;
-    color: #fff;
-}
-
-.btn-secondary {
-    background: #ffffff;
-    color: #1c1917;
-    border: 1px solid var(--border-color);
-}
-.btn-secondary:hover {
-    background: #f6f2e8;
-    border-color: #c2252b;
-    color: #c2252b;
-}
-
-/* ==========================================================
-   MODALES UNIFIÉES SENGOKU / WASHI ("EXIT LES MODALES SOMBRES")
+   MODALES UNIFIÉES STYLE TABLER
    ========================================================== */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(28, 25, 23, 0.65);
-    backdrop-filter: blur(8px);
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -1787,18 +1649,18 @@ a:hover {
 }
 
 .modal-card {
-    background: #fdfbf7;
-    border: 1px solid var(--tblr-border-color, rgba(0, 0, 0, 0.12));
-    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.25);
-    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid rgba(98, 105, 118, 0.16);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
     width: 94%;
     max-width: 520px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    color: #1c1917;
-    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    color: inherit;
+    animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-card-sm { max-width: 440px; }
@@ -1807,14 +1669,14 @@ a:hover {
 .modal-card-xl { max-width: 980px; }
 
 @keyframes modalPop {
-    from { opacity: 0; transform: scale(0.92) translateY(10px); }
+    from { opacity: 0; transform: scale(0.95) translateY(6px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .modal-header, .modal-card > .card-header {
-    background: var(--tblr-bg-surface, #ffffff);
-    border-bottom: 1px solid var(--tblr-border-color, rgba(0, 0, 0, 0.08));
-    padding: 1.1rem 1.5rem;
+    background: #ffffff;
+    border-bottom: 1px solid rgba(98, 105, 118, 0.16);
+    padding: 1rem 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1822,27 +1684,26 @@ a:hover {
 }
 
 .modal-title, .modal-header h2, .modal-header h3, .modal-card > .card-header .card-title {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #1c1917;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: inherit;
     margin: 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    letter-spacing: 0.3px;
 }
 
 .modal-body, .modal-card > .card-body {
-    padding: 1.5rem;
+    padding: 1.25rem;
     overflow-y: auto;
     flex: 1 1 auto;
-    color: #1c1917;
+    color: inherit;
 }
 
 .modal-footer {
-    background: #f6f2e8;
-    border-top: 1px solid var(--border-color);
-    padding: 1rem 1.5rem;
+    background: #ffffff;
+    border-top: 1px solid rgba(98, 105, 118, 0.16);
+    padding: 0.85rem 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1926,133 +1787,7 @@ a:hover {
     margin-top: 1.25rem;
 }
 
-/* ==========================================================
-   FORMULAIRES, INPUTS & TABLES À HAUT CONTRASTE
-   ========================================================== */
-.form-group {
-    margin-bottom: 1.25rem;
-}
 
-.form-label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #1c1917;
-    margin-bottom: 0.4rem;
-    letter-spacing: 0.3px;
-}
-
-.form-control {
-    width: 100%;
-    padding: 0.65rem 0.85rem;
-    font-size: 0.9rem;
-    color: #1c1917;
-    background: #ffffff;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    box-shadow: 0 1px 3px rgba(60, 45, 30, 0.04);
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: #b91c1c;
-    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.15);
-}
-
-.form-control::placeholder {
-    color: #8c8273;
-    opacity: 0.85;
-}
-
-/* Tables Féodales Washi */
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
-    color: #1c1917;
-}
-
-.table th {
-    background: #ede5d5;
-    color: #1c1917;
-    font-weight: 800;
-    padding: 0.65rem 0.85rem;
-    border-bottom: 2px solid var(--border-color);
-    text-align: left;
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.table td {
-    padding: 0.75rem 0.85rem;
-    border-bottom: 1px solid var(--border-color);
-    vertical-align: middle;
-    color: #1c1917;
-}
-
-.table tbody tr:hover {
-    background: rgba(185, 28, 28, 0.03);
-}
-
-/* Classes Utilitaires de Texte à Haut Contraste */
-.text-muted {
-    color: var(--text-muted) !important;
-}
-
-.text-dark {
-    color: #1c1917 !important;
-}
-
-.text-secondary {
-    color: var(--text-secondary) !important;
-}
-
-.text-subtle {
-    color: var(--text-subtle) !important;
-}
-
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.25rem 0.65rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 6px;
-    border: 1px solid transparent;
-}
-
-.badge-primary {
-    background: rgba(185, 28, 28, 0.1);
-    color: #b91c1c;
-    border-color: #b91c1c;
-}
-
-.badge-success {
-    background: #dcfce7;
-    color: #15803d;
-    border-color: #86efac;
-}
-
-.badge-warning {
-    background: #fef3c7;
-    color: #b45309;
-    border-color: #fde68a;
-}
-
-.badge-danger {
-    background: #fee2e2;
-    color: #b91c1c;
-    border-color: #fca5a5;
-}
-
-.badge-info {
-    background: #e0f2fe;
-    color: #0369a1;
-    border-color: #7dd3fc;
-}
 
 .cost-row {
     display: flex;
@@ -2092,7 +1827,7 @@ a:hover {
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     gap: 6px;
-    background: #ede5d5;
+    background: #ffffff;
     padding: 1rem;
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -2104,11 +1839,11 @@ a:hover {
    ========================================================== */
 .galaxy-map-wrapper {
     position: relative;
-    border-radius: 10px;
+    border-radius: 8px;
     overflow: hidden;
-    border: 2px solid var(--border-color);
-    box-shadow: 0 4px 20px rgba(60, 45, 30, 0.1), inset 0 0 30px rgba(60, 45, 30, 0.08);
-    background: #f6f2e8;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    background: #ffffff;
 }
 
 .galaxy-hud-overlay {
@@ -2518,10 +2253,10 @@ a:hover {
 }
 
 .msg-table th {
-    background: #f6f2e8;
+    background: #f8fafc;
     padding: 0.85rem 1rem;
     text-align: left;
-    color: #1c1917;
+    color: inherit;
     font-weight: 700;
     border-bottom: 1px solid var(--border-color);
 }
@@ -2634,22 +2369,22 @@ a:hover {
 /* CARTE DE HÉROS : FOND DE CARTE SCÉNIQUE & TILE */
 .field-hero-card {
     position: relative;
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: hidden;
     border: 1px solid var(--border-color);
-    box-shadow: 0 8px 30px rgba(60, 45, 30, 0.08);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     margin-bottom: 1.5rem;
-    background: #fdfbf7;
+    background: #ffffff;
 }
 
 /* NOUVELLE MISE EN PAGE : RECTANGLE D'INFORMATIONS AU-DESSUS & ESTAMPE SANS COUCHE ALPHA */
 .field-info-card {
     position: relative;
-    border-radius: 12px;
+    border-radius: 8px;
     border: 1px solid var(--border-color);
-    box-shadow: 0 4px 25px rgba(60, 45, 30, 0.08);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     margin-bottom: 1.5rem;
-    background: #fdfbf7;
+    background: #ffffff;
     padding: 2rem 2.2rem;
     display: flex;
     align-items: center;
@@ -3225,9 +2960,9 @@ a:hover {
 }
 
 .field-btn-secondary:hover {
-    background: #f6f2e8;
-    color: #c2252b;
-    border-color: #c2252b;
+    background: #f8fafc;
+    color: var(--tblr-primary, #206bc4);
+    border-color: var(--tblr-primary, #206bc4);
 }
 
 .time-to-afford {
@@ -3243,11 +2978,11 @@ a:hover {
 
 /* BANDEAU DES 20 PARCELLES DU DOMAINE (STYLE TRAVIAN - PLEINE LARGEUR) */
 .field-strip-card {
-    background: #fdfbf7;
+    background: #ffffff;
     border: 1px solid var(--border-color);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 1rem 1.25rem;
-    box-shadow: 0 4px 16px rgba(60, 45, 30, 0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     width: 100%;
     box-sizing: border-box;
     margin-top: 1.5rem;

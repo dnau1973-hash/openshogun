@@ -31,18 +31,18 @@ foreach ($stationedTroops as $t) {
 $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLevel * 25);
 ?>
 
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title" style="font-size: 1rem;">
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
+        <h3 class="card-title m-0" style="font-size: 0.95rem;">
             <span>⚔️</span> Garnison du Domaine
         </h3>
-        <a href="?page=barracks" class="btn btn-secondary" style="font-size:0.7rem; padding:0.2rem 0.5rem;" title="Accéder au Dojo Militaire">
+        <a href="?page=barracks" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Accéder au Dojo Militaire">
             Dojo &rarr;
         </a>
     </div>
-    <div class="card-body" style="padding: 0.85rem;">
-        <!-- Liste des Soldats de la Faction (Style Travian) -->
-        <div style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1rem;">
+    <div class="card-body p-2">
+        <!-- Liste des Soldats de la Faction -->
+        <div class="d-flex flex-column gap-1 mb-2">
             <?php foreach ($stationedTroops as $t): ?>
                 <?php 
                     $count = (int)$t['stationed_count'];
@@ -60,14 +60,14 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                         }
                     }
                 ?>
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:0.35rem 0.5rem; background:var(--bg-ink, #ede5d5); border:1px solid var(--border-color); border-radius:4px; <?= !$hasUnits ? 'opacity:0.6;' : '' ?>">
-                    <div style="display:flex; align-items:center; gap:0.5rem;">
-                        <img src="<?= $imgSrc ?>" alt="" class="unit-img-thumb" style="width:28px; height:28px; border-radius:4px; object-fit:cover; border:1px solid var(--border-color); background:var(--bg-card);">
-                        <span style="font-size:0.85rem; font-weight:<?= $hasUnits ? '600' : 'normal' ?>; color:<?= $hasUnits ? 'var(--text-main)' : 'var(--text-muted)' ?>;">
+                <div class="d-flex justify-content-between align-items-center px-2 py-1 rounded border bg-light-lt <?= !$hasUnits ? 'opacity-50' : '' ?>">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="<?= $imgSrc ?>" alt="" class="rounded border" style="width:28px; height:28px; object-fit:cover;">
+                        <span class="small <?= $hasUnits ? 'fw-bold' : 'text-muted' ?>">
                             <?= htmlspecialchars($t['name']) ?>
                         </span>
                     </div>
-                    <strong style="font-size:0.9rem; font-family:monospace; color:<?= $hasUnits ? 'var(--red-primary, #c2252b)' : 'var(--text-muted)' ?>;">
+                    <strong class="font-monospace <?= $hasUnits ? 'text-danger' : 'text-muted' ?>" style="font-size:0.85rem;">
                         <?= number_format($count) ?>
                     </strong>
                 </div>
@@ -75,39 +75,39 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
         </div>
 
         <!-- Bilan Puissance de Garnison -->
-        <div style="background:var(--bg-surface, #fdfbf7); border:1px solid var(--border-color); padding:0.6rem; border-radius:6px; font-size:0.8rem;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
-                <span style="color:var(--text-muted);">Total Guerriers :</span>
-                <strong style="color:var(--text-main);"><?= number_format($totalSoldiers) ?></strong>
+        <div class="p-2 rounded border bg-light-lt small">
+            <div class="d-flex justify-content-between mb-1">
+                <span class="text-muted">Total Guerriers :</span>
+                <strong><?= number_format($totalSoldiers) ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
-                <span style="color:var(--text-muted);">Puissance d'Attaque :</span>
-                <strong style="color:var(--red-primary, #c2252b);"><?= number_format($totalAttackPower) ?></strong>
+            <div class="d-flex justify-content-between mb-1">
+                <span class="text-muted">Puissance d'Attaque :</span>
+                <strong class="text-danger"><?= number_format($totalAttackPower) ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
-                <span style="color:var(--text-muted);">Défense des Troupes :</span>
-                <strong style="color:#166534;"><?= number_format($totalDefensePower) ?></strong>
+            <div class="d-flex justify-content-between mb-1">
+                <span class="text-muted">Défense des Troupes :</span>
+                <strong class="text-success"><?= number_format($totalDefensePower) ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between; padding-top:0.3rem; border-top:1px dashed var(--border-color); align-items:center;">
-                <a href="/?page=building&code=wall" style="text-decoration:none; color:inherit;" title="Accéder aux Remparts Féodaux">
-                    <span style="color:var(--text-muted); font-size:0.75rem;">🧱 Remparts (Niv. <?= $wallLevel ?>) :</span>
+            <div class="d-flex justify-content-between pt-1 border-top border-dashed align-items-center">
+                <a href="/?page=building&code=wall" class="text-decoration-none text-muted" title="Accéder aux Remparts Féodaux">
+                    <span style="font-size:0.75rem;">🧱 Remparts (Niv. <?= $wallLevel ?>) :</span>
                 </a>
-                <strong style="color:var(--red-primary, #c2252b); font-size:0.85rem;">
-                    <?= ($wallLevel > 0) ? ('+' . ($wallLevel * $wallMultPct) . '% (' . number_format($totalFortifiedDefense) . ')') : '<a href="/?page=building&code=wall" style="font-size:0.75rem; color:#b45309; text-decoration:underline;">Non Bâti</a>' ?>
+                <strong class="text-primary" style="font-size:0.82rem;">
+                    <?= ($wallLevel > 0) ? ('+' . ($wallLevel * $wallMultPct) . '% (' . number_format($totalFortifiedDefense) . ')') : '<a href="/?page=building&code=wall" class="text-decoration-underline text-warning small">Non Bâti</a>' ?>
                 </strong>
             </div>
         </div>
 
         <!-- File d'entraînement en cours -->
         <?php if (!empty($trainingQueue)): ?>
-            <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid rgba(255,255,255,0.08);">
-                <div style="font-size:0.75rem; color:#dc2626; font-weight:700; margin-bottom:0.35rem;">
+            <div class="mt-2 pt-2 border-top">
+                <div class="text-danger fw-bold mb-1" style="font-size:0.75rem;">
                     ⏳ Entraînement au Dojo :
                 </div>
                 <?php foreach ($trainingQueue as $tq): ?>
-                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.25rem;">
+                    <div class="d-flex justify-content-between small mb-1">
                         <span><?= $tq['unit_icon'] ?> <?= $tq['count'] ?>x <?= htmlspecialchars($tq['unit_name']) ?></span>
-                        <span class="queue-timer" data-countdown="<?= $tq['finishes_at'] ?>" style="font-size:0.75rem;">Calcul...</span>
+                        <span class="queue-timer badge bg-secondary-lt" data-countdown="<?= $tq['finishes_at'] ?>" style="font-size:0.7rem;">Calcul...</span>
                     </div>
                 <?php endforeach; ?>
             </div>

@@ -27,25 +27,24 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
 
     <!-- Fenêtre de Chat Dépliée -->
     <div id="feudalChatWindow" class="card shadow-lg d-none"
-         style="width:380px; max-width:calc(100vw - 30px); height:510px; max-height:calc(100vh - 80px); display:flex; flex-direction:column; background:#ffffff; border:2px solid #b45309; border-radius:12px; overflow:hidden;">
+         style="width:380px; max-width:calc(100vw - 30px); height:510px; max-height:calc(100vh - 80px); display:flex; flex-direction:column; overflow:hidden;">
         
         <!-- En-tête Chat -->
-        <div class="card-header py-2 px-3 d-flex align-items-center justify-content-between text-white"
-             style="background:linear-gradient(135deg, #1c1917 0%, #292524 100%); border-bottom:1px solid #78350f;">
+        <div class="card-header py-2 px-3 d-flex align-items-center justify-content-between bg-primary text-white">
             <div class="d-flex align-items-center gap-2 text-truncate" style="max-width:240px;">
                 <!-- Bouton Retour à la File (visible en mode discussion) -->
-                <button type="button" id="feudalChatBackBtn" class="btn btn-sm btn-dark p-1 px-2 d-none align-items-center gap-1 text-warning"
+                <button type="button" id="feudalChatBackBtn" class="btn btn-sm btn-outline-light p-1 px-2 d-none align-items-center gap-1"
                         onclick="window.feudalChat.showQueueView()" title="Retourner à la file des discussions"
-                        style="border:1px solid #78350f; font-size:0.75rem; border-radius:6px; line-height:1.2;">
+                        style="font-size:0.75rem; border-radius:6px; line-height:1.2;">
                     <span>&larr;</span> <span>File</span>
                 </button>
 
                 <span id="feudalChatHeaderIcon" style="font-size:1.15rem;">🏮</span>
                 <div class="text-truncate">
-                    <h5 id="feudalChatHeaderTitle" class="m-0 font-weight-bold text-truncate" style="font-size:0.88rem; color:#fef3c7;">
+                    <h5 id="feudalChatHeaderTitle" class="m-0 fw-bold text-truncate text-white" style="font-size:0.88rem;">
                         Taverne du Shōgunat
                     </h5>
-                    <div class="text-muted small text-truncate" style="font-size:0.68rem; color:#d6d3d1 !important;">
+                    <div class="small text-truncate text-white-50" style="font-size:0.68rem;">
                         <span class="status-dot status-dot-animated bg-success d-inline-block me-1" style="width:6px; height:6px;"></span>
                         <span id="feudalChatOnlineCounter">En direct (2.5s)</span>
                     </div>
@@ -228,8 +227,7 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
                     <input type="text" id="feudalChatInput" class="form-control form-control-sm"
                            placeholder="Votre message au Shōgunat..." maxlength="1000" autocomplete="off"
                            style="font-size:0.82rem; border-color:#d6d3d1;">
-                    <button type="submit" id="feudalChatSubmitBtn" class="btn btn-primary btn-sm px-3"
-                            style="background:#b45309; border-color:#92400e; font-weight:700;">
+                    <button type="submit" id="feudalChatSubmitBtn" class="btn btn-primary btn-sm px-3">
                         Envoyer
                     </button>
                 </form>

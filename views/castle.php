@@ -111,12 +111,12 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
                     </div>
 
                     <?php if ($castle['is_spawned']): ?>
-                        <div class="field-status-badge ready" style="background: rgba(245, 158, 11, 0.2); color: #92400e; border-color: #f59e0b;">
-                            <span class="pulse-dot" style="background: #f59e0b;"></span>
+                        <div class="badge bg-warning-lt text-warning py-1 px-2">
+                            <span class="status-dot status-dot-animated bg-warning me-1"></span>
                             <span>Déployé sur la Carte : [<?= $castle['coord_x'] ?> : <?= $castle['coord_y'] ?>]</span>
                         </div>
                     <?php else: ?>
-                        <div class="field-status-badge" style="background: rgba(100, 116, 139, 0.15); color: #475569; border: 1px solid rgba(100, 116, 139, 0.3);">
+                        <div class="badge bg-secondary-lt py-1 px-2">
                             <span>En réserve (Non déployé sur la carte)</span>
                         </div>
                     <?php endif; ?>
@@ -186,9 +186,9 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
                 <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(254, 243, 199, 0.4) 100%); border: 1.5px solid rgba(245, 158, 11, 0.5); padding: 1.1rem; border-radius: 8px; margin-bottom: 1.25rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
                         <span style="font-size: 1.3rem;">✨</span>
-                        <strong style="color: #92400e; font-size: 0.95rem;">Bénédiction Sacrée & Relique de Province :</strong>
+                        <strong class="text-warning" style="font-size: 0.95rem;">Bénédiction Sacrée & Relique de Province :</strong>
                     </div>
-                    <p style="color: #78350f; font-weight: 600; font-size: 0.9rem; margin: 0;">
+                    <p class="fw-bold text-muted" style="font-size: 0.9rem; margin: 0;">
                         <?= htmlspecialchars($castle['relic_bonus']) ?>
                     </p>
                 </div>
@@ -235,7 +235,7 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
     <!-- CARROUSEL / LISTE DES 12 DONJONS AUTHENTIQUES DU JAPON (現存十二天守) -->
     <div class="card" style="border-color: rgba(245, 158, 11, 0.3);">
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-            <h3 style="color: #92400e; display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 1.1rem;">
+            <h3 class="card-title m-0" style="font-size: 1.1rem;">
                 <span>🏯</span> Les 12 Donjons Authentiques Préservés du Japon (現存十二天守)
             </h3>
             <span style="font-size: 0.8rem; color: var(--text-muted);">Cliquez sur une forteresse pour consulter sa fiche historique</span>

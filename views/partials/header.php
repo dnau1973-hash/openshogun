@@ -142,8 +142,7 @@ $navItems = [
         <div class="container-xl d-print-none px-3 px-xl-0 pt-2 pb-0">
             <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
                 <?php if ($isUserProtected): ?>
-                    <span class="badge bg-success-lt text-success d-inline-flex align-items-center gap-1 shadow-sm"
-                          style="font-size:0.78rem; padding:0.35rem 0.65rem; cursor:help; border: 1px solid rgba(22, 163, 74, 0.45); border-radius:6px; background: rgba(22, 163, 74, 0.08);"
+                    <span class="badge bg-success-lt d-inline-flex align-items-center gap-1 py-1 px-2"
                           title="🔰 Immunité Féodale active jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?> (aucun assaut ni espionnage possible sur vos fiefs)">
                         <span>🔰</span>
                         <span class="fw-bold"><?= htmlspecialchars($userProtection['formatted']) ?></span>
@@ -151,57 +150,48 @@ $navItems = [
                 <?php endif; ?>
 
                 <!-- 🪙 Trésor en Koban (Pièces d'Or) -->
-                <a href="?page=privilege" class="badge text-decoration-none d-inline-flex align-items-center gap-1 py-1 px-3 border shadow-sm"
-                   style="background:#ffffff; border-color:rgba(245,158,11,0.55) !important; color:#92400e; font-size:0.80rem; border-radius:6px; cursor:pointer;"
+                <a href="?page=privilege" class="badge bg-warning-lt text-warning d-inline-flex align-items-center gap-1 py-1 px-3 text-decoration-none shadow-sm"
                    title="Trésor Impérial : <?= number_format($userGoldCoins) ?> Koban. Cliquez pour ouvrir la page des Privilèges du Shōgun.">
-                    <span style="font-size:1rem;">🪙</span>
-                    <strong style="color:#d97706; font-size:0.88rem;"><?= number_format($userGoldCoins) ?></strong>
-                    <span style="color:#78350f; font-weight:600;">Koban</span>
+                    <span>🪙</span>
+                    <strong><?= number_format($userGoldCoins) ?></strong>
+                    <span class="text-muted">Koban</span>
                 </a>
 
                 <!-- 👑 Sceau Impérial -->
                 <a href="?page=privilege" 
-                   class="badge text-decoration-none d-inline-flex align-items-center gap-1 py-1 px-3 border shadow-sm <?= $isSealActive ? 'bg-warning text-dark border-warning' : 'border-warning-subtle' ?>"
-                   style="<?= $isSealActive ? 'font-weight:700; background:#f59e0b; color:#1e1b4b;' : 'background:#ffffff; color:#b45309; border-color:rgba(245,158,11,0.45) !important;' ?> font-size:0.80rem; border-radius:6px; cursor:pointer;"
+                   class="badge <?= $isSealActive ? 'bg-warning text-warning-fg' : 'bg-secondary-lt' ?> d-inline-flex align-items-center gap-1 py-1 px-3 text-decoration-none shadow-sm"
                    title="<?= $isSealActive ? 'Sceau Impérial Actif : ' . $sealStatus['remaining_formatted'] : 'Décrétez le Sceau Impérial du Shōgun' ?>">
-                    <span style="font-size:1rem;">👑</span>
+                    <span>👑</span>
                     <span><?= $isSealActive ? 'Sceau Actif (' . $sealStatus['remaining_formatted'] . ')' : 'Sceau Impérial' ?></span>
                 </a>
             </div>
         </div>
 
-        <!-- 🏯 LOGO EN HAUT AU MILIEU EN GRAND -->
-        <div class="text-center py-2 d-print-none" style="display:flex; justify-content:center; align-items:center;">
+        <!-- 🏯 LOGO EN HAUT AU MILIEU -->
+        <div class="text-center py-2 d-print-none">
             <a href="?page=resources" class="brand-logo-link" title="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>">
                 <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../../public/assets/logo_transparent.png') : 1 ?>" 
                      alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
-                     class="brand-logo-img"
-                     style="height: 175px; max-height: 195px; width: auto; max-width: 92vw; object-fit: contain; filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.22)); transition: transform 0.2s ease;">
+                     style="height: 160px; max-height: 185px; width: auto; max-width: 92vw; object-fit: contain;">
             </a>
         </div>
 
-        <!-- ── BARRE DE NAVIGATION PRINCIPALE (Largeur frame centrale container-xl) ── -->
+        <!-- ── BARRE DE NAVIGATION TABLER NATIVE (Largeur frame centrale container-xl) ── -->
         <div class="container-xl d-print-none px-3 px-xl-0">
-            <nav class="navbar navbar-expand-lg"
-                 style="background:linear-gradient(135deg,#1a0a00 0%,#2d1200 60%,#1a0a00 100%);
-                        border:2px solid rgba(194,37,43,0.5);
-                        border-radius:10px;
-                        min-height:48px; padding:0.25rem 0.65rem;
-                        box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+            <header class="navbar navbar-expand-md navbar-light bg-white border rounded shadow-sm px-2">
                 <div class="container-fluid px-1">
 
                     <!-- Gauche : Fief & Héros -->
                     <div class="d-flex align-items-center gap-2 me-3">
                         <?php
                         $hHp = $heroHeader ? round((float)$heroHeader['health']) : 100;
-                        $hHpCol = ($hHp >= 60) ? '#16a34a' : (($hHp >= 25) ? '#d97706' : '#dc2626');
+                        $hHpCol = ($hHp >= 60) ? 'border-success' : (($hHp >= 25) ? 'border-warning' : 'border-danger');
                         $hLvl = $heroHeader ? (int)$heroHeader['level'] : 1;
                         $hasPoints = ($heroHeader && (int)$heroHeader['unassigned_points'] > 0);
                         ?>
                         <a href="?page=hero" class="position-relative d-inline-flex align-items-center"
                            title="Samouraï Héros Niv.<?= $hLvl ?> — Vitalité <?= $hHp ?>%">
-                            <img src="/public/assets/hero_samurai.jpg" alt="Héros"
-                                 style="width:32px; height:32px; border-radius:50%; border:2px solid <?= $hHpCol ?>; object-fit:cover;">
+                            <span class="avatar avatar-sm rounded-circle border <?= $hHpCol ?>" style="background-image: url(/public/assets/hero_samurai.jpg)"></span>
                             <span class="badge bg-dark text-white position-absolute"
                                   style="bottom:-3px; right:-3px; font-size:0.55rem; padding:1px 3px; border-radius:3px;"><?= $hLvl ?></span>
                             <?php if ($hasPoints): ?>
@@ -211,35 +201,35 @@ $navItems = [
                         </a>
 
                         <?php if ($planet): ?>
-                        <div class="dropdown ms-1">
-                            <button class="btn btn-sm dropdown-toggle d-flex flex-column text-start p-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background:rgba(255,255,255,0.07); border:1px solid rgba(245,158,11,0.25); border-radius:6px; max-width:170px;">
-                                <div style="font-weight:800; font-size:0.82rem; color:#fef3c7; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex flex-column text-start px-2 py-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="max-width:180px;">
+                                <span class="fw-bold text-truncate" style="font-size:0.82rem; line-height:1.2;">
                                     <?= !empty($planet['is_capital']) ? '👑 ' : '🏯 ' ?><?= htmlspecialchars($planet['name']) ?>
-                                </div>
-                                <div style="font-size:0.67rem; color:#f87171; font-family:monospace; font-weight:700;">
-                                    [<?= $planet['coord_x'] ?>|<?= $planet['coord_y'] ?>] <?= !empty($planet['is_capital']) ? '<span style="color:#fbbf24; font-size:0.60rem;">(Capitale)</span>' : '' ?>
-                                </div>
+                                </span>
+                                <span class="text-muted" style="font-size:0.68rem; font-family:monospace;">
+                                    [<?= $planet['coord_x'] ?>|<?= $planet['coord_y'] ?>] <?= !empty($planet['is_capital']) ? '<span class="text-warning fw-bold">(Capitale)</span>' : '' ?>
+                                </span>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-dark shadow" style="background:#1e293b; border:1px solid rgba(245,158,11,0.3); min-width:220px; z-index:1050;">
-                                <li class="dropdown-header text-uppercase text-warning fw-bold d-flex justify-content-between align-items-center" style="font-size:0.68rem; letter-spacing:0.5px;">
+                            <ul class="dropdown-menu shadow-sm" style="min-width:220px; z-index:1050;">
+                                <li class="dropdown-header text-uppercase fw-bold d-flex justify-content-between align-items-center">
                                     <span>Vos Fiefs Féodaux</span>
-                                    <span class="badge bg-secondary"><?= count($allUserPlanets) ?></span>
+                                    <span class="badge bg-secondary-lt"><?= count($allUserPlanets) ?></span>
                                 </li>
                                 <?php foreach ($allUserPlanets as $p): 
                                     $isCurrent = ((int)$p['id'] === (int)$planet['id']);
                                 ?>
                                     <li>
-                                        <a class="dropdown-item d-flex justify-content-between align-items-center py-2 <?= $isCurrent ? 'active fw-bold' : '' ?>" href="?switch_planet=<?= (int)$p['id'] ?>" style="<?= $isCurrent ? 'background:rgba(245,158,11,0.2); color:#fbbf24;' : '' ?>">
+                                        <a class="dropdown-item d-flex justify-content-between align-items-center py-2 <?= $isCurrent ? 'active' : '' ?>" href="?switch_planet=<?= (int)$p['id'] ?>">
                                             <div>
-                                                <div style="font-size:0.84rem; line-height:1.2;">
+                                                <div class="fw-bold" style="font-size:0.85rem;">
                                                     <?= !empty($p['is_capital']) ? '👑' : '🏯' ?> <?= htmlspecialchars($p['name']) ?>
                                                 </div>
-                                                <div style="font-size:0.7rem; color:#94a3b8; font-family:monospace;">
+                                                <div class="text-muted small" style="font-family:monospace;">
                                                     [<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>] <?= !empty($p['is_capital']) ? '<span class="text-warning">Capitale</span>' : '' ?>
                                                 </div>
                                             </div>
                                             <?php if ($isCurrent): ?>
-                                                <span class="badge bg-warning text-dark" style="font-size:0.65rem;">Actif</span>
+                                                <span class="badge bg-primary text-white" style="font-size:0.65rem;">Actif</span>
                                             <?php endif; ?>
                                         </a>
                                     </li>
@@ -250,92 +240,74 @@ $navItems = [
                     </div>
 
                     <!-- Toggler mobile -->
-                    <button class="navbar-toggler border-0" type="button"
-                            data-bs-toggle="collapse" data-bs-target="#mainNavBar"
-                            style="color:#f59e0b;">
+                    <button class="navbar-toggler" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#mainNavBar">
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <!-- Navigation centrale + Menu Utilisateur descendu à droite -->
+                    <!-- Navigation centrale + Menu Utilisateur à droite -->
                     <div class="collapse navbar-collapse" id="mainNavBar">
                         <ul class="navbar-nav me-auto">
                             <?php foreach ($navItems as $nav):
                                 $isActive = in_array($page, $nav['match']);
                             ?>
-                            <li class="nav-item">
-                                <a class="nav-link px-2 py-2 d-flex align-items-center gap-1 position-relative
-                                           <?= $isActive ? 'active fw-bold' : '' ?>"
+                            <li class="nav-item <?= $isActive ? 'active' : '' ?>">
+                                <a class="nav-link <?= $isActive ? 'active fw-bold' : '' ?>"
                                    href="?page=<?= $nav['page'] ?>"
-                                   title="<?= htmlspecialchars($nav['title']) ?>"
-                                   style="color:<?= $isActive ? '#fbbf24' : '#e2d9c8' ?>;
-                                          font-size:0.82rem; white-space:nowrap;
-                                          border-bottom:<?= $isActive ? '2px solid #dc2626' : '2px solid transparent' ?>;
-                                          border-radius:0;">
-                                    <span><?= $nav['icon'] ?></span>
-                                    <span><?= $nav['label'] ?></span>
+                                   title="<?= htmlspecialchars($nav['title']) ?>">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><?= $nav['icon'] ?></span>
+                                    <span class="nav-link-title"><?= $nav['label'] ?></span>
                                 </a>
                             </li>
                             <?php endforeach; ?>
 
                             <?php if ($questSummary): ?>
                             <li class="nav-item">
-                                <a class="nav-link px-2 py-2 d-flex align-items-center gap-1 position-relative"
+                                <a class="nav-link"
                                    href="javascript:void(0)" onclick="openQuestModal()"
-                                   title="Didacticiel & Quêtes Féodales"
-                                   style="color:#e2d9c8; font-size:0.82rem; white-space:nowrap;
-                                          border-bottom:2px solid transparent; border-radius:0;">
-                                    <span>🎯</span>
-                                    <span>Quêtes</span>
+                                   title="Didacticiel & Quêtes Féodales">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block">🎯</span>
+                                    <span class="nav-link-title">Quêtes</span>
                                     <?php if ($questSummary['claimable_count'] > 0): ?>
                                         <span class="badge bg-success ms-1" style="font-size:0.6rem;"><?= $questSummary['claimable_count'] ?></span>
                                     <?php elseif (!$questSummary['all_completed']): ?>
-                                        <span class="badge bg-secondary ms-1" style="font-size:0.6rem;"><?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?></span>
+                                        <span class="badge bg-secondary-lt ms-1" style="font-size:0.6rem;"><?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?></span>
                                     <?php endif; ?>
                                 </a>
                             </li>
                             <?php endif; ?>
                         </ul>
 
-                        <!-- Outils à droite + Bouton Menu Utilisateur (sans redondance) -->
-                        <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
-                            <!-- Menu Déroulant Utilisateur (Daimyō) : Profil, Communications, Codex, Admin, Déconnexion -->
-                            <div class="dropdown">
-                                <a href="#" class="btn btn-sm btn-dark d-flex align-items-center gap-2 text-decoration-none px-2 py-1"
-                                   data-bs-toggle="dropdown" aria-expanded="false"
-                                   style="background:rgba(255,255,255,0.08); border:1px solid rgba(251,191,36,0.35); border-radius:6px;">
-                                    <span style="width:8px; height:8px; border-radius:50%; display:inline-block;
-                                                 background:<?= $factionInfo['color'] ?? '#dc2626' ?>;"></span>
-                                    <span style="font-weight:700; font-size:0.82rem; color:#fef3c7;"><?= htmlspecialchars($user['username']) ?></span>
+                        <!-- Menu Utilisateur Tabler à droite -->
+                        <div class="navbar-nav flex-row order-md-last">
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link d-flex lh-1 text-reset p-0"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="avatar avatar-sm" style="background-color: <?= $factionInfo['color'] ?? '#dc2626' ?>; color: #fff; font-weight:bold;">
+                                        <?= strtoupper(substr($user['username'], 0, 1)) ?>
+                                    </span>
+                                    <div class="d-none d-xl-block ps-2">
+                                        <div><?= htmlspecialchars($user['username']) ?></div>
+                                        <div class="mt-1 small text-muted"><?= htmlspecialchars($factionInfo['name'] ?? 'Daimyō') ?></div>
+                                    </div>
                                     <?php if ($unreadMessagesCount > 0): ?>
-                                        <span class="badge bg-danger rounded-pill" style="font-size:0.6rem; padding:2px 5px;" title="<?= $unreadMessagesCount ?> missive(s) non lue(s)"><?= $unreadMessagesCount ?></span>
+                                        <span class="badge bg-danger ms-1"><?= $unreadMessagesCount ?></span>
                                     <?php endif; ?>
-                                    <?php if ($isUserProtected): ?>
-                                        <span class="d-sm-none" title="Immunité active">🔰</span>
-                                    <?php endif; ?>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#fbbf24;">
-                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                    </svg>
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-end shadow-lg" style="min-width:230px; z-index:1060;">
+                                <div class="dropdown-menu dropdown-menu-end shadow">
                                     <?php if ($isUserProtected): ?>
-                                        <div class="dropdown-item-text small" style="background: rgba(22, 163, 74, 0.08); border-left: 3px solid #16a34a; padding: 0.5rem 0.75rem; margin-bottom: 0.25rem;">
-                                            <div style="font-weight: 700; color: #15803d; display:flex; align-items:center; gap:0.3rem;">
-                                                <span>🔰</span> Immunité Débutant Active
-                                            </div>
-                                            <div class="text-secondary" style="font-size: 0.75rem; margin-top:0.2rem;">
-                                                Jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?> (encore <?= htmlspecialchars($userProtection['formatted']) ?>)
-                                            </div>
+                                        <div class="dropdown-item-text small bg-success-lt text-success fw-bold">
+                                            🔰 Immunité active : <?= htmlspecialchars($userProtection['formatted']) ?>
                                         </div>
                                         <div class="dropdown-divider"></div>
                                     <?php endif; ?>
 
                                     <!-- Privilèges & Empire du Shōgun -->
-                                    <div class="dropdown-header text-uppercase small text-warning fw-bold" style="font-size:0.65rem;">Privilèges du Shōgun</div>
-                                    <a href="?page=empire" class="dropdown-item fw-bold text-dark d-flex align-items-center justify-content-between <?= $page === 'empire' ? 'active' : '' ?>">
+                                    <div class="dropdown-header text-uppercase small text-muted">Privilèges du Shōgun</div>
+                                    <a href="?page=empire" class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'empire' ? 'active' : '' ?>">
                                         <span>👑 Tableau de Bord de l'Empire</span>
                                         <?php if ($isSealActive): ?>
-                                            <span class="badge bg-warning text-dark" style="font-size:0.6rem;">Plus</span>
+                                            <span class="badge bg-warning text-warning-fg" style="font-size:0.6rem;">Actif</span>
                                         <?php endif; ?>
                                     </a>
                                     <a href="?page=privilege" class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'privilege' ? 'active' : '' ?>">
@@ -353,11 +325,11 @@ $navItems = [
 
                                     <!-- Communications & Décrets -->
                                     <div class="dropdown-divider"></div>
-                                    <div class="dropdown-header text-uppercase small text-muted" style="font-size:0.65rem;">Communications & Décrets</div>
+                                    <div class="dropdown-header text-uppercase small text-muted">Communications</div>
                                     <a href="?page=messages" class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'messages' ? 'active' : '' ?>">
                                         <span>✉️ Missives</span>
                                         <?php if ($unreadMessagesCount > 0): ?>
-                                            <span class="badge bg-danger rounded-pill" style="font-size:0.65rem;"><?= $unreadMessagesCount ?></span>
+                                            <span class="badge bg-danger rounded-pill"><?= $unreadMessagesCount ?></span>
                                         <?php endif; ?>
                                     </a>
                                     <a href="?page=chat" class="dropdown-item <?= $page === 'chat' ? 'active' : '' ?>">🏮 Chat Féodal</a>
@@ -367,10 +339,10 @@ $navItems = [
 
                                     <!-- Savoir & Administration -->
                                     <div class="dropdown-divider"></div>
-                                    <div class="dropdown-header text-uppercase small text-muted" style="font-size:0.65rem;">Savoir & Shogunat</div>
+                                    <div class="dropdown-header text-uppercase small text-muted">Savoir & Shogunat</div>
                                     <a href="?page=docs" class="dropdown-item <?= $page === 'docs' ? 'active' : '' ?>">📖 Codex du Sengoku</a>
                                     <?php if ($auth->isAdmin()): ?>
-                                        <a href="?page=admin" class="dropdown-item text-warning fw-bold <?= $page === 'admin' ? 'active' : '' ?>">⚙️ Administration</a>
+                                        <a href="?page=admin" class="dropdown-item text-primary fw-bold <?= $page === 'admin' ? 'active' : '' ?>">⚙️ Administration</a>
                                     <?php endif; ?>
                                     <a href="?page=support" class="dropdown-item <?= $page === 'support' ? 'active' : '' ?>">📮 Support &amp; Aide</a>
 
@@ -388,7 +360,7 @@ $navItems = [
                         </div>
                     </div>
                 </div>
-            </nav>
+            </header>
         </div>
 
         <?php if ($planet): ?>
@@ -415,150 +387,162 @@ $navItems = [
 
                 <!-- 1. Bois de Cèdre -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid #92400e !important; padding:0.35rem 0.65rem;">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-1 text-truncate">
-                                <span style="font-size:0.95rem;">🪵</span>
-                                <strong style="font-size:0.78rem; color:#92400e;">Bois</strong>
-                                <span class="text-muted" style="font-size:0.65rem;">(+<?= number_format($planet['prod_rates']['metal']) ?>/h)</span>
+                    <div class="card card-sm shadow-sm card-status-start bg-yellow">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-1 text-truncate">
+                                    <span style="font-size:0.95rem;">🪵</span>
+                                    <strong class="text-yellow" style="font-size:0.80rem;">Bois</strong>
+                                    <span class="text-muted" style="font-size:0.65rem;">(+<?= number_format($planet['prod_rates']['metal']) ?>/h)</span>
+                                </div>
+                                <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
+                                    <span class="fw-bold" style="font-size:0.82rem;"
+                                          id="res-val-metal"
+                                          data-current="<?= $planet['metal'] ?>"
+                                          data-max="<?= $planet['metal_max'] ?>"
+                                          data-prod="<?= $planet['prod_rates']['metal'] ?>">
+                                        <?= number_format((int)$planet['metal']) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($planet['metal_max']) ?></span>
+                                </div>
                             </div>
-                            <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
-                                <span class="fw-bold" style="font-size:0.82rem; color:#1c1917;"
-                                      id="res-val-metal"
-                                      data-current="<?= $planet['metal'] ?>"
-                                      data-max="<?= $planet['metal_max'] ?>"
-                                      data-prod="<?= $planet['prod_rates']['metal'] ?>">
-                                    <?= number_format((int)$planet['metal']) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($planet['metal_max']) ?></span>
+                            <div class="progress progress-xs mt-1">
+                                <div class="progress-bar bg-yellow" id="bar-metal" style="width:<?= $pctMetal ?>%;"></div>
                             </div>
-                        </div>
-                        <div class="progress" style="height:3px; border-radius:2px; background:#f0eeeb; margin-top:4px;">
-                            <div class="progress-bar bg-warning" id="bar-metal" style="width:<?= $pctMetal ?>%;"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 2. Pierre de Taille -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid #1e40af !important; padding:0.35rem 0.65rem;">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-1 text-truncate">
-                                <span style="font-size:0.95rem;">🪨</span>
-                                <strong style="font-size:0.78rem; color:#1e40af;">Pierre</strong>
-                                <span class="text-muted" style="font-size:0.65rem;">(+<?= number_format($planet['prod_rates']['crystal']) ?>/h)</span>
+                    <div class="card card-sm shadow-sm card-status-start bg-primary">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-1 text-truncate">
+                                    <span style="font-size:0.95rem;">🪨</span>
+                                    <strong class="text-primary" style="font-size:0.80rem;">Pierre</strong>
+                                    <span class="text-muted" style="font-size:0.65rem;">(+<?= number_format($planet['prod_rates']['crystal']) ?>/h)</span>
+                                </div>
+                                <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
+                                    <span class="fw-bold" style="font-size:0.82rem;"
+                                          id="res-val-crystal"
+                                          data-current="<?= $planet['crystal'] ?>"
+                                          data-max="<?= $planet['crystal_max'] ?>"
+                                          data-prod="<?= $planet['prod_rates']['crystal'] ?>">
+                                        <?= number_format((int)$planet['crystal']) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($planet['crystal_max']) ?></span>
+                                </div>
                             </div>
-                            <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
-                                <span class="fw-bold" style="font-size:0.82rem; color:#1c1917;"
-                                      id="res-val-crystal"
-                                      data-current="<?= $planet['crystal'] ?>"
-                                      data-max="<?= $planet['crystal_max'] ?>"
-                                      data-prod="<?= $planet['prod_rates']['crystal'] ?>">
-                                    <?= number_format((int)$planet['crystal']) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($planet['crystal_max']) ?></span>
+                            <div class="progress progress-xs mt-1">
+                                <div class="progress-bar bg-primary" id="bar-crystal" style="width:<?= $pctCrystal ?>%;"></div>
                             </div>
-                        </div>
-                        <div class="progress" style="height:3px; border-radius:2px; background:#f0eeeb; margin-top:4px;">
-                            <div class="progress-bar bg-primary" id="bar-crystal" style="width:<?= $pctCrystal ?>%;"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 3. Riz Impérial -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid #166534 !important; padding:0.35rem 0.65rem;">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-1 text-truncate">
-                                <span style="font-size:0.95rem;">🌾</span>
-                                <strong style="font-size:0.78rem; color:#166534;">Riz</strong>
-                                <span class="text-muted" style="font-size:0.65rem;">(+<?= number_format($planet['prod_rates']['deuterium']) ?>/h)</span>
+                    <div class="card card-sm shadow-sm card-status-start bg-success">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-1 text-truncate">
+                                    <span style="font-size:0.95rem;">🌾</span>
+                                    <strong class="text-success" style="font-size:0.80rem;">Riz</strong>
+                                    <span class="text-muted" style="font-size:0.65rem;">(+<?= number_format($planet['prod_rates']['deuterium']) ?>/h)</span>
+                                </div>
+                                <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
+                                    <span class="fw-bold" style="font-size:0.82rem;"
+                                          id="res-val-deut"
+                                          data-current="<?= $planet['deuterium'] ?>"
+                                          data-max="<?= $planet['deuterium_max'] ?>"
+                                          data-prod="<?= $planet['prod_rates']['deuterium'] ?>">
+                                        <?= number_format((int)$planet['deuterium']) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($planet['deuterium_max']) ?></span>
+                                </div>
                             </div>
-                            <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
-                                <span class="fw-bold" style="font-size:0.82rem; color:#1c1917;"
-                                      id="res-val-deut"
-                                      data-current="<?= $planet['deuterium'] ?>"
-                                      data-max="<?= $planet['deuterium_max'] ?>"
-                                      data-prod="<?= $planet['prod_rates']['deuterium'] ?>">
-                                    <?= number_format((int)$planet['deuterium']) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($planet['deuterium_max']) ?></span>
+                            <div class="progress progress-xs mt-1">
+                                <div class="progress-bar bg-success" id="bar-deut" style="width:<?= $pctDeut ?>%;"></div>
                             </div>
-                        </div>
-                        <div class="progress" style="height:3px; border-radius:2px; background:#f0eeeb; margin-top:4px;">
-                            <div class="progress-bar bg-success" id="bar-deut" style="width:<?= $pctDeut ?>%;"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 4. Farine de Riz (Komeko) -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid #64748b !important; padding:0.35rem 0.65rem;" title="Farine de Riz (Raffinée en Meunerie)">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-1 text-truncate">
-                                <span style="font-size:0.95rem;">🍚</span>
-                                <strong style="font-size:0.78rem; color:#475569;">Farine</strong>
+                    <div class="card card-sm shadow-sm card-status-start bg-secondary" title="Farine de Riz (Raffinée en Meunerie)">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-1 text-truncate">
+                                    <span style="font-size:0.95rem;">🍚</span>
+                                    <strong class="text-secondary" style="font-size:0.80rem;">Farine</strong>
+                                </div>
+                                <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
+                                    <span class="fw-bold" style="font-size:0.82rem;"
+                                          id="res-val-rice-flour"
+                                          data-current="<?= $flourStock ?>"
+                                          data-max="<?= $flourMax ?>">
+                                        <?= number_format((int)$flourStock) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($flourMax) ?></span>
+                                </div>
                             </div>
-                            <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
-                                <span class="fw-bold" style="font-size:0.82rem; color:#1c1917;"
-                                      id="res-val-rice-flour"
-                                      data-current="<?= $flourStock ?>"
-                                      data-max="<?= $flourMax ?>">
-                                    <?= number_format((int)$flourStock) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($flourMax) ?></span>
+                            <div class="progress progress-xs mt-1">
+                                <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
                             </div>
-                        </div>
-                        <div class="progress" style="height:3px; border-radius:2px; background:#f0eeeb; margin-top:4px;">
-                            <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 5. Saké Féodal (Sakagura) -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid #d97706 !important; padding:0.35rem 0.65rem;" title="Saké Impérial (Brassé en Meunerie / Sakagura)">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-1 text-truncate">
-                                <span style="font-size:0.95rem;">🍶</span>
-                                <strong style="font-size:0.78rem; color:#b45309;">Saké</strong>
+                    <div class="card card-sm shadow-sm card-status-start bg-purple" title="Saké Impérial (Brassé en Meunerie / Sakagura)">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-1 text-truncate">
+                                    <span style="font-size:0.95rem;">🍶</span>
+                                    <strong class="text-purple" style="font-size:0.80rem;">Saké</strong>
+                                </div>
+                                <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
+                                    <span class="fw-bold" style="font-size:0.82rem;"
+                                          id="res-val-sake"
+                                          data-current="<?= $sakeStock ?>"
+                                          data-max="<?= $sakeMax ?>">
+                                        <?= number_format((int)$sakeStock) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($sakeMax) ?></span>
+                                </div>
                             </div>
-                            <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
-                                <span class="fw-bold" style="font-size:0.82rem; color:#1c1917;"
-                                      id="res-val-sake"
-                                      data-current="<?= $sakeStock ?>"
-                                      data-max="<?= $sakeMax ?>">
-                                    <?= number_format((int)$sakeStock) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($sakeMax) ?></span>
+                            <div class="progress progress-xs mt-1">
+                                <div class="progress-bar bg-purple" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
                             </div>
-                        </div>
-                        <div class="progress" style="height:3px; border-radius:2px; background:#f0eeeb; margin-top:4px;">
-                            <div class="progress-bar bg-warning" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 6. Sérénité Shinto -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card shadow-sm" style="background:#ffffff; border:1px solid #e7e5e4; border-radius:6px; border-left:3px solid <?= $eOk ? '#166534' : '#dc2626' ?> !important; padding:0.35rem 0.65rem;">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-1 text-truncate">
-                                <span style="font-size:0.95rem;">⛩️</span>
-                                <strong style="font-size:0.78rem; color:<?= $eOk ? '#166534' : '#dc2626' ?>;">Sérénité</strong>
-                                <span class="badge <?= $eOk ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger' ?>" style="font-size:0.58rem; padding:1px 4px;">
-                                    <?= $eOk ? 'OK' : 'Déficit' ?>
-                                </span>
+                    <div class="card card-sm shadow-sm card-status-start <?= $eOk ? 'bg-teal' : 'bg-danger' ?>">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-1 text-truncate">
+                                    <span style="font-size:0.95rem;">⛩️</span>
+                                    <strong class="<?= $eOk ? 'text-teal' : 'text-danger' ?>" style="font-size:0.80rem;">Sérénité</strong>
+                                    <span class="badge <?= $eOk ? 'bg-teal-lt text-teal' : 'bg-danger-lt text-danger' ?>" style="font-size:0.58rem; padding:1px 4px;">
+                                        <?= $eOk ? 'OK' : 'Déficit' ?>
+                                    </span>
+                                </div>
+                                <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
+                                    <span class="fw-bold <?= $eOk ? 'text-teal' : 'text-danger' ?>" style="font-size:0.82rem;">
+                                        <?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.62rem;">(<?= number_format($planet['energy_used']) ?>/<?= number_format($planet['energy_max']) ?>)</span>
+                                </div>
                             </div>
-                            <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
-                                <span class="fw-bold" style="font-size:0.82rem; color:<?= $eOk ? '#166534' : '#dc2626' ?>;">
-                                    <?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;">(<?= number_format($planet['energy_used']) ?>/<?= number_format($planet['energy_max']) ?>)</span>
+                            <div class="progress progress-xs mt-1">
+                                <div class="progress-bar <?= $eOk ? 'bg-teal' : 'bg-danger' ?>" style="width:<?= $pctEnergy ?>%;"></div>
                             </div>
-                        </div>
-                        <div class="progress" style="height:3px; border-radius:2px; background:#f0eeeb; margin-top:4px;">
-                            <div class="progress-bar <?= $eOk ? 'bg-success' : 'bg-danger' ?>" style="width:<?= $pctEnergy ?>%;"></div>
                         </div>
                     </div>
                 </div>

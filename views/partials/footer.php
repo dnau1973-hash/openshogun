@@ -649,10 +649,10 @@ async function openPlayerProfileModal(userId = null, autoEdit = false) {
         const footerLeft = document.getElementById('profFooterLeft');
         if (!p.is_self) {
             footerLeft.innerHTML = `
-                <a href="?page=messages&tab=compose&to=${encodeURIComponent(p.username || '')}" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem;">
+                <a href="?page=messages&tab=compose&to=${encodeURIComponent(p.username || '')}" class="btn btn-secondary">
                     <span>✉️</span> Dépêcher une Missive
                 </a>
-                <button type="button" class="btn btn-primary" style="background:#b45309; border-color:#92400e; display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem;" onclick="closePlayerProfileModal(); window.feudalChat && window.feudalChat.whisperToUser(${p.id}, '${escapeHtmlModal(p.username || '')}');">
+                <button type="button" class="btn btn-primary" onclick="closePlayerProfileModal(); window.feudalChat && window.feudalChat.whisperToUser(${p.id}, '${escapeHtmlModal(p.username || '')}');">
                     <span>🏮</span> Chuchoter en Direct
                 </button>
             `;
@@ -909,13 +909,13 @@ function renderQuestModal() {
                 </div>
 
                 <!-- Objectif précis -->
-                <div style="background:#f6f2e8; border:1px solid var(--border-color); border-radius:8px; padding:0.9rem 1.1rem; margin-bottom:1.25rem;">
-                    <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:0.25rem;">Objectif à atteindre :</div>
-                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                        <span style="font-size:1.05rem; font-weight:800; color:${isClaimable || isClaimed ? '#15803d' : '#1c1917'};">
+                <div class="card card-sm bg-light-lt p-3 mb-3 border">
+                    <div class="text-muted small fw-bold text-uppercase mb-1">Objectif à atteindre :</div>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <span class="fs-3 fw-bold ${isClaimable || isClaimed ? 'text-success' : ''}">
                             ${isClaimable || isClaimed ? '✓ ' : '🎯 '} ${escapeHtmlModal(currentQ.objective)}
                         </span>
-                        <span style="font-size:0.75rem; color:#44403c; background:#ffffff; border:1px solid var(--border-color); padding:0.25rem 0.6rem; border-radius:4px; font-weight:600;">
+                        <span class="badge bg-white border text-muted">
                             📍 ${escapeHtmlModal(currentQ.target_slot_hint || 'Fief')}
                         </span>
                     </div>
