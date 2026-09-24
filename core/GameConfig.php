@@ -50,7 +50,8 @@ class GameConfig {
                     'oasis_respawn_on_capture' => true,
                     'famine_enabled' => false,
                     'famine_rate' => 3.0,
-                    'famine_flour_consumption' => 1.0
+                    'famine_flour_consumption' => 1.0,
+                    'hero_cage_drop_rate' => 15
                 ];
             }
         }
