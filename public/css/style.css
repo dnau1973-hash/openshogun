@@ -125,25 +125,25 @@ a:hover {
 }
 
 .brand-logo-img {
-    height: 140px;
-    max-height: 155px;
+    height: 175px;
+    max-height: 195px;
     width: auto;
     max-width: 92vw;
     object-fit: contain;
-    filter: drop-shadow(0 6px 14px rgba(60, 45, 30, 0.18));
+    filter: drop-shadow(0 6px 16px rgba(60, 45, 30, 0.22));
 }
 
 @media (max-width: 768px) {
     .brand-logo-img {
-        height: 90px;
-        max-height: 95px;
+        height: 115px;
+        max-height: 125px;
     }
 }
 
 @media (max-width: 480px) {
     .brand-logo-img {
-        height: 70px;
-        max-height: 75px;
+        height: 90px;
+        max-height: 95px;
     }
 }
 

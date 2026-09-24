@@ -138,13 +138,45 @@ $navItems = [
 <div class="page">
     <div class="page-wrapper">
 
+        <!-- 🎖️ BADGES DU DAIMYŌ (IMMUNITÉ, KOBAN, SCEAU IMPÉRIAL) EN HAUT À DROITE AU-DESSUS DU LOGO -->
+        <div class="container-xl d-print-none px-3 px-xl-0 pt-2 pb-0">
+            <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                <?php if ($isUserProtected): ?>
+                    <span class="badge bg-success-lt text-success d-inline-flex align-items-center gap-1 shadow-sm"
+                          style="font-size:0.78rem; padding:0.35rem 0.65rem; cursor:help; border: 1px solid rgba(22, 163, 74, 0.45); border-radius:6px; background: rgba(22, 163, 74, 0.08);"
+                          title="🔰 Immunité Féodale active jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?> (aucun assaut ni espionnage possible sur vos fiefs)">
+                        <span>🔰</span>
+                        <span class="fw-bold"><?= htmlspecialchars($userProtection['formatted']) ?></span>
+                    </span>
+                <?php endif; ?>
+
+                <!-- 🪙 Trésor en Koban (Pièces d'Or) -->
+                <a href="?page=privilege" class="badge text-decoration-none d-inline-flex align-items-center gap-1 py-1 px-3 border shadow-sm"
+                   style="background:#ffffff; border-color:rgba(245,158,11,0.55) !important; color:#92400e; font-size:0.80rem; border-radius:6px; cursor:pointer;"
+                   title="Trésor Impérial : <?= number_format($userGoldCoins) ?> Koban. Cliquez pour ouvrir la page des Privilèges du Shōgun.">
+                    <span style="font-size:1rem;">🪙</span>
+                    <strong style="color:#d97706; font-size:0.88rem;"><?= number_format($userGoldCoins) ?></strong>
+                    <span style="color:#78350f; font-weight:600;">Koban</span>
+                </a>
+
+                <!-- 👑 Sceau Impérial -->
+                <a href="?page=privilege" 
+                   class="badge text-decoration-none d-inline-flex align-items-center gap-1 py-1 px-3 border shadow-sm <?= $isSealActive ? 'bg-warning text-dark border-warning' : 'border-warning-subtle' ?>"
+                   style="<?= $isSealActive ? 'font-weight:700; background:#f59e0b; color:#1e1b4b;' : 'background:#ffffff; color:#b45309; border-color:rgba(245,158,11,0.45) !important;' ?> font-size:0.80rem; border-radius:6px; cursor:pointer;"
+                   title="<?= $isSealActive ? 'Sceau Impérial Actif : ' . $sealStatus['remaining_formatted'] : 'Décrétez le Sceau Impérial du Shōgun' ?>">
+                    <span style="font-size:1rem;">👑</span>
+                    <span><?= $isSealActive ? 'Sceau Actif (' . $sealStatus['remaining_formatted'] . ')' : 'Sceau Impérial' ?></span>
+                </a>
+            </div>
+        </div>
+
         <!-- 🏯 LOGO EN HAUT AU MILIEU EN GRAND -->
-        <div class="text-center py-3 d-print-none" style="display:flex; justify-content:center; align-items:center;">
+        <div class="text-center py-2 d-print-none" style="display:flex; justify-content:center; align-items:center;">
             <a href="?page=resources" class="brand-logo-link" title="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>">
                 <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../../public/assets/logo_transparent.png') : 1 ?>" 
                      alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
                      class="brand-logo-img"
-                     style="height: 130px; max-height: 145px; width: auto; max-width: 90vw; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.2)); transition: transform 0.2s ease;">
+                     style="height: 175px; max-height: 195px; width: auto; max-width: 92vw; object-fit: contain; filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.22)); transition: transform 0.2s ease;">
             </a>
         </div>
 
@@ -266,32 +298,6 @@ $navItems = [
 
                         <!-- Outils à droite + Bouton Menu Utilisateur (sans redondance) -->
                         <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
-                            <?php if ($isUserProtected): ?>
-                                <span class="badge bg-success-lt text-success d-none d-xl-inline-flex align-items-center gap-1"
-                                      style="font-size:0.72rem; padding:0.25rem 0.55rem; cursor:help; border: 1px solid rgba(22, 163, 74, 0.45); border-radius:6px;"
-                                      title="🔰 Immunité Féodale active jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?> (aucun assaut ni espionnage possible sur vos fiefs)">
-                                    <span>🔰</span>
-                                    <span><?= htmlspecialchars($userProtection['formatted']) ?></span>
-                                </span>
-                            <?php endif; ?>
-
-                            <!-- 🪙 Trésor en Koban (Pièces d'Or) & 👑 Sceau Impérial -->
-                            <a href="?page=privilege" class="badge text-decoration-none d-flex align-items-center gap-1 py-1 px-2 border"
-                               style="background:rgba(245,158,11,0.15); border-color:rgba(245,158,11,0.45) !important; color:#fbbf24; font-size:0.75rem; border-radius:6px; cursor:pointer;"
-                               title="Trésor Impérial : <?= number_format($userGoldCoins) ?> Koban. Cliquez pour ouvrir la page des Privilèges du Shōgun.">
-                                <span>🪙</span>
-                                <strong><?= number_format($userGoldCoins) ?></strong>
-                                <span class="d-none d-sm-inline">Koban</span>
-                            </a>
-
-                            <a href="?page=privilege" 
-                               class="badge text-decoration-none d-none d-md-inline-flex align-items-center gap-1 py-1 px-2 border <?= $isSealActive ? 'bg-warning text-dark border-warning' : 'text-warning border-warning-subtle' ?>"
-                               style="<?= $isSealActive ? 'font-weight:700;' : 'background:rgba(0,0,0,0.3);' ?> font-size:0.72rem; border-radius:6px; cursor:pointer;"
-                               title="<?= $isSealActive ? 'Sceau Impérial Actif : ' . $sealStatus['remaining_formatted'] : 'Décrétez le Sceau Impérial du Shōgun' ?>">
-                                <span>👑</span>
-                                <span><?= $isSealActive ? 'Sceau Actif' : 'Sceau Impérial' ?></span>
-                            </a>
-
                             <!-- Menu Déroulant Utilisateur (Daimyō) : Profil, Communications, Codex, Admin, Déconnexion -->
                             <div class="dropdown">
                                 <a href="#" class="btn btn-sm btn-dark d-flex align-items-center gap-2 text-decoration-none px-2 py-1"

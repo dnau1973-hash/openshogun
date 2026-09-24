@@ -141,53 +141,139 @@ $goldCoins = (int)$sealStatus['gold'];
         <div class="row g-4">
             <!-- Offre 1 : 7 Jours -->
             <div class="col-md-4">
-                <div class="card h-100 border text-center p-3 hover-shadow" style="border-radius:10px; transition: transform 0.15s ease;">
-                    <div class="text-secondary small fw-bold text-uppercase">Investiture Découverte</div>
-                    <div class="fs-1 fw-bold text-dark my-2">7 Jours</div>
-                    <div class="fs-3 fw-bold text-warning mb-2">50 Koban</div>
-                    <p class="text-secondary small mb-3" style="line-height:1.5;">
-                        Parfait pour un démarrage rapide, accélérer l'annexion d'un second fief ou soutenir une guerre de frontière.
-                    </p>
-                    <button type="button" class="btn btn-outline-warning w-100 fw-bold" onclick="activateSeal(7)">
-                        👑 Proclamer pour 7 Jours
-                    </button>
+                <div class="card h-100 border text-center hover-shadow d-flex flex-column justify-content-between" 
+                     style="border-radius:12px; min-height:490px; padding: 2.2rem 1.5rem; transition: transform 0.15s ease; background:#ffffff;">
+                    <div>
+                        <div class="fs-2 mb-2">⛩️</div>
+                        <div class="text-secondary small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Découverte</div>
+                        <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">7 Jours</div>
+                        <div class="fs-2 fw-bold text-warning mb-1">50 Koban</div>
+                        <div class="text-muted small mb-3">soit ~7,1 Koban / jour</div>
+
+                        <p class="text-secondary small mb-3" style="line-height:1.6;">
+                            Parfait pour un démarrage rapide, accélérer l'annexion d'un second fief ou soutenir une guerre de frontière.
+                        </p>
+
+                        <div class="p-3 rounded text-start small mb-3" style="background: rgba(0,0,0,0.02); border: 1px dashed rgba(0,0,0,0.1);">
+                            <div class="text-dark fw-bold mb-2 small text-uppercase" style="font-size:0.7rem; color:#64748b;">Avantages garantis :</div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-success fw-bold">✓</span>
+                                <span>File de construction <strong>4 chantiers</strong></span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-success fw-bold">✓</span>
+                                <span><strong>Carnet de Raids</strong> illimité en 1 clic</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-success fw-bold">✓</span>
+                                <span><strong>Troc de Marché 1:1:1</strong> débloqué</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-success fw-bold">✓</span>
+                                <span>Ordre de <strong>Repli Samouraï</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="button" class="btn btn-outline-warning w-100 fw-bold py-2 shadow-sm" onclick="activateSeal(7)">
+                            👑 Proclamer pour 7 Jours
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Offre 2 : 14 Jours (Populaire) -->
             <div class="col-md-4">
-                <div class="card h-100 border border-warning text-center p-3 position-relative shadow-sm" 
-                     style="background: #fffdfa; border-radius:10px; border-width:2px !important;">
-                    <span class="badge bg-warning text-dark position-absolute top-0 start-50 translate-middle fw-bold px-3 py-1 shadow-sm">
-                        ⭐ ÉCONOMIE -10%
+                <div class="card h-100 border border-warning text-center position-relative shadow-sm d-flex flex-column justify-content-between" 
+                     style="background: #fffdfa; border-radius:12px; border-width:2.5px !important; min-height:490px; padding: 2.2rem 1.5rem; transition: transform 0.15s ease;">
+                    <span class="badge bg-warning text-dark position-absolute top-0 start-50 translate-middle fw-bold px-3 py-1 shadow" style="letter-spacing:0.5px;">
+                        ⭐ ÉCONOMIE -10% &bull; RECOMMANDE
                     </span>
-                    <div class="text-secondary small fw-bold text-uppercase mt-2">Investiture Royale</div>
-                    <div class="fs-1 fw-bold text-dark my-2">14 Jours</div>
-                    <div class="fs-3 fw-bold text-warning mb-2">90 Koban</div>
-                    <p class="text-secondary small mb-3" style="line-height:1.5;">
-                        La formule recommandée par les conseillers du Shōgun pour fortifier vos cités et planifier vos chantiers sur deux semaines.
-                    </p>
-                    <button type="button" class="btn btn-warning w-100 fw-bold shadow-sm" onclick="activateSeal(14)">
-                        👑 Proclamer pour 14 Jours
-                    </button>
+                    <div>
+                        <div class="fs-2 mb-2 mt-1">🏯</div>
+                        <div class="text-warning small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Royale</div>
+                        <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">14 Jours</div>
+                        <div class="fs-2 fw-bold text-warning mb-1">90 Koban</div>
+                        <div class="text-muted small mb-3">soit ~6,4 Koban / jour</div>
+
+                        <p class="text-secondary small mb-3" style="line-height:1.6;">
+                            La formule recommandée par les conseillers du Shōgun pour fortifier vos cités et planifier vos chantiers sur deux semaines.
+                        </p>
+
+                        <div class="p-3 rounded text-start small mb-3" style="background: rgba(245,158,11,0.06); border: 1px dashed rgba(245,158,11,0.3);">
+                            <div class="text-dark fw-bold mb-2 small text-uppercase" style="font-size:0.7rem; color:#b45309;">Avantages garantis :</div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-success fw-bold">✓</span>
+                                <span>File de construction <strong>4 chantiers</strong></span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-success fw-bold">✓</span>
+                                <span><strong>Carnet de Raids</strong> illimité en 1 clic</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-success fw-bold">✓</span>
+                                <span><strong>Troc de Marché 1:1:1</strong> débloqué</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-success fw-bold">✓</span>
+                                <span>Ordre de <strong>Repli Samouraï</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="button" class="btn btn-warning w-100 fw-bold py-2 shadow" onclick="activateSeal(14)">
+                            👑 Proclamer pour 14 Jours
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Offre 3 : 30 Jours -->
             <div class="col-md-4">
-                <div class="card h-100 border text-center p-3 hover-shadow" style="border-radius:10px; transition: transform 0.15s ease;">
-                    <span class="badge bg-purple-lt text-purple position-absolute top-0 start-50 translate-middle fw-bold px-3 py-1">
-                        👑 PRESTIGE -25%
+                <div class="card h-100 border text-center hover-shadow position-relative d-flex flex-column justify-content-between" 
+                     style="border-radius:12px; min-height:490px; padding: 2.2rem 1.5rem; transition: transform 0.15s ease; background:#ffffff;">
+                    <span class="badge bg-purple text-white position-absolute top-0 start-50 translate-middle fw-bold px-3 py-1 shadow" style="letter-spacing:0.5px;">
+                        👑 PRESTIGE &bull; -25% D'OR
                     </span>
-                    <div class="text-secondary small fw-bold text-uppercase mt-2">Investiture Mensuelle</div>
-                    <div class="fs-1 fw-bold text-dark my-2">30 Jours</div>
-                    <div class="fs-3 fw-bold text-warning mb-2">150 Koban</div>
-                    <p class="text-secondary small mb-3" style="line-height:1.5;">
-                        La tranquillité absolue pour régner un mois complet avec la plénitude de tous les privilèges et le carnet de raids illimité.
-                    </p>
-                    <button type="button" class="btn btn-outline-warning w-100 fw-bold" onclick="activateSeal(30)">
-                        👑 Proclamer pour 30 Jours
-                    </button>
+                    <div>
+                        <div class="fs-2 mb-2 mt-1">👑</div>
+                        <div class="text-purple small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Mensuelle</div>
+                        <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">30 Jours</div>
+                        <div class="fs-2 fw-bold text-warning mb-1">150 Koban</div>
+                        <div class="text-muted small mb-3">soit 5,0 Koban / jour seulement</div>
+
+                        <p class="text-secondary small mb-3" style="line-height:1.6;">
+                            La tranquillité absolue pour régner un mois complet avec la plénitude de tous les privilèges et le carnet de raids illimité.
+                        </p>
+
+                        <div class="p-3 rounded text-start small mb-3" style="background: rgba(107,33,168,0.04); border: 1px dashed rgba(107,33,168,0.25);">
+                            <div class="text-dark fw-bold mb-2 small text-uppercase" style="font-size:0.7rem; color:#6b21a8;">Avantages garantis :</div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-success fw-bold">✓</span>
+                                <span>File de construction <strong>4 chantiers</strong></span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-success fw-bold">✓</span>
+                                <span><strong>Carnet de Raids</strong> illimité en 1 clic</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-success fw-bold">✓</span>
+                                <span><strong>Troc de Marché 1:1:1</strong> débloqué</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-success fw-bold">✓</span>
+                                <span>Ordre de <strong>Repli Samouraï</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="button" class="btn btn-outline-warning w-100 fw-bold py-2 shadow-sm" onclick="activateSeal(30)">
+                            👑 Proclamer pour 30 Jours
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -557,3 +643,4 @@ async function submitNpcExchange() {
     }
 }
 </script>
+
