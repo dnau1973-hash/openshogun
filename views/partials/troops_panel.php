@@ -31,7 +31,7 @@ foreach ($stationedTroops as $t) {
 $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLevel * 25);
 ?>
 
-<div class="card mb-3">
+<div class="card">
     <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
         <h3 class="card-title m-0" style="font-size: 0.95rem;">
             <span>⚔️</span> Garnison du Domaine

@@ -330,7 +330,7 @@ foreach (BUILDINGS as $code => $bInfo) {
     </div>
 
     <!-- Sidebar : File de Construction Urbaine & Régiments -->
-    <div>
+    <div class="d-flex flex-column gap-3">
         <!-- Didacticiel Féodal & Quêtes du Daimyō -->
         <?php require __DIR__ . '/partials/quest_banner.php'; ?>
 

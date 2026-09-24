@@ -243,7 +243,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
     </div>
 
     <!-- Sidebar : Files et Productions -->
-    <div>
+    <div class="d-flex flex-column gap-3">
         <!-- Didacticiel Féodal & Quêtes du Daimyō -->
         <?php require __DIR__ . '/partials/quest_banner.php'; ?>
 
