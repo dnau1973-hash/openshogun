@@ -128,6 +128,27 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
         }
     }
 }
+
+// Vérifier la présence d'un Pionnier Féodal (Colon) dans la garnison
+$hasColonistAvailable = false;
+$availableColonCount = 0;
+foreach ($stationedUnits as $u) {
+    if ($u['unit_code'] === 'colonizer' && (int)$u['count'] > 0) {
+        $hasColonistAvailable = true;
+        $availableColonCount += (int)$u['count'];
+    }
+}
+foreach ($stationedShips as $s) {
+    if ($s['ship_code'] === 'colony_ship' && (int)$s['count'] > 0) {
+        $hasColonistAvailable = true;
+        $availableColonCount += (int)$s['count'];
+    }
+}
+
+// Emplacement du Tenshu pour orientation directe
+$stmtTenshu = $db->prepare("SELECT building_slot FROM planet_buildings WHERE planet_id = ? AND building_code = 'hq'");
+$stmtTenshu->execute([$planet['id']]);
+$tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
 ?>
 
 <div class="grid-main">
@@ -159,11 +180,34 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
                 </div>
             <?php else: ?>
                 <form id="fleetForm" onsubmit="event.preventDefault(); submitFleet();">
+                    <?php if ($preselectedMission === 'colonize' && !$hasColonistAvailable): ?>
+                        <div class="alert alert-warning d-flex align-items-center gap-3 mb-4" style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:1rem 1.25rem;">
+                            <span style="font-size:2rem; flex-shrink:0;">⛩️</span>
+                            <div style="flex:1;">
+                                <strong style="color:#b45309; font-size:1rem;">Aucun Pionnier Féodal (Colon ⛩️) en garnison !</strong>
+                                <p style="color:#78350f; font-size:0.88rem; margin:0.25rem 0 0.75rem 0; line-height:1.5;">
+                                    Pour ériger votre nouveau fief, vous devez d'abord former un <strong>Pionnier Féodal</strong>. Il est disponible au <strong>Donjon Tenshu</strong> (déblocage aux paliers de niveau 5, 10 et 15) ou à l'<strong>Atelier de Siège</strong>.
+                                </p>
+                                <div class="d-flex gap-2 flex-wrap align-items-center">
+                                    <a href="?page=building&slot=<?= $tenshuSlot ?>" class="btn btn-sm btn-success fw-bold">
+                                        🏯 Former au Donjon Tenshu (Niv. 5+) &rarr;
+                                    </a>
+                                    <a href="?page=shipyard" class="btn btn-sm btn-outline-secondary">
+                                        🔨 Atelier de Siège &amp; Écuries
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
                     <!-- Étape 1 : Cavalerie et Engins de Siège -->
                     <?php if (!empty($stationedShips)): ?>
                         <h3 style="font-size:0.95rem; color:#fff; margin-bottom:0.75rem;">🐎 1. Cavalerie, Convois & Engins de Siège</h3>
                         <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem;">
                             <?php foreach ($stationedShips as $s): ?>
+                                <?php 
+                                    $defaultShipVal = ($preselectedMission === 'colonize' && $s['ship_code'] === 'colony_ship' && (int)$s['count'] > 0) ? '1' : '0';
+                                ?>
                                 <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:0.5rem 0.75rem; border-radius:6px;">
                                     <div>
                                         <strong><?= htmlspecialchars($s['name']) ?></strong>
@@ -177,7 +221,7 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
                                             Max
                                         </button>
                                         <input type="number" id="ship-<?= $s['ship_code'] ?>" name="fleet[<?= $s['ship_code'] ?>]" 
-                                                min="0" max="<?= $s['count'] ?>" value="0"
+                                                min="0" max="<?= $s['count'] ?>" value="<?= $defaultShipVal ?>"
                                                 style="width:70px; background:rgba(0,0,0,0.6); border:1px solid var(--border-color); color:#fff; padding:0.3rem; border-radius:4px; text-align:center;">
                                     </div>
                                 </div>
@@ -190,6 +234,9 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
                         <h3 style="font-size:0.95rem; color:#4ade80; margin-bottom:0.75rem;">⚔️ 2. Régiments de Guerriers & Samouraïs</h3>
                         <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem;">
                             <?php foreach ($stationedUnits as $u): ?>
+                                <?php 
+                                    $defaultUnitVal = ($preselectedMission === 'colonize' && $u['unit_code'] === 'colonizer' && (int)$u['count'] > 0) ? '1' : '0';
+                                ?>
                                 <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:0.5rem 0.75rem; border-radius:6px; border-left:3px solid #dc2626;">
                                     <div>
                                         <span style="font-size:1.1rem; margin-right:0.3rem;"><?= $u['icon'] ?></span>
@@ -204,7 +251,7 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
                                             Max
                                         </button>
                                         <input type="number" id="ship-<?= $u['unit_code'] ?>" name="fleet[<?= $u['unit_code'] ?>]" 
-                                                min="0" max="<?= $u['count'] ?>" value="0"
+                                                min="0" max="<?= $u['count'] ?>" value="<?= $defaultUnitVal ?>"
                                                 style="width:70px; background:rgba(0,0,0,0.6); border:1px solid var(--border-color); color:#fff; padding:0.3rem; border-radius:4px; text-align:center;">
                                     </div>
                                 </div>
@@ -406,9 +453,14 @@ async function submitFleet() {
     const selectedOpt = targetSelect.options[targetSelect.selectedIndex];
     const isTargetProtected = selectedOpt && selectedOpt.dataset.protected === '1';
     const hostileMissions = ['raid', 'attack', 'occupy', 'spy'];
-    if (isTargetProtected && hostileMissions.includes(missionType)) {
-        showModalAlert("Ce seigneur bénéficie de l'immunité féodale des nouveaux joueurs (protection active). Cette province ne peut être ni attaquée ni espionnée.", "warning");
-        return;
+    // Contrôle d'éligibilité pour la colonisation
+    if (missionType === 'colonize') {
+        const colonizerCnt = parseInt(document.getElementById('ship-colonizer')?.value || '0', 10);
+        const colonyShipCnt = parseInt(document.getElementById('ship-colony_ship')?.value || '0', 10);
+        if (colonizerCnt <= 0 && colonyShipCnt <= 0) {
+            showModalAlert("Une expédition de colonisation nécessite d'inclure au moins 1 Pionnier Féodal (Colon ⛩️). Si vous n'en avez pas encore en garnison, vous devez d'abord en former un au Donjon Tenshu (Niv. 5+) ou à l'Atelier de Siège.", "warning", "Pionnier Requis");
+            return;
+        }
     }
 
     const formData = new FormData();
