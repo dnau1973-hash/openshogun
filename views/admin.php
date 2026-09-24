@@ -109,6 +109,177 @@ $humanUsers = $db->query("
     ORDER BY u.id ASC
 ")->fetchAll();
 
+// Statistiques & Répartition des Tuiles du Monde Féodal par Catégorie
+$mapRadius = 35;
+try {
+    $maxCoord = (int)$db->query("SELECT MAX(GREATEST(ABS(coord_x), ABS(coord_y))) FROM planets")->fetchColumn();
+    if ($maxCoord > $mapRadius) {
+        $mapRadius = $maxCoord;
+    }
+} catch (Exception $e) {}
+
+$totalTilesCount = (int)pow(($mapRadius * 2) + 1, 2);
+
+// Indexer les coordonnées des donjons authentiques déployés
+$spawnedCastleCoords = [];
+foreach ($authenticCastles as $c) {
+    if (!empty($c['is_spawned'])) {
+        $spawnedCastleCoords[((int)$c['coord_x']) . ':' . ((int)$c['coord_y'])] = true;
+    }
+}
+
+// Indexer les coordonnées des oasis
+$oasisCoords = [];
+foreach ($allOases as $o) {
+    $oasisCoords[((int)$o['coord_x']) . ':' . ((int)$o['coord_y'])] = $o;
+}
+
+// Indexer les planètes (fiefs castraux occupés vs terres libres inoccupées)
+$allPlanetsRows = $db->query("SELECT coord_x, coord_y, user_id FROM planets")->fetchAll(PDO::FETCH_ASSOC);
+$villageCoords = [];
+$freeLandCoords = [];
+foreach ($allPlanetsRows as $p) {
+    $k = ((int)$p['coord_x']) . ':' . ((int)$p['coord_y']);
+    if (isset($spawnedCastleCoords[$k])) {
+        continue; // L'emplacement est un donjon authentique déployé
+    }
+    if (!empty($p['user_id'])) {
+        $villageCoords[$k] = true;
+    } else {
+        $freeLandCoords[$k] = true;
+    }
+}
+
+$mapTileStats = [
+    'radius' => $mapRadius,
+    'total_tiles' => $totalTilesCount,
+    'villages' => count($villageCoords),
+    'free_lands' => count($freeLandCoords),
+    'castles' => count($spawnedCastleCoords),
+    'oases' => count($oasisCoords),
+    'plains' => 0,
+    'forest' => 0,
+    'mountain' => 0,
+    'hills' => 0,
+    'lake' => 0,
+];
+
+// Calcul déterministe des types naturels procéduraux pour les tuiles restantes
+for ($y = -$mapRadius; $y <= $mapRadius; $y++) {
+    for ($x = -$mapRadius; $x <= $mapRadius; $x++) {
+        $k = $x . ':' . $y;
+        if (isset($villageCoords[$k]) || isset($freeLandCoords[$k]) || isset($spawnedCastleCoords[$k]) || isset($oasisCoords[$k])) {
+            continue;
+        }
+        $seed = abs((int)(($x * 73856093) ^ ($y * 19349663))) % 1000;
+        if ($seed < 600) {
+            $mapTileStats['plains']++;
+        } elseif ($seed < 750) {
+            $mapTileStats['forest']++;
+        } elseif ($seed < 870) {
+            $mapTileStats['mountain']++;
+        } elseif ($seed < 950) {
+            $mapTileStats['hills']++;
+        } else {
+            $mapTileStats['lake']++;
+        }
+    }
+}
+
+// Métadonnées d'affichage des 9 catégories de tuiles
+$mapTileCategories = [
+    'villages' => [
+        'name' => 'Fiefs Occupés',
+        'sub' => 'Daimyōs & PNJ',
+        'count' => $mapTileStats['villages'],
+        'icon' => '🏯',
+        'badge_bg' => 'bg-purple-lt text-purple',
+        'bar_color' => 'bg-purple',
+        'img' => '/public/assets/map/tile_village.jpg?v=2',
+        'desc' => 'Capitales et fiefs colonisés par les joueurs et clans IA.'
+    ],
+    'free_lands' => [
+        'name' => 'Terres Libres',
+        'sub' => 'Emplacements arpentés',
+        'count' => $mapTileStats['free_lands'],
+        'icon' => '🏳️',
+        'badge_bg' => 'bg-secondary-lt text-secondary',
+        'bar_color' => 'bg-secondary',
+        'img' => '/public/assets/map/tile_plains.jpg?v=2',
+        'desc' => 'Emplacements arpentés disponibles pour fondation de colonie.'
+    ],
+    'castles' => [
+        'name' => 'Donjons Sacrés',
+        'sub' => '現存十二天守',
+        'count' => $mapTileStats['castles'],
+        'icon' => '👑',
+        'badge_bg' => 'bg-warning-lt text-warning',
+        'bar_color' => 'bg-warning',
+        'img' => '/public/assets/map/tile_authentic_castle.jpg?v=2',
+        'desc' => 'Les 12 forteresses impériales historiques du Japon féodal.'
+    ],
+    'oases' => [
+        'name' => 'Oasis Naturelles',
+        'sub' => 'Faune & Bonus',
+        'count' => $mapTileStats['oases'],
+        'icon' => '🌿',
+        'badge_bg' => 'bg-teal-lt text-teal',
+        'bar_color' => 'bg-teal',
+        'img' => '/public/assets/map/tile_lake.jpg?v=2',
+        'desc' => 'Havres de faune sauvage procurant des bonus de production.'
+    ],
+    'plains' => [
+        'name' => 'Plaines Fertiles',
+        'sub' => 'Prairies & Terres',
+        'count' => $mapTileStats['plains'],
+        'icon' => '🌾',
+        'badge_bg' => 'bg-lime-lt text-lime',
+        'bar_color' => 'bg-lime',
+        'img' => '/public/assets/map/tile_plains.jpg?v=2',
+        'desc' => 'Terres arables verdoyantes et plaines propices à l\'agriculture.'
+    ],
+    'forest' => [
+        'name' => 'Forêt de Cèdres',
+        'sub' => 'Sugi centenaires',
+        'count' => $mapTileStats['forest'],
+        'icon' => '🌲',
+        'badge_bg' => 'bg-green-lt text-green',
+        'bar_color' => 'bg-green',
+        'img' => '/public/assets/map/tile_forest.jpg?v=2',
+        'desc' => 'Massifs sylvestres denses pourvoyeurs de bois de construction.'
+    ],
+    'mountain' => [
+        'name' => 'Pics & Montagnes',
+        'sub' => 'Crêtes rocheuses',
+        'count' => $mapTileStats['mountain'],
+        'icon' => '⛰️',
+        'badge_bg' => 'bg-dark-lt text-dark',
+        'bar_color' => 'bg-dark',
+        'img' => '/public/assets/map/tile_mountain.jpg?v=2',
+        'desc' => 'Reliefs escarpés et carrières granitiques des monts du Japon.'
+    ],
+    'hills' => [
+        'name' => 'Collines & Coteaux',
+        'sub' => 'Cultures en terrasse',
+        'count' => $mapTileStats['hills'],
+        'icon' => '🏞️',
+        'badge_bg' => 'bg-orange-lt text-orange',
+        'bar_color' => 'bg-orange',
+        'img' => '/public/assets/map/tile_hills.jpg?v=2',
+        'desc' => 'Versants vallonnés et vergers suspendus de l\'archipel.'
+    ],
+    'lake' => [
+        'name' => 'Lacs & Eaux Calmes',
+        'sub' => 'Rivières & Bassins',
+        'count' => $mapTileStats['lake'],
+        'icon' => '🌊',
+        'badge_bg' => 'bg-cyan-lt text-cyan',
+        'bar_color' => 'bg-cyan',
+        'img' => '/public/assets/map/tile_lake.jpg?v=2',
+        'desc' => 'Étendues d\'eau douce, étangs sacrés et méandres fluviaux.'
+    ],
+];
+
 // Gestion des onglets d'administration du Shogunat
 $allowedTabs = ['world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all', 'game', 'oases', 'castles'];
 $currentTab = $_GET['tab'] ?? 'world';
@@ -225,21 +396,29 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
         <!-- Paramétrage du Monde -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('world')" title="Arpentage, Oasis et 12 Donjons du Monde Féodal">
+            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('world')" title="Arpentage, Oasis et Répartition des Tuiles du Monde Féodal">
                 <div class="card-body">
-                    <div class="row align-items-center">
+                    <div class="row align-items-center mb-2">
                         <div class="col-auto">
                             <span class="avatar rounded bg-success-lt text-success" style="font-size:1.3rem;">🗾</span>
                         </div>
                         <div class="col">
                             <div class="font-weight-medium">Paramétrage du Monde</div>
                             <div class="text-success font-weight-bold" style="font-size:1.25rem;">
-                                <?= $totalColonies ?> / <?= $totalPlanets ?> Fiefs
+                                <?= number_format($mapTileStats['total_tiles']) ?> Tuiles
                             </div>
                         </div>
                     </div>
-                    <div class="text-secondary small mt-2">
-                        <?= $spawnedCastlesCount ?>/12 Donjons | <?= $oasisStats['total_oases'] ?> Oasis
+                    <div class="d-flex flex-wrap gap-1" style="font-size: 0.72rem;">
+                        <?php foreach ($mapTileCategories as $cat): ?>
+                            <span class="badge <?= $cat['badge_bg'] ?> py-1 px-1" title="<?= htmlspecialchars($cat['name']) ?> : <?= number_format($cat['count']) ?> tuiles (<?= round(($cat['count'] / $mapTileStats['total_tiles']) * 100, 1) ?>%)">
+                                <?= $cat['icon'] ?> <?= number_format($cat['count']) ?>
+                            </span>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="text-secondary small mt-2 d-flex justify-content-between align-items-center">
+                        <span>Rayon &plusmn;<?= $mapTileStats['radius'] ?> &bull; 9 Catégories</span>
+                        <span class="text-success fw-bold">&rarr;</span>
                     </div>
                 </div>
             </div>
@@ -436,6 +615,9 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge bg-indigo-lt">
+                            🗺️ <?= number_format($mapTileStats['total_tiles']) ?> Tuiles
+                        </span>
                         <span class="badge bg-danger-lt">
                             ⚡ x<?= (int)($settings['game_speed'] ?? 5) ?> Vitesse
                         </span>
@@ -448,6 +630,66 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         <span class="badge bg-green-lt">
                             🌿 <?= $oasisStats['total_oases'] ?> Oasis (<?= $oasisStats['wild_oases'] ?> Sauvages)
                         </span>
+                    </div>
+                </div>
+
+                <!-- Répartition Détaillée des Tuiles du Monde Féodal par Catégorie -->
+                <div class="border rounded p-3 bg-body-tertiary mb-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar avatar-xs rounded bg-success-lt text-success" style="font-size: 1rem;">🗺️</span>
+                            <span class="fw-bold text-dark">Répartition des Tuiles du Monde Féodal</span>
+                            <span class="text-secondary small">(Grille de <?= ($mapTileStats['radius'] * 2 + 1) ?>&times;<?= ($mapTileStats['radius'] * 2 + 1) ?> cases &bull; Rayon &plusmn;<?= $mapTileStats['radius'] ?>)</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary text-white fw-bold">
+                                <?= number_format($mapTileStats['total_tiles']) ?> Tuiles au total
+                            </span>
+                            <a href="/?page=map" target="_blank" class="btn btn-xs btn-outline-secondary">
+                                🗾 Ouvrir la Carte &rarr;
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Barre de progression proportionnelle multi-segments -->
+                    <div class="progress progress-separated mb-3" style="height: 10px;" title="Répartition graphique de la carte féodale">
+                        <?php foreach ($mapTileCategories as $cat): 
+                            $pct = round(($cat['count'] / $mapTileStats['total_tiles']) * 100, 2);
+                            if ($pct <= 0) continue;
+                        ?>
+                            <div class="progress-bar <?= $cat['bar_color'] ?>" role="progressbar" style="width: <?= $pct ?>%" aria-valuenow="<?= $pct ?>" aria-valuemin="0" aria-valuemax="100" title="<?= htmlspecialchars($cat['name']) ?> : <?= number_format($cat['count']) ?> tuiles (<?= $pct ?>%)"></div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <!-- Grille des 9 catégories de tuiles -->
+                    <div class="row row-cards g-2">
+                        <?php foreach ($mapTileCategories as $key => $cat): 
+                            $pct = round(($cat['count'] / $mapTileStats['total_tiles']) * 100, 1);
+                        ?>
+                            <div class="col-6 col-sm-4 col-md-3 col-xl">
+                                <div class="card card-sm h-100 shadow-none border">
+                                    <div class="card-body p-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="<?= $cat['img'] ?>" alt="<?= htmlspecialchars($cat['name']) ?>" 
+                                                 style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(0,0,0,0.15);" class="flex-shrink-0">
+                                            <div class="overflow-hidden flex-grow-1">
+                                                <div class="text-truncate fw-bold text-dark small" title="<?= htmlspecialchars($cat['name']) ?> (<?= htmlspecialchars($cat['sub']) ?>)">
+                                                    <?= $cat['icon'] ?> <?= htmlspecialchars($cat['name']) ?>
+                                                </div>
+                                                <div class="d-flex align-items-baseline justify-content-between gap-1 mt-1">
+                                                    <span class="badge <?= $cat['badge_bg'] ?> px-1 py-0 fw-bold" style="font-size: 0.72rem;">
+                                                        <?= number_format($cat['count']) ?>
+                                                    </span>
+                                                    <span class="text-secondary small font-monospace" style="font-size: 0.7rem;">
+                                                        <?= $pct ?>%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
 

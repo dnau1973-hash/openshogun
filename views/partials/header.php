@@ -387,7 +387,7 @@ $navItems = [
 
                 <!-- 1. Bois de Cèdre -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card card-sm shadow-sm border-start border-3 border-warning">
+                    <div class="card card-sm shadow-sm border-start border-1 border-warning">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
@@ -415,7 +415,7 @@ $navItems = [
 
                 <!-- 2. Pierre de Taille -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card card-sm shadow-sm border-start border-3 border-primary">
+                    <div class="card card-sm shadow-sm border-start border-1 border-primary">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
@@ -443,7 +443,7 @@ $navItems = [
 
                 <!-- 3. Riz Impérial -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card card-sm shadow-sm border-start border-3 border-success">
+                    <div class="card card-sm shadow-sm border-start border-1 border-success">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
@@ -471,7 +471,7 @@ $navItems = [
 
                 <!-- 4. Farine de Riz (Komeko) -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card card-sm shadow-sm border-start border-3 border-secondary" title="Farine de Riz (Raffinée en Meunerie)">
+                    <div class="card card-sm shadow-sm border-start border-1 border-secondary" title="Farine de Riz (Raffinée en Meunerie)">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
@@ -497,7 +497,7 @@ $navItems = [
 
                 <!-- 5. Saké Féodal (Sakagura) -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card card-sm shadow-sm border-start border-3 border-purple" title="Saké Impérial (Brassé en Meunerie / Sakagura)">
+                    <div class="card card-sm shadow-sm border-start border-1 border-purple" title="Saké Impérial (Brassé en Meunerie / Sakagura)">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
@@ -523,7 +523,7 @@ $navItems = [
 
                 <!-- 6. Sérénité Shinto -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card card-sm shadow-sm border-start border-3 <?= $eOk ? 'border-teal' : 'border-danger' ?>">
+                    <div class="card card-sm shadow-sm border-start border-1 <?= $eOk ? 'border-teal' : 'border-danger' ?>">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
