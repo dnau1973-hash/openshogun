@@ -189,14 +189,39 @@ window.selectPlanetTile = function(data) {
 
     coords.innerText = `[${data.coord_x} : ${data.coord_y}]`;
 
-    // ── Terres vides ────────────────────────────────────────────
+    // ── Terres Vierges Naturelles (Plaines, Collines, etc.) ────────────────────
     if (data.empty) {
-        title.innerText = '🌑 Terres Inexplorées';
+        title.innerHTML = `🏞️ <span style="color:#15803d;">${data.terrain_name || 'Terres Vierges'}</span> <span class="text-secondary small font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
         body.innerHTML = `
-            <div class="text-center py-4 px-2">
-                <div style="font-size:3rem; margin-bottom:0.75rem;">🌑</div>
-                <h4 class="font-weight-bold mb-1" style="color:#1e293b;">Terres Inexplorées</h4>
-                <p class="text-secondary mb-0">Ces terres lointaines ne contiennent actuellement aucun domaine castral recensé.</p>
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width:58px; height:58px; border-radius:8px; overflow:hidden; border:2px solid #cbd5e1; flex-shrink:0; background:#f1f5f9;">
+                        ${data.terrain_img ? `<img src="${data.terrain_img}" alt="" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:2rem; display:flex; align-items:center; justify-content:center; height:100%;">🌾</span>'}
+                    </div>
+                    <div>
+                        <div style="font-weight:700; color:#1e293b; font-size:1.1rem;">
+                            ${data.terrain_name || 'Terres Vierges Inoccupées'}
+                        </div>
+                        <div class="small text-secondary mt-1">
+                            ${data.terrain_desc || 'Plaines fertiles et terroirs prospères du Japon féodal, prêts à être défrichés.'}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success d-flex align-items-center gap-2 m-0 p-2" style="font-size:0.85rem; border-radius:6px;">
+                    <span style="font-size:1.3rem;">✨</span>
+                    <div>
+                        <strong>Emplacement Disponible pour Nouveau Fief !</strong><br>
+                        Vous pouvez y dépêcher une expédition avec un <strong>Pionnier Féodal (Colon ⛩️)</strong> pour y fonder votre prochain domaine castral.
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
+                <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
+                    🏯 Fonder un Fief ici avec un Pionnier &rarr;
+                </a>
             </div>
         `;
         openMapModal();

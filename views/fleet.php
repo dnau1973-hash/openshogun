@@ -84,6 +84,50 @@ $knownOases = $stmtOases->fetchAll();
 $preselectedTargetType = $_GET['target_type'] ?? 'planet';
 $preselectedTarget = isset($_GET['target_id']) ? (int)$_GET['target_id'] : 0;
 $preselectedMission = $_GET['mission'] ?? 'raid';
+
+// Prise en charge du clic sur n'importe quelle coordonnée libre de la carte [X : Y] pour coloniser
+if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
+    $targetX = (int)$_GET['target_x'];
+    $targetY = (int)$_GET['target_y'];
+
+    // Vérifier si un fief existe déjà à ces coordonnées
+    $stmtFindPlanet = $db->prepare("SELECT id FROM planets WHERE coord_x = ? AND coord_y = ?");
+    $stmtFindPlanet->execute([$targetX, $targetY]);
+    $foundPlanetId = $stmtFindPlanet->fetchColumn();
+
+    if ($foundPlanetId) {
+        $preselectedTargetType = 'planet';
+        $preselectedTarget = (int)$foundPlanetId;
+        $preselectedMission = $_GET['mission'] ?? 'colonize';
+    } else {
+        // Vérifier s'il s'agit d'une oasis
+        $stmtFindOasis = $db->prepare("SELECT id FROM oases WHERE coord_x = ? AND coord_y = ?");
+        $stmtFindOasis->execute([$targetX, $targetY]);
+        $foundOasisId = $stmtFindOasis->fetchColumn();
+
+        if ($foundOasisId) {
+            $preselectedTargetType = 'oasis';
+            $preselectedTarget = (int)$foundOasisId;
+            $preselectedMission = $_GET['mission'] ?? 'occupy';
+        } else {
+            // Emplacement vierge : initialiser la terre libre à coloniser
+            require_once __DIR__ . '/../core/GalaxyEngine.php';
+            $terrainData = GalaxyEngine::getTerrainType($targetX, $targetY);
+            $stmtCreateFree = $db->prepare("
+                INSERT INTO planets 
+                (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
+                VALUES (?, ?, ?, ?, 2000, 1500, 1000, 0, 50, 20000, 20000, 20000, 0, UNIX_TIMESTAMP())
+            ");
+            $freeName = $terrainData['name'] . ' Vierges';
+            $stmtCreateFree->execute([$freeName, $targetX, $targetY, $terrainData['type']]);
+            $createdPlanetId = (int)$db->lastInsertId();
+
+            $preselectedTargetType = 'planet';
+            $preselectedTarget = $createdPlanetId;
+            $preselectedMission = $_GET['mission'] ?? 'colonize';
+        }
+    }
+}
 ?>
 
 <div class="grid-main">
@@ -212,12 +256,27 @@ $preselectedMission = $_GET['mission'] ?? 'raid';
                         <select id="targetSelect" style="width:100%; background:rgba(15,23,42,0.9); border:1px solid var(--border-color); color:#fff; padding:0.6rem; border-radius:6px; margin-bottom:0.75rem;">
                             <option value="">-- Sélectionner une destination féodale ou oasis --</option>
                             <optgroup label="🏯 Fiefs & Domaines Provinciaux">
-                                <?php foreach ($knownPlanets as $kp): ?>
-                                    <?php $protLabel = !empty($kp['is_protected']) ? ' [🔰 Protégé]' : ''; ?>
-                                    <option value="planet:<?= $kp['id'] ?>" data-protected="<?= !empty($kp['is_protected']) ? '1' : '0' ?>" <?= ($preselectedTargetType === 'planet' && $preselectedTarget === (int)$kp['id']) ? 'selected' : '' ?>>
+                                <?php 
+                                    $targetFoundInList = false;
+                                    foreach ($knownPlanets as $kp): 
+                                        $isSelected = ($preselectedTargetType === 'planet' && $preselectedTarget === (int)$kp['id']);
+                                        if ($isSelected) $targetFoundInList = true;
+                                        $protLabel = !empty($kp['is_protected']) ? ' [🔰 Protégé]' : ''; 
+                                ?>
+                                    <option value="planet:<?= $kp['id'] ?>" data-protected="<?= !empty($kp['is_protected']) ? '1' : '0' ?>" <?= $isSelected ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($kp['name']) ?> [<?= $kp['coord_x'] ?> : <?= $kp['coord_y'] ?>]<?= $protLabel ?>
                                     </option>
                                 <?php endforeach; ?>
+                                <?php if (!$targetFoundInList && $preselectedTargetType === 'planet' && $preselectedTarget > 0): 
+                                    $stmtSpecific = $db->prepare("SELECT id, name, coord_x, coord_y, user_id FROM planets WHERE id = ?");
+                                    $stmtSpecific->execute([$preselectedTarget]);
+                                    $sp = $stmtSpecific->fetch();
+                                    if ($sp):
+                                ?>
+                                    <option value="planet:<?= $sp['id'] ?>" selected>
+                                        <?= htmlspecialchars($sp['name']) ?> [<?= $sp['coord_x'] ?> : <?= $sp['coord_y'] ?>] <?= empty($sp['user_id']) ? '(Terre Vierge Libre ⛩️)' : '' ?>
+                                    </option>
+                                <?php endif; endif; ?>
                             </optgroup>
                             <optgroup label="🌿 Oasis Naturelles & Fiefs Sauvages (Bonus de Récoltes)">
                                 <?php foreach ($knownOases as $ko): 

@@ -338,7 +338,7 @@ class GalaxyMapController {
 
                 const planetDataAttr = planet 
                     ? JSON.stringify(planet).replace(/"/g, '&quot;') 
-                    : JSON.stringify({ coord_x: x, coord_y: y, empty: true, terrain_name: terrain.name, terrain_desc: terrain.desc }).replace(/"/g, '&quot;');
+                    : JSON.stringify({ coord_x: x, coord_y: y, empty: true, terrain_name: terrain.name, terrain_desc: terrain.desc, terrain_img: terrain.img, terrain_type: terrain.type }).replace(/"/g, '&quot;');
 
                 let tileTooltip = terrain.name;
                 if (planet) {
