@@ -1007,6 +1007,7 @@ function updateHudResources(planet) {
     updateEl('res-val-deut', 'bar-deut', planet.deuterium, planet.deuterium_max);
     if (planet.rice_flour !== undefined) updateEl('res-val-rice-flour', 'bar-rice-flour', planet.rice_flour, planet.rice_flour_max || 10000);
     if (planet.sake !== undefined) updateEl('res-val-sake', 'bar-sake', planet.sake, planet.sake_max || 10000);
+    if (planet.wooden_beams !== undefined) updateEl('res-val-wooden-beams', 'bar-wooden-beams', planet.wooden_beams, planet.wooden_beams_max || 10000);
 }
 </script>
 <script src="/public/js/audio_manager.js"></script>

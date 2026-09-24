@@ -391,13 +391,17 @@ $navItems = [
                 $sakeMax = max(1, (int)($planet['sake_max'] ?? 10000));
                 $pctSake = min(100, ($sakeStock / $sakeMax) * 100);
 
+                $beamsStock = (float)($planet['wooden_beams'] ?? 0);
+                $beamsMax = max(1, (int)($planet['wooden_beams_max'] ?? 10000));
+                $pctBeams = min(100, ($beamsStock / $beamsMax) * 100);
+
                 $eBalance = $planet['energy_max'] - $planet['energy_used'];
                 $eOk = ($eBalance >= 0);
                 $pctEnergy = ($planet['energy_max'] > 0) ? min(100, ($planet['energy_used'] / $planet['energy_max']) * 100) : 0;
                 ?>
 
                 <!-- 1. Bois de Cèdre -->
-                <div class="col-6 col-md-4 col-lg-2">
+                <div class="col-6 col-sm-4 col-md-3 col-xl">
                     <div class="card card-sm shadow-sm border-start border-1 border-warning">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
@@ -425,7 +429,7 @@ $navItems = [
                 </div>
 
                 <!-- 2. Pierre de Taille -->
-                <div class="col-6 col-md-4 col-lg-2">
+                <div class="col-6 col-sm-4 col-md-3 col-xl">
                     <div class="card card-sm shadow-sm border-start border-1 border-primary">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
@@ -453,7 +457,7 @@ $navItems = [
                 </div>
 
                 <!-- 3. Riz Impérial -->
-                <div class="col-6 col-md-4 col-lg-2">
+                <div class="col-6 col-sm-4 col-md-3 col-xl">
                     <div class="card card-sm shadow-sm border-start border-1 border-success">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
@@ -481,7 +485,7 @@ $navItems = [
                 </div>
 
                 <!-- 4. Farine de Riz (Komeko) -->
-                <div class="col-6 col-md-4 col-lg-2">
+                <div class="col-6 col-sm-4 col-md-3 col-xl">
                     <div class="card card-sm shadow-sm border-start border-1 border-secondary" title="Farine de Riz (Raffinée en Meunerie)">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
@@ -507,7 +511,7 @@ $navItems = [
                 </div>
 
                 <!-- 5. Saké Féodal (Sakagura) -->
-                <div class="col-6 col-md-4 col-lg-2">
+                <div class="col-6 col-sm-4 col-md-3 col-xl">
                     <div class="card card-sm shadow-sm border-start border-1 border-purple" title="Saké Impérial (Brassé en Meunerie / Sakagura)">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
@@ -532,8 +536,34 @@ $navItems = [
                     </div>
                 </div>
 
-                <!-- 6. Sérénité Shinto -->
-                <div class="col-6 col-md-4 col-lg-2">
+                <!-- 6. Poutres en bois (Atelier de Charpenterie) -->
+                <div class="col-6 col-sm-4 col-md-3 col-xl">
+                    <div class="card card-sm shadow-sm border-start border-1 border-orange" title="Poutres en bois (Façonnées à l'Atelier de Charpenterie)">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-1 text-truncate">
+                                    <span style="font-size:0.95rem;">🪵</span>
+                                    <strong class="text-orange" style="font-size:0.80rem;">Poutres</strong>
+                                </div>
+                                <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
+                                    <span class="fw-bold" style="font-size:0.82rem;"
+                                          id="res-val-wooden-beams"
+                                          data-current="<?= $beamsStock ?>"
+                                          data-max="<?= $beamsMax ?>">
+                                        <?= number_format((int)$beamsStock) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($beamsMax) ?></span>
+                                </div>
+                            </div>
+                            <div class="progress progress-xs mt-1">
+                                <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Sérénité Shinto -->
+                <div class="col-6 col-sm-4 col-md-3 col-xl">
                     <div class="card card-sm shadow-sm border-start border-1 <?= $eOk ? 'border-teal' : 'border-danger' ?>">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
