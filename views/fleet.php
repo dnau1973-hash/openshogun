@@ -146,7 +146,7 @@ foreach ($stationedShips as $s) {
 }
 
 // Emplacement du Tenshu pour orientation directe
-$stmtTenshu = $db->prepare("SELECT building_slot FROM planet_buildings WHERE planet_id = ? AND building_code = 'hq'");
+$stmtTenshu = $db->prepare("SELECT slot FROM planet_buildings WHERE planet_id = ? AND building_type = 'hq'");
 $stmtTenshu->execute([$planet['id']]);
 $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
 ?>
@@ -189,7 +189,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                     Pour ériger votre nouveau fief, vous devez d'abord former un <strong>Pionnier Féodal</strong>. Il est disponible au <strong>Donjon Tenshu</strong> (déblocage aux paliers de niveau 5, 10 et 15) ou à l'<strong>Atelier de Siège</strong>.
                                 </p>
                                 <div class="d-flex gap-2 flex-wrap align-items-center">
-                                    <a href="?page=building&slot=<?= $tenshuSlot ?>" class="btn btn-sm btn-success fw-bold">
+                                    <a href="?page=building&code=hq" class="btn btn-sm btn-success fw-bold">
                                         🏯 Former au Donjon Tenshu (Niv. 5+) &rarr;
                                     </a>
                                     <a href="?page=shipyard" class="btn btn-sm btn-outline-secondary">
