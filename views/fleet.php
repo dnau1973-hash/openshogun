@@ -116,10 +116,10 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
             $stmtCreateFree = $db->prepare("
                 INSERT INTO planets 
                 (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
-                VALUES (?, ?, ?, ?, 2000, 1500, 1000, 0, 50, 20000, 20000, 20000, 0, UNIX_TIMESTAMP())
+                VALUES (?, ?, ?, 'terrestrial', 2000, 1500, 1000, 0, 50, 20000, 20000, 20000, 0, UNIX_TIMESTAMP())
             ");
             $freeName = $terrainData['name'] . ' Vierges';
-            $stmtCreateFree->execute([$freeName, $targetX, $targetY, $terrainData['type']]);
+            $stmtCreateFree->execute([$freeName, $targetX, $targetY]);
             $createdPlanetId = (int)$db->lastInsertId();
 
             $preselectedTargetType = 'planet';
