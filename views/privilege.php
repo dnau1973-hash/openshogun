@@ -335,7 +335,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                     Programmez jusqu'à <strong>4 commandes en chaîne</strong> dans votre Meunerie (Farine de Riz 🍚 et Saké 🍶). Les cuves et meules s'enchaînent jour et nuit sans interruption !
                 </p>
                 <div class="mt-auto">
-                    <a href="?page=building&type=grain_mill" class="btn btn-sm btn-outline-success w-100">
+                    <a href="?page=building&slot=31" class="btn btn-sm btn-outline-success w-100">
                         🍶 Ouvrir la Meunerie &rarr;
                     </a>
                 </div>

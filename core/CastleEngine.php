@@ -77,8 +77,8 @@ class CastleEngine {
                 'architectural_features' => '• Donjon de montagne (yamajiro) le plus élevé du Japon (430 m).\n• Murailles de pierre sèches épousant les failles granitiques de la falaise.\n• Tours d\'angle Ote-mon et tourelle à deux niveaux San-no-maru parfaitement conservées.',
                 'final_battle_lore' => 'Position zénithale dominante. Perché au-dessus des brumes, Bitchū Matsuyama offre une visibilité totale sur tous les mouvements militaires ennemis dans le centre de l\'archipel. En cas d\'assaut massif lors de la Bataille Finale, son relief escarpé divise par deux l\'efficacité des troupes d\'assaut adverses.',
                 'relic_bonus' => 'Sceau du Sanctuaire Céleste : Confère +15% de résistance défensive à toutes les garnisons du clan.',
-                'default_x' => -3,
-                'default_y' => 2,
+                'default_x' => -12,
+                'default_y' => -16,
             ],
             [
                 'code' => 'hikone',
@@ -96,8 +96,8 @@ class CastleEngine {
                 'architectural_features' => '• Donjon à trois niveaux et trois étages avec toitures étagées variées.\n• Cloche d\'alarme de garde Tsugibue veillant sur le détroit du lac Biwa.\n• Écuries seigneuriales d\'origine et pont à bascule défensif Tenbin-yagura.',
                 'final_battle_lore' => 'Verrou de la route de la Capitale. Contrôler Hikone permet de bloquer l\'avancée des armées hostiles vers Kyōto et la plaine du Kansai. Lors de la Grande Bataille Finale, sa possession octroie une mobilité accrue sur les voies de ravitaillement centrales.',
                 'relic_bonus' => 'Étendard des Diables Rouges : Confère +10% de puissance d\'assaut et +15% de vitesse de marche à toute la cavalerie.',
-                'default_x' => 1,
-                'default_y' => 3,
+                'default_x' => 14,
+                'default_y' => -12,
             ],
             [
                 'code' => 'himeji',
@@ -115,8 +115,8 @@ class CastleEngine {
                 'architectural_features' => '• Donjon principal majestueux à 6 étages et sous-sol culminant à 46 mètres.\n• Système complexe de 84 portes fortifiées et meurtrières triangulaires, carrées et rondes (sama).\n• Enduit de plâtre blanc résistant au feu recouvrant l\'intégralité des façades et des tuiles.',
                 'final_battle_lore' => 'Le Siège Suprême du Shogunat. Himeji est l\'enjeu ultime : la coalition qui capture et défend le Héron Blanc gagne le titre d\'Hégémonie Impériale et le droit de proclamer l\'avènement de la nouvelle ère shogunale.',
                 'relic_bonus' => 'Plumes du Héron Blanc : Augmente de +25% les défenses de muraille et octroie un prestige immense (+250 points d\'Honneur/semaine).',
-                'default_x' => -2,
-                'default_y' => 1,
+                'default_x' => -14,
+                'default_y' => 14,
             ],
             [
                 'code' => 'hirosaki',
@@ -134,8 +134,8 @@ class CastleEngine {
                 'architectural_features' => '• Seul donjon préservé de l\'époque Edo dans toute la région de Tōhoku.\n• Portes monumentales en cèdre du Nord et douves concentriques triples.\n• Structure compacte renforcée contre les froids polaires et les congères.',
                 'final_battle_lore' => 'Bastion des Terres du Nord. Il permet de lever les légions montagnardes de Mutsu et de prendre en tenaille depuis l\'arrière toute armée engagée dans le centre de l\'archipel.',
                 'relic_bonus' => 'Givre de Mutsu : +15% de vitesse de déplacement des troupes et résistance accrue aux conditions hivernales.',
-                'default_x' => 4,
-                'default_y' => 5,
+                'default_x' => 16,
+                'default_y' => 28,
             ],
             [
                 'code' => 'inuyama',
@@ -153,8 +153,8 @@ class CastleEngine {
                 'architectural_features' => '• Boiseries et piliers d\'origine en cèdre et cyprès hinoki datant du XVIe siècle.\n• Galerie panoramique ouverte circulaire (mawarien) au dernier niveau.\n• Trésor National de structure bōrōgata primitive.',
                 'final_battle_lore' => 'Le Berceau des Conquérants. Contrôler Inuyama, c\'est réveiller la flamme tactique d\'Oda Nobunaga. Il accélère la mobilisation des armes à feu et confère une clairvoyance tactique sur les mouvements ennemis.',
                 'relic_bonus' => 'Sagesse des Anciens Oda : Réduit de -15% le coût en ressources de toutes les troupes militaires du clan.',
-                'default_x' => 2,
-                'default_y' => 0,
+                'default_x' => 14,
+                'default_y' => 14,
             ],
             [
                 'code' => 'kochi',
@@ -172,8 +172,8 @@ class CastleEngine {
                 'architectural_features' => '• Ensemble complet exceptionnel : Donjon, Palais Honmaru Goten et Porte Ote-mon d\'origine.\n• Piques de fer recourbées anti-infiltration shinobi (shinobi-gaeshi).\n• Systèmes de gargouilles de pierre monumentales drainant les pluies de mousson.',
                 'final_battle_lore' => 'Le Bastion Insoumis de Tosa. Véritable verrou de l\'île de Shikoku face à l\'océan Pacifique, Kōchi immunise son détenteur contre les attaques de revers maritimes.',
                 'relic_bonus' => 'Pacte des Guerriers de Tosa : Augmente de +20% la protection des silos et greniers contre tout pillage adverse.',
-                'default_x' => -1,
-                'default_y' => -3,
+                'default_x' => 16,
+                'default_y' => -26,
             ],
             [
                 'code' => 'marugame',
@@ -191,8 +191,8 @@ class CastleEngine {
                 'architectural_features' => '• Murailles de pierre les plus hautes du Japon (plus de 60 mètres de dénivelé total).\n• Courbure en éventail défensive ōgi-no-kōbai empêchant l\'escalade.\n• Donjon en bois compact à trois niveaux veillant sur les détroits maritimes de Seto.',
                 'final_battle_lore' => 'La Citadelle de Pierre Infranchissable. Face aux machines de siège et aux assauts furieux, les remparts de Marugame absorbent les chocs et réduisent drastiquement les pertes de la garnison.',
                 'relic_bonus' => 'Muraille de Sanuki : Ajoute +2,000 points de structure de base à tous les remparts de cité du clan.',
-                'default_x' => 0,
-                'default_y' => -2,
+                'default_x' => 26,
+                'default_y' => -16,
             ],
             [
                 'code' => 'maruoka',
@@ -210,8 +210,8 @@ class CastleEngine {
                 'architectural_features' => '• Toiture exceptionnelle pesant plus de 60 tonnes constituée de tuiles de pierre d\'Asuwa.\n• Escaliers intérieurs en bois extrêmement raides (65 degrés) avec cordes de traction.\n• Donjon bōrōgata primitif à deux niveaux extérieurs et trois étages intérieurs.',
                 'final_battle_lore' => 'Le Voile de Brume Protectrice. Dans la Bataille Finale, Maruoka dissimule l\'état réel des forces armées du clan et neutralise les tentatives d\'espionnage ennemi.',
                 'relic_bonus' => 'Voile de Brume d\'Echizen : Immunité accrue contre l\'espionnage shinobi adverse.',
-                'default_x' => 2,
-                'default_y' => 4,
+                'default_x' => -14,
+                'default_y' => 26,
             ],
             [
                 'code' => 'matsue',
@@ -229,8 +229,8 @@ class CastleEngine {
                 'architectural_features' => '• Trésor National à 5 niveaux extérieurs et 6 étages intérieurs avec tour de guet supérieure.\n• Bardage extérieur sombre en bois laqué traité au charbon de bois.\n• Vastes douves navigables préservées reliées au système fluvial de la cité lacustre.',
                 'final_battle_lore' => 'La Bénédiction des Kami. Siège spirituel de la province d\'Izumo, le contrôle de Matsue rallie la ferveur des fidèles et décuple la sérénité des sanctuaires de toute la faction.',
                 'relic_bonus' => 'Bénédiction des Kami d\'Izumo : +20% de production de ferveur et sérénité (énergie sacrée) sur tous les domaines.',
-                'default_x' => -4,
-                'default_y' => 3,
+                'default_x' => -28,
+                'default_y' => 16,
             ],
             [
                 'code' => 'matsumoto',
@@ -248,8 +248,8 @@ class CastleEngine {
                 'architectural_features' => '• Plus ancien donjon à 5 niveaux et 6 étages conservé au Japon (Trésor National).\n• Contraste architectural saisissant entre le donjon de guerre et le pavillon de contemplation lunaire.\n• Douves d\'eau vive profondes et système d\'archères et arquebusières (ya-sama et teppō-sama).',
                 'final_battle_lore' => 'Le Cœur Stratégique de Shinano. Perché au carrefour des cols alpins, Matsumoto verrouille tout le centre de Honshū. Ses tireurs d\'élite et arquebusiers infligent des dégâts dévastateurs aux avant-gardes ennemies.',
                 'relic_bonus' => 'Regard du Corbeau de Shinano : Augmente de +20% la puissance d\'attaque des archers et unités à distance.',
-                'default_x' => 3,
-                'default_y' => 2,
+                'default_x' => 26,
+                'default_y' => 14,
             ],
             [
                 'code' => 'matsuyama',
@@ -267,8 +267,8 @@ class CastleEngine {
                 'architectural_features' => '• Ensemble fortifié de type renritsu-shiki avec 21 structures féodales authentiques.\n• Portes doubles en chicane Tonan-mon et cours intérieures conçues pour l\'encerclement.\n• Vue stratégique imprenable à 360° sur toute la mer intérieure de Seto.',
                 'final_battle_lore' => 'Le Labyrinthe Invincible d\'Iyo. Sa succession de cours closes permet d\'absorber les assauts répétés et d\'organiser de foudroyantes contre-attaques de flanc.',
                 'relic_bonus' => 'Labyrinthe d\'Iyo : Réduit de -20% les pertes subies lors des sièges et assauts massifs.',
-                'default_x' => -3,
-                'default_y' => -1,
+                'default_x' => -26,
+                'default_y' => -10,
             ],
             [
                 'code' => 'uwajima',
@@ -286,8 +286,8 @@ class CastleEngine {
                 'architectural_features' => '• Plan pentagonal ingénieux conçu par le maître architecte Tōdō Takatora.\n• Donjon d\'époque Edo compact mais richement orné de pignons de style shoin.\n• Forteresse côtière dominant le goulet stratégique de la baie d\'Uwajima.',
                 'final_battle_lore' => 'La Clé Navale de Bungo. Contrôler Uwajima permet de maîtriser les liaisons maritimes entre Kyūshū et Shikoku, constituant la tête de pont idéale pour la bataille finale.',
                 'relic_bonus' => 'Géométrie Secrète de Takatora : Confère +10% de résistance globale et +15% de vitesse de navigation aux navires du clan.',
-                'default_x' => -4,
-                'default_y' => -3,
+                'default_x' => -24,
+                'default_y' => -22,
             ]
         ];
 
