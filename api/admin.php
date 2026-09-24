@@ -190,8 +190,11 @@ try {
 
         // Octroyer des Koban (Pièces d'Or) à un joueur
         case 'give_koban':
+            require_once __DIR__ . '/../core/ImperialSealEngine.php';
+            $sealEngine = new ImperialSealEngine($db);
+
             $targetUserId = (int)($_POST['user_id'] ?? 0);
-            $amount = (int)($_POST['amount'] ?? 100);
+            $amount = (int)($_POST['amount'] ?? 0);
             if ($targetUserId <= 0) {
                 throw new Exception("Daimyō cible invalide.");
             }
