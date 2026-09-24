@@ -999,8 +999,8 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <span class="badge bg-warning-lt fw-bold">
                         <?= $spawnedCastlesCount ?> / 12 Déployés
                     </span>
-                    <button type="button" class="btn btn-sm btn-warning fw-bold" onclick="spawnAllCastles()">
-                        ⚡ Déployer les 12 Donjons
+                    <button type="button" class="btn btn-sm btn-warning fw-bold" onclick="distributeCastlesHomogeneously()" title="Déploie et répartit les 12 forteresses de manière homogène sur les 4 quadrants (rayon ±35)">
+                        🌐 Répartir Homogènement (Rayon &plusmn;35)
                     </button>
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="despawnAllCastles()">
                         🛑 Retirer Tous
@@ -3483,6 +3483,27 @@ async function executeUniverseReset() {
 // ==========================================================
 // GESTION DES 12 CHÂTEAUX AUTHENTIQUES DU JAPON (現存十二天守)
 // ==========================================================
+async function distributeCastlesHomogeneously() {
+    const confirmed = await showModalConfirm('Voulez-vous répartir et déployer les 12 Châteaux Authentiques de façon homogène sur l\'entièreté de la carte (3 par quadrant, rayon ±35) ?', 'Répartition Homogène des 12 Trésors');
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'distribute_castles');
+    formData.append('radius', '35');
+    try {
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await showModalAlert(data.message || '12 Châteaux Authentiques répartis avec succès sur toute la carte !', 'success');
+            window.location.reload();
+        } else {
+            showModalAlert(data.error || 'Erreur lors de la répartition.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication.', 'error');
+    }
+}
+
 async function spawnAllCastles() {
     const confirmed = await showModalConfirm('Voulez-vous déployer l\'ensemble des 12 Châteaux Authentiques du Japon sur la carte des provinces ?', 'Déploiement des 12 Trésors');
     if (!confirmed) return;

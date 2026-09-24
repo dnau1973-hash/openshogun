@@ -307,6 +307,14 @@ try {
             echo json_encode($res);
             break;
 
+        // Répartir de manière homogène les 12 châteaux authentiques sur toute la carte
+        case 'distribute_castles':
+            $castleEngine = new CastleEngine();
+            $radius = max(15, min(50, (int)($_POST['radius'] ?? 35)));
+            $res = $castleEngine->deployCastlesHomogeneously($radius);
+            echo json_encode($res);
+            break;
+
         // Retirer tous les 12 châteaux de la carte
         case 'despawn_all_castles':
             $castleEngine = new CastleEngine();

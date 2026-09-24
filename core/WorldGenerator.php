@@ -20,7 +20,12 @@ class WorldGenerator {
      */
     public function generatePlanets(int $count = 12, int $radius = 10, array $allowedTypes = [], bool $clearExistingUninhabited = false): array {
         if ($clearExistingUninhabited) {
-            $this->db->exec("DELETE FROM planets WHERE user_id IS NULL");
+            $this->db->exec("
+                DELETE FROM planets 
+                WHERE user_id IS NULL 
+                  AND is_capital != 2 
+                  AND id NOT IN (SELECT COALESCE(planet_id, 0) FROM authentic_castles WHERE is_spawned = 1)
+            ");
         }
 
         $allTypes = ['terrestrial', 'oceanic', 'desert', 'volcanic', 'arctic', 'gas'];
@@ -43,8 +48,14 @@ class WorldGenerator {
             'du Sud', 'des Cèdres', 'Antique', 'des Cerisiers'
         ];
 
-        // Coordonnées déjà occupées
-        $occupiedStmt = $this->db->query("SELECT coord_x, coord_y FROM planets");
+        // Coordonnées déjà occupées (planètes existantes, donjons authentiques et oasis)
+        $occupiedStmt = $this->db->query("
+            SELECT coord_x, coord_y FROM planets
+            UNION
+            SELECT coord_x, coord_y FROM authentic_castles WHERE is_spawned = 1
+            UNION
+            SELECT coord_x, coord_y FROM oases
+        ");
         $occupiedMap = [];
         while ($row = $occupiedStmt->fetch()) {
             $occupiedMap[$row['coord_x'] . ':' . $row['coord_y']] = true;
@@ -253,6 +264,15 @@ class WorldGenerator {
             $oasisEngine = new OasisEngine();
             $density = (float)GameConfig::get('oasis_density_percent', 2.0);
             $oasisEngine->spawnOasesByDensity($density, 28, true);
+        } catch (Exception $e) {
+            // Ignorer silencieusement
+        }
+
+        // 10c. Déploiement automatique et homogène des 12 Châteaux Authentiques du Japon
+        try {
+            require_once __DIR__ . '/CastleEngine.php';
+            $castleEngine = new CastleEngine();
+            $castleEngine->deployCastlesHomogeneously(35);
         } catch (Exception $e) {
             // Ignorer silencieusement
         }
