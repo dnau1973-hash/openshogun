@@ -487,9 +487,9 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                         ➕ Nouvelle Liste de Raids
                     </button>
                     <?php if (!$isSealActive): ?>
-                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="openImperialSealModal()">
+                        <a href="/?page=privilege" class="btn btn-outline-warning btn-sm">
                             👑 Sceau Impérial
-                        </button>
+                        </a>
                     <?php endif; ?>
                 </div>
             </div>

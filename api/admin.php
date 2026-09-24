@@ -188,6 +188,43 @@ try {
             ]);
             break;
 
+        // Octroyer des Koban (Pièces d'Or) à un joueur
+        case 'give_koban':
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            $amount = (int)($_POST['amount'] ?? 100);
+            if ($targetUserId <= 0) {
+                throw new Exception("Daimyō cible invalide.");
+            }
+            if ($amount <= 0) {
+                throw new Exception("Le montant de Koban doit être strictement supérieur à zéro.");
+            }
+
+            $stCheck = $db->prepare("SELECT id, username, gold_coins FROM users WHERE id = ?");
+            $stCheck->execute([$targetUserId]);
+            $targetUser = $stCheck->fetch(PDO::FETCH_ASSOC);
+            if (!$targetUser) {
+                throw new Exception("Daimyō introuvable.");
+            }
+
+            $db->prepare("UPDATE users SET gold_coins = gold_coins + ? WHERE id = ?")->execute([$amount, $targetUserId]);
+            $newBalance = (int)$targetUser['gold_coins'] + $amount;
+
+            // Missive royale envoyée au joueur
+            require_once __DIR__ . '/../core/MessageEngine.php';
+            $msgEngine = new MessageEngine();
+            $msgEngine->sendSystemMessage(
+                $targetUserId,
+                "🪙 Faveur Impériale : +{$amount} Koban reçus !",
+                "Noble Daimyō {$targetUser['username']},\n\nLe Shōgun et l'administration impériale vous octroient une gratification exceptionnelle de **{$amount} Koban (Pièces d'Or) 🪙**.\n\nVotre trésor impérial s'élève désormais à **" . number_format($newBalance) . " Koban**.\n\nUtilisez-les à bon escient pour décréter le Sceau Impérial, rééquilibrer vos ressources auprès de l'Intendant ou dynamiser l'expansion de vos domaines !"
+            );
+
+            echo json_encode([
+                'success' => true,
+                'message' => "+{$amount} Koban attribués avec succès à {$targetUser['username']} ! (Nouveau solde : " . number_format($newBalance) . " Koban)",
+                'new_balance' => $newBalance
+            ]);
+            break;
+
         // Obtenir la liste actualisée des bots
         case 'get_bots':
             $bots = $botEngine->getBots();

@@ -54,9 +54,11 @@ if (!Auth::check()) {
 $page = $_GET['page'] ?? 'resources';
 if ($page === 'galaxy') {
     $page = 'map';
+} elseif ($page === 'plus') {
+    $page = 'privilege';
 }
 
-$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'alliance', 'forum', 'chat', 'empire'];
+$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'alliance', 'forum', 'chat', 'empire', 'privilege'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';

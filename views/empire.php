@@ -37,20 +37,20 @@ $unitsDb = $empireData['units_db'];
                 <?php if ($isSealActive): ?>
                     <span class="badge bg-warning text-dark fs-5 shadow-sm">👑 Sceau Impérial Actif</span>
                 <?php else: ?>
-                    <button type="button" class="btn btn-sm btn-outline-warning" onclick="openImperialSealModal()">
+                    <a href="/?page=privilege" class="btn btn-sm btn-outline-warning">
                         👑 Activer le Sceau Impérial
-                    </button>
+                    </a>
                 <?php endif; ?>
             </h2>
         </div>
         <div class="col-auto ms-auto d-print-none">
             <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-dark text-warning p-2 fs-5 border border-warning" style="cursor:pointer;" onclick="openImperialSealModal()">
+                <a href="/?page=privilege" class="badge bg-dark text-warning p-2 fs-5 border border-warning text-decoration-none" title="Accéder aux Privilèges">
                     🪙 <?= number_format($goldCoins) ?> Koban
-                </span>
-                <button type="button" class="btn btn-warning fw-bold" onclick="openImperialSealModal()">
+                </a>
+                <a href="/?page=privilege" class="btn btn-warning fw-bold">
                     📜 Privilèges du Shōgun
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -72,9 +72,9 @@ $unitsDb = $empireData['units_db'];
             </div>
         </div>
         <div>
-            <button type="button" class="btn btn-warning fw-bold px-3 py-2 shadow-sm" onclick="openImperialSealModal()">
+            <a href="/?page=privilege" class="btn btn-warning fw-bold px-3 py-2 shadow-sm">
                 👑 Investir dans le Sceau (dès 50 Koban)
-            </button>
+            </a>
         </div>
     </div>
 </div>
@@ -778,3 +778,4 @@ async function submitNpcExchange() {
     }
 }
 </script>
+

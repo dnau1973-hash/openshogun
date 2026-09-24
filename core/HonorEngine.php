@@ -170,23 +170,25 @@ class HonorEngine {
                     $desc
                 ]);
 
+                // 🪙 Dotation Impériale : 100 Koban offerts à chaque obtention de médaille
+                $this->db->prepare("UPDATE users SET gold_coins = gold_coins + 100 WHERE id = ?")->execute([$player['user_id']]);
+
                 $awarded[] = [
                     'user_id' => $player['user_id'],
                     'username' => $player['username'],
                     'category' => $catLabel,
                     'rank' => $rank,
-                    'medal' => $medalLabel
+                    'medal' => $medalLabel,
+                    'koban_reward' => 100
                 ];
 
-                // Message de félicitations pour les 3 premiers
-                if ($rank <= 3) {
-                    $messageEngine->sendMessage(
-                        null,
-                        (int)$player['user_id'],
-                        "🎖️ Décoration Impériale : {$medalLabel} décernée !",
-                        "Salutations Daimyō {$player['username']},\n\nLe Shogunat et la Cour Impériale ont l'immense honneur de vous décerner la {$medalLabel} pour vos exploits martiaux en tant que {$catLabel} pour la période {$weekCode} !\n\nCette distinction orne désormais votre Fiche de Daimyō et le Panthéon des clans du Japon.\n\nGloire à votre clan !"
-                    );
-                }
+                // Missive officielle de félicitations et versement des 100 Koban
+                $messageEngine->sendMessage(
+                    null,
+                    (int)$player['user_id'],
+                    "🎖️ Décoration Impériale : {$medalLabel} décernée (+100 Koban 🪙) !",
+                    "Salutations Daimyō {$player['username']},\n\nLe Shogunat et la Cour Impériale ont l'immense honneur de vous décerner la {$medalLabel} pour vos exploits martiaux en tant que {$catLabel} pour la période {$weekCode} !\n\nEn hommage à votre bravoure, le Trésor Impérial vous accorde une gratification exceptionnelle de **+100 Koban (Pièces d'Or) 🪙** ajoutés immédiatement à vos coffres.\n\nCette distinction orne désormais votre Fiche de Daimyō et le Panthéon des clans du Japon.\n\nGloire à votre clan !"
+                );
 
                 $rank++;
             }

@@ -469,14 +469,16 @@ class QuestEngine {
 
             $awardedMedal = false;
             if ($claimedTotal >= count($catalog)) {
-                // Attribuer médaille de progression de bienvenue / Maître du Shogunat
+                // Attribuer médaille de progression de bienvenue / Maître du Shogunat (+100 Koban)
                 try {
                     $weekCode = date('Y') . "-S" . date('W');
                     $stmtMedal = $this->db->prepare("
                         INSERT INTO user_medals (user_id, category, `rank`, week_code, description, awarded_at) 
-                        VALUES (?, 'progression', 1, ?, 'Diplôme Impérial du Shogunat : Didacticiel de Daimyō accompli avec honneur', NOW())
+                        VALUES (?, 'progression', 1, ?, 'Diplôme Impérial du Shogunat : Didacticiel de Daimyō accompli avec honneur (+100 Koban)', NOW())
                     ");
                     $stmtMedal->execute([$userId, $weekCode]);
+                    // 🪙 Dotation Impériale : 100 Koban offerts
+                    $this->db->prepare("UPDATE users SET gold_coins = gold_coins + 100 WHERE id = ?")->execute([$userId]);
                     $awardedMedal = true;
                 } catch (Exception $e) {
                     // Ignorer si déjà existant

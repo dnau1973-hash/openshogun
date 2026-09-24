@@ -229,11 +229,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
 
 <script>
 function openImperialSealModal() {
-    const modalEl = document.getElementById('modalImperialSeal');
-    if (modalEl) {
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
-    }
+    window.location.href = '/?page=privilege';
 }
 
 async function activateSeal(days) {
@@ -281,3 +277,4 @@ async function claimDailyGold() {
     }
 }
 </script>
+

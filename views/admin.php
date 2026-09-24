@@ -97,6 +97,7 @@ $botsList = $botEngine->getBots();
 // Liste des joueurs humains
 $humanUsers = $db->query("
     SELECT u.id, u.username, u.email, u.faction, u.points, u.is_admin, u.is_moderator, u.created_at, u.protection_until,
+           u.gold_coins, u.imperial_seal_until,
            COUNT(p.id) as colony_count
     FROM users u
     LEFT JOIN planets p ON p.user_id = u.id
@@ -1325,6 +1326,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                             <th>Clan &amp; Faction</th>
                             <th class="text-center">Fiefs Contrôlés</th>
                             <th class="text-end">Honneur &amp; Points</th>
+                            <th class="text-center">🪙 Trésor Koban</th>
                             <th class="text-center">Rang Shogunal</th>
                             <th class="text-center">Immunité Débutant</th>
                             <th class="text-end">Commandes</th>
@@ -1336,6 +1338,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 $hfInfo = FACTIONS[$hUser['faction']] ?? FACTIONS['terran'];
                                 $hProt = Auth::getProtectionRemaining($hUser);
                                 $hIsProt = $hProt && !empty($hProt['is_protected']);
+                                $hSealActive = !empty($hUser['imperial_seal_until']) && strtotime($hUser['imperial_seal_until']) > time();
                             ?>
                             <tr>
                                 <td class="text-secondary small">#<?= $hUser['id'] ?></td>
@@ -1360,6 +1363,16 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 </td>
                                 <td class="text-end font-weight-bold text-warning">
                                     🏆 <?= number_format($hUser['points']) ?>
+                                </td>
+                                <td class="text-center" id="user-koban-cell-<?= $hUser['id'] ?>">
+                                    <div class="fw-bold text-warning" style="font-size:0.95rem;">
+                                        🪙 <span id="user-koban-val-<?= $hUser['id'] ?>"><?= number_format($hUser['gold_coins'] ?? 0) ?></span>
+                                    </div>
+                                    <?php if ($hSealActive): ?>
+                                        <span class="badge bg-warning text-dark" style="font-size:0.6rem;">👑 Sceau Actif</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary-lt" style="font-size:0.6rem;">Sans Sceau</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-center">
                                     <?php if ((int)$hUser['is_admin'] === 1): ?>
@@ -1389,6 +1402,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-list justify-content-end">
+                                        <button onclick="adminGiveKoban(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>')"
+                                                class="btn btn-sm btn-outline-warning fw-bold" title="Octroyer des Koban (Pièces d'Or)">
+                                            🪙 +Koban
+                                        </button>
                                         <button onclick="extendProtection(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', 7)"
                                                 class="btn btn-sm btn-outline-success" title="Accorder ou prolonger de 7 jours d'immunité">
                                             +7j 🔰
@@ -2732,6 +2749,36 @@ async function toggleAdmin(userId, username, currentStatus) {
             showModalAlert("Erreur", "Une erreur est survenue.", "danger");
         }
     });
+}
+
+async function adminGiveKoban(userId, username) {
+    const rawAmount = prompt(`Combien de Koban (Pièces d'Or 🪙) souhaitez-vous octroyer au Daimyō ${username} ?`, "100");
+    if (rawAmount === null) return;
+    const amount = parseInt(rawAmount, 10);
+    if (isNaN(amount) || amount <= 0) {
+        showModalAlert("Montant Invalide", "Veuillez saisir un nombre entier supérieur à 0.", "warning");
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'give_koban');
+        formData.append('user_id', userId);
+        formData.append('amount', amount);
+        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert("Trésor Impérial", data.message, "success");
+            const valEl = document.getElementById(`user-koban-val-${userId}`);
+            if (valEl && data.new_balance !== undefined) {
+                valEl.innerText = Number(data.new_balance).toLocaleString();
+            }
+        } else {
+            showModalAlert("Erreur", data.error || "Impossible d'attribuer les Koban.", "danger");
+        }
+    } catch (e) {
+        showModalAlert("Erreur", "Une erreur réseau est survenue.", "danger");
+    }
 }
 
 async function extendProtection(userId, username, days = 7) {

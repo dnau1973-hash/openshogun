@@ -276,15 +276,15 @@ $navItems = [
                             <?php endif; ?>
 
                             <!-- 🪙 Trésor en Koban (Pièces d'Or) & 👑 Sceau Impérial -->
-                            <a href="javascript:void(0)" onclick="openImperialSealModal()" class="badge text-decoration-none d-flex align-items-center gap-1 py-1 px-2 border"
+                            <a href="?page=privilege" class="badge text-decoration-none d-flex align-items-center gap-1 py-1 px-2 border"
                                style="background:rgba(245,158,11,0.15); border-color:rgba(245,158,11,0.45) !important; color:#fbbf24; font-size:0.75rem; border-radius:6px; cursor:pointer;"
-                               title="Trésor Impérial : <?= number_format($userGoldCoins) ?> Koban. Cliquez pour ouvrir les privilèges du Sceau Impérial.">
+                               title="Trésor Impérial : <?= number_format($userGoldCoins) ?> Koban. Cliquez pour ouvrir la page des Privilèges du Shōgun.">
                                 <span>🪙</span>
                                 <strong><?= number_format($userGoldCoins) ?></strong>
                                 <span class="d-none d-sm-inline">Koban</span>
                             </a>
 
-                            <a href="javascript:void(0)" onclick="openImperialSealModal()" 
+                            <a href="?page=privilege" 
                                class="badge text-decoration-none d-none d-md-inline-flex align-items-center gap-1 py-1 px-2 border <?= $isSealActive ? 'bg-warning text-dark border-warning' : 'text-warning border-warning-subtle' ?>"
                                style="<?= $isSealActive ? 'font-weight:700;' : 'background:rgba(0,0,0,0.3);' ?> font-size:0.72rem; border-radius:6px; cursor:pointer;"
                                title="<?= $isSealActive ? 'Sceau Impérial Actif : ' . $sealStatus['remaining_formatted'] : 'Décrétez le Sceau Impérial du Shōgun' ?>">
@@ -332,9 +332,9 @@ $navItems = [
                                             <span class="badge bg-warning text-dark" style="font-size:0.6rem;">Plus</span>
                                         <?php endif; ?>
                                     </a>
-                                    <a href="javascript:void(0)" class="dropdown-item d-flex align-items-center justify-content-between" onclick="openImperialSealModal()">
-                                        <span>📜 Mon Sceau Impérial</span>
-                                        <span class="badge bg-secondary-lt" style="font-size:0.6rem;"><?= number_format($userGoldCoins) ?> 🪙</span>
+                                    <a href="?page=privilege" class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'privilege' ? 'active' : '' ?>">
+                                        <span>📜 Privilèges du Shōgun</span>
+                                        <span class="badge bg-warning-lt" style="font-size:0.6rem;"><?= number_format($userGoldCoins) ?> 🪙</span>
                                     </a>
 
                                     <div class="dropdown-divider"></div>
