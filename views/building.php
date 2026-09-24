@@ -92,8 +92,14 @@ foreach ($queue as $q) {
     }
 }
 
+require_once __DIR__ . '/../core/ImperialSealEngine.php';
+$sealEngine = new ImperialSealEngine();
+$isSealActive = $sealEngine->isSealActive((int)$user['id']);
+
 $isTerran = ($user['faction'] === 'terran');
-$canQueueNewBuilding = $isTerran ? ($buildingsInQueue === 0) : (count($queue) === 0);
+$maxAllowedBuildings = $isSealActive ? 2 : 1;
+$maxAllowedTotal = $isSealActive ? 3 : 1;
+$canQueueNewBuilding = $isTerran ? ($buildingsInQueue < $maxAllowedBuildings) : (count($queue) < $maxAllowedTotal);
 
 $isBuildingInQueue = ($code !== 'free_plot' && $activeJob !== null);
 $isEmptyPlot = ($code === 'free_plot');

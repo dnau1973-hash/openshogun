@@ -341,8 +341,11 @@ foreach ($allUnits as $u) {
                 <a href="?page=docs&tab=social" class="btn <?= ($tab === 'social') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
                     <span>💬</span> Ch. 14 : Chat & Forum
                 </a>
+                <a href="?page=docs&tab=seal" class="btn <?= ($tab === 'seal') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap; border-color: #f59e0b; color: #b45309;">
+                    <span>👑</span> Ch. 15 : Sceau Impérial &amp; Empire
+                </a>
                 <a href="?page=docs&tab=all" class="btn <?= ($tab === 'all') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap; background: rgba(194,37,43,0.1); border-color: var(--red-primary); color: var(--red-primary);">
-                    <span>📚</span> Tout Dérouler (1-14)
+                    <span>📚</span> Tout Dérouler (1-15)
                 </a>
             </div>
         </div>
@@ -2396,7 +2399,160 @@ foreach ($allUnits as $u) {
         </div>
     <?php endif; ?>
 
-</div>
+    <?php if ($tab === 'seal' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 15 : LE SCEAU IMPÉRIAL & LE GRAND TABLEAU DE BORD DE L'EMPIRE
+             ============================================================== -->
+        <div class="card" style="margin-bottom: 2rem; border-top: 4px solid #f59e0b; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: var(--bg-surface, #fdfbf7);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 1px;">Privilège du Shōgun &bull; Sengoku Plus</span>
+                    <h2 style="margin: 0.25rem 0 0 0; font-size: 1.75rem; color: var(--text-main); font-weight: 900; display: flex; align-items: center; gap: 0.6rem;">
+                        <span>👑</span> Chapitre 15 : Le Sceau Impérial &amp; l'Empire
+                    </h2>
+                </div>
+                <span class="badge" style="background: rgba(245,158,11,0.15); color: #b45309; border: 1px solid rgba(245,158,11,0.4); font-size: 0.85rem; padding: 0.4rem 0.8rem; border-radius: 6px;">
+                    Système Travian Plus &bull; 6 Privilèges
+                </span>
+            </div>
+
+            <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-main); margin-bottom: 1.5rem;">
+                Le <strong>Sceau Impérial</strong> (Privilège du Shōgun) est l'équivalent féodal du système <em>Travian Plus</em>. Conçu pour apporter un confort de gestion absolu sans compromettre l'équité martiale, il met à la disposition des souverains les plus ambitieux des outils d'intendance de haut rang. OpenShogun garantit un accès <strong>Free-to-Play</strong> : chaque daimyō reçoit 100 Koban à l'investiture et peut réclamer un <strong>tribut quotidien gratuit (+5 Koban)</strong> chaque jour de connexion !
+            </p>
+
+            <!-- GRILLE DES 6 PRIVILÈGES -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+                
+                <!-- 1. ARCHITECTE DE COUR -->
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #3b82f6;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">🔨</span>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #1d4ed8; font-weight: 800;">1. Architecte de Cour (File Étendue)</h3>
+                    </div>
+                    <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
+                        Planifiez vos chantiers castraux jour et nuit. Les maîtres bâtisseurs enchaînent jusqu'à <strong>4 constructions</strong> (jusqu'à 2 parcelles agricoles et 2 infrastructures urbaines pour Oda, et 3 chantiers consécutifs pour les autres clans).
+                    </p>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #1e40af;">
+                        ⚡ Enchaînement automatique : le 2e chantier démarre dès la pose de la dernière pierre du premier !
+                    </div>
+                </div>
+
+                <!-- 2. TABLEAU DE BORD EMPIRE -->
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #f59e0b;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">👑</span>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #b45309; font-weight: 800;">2. Grand Tableau de Bord de l'Empire</h3>
+                    </div>
+                    <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
+                        Accessible via la page <code>?page=empire</code> ou la barre de navigation. Consolidation complète de tous vos villages : jauges de stockage en temps réel, productions nettes horaires, totaux impériaux et surveillance du péril de famine.
+                    </p>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #92400e;">
+                        🌾 Vue globale de tous les chantiers et banquets de célébration de l'Archipel.
+                    </div>
+                </div>
+
+                <!-- 3. CARNET DE RAIDS -->
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #10b981;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">📜</span>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #047857; font-weight: 800;">3. Carnet de Raids (Farm List)</h3>
+                    </div>
+                    <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
+                        Créez vos listes de cibles régulières (oasis sauvages, provinces inactives) et assignez à chacune une composition d'armée dédiée. Un simple clic sur le bouton vert <strong>« ⚡ Lancer la Tournée »</strong> déploie instantanément toutes vos vagues.
+                    </p>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #065f46;">
+                        🏇 Gain de temps phénoménal : plus besoin de recomposer vos régiments manuellement.
+                    </div>
+                </div>
+
+                <!-- 4. INTENDANT DU MARCHÉ -->
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #8b5cf6;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">⚖️</span>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #6d28d9; font-weight: 800;">4. Intendant du Marché (Troc 1:1:1)</h3>
+                    </div>
+                    <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
+                        Vos greniers débordent de Bois mais manquent cruellement de Pierre ou de Riz pour ériger votre Donjon ? L'Intendant rééquilibre immédiatement vos réserves au ratio d'or <strong>1:1:1</strong> sans aucune taxe de perte, pour un tribut symbolique de 3 Koban.
+                    </p>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #5b21b6;">
+                        🎯 Curseur interactif et bouton « Répartir équitablement en tiers » en 1 clic.
+                    </div>
+                </div>
+
+                <!-- 5. ORDRE DE REPLI TACTIQUE -->
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #ef4444;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">⛩️</span>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #b91c1c; font-weight: 800;">5. Ordre de Repli Tactique (Évasion)</h3>
+                    </div>
+                    <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
+                        Activez l'ordre de repli tactique sur vos châteaux pour ordonner à votre garnison et à votre Samouraï Héros d'évacuer discrètement dans les sous-bois lors d'une attaque ennemie. Vos troupes évitent le massacre nocturne et demeurent indemnes.
+                    </p>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #991b1b;">
+                        🛡️ L'assaillant ne combat personne et ne pille que les ressources non protégées par vos Cachettes.
+                    </div>
+                </div>
+
+                <!-- 6. MONNAIE FÉODALE (KOBAN) -->
+                <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #d97706;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">🪙</span>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #b45309; font-weight: 800;">6. Trésor en Koban &amp; Économie Équitable</h3>
+                    </div>
+                    <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
+                        Le Koban est la pièce d'or ovale officielle du Shogunat. Les formules d'investiture du Sceau Impérial sont accessibles à tous les seigneurs : <strong>7 jours (50 Koban)</strong>, <strong>14 jours (90 Koban, -10%)</strong> ou <strong>30 jours (150 Koban, -25%)</strong>.
+                    </p>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #78350f;">
+                        🎁 100 Koban offerts à la création &bull; +5 Koban offerts chaque jour de fidélité.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TABLEAU COMPARATIF : SANS SCEAU VS AVEC LE SCEAU IMPÉRIAL -->
+            <h3 style="font-size: 1.2rem; color: var(--text-main); font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>⚖️</span> Tableau Comparatif : Régime Féodal Ordinaire vs Sceau Impérial
+            </h3>
+            <div style="overflow-x: auto;">
+                <table class="docs-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+                    <thead>
+                        <tr style="background: var(--bg-ink, #ede5d5); text-align: left;">
+                            <th style="padding: 0.75rem 1rem; border: 1px solid var(--border-color);">Fonctionnalité Martiale</th>
+                            <th style="padding: 0.75rem 1rem; border: 1px solid var(--border-color);">Daimyō Ordinaire</th>
+                            <th style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); background: rgba(245,158,11,0.15); color: #b45309; font-weight: 800;">Sous le Sceau Impérial 👑</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); font-weight: 700;">File de Construction</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); color: var(--text-muted);">1 parcelle + 1 bâtiment (Oda) ou 1 seul chantier</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); background: rgba(245,158,11,0.05); font-weight: 700; color: #15803d;">Jusqu'à 4 chantiers enchaînés (2 champs + 2 cités) ou 3 chantiers continus</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); font-weight: 700;">Tableau de Bord Empire</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); color: var(--text-muted);">Consultation individuelle village par village</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); background: rgba(245,158,11,0.05); font-weight: 700; color: #15803d;">Grand Tableau consolidé multi-fiefs, alertes famine et totaux</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); font-weight: 700;">Carnet de Raids (Farm List)</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); color: var(--text-muted);">Saisie manuelle des coordonnées et troupes</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); background: rgba(245,158,11,0.05); font-weight: 700; color: #15803d;">Listes personnalisées &amp; Déploiement groupé en 1 Clic</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); font-weight: 700;">Troc de Ressources</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); color: var(--text-muted);">Échange marchand classique via caravanes</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); background: rgba(245,158,11,0.05); font-weight: 700; color: #15803d;">Intendant du Marché NPC instantané au ratio 1:1:1</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); font-weight: 700;">Protection de Nuit</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); color: var(--text-muted);">Combat obligatoire de toute la garnison présente</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); background: rgba(245,158,11,0.05); font-weight: 700; color: #15803d;">Ordre de Repli Tactique activable par fief (0 perte de troupe)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <?php endif; ?>
 
 <!-- MODALE LIGHTBOX EN HAUTE DÉFINITION POUR LES ILLUSTRATIONS DU CODEX -->
 <div class="modal-overlay" id="docsLightboxModal" style="display: none; position: fixed; inset: 0; background: rgba(5,7,15,0.9); backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center;" onclick="closeDocsLightbox()">

@@ -54,6 +54,8 @@
 
 <!-- Modale d'Annonces & Notifications des Fonctionnalités -->
 <?php require_once __DIR__ . '/announcement_modal.php'; ?>
+<!-- Modale du Sceau Impérial / Privilège du Shōgun -->
+<?php require_once __DIR__ . '/imperial_seal_modal.php'; ?>
 
 <!-- Modale Universelle de la Fiche Daimyō / Profil (Style Washi Féodal) -->
 <div class="modal-overlay" id="playerProfileModal">

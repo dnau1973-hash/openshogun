@@ -37,6 +37,17 @@ class CombatEngine {
             $defenderFleet[$r['code']] = (int)$r['count'];
         }
 
+        // ⛩️ ORDRE DE REPLI TACTIQUE (Évasion de Garnison du Shōgun)
+        $evasionApplied = false;
+        if (!empty($targetPlanet['tactical_evasion']) && $defenderUser && !empty($defenderUser['id'])) {
+            require_once __DIR__ . '/ImperialSealEngine.php';
+            $sealEngine = new ImperialSealEngine($this->db);
+            if ($sealEngine->isSealActive((int)$defenderUser['id'])) {
+                $evasionApplied = true;
+                $defenderFleet = []; // La garnison évacue discrètement les lieux et évite le massacre
+            }
+        }
+
         // 2. Charger les stats de tous les vaisseaux et soldats
         $shipDb = [];
         $stmtAllShips = $this->db->query("SELECT * FROM ships");
@@ -103,7 +114,7 @@ class CombatEngine {
         }
 
         $defenderHero = null;
-        if ($defenderUser) {
+        if ($defenderUser && !$evasionApplied) {
             $defenderHero = $heroEngine->getHeroByUserId((int)$defenderUser['id']);
             if ($defenderHero && (int)$defenderHero['current_planet_id'] === $targetPlanetId && $defenderHero['status'] === 'home' && $defenderHero['health'] > 0) {
                 $defStrength = (int)($defenderHero['effective']['combat_strength'] ?? 150);
@@ -328,11 +339,13 @@ class CombatEngine {
             'defender_lost' => $defLost,
             'looted' => $looted,
             'rounds' => $roundLogs,
-            'winner' => $winner
+            'winner' => $winner,
+            'evasion_applied' => $evasionApplied
         ];
 
-        $title = "Bataille provinciale en ({$targetPlanet['coord_x']}, {$targetPlanet['coord_y']}) : Victoire de " . 
-                 ($winner === 'attacker' ? $attackerUser['username'] : ($defenderUser['username'] ?? 'la Garnison'));
+        $title = $evasionApplied 
+            ? "Repli Tactique Féodal en ({$targetPlanet['coord_x']}, {$targetPlanet['coord_y']}) : Garnison de " . ($defenderUser['username'] ?? 'défense') . " indemne"
+            : "Bataille provinciale en ({$targetPlanet['coord_x']}, {$targetPlanet['coord_y']}) : Victoire de " . ($winner === 'attacker' ? $attackerUser['username'] : ($defenderUser['username'] ?? 'la Garnison'));
 
         $stmtReport = $this->db->prepare("
             INSERT INTO combat_reports 

@@ -5,11 +5,16 @@
 require_once __DIR__ . '/../core/FleetEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
 require_once __DIR__ . '/../core/HeroEngine.php';
+require_once __DIR__ . '/../core/ImperialSealEngine.php';
 
 $fleetEngine = new FleetEngine();
 $planetEngine = new PlanetEngine();
 $heroEngine = new HeroEngine();
+$sealEngine = new ImperialSealEngine();
 $db = Database::getConnection();
+
+$isSealActive = $sealEngine->isSealActive((int)$user['id']);
+$allFarmLists = $sealEngine->getFarmLists((int)$user['id']);
 
 // Samouraï Héros Champion
 $heroData = $heroEngine->getHeroByUserId($user['id']);
@@ -151,9 +156,37 @@ $stmtTenshu->execute([$planet['id']]);
 $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
 ?>
 
-<div class="grid-main">
-    <!-- Déploiement d'armée féodale et engins -->
-    <div class="card">
+<div class="mb-3 d-print-none">
+    <ul class="nav nav-tabs" data-bs-toggle="tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a href="#tab-manual-fleet" class="nav-link active fw-bold d-flex align-items-center gap-1" data-bs-toggle="tab" aria-selected="true" role="tab">
+                <span>🚩</span> Expédition &amp; Manœuvres
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a href="#tab-farm-lists" class="nav-link fw-bold text-warning d-flex align-items-center gap-1" data-bs-toggle="tab" aria-selected="false" role="tab">
+                <span>📜</span> Carnet de Raids (Farm List)
+                <span class="badge bg-warning text-dark ms-1"><?= count($allFarmLists) ?></span>
+                <?php if ($isSealActive): ?>
+                    <span class="badge bg-dark text-warning border border-warning ms-1" style="font-size:0.6rem;">Sceau Actif</span>
+                <?php endif; ?>
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a href="#tab-active-missions" class="nav-link fw-bold d-flex align-items-center gap-1" data-bs-toggle="tab" aria-selected="false" role="tab">
+                <span>🏇</span> Marches Actives
+                <span class="badge bg-secondary ms-1"><?= count($activeMissions) ?></span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content">
+    <!-- ONGLET 1 : EXPÉDITION MANUELLE -->
+    <div class="tab-pane active show" id="tab-manual-fleet" role="tabpanel">
+        <div class="grid-main">
+            <!-- Déploiement d'armée féodale et engins -->
+            <div class="card">
         <div class="card-header">
             <h2 class="card-title">🚩 Expédition Militaire & Convois Provinciaux</h2>
             <span style="font-size:0.85rem; color:var(--text-muted);">Fief d'attache : <?= htmlspecialchars($planet['name']) ?></span>
@@ -434,6 +467,346 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                 <?php endif; ?>
             </div>
         </div>
+        </div>
+    </div>
+
+    <!-- ONGLET 2 : CARNET DE RAIDS (FARM LIST) -->
+    <div class="tab-pane" id="tab-farm-lists" role="tabpanel">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h3 class="card-title text-warning d-flex align-items-center gap-2 m-0">
+                        <span>📜</span> Carnet de Raids Automatisé (Farm List Féodale)
+                    </h3>
+                    <div class="text-secondary small mt-1">
+                        Enregistrez vos cibles récurrentes (oasis d'animaux, domaines inactifs) et lancez des vagues de pillage coordonnées en 1 clic.
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-warning fw-bold btn-sm" onclick="openCreateFarmListModal()">
+                        ➕ Nouvelle Liste de Raids
+                    </button>
+                    <?php if (!$isSealActive): ?>
+                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="openImperialSealModal()">
+                            👑 Sceau Impérial
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="card-body">
+                <?php if (empty($allFarmLists)): ?>
+                    <div class="text-center py-5">
+                        <div class="fs-1 mb-2">📜</div>
+                        <h3>Votre Carnet de Raids est vierge</h3>
+                        <p class="text-secondary small mb-3">
+                            Créez votre première liste de raids pour automatiser le pillage de vos cibles favorites sans recomposer vos armées à chaque fois.
+                        </p>
+                        <button type="button" class="btn btn-warning fw-bold" onclick="openCreateFarmListModal()">
+                            ➕ Créer ma première Liste de Raids
+                        </button>
+                    </div>
+                <?php else: ?>
+                    <div class="d-flex flex-column gap-4">
+                        <?php foreach ($allFarmLists as $fl): ?>
+                            <div class="card border shadow-sm">
+                                <div class="card-header py-2 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:#fafaf9;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="fs-3">⚔️</span>
+                                        <div>
+                                            <strong class="text-dark fs-4"><?= htmlspecialchars($fl['name']) ?></strong>
+                                            <div class="text-muted small">
+                                                Fief de déploiement : <strong><?= htmlspecialchars($fl['source_planet_name']) ?></strong> [<?= $fl['source_coord_x'] ?>|<?= $fl['source_coord_y'] ?>]
+                                                &bull; <?= count($fl['entries']) ?> cible(s) enregistrée(s)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button type="button" class="btn btn-success fw-bold btn-sm" 
+                                                onclick="runFullFarmList(<?= $fl['id'] ?>, '<?= htmlspecialchars(addslashes($fl['name'])) ?>')"
+                                                <?= empty($fl['entries']) ? 'disabled' : '' ?>>
+                                            ⚡ Lancer la Tournée en 1 Clic (<?= count($fl['entries']) ?> raids)
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="openAddFarmEntryModal(<?= $fl['id'] ?>)">
+                                            ➕ Ajouter Cible
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteFarmList(<?= $fl['id'] ?>)" title="Supprimer la liste">
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-vcenter table-striped table-hover m-0">
+                                        <thead>
+                                            <tr class="text-muted small" style="background:rgba(0,0,0,0.02);">
+                                                <th>Cible &amp; Coordonnées</th>
+                                                <th>Distance</th>
+                                                <th>Composition d'Armée Assignée</th>
+                                                <th>Dernier Raid</th>
+                                                <th class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($fl['entries'])): ?>
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-4 text-muted small">
+                                                        Aucune cible dans cette liste. Cliquez sur « ➕ Ajouter Cible » pour commencer votre carnet.
+                                                    </td>
+                                                </tr>
+                                            <?php else: ?>
+                                                <?php foreach ($fl['entries'] as $entry): ?>
+                                                    <tr>
+                                                        <td>
+                                                            <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                                <span><?= $entry['target_type'] === 'oasis' ? '🌴' : '🏯' ?></span>
+                                                                <span><?= htmlspecialchars($entry['target_name']) ?></span>
+                                                            </div>
+                                                            <div class="text-muted font-monospace small">
+                                                                [<?= $entry['coord_x'] ?>|<?= $entry['coord_y'] ?>]
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-secondary-lt font-monospace"><?= $entry['distance'] ?> cases</span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                <?php foreach ($entry['fleet_data_arr'] as $uCode => $uQty): ?>
+                                                                    <span class="badge bg-light text-dark border small">
+                                                                        <strong><?= $uQty ?></strong> <?= htmlspecialchars($uCode) ?>
+                                                                    </span>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <?php if ($entry['last_raid_at']): ?>
+                                                                <div class="small text-muted"><?= date('d/m H:i', strtotime($entry['last_raid_at'])) ?></div>
+                                                                <span class="badge bg-info-lt" style="font-size:0.65rem;"><?= htmlspecialchars($entry['last_status'] ?? 'achevé') ?></span>
+                                                            <?php else: ?>
+                                                                <span class="text-muted small italic">Jamais attaquée</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <div class="btn-group">
+                                                                <button type="button" class="btn btn-sm btn-success" 
+                                                                        onclick="runFarmEntry(<?= $entry['id'] ?>, '<?= htmlspecialchars(addslashes($entry['target_name'])) ?>')"
+                                                                        title="Lancer le raid maintenant">
+                                                                    ⚔️ Raid
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                                        onclick="deleteFarmEntry(<?= $entry['id'] ?>)"
+                                                                        title="Retirer de la liste">
+                                                                    ✕
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- ONGLET 3 : MARCHES ACTIVES (VUE DÉTAILLÉE) -->
+    <div class="tab-pane" id="tab-active-missions" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🏇 Toutes les Marches et Expéditions Féodales en Cours</h3>
+                <div class="card-options"><span class="badge bg-secondary"><?= count($activeMissions) ?> active(s)</span></div>
+            </div>
+            <div class="card-body">
+                <?php if (empty($activeMissions)): ?>
+                    <div class="text-center py-5 text-muted">
+                        <div class="fs-1 mb-2">🚩</div>
+                        <h3>Aucune troupe en marche</h3>
+                        <p class="small">Toutes vos armées sont actuellement stationnées dans vos garnisons castrales.</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-vcenter table-striped">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Type de Mission</th>
+                                    <th>Départ</th>
+                                    <th>Destination</th>
+                                    <th>Effectif Déployé</th>
+                                    <th>Statut</th>
+                                    <th class="text-end">Compte à Rebours</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($activeMissions as $m): 
+                                    $isOutbound = ($m['status'] === 'en_route');
+                                    $targetTime = $isOutbound ? $m['arrival_time'] : $m['return_time'];
+                                    $fleetData = json_decode($m['fleet_data'], true) ?: [];
+                                ?>
+                                <tr>
+                                    <td>
+                                        <span class="badge <?= $isOutbound ? 'bg-danger text-white' : 'bg-success text-white' ?> fw-bold">
+                                            <?= $isOutbound ? '↗️ ' : '↙️ ' ?><?= strtoupper($m['mission_type']) ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong><?= htmlspecialchars($m['source_name']) ?></strong> [<?= $m['sx'] ?>|<?= $m['sy'] ?>]
+                                    </td>
+                                    <td>
+                                        <strong><?= htmlspecialchars($m['target_name']) ?></strong> [<?= $m['tx'] ?>|<?= $m['ty'] ?>]
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <strong><?= array_sum($fleetData) ?></strong> unités
+                                            <?php if (!empty($m['has_hero'])): ?>
+                                                <span class="badge bg-warning text-dark ms-1">🥋 Héros</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary-lt"><?= $isOutbound ? 'En marche vers la cible' : 'Retour vers le fief' ?></span>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="badge bg-primary text-white font-monospace p-2 fs-6" data-countdown="<?= $targetTime ?>">
+                                            Calcul...
+                                        </span>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODALE CRÉATION D'UNE FARM LIST ================= -->
+<div class="modal modal-blur fade" id="modalCreateFarmList" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning-subtle">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                    <span>📜</span> Fonder une Nouvelle Liste de Raids
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nom de la Liste de Raids :</label>
+                    <input type="text" class="form-control" id="farm_list_name" placeholder="Ex: Raids Oasis Est, Inactifs Sud...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Fief d'origine (Garnison de départ) :</label>
+                    <select class="form-select" id="farm_list_source_planet">
+                        <?php foreach ($allUserPlanets as $up): ?>
+                            <option value="<?= $up['id'] ?>" <?= ((int)$up['id'] === (int)$planet['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($up['name']) ?> [<?= $up['coord_x'] ?>|<?= $up['coord_y'] ?>]
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-warning fw-bold" onclick="submitCreateFarmList()">
+                    📜 Établir la Liste
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODALE AJOUT DE CIBLE AU CARNET ================= -->
+<div class="modal modal-blur fade" id="modalAddFarmEntry" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning-subtle">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                    <span>🎯</span> Ajouter une Cible de Raid au Carnet
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="farm_entry_list_id" value="0">
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Sélectionner la Cible Féodale :</label>
+                    <select class="form-select" id="farm_entry_target_select" onchange="onFarmTargetSelectChange()">
+                        <optgroup label="🌐 Cibles enregistrées sur vos cartes">
+                            <?php foreach ($targetOptions as $to): ?>
+                                <option value="<?= $to['type'] ?>:<?= $to['id'] ?>:<?= $to['name'] ?>:<?= $to['x'] ?>:<?= $to['y'] ?>">
+                                    <?= htmlspecialchars($to['name']) ?> [<?= $to['x'] ?>|<?= $to['y'] ?>] &bull; <?= round($to['distance'], 1) ?> cases
+                                </option>
+                            <?php endforeach; ?>
+                        </optgroup>
+                        <option value="custom">✏️ Saisie manuelle de coordonnées [X|Y]</option>
+                    </select>
+                </div>
+
+                <div id="farm_entry_custom_coords" class="row g-2 mb-3 d-none">
+                    <div class="col-6">
+                        <label class="form-label small">Coordonnée X :</label>
+                        <input type="number" class="form-control form-control-sm" id="farm_custom_x" value="0">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small">Coordonnée Y :</label>
+                        <input type="number" class="form-control form-control-sm" id="farm_custom_y" value="0">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small">Nom du Domaine / Cible :</label>
+                        <input type="text" class="form-control form-control-sm" id="farm_custom_name" placeholder="Province Rebelle">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Régiments de Pillards à assigner par raid :</label>
+                    <div class="d-flex flex-column gap-2" style="max-height: 220px; overflow-y:auto;">
+                        <?php foreach ($stationedUnits as $u): ?>
+                            <div class="d-flex align-items-center justify-content-between p-2 border rounded bg-light">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span><?= $u['icon'] ?></span>
+                                    <div>
+                                        <strong class="small"><?= htmlspecialchars($u['name']) ?></strong>
+                                        <div class="text-muted" style="font-size:0.7rem;">Dispo en garnison : <?= $u['count'] ?></div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-1">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm p-1" style="font-size:0.65rem;" onclick="document.getElementById('farm_unit_<?= $u['unit_code'] ?>').value = 5;">5</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm p-1" style="font-size:0.65rem;" onclick="document.getElementById('farm_unit_<?= $u['unit_code'] ?>').value = 10;">10</button>
+                                    <input type="number" id="farm_unit_<?= $u['unit_code'] ?>" class="form-control form-control-sm text-center farm-fleet-input" data-unit="<?= $u['unit_code'] ?>" min="0" value="0" style="width:65px;">
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+
+                        <?php foreach ($stationedShips as $s): ?>
+                            <div class="d-flex align-items-center justify-content-between p-2 border rounded bg-light">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span>🐎</span>
+                                    <div>
+                                        <strong class="small"><?= htmlspecialchars($s['name']) ?></strong>
+                                        <div class="text-muted" style="font-size:0.7rem;">Dispo en garnison : <?= $s['count'] ?></div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-1">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm p-1" style="font-size:0.65rem;" onclick="document.getElementById('farm_unit_<?= $s['ship_code'] ?>').value = 5;">5</button>
+                                    <input type="number" id="farm_unit_<?= $s['ship_code'] ?>" class="form-control form-control-sm text-center farm-fleet-input" data-unit="<?= $s['ship_code'] ?>" min="0" value="0" style="width:65px;">
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-warning fw-bold" onclick="submitAddFarmEntry()">
+                    🎯 Enregistrer dans la Liste
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -513,6 +886,199 @@ async function submitFleet() {
         }
     } catch (e) {
         showModalAlert('Erreur de transmission avec vos généraux.', 'error');
+    }
+}
+
+// ==========================================
+// GESTION DU CARNET DE RAIDS (FARM LIST)
+// ==========================================
+function openCreateFarmListModal() {
+    const modal = new bootstrap.Modal(document.getElementById('modalCreateFarmList'));
+    modal.show();
+}
+
+async function submitCreateFarmList() {
+    const name = document.getElementById('farm_list_name').value.trim();
+    const sourcePlanetId = document.getElementById('farm_list_source_planet').value;
+
+    const fd = new FormData();
+    fd.append('action', 'create_list');
+    fd.append('name', name);
+    fd.append('source_planet_id', sourcePlanetId);
+
+    try {
+        const res = await fetch('/api/farm_list.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Erreur lors de la création de la liste.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur réseau.', 'error');
+    }
+}
+
+async function deleteFarmList(listId) {
+    const confirmed = await showModalConfirm('Êtes-vous certain de vouloir supprimer cette liste de raids et toutes ses cibles assignées ?', 'Suppression de Liste');
+    if (!confirmed) return;
+
+    const fd = new FormData();
+    fd.append('action', 'delete_list');
+    fd.append('list_id', listId);
+
+    try {
+        const res = await fetch('/api/farm_list.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showModalAlert(data.error || 'Erreur lors de la suppression.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur réseau.', 'error');
+    }
+}
+
+function openAddFarmEntryModal(listId) {
+    document.getElementById('farm_entry_list_id').value = listId;
+    document.querySelectorAll('.farm-fleet-input').forEach(inp => inp.value = 0);
+    const modal = new bootstrap.Modal(document.getElementById('modalAddFarmEntry'));
+    modal.show();
+}
+
+function onFarmTargetSelectChange() {
+    const val = document.getElementById('farm_entry_target_select').value;
+    const customDiv = document.getElementById('farm_entry_custom_coords');
+    if (val === 'custom') {
+        customDiv.classList.remove('d-none');
+    } else {
+        customDiv.classList.add('d-none');
+    }
+}
+
+async function submitAddFarmEntry() {
+    const listId = document.getElementById('farm_entry_list_id').value;
+    const rawVal = document.getElementById('farm_entry_target_select').value;
+
+    let targetType = 'planet';
+    let targetId = 0;
+    let targetName = '';
+    let x = 0;
+    let y = 0;
+
+    if (rawVal === 'custom') {
+        x = parseInt(document.getElementById('farm_custom_x').value || '0', 10);
+        y = parseInt(document.getElementById('farm_custom_y').value || '0', 10);
+        targetName = document.getElementById('farm_custom_name').value.trim() || `Province [${x}|${y}]`;
+        targetId = 0;
+    } else {
+        const p = rawVal.split(':');
+        targetType = p[0];
+        targetId = parseInt(p[1], 10);
+        targetName = p[2] || 'Cible';
+        x = parseInt(p[3], 10);
+        y = parseInt(p[4], 10);
+    }
+
+    const fleet = {};
+    let totalAssigned = 0;
+    document.querySelectorAll('.farm-fleet-input').forEach(inp => {
+        const cnt = parseInt(inp.value, 10);
+        if (cnt > 0) {
+            fleet[inp.dataset.unit] = cnt;
+            totalAssigned += cnt;
+        }
+    });
+
+    if (totalAssigned <= 0) {
+        showModalAlert('Veuillez affecter au moins 1 guerrier ou cavalier à cette expédition.', 'warning');
+        return;
+    }
+
+    const fd = new FormData();
+    fd.append('action', 'add_entry');
+    fd.append('list_id', listId);
+    fd.append('target_type', targetType);
+    fd.append('target_id', targetId);
+    fd.append('target_name', targetName);
+    fd.append('coord_x', x);
+    fd.append('coord_y', y);
+    fd.append('fleet', JSON.stringify(fleet));
+
+    try {
+        const res = await fetch('/api/farm_list.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(`Cible ${targetName} enregistrée dans le carnet avec succès !`, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Erreur lors de l\'ajout de la cible.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur réseau.', 'error');
+    }
+}
+
+async function deleteFarmEntry(entryId) {
+    const fd = new FormData();
+    fd.append('action', 'delete_entry');
+    fd.append('entry_id', entryId);
+
+    try {
+        const res = await fetch('/api/farm_list.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 800);
+        } else {
+            showModalAlert(data.error || 'Erreur.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur réseau.', 'error');
+    }
+}
+
+async function runFarmEntry(entryId, targetName) {
+    const fd = new FormData();
+    fd.append('action', 'run_entry');
+    fd.append('entry_id', entryId);
+
+    try {
+        const res = await fetch('/api/farm_list.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message || `Raid lancé vers ${targetName} !`, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Impossible de lancer ce raid (garnison manquante ?).', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de transmission.', 'error');
+    }
+}
+
+async function runFullFarmList(listId, listName) {
+    const confirmed = await showModalConfirm(`Voulez-vous déployer immédiatement tous les raids programmés de la liste « ${listName} » ?`, 'Lancement de Tournée');
+    if (!confirmed) return;
+
+    const fd = new FormData();
+    fd.append('action', 'run_all');
+    fd.append('list_id', listId);
+
+    try {
+        const res = await fetch('/api/farm_list.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success', 'Tournée de Raids Déployée');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showModalAlert(data.error || 'Erreur lors du lancement de la tournée.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur réseau.', 'error');
     }
 }
 </script>

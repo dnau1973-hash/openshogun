@@ -73,9 +73,15 @@ foreach ($queue as $q) {
     }
 }
 
-// Vérifier la disponibilité de la file selon la faction
+// Vérifier la disponibilité de la file selon la faction et le Sceau Impérial
+require_once __DIR__ . '/../core/ImperialSealEngine.php';
+$sealEngine = new ImperialSealEngine();
+$isSealActive = $sealEngine->isSealActive((int)$user['id']);
+
 $isTerran = ($user['faction'] === 'terran');
-$canQueueNewField = $isTerran ? ($fieldsInQueue === 0) : (count($queue) === 0);
+$maxAllowedFields = $isSealActive ? 2 : 1;
+$maxAllowedTotal = $isSealActive ? 3 : 1;
+$canQueueNewField = $isTerran ? ($fieldsInQueue < $maxAllowedFields) : (count($queue) < $maxAllowedTotal);
 
 // Vérifier les ressources
 $hasMetal = $planet['metal'] >= $cost['metal'];

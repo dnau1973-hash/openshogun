@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../core/FleetEngine.php';
 require_once __DIR__ . '/../../core/MessageEngine.php';
 require_once __DIR__ . '/../../core/QuestEngine.php';
 require_once __DIR__ . '/../../core/HeroEngine.php';
+require_once __DIR__ . '/../../core/ImperialSealEngine.php';
 require_once __DIR__ . '/../../config/game_constants.php';
 
 $auth = new Auth();
@@ -38,6 +39,11 @@ if ($user) {
     $heroEngine->ensureAvailableAdventures((int)$user['id'], 3);
 }
 $heroHeader = $user ? $heroEngine->getHeroByUserId((int)$user['id']) : null;
+
+$sealEngine = new ImperialSealEngine();
+$sealStatus = $user ? $sealEngine->getSealStatus((int)$user['id']) : null;
+$isSealActive = $sealStatus && !empty($sealStatus['active']);
+$userGoldCoins = $sealStatus ? (int)$sealStatus['gold'] : 0;
 
 if ($planet) {
     $planetEngine = new PlanetEngine();
@@ -120,6 +126,7 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
 $navItems = [
     ['page' => 'resources', 'match' => ['resources','field'], 'icon' => '🌾', 'label' => 'Terroir Féodal',     'title' => 'Terroir & Récoltes'],
     ['page' => 'city',      'match' => ['city','building'],   'icon' => '🏯', 'label' => 'Cité Castrale',      'title' => 'Bâtiments & Châteaux'],
+    ['page' => 'empire',    'match' => ['empire'],            'icon' => '👑', 'label' => 'Empire',             'title' => 'Grand Tableau de Bord des Fiefs'],
     ['page' => 'map',       'match' => ['map','galaxy'],      'icon' => '🗾', 'label' => 'Carte',               'title' => 'Carte des Provinces'],
     ['page' => 'fleet',     'match' => ['fleet'],             'icon' => '⚔️', 'label' => 'Armées',             'title' => 'Expéditions militaires'],
     ['page' => 'hero',      'match' => ['hero'],              'icon' => '🥋', 'label' => 'Héros',              'title' => 'Votre Samouraï Héros'],
@@ -268,6 +275,23 @@ $navItems = [
                                 </span>
                             <?php endif; ?>
 
+                            <!-- 🪙 Trésor en Koban (Pièces d'Or) & 👑 Sceau Impérial -->
+                            <a href="javascript:void(0)" onclick="openImperialSealModal()" class="badge text-decoration-none d-flex align-items-center gap-1 py-1 px-2 border"
+                               style="background:rgba(245,158,11,0.15); border-color:rgba(245,158,11,0.45) !important; color:#fbbf24; font-size:0.75rem; border-radius:6px; cursor:pointer;"
+                               title="Trésor Impérial : <?= number_format($userGoldCoins) ?> Koban. Cliquez pour ouvrir les privilèges du Sceau Impérial.">
+                                <span>🪙</span>
+                                <strong><?= number_format($userGoldCoins) ?></strong>
+                                <span class="d-none d-sm-inline">Koban</span>
+                            </a>
+
+                            <a href="javascript:void(0)" onclick="openImperialSealModal()" 
+                               class="badge text-decoration-none d-none d-md-inline-flex align-items-center gap-1 py-1 px-2 border <?= $isSealActive ? 'bg-warning text-dark border-warning' : 'text-warning border-warning-subtle' ?>"
+                               style="<?= $isSealActive ? 'font-weight:700;' : 'background:rgba(0,0,0,0.3);' ?> font-size:0.72rem; border-radius:6px; cursor:pointer;"
+                               title="<?= $isSealActive ? 'Sceau Impérial Actif : ' . $sealStatus['remaining_formatted'] : 'Décrétez le Sceau Impérial du Shōgun' ?>">
+                                <span>👑</span>
+                                <span><?= $isSealActive ? 'Sceau Actif' : 'Sceau Impérial' ?></span>
+                            </a>
+
                             <!-- Menu Déroulant Utilisateur (Daimyō) : Profil, Communications, Codex, Admin, Déconnexion -->
                             <div class="dropdown">
                                 <a href="#" class="btn btn-sm btn-dark d-flex align-items-center gap-2 text-decoration-none px-2 py-1"
@@ -299,6 +323,21 @@ $navItems = [
                                         </div>
                                         <div class="dropdown-divider"></div>
                                     <?php endif; ?>
+
+                                    <!-- Privilèges & Empire du Shōgun -->
+                                    <div class="dropdown-header text-uppercase small text-warning fw-bold" style="font-size:0.65rem;">Privilèges du Shōgun</div>
+                                    <a href="?page=empire" class="dropdown-item fw-bold text-dark d-flex align-items-center justify-content-between <?= $page === 'empire' ? 'active' : '' ?>">
+                                        <span>👑 Tableau de Bord de l'Empire</span>
+                                        <?php if ($isSealActive): ?>
+                                            <span class="badge bg-warning text-dark" style="font-size:0.6rem;">Plus</span>
+                                        <?php endif; ?>
+                                    </a>
+                                    <a href="javascript:void(0)" class="dropdown-item d-flex align-items-center justify-content-between" onclick="openImperialSealModal()">
+                                        <span>📜 Mon Sceau Impérial</span>
+                                        <span class="badge bg-secondary-lt" style="font-size:0.6rem;"><?= number_format($userGoldCoins) ?> 🪙</span>
+                                    </a>
+
+                                    <div class="dropdown-divider"></div>
 
                                     <!-- Profil Daimyō -->
                                     <a href="javascript:void(0)" class="dropdown-item"

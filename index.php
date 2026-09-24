@@ -56,7 +56,7 @@ if ($page === 'galaxy') {
     $page = 'map';
 }
 
-$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'alliance', 'forum', 'chat'];
+$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'alliance', 'forum', 'chat', 'empire'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';

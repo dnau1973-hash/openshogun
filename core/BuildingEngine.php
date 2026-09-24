@@ -151,33 +151,62 @@ class BuildingEngine {
             }
         }
 
-        // 2. Vérification des files existantes et du bonus racial Terran
+        // 2. Vérification des files existantes, du Sceau Impérial (Architecte de Cour) et du bonus racial Terran
+        require_once __DIR__ . '/ImperialSealEngine.php';
+        $sealEngine = new ImperialSealEngine($this->db);
+        $isSealActive = $sealEngine->isSealActive((int)$planet['user_id']);
+
         $queue = $this->getQueue($planetId);
         $fieldsInQueue = 0;
         $buildingsInQueue = 0;
+        $maxFinishesAtCategory = time();
+        $maxFinishesAtGlobal = time();
 
         foreach ($queue as $q) {
-            if ($q['build_category'] === 'field') $fieldsInQueue++;
-            else $buildingsInQueue++;
+            $qFin = (int)$q['finishes_at'];
+            if ($qFin > $maxFinishesAtGlobal) {
+                $maxFinishesAtGlobal = $qFin;
+            }
 
-            // Empêcher d'améliorer deux fois la même cible en même temps
+            if ($q['build_category'] === 'field') {
+                $fieldsInQueue++;
+                if ($category === 'field' && $qFin > $maxFinishesAtCategory) {
+                    $maxFinishesAtCategory = $qFin;
+                }
+            } else {
+                $buildingsInQueue++;
+                if ($category === 'building' && $qFin > $maxFinishesAtCategory) {
+                    $maxFinishesAtCategory = $qFin;
+                }
+            }
+
+            // Empêcher d'améliorer deux fois la même cible en même temps dans la file
             if ($q['build_category'] === $category && $q['target_id'] == $targetId) {
-                throw new Exception("Cette structure est déjà en cours d'amélioration.");
+                throw new Exception("Cette structure est déjà en cours d'amélioration dans votre file castrale.");
             }
         }
 
         if ($faction === 'terran') {
-            // Terrans : 1 champ et 1 bâtiment en simultané
-            if ($category === 'field' && $fieldsInQueue >= 1) {
-                throw new Exception("Une parcelle minière est déjà en cours d'amélioration.");
+            $maxAllowedPerCategory = $isSealActive ? 2 : 1;
+            if ($category === 'field' && $fieldsInQueue >= $maxAllowedPerCategory) {
+                $msg = $isSealActive 
+                    ? "Votre file de parcelles agricoles et minières est déjà saturée (maximum 2 chantiers enchaînés)." 
+                    : "Une parcelle rurale est déjà en cours d'amélioration. Décrétez le Sceau Impérial pour mettre en file jusqu'à 2 travaux en attente !";
+                throw new Exception($msg);
             }
-            if ($category === 'building' && $buildingsInQueue >= 1) {
-                throw new Exception("Une infrastructure de la cité est déjà en cours de construction.");
+            if ($category === 'building' && $buildingsInQueue >= $maxAllowedPerCategory) {
+                $msg = $isSealActive 
+                    ? "Votre file d'infrastructures urbaines est déjà saturée (maximum 2 édifices enchaînés)." 
+                    : "Une infrastructure de la cité est déjà en cours de construction. Décrétez le Sceau Impérial pour enchaîner vos chantiers !";
+                throw new Exception($msg);
             }
         } else {
-            // Vorash & Aethelis : 1 seule construction à la fois
-            if (count($queue) >= 1) {
-                throw new Exception("Une construction est déjà en cours sur cette planète.");
+            $maxAllowedTotal = $isSealActive ? 3 : 1;
+            if (count($queue) >= $maxAllowedTotal) {
+                $msg = $isSealActive 
+                    ? "Votre Architecte de Cour a déjà planifié 3 chantiers simultanés sur ce domaine." 
+                    : "Une construction est déjà en cours sur cette province. Décrétez le Sceau Impérial pour planifier jusqu'à 3 chantiers en file !";
+                throw new Exception($msg);
             }
         }
 
@@ -200,16 +229,17 @@ class BuildingEngine {
         ");
         $stmtDeduct->execute([$cost['metal'], $cost['crystal'], $cost['deuterium'], $planetId]);
 
-        // 6. Ajout à la file de construction
+        // 6. Ajout à la file de construction (enchaînement séquentiel si un chantier précédent est en cours)
         $now = time();
-        $finishesAt = $now + $duration;
+        $startTime = ($faction === 'terran') ? max($now, $maxFinishesAtCategory) : max($now, $maxFinishesAtGlobal);
+        $finishesAt = $startTime + $duration;
 
         $stmtInsert = $this->db->prepare("
             INSERT INTO construction_queue 
             (planet_id, build_category, target_id, target_level, started_at, finishes_at) 
             VALUES (?, ?, ?, ?, ?, ?)
         ");
-        $stmtInsert->execute([$planetId, $category, $targetId, $details['target_level'], $now, $finishesAt]);
+        $stmtInsert->execute([$planetId, $category, $targetId, $details['target_level'], $startTime, $finishesAt]);
         $queueId = (int)$this->db->lastInsertId();
 
         return [
