@@ -281,31 +281,32 @@ foreach ($allUnits as $u) {
                     </h1>
                     <p style="font-size: 1.05rem; line-height: 1.6; color: var(--text-muted); margin: 0;">
                         Bienvenue dans les archives impériales du Japon féodal de l'ère Sengoku. Ce codex interactif réunit l'ensemble des règles fondamentales du jeu : 
-                        l'art de la guerre du <strong>Héros Samouraï</strong>, la personnalisation libre de vos <strong>18 parcelles de ressources</strong> et de votre <strong>cité castrale</strong>, 
-                        les fiches illustrées des <strong>25 unités militaires</strong> (Dojo & Siège), la conquête des <strong>Oasis sauvages</strong> et les <strong>Quêtes féodales</strong> d'initiation.
+                        le <strong>Héros Samouraï</strong> et ses <strong>35 reliques uniques</strong>, la personnalisation libre de vos <strong>18 parcelles de terroir</strong> et de votre <strong>cité castrale</strong>, 
+                        les fiches illustrées des <strong>25 unités militaires</strong> (Dojo & Siège), la conquête des <strong>Oasis sauvages</strong>, 
+                        les <strong>Alliances féodales</strong>, l'<strong>Artisanat du Moulin (Saké & Farine)</strong>, les <strong>Banquets au Tenshu</strong>, les <strong>Cages de capture de faune</strong> et la <strong>vie communautaire (Chat & Forum)</strong>.
                     </p>
                 </div>
                 
                 <div style="text-align: right; background: var(--bg-ink, #ede5d5); padding: 1rem 1.5rem; border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Édition Impériale</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Édition Impériale Complète</div>
                     <div style="font-size: 1.25rem; font-weight: 900; color: var(--red-primary);">戦国時代 &bull; 1572</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">25 Unités &bull; 3 Clans &bull; 12 Donjons &bull; Oasis</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">25 Unités &bull; 35 Reliques &bull; Alliances &bull; Artisanat</div>
                 </div>
             </div>
 
             <!-- Sommaire & Navigation entre Chapitres de la Documentation -->
             <div style="display: flex; gap: 0.5rem; margin-top: 1.75rem; overflow-x: auto; padding-bottom: 0.25rem; flex-wrap: wrap;">
                 <a href="?page=docs&tab=overview" class="btn <?= ($tab === 'overview') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>📜</span> Vue d'Ensemble & Nouveautés
+                    <span>📜</span> Vue d'Ensemble
                 </a>
                 <a href="?page=docs&tab=hero" class="btn <?= ($tab === 'hero') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>⚔️</span> Ch. 1 : Héros Samouraï
+                    <span>⚔️</span> Ch. 1 : Héros & 35 Reliques
                 </a>
                 <a href="?page=docs&tab=resources" class="btn <?= ($tab === 'resources') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🌾</span> Ch. 2 : Terroir & Choix Libre (1-18)
+                    <span>🌾</span> Ch. 2 : Terroir (1-18)
                 </a>
                 <a href="?page=docs&tab=city" class="btn <?= ($tab === 'city') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🏯</span> Ch. 3 : Cité & Silos Libres (19-34)
+                    <span>🏯</span> Ch. 3 : Cité Castrale (19-34)
                 </a>
                 <a href="?page=docs&tab=troops" class="btn <?= ($tab === 'troops') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
                     <span>🥋</span> Ch. 4 : Troupes du Dojo (12)
@@ -314,13 +315,13 @@ foreach ($allUnits as $u) {
                     <span>🐎</span> Ch. 5 : Siège & Écuries (13)
                 </a>
                 <a href="?page=docs&tab=oasis" class="btn <?= ($tab === 'oasis') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🌴</span> Ch. 6 : Oasis Sauvages & Faune
+                    <span>🌴</span> Ch. 6 : Oasis & Faune
                 </a>
                 <a href="?page=docs&tab=quests" class="btn <?= ($tab === 'quests') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
                     <span>🎯</span> Ch. 7 : Quêtes & Didacticiel
                 </a>
                 <a href="?page=docs&tab=map" class="btn <?= ($tab === 'map') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🗺️</span> Ch. 8 : Carte & 4 Provinces
+                    <span>🗺️</span> Ch. 8 : Carte Féodale
                 </a>
                 <a href="?page=docs&tab=castles" class="btn <?= ($tab === 'castles') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
                     <span>🏯</span> Ch. 9 : 12 Donjons Historiques
@@ -328,8 +329,20 @@ foreach ($allUnits as $u) {
                 <a href="?page=docs&tab=combat" class="btn <?= ($tab === 'combat') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
                     <span>⚔️</span> Ch. 10 : Combat & Sièges
                 </a>
+                <a href="?page=docs&tab=alliances" class="btn <?= ($tab === 'alliances') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🚩</span> Ch. 11 : Alliances & Diplomatie
+                </a>
+                <a href="?page=docs&tab=craft" class="btn <?= ($tab === 'craft') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🍶</span> Ch. 12 : Artisanat & Banquets
+                </a>
+                <a href="?page=docs&tab=cages" class="btn <?= ($tab === 'cages') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>🦊</span> Ch. 13 : Cages & Faune Sauvage
+                </a>
+                <a href="?page=docs&tab=social" class="btn <?= ($tab === 'social') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
+                    <span>💬</span> Ch. 14 : Chat & Forum
+                </a>
                 <a href="?page=docs&tab=all" class="btn <?= ($tab === 'all') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap; background: rgba(194,37,43,0.1); border-color: var(--red-primary); color: var(--red-primary);">
-                    <span>📚</span> Tout Dérouler
+                    <span>📚</span> Tout Dérouler (1-14)
                 </a>
             </div>
         </div>
@@ -886,6 +899,90 @@ foreach ($allUnits as $u) {
                     <p style="font-size: 0.82rem; color: #dc2626; margin: 0; font-weight: 600;">
                         💀 <strong>Régénération Post-Mortem :</strong> En cas de décès au combat, vous ne perdez <strong>jamais</strong> son niveau ni ses points. La <strong>régénération du héros après sa mort dure 24 heures</strong>, à l'issue desquelles il recouvrira l'intégralité de ses points de vie (100% PV).
                     </p>
+                </div>
+            </div>
+
+            <!-- 4. Le Panthéon des 35 Reliques Féodales Uniques -->
+            <div style="background: var(--bg-ink); padding: 1.5rem; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+                    <div>
+                        <h4 style="margin: 0; font-size: 1.15rem; color: var(--red-primary); display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🏆</span> 4. Le Panthéon Sacré des 35 Reliques Féodales Uniques
+                        </h4>
+                        <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                            35 reliques réparties équitablement en 5 familles de 7 reliques chacune. Chaque objet confère des bonus passifs majeurs.
+                        </div>
+                    </div>
+                    <span style="font-size: 0.75rem; font-weight: 800; background: rgba(194,37,43,0.1); color: var(--red-primary); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(194,37,43,0.2);">
+                        7 Armes &bull; 7 Casques &bull; 7 Armures &bull; 7 Montures &bull; 7 Talismans
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+                    <!-- 1. Armes -->
+                    <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); border-top: 3px solid #dc2626;">
+                        <strong style="color: #dc2626; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+                            🗡️ Armes du Samouraï (7)
+                        </strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
+                            <em>Katana Tamahagane, Yari Ancestrale, Gunbai Impérial, Nodachi Tempête, Naginata Bugeisha, Grand Arc Yumi, Tantō Masamune.</em>
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #dc2626; font-weight: 700;">
+                            Bonus : Force de combat brute (+200 à +450) &amp; Attaque offensive (+1.0% à +2.5%).
+                        </div>
+                    </div>
+
+                    <!-- 2. Casques -->
+                    <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); border-top: 3px solid #f59e0b;">
+                        <strong style="color: #f59e0b; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+                            🪖 Casques &amp; Masques Kabuto (7)
+                        </strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
+                            <em>Cornes d'Or du Shōgun, Croissant de Sendai, Menpō Oni, Dragon de Kai, Kasa Shinobi, Soleil Levant, Cornes de Cerf Sanada.</em>
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #d97706; font-weight: 700;">
+                            Bonus : Résistance aux chocs, Défense de siège (+1.2% à +2.2%) &amp; Gain d'XP (+10% à +20%).
+                        </div>
+                    </div>
+
+                    <!-- 3. Armures -->
+                    <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); border-top: 3px solid #2563eb;">
+                        <strong style="color: #2563eb; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+                            🥋 Armures &amp; Cuirasses Ō-Yoroi (7)
+                        </strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
+                            <em>Cuirasse Ō-Yoroi, Armure Dō-Maru, Plastron Nanban, Armure Écarlate Ii Naomasa, Jimbaori Damassé, Haramaki Léger, Armure d'Ébène Takeda.</em>
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #2563eb; font-weight: 700;">
+                            Bonus : Protection absolue de l'armée, Défense de garnison (+1.2% à +2.5%) &amp; Force.
+                        </div>
+                    </div>
+
+                    <!-- 4. Montures -->
+                    <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); border-top: 3px solid #0891b2;">
+                        <strong style="color: #0891b2; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+                            🐎 Montures &amp; Destriers (7)
+                        </strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
+                            <em>Étalon de Kai, Destrier Noir de Kiso, Destrier au Bamen de Fer, Cheval Bai de Musashi, Étalon Blanc Benzaiten, Pur-Sang Date, Destrier Ambré de Kyoto.</em>
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #0891b2; font-weight: 700;">
+                            Bonus : Vitesse d'expédition prodigieuse (+25% à +45%) &amp; Réduction du temps de marche.
+                        </div>
+                    </div>
+
+                    <!-- 5. Talismans -->
+                    <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); border-top: 3px solid #16a34a;">
+                        <strong style="color: #16a34a; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+                            📿 Talismans &amp; Trésors Sacrés (7)
+                        </strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
+                            <em>Omamori Inari, Miroir Sacré de Yata, Magatama en Jade, Clochette Kagura, Parchemin Dokkōdō, Perle de Marée Ryūjin, Sceau du Chrysanthème.</em>
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #16a34a; font-weight: 700;">
+                            Bonus : Production de ressources (+30 à +50/h Bois, Pierre, Riz), Prestige impérial &amp; XP.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1848,6 +1945,453 @@ foreach ($allUnits as $u) {
                         <li><strong>Rupture Martiale de l'Immunité :</strong> Si vous décidez de rompre le pacte de paix en lançant un raid, un assaut ou un espionnage contre le fief d'un <em>autre seigneur joueur</em>, votre protection de 7 jours sera <strong>immédiatement et irrévocablement levée</strong>.</li>
                     </ul>
                 </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($tab === 'alliances' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 11 : ALLIANCES FÉODALES, PAVILLON DIPLOMATIQUE & GUERRES DE CLANS
+             ============================================================== -->
+        <div class="card" id="chapitre-alliances" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #2563eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 1px;">Chapitre 11</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🚩</span> Alliances Féodales, Pavillon Diplomatique & Guerres de Clans
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Dans le tourbillon de l'époque Sengoku, nul daimyō ne peut prétendre unifier le Japon en combattant seul. Les Alliances féodales permettent de coaliser vos forces militaires, de sécuriser vos frontières grâce à des pactes de non-agression, d'échanger des vivres d'urgence et de coordonner de gigantesques opérations de siège.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Capacité Maximale</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #2563eb;">Jusqu'à 60 Seigneurs</div>
+                </div>
+            </div>
+
+            <!-- BÂTIMENT CLÉ : LE PAVILLON DIPLOMATIQUE -->
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                <?php 
+                    $embassyDisk = __DIR__ . '/../public/assets/building_embassy.jpg';
+                    $embassySrc = '/public/assets/building_embassy.jpg' . (file_exists($embassyDisk) ? '?v=' . filemtime($embassyDisk) : '');
+                ?>
+                <div style="position: relative; width: 280px; max-width: 100%; height: 175px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; flex-shrink: 0;"
+                     onclick="openDocsLightbox('Pavillon Diplomatique', '<?= $embassySrc ?>', 'Bâtiment Urbain Castral (Emplacements 19-34)', 'Lieu solennel de réception des émissaires impériaux et ambassadeurs des clans rivaux. C\'est ici que se négocient les pactes, se ratifient les trêves et s\'élaborent les traités d\'alliance.', '« La plume de l\'ambassadeur prévient souvent ce que mille sabres ne peuvent réparer. »')">
+                    <img src="<?= $embassySrc ?>" alt="Pavillon Diplomatique" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #2563eb; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                        🏛️ Pavillon Diplomatique
+                    </span>
+                    <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                        🔍 Agrandir
+                    </span>
+                </div>
+                <div style="flex: 1; min-width: 280px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="background: #2563eb; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
+                            Condition Fondatrice
+                        </span>
+                        <span style="font-size: 0.8rem; color: #2563eb; font-weight: 700;">Emplacements Urbains (19 à 34)</span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.35rem; color: var(--text-main);">
+                        Fondation & Adhésion à un Clan
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 0.75rem 0;">
+                        Pour prendre part aux affaires diplomatiques d'OpenShogun, tout seigneur doit ériger un <strong>Pavillon Diplomatique</strong> dans sa cité castrale :
+                    </p>
+                    <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; line-height: 1.6; color: var(--text-main);">
+                        <li><strong>Niveau 1 :</strong> Vous pouvez recevoir et accepter des invitations pour rejoindre une alliance existante.</li>
+                        <li><strong>Niveau 3 :</strong> Vous gagnez le droit impérial de <strong>fonder votre propre Clan</strong>, d'en concevoir la bannière, d'en proclamer la charte et de recruter vos premiers vassaux.</li>
+                        <li><strong>Évolution (Niveaux 1 à 20) :</strong> Chaque niveau du Pavillon accroît de +3 le nombre maximal de membres pouvant prêter allégeance au clan (jusqu'à 60 daimyōs coalisés au niveau 20).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- HIÉRARCHIE & RANGS DE L'ALLIANCE -->
+            <h3 style="margin: 1.5rem 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                <span>👑</span> Hiérarchie, Rôles & Prérogatives Féodales
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #b91c1c;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: #b91c1c; margin-bottom: 0.25rem;">Shōgun (Chef Suprême)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Fondateur de la Dynastie</div>
+                    <p style="font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--text-main);">
+                        Possède les pleins pouvoirs impériaux : renommer le clan, changer le blason (Mon), promouvoir ou rétrograder les officiers, signer les pactes diplomatiques, déclarer la guerre ou dissoudre l'alliance.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #d97706;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: #d97706; margin-bottom: 0.25rem;">Taishō (Général d'Armée)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Bras Droit Militaire</div>
+                    <p style="font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--text-main);">
+                        Supervise les opérations d'assaut et de défense commune. Il peut envoyer des invitations officielles, exclure les membres inactifs et ordonner des rassemblements de guerre sur les fiefs ennemis.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #2563eb;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: #2563eb; margin-bottom: 0.25rem;">Karō (Chancelier Intendant)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Affaires Civiles & Diplomatiques</div>
+                    <p style="font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--text-main);">
+                        Gère les requêtes d'admission, supervise les échanges de ressources et anime le forum secret de l'alliance ainsi que les relations avec les ambassades tierces.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #16a34a;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: #16a34a; margin-bottom: 0.25rem;">Samouraï (Membre Confirmé)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Guerrier de la Bannière</div>
+                    <p style="font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--text-main);">
+                        Accès illimité au canal de discussion privé du clan, au forum interne, aux demandes de renforts d'urgence et aux convois solidaires d'approvisionnement sans commission de marché.
+                    </p>
+                </div>
+            </div>
+
+            <!-- RELATIONS DIPLOMATIQUES -->
+            <h3 style="margin: 1.5rem 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                <span>🕊️</span> Les Trois Traités Diplomatiques
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.25); border-radius: 8px; padding: 1.25rem;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #2563eb; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>🤝</span> Pacte de Non-Agression (PNA)
+                    </h4>
+                    <p style="font-size: 0.88rem; line-height: 1.5; margin: 0; color: var(--text-main);">
+                        Signé mutuellement entre deux clans pour sceller une trêve d'honneur. Il empêche les attaques fortuites et les raids de pillage entre membres des deux alliances, facilitant une cohabitation sereine sur les frontières provinciales.
+                    </p>
+                </div>
+                <div style="background: rgba(22,163,74,0.06); border: 1px solid rgba(22,163,74,0.25); border-radius: 8px; padding: 1.25rem;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #16a34a; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>🛡️</span> Confédération & Assistance Totale
+                    </h4>
+                    <p style="font-size: 0.88rem; line-height: 1.5; margin: 0; color: var(--text-main);">
+                        Alliance suprême fusionnant les intérêts stratégiques des deux clans. Permet de stationner des garnisons défensives dans les forteresses amies pour contrer un assaut ennemi et d'accélérer les convois d'approvisionnement.
+                    </p>
+                </div>
+                <div style="background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.25); border-radius: 8px; padding: 1.25rem;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #dc2626; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>⚔️</span> Déclaration de Guerre Ouverte
+                    </h4>
+                    <p style="font-size: 0.88rem; line-height: 1.5; margin: 0; color: var(--text-main);">
+                        Officialise un état de belligérance impitoyable. Débloque le registre des affrontements de guerre (troupes terrassées, donjons assiégés, butins conquis) et motive les régiments pour écraser le rival.
+                    </p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($tab === 'craft' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 12 : ARTISANAT DU MOULIN, BANQUETS AU TENSHU, COLONS & FAMINE
+             ============================================================== -->
+        <div class="card" id="chapitre-craft" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #d97706;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 1px;">Chapitre 12</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🍶</span> Artisanat du Moulin, Banquets au Tenshu, Colons & Famine
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        L'art de gouverner ne se limite pas à lever des sabres : il réside dans la prospérité des récoltes et le raffinement de l'intendance. Le Moulin permet de transformer le riz en Farine pure et en Saké impérial, indispensables pour célébrer les Banquets au Donjon Tenshu et accumuler les précieux Points de Culture (CP) requis pour fonder de nouvelles provinces.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Raffinement Agricole</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #d97706;">Farine & Saké Impérial</div>
+                </div>
+            </div>
+
+            <!-- BÂTIMENT ARTISANAT : LE MOULIN À GRAINS -->
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                <?php 
+                    $millDisk = __DIR__ . '/../public/assets/building_grain_mill.jpg';
+                    $millSrc = '/public/assets/building_grain_mill.jpg' . (file_exists($millDisk) ? '?v=' . filemtime($millDisk) : '');
+                ?>
+                <div style="position: relative; width: 280px; max-width: 100%; height: 175px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; flex-shrink: 0;"
+                     onclick="openDocsLightbox('Moulin à Grains & Raffinage', '<?= $millSrc ?>', 'Atelier d\'Artisanat Féodal (Emplacement Urbain)', 'Actionné par le courant des cours d\'eau ou la force du vent, le Moulin broie le riz brut en fine farine et abrite les cuves de fermentation pour brasser le précieux Saké des dieux.', '« Chaque grain moulu sous la meule prépare la grandeur des banquets futurs. »')">
+                    <img src="<?= $millSrc ?>" alt="Moulin à Grains" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #d97706; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                        🌾 Moulin d'Artisanat
+                    </span>
+                    <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                        🔍 Agrandir
+                    </span>
+                </div>
+                <div style="flex: 1; min-width: 280px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="background: #d97706; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
+                            Recettes de Raffinage
+                        </span>
+                        <span style="font-size: 0.8rem; color: #d97706; font-weight: 700;">Accessible dès le Moulin Niv. 1</span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.35rem; color: var(--text-main);">
+                        La Transformation des Grains de Riz
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 0.75rem 0;">
+                        Le Moulin offre deux ateliers artisanaux permettant de valoriser vos surplus agricoles :
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
+                        <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <div style="font-weight: 800; color: #b45309; font-size: 0.9rem;">🌾 Farine de Riz (米粉 - Komeko)</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                                Obtenue par broyage mécanique. Aliment de base pour les festivités provinciales et les réserves de longue conservation.
+                            </div>
+                        </div>
+                        <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <div style="font-weight: 800; color: #b91c1c; font-size: 0.9rem;">🍶 Saké Impérial (日本酒 - Nihonshu)</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                                Boisson sacrée issue d'une fermentation patiente. Offerte aux sanctuaires et bue lors des grands banquets au Tenshu.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LES BANQUETS DU TENSHU & POINTS DE CULTURE -->
+            <h3 style="margin: 1.5rem 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                <span>🍱</span> Banquets au Tenshu & Rayonnement Culturel (CP)
+            </h3>
+            <p style="font-size: 0.92rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1rem;">
+                Pour fonder ou conquérir de nouveaux villages sur la Carte des Provinces, votre domaine doit accumuler des <strong>Points de Culture (CP)</strong>. Si chaque bâtiment érigé en génère passivement chaque jour, organiser des <strong>Banquets</strong> au sommet du Donjon Tenshu accélère considérablement cette marche vers l'hégémonie :
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; color: #b45309; font-size: 1.1rem;">🏮 Petit Banquet Populaire</h4>
+                        <span style="font-size: 0.75rem; font-weight: 700; background: rgba(245,158,11,0.15); color: #b45309; padding: 2px 8px; border-radius: 4px;">Tenshu Niv. 1+</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.75rem 0;">
+                        Festin festif réunissant les artisans et paysans du domaine. Augmente le contentement populaire et confère un afflux immédiat de points culturels.
+                    </p>
+                    <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.85rem; line-height: 1.6; color: var(--text-main);">
+                        <li><strong>Gain :</strong> +250 Points de Culture immédiats.</li>
+                        <li><strong>Bonus :</strong> +10% de production de ressources sur le domaine pendant 24h.</li>
+                        <li><strong>Coût :</strong> Réserves de Bois, Pierre et Riz.</li>
+                    </ul>
+                </div>
+
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #dc2626;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; color: #b91c1c; font-size: 1.1rem;">🏯 Grand Banquet Impérial</h4>
+                        <span style="font-size: 0.75rem; font-weight: 700; background: rgba(220,38,38,0.15); color: #b91c1c; padding: 2px 8px; border-radius: 4px;">Tenshu Niv. 10+</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.75rem 0;">
+                        Réception fastueuse accueillant les ambassadeurs de Kyoto, princes de sang et généraux de haut rang. Requiert les produits raffinés du Moulin.
+                    </p>
+                    <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.85rem; line-height: 1.6; color: var(--text-main);">
+                        <li><strong>Gain :</strong> Jusqu'à +2 000 Points de Culture instantanés (égal à la production journalière de la cité).</li>
+                        <li><strong>Ingrédients :</strong> Saké Impérial et Farine de Riz du Moulin.</li>
+                        <li><strong>Effet Stratégique :</strong> Débloque en un éclair le quota requis pour recruter vos Colons.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- COLONISATION & RISQUE DE FAMINE -->
+            <div style="background: rgba(220, 38, 38, 0.05); padding: 1.25rem; border-radius: 8px; border: 1px solid rgba(220, 38, 38, 0.35); margin-top: 1rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #b91c1c; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>⚠️</span> Entretien des Armées (Upkeep) & Risque de Famine Déserteuse
+                </h4>
+                <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-main); margin-bottom: 0.75rem;">
+                    Dans OpenShogun, chaque guerrier du Dojo, cavalier et équipage de siège consomme une part de grain chaque heure pour sa subsistance (<strong>1 sac de riz / heure par soldat</strong>) :
+                </p>
+                <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.88rem; line-height: 1.6; color: var(--text-main);">
+                    <li><strong>Production Vivrière Nette :</strong> Visible dans la barre de ressources sous la mention <code>Riz : +X/h</code>. Elle est égale à la production totale de vos rizières moins la ration de vos troupes.</li>
+                    <li><strong>Déficit Vivrier :</strong> Si votre armée est plus nombreuse que la production de vos champs, la production devient négative (ex: <code>-150/h</code>). Vos réserves en Silo se vident alors progressivement pour nourrir vos hommes.</li>
+                    <li><strong>Famine Déserteuse :</strong> Si les réserves de riz tombent à <strong>zéro absolu</strong> alors que le solde est négatif, la famine éclate dans vos casernes. Vos troupes périssent ou désertent alors automatiquement, une à une, jusqu'à ce que la consommation s'équilibre exactement avec la récolte de vos rizières !</li>
+                    <li><strong>Conseil du Chancelier :</strong> Veillez toujours à développer vos rizières (parcelles 1 à 18) avant de lancer des levées en masse au Dojo.</li>
+                </ul>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($tab === 'cages' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 13 : CAGES DE CAPTURE & DOMESTICATION DE LA FAUNE SAUVAGE
+             ============================================================== -->
+        <div class="card" id="chapitre-cages" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #15803d;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #15803d; text-transform: uppercase; letter-spacing: 1px;">Chapitre 13</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>🦊</span> Cages de Capture & Domestication de la Faune Sauvage
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Directement inspirées des tactiques ancestrales de dressage et des chasses en forêt primaire, les <strong>Cages de Capture en fer forgé</strong> permettent à votre Héros Samouraï de capturer vivantes les créatures sauvages qui peuplent les Oasis indépendantes sans verser une goutte de sang, pour en faire des sentinelles féroces et gratuites sur vos remparts.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Coût d'Entretien</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #15803d;">0 Riz (100% Gratuit)</div>
+                </div>
+            </div>
+
+            <!-- ILLUSTRATION DE L'ITEM CAGES DE CAPTURE -->
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                <?php 
+                    $cagesDisk = __DIR__ . '/../public/assets/items/cages_capture.jpeg';
+                    $cagesSrc = '/public/assets/items/cages_capture.jpeg' . (file_exists($cagesDisk) ? '?v=' . filemtime($cagesDisk) : '');
+                ?>
+                <div style="position: relative; width: 280px; max-width: 100%; height: 175px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; flex-shrink: 0;"
+                     onclick="openDocsLightbox('Cages de Capture de Faune Sauvage', '<?= $cagesSrc ?>', 'Équipement Consommable du Héros Samouraï', 'Forgées en barreaux d\'acier trempé munis de déclencheurs à contrepoids, ces cages permettent de capturer vivants ours géants, loups des forêts et sangliers lors des assauts sur les oasis.', '« Pourquoi abattre une bête féroce quand elle peut garder vos remparts jusqu\'à son dernier souffle ? »')">
+                    <img src="<?= $cagesSrc ?>" alt="Cages de Capture" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #15803d; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                        ⛓️ Objet d'Inventaire
+                    </span>
+                    <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                        🔍 Agrandir
+                    </span>
+                </div>
+                <div style="flex: 1; min-width: 280px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="background: #15803d; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
+                            Mécanique de Capture
+                        </span>
+                        <span style="font-size: 0.8rem; color: #15803d; font-weight: 700;">1 Cage Consommée = 1 Bête Domestiquée</span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.35rem; color: var(--text-main);">
+                        Comment Capturer la Faune Sauvage ?
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 0.75rem 0;">
+                        La capture d'animaux sauvages obéit à un protocole martial pacifique et stratégique :
+                    </p>
+                    <ol style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; line-height: 1.6; color: var(--text-main);">
+                        <li><strong>Équiper les Cages :</strong> Placez les cages de fer dans la sacoche d'équipement de votre Héros Samouraï (depuis la page <em>Héros &bull; Équipement</em>).</li>
+                        <li><strong>Lancer l'Attaque sur l'Oasis :</strong> Envoyez votre Héros assaillir une Oasis sauvage occupée par des prédateurs.</li>
+                        <li><strong>Capture Instantanée Sans Dégâts :</strong> Dès l'arrivée, les bêtes sont neutralisées dans les cages <em>sans qu'aucun combat n'ait lieu</em> pour les créatures capturées ! Ni le Héros ni les bêtes ne subissent de blessures.</li>
+                        <li><strong>Retour Triomphal :</strong> Les bêtes capturées accompagnent immédiatement le Héros à son retour au château et s'installent dans vos coursives défensives.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- LE BESTIAIRE FÉODAL EN DÉFENSE -->
+            <h3 style="margin: 1.5rem 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                <span>🐺</span> Le Bestiaire Protecteur : Des Défenseurs d'Élite Gratuits
+            </h3>
+            <p style="font-size: 0.92rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1rem;">
+                L'atout suprême de la faune sauvage réside dans sa totale autonomie vivrière : <strong>les bêtes ne consomment AUCUN sac de riz d'entretien horaire (0 Upkeep)</strong> ! Elles constituent un bouclier idéal contre les raids de cavalerie et les pillages nocturnes.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #4b5563;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                        <span style="font-size: 1.1rem; font-weight: 800; color: var(--text-main);">🐺 Loup des Bois</span>
+                        <span style="font-size: 0.75rem; font-weight: 800; background: rgba(75,85,99,0.15); padding: 2px 6px; border-radius: 4px;">Anti-Infanterie</span>
+                    </div>
+                    <p style="font-size: 0.85rem; line-height: 1.5; margin: 0 0 0.5rem 0; color: var(--text-muted);">
+                        Chasse en meute serrée. Ses crocs déchiquètent les éclaireurs ennemis et perturbent les conscrits peu armés.
+                    </p>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #2563eb;">🛡️ Déf. Infanterie : 30 &bull; Cavalerie : 15</div>
+                </div>
+
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #b45309;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                        <span style="font-size: 1.1rem; font-weight: 800; color: #b45309;">🐗 Sanglier Cuirassé</span>
+                        <span style="font-size: 0.75rem; font-weight: 800; background: rgba(180,83,9,0.15); padding: 2px 6px; border-radius: 4px;">Anti-Cavalerie</span>
+                    </div>
+                    <p style="font-size: 0.85rem; line-height: 1.5; margin: 0 0 0.5rem 0; color: var(--text-muted);">
+                        Doté d'une peau épaisse et de défenses effilées. Sa charge brutale brise l'élan des chevaux et cavaliers adverses.
+                    </p>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #2563eb;">🛡️ Déf. Infanterie : 35 &bull; Cavalerie : 60</div>
+                </div>
+
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #b91c1c;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                        <span style="font-size: 1.1rem; font-weight: 800; color: #b91c1c;">🐻 Ours Brun Géant</span>
+                        <span style="font-size: 0.75rem; font-weight: 800; background: rgba(185,28,28,0.15); padding: 2px 6px; border-radius: 4px;">Colosse Suprême</span>
+                    </div>
+                    <p style="font-size: 0.85rem; line-height: 1.5; margin: 0 0 0.5rem 0; color: var(--text-muted);">
+                        Titan des cimes du mont Fuji. Encaisse des volées entières de flèches et fauche plusieurs assaillants d'un revers de patte.
+                    </p>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #2563eb;">🛡️ Déf. Infanterie : 140 &bull; Cavalerie : 200</div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($tab === 'social' || $tab === 'all'): ?>
+        <!-- ==============================================================
+             CHAPITRE 14 : COMMUNICATION FÉODALE : CHAT EN TEMPS RÉEL & FORUM DU ROYAUME
+             ============================================================== -->
+        <div class="card" id="chapitre-social" style="margin-bottom: 2rem; background: var(--bg-surface, #fdfbf7); padding: 2rem; border: 1px solid var(--border-color); border-radius: 12px; border-left: 6px solid #7c3aed;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px;">Chapitre 14</span>
+                    <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
+                        <span>💬</span> Communication Féodale : Chat en Temps Réel & Forum du Royaume
+                    </h2>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+                        Une communauté active et respectueuse est le pilier d'un empire durable. OpenShogun intègre un dispositif complet de communication en direct (chat multi-canaux avec widget persistant) ainsi qu'un grand forum du shogunat pour débattre des grandes affaires de l'archipel.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 0.75rem 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Canaux Synchrones</div>
+                    <div style="font-size: 1.25rem; font-weight: 900; color: #7c3aed;">Général &bull; Alliance &bull; Troc</div>
+                </div>
+            </div>
+
+            <!-- CHAT EN TEMPS RÉEL -->
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                <?php 
+                    $teahouseDisk = __DIR__ . '/../public/assets/building_teahouse.jpg';
+                    $teahouseSrc = '/public/assets/building_teahouse.jpg' . (file_exists($teahouseDisk) ? '?v=' . filemtime($teahouseDisk) : '');
+                ?>
+                <div style="position: relative; width: 280px; max-width: 100%; height: 175px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; flex-shrink: 0;"
+                     onclick="openDocsLightbox('Maison de Thé & Salons de Discussion', '<?= $teahouseSrc ?>', 'Lieu de Parole & de Diplomatie Féodale', 'Autour d\'un bol de thé matcha ou d\'une coupe de saké, les seigneurs se rencontrent pour échanger nouvelles du front, négocier des trêves ou conter leurs exploits martiaux.', '« Dans le silence du salon de thé, les plus grandes alliances prennent naissance. »')">
+                    <img src="<?= $teahouseSrc ?>" alt="Maison de Thé" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #7c3aed; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
+                        🍵 Salon de Discussion
+                    </span>
+                    <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                        🔍 Agrandir
+                    </span>
+                </div>
+                <div style="flex: 1; min-width: 280px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="background: #7c3aed; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
+                            Chat Instantané Multi-Canaux
+                        </span>
+                        <span style="font-size: 0.8rem; color: #7c3aed; font-weight: 700;">Widget Dépliable en Bas à Droite</span>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.35rem; color: var(--text-main);">
+                        Échangez en Direct avec Tout l'Archipel
+                    </h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 0.75rem 0;">
+                        Le chat d'OpenShogun offre trois espaces distincts accessibles depuis le widget persistant ou via la page dédiée <code>?page=chat</code> :
+                    </p>
+                    <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; line-height: 1.6; color: var(--text-main);">
+                        <li><strong>Canal Général (Royaume) :</strong> Tribune publique où tous les daimyōs discutent, célèbrent leurs victoires et commentent les batailles.</li>
+                        <li><strong>Canal Alliance :</strong> Salon crypté réservé exclusivement aux membres de votre clan pour coordonner les assauts millimétrés et les renforts défensifs.</li>
+                        <li><strong>Canal Commerce & Diplomatie :</strong> Bourse d'annonces pour échanger des cargaisons de ressources ou solliciter des traités diplomatiques.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- FORUM DU SHOGUNAT -->
+            <h3 style="margin: 1.5rem 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                <span>📜</span> Le Forum Officiel du Shogunat (<code>?page=forum</code>)
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #b91c1c;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #b91c1c; font-size: 1.05rem;">📢 Annonces & Édits Impériaux</h4>
+                    <p style="font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--text-muted);">
+                        Communications solennelles de l'administration du jeu : annonces d'événements saisonniers, notes de mise à jour, équilibrages et tournois martiaux.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #2563eb;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #2563eb; font-size: 1.05rem;">⚔️ Chroniques de Guerre & Rapports</h4>
+                    <p style="font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--text-muted);">
+                        Publication des rapports de bataille historiques, déclarations d'hostilités solennelles entre clans et récits d'assauts mémorables.
+                    </p>
+                </div>
+                <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #16a34a;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #16a34a; font-size: 1.05rem;">🍵 La Maison de Thé (Taverne RP)</h4>
+                    <p style="font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--text-muted);">
+                        Espace de convivialité, récits de fiction à l'époque Sengoku, poèmes haïkus et échanges libres dans le respect de l'honneur féodal.
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: rgba(124, 58, 237, 0.06); padding: 1.25rem; border-radius: 8px; border: 1px solid rgba(124, 58, 237, 0.3); margin-top: 1rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #6d28d9; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>🛡️</span> Charte de Conduite & Code du Bushidō
+                </h4>
+                <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--text-main);">
+                    Sur les salons de chat comme sur les coursives du forum, chaque daimyō s'engage à respecter la courtoisie féodale. Les insultes, le harcèlement et les comportements déloyaux sont réprimandés par le Grand Chambellan sous peine de bannissement des canaux publics.
+                </p>
             </div>
         </div>
     <?php endif; ?>
