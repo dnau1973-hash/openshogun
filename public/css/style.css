@@ -103,7 +103,7 @@
     width: 100%;
     max-width: 1368px;
     margin: 0 auto;
-    background: url('/public/assets/shogun_hud_ultraslim_1368.png') center / 100% 100% no-repeat;
+    background: none;
     padding: 6.5% 6.5% 5.5% 6.5%;
     position: relative;
     z-index: 100;

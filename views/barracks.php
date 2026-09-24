@@ -28,7 +28,7 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
     <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; background:linear-gradient(to right, rgba(194,37,43,0.06), transparent); padding:1rem 1.25rem;">
         <div style="display:flex; align-items:center; gap:1rem;">
             <div style="width:52px; height:52px; border-radius:8px; background:var(--bg-ink, #ede5d5); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
-                <img src="/public/assets/tile_barracks.png" alt="Dojo Militaire" style="width:44px; height:44px; object-fit:contain;">
+                <img src="/public/assets/tiles/tile_barracks.png" alt="Dojo Militaire" style="width:44px; height:44px; object-fit:contain;">
             </div>
             <div>
                 <h2 class="card-title" style="margin:0; font-size:1.3rem; display:flex; align-items:center; gap:0.6rem; color:var(--text-main);">

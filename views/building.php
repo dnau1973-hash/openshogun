@@ -1243,7 +1243,10 @@ if (!$isEmptyPlot) {
                             Façonnez le Bois de Cèdre brut en poutres maîtresses et madriers d'exception pour vos chantiers monumentaux et fortifications.
                         </div>
                     </div>
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap ms-auto">
+                        <span class="badge bg-warning text-dark fw-bold shadow-sm" title="Étage / Niveau actuel du bâtiment">
+                            🏛️ Étage <?= $lvl ?> (Niveau <?= $lvl ?>)
+                        </span>
                         <?php if ($lvl < 10): ?>
                             <span class="badge bg-secondary text-white fw-bold">
                                 🔒 Poutres : Niveau 10 requis (<?= $lvl ?>/10)
@@ -1263,7 +1266,7 @@ if (!$isEmptyPlot) {
                             </a>
                         <?php endif; ?>
                         <span class="badge bg-warning-lt fw-bold">
-                            Rendement : +<?= (int)($lvl * 2) ?>% (Niveau <?= $lvl ?>)
+                            Rendement : +<?= (int)($lvl * 2) ?>%
                         </span>
                         <span class="badge bg-info-lt fw-bold">
                             Vitesse : +<?= (int)($lvl * 15) ?>%
@@ -1373,24 +1376,28 @@ if (!$isEmptyPlot) {
 
                     <?php if ($lvl < 10): ?>
                     <!-- Atelier Verrouillé : Niveau 10 requis -->
-                    <div class="card card-sm border-dashed bg-light-lt text-center p-4">
-                        <div class="empty">
-                            <div class="empty-icon text-muted mb-2" style="font-size:2.5rem;">
-                                🔒 🪚
-                            </div>
-                            <h3 class="fw-bold text-dark mb-1">
-                                Façonnage de Poutres en bois Verrouillé
-                            </h3>
-                            <p class="text-secondary small mb-3" style="max-width: 520px; margin: 0 auto;">
-                                L'équarrissage et le rabotage des troncs de cèdre en poutres maîtresses nécessitent un outillage et un savoir-faire avancé. 
-                                Améliorez votre <strong>Atelier de Charpenterie au Niveau 10</strong> pour débloquer la production de poutres.
-                            </p>
-                            <div class="d-inline-flex align-items-center gap-2 px-3 py-2 bg-white rounded border shadow-sm">
-                                <span class="text-muted small">Niveau requis :</span>
-                                <div class="progress" style="width: 140px; height: 8px;">
-                                    <div class="progress-bar bg-warning" style="width: <?= min(100, ($lvl / 10) * 100) ?>%;"></div>
+                    <div class="card card-sm border-dashed bg-light-lt p-4 mb-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="fs-1">🔒</span>
+                                <div>
+                                    <h4 class="m-0 fw-bold text-dark">
+                                        Façonnage de Poutres en bois Verrouillé
+                                    </h4>
+                                    <div class="text-secondary small mt-1">
+                                        L'équarrissage et le rabotage des troncs de cèdre en poutres maîtresses nécessitent un outillage et un savoir-faire avancé. 
+                                        Améliorez votre <strong>Atelier de Charpenterie au Niveau 10</strong> pour débloquer la production de poutres.
+                                    </div>
                                 </div>
-                                <span class="badge bg-warning-lt text-dark fw-bold"><?= $lvl ?> / 10</span>
+                            </div>
+                            <div class="ms-auto text-end">
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 bg-white rounded border shadow-sm">
+                                    <span class="text-muted small">Niveau requis :</span>
+                                    <div class="progress" style="width: 140px; height: 8px;">
+                                        <div class="progress-bar bg-warning" style="width: <?= min(100, ($lvl / 10) * 100) ?>%;"></div>
+                                    </div>
+                                    <span class="badge bg-warning-lt text-dark fw-bold"><?= $lvl ?> / 10</span>
+                                </div>
                             </div>
                         </div>
                     </div>

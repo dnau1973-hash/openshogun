@@ -61,7 +61,7 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
                         if (file_exists($diskFile)) {
                             $imgSrc = '/public/assets/units/' . $imgFile . '?v=' . filemtime($diskFile);
                         } else {
-                            $imgSrc = '/public/assets/tile_shipyard.png';
+                            $imgSrc = '/public/assets/tiles/tile_shipyard.png';
                         }
                         $fullImg = $imgSrc;
 
