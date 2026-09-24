@@ -130,21 +130,26 @@ $goldCoins = (int)$sealStatus['gold'];
 </div>
 
 <!-- ================= 3 FORMULES D'INVESTITURE IMPÉRIALE ================= -->
-<div class="card mb-4 shadow-sm border">
+<div class="card mb-4 shadow-sm border" style="overflow: visible;">
     <div class="card-header bg-warning-subtle py-3">
         <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0">
             <span>📜</span> Décréter ou Prolonger le Sceau Impérial
         </h3>
         <div class="card-options text-muted small">Aucun paiement en argent réel requis</div>
     </div>
-    <div class="card-body p-4">
+    <div class="card-body p-4" style="overflow: visible;">
         <div class="row g-4">
             <!-- Offre 1 : 7 Jours -->
             <div class="col-md-4">
                 <div class="card h-100 border text-center hover-shadow d-flex flex-column justify-content-between" 
-                     style="border-radius:12px; min-height:490px; padding: 2.2rem 1.5rem; transition: transform 0.15s ease; background:#ffffff;">
+                     style="border-radius:12px; min-height:490px; padding: 1.8rem 1.5rem; transition: transform 0.15s ease; background:#ffffff;">
                     <div>
-                        <div class="fs-2 mb-2">⛩️</div>
+                        <div class="mb-3" style="min-height: 26px;">
+                            <span class="badge bg-secondary-lt text-secondary fw-bold px-3 py-1" style="letter-spacing:0.5px; font-size:0.75rem;">
+                                ⛩️ DÉCOUVERTE &bull; SPRINT
+                            </span>
+                        </div>
+                        <div class="fs-2 mb-1">⛩️</div>
                         <div class="text-secondary small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Découverte</div>
                         <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">7 Jours</div>
                         <div class="fs-2 fw-bold text-warning mb-1">200 Koban</div>
@@ -185,13 +190,15 @@ $goldCoins = (int)$sealStatus['gold'];
 
             <!-- Offre 2 : 14 Jours (Populaire) -->
             <div class="col-md-4">
-                <div class="card h-100 border border-warning text-center position-relative shadow-sm d-flex flex-column justify-content-between" 
-                     style="background: #fffdfa; border-radius:12px; border-width:2.5px !important; min-height:490px; padding: 2.2rem 1.5rem; transition: transform 0.15s ease;">
-                    <span class="badge bg-warning text-dark position-absolute top-0 start-50 translate-middle fw-bold px-3 py-1 shadow" style="letter-spacing:0.5px;">
-                        ⭐ ÉCONOMIE -10% &bull; RECOMMANDE
-                    </span>
+                <div class="card h-100 border border-warning text-center shadow-sm d-flex flex-column justify-content-between" 
+                     style="background: #fffdfa; border-radius:12px; border-width:2.5px !important; min-height:490px; padding: 1.8rem 1.5rem; transition: transform 0.15s ease;">
                     <div>
-                        <div class="fs-2 mb-2 mt-1">🏯</div>
+                        <div class="mb-3" style="min-height: 26px;">
+                            <span class="badge bg-warning text-dark fw-bold px-3 py-1 shadow-sm" style="letter-spacing:0.5px; font-size:0.75rem;">
+                                ⭐ ÉCONOMIE -10% &bull; RECOMMANDÉ
+                            </span>
+                        </div>
+                        <div class="fs-2 mb-1">🏯</div>
                         <div class="text-warning small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Royale</div>
                         <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">14 Jours</div>
                         <div class="fs-2 fw-bold text-warning mb-1">360 Koban</div>
@@ -232,13 +239,15 @@ $goldCoins = (int)$sealStatus['gold'];
 
             <!-- Offre 3 : 30 Jours -->
             <div class="col-md-4">
-                <div class="card h-100 border text-center hover-shadow position-relative d-flex flex-column justify-content-between" 
-                     style="border-radius:12px; min-height:490px; padding: 2.2rem 1.5rem; transition: transform 0.15s ease; background:#ffffff;">
-                    <span class="badge bg-purple text-white position-absolute top-0 start-50 translate-middle fw-bold px-3 py-1 shadow" style="letter-spacing:0.5px;">
-                        👑 PRESTIGE &bull; -25% D'OR
-                    </span>
+                <div class="card h-100 border text-center hover-shadow d-flex flex-column justify-content-between" 
+                     style="border-radius:12px; min-height:490px; padding: 1.8rem 1.5rem; transition: transform 0.15s ease; background:#ffffff;">
                     <div>
-                        <div class="fs-2 mb-2 mt-1">👑</div>
+                        <div class="mb-3" style="min-height: 26px;">
+                            <span class="badge bg-purple text-white fw-bold px-3 py-1 shadow-sm" style="letter-spacing:0.5px; font-size:0.75rem;">
+                                👑 PRESTIGE &bull; -25% D'OR
+                            </span>
+                        </div>
+                        <div class="fs-2 mb-1">👑</div>
                         <div class="text-purple small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Mensuelle</div>
                         <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">30 Jours</div>
                         <div class="fs-2 fw-bold text-warning mb-1">600 Koban</div>
