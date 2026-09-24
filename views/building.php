@@ -920,6 +920,13 @@ if (!$isEmptyPlot) {
             $planetEngine->processCraftQueue((int)$planet['id']);
             $craftQueue = $planetEngine->getCraftQueue((int)$planet['id']);
             $activeCraft = !empty($craftQueue) ? $craftQueue[0] : null;
+            $pendingCrafts = count($craftQueue) > 1 ? array_slice($craftQueue, 1) : [];
+
+            require_once __DIR__ . '/../core/ImperialSealEngine.php';
+            $sealEngine = new ImperialSealEngine();
+            $isSealActive = $sealEngine->isSealActive((int)$user['id']);
+            $maxCraftQueue = $isSealActive ? 4 : 1;
+            $canEnqueue = count($craftQueue) < $maxCraftQueue;
             $famineUpkeep = $planetEngine->getEliteUnitsUpkeep((int)$planet['id']);
             ?>
             <!-- ========================================================
@@ -935,7 +942,16 @@ if (!$isEmptyPlot) {
                             Raffinez le riz brut récolté dans vos rizières pour élaborer de la farine fine et du saké traditionnel d'exception.
                         </div>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <?php if ($isSealActive): ?>
+                            <span class="badge bg-warning text-dark fw-bold shadow-sm" title="File de tâches automatique active grâce au Sceau Impérial">
+                                👑 Sceau Impérial : File de raffinage (<?= count($craftQueue) ?>/4)
+                            </span>
+                        <?php else: ?>
+                            <a href="?page=privilege" class="badge bg-secondary-lt fw-bold text-decoration-none" title="Décrétez le Sceau Impérial pour débloquer jusqu'à 4 commandes en file continue !">
+                                ⛩️ File Simple : <?= count($craftQueue) ?>/1 (👑 Sceau : File x4)
+                            </a>
+                        <?php endif; ?>
                         <span class="badge bg-success-lt fw-bold">
                             Rendement : +<?= (int)($lvl * 2) ?>% (Niveau <?= $lvl ?>)
                         </span>
@@ -973,16 +989,19 @@ if (!$isEmptyPlot) {
                     </div>
                     <?php endif; ?>
 
-                    <!-- Lot en cours de raffinage (si actif) -->
+                    <!-- Lot 1 : En cours d'élaboration -->
                     <?php if ($activeCraft): ?>
                     <div class="alert alert-primary mb-3 p-3 border-primary shadow-sm" style="border-left: 5px solid #206bc4; background: #f0f7ff;">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
                             <div class="d-flex align-items-center gap-3">
                                 <span class="fs-1"><?= $activeCraft['product'] === 'sake' ? '🍶' : '🍚' ?></span>
                                 <div>
-                                    <h4 class="m-0 fw-bold text-dark">
-                                        <?= $activeCraft['product'] === 'sake' ? 'Brassage de Saké en cuve...' : 'Mouture de Farine de Riz en cours...' ?>
-                                    </h4>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h4 class="m-0 fw-bold text-dark">
+                                            <?= $activeCraft['product'] === 'sake' ? 'Brassage de Saké en cuve...' : 'Mouture de Farine de Riz en cours...' ?>
+                                        </h4>
+                                        <span class="badge bg-primary text-white">Lot Actif (#1)</span>
+                                    </div>
                                     <div class="text-secondary small mt-1">
                                         Production prévue : <strong class="text-primary">+<?= number_format((int)$activeCraft['produced_amount']) ?> <?= $activeCraft['product'] === 'sake' ? 'Saké 🍶' : 'Farine 🍚' ?></strong>
                                         &bull; Riz engagé : <strong><?= number_format((int)$activeCraft['rice_amount']) ?> 🌾</strong>
@@ -994,7 +1013,7 @@ if (!$isEmptyPlot) {
                                     ⏳ En cours...
                                 </span>
                                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="cancelRiceCraft(<?= (int)$activeCraft['id'] ?>)">
-                                    ✕ Annuler (Récupérer 80% riz)
+                                    ✕ Annuler (Remboursement 80%)
                                 </button>
                             </div>
                         </div>
@@ -1004,9 +1023,50 @@ if (!$isEmptyPlot) {
                                  style="width: <?= $activeCraft['progress'] ?>%;" 
                                  aria-valuenow="<?= $activeCraft['progress'] ?>" 
                                  aria-valuemin="0" 
-                                 aria-valuemax="100"
+                                 aria-valuemax="100" 
                                  id="craftProgressBar">
                             </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Lots Suivants en File d'Attente Séquentielle (Privilège Sceau Impérial) -->
+                    <?php if (!empty($pendingCrafts)): ?>
+                    <div class="card mb-3 border shadow-none" style="background:#fcfcfc;">
+                        <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
+                            <span class="fw-bold small text-dark d-flex align-items-center gap-2">
+                                <span>📋</span> Lots en file d'attente automatique (<?= count($pendingCrafts) ?>)
+                            </span>
+                            <span class="badge bg-warning-lt text-warning fw-bold">👑 Privilège du Shōgun</span>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <?php foreach ($pendingCrafts as $qIdx => $pCraft): ?>
+                            <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="badge bg-secondary-lt fw-bold">#<?= $qIdx + 2 ?></span>
+                                    <span class="fs-2"><?= $pCraft['product'] === 'sake' ? '🍶' : '🍚' ?></span>
+                                    <div>
+                                        <div class="fw-bold text-dark">
+                                            <?= $pCraft['product'] === 'sake' ? 'Brassage de Saké Impérial' : 'Mouture de Farine de Riz' ?>
+                                        </div>
+                                        <div class="text-muted small">
+                                            Rendement : <strong class="text-success">+<?= number_format((int)$pCraft['produced_amount']) ?></strong> &bull; Riz réservé : <strong><?= number_format((int)$pCraft['rice_amount']) ?> 🌾</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end d-flex align-items-center gap-3">
+                                    <div class="small">
+                                        <div class="text-muted">Démarrage estimé :</div>
+                                        <div class="fw-bold font-monospace text-primary">
+                                            dans ~<?= gmdate('i\m s\s', (int)$pCraft['starts_in']) ?>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="cancelRiceCraft(<?= (int)$pCraft['id'] ?>)" title="Annuler ce lot en attente">
+                                        ✕ Annuler
+                                    </button>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                     <?php endif; ?>
@@ -1054,17 +1114,17 @@ if (!$isEmptyPlot) {
                                     <div class="mb-2">
                                         <label class="form-label fw-bold text-dark small mb-1">Quantité de Riz à moudre :</label>
                                         <div class="input-group">
-                                            <input type="number" id="rice_amount_flour" min="5" step="5" value="100" class="form-control fw-bold text-center" oninput="calcFlourPreview()" <?= $activeCraft ? 'disabled' : '' ?>>
+                                            <input type="number" id="rice_amount_flour" min="5" step="5" value="100" class="form-control fw-bold text-center" oninput="calcFlourPreview()" <?= !$canEnqueue ? 'disabled' : '' ?>>
                                             <span class="input-group-text small">Riz</span>
                                         </div>
                                     </div>
 
                                     <!-- Boutons raccourcis -->
                                     <div class="btn-group btn-group-sm w-100 mb-3">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(50)" <?= $activeCraft ? 'disabled' : '' ?>>50</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(200)" <?= $activeCraft ? 'disabled' : '' ?>>200</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(1000)" <?= $activeCraft ? 'disabled' : '' ?>>1 000</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount('max')" <?= $activeCraft ? 'disabled' : '' ?>>Max</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(50)" <?= !$canEnqueue ? 'disabled' : '' ?>>50</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(200)" <?= !$canEnqueue ? 'disabled' : '' ?>>200</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount(1000)" <?= !$canEnqueue ? 'disabled' : '' ?>>1 000</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceFlourAmount('max')" <?= !$canEnqueue ? 'disabled' : '' ?>>Max</button>
                                     </div>
 
                                     <div class="alert alert-info py-2 px-3 small mb-3">
@@ -1079,13 +1139,13 @@ if (!$isEmptyPlot) {
                                     </div>
                                 </div>
 
-                                <?php if ($activeCraft): ?>
+                                <?php if (!$canEnqueue): ?>
                                 <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
-                                    ⏳ Atelier occupé (lot en cours)
+                                    ⏳ File saturée (<?= count($craftQueue) ?>/<?= $maxCraftQueue ?> lots)
                                 </button>
                                 <?php else: ?>
                                 <button type="button" class="btn btn-success w-100 fw-bold" onclick="submitRiceCraft('rice_flour')">
-                                    🍚 Lancer la Mouture de Farine
+                                    <?= empty($craftQueue) ? '🍚 Lancer la Mouture de Farine' : '➕ Ajouter à la File (#'.(count($craftQueue)+1).'/'.$maxCraftQueue.')' ?>
                                 </button>
                                 <?php endif; ?>
                             </div>
@@ -1108,17 +1168,17 @@ if (!$isEmptyPlot) {
                                     <div class="mb-2">
                                         <label class="form-label fw-bold text-dark small mb-1">Quantité de Riz à brasser :</label>
                                         <div class="input-group">
-                                            <input type="number" id="rice_amount_sake" min="10" step="10" value="100" class="form-control fw-bold text-center" oninput="calcSakePreview()" <?= $activeCraft ? 'disabled' : '' ?>>
+                                            <input type="number" id="rice_amount_sake" min="10" step="10" value="100" class="form-control fw-bold text-center" oninput="calcSakePreview()" <?= !$canEnqueue ? 'disabled' : '' ?>>
                                             <span class="input-group-text small">Riz</span>
                                         </div>
                                     </div>
 
                                     <!-- Boutons raccourcis -->
                                     <div class="btn-group btn-group-sm w-100 mb-3">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(50)" <?= $activeCraft ? 'disabled' : '' ?>>50</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(200)" <?= $activeCraft ? 'disabled' : '' ?>>200</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(1000)" <?= $activeCraft ? 'disabled' : '' ?>>1 000</button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount('max')" <?= $activeCraft ? 'disabled' : '' ?>>Max</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(50)" <?= !$canEnqueue ? 'disabled' : '' ?>>50</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(200)" <?= !$canEnqueue ? 'disabled' : '' ?>>200</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount(1000)" <?= !$canEnqueue ? 'disabled' : '' ?>>1 000</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="setRiceSakeAmount('max')" <?= !$canEnqueue ? 'disabled' : '' ?>>Max</button>
                                     </div>
 
                                     <div class="alert alert-warning py-2 px-3 small mb-3">
@@ -1133,13 +1193,13 @@ if (!$isEmptyPlot) {
                                     </div>
                                 </div>
 
-                                <?php if ($activeCraft): ?>
+                                <?php if (!$canEnqueue): ?>
                                 <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
-                                    ⏳ Atelier occupé (lot en cours)
+                                    ⏳ File saturée (<?= count($craftQueue) ?>/<?= $maxCraftQueue ?> lots)
                                 </button>
                                 <?php else: ?>
                                 <button type="button" class="btn btn-warning w-100 fw-bold text-dark" onclick="submitRiceCraft('sake')">
-                                    🍶 Déclencher le Brassage du Saké
+                                    <?= empty($craftQueue) ? '🍶 Déclencher le Brassage du Saké' : '➕ Ajouter à la File (#'.(count($craftQueue)+1).'/'.$maxCraftQueue.')' ?>
                                 </button>
                                 <?php endif; ?>
                             </div>

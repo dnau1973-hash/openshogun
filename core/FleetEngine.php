@@ -61,6 +61,15 @@ class FleetEngine {
         } catch (Exception $e) {
             // Ignorer silencieusement
         }
+
+        // 4. Traiter les convois des routes commerciales automatisées du Sceau Impérial
+        try {
+            require_once __DIR__ . '/ImperialSealEngine.php';
+            $sealEngine = new ImperialSealEngine($this->db);
+            $sealEngine->processAutomatedTradeRoutes();
+        } catch (Exception $e) {
+            // Ignorer silencieusement
+        }
     }
 
     /**

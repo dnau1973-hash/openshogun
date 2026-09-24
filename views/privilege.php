@@ -19,6 +19,10 @@ $sealEngine = new ImperialSealEngine();
 $sealStatus = $sealEngine->getSealStatus((int)$user['id']);
 $isSealActive = $sealStatus['active'];
 $goldCoins = (int)$sealStatus['gold'];
+
+$planetEngine = new PlanetEngine();
+$myVillages = $planetEngine->getUserPlanets((int)$user['id']);
+$tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
 ?>
 
 <div class="page-header d-print-none mb-4">
@@ -289,15 +293,15 @@ $goldCoins = (int)$sealStatus['gold'];
     </div>
 </div>
 
-<!-- ================= PRÉSENTATION DES 6 GRANDS PRIVILÈGES IMPÉRIAUX ================= -->
+<!-- ================= PRÉSENTATION DES 8 GRANDS PRIVILÈGES IMPÉRIAUX ================= -->
 <div class="mb-4">
     <h3 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-        <span>⭐</span> Guide des 6 Grands Privilèges du Shōgun
+        <span>⭐</span> Guide des 8 Grands Privilèges du Shōgun
     </h3>
 
     <div class="row g-3">
         <!-- 1. Architecte de Cour -->
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #3b82f6 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <span class="fs-1">🔨</span>
@@ -307,7 +311,7 @@ $goldCoins = (int)$sealStatus['gold'];
                     </div>
                 </div>
                 <p class="text-secondary small mb-3" style="line-height:1.55;">
-                    Enchaînez jusqu'à <strong>4 constructions</strong> (jusqu'à 2 parcelles agricoles et 2 édifices urbains pour Oda, et 3 chantiers consécutifs pour les autres clans). Le chantier suivant démarre automatiquement à l'achèvement du premier !
+                    Enchaînez jusqu'à <strong>4 constructions</strong> (jusqu'à 2 parcelles agricoles et 2 édifices urbains pour Oda, et 3 chantiers consécutifs pour les autres clans).
                 </p>
                 <div class="mt-auto">
                     <a href="?page=city" class="btn btn-sm btn-outline-primary w-100">
@@ -317,18 +321,60 @@ $goldCoins = (int)$sealStatus['gold'];
             </div>
         </div>
 
-        <!-- 2. Grand Tableau de Bord -->
-        <div class="col-md-6 col-lg-4">
+        <!-- 2. File Meunerie & Saké (NOUVEAU) -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border p-3" style="border-left: 4px solid #166534 !important;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="fs-1">🍶</span>
+                    <div>
+                        <h4 class="m-0 text-dark fw-bold">2. Raffinage Sakagura</h4>
+                        <span class="badge bg-success-lt">File x4 Commandes</span>
+                    </div>
+                </div>
+                <p class="text-secondary small mb-3" style="line-height:1.55;">
+                    Programmez jusqu'à <strong>4 commandes en chaîne</strong> dans votre Meunerie (Farine de Riz 🍚 et Saké 🍶). Les cuves et meules s'enchaînent jour et nuit sans interruption !
+                </p>
+                <div class="mt-auto">
+                    <a href="?page=building&type=grain_mill" class="btn btn-sm btn-outline-success w-100">
+                        🍶 Ouvrir la Meunerie &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Routes Commerciales Automatisées (NOUVEAU) -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border p-3" style="border-left: 4px solid #0891b2 !important;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="fs-1">🛣️</span>
+                    <div>
+                        <h4 class="m-0 text-dark fw-bold">3. Routes Commerciales</h4>
+                        <span class="badge bg-cyan-lt">Convois Autonomes</span>
+                    </div>
+                </div>
+                <p class="text-secondary small mb-3" style="line-height:1.55;">
+                    Automatisez les livraisons régulières de Bois 🪵, Pierre 🪨 et Riz 🌾 entre vos fiefs. Vos convois partent à heure fixe sans action manuelle requise !
+                </p>
+                <div class="mt-auto">
+                    <a href="#sectionTradeRoutes" class="btn btn-sm btn-outline-cyan w-100">
+                        🛣️ Gérer les Routes &darr;
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Grand Tableau de Bord -->
+        <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #f59e0b !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <span class="fs-1">👑</span>
                     <div>
-                        <h4 class="m-0 text-dark fw-bold">2. Grand Tableau de Bord</h4>
-                        <span class="badge bg-warning-lt">Vue Multi-Fiefs</span>
+                        <h4 class="m-0 text-dark fw-bold">4. Tableau Impérial</h4>
+                        <span class="badge bg-warning-lt">Multi-Fiefs</span>
                     </div>
                 </div>
                 <p class="text-secondary small mb-3" style="line-height:1.55;">
-                    Panorama consolidé de tout votre Empire : jauges de stockage globales, productions nettes horaires, totaux impériaux et surveillance en temps réel du risque de famine féodale.
+                    Panorama consolidé de tout votre Empire : stocks globaux, cadences horaires, chantiers actifs et prévention active du risque de famine féodale.
                 </p>
                 <div class="mt-auto">
                     <a href="?page=empire" class="btn btn-sm btn-outline-warning w-100">
@@ -338,61 +384,61 @@ $goldCoins = (int)$sealStatus['gold'];
             </div>
         </div>
 
-        <!-- 3. Carnet de Raids -->
-        <div class="col-md-6 col-lg-4">
+        <!-- 5. Carnet de Raids -->
+        <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #10b981 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <span class="fs-1">📜</span>
                     <div>
-                        <h4 class="m-0 text-dark fw-bold">3. Carnet de Raids (Farm List)</h4>
+                        <h4 class="m-0 text-dark fw-bold">5. Carnet de Raids</h4>
                         <span class="badge bg-success-lt">Attaque en 1 Clic</span>
                     </div>
                 </div>
                 <p class="text-secondary small mb-3" style="line-height:1.55;">
-                    Mémorisez vos cibles régulières (oasis sauvages, provinces inactives) et assignez à chacune une composition d'armée dédiée. Déployez toute votre tournée de pillage en un seul clic !
+                    Mémorisez vos cibles régulières (oasis sauvages, provinces inactives) et lancez l'ensemble de votre tournée de pillage en un seul clic !
                 </p>
                 <div class="mt-auto">
                     <a href="?page=fleet#tab-farm-lists" class="btn btn-sm btn-outline-success w-100">
-                        ⚔️ Ouvrir le Carnet de Raids &rarr;
+                        ⚔️ Ouvrir le Carnet &rarr;
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- 4. Intendant du Marché -->
-        <div class="col-md-6 col-lg-4">
+        <!-- 6. Intendant du Marché -->
+        <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #8b5cf6 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <span class="fs-1">⚖️</span>
                     <div>
-                        <h4 class="m-0 text-dark fw-bold">4. Intendant du Marché</h4>
-                        <span class="badge bg-purple-lt">Troc 1:1:1 Instantané</span>
+                        <h4 class="m-0 text-dark fw-bold">6. Intendant du Marché</h4>
+                        <span class="badge bg-purple-lt">Troc 1:1:1 Immédiat</span>
                     </div>
                 </div>
                 <p class="text-secondary small mb-3" style="line-height:1.55;">
-                    Rééquilibrez immédiatement vos réserves excédentaires de Bois, Pierre et Riz sans perte au ratio 1:1:1 pour un tribut de 3 Koban, et lancez immédiatement vos chantiers cruciaux.
+                    Rééquilibrez immédiatement vos réserves excédentaires de Bois, Pierre et Riz sans perte au ratio 1:1:1 pour 3 Koban, et lancez vos chantiers cruciaux.
                 </p>
                 <div class="mt-auto">
                     <button type="button" class="btn btn-sm btn-outline-purple w-100" 
                             onclick="openNpcExchangeModal(<?= $planet['id'] ?>, '<?= htmlspecialchars(addslashes($planet['name'])) ?>', <?= (int)$planet['metal'] ?>, <?= (int)$planet['crystal'] ?>, <?= (int)$planet['deuterium'] ?>, <?= (int)$planet['metal_max'] ?>, <?= (int)$planet['crystal_max'] ?>, <?= (int)$planet['deuterium_max'] ?>)">
-                        ⚖️ Troc Rapide du Fief Actuel &rarr;
+                        ⚖️ Troc Rapide &rarr;
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- 5. Ordre de Repli Tactique -->
-        <div class="col-md-6 col-lg-4">
+        <!-- 7. Ordre de Repli Tactique -->
+        <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #ef4444 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <span class="fs-1">⛩️</span>
                     <div>
-                        <h4 class="m-0 text-dark fw-bold">5. Ordre de Repli Tactique</h4>
+                        <h4 class="m-0 text-dark fw-bold">7. Repli Tactique</h4>
                         <span class="badge bg-danger-lt">Évasion Nocturne</span>
                     </div>
                 </div>
                 <p class="text-secondary small mb-3" style="line-height:1.55;">
-                    Vos garnisons et votre Samouraï Héros se replient dans les collines et forêts lors des assauts nocturnes pour éviter l'anéantissement direct. Aucune perte de troupe face aux armées écrasantes !
+                    Vos garnisons et votre Héros se replient dans les collines et forêts lors des assauts pour éviter l'anéantissement face aux armées écrasantes !
                 </p>
                 <div class="mt-auto">
                     <a href="?page=empire#tab-evasion" class="btn btn-sm btn-outline-danger w-100">
@@ -402,24 +448,266 @@ $goldCoins = (int)$sealStatus['gold'];
             </div>
         </div>
 
-        <!-- 6. Récompenses d'Honneur -->
-        <div class="col-md-6 col-lg-4">
+        <!-- 8. Récompenses d'Honneur -->
+        <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #d97706 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <span class="fs-1">🎖️</span>
                     <div>
-                        <h4 class="m-0 text-dark fw-bold">6. Récompenses de Médailles</h4>
+                        <h4 class="m-0 text-dark fw-bold">8. Médailles d'Honneur</h4>
                         <span class="badge bg-warning-lt">+100 Koban / Médaille</span>
                     </div>
                 </div>
                 <p class="text-secondary small mb-3" style="line-height:1.55;">
-                    Chaque exploit récompensé par la Cour Impériale (Top Hebdomadaire d'Assaut, de Défense, de Raid, de Progression ou Didacticiel) vous verse automatiquement <strong>+100 Koban</strong>.
+                    Chaque exploit récompensé par la Cour Impériale (Top Assaut, Défense, Raid ou Progression) vous octroie automatiquement <strong>+100 Koban</strong>.
                 </p>
                 <div class="mt-auto">
                     <a href="?page=ranking" class="btn btn-sm btn-outline-warning w-100">
                         🏆 Voir le Classement &rarr;
                     </a>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= SECTION : ROUTES COMMERCIALES FÉODALES AUTOMATISÉES ================= -->
+<div class="card mb-4 shadow-sm border" id="sectionTradeRoutes" style="border-top: 3px solid #0891b2 !important;">
+    <div class="card-header bg-cyan-subtle py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0">
+                <span>🛣️</span> Routes Commerciales &amp; Convois Féodaux Automatisés
+            </h3>
+            <div class="text-secondary small mt-1">
+                Programmez des rotations logistiques régulières entre vos fiefs sans aucune intervention manuelle.
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <?php if ($isSealActive): ?>
+                <button type="button" class="btn btn-cyan text-white fw-bold shadow-sm" onclick="openCreateTradeRouteModal()">
+                    ➕ Établir une Route Commerciale
+                </button>
+            <?php else: ?>
+                <a href="#decretSection" class="btn btn-outline-secondary fw-bold" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                    👑 Sceau Impérial Requis
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+    <div class="card-body p-3">
+        <?php if (!$isSealActive): ?>
+            <div class="alert alert-warning mb-0 p-3 border-warning">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fs-1">👑</span>
+                    <div>
+                        <h4 class="m-0 fw-bold text-dark">Privilège Exclusif du Sceau Impérial</h4>
+                        <div class="text-secondary small mt-1">
+                            L'automatisation des routes commerciales permet à vos intendants d'expédier régulièrement des chariots de ravitaillement (Bois, Pierre, Riz) entre vos provinces pour nourrir vos chantiers castraux et approvisionner vos troupes. Décrétez le Sceau Impérial pour activer ce service !
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php elseif (empty($tradeRoutes)): ?>
+            <div class="text-center py-5 text-muted">
+                <div class="fs-1 mb-2">🛣️</div>
+                <h4 class="text-dark fw-bold mb-1">Aucune Route Commerciale Active</h4>
+                <p class="small text-secondary mb-3" style="max-width: 500px; margin: 0 auto;">
+                    Vous n'avez pas encore défini de route de ravitaillement automatique entre vos fiefs. Cliquez sur le bouton ci-dessous pour planifier votre premier convoi récurrent.
+                </p>
+                <button type="button" class="btn btn-outline-cyan fw-bold" onclick="openCreateTradeRouteModal()">
+                    ➕ Définir ma première route commerciale
+                </button>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Départ &rarr; Destination</th>
+                            <th>Cargaison par Convoi</th>
+                            <th>Fréquence</th>
+                            <th>Prochain Passage</th>
+                            <th>Livraisons</th>
+                            <th>Statut</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($tradeRoutes as $tr): ?>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div>
+                                        <a href="?page=overview&planet=<?= $tr['source_planet_id'] ?>" class="fw-bold text-dark">
+                                            🏯 <?= htmlspecialchars($tr['source_name']) ?>
+                                        </a>
+                                        <div class="text-muted" style="font-size:0.75rem;">(<?= $tr['source_x'] ?>|<?= $tr['source_y'] ?>)</div>
+                                    </div>
+                                    <span class="text-muted fs-4">&rarr;</span>
+                                    <div>
+                                        <a href="?page=overview&planet=<?= $tr['target_planet_id'] ?>" class="fw-bold text-primary">
+                                            🏯 <?= htmlspecialchars($tr['target_name']) ?>
+                                        </a>
+                                        <div class="text-muted" style="font-size:0.75rem;">(<?= $tr['target_x'] ?>|<?= $tr['target_y'] ?>)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2 flex-wrap" style="font-size:0.85rem;">
+                                    <?php if ($tr['wood'] > 0): ?>
+                                        <span class="badge bg-light text-dark border">🪵 <?= number_format($tr['wood']) ?></span>
+                                    <?php endif; ?>
+                                    <?php if ($tr['stone'] > 0): ?>
+                                        <span class="badge bg-light text-dark border">🪨 <?= number_format($tr['stone']) ?></span>
+                                    <?php endif; ?>
+                                    <?php if ($tr['rice'] > 0): ?>
+                                        <span class="badge bg-light text-dark border">🌾 <?= number_format($tr['rice']) ?></span>
+                                    <?php endif; ?>
+                                    <span class="text-muted" style="font-size:0.75rem;">(Total : <?= number_format($tr['total_cargo']) ?>)</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-cyan-lt fw-bold">
+                                    ⏱️ Toutes les <?= $tr['interval_hours'] ?>h
+                                </span>
+                            </td>
+                            <td>
+                                <?php if (!$tr['is_active']): ?>
+                                    <span class="badge bg-secondary-lt">En pause</span>
+                                <?php elseif ($tr['is_due']): ?>
+                                    <span class="badge bg-warning text-dark font-monospace animate-pulse">
+                                        ⚡ Échu (convoi imminent)
+                                    </span>
+                                <?php else: ?>
+                                    <span class="font-monospace text-dark fw-bold small" data-countdown="<?= strtotime($tr['next_run_at']) ?>">
+                                        <?= htmlspecialchars($tr['next_run_at']) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    📦 <?= (int)$tr['deliveries_count'] ?> convois
+                                </span>
+                            </td>
+                            <td>
+                                <?php if (!$tr['is_active']): ?>
+                                    <span class="badge bg-secondary text-white">Mise en pause</span>
+                                <?php else: ?>
+                                    <span class="badge bg-success-lt fw-bold">Active</span>
+                                <?php endif; ?>
+                                <div class="text-muted" style="font-size:0.7rem; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?= htmlspecialchars($tr['last_status'] ?? '') ?>">
+                                    <?= htmlspecialchars($tr['last_status'] ?? 'En attente') ?>
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-primary" onclick="executeTradeRouteNow(<?= $tr['id'] ?>)" title="Expédier immédiatement un convoi">
+                                        🚀 Expédier
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="toggleTradeRoute(<?= $tr['id'] ?>)" title="<?= $tr['is_active'] ? 'Mettre en pause' : 'Réactiver' ?>">
+                                        <?= $tr['is_active'] ? '⏸️' : '▶️' ?>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" onclick="deleteTradeRoute(<?= $tr['id'] ?>)" title="Supprimer la route">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- ================= MODALE DE CRÉATION DE ROUTE COMMERCIALE ================= -->
+<div class="modal modal-blur fade" id="modalCreateTradeRoute" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-cyan-subtle">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                    <span>🛣️</span> Établir une Route Commerciale Féodale
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-secondary small mb-3">
+                    Vos intendants mobiliseront automatiquement des chariots de transport pour acheminer les denrées choisies selon la fréquence définie.
+                </p>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-bold text-dark small">Fief d'Expédition (Départ) :</label>
+                        <select id="tr_source_planet" class="form-select">
+                            <?php foreach ($myVillages as $v): ?>
+                                <option value="<?= $v['id'] ?>" <?= ((int)$v['id'] === (int)$planet['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($v['name']) ?> (<?= $v['coord_x'] ?>|<?= $v['coord_y'] ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-bold text-dark small">Fief de Destination :</label>
+                        <select id="tr_target_planet" class="form-select">
+                            <?php foreach ($myVillages as $v): ?>
+                                <option value="<?= $v['id'] ?>" <?= ((int)$v['id'] !== (int)$planet['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($v['name']) ?> (<?= $v['coord_x'] ?>|<?= $v['coord_y'] ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-dark small mb-2">Chargement par expédition :</label>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <label class="form-label small text-muted mb-1">🪵 Bois</label>
+                            <input type="number" id="tr_wood" class="form-control text-center fw-bold" value="1000" min="0" step="500">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small text-muted mb-1">🪨 Pierre</label>
+                            <input type="number" id="tr_stone" class="form-control text-center fw-bold" value="1000" min="0" step="500">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small text-muted mb-1">🌾 Riz</label>
+                            <input type="number" id="tr_rice" class="form-control text-center fw-bold" value="1000" min="0" step="500">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-bold text-dark small">Périodicité d'envoi :</label>
+                        <select id="tr_interval_hours" class="form-select">
+                            <option value="1">Toutes les 1 heure</option>
+                            <option value="2">Toutes les 2 heures</option>
+                            <option value="4" selected>Toutes les 4 heures (Idéal)</option>
+                            <option value="8">Toutes les 8 heures</option>
+                            <option value="12">Toutes les 12 heures</option>
+                            <option value="24">Toutes les 24 heures (1x / jour)</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-bold text-dark small">Choix des Transporteurs :</label>
+                        <select id="tr_transporter_pref" class="form-select">
+                            <option value="auto" selected>Automatique (Optimal)</option>
+                            <option value="transporter_light">Chariots Légers (5k)</option>
+                            <option value="transporter_heavy">Grands Convois (25k)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="alert alert-info py-2 px-3 small mb-0">
+                    ℹ️ <strong>Règle Féodale :</strong> Le fief d'expédition doit posséder un <strong>Marché Castral</strong> (Niveau 1+) et les transporteurs requis en garnison lors du passage horaire.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-cyan text-white fw-bold" id="btnSubmitCreateTradeRoute" onclick="submitCreateTradeRoute()">
+                    🛣️ Déployer la Route Commerciale
+                </button>
             </div>
         </div>
     </div>
@@ -649,6 +937,133 @@ async function submitNpcExchange() {
         }
     } catch (e) {
         showModalAlert('Erreur de communication.', 'error');
+    }
+}
+
+// ==========================================
+// GESTION DES ROUTES COMMERCIALES FÉODALES
+// ==========================================
+function openCreateTradeRouteModal() {
+    const modalEl = document.getElementById('modalCreateTradeRoute');
+    if (!modalEl) return;
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+}
+
+async function submitCreateTradeRoute() {
+    const src = document.getElementById('tr_source_planet').value;
+    const tgt = document.getElementById('tr_target_planet').value;
+    const wood = parseInt(document.getElementById('tr_wood').value || 0, 10);
+    const stone = parseInt(document.getElementById('tr_stone').value || 0, 10);
+    const rice = parseInt(document.getElementById('tr_rice').value || 0, 10);
+    const interval = parseInt(document.getElementById('tr_interval_hours').value || 4, 10);
+    const pref = document.getElementById('tr_transporter_pref').value;
+
+    if (src === tgt) {
+        showModalAlert("Le fief de départ et le fief d'arrivée doivent être distincts.", "warning");
+        return;
+    }
+
+    if ((wood + stone + rice) <= 0) {
+        showModalAlert("Veuillez allouer au moins une ressource pour le convoi.", "warning");
+        return;
+    }
+
+    const fd = new FormData();
+    fd.append('action', 'create_route');
+    fd.append('source_planet_id', src);
+    fd.append('target_planet_id', tgt);
+    fd.append('wood', wood);
+    fd.append('stone', stone);
+    fd.append('rice', rice);
+    fd.append('interval_hours', interval);
+    fd.append('transporter_pref', pref);
+
+    const btn = document.getElementById('btnSubmitCreateTradeRoute');
+    if (btn) btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/trade_route.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Erreur lors de la création de la route.', 'error');
+            if (btn) btn.disabled = false;
+        }
+    } catch (e) {
+        showModalAlert('Erreur de transmission avec les intendants.', 'error');
+        if (btn) btn.disabled = false;
+    }
+}
+
+async function toggleTradeRoute(routeId) {
+    const fd = new FormData();
+    fd.append('action', 'toggle_route');
+    fd.append('route_id', routeId);
+
+    try {
+        const res = await fetch('/api/trade_route.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showModalAlert(data.error || 'Erreur lors du changement de statut.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication.', 'error');
+    }
+}
+
+async function deleteTradeRoute(routeId) {
+    const confirmed = await showModalConfirm(
+        'Voulez-vous supprimer définitivement cette route commerciale ?',
+        'Dissolution de Route Commerciale'
+    );
+    if (!confirmed) return;
+
+    const fd = new FormData();
+    fd.append('action', 'delete_route');
+    fd.append('route_id', routeId);
+
+    try {
+        const res = await fetch('/api/trade_route.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showModalAlert(data.error || 'Erreur lors de la suppression.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication.', 'error');
+    }
+}
+
+async function executeTradeRouteNow(routeId) {
+    const confirmed = await showModalConfirm(
+        'Voulez-vous affréter et expédier immédiatement ce convoi de transport sans attendre la prochaine heure planifiée ?',
+        'Expédition Immédiate de Convoi'
+    );
+    if (!confirmed) return;
+
+    const fd = new FormData();
+    fd.append('action', 'execute_route');
+    fd.append('route_id', routeId);
+
+    try {
+        const res = await fetch('/api/trade_route.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Échec du lancement du convoi.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication avec les écuries.', 'error');
     }
 }
 </script>

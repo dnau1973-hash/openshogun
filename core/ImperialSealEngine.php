@@ -88,6 +88,31 @@ class ImperialSealEngine {
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
             ");
 
+            // 5. Table des routes commerciales automatisées (Privilège Sceau Impérial)
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS `trade_routes` (
+                    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    `user_id` INT UNSIGNED NOT NULL,
+                    `source_planet_id` INT UNSIGNED NOT NULL,
+                    `target_planet_id` INT UNSIGNED NOT NULL,
+                    `wood` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `stone` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `rice` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `interval_hours` INT UNSIGNED NOT NULL DEFAULT 4,
+                    `transporter_pref` VARCHAR(30) NOT NULL DEFAULT 'auto',
+                    `deliveries_count` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `last_run_at` DATETIME NULL DEFAULT NULL,
+                    `next_run_at` DATETIME NOT NULL,
+                    `last_status` VARCHAR(255) NULL DEFAULT NULL,
+                    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+                    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    INDEX `idx_tr_user` (`user_id`),
+                    INDEX `idx_tr_source` (`source_planet_id`),
+                    INDEX `idx_tr_target` (`target_planet_id`),
+                    INDEX `idx_tr_next` (`is_active`, `next_run_at`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ");
+
         } catch (Exception $e) {
             error_log("[ImperialSealEngine::ensureSchema] " . $e->getMessage());
         }
@@ -734,6 +759,348 @@ class ImperialSealEngine {
             'units_db' => $unitsDb,
             'is_seal_active' => $this->isSealActive($userId)
         ];
+    }
+
+    // ========================================================
+    // ROUTES COMMERCIALES FÉODALES AUTOMATISÉES (TRADE ROUTES)
+    // Privilège exclusif du Sceau Impérial
+    // ========================================================
+
+    /**
+     * Récupère la liste des routes commerciales d'un Daimyō
+     */
+    public function getTradeRoutes(int $userId): array {
+        $st = $this->db->prepare("
+            SELECT tr.*, 
+                   ps.name AS source_name, ps.coord_x AS source_x, ps.coord_y AS source_y,
+                   pt.name AS target_name, pt.coord_x AS target_x, pt.coord_y AS target_y
+            FROM trade_routes tr
+            JOIN planets ps ON tr.source_planet_id = ps.id
+            JOIN planets pt ON tr.target_planet_id = pt.id
+            WHERE tr.user_id = ?
+            ORDER BY tr.created_at DESC
+        ");
+        $st->execute([$userId]);
+        $routes = $st->fetchAll(PDO::FETCH_ASSOC);
+
+        $now = time();
+        foreach ($routes as &$r) {
+            $nextTs = strtotime($r['next_run_at']);
+            $r['time_until_next'] = max(0, $nextTs - $now);
+            $r['is_due'] = ($r['is_active'] && $r['time_until_next'] === 0);
+            $r['total_cargo'] = (int)$r['wood'] + (int)$r['stone'] + (int)$r['rice'];
+        }
+        unset($r);
+        return $routes;
+    }
+
+    /**
+     * Crée une nouvelle route commerciale récurrente entre deux fiefs du joueur
+     */
+    public function createTradeRoute(
+        int $userId, 
+        int $sourcePlanetId, 
+        int $targetPlanetId, 
+        int $wood, 
+        int $stone, 
+        int $rice, 
+        int $intervalHours, 
+        string $transporterPref = 'auto'
+    ): array {
+        if (!$this->isSealActive($userId)) {
+            return [
+                'success' => false, 
+                'error' => "Le Sceau Impérial est requis pour établir des routes commerciales automatisées. Proclamez le Sceau dans la Cour du Shōgun."
+            ];
+        }
+
+        if ($sourcePlanetId === $targetPlanetId) {
+            return ['success' => false, 'error' => "Le fief d'origine et le fief de destination doivent être distincts."];
+        }
+
+        // Vérifier la possession des deux fiefs
+        $stCheck = $this->db->prepare("SELECT id, name FROM planets WHERE id IN (?, ?) AND user_id = ?");
+        $stCheck->execute([$sourcePlanetId, $targetPlanetId, $userId]);
+        $planets = $stCheck->fetchAll(PDO::FETCH_ASSOC);
+        if (count($planets) < 2) {
+            return ['success' => false, 'error' => "Vous devez être le seigneur légitime de ces deux fiefs."];
+        }
+
+        $wood = max(0, $wood);
+        $stone = max(0, $stone);
+        $rice = max(0, $rice);
+        $totalCargo = $wood + $stone + $rice;
+        if ($totalCargo <= 0) {
+            return ['success' => false, 'error' => "Veuillez spécifier au moins une quantité de ressources à acheminer (Bois, Pierre ou Riz)."];
+        }
+
+        $intervalHours = max(1, min(48, $intervalHours));
+        if (!in_array($transporterPref, ['auto', 'transporter_light', 'transporter_heavy'])) {
+            $transporterPref = 'auto';
+        }
+
+        // Vérifier la présence du Marché Castral sur le fief d'expédition
+        require_once __DIR__ . '/PlanetEngine.php';
+        $planetEngine = new PlanetEngine();
+        $buildings = $planetEngine->getBuildings($sourcePlanetId);
+        $marketLvl = (int)($buildings['market'] ?? 0);
+        if ($marketLvl < 1) {
+            return ['success' => false, 'error' => "Le Marché Castral (Bazar de Fief) doit être érigé au Niveau 1 minimum sur le fief de départ pour affréter des convois commerciaux."];
+        }
+
+        $nextRun = date('Y-m-d H:i:s', time() + ($intervalHours * 3600));
+
+        $ins = $this->db->prepare("
+            INSERT INTO trade_routes (user_id, source_planet_id, target_planet_id, wood, stone, rice, interval_hours, transporter_pref, next_run_at, last_status, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'En attente du premier passage', 1)
+        ");
+        $ins->execute([
+            $userId,
+            $sourcePlanetId,
+            $targetPlanetId,
+            $wood,
+            $stone,
+            $rice,
+            $intervalHours,
+            $transporterPref,
+            $nextRun
+        ]);
+
+        $routeId = (int)$this->db->lastInsertId();
+
+        return [
+            'success' => true,
+            'message' => "Route commerciale établie avec succès ! Un convoi de ravitaillement partira toutes les <strong>{$intervalHours}h</strong>.",
+            'route_id' => $routeId,
+            'next_run_at' => $nextRun
+        ];
+    }
+
+    /**
+     * Active ou met en pause une route commerciale
+     */
+    public function toggleTradeRoute(int $userId, int $routeId): array {
+        $st = $this->db->prepare("SELECT * FROM trade_routes WHERE id = ? AND user_id = ?");
+        $st->execute([$routeId, $userId]);
+        $route = $st->fetch(PDO::FETCH_ASSOC);
+        if (!$route) {
+            return ['success' => false, 'error' => "Route commerciale introuvable."];
+        }
+
+        $newActive = $route['is_active'] ? 0 : 1;
+        $nextRun = $route['next_run_at'];
+        if ($newActive) {
+            $nextRun = date('Y-m-d H:i:s', time() + ($route['interval_hours'] * 3600));
+        }
+
+        $up = $this->db->prepare("UPDATE trade_routes SET is_active = ?, next_run_at = ?, last_status = ? WHERE id = ?");
+        $up->execute([
+            $newActive,
+            $nextRun,
+            $newActive ? 'Réactivée &bull; Prochain passage planifié' : 'Mise en pause par le Daimyō',
+            $routeId
+        ]);
+
+        return [
+            'success' => true,
+            'is_active' => (bool)$newActive,
+            'message' => $newActive ? "Route commerciale réactivée." : "Route commerciale mise en pause."
+        ];
+    }
+
+    /**
+     * Supprime une route commerciale
+     */
+    public function deleteTradeRoute(int $userId, int $routeId): array {
+        $del = $this->db->prepare("DELETE FROM trade_routes WHERE id = ? AND user_id = ?");
+        $del->execute([$routeId, $userId]);
+        if ($del->rowCount() === 0) {
+            return ['success' => false, 'error' => "Route commerciale introuvable ou déjà supprimée."];
+        }
+        return ['success' => true, 'message' => "Route commerciale dissoute avec succès."];
+    }
+
+    /**
+     * Exécute une route commerciale (envoi effectif du convoi de transport)
+     */
+    public function executeTradeRoute(int $routeId, bool $force = false): array {
+        $st = $this->db->prepare("SELECT * FROM trade_routes WHERE id = ?");
+        $st->execute([$routeId]);
+        $route = $st->fetch(PDO::FETCH_ASSOC);
+        if (!$route) {
+            return ['success' => false, 'error' => "Route commerciale introuvable."];
+        }
+
+        $userId = (int)$route['user_id'];
+        $sourcePlanetId = (int)$route['source_planet_id'];
+        $targetPlanetId = (int)$route['target_planet_id'];
+        $intervalHours = (int)$route['interval_hours'];
+
+        // 1. Vérifier la validité du Sceau Impérial
+        if (!$this->isSealActive($userId)) {
+            $this->db->prepare("
+                UPDATE trade_routes 
+                SET is_active = 0, last_status = 'Suspendu : Sceau Impérial expiré' 
+                WHERE id = ?
+            ")->execute([$routeId]);
+            return ['success' => false, 'error' => "Le Sceau Impérial de ce domaine a expiré. La route a été suspendue."];
+        }
+
+        // 2. Mettre à jour les ressources du fief source
+        require_once __DIR__ . '/PlanetEngine.php';
+        $planetEngine = new PlanetEngine();
+        $sourcePlanet = $planetEngine->updatePlanet($sourcePlanetId);
+
+        $wood = (int)$route['wood'];
+        $stone = (int)$route['stone'];
+        $rice = (int)$route['rice'];
+        $totalCargo = $wood + $stone + $rice;
+
+        // 3. Vérifier les stocks disponibles
+        if ((float)$sourcePlanet['metal'] < $wood || (float)$sourcePlanet['crystal'] < $stone || (float)$sourcePlanet['deuterium'] < $rice) {
+            $nextAttempt = date('Y-m-d H:i:s', time() + 1800); // Réessayer dans 30 min
+            $this->db->prepare("
+                UPDATE trade_routes 
+                SET last_status = 'Reporté : Ressources insuffisantes dans les greniers de départ', next_run_at = ? 
+                WHERE id = ?
+            ")->execute([$nextAttempt, $routeId]);
+            return ['success' => false, 'error' => "Ressources insuffisantes sur le fief d'expédition pour honorer ce convoi."];
+        }
+
+        // 4. Calculer la flotte de transporteurs requise
+        $stShips = $this->db->prepare("
+            SELECT ship_code, count FROM planet_ships 
+            WHERE planet_id = ? AND ship_code IN ('transporter_light', 'transporter_heavy')
+        ");
+        $stShips->execute([$sourcePlanetId]);
+        $ships = $stShips->fetchAll(PDO::FETCH_KEY_PAIR);
+        $availLight = (int)($ships['transporter_light'] ?? 0);
+        $availHeavy = (int)($ships['transporter_heavy'] ?? 0);
+        $totalCapacity = ($availLight * 5000) + ($availHeavy * 25000);
+
+        if ($totalCapacity < $totalCargo) {
+            $nextAttempt = date('Y-m-d H:i:s', time() + 1800);
+            $this->db->prepare("
+                UPDATE trade_routes 
+                SET last_status = 'Reporté : Chariots de transport indisponibles ou insuffisants (requis : ' . number_format($totalCargo) . ' fret)', next_run_at = ? 
+                WHERE id = ?
+            ")->execute([$nextAttempt, $routeId]);
+            return [
+                'success' => false, 
+                'error' => "Capacité de transport insuffisante sur le fief d'expédition ($totalCapacity / $totalCargo capacité disponible)."
+            ];
+        }
+
+        // Répartition optimale de la flotte selon la préférence
+        $pref = $route['transporter_pref'] ?? 'auto';
+        $fleet = [];
+        $needHeavy = 0;
+        $needLight = 0;
+
+        if ($pref === 'transporter_heavy') {
+            $needHeavy = min($availHeavy, (int)ceil($totalCargo / 25000));
+            $remCargo = max(0, $totalCargo - ($needHeavy * 25000));
+            $needLight = ($remCargo > 0) ? min($availLight, (int)ceil($remCargo / 5000)) : 0;
+        } elseif ($pref === 'transporter_light') {
+            $needLight = min($availLight, (int)ceil($totalCargo / 5000));
+            $remCargo = max(0, $totalCargo - ($needLight * 5000));
+            $needHeavy = ($remCargo > 0) ? min($availHeavy, (int)ceil($remCargo / 25000)) : 0;
+        } else { // auto
+            $needHeavy = min($availHeavy, (int)floor($totalCargo / 25000));
+            $remCargo = $totalCargo - ($needHeavy * 25000);
+            if ($remCargo > 0) {
+                if ($availLight * 5000 >= $remCargo) {
+                    $needLight = (int)ceil($remCargo / 5000);
+                } elseif ($availHeavy > $needHeavy) {
+                    $needHeavy++;
+                    $needLight = 0;
+                } else {
+                    $needLight = min($availLight, (int)ceil($remCargo / 5000));
+                }
+            }
+        }
+
+        if ($needLight > 0) $fleet['transporter_light'] = $needLight;
+        if ($needHeavy > 0) $fleet['transporter_heavy'] = $needHeavy;
+
+        if (empty($fleet)) {
+            return ['success' => false, 'error' => "Aucun convoi n'a pu être constitué."];
+        }
+
+        // 5. Expédier la mission via FleetEngine
+        require_once __DIR__ . '/FleetEngine.php';
+        $fleetEngine = new FleetEngine();
+
+        try {
+            $cargo = [
+                'metal' => $wood,
+                'crystal' => $stone,
+                'deuterium' => $rice
+            ];
+            $mission = $fleetEngine->dispatchMission(
+                $userId,
+                $sourcePlanetId,
+                $targetPlanetId,
+                'transport',
+                $fleet,
+                $cargo
+            );
+
+            // Mettre à jour la route commerciale
+            $nextRun = date('Y-m-d H:i:s', time() + ($intervalHours * 3600));
+            $this->db->prepare("
+                UPDATE trade_routes 
+                SET deliveries_count = deliveries_count + 1,
+                    last_run_at = NOW(),
+                    next_run_at = ?,
+                    last_status = 'Succès : Convoi logistique en route'
+                WHERE id = ?
+            ")->execute([$nextRun, $routeId]);
+
+            return [
+                'success' => true,
+                'message' => "Convoi automatique expédié avec succès vers la destination !",
+                'mission_id' => $mission['mission_id'] ?? null,
+                'next_run_at' => $nextRun
+            ];
+        } catch (Exception $e) {
+            $nextAttempt = date('Y-m-d H:i:s', time() + 1800);
+            $this->db->prepare("
+                UPDATE trade_routes 
+                SET last_status = ?, next_run_at = ? 
+                WHERE id = ?
+            ")->execute(['Échec expédition : ' . substr($e->getMessage(), 0, 200), $nextAttempt, $routeId]);
+
+            return ['success' => false, 'error' => "Échec du convoi : " . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Traite en arrière-plan toutes les routes commerciales échues (appelé par FleetEngine)
+     */
+    public function processAutomatedTradeRoutes(): int {
+        try {
+            $st = $this->db->prepare("
+                SELECT id FROM trade_routes 
+                WHERE is_active = 1 AND next_run_at <= NOW()
+                ORDER BY next_run_at ASC
+                LIMIT 20
+            ");
+            $st->execute();
+            $dueRoutes = $st->fetchAll(PDO::FETCH_COLUMN);
+
+            $dispatchedCount = 0;
+            foreach ($dueRoutes as $rId) {
+                $res = $this->executeTradeRoute((int)$rId);
+                if (!empty($res['success'])) {
+                    $dispatchedCount++;
+                }
+            }
+            return $dispatchedCount;
+        } catch (Exception $e) {
+            error_log("[ImperialSealEngine::processAutomatedTradeRoutes] " . $e->getMessage());
+            return 0;
+        }
     }
 }
 

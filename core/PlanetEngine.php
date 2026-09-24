@@ -400,16 +400,31 @@ class PlanetEngine {
             $stmt = $this->db->prepare("
                 SELECT * FROM craft_queue 
                 WHERE planet_id = ? 
-                ORDER BY started_at ASC
+                ORDER BY started_at ASC, id ASC
             ");
             $stmt->execute([$planetId]);
-            $queue = $stmt->fetchAll();
+            $queue = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            foreach ($queue as &$item) {
-                $item['time_remaining'] = max(0, (int)$item['finishes_at'] - $now);
+            foreach ($queue as $idx => &$item) {
+                $isCurrent = ($idx === 0 && (int)$item['started_at'] <= $now);
+                $item['is_current'] = $isCurrent;
+                $item['status'] = $isCurrent ? 'processing' : 'queued';
+                $item['product_name'] = ($item['product'] === 'sake') ? 'Saké Impérial' : 'Farine de Riz';
+                $item['product_icon'] = ($item['product'] === 'sake') ? '🍶' : '🍚';
+                
                 $totalDuration = max(1, (int)$item['finishes_at'] - (int)$item['started_at']);
-                $elapsed = $totalDuration - $item['time_remaining'];
-                $item['progress'] = min(100, max(0, round(($elapsed / $totalDuration) * 100, 1)));
+                $item['total_duration'] = $totalDuration;
+
+                if ($isCurrent) {
+                    $item['time_remaining'] = max(0, (int)$item['finishes_at'] - $now);
+                    $item['starts_in'] = 0;
+                    $elapsed = max(0, $now - (int)$item['started_at']);
+                    $item['progress'] = min(100, max(0, round(($elapsed / $totalDuration) * 100, 1)));
+                } else {
+                    $item['starts_in'] = max(0, (int)$item['started_at'] - $now);
+                    $item['time_remaining'] = $totalDuration;
+                    $item['progress'] = 0;
+                }
             }
             unset($item);
             return $queue;
@@ -986,16 +1001,29 @@ class PlanetEngine {
             return ['success' => false, 'error' => "La Meunerie & Brasserie de riz (Sakagura) doit être érigée au Niveau 1 minimum pour raffiner le riz."];
         }
 
-        // 2. Traiter les productions terminées et vérifier si une tâche est déjà en cours
+        // 2. Traiter les productions terminées et vérifier la limite de la file
         $this->processCraftQueue($planetId);
         $activeQueue = $this->getCraftQueue($planetId);
-        if (!empty($activeQueue)) {
-            $active = $activeQueue[0];
-            $remaining = gmdate('i\m s\s', $active['time_remaining']);
-            return [
-                'success' => false, 
-                'error' => "Une cuvée ou mouture de raffinage est déjà en cours dans la Meunerie (temps restant : {$remaining}). Attendez sa finalisation ou annulez-la."
-            ];
+        
+        $planet = $this->getPlanet($planetId);
+        require_once __DIR__ . '/ImperialSealEngine.php';
+        $sealEngine = new ImperialSealEngine($this->db);
+        $isSealActive = $sealEngine->isSealActive((int)$planet['user_id']);
+        $maxQueue = $isSealActive ? 4 : 1;
+
+        if (count($activeQueue) >= $maxQueue) {
+            if ($maxQueue === 1) {
+                $remaining = !empty($activeQueue[0]['time_remaining']) ? gmdate('i\m s\s', $activeQueue[0]['time_remaining']) : 'quelques instants';
+                return [
+                    'success' => false, 
+                    'error' => "Une cuvée ou mouture de raffinage est déjà en cours dans la Meunerie (temps restant : {$remaining}). Décrétez le <strong>Sceau Impérial (Privilège du Shōgun)</strong> pour débloquer la file d'attente automatique jusqu'à 4 commandes consécutives !"
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'error' => "La file de raffinage de la Meunerie & Brasserie est déjà pleine (4/4 lots programmés). Attendez la finalisation d'un lot avant d'en ajouter un nouveau."
+                ];
+            }
         }
 
         // 3. Calculer les détails de production
@@ -1025,9 +1053,20 @@ class PlanetEngine {
             ];
         }
 
-        // 5. Engager les ressources et placer dans la file de raffinage
+        // 5. Engager les ressources et placer dans la file de raffinage (séquentielle)
         $now = time();
-        $finishesAt = $now + $details['duration_seconds'];
+        if (empty($activeQueue)) {
+            $startedAt = $now;
+        } else {
+            $lastFinish = 0;
+            foreach ($activeQueue as $qItem) {
+                if ((int)$qItem['finishes_at'] > $lastFinish) {
+                    $lastFinish = (int)$qItem['finishes_at'];
+                }
+            }
+            $startedAt = max($now, $lastFinish);
+        }
+        $finishesAt = $startedAt + $details['duration_seconds'];
 
         $this->db->beginTransaction();
         try {
@@ -1052,7 +1091,7 @@ class PlanetEngine {
                 $product,
                 $engagedRice,
                 $details['actual_produced'],
-                $now,
+                $startedAt,
                 $finishesAt
             ]);
 
@@ -1104,6 +1143,35 @@ class PlanetEngine {
             if ($refundRice > 0) {
                 $up = $this->db->prepare("UPDATE planets SET deuterium = deuterium + ? WHERE id = ?");
                 $up->execute([$refundRice, $planetId]);
+            }
+
+            // Réaligner séquentiellement les créneaux temporels des tâches restantes
+            $stmtRem = $this->db->prepare("SELECT id, started_at, finishes_at FROM craft_queue WHERE planet_id = ? ORDER BY started_at ASC, id ASC");
+            $stmtRem->execute([$planetId]);
+            $remainingQueue = $stmtRem->fetchAll(PDO::FETCH_ASSOC);
+
+            $now = time();
+            $timeCursor = $now;
+
+            foreach ($remainingQueue as $idx => $rItem) {
+                $duration = max(1, (int)$rItem['finishes_at'] - (int)$rItem['started_at']);
+                if ($idx === 0) {
+                    // Si la 1ère tâche avait déjà démarré avant l'annulation, on conserve son échéance si finishes_at > now
+                    if ((int)$rItem['started_at'] <= $now && (int)$rItem['finishes_at'] > $now) {
+                        $timeCursor = (int)$rItem['finishes_at'];
+                    } else {
+                        // Sinon elle démarre immédiatement !
+                        $newStart = $now;
+                        $newFinish = $newStart + $duration;
+                        $this->db->prepare("UPDATE craft_queue SET started_at = ?, finishes_at = ? WHERE id = ?")->execute([$newStart, $newFinish, $rItem['id']]);
+                        $timeCursor = $newFinish;
+                    }
+                } else {
+                    $newStart = max($now, $timeCursor);
+                    $newFinish = $newStart + $duration;
+                    $this->db->prepare("UPDATE craft_queue SET started_at = ?, finishes_at = ? WHERE id = ?")->execute([$newStart, $newFinish, $rItem['id']]);
+                    $timeCursor = $newFinish;
+                }
             }
 
             $this->db->commit();

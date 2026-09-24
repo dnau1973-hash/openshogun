@@ -178,6 +178,11 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                 <span class="badge bg-secondary ms-1"><?= count($activeMissions) ?></span>
             </a>
         </li>
+        <li class="nav-item ms-auto" role="presentation">
+            <a href="?page=privilege#sectionTradeRoutes" class="nav-link text-cyan fw-bold d-flex align-items-center gap-1">
+                <span>🛣️</span> Routes Commerciales Féodales &rarr;
+            </a>
+        </li>
     </ul>
 </div>
 
