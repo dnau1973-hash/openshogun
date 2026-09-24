@@ -95,6 +95,7 @@ unset($oRow);
 // Variables de configuration
 $settings = GameConfig::load();
 $botsList = $botEngine->getBots();
+$botSpawnStatus = $botEngine->getBotSpawnStatus();
 
 // Liste des joueurs humains
 $humanUsers = $db->query("
@@ -1231,12 +1232,170 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </div>
                     </div>
 
+                    <!-- Paramètres d'Éclosion Spontanée Homogène de Villages PNJ -->
+                    <div class="card bg-surface-secondary border-primary-subtle mb-3">
+                        <div class="card-header bg-primary-lt py-2 d-flex justify-content-between align-items-center">
+                            <h4 class="card-title m-0 text-primary fw-bold d-flex align-items-center gap-2">
+                                <span>🌸</span> Éclosion Spontanée de Villages PNJ (Apparition Homogène sur la Carte)
+                            </h4>
+                            <span class="badge bg-primary text-white">
+                                Toutes les <?= (int)($settings['bot_spawn_interval_min'] ?? 15) ?> min
+                            </span>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-dark mb-1">
+                                        Mécanisme d'Éclosion Spontanée
+                                    </label>
+                                    <select name="bot_spawn_enabled" class="form-select" id="bot_spawn_enabled">
+                                        <option value="1" <?= !empty($settings['bot_spawn_enabled']) ? 'selected' : '' ?>>🟢 Éclosion Activée (Automatique)</option>
+                                        <option value="0" <?= empty($settings['bot_spawn_enabled']) ? 'selected' : '' ?>>🔴 Éclosion En Sommeil (Désactivée)</option>
+                                    </select>
+                                    <div class="form-hint">Fait naître de nouveaux villages PNJ à intervalle régulier.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-dark mb-1">
+                                        ⏱️ Intervalle d'Apparition (Minutes)
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="number" name="bot_spawn_interval_min" id="bot_spawn_interval_min" min="1" max="1440" 
+                                               value="<?= (int)($settings['bot_spawn_interval_min'] ?? 15) ?>" class="form-control text-center font-weight-bold">
+                                        <span class="input-group-text">min</span>
+                                    </div>
+                                    <div class="form-hint">Délai entre deux apparitions spontanées de fiefs.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-dark mb-1">
+                                        🏯 Plafond Global de Villages PNJ
+                                    </label>
+                                    <input type="number" name="bot_spawn_max_villages" id="bot_spawn_max_villages" min="5" max="200" 
+                                           value="<?= (int)($settings['bot_spawn_max_villages'] ?? 50) ?>" class="form-control text-center font-weight-bold">
+                                    <div class="form-hint">Nombre maximum de villages PNJ sur l'ensemble de la carte.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary px-4 fw-bold">
-                            💾 Sauvegarder la Directive IA
+                            💾 Sauvegarder la Directive IA &amp; Éclosions
                         </button>
                     </div>
                 </form>
+
+                <!-- Panneau de Monitoring en Temps Réel de l'Éclosion Spontanée -->
+                <div class="card mt-4 border shadow-sm">
+                    <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="font-size: 1.3rem;">🗾</span>
+                            <div>
+                                <h4 class="card-title m-0 fw-bold">Distribution Spatiale &amp; Prochaine Éclosion Homogène</h4>
+                                <div class="text-secondary small">
+                                    L'algorithme analyse en temps réel les 4 quadrants pour faire éclore chaque nouveau fief dans la province la moins occupée.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" onclick="triggerSpontaneousSpawn()" class="btn btn-sm btn-success fw-bold">
+                                🌸 Faire Éclore un Fief PNJ Maintenant
+                            </button>
+                            <button type="button" onclick="runBotCycle()" class="btn btn-sm btn-outline-primary">
+                                ⚙️ Forcer un Cycle IA
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-3 align-items-center">
+                            <!-- Compte à rebours & métriques globales -->
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded bg-surface">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-secondary fw-bold small text-uppercase">Statut d'Éclosion :</span>
+                                        <?php if (!empty($botSpawnStatus['enabled'])): ?>
+                                            <span class="badge bg-success-lt fw-bold">🟢 Actif (Toutes les <?= $botSpawnStatus['interval_min'] ?> min)</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary-lt fw-bold">⚪ En Sommeil</span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div class="text-center py-2">
+                                        <div class="text-secondary small">Prochaine Éclosion dans :</div>
+                                        <div class="display-6 fw-bold text-primary font-monospace" id="botSpawnCountdownText">
+                                            <?= $botSpawnStatus['enabled'] ? $botSpawnStatus['next_spawn_in_formatted'] : '--m --s' ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2 pt-2 border-top small d-flex justify-content-between">
+                                        <span class="text-muted">Total Fiefs PNJ :</span>
+                                        <strong><?= $botSpawnStatus['current_villages'] ?> / <?= $botSpawnStatus['max_villages'] ?></strong>
+                                    </div>
+                                    <div class="mt-1 small d-flex justify-content-between">
+                                        <span class="text-muted">Dernière Apparition :</span>
+                                        <span class="text-dark fw-medium"><?= $botSpawnStatus['last_spawn_formatted'] ?></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Répartition par Quadrant (Homogénéité) -->
+                            <div class="col-md-8">
+                                <div class="p-3 border rounded bg-surface">
+                                    <div class="fw-bold mb-2 small text-uppercase text-secondary d-flex justify-content-between">
+                                        <span>📊 Répartition Actuelle des Fiefs PNJ par Quadrant :</span>
+                                        <span class="text-success small fw-medium">Couverture Homogène 360°</span>
+                                    </div>
+
+                                    <div class="row g-2 text-center">
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <div class="small fw-bold text-dark">↖️ Nord-Ouest</div>
+                                                <div class="h3 m-0 text-primary font-monospace"><?= $botSpawnStatus['quadrants']['NO'] ?? 0 ?></div>
+                                                <div class="text-muted small">fiefs PNJ</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <div class="small fw-bold text-dark">↗️ Nord-Est</div>
+                                                <div class="h3 m-0 text-primary font-monospace"><?= $botSpawnStatus['quadrants']['NE'] ?? 0 ?></div>
+                                                <div class="text-muted small">fiefs PNJ</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <div class="small fw-bold text-dark">↙️ Sud-Ouest</div>
+                                                <div class="h3 m-0 text-primary font-monospace"><?= $botSpawnStatus['quadrants']['SO'] ?? 0 ?></div>
+                                                <div class="text-muted small">fiefs PNJ</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <div class="small fw-bold text-dark">↘️ Sud-Est</div>
+                                                <div class="h3 m-0 text-primary font-monospace"><?= $botSpawnStatus['quadrants']['SE'] ?? 0 ?></div>
+                                                <div class="text-muted small">fiefs PNJ</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <?php if (!empty($botSpawnStatus['last_village'])): ?>
+                                        <?php $lv = $botSpawnStatus['last_village']; ?>
+                                        <div class="mt-3 p-2 bg-success-lt border border-success-subtle rounded small d-flex justify-content-between align-items-center flex-wrap gap-1">
+                                            <span>
+                                                🌸 <strong>Dernier Fief Éclos :</strong> 
+                                                <?= htmlspecialchars($lv['planet_name']) ?> (<?= htmlspecialchars($lv['username']) ?>) 
+                                                en <strong>[<?= $lv['x'] ?> : <?= $lv['y'] ?>]</strong> &bull; Quadrant <strong><?= $lv['quadrant'] ?></strong>
+                                            </span>
+                                            <a href="/?page=map&x=<?= $lv['x'] ?>&y=<?= $lv['y'] ?>" target="_blank" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:0.75rem;">
+                                                🗾 Localiser
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <hr class="my-4">
 
@@ -2622,17 +2781,40 @@ function applyPreset(gSpeed, rSpeed, fSpeed) {
 
 async function saveSettings(event) {
     if (event) event.preventDefault();
-    const formData = new FormData(document.getElementById('gameSettingsForm'));
+    const gForm = document.getElementById('gameSettingsForm');
+    const formData = gForm ? new FormData(gForm) : new FormData();
     formData.append('action', 'save_settings');
     formData.append('bots_enabled', document.getElementById('bots_enabled').value);
     formData.append('bot_colonize_enabled', document.getElementById('bot_colonize_enabled').value);
     formData.append('bot_max_planets', document.getElementById('bot_max_planets').value);
     formData.append('bot_aggressiveness', document.getElementById('bot_aggressiveness').value);
-    formData.append('oasis_density_percent', document.getElementById('oasis_density_percent_input').value);
-    formData.append('oasis_respawn_on_capture', document.getElementById('oasis_respawn_on_capture').checked ? '1' : '0');
-    formData.append('famine_enabled', document.getElementById('famine_enabled').checked ? '1' : '0');
-    formData.append('famine_rate', document.getElementById('famine_rate_input').value);
-    formData.append('famine_flour_consumption', document.getElementById('famine_flour_consumption_input').value);
+    
+    // Paramètres d'éclosion spontanée PNJ
+    if (document.getElementById('bot_spawn_enabled')) {
+        formData.append('bot_spawn_enabled', document.getElementById('bot_spawn_enabled').value);
+    }
+    if (document.getElementById('bot_spawn_interval_min')) {
+        formData.append('bot_spawn_interval_min', document.getElementById('bot_spawn_interval_min').value);
+    }
+    if (document.getElementById('bot_spawn_max_villages')) {
+        formData.append('bot_spawn_max_villages', document.getElementById('bot_spawn_max_villages').value);
+    }
+
+    if (document.getElementById('oasis_density_percent_input')) {
+        formData.append('oasis_density_percent', document.getElementById('oasis_density_percent_input').value);
+    }
+    if (document.getElementById('oasis_respawn_on_capture')) {
+        formData.append('oasis_respawn_on_capture', document.getElementById('oasis_respawn_on_capture').checked ? '1' : '0');
+    }
+    if (document.getElementById('famine_enabled')) {
+        formData.append('famine_enabled', document.getElementById('famine_enabled').checked ? '1' : '0');
+    }
+    if (document.getElementById('famine_rate_input')) {
+        formData.append('famine_rate', document.getElementById('famine_rate_input').value);
+    }
+    if (document.getElementById('famine_flour_consumption_input')) {
+        formData.append('famine_flour_consumption', document.getElementById('famine_flour_consumption_input').value);
+    }
 
     try {
         const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
@@ -2650,6 +2832,61 @@ async function saveSettings(event) {
 async function saveBotSettings(event) {
     if (event) event.preventDefault();
     saveSettings();
+}
+
+// Compte à rebours temps réel pour l'éclosion spontanée
+let botSpawnSecondsRemaining = <?= (int)($botSpawnStatus['next_spawn_in_seconds'] ?? 0) ?>;
+const isBotSpawnActive = <?= !empty($botSpawnStatus['enabled']) ? 'true' : 'false' ?>;
+
+if (isBotSpawnActive && botSpawnSecondsRemaining > 0) {
+    setInterval(() => {
+        if (botSpawnSecondsRemaining > 0) {
+            botSpawnSecondsRemaining--;
+            const mins = Math.floor(botSpawnSecondsRemaining / 60);
+            const secs = botSpawnSecondsRemaining % 60;
+            const el = document.getElementById('botSpawnCountdownText');
+            if (el) {
+                el.textContent = `${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
+            }
+        } else {
+            const el = document.getElementById('botSpawnCountdownText');
+            if (el) el.textContent = "Éclosion imminente...";
+        }
+    }, 1000);
+}
+
+async function triggerSpontaneousSpawn() {
+    showModalConfirm(
+        "Éclosion Spontanée Immédiate", 
+        "Voulez-vous déclencher l'apparition immédiate d'un nouveau village PNJ ? L'emplacement sera choisi de façon homogène sur la carte afin de combler le quadrant le moins occupé.", 
+        async () => {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'spawn_spontaneous_village');
+                const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.success) {
+                    const v = data.village;
+                    showModalAlert(
+                        "🌸 Nouveau Village PNJ Éclos", 
+                        `Un nouveau domaine a fait son apparition dans l'archipel !<br><br>
+                         🏰 <strong>${v.planet_name}</strong><br>
+                         👤 Seigneur : <strong>${v.username}</strong> (${v.faction})<br>
+                         📍 Coordonnées : <strong>[${v.x} : ${v.y}]</strong> &bull; Quadrant : <strong>${v.quadrant}</strong><br>
+                         ${v.is_new_daimyo ? '👑 <em>Nouveau Daimyō fondateur</em>' : '🏯 <em>Extension territoriale provinciale</em>'}<br><br>
+                         <a href="/?page=map&x=${v.x}&y=${v.y}" target="_blank" class="btn btn-sm btn-primary">🗾 Explorer sur la Carte</a>`,
+                        "success"
+                    );
+                    setTimeout(() => location.reload(), 2500);
+                } else {
+                    showModalAlert("Éclosion Impossible", data.error || data.message, "warning");
+                }
+            } catch (e) {
+                showModalAlert("Erreur Réseau", "Une erreur est survenue lors de l'éclosion du village.", "danger");
+            }
+        }
+    );
 }
 
 async function runBotCycle() {

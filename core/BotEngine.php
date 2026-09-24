@@ -156,25 +156,41 @@ class BotEngine {
      * Exécuté en arrière-plan à chaque requête si le délai est écoulé
      */
     public function tickPeriodicSimulation(): ?array {
-        if (!GameConfig::get('bots_enabled', true)) {
-            return null;
+        $now = time();
+        $report = [];
+
+        // 1. 🌸 Éclosion spontanée de nouveaux villages PNJ (si activée et délai écoulé)
+        if (GameConfig::get('bot_spawn_enabled', false)) {
+            $spawnIntervalMin = max(1, (int)GameConfig::get('bot_spawn_interval_min', 15));
+            $lastSpawn = (int)GameConfig::get('bot_spawn_last_time', 0);
+            if (($now - $lastSpawn) >= ($spawnIntervalMin * 60)) {
+                $spawnRes = $this->spawnSpontaneousVillage();
+                if ($spawnRes && !empty($spawnRes['success'])) {
+                    $report['spontaneous_village'] = $spawnRes;
+                }
+            }
         }
 
-        $now = time();
+        // 2. ⚔️ Simulation régulière d'IA (bâtiments, parcelles, armées & raids)
+        if (!GameConfig::get('bots_enabled', true)) {
+            return !empty($report) ? $report : null;
+        }
+
         $lastTick = (int)GameConfig::get('bot_last_tick_time', 0);
         $fleetSpeed = max(1, (float)GameConfig::get('fleet_speed', 5));
         
         // Intervalle : 60 à 90 secondes en vitesse standard, ajusté par la vitesse de jeu
         $interval = max(25, (int)round(75 / $fleetSpeed));
 
-        if (($now - $lastTick) < $interval) {
-            return null;
+        if (($now - $lastTick) >= $interval) {
+            // Mettre à jour l'horodatage du dernier cycle
+            GameConfig::set('bot_last_tick_time', $now);
+            $cycleRes = $this->executeBotCycle();
+            $report = array_merge($report, $cycleRes);
+            return $report;
         }
 
-        // Mettre à jour l'horodatage du dernier cycle
-        GameConfig::set('bot_last_tick_time', $now);
-
-        return $this->executeBotCycle();
+        return !empty($report) ? $report : null;
     }
 
     /**
@@ -608,10 +624,355 @@ class BotEngine {
     }
 
     /**
+     * Recherche des coordonnées (X, Y) optimales pour une éclosion spontanée
+     * garantissant une répartition homogène sur l'ensemble de la carte
+     */
+    public function findHomogeneousFreeCoordinates(): array {
+        // 1. Recenser les coordonnées de tous les villages (joueurs et bots), donjons et oasis
+        $occupied = [];
+        $planetCoords = [];
+        $quadrantCounts = ['NE' => 0, 'NO' => 0, 'SO' => 0, 'SE' => 0];
+
+        $stmtP = $this->db->query("SELECT coord_x, coord_y, user_id FROM planets WHERE coord_x IS NOT NULL AND coord_y IS NOT NULL");
+        while ($r = $stmtP->fetch(PDO::FETCH_ASSOC)) {
+            $x = (int)$r['coord_x'];
+            $y = (int)$r['coord_y'];
+            $k = $x . ':' . $y;
+            $occupied[$k] = true;
+            $planetCoords[] = [$x, $y];
+
+            // Compter par quadrant
+            if ($x >= 0 && $y >= 0) $quadrantCounts['NE']++;
+            elseif ($x < 0 && $y >= 0) $quadrantCounts['NO']++;
+            elseif ($x < 0 && $y < 0) $quadrantCounts['SO']++;
+            else $quadrantCounts['SE']++;
+        }
+
+        // Donjons sacrés
+        try {
+            $stmtC = $this->db->query("SELECT coord_x, coord_y FROM authentic_castles WHERE is_spawned = 1");
+            while ($r = $stmtC->fetch(PDO::FETCH_ASSOC)) {
+                $occupied[(int)$r['coord_x'] . ':' . (int)$r['coord_y']] = true;
+            }
+        } catch (Exception $e) {}
+
+        // Oasis
+        try {
+            $stmtO = $this->db->query("SELECT coord_x, coord_y FROM oases");
+            while ($r = $stmtO->fetch(PDO::FETCH_ASSOC)) {
+                $occupied[(int)$r['coord_x'] . ':' . (int)$r['coord_y']] = true;
+            }
+        } catch (Exception $e) {}
+
+        // 2. Sélectionner le quadrant le moins peuplé pour équilibrer la carte
+        asort($quadrantCounts);
+        $minCount = reset($quadrantCounts);
+        $candidateQuadrants = array_keys(array_filter($quadrantCounts, fn($c) => $c <= $minCount + 1));
+        $targetQuadrant = $candidateQuadrants[array_rand($candidateQuadrants)];
+
+        // 3. Déterminer les signes selon le quadrant
+        $signX = ($targetQuadrant === 'NE' || $targetQuadrant === 'SE') ? 1 : -1;
+        $signY = ($targetQuadrant === 'NE' || $targetQuadrant === 'NO') ? 1 : -1;
+
+        // On alterne les distances (intérieure: 8-16, médiane: 17-25, extérieure: 26-34)
+        $distanceBands = [
+            ['min' => 8, 'max' => 16],
+            ['min' => 17, 'max' => 25],
+            ['min' => 26, 'max' => 34]
+        ];
+        shuffle($distanceBands);
+
+        $bestCandidate = null;
+        $maxMinDist = -1;
+
+        // Chercher un emplacement bien espacé
+        for ($attempt = 0; $attempt < 150; $attempt++) {
+            $band = $distanceBands[$attempt % count($distanceBands)];
+            $x = rand($band['min'], $band['max']) * $signX;
+            $y = rand($band['min'], $band['max']) * $signY;
+
+            if ($x === 0 && $y === 0) continue;
+            $k = $x . ':' . $y;
+            if (isset($occupied[$k])) continue;
+
+            // Calculer la distance au village le plus proche
+            $closestDist = 999.0;
+            foreach ($planetCoords as $pc) {
+                $d = sqrt(pow($x - $pc[0], 2) + pow($y - $pc[1], 2));
+                if ($d < $closestDist) {
+                    $closestDist = $d;
+                }
+            }
+
+            // Si espacement >= 3 cases, excellent emplacement immédiat !
+            if ($closestDist >= 3.0) {
+                return [
+                    'x' => $x,
+                    'y' => $y,
+                    'quadrant' => $targetQuadrant,
+                    'distance_to_nearest' => round($closestDist, 1)
+                ];
+            }
+
+            if ($closestDist > $maxMinDist) {
+                $maxMinDist = $closestDist;
+                $bestCandidate = [
+                    'x' => $x,
+                    'y' => $y,
+                    'quadrant' => $targetQuadrant,
+                    'distance_to_nearest' => round($closestDist, 1)
+                ];
+            }
+        }
+
+        if ($bestCandidate !== null) {
+            return $bestCandidate;
+        }
+
+        // Repli standard si la zone est dense
+        $fallback = VillageFieldGenerator::findRandomFreeCoordinates($this->db, 35, strtolower($targetQuadrant));
+        return [
+            'x' => $fallback['x'],
+            'y' => $fallback['y'],
+            'quadrant' => $targetQuadrant,
+            'distance_to_nearest' => 1.0
+        ];
+    }
+
+    /**
+     * Déclenche l'éclosion spontanée d'un nouveau village PNJ (Daimyō autonome ou fief provincial)
+     */
+    public function spawnSpontaneousVillage(): array {
+        // Vérifier si le nombre total de villages PNJ a atteint la limite
+        $maxVillages = (int)GameConfig::get('bot_spawn_max_villages', 50);
+        $currentBotVillages = (int)$this->db->query("
+            SELECT COUNT(p.id) 
+            FROM planets p 
+            JOIN users u ON p.user_id = u.id 
+            WHERE u.is_bot = 1
+        ")->fetchColumn();
+
+        if ($currentBotVillages >= $maxVillages) {
+            return [
+                'success' => false,
+                'error' => "Plafond maximal atteint ({$currentBotVillages} / {$maxVillages} villages PNJ déployés sur la carte)."
+            ];
+        }
+
+        // Trouver coordonnées homogènes libres
+        $loc = $this->findHomogeneousFreeCoordinates();
+        $targetX = $loc['x'];
+        $targetY = $loc['y'];
+        $quadrant = $loc['quadrant'];
+
+        // Factions disponibles
+        $factions = ['terran', 'vorash', 'aethelis'];
+        
+        // Décider si on rattache le village à un Bot existant ou si on fait émerger un nouveau Daimyō PNJ
+        $maxPerBot = (int)GameConfig::get('bot_max_planets', 3);
+        $eligibleBots = $this->db->prepare("
+            SELECT u.id, u.username, u.faction, COUNT(p.id) as planet_count
+            FROM users u
+            LEFT JOIN planets p ON p.user_id = u.id
+            WHERE u.is_bot = 1
+            GROUP BY u.id
+            HAVING planet_count < ?
+            ORDER BY planet_count ASC
+        ");
+        $eligibleBots->execute([$maxPerBot]);
+        $botsUnderLimit = $eligibleBots->fetchAll(PDO::FETCH_ASSOC);
+
+        $isNewDaimyo = empty($botsUnderLimit) || (rand(1, 100) <= 60); // 60% chance de créer un nouveau daimyō
+
+        $this->db->beginTransaction();
+        try {
+            $botId = null;
+            $botUsername = '';
+            $botFaction = 'terran';
+            $planetName = '';
+            $isCapital = 0;
+
+            if (!$isNewDaimyo && !empty($botsUnderLimit)) {
+                $chosenBot = $botsUnderLimit[array_rand($botsUnderLimit)];
+                $botId = (int)$chosenBot['id'];
+                $botUsername = $chosenBot['username'];
+                $botFaction = $chosenBot['faction'];
+                $villageNum = (int)$chosenBot['planet_count'] + 1;
+                $planetName = "Fief " . $botUsername . " " . $villageNum;
+                $isCapital = 0;
+            } else {
+                // Créer un nouveau Daimyō PNJ
+                $daimyoNames = [
+                    'Kenshin', 'Motonari', 'Kiyomasa', 'Ujiyasu', 'Yoshitsune',
+                    'Kanetsugu', 'Mitsunari', 'Nagahide', 'Katsuyori', 'Toramori',
+                    'Hidetada', 'Munenori', 'Masamune', 'Kojiro', 'Nobushige',
+                    'Asakura', 'Amago', 'Chosokabe', 'Shimazu', 'Otomo',
+                    'Ryuzoji', 'Satake', 'Hatakeyama', 'Sokokawa', 'Kotaro'
+                ];
+                $titles = ['Daimyo_', 'Seigneur_', 'General_', 'Guerrier_', 'Clan_'];
+                
+                // Trouver un nom unique
+                $existingUsers = $this->db->query("SELECT username FROM users")->fetchAll(PDO::FETCH_COLUMN);
+                $uniqueName = null;
+                shuffle($titles);
+                shuffle($daimyoNames);
+                foreach ($titles as $t) {
+                    foreach ($daimyoNames as $n) {
+                        $cand = $t . $n;
+                        if (!in_array($cand, $existingUsers)) {
+                            $uniqueName = $cand;
+                            break 2;
+                        }
+                    }
+                }
+                if (!$uniqueName) {
+                    $uniqueName = 'Daimyo_Sengoku_' . rand(100, 999);
+                }
+
+                // Équilibrer la faction selon les bots existants
+                $factionCounts = ['terran' => 0, 'vorash' => 0, 'aethelis' => 0];
+                $fStmt = $this->db->query("SELECT faction, COUNT(*) as c FROM users WHERE is_bot = 1 GROUP BY faction");
+                while ($fr = $fStmt->fetch(PDO::FETCH_ASSOC)) {
+                    if (isset($factionCounts[$fr['faction']])) $factionCounts[$fr['faction']] = (int)$fr['c'];
+                }
+                asort($factionCounts);
+                $botFaction = array_key_first($factionCounts);
+
+                $dummyHash = password_hash(bin2hex(random_bytes(8)), PASSWORD_BCRYPT);
+                $email = strtolower($uniqueName) . "@bot.opengalaxy.local";
+
+                $stmtUser = $this->db->prepare("
+                    INSERT INTO users (username, email, password_hash, faction, is_admin, is_bot, points, created_at, last_active)
+                    VALUES (?, ?, ?, ?, 0, 1, 100, NOW(), NOW())
+                ");
+                $stmtUser->execute([$uniqueName, $email, $dummyHash, $botFaction]);
+                $botId = (int)$this->db->lastInsertId();
+                $botUsername = $uniqueName;
+                $planetName = "Château " . $uniqueName;
+                $isCapital = 1;
+            }
+
+            // Créer la planète du village
+            $stmtPlanet = $this->db->prepare("
+                INSERT INTO planets 
+                (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, last_resource_update, is_capital) 
+                VALUES (?, ?, ?, ?, 'terrestrial', 3000, 2500, 1200, 0, 80, 25000, 25000, 25000, UNIX_TIMESTAMP(), ?)
+            ");
+            $stmtPlanet->execute([$botId, $planetName, $targetX, $targetY, $isCapital]);
+            $planetId = (int)$this->db->lastInsertId();
+
+            // Initialiser les 19 parcelles de terroir procédural
+            VillageFieldGenerator::populatePlanetFields($this->db, $planetId, null, 0, false);
+
+            // Garnison de défense de départ
+            $starterUnits = [
+                'terran' => ['code' => 'piquier_ashigaru_yari', 'count' => 30],
+                'vorash' => ['code' => 'fantassin_leger_takeda', 'count' => 45],
+                'aethelis' => ['code' => 'sentinelle_yari_tokugawa', 'count' => 25]
+            ];
+            $u = $starterUnits[$botFaction] ?? $starterUnits['terran'];
+            $this->db->prepare("
+                INSERT INTO planet_units (planet_id, unit_code, count) VALUES (?, ?, ?)
+            ")->execute([$planetId, $u['code'], $u['count']]);
+
+            // Flotte de transporteurs et sondes
+            $this->db->prepare("
+                INSERT INTO planet_ships (planet_id, ship_code, count) VALUES (?, 'transporter_light', 3)
+            ")->execute([$planetId]);
+            $this->db->prepare("
+                INSERT INTO planet_ships (planet_id, ship_code, count) VALUES (?, 'spy_probe', 4)
+            ")->execute([$planetId]);
+
+            $this->db->commit();
+
+            // Mettre à jour l'horodatage de dernière éclosion
+            $now = time();
+            GameConfig::set('bot_spawn_last_time', $now);
+            $lastInfo = [
+                'time' => $now,
+                'planet_name' => $planetName,
+                'planet_id' => $planetId,
+                'user_id' => $botId,
+                'username' => $botUsername,
+                'faction' => $botFaction,
+                'x' => $targetX,
+                'y' => $targetY,
+                'quadrant' => $quadrant,
+                'is_new_daimyo' => $isNewDaimyo
+            ];
+            GameConfig::set('bot_spawn_last_info', json_encode($lastInfo));
+
+            return [
+                'success' => true,
+                'message' => "Éclosion réussie du village '{$planetName}' en [{$targetX} : {$targetY}] ({$quadrant}) !",
+                'village' => $lastInfo
+            ];
+
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'error' => "Erreur lors de l'éclosion spontanée : " . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Récupère le statut complet et les métriques de l'éclosion spontanée des villages PNJ
+     */
+    public function getBotSpawnStatus(): array {
+        $enabled = (bool)GameConfig::get('bot_spawn_enabled', false);
+        $intervalMin = max(1, (int)GameConfig::get('bot_spawn_interval_min', 15));
+        $maxVillages = max(1, (int)GameConfig::get('bot_spawn_max_villages', 50));
+        $lastSpawnTime = (int)GameConfig::get('bot_spawn_last_time', 0);
+        $lastInfoRaw = GameConfig::get('bot_spawn_last_info', null);
+        $lastInfo = is_string($lastInfoRaw) ? json_decode($lastInfoRaw, true) : null;
+
+        $now = time();
+        $nextSpawnTime = $lastSpawnTime > 0 ? ($lastSpawnTime + ($intervalMin * 60)) : ($now + ($intervalMin * 60));
+        $remainingSeconds = max(0, $nextSpawnTime - $now);
+
+        // Recensement des villages PNJ par quadrant
+        $quadrants = ['NE' => 0, 'NO' => 0, 'SO' => 0, 'SE' => 0];
+        $totalBotVillages = 0;
+        $totalBots = 0;
+
+        $stmt = $this->db->query("
+            SELECT p.coord_x, p.coord_y 
+            FROM planets p 
+            JOIN users u ON p.user_id = u.id 
+            WHERE u.is_bot = 1
+        ");
+        while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $totalBotVillages++;
+            $x = (int)$r['coord_x'];
+            $y = (int)$r['coord_y'];
+            if ($x >= 0 && $y >= 0) $quadrants['NE']++;
+            elseif ($x < 0 && $y >= 0) $quadrants['NO']++;
+            elseif ($x < 0 && $y < 0) $quadrants['SO']++;
+            else $quadrants['SE']++;
+        }
+
+        $totalBots = (int)$this->db->query("SELECT COUNT(*) FROM users WHERE is_bot = 1")->fetchColumn();
+
+        return [
+            'enabled' => $enabled,
+            'interval_min' => $intervalMin,
+            'max_villages' => $maxVillages,
+            'current_villages' => $totalBotVillages,
+            'current_bots' => $totalBots,
+            'quadrants' => $quadrants,
+            'last_spawn_time' => $lastSpawnTime,
+            'last_spawn_formatted' => $lastSpawnTime > 0 ? date('d/m/Y H:i:s', $lastSpawnTime) : 'Aucune',
+            'next_spawn_in_seconds' => $remainingSeconds,
+            'next_spawn_in_formatted' => gmdate('i\m s\s', $remainingSeconds),
+            'last_village' => $lastInfo
+        ];
+    }
+
+    /**
      * Trouve des coordonnées libres aléatoires (Style Travian)
      */
     private function findFreeCoordinates(): array {
         return VillageFieldGenerator::findRandomFreeCoordinates($this->db, 35);
     }
 }
+
 

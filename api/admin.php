@@ -43,6 +43,10 @@ try {
                 ? $_POST['bot_aggressiveness'] 
                 : 'moderate';
 
+            $botSpawnEnabled = !empty($_POST['bot_spawn_enabled']) && ($_POST['bot_spawn_enabled'] === '1' || $_POST['bot_spawn_enabled'] === 'true');
+            $botSpawnIntervalMin = max(1, min(1440, (int)($_POST['bot_spawn_interval_min'] ?? 15)));
+            $botSpawnMaxVillages = max(1, min(200, (int)($_POST['bot_spawn_max_villages'] ?? 50)));
+
             $oasisDensity = max(0.5, min(20.0, (float)($_POST['oasis_density_percent'] ?? 2.0)));
             $oasisRespawn = !empty($_POST['oasis_respawn_on_capture']) && ($_POST['oasis_respawn_on_capture'] === '1' || $_POST['oasis_respawn_on_capture'] === 'true');
             $beginnerProtectionDays = max(0, min(365, (int)($_POST['beginner_protection_days'] ?? 7)));
@@ -58,6 +62,9 @@ try {
             GameConfig::set('bot_colonize_enabled', $botColonize);
             GameConfig::set('bot_max_planets', $botMaxPlanets);
             GameConfig::set('bot_aggressiveness', $botAggressiveness);
+            GameConfig::set('bot_spawn_enabled', $botSpawnEnabled);
+            GameConfig::set('bot_spawn_interval_min', $botSpawnIntervalMin);
+            GameConfig::set('bot_spawn_max_villages', $botSpawnMaxVillages);
             GameConfig::set('oasis_density_percent', $oasisDensity);
             GameConfig::set('oasis_respawn_on_capture', $oasisRespawn);
             GameConfig::set('beginner_protection_days', $beginnerProtectionDays);
@@ -67,7 +74,7 @@ try {
 
             echo json_encode([
                 'success' => true,
-                'message' => "Variables de jeu, équilibrage, oasis, immunité et mécanisme de famine sauvegardés avec succès !",
+                'message' => "Variables de jeu, équilibrage, éclosion spontanée PNJ, oasis et mécanisme de famine sauvegardés avec succès !",
                 'settings' => GameConfig::load()
             ]);
             break;
@@ -76,6 +83,18 @@ try {
         case 'run_bot_cycle':
             $result = $botEngine->executeBotCycle();
             echo json_encode($result);
+            break;
+
+        // 🌸 Déclencher manuellement l'éclosion spontanée immédiate d'un village PNJ
+        case 'spawn_spontaneous_village':
+            $result = $botEngine->spawnSpontaneousVillage();
+            echo json_encode($result);
+            break;
+
+        // Obtenir le statut et compte à rebours de l'éclosion spontanée
+        case 'get_bot_spawn_status':
+            $status = $botEngine->getBotSpawnStatus();
+            echo json_encode(['success' => true, 'status' => $status]);
             break;
 
         // Générer une escadre de bots prédéfinis
