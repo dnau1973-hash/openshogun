@@ -238,6 +238,14 @@
 
         <!-- Corps de la Modale -->
         <div class="modal-body" style="max-height:600px; overflow-y:auto; padding:1.25rem;">
+            <?php if (($watchtowerLevel ?? 0) < 1): ?>
+                <div class="alert alert-warning mb-3 d-flex align-items-center gap-2">
+                    <span class="fs-2">🏮</span>
+                    <div class="small">
+                        <strong>Tour de Guet non érigée :</strong> Sans Tour de Guet Yagura (Niveau 1 minimum) sur ce fief, vos vigies ne peuvent pas repérer les armées ennemies ni détecter les infiltrations de Shinobis à l'approche de vos murailles. Seules vos propres expéditions sont répertoriées.
+                    </div>
+                </div>
+            <?php endif; ?>
             <!-- Barre KPI Synthétique -->
             <div class="watchtower-kpi-bar">
                 <div class="watchtower-kpi-item <?= !empty($incomingHostile) ? 'threat' : '' ?>">

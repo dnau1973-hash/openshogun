@@ -601,9 +601,8 @@
    BANNIÈRE D'ALERTE MILITAIRE & TOUR DE GUET (STYLE SENGOKU)
    ========================================================== */
 .travian-alert-banner {
-    max-width: 1368px;
     width: 100%;
-    margin: 0.4rem auto 0.65rem auto;
+    margin: 0.4rem 0 0.65rem 0;
     border-radius: 8px;
     padding: 0.5rem 1.25rem;
     font-size: 0.88rem;

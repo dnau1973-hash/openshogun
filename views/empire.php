@@ -190,6 +190,7 @@ $unitsDb = $empireData['units_db'];
                                 <th>🌾 Riz Impérial</th>
                                 <th>🍚 Farine &amp; Vivres</th>
                                 <th>🍶 Saké d'Apparat</th>
+                                <th>🪵 Poutres en bois</th>
                                 <th class="text-end">Action</th>
                             </tr>
                         </thead>
@@ -258,6 +259,10 @@ $unitsDb = $empireData['units_db'];
                                     <div class="fw-bold text-warning"><?= number_format((int)($p['sake'] ?? 0)) ?> 🍶</div>
                                     <div class="text-muted small">/ <?= number_format((int)($p['sake_max'] ?? 10000)) ?> max</div>
                                 </td>
+                                <td>
+                                    <div class="fw-bold text-dark"><?= number_format((int)($p['wooden_beams'] ?? 0)) ?> 🪵</div>
+                                    <div class="text-muted small">/ <?= number_format((int)($p['wooden_beams_max'] ?? 10000)) ?> max</div>
+                                </td>
                                 <td class="text-end">
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-sm btn-outline-warning" 
@@ -293,6 +298,9 @@ $unitsDb = $empireData['units_db'];
                                 </td>
                                 <td>
                                     <div class="text-warning"><?= number_format($totals['sake']) ?> 🍶</div>
+                                </td>
+                                <td>
+                                    <div class="text-dark"><?= number_format($totals['wooden_beams']) ?> 🪵</div>
                                 </td>
                                 <td class="text-end">
                                     <span class="badge bg-warning text-dark"><?= count($villages) ?> Domaines</span>

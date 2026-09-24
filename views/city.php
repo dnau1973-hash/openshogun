@@ -175,7 +175,7 @@ foreach (BUILDINGS as $code => $bInfo) {
         </div>
         <div class="card-body">
             <?php if (!empty($planet['famine_active']) && !empty($planet['famine_enabled'])): ?>
-                <div style="background:#fef2f2; border:2px solid #ef4444; border-radius:8px; padding:0.6rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; animation: pulse 2s infinite;">
+                <div style="background:#fef2f2; border:2px solid #ef4444; border-radius:8px; padding:0.6rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
                     <div style="display:flex; align-items:center; gap:0.6rem; color:#991b1b; font-size:0.85rem; font-weight:700;">
                         <span style="font-size:1.4rem;">⚠️</span>
                         <div>
@@ -315,6 +315,8 @@ foreach (BUILDINGS as $code => $bInfo) {
                                 <a href="?page=research" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">📜 Académie des Savoirs</a>
                             <?php elseif ($code === 'grain_mill' && $lvl > 0): ?>
                                 <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🍶 Raffiner Saké &amp; Farine</a>
+                            <?php elseif ($code === 'sawmill' && $lvl > 0): ?>
+                                <a href="/?page=building&code=sawmill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🪚 Façonner Poutres</a>
                             <?php endif; ?>
 
                             <a href="/?page=building&code=<?= $code ?>" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">

@@ -693,6 +693,7 @@ class ImperialSealEngine {
             'deuterium' => 0,
             'rice_flour' => 0,
             'sake' => 0,
+            'wooden_beams' => 0,
             'prod_metal' => 0,
             'prod_crystal' => 0,
             'prod_deuterium' => 0,
@@ -736,6 +737,7 @@ class ImperialSealEngine {
             $totals['deuterium'] += (float)$pData['deuterium'];
             $totals['rice_flour'] += (float)($pData['rice_flour'] ?? 0);
             $totals['sake'] += (float)($pData['sake'] ?? 0);
+            $totals['wooden_beams'] += (float)($pData['wooden_beams'] ?? 0);
             $totals['prod_metal'] += (float)$pData['prod_rates']['metal'];
             $totals['prod_crystal'] += (float)$pData['prod_rates']['crystal'];
             $totals['prod_deuterium'] += (float)$pData['prod_rates']['deuterium'];

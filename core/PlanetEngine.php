@@ -57,12 +57,14 @@ class PlanetEngine {
         $storageLvl = $buildings['storage'] ?? 0;
         $tankLvl = $buildings['tank'] ?? 0;
         $grainMillLvl = $buildings['grain_mill'] ?? 0;
+        $sawmillLvl = $buildings['sawmill'] ?? 0;
 
         $metalMax = (int)(15000 * pow(1.5, $storageLvl));
         $crystalMax = (int)(15000 * pow(1.5, $storageLvl));
         $deutMax = (int)(15000 * pow(1.5, $tankLvl));
         $sakeMax = (int)(10000 * pow(1.4, $grainMillLvl));
         $flourMax = (int)(10000 * pow(1.4, $grainMillLvl));
+        $beamsMax = (int)(10000 * pow(1.4, $sawmillLvl));
 
         // 5. Calcul de l'énergie et des productions horaires (avec bonus d'oasis annexées)
         $fields = $this->getFields($planetId);
@@ -191,6 +193,8 @@ class PlanetEngine {
         $planet['rice_flour'] = (float)$curFlour;
         $planet['sake_max'] = (int)($planet['sake_max'] ?? $sakeMax);
         $planet['rice_flour_max'] = (int)($planet['rice_flour_max'] ?? $flourMax);
+        $planet['wooden_beams'] = (float)($planet['wooden_beams'] ?? 0);
+        $planet['wooden_beams_max'] = (int)($planet['wooden_beams_max'] ?? $beamsMax);
         $planet['population'] = (int)$curPop;
         $planet['population_max'] = (int)$maxPopulation;
         $planet['famine_active'] = !empty($famineResult['famine']) || (!empty($planet['famine_active']));
@@ -347,7 +351,7 @@ class PlanetEngine {
     }
 
     /**
-     * Traite les lots de raffinage terminés dans la Meunerie & Brasserie (Sakagura)
+     * Traite les lots de raffinage et de charpente terminés dans les ateliers (Meunerie, Charpenterie)
      */
     public function processCraftQueue(int $planetId): void {
         $now = time();
@@ -362,28 +366,44 @@ class PlanetEngine {
 
             foreach ($completed as $item) {
                 $product = $item['product'];
-                if (!in_array($product, ['sake', 'rice_flour'])) {
-                    $this->db->prepare("DELETE FROM craft_queue WHERE id = ?")->execute([$item['id']]);
-                    continue;
-                }
-
                 $amount = (float)$item['produced_amount'];
 
-                $this->db->beginTransaction();
-                try {
-                    $up = $this->db->prepare("
-                        UPDATE planets 
-                        SET {$product} = {$product} + ? 
-                        WHERE id = ?
-                    ");
-                    $up->execute([$amount, $planetId]);
+                if ($product === 'wooden_beams') {
+                    $this->db->beginTransaction();
+                    try {
+                        $up = $this->db->prepare("
+                            UPDATE planets 
+                            SET wooden_beams = LEAST(wooden_beams_max, wooden_beams + ?) 
+                            WHERE id = ?
+                        ");
+                        $up->execute([$amount, $planetId]);
 
-                    $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
-                    $del->execute([$item['id']]);
+                        $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
+                        $del->execute([$item['id']]);
 
-                    $this->db->commit();
-                } catch (Exception $e) {
-                    $this->db->rollBack();
+                        $this->db->commit();
+                    } catch (Exception $e) {
+                        $this->db->rollBack();
+                    }
+                } elseif (in_array($product, ['sake', 'rice_flour'])) {
+                    $this->db->beginTransaction();
+                    try {
+                        $up = $this->db->prepare("
+                            UPDATE planets 
+                            SET {$product} = LEAST({$product}_max, {$product} + ?) 
+                            WHERE id = ?
+                        ");
+                        $up->execute([$amount, $planetId]);
+
+                        $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
+                        $del->execute([$item['id']]);
+
+                        $this->db->commit();
+                    } catch (Exception $e) {
+                        $this->db->rollBack();
+                    }
+                } else {
+                    $this->db->prepare("DELETE FROM craft_queue WHERE id = ?")->execute([$item['id']]);
                 }
             }
         } catch (Exception $e) {
@@ -392,25 +412,43 @@ class PlanetEngine {
     }
 
     /**
-     * Récupère la file active de raffinage pour une planète
+     * Récupère la file active de raffinage / charpente pour une planète
      */
-    public function getCraftQueue(int $planetId): array {
+    public function getCraftQueue(int $planetId, ?string $buildingType = null): array {
         $now = time();
         try {
-            $stmt = $this->db->prepare("
-                SELECT * FROM craft_queue 
-                WHERE planet_id = ? 
-                ORDER BY started_at ASC, id ASC
-            ");
-            $stmt->execute([$planetId]);
+            if ($buildingType) {
+                $stmt = $this->db->prepare("
+                    SELECT * FROM craft_queue 
+                    WHERE planet_id = ? AND (building_type = ? OR (building_type = '' AND ? = 'grain_mill'))
+                    ORDER BY started_at ASC, id ASC
+                ");
+                $stmt->execute([$planetId, $buildingType, $buildingType]);
+            } else {
+                $stmt = $this->db->prepare("
+                    SELECT * FROM craft_queue 
+                    WHERE planet_id = ? 
+                    ORDER BY started_at ASC, id ASC
+                ");
+                $stmt->execute([$planetId]);
+            }
             $queue = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             foreach ($queue as $idx => &$item) {
                 $isCurrent = ($idx === 0 && (int)$item['started_at'] <= $now);
                 $item['is_current'] = $isCurrent;
                 $item['status'] = $isCurrent ? 'processing' : 'queued';
-                $item['product_name'] = ($item['product'] === 'sake') ? 'Saké Impérial' : 'Farine de Riz';
-                $item['product_icon'] = ($item['product'] === 'sake') ? '🍶' : '🍚';
+                
+                if ($item['product'] === 'wooden_beams') {
+                    $item['product_name'] = 'Poutres en bois';
+                    $item['product_icon'] = '🪵';
+                } elseif ($item['product'] === 'sake') {
+                    $item['product_name'] = 'Saké Impérial';
+                    $item['product_icon'] = '🍶';
+                } else {
+                    $item['product_name'] = 'Farine de Riz';
+                    $item['product_icon'] = '🍚';
+                }
                 
                 $totalDuration = max(1, (int)$item['finishes_at'] - (int)$item['started_at']);
                 $item['total_duration'] = $totalDuration;
@@ -800,7 +838,7 @@ class PlanetEngine {
         $executed = true;
 
         try {
-            // 1. Colonne sake et rice_flour sur planets
+            // 1. Colonne sake, rice_flour et wooden_beams sur planets
             $stmt = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'sake'");
             if ($stmt && $stmt->rowCount() === 0) {
                 $this->db->exec("ALTER TABLE `planets` 
@@ -808,12 +846,18 @@ class PlanetEngine {
                     ADD COLUMN `rice_flour` DOUBLE NOT NULL DEFAULT 0,
                     ADD COLUMN `sake_max` INT UNSIGNED NOT NULL DEFAULT 10000,
                     ADD COLUMN `rice_flour_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+                    ADD COLUMN `wooden_beams` DOUBLE NOT NULL DEFAULT 0,
+                    ADD COLUMN `wooden_beams_max` INT UNSIGNED NOT NULL DEFAULT 10000,
                     ADD COLUMN `population` INT UNSIGNED NOT NULL DEFAULT 100
                 ");
             } else {
                 $stmtFlour = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'rice_flour'");
                 if ($stmtFlour && $stmtFlour->rowCount() === 0) {
                     $this->db->exec("ALTER TABLE `planets` ADD COLUMN `rice_flour` DOUBLE NOT NULL DEFAULT 0");
+                }
+                $stmtBeams = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'wooden_beams'");
+                if ($stmtBeams && $stmtBeams->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets` ADD COLUMN `wooden_beams` DOUBLE NOT NULL DEFAULT 0, ADD COLUMN `wooden_beams_max` INT UNSIGNED NOT NULL DEFAULT 10000");
                 }
                 $stmtPop = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'population'");
                 if ($stmtPop && $stmtPop->rowCount() === 0) {
@@ -843,19 +887,33 @@ class PlanetEngine {
                 CONSTRAINT `fk_pf_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
-            // 4. Table craft_queue (file de raffinage de la meunerie)
+            // 4. Table craft_queue (file de raffinage de la meunerie et charpenterie)
             $this->db->exec("CREATE TABLE IF NOT EXISTS `craft_queue` (
                 `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                 `planet_id` INT UNSIGNED NOT NULL,
+                `building_type` VARCHAR(30) NOT NULL DEFAULT 'grain_mill',
                 `product` VARCHAR(30) NOT NULL,
-                `rice_amount` DOUBLE NOT NULL,
+                `cost_resource` VARCHAR(30) NOT NULL DEFAULT 'deuterium',
+                `cost_amount` DOUBLE NOT NULL DEFAULT 0,
+                `rice_amount` DOUBLE NOT NULL DEFAULT 0,
                 `produced_amount` INT UNSIGNED NOT NULL,
                 `started_at` INT UNSIGNED NOT NULL,
                 `finishes_at` INT UNSIGNED NOT NULL,
                 INDEX `idx_cq_planet` (`planet_id`),
+                INDEX `idx_cq_building` (`building_type`),
                 INDEX `idx_cq_finishes` (`finishes_at`),
                 CONSTRAINT `fk_cq_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+            $stmtCqB = $this->db->query("SHOW COLUMNS FROM `craft_queue` LIKE 'building_type'");
+            if ($stmtCqB && $stmtCqB->rowCount() === 0) {
+                $this->db->exec("ALTER TABLE `craft_queue` 
+                    ADD COLUMN `building_type` VARCHAR(30) NOT NULL DEFAULT 'grain_mill',
+                    ADD COLUMN `cost_resource` VARCHAR(30) NOT NULL DEFAULT 'deuterium',
+                    ADD COLUMN `cost_amount` DOUBLE NOT NULL DEFAULT 0,
+                    ADD INDEX `idx_cq_building` (`building_type`)
+                ");
+            }
 
             // 5. Colonnes famine sur planets
             $stmtFamine = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'famine_active'");
@@ -1083,12 +1141,13 @@ class PlanetEngine {
             }
 
             $stmtQueue = $this->db->prepare("
-                INSERT INTO craft_queue (planet_id, product, rice_amount, produced_amount, started_at, finishes_at) 
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at) 
+                VALUES (?, 'grain_mill', ?, 'deuterium', ?, ?, ?, ?, ?)
             ");
             $stmtQueue->execute([
                 $planetId,
                 $product,
+                $engagedRice,
                 $engagedRice,
                 $details['actual_produced'],
                 $startedAt,
@@ -1102,7 +1161,7 @@ class PlanetEngine {
         }
 
         $updatedPlanet = $this->getPlanet($planetId);
-        $activeQueue = $this->getCraftQueue($planetId);
+        $activeQueue = $this->getCraftQueue($planetId, 'grain_mill');
 
         $durationFmt = gmdate('i\m s\s', $details['duration_seconds']);
         return [
@@ -1122,32 +1181,231 @@ class PlanetEngine {
     }
 
     /**
-     * Annule un lot de raffinage en cours et rembourse 80% du riz engagé
+     * Façonnage de Bois de Cèdre en Poutres en bois (Atelier de Charpenterie Kizukuri)
      */
-    public function cancelRiceCraft(int $planetId, int $craftId): array {
+    public function calculateWoodCraftDetails(int $planetId, string $product, float $woodAmount): array {
+        $buildings = $this->getBuildings($planetId);
+        $sawmillLvl = (int)($buildings['sawmill'] ?? 1);
+        $planet = $this->getPlanet($planetId);
+
+        $efficiencyMultiplier = 1.0 + ($sawmillLvl * 0.02);
+        $baseCostPerUnit = 10; // 10 Bois de Cèdre pour 1 Poutre en bois
+        $rawProduced = floor(($woodAmount / $baseCostPerUnit) * $efficiencyMultiplier);
+        $productName = "Poutres en bois";
+        $productIcon = "🪵";
+        $currentStock = (float)($planet['wooden_beams'] ?? 0);
+        $maxStock = (int)($planet['wooden_beams_max'] ?? (10000 * pow(1.4, max(1, $sawmillLvl))));
+
+        $availableSpace = max(0, $maxStock - $currentStock);
+        $actualProduced = min($rawProduced, $availableSpace);
+
+        // Si la réserve limite la production, on n'utilise que le bois proportionnel
+        $actualWoodEngaged = $woodAmount;
+        if ($actualProduced < $rawProduced && $actualProduced > 0) {
+            $actualWoodEngaged = ceil(($actualProduced / $efficiencyMultiplier) * $baseCostPerUnit);
+        }
+
+        $gameSpeed = (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1);
+        if ($gameSpeed <= 0) $gameSpeed = 1;
+
+        // Vitesse accélérée de 15% par niveau de charpenterie
+        $durationSeconds = max(10, (int)round(($actualWoodEngaged * 0.5) / (1 + ($sawmillLvl * 0.15)) / $gameSpeed));
+
+        return [
+            'product' => $product,
+            'product_name' => $productName,
+            'product_icon' => $productIcon,
+            'sawmill_level' => $sawmillLvl,
+            'efficiency_multiplier' => $efficiencyMultiplier,
+            'base_cost_per_unit' => $baseCostPerUnit,
+            'raw_produced' => $rawProduced,
+            'actual_produced' => $actualProduced,
+            'current_stock' => $currentStock,
+            'max_stock' => $maxStock,
+            'available_space' => $availableSpace,
+            'actual_wood_engaged' => $actualWoodEngaged,
+            'duration_seconds' => $durationSeconds
+        ];
+    }
+
+    /**
+     * Lance le façonnage de Bois de Cèdre en Poutres en bois dans la Charpenterie
+     */
+    public function craftWoodProduct(int $planetId, string $product, float $woodAmount): array {
+        $this->ensureSchemaMigration();
+        if ($product !== 'wooden_beams') {
+            return ['success' => false, 'error' => "Produit de charpente invalide (Poutres en bois uniquement)."];
+        }
+
+        $woodAmount = floor($woodAmount);
+        if ($woodAmount <= 0) {
+            return ['success' => false, 'error' => "Veuillez indiquer une quantité de bois valide supérieure à zéro."];
+        }
+
+        // 1. Vérifier le bâtiment Atelier de Charpenterie
+        $buildings = $this->getBuildings($planetId);
+        $sawmillLvl = (int)($buildings['sawmill'] ?? 0);
+        if ($sawmillLvl < 1) {
+            return ['success' => false, 'error' => "L'Atelier de Charpenterie (Kizukuri) doit être érigé au Niveau 1 minimum pour façonner des poutres en bois."];
+        }
+
+        // 2. Traiter les productions terminées et vérifier la limite de la file
+        $this->processCraftQueue($planetId);
+        $activeQueue = $this->getCraftQueue($planetId, 'sawmill');
+        
+        $planet = $this->getPlanet($planetId);
+        require_once __DIR__ . '/ImperialSealEngine.php';
+        $sealEngine = new ImperialSealEngine($this->db);
+        $isSealActive = $sealEngine->isSealActive((int)$planet['user_id']);
+        $maxQueue = $isSealActive ? 4 : 1;
+
+        if (count($activeQueue) >= $maxQueue) {
+            if ($maxQueue === 1) {
+                $remaining = !empty($activeQueue[0]['time_remaining']) ? gmdate('i\m s\s', $activeQueue[0]['time_remaining']) : 'quelques instants';
+                return [
+                    'success' => false, 
+                    'error' => "Un façonnage de poutres est déjà en cours dans la Charpenterie (temps restant : {$remaining}). Décrétez le <strong>Sceau Impérial (Privilège du Shōgun)</strong> pour débloquer la file d'attente automatique jusqu'à 4 commandes consécutives !"
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'error' => "La file de façonnage de l'Atelier de Charpenterie est déjà pleine (4/4 lots programmés). Attendez la finalisation d'un lot avant d'en ajouter un nouveau."
+                ];
+            }
+        }
+
+        // 3. Calculer les détails de production
+        $details = $this->calculateWoodCraftDetails($planetId, $product, $woodAmount);
+
+        if ($details['actual_produced'] < 1) {
+            return [
+                'success' => false, 
+                'error' => "Quantité de bois insuffisante pour produire au moins 1 Poutre en bois (minimum {$details['base_cost_per_unit']} Bois requis)."
+            ];
+        }
+
+        if ($details['available_space'] <= 0) {
+            return [
+                'success' => false, 
+                'error' => "Vos réserves de Poutres en bois sont saturées (" . number_format($details['current_stock']) . "/" . number_format($details['max_stock']) . "). Augmentez le niveau de votre Atelier de Charpenterie."
+            ];
+        }
+
+        // 4. Mettre à jour les ressources de la planète et vérifier le stock de bois
+        $planet = $this->updatePlanet($planetId);
+        $engagedWood = $details['actual_wood_engaged'];
+        if ($planet['metal'] < $engagedWood) {
+            return [
+                'success' => false, 
+                'error' => "Stock de Bois de Cèdre insuffisant (" . number_format((int)$planet['metal']) . " disponible, " . number_format($engagedWood) . " requis)."
+            ];
+        }
+
+        // 5. Engager les ressources et placer dans la file séquentielle de la charpenterie
+        $now = time();
+        if (empty($activeQueue)) {
+            $startedAt = $now;
+        } else {
+            $lastFinish = 0;
+            foreach ($activeQueue as $qItem) {
+                if ((int)$qItem['finishes_at'] > $lastFinish) {
+                    $lastFinish = (int)$qItem['finishes_at'];
+                }
+            }
+            $startedAt = max($now, $lastFinish);
+        }
+        $finishesAt = $startedAt + $details['duration_seconds'];
+
+        $this->db->beginTransaction();
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE planets 
+                SET metal = GREATEST(0, metal - ?) 
+                WHERE id = ? AND metal >= ?
+            ");
+            $stmt->execute([$engagedWood, $planetId, $engagedWood]);
+
+            if ($stmt->rowCount() === 0) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => "Échec de l'opération : stock de bois modifié entretemps."];
+            }
+
+            $stmtQueue = $this->db->prepare("
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at) 
+                VALUES (?, 'sawmill', ?, 'metal', ?, ?, ?, ?, ?)
+            ");
+            $stmtQueue->execute([
+                $planetId,
+                $product,
+                $engagedWood,
+                $engagedWood,
+                $details['actual_produced'],
+                $startedAt,
+                $finishesAt
+            ]);
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'error' => "Erreur lors du lancement du façonnage : " . $e->getMessage()];
+        }
+
+        $updatedPlanet = $this->getPlanet($planetId);
+        $activeQueue = $this->getCraftQueue($planetId, 'sawmill');
+
+        $durationFmt = gmdate('i\m s\s', $details['duration_seconds']);
+        return [
+            'success' => true,
+            'message' => "Le façonnage de <strong>+" . number_format($details['actual_produced']) . " Poutres en bois 🪵</strong> a débuté ! Durée estimée : <strong>{$durationFmt}</strong> (consommé : -{$engagedWood} Bois 🪵).",
+            'product' => $product,
+            'product_name' => $details['product_name'],
+            'product_icon' => $details['product_icon'],
+            'produced' => $details['actual_produced'],
+            'consumed_wood' => $engagedWood,
+            'duration_seconds' => $details['duration_seconds'],
+            'craft' => $activeQueue[0] ?? null,
+            'new_metal' => $updatedPlanet['metal'],
+            'new_product_stock' => $updatedPlanet['wooden_beams'] ?? 0,
+            'planet' => $updatedPlanet
+        ];
+    }
+
+    /**
+     * Annule un lot de raffinage ou charpente en cours et rembourse 80% des matières engagées
+     */
+    public function cancelCraft(int $planetId, int $craftId): array {
         $stmt = $this->db->prepare("SELECT * FROM craft_queue WHERE id = ? AND planet_id = ?");
         $stmt->execute([$craftId, $planetId]);
         $craft = $stmt->fetch();
 
         if (!$craft) {
-            return ['success' => false, 'error' => "Ce lot de raffinage est introuvable ou déjà terminé."];
+            return ['success' => false, 'error' => "Ce lot est introuvable ou déjà terminé."];
         }
 
-        $refundRice = (float)floor($craft['rice_amount'] * 0.8);
+        $bType = $craft['building_type'] ?? ($craft['product'] === 'wooden_beams' ? 'sawmill' : 'grain_mill');
+        $isWood = ($bType === 'sawmill' || $craft['product'] === 'wooden_beams' || ($craft['cost_resource'] ?? '') === 'metal');
+        $rawEngaged = !empty($craft['cost_amount']) ? (float)$craft['cost_amount'] : (float)$craft['rice_amount'];
+        $refundAmount = (float)floor($rawEngaged * 0.8);
+        $refundResName = $isWood ? 'Bois de Cèdre 🪵' : 'Riz 🌾';
 
         $this->db->beginTransaction();
         try {
             $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
             $del->execute([$craftId]);
 
-            if ($refundRice > 0) {
-                $up = $this->db->prepare("UPDATE planets SET deuterium = deuterium + ? WHERE id = ?");
-                $up->execute([$refundRice, $planetId]);
+            if ($refundAmount > 0) {
+                if ($isWood) {
+                    $up = $this->db->prepare("UPDATE planets SET metal = metal + ? WHERE id = ?");
+                    $up->execute([$refundAmount, $planetId]);
+                } else {
+                    $up = $this->db->prepare("UPDATE planets SET deuterium = deuterium + ? WHERE id = ?");
+                    $up->execute([$refundAmount, $planetId]);
+                }
             }
 
-            // Réaligner séquentiellement les créneaux temporels des tâches restantes
-            $stmtRem = $this->db->prepare("SELECT id, started_at, finishes_at FROM craft_queue WHERE planet_id = ? ORDER BY started_at ASC, id ASC");
-            $stmtRem->execute([$planetId]);
+            // Réaligner séquentiellement les créneaux temporels des tâches restantes POUR CE BÂTIMENT
+            $stmtRem = $this->db->prepare("SELECT id, started_at, finishes_at FROM craft_queue WHERE planet_id = ? AND (building_type = ? OR (building_type = '' AND ? = 'grain_mill')) ORDER BY started_at ASC, id ASC");
+            $stmtRem->execute([$planetId, $bType, $bType]);
             $remainingQueue = $stmtRem->fetchAll(PDO::FETCH_ASSOC);
 
             $now = time();
@@ -1156,11 +1414,9 @@ class PlanetEngine {
             foreach ($remainingQueue as $idx => $rItem) {
                 $duration = max(1, (int)$rItem['finishes_at'] - (int)$rItem['started_at']);
                 if ($idx === 0) {
-                    // Si la 1ère tâche avait déjà démarré avant l'annulation, on conserve son échéance si finishes_at > now
                     if ((int)$rItem['started_at'] <= $now && (int)$rItem['finishes_at'] > $now) {
                         $timeCursor = (int)$rItem['finishes_at'];
                     } else {
-                        // Sinon elle démarre immédiatement !
                         $newStart = $now;
                         $newFinish = $newStart + $duration;
                         $this->db->prepare("UPDATE craft_queue SET started_at = ?, finishes_at = ? WHERE id = ?")->execute([$newStart, $newFinish, $rItem['id']]);
@@ -1183,11 +1439,21 @@ class PlanetEngine {
         $updatedPlanet = $this->getPlanet($planetId);
         return [
             'success' => true,
-            'message' => "Raffinage annulé. <strong>+" . number_format($refundRice) . " Riz 🌾</strong> (80% du stock engagé) ont été restitués à vos réserves.",
-            'refunded_rice' => $refundRice,
+            'message' => "Lot annulé. <strong>+" . number_format($refundAmount) . " {$refundResName}</strong> (80% du stock engagé) ont été restitués à vos réserves.",
+            'refunded_amount' => $refundAmount,
+            'refunded_rice' => !$isWood ? $refundAmount : 0,
+            'refunded_wood' => $isWood ? $refundAmount : 0,
             'new_deuterium' => $updatedPlanet['deuterium'],
+            'new_metal' => $updatedPlanet['metal'],
             'planet' => $updatedPlanet
         ];
+    }
+
+    /**
+     * Rétro-compatibilité : Annule un lot de raffinage en cours et rembourse 80% du riz engagé
+     */
+    public function cancelRiceCraft(int $planetId, int $craftId): array {
+        return $this->cancelCraft($planetId, $craftId);
     }
 
     /**

@@ -89,19 +89,30 @@ if ($planet) {
         $shipsMap[$sr['code']] = $sr;
     }
 
+    $planetBuildings = $planetEngine->getBuildings((int)$planet['id']);
+    $watchtowerLevel = (int)($planetBuildings['radar'] ?? 0);
+
     $incomingHostile = [];
     $incomingSpy = [];
     $outgoingMissions = [];
     foreach ($activeMissions as $m) {
         if ($m['target_planet_id'] == $planet['id'] && $m['status'] === 'en_route') {
-            if ($m['mission_type'] === 'spy') {
-                $incomingSpy[] = $m;
-            } else {
-                $incomingHostile[] = $m;
+            // Détection opérationnelle UNIQUEMENT si la Tour de Guet (radar) est construite (Niveau >= 1)
+            if ($watchtowerLevel >= 1) {
+                if ($m['mission_type'] === 'spy') {
+                    $incomingSpy[] = $m;
+                } else {
+                    $incomingHostile[] = $m;
+                }
             }
         } else {
             $outgoingMissions[] = $m;
         }
+    }
+
+    // Si la Tour de Guet n'est pas construite, les alertes d'armées ennemies ne sont pas visibles
+    if ($watchtowerLevel < 1) {
+        $activeMissions = $outgoingMissions;
     }
 }
 
@@ -559,29 +570,31 @@ $navItems = [
             $closest    = !empty($incomingHostile) ? $incomingHostile[0] : (!empty($incomingSpy) ? $incomingSpy[0] : $outgoingMissions[0]);
             $closestTime = ($closest['status'] === 'en_route') ? $closest['arrival_time'] : $closest['return_time'];
         ?>
-        <div class="travian-alert-banner <?= $alertClass ?>"
-             onclick="openWatchtowerModal()"
-             title="Cliquer pour afficher le registre de la Tour de Guet (<?= count($activeMissions) ?> mouvements)">
-            <div class="alert-banner-left">
-                <?php if ($hasHostile): ?>
-                    <span class="alert-status-badge threat">🚨 TOUR DE GUET</span>
-                    <span class="alert-headline"><strong><?= count($incomingHostile) ?> incursion(s) armée(s)</strong> en approche !</span>
-                    <span class="alert-countdown-chip">Impact dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
-                <?php elseif ($hasSpy): ?>
-                    <span class="alert-status-badge spy">🥷 TOUR DE GUET</span>
-                    <span class="alert-headline"><strong>Infiltration Shinobi détectée</strong> vers votre domaine !</span>
-                    <span class="alert-countdown-chip">Arrivée dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
-                <?php else: ?>
-                    <span class="alert-status-badge info">🐎 EXPÉDITIONS</span>
-                    <span class="alert-headline"><strong><?= count($outgoingMissions) ?> troupe(s)</strong> en marche sur les provinces.</span>
-                    <span class="alert-countdown-chip">Retour dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
-                <?php endif; ?>
-            </div>
-            <div class="alert-banner-right">
-                <span class="alert-cta-btn">
-                    <span>📜 Détails (<?= count($activeMissions) ?>)</span>
-                    <span class="alert-cta-arrow">&rarr;</span>
-                </span>
+        <div class="container-xl d-print-none px-3 px-xl-0">
+            <div class="travian-alert-banner <?= $alertClass ?>"
+                 onclick="openWatchtowerModal()"
+                 title="Cliquer pour afficher le registre de la Tour de Guet (<?= count($activeMissions) ?> mouvements)">
+                <div class="alert-banner-left">
+                    <?php if ($hasHostile): ?>
+                        <span class="alert-status-badge threat">🚨 TOUR DE GUET</span>
+                        <span class="alert-headline"><strong><?= count($incomingHostile) ?> incursion(s) armée(s)</strong> en approche !</span>
+                        <span class="alert-countdown-chip">Impact dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
+                    <?php elseif ($hasSpy): ?>
+                        <span class="alert-status-badge spy">🥷 TOUR DE GUET</span>
+                        <span class="alert-headline"><strong>Infiltration Shinobi détectée</strong> vers votre domaine !</span>
+                        <span class="alert-countdown-chip">Arrivée dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
+                    <?php else: ?>
+                        <span class="alert-status-badge info">🐎 EXPÉDITIONS</span>
+                        <span class="alert-headline"><strong><?= count($outgoingMissions) ?> troupe(s)</strong> en marche sur les provinces.</span>
+                        <span class="alert-countdown-chip">Retour dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
+                    <?php endif; ?>
+                </div>
+                <div class="alert-banner-right">
+                    <span class="alert-cta-btn">
+                        <span>📜 Détails (<?= count($activeMissions) ?>)</span>
+                        <span class="alert-cta-arrow">&rarr;</span>
+                    </span>
+                </div>
             </div>
         </div>
         <?php endif; ?>

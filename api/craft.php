@@ -27,15 +27,20 @@ $craftId = (int)($_POST['craft_id'] ?? 0);
 try {
     $planetEngine = new PlanetEngine();
 
-    if ($action === 'craft_rice' || $action === 'start_craft') {
+    if ($action === 'craft_wood' || $action === 'craft_beams' || ($action === 'start_craft' && $product === 'wooden_beams')) {
+        $woodAmount = (float)($_POST['wood_amount'] ?? $_POST['amount'] ?? 0);
+        $result = $planetEngine->craftWoodProduct((int)$planet['id'], 'wooden_beams', $woodAmount);
+        echo json_encode($result);
+    } elseif ($action === 'craft_rice' || $action === 'start_craft') {
         $result = $planetEngine->craftRiceProduct((int)$planet['id'], $product, $amount);
         echo json_encode($result);
-    } elseif ($action === 'cancel_craft') {
-        $result = $planetEngine->cancelRiceCraft((int)$planet['id'], $craftId);
+    } elseif ($action === 'cancel_craft' || $action === 'cancel_wood_craft') {
+        $result = $planetEngine->cancelCraft((int)$planet['id'], $craftId);
         echo json_encode($result);
     } elseif ($action === 'get_queue') {
+        $bType = $_GET['building_type'] ?? $_POST['building_type'] ?? null;
         $planetEngine->processCraftQueue((int)$planet['id']);
-        $queue = $planetEngine->getCraftQueue((int)$planet['id']);
+        $queue = $planetEngine->getCraftQueue((int)$planet['id'], $bType);
         echo json_encode(['success' => true, 'queue' => $queue]);
     } else {
         echo json_encode(['success' => false, 'error' => 'Action inconnue.']);
