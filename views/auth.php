@@ -4,7 +4,7 @@
  */
 require_once __DIR__ . '/../config/game_constants.php';
 $error = $authError ?? null;
-$tab = $_GET['tab'] ?? 'login';
+$tab = $_GET['tab'] ?? (($action ?? '') === 'register' ? 'register' : 'login');
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -19,9 +19,8 @@ $tab = $_GET['tab'] ?? 'login';
         body {
             background: url('/public/assets/shogun_login_bg.jpg?v=<?= file_exists(__DIR__ . '/../public/assets/shogun_login_bg.jpg') ? filemtime(__DIR__ . '/../public/assets/shogun_login_bg.jpg') : time() ?>') center center / cover no-repeat fixed !important;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin: 0;
+            padding: 0;
             position: relative;
             overflow-x: hidden;
         }
@@ -48,16 +47,211 @@ $tab = $_GET['tab'] ?? 'login';
             opacity: 1 !important;
             filter: none !important;
         }
-        .auth-container {
-            max-width: 850px;
-            width: 100%;
-            margin: 2.5rem auto;
-            padding: 0 1rem;
+
+        /* Page d'Accueil Landing */
+        .landing-page-wrapper {
             position: relative;
             z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 1rem;
+            box-sizing: border-box;
         }
+        .landing-header {
+            text-align: center;
+            margin-top: clamp(2.5rem, 7vh, 5.5rem);
+            animation: fadeInDown 0.8s ease-out;
+        }
+        .landing-logo {
+            max-width: 480px;
+            width: 85vw;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 35px rgba(185, 28, 28, 0.35));
+            transition: transform 0.3s ease;
+        }
+        .landing-logo:hover {
+            transform: scale(1.02);
+        }
+        .landing-subtitle {
+            color: #fef08a;
+            font-size: clamp(0.9rem, 2vw, 1.15rem);
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 1rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 15px rgba(0, 0, 0, 0.85);
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+        /* Boutons d'Action en Bas */
+        .landing-actions {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 580px;
+            margin-bottom: clamp(2.5rem, 6vh, 4.5rem);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        @media (max-width: 576px) {
+            .landing-actions {
+                flex-direction: column;
+                gap: 1rem;
+                width: 90%;
+            }
+        }
+        .landing-btn {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1.1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .landing-btn-icon {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+        .landing-btn-login {
+            background: linear-gradient(145deg, rgba(28, 25, 23, 0.94) 0%, rgba(12, 10, 9, 0.98) 100%);
+            color: #fef08a;
+            border: 2px solid #ca8a04;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(202, 138, 4, 0.25), inset 0 1px 0 rgba(254, 240, 138, 0.2);
+        }
+        .landing-btn-login:hover {
+            background: linear-gradient(145deg, rgba(41, 37, 36, 0.96) 0%, rgba(20, 16, 14, 1) 100%);
+            border-color: #eab308;
+            color: #ffffff;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.75), 0 0 30px rgba(234, 179, 8, 0.45);
+            transform: translateY(-3px) scale(1.02);
+        }
+        .landing-btn-login:active {
+            transform: translateY(0) scale(0.99);
+        }
+        .landing-btn-register {
+            background: linear-gradient(145deg, #b91c1c 0%, #991b1b 100%);
+            color: #ffffff;
+            border: 2px solid #ef4444;
+            box-shadow: 0 8px 25px rgba(185, 28, 28, 0.5), 0 0 25px rgba(220, 38, 38, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+        .landing-btn-register:hover {
+            background: linear-gradient(145deg, #dc2626 0%, #b91c1c 100%);
+            border-color: #f87171;
+            box-shadow: 0 12px 32px rgba(220, 38, 38, 0.65), 0 0 35px rgba(248, 113, 113, 0.45);
+            transform: translateY(-3px) scale(1.02);
+        }
+        .landing-btn-register:active {
+            transform: translateY(0) scale(0.99);
+        }
+
+        /* Modal Overlay (Dalle de Connexion / Inscription) */
+        .auth-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 8, 7, 0.82);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .auth-modal-dialog {
+            position: relative;
+            max-width: 820px;
+            width: 100%;
+            margin: auto;
+            animation: modalScaleIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .auth-modal-close {
+            position: absolute;
+            top: -16px;
+            right: -16px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #b91c1c;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 20;
+            transition: all 0.2s ease;
+        }
+        .auth-modal-close:hover {
+            background: #dc2626;
+            transform: scale(1.1) rotate(90deg);
+        }
+        @media (max-width: 576px) {
+            .auth-modal-close {
+                top: 8px;
+                right: 8px;
+                width: 32px;
+                height: 32px;
+                font-size: 1.1rem;
+            }
+        }
+        @keyframes modalScaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.94) translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .auth-box {
-            background: rgba(253, 251, 247, 0.96);
+            background: rgba(253, 251, 247, 0.98);
             border: 2px solid #b91c1c;
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(60, 45, 30, 0.35), 0 0 35px rgba(194, 37, 43, 0.15);
@@ -67,7 +261,7 @@ $tab = $_GET['tab'] ?? 'login';
         }
         .auth-header {
             text-align: center;
-            padding: 2.5rem 1rem 1.5rem;
+            padding: 2rem 1rem 1.25rem;
             border-bottom: 1px solid var(--border-color);
         }
         .auth-tabs {
@@ -293,27 +487,56 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
     </div>
 <?php endif; ?>
 
-<div class="auth-container">
-    <div class="auth-box">
-        <div class="auth-header" style="text-align: center; padding: 2rem 1rem 1.25rem;">
-            <div style="margin-bottom: 0.5rem;">
-                <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../public/assets/logo_transparent.png') : 1 ?>" 
-                     alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
-                     style="max-width: 420px; width: 90%; height: auto; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(60, 45, 30, 0.2));">
-            </div>
-            <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0.25rem 0 0 0; font-weight: 600;">
-                Chronique Historique de l'Ère Sengoku Jidai &bull; Conquête du Shogunat
-            </p>
-        </div>
+<!-- PAGE D'ACCUEIL : LOGO EN HAUT ET 2 BOUTONS EN BAS -->
+<div class="landing-page-wrapper">
+    <!-- Logo en haut au milieu avec espace depuis le haut -->
+    <header class="landing-header">
+        <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../public/assets/logo_transparent.png') : 1 ?>" 
+             alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
+             class="landing-logo">
+        <p class="landing-subtitle">
+            Chronique Historique de l'Ère Sengoku Jidai &bull; Conquête du Shogunat
+        </p>
+    </header>
 
-        <div class="auth-tabs">
-            <button class="auth-tab-btn <?= ($tab === 'login') ? 'active' : '' ?>" onclick="setTab('login')">
-                Connexion
-            </button>
-            <button class="auth-tab-btn <?= ($tab === 'register') ? 'active' : '' ?>" onclick="setTab('register')">
-                Prêter Allégeance à un Clan
-            </button>
-        </div>
+    <!-- En bas : Uniquement les deux boutons Connexion et Inscription -->
+    <div class="landing-actions">
+        <button type="button" class="landing-btn landing-btn-login" onclick="openAuthModal('login')">
+            <span class="landing-btn-icon">⚔️</span>
+            <span>CONNEXION</span>
+        </button>
+        <button type="button" class="landing-btn landing-btn-register" onclick="openAuthModal('register')">
+            <span class="landing-btn-icon">📜</span>
+            <span>INSCRIPTION</span>
+        </button>
+    </div>
+</div>
+
+<!-- DALLE DE CONNEXION / INSCRIPTION (MODAL OVERLAY) -->
+<div id="authModal" class="auth-modal-backdrop" style="display: <?= $error ? 'flex' : 'none' ?>;" onclick="handleModalBackdropClick(event)">
+    <div class="auth-modal-dialog">
+        <button type="button" class="auth-modal-close" onclick="closeAuthModal()" title="Fermer la fenêtre (Échap)">&times;</button>
+        
+        <div class="auth-box">
+            <div class="auth-header" style="text-align: center; padding: 1.5rem 1rem 1.25rem;">
+                <div style="margin-bottom: 0.35rem;">
+                    <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../public/assets/logo_transparent.png') : 1 ?>" 
+                         alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
+                         style="max-width: 320px; width: 75%; height: auto; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(60, 45, 30, 0.15));">
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0.25rem 0 0 0; font-weight: 600;">
+                    Chronique Historique de l'Ère Sengoku Jidai &bull; Conquête du Shogunat
+                </p>
+            </div>
+
+            <div class="auth-tabs">
+                <button type="button" id="tabBtnLogin" class="auth-tab-btn <?= ($tab === 'login') ? 'active' : '' ?>" onclick="setTab('login')">
+                    ⚔️ Connexion
+                </button>
+                <button type="button" id="tabBtnRegister" class="auth-tab-btn <?= ($tab === 'register') ? 'active' : '' ?>" onclick="setTab('register')">
+                    📜 Prêter Allégeance (Inscription)
+                </button>
+            </div>
 
         <div style="padding: 2rem;">
             <?php if ($error): ?>
@@ -517,23 +740,70 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
         </div>
     </div>
 </div>
+</div>
 
 <script>
 let currentRegisterStep = 1;
 let selectedClanLabel = 'Clan Oda';
 let selectedZoneLabel = 'Aléatoire (Équilibré)';
 
+function openAuthModal(tab) {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    setTab(tab);
+}
+
+function closeAuthModal() {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+function handleModalBackdropClick(event) {
+    if (event.target === document.getElementById('authModal')) {
+        closeAuthModal();
+    }
+}
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeAuthModal();
+    }
+});
+
 function setTab(tab) {
-    document.getElementById('loginForm').style.display = (tab === 'login') ? 'block' : 'none';
-    document.getElementById('registerForm').style.display = (tab === 'register') ? 'block' : 'none';
-    document.querySelectorAll('.auth-tab-btn').forEach(btn => btn.classList.remove('active'));
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const tabBtnLogin = document.getElementById('tabBtnLogin');
+    const tabBtnRegister = document.getElementById('tabBtnRegister');
+
+    if (loginForm) loginForm.style.display = (tab === 'login') ? 'block' : 'none';
+    if (registerForm) registerForm.style.display = (tab === 'register') ? 'block' : 'none';
+    
+    if (tabBtnLogin && tabBtnRegister) {
+        if (tab === 'login') {
+            tabBtnLogin.classList.add('active');
+            tabBtnRegister.classList.remove('active');
+        } else {
+            tabBtnLogin.classList.remove('active');
+            tabBtnRegister.classList.add('active');
+        }
     }
     if (tab === 'register') {
         goToRegisterStep(currentRegisterStep, false);
     }
 }
+
+<?php if ($error || isset($_GET['tab'])): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    openAuthModal('<?= ($tab === 'register') ? 'register' : 'login' ?>');
+});
+<?php endif; ?>
 
 function validateStep1() {
     const userInp = document.getElementById('reg_username');
