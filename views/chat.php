@@ -16,6 +16,15 @@ $allianceName = $chatUser['alliance_name'] ?? '';
 
 $onlineUsers = $chatEngine->getOnlineChatters(10);
 $conversations = $chatEngine->getRecentConversations((int)$chatUser['id']);
+
+// Marquer les chuchotements reçus comme lus
+if (!empty($chatUser['id'])) {
+    try {
+        $db = Database::getConnection();
+        $db->prepare("UPDATE chat_messages SET is_read = 1 WHERE recipient_id = ? AND is_read = 0")
+           ->execute([(int)$chatUser['id']]);
+    } catch (Throwable $e) {}
+}
 ?>
 
 <div class="container-xl py-3">

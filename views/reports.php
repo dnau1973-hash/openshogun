@@ -86,6 +86,28 @@ $targetDaimyo = '';
 if ($currentReport && $repData) {
     $targetDaimyo = $isCurAtt ? ($repData['defender_name'] ?? $currentReport['def_user'] ?? '') : ($repData['attacker_name'] ?? $currentReport['att_user'] ?? '');
 }
+
+// Marquer automatiquement le rapport consulté comme lu
+if ($currentReport && !empty($user['id'])) {
+    try {
+        if ($isCurAtt && empty($currentReport['read_by_attacker'])) {
+            $db->prepare("UPDATE combat_reports SET read_by_attacker = 1 WHERE id = ?")->execute([$currentReport['id']]);
+            $currentReport['read_by_attacker'] = 1;
+        } elseif ($isCurDef && empty($currentReport['read_by_defender'])) {
+            $db->prepare("UPDATE combat_reports SET read_by_defender = 1 WHERE id = ?")->execute([$currentReport['id']]);
+            $currentReport['read_by_defender'] = 1;
+        }
+    } catch (Throwable $e) {}
+}
+
+if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
+    try {
+        $db->prepare("UPDATE combat_reports SET read_by_attacker = 1 WHERE attacker_id = ?")->execute([(int)$user['id']]);
+        $db->prepare("UPDATE combat_reports SET read_by_defender = 1 WHERE defender_id = ?")->execute([(int)$user['id']]);
+        header('Location: ?page=reports');
+        exit;
+    } catch (Throwable $e) {}
+}
 ?>
 
 <div class="container-xl my-3">
@@ -225,6 +247,11 @@ if ($currentReport && $repData) {
                                             <span class="badge <?= $badgeClass ?> font-monospace" style="font-size: 0.68rem;">
                                                 <?= $badgeLabel ?>
                                             </span>
+                                            <?php
+                                            $isRepUnread = ($isAtt && empty($rep['read_by_attacker'])) || (!$isAtt && empty($rep['read_by_defender']));
+                                            if ($isRepUnread): ?>
+                                                <span class="badge bg-danger text-white" style="font-size: 0.6rem; padding: 2px 5px;">Nouveau</span>
+                                            <?php endif; ?>
                                         </div>
                                         <span class="text-secondary small font-monospace" style="font-size: 0.72rem;">
                                             <?= $formattedDate ?>

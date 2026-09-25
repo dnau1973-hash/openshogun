@@ -26,8 +26,51 @@ $user = $auth->getCurrentUser();
 $planet = $auth->getCurrentPlanet();
 $planetEngine = new PlanetEngine();
 $allUserPlanets = ($user && $planet) ? $planetEngine->getUserPlanets((int)$user['id']) : [];
+$db = Database::getConnection();
 $messageEngine = new MessageEngine();
-$unreadMessagesCount = $messageEngine->getUnreadCount((int)$user['id']);
+$unreadMessagesCount = ($user && !empty($user['id'])) ? $messageEngine->getUnreadCount((int)$user['id']) : 0;
+
+// Rapports de combat non lus
+$unreadReportsCount = 0;
+if ($user && !empty($user['id'])) {
+    try {
+        $crCols = $db->query("SHOW COLUMNS FROM combat_reports")->fetchAll(PDO::FETCH_COLUMN);
+        if (in_array('read_by_attacker', $crCols) && in_array('read_by_defender', $crCols)) {
+            $stmtRep = $db->prepare("
+                SELECT COUNT(*) FROM combat_reports
+                WHERE (attacker_id = :uid1 AND read_by_attacker = 0)
+                   OR (defender_id = :uid2 AND read_by_defender = 0)
+            ");
+            $stmtRep->execute([':uid1' => (int)$user['id'], ':uid2' => (int)$user['id']]);
+            $unreadReportsCount = (int)$stmtRep->fetchColumn();
+        }
+    } catch (Throwable $e) {
+        $unreadReportsCount = 0;
+    }
+}
+
+// Chuchotements de Chat non lus
+$unreadChatCount = 0;
+if ($user && !empty($user['id'])) {
+    try {
+        $chatCols = $db->query("SHOW COLUMNS FROM chat_messages")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('is_read', $chatCols)) {
+            $db->exec("ALTER TABLE chat_messages ADD COLUMN is_read TINYINT(1) NOT NULL DEFAULT 0 AFTER is_deleted");
+            $db->exec("ALTER TABLE chat_messages ADD INDEX idx_chat_unread (recipient_id, is_read)");
+        }
+        $stmtChat = $db->prepare("
+            SELECT COUNT(*) FROM chat_messages
+            WHERE recipient_id = ? AND is_read = 0 AND is_deleted = 0
+        ");
+        $stmtChat->execute([(int)$user['id']]);
+        $unreadChatCount = (int)$stmtChat->fetchColumn();
+    } catch (Throwable $e) {
+        $unreadChatCount = 0;
+    }
+}
+
+// Total combiné pour le badge du bouton Communication (Messagerie + Chat + Rapports)
+$totalUnreadComm = $unreadMessagesCount + $unreadReportsCount + $unreadChatCount;
 
 $userProtection = ($user && !empty($user['id'])) ? Auth::getProtectionRemaining($user) : null;
 $isUserProtected = $userProtection && !empty($userProtection['is_protected']);
@@ -308,8 +351,10 @@ $navItems = [
                                    title="Espace de Communication Féodale">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block">💬</span>
                                     <span class="nav-link-title">Communication</span>
-                                    <?php if ($unreadMessagesCount > 0): ?>
-                                        <span class="badge bg-danger ms-1" style="font-size:0.6rem;"><?= $unreadMessagesCount ?></span>
+                                    <?php if ($totalUnreadComm > 0): ?>
+                                        <span class="badge bg-danger text-white rounded-pill ms-1" style="font-size:0.65rem; padding: 2px 6px;">
+                                            <?= $totalUnreadComm > 99 ? '99+' : $totalUnreadComm ?>
+                                        </span>
                                     <?php endif; ?>
                                 </a>
                                 <div class="dropdown-menu">
@@ -319,56 +364,59 @@ $navItems = [
                                             <span>Messagerie</span>
                                         </span>
                                         <?php if ($unreadMessagesCount > 0): ?>
-                                            <span class="badge bg-danger rounded-pill ms-2"><?= $unreadMessagesCount ?></span>
+                                            <span class="badge bg-danger text-white rounded-pill ms-2"><?= $unreadMessagesCount ?></span>
                                         <?php endif; ?>
                                     </a>
-                                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'chat' ? 'active fw-bold' : '' ?>" href="?page=chat">
-                                        <span class="dropdown-item-icon">🏮</span>
-                                        <span>Chat</span>
+                                    <a class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'chat' ? 'active fw-bold' : '' ?>" href="?page=chat">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <span class="dropdown-item-icon">🏮</span>
+                                            <span>Chat</span>
+                                        </span>
+                                        <?php if ($unreadChatCount > 0): ?>
+                                            <span class="badge bg-danger text-white rounded-pill ms-2"><?= $unreadChatCount ?></span>
+                                        <?php endif; ?>
                                     </a>
                                     <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'forum' ? 'active fw-bold' : '' ?>" href="?page=forum">
                                         <span class="dropdown-item-icon">👥</span>
                                         <span>Forum</span>
                                     </a>
-                                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'reports' ? 'active fw-bold' : '' ?>" href="?page=reports">
-                                        <span class="dropdown-item-icon">🛡️</span>
-                                        <span>Rapports de combat</span>
+                                    <a class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'reports' ? 'active fw-bold' : '' ?>" href="?page=reports">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <span class="dropdown-item-icon">🛡️</span>
+                                            <span>Rapports de combat</span>
+                                        </span>
+                                        <?php if ($unreadReportsCount > 0): ?>
+                                            <span class="badge bg-danger text-white rounded-pill ms-2"><?= $unreadReportsCount ?></span>
+                                        <?php endif; ?>
                                     </a>
                                 </div>
                             </li>
                         </ul>
 
-                        <!-- Menu Utilisateur / Switch Fiefs Tabler à droite -->
-                        <div class="navbar-nav flex-row order-md-last">
+                        <!-- Menu Utilisateur / Switch Fiefs Tabler & Avatar Samouraï à droite -->
+                        <div class="navbar-nav flex-row order-md-last align-items-center gap-2">
                             <?php
                             $hHp = $heroHeader ? round((float)$heroHeader['health']) : 100;
                             $hHpCol = ($hHp >= 60) ? 'border-success' : (($hHp >= 25) ? 'border-warning' : 'border-danger');
                             $hLvl = $heroHeader ? (int)$heroHeader['level'] : 1;
                             $hasPoints = ($heroHeader && (int)$heroHeader['unassigned_points'] > 0);
                             ?>
+
+                            <!-- 1. Bouton Sélecteur / Switcher de Fief (dissocié de l'avatar) -->
                             <div class="nav-item dropdown">
-                                <a href="#" class="nav-link d-flex align-items-center gap-2 text-reset p-1 rounded"
-                                   data-bs-toggle="dropdown" aria-expanded="false" title="Fiefs du domaine &amp; Champion Samouraï">
-                                    <!-- Effigie Héros Samouraï -->
-                                    <div class="position-relative d-inline-flex flex-shrink-0">
-                                        <span class="avatar avatar-sm rounded-circle border <?= $hHpCol ?>" style="background-image: url(/public/assets/hero_samurai.jpg)"></span>
-                                        <span class="badge bg-dark text-white position-absolute"
-                                              style="bottom:-3px; right:-3px; font-size:0.55rem; padding:1px 3px; border-radius:3px;"><?= $hLvl ?></span>
-                                        <?php if ($hasPoints): ?>
-                                            <span class="badge bg-danger position-absolute"
-                                                  style="top:-3px; right:-3px; font-size:0.55rem; padding:1px 4px; border-radius:50%;">+</span>
-                                        <?php endif; ?>
-                                    </div>
+                                <a href="#" class="nav-link d-flex align-items-center gap-2 text-reset p-1 rounded border bg-light-subtle"
+                                   data-bs-toggle="dropdown" aria-expanded="false" title="Changer de fief féodal">
+                                    <span class="fs-3 lh-1 ps-1"><?= !empty($planet['is_capital']) ? '👑' : '🏯' ?></span>
                                     <!-- Nom du Fief Actif & Coordonnées -->
                                     <div class="d-none d-sm-block text-start lh-1">
                                         <div class="fw-bold text-dark text-truncate" style="font-size:0.85rem; max-width:140px;">
-                                            <?= !empty($planet['is_capital']) ? '👑 ' : '🏯 ' ?><?= htmlspecialchars($planet['name'] ?? 'Fief') ?>
+                                            <?= htmlspecialchars($planet['name'] ?? 'Fief') ?>
                                         </div>
                                         <div class="text-secondary small mt-1 font-monospace" style="font-size:0.68rem;">
                                             [<?= $planet['coord_x'] ?? 0 ?>|<?= $planet['coord_y'] ?? 0 ?>] <?= !empty($planet['is_capital']) ? '<span class="text-warning fw-bold">Capitale</span>' : '' ?>
                                         </div>
                                     </div>
-                                    <span class="dropdown-toggle text-secondary ms-1"></span>
+                                    <span class="dropdown-toggle text-secondary ms-1 me-1"></span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width:240px; z-index:1050;">
                                     <?php if ($isUserProtected): ?>
@@ -400,6 +448,28 @@ $navItems = [
                                     <?php endforeach; ?>
                                 </div>
                             </div>
+
+                            <!-- 2. Avatar du Samouraï Héros déplacé sur la droite avec badge ROND, ROUGE et TEXTE BLANC -->
+                            <div class="nav-item">
+                                <a href="?page=hero" class="nav-link p-0 position-relative d-inline-flex align-items-center"
+                                   title="Samouraï Héros &bull; Niveau <?= $hLvl ?> (Santé : <?= $hHp ?>%)">
+                                    <span class="avatar avatar-sm rounded-circle border border-2 <?= $hHpCol ?> shadow-sm"
+                                          style="background-image: url(/public/assets/hero_samurai.jpg); width: 34px; height: 34px;"></span>
+
+                                    <!-- Badge Rond, Rouge, Texte Blanc -->
+                                    <span class="badge bg-danger text-white rounded-circle position-absolute d-inline-flex align-items-center justify-content-center fw-bold shadow-sm"
+                                          style="bottom: -3px; right: -3px; width: 18px; height: 18px; font-size: 0.65rem; border: 2px solid #ffffff; line-height: 1; padding: 0;">
+                                        <?= $hLvl ?>
+                                    </span>
+
+                                    <?php if ($hasPoints): ?>
+                                        <span class="badge bg-warning text-dark rounded-circle position-absolute d-inline-flex align-items-center justify-content-center fw-bold"
+                                              style="top: -3px; right: -3px; width: 15px; height: 15px; font-size: 0.6rem; border: 2px solid #ffffff; line-height: 1; padding: 0;"
+                                              title="<?= (int)$heroHeader['unassigned_points'] ?> point(s) d'attribut à distribuer !">+</span>
+                                    <?php endif; ?>
+                                </a>
+                            </div>
+
                         </div>
                     </div>
                 </div>
