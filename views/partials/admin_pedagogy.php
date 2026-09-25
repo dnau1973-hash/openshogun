@@ -201,17 +201,29 @@
             white-space: pre;
             tab-size: 4;
         }
-        .module-pedagogy-section .step-item {
+        .module-pedagogy-section .algo-phase-card {
             display: flex !important;
             align-items: flex-start !important;
             flex-wrap: nowrap !important;
-            gap: 0.75rem !important;
+            gap: 0.85rem !important;
+            background-color: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            padding: 0.65rem 0.85rem !important;
+            text-align: left !important;
+            position: static !important;
             transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
         }
-        .module-pedagogy-section .step-item:hover {
+        .module-pedagogy-section .algo-phase-card:hover {
             transform: translateX(3px);
             background-color: #ffffff !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+        }
+        .module-pedagogy-section .algo-phase-card::before,
+        .module-pedagogy-section .algo-phase-card::after {
+            display: none !important;
+            content: none !important;
         }
         .module-pedagogy-section .step-badge-num {
             display: inline-flex !important;
@@ -224,7 +236,7 @@
             max-width: 26px !important;
             max-height: 26px !important;
             border-radius: 50% !important;
-            font-size: 0.78rem !important;
+            font-size: 0.8rem !important;
             font-weight: 700 !important;
             line-height: 1 !important;
             flex-shrink: 0 !important;
@@ -235,6 +247,7 @@
         .module-pedagogy-section .step-content {
             flex: 1 1 auto !important;
             min-width: 0 !important;
+            text-align: left !important;
         }
         @media (max-width: 991.98px) {
             .module-pedagogy-section .algo-ide-window {
@@ -340,28 +353,28 @@
                             <!-- Les 4 Phases du Cycle d'États -->
                             <h4 class="text-dark fw-bold mb-3 fs-3">Le cycle d'états à 4 temps :</h4>
                             <div class="d-flex flex-column gap-2 mb-4">
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                <div class="algo-phase-card">
                                     <span class="step-badge-num bg-azure text-white">1</span>
                                     <div class="step-content">
                                         <strong class="text-dark small d-block">Attente (IDLE) :</strong>
                                         <span class="text-secondary small">Le serveur dort paisiblement. Zéro calcul, zéro consommation de processeur.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                <div class="algo-phase-card">
                                     <span class="step-badge-num bg-azure text-white">2</span>
                                     <div class="step-content">
                                         <strong class="text-dark small d-block">Action Joueur (INPUT) :</strong>
                                         <span class="text-secondary small">Le joueur clique pour lancer une construction ou entraîner des lanciers.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                <div class="algo-phase-card">
                                     <span class="step-badge-num bg-azure text-white">3</span>
                                     <div class="step-content">
                                         <strong class="text-dark small d-block">Calcul Temporel (TICK / &Delta;t) :</strong>
                                         <span class="text-secondary small">Mesure exacte du temps écoulé : <code>&Delta;t = maintenant - dernier_passage</code>.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                <div class="algo-phase-card">
                                     <span class="step-badge-num bg-azure text-white">4</span>
                                     <div class="step-content">
                                         <strong class="text-dark small d-block">Résolution (RESOLVED) :</strong>
@@ -458,21 +471,21 @@ derniere_visite = heure_actuelle();
                             <!-- Triple Barrière de Contrôle -->
                             <h4 class="text-dark fw-bold mb-3 fs-3">La triple barrière de contrôle serveur :</h4>
                             <div class="d-flex flex-column gap-2 mb-4">
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                <div class="algo-phase-card">
                                     <span class="step-badge-num bg-indigo text-white">1</span>
                                     <div class="step-content">
                                         <strong class="text-dark small d-block">Barrière Technologique (Prérequis) :</strong>
                                         <span class="text-secondary small">Vérifie l'existence et le niveau du bâtiment (ex: Forge Niv. 3 requise pour forger un Katana).</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                <div class="algo-phase-card">
                                     <span class="step-badge-num bg-indigo text-white">2</span>
                                     <div class="step-content">
                                         <strong class="text-dark small d-block">Barrière Économique (Solvabilité) :</strong>
                                         <span class="text-secondary small">Débite les ressources de manière atomique. Aucun compte ne peut passer en solde négatif.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                <div class="algo-phase-card">
                                     <span class="step-badge-num bg-indigo text-white">3</span>
                                     <div class="step-content">
                                         <strong class="text-dark small d-block">Barrière d'État (Victoire / Défaite) :</strong>
@@ -571,21 +584,21 @@ valider_transaction_sql();
                             <!-- 3 Principes de l'Aléatoire de Jeu -->
                             <h4 class="text-dark fw-bold mb-3 fs-3">Les 3 principes du hasard équilibré :</h4>
                             <div class="d-flex flex-column gap-2 mb-4">
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                <div class="algo-phase-card">
                                     <span class="step-badge-num bg-yellow text-dark">1</span>
                                     <div class="step-content">
                                         <strong class="text-dark small d-block">Tirage Uniforme (RNG Cryptographique) :</strong>
                                         <span class="text-secondary small">Génération d'un entier équi-réparti de 1 à 100 via <code>random_int()</code> en PHP.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                <div class="algo-phase-card">
                                     <span class="step-badge-num bg-yellow text-dark">2</span>
                                     <div class="step-content">
                                         <strong class="text-dark small d-block">Seuils Paramétrables depuis l'Admin :</strong>
                                         <span class="text-secondary small">Une cage de capture à 15% signifie que tout résultat entre 1 et 15 déclenche le succès.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                <div class="algo-phase-card">
                                     <span class="step-badge-num bg-yellow text-dark">3</span>
                                     <div class="step-content">
                                         <strong class="text-dark small d-block">Anti-frustration (Bad Luck Mitigation) :</strong>
