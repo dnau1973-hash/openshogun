@@ -145,7 +145,6 @@ $navItems = [
     ['page' => 'fleet',     'match' => ['fleet'],             'icon' => '⚔️', 'label' => 'Armées',             'title' => 'Expéditions militaires'],
     ['page' => 'hero',      'match' => ['hero'],              'icon' => '🥋', 'label' => 'Héros',              'title' => 'Votre Samouraï Héros'],
     ['page' => 'alliance',  'match' => ['alliance'],          'icon' => '🎌', 'label' => 'Alliance',           'title' => 'Pacte Féodal & Ambassade'],
-    ['page' => 'pedagogy',  'match' => ['pedagogy','atelier'],'icon' => '🎓', 'label' => 'Atelier Pédago',      'title' => 'Coulisses de Conception (Projet Père-Fils)'],
 ];
 ?>
 
@@ -276,21 +275,43 @@ $navItems = [
                             </li>
                             <?php endforeach; ?>
 
-                            <?php if ($questSummary): ?>
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   href="javascript:void(0)" onclick="openQuestModal()"
-                                   title="Didacticiel & Quêtes Féodales">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">🎯</span>
-                                    <span class="nav-link-title">Quêtes</span>
-                                    <?php if ($questSummary['claimable_count'] > 0): ?>
-                                        <span class="badge bg-success ms-1" style="font-size:0.6rem;"><?= $questSummary['claimable_count'] ?></span>
-                                    <?php elseif (!$questSummary['all_completed']): ?>
-                                        <span class="badge bg-secondary-lt ms-1" style="font-size:0.6rem;"><?= $questSummary['claimed_count'] ?>/<?= $questSummary['total_quests'] ?></span>
+                            <?php 
+                            $isCommActive = in_array($page, ['messages', 'chat', 'forum']);
+                            ?>
+                            <li class="nav-item dropdown <?= $isCommActive ? 'active' : '' ?>">
+                                <a class="nav-link dropdown-toggle <?= $isCommActive ? 'active fw-bold' : '' ?>" 
+                                   href="#navbar-communication" 
+                                   data-bs-toggle="dropdown" 
+                                   data-bs-auto-close="outside" 
+                                   role="button" 
+                                   aria-expanded="<?= $isCommActive ? 'true' : 'false' ?>"
+                                   title="Espace de Communication Féodale">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block">💬</span>
+                                    <span class="nav-link-title">Communication</span>
+                                    <?php if ($unreadMessagesCount > 0): ?>
+                                        <span class="badge bg-danger ms-1" style="font-size:0.6rem;"><?= $unreadMessagesCount ?></span>
                                     <?php endif; ?>
                                 </a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'messages' ? 'active fw-bold' : '' ?>" href="?page=messages">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <span class="dropdown-item-icon">📬</span>
+                                            <span>Messagerie</span>
+                                        </span>
+                                        <?php if ($unreadMessagesCount > 0): ?>
+                                            <span class="badge bg-danger rounded-pill ms-2"><?= $unreadMessagesCount ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'chat' ? 'active fw-bold' : '' ?>" href="?page=chat">
+                                        <span class="dropdown-item-icon">🏮</span>
+                                        <span>Chat</span>
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'forum' ? 'active fw-bold' : '' ?>" href="?page=forum">
+                                        <span class="dropdown-item-icon">👥</span>
+                                        <span>Forum</span>
+                                    </a>
+                                </div>
                             </li>
-                            <?php endif; ?>
                         </ul>
 
                         <!-- Menu Utilisateur Tabler à droite -->
@@ -342,13 +363,13 @@ $navItems = [
                                     <div class="dropdown-divider"></div>
                                     <div class="dropdown-header text-uppercase small text-muted">Communications</div>
                                     <a href="?page=messages" class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'messages' ? 'active' : '' ?>">
-                                        <span>✉️ Missives</span>
+                                        <span>📬 Messagerie</span>
                                         <?php if ($unreadMessagesCount > 0): ?>
                                             <span class="badge bg-danger rounded-pill"><?= $unreadMessagesCount ?></span>
                                         <?php endif; ?>
                                     </a>
                                     <a href="?page=chat" class="dropdown-item <?= $page === 'chat' ? 'active' : '' ?>">🏮 Chat Féodal</a>
-                                    <a href="?page=forum" class="dropdown-item <?= $page === 'forum' ? 'active' : '' ?>">💬 Forum Féodal</a>
+                                    <a href="?page=forum" class="dropdown-item <?= $page === 'forum' ? 'active' : '' ?>">👥 Forum Féodal</a>
                                     <a href="?page=reports" class="dropdown-item <?= $page === 'reports' ? 'active' : '' ?>">📜 Chroniques</a>
                                     <a href="?page=ranking" class="dropdown-item <?= $page === 'ranking' ? 'active' : '' ?>">🏆 Classement</a>
 
@@ -358,7 +379,6 @@ $navItems = [
                                     <a href="?page=docs" class="dropdown-item <?= $page === 'docs' ? 'active' : '' ?>">📖 Règles du jeu</a>
                                     <a href="?page=support" class="dropdown-item <?= $page === 'support' ? 'active' : '' ?>">📮 Support &amp; Aide</a>
                                     <a href="/changelog.html" class="dropdown-item">📜 Changelog</a>
-                                    <a href="?page=pedagogy" class="dropdown-item <?= $page === 'pedagogy' ? 'active' : '' ?>">🎓 Atelier Pédagogique</a>
                                     <?php if ($auth->isAdmin()): ?>
                                         <a href="?page=admin" class="dropdown-item text-primary fw-bold <?= $page === 'admin' ? 'active' : '' ?>">⚙️ Administration</a>
                                     <?php endif; ?>
