@@ -10,3 +10,4 @@
 3. **Zéro hallucination d'arborescence** : Ne lis pas les répertoires volumineux ou générés (`vendor`, `node_modules`, `storage`, logs).
 4. **Style de code** : Suis scrupuleusement les conventions PSR-12 en PHP et les bonnes pratiques ShellCheck pour Bash.
 5. **Gestion d'état** : Ne conserve pas en mémoire de contexte les fichiers de configuration système ou les dumps SQL bruts.
+6. **Mise à jour systématique du Changelog (`public/changelog.html`)** : À l'issue de chaque traitement (nouvelle fonctionnalité, correction de bug, refactorisation, amélioration UI/UX, équilibrage, etc.), implémenter et documenter systématiquement tous les changements apportés dans `public/changelog.html` (incrément de version, badges Tabler.io, détails des ajouts et correctifs).
