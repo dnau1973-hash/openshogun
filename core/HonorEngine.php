@@ -179,7 +179,18 @@ class HonorEngine {
                     default => "🎖️ Ruban d'Honneur (Top {$rank})"
                 };
 
+                // 🪙 Dotation Impériale : 100 Koban au 1er, 50 au 2e et 25 au 3e
+                $kobanReward = match ($rank) {
+                    1 => 100,
+                    2 => 50,
+                    3 => 25,
+                    default => 0
+                };
+
                 $desc = "{$medalLabel} : {$catLabel} ({$weekCode}) avec un score de " . number_format($player['score']);
+                if ($kobanReward > 0) {
+                    $desc .= " (+{$kobanReward} Koban 🪙)";
+                }
 
                 $stmtInsertMedal->execute([
                     $player['user_id'],
@@ -189,8 +200,10 @@ class HonorEngine {
                     $desc
                 ]);
 
-                // 🪙 Dotation Impériale : 100 Koban offerts à chaque obtention de médaille
-                $this->db->prepare("UPDATE users SET gold_coins = gold_coins + 100 WHERE id = ?")->execute([$player['user_id']]);
+                // 🪙 Crédit des Koban si éligible
+                if ($kobanReward > 0) {
+                    $this->db->prepare("UPDATE users SET gold_coins = gold_coins + ? WHERE id = ?")->execute([$kobanReward, $player['user_id']]);
+                }
 
                 $awarded[] = [
                     'user_id' => $player['user_id'],
@@ -198,15 +211,20 @@ class HonorEngine {
                     'category' => $catLabel,
                     'rank' => $rank,
                     'medal' => $medalLabel,
-                    'koban_reward' => 100
+                    'koban_reward' => $kobanReward
                 ];
 
-                // Missive officielle de félicitations et versement des 100 Koban
+                // Missive officielle de félicitations et versement éventuel des Koban
+                $subjectSuffix = $kobanReward > 0 ? " (+{$kobanReward} Koban 🪙)" : "";
+                $rewardText = $kobanReward > 0
+                    ? "\n\nEn hommage à votre bravoure, le Trésor Impérial vous accorde une gratification exceptionnelle de **+{$kobanReward} Koban (Pièces d'Or) 🪙** ajoutés immédiatement à vos coffres."
+                    : "";
+
                 $messageEngine->sendMessage(
                     null,
                     (int)$player['user_id'],
-                    "🎖️ Décoration Impériale : {$medalLabel} décernée (+100 Koban 🪙) !",
-                    "Salutations Daimyō {$player['username']},\n\nLe Shogunat et la Cour Impériale ont l'immense honneur de vous décerner la {$medalLabel} pour vos exploits martiaux en tant que {$catLabel} pour la période {$weekCode} !\n\nEn hommage à votre bravoure, le Trésor Impérial vous accorde une gratification exceptionnelle de **+100 Koban (Pièces d'Or) 🪙** ajoutés immédiatement à vos coffres.\n\nCette distinction orne désormais votre Fiche de Daimyō et le Panthéon des clans du Japon.\n\nGloire à votre clan !"
+                    "🎖️ Décoration Impériale : {$medalLabel} décernée{$subjectSuffix} !",
+                    "Salutations Daimyō {$player['username']},\n\nLe Shogunat et la Cour Impériale ont l'immense honneur de vous décerner la {$medalLabel} pour vos exploits martiaux en tant que {$catLabel} pour la période {$weekCode} !{$rewardText}\n\nCette distinction orne désormais votre Fiche de Daimyō et le Panthéon des clans du Japon.\n\nGloire à votre clan !"
                 );
 
                 $rank++;
@@ -259,9 +277,9 @@ class HonorEngine {
         $user['is_protected'] = Auth::isUserProtected($user);
         $user['protection_info'] = Auth::getProtectionRemaining($user);
 
-        // 2. Rang général au classement
+        // 2. Rang général au classement (parmi les joueurs humains)
         $stmtRank = $this->db->prepare("
-            SELECT COUNT(*) + 1 as rank_pos FROM users WHERE points > ?
+            SELECT COUNT(*) + 1 as rank_pos FROM users WHERE points > ? AND is_bot = 0
         ");
         $stmtRank->execute([$user['points']]);
         $rankPos = (int)$stmtRank->fetchColumn();
@@ -333,7 +351,7 @@ class HonorEngine {
         ];
         $progressionPoints = max(0, (int)$user['points'] - (int)$stats['start_week_points']);
         $factionInfo = FACTIONS[$user['faction']] ?? ['name' => ucfirst($user['faction']), 'icon' => '🏯'];
-        $totalPlayers = (int)$this->db->query("SELECT COUNT(*) FROM users")->fetchColumn();
+        $totalPlayers = (int)$this->db->query("SELECT COUNT(*) FROM users WHERE is_bot = 0")->fetchColumn();
 
         return [
             'id' => (int)$user['id'],

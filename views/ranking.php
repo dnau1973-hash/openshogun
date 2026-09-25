@@ -22,7 +22,7 @@ if (!in_array($tab, ['general', 'alliances', 'honor'])) {
 // 1. CLASSEMENT GÉNÉRAL DES DAIMYŌS (AVEC PAGINATION)
 // -------------------------------------------------------------
 $perPage = 25;
-$totalPlayers = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
+$totalPlayers = (int)$db->query("SELECT COUNT(*) FROM users WHERE is_bot = 0")->fetchColumn();
 $totalPages = max(1, (int)ceil($totalPlayers / $perPage));
 $pageNum = min(max(1, (int)($_GET['p'] ?? 1)), $totalPages);
 $offset = ($pageNum - 1) * $perPage;
@@ -33,6 +33,7 @@ $stmtPlayers = $db->prepare("
     FROM users u 
     LEFT JOIN planets p ON p.user_id = u.id 
     LEFT JOIN alliances a ON u.alliance_id = a.id 
+    WHERE u.is_bot = 0
     GROUP BY u.id 
     ORDER BY u.points DESC, u.id ASC 
     LIMIT :limit OFFSET :offset
@@ -128,7 +129,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
     echo '<div class="table-responsive">';
     echo '<table class="table table-vcenter card-table table-hover table-sm" style="table-layout: fixed; width: 100%;">';
     echo '<colgroup>';
-    echo '  <col style="width: 55px;">';
+    echo '  <col style="width: 65px;">';
     echo '  <col>';
     echo '  <col style="width: 105px;">';
     echo '</colgroup>';
@@ -147,13 +148,13 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
             default => '#' . $pos
         };
         $fInfo = FACTIONS[$row['faction']] ?? FACTIONS['terran'];
-        echo '<tr>';
-        echo '<td class="text-center py-2"><span class="badge ' . $badgeClass . ' py-1 px-2">' . $medalLabel . '</span></td>';
-        echo '<td class="py-2 text-truncate">';
-        echo '  <a href="javascript:void(0)" onclick="openPlayerProfileModal(' . (int)$row['user_id'] . ')" class="text-reset fw-semibold d-inline-flex align-items-center gap-1 text-decoration-none text-truncate" title="Voir la fiche de ' . htmlspecialchars($row['username']) . '">';
+        echo '<tr style="cursor: pointer;" onclick="openPlayerProfileModal(' . (int)$row['user_id'] . ')" title="Consulter la fiche du Daimyō : ' . htmlspecialchars($row['username']) . '">';
+        echo '<td class="text-center py-2 pe-1"><span class="badge ' . $badgeClass . ' py-1 px-2">' . $medalLabel . '</span></td>';
+        echo '<td class="py-2 ps-3 text-truncate">';
+        echo '  <div class="d-inline-flex align-items-center gap-2 text-truncate">';
         echo '    <span class="fs-4 flex-shrink-0">' . $fInfo['icon'] . '</span>';
-        echo '    <span class="text-truncate">' . htmlspecialchars($row['username']) . '</span>';
-        echo '  </a>';
+        echo '    <span class="fw-semibold text-truncate text-reset">' . htmlspecialchars($row['username']) . '</span>';
+        echo '  </div>';
         echo '</td>';
         echo '<td class="text-end py-2 text-nowrap">';
         echo '  <span class="badge bg-warning-lt text-warning fw-bold font-monospace fs-4">+' . number_format($row['score']) . '</span>';
@@ -330,7 +331,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                                     $isCurrent = ($p['id'] == $user['id']); 
                                     $fInfo = FACTIONS[$p['faction']] ?? FACTIONS['terran'];
                                 ?>
-                                <tr class="<?= $isCurrent ? 'table-warning' : '' ?>">
+                                <tr class="<?= $isCurrent ? 'table-warning' : '' ?>" style="cursor: pointer;" onclick="if (!event.target.closest('button, a')) openPlayerProfileModal(<?= (int)$p['id'] ?>)" title="Consulter la fiche du Daimyō : <?= htmlspecialchars($p['username']) ?>">
                                     <td class="text-center">
                                         <?php if ($curRank === 1): ?>
                                             <span class="badge bg-warning text-dark fw-bold fs-4 px-2 py-1 shadow-sm">🥇 #1</span>
@@ -564,8 +565,8 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                         </h3>
                         <p class="text-secondary mb-0">
                             Les 10 plus illustres daimyōs récompensés chaque semaine par décret impérial du Shogunat.<br>
-                            Médailles décernées : <strong>🥇 Or (1er)</strong>, <strong>🥈 Argent (2ème)</strong>, <strong>🥉 Bronze (3ème)</strong> et <strong>🎖️ Rubans Top 10</strong>.
-                            <span class="d-block mt-1 text-muted small"><span class="badge bg-secondary-lt">ℹ️ Règle impériale</span> Seuls les commandants humains participent au Tableau d'Honneur et peuvent recevoir des décorations impériales (les daimyōs IA en sont exclus).</span>
+                            Médailles &amp; Dotations : <strong>🥇 Or (1er) +100 Koban</strong>, <strong>🥈 Argent (2ème) +50 Koban</strong>, <strong>🥉 Bronze (3ème) +25 Koban</strong> et <strong>🎖️ Rubans Top 10</strong>.
+                            <span class="d-block mt-1 text-muted small"><span class="badge bg-secondary-lt">ℹ️ Règle impériale</span> Seuls les commandants humains sont classés et peuvent recevoir des décorations impériales (les daimyōs IA en sont exclus).</span>
                         </p>
                     </div>
                     <div class="col-auto">
