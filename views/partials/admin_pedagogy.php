@@ -202,12 +202,39 @@
             tab-size: 4;
         }
         .module-pedagogy-section .step-item {
+            display: flex !important;
+            align-items: flex-start !important;
+            flex-wrap: nowrap !important;
+            gap: 0.75rem !important;
             transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
         }
         .module-pedagogy-section .step-item:hover {
             transform: translateX(3px);
             background-color: #ffffff !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .module-pedagogy-section .step-badge-num {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 26px !important;
+            height: 26px !important;
+            min-width: 26px !important;
+            min-height: 26px !important;
+            max-width: 26px !important;
+            max-height: 26px !important;
+            border-radius: 50% !important;
+            font-size: 0.78rem !important;
+            font-weight: 700 !important;
+            line-height: 1 !important;
+            flex-shrink: 0 !important;
+            flex-grow: 0 !important;
+            margin-top: 2px !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+        }
+        .module-pedagogy-section .step-content {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
         }
         @media (max-width: 991.98px) {
             .module-pedagogy-section .algo-ide-window {
@@ -221,7 +248,7 @@
         <!-- En-tête de Module Pédagogique -->
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             <div class="d-flex align-items-center gap-3">
-                <div class="avatar avatar-md bg-azure-lt text-azure rounded-circle fw-bold fs-2 shadow-sm">
+                <div class="avatar avatar-md bg-azure-lt text-azure rounded-circle fw-bold fs-2 shadow-sm flex-shrink-0">
                     ⚙️
                 </div>
                 <div>
@@ -246,32 +273,32 @@
                 </div>
                 <div class="row g-2 align-items-center text-center">
                     <div class="col-12 col-md-4">
-                        <div class="p-3 rounded-3 bg-azure-lt border border-azure-subtle d-flex align-items-center gap-3 text-start">
-                            <span class="fs-1">⏳</span>
-                            <div>
+                        <div class="p-3 rounded-3 bg-azure-lt border border-azure-subtle d-flex align-items-center gap-3 text-start flex-nowrap">
+                            <span class="fs-1 flex-shrink-0">⏳</span>
+                            <div class="flex-grow-1 min-w-0" style="min-width: 0;">
                                 <div class="fw-bold text-azure small text-uppercase">Étape 1 &bull; Temps</div>
                                 <div class="fw-bold text-dark">Boucle &amp; &Delta;t (Temps)</div>
-                                <div class="text-secondary small">Rattrapage du temps écoulé</div>
+                                <div class="text-secondary small text-truncate">Rattrapage du temps écoulé</div>
                             </div>
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
-                        <div class="p-3 rounded-3 bg-indigo-lt border border-indigo-subtle d-flex align-items-center gap-3 text-start">
-                            <span class="fs-1">⚖️</span>
-                            <div>
+                        <div class="p-3 rounded-3 bg-indigo-lt border border-indigo-subtle d-flex align-items-center gap-3 text-start flex-nowrap">
+                            <span class="fs-1 flex-shrink-0">⚖️</span>
+                            <div class="flex-grow-1 min-w-0" style="min-width: 0;">
                                 <div class="fw-bold text-indigo small text-uppercase">Étape 2 &bull; Arbitrage</div>
                                 <div class="fw-bold text-dark">Moteur de Règles</div>
-                                <div class="text-secondary small">Validation anti-triche stricte</div>
+                                <div class="text-secondary small text-truncate">Validation anti-triche stricte</div>
                             </div>
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
-                        <div class="p-3 rounded-3 bg-yellow-lt border border-yellow-subtle d-flex align-items-center gap-3 text-start">
-                            <span class="fs-1">🎲</span>
-                            <div>
+                        <div class="p-3 rounded-3 bg-yellow-lt border border-yellow-subtle d-flex align-items-center gap-3 text-start flex-nowrap">
+                            <span class="fs-1 flex-shrink-0">🎲</span>
+                            <div class="flex-grow-1 min-w-0" style="min-width: 0;">
                                 <div class="fw-bold text-yellow small text-uppercase">Étape 3 &bull; Résolution</div>
                                 <div class="fw-bold text-dark">Aléatoire Contrôlé</div>
-                                <div class="text-secondary small">Tirages équilibrés &amp; équitables</div>
+                                <div class="text-secondary small text-truncate">Tirages équilibrés &amp; équitables</div>
                             </div>
                         </div>
                     </div>
@@ -313,30 +340,30 @@
                             <!-- Les 4 Phases du Cycle d'États -->
                             <h4 class="text-dark fw-bold mb-3 fs-3">Le cycle d'états à 4 temps :</h4>
                             <div class="d-flex flex-column gap-2 mb-4">
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle">
-                                    <span class="badge bg-azure text-white rounded-pill px-2 py-1 mt-1 fw-bold">1</span>
-                                    <div>
+                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                    <span class="step-badge-num bg-azure text-white">1</span>
+                                    <div class="step-content">
                                         <strong class="text-dark small d-block">Attente (IDLE) :</strong>
                                         <span class="text-secondary small">Le serveur dort paisiblement. Zéro calcul, zéro consommation de processeur.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle">
-                                    <span class="badge bg-azure text-white rounded-pill px-2 py-1 mt-1 fw-bold">2</span>
-                                    <div>
+                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                    <span class="step-badge-num bg-azure text-white">2</span>
+                                    <div class="step-content">
                                         <strong class="text-dark small d-block">Action Joueur (INPUT) :</strong>
                                         <span class="text-secondary small">Le joueur clique pour lancer une construction ou entraîner des lanciers.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle">
-                                    <span class="badge bg-azure text-white rounded-pill px-2 py-1 mt-1 fw-bold">3</span>
-                                    <div>
+                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                    <span class="step-badge-num bg-azure text-white">3</span>
+                                    <div class="step-content">
                                         <strong class="text-dark small d-block">Calcul Temporel (TICK / &Delta;t) :</strong>
                                         <span class="text-secondary small">Mesure exacte du temps écoulé : <code>&Delta;t = maintenant - dernier_passage</code>.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle">
-                                    <span class="badge bg-azure text-white rounded-pill px-2 py-1 mt-1 fw-bold">4</span>
-                                    <div>
+                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                    <span class="step-badge-num bg-azure text-white">4</span>
+                                    <div class="step-content">
                                         <strong class="text-dark small d-block">Résolution (RESOLVED) :</strong>
                                         <span class="text-secondary small">Mise à jour atomique des stocks, enregistrement en base SQL et retour au sommeil.</span>
                                     </div>
@@ -431,23 +458,23 @@ derniere_visite = heure_actuelle();
                             <!-- Triple Barrière de Contrôle -->
                             <h4 class="text-dark fw-bold mb-3 fs-3">La triple barrière de contrôle serveur :</h4>
                             <div class="d-flex flex-column gap-2 mb-4">
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle">
-                                    <span class="badge bg-indigo text-white rounded-pill px-2 py-1 mt-1 fw-bold">1</span>
-                                    <div>
+                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                    <span class="step-badge-num bg-indigo text-white">1</span>
+                                    <div class="step-content">
                                         <strong class="text-dark small d-block">Barrière Technologique (Prérequis) :</strong>
                                         <span class="text-secondary small">Vérifie l'existence et le niveau du bâtiment (ex: Forge Niv. 3 requise pour forger un Katana).</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle">
-                                    <span class="badge bg-indigo text-white rounded-pill px-2 py-1 mt-1 fw-bold">2</span>
-                                    <div>
+                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                    <span class="step-badge-num bg-indigo text-white">2</span>
+                                    <div class="step-content">
                                         <strong class="text-dark small d-block">Barrière Économique (Solvabilité) :</strong>
                                         <span class="text-secondary small">Débite les ressources de manière atomique. Aucun compte ne peut passer en solde négatif.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle">
-                                    <span class="badge bg-indigo text-white rounded-pill px-2 py-1 mt-1 fw-bold">3</span>
-                                    <div>
+                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                    <span class="step-badge-num bg-indigo text-white">3</span>
+                                    <div class="step-content">
                                         <strong class="text-dark small d-block">Barrière d'État (Victoire / Défaite) :</strong>
                                         <span class="text-secondary small">Évalue l'honneur du Daimyō et la chute éventuelle du Donjon (Tenshu) pour clore une manche.</span>
                                     </div>
@@ -544,23 +571,23 @@ valider_transaction_sql();
                             <!-- 3 Principes de l'Aléatoire de Jeu -->
                             <h4 class="text-dark fw-bold mb-3 fs-3">Les 3 principes du hasard équilibré :</h4>
                             <div class="d-flex flex-column gap-2 mb-4">
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle">
-                                    <span class="badge bg-yellow text-dark rounded-pill px-2 py-1 mt-1 fw-bold">1</span>
-                                    <div>
+                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                    <span class="step-badge-num bg-yellow text-dark">1</span>
+                                    <div class="step-content">
                                         <strong class="text-dark small d-block">Tirage Uniforme (RNG Cryptographique) :</strong>
                                         <span class="text-secondary small">Génération d'un entier équi-réparti de 1 à 100 via <code>random_int()</code> en PHP.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle">
-                                    <span class="badge bg-yellow text-dark rounded-pill px-2 py-1 mt-1 fw-bold">2</span>
-                                    <div>
+                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                    <span class="step-badge-num bg-yellow text-dark">2</span>
+                                    <div class="step-content">
                                         <strong class="text-dark small d-block">Seuils Paramétrables depuis l'Admin :</strong>
                                         <span class="text-secondary small">Une cage de capture à 15% signifie que tout résultat entre 1 et 15 déclenche le succès.</span>
                                     </div>
                                 </div>
-                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle">
-                                    <span class="badge bg-yellow text-dark rounded-pill px-2 py-1 mt-1 fw-bold">3</span>
-                                    <div>
+                                <div class="step-item d-flex align-items-start gap-3 p-2 rounded bg-light border border-secondary-subtle flex-nowrap">
+                                    <span class="step-badge-num bg-yellow text-dark">3</span>
+                                    <div class="step-content">
                                         <strong class="text-dark small d-block">Anti-frustration (Bad Luck Mitigation) :</strong>
                                         <span class="text-secondary small">Un bonus cumulatif de +5% par échec consécutif garantit une victoire avant l'écœurement.</span>
                                     </div>
