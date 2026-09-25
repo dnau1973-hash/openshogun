@@ -152,9 +152,9 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                         <div class="col">
                             <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                                 <h3 class="card-title text-purple fw-bold mb-0 fs-3">
-                                    Perfectionnement en cours : <?= htmlspecialchars($activeResearch['name']) ?>
+                                    Perfectionnement en cours : <?= htmlspecialchars($activeResearch['name'] ?? $activeResearch['research_name'] ?? 'Technologie féodale') ?>
                                 </h3>
-                                <span class="badge bg-purple text-white fw-bold">Palier <?= $activeResearch['target_level'] ?></span>
+                                <span class="badge bg-purple text-white fw-bold">Palier <?= (int)($activeResearch['target_level'] ?? 1) ?></span>
                             </div>
                             <div class="progress progress-sm mb-2" style="height: 6px;">
                                 <div class="progress-bar bg-purple" style="width: <?= $activeResearch['progress_pct'] ?>%" role="progressbar" aria-valuenow="<?= $activeResearch['progress_pct'] ?>" aria-valuemin="0" aria-valuemax="100"></div>

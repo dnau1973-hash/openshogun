@@ -99,10 +99,12 @@ class ResearchService {
             $remaining = max(0, $finishesAt - $now);
             $progressPct = min(100, max(0, (int)round((($totalDuration - $remaining) / $totalDuration) * 100)));
 
+            $techName = (string)($activeQueue['research_name'] ?? $activeQueue['name'] ?? 'Technologie féodale');
             $activeQueueViewModel = [
                 'research_code' => (string)($activeQueue['research_code'] ?? ''),
-                'research_name' => (string)$activeQueue['research_name'],
-                'target_level' => (int)$activeQueue['target_level'],
+                'research_name' => $techName,
+                'name' => $techName,
+                'target_level' => (int)($activeQueue['target_level'] ?? 1),
                 'finishes_at' => $finishesAt,
                 'remaining_seconds' => $remaining,
                 'remaining_formatted' => sprintf(
