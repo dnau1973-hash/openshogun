@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog &bull; Notes de Version &amp; Évolutions d'OpenShogun</title>
+    <meta name="description" content="Historique complet des mises à jour, correctifs et nouveautés du jeu de stratégie féodale OpenShogun.">
+    <!-- Tabler Core CSS -->
+    <link rel="stylesheet" href="/public/css/tabler/tabler.min.css">
+    <link rel="stylesheet" href="/public/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        .changelog-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .timeline-version {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline-version::before {
+            content: '';
+            position: absolute;
+            left: 0.45rem;
+            top: 1.5rem;
+            bottom: -1rem;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        .timeline-version:last-child::before {
+            display: none;
+        }
+        .timeline-badge-dot {
+            position: absolute;
+            left: 0;
+            top: 0.35rem;
+            width: 1.1rem;
+            height: 1.1rem;
+            border-radius: 50%;
+            background: #b91c1c;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 0 2px #b91c1c;
+        }
+        .feature-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .release-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #ffffff;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .release-card:hover {
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="antialiased bg-light">
+    <div class="page">
+        <!-- Barre de navigation supérieure -->
+        <header class="navbar navbar-expand-md changelog-header py-2 sticky-top">
+            <div class="container-xl d-flex justify-content-between align-items-center">
+                <a href="/" class="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
+                    <span style="font-size: 1.6rem;">📜</span>
+                    <div>
+                        <div class="fw-bold text-dark lh-1" style="font-size: 1.15rem; letter-spacing: 0.3px;">OpenShogun &bull; Changelog</div>
+                        <div class="text-secondary small fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.6px; text-transform: uppercase;">Chroniques des Mises à Jour &amp; Évolutions</div>
+                    </div>
+                </a>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="/?page=docs" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-flex align-items-center gap-1">
+                        <span>📖</span> Règles du jeu
+                    </a>
+                    <a href="/?page=support" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-flex align-items-center gap-1">
+                        <span>📮</span> Support &amp; Aide
+                    </a>
+                    <a href="/?page=pedagogy" class="btn btn-sm btn-outline-cyan d-none d-md-inline-flex align-items-center gap-1">
+                        <span>🎓</span> Atelier Pédagogique
+                    </a>
+                    <a href="/" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 shadow-sm">
+                        <span>🏯</span> Retour au Jeu
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenu Principal -->
+        <main class="page-body my-4">
+            <div class="container-xl">
+                
+                <!-- Bannière d'introduction -->
+                <div class="card bg-white border mb-4 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="badge bg-red-lt text-red fw-bold mb-2">Historique Officiel des Versions</div>
+                                <h1 class="display-6 fw-bold text-dark mb-2">Chroniques de Déploiement du Shōgunat</h1>
+                                <p class="text-secondary m-0" style="font-size: 0.95rem; line-height: 1.6;">
+                                    Retrouvez ici le détail exhaustif de toutes les améliorations graphiques, mécaniques stratégiques, optimisations de performance et réformes d'équilibrage apportées au monde féodal d'<strong>OpenShogun</strong>.
+                                </p>
+                            </div>
+                            <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
+                                <div class="p-3 bg-light rounded border d-inline-block text-start">
+                                    <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.7.2</div>
+                                    <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ligne du temps des Versions -->
+                <div class="space-y-4">
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.7.2 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.7.2</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-purple-lt fw-bold">Ergonomie &amp; Stabilité</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 25 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary d-flex align-items-center gap-2 mb-3">
+                                <span>🛠️</span> Correctifs DOM Administration &amp; Refonte Pied de Page
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-teal-lt">Affichage &amp; DOM</span>
+                                            <span>Rétablissement Forum Féodal &amp; GitHub Sync</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Correction d'un déséquilibre de balises HTML dans l'arborescence DOM de l'administration. Les onglets <strong>Forum Féodal</strong> et <strong>GitHub Sync</strong> s'affichent désormais instantanément sans être masqués par le conteneur parent.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-indigo-lt">Navigation</span>
+                                            <span>Pied de Page Unifié &amp; Liens Rapides</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Rénovation complète du pied de page du jeu : intégration du présent <strong>Changelog officiel</strong>, accès direct aux <strong>Règles du jeu</strong> (ex-Codex) et au guichet <strong>Support &amp; Aide</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="p-3 bg-light rounded border">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-yellow-lt">Pagination</span>
+                                            <span>Navigation par Pages Tabler.io dans l'Administration</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Ajout de la pagination côté client/serveur pour les listes volumineuses : <strong>Écosystème des Oasis Naturelles</strong> (10/page), <strong>Daimyōs Joueurs</strong> (15/page), <strong>Samouraïs Héros</strong> (15/page) et <strong>Tickets de Support</strong> (10/page).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.7.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background:#0284c7; box-shadow:0 0 0 2px #0284c7;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.7.0</span>
+                                <span class="badge bg-cyan-lt fw-bold">🎓 NOUVEAUTÉ MAJEURE</span>
+                                <span class="badge bg-blue-lt fw-bold">Pédagogie &amp; Architecture</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 24-25 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-cyan d-flex align-items-center gap-2 mb-3">
+                                <span>🎓</span> Atelier Pédagogique Public &bull; Sous le Capot d'un Jeu Vidéo
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark mb-1">🎮 Studio de Conception Père &amp; Fils</div>
+                                        <p class="text-secondary small m-0">
+                                            Ouverture d'une section publique dédiée à l'apprentissage de la programmation et de l'architecture logicielle à travers l'exemple vivant d'OpenShogun.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark mb-1">⚙️ Découpage Algorithmique 3 Piliers</div>
+                                        <p class="text-secondary small m-0">
+                                            Exploration pas-à-pas : <em>Production continue sur delta de temps</em>, <em>File de construction asynchrone</em> et <em>Résolution matricielle des combats féodaux</em> avec pseudo-code interactif.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark mb-1">🤖 Transparence IA &amp; Prompts Gemini</div>
+                                        <p class="text-secondary small m-0">
+                                            Intégration d'un badge de transparence et d'une modale permettant aux joueurs et apprenants d'inspecter les prompts IA exacts utilisés pour générer les visuels du jeu.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.6.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background:#059669; box-shadow:0 0 0 2px #059669;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.6.0</span>
+                                <span class="badge bg-green-lt fw-bold">🎨 DESIGN SYSTEM</span>
+                                <span class="badge bg-teal-lt fw-bold">Tabler.io UI/UX</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 22-23 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-success d-flex align-items-center gap-2 mb-3">
+                                <span>🎨</span> Refonte Intégrale de l'Interface avec Tabler.io
+                            </h4>
+                            <ul class="text-secondary small space-y-2 mb-0" style="line-height: 1.6;">
+                                <li><strong>Migration 100% Tabler.io :</strong> Abandon des styles sombres surchargés au profit d'un design clair, épuré, accessible et lumineux.</li>
+                                <li><strong>Toasts &amp; Retours Instantanés :</strong> Disparition des boîtes de dialogue bloquantes (<code>alert</code>/<code>confirm</code>) remplacées par des toasts Tabler discrets et modernes.</li>
+                                <li><strong>Paliers de Colonisation du Tenshu :</strong> Déblocage des colons pionniers aux niveaux clés 10, 15 et 20 du Donjon Tenshu pour une saine émulation de l'expansion.</li>
+                                <li><strong>Équilibrage de l'Expérience du Héros :</strong> Progression optimisée du seigneur samouraï en fonction des victoires militaires et des bêtes sauvages vaincues.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.5.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background:#d97706; box-shadow:0 0 0 2px #d97706;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.5.0</span>
+                                <span class="badge bg-warning-lt fw-bold">🌿 MONDE FÉODAL</span>
+                                <span class="badge bg-danger-lt fw-bold">Oasis &amp; Donjons</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 20-21 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-warning-emphasis d-flex align-items-center gap-2 mb-3">
+                                <span>🌿</span> Écosystème des Oasis Sauvages &amp; Répartition des 12 Donjons
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark mb-1">🐺 Faune Sauvage &amp; Oasis Naturelles</div>
+                                        <p class="text-secondary small m-0">
+                                            Apparition d'oasis riches en ressources naturelles (Cèdre, Pierre, Riz) peuplées de meutes sauvages (Loups de Honshū, Ours d'Hokkaidō, Sangliers féroces) à pacifier ou capturer avec des cages.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark mb-1">🏯 12 Châteaux Authentiques Homogènes</div>
+                                        <p class="text-secondary small m-0">
+                                            Algorithme de répartition géographique homogène garantissant un placement équitable des forteresses historiques légendaires sur l'ensemble de la carte de province.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.4.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background:#7c3aed; box-shadow:0 0 0 2px #7c3aed;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.4.0</span>
+                                <span class="badge bg-purple-lt fw-bold">⚖️ ÉCONOMIE &amp; LOGISTIQUE</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 18-19 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-purple d-flex align-items-center gap-2 mb-3">
+                                <span>🪵</span> Charpenterie, Commerce Féodal &amp; Sceau Impérial
+                            </h4>
+                            <ul class="text-secondary small space-y-2 mb-0" style="line-height: 1.6;">
+                                <li><strong>Atelier de Charpenterie :</strong> Façonnage de poutres massives de cèdre (débloqué à la Scierie niveau 10+) pour ériger des fortifications avancées.</li>
+                                <li><strong>Expéditions Marchandes Autonomes :</strong> Envoi direct de convois commerciaux et comptoirs d'échanges bilatéraux entre seigneurs de guerre.</li>
+                                <li><strong>Privilège du Sceau Impérial :</strong> File d'attente de raffinage automatisée x4 dans les Moulins à riz et Brasseries de saké féodales.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.3.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background:#dc2626; box-shadow:0 0 0 2px #dc2626;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.3.0</span>
+                                <span class="badge bg-danger-lt fw-bold">⚔️ ÉVEIL DU HÉROS</span>
+                                <span class="badge bg-secondary-lt fw-bold">Parcelles Libres</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 17 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-danger d-flex align-items-center gap-2 mb-3">
+                                <span>🥋</span> Héros Samouraï &amp; Terroirs Déverrouillés
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark mb-1">🥋 Héros Samouraï &amp; Voie du Bushidō</div>
+                                        <p class="text-secondary small m-0">
+                                            Votre seigneur de guerre gagne des niveaux en menant vos armées. Répartissez ses points d'attributs (Force, Stratégie, Vigueur, Charisme, Sagesse) pour octroyer de puissants bonus économiques et militaires à vos fiefs.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark mb-1">🏯 Liberté Stratégique Totale (Parcelles 19 à 34)</div>
+                                        <p class="text-secondary small m-0">
+                                            Tous les fiefs disposent de leurs 16 emplacements de construction entièrement libres. Bâtissez forteresses, casernes et marchés selon votre propre stratégie dès le premier jour.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark mb-1">🛡️ Engins de Siège &amp; Logistique Lourde</div>
+                                        <p class="text-secondary small m-0">
+                                            Déploiement du Bélier à éperon d'acier, de la Grande Tour de Siège baliste et des Grands Convois logistiques pour les assauts de forteresses.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark mb-1">📜 Parchemins d'Annonces Impériales</div>
+                                        <p class="text-secondary small m-0">
+                                            Système de notification in-game présentant les évolutions du royaume dès leur promulgation par le Shōgunat.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.0.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background:#64748b; box-shadow:0 0 0 2px #64748b;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.0.0</span>
+                                <span class="badge bg-secondary-lt fw-bold">⛩️ FONDATION</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-secondary d-flex align-items-center gap-2 mb-3">
+                                <span>⛩️</span> Naissance d'OpenShogun &bull; L'Ère du Sengoku Jidai
+                            </h4>
+                            <p class="text-secondary small mb-2" style="line-height: 1.6;">
+                                Lancement initial du moteur de stratégie féodale asynchrone par navigateur inspiré de Travian :
+                            </p>
+                            <ul class="text-secondary small space-y-1 mb-0" style="line-height: 1.6;">
+                                <li>Économie des 4 ressources féodales : Bois de Cèdre, Pierre de Taille, Fer &amp; Armes, Riz Impérial.</li>
+                                <li>Clans et factions asymétriques : Clan Oda, Clan Takeda, Clan Tokugawa.</li>
+                                <li>Recrutement militaire, dojos d'entraînement, remparts défensifs et expéditions provinciales.</li>
+                                <li>Système de messagerie diplomatique féodale, rapports de combat détaillés et classements du Shōgunat.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Pied de page -->
+        <footer class="footer footer-transparent d-print-none py-4 border-top bg-white mt-auto">
+            <div class="container-xl text-center">
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2 small fw-semibold">
+                    <a href="/?page=docs" class="text-decoration-none text-secondary">📖 Règles du jeu</a>
+                    <span class="text-muted opacity-50">&bull;</span>
+                    <a href="/?page=support" class="text-decoration-none text-secondary">📮 Support &amp; Aide</a>
+                    <span class="text-muted opacity-50">&bull;</span>
+                    <a href="/changelog.html" class="text-decoration-none text-primary">📜 Changelog</a>
+                    <span class="text-muted opacity-50">&bull;</span>
+                    <a href="/?page=pedagogy" class="text-decoration-none text-secondary">🎓 Atelier Pédagogique</a>
+                    <span class="text-muted opacity-50">&bull;</span>
+                    <a href="/?page=forum" class="text-decoration-none text-secondary">💬 Forum Féodal</a>
+                </div>
+                <div class="text-muted small">
+                    OpenShogun &copy; 2026 &bull; Jeu de stratégie féodale par navigateur &bull; Moteur Sengoku PHP 8 + MariaDB
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Tabler Core JS -->
+    <script src="/public/js/tabler/tabler.min.js"></script>
+</body>
+</html>

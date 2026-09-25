@@ -61,7 +61,7 @@ if (!$isAuth):
 
                 <div class="navbar-nav flex-row order-md-last align-items-center gap-2 ms-auto">
                     <a href="/?page=docs" class="btn btn-sm btn-outline-primary d-none d-sm-inline-flex align-items-center gap-1">
-                        <span>📖</span> Codex &amp; Lore
+                        <span>📖</span> Règles du jeu
                     </a>
                     <a href="/?action=login" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1">
                         <span>🏯</span> Connexion
@@ -99,6 +99,13 @@ if (!$isAuth):
         <!-- Pied de page public épuré -->
         <footer class="footer footer-transparent d-print-none py-3 border-top bg-white">
             <div class="container-xl text-center text-muted small">
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2 small fw-semibold">
+                    <a href="/?page=docs" class="text-decoration-none text-secondary">📖 Règles du jeu</a>
+                    <span class="text-muted opacity-50">&bull;</span>
+                    <a href="/?page=support" class="text-decoration-none text-secondary">📮 Support &amp; Aide</a>
+                    <span class="text-muted opacity-50">&bull;</span>
+                    <a href="/changelog.html" class="text-decoration-none text-secondary">📜 Changelog</a>
+                </div>
                 Projet Éducatif Père &amp; Fils &bull; OpenShogun Engine &bull; <?= date('Y') ?> &bull; Tous droits réservés.
             </div>
         </footer>

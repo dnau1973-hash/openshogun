@@ -7,6 +7,14 @@ if (!file_exists(__DIR__ . '/config/installed.lock') || !file_exists(__DIR__ . '
     exit;
 }
 
+// Détection ultra-rapide des pages publiques statiques (Changelog)
+$reqPage = $_GET['page'] ?? null;
+$requestUriPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+if ($reqPage === 'changelog' || $requestUriPath === '/changelog') {
+    require __DIR__ . '/changelog.html';
+    exit;
+}
+
 require_once __DIR__ . '/core/Auth.php';
 
 $auth = new Auth();
@@ -45,7 +53,6 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Détecter si la page demandée est publique (ex: Atelier Pédagogique accessible à tous)
-$reqPage = $_GET['page'] ?? null;
 if ($reqPage === 'pedagogy' || $reqPage === 'atelier') {
     $page = 'pedagogy';
     if (!Auth::check()) {

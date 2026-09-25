@@ -476,9 +476,33 @@
     </div>
 </div>
 
-<footer style="text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.85rem; border-top:1px solid rgba(255,255,255,0.05); margin-top:3rem;">
-    <p><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> &copy; <?= date('Y') ?> - Jeu de stratégie féodale japonaise par navigateur inspiré de Travian.</p>
-    <p style="margin-top:0.35rem; color:#64748b;">Moteur féodal Sengoku PHP 8 + MariaDB + JavaScript Vanilla</p>
+<footer class="footer footer-transparent d-print-none py-4 border-top" style="text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.85rem; border-top:1px solid rgba(255,255,255,0.08); margin-top:3rem;">
+    <div class="container-xl">
+        <!-- Liens rapides de navigation et d'assistance -->
+        <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2" style="font-weight: 600;">
+            <a href="?page=docs" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
+                <span>📖</span> Règles du jeu
+            </a>
+            <span class="text-muted opacity-50">&bull;</span>
+            <a href="?page=support" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
+                <span>📮</span> Support &amp; Aide
+            </a>
+            <span class="text-muted opacity-50">&bull;</span>
+            <a href="/changelog.html" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
+                <span>📜</span> Changelog
+            </a>
+            <span class="text-muted opacity-50">&bull;</span>
+            <a href="?page=pedagogy" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
+                <span>🎓</span> Atelier Pédagogique
+            </a>
+            <span class="text-muted opacity-50">&bull;</span>
+            <a href="?page=forum" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
+                <span>💬</span> Forum Féodal
+            </a>
+        </div>
+        <p class="m-0"><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> &copy; <?= date('Y') ?> &mdash; Jeu de stratégie féodale japonaise par navigateur inspiré de Travian.</p>
+        <p style="margin-top:0.35rem; color:#64748b;" class="small">Moteur féodal Sengoku PHP 8 &bull; MariaDB &bull; JavaScript Vanilla &bull; Tabler.io</p>
+    </div>
 </footer>
 
 <script src="/public/js/app.js?v=<?= file_exists(__DIR__ . '/../../public/js/app.js') ? filemtime(__DIR__ . '/../../public/js/app.js') : time() ?>"></script>

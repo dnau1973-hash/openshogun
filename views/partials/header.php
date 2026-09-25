@@ -355,12 +355,13 @@ $navItems = [
                                     <!-- Savoir & Administration -->
                                     <div class="dropdown-divider"></div>
                                     <div class="dropdown-header text-uppercase small text-muted">Savoir & Shogunat</div>
-                                    <a href="?page=docs" class="dropdown-item <?= $page === 'docs' ? 'active' : '' ?>">📖 Codex du Sengoku</a>
+                                    <a href="?page=docs" class="dropdown-item <?= $page === 'docs' ? 'active' : '' ?>">📖 Règles du jeu</a>
+                                    <a href="?page=support" class="dropdown-item <?= $page === 'support' ? 'active' : '' ?>">📮 Support &amp; Aide</a>
+                                    <a href="/changelog.html" class="dropdown-item">📜 Changelog</a>
                                     <a href="?page=pedagogy" class="dropdown-item <?= $page === 'pedagogy' ? 'active' : '' ?>">🎓 Atelier Pédagogique</a>
                                     <?php if ($auth->isAdmin()): ?>
                                         <a href="?page=admin" class="dropdown-item text-primary fw-bold <?= $page === 'admin' ? 'active' : '' ?>">⚙️ Administration</a>
                                     <?php endif; ?>
-                                    <a href="?page=support" class="dropdown-item <?= $page === 'support' ? 'active' : '' ?>">📮 Support &amp; Aide</a>
 
                                     <!-- Préférences & Déconnexion -->
                                     <div class="dropdown-divider"></div>
