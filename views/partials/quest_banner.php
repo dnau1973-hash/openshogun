@@ -12,38 +12,16 @@ if (!isset($user) || !isset($planet)) {
 
 $questEngine = new QuestEngine();
 $questSummary = $questEngine->getPlayerQuestsStatus((int)$user['id'], (int)$planet['id']);
+
+// Dès que le joueur a terminé l'intégralité du tutoriel/didacticiel féodal, ce bloc de droite disparaît complètement
+if (!empty($questSummary['all_completed']) || empty($questSummary['active_quest'])) {
+    return;
+}
 $activeQuest = $questSummary['active_quest'];
 ?>
 
 <div id="questBannerContainer" class="card">
-    <?php if ($questSummary['all_completed']): ?>
-        <!-- Bloc Didacticiel Complété (Style Washi Sobre) -->
-        <div class="card-header">
-            <h3 class="card-title" style="font-size: 1rem;">
-                <span>👑</span> Didacticiel Féodal
-            </h3>
-            <span class="badge" style="background: rgba(21, 128, 61, 0.12); color: #15803d; border: 1px solid #15803d; font-size: 0.72rem; padding: 0.15rem 0.45rem; font-weight: 700; border-radius: 4px;">
-                12 / 12
-            </span>
-        </div>
-        <div class="card-body" style="padding: 1rem;">
-            <div style="font-size: 0.85rem; font-weight: 700; color: #15803d; margin-bottom: 0.35rem;">
-                🏆 Didacticiel Accompli &bull; Maître du Shogunat
-            </div>
-            <p style="margin: 0 0 0.85rem 0; font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
-                Félicitations noble Daimyō ! Vous maîtrisez désormais tous les rouages du Terroir, de la Cité et des Armées provinciales. Le destin du Japon repose entre vos mains.
-            </p>
-            <div style="display: flex; gap: 0.5rem;">
-                <button type="button" onclick="openQuestModal()" class="btn btn-secondary" style="flex: 1; font-size: 0.8rem; padding: 0.4rem 0.6rem;">
-                    📜 Codex
-                </button>
-                <button type="button" onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)" class="btn btn-primary" style="flex: 1; font-size: 0.8rem; padding: 0.4rem 0.6rem; background: var(--red-primary, #c2252b); border-color: var(--red-deep, #991b1b); color: #ffffff;">
-                    🎖️ Médaille
-                </button>
-            </div>
-        </div>
-
-    <?php elseif ($activeQuest): ?>
+    <?php if ($activeQuest): ?>
         <!-- Bloc Quête Active (Style Washi Sobre sans Dégradé) -->
         <?php $isClaimable = $activeQuest['is_claimable']; ?>
         <div class="card-header">
@@ -51,7 +29,7 @@ $activeQuest = $questSummary['active_quest'];
                 <span>📜</span> Didacticiel du Daimyō
             </h3>
             <?php if ($isClaimable): ?>
-                <span class="badge" style="background: #15803d; color: #ffffff; font-size: 0.7rem; padding: 0.15rem 0.45rem; font-weight: 800; border-radius: 4px;">
+                <span class="badge " style="background: #15803d; color: #ffffff; font-size: 0.7rem; padding: 0.15rem 0.45rem; font-weight: 800; border-radius: 4px;">
                     ✨ Objectif atteint !
                 </span>
             <?php else: ?>

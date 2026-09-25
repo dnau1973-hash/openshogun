@@ -1043,23 +1043,14 @@ function updateHudResources(planet) {
 <!-- Tabler JS -->
 <script src="/public/js/tabler/tabler.min.js"></script>
 <script>
-// Toggle thème clair / sombre
-function toggleTheme() {
-    const html = document.documentElement;
-    const current = html.getAttribute('data-bs-theme');
-    const next = (current === 'dark') ? 'light' : 'dark';
-    html.setAttribute('data-bs-theme', next);
-    try { localStorage.setItem('shogun-theme', next); } catch(e) {}
-}
-// Restaurer le thème sauvegardé
+// Thème clair 100% natif Tabler.io - Nettoyage et verrouillage du thème clair
 (function() {
     try {
-        const saved = localStorage.getItem('shogun-theme');
-        if (saved === 'dark' || saved === 'light') {
-            document.documentElement.setAttribute('data-bs-theme', saved);
-        }
+        localStorage.removeItem('shogun-theme');
     } catch(e) {}
+    document.documentElement.setAttribute('data-bs-theme', 'light');
 })();
+function toggleTheme() {}
 </script>
 <?php require_once __DIR__ . '/chat_widget.php'; ?>
 <!-- Script Modale Transparence Prompts IA -->

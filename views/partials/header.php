@@ -140,11 +140,7 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
 $navItems = [
     ['page' => 'resources', 'match' => ['resources','field'], 'icon' => '🌾', 'label' => 'Terroir Féodal',     'title' => 'Terroir & Récoltes'],
     ['page' => 'city',      'match' => ['city','building'],   'icon' => '🏯', 'label' => 'Cité Castrale',      'title' => 'Bâtiments & Châteaux'],
-    ['page' => 'empire',    'match' => ['empire'],            'icon' => '👑', 'label' => 'Empire',             'title' => 'Grand Tableau de Bord des Fiefs'],
     ['page' => 'map',       'match' => ['map','galaxy'],      'icon' => '🗾', 'label' => 'Carte',               'title' => 'Carte des Provinces'],
-    ['page' => 'fleet',     'match' => ['fleet'],             'icon' => '⚔️', 'label' => 'Armées',             'title' => 'Expéditions militaires'],
-    ['page' => 'hero',      'match' => ['hero'],              'icon' => '🥋', 'label' => 'Héros',              'title' => 'Votre Samouraï Héros'],
-    ['page' => 'alliance',  'match' => ['alliance'],          'icon' => '🎌', 'label' => 'Alliance',           'title' => 'Pacte Féodal & Ambassade'],
 ];
 ?>
 
@@ -275,6 +271,47 @@ $navItems = [
                             </li>
                             <?php endforeach; ?>
 
+                            <!-- Position 4 : Menu déroulant « Mon Empire » -->
+                            <?php 
+                            $isEmpireActive = in_array($page, ['fleet', 'hero', 'alliance', 'empire']);
+                            ?>
+                            <li class="nav-item dropdown <?= $isEmpireActive ? 'active' : '' ?>">
+                                <a class="nav-link dropdown-toggle <?= $isEmpireActive ? 'active fw-bold' : '' ?>" 
+                                   href="#navbar-empire" 
+                                   data-bs-toggle="dropdown" 
+                                   data-bs-auto-close="outside" 
+                                   role="button" 
+                                   aria-expanded="<?= $isEmpireActive ? 'true' : 'false' ?>"
+                                   title="Mon Empire &amp; Puissance Féodale">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block">👑</span>
+                                    <span class="nav-link-title">Mon Empire</span>
+                                </a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'fleet' ? 'active fw-bold' : '' ?>" href="?page=fleet">
+                                        <span class="dropdown-item-icon">⚔️</span>
+                                        <span>Armée</span>
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'hero' ? 'active fw-bold' : '' ?>" href="?page=hero">
+                                        <span class="dropdown-item-icon">🥋</span>
+                                        <span>Héros</span>
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'alliance' ? 'active fw-bold' : '' ?>" href="?page=alliance">
+                                        <span class="dropdown-item-icon">🎌</span>
+                                        <span>Alliance</span>
+                                    </a>
+                                    <?php if ($isSealActive): ?>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'empire' ? 'active fw-bold' : '' ?>" href="?page=empire">
+                                            <span class="d-flex align-items-center gap-2">
+                                                <span class="dropdown-item-icon">👑</span>
+                                                <span>Tableau de bord de l'empire</span>
+                                            </span>
+                                            <span class="badge bg-warning text-warning-fg ms-2" style="font-size:0.6rem;">Sceau Actif</span>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </li>
+
                             <?php 
                             $isCommActive = in_array($page, ['messages', 'chat', 'forum']);
                             ?>
@@ -338,44 +375,21 @@ $navItems = [
                                         <div class="dropdown-divider"></div>
                                     <?php endif; ?>
 
-                                    <!-- Privilèges & Empire du Shōgun -->
-                                    <div class="dropdown-header text-uppercase small text-muted">Privilèges du Shōgun</div>
-                                    <a href="?page=empire" class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'empire' ? 'active' : '' ?>">
-                                        <span>👑 Tableau de Bord de l'Empire</span>
-                                        <?php if ($isSealActive): ?>
-                                            <span class="badge bg-warning text-warning-fg" style="font-size:0.6rem;">Actif</span>
-                                        <?php endif; ?>
-                                    </a>
-                                    <a href="?page=privilege" class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'privilege' ? 'active' : '' ?>">
-                                        <span>📜 Privilèges du Shōgun</span>
-                                        <span class="badge bg-warning-lt" style="font-size:0.6rem;"><?= number_format($userGoldCoins) ?> 🪙</span>
-                                    </a>
-
-                                    <div class="dropdown-divider"></div>
-
                                     <!-- Profil Daimyō -->
                                     <a href="javascript:void(0)" class="dropdown-item"
                                        onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">👤 Ma Fiche Daimyō</a>
                                     <a href="javascript:void(0)" class="dropdown-item"
                                        onclick="openEditMottoModal()">📜 Ma Devise</a>
 
-                                    <!-- Communications & Décrets -->
+                                    <!-- Décrets & Annales -->
                                     <div class="dropdown-divider"></div>
-                                    <div class="dropdown-header text-uppercase small text-muted">Communications</div>
-                                    <a href="?page=messages" class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'messages' ? 'active' : '' ?>">
-                                        <span>📬 Messagerie</span>
-                                        <?php if ($unreadMessagesCount > 0): ?>
-                                            <span class="badge bg-danger rounded-pill"><?= $unreadMessagesCount ?></span>
-                                        <?php endif; ?>
-                                    </a>
-                                    <a href="?page=chat" class="dropdown-item <?= $page === 'chat' ? 'active' : '' ?>">🏮 Chat Féodal</a>
-                                    <a href="?page=forum" class="dropdown-item <?= $page === 'forum' ? 'active' : '' ?>">👥 Forum Féodal</a>
+                                    <div class="dropdown-header text-uppercase small text-muted">Décrets &amp; Annales</div>
                                     <a href="?page=reports" class="dropdown-item <?= $page === 'reports' ? 'active' : '' ?>">📜 Chroniques</a>
                                     <a href="?page=ranking" class="dropdown-item <?= $page === 'ranking' ? 'active' : '' ?>">🏆 Classement</a>
 
                                     <!-- Savoir & Administration -->
                                     <div class="dropdown-divider"></div>
-                                    <div class="dropdown-header text-uppercase small text-muted">Savoir & Shogunat</div>
+                                    <div class="dropdown-header text-uppercase small text-muted">Savoir &amp; Shogunat</div>
                                     <a href="?page=docs" class="dropdown-item <?= $page === 'docs' ? 'active' : '' ?>">📖 Règles du jeu</a>
                                     <a href="?page=support" class="dropdown-item <?= $page === 'support' ? 'active' : '' ?>">📮 Support &amp; Aide</a>
                                     <a href="/changelog.html" class="dropdown-item">📜 Changelog</a>
@@ -389,7 +403,6 @@ $navItems = [
                                             onclick="window.shogunAudio && window.shogunAudio.toggle()">
                                         <span id="shogun-audio-icon">🔇</span> Ambiance sonore
                                     </button>
-                                    <button type="button" class="dropdown-item" onclick="toggleTheme()">🌓 Thème clair / sombre</button>
                                     <div class="dropdown-divider"></div>
                                     <a href="?action=logout" class="dropdown-item text-danger">🚪 Déconnexion</a>
                                 </div>
