@@ -1695,55 +1695,77 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         Aucun Daimyō IA n'est actuellement déployé dans l'archipel. Cliquez sur le bouton ci-dessus pour peupler le royaume !
                     </div>
                 <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-vcenter table-nowrap card-table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Daimyō IA</th>
-                                    <th>Clan Féodal</th>
-                                    <th>Fief Capitale</th>
-                                    <th class="text-center">Fiefs Annexes</th>
-                                    <th class="text-end">Puissance Militaire</th>
-                                    <th class="text-end">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($botsList as $bot): ?>
-                                    <?php $fInfo = FACTIONS[$bot['faction']] ?? FACTIONS['terran']; ?>
+                    <div class="card border mb-0">
+                        <div class="table-responsive">
+                            <table class="table table-vcenter table-nowrap card-table table-hover" id="tableBotsList">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <div class="font-weight-medium">
-                                                🤖 <?= htmlspecialchars($bot['username']) ?>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-secondary-lt">
-                                                <?= $fInfo['icon'] ?> <?= htmlspecialchars($fInfo['name']) ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-danger-lt font-monospace">
-                                                [<?= $bot['capital_x'] ?> : <?= $bot['capital_y'] ?>]
-                                            </span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="badge bg-success-lt font-weight-bold">
-                                                <?= $bot['planet_count'] ?> fief(s)
-                                            </span>
-                                        </td>
-                                        <td class="text-end font-weight-bold text-warning">
-                                            🏆 <?= number_format($bot['points']) ?>
-                                        </td>
-                                        <td class="text-end">
-                                            <button onclick="deleteBot(<?= $bot['id'] ?>, '<?= htmlspecialchars(addslashes($bot['username'])) ?>')" 
-                                                    class="btn btn-sm btn-outline-danger">
-                                                🗑️ Purger
-                                            </button>
-                                        </td>
+                                        <th>Daimyō IA</th>
+                                        <th>Clan Féodal</th>
+                                        <th>Fief Capitale</th>
+                                        <th class="text-center">Fiefs Annexes</th>
+                                        <th class="text-end">Puissance Militaire</th>
+                                        <th class="text-end">Action</th>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody id="botsTableBody">
+                                    <?php foreach ($botsList as $botIndex => $bot): ?>
+                                        <?php 
+                                            $fInfo = FACTIONS[$bot['faction']] ?? FACTIONS['terran']; 
+                                            $isInitialHidden = ($botIndex >= 10);
+                                        ?>
+                                        <tr class="bot-table-row" data-index="<?= $botIndex ?>" style="<?= $isInitialHidden ? 'display: none;' : '' ?>">
+                                            <td>
+                                                <div class="font-weight-medium">
+                                                    🤖 <?= htmlspecialchars($bot['username']) ?>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary-lt">
+                                                    <?= $fInfo['icon'] ?> <?= htmlspecialchars($fInfo['name']) ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-danger-lt font-monospace">
+                                                    [<?= $bot['capital_x'] ?> : <?= $bot['capital_y'] ?>]
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success-lt font-weight-bold">
+                                                    <?= $bot['planet_count'] ?> fief(s)
+                                                </span>
+                                            </td>
+                                            <td class="text-end font-weight-bold text-warning">
+                                                🏆 <?= number_format($bot['points']) ?>
+                                            </td>
+                                            <td class="text-end">
+                                                <button onclick="deleteBot(<?= $bot['id'] ?>, '<?= htmlspecialchars(addslashes($bot['username'])) ?>')" 
+                                                        class="btn btn-sm btn-outline-danger">
+                                                    🗑️ Purger
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination du Registre des Bots -->
+                        <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-2 py-2" id="botsPaginationContainer">
+                            <p class="m-0 text-secondary small" id="botsPaginationInfo">
+                                Affichage de <strong id="botsPaginationStart"><?= min(1, count($botsList)) ?></strong> à <strong id="botsPaginationEnd"><?= min(10, count($botsList)) ?></strong> sur <strong id="botsPaginationTotal"><?= count($botsList) ?></strong> daimyōs IA
+                            </p>
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="botsPerPageSelect" class="small text-muted mb-0 d-none d-sm-inline">Par page :</label>
+                                <select id="botsPerPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changeBotsPerPage(this.value)">
+                                    <option value="10" selected>10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+                                <ul class="pagination pagination-sm m-0" id="botsPaginationList">
+                                    <!-- Généré dynamiquement en JS -->
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 <?php endif; ?>
             </div>
@@ -2647,6 +2669,12 @@ function switchAdminTab(tabKey) {
     } catch (e) {
         // En cas de restriction d'historique
     }
+
+    if (tabKey === 'bots' || tabKey === 'all') {
+        if (typeof renderBotsPage === 'function') {
+            renderBotsPage(currentBotsPage);
+        }
+    }
 }
 
 // --- FONCTIONS ADMINISTRATIVES DES SAMOURAÏS HÉROS & RELIQUES ---
@@ -2737,6 +2765,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedTab) {
             switchAdminTab(savedTab);
         }
+    }
+    if (typeof initBotsPagination === 'function') {
+        initBotsPagination();
     }
 });
 
@@ -3211,6 +3242,125 @@ async function runBotCycle() {
             showModalAlert("Erreur Réseau", "Impossible de déclencher le cycle IA.", "danger");
         }
     });
+}
+
+// --- PAGINATION DU REGISTRE DES DAIMYŌS IA ---
+let currentBotsPage = 1;
+let botsPerPage = 10;
+
+function initBotsPagination() {
+    const rows = document.querySelectorAll('.bot-table-row');
+    const totalBots = rows.length;
+    if (totalBots === 0) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const p = parseInt(urlParams.get('bot_page'), 10);
+    if (!isNaN(p) && p >= 1) {
+        currentBotsPage = p;
+    }
+
+    const select = document.getElementById('botsPerPageSelect');
+    if (select) {
+        botsPerPage = parseInt(select.value, 10) || 10;
+    }
+
+    renderBotsPage(currentBotsPage);
+}
+
+function changeBotsPerPage(newVal) {
+    botsPerPage = parseInt(newVal, 10) || 10;
+    currentBotsPage = 1;
+    renderBotsPage(currentBotsPage);
+}
+
+function renderBotsPage(page) {
+    const rows = Array.from(document.querySelectorAll('.bot-table-row'));
+    const totalBots = rows.length;
+    if (totalBots === 0) return;
+
+    const totalPages = Math.ceil(totalBots / botsPerPage) || 1;
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentBotsPage = page;
+
+    try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('tab') === 'bots') {
+            url.searchParams.set('bot_page', page);
+            window.history.replaceState({}, '', url.toString());
+        }
+    } catch (e) {}
+
+    const startIndex = (page - 1) * botsPerPage;
+    const endIndex = Math.min(startIndex + botsPerPage, totalBots);
+
+    rows.forEach((row, idx) => {
+        row.style.display = (idx >= startIndex && idx < endIndex) ? '' : 'none';
+    });
+
+    const startEl = document.getElementById('botsPaginationStart');
+    const endEl = document.getElementById('botsPaginationEnd');
+    const totalEl = document.getElementById('botsPaginationTotal');
+    if (startEl) startEl.textContent = (totalBots > 0) ? (startIndex + 1) : 0;
+    if (endEl) endEl.textContent = endIndex;
+    if (totalEl) totalEl.textContent = totalBots;
+
+    const ul = document.getElementById('botsPaginationList');
+    if (!ul) return;
+    ul.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    // Bouton Précédent
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${page <= 1 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="renderBotsPage(${page - 1})" aria-label="Précédent">&lsaquo;</a>`;
+    ul.appendChild(prevLi);
+
+    // Fenêtre des numéros de pages
+    let startPage = Math.max(1, page - 2);
+    let endPage = Math.min(totalPages, page + 2);
+
+    if (startPage > 1) {
+        const firstLi = document.createElement('li');
+        firstLi.className = 'page-item';
+        firstLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="renderBotsPage(1)">1</a>`;
+        ul.appendChild(firstLi);
+
+        if (startPage > 2) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = `<span class="page-link">&hellip;</span>`;
+            ul.appendChild(ellipsisLi);
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const numLi = document.createElement('li');
+        numLi.className = `page-item ${i === page ? 'active' : ''}`;
+        numLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="renderBotsPage(${i})">${i}</a>`;
+        ul.appendChild(numLi);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = `<span class="page-link">&hellip;</span>`;
+            ul.appendChild(ellipsisLi);
+        }
+
+        const lastLi = document.createElement('li');
+        lastLi.className = 'page-item';
+        lastLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="renderBotsPage(${totalPages})">${totalPages}</a>`;
+        ul.appendChild(lastLi);
+    }
+
+    // Bouton Suivant
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${page >= totalPages ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="renderBotsPage(${page + 1})" aria-label="Suivant">&rsaquo;</a>`;
+    ul.appendChild(nextLi);
 }
 
 async function generatePresetBots() {
