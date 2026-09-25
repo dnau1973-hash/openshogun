@@ -1703,11 +1703,11 @@ class PlanetEngine {
 
         // Slots débloqués selon niveau du Tenshu
         $maxSlots = 0;
-        if ($hqLvl >= 15) {
+        if ($hqLvl >= 20) {
             $maxSlots = 3;
-        } elseif ($hqLvl >= 10) {
+        } elseif ($hqLvl >= 15) {
             $maxSlots = 2;
-        } elseif ($hqLvl >= 5) {
+        } elseif ($hqLvl >= 10) {
             $maxSlots = 1;
         }
 
@@ -1768,7 +1768,7 @@ class PlanetEngine {
             'available_slots' => $availableSlots,
             'costs' => $costs,
             'train_time' => $trainTime,
-            'next_threshold' => ($hqLvl < 5) ? 5 : (($hqLvl < 10) ? 10 : (($hqLvl < 15) ? 15 : null))
+            'next_threshold' => ($hqLvl < 10) ? 10 : (($hqLvl < 15) ? 15 : (($hqLvl < 20) ? 20 : null))
         ];
     }
 

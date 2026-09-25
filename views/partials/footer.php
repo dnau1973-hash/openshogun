@@ -52,6 +52,9 @@
     </div>
 </div>
 
+<!-- Conteneur Universel de Toasts Tabler.io pour Confirmations d'Actions & Notifications -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="tablerToastContainer" style="z-index: 99999; max-width: 420px;"></div>
+
 <!-- Modale d'Annonces & Notifications des Fonctionnalités -->
 <?php require_once __DIR__ . '/announcement_modal.php'; ?>
 <!-- Modale du Sceau Impérial / Privilège du Shōgun -->

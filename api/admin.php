@@ -54,7 +54,8 @@ try {
             $famineEnabled = !empty($_POST['famine_enabled']) && ($_POST['famine_enabled'] === '1' || $_POST['famine_enabled'] === 'true');
             $famineRate = max(0.5, min(50.0, (float)($_POST['famine_rate'] ?? 3.0)));
             $famineConsumption = max(0.1, min(20.0, (float)($_POST['famine_flour_consumption'] ?? 1.0)));
-            $heroCageDropRate = max(0, min(100, (int)($_POST['hero_cage_drop_rate'] ?? 15)));
+            $heroCageDropRate = max(0, min(100, (int)($_POST['hero_cage_drop_rate'] ?? 25)));
+            $heroXpRate = max(10, min(500, (int)($_POST['hero_xp_rate_percent'] ?? 100)));
 
             GameConfig::set('game_speed', $gameSpeed);
             GameConfig::set('resource_speed', $resourceSpeed);
@@ -73,6 +74,7 @@ try {
             GameConfig::set('famine_rate', $famineRate);
             GameConfig::set('famine_flour_consumption', $famineConsumption);
             GameConfig::set('hero_cage_drop_rate', $heroCageDropRate);
+            GameConfig::set('hero_xp_rate_percent', $heroXpRate);
 
             echo json_encode([
                 'success' => true,

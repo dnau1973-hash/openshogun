@@ -1998,7 +1998,7 @@ if (!$isEmptyPlot) {
                                 <span>⛩️</span> Expansion Coloniale : Pionniers Féodaux (Colons)
                             </h3>
                             <div class="text-secondary small mt-1">
-                                Le Tenshu permet de former des <strong>Pionniers Féodaux</strong> aux paliers de niveau <strong>5, 10 et 15</strong> pour annexer de nouveaux villages.
+                                Le Tenshu permet de former des <strong>Pionniers Féodaux</strong> aux paliers de niveau <strong>10, 15 et 20</strong> pour annexer de nouveaux villages.
                             </div>
                         </div>
                         <span class="badge <?= ($colonStatus['available_slots'] > 0) ? 'bg-success' : 'bg-secondary' ?> fs-5">
@@ -2009,21 +2009,21 @@ if (!$isEmptyPlot) {
                         <!-- Paliers de déblocage -->
                         <div class="row g-2 mb-3 text-center">
                             <div class="col-4">
-                                <div class="p-2 rounded border <?= ($tenshuLvl >= 5) ? 'border-success bg-success-lt' : 'bg-light text-muted' ?>">
-                                    <div class="fw-bold" style="font-size:0.8rem;">1er Fief</div>
-                                    <div class="small"><?= ($tenshuLvl >= 5) ? '🔓 Débloqué (Niv. 5)' : '🔒 Tenshu Niv. 5' ?></div>
-                                </div>
-                            </div>
-                            <div class="col-4">
                                 <div class="p-2 rounded border <?= ($tenshuLvl >= 10) ? 'border-success bg-success-lt' : 'bg-light text-muted' ?>">
-                                    <div class="fw-bold" style="font-size:0.8rem;">2e Fief</div>
+                                    <div class="fw-bold" style="font-size:0.8rem;">1er Fief</div>
                                     <div class="small"><?= ($tenshuLvl >= 10) ? '🔓 Débloqué (Niv. 10)' : '🔒 Tenshu Niv. 10' ?></div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="p-2 rounded border <?= ($tenshuLvl >= 15) ? 'border-success bg-success-lt' : 'bg-light text-muted' ?>">
-                                    <div class="fw-bold" style="font-size:0.8rem;">3e Fief</div>
+                                    <div class="fw-bold" style="font-size:0.8rem;">2e Fief</div>
                                     <div class="small"><?= ($tenshuLvl >= 15) ? '🔓 Débloqué (Niv. 15)' : '🔒 Tenshu Niv. 15' ?></div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 rounded border <?= ($tenshuLvl >= 20) ? 'border-success bg-success-lt' : 'bg-light text-muted' ?>">
+                                    <div class="fw-bold" style="font-size:0.8rem;">3e Fief</div>
+                                    <div class="small"><?= ($tenshuLvl >= 20) ? '🔓 Débloqué (Niv. 20)' : '🔒 Tenshu Niv. 20' ?></div>
                                 </div>
                             </div>
                         </div>

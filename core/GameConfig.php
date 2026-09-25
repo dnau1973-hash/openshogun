@@ -51,7 +51,8 @@ class GameConfig {
                     'famine_enabled' => false,
                     'famine_rate' => 3.0,
                     'famine_flour_consumption' => 1.0,
-                    'hero_cage_drop_rate' => 15
+                    'hero_cage_drop_rate' => 25,
+                    'hero_xp_rate_percent' => 100
                 ];
             }
         }

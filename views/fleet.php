@@ -224,11 +224,11 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                             <div style="flex:1;">
                                 <strong class="d-block mb-1">Aucun Pionnier Féodal (Colon ⛩️) en garnison !</strong>
                                 <p class="mb-2 small">
-                                    Pour ériger votre nouveau fief, vous devez d'abord former un <strong>Pionnier Féodal</strong>. Il est disponible au <strong>Donjon Tenshu</strong> (déblocage aux paliers de niveau 5, 10 et 15) ou à l'<strong>Atelier de Siège</strong>.
+                                    Pour ériger votre nouveau fief, vous devez d'abord former un <strong>Pionnier Féodal</strong>. Il est disponible au <strong>Donjon Tenshu</strong> (déblocage aux paliers de niveau 10, 15 et 20) ou à l'<strong>Atelier de Siège</strong>.
                                 </p>
                                 <div class="d-flex gap-2 flex-wrap align-items-center">
                                     <a href="?page=building&code=hq" class="btn btn-sm btn-success fw-bold">
-                                        🏯 Former au Donjon Tenshu (Niv. 5+) &rarr;
+                                        🏯 Former au Donjon Tenshu (Niv. 10+) &rarr;
                                     </a>
                                     <a href="?page=shipyard" class="btn btn-sm btn-outline-secondary">
                                         🔨 Atelier de Siège &amp; Écuries
@@ -836,7 +836,7 @@ async function submitFleet() {
         const colonizerCnt = parseInt(document.getElementById('ship-colonizer')?.value || '0', 10);
         const colonyShipCnt = parseInt(document.getElementById('ship-colony_ship')?.value || '0', 10);
         if (colonizerCnt <= 0 && colonyShipCnt <= 0) {
-            showModalAlert("Une expédition de colonisation nécessite d'inclure au moins 1 Pionnier Féodal (Colon ⛩️). Si vous n'en avez pas encore en garnison, vous devez d'abord en former un au Donjon Tenshu (Niv. 5+) ou à l'Atelier de Siège.", "warning", "Pionnier Requis");
+            showModalAlert("Une expédition de colonisation nécessite d'inclure au moins 1 Pionnier Féodal (Colon ⛩️). Si vous n'en avez pas encore en garnison, vous devez d'abord en former un au Donjon Tenshu (Niv. 10+) ou à l'Atelier de Siège.", "warning", "Pionnier Requis");
             return;
         }
     }

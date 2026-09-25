@@ -807,10 +807,16 @@ class HeroEngine {
 
         $dmgRes = $this->applyDamage($userId, $dmg);
 
-        // 2. Gain d'XP
-        $xpRanges = ['easy' => [80, 140], 'medium' => [140, 220], 'hard' => [220, 350]];
-        $xpRng = $xpRanges[$diff] ?? [100, 150];
+        // 2. Gain d'XP (base réduite pour freiner la progression trop rapide + modificateur admin paramétrable)
+        $xpRanges = ['easy' => [25, 45], 'medium' => [45, 75], 'hard' => [75, 120]];
+        $xpRng = $xpRanges[$diff] ?? [30, 50];
         $xpGain = rand($xpRng[0], $xpRng[1]);
+
+        // Modificateur d'expérience globale issu de l'Administration (Paramétrage du Monde)
+        $xpRatePct = max(10, min(500, (int)GameConfig::get('hero_xp_rate_percent', 100)));
+        if ($xpRatePct !== 100) {
+            $xpGain = (int)round($xpGain * ($xpRatePct / 100.0));
+        }
 
         // Bonus d'XP issu des reliques équipées (Miroir de Yata, Parchemins secrets, Kabutos dorés, etc.)
         $expBonusPct = (float)($hero['effective']['exp_bonus_pct'] ?? 0);
@@ -818,58 +824,54 @@ class HeroEngine {
             $xpGain = (int)round($xpGain * (1.0 + ($expBonusPct / 100.0)));
         }
 
+        $xpGain = max(1, $xpGain);
         $xpRes = $this->addExperience($userId, $xpGain);
 
-        // 3. Déterminer le trésor / butin trouvé (avec taux de drop paramétrable pour les cages)
-        $cageDropRate = max(0, min(100, (int)GameConfig::get('hero_cage_drop_rate', 15)));
+        // 3. Déterminer le trésor / butin trouvé
         $lootRoll = rand(1, 100);
         $cargoData = ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
         $lootMsg = "";
         $rewardedItem = null;
         $ralliedTroops = null;
 
-        if ($lootRoll <= $cageDropRate) {
+        if ($lootRoll <= 40) {
+            // Ressources
+            $mult = rand(5, 15) * 100;
+            $cargoData['metal'] = $mult;
+            $cargoData['crystal'] = (int)round($mult * 0.8);
+            $cargoData['deuterium'] = (int)round($mult * 0.6);
+            $lootMsg = "Des coffres de guerre dissimulés contenant {$cargoData['metal']} 🪵 Bois, {$cargoData['crystal']} 🪨 Pierre et {$cargoData['deuterium']} 🌾 Koku de Riz ont été découverts !";
+        } elseif ($lootRoll <= 65) {
+            // Équipement / Arsenal (Relique unique - jamais de doublon)
+            $rewardedItem = $this->grantRandomEquipment($userId);
+            if ($rewardedItem) {
+                $lootMsg = "Une relique légendaire sacrée et inédite a été exhumée : « {$rewardedItem['name']} » ({$rewardedItem['description']}) !";
+            } else {
+                // Si toutes les reliques sont déjà possédées par le joueur, récompense en abondance de ressources
+                $mult = rand(15, 25) * 100;
+                $cargoData['metal'] = $mult;
+                $cargoData['crystal'] = (int)round($mult * 0.8);
+                $cargoData['deuterium'] = (int)round($mult * 0.6);
+                $lootMsg = "Possédant déjà toutes les reliques sacrées de l'archipel, votre Samouraï découvre à la place un opulent trésor féodal : {$cargoData['metal']} 🪵 Bois, {$cargoData['crystal']} 🪨 Pierre et {$cargoData['deuterium']} 🌾 Koku de Riz !";
+            }
+        } elseif ($lootRoll <= 80) {
             // Cages de Capture Féodales (Kago 🎋) pour capturer les bêtes sauvages dans les oasis
             $cagesFound = rand(4, 10);
             $this->addCages($userId, $cagesFound);
             $totalCages = $this->getCagesCount($userId);
             $lootMsg = "Un lot de <strong>{$cagesFound} Cages Féodales de Chasse aux Fauves (Kago 🎋)</strong> en bambou armé a été récupéré (Stock total : {$totalCages}) ! Votre Samouraï pourra s'en servir pour capturer vivantes les bêtes sauvages des oasis sans combat.";
         } else {
-            // Autres récompenses équitablement réparties (Ressources 45%, Équipement/Relique 30%, Conscrits 25%)
-            $subRoll = rand(1, 100);
-            if ($subRoll <= 45) {
-                // Ressources
-                $mult = rand(5, 15) * 100;
-                $cargoData['metal'] = $mult;
-                $cargoData['crystal'] = (int)round($mult * 0.8);
-                $cargoData['deuterium'] = (int)round($mult * 0.6);
-                $lootMsg = "Des coffres de guerre dissimulés contenant {$cargoData['metal']} 🪵 Bois, {$cargoData['crystal']} 🪨 Pierre et {$cargoData['deuterium']} 🌾 Koku de Riz ont été découverts !";
-            } elseif ($subRoll <= 75) {
-                // Équipement / Arsenal (Relique unique - jamais de doublon)
-                $rewardedItem = $this->grantRandomEquipment($userId);
-                if ($rewardedItem) {
-                    $lootMsg = "Une relique légendaire sacrée et inédite a été exhumée : « {$rewardedItem['name']} » ({$rewardedItem['description']}) !";
-                } else {
-                    // Si toutes les reliques sont déjà possédées par le joueur, récompense en abondance de ressources
-                    $mult = rand(15, 25) * 100;
-                    $cargoData['metal'] = $mult;
-                    $cargoData['crystal'] = (int)round($mult * 0.8);
-                    $cargoData['deuterium'] = (int)round($mult * 0.6);
-                    $lootMsg = "Possédant déjà toutes les reliques sacrées de l'archipel, votre Samouraï découvre à la place un opulent trésor féodal : {$cargoData['metal']} 🪵 Bois, {$cargoData['crystal']} 🪨 Pierre et {$cargoData['deuterium']} 🌾 Koku de Riz !";
-                }
-            } else {
-                // Ralliement de guerriers conscrits
-                $faction = $hero['faction'] ?? 'terran';
-                $unitCodes = [
-                    'terran' => ['code' => 'piquier_ashigaru_yari', 'name' => 'Piquiers Ashigaru'],
-                    'vorash' => ['code' => 'fantassin_leger_takeda', 'name' => 'Fantassins Légers'],
-                    'aethelis' => ['code' => 'sentinelle_yari_tokugawa', 'name' => 'Sentinelles Yari']
-                ];
-                $uInfo = $unitCodes[$faction] ?? $unitCodes['terran'];
-                $troopCount = rand(4, 10);
-                $ralliedTroops = ['code' => $uInfo['code'], 'count' => $troopCount, 'name' => $uInfo['name']];
-                $lootMsg = "Des ronins et vaillants guerriers errants ({$troopCount} {$uInfo['name']}) impressionnés par la bravoure du Samouraï se rallient à votre clan !";
-            }
+            // Ralliement de guerriers conscrits
+            $faction = $hero['faction'] ?? 'terran';
+            $unitCodes = [
+                'terran' => ['code' => 'piquier_ashigaru_yari', 'name' => 'Piquiers Ashigaru'],
+                'vorash' => ['code' => 'fantassin_leger_takeda', 'name' => 'Fantassins Légers'],
+                'aethelis' => ['code' => 'sentinelle_yari_tokugawa', 'name' => 'Sentinelles Yari']
+            ];
+            $uInfo = $unitCodes[$faction] ?? $unitCodes['terran'];
+            $troopCount = rand(4, 10);
+            $ralliedTroops = ['code' => $uInfo['code'], 'count' => $troopCount, 'name' => $uInfo['name']];
+            $lootMsg = "Des ronins et vaillants guerriers errants ({$troopCount} {$uInfo['name']}) impressionnés par la bravoure du Samouraï se rallient à votre clan !";
         }
 
         // 4. Marquer l'aventure comme terminée

@@ -117,76 +117,99 @@ function closeUpgradeModal() {
 }
 
 // ==========================================================
-// SYSTÈME DE MODALE PERSONNALISÉE (REMPLACE ALERT & CONFIRM)
 // ==========================================================
-let customAlertResolver = null;
+// SYSTÈME DE TOAST TABLER.IO (CONFIRMATIONS D'ACTIONS & ALERTES)
+// ==========================================================
 
+function showToast(param1, param2 = 'info', param3 = null, duration = 4500) {
+    let message = param1 || '';
+    let type = param2 || 'info';
+    let title = param3 || null;
+
+    const validTypes = ['info', 'error', 'danger', 'warning', 'success'];
+    if (typeof param2 === 'string' && typeof param3 === 'string' && validTypes.includes(param3.toLowerCase())) {
+        title = param1;
+        message = param2;
+        type = param3.toLowerCase();
+    } else if (typeof param1 === 'string' && typeof param2 === 'string' && validTypes.includes(param2.toLowerCase())) {
+        message = param1;
+        type = param2.toLowerCase();
+        title = param3;
+    }
+
+    if (type === 'error') type = 'danger';
+
+    let container = document.getElementById('tablerToastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'tablerToastContainer';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '99999';
+        container.style.maxWidth = '420px';
+        document.body.appendChild(container);
+    }
+
+    const typeConfig = {
+        success: { color: 'success', icon: '✅', defaultTitle: 'Ordre Exécuté' },
+        danger:  { color: 'danger',  icon: '⚠️', defaultTitle: 'Alerte Système' },
+        warning: { color: 'warning', icon: '⚡', defaultTitle: 'Avertissement' },
+        info:    { color: 'info',    icon: 'ℹ️', defaultTitle: 'Transmission Féodale' }
+    };
+
+    const cfg = typeConfig[type] || typeConfig.info;
+    const finalTitle = title || cfg.defaultTitle;
+
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast show border border-${cfg.color} shadow-lg mb-2`;
+    toastEl.setAttribute('role', 'alert');
+    toastEl.setAttribute('aria-live', 'assertive');
+    toastEl.setAttribute('aria-atomic', 'true');
+    toastEl.style.backgroundColor = '#ffffff';
+    toastEl.style.borderRadius = '8px';
+    toastEl.style.overflow = 'hidden';
+    toastEl.style.transition = 'all 0.3s ease';
+
+    toastEl.innerHTML = `
+        <div class="toast-header bg-surface border-bottom py-2">
+            <span class="status-dot status-dot-animated bg-${cfg.color} me-2"></span>
+            <strong class="me-auto text-dark" style="font-size:0.88rem;"></strong>
+            <small class="text-muted ms-2" style="font-size:0.75rem;">À l'instant</small>
+            <button type="button" class="btn-close ms-2" aria-label="Fermer"></button>
+        </div>
+        <div class="toast-body d-flex align-items-center gap-2 py-2 px-3 text-dark" style="font-size:0.875rem; line-height:1.4;">
+            <span style="font-size:1.25rem;" class="flex-shrink-0">${cfg.icon}</span>
+            <div class="toast-message-content flex-grow-1"></div>
+        </div>
+    `;
+
+    toastEl.querySelector('strong').textContent = finalTitle;
+    const msgContent = toastEl.querySelector('.toast-message-content');
+    if (typeof message === 'string' && /<[a-z][\s\S]*>/i.test(message)) {
+        msgContent.innerHTML = message;
+    } else {
+        msgContent.textContent = message;
+    }
+
+    container.appendChild(toastEl);
+
+    const closeBtn = toastEl.querySelector('.btn-close');
+    const removeToast = () => {
+        toastEl.style.opacity = '0';
+        toastEl.style.transform = 'translateY(10px)';
+        setTimeout(() => toastEl.remove(), 250);
+    };
+
+    if (closeBtn) closeBtn.onclick = removeToast;
+    if (duration > 0) {
+        setTimeout(removeToast, duration);
+    }
+
+    return Promise.resolve(true);
+}
+
+// Remplacer showModalAlert par showToast pour toutes les confirmations d'action
 function showModalAlert(param1, param2 = 'info', param3 = null) {
-    return new Promise((resolve) => {
-        let message = param1 || '';
-        let type = param2 || 'info';
-        let title = param3 || null;
-
-        const validTypes = ['info', 'error', 'danger', 'warning', 'success'];
-        if (typeof param2 === 'string' && typeof param3 === 'string' && validTypes.includes(param3.toLowerCase())) {
-            title = param1;
-            message = param2;
-            type = param3.toLowerCase();
-        } else if (typeof param1 === 'string' && typeof param2 === 'string' && validTypes.includes(param2.toLowerCase())) {
-            message = param1;
-            type = param2.toLowerCase();
-            title = param3;
-        }
-
-        if (type === 'danger') type = 'error';
-
-        const modal = document.getElementById('customAlertModal');
-        const card = document.getElementById('customAlertCard');
-        const titleEl = document.getElementById('customAlertTitle');
-        const iconEl = document.getElementById('customAlertIcon');
-        const textEl = document.getElementById('customAlertText');
-        const actionsEl = document.getElementById('customAlertActions');
-
-        if (!modal) {
-            console.log(message);
-            return resolve(true);
-        }
-
-        // Nettoyer les classes de type précédentes
-        card.classList.remove('type-error', 'type-success', 'type-warning', 'type-confirm');
-
-        let defaultTitle = 'Transmission';
-        let icon = 'ℹ️';
-
-        if (type === 'error') {
-            card.classList.add('type-error');
-            defaultTitle = 'Alerte Système';
-            icon = '⚠️';
-        } else if (type === 'success') {
-            card.classList.add('type-success');
-            defaultTitle = 'Ordre Exécuté';
-            icon = '✅';
-        } else if (type === 'warning') {
-            card.classList.add('type-warning');
-            defaultTitle = 'Avertissement';
-            icon = '⚡';
-        }
-
-        titleEl.innerText = title || defaultTitle;
-        iconEl.innerText = icon;
-        textEl.innerText = message;
-
-        actionsEl.innerHTML = `
-            <button class="btn btn-primary" id="customAlertOkBtn" style="padding:0.5rem 1.25rem;">Compris</button>
-        `;
-
-        document.getElementById('customAlertOkBtn').onclick = () => {
-            closeCustomAlert();
-            resolve(true);
-        };
-
-        modal.style.display = 'flex';
-    });
+    return showToast(param1, param2, param3);
 }
 
 let currentConfirmResolve = null;

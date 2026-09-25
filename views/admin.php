@@ -843,39 +843,44 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </div>
                     </div>
 
-                    <!-- Paramètre Probabilité des Cages de Capture Féodales -->
+                    <!-- Paramètres des Quêtes Féodales & Samouraï Héros (Cages & XP) -->
                     <div class="row g-3 mb-3 border-top pt-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
                                 <span>🎋 Cages de Capture (Kago) en Quête (%)</span>
-                                <span class="badge bg-green-lt fw-bold" id="badge_hero_cage_drop_rate"><?= (int)($settings['hero_cage_drop_rate'] ?? 15) ?> %</span>
+                                <span class="badge bg-green-lt fw-bold" id="badge_hero_cage_drop_rate"><?= (int)($settings['hero_cage_drop_rate'] ?? 25) ?> %</span>
                             </label>
                             <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
                                 <input type="range" id="hero_cage_drop_rate_range" min="0" max="100" step="1" 
-                                       value="<?= (int)($settings['hero_cage_drop_rate'] ?? 15) ?>" class="form-range flex-grow-1" 
+                                       value="<?= (int)($settings['hero_cage_drop_rate'] ?? 25) ?>" class="form-range flex-grow-1" 
                                        oninput="document.getElementById('hero_cage_drop_rate_input').value = this.value; document.getElementById('badge_hero_cage_drop_rate').textContent = this.value + ' %';">
                                 <div class="input-group" style="width: 95px;">
                                     <input type="number" id="hero_cage_drop_rate_input" name="hero_cage_drop_rate" min="0" max="100" step="1" 
-                                           value="<?= (int)($settings['hero_cage_drop_rate'] ?? 15) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
+                                           value="<?= (int)($settings['hero_cage_drop_rate'] ?? 25) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
                                            oninput="document.getElementById('hero_cage_drop_rate_range').value = this.value; document.getElementById('badge_hero_cage_drop_rate').textContent = this.value + ' %';">
                                     <span class="input-group-text px-1 text-muted">%</span>
                                 </div>
                             </div>
-                            <div class="form-hint">Probabilité pour le Samouraï d'obtenir un lot de Cages (Kago 🎋) lors de chaque aventure, afin de capturer vivantes les bêtes sauvages (ours, loups, sangliers) des oasis pour défendre le fief.</div>
+                            <div class="form-hint">Probabilité pour le Samouraï de rapporter un lot de Cages (Kago 🎋) pour capturer les bêtes sauvages des oasis sans combat.</div>
                         </div>
 
                         <div class="col-md-6">
-                            <div class="card card-sm bg-body-tertiary border p-2 h-100 d-flex justify-content-center">
-                                <div class="d-flex align-items-center gap-3">
-                                    <span class="avatar avatar-md bg-success-lt text-success fs-2 flex-shrink-0">🎋</span>
-                                    <div>
-                                        <div class="fw-bold text-dark">Capture des Bêtes Sauvages (Faune Féodale)</div>
-                                        <div class="text-secondary small">
-                                            1 cage = 1 fauve capturé sans combat lors d'un assaut de héros sur une oasis. Les bêtes capturées rejoignent immédiatement la garnison défensive de votre château.
-                                        </div>
-                                    </div>
+                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
+                                <span>🥋 Gain d'Expérience (XP) en Aventure (%)</span>
+                                <span class="badge bg-primary-lt fw-bold" id="badge_hero_xp_rate"><?= (int)($settings['hero_xp_rate_percent'] ?? 100) ?> %</span>
+                            </label>
+                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
+                                <input type="range" id="hero_xp_rate_percent_range" min="10" max="500" step="5" 
+                                       value="<?= (int)($settings['hero_xp_rate_percent'] ?? 100) ?>" class="form-range flex-grow-1" 
+                                       oninput="document.getElementById('hero_xp_rate_percent_input').value = this.value; document.getElementById('badge_hero_xp_rate').textContent = this.value + ' %';">
+                                <div class="input-group" style="width: 95px;">
+                                    <input type="number" id="hero_xp_rate_percent_input" name="hero_xp_rate_percent" min="10" max="500" step="5" 
+                                           value="<?= (int)($settings['hero_xp_rate_percent'] ?? 100) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
+                                           oninput="document.getElementById('hero_xp_rate_percent_range').value = this.value; document.getElementById('badge_hero_xp_rate').textContent = this.value + ' %';">
+                                    <span class="input-group-text px-1 text-muted">%</span>
                                 </div>
                             </div>
+                            <div class="form-hint">Multiplicateur du gain d'XP du Héros lors des aventures. Diminuez ce pourcentage pour ralentir la montée de niveau du Samouraï.</div>
                         </div>
                     </div>
 
@@ -3095,6 +3100,9 @@ async function saveSettings(event) {
     }
     if (document.getElementById('hero_cage_drop_rate_input')) {
         formData.append('hero_cage_drop_rate', document.getElementById('hero_cage_drop_rate_input').value);
+    }
+    if (document.getElementById('hero_xp_rate_percent_input')) {
+        formData.append('hero_xp_rate_percent', document.getElementById('hero_xp_rate_percent_input').value);
     }
 
     try {
