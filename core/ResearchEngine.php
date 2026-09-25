@@ -38,10 +38,10 @@ class ResearchEngine {
             $nextLvl = $curLvl + 1;
             $mult = pow(1.8, $curLvl);
             $res['next_level'] = $nextLvl;
-            $res['cost_metal'] = (int)($res['metal_cost'] * $mult);
-            $res['cost_crystal'] = (int)($res['crystal_cost'] * $mult);
-            $res['cost_deuterium'] = (int)($res['deuterium_cost'] * $mult);
-            $res['duration'] = max(30, (int)(($res['base_time'] * pow(1.38, $curLvl) * $nextLvl) / ((1 + ($labLvl * 0.15)) * $speed)));
+            $res['cost_metal'] = (int)round($res['metal_cost'] * $mult);
+            $res['cost_crystal'] = (int)round($res['crystal_cost'] * $mult);
+            $res['cost_deuterium'] = (int)round($res['deuterium_cost'] * $mult);
+            $res['duration'] = max(30, (int)round(($res['base_time'] * pow(1.38, $curLvl) * $nextLvl) / ((1 + ($labLvl * 0.15)) * $speed)));
             $res['can_research'] = ($labLvl >= 1);
         }
 
@@ -88,16 +88,16 @@ class ResearchEngine {
         $curLvl = (int)$res['current_level'];
         $nextLvl = $curLvl + 1;
         $mult = pow(1.8, $curLvl);
-        $costMetal = (int)($res['metal_cost'] * $mult);
-        $costCrystal = (int)($res['crystal_cost'] * $mult);
-        $costDeut = (int)($res['deuterium_cost'] * $mult);
+        $costMetal = (int)round($res['metal_cost'] * $mult);
+        $costCrystal = (int)round($res['crystal_cost'] * $mult);
+        $costDeut = (int)round($res['deuterium_cost'] * $mult);
 
         if ($planet['metal'] < $costMetal || $planet['crystal'] < $costCrystal || $planet['deuterium'] < $costDeut) {
             throw new Exception("Ressources insuffisantes pour cette technologie.");
         }
 
         $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
-        $duration = max(30, (int)(($res['base_time'] * pow(1.38, $curLvl) * $nextLvl) / ((1 + ($labLvl * 0.15)) * $speed)));
+        $duration = max(30, (int)round(($res['base_time'] * pow(1.38, $curLvl) * $nextLvl) / ((1 + ($labLvl * 0.15)) * $speed)));
 
         $now = time();
         $finishesAt = $now + $duration;
