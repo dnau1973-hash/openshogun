@@ -141,6 +141,7 @@ $navItems = [
     ['page' => 'resources', 'match' => ['resources','field'], 'icon' => '🌾', 'label' => 'Terroir Féodal',     'title' => 'Terroir & Récoltes'],
     ['page' => 'city',      'match' => ['city','building'],   'icon' => '🏯', 'label' => 'Cité Castrale',      'title' => 'Bâtiments & Châteaux'],
     ['page' => 'map',       'match' => ['map','galaxy'],      'icon' => '🗾', 'label' => 'Carte',               'title' => 'Carte des Provinces'],
+    ['page' => 'ranking',   'match' => ['ranking'],           'icon' => '🏆', 'label' => 'Classement',          'title' => 'Classement des Daimyōs & Alliances'],
 ];
 ?>
 
@@ -266,6 +267,10 @@ $navItems = [
                                     <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'alliance' ? 'active fw-bold' : '' ?>" href="?page=alliance">
                                         <span class="dropdown-item-icon">🎌</span>
                                         <span>Alliance</span>
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'ranking' ? 'active fw-bold' : '' ?>" href="?page=ranking">
+                                        <span class="dropdown-item-icon">🏆</span>
+                                        <span>Classement</span>
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a href="javascript:void(0)" class="dropdown-item d-flex align-items-center gap-2" onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">

@@ -1,6 +1,6 @@
 <?php
 /**
- * Vue du Classement Galactique, Alliances & Tableau d'Honneur (Style Travian)
+ * Vue du Classement Féodal, Alliances & Tableau d'Honneur (Style Travian - Full Tabler.io)
  */
 require_once __DIR__ . '/../core/HonorEngine.php';
 require_once __DIR__ . '/../core/AllianceEngine.php';
@@ -12,8 +12,11 @@ $honorEngine = new HonorEngine();
 $allianceEngine = new AllianceEngine();
 
 $tab = $_GET['tab'] ?? 'general';
+if (!in_array($tab, ['general', 'alliances', 'honor'])) {
+    $tab = 'general';
+}
 
-// 1. Classement Général
+// 1. Classement Général des Joueurs
 $stmt = $db->query("
     SELECT u.id, u.username, u.faction, u.points, u.created_at, u.protection_until, u.is_bot,
            COUNT(p.id) as planet_count, a.name as alliance_name, a.tag as alliance_tag
@@ -24,325 +27,457 @@ $stmt = $db->query("
     ORDER BY u.points DESC, u.id ASC 
     LIMIT 50
 ");
-$players = $stmt->fetchAll();
+$players = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 2. Tableau d'Honneur de la Semaine
+// 2. Tableau d'Honneur Hebdomadaire
 $honorRoll = $honorEngine->getFullHonorRoll(10);
 $currentWeek = date('W');
 $currentYear = date('Y');
 
 // 3. Classement des Alliances Féodales
 $alliancesRanking = $allianceEngine->getAlliancesRanking(50);
+
+/**
+ * Helper de rendu d'une colonne du Tableau d'Honneur
+ */
+function renderTablerHonorColumn(array $list, string $unitLabel): void {
+    if (empty($list)) {
+        echo '<div class="card-body text-center text-secondary py-4 small">Aucune donnée pour cette semaine.</div>';
+        return;
+    }
+    echo '<div class="table-responsive">';
+    echo '<table class="table table-vcenter card-table table-hover table-sm">';
+    $pos = 1;
+    foreach ($list as $row) {
+        $badgeClass = match ($pos) {
+            1 => 'bg-warning text-dark fw-bold',
+            2 => 'bg-secondary text-white fw-bold',
+            3 => 'bg-amber text-white fw-bold',
+            default => 'bg-secondary-lt text-secondary'
+        };
+        $medalLabel = match ($pos) {
+            1 => '🥇 1',
+            2 => '🥈 2',
+            3 => '🥉 3',
+            default => '#' . $pos
+        };
+        $fInfo = FACTIONS[$row['faction']] ?? FACTIONS['terran'];
+        echo '<tr>';
+        echo '<td class="w-1 text-center py-2"><span class="badge ' . $badgeClass . ' py-1 px-2">' . $medalLabel . '</span></td>';
+        echo '<td class="py-2">';
+        echo '  <a href="javascript:void(0)" onclick="openPlayerProfileModal(' . (int)$row['user_id'] . ')" class="text-reset fw-semibold d-inline-flex align-items-center gap-1 text-decoration-none" title="Voir la fiche de ' . htmlspecialchars($row['username']) . '">';
+        echo '    <span class="fs-4">' . $fInfo['icon'] . '</span>';
+        echo '    <span>' . htmlspecialchars($row['username']) . '</span>';
+        echo '  </a>';
+        echo '</td>';
+        echo '<td class="text-end py-2">';
+        echo '  <span class="badge bg-warning-lt text-warning fw-bold font-monospace fs-4">+' . number_format($row['score']) . '</span>';
+        echo '</td>';
+        echo '</tr>';
+        $pos++;
+    }
+    echo '</table>';
+    echo '</div>';
+}
 ?>
 
-<div class="ranking-container">
-    <!-- Sélecteur d'Onglets de Prestige -->
-    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; flex-wrap: wrap;">
-        <button class="btn <?= ($tab === 'general') ? 'btn-primary' : 'btn-secondary' ?>" 
-                id="tabBtnGeneral" onclick="switchRankingTab('general')" style="font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-            <span>🏆</span> Classement Général
-        </button>
-        <button class="btn <?= ($tab === 'alliances') ? 'btn-primary' : 'btn-secondary' ?>" 
-                id="tabBtnAlliances" onclick="switchRankingTab('alliances')" style="font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-            <span>🎌</span> Alliances Féodales
-            <span class="badge bg-danger-lt" style="font-size: 0.75rem;">
-                <?= count($alliancesRanking) ?>
-            </span>
-        </button>
-        <button class="btn <?= ($tab === 'honor') ? 'btn-primary' : 'btn-secondary' ?>" 
-                id="tabBtnHonor" onclick="switchRankingTab('honor')" style="font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-            <span>🎖️</span> Tableau d'Honneur de la Semaine
-            <span class="badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15; font-size: 0.75rem; border: 1px solid #eab308;">
-                S<?= $currentWeek ?>
-            </span>
-        </button>
-    </div>
-
-    <!-- ONGLET 1 : Classement Général des Points de Puissance -->
-    <div id="sectionGeneral" style="display: <?= ($tab === 'general') ? 'block' : 'none' ?>;">
-        <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                    <span>🏆</span> Panthéon des Daimyōs - Points de Puissance Féodale
+<!-- 🏆 EN-TÊTE DE PAGE TABLER -->
+<div class="page-header d-print-none mb-3">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle text-secondary">Honneur &amp; Renommée de l'Archipel</div>
+                <h2 class="page-title d-flex align-items-center gap-2">
+                    <span class="text-warning">🏆</span> Palmarès &amp; Gloire du Japon
                 </h2>
-                <span style="color: var(--text-muted); font-size: 0.85rem;">Mise à jour en temps réel</span>
             </div>
-            <div class="card-body" style="padding:0; overflow-x:auto;">
-                <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
-                    <thead>
-                        <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-muted);">
-                            <th style="padding:0.75rem 1rem; width: 60px;">Rang</th>
-                            <th style="padding:0.75rem 1rem;">Daimyō</th>
-                            <th style="padding:0.75rem 1rem;">Clan</th>
-                            <th style="padding:0.75rem 1rem;">Pacte de Clan</th>
-                            <th style="padding:0.75rem 1rem; text-align: center;">Fiefs</th>
-                            <th style="padding:0.75rem 1rem; text-align:right;">Puissance Féodale</th>
-                            <th style="padding:0.75rem 1rem; text-align:center; width:140px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php $rank = 1; foreach ($players as $p): ?>
-                            <?php 
-                                $isCurrent = ($p['id'] == $user['id']); 
-                                $fInfo = FACTIONS[$p['faction']] ?? FACTIONS['terran'];
-                            ?>
-                            <tr style="border-bottom:1px solid rgba(255,255,255,0.05); background:<?= $isCurrent ? 'rgba(220,38,38,0.1)' : 'transparent' ?>;">
-                                <td style="padding:0.75rem 1rem; font-weight:700; color:<?= ($rank === 1) ? '#facc15' : (($rank === 2) ? '#cbd5e1' : (($rank === 3) ? '#d97706' : 'inherit')) ?>;">
-                                    <?= ($rank === 1) ? '🥇 #1' : (($rank === 2) ? '🥈 #2' : (($rank === 3) ? '🥉 #3' : '#' . $rank)) ?>
-                                    <?php $rank++; ?>
-                                </td>
-                                <td style="padding:0.75rem 1rem; font-weight:700;">
-                                    <a href="javascript:void(0)" onclick="openPlayerProfileModal(<?= $p['id'] ?>)" 
-                                       style="color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;" 
-                                       class="profile-link-hover" title="Consulter la fiche du Daimyō">
-                                        <span>👤</span> <?= htmlspecialchars($p['username']) ?>
-                                    </a>
-                                    <?php if (Auth::isUserProtected($p)): ?>
-                                        <span class="badge bg-success-lt ms-1" style="font-size:0.68rem; padding:0.15rem 0.35rem;" title="Immunité Féodale des Nouveaux Joueurs Active">🔰</span>
-                                    <?php endif; ?>
-                                    <?= $isCurrent ? '<span style="color:#dc2626; font-size:0.75rem; margin-left:0.5rem;">(Vous)</span>' : '' ?>
-                                </td>
-                                <td style="padding:0.75rem 1rem;">
-                                    <span class="faction-badge <?= $p['faction'] ?>">
-                                        <?= $fInfo['icon'] ?> <?= htmlspecialchars($fInfo['name']) ?>
-                                    </span>
-                                </td>
-                                <td style="padding:0.75rem 1rem; color:var(--text-muted);">
-                                    <?= $p['alliance_tag'] ? '[' . htmlspecialchars($p['alliance_tag']) . ']' : '-' ?>
-                                </td>
-                                <td style="padding:0.75rem 1rem; text-align:center; font-weight:700;">
-                                    <?= number_format($p['planet_count']) ?>
-                                </td>
-                                <td style="padding:0.75rem 1rem; text-align:right; font-weight:700; color:#dc2626;">
-                                    <?= number_format($p['points']) ?>
-                                </td>
-                                <td style="padding:0.75rem 1rem; text-align:center;">
-                                    <div style="display: flex; gap: 0.4rem; justify-content: center;">
-                                        <button onclick="openPlayerProfileModal(<?= $p['id'] ?>)" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem;" title="Fiche du Daimyō">
-                                            👤 Fiche
-                                        </button>
-                                        <?php if (!$isCurrent): ?>
-                                            <a href="?page=messages&tab=compose&to=<?= urlencode($p['username']) ?>" 
-                                               class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem;" 
-                                               title="Envoyer une missive">
-                                                ✉️
-                                            </a>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- ONGLET ALLIANCES : Classement des Alliances Féodales -->
-    <div id="sectionAlliances" style="display: <?= ($tab === 'alliances') ? 'block' : 'none' ?>;">
-        <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                    <span>🎌</span> Grand Livre des Alliances & Ligues Féodales
-                </h2>
-                <a href="/?page=alliance" class="btn btn-sm btn-outline-danger">
-                    🏛️ Ouvrir le Pavillon des Alliances
-                </a>
-            </div>
-            <div class="card-body" style="padding:0; overflow-x:auto;">
-                <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
-                    <thead>
-                        <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-muted);">
-                            <th style="padding:0.75rem 1rem; width: 60px;">Rang</th>
-                            <th style="padding:0.75rem 1rem;">Alliance</th>
-                            <th style="padding:0.75rem 1rem;">Chef Suprême</th>
-                            <th style="padding:0.75rem 1rem; text-align:center;">Membres / Capacité</th>
-                            <th style="padding:0.75rem 1rem; text-align:center;">Fiefs</th>
-                            <th style="padding:0.75rem 1rem; text-align:right;">Moyenne / Daimyō</th>
-                            <th style="padding:0.75rem 1rem; text-align:right;">Puissance Globale</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($alliancesRanking)): ?>
-                            <tr>
-                                <td colspan="7" style="padding: 2rem; text-align: center; color: var(--text-muted);">
-                                    Aucune alliance n'a encore été proclamée. Rendez-vous au Pavillon Diplomatique pour fonder la première ligue du Japon !
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php $aRank = 1; foreach ($alliancesRanking as $a): ?>
-                                <?php
-                                $isMyAlly = (!empty($user['alliance_id']) && (int)$user['alliance_id'] === (int)$a['id']);
-                                ?>
-                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05); background:<?= $isMyAlly ? 'rgba(220,38,38,0.1)' : 'transparent' ?>;">
-                                    <td style="padding:0.75rem 1rem; font-weight:700; color:<?= ($aRank === 1) ? '#facc15' : (($aRank === 2) ? '#cbd5e1' : (($aRank === 3) ? '#d97706' : 'inherit')) ?>;">
-                                        <?= ($aRank === 1) ? '🥇 #1' : (($aRank === 2) ? '🥈 #2' : (($aRank === 3) ? '🥉 #3' : '#' . $aRank)) ?>
-                                        <?php $aRank++; ?>
-                                    </td>
-                                    <td style="padding:0.75rem 1rem; font-weight:700;">
-                                        <span class="badge bg-danger text-white me-1">[<?= htmlspecialchars($a['tag']) ?>]</span>
-                                        <span style="color: #fff;"><?= htmlspecialchars($a['name']) ?></span>
-                                        <?= $isMyAlly ? '<span style="color:#dc2626; font-size:0.75rem; margin-left:0.5rem;">(Votre Clan)</span>' : '' ?>
-                                    </td>
-                                    <td style="padding:0.75rem 1rem;">
-                                        <a href="javascript:void(0)" onclick="openPlayerProfileModal(<?= $a['leader_id'] ?>)" 
-                                           style="color: inherit; text-decoration: none;" class="profile-link-hover">
-                                            👑 <?= htmlspecialchars($a['leader_name']) ?>
-                                        </a>
-                                    </td>
-                                    <td style="padding:0.75rem 1rem; text-align:center;">
-                                        <?= $a['member_count'] ?> / <?= $a['capacity'] ?>
-                                        <?php if ($a['member_count'] >= $a['capacity']): ?>
-                                            <span class="badge bg-secondary ms-1" style="font-size:0.68rem;">Plein</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td style="padding:0.75rem 1rem; text-align:center; font-weight:700;">
-                                        <?= number_format($a['total_planets']) ?>
-                                    </td>
-                                    <td style="padding:0.75rem 1rem; text-align:right; color:var(--text-muted);">
-                                        <?= number_format($a['avg_points']) ?>
-                                    </td>
-                                    <td style="padding:0.75rem 1rem; text-align:right; font-weight:700; color:#dc2626;">
-                                        <?= number_format($a['total_points']) ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- ONGLET 3 : Tableau d'Honneur Hebdomadaire (Style Travian) -->
-    <div id="sectionHonor" style="display: <?= ($tab === 'honor') ? 'block' : 'none' ?>;">
-        <!-- Bannière d'Honneur -->
-        <div style="background: linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(17, 18, 24, 0.95) 100%); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-                <h2 style="color: #facc15; font-size: 1.6rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                    <span>🎖️</span> Tableau d'Honneur Féodal - Semaine <?= $currentWeek ?> / <?= $currentYear ?>
-                </h2>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.35rem; line-height: 1.5;">
-                    Les 10 plus illustres daimyōs récompensés chaque semaine par décret impérial du Shogunat.<br>
-                    Médailles décernées : <strong>🥇 Or (1er)</strong>, <strong>🥈 Argent (2ème)</strong>, <strong>🥉 Bronze (3ème)</strong> et <strong>🎖️ Rubans Top 10</strong>.
-                </p>
-            </div>
-            <div style="text-align: right;">
-                <span class="badge" style="background: rgba(234, 179, 8, 0.25); color: #fef08a; border: 1px solid #eab308; padding: 0.5rem 1rem; font-size: 0.9rem; font-weight: 800;">
-                    🏆 DÉCRET DU SHOGUNAT
-                </span>
-            </div>
-        </div>
-
-        <!-- 4 Colonnes du Top 10 Travian-Style -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 1.5rem;">
-            <!-- 1. Meilleure Progression -->
-            <div class="card" style="border-color: rgba(220, 38, 38, 0.3);">
-                <div class="card-header" style="background: rgba(220, 38, 38, 0.1); border-bottom: 1px solid rgba(220, 38, 38, 0.2); padding: 0.85rem 1rem;">
-                    <h3 style="color: #dc2626; font-size: 1.05rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📈</span> Top Progression
-                    </h3>
-                    <small style="color: var(--text-muted); font-size: 0.75rem;">Puissance de domaine acquise cette semaine</small>
-                </div>
-                <div class="card-body" style="padding: 0;">
-                    <?php renderHonorColumn($honorRoll['progression'], 'points'); ?>
-                </div>
-            </div>
-
-            <!-- 2. Meilleurs Attaquants -->
-            <div class="card" style="border-color: rgba(239, 68, 68, 0.3);">
-                <div class="card-header" style="background: rgba(239, 68, 68, 0.1); border-bottom: 1px solid rgba(239, 68, 68, 0.2); padding: 0.85rem 1rem;">
-                    <h3 style="color: #f87171; font-size: 1.05rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>⚔️</span> Top Conquérants
-                    </h3>
-                    <small style="color: var(--text-muted); font-size: 0.75rem;">Sièges victorieux et garnisons vaincues</small>
-                </div>
-                <div class="card-body" style="padding: 0;">
-                    <?php renderHonorColumn($honorRoll['attack'], 'points'); ?>
-                </div>
-            </div>
-
-            <!-- 3. Meilleurs Défenseurs -->
-            <div class="card" style="border-color: rgba(52, 211, 153, 0.3);">
-                <div class="card-header" style="background: rgba(52, 211, 153, 0.1); border-bottom: 1px solid rgba(52, 211, 153, 0.2); padding: 0.85rem 1rem;">
-                    <h3 style="color: #34d399; font-size: 1.05rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🛡️</span> Top Défenseurs
-                    </h3>
-                    <small style="color: var(--text-muted); font-size: 0.75rem;">Assauts ennemis repoussés sur vos châteaux</small>
-                </div>
-                <div class="card-body" style="padding: 0;">
-                    <?php renderHonorColumn($honorRoll['defense'], 'points'); ?>
-                </div>
-            </div>
-
-            <!-- 4. Meilleurs Pillards -->
-            <div class="card" style="border-color: rgba(168, 85, 247, 0.3);">
-                <div class="card-header" style="background: rgba(168, 85, 247, 0.1); border-bottom: 1px solid rgba(168, 85, 247, 0.2); padding: 0.85rem 1rem;">
-                    <h3 style="color: #c084fc; font-size: 1.05rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🌾</span> Top Pillards de Riz
-                    </h3>
-                    <small style="color: var(--text-muted); font-size: 0.75rem;">Récoltes et vivres saisis en raid</small>
-                </div>
-                <div class="card-body" style="padding: 0;">
-                    <?php renderHonorColumn($honorRoll['raid'], 'ressources'); ?>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="?page=alliance" class="btn btn-outline-danger d-none d-sm-inline-flex align-items-center gap-1">
+                        <span>🎌</span> Pavillon des Alliances
+                    </a>
+                    <button type="button" onclick="window.location.reload()" class="btn btn-white d-inline-flex align-items-center gap-1 shadow-sm" title="Actualiser le classement">
+                        <span>🔄</span> Actualiser
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<?php
-/**
- * Rendu d'une colonne du Tableau d'Honneur
- */
-function renderHonorColumn(array $list, string $unitLabel): void {
-    if (empty($list)) {
-        echo "<div style='padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;'>Aucune donnée pour cette semaine.</div>";
-        return;
-    }
-    echo "<table style='width:100%; border-collapse:collapse; font-size:0.85rem;'>";
-    $pos = 1;
-    foreach ($list as $row) {
-        $medalIcon = match ($pos) {
-            1 => "🥇",
-            2 => "🥈",
-            3 => "🥉",
-            default => "<span style='color:var(--text-muted); font-size:0.75rem;'>#{$pos}</span>"
-        };
-        $fInfo = FACTIONS[$row['faction']] ?? FACTIONS['terran'];
-        echo "<tr style='border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s;'>";
-        echo "<td style='padding: 0.6rem 0.75rem; width: 35px; text-align: center; font-size: 1rem;'>{$medalIcon}</td>";
-        echo "<td style='padding: 0.6rem 0.5rem; font-weight: 700;'>
-                <a href='javascript:void(0)' onclick='openPlayerProfileModal({$row['user_id']})' 
-                   style='color:#fff; text-decoration:none;' class='profile-link-hover' title='Voir la fiche de {$row['username']}'>
-                   {$fInfo['icon']} " . htmlspecialchars($row['username']) . "
-                </a>
-              </td>";
-        echo "<td style='padding: 0.6rem 0.75rem; text-align: right; font-weight: 800; color: #facc15; font-family: monospace;'>
-                +" . number_format($row['score']) . "
-              </td>";
-        echo "</tr>";
-        $pos++;
-    }
-    echo "</table>";
-}
-?>
+<div class="container-xl">
+    <!-- 🗂️ CARTE AVEC ONGLETS TABLER -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header border-bottom-0 pb-0">
+            <ul class="nav nav-tabs card-header-tabs flex-wrap" data-bs-toggle="tabs" role="tablist" id="rankingTabsNav">
+                <li class="nav-item" role="presentation">
+                    <a href="#tab-general" 
+                       class="nav-link <?= ($tab === 'general') ? 'active' : '' ?>" 
+                       data-bs-toggle="tab" 
+                       data-tab-name="general"
+                       role="tab" 
+                       aria-selected="<?= ($tab === 'general') ? 'true' : 'false' ?>">
+                        <span class="nav-link-icon me-1">🏆</span>
+                        Classement Général
+                        <span class="badge bg-primary-lt ms-2"><?= count($players) ?></span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a href="#tab-alliances" 
+                       class="nav-link <?= ($tab === 'alliances') ? 'active' : '' ?>" 
+                       data-bs-toggle="tab" 
+                       data-tab-name="alliances"
+                       role="tab" 
+                       aria-selected="<?= ($tab === 'alliances') ? 'true' : 'false' ?>">
+                        <span class="nav-link-icon me-1">🎌</span>
+                        Alliances Féodales
+                        <span class="badge bg-danger-lt ms-2"><?= count($alliancesRanking) ?></span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a href="#tab-honor" 
+                       class="nav-link <?= ($tab === 'honor') ? 'active' : '' ?>" 
+                       data-bs-toggle="tab" 
+                       data-tab-name="honor"
+                       role="tab" 
+                       aria-selected="<?= ($tab === 'honor') ? 'true' : 'false' ?>">
+                        <span class="nav-link-icon me-1">🎖️</span>
+                        Tableau d'Honneur
+                        <span class="badge bg-warning-lt ms-2">Semaine <?= $currentWeek ?></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
 
-<style>
-.profile-link-hover:hover {
-    color: #dc2626 !important;
-    text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
-}
-</style>
+        <div class="tab-content">
+            <!-- ========================================== -->
+            <!-- ONGLET 1 : CLASSEMENT GÉNÉRAL DES JOUEURS  -->
+            <!-- ========================================== -->
+            <div class="tab-pane <?= ($tab === 'general') ? 'active show' : '' ?>" id="tab-general" role="tabpanel">
+                <div class="card-body border-bottom py-3 d-flex justify-content-between align-items-center bg-light-subtle">
+                    <div class="text-secondary small">
+                        <span>Top 50 des Daimyōs les plus puissants du Japon • Points calculés selon le développement des fiefs et des armées</span>
+                    </div>
+                    <div class="text-secondary small d-none d-md-flex align-items-center gap-2">
+                        <span class="badge bg-success-lt d-inline-flex align-items-center gap-1">
+                            <span class="badge-dot bg-success"></span> Temps réel
+                        </span>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-vcenter table-nowrap card-table table-hover">
+                        <thead>
+                            <tr class="text-uppercase text-secondary fs-6">
+                                <th class="w-1 text-center">Rang</th>
+                                <th>Daimyō</th>
+                                <th>Clan</th>
+                                <th>Alliance</th>
+                                <th class="text-center">Fiefs</th>
+                                <th class="text-end">Puissance Féodale</th>
+                                <th class="w-1 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $rank = 1; foreach ($players as $p): ?>
+                                <?php 
+                                    $isCurrent = ($p['id'] == $user['id']); 
+                                    $fInfo = FACTIONS[$p['faction']] ?? FACTIONS['terran'];
+                                ?>
+                                <tr class="<?= $isCurrent ? 'table-warning' : '' ?>">
+                                    <td class="text-center">
+                                        <?php if ($rank === 1): ?>
+                                            <span class="badge bg-warning text-dark fw-bold fs-4 px-2 py-1 shadow-sm">🥇 #1</span>
+                                        <?php elseif ($rank === 2): ?>
+                                            <span class="badge bg-secondary text-white fw-bold fs-4 px-2 py-1 shadow-sm">🥈 #2</span>
+                                        <?php elseif ($rank === 3): ?>
+                                            <span class="badge bg-amber text-white fw-bold fs-4 px-2 py-1 shadow-sm">🥉 #3</span>
+                                        <?php else: ?>
+                                            <span class="text-secondary fw-bold fs-4">#<?= $rank ?></span>
+                                        <?php endif; ?>
+                                        <?php $rank++; ?>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <a href="javascript:void(0)" onclick="openPlayerProfileModal(<?= (int)$p['id'] ?>)" 
+                                               class="text-reset fw-bold text-decoration-none d-inline-flex align-items-center gap-1" 
+                                               title="Consulter la fiche du Daimyō">
+                                                <span>👤</span>
+                                                <span><?= htmlspecialchars($p['username']) ?></span>
+                                            </a>
+                                            <?php if (Auth::isUserProtected($p)): ?>
+                                                <span class="badge bg-success-lt" title="Immunité Féodale des Nouveaux Joueurs Active">🔰 Trêve</span>
+                                            <?php endif; ?>
+                                            <?php if (!empty($p['is_bot'])): ?>
+                                                <span class="badge bg-secondary-lt" title="Daimyō IA Autonome">🤖 IA</span>
+                                            <?php endif; ?>
+                                            <?php if ($isCurrent): ?>
+                                                <span class="badge bg-red text-white fw-bold">Vous</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-blue-lt d-inline-flex align-items-center gap-1">
+                                            <span><?= $fInfo['icon'] ?></span>
+                                            <span><?= htmlspecialchars($fInfo['name']) ?></span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($p['alliance_tag'])): ?>
+                                            <a href="?page=alliance" class="badge bg-danger-lt text-danger text-decoration-none fw-bold" title="Ligue : <?= htmlspecialchars($p['alliance_name'] ?? '') ?>">
+                                                [<?= htmlspecialchars($p['alliance_tag']) ?>] <?= htmlspecialchars($p['alliance_name'] ?? '') ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-secondary small">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-azure-lt fw-bold fs-4"><?= number_format($p['planet_count']) ?></span>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="text-danger fw-bold fs-3"><?= number_format($p['points']) ?></span>
+                                        <span class="text-secondary small ms-1">pts</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-list flex-nowrap justify-content-center">
+                                            <button type="button" onclick="openPlayerProfileModal(<?= (int)$p['id'] ?>)" 
+                                                    class="btn btn-sm btn-white d-inline-flex align-items-center gap-1 shadow-sm" 
+                                                    title="Fiche du Daimyō">
+                                                <span>👤</span> <span class="d-none d-md-inline">Fiche</span>
+                                            </button>
+                                            <?php if (!$isCurrent): ?>
+                                                <a href="?page=messages&tab=compose&to=<?= urlencode($p['username']) ?>" 
+                                                   class="btn btn-sm btn-white d-inline-flex align-items-center gap-1 shadow-sm" 
+                                                   title="Envoyer une missive">
+                                                    <span>✉️</span>
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- ONGLET 2 : CLASSEMENT DES ALLIANCES        -->
+            <!-- ========================================== -->
+            <div class="tab-pane <?= ($tab === 'alliances') ? 'active show' : '' ?>" id="tab-alliances" role="tabpanel">
+                <div class="card-body border-bottom py-3 d-flex justify-content-between align-items-center bg-light-subtle flex-wrap gap-2">
+                    <div class="text-secondary small">
+                        <span>Grand Livre des Alliances &amp; Ligues Féodales du Shogunat</span>
+                    </div>
+                    <div>
+                        <a href="/?page=alliance" class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1 shadow-sm">
+                            <span>🏛️</span> Pavillon Diplomatique
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-vcenter table-nowrap card-table table-hover">
+                        <thead>
+                            <tr class="text-uppercase text-secondary fs-6">
+                                <th class="w-1 text-center">Rang</th>
+                                <th>Alliance</th>
+                                <th>Chef Suprême</th>
+                                <th class="text-center">Membres / Capacité</th>
+                                <th class="text-center">Fiefs</th>
+                                <th class="text-end">Moyenne / Daimyō</th>
+                                <th class="text-end">Puissance Globale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($alliancesRanking)): ?>
+                                <tr>
+                                    <td colspan="7" class="p-0">
+                                        <div class="empty py-5">
+                                            <div class="empty-icon fs-1 text-secondary">🎌</div>
+                                            <p class="empty-title">Aucune alliance n'a encore été proclamée</p>
+                                            <p class="empty-subtitle text-secondary">Rendez-vous au Pavillon Diplomatique pour fonder la première ligue souveraine du Japon !</p>
+                                            <div class="empty-action">
+                                                <a href="/?page=alliance" class="btn btn-primary d-inline-flex align-items-center gap-1">
+                                                    <span>🏛️</span> Fonder une Alliance
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php $aRank = 1; foreach ($alliancesRanking as $a): ?>
+                                    <?php
+                                    $isMyAlly = (!empty($user['alliance_id']) && (int)$user['alliance_id'] === (int)$a['id']);
+                                    ?>
+                                    <tr class="<?= $isMyAlly ? 'table-warning' : '' ?>">
+                                        <td class="text-center">
+                                            <?php if ($aRank === 1): ?>
+                                                <span class="badge bg-warning text-dark fw-bold fs-4 px-2 py-1 shadow-sm">🥇 #1</span>
+                                            <?php elseif ($aRank === 2): ?>
+                                                <span class="badge bg-secondary text-white fw-bold fs-4 px-2 py-1 shadow-sm">🥈 #2</span>
+                                            <?php elseif ($aRank === 3): ?>
+                                                <span class="badge bg-amber text-white fw-bold fs-4 px-2 py-1 shadow-sm">🥉 #3</span>
+                                            <?php else: ?>
+                                                <span class="text-secondary fw-bold fs-4">#<?= $aRank ?></span>
+                                            <?php endif; ?>
+                                            <?php $aRank++; ?>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <span class="badge bg-danger text-white fw-bold me-1">[<?= htmlspecialchars($a['tag']) ?>]</span>
+                                                <a href="?page=alliance" class="text-reset fw-bold text-decoration-none">
+                                                    <?= htmlspecialchars($a['name']) ?>
+                                                </a>
+                                                <?php if ($isMyAlly): ?>
+                                                    <span class="badge bg-red text-white fw-bold ms-2">Votre Clan</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0)" onclick="openPlayerProfileModal(<?= (int)$a['leader_id'] ?>)" 
+                                               class="text-reset text-decoration-none d-inline-flex align-items-center gap-1 fw-semibold">
+                                                <span>👑</span>
+                                                <span><?= htmlspecialchars($a['leader_name']) ?></span>
+                                            </a>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge <?= ($a['member_count'] >= $a['capacity']) ? 'bg-orange-lt text-orange' : 'bg-primary-lt' ?> fw-bold">
+                                                <?= $a['member_count'] ?> / <?= $a['capacity'] ?>
+                                            </span>
+                                            <?php if ($a['member_count'] >= $a['capacity']): ?>
+                                                <span class="badge bg-secondary-lt ms-1">Plein</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-azure-lt fw-bold fs-4"><?= number_format($a['total_planets']) ?></span>
+                                        </td>
+                                        <td class="text-end text-secondary fw-semibold">
+                                            <?= number_format($a['avg_points']) ?> pts
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="text-danger fw-bold fs-3"><?= number_format($a['total_points']) ?></span>
+                                            <span class="text-secondary small ms-1">pts</span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- ONGLET 3 : TABLEAU D'HONNEUR HEBDOMADAIRE  -->
+            <!-- ========================================== -->
+            <div class="tab-pane <?= ($tab === 'honor') ? 'active show' : '' ?>" id="tab-honor" role="tabpanel">
+                <div class="p-3 p-lg-4">
+                    <!-- Bannière d'Honneur Shogunal -->
+                    <div class="card bg-warning-lt border-warning-subtle shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="row align-items-center g-3">
+                                <div class="col">
+                                    <h3 class="card-title text-warning fw-bold d-flex align-items-center gap-2 mb-1 fs-2">
+                                        <span>🎖️</span> Tableau d'Honneur Féodal — Semaine <?= $currentWeek ?> / <?= $currentYear ?>
+                                    </h3>
+                                    <p class="text-secondary mb-0">
+                                        Les 10 plus illustres daimyōs récompensés chaque semaine par décret impérial du Shogunat.<br>
+                                        Médailles décernées : <strong>🥇 Or (1er)</strong>, <strong>🥈 Argent (2ème)</strong>, <strong>🥉 Bronze (3ème)</strong> et <strong>🎖️ Rubans Top 10</strong>.
+                                    </p>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge bg-warning text-dark fw-bold px-3 py-2 fs-4 shadow-sm">
+                                        🏆 DÉCRET DU SHOGUNAT
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4 Colonnes du Top 10 Travian-Style en cartes Tabler -->
+                    <div class="row row-cards">
+                        <!-- 1. Meilleure Progression -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-status-top bg-danger"></div>
+                                <div class="card-header border-bottom py-2">
+                                    <div>
+                                        <h4 class="card-title text-danger fw-bold mb-0 d-flex align-items-center gap-1">
+                                            <span>📈</span> Top Progression
+                                        </h4>
+                                        <div class="text-secondary small">Puissance acquise cette semaine</div>
+                                    </div>
+                                </div>
+                                <?php renderTablerHonorColumn($honorRoll['progression'], 'points'); ?>
+                            </div>
+                        </div>
+
+                        <!-- 2. Meilleurs Attaquants -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-status-top bg-red"></div>
+                                <div class="card-header border-bottom py-2">
+                                    <div>
+                                        <h4 class="card-title text-red fw-bold mb-0 d-flex align-items-center gap-1">
+                                            <span>⚔️</span> Top Conquérants
+                                        </h4>
+                                        <div class="text-secondary small">Sièges victorieux &amp; garnisons vaincues</div>
+                                    </div>
+                                </div>
+                                <?php renderTablerHonorColumn($honorRoll['attack'], 'points'); ?>
+                            </div>
+                        </div>
+
+                        <!-- 3. Meilleurs Défenseurs -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-status-top bg-success"></div>
+                                <div class="card-header border-bottom py-2">
+                                    <div>
+                                        <h4 class="card-title text-success fw-bold mb-0 d-flex align-items-center gap-1">
+                                            <span>🛡️</span> Top Défenseurs
+                                        </h4>
+                                        <div class="text-secondary small">Assauts ennemis repoussés</div>
+                                    </div>
+                                </div>
+                                <?php renderTablerHonorColumn($honorRoll['defense'], 'points'); ?>
+                            </div>
+                        </div>
+
+                        <!-- 4. Meilleurs Pillards -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-status-top bg-purple"></div>
+                                <div class="card-header border-bottom py-2">
+                                    <div>
+                                        <h4 class="card-title text-purple fw-bold mb-0 d-flex align-items-center gap-1">
+                                            <span>🌾</span> Top Pillards de Riz
+                                        </h4>
+                                        <div class="text-secondary small">Récoltes et vivres saisis en raid</div>
+                                    </div>
+                                </div>
+                                <?php renderTablerHonorColumn($honorRoll['raid'], 'ressources'); ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-function switchRankingTab(tabName) {
-    document.getElementById('sectionGeneral').style.display = (tabName === 'general') ? 'block' : 'none';
-    document.getElementById('sectionAlliances').style.display = (tabName === 'alliances') ? 'block' : 'none';
-    document.getElementById('sectionHonor').style.display = (tabName === 'honor') ? 'block' : 'none';
-    
-    document.getElementById('tabBtnGeneral').className = (tabName === 'general') ? 'btn btn-primary' : 'btn btn-secondary';
-    document.getElementById('tabBtnAlliances').className = (tabName === 'alliances') ? 'btn btn-primary' : 'btn btn-secondary';
-    document.getElementById('tabBtnHonor').className = (tabName === 'honor') ? 'btn btn-primary' : 'btn btn-secondary';
-}
+document.addEventListener('DOMContentLoaded', function () {
+    const tabLinks = document.querySelectorAll('#rankingTabsNav a[data-bs-toggle="tab"]');
+    tabLinks.forEach(function (tabLink) {
+        tabLink.addEventListener('shown.bs.tab', function (e) {
+            const tabName = e.target.getAttribute('data-tab-name');
+            if (tabName && window.history && window.history.replaceState) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('tab', tabName);
+                window.history.replaceState(null, '', url.toString());
+            }
+        });
+    });
+});
 </script>
