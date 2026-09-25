@@ -142,12 +142,7 @@ endif;
                 </div>
             </div>
             <div class="col-auto ms-auto d-print-none">
-                <div class="btn-list">
-                    <?php if ($auth->isAdmin()): ?>
-                        <a href="?page=admin&tab=pedagogy" class="btn btn-sm btn-outline-primary">
-                            <span>🛡️</span> Vue Administration
-                        </a>
-                    <?php endif; ?>
+                <div class="btn-list">                    
                     <a href="?page=resources" class="btn btn-sm btn-secondary">
                         &larr; Retour au Fief
                     </a>

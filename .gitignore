@@ -17,6 +17,5 @@ config/github.local.php
 config/installed.lock
 tmp/
 networks:.yaml
-
-
-
+*.bik
+.antigravity/

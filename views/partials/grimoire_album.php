@@ -243,20 +243,7 @@ foreach ($promptsCatalog as $p) {
                         <!-- Indicateur de zoom -->
                         <div class="position-absolute bottom-0 end-0 m-2 badge bg-dark text-white opacity-75 grimoire-zoom-hint pointer-events-none" style="z-index: 2;">
                             🔍 Agrandir
-                        </div>
-
-                        <!-- Bouton Transparence IA (« ? ») -->
-                        <button type="button" 
-                                class="ai-prompt-badge position-absolute bottom-0 start-0 m-2" 
-                                data-ai-title="<?= htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8') ?>"
-                                data-ai-img="<?= htmlspecialchars($imgUrl, ENT_QUOTES, 'UTF-8') ?>"
-                                data-ai-prompt="<?= htmlspecialchars($p['prompt'], ENT_QUOTES, 'UTF-8') ?>"
-                                data-ai-translation="<?= htmlspecialchars($p['translation'], ENT_QUOTES, 'UTF-8') ?>"
-                                title="Détails du prompt & transparence IA"
-                                style="z-index: 3;"
-                                onclick="event.stopPropagation();">
-                            <span class="ai-badge-icon">?</span>
-                        </button>
+                        </div>                        
                     </div>
 
                     <!-- Corps de la Carte Tabler -->
