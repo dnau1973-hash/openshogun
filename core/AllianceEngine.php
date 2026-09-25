@@ -543,25 +543,26 @@ class AllianceEngine {
     }
 
     /**
-     * Récupère le classement des alliances par points de puissance
+     * Récupère le classement des alliances par points de puissance avec pagination
      */
-    public function getAlliancesRanking(int $limit = 50): array {
+    public function getAlliancesRanking(int $limit = 50, int $offset = 0): array {
         $stmt = $this->db->prepare("
             SELECT a.id, a.name, a.tag, a.created_at, a.leader_id,
                    u.username as leader_name, u.faction as leader_faction,
-                   COUNT(m.id) as member_count,
+                   COUNT(DISTINCT m.id) as member_count,
                    COALESCE(SUM(m.points), 0) as total_points,
                    ROUND(COALESCE(AVG(m.points), 0)) as avg_points,
-                   COUNT(p.id) as total_planets
+                   COUNT(DISTINCT p.id) as total_planets
             FROM alliances a
             JOIN users u ON a.leader_id = u.id
             LEFT JOIN users m ON m.alliance_id = a.id
             LEFT JOIN planets p ON p.user_id = m.id
             GROUP BY a.id
             ORDER BY total_points DESC, member_count DESC, a.id ASC
-            LIMIT ?
+            LIMIT ? OFFSET ?
         ");
         $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(2, $offset, PDO::PARAM_INT);
         $stmt->execute();
         $rankings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -569,6 +570,13 @@ class AllianceEngine {
             $r['capacity'] = $this->getAllianceCapacity((int)$r['id'], (int)$r['leader_id']);
         }
         return $rankings;
+    }
+
+    /**
+     * Récupère le nombre total d'alliances
+     */
+    public function getTotalAlliancesCount(): int {
+        return (int)$this->db->query("SELECT COUNT(*) FROM alliances")->fetchColumn();
     }
 
     /**
