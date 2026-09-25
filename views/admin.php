@@ -2802,7 +2802,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <h3 class="card-title text-pink d-flex align-items-center gap-2 m-0">
                         <span>📢</span> Annonces & Nouvelles Fonctionnalités aux Joueurs
                     </h3>
-                    <div class="text-secondary small mt-1">
+                    <p class="text-secondary small mt-1 mb-0">
                         Toutes les annonces sont persistées dans <code>config/announcements.json</code>. Validez leur publication pour déclencher la modale d'explication aux daimyōs.
                     </p>
                 </div>
