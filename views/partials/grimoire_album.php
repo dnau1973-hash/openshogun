@@ -1,8 +1,7 @@
 <?php
 /**
- * Album Bootstrap du Grimoire des Prompts d'OpenShogun
- * Présentation moderne inspirée de Bootstrap Album avec filtrage instantané,
- * recherche temps-réel, copie 1-clic et modale HD.
+ * Album Tabler.io du Grimoire des Prompts d'OpenShogun
+ * 100% Conforme au Design System Tabler (Thème clair, cartes modulaires, recherche & filtres réactifs)
  */
 
 $promptsCatalog = require __DIR__ . '/grimoire_prompts_data.php';
@@ -31,642 +30,180 @@ foreach ($promptsCatalog as $p) {
 ?>
 
 <style>
-/* ==========================================================================
-   STYLE DU GRIMOIRE BOOTSTRAP ALBUM (OPENSHOGUN)
-   ========================================================================== */
-.grimoire-album-section {
-    color: #e2e8f0;
-    margin-top: 1.5rem;
+/* Micro-interactions conformes au Design System Tabler */
+.grimoire-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-/* En-tête Jumbotron de l'Album */
-.grimoire-hero-banner {
-    background: linear-gradient(135deg, rgba(244, 114, 182, 0.12) 0%, rgba(30, 27, 75, 0.8) 50%, rgba(15, 23, 42, 0.95) 100%);
-    border: 1px solid rgba(244, 114, 182, 0.35);
-    border-radius: 14px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 40px rgba(244, 114, 182, 0.05);
+.grimoire-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+.grimoire-card-media {
     position: relative;
     overflow: hidden;
-}
-
-.grimoire-hero-banner::after {
-    content: "🎨";
-    position: absolute;
-    right: 1.5rem;
-    bottom: -1rem;
-    font-size: 8rem;
-    opacity: 0.06;
-    pointer-events: none;
-}
-
-/* Barre de Recherche et Filtres Rapides */
-.grimoire-filter-bar {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-}
-
-.grimoire-search-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.grimoire-search-input-group {
-    flex: 1;
-    min-width: 280px;
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.grimoire-search-icon {
-    position: absolute;
-    left: 1rem;
-    color: #f472b6;
-    font-size: 1.1rem;
-    pointer-events: none;
-}
-
-.grimoire-search-input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.75rem;
-    background: rgba(15, 23, 42, 0.85);
-    border: 1.5px solid rgba(244, 114, 182, 0.35);
-    border-radius: 10px;
-    color: #fff;
-    font-size: 0.92rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.grimoire-search-input:focus {
-    outline: none;
-    border-color: #f472b6;
-    box-shadow: 0 0 15px rgba(244, 114, 182, 0.35);
-    background: rgba(15, 23, 42, 0.95);
-}
-
-.grimoire-clear-search {
-    position: absolute;
-    right: 0.75rem;
-    background: transparent;
-    border: none;
-    color: #94a3b8;
     cursor: pointer;
-    font-size: 1.1rem;
-    display: none;
+    background: #f8fafc;
 }
-
-.grimoire-clear-search:hover {
-    color: #fff;
+.grimoire-card-media img {
+    transition: transform 0.3s ease;
 }
-
-/* Pilules de Catégories (Filtres Bootstrap Album) */
-.grimoire-pills-container {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    align-items: center;
+.grimoire-card-media:hover img {
+    transform: scale(1.04);
 }
-
-.grimoire-pill-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #cbd5e1;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.45rem 0.85rem;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.grimoire-pill-btn:hover {
-    background: rgba(244, 114, 182, 0.18);
-    border-color: rgba(244, 114, 182, 0.4);
-    color: #fff;
-    transform: translateY(-1px);
-}
-
-.grimoire-pill-btn.active {
-    background: linear-gradient(135deg, #ec4899, #db2777);
-    border-color: #f472b6;
-    color: #fff;
-    font-weight: 800;
-    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35);
-}
-
-.grimoire-pill-count {
-    background: rgba(0, 0, 0, 0.35);
-    padding: 0.1rem 0.45rem;
-    border-radius: 12px;
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-
-/* Grille de Cartes Bootstrap Album */
-.grimoire-album-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 1.5rem;
-}
-
-@media (max-width: 768px) {
-    .grimoire-album-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Carte Album Individuelle */
-.prompt-album-card {
-    background: rgba(15, 23, 42, 0.82);
-    border: 1px solid rgba(244, 114, 182, 0.25);
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-.prompt-album-card:hover {
-    transform: translateY(-4px);
-    border-color: #f472b6;
-    box-shadow: 0 12px 28px rgba(244, 114, 182, 0.25);
-}
-
-/* Zone Image & Vignette */
-.prompt-card-media {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 10;
-    background: #090d16;
-    overflow: hidden;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.prompt-card-media.is-tile-bg {
-    background: repeating-conic-gradient(#131b2e 0% 25%, #0b111e 0% 50%) 50% / 20px 20px !important;
+.grimoire-card-media.is-tile-bg {
+    background: repeating-conic-gradient(#f1f5f9 0% 25%, #ffffff 0% 50%) 50% / 16px 16px !important;
     display: flex;
     align-items: center;
     justify-content: center;
 }
-
-.prompt-card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.35s ease;
-}
-
-.prompt-card-media.is-tile-bg .prompt-card-img {
+.grimoire-card-media.is-tile-bg img {
     object-fit: contain !important;
-    padding: 1.25rem;
-    max-height: 90%;
+    padding: 1rem;
+    max-height: 88%;
     width: auto;
 }
-
-.prompt-album-card:hover .prompt-card-img {
-    transform: scale(1.04);
-}
-
-.prompt-media-overlay {
-    position: absolute;
-    top: 0.6rem;
-    left: 0.6rem;
-    right: 0.6rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.prompt-cat-badge {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(244, 114, 182, 0.4);
-    color: #f472b6;
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 0.25rem 0.6rem;
-    border-radius: 6px;
-}
-
-.prompt-fmt-badge {
-    background: rgba(0, 0, 0, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fde047;
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-}
-
-.prompt-zoom-hint {
-    position: absolute;
-    bottom: 0.6rem;
-    right: 0.6rem;
-    background: rgba(0, 0, 0, 0.75);
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 0.25rem 0.6rem;
-    border-radius: 6px;
+.grimoire-zoom-hint {
     opacity: 0;
     transform: translateY(4px);
     transition: all 0.2s ease;
 }
-
-.prompt-card-media:hover .prompt-zoom-hint {
-    opacity: 1;
+.grimoire-card-media:hover .grimoire-zoom-hint {
+    opacity: 0.9;
     transform: translateY(0);
 }
-
-/* Corps de la Carte */
-.prompt-card-body {
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+.grimoire-file-pill {
+    transition: background-color 0.15s ease, border-color 0.15s ease;
 }
-
-.prompt-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 0.5rem;
-    margin-bottom: 0.35rem;
+.grimoire-file-pill:hover {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
 }
-
-.prompt-card-title {
-    color: #fff;
-    font-size: 1.05rem;
-    font-weight: 800;
-    margin: 0;
-    line-height: 1.35;
-}
-
-.prompt-clan-badge {
-    background: rgba(59, 130, 246, 0.2);
-    color: #93c5fd;
-    border: 1px solid rgba(59, 130, 246, 0.35);
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 0.15rem 0.45rem;
-    border-radius: 4px;
-    white-space: nowrap;
-}
-
-.prompt-subtitle {
-    color: var(--text-muted, #94a3b8);
-    font-size: 0.8rem;
-    margin-bottom: 0.85rem;
-    line-height: 1.4;
-}
-
-/* Pilule Chemin de Fichier */
-.prompt-file-pill {
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px dashed rgba(103, 232, 249, 0.3);
-    border-radius: 6px;
-    padding: 0.4rem 0.65rem;
-    font-family: monospace;
-    font-size: 0.75rem;
-    color: #67e8f9;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    margin-bottom: 1rem;
-    transition: all 0.15s ease;
-}
-
-.prompt-file-pill:hover {
-    background: rgba(6, 182, 212, 0.15);
-    border-color: #67e8f9;
-    color: #fff;
-}
-
-.prompt-file-pill code {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* Bloc Prompt Anglais */
-.prompt-box {
-    background: rgba(9, 13, 22, 0.7);
-    border: 1px solid rgba(244, 114, 182, 0.2);
-    border-radius: 8px;
-    padding: 0.75rem;
-    margin-bottom: 0.85rem;
-    position: relative;
-}
-
-.prompt-box-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.4rem;
-}
-
-.prompt-lang-tag {
-    font-size: 0.7rem;
-    font-weight: 800;
-    color: #f472b6;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.btn-copy-prompt-mini {
-    background: rgba(244, 114, 182, 0.15);
-    border: 1px solid rgba(244, 114, 182, 0.3);
-    color: #f472b6;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.btn-copy-prompt-mini:hover {
-    background: #f472b6;
-    color: #0f172a;
-}
-
-.prompt-text {
-    color: #cbd5e1;
-    font-size: 0.78rem;
-    line-height: 1.5;
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    max-height: 100px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-}
-
-/* Bloc Traduction Française */
-.translation-box {
-    background: rgba(254, 240, 138, 0.05);
-    border-left: 3px solid #facc15;
-    border-radius: 0 6px 6px 0;
-    padding: 0.6rem 0.75rem;
-    margin-top: auto;
-}
-
-.translation-header {
-    color: #facc15;
-    font-size: 0.72rem;
-    font-weight: 800;
-    margin-bottom: 0.25rem;
-}
-
-.translation-text {
-    color: #e2e8f0;
-    font-size: 0.76rem;
-    line-height: 1.45;
-    margin: 0;
-    font-style: italic;
-}
-
-/* Pied de Carte (Style Bootstrap Album) */
-.prompt-card-footer {
-    background: rgba(0, 0, 0, 0.25);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 0.75rem 1.25rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.prompt-btn-group {
-    display: inline-flex;
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.btn-album-action {
-    background: rgba(244, 114, 182, 0.12);
-    border: 1px solid rgba(244, 114, 182, 0.3);
-    color: #f472b6;
-    font-size: 0.78rem;
-    font-weight: 700;
-    padding: 0.4rem 0.75rem;
+.grimoire-pill-btn {
     cursor: pointer;
     transition: all 0.15s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
 }
-
-.btn-album-action:first-child {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+.grimoire-pill-btn.active {
+    background-color: var(--tblr-primary, #0054a6) !important;
+    color: #ffffff !important;
+    border-color: var(--tblr-primary, #0054a6) !important;
 }
-
-.btn-album-action:last-child {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    border-left: none;
+.grimoire-pill-btn.active .badge {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
 }
-
-.btn-album-action:hover {
-    background: #f472b6;
-    color: #0f172a;
-}
-
-.prompt-res-tag {
-    color: var(--text-muted, #94a3b8);
-    font-size: 0.72rem;
-    font-weight: 600;
-}
-
-/* Toast de Notification Flottant */
-#grimoireToast {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #fff;
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    font-size: 0.88rem;
-    font-weight: 700;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-}
-
-#grimoireToast.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-/* Modale HD Grand Format */
-#grimoireModal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.88);
-    backdrop-filter: blur(8px);
-    z-index: 99999;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-}
-
-#grimoireModal.open {
-    display: flex;
-}
-
-.grimoire-modal-content {
-    background: #0f172a;
-    border: 1.5px solid #f472b6;
-    border-radius: 14px;
-    max-width: 960px;
-    width: 100%;
-    max-height: 92vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(244, 114, 182, 0.3);
-}
-
-.grimoire-modal-header {
-    padding: 1rem 1.5rem;
-    background: rgba(244, 114, 182, 0.1);
-    border-bottom: 1px solid rgba(244, 114, 182, 0.25);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.grimoire-modal-body {
-    padding: 1rem;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-}
-
-.grimoire-modal-img {
-    max-width: 100%;
-    max-height: 55vh;
-    object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+/* Modale plein écran HD */
+#grimoireModalTabler {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
 }
 </style>
 
 <div class="grimoire-album-section">
 
-    <!-- JUMBOTRON / EN-TÊTE DE L'ALBUM -->
-    <div class="grimoire-hero-banner">
-        <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(244, 114, 182, 0.2); border: 1px solid #f472b6; color: #fbcfe8; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0.75rem;">
-            <span>📜</span> Grimoire d'Art & Prompt Engineering &bull; Sengoku Jidai
-        </div>
-        <h2 style="color: #fff; margin: 0 0 0.6rem 0; font-size: 1.75rem; font-weight: 900; display: flex; align-items: center; gap: 0.6rem;">
-            <span>🎨</span> Le Grimoire des Prompts Utilisés pour OpenShogun
-        </h2>
-        <p style="color: #cbd5e1; font-size: 0.95rem; margin: 0; max-width: 860px; line-height: 1.6;">
-            Retrouvez ici l'intégralité des <strong>80 prompts d'art féodal</strong> ayant façonné l'univers visuel d'OpenShogun avec l'Intelligence Artificielle (Gemini, Imagen, Midjourney).
-            Présenté sous forme d'<strong>Album interactif (style Bootstrap Album)</strong> : explorez les illustrations en situation, copiez les prompts en 1 clic et vérifiez chaque fichier dans le projet.
-        </p>
-        <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap; align-items: center;">
-            <span style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); color: #67e8f9; padding: 0.35rem 0.85rem; border-radius: 8px; font-size: 0.82rem; font-weight: 700;">
-                📊 80 Assets Authentiques Actifs
-            </span>
-            <span style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); color: #facc15; padding: 0.35rem 0.85rem; border-radius: 8px; font-size: 0.82rem; font-weight: 700;">
-                🛡️ 0 Prompt Obsolète (Nettoyage Intégral)
-            </span>
-            <span style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); color: #a7f3d0; padding: 0.35rem 0.85rem; border-radius: 8px; font-size: 0.82rem; font-weight: 700;">
-                🖼️ Style Ukiyo-e & 2.5D Vectoriel Pur
-            </span>
-            <button type="button" class="btn btn-secondary" onclick="exportGrimoireMarkdown()" style="font-size: 0.8rem; padding: 0.35rem 0.85rem; margin-left: auto; border-color: #f472b6; color: #f472b6; font-weight: 700;">
-                📋 Copier Tout le Grimoire (Markdown)
-            </button>
+    <!-- 1. EN-TÊTE HERO AUX NORMES TABLER (CARD ÉPURÉE) -->
+    <div class="card bg-white border shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-primary-lt text-primary fw-bold text-uppercase mb-2">
+                        📜 Grimoire d'Art &bull; Prompt Engineering Sengoku Jidai
+                    </span>
+                    <h2 class="card-title fs-2 text-dark d-flex align-items-center gap-2 mb-2">
+                        <span>🎨</span> Le Grimoire des 80 Prompts d'OpenShogun
+                    </h2>
+                    <p class="text-secondary small mb-3" style="line-height: 1.6; max-width: 820px;">
+                        Explorez l'intégralité des <strong>80 requêtes génératrices d'art</strong> ayant façonné les panoramas, héros, forteresses, engins et armées féodales du jeu. 
+                        Copiez les prompts en un clic, inspectez les fichiers cibles et découvrez les secrets de direction artistique (Ukiyo-e, précision vectorielle 2.5D et palette d'époque).
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        <span class="badge bg-teal-lt p-2">
+                            <span class="me-1">📊</span> 80 Assets Authentiques Actifs
+                        </span>
+                        <span class="badge bg-yellow-lt p-2">
+                            <span class="me-1">🛡️</span> 100% Prompts Vérifiés
+                        </span>
+                        <span class="badge bg-azure-lt p-2">
+                            <span class="me-1">🖼️</span> Style Ukiyo-e &amp; 2.5D Vectoriel Pur
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
+                    <button type="button" class="btn btn-outline-primary d-inline-flex align-items-center gap-2 shadow-sm" onclick="exportGrimoireMarkdown()">
+                        <span>📋</span> Copier Tout le Grimoire (Markdown)
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- BARRE DE CONTRÔLE : RECHERCHE & FILTRES RAPIDES PAR CATÉGORIE -->
-    <div class="grimoire-filter-bar">
-        <!-- Recherche Instantanée -->
-        <div class="grimoire-search-wrapper">
-            <div class="grimoire-search-input-group">
-                <span class="grimoire-search-icon">🔍</span>
-                <input type="text" 
-                       id="grimoireSearchInput" 
-                       class="grimoire-search-input" 
-                       placeholder="Rechercher par nom (ex: Bûcheron, Bélier, Takeda), mot-clé anglais, clan ou nom de fichier..."
-                       autocomplete="off">
-                <button type="button" id="grimoireClearBtn" class="grimoire-clear-search" onclick="clearGrimoireSearch()" title="Effacer la recherche">&times;</button>
+    <!-- 2. BARRE DE CONTRÔLE TABLER : RECHERCHE INSTANTANÉE & FILTRES RAPIDES -->
+    <div class="card bg-white border shadow-sm mb-4">
+        <div class="card-body p-3">
+            <div class="row g-3 align-items-center mb-3">
+                <!-- Champ de Recherche Tabler avec Icône -->
+                <div class="col-md-8 col-lg-9">
+                    <div class="input-icon">
+                        <span class="input-icon-addon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>
+                        </span>
+                        <input type="text" 
+                               id="grimoireSearchInput" 
+                               class="form-control" 
+                               placeholder="Rechercher par nom (ex: Bûcheron, Bélier, Takeda), mot-clé anglais, clan ou fichier..."
+                               autocomplete="off">
+                    </div>
+                </div>
+                <!-- Compteur de résultats dynamique -->
+                <div class="col-md-4 col-lg-3 text-md-end">
+                    <span class="badge bg-light text-secondary border p-2 w-100 justify-content-center justify-content-md-end d-flex align-items-center gap-1">
+                        <span>Affichage :</span>
+                        <strong id="countVisible" class="text-primary font-monospace"><?= count($promptsCatalog) ?></strong>
+                        <span class="text-muted">/ <?= count($promptsCatalog) ?></span>
+                    </span>
+                </div>
             </div>
-            <div id="grimoireCounterBadge" style="font-size: 0.85rem; font-weight: 700; color: #cbd5e1; padding: 0.5rem 1rem; background: rgba(0,0,0,0.35); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                Affichage de <span id="countVisible" style="color:#f472b6;"><?= count($promptsCatalog) ?></span> / <?= count($promptsCatalog) ?> prompts
-            </div>
-        </div>
 
-        <!-- Pilules de Catégories (Filtres Rapides) -->
-        <div class="grimoire-pills-container">
-            <button type="button" class="grimoire-pill-btn active" data-filter="all" onclick="filterGrimoireCategory('all', this)">
-                🌐 Tous <span class="grimoire-pill-count"><?= $categoryCounts['all'] ?></span>
-            </button>
-            <button type="button" class="grimoire-pill-btn" data-filter="panoramas" onclick="filterGrimoireCategory('panoramas', this)">
-                🌄 Panoramas <span class="grimoire-pill-count"><?= $categoryCounts['panoramas'] ?></span>
-            </button>
-            <button type="button" class="grimoire-pill-btn" data-filter="terroirs" onclick="filterGrimoireCategory('terroirs', this)">
-                🌾 Ressources <span class="grimoire-pill-count"><?= $categoryCounts['terroirs'] ?></span>
-            </button>
-            <button type="button" class="grimoire-pill-btn" data-filter="buildings" onclick="filterGrimoireCategory('buildings', this)">
-                🏯 Cité Castrale <span class="grimoire-pill-count"><?= $categoryCounts['buildings'] ?></span>
-            </button>
-            <button type="button" class="grimoire-pill-btn" data-filter="tiles" onclick="filterGrimoireCategory('tiles', this)">
-                🀄 Tuiles 2.5D <span class="grimoire-pill-count"><?= $categoryCounts['tiles'] ?></span>
-            </button>
-            <button type="button" class="grimoire-pill-btn" data-filter="infantry" onclick="filterGrimoireCategory('infantry', this)">
-                ⚔️ Infanterie <span class="grimoire-pill-count"><?= $categoryCounts['infantry'] ?></span>
-            </button>
-            <button type="button" class="grimoire-pill-btn" data-filter="cavalry" onclick="filterGrimoireCategory('cavalry', this)">
-                🐎 Cavalerie <span class="grimoire-pill-count"><?= $categoryCounts['cavalry'] ?></span>
-            </button>
-            <button type="button" class="grimoire-pill-btn" data-filter="animals" onclick="filterGrimoireCategory('animals', this)">
-                🐗 Bêtes Oasis <span class="grimoire-pill-count"><?= $categoryCounts['animals'] ?></span>
-            </button>
-            <button type="button" class="grimoire-pill-btn" data-filter="siege" onclick="filterGrimoireCategory('siege', this)">
-                💥 Siège <span class="grimoire-pill-count"><?= $categoryCounts['siege'] ?></span>
-            </button>
-            <button type="button" class="grimoire-pill-btn" data-filter="hero" onclick="filterGrimoireCategory('hero', this)">
-                👑 Héros <span class="grimoire-pill-count"><?= $categoryCounts['hero'] ?></span>
-            </button>
-            <button type="button" class="grimoire-pill-btn" data-filter="castles" onclick="filterGrimoireCategory('castles', this)">
-                🏯 12 Châteaux <span class="grimoire-pill-count"><?= $categoryCounts['castles'] ?></span>
-            </button>
+            <!-- Pilules de Catégories (Nav-Pills Tabler) -->
+            <div class="nav nav-pills flex-wrap gap-1 align-items-center m-0 p-0" id="grimoirePillsNav">
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn active py-1 px-2 border" data-filter="all" onclick="filterGrimoireCategory('all', this)">
+                    🌐 Tous <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['all'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="panoramas" onclick="filterGrimoireCategory('panoramas', this)">
+                    🌄 Panoramas <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['panoramas'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="terroirs" onclick="filterGrimoireCategory('terroirs', this)">
+                    🌾 Ressources <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['terroirs'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="buildings" onclick="filterGrimoireCategory('buildings', this)">
+                    🏯 Cité Castrale <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['buildings'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="tiles" onclick="filterGrimoireCategory('tiles', this)">
+                    🀄 Tuiles 2.5D <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['tiles'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="infantry" onclick="filterGrimoireCategory('infantry', this)">
+                    ⚔️ Infanterie <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['infantry'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="cavalry" onclick="filterGrimoireCategory('cavalry', this)">
+                    🐎 Cavalerie <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['cavalry'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="animals" onclick="filterGrimoireCategory('animals', this)">
+                    🐗 Bêtes Oasis <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['animals'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="siege" onclick="filterGrimoireCategory('siege', this)">
+                    💥 Siège <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['siege'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="hero" onclick="filterGrimoireCategory('hero', this)">
+                    👑 Héros <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['hero'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="castles" onclick="filterGrimoireCategory('castles', this)">
+                    🏯 12 Châteaux <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['castles'] ?></span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- GRILLE D'ALBUM (STYLE BOOTSTRAP ALBUM) -->
-    <div class="grimoire-album-grid" id="grimoireCardsGrid">
+    <!-- 3. GRILLE DE CARTES TABLER (ROW ROW-CARDS) -->
+    <div class="row row-cards g-3" id="grimoireCardsGrid">
         <?php foreach ($promptsCatalog as $idx => $p): 
             $imgDiskPath = __DIR__ . '/../../public/assets/' . $p['file'];
             $imgExists = file_exists($imgDiskPath);
@@ -675,149 +212,185 @@ foreach ($promptsCatalog as $p) {
             // Chaîne de recherche normalisée
             $searchIndex = strtolower($p['title'] . ' ' . $p['subtitle'] . ' ' . $p['display_path'] . ' ' . $p['clan'] . ' ' . $p['prompt'] . ' ' . $p['translation'] . ' ' . $p['category']);
             $isTile = ($p['category'] === 'tiles');
+            $cardId = 'card-prompt-' . $p['id'];
         ?>
-            <div class="prompt-album-card" 
+            <div class="col-sm-6 col-lg-4 col-xl-3 prompt-album-col" 
                  data-category="<?= htmlspecialchars($p['category']) ?>" 
                  data-search="<?= htmlspecialchars($searchIndex) ?>"
-                 id="card-prompt-<?= $p['id'] ?>">
+                 id="<?= $cardId ?>">
 
-                <!-- Aperçu Visuel / Image Top -->
-                <div class="prompt-card-media <?= $isTile ? 'is-tile-bg' : '' ?>" 
-                     onclick="openGrimoireModal('<?= $imgUrl ?>', '<?= htmlspecialchars(addslashes($p['title'])) ?>', '<?= htmlspecialchars(addslashes($p['display_path'])) ?>', 'card-prompt-<?= $p['id'] ?>')"
-                     title="Cliquer pour admirer en plein écran">
-                    <img src="<?= $imgUrl ?>" 
-                         class="prompt-card-img" 
-                         alt="<?= htmlspecialchars($p['title']) ?>" 
-                         loading="lazy">
-                    
-                    <div class="prompt-media-overlay">
-                        <span class="prompt-cat-badge"><?= htmlspecialchars($p['category_label']) ?></span>
-                        <span class="prompt-fmt-badge"><?= htmlspecialchars($p['format']) ?></span>
+                <div class="card card-sm bg-white border shadow-sm h-100 d-flex flex-column grimoire-card">
+                    <!-- Zone Aperçu Visuel / Média Top -->
+                    <div class="grimoire-card-media <?= $isTile ? 'is-tile-bg' : '' ?> border-bottom" 
+                         style="aspect-ratio: 16 / 10;"
+                         onclick="openGrimoireModalTabler('<?= $imgUrl ?>', '<?= htmlspecialchars(addslashes($p['title'])) ?>', '<?= htmlspecialchars(addslashes($p['display_path'])) ?>', '<?= $cardId ?>')"
+                         title="Cliquer pour admirer en grand format">
+                        <img src="<?= $imgUrl ?>" 
+                             class="w-100 h-100 object-fit-cover" 
+                             alt="<?= htmlspecialchars($p['title']) ?>" 
+                             loading="lazy">
+                        
+                        <!-- Badges en Overlay -->
+                        <div class="position-absolute top-0 start-0 end-0 p-2 d-flex justify-content-between align-items-center pointer-events-none" style="z-index: 2;">
+                            <span class="badge bg-dark text-white opacity-90 shadow-sm small">
+                                <?= htmlspecialchars($p['category_label']) ?>
+                            </span>
+                            <span class="badge bg-azure text-white opacity-90 shadow-sm font-monospace small">
+                                <?= htmlspecialchars($p['format']) ?>
+                            </span>
+                        </div>
+
+                        <!-- Indicateur de zoom -->
+                        <div class="position-absolute bottom-0 end-0 m-2 badge bg-dark text-white opacity-75 grimoire-zoom-hint pointer-events-none" style="z-index: 2;">
+                            🔍 Agrandir
+                        </div>
+
+                        <!-- Bouton Transparence IA (« ? ») -->
+                        <button type="button" 
+                                class="ai-prompt-badge position-absolute bottom-0 start-0 m-2" 
+                                data-ai-title="<?= htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-ai-img="<?= htmlspecialchars($imgUrl, ENT_QUOTES, 'UTF-8') ?>"
+                                data-ai-prompt="<?= htmlspecialchars($p['prompt'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-ai-translation="<?= htmlspecialchars($p['translation'], ENT_QUOTES, 'UTF-8') ?>"
+                                title="Détails du prompt & transparence IA"
+                                style="z-index: 3;"
+                                onclick="event.stopPropagation();">
+                            <span class="ai-badge-icon">?</span>
+                        </button>
                     </div>
 
-                    <div class="prompt-zoom-hint">🔍 Agrandir</div>
+                    <!-- Corps de la Carte Tabler -->
+                    <div class="card-body p-3 d-flex flex-column flex-fill">
+                        <!-- En-tête : Titre & Badge Clan -->
+                        <div class="d-flex justify-content-between align-items-start gap-1 mb-1">
+                            <h4 class="card-title fw-bold text-dark m-0 lh-sm" style="font-size: 0.95rem;">
+                                <?= htmlspecialchars($p['title']) ?>
+                            </h4>
+                            <span class="badge bg-purple-lt small text-nowrap">
+                                <?= htmlspecialchars($p['clan']) ?>
+                            </span>
+                        </div>
 
-                    <!-- Badge Transparence Prompt IA (« ? ») -->
-                    <button type="button" 
-                            class="ai-prompt-badge" 
-                            data-ai-title="<?= htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8') ?>"
-                            data-ai-img="<?= htmlspecialchars($imgUrl, ENT_QUOTES, 'UTF-8') ?>"
-                            data-ai-prompt="<?= htmlspecialchars($p['prompt'], ENT_QUOTES, 'UTF-8') ?>"
-                            data-ai-translation="<?= htmlspecialchars($p['translation'], ENT_QUOTES, 'UTF-8') ?>"
-                            title="Détails du prompt & transparence IA">
-                        <span class="ai-badge-icon">?</span>
-                    </button>
-                </div>
+                        <div class="text-secondary small mb-2 lh-sm" style="font-size: 0.78rem;">
+                            <?= htmlspecialchars($p['subtitle']) ?>
+                        </div>
 
-                <!-- Corps de la Carte -->
-                <div class="prompt-card-body">
-                    <div class="prompt-card-header">
-                        <h4 class="prompt-card-title"><?= htmlspecialchars($p['title']) ?></h4>
-                        <span class="prompt-clan-badge"><?= htmlspecialchars($p['clan']) ?></span>
+                        <!-- Chemin de Fichier Cliquable Tabler -->
+                        <div class="grimoire-file-pill bg-body-tertiary border rounded p-1 px-2 font-monospace small text-teal d-flex justify-content-between align-items-center cursor-pointer mb-2" 
+                             onclick="copyTextToClipboard('<?= htmlspecialchars(addslashes($p['display_path'])) ?>', this)" 
+                             title="Cliquer pour copier le chemin du fichier">
+                            <div class="text-truncate me-1 small">
+                                📁 <code><?= htmlspecialchars($p['display_path']) ?></code>
+                            </div>
+                            <span class="text-secondary opacity-75 small">📋</span>
+                        </div>
+
+                        <!-- Bloc Prompt Anglais Tabler -->
+                        <div class="bg-light border rounded p-2 mb-2 flex-fill d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-primary-lt font-monospace text-uppercase" style="font-size: 0.65rem;">
+                                    🇬🇧 Prompt IA Transmis
+                                </span>
+                                <button type="button" 
+                                        class="btn btn-xs btn-outline-primary py-0 px-2" 
+                                        onclick="copyPromptCardText(this)" 
+                                        style="font-size: 0.68rem;"
+                                        title="Copier le prompt anglais">
+                                    📋 Copier
+                                </button>
+                            </div>
+                            <p class="text-secondary font-monospace small m-0 lh-sm grimoire-prompt-text" style="font-size: 0.74rem; max-height: 80px; overflow-y: auto;">
+                                <?= htmlspecialchars($p['prompt']) ?>
+                            </p>
+                        </div>
+
+                        <!-- Bloc Traduction Française Tabler -->
+                        <div class="border-start border-3 border-warning bg-warning-lt p-2 rounded-end mt-auto">
+                            <div class="text-warning-emphasis fw-bold mb-1" style="font-size: 0.68rem;">
+                                🇫🇷 Traduction &amp; Contexte Pédagogique
+                            </div>
+                            <p class="text-secondary small m-0 fst-italic lh-sm grimoire-translation-text" style="font-size: 0.73rem;">
+                                <?= htmlspecialchars($p['translation']) ?>
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="prompt-subtitle">
-                        <?= htmlspecialchars($p['subtitle']) ?>
-                    </div>
-
-                    <!-- Fichier Cible Cliquable pour Copier -->
-                    <div class="prompt-file-pill" 
-                         onclick="copyTextToClipboard('<?= htmlspecialchars(addslashes($p['display_path'])) ?>', this)" 
-                         title="Cliquer pour copier le chemin du fichier">
-                        <span style="display:flex; align-items:center; gap:0.4rem; overflow:hidden;">
-                            <span>📁</span>
-                            <code><?= htmlspecialchars($p['display_path']) ?></code>
-                        </span>
-                        <span style="opacity:0.7;">📋</span>
-                    </div>
-
-                    <!-- Bloc Prompt Anglais -->
-                    <div class="prompt-box">
-                        <div class="prompt-box-header">
-                            <span class="prompt-lang-tag">🇬🇧 Prompt Exact Transmis à l'IA</span>
+                    <!-- Pied de Carte Tabler (Actions) -->
+                    <div class="card-footer bg-light p-2 d-flex justify-content-between align-items-center border-top">
+                        <div class="btn-group btn-group-sm">
                             <button type="button" 
-                                    class="btn-copy-prompt-mini" 
-                                    onclick="copyPromptCardText(this)" 
-                                    title="Copier ce prompt en anglais">
-                                📋 Copier
+                                    class="btn btn-outline-primary" 
+                                    onclick="copyPromptCardText(this)"
+                                    title="Copier le prompt anglais">
+                                <span>📋</span> Copier
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-outline-secondary" 
+                                    onclick="openGrimoireModalTabler('<?= $imgUrl ?>', '<?= htmlspecialchars(addslashes($p['title'])) ?>', '<?= htmlspecialchars(addslashes($p['display_path'])) ?>', '<?= $cardId ?>')"
+                                    title="Admirer en haute résolution">
+                                <span>🔍</span> Voir HD
                             </button>
                         </div>
-                        <p class="prompt-text"><?= htmlspecialchars($p['prompt']) ?></p>
+                        <span class="text-muted small font-monospace" style="font-size: 0.72rem;">
+                            <?= htmlspecialchars($p['resolution']) ?>
+                        </span>
                     </div>
 
-                    <!-- Bloc Traduction Française -->
-                    <div class="translation-box">
-                        <div class="translation-header">🇫🇷 Traduction & Contexte Pédagogique</div>
-                        <p class="translation-text"><?= htmlspecialchars($p['translation']) ?></p>
-                    </div>
                 </div>
-
-                <!-- Pied de Carte (Style Bootstrap Album) -->
-                <div class="prompt-card-footer">
-                    <div class="prompt-btn-group">
-                        <button type="button" 
-                                class="btn-album-action" 
-                                onclick="copyPromptCardText(this)"
-                                title="Copier le prompt anglais dans le presse-papiers">
-                            <span>📋</span> Copier
-                        </button>
-                        <button type="button" 
-                                class="btn-album-action" 
-                                onclick="openGrimoireModal('<?= $imgUrl ?>', '<?= htmlspecialchars(addslashes($p['title'])) ?>', '<?= htmlspecialchars(addslashes($p['display_path'])) ?>', 'card-prompt-<?= $p['id'] ?>')"
-                                title="Voir l'illustration en grand format">
-                            <span>🔍</span> Voir
-                        </button>
-                    </div>
-                    <span class="prompt-res-tag"><?= htmlspecialchars($p['resolution']) ?></span>
-                </div>
-
             </div>
         <?php endforeach; ?>
     </div>
 
-    <!-- État Aucun Résultat -->
-    <div id="grimoireNoResults" style="display: none; text-align: center; padding: 4rem 1rem; background: rgba(15, 23, 42, 0.6); border: 1px dashed rgba(244, 114, 182, 0.3); border-radius: 12px; margin-top: 2rem;">
-        <div style="font-size: 3rem; margin-bottom: 0.75rem;">🔍</div>
-        <h4 style="color: #fff; margin: 0 0 0.5rem 0;">Aucun prompt ne correspond à votre recherche</h4>
-        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem;">
-            Essayez de modifier votre mot-clé ou réinitialisez les filtres.
+    <!-- 4. ÉTAT AUCUN RÉSULTAT TABLER (EMPTY STATE) -->
+    <div id="grimoireNoResults" class="empty border rounded bg-white p-5 my-4 shadow-sm" style="display: none;">
+        <div class="empty-icon fs-1">🔍</div>
+        <p class="empty-title fs-2 text-dark">Aucun prompt ne correspond à votre recherche</p>
+        <p class="empty-subtitle text-secondary">
+            Modifiez votre terme de recherche ou réinitialisez les filtres par catégorie.
         </p>
-        <button type="button" class="btn btn-secondary" onclick="clearGrimoireSearch()" style="border-color: #f472b6; color: #f472b6;">
-            🔄 Réinitialiser la recherche
-        </button>
-    </div>
-
-</div>
-
-<!-- TOAST FLOTTANT DE CONFIRMATION DE COPIE -->
-<div id="grimoireToast">
-    <span>✅</span>
-    <span id="grimoireToastMsg">Prompt copié dans le presse-papiers !</span>
-</div>
-
-<!-- MODALE D'ILLUSTRATION HD -->
-<div id="grimoireModal" onclick="closeGrimoireModal()">
-    <div class="grimoire-modal-content" onclick="event.stopPropagation()">
-        <div class="grimoire-modal-header">
-            <div>
-                <h3 id="gmTitle" style="margin:0; color:#fff; font-size:1.2rem; font-weight:800;"></h3>
-                <div id="gmFile" style="font-family:monospace; font-size:0.78rem; color:#67e8f9; margin-top:0.2rem;"></div>
-            </div>
-            <button onclick="closeGrimoireModal()" style="background:transparent; border:none; color:#f472b6; font-size:1.6rem; cursor:pointer; line-height:1;">&times;</button>
-        </div>
-        <div class="grimoire-modal-body">
-            <img id="gmImg" src="" alt="" class="grimoire-modal-img">
-            <div style="width: 100%; display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 0.5rem;">
-                <button type="button" class="btn btn-secondary" onclick="closeGrimoireModal()">Fermer</button>
-                <button type="button" class="btn btn-primary" id="gmCopyBtn" onclick="copyModalPrompt()" style="background:#ec4899; border-color:#db2777; font-weight:700;">
-                    📋 Copier le Prompt IA
-                </button>
-            </div>
+        <div class="empty-action">
+            <button type="button" class="btn btn-outline-primary" onclick="clearGrimoireSearch()">
+                🔄 Réinitialiser la recherche
+            </button>
         </div>
     </div>
+
 </div>
 
-<!-- SCRIPTS INTERACTIFS DU GRIMOIRE BOOTSTRAP ALBUM -->
+<!-- 5. MODALE TABLER DE PRÉVISUALISATION HD -->
+<div class="modal fade" id="grimoireModalTabler" tabindex="-1" style="display: none;" aria-hidden="true" onclick="if(event.target === this) closeGrimoireModalTabler();">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content shadow-lg border">
+            <div class="modal-header bg-light">
+                <div>
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="gmTitleTabler">
+                        <!-- Rempli en JS -->
+                    </h5>
+                    <div id="gmFileTabler" class="text-muted small font-monospace mt-1"></div>
+                </div>
+                <button type="button" class="btn-close" onclick="closeGrimoireModalTabler()" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body text-center p-3">
+                <img id="gmImgTabler" src="" alt="" class="img-fluid rounded border shadow-sm mb-3" style="max-height: 55vh; object-fit: contain;">
+                
+                <div class="text-start p-3 bg-light rounded border">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="badge bg-primary-lt fw-bold font-monospace">🇬🇧 Prompt IA Complet</span>
+                        <button type="button" class="btn btn-sm btn-primary" id="gmCopyBtnTabler" onclick="copyModalPromptTabler()">
+                            📋 Copier le Prompt IA
+                        </button>
+                    </div>
+                    <p id="gmPromptTextTabler" class="font-monospace small text-secondary m-0" style="white-space: pre-wrap; font-size: 0.82rem; line-height: 1.5;"></p>
+                </div>
+            </div>
+            <div class="modal-footer bg-light p-2 d-flex justify-content-end">
+                <button type="button" class="btn btn-secondary" onclick="closeGrimoireModalTabler()">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS DU GRIMOIRE TABLER -->
 <script>
 let currentActiveCategory = 'all';
 let modalActivePrompt = '';
@@ -835,15 +408,9 @@ function filterGrimoireCategory(cat, btn) {
 
 // Recherche instantanée
 const searchInput = document.getElementById('grimoireSearchInput');
-const clearBtn = document.getElementById('grimoireClearBtn');
 
 if (searchInput) {
     searchInput.addEventListener('input', function() {
-        if (this.value.trim().length > 0) {
-            clearBtn.style.display = 'block';
-        } else {
-            clearBtn.style.display = 'none';
-        }
         applyGrimoireFilters();
     });
 }
@@ -851,30 +418,29 @@ if (searchInput) {
 function clearGrimoireSearch() {
     if (searchInput) {
         searchInput.value = '';
-        clearBtn.style.display = 'none';
         searchInput.focus();
     }
-    applyGrimoireFilters();
+    filterGrimoireCategory('all', document.querySelector('.grimoire-pill-btn[data-filter="all"]'));
 }
 
 // Appliquer filtres catégorie + recherche
 function applyGrimoireFilters() {
     const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
-    const cards = document.querySelectorAll('.prompt-album-card');
+    const cols = document.querySelectorAll('.prompt-album-col');
     let visibleCount = 0;
 
-    cards.forEach(card => {
-        const cardCat = card.getAttribute('data-category');
-        const cardSearch = card.getAttribute('data-search') || '';
+    cols.forEach(col => {
+        const cardCat = col.getAttribute('data-category');
+        const cardSearch = col.getAttribute('data-search') || '';
 
         const matchesCat = (currentActiveCategory === 'all' || cardCat === currentActiveCategory);
         const matchesQuery = (query === '' || cardSearch.includes(query));
 
         if (matchesCat && matchesQuery) {
-            card.style.display = 'flex';
+            col.style.display = 'block';
             visibleCount++;
         } else {
-            card.style.display = 'none';
+            col.style.display = 'none';
         }
     });
 
@@ -887,14 +453,46 @@ function applyGrimoireFilters() {
     }
 }
 
-// Copier texte générique
+// Notification Toast Tabler Unifiée
+function triggerGrimoireToast(msg, type = 'success') {
+    if (typeof showToast === 'function') {
+        showToast(msg, type);
+    } else {
+        // Fallback discret Tabler Toast
+        let container = document.getElementById('tablerToastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'tablerToastContainer';
+            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            container.style.zIndex = '99999';
+            document.body.appendChild(container);
+        }
+        const toastEl = document.createElement('div');
+        toastEl.className = 'toast show align-items-center text-white bg-dark border-0 shadow-lg mb-2';
+        toastEl.setAttribute('role', 'alert');
+        toastEl.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body small fw-semibold">
+                    ${msg}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        container.appendChild(toastEl);
+        setTimeout(() => {
+            if (toastEl.parentNode) toastEl.remove();
+        }, 2500);
+    }
+}
+
+// Copier texte générique (ex: chemin de fichier)
 function copyTextToClipboard(text, el = null) {
     navigator.clipboard.writeText(text).then(() => {
-        showGrimoireToast('Chemin copié : ' + text);
+        triggerGrimoireToast('Chemin copié : ' + text, 'info');
         if (el) {
-            const originalBg = el.style.background;
-            el.style.background = 'rgba(16, 185, 129, 0.3)';
-            setTimeout(() => { el.style.background = originalBg; }, 600);
+            const originalBg = el.style.backgroundColor;
+            el.style.backgroundColor = '#dcfce7';
+            setTimeout(() => { el.style.backgroundColor = originalBg; }, 400);
         }
     }).catch(err => {
         prompt('Copiez manuellement :', text);
@@ -903,91 +501,87 @@ function copyTextToClipboard(text, el = null) {
 
 // Copier le prompt depuis la carte
 function copyPromptCardText(btn) {
-    const card = btn.closest('.prompt-album-card');
+    const card = btn.closest('.grimoire-card');
     if (!card) return;
-    const promptP = card.querySelector('.prompt-text');
+    const promptP = card.querySelector('.grimoire-prompt-text');
     if (!promptP) return;
     const text = promptP.innerText.trim();
 
     navigator.clipboard.writeText(text).then(() => {
-        showGrimoireToast('Prompt copié dans le presse-papiers !');
+        triggerGrimoireToast('Prompt copié dans le presse-papiers !', 'success');
         const originalText = btn.innerHTML;
         btn.innerHTML = '<span>✅</span> Copié !';
-        setTimeout(() => { btn.innerHTML = originalText; }, 1800);
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-success');
+        setTimeout(() => { 
+            btn.innerHTML = originalText; 
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+        }, 1500);
     }).catch(err => {
         prompt('Copiez le prompt :', text);
     });
 }
 
-// Toast Flottant
-let toastTimeout = null;
-function showGrimoireToast(msg) {
-    const toast = document.getElementById('grimoireToast');
-    const msgEl = document.getElementById('grimoireToastMsg');
-    if (!toast || !msgEl) return;
-
-    msgEl.innerText = msg;
-    toast.classList.add('show');
-
-    if (toastTimeout) clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-        toast.classList.remove('show');
-    }, 2400);
-}
-
-// Modale Grand Format
-function openGrimoireModal(imgUrl, title, filePath, cardId) {
-    const modal = document.getElementById('grimoireModal');
-    const titleEl = document.getElementById('gmTitle');
-    const fileEl = document.getElementById('gmFile');
-    const imgEl = document.getElementById('gmImg');
+// Modale Grand Format Tabler
+function openGrimoireModalTabler(imgUrl, title, filePath, cardId) {
+    const modal = document.getElementById('grimoireModalTabler');
+    const titleEl = document.getElementById('gmTitleTabler');
+    const fileEl = document.getElementById('gmFileTabler');
+    const imgEl = document.getElementById('gmImgTabler');
+    const promptEl = document.getElementById('gmPromptTextTabler');
     
     if (!modal) return;
 
-    titleEl.innerText = title;
-    fileEl.innerText = '📁 ' + filePath;
-    imgEl.src = imgUrl;
+    if (titleEl) titleEl.innerHTML = `<span>🎨</span> ${title}`;
+    if (fileEl) fileEl.innerText = '📁 ' + filePath;
+    if (imgEl) imgEl.src = imgUrl;
 
     const card = document.getElementById(cardId);
     if (card) {
-        const pText = card.querySelector('.prompt-text');
+        const pText = card.querySelector('.grimoire-prompt-text');
         modalActivePrompt = pText ? pText.innerText.trim() : '';
+        if (promptEl) promptEl.innerText = modalActivePrompt;
     }
 
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
+    modal.style.display = 'block';
+    modal.classList.add('show');
+    document.body.classList.add('modal-open');
 }
 
-function closeGrimoireModal() {
-    const modal = document.getElementById('grimoireModal');
-    if (modal) modal.classList.remove('open');
-    document.body.style.overflow = '';
+function closeGrimoireModalTabler() {
+    const modal = document.getElementById('grimoireModalTabler');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    }
+    document.body.classList.remove('modal-open');
 }
 
-function copyModalPrompt() {
+function copyModalPromptTabler() {
     if (!modalActivePrompt) return;
     navigator.clipboard.writeText(modalActivePrompt).then(() => {
-        showGrimoireToast('Prompt copié depuis la vue HD !');
-        const btn = document.getElementById('gmCopyBtn');
+        triggerGrimoireToast('Prompt copié depuis la vue HD !', 'success');
+        const btn = document.getElementById('gmCopyBtnTabler');
         if (btn) {
             btn.innerText = '✅ Copié !';
-            setTimeout(() => { btn.innerText = '📋 Copier le Prompt IA'; }, 1600);
+            setTimeout(() => { btn.innerText = '📋 Copier le Prompt IA'; }, 1500);
         }
     });
 }
 
 // Exporter l'intégralité du Grimoire en Markdown
 function exportGrimoireMarkdown() {
-    const cards = document.querySelectorAll('.prompt-album-card');
+    const cards = document.querySelectorAll('.prompt-album-col');
     let md = '# 📜 Le Grimoire des 80 Prompts d\'Art Féodal (OpenShogun)\n\n';
-    md += '> Généré automatiquement depuis l\'Atelier Pédagogique d\'OpenShogun.\n\n';
+    md += '> Généré automatiquement depuis l\'Atelier Pédagogique d\'OpenShogun (Design System Tabler.io).\n\n';
 
     cards.forEach(c => {
-        const title = c.querySelector('.prompt-card-title')?.innerText || '';
-        const subtitle = c.querySelector('.prompt-subtitle')?.innerText || '';
-        const file = c.querySelector('.prompt-file-pill code')?.innerText || '';
-        const prompt = c.querySelector('.prompt-text')?.innerText || '';
-        const trans = c.querySelector('.translation-text')?.innerText || '';
+        const title = c.querySelector('.card-title')?.innerText || '';
+        const subtitle = c.querySelector('.text-secondary.small')?.innerText || '';
+        const file = c.querySelector('.grimoire-file-pill code')?.innerText || '';
+        const prompt = c.querySelector('.grimoire-prompt-text')?.innerText || '';
+        const trans = c.querySelector('.grimoire-translation-text')?.innerText || '';
 
         md += `### ${title} — *${subtitle}*\n`;
         md += `\`\`\`text\n${prompt}\n\`\`\`\n`;
@@ -996,7 +590,7 @@ function exportGrimoireMarkdown() {
     });
 
     navigator.clipboard.writeText(md).then(() => {
-        showGrimoireToast('Grimoire complet (80 prompts en Markdown) copié !');
+        triggerGrimoireToast('Grimoire complet (80 prompts en Markdown) copié !', 'success');
     }).catch(err => {
         alert('Erreur lors de la copie du Grimoire.');
     });
@@ -1005,8 +599,7 @@ function exportGrimoireMarkdown() {
 // Fermeture avec touche Échap
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        closeGrimoireModal();
+        closeGrimoireModalTabler();
     }
 });
 </script>
-

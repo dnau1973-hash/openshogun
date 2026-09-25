@@ -39,7 +39,7 @@
                         <a href="#section-ia-gemini" class="btn btn-outline-warning rounded-pill">
                             <span>✨</span> 3. L'Univers Visuel &amp; Gemini
                         </a>
-                        <a href="#section-grimoire" class="btn btn-outline-secondary rounded-pill">
+                        <a href="#section-grimoire" class="btn btn-outline-secondary rounded-pill" onclick="toggleGrimoireCatalog(true)">
                             <span>📖</span> 4. Le Grimoire des 80 Prompts
                         </a>
                     </div>
@@ -829,13 +829,14 @@ seuil_final   = seuil_de_base + bonus_pitié;
 </div>
 
 <script>
-function toggleGrimoireCatalog() {
+function toggleGrimoireCatalog(forceOpen = null) {
     const cont = document.getElementById('grimoireContainer');
     const label = document.getElementById('grimoireToggleLabel');
     const icon = document.getElementById('grimoireToggleIcon');
     if (!cont) return;
 
-    if (cont.style.display === 'none' || cont.style.display === '') {
+    const shouldOpen = (forceOpen !== null) ? forceOpen : (cont.style.display === 'none' || cont.style.display === '');
+    if (shouldOpen) {
         cont.style.display = 'block';
         if (label) label.textContent = 'Replier le Grimoire';
         if (icon) icon.textContent = '📁';
@@ -845,4 +846,11 @@ function toggleGrimoireCatalog() {
         if (icon) icon.textContent = '📂';
     }
 }
+
+// Auto-ouverture si hash ou paramètre grimoire
+window.addEventListener('DOMContentLoaded', () => {
+    if (window.location.hash === '#section-grimoire' || window.location.search.includes('grimoire=1')) {
+        toggleGrimoireCatalog(true);
+    }
+});
 </script>
