@@ -7,12 +7,11 @@ if (!file_exists(__DIR__ . '/config/installed.lock') || !file_exists(__DIR__ . '
     exit;
 }
 
-// Détection ultra-rapide des pages publiques statiques (Changelog)
 $reqPage = $_GET['page'] ?? null;
 $requestUriPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
-if ($reqPage === 'changelog' || $requestUriPath === '/changelog') {
-    require __DIR__ . '/changelog.html';
-    exit;
+if ($requestUriPath === '/changelog') {
+    $_GET['page'] = 'changelog';
+    $reqPage = 'changelog';
 }
 
 require_once __DIR__ . '/core/Auth.php';
@@ -52,11 +51,17 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Détecter si la page demandée est publique (ex: Atelier Pédagogique accessible à tous)
+// Détecter si la page demandée est publique (ex: Atelier Pédagogique ou Changelog accessible à tous)
 if ($reqPage === 'pedagogy' || $reqPage === 'atelier') {
     $page = 'pedagogy';
     if (!Auth::check()) {
         require __DIR__ . '/views/pedagogy.php';
+        exit;
+    }
+} elseif ($reqPage === 'changelog') {
+    $page = 'changelog';
+    if (!Auth::check()) {
+        require __DIR__ . '/views/changelog.php';
         exit;
     }
 }
@@ -86,7 +91,7 @@ if ($page === 'galaxy') {
     $page = 'pedagogy';
 }
 
-$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy'];
+$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';

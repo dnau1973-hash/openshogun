@@ -104,7 +104,7 @@ if (!$isAuth):
                     <span class="text-muted opacity-50">&bull;</span>
                     <a href="/?page=support" class="text-decoration-none text-secondary">📮 Support &amp; Aide</a>
                     <span class="text-muted opacity-50">&bull;</span>
-                    <a href="/changelog.html" class="text-decoration-none text-secondary">📜 Changelog</a>
+                    <a href="?page=changelog" class="text-decoration-none text-secondary">📜 Changelog</a>
                 </div>
                 Projet Éducatif Père &amp; Fils &bull; OpenShogun Engine &bull; <?= date('Y') ?> &bull; Tous droits réservés.
             </div>

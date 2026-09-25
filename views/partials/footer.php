@@ -488,7 +488,7 @@
                 <span>📮</span> Support &amp; Aide
             </a>
             <span class="text-muted opacity-50">&bull;</span>
-            <a href="/changelog.html" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
+            <a href="?page=changelog" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
                 <span>📜</span> Changelog
             </a>
             <span class="text-muted opacity-50">&bull;</span>
