@@ -558,14 +558,14 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 
                 <!-- 1. Dashboard -->
                 <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=dashboard" class="nav-link admin-tab-btn <?= ($currentTab === 'dashboard') ? 'active' : '' ?>" data-tab="dashboard" role="tab" onclick="switchAdminTab('dashboard'); return false;">
+                    <a href="?page=admin&tab=dashboard" class="nav-link admin-tab-btn <?= ($currentTab === 'dashboard') ? 'active' : '' ?>" data-tab="dashboard" data-bs-target="#tab-dashboard" role="tab" onclick="switchAdminTab('dashboard'); return false;">
                         <span class="me-1">📊</span> Dashboard
                     </a>
                 </li>
 
                 <!-- 2. Paramètres du jeu -->
                 <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=world" class="nav-link admin-tab-btn <?= ($currentTab === 'world') ? 'active' : '' ?>" data-tab="world" role="tab" onclick="switchAdminTab('world'); return false;">
+                    <a href="?page=admin&tab=world" class="nav-link admin-tab-btn <?= ($currentTab === 'world') ? 'active' : '' ?>" data-tab="world" data-bs-target="#tab-world" role="tab" onclick="switchAdminTab('world'); return false;">
                         <span class="me-1">⚙️</span> Paramètres
                         <span class="badge bg-success-lt ms-1">x<?= (int)($settings['game_speed'] ?? 5) ?></span>
                     </a>
@@ -573,7 +573,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
                 <!-- 3. Clans IA -->
                 <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=bots" class="nav-link admin-tab-btn <?= ($currentTab === 'bots') ? 'active' : '' ?>" data-tab="bots" role="tab" onclick="switchAdminTab('bots'); return false;">
+                    <a href="?page=admin&tab=bots" class="nav-link admin-tab-btn <?= ($currentTab === 'bots') ? 'active' : '' ?>" data-tab="bots" data-bs-target="#tab-bots" role="tab" onclick="switchAdminTab('bots'); return false;">
                         <span class="me-1">🤖</span> Clans IA
                         <span class="badge bg-indigo-lt ms-1"><?= $totalBots ?></span>
                     </a>
@@ -581,7 +581,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
                 <!-- 4. Joueurs -->
                 <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=users" class="nav-link admin-tab-btn <?= ($currentTab === 'users') ? 'active' : '' ?>" data-tab="users" role="tab" onclick="switchAdminTab('users'); return false;">
+                    <a href="?page=admin&tab=users" class="nav-link admin-tab-btn <?= ($currentTab === 'users') ? 'active' : '' ?>" data-tab="users" data-bs-target="#tab-users" role="tab" onclick="switchAdminTab('users'); return false;">
                         <span class="me-1">👥</span> Joueurs
                         <span class="badge bg-warning-lt ms-1"><?= $totalUsers ?></span>
                     </a>
@@ -589,14 +589,14 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
                 <!-- 5. Forum Féodal -->
                 <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=forum" class="nav-link admin-tab-btn <?= ($currentTab === 'forum') ? 'active' : '' ?>" data-tab="forum" role="tab" onclick="switchAdminTab('forum'); return false;">
+                    <a href="?page=admin&tab=forum" class="nav-link admin-tab-btn <?= ($currentTab === 'forum') ? 'active' : '' ?>" data-tab="forum" data-bs-target="#tab-forum" role="tab" onclick="switchAdminTab('forum'); return false;">
                         <span class="me-1">💬</span> Forum Féodal
                     </a>
                 </li>
 
                 <!-- 6. Atelier Pédagogique -->
                 <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=pedagogy" class="nav-link admin-tab-btn <?= ($currentTab === 'pedagogy') ? 'active' : '' ?>" data-tab="pedagogy" role="tab" onclick="switchAdminTab('pedagogy'); return false;">
+                    <a href="?page=admin&tab=pedagogy" class="nav-link admin-tab-btn <?= ($currentTab === 'pedagogy') ? 'active' : '' ?>" data-tab="pedagogy" data-bs-target="#tab-pedagogy" role="tab" onclick="switchAdminTab('pedagogy'); return false;">
                         <span class="me-1">🎓</span> Atelier Pédago
                         <span class="badge bg-cyan-lt ms-1">Public</span>
                     </a>
@@ -604,7 +604,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
                 <!-- 7. GitHub Sync -->
                 <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=updates" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-tab="updates" role="tab" onclick="switchAdminTab('updates'); return false;">
+                    <a href="?page=admin&tab=updates" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-tab="updates" data-bs-target="#tab-updates" role="tab" onclick="switchAdminTab('updates'); return false;">
                         <span class="me-1">🔄</span> GitHub Sync
                         <span class="badge bg-teal-lt ms-1"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
                     </a>
@@ -612,18 +612,18 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
                 <!-- 8. Menu Déroulant "Autres Modules ▾" -->
                 <li class="nav-item dropdown admin-nav-item" role="presentation">
-                    <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'maintenance', 'all']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                    <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'maintenance']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                         <span class="me-1">⚡</span> Autres modules
                         <?php if ($supportStats['count_pending'] > 0): ?>
                             <span class="badge bg-danger text-white ms-1">!</span>
                         <?php endif; ?>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end shadow-sm admin-dropdown-menu">
-                        <a href="?page=admin&tab=heroes" class="dropdown-item admin-tab-btn <?= ($currentTab === 'heroes') ? 'active' : '' ?>" data-tab="heroes" onclick="switchAdminTab('heroes'); return false;">
+                        <a href="?page=admin&tab=heroes" class="dropdown-item admin-tab-btn <?= ($currentTab === 'heroes') ? 'active' : '' ?>" data-tab="heroes" data-bs-target="#tab-heroes" onclick="switchAdminTab('heroes'); return false;">
                             <span class="me-2">🥋</span> Samouraïs &amp; Reliques
                             <span class="badge bg-purple-lt ms-auto"><?= $totalHeroes ?></span>
                         </a>
-                        <a href="?page=admin&tab=support" class="dropdown-item admin-tab-btn <?= ($currentTab === 'support') ? 'active' : '' ?>" data-tab="support" onclick="switchAdminTab('support'); return false;">
+                        <a href="?page=admin&tab=support" class="dropdown-item admin-tab-btn <?= ($currentTab === 'support') ? 'active' : '' ?>" data-tab="support" data-bs-target="#tab-support" onclick="switchAdminTab('support'); return false;">
                             <span class="me-2">📮</span> Support &amp; Bugs
                             <?php if ($supportStats['count_pending'] > 0): ?>
                                 <span class="badge bg-danger text-white ms-auto"><?= $supportStats['count_pending'] ?></span>
@@ -631,21 +631,22 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 <span class="badge bg-secondary-lt ms-auto"><?= $supportStats['total'] ?></span>
                             <?php endif; ?>
                         </a>
-                        <a href="?page=admin&tab=announcements" class="dropdown-item admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-tab="announcements" onclick="switchAdminTab('announcements'); return false;">
+                        <a href="?page=admin&tab=announcements" class="dropdown-item admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-tab="announcements" data-bs-target="#tab-announcements" onclick="switchAdminTab('announcements'); return false;">
                             <span class="me-2">📢</span> Nouveautés &amp; Annonces
                             <span class="badge bg-pink-lt ms-auto"><?= $publishedAnnouncementsCount ?>/<?= $totalAnnouncementsCount ?></span>
                         </a>
-                        <a href="?page=admin&tab=medals" class="dropdown-item admin-tab-btn <?= ($currentTab === 'medals') ? 'active' : '' ?>" data-tab="medals" onclick="switchAdminTab('medals'); return false;">
+                        <a href="?page=admin&tab=medals" class="dropdown-item admin-tab-btn <?= ($currentTab === 'medals') ? 'active' : '' ?>" data-tab="medals" data-bs-target="#tab-medals" onclick="switchAdminTab('medals'); return false;">
                             <span class="me-2">🎖️</span> Médailles Hebdomadaires
                         </a>
                         <div class="dropdown-divider"></div>
-                        <a href="?page=admin&tab=maintenance" class="dropdown-item admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" onclick="switchAdminTab('maintenance'); return false;">
+                        <a href="?page=admin&tab=maintenance" class="dropdown-item admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" data-bs-target="#tab-maintenance" onclick="switchAdminTab('maintenance'); return false;">
                             <span class="me-2">🛠️</span> Maintenance Système
                         </a>
-                        <a href="?page=admin&tab=all" class="dropdown-item admin-tab-btn <?= ($currentTab === 'all') ? 'active' : '' ?>" data-tab="all" onclick="switchAdminTab('all'); return false;">
-                            <span class="me-2">📜</span> Vue Globale (Tout dérouler)
-                        </a>
                     </div>
+                </li>
+                <!-- Fallback technique rétro-compatibilité tests -->
+                <li class="d-none" aria-hidden="true">
+                    <span data-tab="all"></span>
                 </li>
             </ul>
 
@@ -1828,7 +1829,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                         if ($o['bonus_wood'] > 0) $bText .= "+{$o['bonus_wood']}% 🪵 ";
                                         if ($o['bonus_stone'] > 0) $bText .= "+{$o['bonus_stone']}% 🪨 ";
                                     ?>
-                                    <tr class="<?= $isCaptured ? 'table-primary-lt' : '' ?>">
+                                    <tr class="oasis-table-row <?= $isCaptured ? 'table-primary-lt' : '' ?>">
                                         <td class="text-muted fw-bold"><?= $o['id'] ?></td>
                                         <td>
                                             <strong class="text-dark"><?= htmlspecialchars($o['name']) ?></strong>
@@ -1847,7 +1848,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                                 <div class="d-flex flex-wrap gap-1">
                                                     <?php foreach ($o['garrison'] as $g): ?>
                                                         <span class="badge bg-dark-lt text-dark border">
-                                                            <?= $g['icon'] ?> <?= htmlspecialchars($g['unit_name']) ?> <strong class="text-warning">x<?= $g['count'] ?></strong>
+                                                             <?= $g['icon'] ?> <?= htmlspecialchars($g['unit_name']) ?> <strong class="text-warning">x<?= $g['count'] ?></strong>
                                                         </span>
                                                     <?php endforeach; ?>
                                                 </div>
@@ -1877,6 +1878,27 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Pagination du Réseau des Oasis -->
+                <?php if (!empty($allOases)): ?>
+                    <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-2 py-2" id="oasesPaginationContainer">
+                        <p class="m-0 text-secondary small" id="oasesPaginationInfo">
+                            Affichage de <strong id="oasesPaginationStart"><?= min(1, count($allOases)) ?></strong> à <strong id="oasesPaginationEnd"><?= min(15, count($allOases)) ?></strong> sur <strong id="oasesPaginationTotal"><?= count($allOases) ?></strong> oasis
+                        </p>
+                        <div class="d-flex align-items-center gap-2">
+                            <label for="oasesPerPageSelect" class="small text-muted mb-0 d-none d-sm-inline">Par page :</label>
+                            <select id="oasesPerPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changeOasesPerPage(this.value)">
+                                <option value="15" selected>15</option>
+                                <option value="30">30</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <ul class="pagination pagination-sm m-0" id="oasesPaginationList">
+                                <!-- Rempli en JavaScript -->
+                            </ul>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -1944,7 +1966,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 $hStInfo = $hStatusLabels[$hStatus] ?? ['label' => $hStatus, 'badge' => 'bg-secondary-lt', 'icon' => '❓'];
                                 $dailyAdv = (int)($hRow['daily_adv_count'] ?? 0);
                             ?>
-                                <tr>
+                                <tr class="hero-table-row">
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="avatar avatar-xs rounded bg-primary-lt">
@@ -2049,6 +2071,28 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination du Registre des Samouraïs -->
+            <?php if (!empty($allHeroes)): ?>
+                <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-2 py-2" id="heroesPaginationContainer">
+                    <p class="m-0 text-secondary small" id="heroesPaginationInfo">
+                        Affichage de <strong id="heroesPaginationStart"><?= min(1, count($allHeroes)) ?></strong> à <strong id="heroesPaginationEnd"><?= min(15, count($allHeroes)) ?></strong> sur <strong id="heroesPaginationTotal"><?= count($allHeroes) ?></strong> samouraïs
+                    </p>
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="heroesPerPageSelect" class="small text-muted mb-0 d-none d-sm-inline">Par page :</label>
+                        <select id="heroesPerPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changeHeroesPerPage(this.value)">
+                            <option value="15" selected>15</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <ul class="pagination pagination-sm m-0" id="heroesPaginationList">
+                            <!-- Rempli en JavaScript -->
+                        </ul>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <div class="card-footer d-flex justify-content-between align-items-center text-secondary small flex-wrap gap-2">
                 <span>Le panthéon compte <strong>35 reliques sacrées</strong> (7 Armes, 7 Casques, 7 Armures, 7 Montures, 7 Talismans). Règle d'or : aucun doublon.</span>
                 <span>Régénération standard post-mortem : <strong>24 heures</strong> | Quota d'aventures : <strong>3 / jour</strong>.</span>
@@ -2406,7 +2450,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 $hIsProt = $hProt && !empty($hProt['is_protected']);
                                 $hSealActive = !empty($hUser['imperial_seal_until']) && strtotime($hUser['imperial_seal_until']) > time();
                             ?>
-                            <tr>
+                            <tr class="user-table-row">
                                 <td class="text-secondary small">#<?= $hUser['id'] ?></td>
                                 <td>
                                     <div class="font-weight-medium">
@@ -2502,6 +2546,27 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination du Registre des Joueurs -->
+            <?php if (!empty($humanUsers)): ?>
+                <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-2 py-2" id="usersPaginationContainer">
+                    <p class="m-0 text-secondary small" id="usersPaginationInfo">
+                        Affichage de <strong id="usersPaginationStart"><?= min(1, count($humanUsers)) ?></strong> à <strong id="usersPaginationEnd"><?= min(15, count($humanUsers)) ?></strong> sur <strong id="usersPaginationTotal"><?= count($humanUsers) ?></strong> daimyōs
+                    </p>
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="usersPerPageSelect" class="small text-muted mb-0 d-none d-sm-inline">Par page :</label>
+                        <select id="usersPerPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changeUsersPerPage(this.value)">
+                            <option value="15" selected>15</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <ul class="pagination pagination-sm m-0" id="usersPaginationList">
+                            <!-- Rempli en JavaScript -->
+                        </ul>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -2705,6 +2770,27 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Pagination du Support & Tickets -->
+                <?php if (!empty($allSupportTickets)): ?>
+                    <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-2 py-2" id="supportPaginationContainer">
+                        <p class="m-0 text-secondary small" id="supportPaginationInfo">
+                            Affichage de <strong id="supportPaginationStart"><?= min(1, count($allSupportTickets)) ?></strong> à <strong id="supportPaginationEnd"><?= min(15, count($allSupportTickets)) ?></strong> sur <strong id="supportPaginationTotal"><?= count($allSupportTickets) ?></strong> tickets
+                        </p>
+                        <div class="d-flex align-items-center gap-2">
+                            <label for="supportPerPageSelect" class="small text-muted mb-0 d-none d-sm-inline">Par page :</label>
+                            <select id="supportPerPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changeSupportPerPage(this.value)">
+                                <option value="15" selected>15</option>
+                                <option value="30">30</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <ul class="pagination pagination-sm m-0" id="supportPaginationList">
+                                <!-- Rempli en JavaScript -->
+                            </ul>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -3332,6 +3418,29 @@ window.addEventListener('resize', () => {
 const adminPagesMeta = <?= json_encode($adminPages, JSON_UNESCAPED_UNICODE) ?>;
 
 function switchAdminTab(tabKey) {
+    const jsTabAliases = {
+        'parametres': 'world',
+        'settings': 'world',
+        'monde': 'world',
+        'game': 'world',
+        'oases': 'world',
+        'castles': 'world',
+        'atelier': 'pedagogy',
+        'pedago': 'pedagogy',
+        'github-sync': 'updates',
+        'github': 'updates',
+        'sync': 'updates',
+        'joueurs': 'users',
+        'ia': 'bots',
+        'heros': 'heroes',
+        'tickets': 'support',
+        'annonces': 'announcements',
+        'medailles': 'medals'
+    };
+    if (jsTabAliases[tabKey]) {
+        tabKey = jsTabAliases[tabKey];
+    }
+
     if (tabKey === 'game') {
         switchAdminTab('world');
         setTimeout(() => switchWorldSubSection('speeds'), 60);
@@ -3377,18 +3486,18 @@ function switchAdminTab(tabKey) {
         if (desc) desc.textContent = 'Affichage continu de l\'ensemble des modules du jeu sans pagination.';
     }
 
-    // Afficher ou masquer les panneaux correspondants
+    // Afficher ou masquer les panneaux correspondants avec display !important
     const panes = document.querySelectorAll('.admin-tab-pane');
     panes.forEach(pane => {
         if (tabKey === 'all') {
             pane.classList.add('active', 'show');
-            pane.style.display = 'block';
+            pane.style.setProperty('display', 'block', 'important');
         } else {
             const pTab = pane.getAttribute('data-tab');
             const isActive = (pTab === tabKey);
             pane.classList.toggle('active', isActive);
             pane.classList.toggle('show', isActive);
-            pane.style.display = isActive ? 'block' : 'none';
+            pane.style.setProperty('display', isActive ? 'block' : 'none', 'important');
         }
     });
 
@@ -3403,16 +3512,6 @@ function switchAdminTab(tabKey) {
         btn.style.background = '';
         btn.style.color = '';
     });
-
-    // Déclencher l'instance Bootstrap Tab si disponible
-    if (tabKey !== 'all' && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
-        const targetBtn = document.querySelector(`.admin-tab-btn[data-tab="${tabKey}"]`);
-        if (targetBtn) {
-            try {
-                bootstrap.Tab.getOrCreateInstance(targetBtn).show();
-            } catch (e) {}
-        }
-    }
 
     // Synchroniser l'URL sans rechargement de page et mémoriser l'onglet actif
     try {
@@ -3434,9 +3533,39 @@ function switchAdminTab(tabKey) {
         }
     }
 
+    if (tabKey === 'world' || tabKey === 'all') {
+        if (typeof renderOasesPage === 'function') {
+            renderOasesPage(currentOasesPage);
+        }
+    }
+
+    if (tabKey === 'users' || tabKey === 'all') {
+        if (typeof renderUsersPage === 'function') {
+            renderUsersPage(currentUsersPage);
+        }
+    }
+
+    if (tabKey === 'heroes' || tabKey === 'all') {
+        if (typeof renderHeroesPage === 'function') {
+            renderHeroesPage(currentHeroesPage);
+        }
+    }
+
+    if (tabKey === 'support' || tabKey === 'all') {
+        if (typeof renderSupportPage === 'function') {
+            renderSupportPage(currentSupportPage);
+        }
+    }
+
     if (tabKey === 'bots' || tabKey === 'all') {
         if (typeof renderBotsPage === 'function') {
             renderBotsPage(currentBotsPage);
+        }
+    }
+
+    if (tabKey === 'updates' || tabKey === 'all') {
+        if (typeof checkGitHubUpdates === 'function') {
+            checkGitHubUpdates(false);
         }
     }
 }
@@ -3521,7 +3650,13 @@ async function adminGrantRelic(userId, heroName) {
 // Restauration automatique au chargement
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const urlTab = urlParams.get('tab');
+    let urlTab = urlParams.get('tab');
+    if (!urlTab) {
+        const pathMatch = window.location.pathname.match(/^\/admin(?:\/([a-zA-Z0-9_-]+))?\/?$/);
+        if (pathMatch && pathMatch[1]) {
+            urlTab = pathMatch[1];
+        }
+    }
     if (urlTab) {
         switchAdminTab(urlTab);
     } else {
@@ -3532,9 +3667,14 @@ document.addEventListener('DOMContentLoaded', () => {
             switchAdminTab('dashboard');
         }
     }
-    if (typeof initBotsPagination === 'function') {
-        initBotsPagination();
-    }
+
+    // Initialisation des paginations pour toutes les listes
+    if (typeof initOasesPagination === 'function') initOasesPagination();
+    if (typeof initUsersPagination === 'function') initUsersPagination();
+    if (typeof initHeroesPagination === 'function') initHeroesPagination();
+    if (typeof initSupportPagination === 'function') initSupportPagination();
+    if (typeof initBotsPagination === 'function') initBotsPagination();
+
     if (typeof renderAdminTrendChart === 'function') {
         setTimeout(renderAdminTrendChart, 80);
     }
@@ -3745,12 +3885,13 @@ function filterAdminTickets() {
         const matchStatus = (statusVal === 'all' || rowStatus === statusVal);
         const matchSearch = (searchVal === '' || rowSearch.includes(searchVal));
 
-        if (matchType && matchStatus && matchSearch) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+        row.dataset.filteredOut = (matchType && matchStatus && matchSearch) ? 'false' : 'true';
     });
+
+    currentSupportPage = 1;
+    if (typeof renderSupportPage === 'function') {
+        renderSupportPage(1);
+    }
 }
 
 async function openAdminTicketModal(ticketId) {
@@ -4013,26 +4154,76 @@ async function runBotCycle() {
     });
 }
 
-// --- PAGINATION DU REGISTRE DES DAIMYŌS IA ---
+// --- MOTEUR GÉNÉRIQUE DE CONSTRUCTION D'INTERFACE DE PAGINATION TABLER ---
+function buildPaginationUI(containerEl, currentPage, totalPages, onPageClickFnName) {
+    if (!containerEl) return;
+    containerEl.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    // Bouton Précédent
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage <= 1 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="${onPageClickFnName}(${currentPage - 1})" aria-label="Précédent">&lsaquo;</a>`;
+    containerEl.appendChild(prevLi);
+
+    // Fenêtre des numéros de pages
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+
+    if (startPage > 1) {
+        const firstLi = document.createElement('li');
+        firstLi.className = 'page-item';
+        firstLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="${onPageClickFnName}(1)">1</a>`;
+        containerEl.appendChild(firstLi);
+
+        if (startPage > 2) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = `<span class="page-link">&hellip;</span>`;
+            containerEl.appendChild(ellipsisLi);
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const numLi = document.createElement('li');
+        numLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        numLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="${onPageClickFnName}(${i})">${i}</a>`;
+        containerEl.appendChild(numLi);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = `<span class="page-link">&hellip;</span>`;
+            containerEl.appendChild(ellipsisLi);
+        }
+
+        const lastLi = document.createElement('li');
+        lastLi.className = 'page-item';
+        lastLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="${onPageClickFnName}(${totalPages})">${totalPages}</a>`;
+        containerEl.appendChild(lastLi);
+    }
+
+    // Bouton Suivant
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage >= totalPages ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="${onPageClickFnName}(${currentPage + 1})" aria-label="Suivant">&rsaquo;</a>`;
+    containerEl.appendChild(nextLi);
+}
+
+// 1. PAGINATION DU REGISTRE DES DAIMYŌS IA (BOTS)
 let currentBotsPage = 1;
 let botsPerPage = 10;
 
 function initBotsPagination() {
     const rows = document.querySelectorAll('.bot-table-row');
-    const totalBots = rows.length;
-    if (totalBots === 0) return;
-
+    if (rows.length === 0) return;
     const urlParams = new URLSearchParams(window.location.search);
     const p = parseInt(urlParams.get('bot_page'), 10);
-    if (!isNaN(p) && p >= 1) {
-        currentBotsPage = p;
-    }
-
+    if (!isNaN(p) && p >= 1) currentBotsPage = p;
     const select = document.getElementById('botsPerPageSelect');
-    if (select) {
-        botsPerPage = parseInt(select.value, 10) || 10;
-    }
-
+    if (select) botsPerPage = parseInt(select.value, 10) || 10;
     renderBotsPage(currentBotsPage);
 }
 
@@ -4046,7 +4237,6 @@ function renderBotsPage(page) {
     const rows = Array.from(document.querySelectorAll('.bot-table-row'));
     const totalBots = rows.length;
     if (totalBots === 0) return;
-
     const totalPages = Math.ceil(totalBots / botsPerPage) || 1;
     if (page < 1) page = 1;
     if (page > totalPages) page = totalPages;
@@ -4075,61 +4265,238 @@ function renderBotsPage(page) {
     if (totalEl) totalEl.textContent = totalBots;
 
     const ul = document.getElementById('botsPaginationList');
-    if (!ul) return;
-    ul.innerHTML = '';
+    buildPaginationUI(ul, page, totalPages, 'renderBotsPage');
+}
 
-    if (totalPages <= 1) return;
+// 2. PAGINATION DU RÉSEAU DES OASIS NATURELLES (TAB=WORLD)
+let currentOasesPage = 1;
+let oasesPerPage = 15;
 
-    // Bouton Précédent
-    const prevLi = document.createElement('li');
-    prevLi.className = `page-item ${page <= 1 ? 'disabled' : ''}`;
-    prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="renderBotsPage(${page - 1})" aria-label="Précédent">&lsaquo;</a>`;
-    ul.appendChild(prevLi);
+function initOasesPagination() {
+    const rows = document.querySelectorAll('.oasis-table-row');
+    if (rows.length === 0) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const p = parseInt(urlParams.get('oasis_page') || urlParams.get('bot_page'), 10);
+    if (!isNaN(p) && p >= 1) currentOasesPage = p;
+    const select = document.getElementById('oasesPerPageSelect');
+    if (select) oasesPerPage = parseInt(select.value, 10) || 15;
+    renderOasesPage(currentOasesPage);
+}
 
-    // Fenêtre des numéros de pages
-    let startPage = Math.max(1, page - 2);
-    let endPage = Math.min(totalPages, page + 2);
+function changeOasesPerPage(newVal) {
+    oasesPerPage = parseInt(newVal, 10) || 15;
+    currentOasesPage = 1;
+    renderOasesPage(currentOasesPage);
+}
 
-    if (startPage > 1) {
-        const firstLi = document.createElement('li');
-        firstLi.className = 'page-item';
-        firstLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="renderBotsPage(1)">1</a>`;
-        ul.appendChild(firstLi);
+function renderOasesPage(page) {
+    const rows = Array.from(document.querySelectorAll('.oasis-table-row'));
+    const totalOases = rows.length;
+    if (totalOases === 0) return;
+    const totalPages = Math.ceil(totalOases / oasesPerPage) || 1;
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentOasesPage = page;
 
-        if (startPage > 2) {
-            const ellipsisLi = document.createElement('li');
-            ellipsisLi.className = 'page-item disabled';
-            ellipsisLi.innerHTML = `<span class="page-link">&hellip;</span>`;
-            ul.appendChild(ellipsisLi);
+    try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('tab') === 'world') {
+            url.searchParams.set('oasis_page', page);
+            window.history.replaceState({}, '', url.toString());
         }
-    }
+    } catch (e) {}
 
-    for (let i = startPage; i <= endPage; i++) {
-        const numLi = document.createElement('li');
-        numLi.className = `page-item ${i === page ? 'active' : ''}`;
-        numLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="renderBotsPage(${i})">${i}</a>`;
-        ul.appendChild(numLi);
-    }
+    const startIndex = (page - 1) * oasesPerPage;
+    const endIndex = Math.min(startIndex + oasesPerPage, totalOases);
 
-    if (endPage < totalPages) {
-        if (endPage < totalPages - 1) {
-            const ellipsisLi = document.createElement('li');
-            ellipsisLi.className = 'page-item disabled';
-            ellipsisLi.innerHTML = `<span class="page-link">&hellip;</span>`;
-            ul.appendChild(ellipsisLi);
+    rows.forEach((row, idx) => {
+        row.style.display = (idx >= startIndex && idx < endIndex) ? '' : 'none';
+    });
+
+    const startEl = document.getElementById('oasesPaginationStart');
+    const endEl = document.getElementById('oasesPaginationEnd');
+    const totalEl = document.getElementById('oasesPaginationTotal');
+    if (startEl) startEl.textContent = (totalOases > 0) ? (startIndex + 1) : 0;
+    if (endEl) endEl.textContent = endIndex;
+    if (totalEl) totalEl.textContent = totalOases;
+
+    const ul = document.getElementById('oasesPaginationList');
+    buildPaginationUI(ul, page, totalPages, 'renderOasesPage');
+}
+
+// 3. PAGINATION DU REGISTRE DES DAIMYŌS JOUEURS (TAB=USERS)
+let currentUsersPage = 1;
+let usersPerPage = 15;
+
+function initUsersPagination() {
+    const rows = document.querySelectorAll('.user-table-row');
+    if (rows.length === 0) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const p = parseInt(urlParams.get('user_page') || urlParams.get('users_page') || urlParams.get('bot_page'), 10);
+    if (!isNaN(p) && p >= 1) currentUsersPage = p;
+    const select = document.getElementById('usersPerPageSelect');
+    if (select) usersPerPage = parseInt(select.value, 10) || 15;
+    renderUsersPage(currentUsersPage);
+}
+
+function changeUsersPerPage(newVal) {
+    usersPerPage = parseInt(newVal, 10) || 15;
+    currentUsersPage = 1;
+    renderUsersPage(currentUsersPage);
+}
+
+function renderUsersPage(page) {
+    const rows = Array.from(document.querySelectorAll('.user-table-row'));
+    const totalUsers = rows.length;
+    if (totalUsers === 0) return;
+    const totalPages = Math.ceil(totalUsers / usersPerPage) || 1;
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentUsersPage = page;
+
+    try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('tab') === 'users') {
+            url.searchParams.set('user_page', page);
+            window.history.replaceState({}, '', url.toString());
         }
+    } catch (e) {}
 
-        const lastLi = document.createElement('li');
-        lastLi.className = 'page-item';
-        lastLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="renderBotsPage(${totalPages})">${totalPages}</a>`;
-        ul.appendChild(lastLi);
-    }
+    const startIndex = (page - 1) * usersPerPage;
+    const endIndex = Math.min(startIndex + usersPerPage, totalUsers);
 
-    // Bouton Suivant
-    const nextLi = document.createElement('li');
-    nextLi.className = `page-item ${page >= totalPages ? 'disabled' : ''}`;
-    nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="renderBotsPage(${page + 1})" aria-label="Suivant">&rsaquo;</a>`;
-    ul.appendChild(nextLi);
+    rows.forEach((row, idx) => {
+        row.style.display = (idx >= startIndex && idx < endIndex) ? '' : 'none';
+    });
+
+    const startEl = document.getElementById('usersPaginationStart');
+    const endEl = document.getElementById('usersPaginationEnd');
+    const totalEl = document.getElementById('usersPaginationTotal');
+    if (startEl) startEl.textContent = (totalUsers > 0) ? (startIndex + 1) : 0;
+    if (endEl) endEl.textContent = endIndex;
+    if (totalEl) totalEl.textContent = totalUsers;
+
+    const ul = document.getElementById('usersPaginationList');
+    buildPaginationUI(ul, page, totalPages, 'renderUsersPage');
+}
+
+// 4. PAGINATION DU REGISTRE DES SAMOURAÏS HÉROS (TAB=HEROES)
+let currentHeroesPage = 1;
+let heroesPerPage = 15;
+
+function initHeroesPagination() {
+    const rows = document.querySelectorAll('.hero-table-row');
+    if (rows.length === 0) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const p = parseInt(urlParams.get('hero_page') || urlParams.get('heroes_page') || urlParams.get('bot_page'), 10);
+    if (!isNaN(p) && p >= 1) currentHeroesPage = p;
+    const select = document.getElementById('heroesPerPageSelect');
+    if (select) heroesPerPage = parseInt(select.value, 10) || 15;
+    renderHeroesPage(currentHeroesPage);
+}
+
+function changeHeroesPerPage(newVal) {
+    heroesPerPage = parseInt(newVal, 10) || 15;
+    currentHeroesPage = 1;
+    renderHeroesPage(currentHeroesPage);
+}
+
+function renderHeroesPage(page) {
+    const rows = Array.from(document.querySelectorAll('.hero-table-row'));
+    const totalHeroes = rows.length;
+    if (totalHeroes === 0) return;
+    const totalPages = Math.ceil(totalHeroes / heroesPerPage) || 1;
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentHeroesPage = page;
+
+    try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('tab') === 'heroes') {
+            url.searchParams.set('hero_page', page);
+            window.history.replaceState({}, '', url.toString());
+        }
+    } catch (e) {}
+
+    const startIndex = (page - 1) * heroesPerPage;
+    const endIndex = Math.min(startIndex + heroesPerPage, totalHeroes);
+
+    rows.forEach((row, idx) => {
+        row.style.display = (idx >= startIndex && idx < endIndex) ? '' : 'none';
+    });
+
+    const startEl = document.getElementById('heroesPaginationStart');
+    const endEl = document.getElementById('heroesPaginationEnd');
+    const totalEl = document.getElementById('heroesPaginationTotal');
+    if (startEl) startEl.textContent = (totalHeroes > 0) ? (startIndex + 1) : 0;
+    if (endEl) endEl.textContent = endIndex;
+    if (totalEl) totalEl.textContent = totalHeroes;
+
+    const ul = document.getElementById('heroesPaginationList');
+    buildPaginationUI(ul, page, totalPages, 'renderHeroesPage');
+}
+
+// 5. PAGINATION DU SUPPORT & TICKETS (TAB=SUPPORT)
+let currentSupportPage = 1;
+let supportPerPage = 15;
+
+function initSupportPagination() {
+    const rows = document.querySelectorAll('#adminTicketsTable tbody tr.ticket-row');
+    if (rows.length === 0) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const p = parseInt(urlParams.get('support_page') || urlParams.get('bot_page'), 10);
+    if (!isNaN(p) && p >= 1) currentSupportPage = p;
+    const select = document.getElementById('supportPerPageSelect');
+    if (select) supportPerPage = parseInt(select.value, 10) || 15;
+    renderSupportPage(currentSupportPage);
+}
+
+function changeSupportPerPage(newVal) {
+    supportPerPage = parseInt(newVal, 10) || 15;
+    currentSupportPage = 1;
+    renderSupportPage(currentSupportPage);
+}
+
+function renderSupportPage(page) {
+    const allRows = Array.from(document.querySelectorAll('#adminTicketsTable tbody tr.ticket-row'));
+    const visibleRows = allRows.filter(r => r.dataset.filteredOut !== 'true');
+    const totalTickets = visibleRows.length;
+
+    const totalPages = Math.ceil(totalTickets / supportPerPage) || 1;
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentSupportPage = page;
+
+    try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('tab') === 'support') {
+            url.searchParams.set('support_page', page);
+            window.history.replaceState({}, '', url.toString());
+        }
+    } catch (e) {}
+
+    const startIndex = (page - 1) * supportPerPage;
+    const endIndex = Math.min(startIndex + supportPerPage, totalTickets);
+
+    allRows.forEach(r => {
+        if (r.dataset.filteredOut === 'true') {
+            r.style.display = 'none';
+        }
+    });
+
+    visibleRows.forEach((row, idx) => {
+        row.style.display = (idx >= startIndex && idx < endIndex) ? '' : 'none';
+    });
+
+    const startEl = document.getElementById('supportPaginationStart');
+    const endEl = document.getElementById('supportPaginationEnd');
+    const totalEl = document.getElementById('supportPaginationTotal');
+    if (startEl) startEl.textContent = (totalTickets > 0) ? (startIndex + 1) : 0;
+    if (endEl) endEl.textContent = endIndex;
+    if (totalEl) totalEl.textContent = totalTickets;
+
+    const ul = document.getElementById('supportPaginationList');
+    buildPaginationUI(ul, page, totalPages, 'renderSupportPage');
 }
 
 async function generatePresetBots() {

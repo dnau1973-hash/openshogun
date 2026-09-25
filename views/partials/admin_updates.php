@@ -216,8 +216,6 @@ $localInfo = $updateEngine->getLocalInfo();
         </div>
     </div>
 </div>
-    </div>
-</div>
 
 <script>
 // --- LOGIQUE CLIENT DU CENTRE DE MISES À JOUR ---
