@@ -335,338 +335,328 @@ try {
     $dbSizeMb = round((float)$db->query("SELECT SUM(data_length + index_length) / 1024 / 1024 FROM information_schema.TABLES WHERE table_schema = DATABASE()")->fetchColumn(), 2);
 } catch (Exception $e) {}
 
-// Gestion des onglets d'administration du Shogunat
-$allowedTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all', 'game', 'oases', 'castles'];
+// Gestion & Normalisation des routes d'administration du Shogunat
+$tabAliases = [
+    'parametres' => 'world',
+    'settings' => 'world',
+    'monde' => 'world',
+    'game' => 'world',
+    'oases' => 'world',
+    'castles' => 'world',
+    'atelier' => 'pedagogy',
+    'pedago' => 'pedagogy',
+    'github-sync' => 'updates',
+    'github' => 'updates',
+    'sync' => 'updates',
+    'joueurs' => 'users',
+    'ia' => 'bots',
+    'heros' => 'heroes',
+    'tickets' => 'support',
+    'annonces' => 'announcements',
+    'medailles' => 'medals',
+];
+$allowedTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all'];
 $currentTab = $_GET['tab'] ?? 'dashboard';
-if ($currentTab === 'game' || $currentTab === 'oases' || $currentTab === 'castles') {
-    $currentTab = 'world';
+if (isset($tabAliases[$currentTab])) {
+    $currentTab = $tabAliases[$currentTab];
 }
 if (!in_array($currentTab, $allowedTabs, true)) {
     $currentTab = 'dashboard';
 }
+
+$adminPages = [
+    'dashboard' => [
+        'title' => 'Tableau de Bord Exécutif',
+        'short' => 'Dashboard',
+        'icon' => '📊',
+        'pretitle' => 'Vue d\'ensemble & Activité',
+        'desc' => 'Indicateurs clés en temps réel, évolution sur 30 jours, alertes et raccourcis du Shōgunat.',
+    ],
+    'world' => [
+        'title' => 'Paramètres du Jeu & Monde',
+        'short' => 'Paramètres',
+        'icon' => '⚙️',
+        'pretitle' => 'Équilibrage & Cartographie',
+        'desc' => 'Configuration des vitesses de production, arpentage de l\'archipel, oasis et donjons authentiques.',
+    ],
+    'bots' => [
+        'title' => 'Clans IA & Daimyōs Autonomes',
+        'short' => 'Clans IA',
+        'icon' => '🤖',
+        'pretitle' => 'Intelligence Artificielle',
+        'desc' => 'Supervision des clans simulés, cycles de décision, apparition et rééquilibrage automatique.',
+    ],
+    'users' => [
+        'title' => 'Gestion des Joueurs & Rôles',
+        'short' => 'Joueurs',
+        'icon' => '👥',
+        'pretitle' => 'Communauté & Droits',
+        'desc' => 'Registre des joueurs, attributions de Kobans, rôles d\'administrateur/modérateur et sécurité.',
+    ],
+    'forum' => [
+        'title' => 'Forum Féodal',
+        'short' => 'Forum',
+        'icon' => '💬',
+        'pretitle' => 'Discussions & Échanges',
+        'desc' => 'Administration des salons du forum, modération des sujets et animation de la communauté.',
+    ],
+    'pedagogy' => [
+        'title' => 'Atelier Pédagogique',
+        'short' => 'Atelier Pédago',
+        'icon' => '🎓',
+        'pretitle' => 'Projet Père-Fils & Coulisses',
+        'desc' => 'Présentation, modules algorithmiques « Sous le capot » et Grimoire des prompts IA.',
+    ],
+    'updates' => [
+        'title' => 'GitHub Sync & Mises à Jour',
+        'short' => 'GitHub Sync',
+        'icon' => '🔄',
+        'pretitle' => 'Déploiement Continu',
+        'desc' => 'Suivi des commits Git distants, synchronisation en 1 clic et statut du déploiement.',
+    ],
+    'heroes' => [
+        'title' => 'Samouraïs Héros & Reliques',
+        'short' => 'Héros & Reliques',
+        'icon' => '🥋',
+        'pretitle' => 'Champions du Fief',
+        'desc' => 'État de santé, réanimation d\'urgence et distribution de trésors anciens.',
+    ],
+    'support' => [
+        'title' => 'Support & Requêtes',
+        'short' => 'Support',
+        'icon' => '📮',
+        'pretitle' => 'Assistance & Signalements',
+        'desc' => 'Traitement des signalements de bugs, suggestions des joueurs et réponses de l\'équipe.',
+    ],
+    'announcements' => [
+        'title' => 'Annonces & Nouveautés',
+        'short' => 'Nouveautés',
+        'icon' => '📢',
+        'pretitle' => 'Communications Officielles',
+        'desc' => 'Rédaction et diffusion des parchemins officiels du Shōgunat aux daimyōs.',
+    ],
+    'medals' => [
+        'title' => 'Médailles & Récompenses',
+        'short' => 'Médailles',
+        'icon' => '🎖️',
+        'pretitle' => 'Palmarès Hebdomadaire',
+        'desc' => 'Attribution des distinctions honorifiques de la semaine.',
+    ],
+    'maintenance' => [
+        'title' => 'Maintenance Système',
+        'short' => 'Maintenance',
+        'icon' => '🛠️',
+        'pretitle' => 'Opérations Techniques',
+        'desc' => 'Sauvegardes de base de données, vidage des caches et réinitialisations sécurisées.',
+    ],
+    'all' => [
+        'title' => 'Console Globale (Tout Dérouler)',
+        'short' => 'Tout Dérouler',
+        'icon' => '📜',
+        'pretitle' => 'Vue d\'Ensemble Complète',
+        'desc' => 'Affichage continu de l\'ensemble des modules administratifs.',
+    ]
+];
+$currentPageMeta = $adminPages[$currentTab] ?? $adminPages['dashboard'];
 $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab === $tabKey);
 ?>
 
+<style>
+    /* Design System Tabler.io - Navigation & Modules Admin */
+    .admin-navbar-card {
+        border-radius: 8px;
+        background: #ffffff;
+    }
+    .admin-nav-item .admin-tab-btn {
+        color: #475569;
+        font-weight: 500;
+        padding: 0.5rem 0.85rem;
+        border-radius: 6px;
+        transition: all 0.15s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+    }
+    .admin-nav-item .admin-tab-btn:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+    }
+    .admin-nav-item .admin-tab-btn.active {
+        background-color: #0054a6 !important;
+        color: #ffffff !important;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 84, 166, 0.25);
+    }
+    .admin-nav-item .admin-tab-btn.active .badge {
+        background-color: rgba(255, 255, 255, 0.25) !important;
+        color: #ffffff !important;
+    }
+    .admin-dropdown-menu .dropdown-item.active {
+        background-color: #0054a6;
+        color: #ffffff;
+        font-weight: 600;
+    }
+    .admin-tab-pane {
+        display: none;
+    }
+    .admin-tab-pane.active {
+        display: block !important;
+    }
+</style>
+
 <div class="admin-panel mb-5">
-    <!-- En-tête Terminal de Commandement Tabler.io -->
+    
+    <!-- 1. FIL D'ARIANE (BREADCRUMBS) DISCRET & RAPIDE -->
+    <nav aria-label="breadcrumb" class="mb-2">
+        <ol class="breadcrumb breadcrumb-arrows small text-secondary">
+            <li class="breadcrumb-item">
+                <a href="/?page=resources" class="text-secondary text-decoration-none">🏯 Le Fief</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="?page=admin&tab=dashboard" onclick="switchAdminTab('dashboard'); return false;" class="text-secondary text-decoration-none">Administration</a>
+            </li>
+            <li class="breadcrumb-item active fw-bold text-dark" aria-current="page" id="adminBreadcrumbCurrent">
+                <?= htmlspecialchars($currentPageMeta['short']) ?>
+            </li>
+        </ol>
+    </nav>
+
+    <!-- 2. EN-TÊTE DE PAGE TABLER.IO MODULAIRE & ACTIONS -->
     <div class="page-header d-print-none mb-3">
         <div class="row align-items-center">
             <div class="col">
-                <div class="page-pretitle">Console d'Administration du Shōgunat</div>
-                <h2 class="page-title d-flex align-items-center gap-2">
-                    <span>🏯</span>
-                    <span>Conseil du Shōgunat — Haute Administration</span>
-                    <span class="badge bg-danger text-white ms-2" style="font-size:0.75rem;">Accès Maître</span>
-                </h2>
-                <div class="text-secondary small mt-1">
-                    Pilotage central des constantes de l'archipel, équilibrage des vitesses, régulation des Samouraïs Héros et supervision des clans autonomes (Bots).
+                <div class="page-pretitle text-uppercase text-secondary" id="adminPagePretitle" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                    <?= htmlspecialchars($currentPageMeta['pretitle']) ?>
+                </div>
+                <h1 class="page-title d-flex align-items-center gap-2 mb-1">
+                    <span id="adminPageTitleIcon"><?= $currentPageMeta['icon'] ?></span>
+                    <span id="adminPageTitleText"><?= htmlspecialchars($currentPageMeta['title']) ?></span>
+                    <span class="badge bg-danger text-white ms-2" style="font-size:0.7rem;">Accès Maître</span>
+                </h1>
+                <div class="text-secondary small" id="adminPageDesc">
+                    <?= htmlspecialchars($currentPageMeta['desc']) ?>
                 </div>
             </div>
             <div class="col-auto ms-auto d-print-none">
-                <div class="btn-list">
-                    <a href="?page=admin&tab=updates" onclick="switchAdminTab('updates'); return false;" class="btn btn-outline-teal d-flex align-items-center gap-1 fw-bold shadow-sm" title="Mises à jour GitHub & Déploiement en 1 clic">
+                <div class="btn-list" id="adminPageActions">
+                    <a href="?page=admin&tab=updates" onclick="switchAdminTab('updates'); return false;" class="btn btn-outline-teal d-flex align-items-center gap-1 shadow-sm" title="Mises à jour GitHub &amp; Déploiement en 1 clic">
                         <span>🔄</span> GitHub Sync
                         <span class="badge bg-teal text-white ms-1"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
                     </a>
-                    <a href="?page=admin&tab=pedagogy" onclick="switchAdminTab('pedagogy'); return false;" class="btn btn-outline-cyan d-flex align-items-center gap-1 fw-bold shadow-sm" title="Atelier Pédagogique (Console Admin)">
-                        <span>🎓</span> Atelier Pédago
-                    </a>
-                    <a href="?page=admin&tab=forum" onclick="switchAdminTab('forum'); return false;" class="btn btn-outline-primary d-flex align-items-center gap-1 fw-bold shadow-sm" title="Gestion du Forum Féodal">
-                        <span>💬</span> Forum
-                    </a>
-                    <button type="button" onclick="runBotCycle()" class="btn btn-warning d-flex align-items-center gap-2">
-                        <span>⚔️</span> Exécuter Cycle IA
-                    </button>
-                    <button type="button" onclick="generatePresetBots()" class="btn btn-primary d-flex align-items-center gap-2">
-                        <span>➕</span> 3 Daimyōs IA
-                    </button>
-                    <a href="/?page=resources" class="btn btn-secondary">
-                        &larr; Retour Fief
+                    <a href="/?page=resources" class="btn btn-outline-secondary d-flex align-items-center gap-1">
+                        <span>&larr;</span> <span>Retour au Fief</span>
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Cartes Métriques Rapides Cliquables (Tabler Stat Cards unifiées) -->
-    <div class="row row-cards mb-3">
-        <!-- Vitesse Active -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('world'); setTimeout(() => switchWorldSubSection('speeds'), 50);" title="Configurer les constantes & vitesses">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <span class="avatar rounded bg-danger-lt text-danger" style="font-size:1.3rem;">⚡</span>
-                        </div>
-                        <div class="col">
-                            <div class="font-weight-medium">Vitesse Active</div>
-                            <div class="text-danger font-weight-bold" style="font-size:1.25rem;">
-                                x<?= (int)($settings['game_speed'] ?? 5) ?>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-secondary small mt-2">
-                        Prod: x<?= (int)($settings['resource_speed'] ?? 5) ?> | Marche: x<?= (int)($settings['fleet_speed'] ?? 5) ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Samouraïs Héros -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('heroes')" title="Gérer les Samouraïs Héros et Reliques">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <span class="avatar rounded bg-purple-lt text-purple" style="font-size:1.3rem;">🥋</span>
-                        </div>
-                        <div class="col">
-                            <div class="font-weight-medium">Samouraïs Héros</div>
-                            <div class="text-purple font-weight-bold" style="font-size:1.25rem;">
-                                <?= $totalHeroes ?> Héros
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-secondary small mt-2">
-                        <span class="<?= ($heroesDead + $heroesReviving > 0) ? 'text-danger font-weight-bold' : '' ?>">
-                            <?= $heroesDead + $heroesReviving ?> en péril
-                        </span>
-                        | 🛡️ <?= $totalRelicsFound ?> reliques
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Clans IA (Bots) -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('bots')" title="Gérer les Daimyōs IA et bots">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <span class="avatar rounded bg-indigo-lt text-indigo" style="font-size:1.3rem;">🤖</span>
-                        </div>
-                        <div class="col">
-                            <div class="font-weight-medium">Clans IA (Bots)</div>
-                            <div class="text-indigo font-weight-bold" style="font-size:1.25rem;">
-                                <?= $totalBots ?> PNJ
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-secondary small mt-2">
-                        Statut IA : <strong class="<?= !empty($settings['bots_enabled']) ? 'text-success' : 'text-danger' ?>"><?= !empty($settings['bots_enabled']) ? 'Actif' : 'En sommeil' ?></strong>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Paramétrage du Monde -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('world')" title="Arpentage, Oasis et Répartition des Tuiles du Monde Féodal">
-                <div class="card-body">
-                    <div class="row align-items-center mb-2">
-                        <div class="col-auto">
-                            <span class="avatar rounded bg-success-lt text-success" style="font-size:1.3rem;">🗾</span>
-                        </div>
-                        <div class="col">
-                            <div class="font-weight-medium">Paramétrage du Monde</div>
-                            <div class="text-success font-weight-bold" style="font-size:1.25rem;">
-                                <?= number_format($mapTileStats['total_tiles']) ?> Tuiles
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex flex-wrap gap-1" style="font-size: 0.72rem;">
-                        <?php foreach ($mapTileCategories as $cat): ?>
-                            <span class="badge <?= $cat['badge_bg'] ?> py-1 px-1" title="<?= htmlspecialchars($cat['name']) ?> : <?= number_format($cat['count']) ?> tuiles (<?= round(($cat['count'] / $mapTileStats['total_tiles']) * 100, 1) ?>%)">
-                                <?= $cat['icon'] ?> <?= number_format($cat['count']) ?>
-                            </span>
-                        <?php endforeach; ?>
-                    </div>
-                    <div class="text-secondary small mt-2 d-flex justify-content-between align-items-center">
-                        <span>Rayon &plusmn;<?= $mapTileStats['radius'] ?> &bull; 9 Catégories</span>
-                        <span class="text-success fw-bold">&rarr;</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Daimyōs Joueurs -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('users')" title="Gérer les joueurs et privilèges">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <span class="avatar rounded bg-warning-lt text-warning" style="font-size:1.3rem;">👥</span>
-                        </div>
-                        <div class="col">
-                            <div class="font-weight-medium">Daimyōs Joueurs</div>
-                            <div class="text-warning font-weight-bold" style="font-size:1.25rem;">
-                                <?= $totalUsers ?> Joueurs
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-secondary small mt-2">
-                        Comptes inscrits sur le serveur
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Support & Requêtes -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('support')" title="Traiter les bugs & suggestions">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <span class="avatar rounded bg-azure-lt text-azure" style="font-size:1.3rem;">📮</span>
-                        </div>
-                        <div class="col">
-                            <div class="font-weight-medium">Bugs &amp; Idées</div>
-                            <div class="text-azure font-weight-bold" style="font-size:1.25rem;">
-                                <?= $supportStats['total'] ?> Demandes
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-secondary small mt-2">
-                        <strong class="<?= $supportStats['count_pending'] > 0 ? 'text-danger' : 'text-success' ?>">
-                            <?= $supportStats['count_pending'] ?> en attente
-                        </strong> | <?= $supportStats['count_in_progress'] ?> en cours
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Nouveautés -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('announcements')" title="Gérer les annonces du jeu">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <span class="avatar rounded bg-pink-lt text-pink" style="font-size:1.3rem;">📢</span>
-                        </div>
-                        <div class="col">
-                            <div class="font-weight-medium">Nouveautés</div>
-                            <div class="text-pink font-weight-bold" style="font-size:1.25rem;">
-                                <?= $publishedAnnouncementsCount ?> / <?= $totalAnnouncementsCount ?>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-secondary small mt-2">
-                        <?= $publishedAnnouncementsCount ?> publiée(s) aux daimyōs
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mises à Jour Git -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm h-100" style="cursor: pointer;" onclick="switchAdminTab('updates')" title="Contrôler et déployer les mises à jour GitHub">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <span class="avatar rounded bg-teal-lt text-teal" style="font-size:1.3rem;">🔄</span>
-                        </div>
-                        <div class="col">
-                            <div class="font-weight-medium">Mises à Jour Git</div>
-                            <div class="text-teal font-weight-bold" style="font-size:1.25rem;">
-                                <?= htmlspecialchars($localGitInfo['short_sha']) ?>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-secondary small mt-2">
-                        Branche <?= htmlspecialchars($localGitInfo['branch']) ?> | Sync
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-        <!-- Conteneur d'Onglets Tabler.io Unifié & Responsive pour l'Administration -->
-    <div class="card mb-4 bg-white border shadow-sm">
-        <div class="card-header border-bottom p-2 bg-white">
-            <ul class="nav nav-pills flex-wrap gap-1 w-100 align-items-center" role="tablist" id="adminTabsNav">
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-dashboard" class="nav-link admin-tab-btn <?= ($currentTab === 'dashboard') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="dashboard" role="tab" onclick="switchAdminTab('dashboard')">
-                        <span class="me-1">📊</span> Tableau de Bord
+    <!-- 3. BARRE DE NAVIGATION TABLER COMPACTE, ÉPURÉE & CENTRALE -->
+    <div class="card mb-4 bg-white border shadow-sm admin-navbar-card">
+        <div class="card-header border-bottom p-2 bg-white d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <ul class="nav nav-pills flex-wrap gap-1 align-items-center m-0 p-0 border-0" data-bs-toggle="tabs" role="tablist" id="adminTabsNav">
+                
+                <!-- 1. Dashboard -->
+                <li class="nav-item admin-nav-item" role="presentation">
+                    <a href="?page=admin&tab=dashboard" class="nav-link admin-tab-btn <?= ($currentTab === 'dashboard') ? 'active' : '' ?>" data-tab="dashboard" role="tab" onclick="switchAdminTab('dashboard'); return false;">
+                        <span class="me-1">📊</span> Dashboard
                     </a>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-world" class="nav-link admin-tab-btn <?= ($currentTab === 'world') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="world" role="tab" onclick="switchAdminTab('world')">
-                        <span class="me-1">🗾</span> Paramétrage du Monde
-                        <span class="badge bg-success-lt ms-2">x<?= (int)($settings['game_speed'] ?? 5) ?></span>
+
+                <!-- 2. Paramètres du jeu -->
+                <li class="nav-item admin-nav-item" role="presentation">
+                    <a href="?page=admin&tab=world" class="nav-link admin-tab-btn <?= ($currentTab === 'world') ? 'active' : '' ?>" data-tab="world" role="tab" onclick="switchAdminTab('world'); return false;">
+                        <span class="me-1">⚙️</span> Paramètres
+                        <span class="badge bg-success-lt ms-1">x<?= (int)($settings['game_speed'] ?? 5) ?></span>
                     </a>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-bots" class="nav-link admin-tab-btn <?= ($currentTab === 'bots') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="bots" role="tab" onclick="switchAdminTab('bots')">
+
+                <!-- 3. Clans IA -->
+                <li class="nav-item admin-nav-item" role="presentation">
+                    <a href="?page=admin&tab=bots" class="nav-link admin-tab-btn <?= ($currentTab === 'bots') ? 'active' : '' ?>" data-tab="bots" role="tab" onclick="switchAdminTab('bots'); return false;">
                         <span class="me-1">🤖</span> Clans IA
-                        <span class="badge bg-indigo-lt ms-2"><?= $totalBots ?></span>
+                        <span class="badge bg-indigo-lt ms-1"><?= $totalBots ?></span>
                     </a>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-heroes" class="nav-link admin-tab-btn <?= ($currentTab === 'heroes') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="heroes" role="tab" onclick="switchAdminTab('heroes')">
-                        <span class="me-1">🥋</span> Samouraïs &amp; Reliques
-                        <span class="badge bg-purple-lt ms-2"><?= $totalHeroes ?></span>
-                    </a>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-users" class="nav-link admin-tab-btn <?= ($currentTab === 'users') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="users" role="tab" onclick="switchAdminTab('users')">
+
+                <!-- 4. Joueurs -->
+                <li class="nav-item admin-nav-item" role="presentation">
+                    <a href="?page=admin&tab=users" class="nav-link admin-tab-btn <?= ($currentTab === 'users') ? 'active' : '' ?>" data-tab="users" role="tab" onclick="switchAdminTab('users'); return false;">
                         <span class="me-1">👥</span> Joueurs
-                        <span class="badge bg-warning-lt ms-2"><?= $totalUsers ?></span>
+                        <span class="badge bg-warning-lt ms-1"><?= $totalUsers ?></span>
                     </a>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-medals" class="nav-link admin-tab-btn <?= ($currentTab === 'medals') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="medals" role="tab" onclick="switchAdminTab('medals')">
-                        <span class="me-1">🎖️</span> Médailles
-                        <span class="badge bg-yellow-lt ms-2"><?= htmlspecialchars($currentWeekCode) ?></span>
-                    </a>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-support" class="nav-link admin-tab-btn <?= ($currentTab === 'support') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="support" role="tab" onclick="switchAdminTab('support')">
-                        <span class="me-1">📮</span> Support &amp; Bugs
-                        <?php if ($supportStats['count_pending'] > 0): ?>
-                            <span class="badge bg-danger text-white ms-2">⚠️ <?= $supportStats['count_pending'] ?></span>
-                        <?php else: ?>
-                            <span class="badge bg-azure-lt ms-2"><?= $supportStats['total'] ?></span>
-                        <?php endif; ?>
-                    </a>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-announcements" class="nav-link admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="announcements" role="tab" onclick="switchAdminTab('announcements')">
-                        <span class="me-1">📢</span> Nouveautés
-                        <span class="badge bg-pink-lt ms-2"><?= $publishedAnnouncementsCount ?>/<?= $totalAnnouncementsCount ?></span>
-                    </a>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-forum" class="nav-link admin-tab-btn <?= ($currentTab === 'forum') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="forum" role="tab" onclick="switchAdminTab('forum')">
+
+                <!-- 5. Forum Féodal -->
+                <li class="nav-item admin-nav-item" role="presentation">
+                    <a href="?page=admin&tab=forum" class="nav-link admin-tab-btn <?= ($currentTab === 'forum') ? 'active' : '' ?>" data-tab="forum" role="tab" onclick="switchAdminTab('forum'); return false;">
                         <span class="me-1">💬</span> Forum Féodal
                     </a>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-pedagogy" class="nav-link admin-tab-btn <?= ($currentTab === 'pedagogy') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="pedagogy" role="tab" onclick="switchAdminTab('pedagogy')">
-                        <span class="me-1">🎓</span> Atelier Pédagogique
+
+                <!-- 6. Atelier Pédagogique -->
+                <li class="nav-item admin-nav-item" role="presentation">
+                    <a href="?page=admin&tab=pedagogy" class="nav-link admin-tab-btn <?= ($currentTab === 'pedagogy') ? 'active' : '' ?>" data-tab="pedagogy" role="tab" onclick="switchAdminTab('pedagogy'); return false;">
+                        <span class="me-1">🎓</span> Atelier Pédago
                         <span class="badge bg-cyan-lt ms-1">Public</span>
                     </a>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-updates" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="updates" role="tab" onclick="switchAdminTab('updates')">
+
+                <!-- 7. GitHub Sync -->
+                <li class="nav-item admin-nav-item" role="presentation">
+                    <a href="?page=admin&tab=updates" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-tab="updates" role="tab" onclick="switchAdminTab('updates'); return false;">
                         <span class="me-1">🔄</span> GitHub Sync
-                        <span class="badge bg-teal-lt ms-2"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
+                        <span class="badge bg-teal-lt ms-1"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
                     </a>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-maintenance" class="nav-link admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="maintenance" role="tab" onclick="switchAdminTab('maintenance')">
-                        <span class="me-1">⚠️</span> Maintenance
+
+                <!-- 8. Menu Déroulant "Autres Modules ▾" -->
+                <li class="nav-item dropdown admin-nav-item" role="presentation">
+                    <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'maintenance', 'all']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                        <span class="me-1">⚡</span> Autres modules
+                        <?php if ($supportStats['count_pending'] > 0): ?>
+                            <span class="badge bg-danger text-white ms-1">!</span>
+                        <?php endif; ?>
                     </a>
-                </li>
-                <li class="nav-item ms-auto d-flex align-items-center gap-1" role="presentation">
-                    <a href="/?page=pedagogy" target="_blank" class="btn btn-sm btn-outline-cyan rounded-pill me-1" title="Ouvrir la page publique de l'Atelier Pédagogique">
-                        <span>🎓 Vue Publique ↗</span>
-                    </a>
-                    <a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary rounded-pill admin-tab-btn <?= ($currentTab === 'all') ? 'active' : '' ?>" data-tab="all" onclick="switchAdminTab('all')" title="Afficher tous les onglets en continu">
-                        <span class="me-1">📚</span> Tout Dérouler
-                    </a>
+                    <div class="dropdown-menu dropdown-menu-end shadow-sm admin-dropdown-menu">
+                        <a href="?page=admin&tab=heroes" class="dropdown-item admin-tab-btn <?= ($currentTab === 'heroes') ? 'active' : '' ?>" data-tab="heroes" onclick="switchAdminTab('heroes'); return false;">
+                            <span class="me-2">🥋</span> Samouraïs &amp; Reliques
+                            <span class="badge bg-purple-lt ms-auto"><?= $totalHeroes ?></span>
+                        </a>
+                        <a href="?page=admin&tab=support" class="dropdown-item admin-tab-btn <?= ($currentTab === 'support') ? 'active' : '' ?>" data-tab="support" onclick="switchAdminTab('support'); return false;">
+                            <span class="me-2">📮</span> Support &amp; Bugs
+                            <?php if ($supportStats['count_pending'] > 0): ?>
+                                <span class="badge bg-danger text-white ms-auto"><?= $supportStats['count_pending'] ?></span>
+                            <?php else: ?>
+                                <span class="badge bg-secondary-lt ms-auto"><?= $supportStats['total'] ?></span>
+                            <?php endif; ?>
+                        </a>
+                        <a href="?page=admin&tab=announcements" class="dropdown-item admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-tab="announcements" onclick="switchAdminTab('announcements'); return false;">
+                            <span class="me-2">📢</span> Nouveautés &amp; Annonces
+                            <span class="badge bg-pink-lt ms-auto"><?= $publishedAnnouncementsCount ?>/<?= $totalAnnouncementsCount ?></span>
+                        </a>
+                        <a href="?page=admin&tab=medals" class="dropdown-item admin-tab-btn <?= ($currentTab === 'medals') ? 'active' : '' ?>" data-tab="medals" onclick="switchAdminTab('medals'); return false;">
+                            <span class="me-2">🎖️</span> Médailles Hebdomadaires
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="?page=admin&tab=maintenance" class="dropdown-item admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" onclick="switchAdminTab('maintenance'); return false;">
+                            <span class="me-2">🛠️</span> Maintenance Système
+                        </a>
+                        <a href="?page=admin&tab=all" class="dropdown-item admin-tab-btn <?= ($currentTab === 'all') ? 'active' : '' ?>" data-tab="all" onclick="switchAdminTab('all'); return false;">
+                            <span class="me-2">📜</span> Vue Globale (Tout dérouler)
+                        </a>
+                    </div>
                 </li>
             </ul>
+
+            <div class="d-none d-xl-flex align-items-center text-secondary small px-2">
+                <a href="/?page=pedagogy" target="_blank" class="btn btn-sm btn-outline-cyan rounded-pill me-2" title="Ouvrir la page publique de l'Atelier Pédagogique">
+                    <span>🎓 Vue Publique ↗</span>
+                </a>
+                <span class="badge bg-light text-secondary border font-monospace"><?= htmlspecialchars($localGitInfo['branch']) ?></span>
+            </div>
         </div>
+
         <div class="card-body p-0">
             <div class="tab-content" id="adminTabsContent">
 
@@ -785,6 +775,206 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top small text-muted">
                         <span>Page 1er Niveau</span>
                         <span class="badge bg-cyan-lt fw-bold"><?= $pedagogyEngagementPct ?>% engagement</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── ACCÈS RAPIDES AUX MODULES (CARTES KPI STATS CLIQUABLES) ── -->
+    <div class="mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h4 class="m-0 text-secondary text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                ⚡ Modules &amp; Raccourcis Administratifs
+            </h4>
+            <span class="text-muted small">Cliquez sur une carte pour basculer directement sur le module</span>
+        </div>
+        <div class="row row-cards mb-4">
+            <!-- Vitesse Active -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm h-100 shadow-sm" style="cursor: pointer;" onclick="switchAdminTab('world'); setTimeout(() => switchWorldSubSection('speeds'), 50);" title="Configurer les constantes & vitesses">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar rounded bg-danger-lt text-danger" style="font-size:1.3rem;">⚡</span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-medium">Vitesse Active</div>
+                                <div class="text-danger font-weight-bold" style="font-size:1.25rem;">
+                                    x<?= (int)($settings['game_speed'] ?? 5) ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-secondary small mt-2">
+                            Prod: x<?= (int)($settings['resource_speed'] ?? 5) ?> | Marche: x<?= (int)($settings['fleet_speed'] ?? 5) ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Samouraïs Héros -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm h-100 shadow-sm" style="cursor: pointer;" onclick="switchAdminTab('heroes')" title="Gérer les Samouraïs Héros et Reliques">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar rounded bg-purple-lt text-purple" style="font-size:1.3rem;">🥋</span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-medium">Samouraïs Héros</div>
+                                <div class="text-purple font-weight-bold" style="font-size:1.25rem;">
+                                    <?= $totalHeroes ?> Héros
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-secondary small mt-2">
+                            <span class="<?= ($heroesDead + $heroesReviving > 0) ? 'text-danger font-weight-bold' : '' ?>">
+                                <?= $heroesDead + $heroesReviving ?> en péril
+                            </span>
+                            | 🛡️ <?= $totalRelicsFound ?> reliques
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clans IA (Bots) -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm h-100 shadow-sm" style="cursor: pointer;" onclick="switchAdminTab('bots')" title="Gérer les Daimyōs IA et bots">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar rounded bg-indigo-lt text-indigo" style="font-size:1.3rem;">🤖</span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-medium">Clans IA (Bots)</div>
+                                <div class="text-indigo font-weight-bold" style="font-size:1.25rem;">
+                                    <?= $totalBots ?> PNJ
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-secondary small mt-2">
+                            Statut IA : <strong class="<?= !empty($settings['bots_enabled']) ? 'text-success' : 'text-danger' ?>"><?= !empty($settings['bots_enabled']) ? 'Actif' : 'En sommeil' ?></strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paramétrage du Monde -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm h-100 shadow-sm" style="cursor: pointer;" onclick="switchAdminTab('world')" title="Arpentage, Oasis et Répartition des Tuiles du Monde Féodal">
+                    <div class="card-body">
+                        <div class="row align-items-center mb-2">
+                            <div class="col-auto">
+                                <span class="avatar rounded bg-success-lt text-success" style="font-size:1.3rem;">🗾</span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-medium">Paramétrage du Monde</div>
+                                <div class="text-success font-weight-bold" style="font-size:1.25rem;">
+                                    <?= number_format($mapTileStats['total_tiles']) ?> Tuiles
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1" style="font-size: 0.72rem;">
+                            <?php foreach ($mapTileCategories as $cat): ?>
+                                <span class="badge <?= $cat['badge_bg'] ?> py-1 px-1" title="<?= htmlspecialchars($cat['name']) ?> : <?= number_format($cat['count']) ?> tuiles (<?= round(($cat['count'] / $mapTileStats['total_tiles']) * 100, 1) ?>%)">
+                                    <?= $cat['icon'] ?> <?= number_format($cat['count']) ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="text-secondary small mt-2 d-flex justify-content-between align-items-center">
+                            <span>Rayon &plusmn;<?= $mapTileStats['radius'] ?> &bull; 9 Catégories</span>
+                            <span class="text-success fw-bold">&rarr;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daimyōs Joueurs -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm h-100 shadow-sm" style="cursor: pointer;" onclick="switchAdminTab('users')" title="Gérer les joueurs et privilèges">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar rounded bg-warning-lt text-warning" style="font-size:1.3rem;">👥</span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-medium">Daimyōs Joueurs</div>
+                                <div class="text-warning font-weight-bold" style="font-size:1.25rem;">
+                                    <?= $totalUsers ?> Joueurs
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-secondary small mt-2">
+                            Comptes inscrits sur le serveur
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support & Requêtes -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm h-100 shadow-sm" style="cursor: pointer;" onclick="switchAdminTab('support')" title="Traiter les bugs & suggestions">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar rounded bg-azure-lt text-azure" style="font-size:1.3rem;">📮</span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-medium">Bugs &amp; Idées</div>
+                                <div class="text-azure font-weight-bold" style="font-size:1.25rem;">
+                                    <?= $supportStats['total'] ?> Demandes
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-secondary small mt-2">
+                            <strong class="<?= $supportStats['count_pending'] > 0 ? 'text-danger' : 'text-success' ?>">
+                                <?= $supportStats['count_pending'] ?> en attente
+                            </strong> | <?= $supportStats['count_in_progress'] ?> en cours
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nouveautés -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm h-100 shadow-sm" style="cursor: pointer;" onclick="switchAdminTab('announcements')" title="Gérer les annonces du jeu">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar rounded bg-pink-lt text-pink" style="font-size:1.3rem;">📢</span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-medium">Nouveautés</div>
+                                <div class="text-pink font-weight-bold" style="font-size:1.25rem;">
+                                    <?= $publishedAnnouncementsCount ?> / <?= $totalAnnouncementsCount ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-secondary small mt-2">
+                            <?= $publishedAnnouncementsCount ?> publiée(s) aux daimyōs
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mises à Jour Git -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm h-100 shadow-sm" style="cursor: pointer;" onclick="switchAdminTab('updates')" title="Contrôler et déployer les mises à jour GitHub">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar rounded bg-teal-lt text-teal" style="font-size:1.3rem;">🔄</span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-medium">Mises à Jour Git</div>
+                                <div class="text-teal font-weight-bold" style="font-size:1.25rem;">
+                                    <?= htmlspecialchars($localGitInfo['short_sha']) ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-secondary small mt-2">
+                            Branche : <?= htmlspecialchars($localGitInfo['branch']) ?>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3139,6 +3329,8 @@ window.addEventListener('resize', () => {
     }
 });
 
+const adminPagesMeta = <?= json_encode($adminPages, JSON_UNESCAPED_UNICODE) ?>;
+
 function switchAdminTab(tabKey) {
     if (tabKey === 'game') {
         switchAdminTab('world');
@@ -3158,6 +3350,32 @@ function switchAdminTab(tabKey) {
 
     const validTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all'];
     if (!validTabs.includes(tabKey)) tabKey = 'dashboard';
+
+    // Mettre à jour dynamiquement le fil d'Ariane et l'en-tête de page Tabler
+    if (adminPagesMeta && adminPagesMeta[tabKey]) {
+        const meta = adminPagesMeta[tabKey];
+        const bc = document.getElementById('adminBreadcrumbCurrent');
+        if (bc) bc.textContent = meta.short || meta.title;
+        const icon = document.getElementById('adminPageTitleIcon');
+        if (icon) icon.textContent = meta.icon;
+        const title = document.getElementById('adminPageTitleText');
+        if (title) title.textContent = meta.title;
+        const pretitle = document.getElementById('adminPagePretitle');
+        if (pretitle) pretitle.textContent = meta.pretitle;
+        const desc = document.getElementById('adminPageDesc');
+        if (desc) desc.textContent = meta.desc;
+    } else if (tabKey === 'all') {
+        const bc = document.getElementById('adminBreadcrumbCurrent');
+        if (bc) bc.textContent = 'Vue Globale';
+        const icon = document.getElementById('adminPageTitleIcon');
+        if (icon) icon.textContent = '📜';
+        const title = document.getElementById('adminPageTitleText');
+        if (title) title.textContent = 'Administration Complète (Vue Globale)';
+        const pretitle = document.getElementById('adminPagePretitle');
+        if (pretitle) pretitle.textContent = 'Tous les modules';
+        const desc = document.getElementById('adminPageDesc');
+        if (desc) desc.textContent = 'Affichage continu de l\'ensemble des modules du jeu sans pagination.';
+    }
 
     // Afficher ou masquer les panneaux correspondants
     const panes = document.querySelectorAll('.admin-tab-pane');
@@ -3200,7 +3418,11 @@ function switchAdminTab(tabKey) {
     try {
         const url = new URL(window.location.href);
         url.searchParams.set('tab', tabKey);
-        window.history.replaceState({}, '', url.toString());
+        let targetHref = url.toString();
+        if (window.location.pathname.startsWith('/admin')) {
+            targetHref = (tabKey === 'dashboard') ? '/admin' : ('/admin/' + tabKey);
+        }
+        window.history.replaceState({}, '', targetHref);
         sessionStorage.setItem('admin_active_tab', tabKey);
     } catch (e) {
         // En cas de restriction d'historique

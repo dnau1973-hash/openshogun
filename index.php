@@ -60,6 +60,15 @@ if (!Auth::check()) {
     exit;
 }
 
+// Détection des routes d'administration (/admin ou /admin/{section})
+$requestUriPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+if (preg_match('#^/admin(?:/([a-zA-Z0-9_-]+))?/?$#', $requestUriPath, $adminMatches)) {
+    $_GET['page'] = 'admin';
+    if (!empty($adminMatches[1])) {
+        $_GET['tab'] = $adminMatches[1];
+    }
+}
+
 // Récupérer la page demandée
 $page = $_GET['page'] ?? 'resources';
 if ($page === 'galaxy') {
