@@ -41,9 +41,9 @@ class PlanetEngine {
 
         // 5. Récupération de la planète
         $stmt = $this->db->prepare("
-            SELECT p.*, u.faction, u.username 
-            FROM planets p 
-            LEFT JOIN users u ON p.user_id = u.id 
+            SELECT p.*, u.faction, u.username
+            FROM planets p
+            LEFT JOIN users u ON p.user_id = u.id
             WHERE p.id = ?
         ");
         $stmt->execute([$planetId]);
@@ -82,7 +82,7 @@ class PlanetEngine {
         if ($elapsed > 0) {
             // Facteur horaire
             $hours = $elapsed / 3600.0;
-            
+
             $newMetal = min($metalMax, $planet['metal'] + ($prodRates['metal'] * $hours));
             $newCrystal = min($crystalMax, $planet['crystal'] + ($prodRates['crystal'] * $hours));
             $newDeut = min($deutMax, $planet['deuterium'] + ($prodRates['deuterium'] * $hours));
@@ -101,11 +101,11 @@ class PlanetEngine {
 
             try {
                 $stmtUpdate = $this->db->prepare("
-                    UPDATE planets 
-                    SET metal = ?, crystal = ?, deuterium = ?, 
+                    UPDATE planets
+                    SET metal = ?, crystal = ?, deuterium = ?,
                         rice_flour = ?, population = ?,
-                        energy_used = ?, energy_max = ?, 
-                        metal_max = ?, crystal_max = ?, deuterium_max = ?, 
+                        energy_used = ?, energy_max = ?,
+                        metal_max = ?, crystal_max = ?, deuterium_max = ?,
                         sake_max = ?, rice_flour_max = ?,
                         last_resource_update = ?
                     WHERE id = ?
@@ -130,10 +130,10 @@ class PlanetEngine {
                 try {
                     // Fallback si la colonne population n'existe pas encore
                     $stmtUpdate = $this->db->prepare("
-                        UPDATE planets 
-                        SET metal = ?, crystal = ?, deuterium = ?, 
-                            energy_used = ?, energy_max = ?, 
-                            metal_max = ?, crystal_max = ?, deuterium_max = ?, 
+                        UPDATE planets
+                        SET metal = ?, crystal = ?, deuterium = ?,
+                            energy_used = ?, energy_max = ?,
+                            metal_max = ?, crystal_max = ?, deuterium_max = ?,
                             sake_max = ?, rice_flour_max = ?,
                             last_resource_update = ?
                         WHERE id = ?
@@ -155,10 +155,10 @@ class PlanetEngine {
                 } catch (Exception $e2) {
                     // Fallback initial
                     $stmtUpdate = $this->db->prepare("
-                        UPDATE planets 
-                        SET metal = ?, crystal = ?, deuterium = ?, 
-                            energy_used = ?, energy_max = ?, 
-                            metal_max = ?, crystal_max = ?, deuterium_max = ?, 
+                        UPDATE planets
+                        SET metal = ?, crystal = ?, deuterium = ?,
+                            energy_used = ?, energy_max = ?,
+                            metal_max = ?, crystal_max = ?, deuterium_max = ?,
                             last_resource_update = ?
                         WHERE id = ?
                     ");
@@ -211,8 +211,8 @@ class PlanetEngine {
     public function processConstructionQueue(int $planetId): void {
         $now = time();
         $stmt = $this->db->prepare("
-            SELECT * FROM construction_queue 
-            WHERE planet_id = ? AND finishes_at <= ? 
+            SELECT * FROM construction_queue
+            WHERE planet_id = ? AND finishes_at <= ?
             ORDER BY finishes_at ASC
         ");
         $stmt->execute([$planetId, $now]);
@@ -252,8 +252,8 @@ class PlanetEngine {
                     }
                 } else {
                     $up = $this->db->prepare("
-                        UPDATE planet_fields 
-                        SET level = ? 
+                        UPDATE planet_fields
+                        SET level = ?
                         WHERE planet_id = ? AND field_slot = ?
                     ");
                     $up->execute([$targetLevel, $planetId, $slot]);
@@ -286,8 +286,8 @@ class PlanetEngine {
                     }
                 } else {
                     $up = $this->db->prepare("
-                        INSERT INTO planet_buildings (planet_id, building_type, level) 
-                        VALUES (?, ?, ?) 
+                        INSERT INTO planet_buildings (planet_id, building_type, level)
+                        VALUES (?, ?, ?)
                         ON DUPLICATE KEY UPDATE level = ?
                     ");
                     $up->execute([$planetId, $bType, $targetLevel, $targetLevel]);
@@ -301,52 +301,130 @@ class PlanetEngine {
     }
 
     /**
-     * Résolution du chantier spatial
+     * Résolution progressive ("au fil de l'eau") du chantier de siège et cavalerie
      */
     public function processShipyardQueue(int $planetId): void {
         $now = time();
         $stmt = $this->db->prepare("
-            SELECT * FROM shipyard_queue 
-            WHERE planet_id = ? AND finishes_at <= ?
+            SELECT * FROM shipyard_queue
+            WHERE planet_id = ?
+            ORDER BY started_at ASC, id ASC
         ");
-        $stmt->execute([$planetId, $now]);
-        $completed = $stmt->fetchAll();
+        $stmt->execute([$planetId]);
+        $queueItems = $stmt->fetchAll();
 
-        foreach ($completed as $item) {
-            $up = $this->db->prepare("
-                INSERT INTO planet_ships (planet_id, ship_code, count) 
-                VALUES (?, ?, ?) 
-                ON DUPLICATE KEY UPDATE count = count + ?
-            ");
-            $up->execute([$planetId, $item['ship_code'], $item['count'], $item['count']]);
+        foreach ($queueItems as $item) {
+            $startedAt = (int)$item['started_at'];
+            if ($now < $startedAt) {
+                // Cette commande en file n'a pas encore débuté
+                break;
+            }
 
-            $del = $this->db->prepare("DELETE FROM shipyard_queue WHERE id = ?");
-            $del->execute([$item['id']]);
+            $currentRemaining = (int)$item['count'];
+            $totalCount = !empty($item['total_count']) ? (int)$item['total_count'] : $currentRemaining;
+            $unitTime = max(1, (int)$item['unit_build_time']);
+            $elapsed = $now - $startedAt;
+
+            // Nombre d'engins / montures achevés au fil de l'eau
+            $unitsDone = (int)floor($elapsed / $unitTime);
+            $unitsDone = min($currentRemaining, $unitsDone);
+
+            if ($unitsDone > 0) {
+                // Créditer immédiatement dans la flotte / garnison du fief
+                $up = $this->db->prepare("
+                    INSERT INTO planet_ships (planet_id, ship_code, count)
+                    VALUES (?, ?, ?)
+                    ON DUPLICATE KEY UPDATE count = count + ?
+                ");
+                $up->execute([$planetId, $item['ship_code'], $unitsDone, $unitsDone]);
+
+                if ($unitsDone >= $currentRemaining) {
+                    // Lot entièrement terminé
+                    $del = $this->db->prepare("DELETE FROM shipyard_queue WHERE id = ?");
+                    $del->execute([$item['id']]);
+                } else {
+                    // Lot partiellement terminé : mise à jour au fil de l'eau
+                    $newRemaining = $currentRemaining - $unitsDone;
+                    $newStartedAt = $startedAt + ($unitsDone * $unitTime);
+
+                    $upd = $this->db->prepare("
+                        UPDATE shipyard_queue
+                        SET count = ?, total_count = ?, started_at = ?
+                        WHERE id = ?
+                    ");
+                    $upd->execute([$newRemaining, $totalCount, $newStartedAt, $item['id']]);
+
+                    // Le lot courant est toujours actif, les suivants attendent
+                    break;
+                }
+            } else {
+                // Le lot courant est en train d'assembler une unité
+                break;
+            }
         }
     }
 
     /**
-     * Résolution des régiments de soldats terminés
+     * Résolution progressive ("au fil de l'eau") des régiments de soldats en formation
      */
     public function processBarracksQueue(int $planetId): void {
         $now = time();
         $stmt = $this->db->prepare("
-            SELECT * FROM barracks_queue 
-            WHERE planet_id = ? AND finishes_at <= ?
+            SELECT * FROM barracks_queue
+            WHERE planet_id = ?
+            ORDER BY started_at ASC, id ASC
         ");
-        $stmt->execute([$planetId, $now]);
-        $completed = $stmt->fetchAll();
+        $stmt->execute([$planetId]);
+        $queueItems = $stmt->fetchAll();
 
-        foreach ($completed as $item) {
-            $up = $this->db->prepare("
-                INSERT INTO planet_units (planet_id, unit_code, count) 
-                VALUES (?, ?, ?) 
-                ON DUPLICATE KEY UPDATE count = count + ?
-            ");
-            $up->execute([$planetId, $item['unit_code'], $item['count'], $item['count']]);
+        foreach ($queueItems as $item) {
+            $startedAt = (int)$item['started_at'];
+            if ($now < $startedAt) {
+                // Cette commande en file n'a pas encore débuté
+                break;
+            }
 
-            $del = $this->db->prepare("DELETE FROM barracks_queue WHERE id = ?");
-            $del->execute([$item['id']]);
+            $currentRemaining = (int)$item['count'];
+            $totalCount = !empty($item['total_count']) ? (int)$item['total_count'] : $currentRemaining;
+            $unitTime = max(1, (int)$item['unit_train_time']);
+            $elapsed = $now - $startedAt;
+
+            // Nombre de soldats achevés au fil de l'eau
+            $unitsDone = (int)floor($elapsed / $unitTime);
+            $unitsDone = min($currentRemaining, $unitsDone);
+
+            if ($unitsDone > 0) {
+                // Créditer immédiatement dans la garnison du fief
+                $up = $this->db->prepare("
+                    INSERT INTO planet_units (planet_id, unit_code, count)
+                    VALUES (?, ?, ?)
+                    ON DUPLICATE KEY UPDATE count = count + ?
+                ");
+                $up->execute([$planetId, $item['unit_code'], $unitsDone, $unitsDone]);
+
+                if ($unitsDone >= $currentRemaining) {
+                    // Lot entièrement terminé
+                    $del = $this->db->prepare("DELETE FROM barracks_queue WHERE id = ?");
+                    $del->execute([$item['id']]);
+                } else {
+                    // Lot partiellement terminé : mise à jour au fil de l'eau
+                    $newRemaining = $currentRemaining - $unitsDone;
+                    $newStartedAt = $startedAt + ($unitsDone * $unitTime);
+
+                    $upd = $this->db->prepare("
+                        UPDATE barracks_queue
+                        SET count = ?, total_count = ?, started_at = ?
+                        WHERE id = ?
+                    ");
+                    $upd->execute([$newRemaining, $totalCount, $newStartedAt, $item['id']]);
+
+                    // Le lot courant est toujours actif, les suivants attendent
+                    break;
+                }
+            } else {
+                // Le lot courant est en train d'entraîner une unité
+                break;
+            }
         }
     }
 
@@ -357,7 +435,7 @@ class PlanetEngine {
         $now = time();
         try {
             $stmt = $this->db->prepare("
-                SELECT * FROM craft_queue 
+                SELECT * FROM craft_queue
                 WHERE planet_id = ? AND finishes_at <= ?
                 ORDER BY finishes_at ASC
             ");
@@ -372,8 +450,8 @@ class PlanetEngine {
                     $this->db->beginTransaction();
                     try {
                         $up = $this->db->prepare("
-                            UPDATE planets 
-                            SET wooden_beams = LEAST(wooden_beams_max, wooden_beams + ?) 
+                            UPDATE planets
+                            SET wooden_beams = LEAST(wooden_beams_max, wooden_beams + ?)
                             WHERE id = ?
                         ");
                         $up->execute([$amount, $planetId]);
@@ -389,8 +467,8 @@ class PlanetEngine {
                     $this->db->beginTransaction();
                     try {
                         $up = $this->db->prepare("
-                            UPDATE planets 
-                            SET {$product} = LEAST({$product}_max, {$product} + ?) 
+                            UPDATE planets
+                            SET {$product} = LEAST({$product}_max, {$product} + ?)
                             WHERE id = ?
                         ");
                         $up->execute([$amount, $planetId]);
@@ -419,15 +497,15 @@ class PlanetEngine {
         try {
             if ($buildingType) {
                 $stmt = $this->db->prepare("
-                    SELECT * FROM craft_queue 
+                    SELECT * FROM craft_queue
                     WHERE planet_id = ? AND (building_type = ? OR (building_type = '' AND ? = 'grain_mill'))
                     ORDER BY started_at ASC, id ASC
                 ");
                 $stmt->execute([$planetId, $buildingType, $buildingType]);
             } else {
                 $stmt = $this->db->prepare("
-                    SELECT * FROM craft_queue 
-                    WHERE planet_id = ? 
+                    SELECT * FROM craft_queue
+                    WHERE planet_id = ?
                     ORDER BY started_at ASC, id ASC
                 ");
                 $stmt->execute([$planetId]);
@@ -438,7 +516,7 @@ class PlanetEngine {
                 $isCurrent = ($idx === 0 && (int)$item['started_at'] <= $now);
                 $item['is_current'] = $isCurrent;
                 $item['status'] = $isCurrent ? 'processing' : 'queued';
-                
+
                 if ($item['product'] === 'wooden_beams') {
                     $item['product_name'] = 'Poutres en bois';
                     $item['product_icon'] = '🪵';
@@ -449,7 +527,7 @@ class PlanetEngine {
                     $item['product_name'] = 'Farine de Riz';
                     $item['product_icon'] = '🍚';
                 }
-                
+
                 $totalDuration = max(1, (int)$item['finishes_at'] - (int)$item['started_at']);
                 $item['total_duration'] = $totalDuration;
 
@@ -473,7 +551,7 @@ class PlanetEngine {
 
     /**
      * Traite l'entretien en farine des troupes d'élite et le mécanisme de famine si activé
-     * 
+     *
      * @param int $planetId
      * @param float $hours Heures écoulées depuis la dernière actualisation
      * @param float &$curFlour Référence au stock de farine de riz actuel
@@ -488,9 +566,9 @@ class PlanetEngine {
         try {
             // Récupérer les troupes d'élite présentes sur le fief (Tier >= 2)
             $stmtUnits = $this->db->prepare("
-                SELECT pu.id, pu.unit_code, pu.count, u.name, u.tier 
-                FROM planet_units pu 
-                JOIN units u ON pu.unit_code = u.code 
+                SELECT pu.id, pu.unit_code, pu.count, u.name, u.tier
+                FROM planet_units pu
+                JOIN units u ON pu.unit_code = u.code
                 WHERE pu.planet_id = ? AND pu.count > 0 AND u.tier >= 2
             ");
             $stmtUnits->execute([$planetId]);
@@ -545,8 +623,8 @@ class PlanetEngine {
                 }
 
                 $this->db->prepare("
-                    UPDATE planets 
-                    SET famine_active = 1, last_famine_losses = last_famine_losses + ? 
+                    UPDATE planets
+                    SET famine_active = 1, last_famine_losses = last_famine_losses + ?
                     WHERE id = ?
                 ")->execute([$totalCasualties, $planetId]);
 
@@ -571,9 +649,9 @@ class PlanetEngine {
     public function getEliteUnitsUpkeep(int $planetId): array {
         try {
             $stmtUnits = $this->db->prepare("
-                SELECT pu.count, u.tier, u.name, u.icon 
-                FROM planet_units pu 
-                JOIN units u ON pu.unit_code = u.code 
+                SELECT pu.count, u.tier, u.name, u.icon
+                FROM planet_units pu
+                JOIN units u ON pu.unit_code = u.code
                 WHERE pu.planet_id = ? AND pu.count > 0 AND u.tier >= 2
             ");
             $stmtUnits->execute([$planetId]);
@@ -642,8 +720,8 @@ class PlanetEngine {
      */
     public function getCitySlotMap(int $planetId): array {
         $stmt = $this->db->prepare("
-            SELECT id, slot, building_type, level 
-            FROM planet_buildings 
+            SELECT id, slot, building_type, level
+            FROM planet_buildings
             WHERE planet_id = ?
         ");
         $stmt->execute([$planetId]);
@@ -841,7 +919,7 @@ class PlanetEngine {
             // 1. Colonne sake, rice_flour et wooden_beams sur planets
             $stmt = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'sake'");
             if ($stmt && $stmt->rowCount() === 0) {
-                $this->db->exec("ALTER TABLE `planets` 
+                $this->db->exec("ALTER TABLE `planets`
                     ADD COLUMN `sake` DOUBLE NOT NULL DEFAULT 0,
                     ADD COLUMN `rice_flour` DOUBLE NOT NULL DEFAULT 0,
                     ADD COLUMN `sake_max` INT UNSIGNED NOT NULL DEFAULT 10000,
@@ -907,7 +985,7 @@ class PlanetEngine {
 
             $stmtCqB = $this->db->query("SHOW COLUMNS FROM `craft_queue` LIKE 'building_type'");
             if ($stmtCqB && $stmtCqB->rowCount() === 0) {
-                $this->db->exec("ALTER TABLE `craft_queue` 
+                $this->db->exec("ALTER TABLE `craft_queue`
                     ADD COLUMN `building_type` VARCHAR(30) NOT NULL DEFAULT 'grain_mill',
                     ADD COLUMN `cost_resource` VARCHAR(30) NOT NULL DEFAULT 'deuterium',
                     ADD COLUMN `cost_amount` DOUBLE NOT NULL DEFAULT 0,
@@ -918,7 +996,7 @@ class PlanetEngine {
             // 5. Colonnes famine sur planets
             $stmtFamine = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'famine_active'");
             if ($stmtFamine && $stmtFamine->rowCount() === 0) {
-                $this->db->exec("ALTER TABLE `planets` 
+                $this->db->exec("ALTER TABLE `planets`
                     ADD COLUMN `famine_active` TINYINT(1) NOT NULL DEFAULT 0,
                     ADD COLUMN `last_famine_losses` INT UNSIGNED NOT NULL DEFAULT 0
                 ");
@@ -940,9 +1018,9 @@ class PlanetEngine {
             // 8. Unité colonizer dans la table units
             $stmtCol = $this->db->query("SELECT code FROM `units` WHERE `code` = 'colonizer'");
             if ($stmtCol && $stmtCol->rowCount() === 0) {
-                $this->db->exec("INSERT INTO `units` 
-                    (`code`, `name`, `faction`, `tier`, `icon`, `image`, `metal_cost`, `crystal_cost`, `deuterium_cost`, `rice_flour_cost`, `attack`, `def_infantry`, `def_mech`, `speed`, `cargo_capacity`, `base_train_time`, `description`) 
-                    VALUES 
+                $this->db->exec("INSERT INTO `units`
+                    (`code`, `name`, `faction`, `tier`, `icon`, `image`, `metal_cost`, `crystal_cost`, `deuterium_cost`, `rice_flour_cost`, `attack`, `def_infantry`, `def_mech`, `speed`, `cargo_capacity`, `base_train_time`, `description`)
+                    VALUES
                     ('colonizer', 'Pionnier Féodal (Colon)', 'all', 3, '⛩️', 'expedition_etablissement_castral.jpg', 4500, 4000, 4500, 150, 10, 30, 20, 4, 3000, 7200, 'Troupe de pionniers et maîtres charpentiers équipés pour fonder un nouveau village castral indépendant.')
                 ");
             }
@@ -951,15 +1029,28 @@ class PlanetEngine {
             $this->db->exec("
                 UPDATE planets p
                 JOIN (
-                    SELECT user_id, MIN(id) as first_id 
-                    FROM planets 
-                    WHERE user_id IS NOT NULL 
+                    SELECT user_id, MIN(id) as first_id
+                    FROM planets
+                    WHERE user_id IS NOT NULL
                     GROUP BY user_id
                 ) fp ON p.id = fp.first_id
                 SET p.is_capital = 1
-                WHERE p.user_id IS NOT NULL 
+                WHERE p.user_id IS NOT NULL
                   AND p.user_id NOT IN (SELECT DISTINCT user_id FROM (SELECT user_id FROM planets WHERE is_capital = 1) existing_cap)
             ");
+
+            // 10. Colonne total_count pour la génération au fil de l'eau dans barracks_queue et shipyard_queue
+            $stmtBQ = $this->db->query("SHOW COLUMNS FROM `barracks_queue` LIKE 'total_count'");
+            if ($stmtBQ && $stmtBQ->rowCount() === 0) {
+                $this->db->exec("ALTER TABLE `barracks_queue` ADD COLUMN `total_count` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `count`");
+                $this->db->exec("UPDATE `barracks_queue` SET `total_count` = `count` WHERE `total_count` = 0");
+            }
+
+            $stmtSQ = $this->db->query("SHOW COLUMNS FROM `shipyard_queue` LIKE 'total_count'");
+            if ($stmtSQ && $stmtSQ->rowCount() === 0) {
+                $this->db->exec("ALTER TABLE `shipyard_queue` ADD COLUMN `total_count` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `count`");
+                $this->db->exec("UPDATE `shipyard_queue` SET `total_count` = `count` WHERE `total_count` = 0");
+            }
         } catch (Exception $e) {
             // Ignorer silencieusement si déjà en cours ou permissions limitées
         }
@@ -1035,7 +1126,7 @@ class PlanetEngine {
 
     /**
      * Lance le raffinage de riz en Farine ou Saké avec durée de préparation
-     * 
+     *
      * @param int $planetId
      * @param string $product 'sake' ou 'rice_flour'
      * @param float $riceAmount Quantité de riz brut (deuterium) à engager
@@ -1062,7 +1153,7 @@ class PlanetEngine {
         // 2. Traiter les productions terminées et vérifier la limite de la file
         $this->processCraftQueue($planetId);
         $activeQueue = $this->getCraftQueue($planetId);
-        
+
         $planet = $this->getPlanet($planetId);
         require_once __DIR__ . '/ImperialSealEngine.php';
         $sealEngine = new ImperialSealEngine($this->db);
@@ -1073,7 +1164,7 @@ class PlanetEngine {
             if ($maxQueue === 1) {
                 $remaining = !empty($activeQueue[0]['time_remaining']) ? gmdate('i\m s\s', $activeQueue[0]['time_remaining']) : 'quelques instants';
                 return [
-                    'success' => false, 
+                    'success' => false,
                     'error' => "Une cuvée ou mouture de raffinage est déjà en cours dans la Meunerie (temps restant : {$remaining}). Décrétez le <strong>Sceau Impérial (Privilège du Shōgun)</strong> pour débloquer la file d'attente automatique jusqu'à 4 commandes consécutives !"
                 ];
             } else {
@@ -1089,14 +1180,14 @@ class PlanetEngine {
 
         if ($details['actual_produced'] < 1) {
             return [
-                'success' => false, 
+                'success' => false,
                 'error' => "Quantité de riz insuffisante pour produire au moins 1 unité de {$details['product_name']} (minimum {$details['base_cost_per_unit']} Riz requis)."
             ];
         }
 
         if ($details['available_space'] <= 0) {
             return [
-                'success' => false, 
+                'success' => false,
                 'error' => "Vos réserves de {$details['product_name']} sont saturées (" . number_format($details['current_stock']) . "/" . number_format($details['max_stock']) . "). Augmentez le niveau de votre Meunerie ou consommez vos stocks."
             ];
         }
@@ -1106,7 +1197,7 @@ class PlanetEngine {
         $engagedRice = $details['actual_rice_engaged'];
         if ($planet['deuterium'] < $engagedRice) {
             return [
-                'success' => false, 
+                'success' => false,
                 'error' => "Stock de Riz insuffisant (" . number_format((int)$planet['deuterium']) . " disponible, " . number_format($engagedRice) . " requis)."
             ];
         }
@@ -1129,8 +1220,8 @@ class PlanetEngine {
         $this->db->beginTransaction();
         try {
             $stmt = $this->db->prepare("
-                UPDATE planets 
-                SET deuterium = GREATEST(0, deuterium - ?) 
+                UPDATE planets
+                SET deuterium = GREATEST(0, deuterium - ?)
                 WHERE id = ? AND deuterium >= ?
             ");
             $stmt->execute([$engagedRice, $planetId, $engagedRice]);
@@ -1141,7 +1232,7 @@ class PlanetEngine {
             }
 
             $stmtQueue = $this->db->prepare("
-                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at) 
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
                 VALUES (?, 'grain_mill', ?, 'deuterium', ?, ?, ?, ?, ?)
             ");
             $stmtQueue->execute([
@@ -1252,7 +1343,7 @@ class PlanetEngine {
         // 2. Traiter les productions terminées et vérifier la limite de la file
         $this->processCraftQueue($planetId);
         $activeQueue = $this->getCraftQueue($planetId, 'sawmill');
-        
+
         $planet = $this->getPlanet($planetId);
         require_once __DIR__ . '/ImperialSealEngine.php';
         $sealEngine = new ImperialSealEngine($this->db);
@@ -1263,7 +1354,7 @@ class PlanetEngine {
             if ($maxQueue === 1) {
                 $remaining = !empty($activeQueue[0]['time_remaining']) ? gmdate('i\m s\s', $activeQueue[0]['time_remaining']) : 'quelques instants';
                 return [
-                    'success' => false, 
+                    'success' => false,
                     'error' => "Un façonnage de poutres est déjà en cours dans la Charpenterie (temps restant : {$remaining}). Décrétez le <strong>Sceau Impérial (Privilège du Shōgun)</strong> pour débloquer la file d'attente automatique jusqu'à 4 commandes consécutives !"
                 ];
             } else {
@@ -1279,14 +1370,14 @@ class PlanetEngine {
 
         if ($details['actual_produced'] < 1) {
             return [
-                'success' => false, 
+                'success' => false,
                 'error' => "Quantité de bois insuffisante pour produire au moins 1 Poutre en bois (minimum {$details['base_cost_per_unit']} Bois requis)."
             ];
         }
 
         if ($details['available_space'] <= 0) {
             return [
-                'success' => false, 
+                'success' => false,
                 'error' => "Vos réserves de Poutres en bois sont saturées (" . number_format($details['current_stock']) . "/" . number_format($details['max_stock']) . "). Augmentez le niveau de votre Atelier de Charpenterie."
             ];
         }
@@ -1296,7 +1387,7 @@ class PlanetEngine {
         $engagedWood = $details['actual_wood_engaged'];
         if ($planet['metal'] < $engagedWood) {
             return [
-                'success' => false, 
+                'success' => false,
                 'error' => "Stock de Bois de Cèdre insuffisant (" . number_format((int)$planet['metal']) . " disponible, " . number_format($engagedWood) . " requis)."
             ];
         }
@@ -1319,8 +1410,8 @@ class PlanetEngine {
         $this->db->beginTransaction();
         try {
             $stmt = $this->db->prepare("
-                UPDATE planets 
-                SET metal = GREATEST(0, metal - ?) 
+                UPDATE planets
+                SET metal = GREATEST(0, metal - ?)
                 WHERE id = ? AND metal >= ?
             ");
             $stmt->execute([$engagedWood, $planetId, $engagedWood]);
@@ -1331,7 +1422,7 @@ class PlanetEngine {
             }
 
             $stmtQueue = $this->db->prepare("
-                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at) 
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
                 VALUES (?, 'sawmill', ?, 'metal', ?, ?, ?, ?, ?)
             ");
             $stmtQueue->execute([
@@ -1491,8 +1582,8 @@ class PlanetEngine {
         try {
             $now = time();
             $stmt = $this->db->prepare("
-                SELECT * FROM planet_feasts 
-                WHERE planet_id = ? AND finishes_at > ? 
+                SELECT * FROM planet_feasts
+                WHERE planet_id = ? AND finishes_at > ?
                 ORDER BY id DESC LIMIT 1
             ");
             $stmt->execute([$planetId, $now]);
@@ -1557,7 +1648,7 @@ class PlanetEngine {
         $cfg = $configs[$feastType];
         if ($tenshuLvl < $cfg['min_tenshu']) {
             return [
-                'success' => false, 
+                'success' => false,
                 'error' => "Votre Tenshu doit atteindre le Niveau {$cfg['min_tenshu']} pour organiser le {$cfg['name']} (actuellement Niveau {$tenshuLvl})."
             ];
         }
@@ -1577,8 +1668,8 @@ class PlanetEngine {
         $this->db->beginTransaction();
         try {
             $stmt = $this->db->prepare("
-                UPDATE planets 
-                SET sake = GREATEST(0, sake - ?) 
+                UPDATE planets
+                SET sake = GREATEST(0, sake - ?)
                 WHERE id = ? AND sake >= ?
             ");
             $stmt->execute([$sakeCost, $planetId, $sakeCost]);
@@ -1588,7 +1679,7 @@ class PlanetEngine {
             }
 
             $stmtFeast = $this->db->prepare("
-                INSERT INTO planet_feasts (planet_id, feast_type, tenshu_level, started_at, finishes_at) 
+                INSERT INTO planet_feasts (planet_id, feast_type, tenshu_level, started_at, finishes_at)
                 VALUES (?, ?, ?, ?, ?)
             ");
             $stmtFeast->execute([$planetId, $feastType, $tenshuLvl, $now, $finishesAt]);
@@ -1622,7 +1713,7 @@ class PlanetEngine {
     public function getUserPlanets(int $userId): array {
         $this->ensureSchemaMigration();
         $stmt = $this->db->prepare("
-            SELECT p.*, 
+            SELECT p.*,
                    (SELECT COUNT(*) FROM planet_fields WHERE planet_id = p.id) as fields_count,
                    (SELECT level FROM planet_buildings WHERE planet_id = p.id AND building_type = 'hq') as hq_level
             FROM planets p
@@ -1652,7 +1743,7 @@ class PlanetEngine {
         $up->execute([$newName, $planetId, $userId]);
 
         return [
-            'success' => true, 
+            'success' => true,
             'message' => "Le village a été renommé en « " . htmlspecialchars($newName) . " » avec succès.",
             'name' => $newName
         ];
@@ -1686,7 +1777,7 @@ class PlanetEngine {
         }
 
         return [
-            'success' => true, 
+            'success' => true,
             'message' => "Le village « " . htmlspecialchars($planet['name']) . " » est désormais proclamé Capitale officielle de votre clan !",
             'planet_id' => $planetId
         ];
@@ -1729,7 +1820,7 @@ class PlanetEngine {
 
         // Colons actuellement en mission depuis ce village
         $stmtMissions = $this->db->prepare("
-            SELECT fleet_data FROM fleet_missions 
+            SELECT fleet_data FROM fleet_missions
             WHERE source_planet_id = ? AND status IN ('en_route', 'returning')
         ");
         $stmtMissions->execute([$planetId]);
@@ -1816,8 +1907,8 @@ class PlanetEngine {
         $this->db->beginTransaction();
         try {
             $stmtDeduct = $this->db->prepare("
-                UPDATE planets 
-                SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ?, rice_flour = GREATEST(0, rice_flour - ?) 
+                UPDATE planets
+                SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ?, rice_flour = GREATEST(0, rice_flour - ?)
                 WHERE id = ? AND metal >= ? AND crystal >= ? AND deuterium >= ? AND rice_flour >= ?
             ");
             $stmtDeduct->execute([$totalWood, $totalStone, $totalRice, $totalFlour, $planetId, $totalWood, $totalStone, $totalRice, $totalFlour]);
@@ -1827,10 +1918,10 @@ class PlanetEngine {
             }
 
             $stmtQueue = $this->db->prepare("
-                INSERT INTO barracks_queue (planet_id, unit_code, count, started_at, finishes_at, unit_train_time)
-                VALUES (?, 'colonizer', ?, ?, ?, ?)
+                INSERT INTO barracks_queue (planet_id, unit_code, count, total_count, started_at, finishes_at, unit_train_time)
+                VALUES (?, 'colonizer', ?, ?, ?, ?, ?)
             ");
-            $stmtQueue->execute([$planetId, $count, $startTime, $finishesAt, $status['train_time']]);
+            $stmtQueue->execute([$planetId, $count, $count, $startTime, $finishesAt, $status['train_time']]);
 
             $this->db->commit();
         } catch (Exception $e) {

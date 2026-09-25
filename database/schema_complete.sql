@@ -1,4 +1,4 @@
-/*M!999999\- enable the sandbox mode */ 
+/*M!999999\- enable the sandbox mode */
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -93,6 +93,7 @@ CREATE TABLE `barracks_queue` (
   `planet_id` int(10) unsigned NOT NULL,
   `unit_code` varchar(60) NOT NULL,
   `count` int(10) unsigned NOT NULL,
+  `total_count` int(10) unsigned NOT NULL DEFAULT 0,
   `started_at` int(10) unsigned NOT NULL,
   `finishes_at` int(10) unsigned NOT NULL,
   `unit_train_time` int(10) unsigned NOT NULL,
@@ -465,6 +466,7 @@ CREATE TABLE `shipyard_queue` (
   `planet_id` int(10) unsigned NOT NULL,
   `ship_code` varchar(30) NOT NULL,
   `count` int(10) unsigned NOT NULL,
+  `total_count` int(10) unsigned NOT NULL DEFAULT 0,
   `started_at` int(10) unsigned NOT NULL,
   `finishes_at` int(10) unsigned NOT NULL,
   `unit_build_time` int(10) unsigned NOT NULL,

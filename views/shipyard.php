@@ -32,22 +32,112 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
                 <a href="?page=city" class="btn btn-primary">Bâtir l'Atelier</a>
             </div>
         <?php else: ?>
-            <!-- File active du Chantier -->
+            <!-- File active du Chantier & Écuries avec Double Barre de Progression -->
             <?php if (!empty($queue)): ?>
-                <div class="card" style="margin-bottom:1.5rem; border-color:#dc2626;">
-                    <div class="card-header">
-                        <h4 class="card-title">🐎 En cours d'entraînement et d'assemblage</h4>
-                    </div>
-                    <div class="card-body">
-                        <?php foreach ($queue as $q): ?>
-                            <div class="queue-item">
-                                <div class="queue-info">
-                                    <h4><?= $q['count'] ?>x <?= htmlspecialchars($q['ship_name']) ?></h4>
-                                    <span style="font-size:0.75rem; color:var(--text-muted);">Durée unitaire : <?= $q['unit_build_time'] ?>s</span>
+                <div class="card mb-4 shadow-sm" style="border-top: 4px solid #dc2626; background:var(--bg-surface, #ffffff); border-radius:10px;">
+                    <div class="card-header py-3 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:linear-gradient(to right, rgba(220,38,38,0.06), transparent);">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fs-2">🐎</span>
+                            <div>
+                                <h3 class="card-title m-0 fw-bold" style="font-size:1.05rem; color:var(--text-main);">
+                                    Atelier de Siège & Écuries — Mobilisation Active
+                                </h3>
+                                <div class="text-secondary small">
+                                    Assemblage progressif <strong>au fil de l'eau</strong> &bull; <?= count($queue) ?> lot(s) en production
                                 </div>
-                                <div class="queue-timer" data-countdown="<?= $q['finishes_at'] ?>">Calcul...</div>
                             </div>
-                        <?php endforeach; ?>
+                        </div>
+                        <span class="badge bg-danger-lt fw-bold px-3 py-1">
+                            Disponibilité Immédiate dans la Flotte
+                        </span>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="d-flex flex-column gap-3">
+                            <?php foreach ($queue as $q): ?>
+                                <div class="shipyard-queue-card p-3 rounded border shadow-sm"
+                                     style="background:var(--bg-surface, #ffffff); border-left: 4px solid #dc2626 !important;"
+                                     data-started="<?= $q['started_at'] ?>"
+                                     data-finishes="<?= $q['finishes_at'] ?>"
+                                     data-unit-time="<?= $q['unit_build_time'] ?>"
+                                     data-remaining="<?= $q['count'] ?>"
+                                     data-total="<?= $q['total_count'] ?>"
+                                     data-completed="<?= $q['completed_count'] ?>">
+
+                                    <!-- Entête de la commande -->
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fs-2 lh-1">🐎</span>
+                                            <div>
+                                                <h4 class="m-0 fw-bold text-dark fs-3 d-flex align-items-center gap-2">
+                                                    <span><?= htmlspecialchars($q['ship_name']) ?></span>
+                                                    <span class="badge bg-danger text-white rounded-pill px-2 py-1 fs-5">
+                                                        Lot : <span class="queue-completed-count"><?= $q['completed_count'] ?></span> / <?= $q['total_count'] ?> prêts
+                                                    </span>
+                                                </h4>
+                                                <div class="text-secondary small mt-1">
+                                                    Cadence : <strong><?= $q['unit_build_time'] ?>s</strong> par unité &bull;
+                                                    <span class="queue-remaining-badge text-danger fw-semibold"><?= $q['count'] ?> restant(s) à assembler</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="small text-secondary fw-semibold">Fin totale estimée</div>
+                                            <div class="queue-lot-timer text-danger fw-bold font-monospace fs-3">
+                                                Calcul...
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 1ère Barre : Engin / Cavalier en cours de création -->
+                                    <div class="p-2 rounded mb-2" style="background: rgba(220, 38, 38, 0.04); border: 1px solid rgba(220, 38, 38, 0.15);">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small text-dark fw-bold d-flex align-items-center gap-1">
+                                                <span>⚡</span>
+                                                <span>Unité en cours d'assemblage (<span class="queue-current-unit-num"><?= $q['current_unit_number'] ?></span>/<?= $q['total_count'] ?>) :</span>
+                                                <strong class="queue-unit-countdown font-monospace text-danger ms-1">--:--</strong>
+                                            </span>
+                                            <span class="badge bg-danger-lt fw-bold font-monospace queue-unit-pct"><?= $q['unit_pct'] ?>%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px; background: rgba(0,0,0,0.08); border-radius: 4px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger queue-unit-bar"
+                                                 role="progressbar"
+                                                 style="width: <?= $q['unit_pct'] ?>%;"
+                                                 aria-valuenow="<?= $q['unit_pct'] ?>"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2ème Barre : Progression Globale du Lot -->
+                                    <div class="p-2 rounded" style="background: rgba(32, 107, 196, 0.04); border: 1px solid rgba(32, 107, 196, 0.15);">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small text-dark fw-bold d-flex align-items-center gap-1">
+                                                <span>📦</span>
+                                                <span>Progression globale du lot :</span>
+                                                <span class="text-secondary fw-normal queue-lot-status ms-1">
+                                                    <strong><span class="queue-lot-ready"><?= $q['completed_count'] ?></span></strong> sur <strong><?= $q['total_count'] ?></strong> engins mobilisés
+                                                </span>
+                                            </span>
+                                            <span class="badge bg-primary-lt fw-bold font-monospace queue-lot-pct"><?= $q['lot_pct'] ?>%</span>
+                                        </div>
+                                        <div class="progress" style="height: 10px; background: rgba(0,0,0,0.08); border-radius: 5px;">
+                                            <div class="progress-bar bg-primary queue-lot-bar"
+                                                 role="progressbar"
+                                                 style="width: <?= $q['lot_pct'] ?>%;"
+                                                 aria-valuenow="<?= $q['lot_pct'] ?>"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Note au fil de l'eau -->
+                                    <div class="d-flex align-items-center justify-content-between mt-2 pt-1 text-secondary" style="font-size: 0.78rem;">
+                                        <span>💧 <em>Production au fil de l'eau : chaque engin achevé est immédiatement transféré dans votre flotte active.</em></span>
+                                        <span class="badge bg-success-lt fw-semibold">✔ Disponibilité instantanée</span>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 </div>
             <?php endif; ?>
@@ -55,7 +145,7 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
             <!-- Grille des Vaisseaux & Engins de Siège Disponibles -->
             <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap:1.5rem;">
                 <?php foreach ($availableShips as $s): ?>
-                    <?php 
+                    <?php
                         $imgFile = !empty($s['image']) ? $s['image'] : ($s['code'] . '.jpg');
                         $diskFile = __DIR__ . '/../public/assets/units/' . $imgFile;
                         if (file_exists($diskFile)) {
@@ -80,14 +170,14 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
                         $maxAffordable = max(0, min($maxMetal, $maxCrystal, $maxDeut));
                     ?>
                     <div class="card unit-card" style="margin:0; background:var(--bg-surface, #fdfbf7); overflow:hidden; border:1px solid var(--border-color); border-radius:10px; display:flex; flex-direction:column; box-shadow:0 6px 18px rgba(0,0,0,0.05); transition:transform 0.2s ease, box-shadow 0.2s ease;">
-                        
+
                         <!-- Illustration Grand Format de l'Engin / Cavalier -->
                         <div style="position:relative; width:100%; height:230px; overflow:hidden; background:var(--bg-ink, #ede5d5); border-bottom:1px solid var(--border-color); cursor:pointer;"
                              onclick="openUnitLightbox('<?= htmlspecialchars(addslashes($s['name'])) ?>', '<?= $fullImg ?>', '<?= htmlspecialchars(addslashes($s['description'])) ?>', '<?= $clanBadge['name'] ?>', 'Écuries & Siège')"
                              title="Cliquer pour admirer l'illustration en grand format">
-                            
+
                             <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($s['name']) ?>" style="width:100%; height:100%; object-fit:cover; object-position:center; transition:transform 0.4s ease;">
-                            
+
                             <!-- Badge de Clan / Faction -->
                             <div style="position:absolute; top:10px; left:10px; background:rgba(253,251,247,0.95); backdrop-filter:blur(6px); border:1px solid <?= $clanBadge['color'] ?>; border-radius:6px; padding:3px 10px; font-size:0.75rem; font-weight:800; color:<?= $clanBadge['color'] ?>; box-shadow:0 2px 6px rgba(0,0,0,0.12);">
                                 <?= $clanBadge['icon'] ?> <?= $clanBadge['name'] ?>
@@ -151,9 +241,9 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
                                     </button>
                                 </div>
                                 <div style="display:flex; gap:0.5rem;">
-                                    <input type="number" id="count-<?= $s['code'] ?>" min="1" max="<?= max(1, $maxAffordable) ?>" value="1" 
+                                    <input type="number" id="count-<?= $s['code'] ?>" min="1" max="<?= max(1, $maxAffordable) ?>" value="1"
                                            style="width:80px; background:var(--bg-ink, #ede5d5); border:1px solid var(--border-color); color:var(--text-main); padding:0.5rem; border-radius:6px; text-align:center; font-weight:700; font-size:0.9rem;">
-                                    <button class="btn btn-primary" style="flex:1; font-size:0.85rem; font-weight:700; padding:0.5rem 1rem;" 
+                                    <button class="btn btn-primary" style="flex:1; font-size:0.85rem; font-weight:700; padding:0.5rem 1rem;"
                                             onclick="orderShips('<?= $s['code'] ?>')">
                                         Mobiliser
                                     </button>
@@ -233,5 +323,125 @@ async function orderShips(shipCode) {
         showModalAlert('Erreur de communication avec les écuries.', 'error');
     }
 }
+
+// ⏱️ Mise à jour en temps réel de la Double Barre de Progression (Chantier / Cavalerie)
+function formatTime(seconds) {
+    if (seconds <= 0) return "00:00";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    if (h > 0) {
+        return h + "h " + (m < 10 ? "0" : "") + m + "m " + (s < 10 ? "0" : "") + s + "s";
+    }
+    return (m < 10 ? "0" : "") + m + "m " + (s < 10 ? "0" : "") + s + "s";
+}
+
+function updateShipyardDoubleProgress() {
+    const cards = document.querySelectorAll('.shipyard-queue-card');
+    if (!cards.length) return;
+
+    const now = Math.floor(Date.now() / 1000);
+    let shouldReload = false;
+
+    cards.forEach(card => {
+        const startedAt = parseInt(card.dataset.started, 10);
+        const finishesAt = parseInt(card.dataset.finishes, 10);
+        const unitTime = Math.max(1, parseInt(card.dataset.unitTime, 10));
+        const totalCount = Math.max(1, parseInt(card.dataset.total, 10));
+        const initialCompleted = parseInt(card.dataset.completed, 10);
+
+        if (now < startedAt) {
+            // Ordre en attente dans la file
+            const waitTime = startedAt - now;
+            const lotTimer = card.querySelector('.queue-lot-timer');
+            if (lotTimer) lotTimer.textContent = "En attente (" + formatTime(waitTime) + ")";
+            const unitCountdown = card.querySelector('.queue-unit-countdown');
+            if (unitCountdown) unitCountdown.textContent = "En attente...";
+            const unitPct = card.querySelector('.queue-unit-pct');
+            if (unitPct) unitPct.textContent = "0%";
+            const unitBar = card.querySelector('.queue-unit-bar');
+            if (unitBar) unitBar.style.width = "0%";
+            return;
+        }
+
+        if (now >= finishesAt) {
+            // Lot entièrement terminé
+            const lotTimer = card.querySelector('.queue-lot-timer');
+            if (lotTimer) lotTimer.textContent = "Terminé !";
+            const unitCountdown = card.querySelector('.queue-unit-countdown');
+            if (unitCountdown) unitCountdown.textContent = "Terminé !";
+            const unitPct = card.querySelector('.queue-unit-pct');
+            if (unitPct) unitPct.textContent = "100%";
+            const unitBar = card.querySelector('.queue-unit-bar');
+            if (unitBar) unitBar.style.width = "100%";
+            const lotPct = card.querySelector('.queue-lot-pct');
+            if (lotPct) lotPct.textContent = "100%";
+            const lotBar = card.querySelector('.queue-lot-bar');
+            if (lotBar) lotBar.style.width = "100%";
+            shouldReload = true;
+            return;
+        }
+
+        // Commande en cours d'exécution
+        const totalElapsed = now - startedAt;
+        const currentCompletedInBatch = Math.min(totalCount, Math.floor(totalElapsed / unitTime));
+        const currentRemainingInBatch = Math.max(0, totalCount - currentCompletedInBatch);
+
+        // Détection d'une nouvelle unité terminée "au fil de l'eau"
+        if (currentCompletedInBatch > initialCompleted) {
+            shouldReload = true;
+        }
+
+        // Unité en cours
+        const unitElapsed = totalElapsed % unitTime;
+        const unitRemaining = Math.max(0, unitTime - unitElapsed);
+        const unitPct = Math.min(100, Math.max(0, (unitElapsed / unitTime) * 100));
+        const currentUnitNum = Math.min(totalCount, currentCompletedInBatch + 1);
+
+        // Lot global (unités achevées + fraction de l'unité courante)
+        const lotPct = Math.min(100, Math.max(0, ((currentCompletedInBatch + (unitElapsed / unitTime)) / totalCount) * 100));
+        const lotRemaining = Math.max(0, finishesAt - now);
+
+        // Rafraîchissement DOM
+        const lotTimerEl = card.querySelector('.queue-lot-timer');
+        if (lotTimerEl) lotTimerEl.textContent = formatTime(lotRemaining);
+
+        const unitCountdownEl = card.querySelector('.queue-unit-countdown');
+        if (unitCountdownEl) unitCountdownEl.textContent = formatTime(unitRemaining) + " (" + unitElapsed + "s / " + unitTime + "s)";
+
+        const unitPctEl = card.querySelector('.queue-unit-pct');
+        if (unitPctEl) unitPctEl.textContent = unitPct.toFixed(0) + "%";
+
+        const unitBarEl = card.querySelector('.queue-unit-bar');
+        if (unitBarEl) unitBarEl.style.width = unitPct.toFixed(1) + "%";
+
+        const currentUnitNumEl = card.querySelector('.queue-current-unit-num');
+        if (currentUnitNumEl) currentUnitNumEl.textContent = currentUnitNum;
+
+        const lotPctEl = card.querySelector('.queue-lot-pct');
+        if (lotPctEl) lotPctEl.textContent = lotPct.toFixed(0) + "%";
+
+        const lotBarEl = card.querySelector('.queue-lot-bar');
+        if (lotBarEl) lotBarEl.style.width = lotPct.toFixed(1) + "%";
+
+        const completedCountEl = card.querySelector('.queue-completed-count');
+        if (completedCountEl) completedCountEl.textContent = currentCompletedInBatch;
+
+        const lotReadyEl = card.querySelector('.queue-lot-ready');
+        if (lotReadyEl) lotReadyEl.textContent = currentCompletedInBatch;
+
+        const remainingBadgeEl = card.querySelector('.queue-remaining-badge');
+        if (remainingBadgeEl) remainingBadgeEl.textContent = currentRemainingInBatch + " restant(s) à assembler";
+    });
+
+    if (shouldReload) {
+        setTimeout(() => { window.location.reload(); }, 1200);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateShipyardDoubleProgress();
+    setInterval(updateShipyardDoubleProgress, 1000);
+});
 </script>
 

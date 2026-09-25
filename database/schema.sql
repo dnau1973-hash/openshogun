@@ -175,6 +175,7 @@ CREATE TABLE `shipyard_queue` (
   `planet_id` INT UNSIGNED NOT NULL,
   `ship_code` VARCHAR(30) NOT NULL,
   `count` INT UNSIGNED NOT NULL,
+  `total_count` INT UNSIGNED NOT NULL DEFAULT 0,
   `started_at` INT UNSIGNED NOT NULL,
   `finishes_at` INT UNSIGNED NOT NULL,
   `unit_build_time` INT UNSIGNED NOT NULL,

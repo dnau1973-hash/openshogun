@@ -21,8 +21,8 @@ class BarracksEngine {
      */
     public function getStationedUnits(int $planetId, string $faction): array {
         $stmt = $this->db->prepare("
-            SELECT u.*, COALESCE(pu.count, 0) as stationed_count 
-            FROM units u 
+            SELECT u.*, COALESCE(pu.count, 0) as stationed_count
+            FROM units u
             LEFT JOIN planet_units pu ON pu.unit_code = u.code AND pu.planet_id = ?
             WHERE u.faction = 'all' OR u.faction = ?
             ORDER BY u.tier ASC, u.attack ASC
@@ -87,18 +87,61 @@ class BarracksEngine {
     }
 
     /**
-     * Récupère la file active d'entraînement de la caserne
+     * Récupère la file active d'entraînement de la caserne (avec métriques au fil de l'eau)
      */
     public function getQueue(int $planetId): array {
+        // Traiter d'abord au fil de l'eau pour avoir les données fraîches
+        $this->planetEngine->processBarracksQueue($planetId);
+
         $stmt = $this->db->prepare("
-            SELECT bq.*, u.name as unit_name, u.icon as unit_icon 
-            FROM barracks_queue bq 
-            JOIN units u ON bq.unit_code = u.code 
-            WHERE bq.planet_id = ? 
-            ORDER BY bq.finishes_at ASC
+            SELECT bq.*, u.name as unit_name, u.icon as unit_icon, u.image as unit_image
+            FROM barracks_queue bq
+            LEFT JOIN units u ON bq.unit_code = u.code
+            WHERE bq.planet_id = ?
+            ORDER BY bq.started_at ASC, bq.id ASC
         ");
         $stmt->execute([$planetId]);
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+
+        $now = time();
+        foreach ($rows as &$r) {
+            $totalCount = !empty($r['total_count']) ? (int)$r['total_count'] : (int)$r['count'];
+            $r['total_count'] = $totalCount;
+            $remainingCount = (int)$r['count'];
+            $completedCount = max(0, $totalCount - $remainingCount);
+            $r['completed_count'] = $completedCount;
+            $unitTime = max(1, (int)$r['unit_train_time']);
+            $startedAt = (int)$r['started_at'];
+            $finishesAt = (int)$r['finishes_at'];
+
+            $isStarted = ($now >= $startedAt);
+            $r['is_active'] = $isStarted;
+
+            if ($isStarted) {
+                $unitElapsed = min($unitTime, max(0, $now - $startedAt));
+                $unitRemaining = max(0, $unitTime - $unitElapsed);
+                $unitPct = min(100.0, max(0.0, ($unitElapsed / $unitTime) * 100.0));
+                $currentUnitNum = min($totalCount, $completedCount + 1);
+                $lotPct = min(100.0, max(0.0, (($completedCount + ($unitElapsed / $unitTime)) / $totalCount) * 100.0));
+            } else {
+                $unitElapsed = 0;
+                $unitRemaining = $unitTime;
+                $unitPct = 0.0;
+                $currentUnitNum = $completedCount + 1;
+                $lotPct = 0.0;
+            }
+
+            $r['unit_elapsed'] = $unitElapsed;
+            $r['unit_remaining'] = $unitRemaining;
+            $r['unit_pct'] = round($unitPct, 1);
+            $r['current_unit_number'] = $currentUnitNum;
+            $r['lot_pct'] = round($lotPct, 1);
+            $r['lot_remaining_time'] = max(0, $finishesAt - $now);
+            $r['unit_name'] = $r['unit_name'] ?? ($r['unit_code'] === 'colonizer' ? 'Pionnier Féodal (Colon)' : $r['unit_code']);
+            $r['unit_icon'] = $r['unit_icon'] ?? ($r['unit_code'] === 'colonizer' ? '⛩️' : '🥋');
+        }
+
+        return $rows;
     }
 
     /**
@@ -174,26 +217,30 @@ class BarracksEngine {
         $this->db->beginTransaction();
         try {
             $this->db->prepare("
-                UPDATE planets 
-                SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ?, rice_flour = GREATEST(0, rice_flour - ?) 
+                UPDATE planets
+                SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ?, rice_flour = GREATEST(0, rice_flour - ?)
                 WHERE id = ?
             ")->execute([$totalMetal, $totalCrystal, $totalDeut, $totalFlour, $planetId]);
         } catch (Exception $e) {
             $this->db->prepare("
-                UPDATE planets 
-                SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ? 
+                UPDATE planets
+                SET metal = metal - ?, crystal = crystal - ?, deuterium = deuterium - ?
                 WHERE id = ?
             ")->execute([$totalMetal, $totalCrystal, $totalDeut, $planetId]);
         }
 
         $now = time();
-        $finishesAt = $now + $totalTime;
+        $stmtLast = $this->db->prepare("SELECT MAX(finishes_at) FROM barracks_queue WHERE planet_id = ?");
+        $stmtLast->execute([$planetId]);
+        $lastFinish = (int)$stmtLast->fetchColumn();
+        $startTime = max($now, $lastFinish);
+        $finishesAt = $startTime + $totalTime;
 
         $this->db->prepare("
-            INSERT INTO barracks_queue 
-            (planet_id, unit_code, count, started_at, finishes_at, unit_train_time) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        ")->execute([$planetId, $unitCode, $count, $now, $finishesAt, $unitTime]);
+            INSERT INTO barracks_queue
+            (planet_id, unit_code, count, total_count, started_at, finishes_at, unit_train_time)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ")->execute([$planetId, $unitCode, $count, $count, $startTime, $finishesAt, $unitTime]);
 
         $this->db->commit();
 
@@ -205,26 +252,10 @@ class BarracksEngine {
     }
 
     /**
-     * Résolution des régiments dont l'entraînement est terminé
+     * Résolution progressive ("au fil de l'eau") des régiments en cours de formation
      */
     public function processQueue(int $planetId): void {
-        $now = time();
-        $stmt = $this->db->prepare("
-            SELECT * FROM barracks_queue 
-            WHERE planet_id = ? AND finishes_at <= ?
-        ");
-        $stmt->execute([$planetId, $now]);
-        $completed = $stmt->fetchAll();
-
-        foreach ($completed as $item) {
-            $this->db->prepare("
-                INSERT INTO planet_units (planet_id, unit_code, count) 
-                VALUES (?, ?, ?) 
-                ON DUPLICATE KEY UPDATE count = count + ?
-            ")->execute([$planetId, $item['unit_code'], $item['count'], $item['count']]);
-
-            $this->db->prepare("DELETE FROM barracks_queue WHERE id = ?")->execute([$item['id']]);
-        }
+        $this->planetEngine->processBarracksQueue($planetId);
     }
 }
 

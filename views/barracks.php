@@ -95,30 +95,112 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                 </a>
             </div>
         <?php else: ?>
-            <!-- File active d'entraînement -->
+            <!-- File active d'entraînement avec Double Barre de Progression (Unité en cours & Lot Global) -->
             <?php if (!empty($queue)): ?>
-                <div class="card" style="margin-bottom:1.75rem; border-left:4px solid var(--red-primary); background:var(--bg-surface, #fdfbf7); box-shadow:0 3px 10px rgba(0,0,0,0.04);">
-                    <div class="card-header" style="background:transparent; padding:0.75rem 1rem; border-bottom:1px solid var(--border-color);">
-                        <h4 class="card-title" style="font-size:0.95rem; margin:0; display:flex; align-items:center; gap:0.5rem; color:var(--text-main);">
-                            <span>⏳</span> Régiments en cours de formation au Dojo
-                        </h4>
-                    </div>
-                    <div class="card-body" style="padding:0.75rem 1rem;">
-                        <?php foreach ($queue as $q): ?>
-                            <div class="queue-item" style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0.85rem; background:var(--bg-ink, #ede5d5); border:1px solid var(--border-color); border-radius:6px; margin-bottom:0.5rem;">
-                                <div class="queue-info">
-                                    <h4 style="margin:0; font-size:0.95rem; color:var(--text-main);">
-                                        <?= $q['count'] ?>x <?= htmlspecialchars($q['unit_name']) ?>
-                                    </h4>
-                                    <span style="font-size:0.75rem; color:var(--text-muted);">
-                                        Temps par guerrier : <?= $q['unit_train_time'] ?>s
-                                    </span>
-                                </div>
-                                <div class="queue-timer" data-countdown="<?= $q['finishes_at'] ?>" style="font-weight:700; font-family:monospace; color:var(--red-primary);">
-                                    Calcul...
+                <div class="card mb-4 shadow-sm" style="border-top: 4px solid var(--red-primary, #c2252b); background:var(--bg-surface, #ffffff); border-radius:10px;">
+                    <div class="card-header py-3 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:linear-gradient(to right, rgba(194,37,43,0.06), transparent);">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fs-2">⏳</span>
+                            <div>
+                                <h3 class="card-title m-0 fw-bold" style="font-size:1.05rem; color:var(--text-main);">
+                                    Régiments en cours de formation au Dojo
+                                </h3>
+                                <div class="text-secondary small">
+                                    Mobilisation progressive <strong>au fil de l'eau</strong> &bull; <?= count($queue) ?> ordre(s) d'enrôlement actif(s)
                                 </div>
                             </div>
-                        <?php endforeach; ?>
+                        </div>
+                        <span class="badge bg-danger-lt fw-bold px-3 py-1">
+                            Disponibilité Immédiate dans la Garnison
+                        </span>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="d-flex flex-column gap-3">
+                            <?php foreach ($queue as $q): ?>
+                                <div class="barracks-queue-card p-3 rounded border shadow-sm"
+                                     style="background:var(--bg-surface, #ffffff); border-left: 4px solid var(--red-primary, #c2252b) !important;"
+                                     data-started="<?= $q['started_at'] ?>"
+                                     data-finishes="<?= $q['finishes_at'] ?>"
+                                     data-unit-time="<?= $q['unit_train_time'] ?>"
+                                     data-remaining="<?= $q['count'] ?>"
+                                     data-total="<?= $q['total_count'] ?>"
+                                     data-completed="<?= $q['completed_count'] ?>">
+
+                                    <!-- Entête de la commande -->
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fs-2 lh-1"><?= $q['unit_icon'] ?></span>
+                                            <div>
+                                                <h4 class="m-0 fw-bold text-dark fs-3 d-flex align-items-center gap-2">
+                                                    <span><?= htmlspecialchars($q['unit_name']) ?></span>
+                                                    <span class="badge bg-danger text-white rounded-pill px-2 py-1 fs-5">
+                                                        Lot : <span class="queue-completed-count"><?= $q['completed_count'] ?></span> / <?= $q['total_count'] ?> prêts
+                                                    </span>
+                                                </h4>
+                                                <div class="text-secondary small mt-1">
+                                                    Cadence : <strong><?= $q['unit_train_time'] ?>s</strong> par guerrier &bull;
+                                                    <span class="queue-remaining-badge text-danger fw-semibold"><?= $q['count'] ?> restant(s) à former</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="small text-secondary fw-semibold">Fin totale estimée</div>
+                                            <div class="queue-lot-timer text-danger fw-bold font-monospace fs-3">
+                                                Calcul...
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 1ère Barre : Unité en cours de création -->
+                                    <div class="p-2 rounded mb-2" style="background: rgba(194, 37, 43, 0.04); border: 1px solid rgba(194, 37, 43, 0.15);">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small text-dark fw-bold d-flex align-items-center gap-1">
+                                                <span>⚡</span>
+                                                <span>Guerrier en cours de formation (<span class="queue-current-unit-num"><?= $q['current_unit_number'] ?></span>/<?= $q['total_count'] ?>) :</span>
+                                                <strong class="queue-unit-countdown font-monospace text-danger ms-1">--:--</strong>
+                                            </span>
+                                            <span class="badge bg-danger-lt fw-bold font-monospace queue-unit-pct"><?= $q['unit_pct'] ?>%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px; background: rgba(0,0,0,0.08); border-radius: 4px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger queue-unit-bar"
+                                                 role="progressbar"
+                                                 style="width: <?= $q['unit_pct'] ?>%;"
+                                                 aria-valuenow="<?= $q['unit_pct'] ?>"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2ème Barre : Progression Globale du Lot -->
+                                    <div class="p-2 rounded" style="background: rgba(32, 107, 196, 0.04); border: 1px solid rgba(32, 107, 196, 0.15);">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small text-dark fw-bold d-flex align-items-center gap-1">
+                                                <span>📦</span>
+                                                <span>Progression globale du lot :</span>
+                                                <span class="text-secondary fw-normal queue-lot-status ms-1">
+                                                    <strong><span class="queue-lot-ready"><?= $q['completed_count'] ?></span></strong> sur <strong><?= $q['total_count'] ?></strong> guerriers mobilisés
+                                                </span>
+                                            </span>
+                                            <span class="badge bg-primary-lt fw-bold font-monospace queue-lot-pct"><?= $q['lot_pct'] ?>%</span>
+                                        </div>
+                                        <div class="progress" style="height: 10px; background: rgba(0,0,0,0.08); border-radius: 5px;">
+                                            <div class="progress-bar bg-primary queue-lot-bar"
+                                                 role="progressbar"
+                                                 style="width: <?= $q['lot_pct'] ?>%;"
+                                                 aria-valuenow="<?= $q['lot_pct'] ?>"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Note au fil de l'eau -->
+                                    <div class="d-flex align-items-center justify-content-between mt-2 pt-1 text-secondary" style="font-size: 0.78rem;">
+                                        <span>💧 <em>Mobilisation au fil de l'eau : chaque guerrier achevé rejoint directement votre garnison sans attendre la fin du lot de <?= $q['total_count'] ?>.</em></span>
+                                        <span class="badge bg-success-lt fw-semibold">✔ Déploiement instantané</span>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 </div>
             <?php endif; ?>
@@ -126,7 +208,7 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
             <!-- Grille des Soldats & Nouveaux Visuels Féodaux -->
             <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:1.5rem;">
                 <?php foreach ($availableUnits as $u): ?>
-                    <?php 
+                    <?php
                         // Image nommée d'après le nom du soldat
                         $imgFile = !empty($u['image']) ? $u['image'] : ($u['code'] . '.jpg');
                         $diskFile = __DIR__ . '/../public/assets/units/' . $imgFile;
@@ -153,14 +235,14 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                         $roleText = $roleLabels[$u['tier']] ?? 'Guerrier Féodal';
                     ?>
                     <div class="card unit-card <?= !$u['can_train'] ? 'unit-locked' : '' ?>" style="margin:0; background:var(--bg-surface, #fdfbf7); overflow:hidden; border:1px solid var(--border-color); border-radius:10px; display:flex; flex-direction:column; box-shadow:0 6px 18px rgba(0,0,0,0.05); transition:transform 0.2s ease, box-shadow 0.2s ease;">
-                        
+
                         <!-- Illustration Grand Format du Guerrier (Style Feodal Washi) -->
                         <div style="position:relative; width:100%; height:240px; overflow:hidden; background:var(--bg-ink, #ede5d5); border-bottom:1px solid var(--border-color); cursor:pointer;"
                              onclick="openUnitLightbox('<?= htmlspecialchars(addslashes($u['name'])) ?>', '<?= $fullImg ?>', '<?= htmlspecialchars(addslashes($u['description'])) ?>', '<?= $roleText ?>', 'Rang <?= $u['tier'] ?>')"
                              title="Cliquer pour admirer l'illustration en grand format">
-                            
+
                             <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($u['name']) ?>" class="unit-img" style="width:100%; height:100%; object-fit:cover; object-position:top center; transition:transform 0.4s ease;">
-                            
+
                             <!-- Badge de Rang -->
                             <div style="position:absolute; top:10px; left:10px; background:rgba(253,251,247,0.95); backdrop-filter:blur(6px); border:1px solid rgba(194,37,43,0.5); border-radius:6px; padding:3px 10px; font-size:0.75rem; font-weight:800; color:var(--red-primary, #c2252b); box-shadow:0 2px 6px rgba(0,0,0,0.12);">
                                 <?= $u['icon'] ?> Rang <?= $u['tier'] ?>
@@ -213,7 +295,7 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                                 <div class="cost-item" title="Bois de Cèdre"><span style="color:var(--res-metal);">🪵</span> <?= number_format($u['metal_cost']) ?></div>
                                 <div class="cost-item" title="Pierre de Taille"><span style="color:var(--res-crystal);">🪨</span> <?= number_format($u['crystal_cost']) ?></div>
                                 <div class="cost-item" title="Riz Impérial"><span style="color:var(--res-deut);">🌾</span> <?= number_format($u['deuterium_cost']) ?></div>
-                                <?php if (!empty($u['rice_flour_cost'])): 
+                                <?php if (!empty($u['rice_flour_cost'])):
                                     $hasEnoughFlour = (($planet['rice_flour'] ?? 0) >= $u['rice_flour_cost']);
                                 ?>
                                     <div class="cost-item <?= !$hasEnoughFlour ? 'text-danger' : '' ?>" title="Farine de Riz (Rations de campagne)">
@@ -234,9 +316,9 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                                             <button type="button" class="btn btn-secondary" style="padding:0.15rem 0.4rem; font-size:0.7rem;" onclick="setRecruits('<?= $u['code'] ?>', 50)">+50</button>
                                         </div>
                                         <div style="display:flex; gap:0.5rem;">
-                                            <input type="number" id="unit-count-<?= $u['code'] ?>" min="1" max="1000" value="5" 
+                                            <input type="number" id="unit-count-<?= $u['code'] ?>" min="1" max="1000" value="5"
                                                    style="width:75px; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-main); padding:0.45rem; border-radius:6px; text-align:center; font-weight:bold; font-size:0.9rem;">
-                                            <button class="btn btn-primary" style="flex:1; font-size:0.85rem; font-weight:700; padding:0.45rem 0.75rem; display:flex; align-items:center; justify-content:center; gap:0.4rem;" 
+                                            <button class="btn btn-primary" style="flex:1; font-size:0.85rem; font-weight:700; padding:0.45rem 0.75rem; display:flex; align-items:center; justify-content:center; gap:0.4rem;"
                                                     onclick="trainTroops('<?= $u['code'] ?>')">
                                                 <span>🥋</span> Entraîner
                                             </button>
@@ -341,4 +423,124 @@ async function trainTroops(unitCode) {
         }
     }
 }
+
+// ⏱️ Mise à jour en temps réel de la Double Barre de Progression (Unité en cours & Lot Global)
+function formatTime(seconds) {
+    if (seconds <= 0) return "00:00";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    if (h > 0) {
+        return h + "h " + (m < 10 ? "0" : "") + m + "m " + (s < 10 ? "0" : "") + s + "s";
+    }
+    return (m < 10 ? "0" : "") + m + "m " + (s < 10 ? "0" : "") + s + "s";
+}
+
+function updateBarracksDoubleProgress() {
+    const cards = document.querySelectorAll('.barracks-queue-card');
+    if (!cards.length) return;
+
+    const now = Math.floor(Date.now() / 1000);
+    let shouldReload = false;
+
+    cards.forEach(card => {
+        const startedAt = parseInt(card.dataset.started, 10);
+        const finishesAt = parseInt(card.dataset.finishes, 10);
+        const unitTime = Math.max(1, parseInt(card.dataset.unitTime, 10));
+        const totalCount = Math.max(1, parseInt(card.dataset.total, 10));
+        const initialCompleted = parseInt(card.dataset.completed, 10);
+
+        if (now < startedAt) {
+            // Ordre en attente dans la file
+            const waitTime = startedAt - now;
+            const lotTimer = card.querySelector('.queue-lot-timer');
+            if (lotTimer) lotTimer.textContent = "En attente (" + formatTime(waitTime) + ")";
+            const unitCountdown = card.querySelector('.queue-unit-countdown');
+            if (unitCountdown) unitCountdown.textContent = "En attente...";
+            const unitPct = card.querySelector('.queue-unit-pct');
+            if (unitPct) unitPct.textContent = "0%";
+            const unitBar = card.querySelector('.queue-unit-bar');
+            if (unitBar) unitBar.style.width = "0%";
+            return;
+        }
+
+        if (now >= finishesAt) {
+            // Lot entièrement terminé
+            const lotTimer = card.querySelector('.queue-lot-timer');
+            if (lotTimer) lotTimer.textContent = "Terminé !";
+            const unitCountdown = card.querySelector('.queue-unit-countdown');
+            if (unitCountdown) unitCountdown.textContent = "Terminé !";
+            const unitPct = card.querySelector('.queue-unit-pct');
+            if (unitPct) unitPct.textContent = "100%";
+            const unitBar = card.querySelector('.queue-unit-bar');
+            if (unitBar) unitBar.style.width = "100%";
+            const lotPct = card.querySelector('.queue-lot-pct');
+            if (lotPct) lotPct.textContent = "100%";
+            const lotBar = card.querySelector('.queue-lot-bar');
+            if (lotBar) lotBar.style.width = "100%";
+            shouldReload = true;
+            return;
+        }
+
+        // Commande en cours d'exécution
+        const totalElapsed = now - startedAt;
+        const currentCompletedInBatch = Math.min(totalCount, Math.floor(totalElapsed / unitTime));
+        const currentRemainingInBatch = Math.max(0, totalCount - currentCompletedInBatch);
+
+        // Détection d'une nouvelle unité terminée "au fil de l'eau"
+        if (currentCompletedInBatch > initialCompleted) {
+            shouldReload = true;
+        }
+
+        // Unité en cours
+        const unitElapsed = totalElapsed % unitTime;
+        const unitRemaining = Math.max(0, unitTime - unitElapsed);
+        const unitPct = Math.min(100, Math.max(0, (unitElapsed / unitTime) * 100));
+        const currentUnitNum = Math.min(totalCount, currentCompletedInBatch + 1);
+
+        // Lot global (unités achevées + fraction de l'unité courante)
+        const lotPct = Math.min(100, Math.max(0, ((currentCompletedInBatch + (unitElapsed / unitTime)) / totalCount) * 100));
+        const lotRemaining = Math.max(0, finishesAt - now);
+
+        // Rafraîchissement DOM
+        const lotTimerEl = card.querySelector('.queue-lot-timer');
+        if (lotTimerEl) lotTimerEl.textContent = formatTime(lotRemaining);
+
+        const unitCountdownEl = card.querySelector('.queue-unit-countdown');
+        if (unitCountdownEl) unitCountdownEl.textContent = formatTime(unitRemaining) + " (" + unitElapsed + "s / " + unitTime + "s)";
+
+        const unitPctEl = card.querySelector('.queue-unit-pct');
+        if (unitPctEl) unitPctEl.textContent = unitPct.toFixed(0) + "%";
+
+        const unitBarEl = card.querySelector('.queue-unit-bar');
+        if (unitBarEl) unitBarEl.style.width = unitPct.toFixed(1) + "%";
+
+        const currentUnitNumEl = card.querySelector('.queue-current-unit-num');
+        if (currentUnitNumEl) currentUnitNumEl.textContent = currentUnitNum;
+
+        const lotPctEl = card.querySelector('.queue-lot-pct');
+        if (lotPctEl) lotPctEl.textContent = lotPct.toFixed(0) + "%";
+
+        const lotBarEl = card.querySelector('.queue-lot-bar');
+        if (lotBarEl) lotBarEl.style.width = lotPct.toFixed(1) + "%";
+
+        const completedCountEl = card.querySelector('.queue-completed-count');
+        if (completedCountEl) completedCountEl.textContent = currentCompletedInBatch;
+
+        const lotReadyEl = card.querySelector('.queue-lot-ready');
+        if (lotReadyEl) lotReadyEl.textContent = currentCompletedInBatch;
+
+        const remainingBadgeEl = card.querySelector('.queue-remaining-badge');
+        if (remainingBadgeEl) remainingBadgeEl.textContent = currentRemainingInBatch + " restant(s) à former";
+    });
+
+    if (shouldReload) {
+        setTimeout(() => { window.location.reload(); }, 1200);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateBarracksDoubleProgress();
+    setInterval(updateBarracksDoubleProgress, 1000);
+});
 </script>

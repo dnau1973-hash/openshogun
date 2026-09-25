@@ -44,7 +44,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
         <!-- Liste des Soldats de la Faction -->
         <div class="d-flex flex-column gap-1 mb-2">
             <?php foreach ($stationedTroops as $t): ?>
-                <?php 
+                <?php
                     $count = (int)$t['stationed_count'];
                     $hasUnits = ($count > 0);
                     $imgFile = !empty($t['image']) ? $t['image'] : ($t['code'] . '.jpg');
@@ -101,16 +101,41 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
             </div>
         </div>
 
-        <!-- File d'entraînement en cours -->
+        <!-- File d'entraînement en cours (Double Progression au fil de l'eau) -->
         <?php if (!empty($trainingQueue)): ?>
             <div class="mt-2 pt-2 border-top">
-                <div class="text-danger fw-bold mb-1" style="font-size:0.75rem;">
-                    ⏳ Entraînement au Dojo :
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-danger fw-bold" style="font-size:0.75rem;">
+                        ⏳ Entraînement (au fil de l'eau) :
+                    </span>
+                    <span class="badge bg-danger-lt" style="font-size:0.65rem;">
+                        <?= count($trainingQueue) ?> lot(s)
+                    </span>
                 </div>
                 <?php foreach ($trainingQueue as $tq): ?>
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span><?= $tq['unit_icon'] ?> <?= $tq['count'] ?>x <?= htmlspecialchars($tq['unit_name']) ?></span>
-                        <span class="queue-timer badge bg-secondary-lt" data-countdown="<?= $tq['finishes_at'] ?>" style="font-size:0.7rem;">Calcul...</span>
+                    <div class="p-2 mb-2 rounded border bg-light-subtle" style="font-size:0.72rem;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-semibold text-truncate"><?= $tq['unit_icon'] ?> <?= htmlspecialchars($tq['unit_name']) ?></span>
+                            <span class="badge bg-danger text-white rounded-pill font-monospace" style="font-size:0.65rem; padding:1px 6px;">
+                                <?= $tq['completed_count'] ?> / <?= $tq['total_count'] ?>
+                            </span>
+                        </div>
+                        <!-- Barre 1 : Unité actuelle -->
+                        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.65rem; margin-bottom:2px;">
+                            <span>⚡ Guerrier <?= $tq['current_unit_number'] ?>/<?= $tq['total_count'] ?></span>
+                            <span class="font-monospace text-danger fw-bold"><?= $tq['unit_pct'] ?>%</span>
+                        </div>
+                        <div class="progress mb-1" style="height:4px; background:rgba(0,0,0,0.06);">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" style="width: <?= $tq['unit_pct'] ?>%;"></div>
+                        </div>
+                        <!-- Barre 2 : Lot global -->
+                        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.65rem; margin-bottom:2px;">
+                            <span>📦 Lot global</span>
+                            <span class="font-monospace text-primary fw-bold"><?= $tq['lot_pct'] ?>%</span>
+                        </div>
+                        <div class="progress" style="height:5px; background:rgba(0,0,0,0.06);">
+                            <div class="progress-bar bg-primary" style="width: <?= $tq['lot_pct'] ?>%;"></div>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>
