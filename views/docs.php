@@ -1348,6 +1348,7 @@ foreach ($allUnits as $u) {
                                     <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
                                         Rang <?= $u['tier'] ?>
                                     </span>
+                                    <?= AiPromptHelper::renderBadge($imgName, $u['name'], $imgSrc) ?>
                                 </div>
                                 <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                                     <div>
@@ -1421,6 +1422,7 @@ foreach ($allUnits as $u) {
                             <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.8); color: <?= $clanBadge['color'] ?>; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
                                 <?= $clanBadge['icon'] ?> <?= $clanBadge['name'] ?>
                             </span>
+                            <?= AiPromptHelper::renderBadge($imgFile, $s['name'], $imgSrc) ?>
                         </div>
                         <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                             <div>

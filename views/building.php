@@ -600,6 +600,8 @@ if (!$isEmptyPlot) {
                         <span class="badge bg-dark text-white" style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.75) !important; font-size:0.75rem; padding:4px 8px; border-radius:4px; backdrop-filter:blur(3px); border:1px solid rgba(255,255,255,0.3); z-index:2; display:inline-flex; align-items:center; gap:4px;">
                             🔍 Agrandir
                         </span>
+                        <!-- Badge Transparence IA Prompts (« ? ») -->
+                        <?= AiPromptHelper::renderBadge($heroImgRel, $bInfo['name'], $buildingIllustrationUrl) ?>
                     </div>
                 <?php else: ?>
                     <div style="height:120px; background:linear-gradient(135deg,rgba(185,28,28,0.15),rgba(30,41,59,0.1)); display:flex; align-items:center; justify-content:center; font-size:3rem;">

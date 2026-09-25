@@ -167,9 +167,12 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                             </div>
 
                             <!-- Badge Effectif Garnison -->
-                            <div style="position:absolute; top:10px; right:10px; background:rgba(253,251,247,0.95); backdrop-filter:blur(6px); border:1px solid rgba(22,101,52,0.5); border-radius:6px; padding:3px 10px; font-size:0.75rem; font-weight:800; color:#166534; box-shadow:0 2px 6px rgba(0,0,0,0.12);">
+                            <div style="position:absolute; top:10px; right:46px; background:rgba(253,251,247,0.95); backdrop-filter:blur(6px); border:1px solid rgba(22,101,52,0.5); border-radius:6px; padding:3px 10px; font-size:0.75rem; font-weight:800; color:#166534; box-shadow:0 2px 6px rgba(0,0,0,0.12);">
                                 🛡️ Garnison : <?= number_format($u['stationed_count']) ?>
                             </div>
+
+                            <!-- Badge Transparence IA Prompts -->
+                            <?= AiPromptHelper::renderBadge($imgFile, $u['name'], $fullImg) ?>
 
                             <!-- Bouton Agrandir Loupe -->
                             <div style="position:absolute; bottom:8px; right:8px; background:rgba(28,25,23,0.75); backdrop-filter:blur(4px); color:#ffffff; border-radius:4px; padding:3px 8px; font-size:0.7rem; display:flex; align-items:center; gap:4px; border:1px solid rgba(255,255,255,0.2);">

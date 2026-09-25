@@ -62,7 +62,10 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                 ?>
                 <div class="d-flex justify-content-between align-items-center px-2 py-1 rounded border bg-light-lt <?= !$hasUnits ? 'opacity-50' : '' ?>">
                     <div class="d-flex align-items-center gap-2">
-                        <img src="<?= $imgSrc ?>" alt="" class="rounded border" style="width:28px; height:28px; object-fit:cover;">
+                        <div class="ai-image-container" style="position:relative; width:28px; height:28px; flex-shrink:0;">
+                            <img src="<?= $imgSrc ?>" alt="" class="rounded border" style="width:28px; height:28px; object-fit:cover;">
+                            <?= AiPromptHelper::renderBadge($imgFile, $t['name'], $imgSrc, 'ai-prompt-badge-sm') ?>
+                        </div>
                         <span class="small <?= $hasUnits ? 'fw-bold' : 'text-muted' ?>">
                             <?= htmlspecialchars($t['name']) ?>
                         </span>

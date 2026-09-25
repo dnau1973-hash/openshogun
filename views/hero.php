@@ -647,6 +647,8 @@ if (!function_exists('renderRelicBonusesHtml')) {
                             <div class="text-white font-weight-bold fs-5"><?= htmlspecialchars($hero['name']) ?></div>
                             <div class="text-warning small font-weight-bold">Niveau <?= $hero['level'] ?> &bull; <?= number_format($hero['effective']['combat_strength']) ?> pts</div>
                         </div>
+                        <!-- Badge Transparence IA Prompts (« ? ») -->
+                        <?= AiPromptHelper::renderBadge('hero_samurai.jpg', $hero['name']) ?>
                     </div>
                 </div>
 

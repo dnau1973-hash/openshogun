@@ -696,6 +696,17 @@ foreach ($promptsCatalog as $p) {
                     </div>
 
                     <div class="prompt-zoom-hint">🔍 Agrandir</div>
+
+                    <!-- Badge Transparence Prompt IA (« ? ») -->
+                    <button type="button" 
+                            class="ai-prompt-badge" 
+                            data-ai-title="<?= htmlspecialchars($p['title'], ENT_QUOTES, 'UTF-8') ?>"
+                            data-ai-img="<?= htmlspecialchars($imgUrl, ENT_QUOTES, 'UTF-8') ?>"
+                            data-ai-prompt="<?= htmlspecialchars($p['prompt'], ENT_QUOTES, 'UTF-8') ?>"
+                            data-ai-translation="<?= htmlspecialchars($p['translation'], ENT_QUOTES, 'UTF-8') ?>"
+                            title="Détails du prompt & transparence IA">
+                        <span class="ai-badge-icon">?</span>
+                    </button>
                 </div>
 
                 <!-- Corps de la Carte -->

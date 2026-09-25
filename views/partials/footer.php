@@ -59,6 +59,8 @@
 <?php require_once __DIR__ . '/announcement_modal.php'; ?>
 <!-- Modale du Sceau Impérial / Privilège du Shōgun -->
 <?php require_once __DIR__ . '/imperial_seal_modal.php'; ?>
+<!-- Modale de Transparence IA (Prompts & Traduction) -->
+<?php require_once __DIR__ . '/ai_prompt_modal.php'; ?>
 
 <!-- Modale Universelle de la Fiche Daimyō / Profil (Style Washi Féodal) -->
 <div class="modal-overlay" id="playerProfileModal">
@@ -1036,6 +1038,8 @@ function toggleTheme() {
 })();
 </script>
 <?php require_once __DIR__ . '/chat_widget.php'; ?>
+<!-- Script Modale Transparence Prompts IA -->
+<script src="/public/js/ai_prompt_modal.js"></script>
 </body>
 </html>
 
