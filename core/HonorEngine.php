@@ -57,6 +57,18 @@ class HonorEngine {
                     CONSTRAINT `fk_um_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             ");
+
+            // 4. Nettoyage rétroactif : exclusion absolue des IA du Panthéon et des médailles
+            $this->db->exec("
+                DELETE um FROM user_medals um
+                JOIN users u ON um.user_id = u.id
+                WHERE u.is_bot = 1
+            ");
+            $this->db->exec("
+                DELETE uws FROM user_weekly_stats uws
+                JOIN users u ON uws.user_id = u.id
+                WHERE u.is_bot = 1
+            ");
         } catch (Exception $e) {
             // Ignorer silencieusement si tables déjà créées
         }
@@ -86,7 +98,7 @@ class HonorEngine {
             FROM users u
             LEFT JOIN user_weekly_stats s ON s.user_id = u.id
             LEFT JOIN alliances a ON u.alliance_id = a.id
-            WHERE u.is_bot = 0 OR u.is_bot = 1
+            WHERE u.is_bot = 0
             ORDER BY {$orderClause}
             LIMIT " . (int)$limit;
 
@@ -148,6 +160,13 @@ class HonorEngine {
             $rank = 1;
 
             foreach ($topList as $player) {
+                // Seuls les joueurs humains peuvent recevoir des médailles et participer au Tableau d'Honneur
+                $stmtBotCheck = $this->db->prepare("SELECT is_bot FROM users WHERE id = ?");
+                $stmtBotCheck->execute([(int)$player['user_id']]);
+                if ((int)$stmtBotCheck->fetchColumn() !== 0) {
+                    continue;
+                }
+
                 // Ne décerner que si score > 0 (sauf pour progression où score peut être >= 0)
                 if ($catKey !== 'progression' && $player['score'] <= 0) {
                     continue;
@@ -194,7 +213,7 @@ class HonorEngine {
             }
         }
 
-        // Réinitialiser les compteurs de la semaine
+        // Réinitialiser les compteurs de la semaine pour les joueurs humains
         $this->db->exec("
             UPDATE user_weekly_stats s 
             JOIN users u ON s.user_id = u.id 
@@ -203,12 +222,13 @@ class HonorEngine {
                 s.raid_resources = 0, 
                 s.start_week_points = u.points,
                 s.updated_at = NOW()
+            WHERE u.is_bot = 0
         ");
 
-        // Insérer les joueurs qui n'étaient pas dans weekly_stats
+        // Insérer uniquement les joueurs humains qui n'étaient pas dans weekly_stats
         $this->db->exec("
             INSERT INTO user_weekly_stats (user_id, attack_points, defense_points, raid_resources, start_week_points)
-            SELECT id, 0, 0, 0, points FROM users
+            SELECT id, 0, 0, 0, points FROM users WHERE is_bot = 0
             ON DUPLICATE KEY UPDATE start_week_points = start_week_points
         ");
 
@@ -352,25 +372,33 @@ class HonorEngine {
      * Met à jour les statistiques de combat et de pillage après une bataille
      */
     public function updateCombatStats(int $attackerId, ?int $defenderId, int $attDmg, int $defDmg, int $lootTotal): void {
-        // Mettre à jour l'attaquant
-        $this->db->prepare("
-            INSERT INTO user_weekly_stats (user_id, attack_points, raid_resources, updated_at)
-            VALUES (?, ?, ?, NOW())
-            ON DUPLICATE KEY UPDATE 
-                attack_points = attack_points + VALUES(attack_points),
-                raid_resources = raid_resources + VALUES(raid_resources),
-                updated_at = NOW()
-        ")->execute([$attackerId, $attDmg, $lootTotal]);
-
-        // Mettre à jour le défenseur si joueur réel ou bot
-        if ($defenderId && $defenderId > 0) {
+        // Mettre à jour l'attaquant (uniquement si joueur humain)
+        $stmtAtt = $this->db->prepare("SELECT is_bot FROM users WHERE id = ?");
+        $stmtAtt->execute([$attackerId]);
+        if ((int)$stmtAtt->fetchColumn() === 0) {
             $this->db->prepare("
-                INSERT INTO user_weekly_stats (user_id, defense_points, updated_at)
-                VALUES (?, ?, NOW())
-                ON DUPLICATE KEY UPDATE 
-                    defense_points = defense_points + VALUES(defense_points),
+                INSERT INTO user_weekly_stats (user_id, attack_points, raid_resources, updated_at)
+                VALUES (?, ?, ?, NOW())
+                ON DUPLICATE KEY UPDATE
+                    attack_points = attack_points + VALUES(attack_points),
+                    raid_resources = raid_resources + VALUES(raid_resources),
                     updated_at = NOW()
-            ")->execute([$defenderId, $defDmg]);
+            ")->execute([$attackerId, $attDmg, $lootTotal]);
+        }
+
+        // Mettre à jour le défenseur (uniquement si joueur humain)
+        if ($defenderId && $defenderId > 0) {
+            $stmtDef = $this->db->prepare("SELECT is_bot FROM users WHERE id = ?");
+            $stmtDef->execute([$defenderId]);
+            if ((int)$stmtDef->fetchColumn() === 0) {
+                $this->db->prepare("
+                    INSERT INTO user_weekly_stats (user_id, defense_points, updated_at)
+                    VALUES (?, ?, NOW())
+                    ON DUPLICATE KEY UPDATE
+                        defense_points = defense_points + VALUES(defense_points),
+                        updated_at = NOW()
+                ")->execute([$defenderId, $defDmg]);
+            }
         }
     }
 

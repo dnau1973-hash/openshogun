@@ -565,6 +565,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                         <p class="text-secondary mb-0">
                             Les 10 plus illustres daimyōs récompensés chaque semaine par décret impérial du Shogunat.<br>
                             Médailles décernées : <strong>🥇 Or (1er)</strong>, <strong>🥈 Argent (2ème)</strong>, <strong>🥉 Bronze (3ème)</strong> et <strong>🎖️ Rubans Top 10</strong>.
+                            <span class="d-block mt-1 text-muted small"><span class="badge bg-secondary-lt">ℹ️ Règle impériale</span> Seuls les commandants humains participent au Tableau d'Honneur et peuvent recevoir des décorations impériales (les daimyōs IA en sont exclus).</span>
                         </p>
                     </div>
                     <div class="col-auto">
