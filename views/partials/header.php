@@ -186,68 +186,36 @@ $navItems = [
             </a>
         </div>
 
+        <!-- ── BARRE UTILITAIRE SUPÉRIEURE (Top-bar discrète alignée à droite au-dessus de la nav) ── -->
+        <div class="container-xl d-print-none px-3 px-xl-0 mb-1">
+            <div class="d-flex justify-content-end align-items-center gap-3 small">
+                <?php if ($auth->isAdmin()): ?>
+                    <a href="?page=admin" class="text-secondary text-decoration-none d-inline-flex align-items-center gap-1 hover-underline <?= $page === 'admin' ? 'fw-bold text-primary' : '' ?>" title="Panneau d'administration">
+                        <span>⚙️</span>
+                        <span>Administration</span>
+                    </a>
+                <?php endif; ?>
+
+                <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none p-0 d-inline-flex align-items-center gap-1 shadow-none" 
+                        id="shogun-audio-btn" 
+                        onclick="window.shogunAudio && window.shogunAudio.toggle()" 
+                        style="font-size:0.8rem;"
+                        title="Activer / Couper la musique et les ambiances">
+                    <span id="shogun-audio-icon">🔇</span>
+                    <span>Ambiance sonore</span>
+                </button>
+
+                <a href="?action=logout" class="text-danger text-decoration-none d-inline-flex align-items-center gap-1 hover-underline" style="font-size:0.8rem;" title="Fermer la session">
+                    <span>🚪</span>
+                    <span>Déconnexion</span>
+                </a>
+            </div>
+        </div>
+
         <!-- ── BARRE DE NAVIGATION TABLER NATIVE (Largeur frame centrale container-xl) ── -->
         <div class="container-xl d-print-none px-3 px-xl-0">
             <header class="navbar navbar-expand-md navbar-light bg-white border rounded shadow-sm px-2">
                 <div class="container-fluid px-1">
-
-                    <!-- Gauche : Fief & Héros -->
-                    <div class="d-flex align-items-center gap-2 me-3">
-                        <?php
-                        $hHp = $heroHeader ? round((float)$heroHeader['health']) : 100;
-                        $hHpCol = ($hHp >= 60) ? 'border-success' : (($hHp >= 25) ? 'border-warning' : 'border-danger');
-                        $hLvl = $heroHeader ? (int)$heroHeader['level'] : 1;
-                        $hasPoints = ($heroHeader && (int)$heroHeader['unassigned_points'] > 0);
-                        ?>
-                        <a href="?page=hero" class="position-relative d-inline-flex align-items-center"
-                           title="Samouraï Héros Niv.<?= $hLvl ?> — Vitalité <?= $hHp ?>%">
-                            <span class="avatar avatar-sm rounded-circle border <?= $hHpCol ?>" style="background-image: url(/public/assets/hero_samurai.jpg)"></span>
-                            <span class="badge bg-dark text-white position-absolute"
-                                  style="bottom:-3px; right:-3px; font-size:0.55rem; padding:1px 3px; border-radius:3px;"><?= $hLvl ?></span>
-                            <?php if ($hasPoints): ?>
-                                <span class="badge bg-danger position-absolute"
-                                      style="top:-3px; right:-3px; font-size:0.55rem; padding:1px 4px; border-radius:50%;">+</span>
-                            <?php endif; ?>
-                        </a>
-
-                        <?php if ($planet): ?>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex flex-column text-start px-2 py-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="max-width:180px;">
-                                <span class="fw-bold text-truncate" style="font-size:0.82rem; line-height:1.2;">
-                                    <?= !empty($planet['is_capital']) ? '👑 ' : '🏯 ' ?><?= htmlspecialchars($planet['name']) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.68rem; font-family:monospace;">
-                                    [<?= $planet['coord_x'] ?>|<?= $planet['coord_y'] ?>] <?= !empty($planet['is_capital']) ? '<span class="text-warning fw-bold">(Capitale)</span>' : '' ?>
-                                </span>
-                            </button>
-                            <ul class="dropdown-menu shadow-sm" style="min-width:220px; z-index:1050;">
-                                <li class="dropdown-header text-uppercase fw-bold d-flex justify-content-between align-items-center">
-                                    <span>Vos Fiefs Féodaux</span>
-                                    <span class="badge bg-secondary-lt"><?= count($allUserPlanets) ?></span>
-                                </li>
-                                <?php foreach ($allUserPlanets as $p): 
-                                    $isCurrent = ((int)$p['id'] === (int)$planet['id']);
-                                ?>
-                                    <li>
-                                        <a class="dropdown-item d-flex justify-content-between align-items-center py-2 <?= $isCurrent ? 'active' : '' ?>" href="?switch_planet=<?= (int)$p['id'] ?>">
-                                            <div>
-                                                <div class="fw-bold" style="font-size:0.85rem;">
-                                                    <?= !empty($p['is_capital']) ? '👑' : '🏯' ?> <?= htmlspecialchars($p['name']) ?>
-                                                </div>
-                                                <div class="text-muted small" style="font-family:monospace;">
-                                                    [<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>] <?= !empty($p['is_capital']) ? '<span class="text-warning">Capitale</span>' : '' ?>
-                                                </div>
-                                            </div>
-                                            <?php if ($isCurrent): ?>
-                                                <span class="badge bg-primary text-white" style="font-size:0.65rem;">Actif</span>
-                                            <?php endif; ?>
-                                        </a>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                        <?php endif; ?>
-                    </div>
 
                     <!-- Toggler mobile -->
                     <button class="navbar-toggler" type="button"
@@ -255,7 +223,7 @@ $navItems = [
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <!-- Navigation centrale + Menu Utilisateur à droite -->
+                    <!-- Navigation centrale + Menu Fiefs / Profil à droite -->
                     <div class="collapse navbar-collapse" id="mainNavBar">
                         <ul class="navbar-nav me-auto">
                             <?php foreach ($navItems as $nav):
@@ -299,6 +267,15 @@ $navItems = [
                                         <span class="dropdown-item-icon">🎌</span>
                                         <span>Alliance</span>
                                     </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="javascript:void(0)" class="dropdown-item d-flex align-items-center gap-2" onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">
+                                        <span class="dropdown-item-icon">👤</span>
+                                        <span>Ma Fiche</span>
+                                    </a>
+                                    <a href="javascript:void(0)" class="dropdown-item d-flex align-items-center gap-2" onclick="openEditMottoModal()">
+                                        <span class="dropdown-item-icon">📜</span>
+                                        <span>Ma Devise</span>
+                                    </a>
                                     <?php if ($isSealActive): ?>
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'empire' ? 'active fw-bold' : '' ?>" href="?page=empire">
@@ -312,8 +289,9 @@ $navItems = [
                                 </div>
                             </li>
 
+                            <!-- Position 5 : Menu déroulant « Communication » -->
                             <?php 
-                            $isCommActive = in_array($page, ['messages', 'chat', 'forum']);
+                            $isCommActive = in_array($page, ['messages', 'chat', 'forum', 'reports']);
                             ?>
                             <li class="nav-item dropdown <?= $isCommActive ? 'active' : '' ?>">
                                 <a class="nav-link dropdown-toggle <?= $isCommActive ? 'active fw-bold' : '' ?>" 
@@ -347,64 +325,74 @@ $navItems = [
                                         <span class="dropdown-item-icon">👥</span>
                                         <span>Forum</span>
                                     </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'reports' ? 'active fw-bold' : '' ?>" href="?page=reports">
+                                        <span class="dropdown-item-icon">🛡️</span>
+                                        <span>Rapports de combat</span>
+                                    </a>
                                 </div>
                             </li>
                         </ul>
 
-                        <!-- Menu Utilisateur Tabler à droite -->
+                        <!-- Menu Utilisateur / Switch Fiefs Tabler à droite -->
                         <div class="navbar-nav flex-row order-md-last">
+                            <?php
+                            $hHp = $heroHeader ? round((float)$heroHeader['health']) : 100;
+                            $hHpCol = ($hHp >= 60) ? 'border-success' : (($hHp >= 25) ? 'border-warning' : 'border-danger');
+                            $hLvl = $heroHeader ? (int)$heroHeader['level'] : 1;
+                            $hasPoints = ($heroHeader && (int)$heroHeader['unassigned_points'] > 0);
+                            ?>
                             <div class="nav-item dropdown">
-                                <a href="#" class="nav-link d-flex lh-1 text-reset p-0"
-                                   data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="avatar avatar-sm" style="background-color: <?= $factionInfo['color'] ?? '#dc2626' ?>; color: #fff; font-weight:bold;">
-                                        <?= strtoupper(substr($user['username'], 0, 1)) ?>
-                                    </span>
-                                    <div class="d-none d-xl-block ps-2">
-                                        <div><?= htmlspecialchars($user['username']) ?></div>
-                                        <div class="mt-1 small text-muted"><?= htmlspecialchars($factionInfo['name'] ?? 'Daimyō') ?></div>
+                                <a href="#" class="nav-link d-flex align-items-center gap-2 text-reset p-1 rounded"
+                                   data-bs-toggle="dropdown" aria-expanded="false" title="Fiefs du domaine &amp; Champion Samouraï">
+                                    <!-- Effigie Héros Samouraï -->
+                                    <div class="position-relative d-inline-flex flex-shrink-0">
+                                        <span class="avatar avatar-sm rounded-circle border <?= $hHpCol ?>" style="background-image: url(/public/assets/hero_samurai.jpg)"></span>
+                                        <span class="badge bg-dark text-white position-absolute"
+                                              style="bottom:-3px; right:-3px; font-size:0.55rem; padding:1px 3px; border-radius:3px;"><?= $hLvl ?></span>
+                                        <?php if ($hasPoints): ?>
+                                            <span class="badge bg-danger position-absolute"
+                                                  style="top:-3px; right:-3px; font-size:0.55rem; padding:1px 4px; border-radius:50%;">+</span>
+                                        <?php endif; ?>
                                     </div>
-                                    <?php if ($unreadMessagesCount > 0): ?>
-                                        <span class="badge bg-danger ms-1"><?= $unreadMessagesCount ?></span>
-                                    <?php endif; ?>
+                                    <!-- Nom du Fief Actif & Coordonnées -->
+                                    <div class="d-none d-sm-block text-start lh-1">
+                                        <div class="fw-bold text-dark text-truncate" style="font-size:0.85rem; max-width:140px;">
+                                            <?= !empty($planet['is_capital']) ? '👑 ' : '🏯 ' ?><?= htmlspecialchars($planet['name'] ?? 'Fief') ?>
+                                        </div>
+                                        <div class="text-secondary small mt-1 font-monospace" style="font-size:0.68rem;">
+                                            [<?= $planet['coord_x'] ?? 0 ?>|<?= $planet['coord_y'] ?? 0 ?>] <?= !empty($planet['is_capital']) ? '<span class="text-warning fw-bold">Capitale</span>' : '' ?>
+                                        </div>
+                                    </div>
+                                    <span class="dropdown-toggle text-secondary ms-1"></span>
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-end shadow">
+                                <div class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width:240px; z-index:1050;">
                                     <?php if ($isUserProtected): ?>
                                         <div class="dropdown-item-text small bg-success-lt text-success fw-bold">
                                             🔰 Immunité active : <?= htmlspecialchars($userProtection['formatted']) ?>
                                         </div>
                                         <div class="dropdown-divider"></div>
                                     <?php endif; ?>
-
-                                    <!-- Profil Daimyō -->
-                                    <a href="javascript:void(0)" class="dropdown-item"
-                                       onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">👤 Ma Fiche Daimyō</a>
-                                    <a href="javascript:void(0)" class="dropdown-item"
-                                       onclick="openEditMottoModal()">📜 Ma Devise</a>
-
-                                    <!-- Décrets & Annales -->
-                                    <div class="dropdown-divider"></div>
-                                    <div class="dropdown-header text-uppercase small text-muted">Décrets &amp; Annales</div>
-                                    <a href="?page=reports" class="dropdown-item <?= $page === 'reports' ? 'active' : '' ?>">📜 Chroniques</a>
-                                    <a href="?page=ranking" class="dropdown-item <?= $page === 'ranking' ? 'active' : '' ?>">🏆 Classement</a>
-
-                                    <!-- Savoir & Administration -->
-                                    <div class="dropdown-divider"></div>
-                                    <div class="dropdown-header text-uppercase small text-muted">Savoir &amp; Shogunat</div>
-                                    <a href="?page=docs" class="dropdown-item <?= $page === 'docs' ? 'active' : '' ?>">📖 Règles du jeu</a>
-                                    <a href="?page=support" class="dropdown-item <?= $page === 'support' ? 'active' : '' ?>">📮 Support &amp; Aide</a>
-                                    <a href="/changelog.html" class="dropdown-item">📜 Changelog</a>
-                                    <?php if ($auth->isAdmin()): ?>
-                                        <a href="?page=admin" class="dropdown-item text-primary fw-bold <?= $page === 'admin' ? 'active' : '' ?>">⚙️ Administration</a>
-                                    <?php endif; ?>
-
-                                    <!-- Préférences & Déconnexion -->
-                                    <div class="dropdown-divider"></div>
-                                    <button type="button" class="dropdown-item" id="shogun-audio-btn"
-                                            onclick="window.shogunAudio && window.shogunAudio.toggle()">
-                                        <span id="shogun-audio-icon">🔇</span> Ambiance sonore
-                                    </button>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="?action=logout" class="dropdown-item text-danger">🚪 Déconnexion</a>
+                                    <div class="dropdown-header text-uppercase fw-bold d-flex justify-content-between align-items-center py-2 bg-light-subtle">
+                                        <span>Vos Fiefs Féodaux</span>
+                                        <span class="badge bg-secondary-lt"><?= count($allUserPlanets) ?></span>
+                                    </div>
+                                    <?php foreach ($allUserPlanets as $p): 
+                                        $isCurrent = ((int)$p['id'] === (int)$planet['id']);
+                                    ?>
+                                        <a class="dropdown-item d-flex justify-content-between align-items-center py-2 <?= $isCurrent ? 'active' : '' ?>" href="?switch_planet=<?= (int)$p['id'] ?>">
+                                            <div>
+                                                <div class="fw-bold" style="font-size:0.85rem;">
+                                                    <?= !empty($p['is_capital']) ? '👑' : '🏯' ?> <?= htmlspecialchars($p['name']) ?>
+                                                </div>
+                                                <div class="text-secondary small font-monospace" style="font-size:0.72rem;">
+                                                    [<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>] <?= !empty($p['is_capital']) ? '<span class="text-warning">Capitale</span>' : '' ?>
+                                                </div>
+                                            </div>
+                                            <?php if ($isCurrent): ?>
+                                                <span class="badge bg-primary text-white" style="font-size:0.65rem;">Actif</span>
+                                            <?php endif; ?>
+                                        </a>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>
