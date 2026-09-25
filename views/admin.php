@@ -364,17 +364,24 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             </div>
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
-                    <a href="/?page=pedagogy" target="_blank" class="btn btn-outline-cyan d-flex align-items-center gap-1 fw-bold">
-                        <span>🎓</span> Atelier Pédagogique (Public) ↗
+                    <a href="?page=admin&tab=updates" onclick="switchAdminTab('updates'); return false;" class="btn btn-outline-teal d-flex align-items-center gap-1 fw-bold shadow-sm" title="Mises à jour GitHub & Déploiement en 1 clic">
+                        <span>🔄</span> GitHub Sync
+                        <span class="badge bg-teal text-white ms-1"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
+                    </a>
+                    <a href="?page=admin&tab=pedagogy" onclick="switchAdminTab('pedagogy'); return false;" class="btn btn-outline-cyan d-flex align-items-center gap-1 fw-bold shadow-sm" title="Atelier Pédagogique (Console Admin)">
+                        <span>🎓</span> Atelier Pédago
+                    </a>
+                    <a href="?page=admin&tab=forum" onclick="switchAdminTab('forum'); return false;" class="btn btn-outline-primary d-flex align-items-center gap-1 fw-bold shadow-sm" title="Gestion du Forum Féodal">
+                        <span>💬</span> Forum
                     </a>
                     <button type="button" onclick="runBotCycle()" class="btn btn-warning d-flex align-items-center gap-2">
-                        <span>⚔️</span> Exécuter un Cycle IA
+                        <span>⚔️</span> Exécuter Cycle IA
                     </button>
                     <button type="button" onclick="generatePresetBots()" class="btn btn-primary d-flex align-items-center gap-2">
-                        <span>➕</span> Générer 3 Daimyōs IA
+                        <span>➕</span> 3 Daimyōs IA
                     </button>
                     <a href="/?page=resources" class="btn btn-secondary">
-                        &larr; Retour au Fief
+                        &larr; Retour Fief
                     </a>
                 </div>
             </div>
@@ -573,47 +580,47 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
     </div>
 
-        <!-- Conteneur d'Onglets Tabler.io Unifié pour l'Administration -->
-    <div class="card mb-4">
-        <div class="card-header border-bottom-0 pb-0">
-            <ul class="nav nav-tabs card-header-tabs flex-wrap" data-bs-toggle="tabs" role="tablist" id="adminTabsNav">
+        <!-- Conteneur d'Onglets Tabler.io Unifié & Responsive pour l'Administration -->
+    <div class="card mb-4 bg-white border shadow-sm">
+        <div class="card-header border-bottom p-2 bg-white">
+            <ul class="nav nav-pills flex-wrap gap-1 w-100 align-items-center" role="tablist" id="adminTabsNav">
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-dashboard" class="nav-link admin-tab-btn <?= ($currentTab === 'dashboard') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="dashboard" role="tab" onclick="switchAdminTab('dashboard')">
+                    <a href="#tab-dashboard" class="nav-link admin-tab-btn <?= ($currentTab === 'dashboard') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="dashboard" role="tab" onclick="switchAdminTab('dashboard')">
                         <span class="me-1">📊</span> Tableau de Bord
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-world" class="nav-link admin-tab-btn <?= ($currentTab === 'world') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="world" role="tab" onclick="switchAdminTab('world')">
+                    <a href="#tab-world" class="nav-link admin-tab-btn <?= ($currentTab === 'world') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="world" role="tab" onclick="switchAdminTab('world')">
                         <span class="me-1">🗾</span> Paramétrage du Monde
                         <span class="badge bg-success-lt ms-2">x<?= (int)($settings['game_speed'] ?? 5) ?></span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-bots" class="nav-link admin-tab-btn <?= ($currentTab === 'bots') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="bots" role="tab" onclick="switchAdminTab('bots')">
+                    <a href="#tab-bots" class="nav-link admin-tab-btn <?= ($currentTab === 'bots') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="bots" role="tab" onclick="switchAdminTab('bots')">
                         <span class="me-1">🤖</span> Clans IA
                         <span class="badge bg-indigo-lt ms-2"><?= $totalBots ?></span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-heroes" class="nav-link admin-tab-btn <?= ($currentTab === 'heroes') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="heroes" role="tab" onclick="switchAdminTab('heroes')">
+                    <a href="#tab-heroes" class="nav-link admin-tab-btn <?= ($currentTab === 'heroes') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="heroes" role="tab" onclick="switchAdminTab('heroes')">
                         <span class="me-1">🥋</span> Samouraïs &amp; Reliques
                         <span class="badge bg-purple-lt ms-2"><?= $totalHeroes ?></span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-users" class="nav-link admin-tab-btn <?= ($currentTab === 'users') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="users" role="tab" onclick="switchAdminTab('users')">
+                    <a href="#tab-users" class="nav-link admin-tab-btn <?= ($currentTab === 'users') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="users" role="tab" onclick="switchAdminTab('users')">
                         <span class="me-1">👥</span> Joueurs
                         <span class="badge bg-warning-lt ms-2"><?= $totalUsers ?></span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-medals" class="nav-link admin-tab-btn <?= ($currentTab === 'medals') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="medals" role="tab" onclick="switchAdminTab('medals')">
+                    <a href="#tab-medals" class="nav-link admin-tab-btn <?= ($currentTab === 'medals') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="medals" role="tab" onclick="switchAdminTab('medals')">
                         <span class="me-1">🎖️</span> Médailles
                         <span class="badge bg-yellow-lt ms-2"><?= htmlspecialchars($currentWeekCode) ?></span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-support" class="nav-link admin-tab-btn <?= ($currentTab === 'support') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="support" role="tab" onclick="switchAdminTab('support')">
+                    <a href="#tab-support" class="nav-link admin-tab-btn <?= ($currentTab === 'support') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="support" role="tab" onclick="switchAdminTab('support')">
                         <span class="me-1">📮</span> Support &amp; Bugs
                         <?php if ($supportStats['count_pending'] > 0): ?>
                             <span class="badge bg-danger text-white ms-2">⚠️ <?= $supportStats['count_pending'] ?></span>
@@ -623,38 +630,38 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-announcements" class="nav-link admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="announcements" role="tab" onclick="switchAdminTab('announcements')">
+                    <a href="#tab-announcements" class="nav-link admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="announcements" role="tab" onclick="switchAdminTab('announcements')">
                         <span class="me-1">📢</span> Nouveautés
                         <span class="badge bg-pink-lt ms-2"><?= $publishedAnnouncementsCount ?>/<?= $totalAnnouncementsCount ?></span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-forum" class="nav-link admin-tab-btn <?= ($currentTab === 'forum') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="forum" role="tab" onclick="switchAdminTab('forum')">
+                    <a href="#tab-forum" class="nav-link admin-tab-btn <?= ($currentTab === 'forum') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="forum" role="tab" onclick="switchAdminTab('forum')">
                         <span class="me-1">💬</span> Forum Féodal
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-pedagogy" class="nav-link admin-tab-btn <?= ($currentTab === 'pedagogy') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="pedagogy" role="tab" onclick="switchAdminTab('pedagogy')">
+                    <a href="#tab-pedagogy" class="nav-link admin-tab-btn <?= ($currentTab === 'pedagogy') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="pedagogy" role="tab" onclick="switchAdminTab('pedagogy')">
                         <span class="me-1">🎓</span> Atelier Pédagogique
                         <span class="badge bg-cyan-lt ms-1">Public</span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-updates" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="updates" role="tab" onclick="switchAdminTab('updates')">
+                    <a href="#tab-updates" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="updates" role="tab" onclick="switchAdminTab('updates')">
                         <span class="me-1">🔄</span> GitHub Sync
                         <span class="badge bg-teal-lt ms-2"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-maintenance" class="nav-link admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-bs-toggle="tab" data-tab="maintenance" role="tab" onclick="switchAdminTab('maintenance')">
+                    <a href="#tab-maintenance" class="nav-link admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-bs-toggle="pill" data-tab="maintenance" role="tab" onclick="switchAdminTab('maintenance')">
                         <span class="me-1">⚠️</span> Maintenance
                     </a>
                 </li>
                 <li class="nav-item ms-auto d-flex align-items-center gap-1" role="presentation">
-                    <a href="/?page=pedagogy" target="_blank" class="nav-link text-cyan fw-bold py-1 px-2 border border-cyan-subtle rounded-pill small me-2" title="Ouvrir la page publique de l'Atelier Pédagogique">
+                    <a href="/?page=pedagogy" target="_blank" class="btn btn-sm btn-outline-cyan rounded-pill me-1" title="Ouvrir la page publique de l'Atelier Pédagogique">
                         <span>🎓 Vue Publique ↗</span>
                     </a>
-                    <a href="javascript:void(0)" class="nav-link admin-tab-btn <?= ($currentTab === 'all') ? 'active' : '' ?>" data-tab="all" onclick="switchAdminTab('all')" title="Afficher tous les onglets en continu">
+                    <a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary rounded-pill admin-tab-btn <?= ($currentTab === 'all') ? 'active' : '' ?>" data-tab="all" onclick="switchAdminTab('all')" title="Afficher tous les onglets en continu">
                         <span class="me-1">📚</span> Tout Dérouler
                     </a>
                 </li>
