@@ -93,11 +93,19 @@ class ResearchService {
         $activeQueueViewModel = null;
         if ($activeQueue) {
             $now = time();
-            $finishesAt = (int)$activeQueue['finishes_at'];
-            $startedAt = (int)($activeQueue['started_at'] ?? ($finishesAt - 60));
+            $finishesAt = (int)($activeQueue['finishes_at'] ?? 0);
+            $startedAt = (int)($activeQueue['started_at'] ?? 0);
+
+            // Validation de started_at (doit être un timestamp Unix valide et antérieur à finishes_at)
+            if ($startedAt <= 1000000000 || $startedAt >= $finishesAt) {
+                $estimatedDuration = max(30, (int)($activeQueue['duration'] ?? 120));
+                $startedAt = max(1, $finishesAt - $estimatedDuration);
+            }
+
             $totalDuration = max(1, $finishesAt - $startedAt);
             $remaining = max(0, $finishesAt - $now);
-            $progressPct = min(100, max(0, (int)round((($totalDuration - $remaining) / $totalDuration) * 100)));
+            $elapsed = max(0, $now - $startedAt);
+            $progressPct = min(100, max(0, (int)round(($elapsed / $totalDuration) * 100)));
 
             $techName = (string)($activeQueue['research_name'] ?? $activeQueue['name'] ?? 'Technologie féodale');
             $activeQueueViewModel = [
@@ -105,7 +113,9 @@ class ResearchService {
                 'research_name' => $techName,
                 'name' => $techName,
                 'target_level' => (int)($activeQueue['target_level'] ?? 1),
+                'started_at' => $startedAt,
                 'finishes_at' => $finishesAt,
+                'total_duration' => $totalDuration,
                 'remaining_seconds' => $remaining,
                 'remaining_formatted' => sprintf(
                     '%02d:%02d:%02d',

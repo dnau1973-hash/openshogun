@@ -156,13 +156,21 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                 </h3>
                                 <span class="badge bg-purple text-white fw-bold">Palier <?= (int)($activeResearch['target_level'] ?? 1) ?></span>
                             </div>
-                            <div class="progress progress-sm mb-2" style="height: 6px;">
-                                <div class="progress-bar bg-purple" style="width: <?= $activeResearch['progress_pct'] ?>%" role="progressbar" aria-valuenow="<?= $activeResearch['progress_pct'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress progress-sm mb-2" style="height: 8px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-purple"
+                                     id="researchProgressBar"
+                                     style="width: <?= (int)$activeResearch['progress_pct'] ?>%;"
+                                     role="progressbar"
+                                     aria-valuenow="<?= (int)$activeResearch['progress_pct'] ?>"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100"
+                                     data-started="<?= (int)$activeResearch['started_at'] ?>"
+                                     data-finishes="<?= (int)$activeResearch['finishes_at'] ?>"></div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center text-secondary small flex-wrap gap-2">
-                                <span>Progression : <strong><?= $activeResearch['progress_pct'] ?>%</strong></span>
+                                <span>Progression : <strong id="researchProgressText"><?= (int)$activeResearch['progress_pct'] ?>%</strong></span>
                                 <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark font-monospace fs-4">
-                                    ⏱️ <span class="queue-timer" data-countdown="<?= $activeResearch['finishes_at'] ?>"><?= $activeResearch['remaining_formatted'] ?></span>
+                                    ⏱️ <span class="queue-timer" data-countdown="<?= (int)$activeResearch['finishes_at'] ?>"><?= $activeResearch['remaining_formatted'] ?></span>
                                 </span>
                             </div>
                         </div>
@@ -477,28 +485,65 @@ function setViewMode(mode) {
 }
 
 /**
- * Mise à jour en temps réel des décomptes de file
+ * Mise à jour en temps réel des décomptes et de la barre de progression
  */
 document.addEventListener('DOMContentLoaded', function () {
     const timerEls = document.querySelectorAll('.queue-timer');
-    if (timerEls.length === 0) return;
+    const progressBar = document.getElementById('researchProgressBar');
+    const progressText = document.getElementById('researchProgressText');
 
-    setInterval(function () {
-        const now = Math.floor(Date.now() / 1000);
+    if (timerEls.length === 0 && !progressBar) return;
+
+    // Calcul du décalage éventuel entre l'horloge du serveur et l'horloge du navigateur client
+    const serverTimestamp = <?= time() ?>;
+    const clientTimestamp = Math.floor(Date.now() / 1000);
+    const clockDelta = serverTimestamp - clientTimestamp;
+
+    function refreshActiveQueue() {
+        const now = Math.floor(Date.now() / 1000) + clockDelta;
+
+        // Décompte textuel
         timerEls.forEach(function (el) {
             const finishTs = parseInt(el.getAttribute('data-countdown') || '0', 10);
             const remaining = Math.max(0, finishTs - now);
+
             if (remaining <= 0) {
                 el.textContent = 'Terminé !';
-                setTimeout(function () { window.location.reload(); }, 1500);
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                    progressBar.setAttribute('aria-valuenow', '100');
+                }
+                if (progressText) {
+                    progressText.textContent = '100%';
+                }
+                setTimeout(function () { window.location.reload(); }, 1200);
                 return;
             }
+
             const hours = Math.floor(remaining / 3600);
             const minutes = Math.floor((remaining % 3600) / 60);
             const seconds = remaining % 60;
             const pad = (n) => n < 10 ? '0' + n : n;
             el.textContent = pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
         });
-    }, 1000);
+
+        // Barre de progression dynamique
+        if (progressBar) {
+            const finishTs = parseInt(progressBar.getAttribute('data-finishes') || '0', 10);
+            const startTs = parseInt(progressBar.getAttribute('data-started') || '0', 10);
+            const total = Math.max(1, finishTs - startTs);
+            const elapsed = Math.max(0, now - startTs);
+            const pct = Math.min(100, Math.max(0, Math.floor((elapsed / total) * 100)));
+
+            progressBar.style.width = pct + '%';
+            progressBar.setAttribute('aria-valuenow', pct);
+            if (progressText) {
+                progressText.textContent = pct + '%';
+            }
+        }
+    }
+
+    refreshActiveQueue();
+    setInterval(refreshActiveQueue, 1000);
 });
 </script>

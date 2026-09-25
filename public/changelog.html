@@ -114,7 +114,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.7.4</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.7.5</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -126,14 +126,61 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
-                    <!-- VERSION 1.7.4 -->
+                    <!-- VERSION 1.7.5 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
                         <div class="timeline-badge-dot"></div>
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.7.4</span>
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.7.5</span>
                                 <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-purple-lt fw-bold">Académie &amp; Temps Réel</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 25 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary d-flex align-items-center gap-2 mb-3">
+                                <span>⚡</span> Correctif Barre d'Avancement Temps Réel &amp; Synchronisation de l'Académie
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-purple-lt">JavaScript &amp; UI</span>
+                                            <span>Animation Dynamique de la Barre de Progression</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Correction du gel à 0% de la barre d'avancement lors du développement d'un palier technologique. La boucle d'horloge recalcule désormais à chaque seconde le pourcentage écoulé réel (<code>Math.floor((elapsed / total) * 100)</code>) et met à jour en temps réel la largeur du composant Tabler (<code>progress-bar-striped progress-bar-animated</code>) ainsi que le texte de progression.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-teal-lt">Backend &amp; Sécurité</span>
+                                            <span>Fiabilisation des Métriques Temporelles</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Enrichissement du <code>ResearchService</code> avec la transmission explicite de <code>started_at</code>, <code>finishes_at</code> et <code>total_duration</code>, assortie d'une validation rigoureuse des timestamps Unix et d'une compensation de l'écart d'horloge client/serveur (<em>clock delta</em>).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.7.4 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background:#6366f1; box-shadow:0 0 0 2px #6366f1;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.7.4</span>
+                                <span class="badge bg-secondary-lt fw-bold">Version précédente</span>
                                 <span class="badge bg-purple-lt fw-bold">POO &amp; Interface Tabler.io</span>
                             </div>
                             <div class="text-secondary small">
