@@ -499,16 +499,21 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
         </p>
     </header>
 
-    <!-- En bas : Uniquement les deux boutons Connexion et Inscription -->
-    <div class="landing-actions">
-        <button type="button" class="landing-btn landing-btn-login" onclick="openAuthModal('login')">
-            <span class="landing-btn-icon">⚔️</span>
-            <span>CONNEXION</span>
-        </button>
-        <button type="button" class="landing-btn landing-btn-register" onclick="openAuthModal('register')">
-            <span class="landing-btn-icon">📜</span>
-            <span>INSCRIPTION</span>
-        </button>
+    <!-- En bas : Boutons Connexion et Inscription + Lien Découverte Atelier Pédagogique -->
+    <div class="landing-actions flex-column align-items-center">
+        <div class="d-flex gap-3 justify-content-center w-100" style="flex-wrap: wrap;">
+            <button type="button" class="landing-btn landing-btn-login" onclick="openAuthModal('login')">
+                <span class="landing-btn-icon">⚔️</span>
+                <span>CONNEXION</span>
+            </button>
+            <button type="button" class="landing-btn landing-btn-register" onclick="openAuthModal('register')">
+                <span class="landing-btn-icon">📜</span>
+                <span>INSCRIPTION</span>
+            </button>
+        </div>
+        <a href="/?page=pedagogy" class="text-decoration-none mt-2 px-3 py-1 rounded-pill small text-center" style="color: #67e8f9; background: rgba(8, 145, 178, 0.25); border: 1px solid rgba(6, 182, 212, 0.5); font-size: 0.82rem; letter-spacing: 0.5px; backdrop-filter: blur(4px);">
+            <span>🎓</span> Découvrir l'Atelier Pédagogique &bull; Coulisses de Conception &rarr;
+        </a>
     </div>
 </div>
 

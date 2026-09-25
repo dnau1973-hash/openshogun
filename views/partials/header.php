@@ -142,6 +142,7 @@ $navItems = [
     ['page' => 'fleet',     'match' => ['fleet'],             'icon' => '⚔️', 'label' => 'Armées',             'title' => 'Expéditions militaires'],
     ['page' => 'hero',      'match' => ['hero'],              'icon' => '🥋', 'label' => 'Héros',              'title' => 'Votre Samouraï Héros'],
     ['page' => 'alliance',  'match' => ['alliance'],          'icon' => '🎌', 'label' => 'Alliance',           'title' => 'Pacte Féodal & Ambassade'],
+    ['page' => 'pedagogy',  'match' => ['pedagogy','atelier'],'icon' => '🎓', 'label' => 'Atelier Pédago',      'title' => 'Coulisses de Conception (Projet Père-Fils)'],
 ];
 ?>
 
@@ -352,6 +353,7 @@ $navItems = [
                                     <div class="dropdown-divider"></div>
                                     <div class="dropdown-header text-uppercase small text-muted">Savoir & Shogunat</div>
                                     <a href="?page=docs" class="dropdown-item <?= $page === 'docs' ? 'active' : '' ?>">📖 Codex du Sengoku</a>
+                                    <a href="?page=pedagogy" class="dropdown-item <?= $page === 'pedagogy' ? 'active' : '' ?>">🎓 Atelier Pédagogique</a>
                                     <?php if ($auth->isAdmin()): ?>
                                         <a href="?page=admin" class="dropdown-item text-primary fw-bold <?= $page === 'admin' ? 'active' : '' ?>">⚙️ Administration</a>
                                     <?php endif; ?>

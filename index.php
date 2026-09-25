@@ -44,6 +44,16 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
+// Détecter si la page demandée est publique (ex: Atelier Pédagogique accessible à tous)
+$reqPage = $_GET['page'] ?? null;
+if ($reqPage === 'pedagogy' || $reqPage === 'atelier') {
+    $page = 'pedagogy';
+    if (!Auth::check()) {
+        require __DIR__ . '/views/pedagogy.php';
+        exit;
+    }
+}
+
 // Si non connecté, afficher le portail d'authentification
 if (!Auth::check()) {
     require __DIR__ . '/views/auth.php';
@@ -56,9 +66,11 @@ if ($page === 'galaxy') {
     $page = 'map';
 } elseif ($page === 'plus') {
     $page = 'privilege';
+} elseif ($page === 'atelier') {
+    $page = 'pedagogy';
 }
 
-$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'alliance', 'forum', 'chat', 'empire', 'privilege'];
+$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';
