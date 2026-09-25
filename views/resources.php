@@ -90,7 +90,7 @@ $resourceBuildings = [
     ]
 ];
 
-$bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg') 
+$bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg')
     ? filemtime(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg') : 1;
 ?>
 
@@ -175,7 +175,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
             <div>
                 <h2 class="card-title">🌾 Terroir Agricole & Domaines Ruraux - <?= htmlspecialchars($planet['name']) ?></h2>
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
-                    Terroir : <strong style="color:var(--border-highlight, #dc2626);"><?= $terroir['icon'] ?> <?= htmlspecialchars($terroir['name']) ?></strong> 
+                    Terroir : <strong style="color:var(--border-highlight, #dc2626);"><?= $terroir['icon'] ?> <?= htmlspecialchars($terroir['name']) ?></strong>
                     <span style="opacity:0.85;">(<?= $fieldCounts['metal_mine'] ?> 🪵 Bois, <?= $fieldCounts['crystal_mine'] ?> 🪨 Pierre, <?= $fieldCounts['deuterium_synth'] ?> 🌾 Riz, <?= $fieldCounts['solar_plant'] ?> ⛩️ Sanctuaires)</span>
                 </div>
             </div>
@@ -195,7 +195,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
             <!-- Viewport RTS de la Surface Rurale -->
             <div class="fields-viewport rts-surface">
                 <!-- Tenshu & Donjon Central (Centre Cité) -->
-                <div class="rts-hotspot sector-hq hotspot-bunker-hq" 
+                <div class="rts-hotspot sector-hq hotspot-bunker-hq"
                      data-sector="hq"
                      title="🏯 Tenshu Donjon & Cité Castrale (Niveau <?= $hqLevel ?>)"
                      onclick="window.location.href='?page=city'">
@@ -206,7 +206,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
 
                 <!-- 18 Exploitations de Ressources Cliquables sur le Terroir -->
                 <?php foreach ($fields as $f): ?>
-                    <?php 
+                    <?php
                         $slot = (int)$f['field_slot'];
                         $type = $f['type'];
                         $lvl = (int)$f['level'];
@@ -214,12 +214,12 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         $isUpgrading = isset($activeFieldQueue[$slot]);
                         $isDemolishing = ($isUpgrading && (int)($activeFieldQueue[$slot]['target_level'] ?? -1) === 0);
                     ?>
-                    <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?> <?= $isUpgrading ? 'is-upgrading' : '' ?> <?= $isDemolishing ? 'is-demolishing' : '' ?> <?= ($lvl === 0) ? 'is-level-zero' : '' ?>" 
+                    <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?> <?= $isUpgrading ? 'is-upgrading' : '' ?> <?= $isDemolishing ? 'is-demolishing' : '' ?> <?= ($lvl === 0) ? 'is-level-zero' : '' ?>"
                          data-sector="<?= $type ?>"
                          data-slot="<?= $slot ?>"
                          title="<?= htmlspecialchars($info['name']) ?> #<?= $slot ?> (<?= $isDemolishing ? 'Démantèlement en cours' : ($isUpgrading ? 'Chantier en cours' : ($lvl > 0 ? 'Niveau ' . $lvl : 'Niveau 0 - Prêt à être fondé')) ?>)"
                          onclick="window.location.href='/?page=field&slot=<?= $slot ?>'">
-                        
+
                         <!-- Badge féodal de niveau (Style Travian) -->
                         <div class="rts-level-bubble <?= $isDemolishing ? 'demolishing' : ($isUpgrading ? 'upgrading' : ($lvl === 0 ? 'level-zero' : '')) ?>" title="<?= htmlspecialchars($info['name']) ?> (<?= $isDemolishing ? 'Démolition vers Niv. 0' : 'Niveau ' . $lvl ?>)">
                             <?php if ($lvl === 0 && !$isUpgrading && !$isDemolishing): ?>
@@ -235,7 +235,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                     </div>
                 <?php endforeach; ?>
             </div>
-            
+
             <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted); text-align:center;">
                 💡 <strong>Gestion du Terroir Féodal :</strong> Cliquez sur une exploitation existante ou un emplacement rural (Niv. 0) pour l'élever, ou sur le Tenshu central pour visiter votre cité castrale.
             </p>
@@ -257,7 +257,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                     <p style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:1rem 0;">Aucun chantier en cours.</p>
                 <?php else: ?>
                     <?php foreach ($queue as $q): ?>
-                        <?php 
+                        <?php
                             if ($q['build_category'] === 'field') {
                                 $tSlot = (int)$q['target_id'];
                                 $tType = $fieldsBySlot[$tSlot]['type'] ?? FIELD_LAYOUT[$tSlot] ?? 'metal_mine';
@@ -265,19 +265,43 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                             } else {
                                 $name = BUILDINGS[$q['target_id']]['name'] ?? $q['target_id'];
                             }
+                            $qNow = time();
+                            $qStart = (int)($q['started_at'] ?? $qNow);
+                            $qEnd = (int)($q['finishes_at'] ?? $qNow);
+                            $qTotal = max(1, $qEnd - $qStart);
+                            $qElapsed = max(0, $qNow - $qStart);
+                            $qPct = min(100, max(0, (int)round(($qElapsed / $qTotal) * 100)));
+                            $isDemolish = ((int)$q['target_level'] === 0);
                         ?>
-                        <div class="queue-item">
-                            <div class="queue-info">
-                                <h4><?= htmlspecialchars($name) ?></h4>
-                                <?php if ((int)$q['target_level'] === 0): ?>
-                                    <span style="font-size:0.75rem; color:#f87171; font-weight:700;">🗑️ Démantèlement (Raser)</span>
-                                <?php else: ?>
-                                    <span style="font-size:0.75rem; color:var(--text-muted);">Niveau <?= $q['target_level'] ?></span>
-                                <?php endif; ?>
-                            </div>
-                            <div style="text-align:right;">
-                                <div class="queue-timer" data-countdown="<?= $q['finishes_at'] ?>">Calcul...</div>
+                        <div class="queue-item" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem; padding: 0.75rem;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="queue-info">
+                                    <h4 class="mb-0 fw-bold" style="font-size:0.9rem;"><?= htmlspecialchars($name) ?></h4>
+                                    <?php if ($isDemolish): ?>
+                                        <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;">🗑️ Démantèlement</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary-lt" style="font-size:0.7rem;">Niveau <?= $q['target_level'] ?></span>
+                                    <?php endif; ?>
+                                </div>
                                 <button class="btn-cancel" onclick="cancelBuild(<?= $q['id'] ?>)">Annuler</button>
+                            </div>
+
+                            <!-- Barre de progression -->
+                            <div class="queue-progress-box mt-1">
+                                <div class="progress" style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-<?= $isDemolish ? 'danger' : 'warning' ?> building-progress-bar"
+                                         role="progressbar"
+                                         style="width: <?= $qPct ?>%;"
+                                         aria-valuenow="<?= $qPct ?>"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"
+                                         data-started="<?= $qStart ?>"
+                                         data-finishes="<?= $qEnd ?>"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
+                                    <span class="text-secondary fw-semibold">Avancement : <strong class="text-dark building-progress-pct"><?= $qPct ?>%</strong></span>
+                                    <span class="queue-timer font-monospace fw-bold text-danger building-time-remaining" data-countdown="<?= $qEnd ?>">Calcul...</span>
+                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -335,7 +359,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         <span>🌿 Oasis Annexées (<?= count($annexedOases) ?> / 3)</span>
                         <a href="?page=map" style="color:var(--accent-color); text-decoration:none; font-size:0.75rem;">Carte Provinciale &rarr;</a>
                     </div>
-                    <?php foreach ($annexedOases as $ao): 
+                    <?php foreach ($annexedOases as $ao):
                         $bLabel = '';
                         if ($ao['bonus_rice'] > 0) $bLabel .= "+{$ao['bonus_rice']}% 🌾 ";
                         if ($ao['bonus_wood'] > 0) $bLabel .= "+{$ao['bonus_wood']}% 🪵 ";

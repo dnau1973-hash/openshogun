@@ -409,22 +409,60 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
             <div class="card-body">
 
                 <?php if ($activeJob): ?>
-                    <?php $isDemolishingJob = ((int)$activeJob['target_level'] === 0); ?>
+                    <?php
+                        $isDemolishingJob = ((int)$activeJob['target_level'] === 0);
+                        $jobNow = time();
+                        $jobStart = (int)($activeJob['started_at'] ?? $jobNow);
+                        $jobEnd = (int)($activeJob['finishes_at'] ?? $jobNow);
+                        $jobTotal = max(1, $jobEnd - $jobStart);
+                        $jobElapsed = max(0, $jobNow - $jobStart);
+                        $jobPct = min(100, max(0, (int)round(($jobElapsed / $jobTotal) * 100)));
+                    ?>
                     <div class="alert alert-<?= $isDemolishingJob ? 'danger' : 'warning' ?> mb-3">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <span style="font-size:1.3rem;">⏳</span>
-                            <div>
-                                <strong><?= $isDemolishingJob ? 'Démantèlement en cours' : 'Travaux en cours' ?></strong> →
-                                <?= $isDemolishingJob ? 'Niveau 0 (Raser)' : 'Niveau ' . $activeJob['target_level'] ?>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="font-size:1.3rem;">🌾</span>
+                                <div>
+                                    <strong><?= $isDemolishingJob ? 'Démantèlement en cours' : 'Travaux en cours' ?></strong> →
+                                    <span class="badge bg-<?= $isDemolishingJob ? 'danger' : 'warning' ?> text-dark fw-bold">
+                                        <?= $isDemolishingJob ? 'Niveau 0 (Raser)' : 'Niveau ' . $activeJob['target_level'] ?>
+                                    </span>
+                                </div>
                             </div>
+                            <span class="badge bg-white text-<?= $isDemolishingJob ? 'danger' : 'dark' ?> fw-bold font-monospace fs-4 shadow-sm building-progress-pct" id="fieldProgressPct">
+                                <?= $jobPct ?>%
+                            </span>
                         </div>
                         <p class="text-muted mb-2" style="font-size:0.85rem;">
                             <?= $isDemolishingJob
                                 ? 'Vos maîtres d\'œuvre déconstruisent cette exploitation. Vous récupérerez 30% des matériaux.'
                                 : 'Vos artisans s\'activent sur la parcelle. Le rendement sera accru dès la fin des travaux.' ?>
                         </p>
-                        <div class="font-monospace fw-bold fs-4 text-center py-2 job-timer-display" data-countdown="<?= $activeJob['finishes_at'] ?>">
-                            Calcul...
+
+                        <!-- Barre de progression des travaux de construction -->
+                        <div class="building-progress-wrapper p-2 bg-white rounded border shadow-sm my-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1 text-secondary small">
+                                <span class="fw-semibold d-flex align-items-center gap-1"><span>🚧</span> Avancement du chantier</span>
+                                <span class="badge bg-<?= $isDemolishingJob ? 'danger' : 'warning' ?>-lt fw-bold font-monospace building-progress-pct"><?= $jobPct ?>%</span>
+                            </div>
+                            <div class="progress mb-2" style="height: 12px; background-color: #e2e8f0; border-radius: 6px; overflow: hidden;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-<?= $isDemolishingJob ? 'danger' : 'warning' ?> building-progress-bar"
+                                     id="fieldProgressBar"
+                                     role="progressbar"
+                                     style="width: <?= $jobPct ?>%; transition: width 0.3s ease;"
+                                     aria-valuenow="<?= $jobPct ?>"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100"
+                                     data-started="<?= $jobStart ?>"
+                                     data-finishes="<?= $jobEnd ?>">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center text-secondary small">
+                                <span>⏱️ Compte à rebours :</span>
+                                <span class="font-monospace fw-bold text-dark fs-4 building-time-remaining" data-countdown="<?= $jobEnd ?>">
+                                    Calcul...
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <button type="button" class="btn btn-outline-danger w-100"

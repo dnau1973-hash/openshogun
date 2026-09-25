@@ -53,7 +53,7 @@ $buildingSectors = [
     'free_plot' => 'logistics',
 ];
 
-$bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg') 
+$bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg')
     ? filemtime(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg') : 1;
 
 // Cartographie dynamique des emplacements de la cité castrale (Slots 19 à 34)
@@ -164,7 +164,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                     </button>
                 </h2>
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
-                    Forteresse Principale : <strong style="color:var(--border-highlight, #c2252b);">Tenshu Niveau <?= $hqLevel ?></strong> 
+                    Forteresse Principale : <strong style="color:var(--border-highlight, #c2252b);">Tenshu Niveau <?= $hqLevel ?></strong>
                     <span style="opacity:0.85;">&bull; 👥 <strong><?= number_format($pop) ?></strong>/<?= number_format($popMax) ?> Habitants (<span class="text-success">+<?= $popBonus ?>% vitesse chantiers</span>)</span>
                 </div>
             </div>
@@ -192,7 +192,7 @@ foreach (BUILDINGS as $code => $bInfo) {
             <?php endif; ?>
 
             <?php if ($activeFeast): ?>
-                <?php 
+                <?php
                     $feastLabels = [
                         'matsuri' => ['Matsuri Populaire des Saisons', '🏮', '#fef9c3', '#ca8a04'],
                         'warriors' => ['Banquet des Guerriers (Kanpai)', '⚔️', '#fee2e2', '#dc2626'],
@@ -224,7 +224,7 @@ foreach (BUILDINGS as $code => $bInfo) {
             <!-- Viewport RTS de la Cité Castrale (shogun_castle_city_bg.jpg) -->
             <div class="fields-viewport rts-surface rts-city-surface" id="rts-city-viewport">
                 <!-- Porte fortifiée vers les terroirs ruraux (en bas à droite avec Mon) -->
-                <div class="rts-hotspot sector-gateway hotspot-city-slot-gateway" 
+                <div class="rts-hotspot sector-gateway hotspot-city-slot-gateway"
                      data-sector="gateway"
                      title="🌾 Grande Porte Castrale (Retour aux Terroirs Ruraux)"
                      onclick="window.location.href='?page=resources'">
@@ -232,7 +232,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                 </div>
 
                 <!-- Boucle sur les 16 Bâtiments de la Cité Féodale (Slots 19 à 34) -->
-                <?php foreach ($citySlots as $slot => $slotData): 
+                <?php foreach ($citySlots as $slot => $slotData):
                     $code = $slotData['code'];
                     if ($code === 'free_plot' && isset(CITY_SLOT_LAYOUT[$slot])) {
                         $code = CITY_SLOT_LAYOUT[$slot];
@@ -251,15 +251,15 @@ foreach (BUILDINGS as $code => $bInfo) {
                     $isUpgrading = ($lvl > 0 && $isBuildingInQueue && !$isDemolishing);
                     $isLevelZero = ($lvl === 0 && !$isBuildingInQueue);
                 ?>
-                    <div class="rts-hotspot sector-<?= $sector ?> <?= $isLevelZero ? 'is-level-zero' : '' ?> hotspot-city-slot-<?= $slot ?>" 
+                    <div class="rts-hotspot sector-<?= $sector ?> <?= $isLevelZero ? 'is-level-zero' : '' ?> hotspot-city-slot-<?= $slot ?>"
                          data-sector="<?= $sector ?>"
                          data-slot="<?= $slot ?>"
                          data-building="<?= $code ?>"
                          title="<?= htmlspecialchars($bInfo['name']) ?> (<?= $isLevelZero ? 'Non bâti - Cliquez pour fonder' : ($isDemolishing ? 'Démantèlement en cours' : ($isUnderConstruction ? 'Chantier en cours (Niv. 1)' : 'Niveau ' . $lvl)) ?>)"
                          onclick="window.location.href='/?page=building&slot=<?= $slot ?>'">
-                        
+
                         <!-- Badge féodal de niveau (ou marqueur de fondation) -->
-                        <div class="rts-level-bubble <?= ($code === 'hq') ? 'rts-tenshu-bubble' : '' ?> <?= $isLevelZero ? 'level-zero' : '' ?> <?= $isDemolishing ? 'demolishing' : (($isUnderConstruction || $isUpgrading) ? 'upgrading' : '') ?>" 
+                        <div class="rts-level-bubble <?= ($code === 'hq') ? 'rts-tenshu-bubble' : '' ?> <?= $isLevelZero ? 'level-zero' : '' ?> <?= $isDemolishing ? 'demolishing' : (($isUnderConstruction || $isUpgrading) ? 'upgrading' : '') ?>"
                              title="<?= htmlspecialchars($bInfo['name']) ?> (<?= $isLevelZero ? 'Non bâti - Cliquer pour ériger' : 'Niveau ' . $lvl ?>)">
                             <?php if ($isLevelZero): ?>
                                 +
@@ -282,7 +282,7 @@ foreach (BUILDINGS as $code => $bInfo) {
             <!-- Vue Grille des Cartes Détaillées (Repliable) -->
             <div class="city-grid" id="city-cards-grid" style="display:none; margin-top:1.5rem;">
                 <?php foreach (BUILDINGS as $code => $bInfo): ?>
-                    <?php 
+                    <?php
                         $lvl = $buildings[$code] ?? 0;
                         $details = $buildingEngine->getUpgradeDetails('building', $code, $lvl, $hqLevel);
                         $cost = $details['cost'];
@@ -305,7 +305,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                         <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem; flex:1;">
                             <?= htmlspecialchars($bInfo['description']) ?>
                         </p>
-                        
+
                         <div style="width:100%; display:flex; flex-direction:column; gap:0.5rem;">
                             <?php if ($code === 'shipyard' && $lvl > 0): ?>
                                 <a href="?page=shipyard" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🐎 Mobiliser Cavalerie & Siège</a>
@@ -344,7 +344,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                     <p style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:1rem 0;">Aucune construction urbaine en cours.</p>
                 <?php else: ?>
                     <?php foreach ($queue as $q): ?>
-                        <?php 
+                        <?php
                             if ($q['build_category'] === 'field') {
                                 $tSlot = (int)$q['target_id'];
                                 $tType = $fieldsBySlot[$tSlot]['type'] ?? FIELD_LAYOUT[$tSlot] ?? 'metal_mine';
@@ -352,19 +352,43 @@ foreach (BUILDINGS as $code => $bInfo) {
                             } else {
                                 $name = BUILDINGS[$q['target_id']]['name'] ?? $q['target_id'];
                             }
+                            $qNow = time();
+                            $qStart = (int)($q['started_at'] ?? $qNow);
+                            $qEnd = (int)($q['finishes_at'] ?? $qNow);
+                            $qTotal = max(1, $qEnd - $qStart);
+                            $qElapsed = max(0, $qNow - $qStart);
+                            $qPct = min(100, max(0, (int)round(($qElapsed / $qTotal) * 100)));
+                            $isDemolish = ((int)$q['target_level'] === 0);
                         ?>
-                        <div class="queue-item">
-                            <div class="queue-info">
-                                <h4><?= htmlspecialchars($name) ?></h4>
-                                <?php if ((int)$q['target_level'] === 0): ?>
-                                    <span style="font-size:0.75rem; color:#f87171; font-weight:700;">🗑️ Démolition (Raser)</span>
-                                <?php else: ?>
-                                    <span style="font-size:0.75rem; color:var(--text-muted);">Niveau <?= $q['target_level'] ?></span>
-                                <?php endif; ?>
-                            </div>
-                            <div style="text-align:right;">
-                                <div class="queue-timer" data-countdown="<?= $q['finishes_at'] ?>">Calcul...</div>
+                        <div class="queue-item" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem; padding: 0.75rem;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="queue-info">
+                                    <h4 class="mb-0 fw-bold" style="font-size:0.9rem;"><?= htmlspecialchars($name) ?></h4>
+                                    <?php if ($isDemolish): ?>
+                                        <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;">🗑️ Démolition</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary-lt" style="font-size:0.7rem;">Niveau <?= $q['target_level'] ?></span>
+                                    <?php endif; ?>
+                                </div>
                                 <button class="btn-cancel" onclick="cancelBuild(<?= $q['id'] ?>)">Annuler</button>
+                            </div>
+
+                            <!-- Barre de progression -->
+                            <div class="queue-progress-box mt-1">
+                                <div class="progress" style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-<?= $isDemolish ? 'danger' : 'warning' ?> building-progress-bar"
+                                         role="progressbar"
+                                         style="width: <?= $qPct ?>%;"
+                                         aria-valuenow="<?= $qPct ?>"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"
+                                         data-started="<?= $qStart ?>"
+                                         data-finishes="<?= $qEnd ?>"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
+                                    <span class="text-secondary fw-semibold">Avancement : <strong class="text-dark building-progress-pct"><?= $qPct ?>%</strong></span>
+                                    <span class="queue-timer font-monospace fw-bold text-danger building-time-remaining" data-countdown="<?= $qEnd ?>">Calcul...</span>
+                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -380,7 +404,7 @@ foreach (BUILDINGS as $code => $bInfo) {
 <!-- Modale de Fondation sur Emplacement Libre (Style Travian) -->
 <div class="modal-overlay" id="freeSlotModal" style="display:none; position:fixed; inset:0; background:rgba(5,7,15,0.88); backdrop-filter:blur(10px); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
     <div class="modal-card" style="background:#0f172a; border:1px solid #334155; border-radius:12px; width:100%; max-width:920px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.7); overflow:hidden;">
-        
+
         <!-- En-tête -->
         <div class="card-header" style="background:rgba(15,23,42,0.95); padding:1rem 1.25rem; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
             <div>
@@ -409,7 +433,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                     <p style="font-size:0.85rem; max-width:450px; margin:0 auto;">Vous avez déjà fondé l'ensemble des bâtiments uniques du clan. Vous pouvez améliorer leurs niveaux depuis la vue générale de la cité.</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($availableBuildingsToConstruct as $bCode => $item): 
+                <?php foreach ($availableBuildingsToConstruct as $bCode => $item):
                     $info = $item['info'];
                     $det = $item['details'];
                     $c = $det['cost'];
@@ -421,7 +445,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                     <div class="modal-building-row" data-sector="<?= $sec ?>" style="background:rgba(30,41,59,0.5); border:1px solid #334155; border-radius:8px; padding:0.85rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; transition:border-color 0.2s;">
                         <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:280px;">
                             <div style="width:52px; height:52px; background:rgba(15,23,42,0.8); border:1px solid #475569; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden;">
-                                <?php if (!empty($info['tile_img'])): 
+                                <?php if (!empty($info['tile_img'])):
                                     $cityTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $info['tile_img']) ? '/public/assets/tiles/' . $info['tile_img'] : '/public/assets/' . $info['tile_img'];
                                 ?>
                                     <img src="<?= $cityTileUrl ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:44px; height:44px; object-fit:contain;">

@@ -8,23 +8,23 @@
     --bg-card: #ffffff;
     --bg-card-solid: #ffffff;
     --bg-ink: #f8fafc;
-    
+
     /* Bordures & Ombres Tabler */
     --border-color: rgba(98, 105, 118, 0.16);
     --border-highlight: var(--tblr-primary, #206bc4);
-    
+
     /* Typographie Tabler */
     --text-main: var(--tblr-body-color, #1e293b);
     --text-muted: var(--tblr-muted, #64748b);
     --text-secondary: #475569;
     --text-subtle: #64748b;
     --text-bright: #0f172a;
-    
+
     /* Couleurs de factions */
     --color-terran: #d63939;
     --color-vorash: #d63939;
     --color-aethelis: #f59f00;
-    
+
     /* Ressources */
     --res-metal: #f59f00;
     --res-crystal: #206bc4;
@@ -1595,14 +1595,22 @@
    ========================================================== */
 .queue-item {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
     background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 0.75rem;
     margin-bottom: 0.75rem;
     box-shadow: 0 2px 6px rgba(60, 45, 30, 0.04);
+}
+
+.queue-progress-box {
+    width: 100%;
+}
+
+.building-progress-bar {
+    transition: width 0.35s ease;
 }
 
 .queue-info h4 {

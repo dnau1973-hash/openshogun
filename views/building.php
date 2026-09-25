@@ -721,7 +721,7 @@ if (!$isEmptyPlot) {
         <!-- Colonne Droite : Coûts, Chantier & Zone Tenshu -->
         <div class="col-lg-7">
 
-            <?php if ($code === 'hq'): 
+            <?php if ($code === 'hq'):
                 $activeFeast = $planetEngine->getActiveFeast((int)$planet['id']);
                 $tenshuLvl = max(1, $lvl);
                 $matsuriCost = 100 * $tenshuLvl;
@@ -794,7 +794,7 @@ if (!$isEmptyPlot) {
                 <div class="card-body">
 
                     <?php if ($activeFeast): ?>
-                        <?php 
+                        <?php
                             $feastNames = [
                                 'matsuri' => ['Matsuri Populaire des Saisons', '🏮', 'bg-warning-lt text-warning'],
                                 'warriors' => ['Banquet des Guerriers (Kanpai)', '⚔️', 'bg-danger-lt text-danger'],
@@ -1028,12 +1028,12 @@ if (!$isEmptyPlot) {
                             </div>
                         </div>
                         <div class="progress" style="height: 10px; background-color: #dbeafe;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
-                                 role="progressbar" 
-                                 style="width: <?= $activeCraft['progress'] ?>%;" 
-                                 aria-valuenow="<?= $activeCraft['progress'] ?>" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100" 
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                                 role="progressbar"
+                                 style="width: <?= $activeCraft['progress'] ?>%;"
+                                 aria-valuenow="<?= $activeCraft['progress'] ?>"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
                                  id="craftProgressBar">
                             </div>
                         </div>
@@ -1305,12 +1305,12 @@ if (!$isEmptyPlot) {
                             </div>
                         </div>
                         <div class="progress" style="height: 10px; background-color: #fef3c7;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
-                                 role="progressbar" 
-                                 style="width: <?= $activeWoodCraft['progress'] ?>%;" 
-                                 aria-valuenow="<?= $activeWoodCraft['progress'] ?>" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100" 
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning"
+                                 role="progressbar"
+                                 style="width: <?= $activeWoodCraft['progress'] ?>%;"
+                                 aria-valuenow="<?= $activeWoodCraft['progress'] ?>"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
                                  id="woodCraftProgressBar">
                             </div>
                         </div>
@@ -1387,7 +1387,7 @@ if (!$isEmptyPlot) {
                                         Façonnage de Poutres en bois Verrouillé
                                     </h4>
                                     <div class="text-secondary small mt-1">
-                                        L'équarrissage et le rabotage des troncs de cèdre en poutres maîtresses nécessitent un outillage et un savoir-faire avancé. 
+                                        L'équarrissage et le rabotage des troncs de cèdre en poutres maîtresses nécessitent un outillage et un savoir-faire avancé.
                                         Améliorez votre <strong>Atelier de Charpenterie au Niveau 10</strong> pour débloquer la production de poutres.
                                     </div>
                                 </div>
@@ -1888,22 +1888,60 @@ if (!$isEmptyPlot) {
                 <div class="card-body">
 
                     <?php if ($activeJob): ?>
-                        <?php $isDemolishingJob = ((int)$activeJob['target_level'] === 0); ?>
+                        <?php
+                            $isDemolishingJob = ((int)$activeJob['target_level'] === 0);
+                            $jobNow = time();
+                            $jobStart = (int)($activeJob['started_at'] ?? $jobNow);
+                            $jobEnd = (int)($activeJob['finishes_at'] ?? $jobNow);
+                            $jobTotal = max(1, $jobEnd - $jobStart);
+                            $jobElapsed = max(0, $jobNow - $jobStart);
+                            $jobPct = min(100, max(0, (int)round(($jobElapsed / $jobTotal) * 100)));
+                        ?>
                         <div class="alert alert-<?= $isDemolishingJob ? 'danger' : 'warning' ?> mb-3">
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span style="font-size:1.3rem;">⏳</span>
-                                <div>
-                                    <strong><?= $isDemolishingJob ? 'Démantèlement en cours' : 'Travaux en cours' ?></strong> &rarr;
-                                    <?= $isDemolishingJob ? 'Niveau 0 (Raser)' : 'Niveau ' . $activeJob['target_level'] ?>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span style="font-size:1.3rem;">🏗️</span>
+                                    <div>
+                                        <strong><?= $isDemolishingJob ? 'Démantèlement en cours' : 'Travaux en cours' ?></strong> &rarr;
+                                        <span class="badge bg-<?= $isDemolishingJob ? 'danger' : 'warning' ?> text-dark fw-bold">
+                                            <?= $isDemolishingJob ? 'Niveau 0 (Raser)' : 'Niveau ' . $activeJob['target_level'] ?>
+                                        </span>
+                                    </div>
                                 </div>
+                                <span class="badge bg-white text-<?= $isDemolishingJob ? 'danger' : 'dark' ?> fw-bold font-monospace fs-4 shadow-sm building-progress-pct" id="buildingProgressPct">
+                                    <?= $jobPct ?>%
+                                </span>
                             </div>
                             <p class="text-muted mb-2" style="font-size:0.85rem;">
                                 <?= $isDemolishingJob
                                     ? 'Vos maîtres d\'œuvre déconstruisent cette bâtisse pour libérer l\'emplacement. Vous récupérerez 30% des matériaux.'
                                     : 'Vos bâtisseurs et charpentiers travaillent sur cette bâtisse. La forteresse bénéficiera de ses nouvelles capacités dès achèvement.' ?>
                             </p>
-                            <div class="font-monospace fw-bold fs-4 text-center py-2 job-timer-display" data-countdown="<?= $activeJob['finishes_at'] ?>">
-                                Calcul...
+
+                            <!-- Barre de progression des travaux de construction -->
+                            <div class="building-progress-wrapper p-2 bg-white rounded border shadow-sm my-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1 text-secondary small">
+                                    <span class="fw-semibold d-flex align-items-center gap-1"><span>🚧</span> Avancement du chantier</span>
+                                    <span class="badge bg-<?= $isDemolishingJob ? 'danger' : 'warning' ?>-lt fw-bold font-monospace building-progress-pct"><?= $jobPct ?>%</span>
+                                </div>
+                                <div class="progress mb-2" style="height: 12px; background-color: #e2e8f0; border-radius: 6px; overflow: hidden;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-<?= $isDemolishingJob ? 'danger' : 'warning' ?> building-progress-bar"
+                                         id="buildingProgressBar"
+                                         role="progressbar"
+                                         style="width: <?= $jobPct ?>%; transition: width 0.3s ease;"
+                                         aria-valuenow="<?= $jobPct ?>"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"
+                                         data-started="<?= $jobStart ?>"
+                                         data-finishes="<?= $jobEnd ?>">
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center text-secondary small">
+                                    <span>⏱️ Compte à rebours :</span>
+                                    <span class="font-monospace fw-bold text-dark fs-4 building-time-remaining" data-countdown="<?= $jobEnd ?>">
+                                        Calcul...
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <button type="button" class="btn btn-outline-danger w-100" onclick="cancelBuildingBuild(<?= (int)$activeJob['id'] ?>)">
@@ -1988,7 +2026,7 @@ if (!$isEmptyPlot) {
                 </div>
 
                 <!-- ZONE EXCLUSIVE DU TENSHU : EXPANSION FÉODALE & COLONS -->
-                <?php 
+                <?php
                     $colonStatus = $planetEngine->getTenshuColonizerStatus((int)$planet['id']);
                     $cCosts = $colonStatus['costs'];
                     $canAffordColon = ($planet['metal'] >= $cCosts['metal'] && $planet['crystal'] >= $cCosts['crystal'] && $planet['deuterium'] >= $cCosts['deuterium'] && ($planet['rice_flour'] ?? 0) >= $cCosts['rice_flour']);
@@ -2236,9 +2274,32 @@ async function confirmDemolishBuilding(buildingCode, slot, buildingName) {
     }
 }
 
-// Mise à jour des comptes à rebours
+// Mise à jour des comptes à rebours et barres de progression de chantier
 function updateBuildingCountdowns() {
     const now = Math.floor(Date.now() / 1000);
+
+    // 1. Barres de progression de construction
+    document.querySelectorAll('.building-progress-bar').forEach(bar => {
+        const startTs = parseInt(bar.getAttribute('data-started') || '0', 10);
+        const finishTs = parseInt(bar.getAttribute('data-finishes') || '0', 10);
+        if (finishTs > startTs) {
+            const total = finishTs - startTs;
+            const elapsed = Math.max(0, now - startTs);
+            const pct = Math.min(100, Math.max(0, Math.floor((elapsed / total) * 100)));
+            bar.style.width = pct + '%';
+            bar.setAttribute('aria-valuenow', pct);
+
+            const container = bar.closest('.building-progress-wrapper, .alert, .card') || bar.parentElement.parentElement;
+            if (container) {
+                const pctLabels = container.querySelectorAll('.building-progress-pct');
+                pctLabels.forEach(lbl => {
+                    lbl.textContent = pct + '%';
+                });
+            }
+        }
+    });
+
+    // 2. Décomptes temporels
     document.querySelectorAll('[data-countdown]').forEach(el => {
         const target = parseInt(el.getAttribute('data-countdown'), 10);
         const diff = target - now;
@@ -2250,10 +2311,14 @@ function updateBuildingCountdowns() {
             const h = Math.floor((diff % 86400) / 3600);
             const m = Math.floor((diff % 3600) / 60);
             const s = diff % 60;
-            const timeStr = (d > 0) 
+            const timeStr = (d > 0)
                 ? `${d}j ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
                 : `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-            el.innerText = `⏳ Temps restant : ${timeStr}`;
+            if (el.classList.contains('building-time-remaining') || el.classList.contains('queue-timer')) {
+                el.innerText = timeStr;
+            } else {
+                el.innerText = `⏳ Temps restant : ${timeStr}`;
+            }
         }
     });
 }

@@ -65,8 +65,8 @@ $unitsDb = $empireData['units_db'];
             <div>
                 <h4 class="alert-title fw-bold text-dark m-0">Privilège du Shōgun : Débloquez la Puissance Impériale</h4>
                 <div class="text-secondary small mt-1">
-                    Le Sceau Impérial vous accorde l'<strong>Architecte de Cour</strong> (file de construction jusqu'à 4 travaux), 
-                    le <strong>Carnet de Raids</strong> en 1 clic, l'<strong>Intendant du Marché</strong> (troc 1:1:1), 
+                    Le Sceau Impérial vous accorde l'<strong>Architecte de Cour</strong> (file de construction jusqu'à 4 travaux),
+                    le <strong>Carnet de Raids</strong> en 1 clic, l'<strong>Intendant du Marché</strong> (troc 1:1:1),
                     l'<strong>Ordre de Repli Tactique</strong> et l'optimisation complète de votre Empire.
                 </div>
             </div>
@@ -195,7 +195,7 @@ $unitsDb = $empireData['units_db'];
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($villages as $item): 
+                            <?php foreach ($villages as $item):
                                 $p = $item['planet'];
                                 $isCur = ($planet && (int)$p['id'] === (int)$planet['id']);
                                 $pctW = min(100, round(($p['metal'] / max(1, $p['metal_max'])) * 100));
@@ -265,7 +265,7 @@ $unitsDb = $empireData['units_db'];
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-warning" 
+                                        <button type="button" class="btn btn-sm btn-outline-warning"
                                                 onclick="openNpcExchangeModal(<?= $p['id'] ?>, '<?= htmlspecialchars(addslashes($p['name'])) ?>', <?= (int)$p['metal'] ?>, <?= (int)$p['crystal'] ?>, <?= (int)$p['deuterium'] ?>, <?= (int)$p['metal_max'] ?>, <?= (int)$p['crystal_max'] ?>, <?= (int)$p['deuterium_max'] ?>)">
                                             ⚖️ Intendant
                                         </button>
@@ -314,7 +314,7 @@ $unitsDb = $empireData['units_db'];
             <!-- ================= ONGLET 2 : CHANTIERS DE L'EMPIRE ================= -->
             <div class="tab-pane" id="tab-constructions" role="tabpanel">
                 <div class="p-3">
-                    <?php 
+                    <?php
                     $hasAnyJob = false;
                     foreach ($villages as $item):
                         $p = $item['planet'];
@@ -343,7 +343,7 @@ $unitsDb = $empireData['units_db'];
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($qList as $job): 
+                                        <?php foreach ($qList as $job):
                                             $isDemolish = ((int)$job['target_level'] === 0);
                                             $bName = ($job['build_category'] === 'field')
                                                 ? "Parcelle Agricole #" . $job['target_id']
@@ -365,10 +365,29 @@ $unitsDb = $empireData['units_db'];
                                             <td>
                                                 <span class="text-secondary small">Fin programmée : <?= date('H:i:s', $job['finishes_at']) ?></span>
                                             </td>
-                                            <td class="text-end">
-                                                <span class="badge bg-primary text-white font-monospace p-2 fs-5" data-countdown="<?= $job['finishes_at'] ?>">
-                                                    ⏳ Calcul...
-                                                </span>
+                                            <td style="min-width: 170px;">
+                                                <?php
+                                                    $eNow = time();
+                                                    $eStart = (int)($job['started_at'] ?? $eNow);
+                                                    $eEnd = (int)($job['finishes_at'] ?? $eNow);
+                                                    $eTotal = max(1, $eEnd - $eStart);
+                                                    $eElapsed = max(0, $eNow - $eStart);
+                                                    $ePct = min(100, max(0, (int)round(($eElapsed / $eTotal) * 100)));
+                                                ?>
+                                                <div class="progress progress-xs mb-1" style="height: 7px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-<?= $isDemolish ? 'danger' : 'warning' ?> building-progress-bar"
+                                                         role="progressbar"
+                                                         style="width: <?= $ePct ?>%;"
+                                                         aria-valuenow="<?= $ePct ?>"
+                                                         aria-valuemin="0"
+                                                         aria-valuemax="100"
+                                                         data-started="<?= $eStart ?>"
+                                                         data-finishes="<?= $eEnd ?>"></div>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center small">
+                                                    <span class="fw-bold text-secondary building-progress-pct"><?= $ePct ?>%</span>
+                                                    <span class="font-monospace fw-bold text-dark building-time-remaining" data-countdown="<?= $eEnd ?>">Calcul...</span>
+                                                </div>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -402,7 +421,7 @@ $unitsDb = $empireData['units_db'];
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($villages as $item): 
+                                <?php foreach ($villages as $item):
                                     $p = $item['planet'];
                                     $garrison = $item['garrison'];
                                 ?>
@@ -414,7 +433,7 @@ $unitsDb = $empireData['units_db'];
                                     <td>
                                         <?php if (!empty($garrison)): ?>
                                             <div class="d-flex flex-wrap gap-2">
-                                                <?php foreach ($garrison as $gu): 
+                                                <?php foreach ($garrison as $gu):
                                                     $uInfo = $unitsDb[$gu['unit_code']] ?? ['name' => $gu['unit_code'], 'icon' => '⚔️'];
                                                 ?>
                                                     <span class="badge bg-light text-dark border p-1 px-2 d-flex align-items-center gap-1">
@@ -453,7 +472,7 @@ $unitsDb = $empireData['units_db'];
             <div class="tab-pane" id="tab-culture" role="tabpanel">
                 <div class="p-3">
                     <div class="row g-3">
-                        <?php foreach ($villages as $item): 
+                        <?php foreach ($villages as $item):
                             $p = $item['planet'];
                             $feast = $item['feast'];
                         ?>
@@ -503,7 +522,7 @@ $unitsDb = $empireData['units_db'];
                             <div>
                                 <strong>Principe de l'Ordre de Repli Tactique (Privilège du Shōgun) :</strong>
                                 <div class="small mt-1">
-                                    Lorsqu'il est activé sur un fief, vos garnisons et votre Samouraï Héros se replient discrètement dans les collines lors d'un assaut ennemi. 
+                                    Lorsqu'il est activé sur un fief, vos garnisons et votre Samouraï Héros se replient discrètement dans les collines lors d'un assaut ennemi.
                                     Vos troupes échappent ainsi à l'anéantissement de nuit. L'attaquant ne combat personne (mais peut s'emparer des ressources non dissimulées dans vos cachettes).
                                 </div>
                             </div>
@@ -521,7 +540,7 @@ $unitsDb = $empireData['units_db'];
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($villages as $item): 
+                                <?php foreach ($villages as $item):
                                     $p = $item['planet'];
                                     $isEvasion = !empty($item['tactical_evasion']);
                                 ?>
@@ -547,7 +566,7 @@ $unitsDb = $empireData['units_db'];
                                         </span>
                                     </td>
                                     <td class="text-end">
-                                        <button type="button" 
+                                        <button type="button"
                                                 class="btn btn-sm <?= $isEvasion ? 'btn-success' : 'btn-outline-secondary' ?>"
                                                 onclick="toggleEvasion(<?= $p['id'] ?>)">
                                             <?= $isEvasion ? '🛡️ Activé (Cliquez pour désactiver)' : '⛩️ Activer le Repli' ?>

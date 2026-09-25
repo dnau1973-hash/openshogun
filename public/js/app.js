@@ -52,15 +52,41 @@ function updateBar(type, val, max) {
     }
 }
 
-// 2. Gestion des comptes à rebours (Files de construction, chantiers, flottes)
+// 2. Gestion des comptes à rebours et barres de progression des chantiers
 function initCountdownTimers() {
     const timers = document.querySelectorAll('[data-countdown]');
-    if (timers.length === 0) return;
+    const progressBars = document.querySelectorAll('.building-progress-bar');
+    if (timers.length === 0 && progressBars.length === 0) return;
 
     const interval = setInterval(() => {
         let hasActive = false;
         const now = Math.floor(Date.now() / 1000);
 
+        // Mise à jour continue des barres de progression
+        progressBars.forEach(bar => {
+            const startTs = parseInt(bar.getAttribute('data-started') || '0', 10);
+            const finishTs = parseInt(bar.getAttribute('data-finishes') || '0', 10);
+            if (finishTs > startTs) {
+                const total = finishTs - startTs;
+                const elapsed = Math.max(0, now - startTs);
+                const pct = Math.min(100, Math.max(0, Math.floor((elapsed / total) * 100)));
+                bar.style.width = pct + '%';
+                bar.setAttribute('aria-valuenow', pct);
+
+                const container = bar.closest('.building-progress-wrapper, .queue-item, .queue-progress-box, .alert, .card, tr, td') || bar.parentElement.parentElement;
+                if (container) {
+                    const pctLabels = container.querySelectorAll('.building-progress-pct');
+                    pctLabels.forEach(lbl => {
+                        lbl.textContent = pct + '%';
+                    });
+                }
+                if (now < finishTs) {
+                    hasActive = true;
+                }
+            }
+        });
+
+        // Décomptes temporels
         timers.forEach(el => {
             const target = parseInt(el.dataset.countdown, 10);
             const remaining = target - now;
@@ -77,7 +103,7 @@ function initCountdownTimers() {
             }
         });
 
-        if (!hasActive) clearInterval(interval);
+        if (!hasActive && progressBars.length === 0) clearInterval(interval);
     }, 1000);
 }
 
@@ -244,7 +270,7 @@ function showModalConfirm(message, title = 'Ordre de Commandement', callback = n
 
         const isDemolish = /raser|démant|démol/i.test(title + ' ' + message);
         const isCancelAction = /interruption|annul|suspend/i.test(title + ' ' + message);
-        
+
         let icon = '❓';
         let confirmLabel = 'Confirmer';
         if (isDemolish) {
