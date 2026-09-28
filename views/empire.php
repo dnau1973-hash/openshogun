@@ -659,23 +659,13 @@ $unitsDb = $empireData['units_db'];
 </div>
 
 <script>
-// Comptes à rebours
+// Comptes à rebours et barres de progression de l'Empire
 function updateEmpireCountdowns() {
-    const now = Math.floor(Date.now() / 1000);
-    document.querySelectorAll('[data-countdown]').forEach(el => {
-        const target = parseInt(el.getAttribute('data-countdown'), 10);
-        const diff = target - now;
-        if (diff <= 0) {
-            el.innerText = 'Terminé !';
-        } else {
-            const h = Math.floor(diff / 3600);
-            const m = Math.floor((diff % 3600) / 60);
-            const s = diff % 60;
-            el.innerText = `⏳ ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        }
-    });
+    if (window.ProgressBar) {
+        window.ProgressBar.initAll();
+        window.ProgressBar.instances.forEach(pb => pb.update());
+    }
 }
-setInterval(updateEmpireCountdowns, 1000);
 updateEmpireCountdowns();
 
 // Commutateur Repli Tactique

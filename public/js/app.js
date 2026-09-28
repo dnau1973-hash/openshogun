@@ -52,58 +52,226 @@ function updateBar(type, val, max) {
     }
 }
 
-// 2. Gestion des comptes à rebours et barres de progression des chantiers
-function initCountdownTimers() {
-    const timers = document.querySelectorAll('[data-countdown]');
-    const progressBars = document.querySelectorAll('.building-progress-bar');
-    if (timers.length === 0 && progressBars.length === 0) return;
+// ==========================================================
+// COMPOSANT ORIENTÉ OBJET : ProgressBar
+// Encapsulation stricte de l'état, identifiants uniques et indépendance totale des instances
+// ==========================================================
 
-    const interval = setInterval(() => {
-        let hasActive = false;
-        const now = Math.floor(Date.now() / 1000);
+class ProgressBar {
+    constructor(element, options = {}) {
+        if (!element) return;
+        this.element = element;
 
-        // Mise à jour continue des barres de progression
-        progressBars.forEach(bar => {
-            const startTs = parseInt(bar.getAttribute('data-started') || '0', 10);
-            const finishTs = parseInt(bar.getAttribute('data-finishes') || '0', 10);
-            if (finishTs > startTs) {
-                const total = finishTs - startTs;
-                const elapsed = Math.max(0, now - startTs);
-                const pct = Math.min(100, Math.max(0, Math.floor((elapsed / total) * 100)));
-                bar.style.width = pct + '%';
-                bar.setAttribute('aria-valuenow', pct);
+        // Identifiant unique garanti propre à chaque instance (évite tout conflit ou collision)
+        this.id = options.id || element.dataset.progressId || (element.id && element.id !== 'buildingProgressBar' ? element.id : null) || ('pbar_' + Math.random().toString(36).substring(2, 9));
+        this.element.dataset.progressId = this.id;
 
-                const container = bar.closest('.building-progress-wrapper, .queue-item, .queue-progress-box, .alert, .card, tr, td') || bar.parentElement.parentElement;
-                if (container) {
-                    const pctLabels = container.querySelectorAll('.building-progress-pct');
-                    pctLabels.forEach(lbl => {
-                        lbl.textContent = pct + '%';
-                    });
+        // Timestamps isolés par instance
+        this.startedAt = options.startedAt ?? parseInt(element.getAttribute('data-started') || '0', 10);
+        this.finishesAt = options.finishesAt ?? parseInt(element.getAttribute('data-finishes') || '0', 10);
+
+        // Conteneur DOM dédié à ce chantier spécifique
+        this.container = options.container || element.closest('.alert, .card, .queue-item, .queue-progress-box, .building-progress-wrapper, tr, td') || element.parentElement;
+
+        // Étiquettes de pourcentages et comptes à rebours scoped à ce conteneur
+        this.pctLabels = options.pctLabels || (this.container ? Array.from(this.container.querySelectorAll('.building-progress-pct')) : []);
+        this.timerEl = options.timerEl || (this.container ? this.container.querySelector('[data-countdown], .building-time-remaining, .queue-timer') : null);
+
+        // Variables d'état interne strictement encapsulées
+        this.currentProgress = 0;
+        this.status = 'initialized'; // 'pending' | 'in_progress' | 'completed'
+        this.isCompleted = false;
+
+        // Souscriptions d'événements propres à cette instance
+        this.onProgress = options.onProgress || null;
+        this.onComplete = options.onComplete || null;
+        this.onStatusChange = options.onStatusChange || null;
+
+        // Enregistrement dans le registre global des instances
+        ProgressBar.instances.set(this.id, this);
+
+        // Premier rafraîchissement synchrone
+        this.update();
+    }
+
+    /**
+     * Calcule l'avancement temporel de façon complètement étanche
+     */
+    calculateState(now = Math.floor(Date.now() / 1000)) {
+        if (this.finishesAt <= this.startedAt) {
+            return { pct: 100, remaining: 0, waitTime: 0, status: 'completed' };
+        }
+
+        // Cas 1 : Chantier séquentiel en attente dans la file (début planifié dans le futur)
+        if (now < this.startedAt) {
+            return {
+                pct: 0,
+                remaining: Math.max(0, this.finishesAt - now),
+                waitTime: Math.max(0, this.startedAt - now),
+                status: 'pending'
+            };
+        }
+
+        // Cas 2 : Chantier achevé
+        if (now >= this.finishesAt) {
+            return { pct: 100, remaining: 0, waitTime: 0, status: 'completed' };
+        }
+
+        // Cas 3 : Chantier actif en cours d'avancement
+        const totalDuration = this.finishesAt - this.startedAt;
+        const elapsed = Math.max(0, now - this.startedAt);
+        const pct = Math.min(100, Math.max(0, Math.floor((elapsed / totalDuration) * 100)));
+        const remaining = Math.max(0, this.finishesAt - now);
+
+        return { pct, remaining, waitTime: 0, status: 'in_progress' };
+    }
+
+    /**
+     * Mise à jour autonome de l'instance
+     */
+    update(now = Math.floor(Date.now() / 1000)) {
+        const state = this.calculateState(now);
+        const prevStatus = this.status;
+        this.status = state.status;
+        this.currentProgress = state.pct;
+
+        // Notification de transition de statut
+        if (prevStatus !== this.status && typeof this.onStatusChange === 'function') {
+            this.onStatusChange(this.status, prevStatus);
+        }
+
+        // 1. Mise à jour de la largeur de la jauge
+        this.element.style.width = state.pct + '%';
+        this.element.setAttribute('aria-valuenow', state.pct);
+
+        // 2. Mise à jour des libellés de pourcentage isolés
+        if (this.pctLabels && this.pctLabels.length > 0) {
+            this.pctLabels.forEach(lbl => {
+                if (state.status === 'pending') {
+                    lbl.textContent = 'En attente';
+                } else {
+                    lbl.textContent = state.pct + '%';
                 }
-                if (now < finishTs) {
-                    hasActive = true;
+            });
+        }
+
+        // 3. Mise à jour du timer associé à cette instance
+        if (this.timerEl) {
+            if (state.status === 'completed') {
+                this.timerEl.innerText = 'Terminé !';
+            } else if (state.status === 'pending') {
+                this.timerEl.innerText = `⏳ En attente (~${formatTime(state.waitTime)})`;
+            } else {
+                const timeStr = formatTime(state.remaining);
+                if (this.timerEl.classList.contains('building-time-remaining') || this.timerEl.classList.contains('queue-timer')) {
+                    this.timerEl.innerText = timeStr;
+                } else {
+                    this.timerEl.innerText = `⏳ Temps restant : ${timeStr}`;
                 }
             }
+        }
+
+        // 4. Déclenchement du callback onProgress
+        if (typeof this.onProgress === 'function') {
+            this.onProgress({
+                id: this.id,
+                pct: state.pct,
+                remaining: state.remaining,
+                waitTime: state.waitTime,
+                status: state.status
+            });
+        }
+
+        // 5. Achèvement du chantier
+        if (state.status === 'completed' && !this.isCompleted) {
+            this.isCompleted = true;
+            if (typeof this.onComplete === 'function') {
+                this.onComplete(this);
+            } else {
+                ProgressBar.triggerReload();
+            }
+        }
+
+        return state.status !== 'completed';
+    }
+
+    /**
+     * Suppression propre de l'instance
+     */
+    destroy() {
+        ProgressBar.instances.delete(this.id);
+    }
+}
+
+// Registre d'instances statique (clé = ID unique)
+ProgressBar.instances = new Map();
+
+// Déclenchement d'un rechargement contrôlé anti-rebond
+ProgressBar.isReloading = false;
+ProgressBar.triggerReload = function (delay = 1200) {
+    if (ProgressBar.isReloading) return;
+    ProgressBar.isReloading = true;
+    setTimeout(() => {
+        window.location.reload();
+    }, delay);
+};
+
+// Initialisation globale de toutes les barres de progression
+ProgressBar.initAll = function (selector = '.building-progress-bar') {
+    document.querySelectorAll(selector).forEach((el, index) => {
+        const id = el.dataset.progressId || (el.id && el.id !== 'buildingProgressBar' ? el.id : null) || `pb_auto_${index}_${Date.now()}`;
+        if (!ProgressBar.instances.has(id)) {
+            new ProgressBar(el, { id });
+        }
+    });
+};
+
+// Alias pour rétro-compatibilité
+window.ProgressBar = ProgressBar;
+window.ConstructionProgressBar = ProgressBar;
+
+// 2. Gestion des comptes à rebours et barres de progression des chantiers
+function initCountdownTimers() {
+    // Instanciation automatique de chaque barre de progression comme objet autonome
+    ProgressBar.initAll();
+
+    const timers = document.querySelectorAll('[data-countdown]');
+    if (timers.length === 0 && ProgressBar.instances.size === 0) return;
+
+    // Ticker centralisé qui orchestre la mise à jour des instances isolées
+    const interval = setInterval(() => {
+        const now = Math.floor(Date.now() / 1000);
+        let hasActiveBars = false;
+
+        // Chaque instance se met à jour avec son propre état isolé
+        ProgressBar.instances.forEach(instance => {
+            const isActive = instance.update(now);
+            if (isActive) hasActiveBars = true;
         });
 
-        // Décomptes temporels
+        // Décomptes temporels autonomes qui ne sont pas rattachés à une ProgressBar
+        let hasActiveTimers = false;
         timers.forEach(el => {
+            // Ignorer si ce timer est déjà sous la responsabilité d'une instance ProgressBar
+            if (el.closest('.building-progress-wrapper, .queue-item, .queue-progress-box, .alert')) {
+                return;
+            }
+
             const target = parseInt(el.dataset.countdown, 10);
             const remaining = target - now;
 
             if (remaining <= 0) {
                 el.innerText = 'Terminé !';
-                if (!el.dataset.reloaded) {
-                    el.dataset.reloaded = 'true';
-                    setTimeout(() => window.location.reload(), 1200);
-                }
+                ProgressBar.triggerReload();
             } else {
-                hasActive = true;
+                hasActiveTimers = true;
                 el.innerText = formatTime(remaining);
             }
         });
 
-        if (!hasActive && progressBars.length === 0) clearInterval(interval);
+        if (!hasActiveBars && !hasActiveTimers) {
+            clearInterval(interval);
+        }
     }, 1000);
 }
 

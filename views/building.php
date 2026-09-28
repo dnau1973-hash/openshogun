@@ -2276,53 +2276,11 @@ async function confirmDemolishBuilding(buildingCode, slot, buildingName) {
 
 // Mise à jour des comptes à rebours et barres de progression de chantier
 function updateBuildingCountdowns() {
-    const now = Math.floor(Date.now() / 1000);
-
-    // 1. Barres de progression de construction
-    document.querySelectorAll('.building-progress-bar').forEach(bar => {
-        const startTs = parseInt(bar.getAttribute('data-started') || '0', 10);
-        const finishTs = parseInt(bar.getAttribute('data-finishes') || '0', 10);
-        if (finishTs > startTs) {
-            const total = finishTs - startTs;
-            const elapsed = Math.max(0, now - startTs);
-            const pct = Math.min(100, Math.max(0, Math.floor((elapsed / total) * 100)));
-            bar.style.width = pct + '%';
-            bar.setAttribute('aria-valuenow', pct);
-
-            const container = bar.closest('.building-progress-wrapper, .alert, .card') || bar.parentElement.parentElement;
-            if (container) {
-                const pctLabels = container.querySelectorAll('.building-progress-pct');
-                pctLabels.forEach(lbl => {
-                    lbl.textContent = pct + '%';
-                });
-            }
-        }
-    });
-
-    // 2. Décomptes temporels
-    document.querySelectorAll('[data-countdown]').forEach(el => {
-        const target = parseInt(el.getAttribute('data-countdown'), 10);
-        const diff = target - now;
-        if (diff <= 0) {
-            el.innerText = 'Travaux achevés ! Actualisation...';
-            setTimeout(() => window.location.reload(), 1500);
-        } else {
-            const d = Math.floor(diff / 86400);
-            const h = Math.floor((diff % 86400) / 3600);
-            const m = Math.floor((diff % 3600) / 60);
-            const s = diff % 60;
-            const timeStr = (d > 0)
-                ? `${d}j ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-                : `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-            if (el.classList.contains('building-time-remaining') || el.classList.contains('queue-timer')) {
-                el.innerText = timeStr;
-            } else {
-                el.innerText = `⏳ Temps restant : ${timeStr}`;
-            }
-        }
-    });
+    if (window.ProgressBar) {
+        window.ProgressBar.initAll();
+        window.ProgressBar.instances.forEach(pb => pb.update());
+    }
 }
-setInterval(updateBuildingCountdowns, 1000);
 updateBuildingCountdowns();
 
 function openArtworkModal(imgSrc, title) {
