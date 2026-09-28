@@ -310,11 +310,7 @@ $navItems = [
                                     <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'alliance' ? 'active fw-bold' : '' ?>" href="?page=alliance">
                                         <span class="dropdown-item-icon">🎌</span>
                                         <span>Alliance</span>
-                                    </a>
-                                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'ranking' ? 'active fw-bold' : '' ?>" href="?page=ranking">
-                                        <span class="dropdown-item-icon">🏆</span>
-                                        <span>Classement</span>
-                                    </a>
+                                    </a>                                    
                                     <div class="dropdown-divider"></div>
                                     <a href="javascript:void(0)" class="dropdown-item d-flex align-items-center gap-2" onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">
                                         <span class="dropdown-item-icon">👤</span>
