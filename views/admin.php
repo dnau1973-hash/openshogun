@@ -696,7 +696,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     <div class="row row-cards mb-4">
         <!-- 1. Joueurs Actifs -->
         <div class="col-sm-6 col-xl-3">
-            <div class="card card-sm border-start border-3 border-primary shadow-sm h-100">
+            <div class="card card-sm border-start border-1 border-primary shadow-sm h-100">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center">
                         <span class="avatar avatar-md rounded bg-primary-lt text-primary me-3 fs-2">👥</span>
@@ -717,7 +717,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
         <!-- 2. Taux d'Achèvement (Quêtes & Didacticiel) -->
         <div class="col-sm-6 col-xl-3">
-            <div class="card card-sm border-start border-3 border-success shadow-sm h-100">
+            <div class="card card-sm border-start border-1 border-success shadow-sm h-100">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center">
                         <span class="avatar avatar-md rounded bg-success-lt text-success me-3 fs-2">🎯</span>
@@ -741,7 +741,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
         <!-- 3. Temps Moyen / Session -->
         <div class="col-sm-6 col-xl-3">
-            <div class="card card-sm border-start border-3 border-warning shadow-sm h-100">
+            <div class="card card-sm border-start border-1 border-warning shadow-sm h-100">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center">
                         <span class="avatar avatar-md rounded bg-warning-lt text-warning me-3 fs-2">⏱️</span>
@@ -762,7 +762,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
         <!-- 4. Engagement Atelier Pédagogique -->
         <div class="col-sm-6 col-xl-3">
-            <div class="card card-sm border-start border-3 border-cyan shadow-sm h-100" style="cursor: pointer;" onclick="window.open('/?page=pedagogy', '_blank')" title="Ouvrir la page publique de l'Atelier Pédagogique">
+            <div class="card card-sm border-start border-1 border-cyan shadow-sm h-100" style="cursor: pointer;" onclick="window.open('/?page=pedagogy', '_blank')" title="Ouvrir la page publique de l'Atelier Pédagogique">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center">
                         <span class="avatar avatar-md rounded bg-cyan-lt text-cyan me-3 fs-2">🎓</span>
