@@ -595,11 +595,8 @@ if (!$isEmptyPlot) {
             <!-- Card identité du bâtiment -->
             <div class="card mb-3">
                 <?php if ($buildingIllustrationUrl): ?>
-                    <div class="card-img-top position-relative" style="position:relative; cursor:pointer; overflow:hidden; max-height:220px;" onclick="openArtworkModal('<?= $buildingIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($bInfo['name'])) ?>')" title="Agrandir l'estampe">
-                        <img src="<?= $buildingIllustrationUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:100%; height:220px; object-fit:cover; display:block;">
-                        <span class="badge bg-dark text-white" style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.75) !important; font-size:0.75rem; padding:4px 8px; border-radius:4px; backdrop-filter:blur(3px); border:1px solid rgba(255,255,255,0.3); z-index:2; display:inline-flex; align-items:center; gap:4px;">
-                            🔍 Agrandir
-                        </span>
+                    <div class="card-img-top position-relative" style="position:relative; cursor:pointer; overflow:hidden; max-height:220px;" title="Agrandir l'estampe">
+                        <img src="<?= $buildingIllustrationUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:100%; height:220px; object-fit:cover; display:block;">                        
                         <!-- Badge Transparence IA Prompts (« ? ») -->
                         <?= AiPromptHelper::renderBadge($heroImgRel, $bInfo['name'], $buildingIllustrationUrl) ?>
                     </div>
