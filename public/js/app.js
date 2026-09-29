@@ -85,9 +85,35 @@ class ProgressBar {
             || element.closest('.alert, .card, .queue-item, .queue-progress-box, .building-progress-wrapper, tr, td')
             || element.parentElement;
 
-        // Étiquettes de pourcentages et comptes à rebours scoped à ce conteneur uniquement
-        this.pctLabels = options.pctLabels
-            || (this.container ? Array.from(this.container.querySelectorAll('.building-progress-pct')) : []);
+        // Étiquettes de pourcentage — scoped au container direct ET au bloc .alert/.card parent.
+        // Cas building.php / field.php : un badge « pct » externe est dans .alert mais HORS de
+        // .building-progress-wrapper. On remonte au parent .alert/.card pour le capturer aussi.
+        // SAUF si le container est déjà un scope isolé (queue-item, td, tr…) : on évite les fuites
+        // entre items de la file de city.php.
+        if (options.pctLabels) {
+            this.pctLabels = options.pctLabels;
+        } else {
+            const directLabels = this.container
+                ? Array.from(this.container.querySelectorAll('.building-progress-pct'))
+                : [];
+            // Remonter seulement si le container est .building-progress-wrapper
+            // (cas building.php / field.php avec badge externe dans .alert)
+            const isIsolatedScope = this.container && (
+                this.container.classList.contains('queue-item') ||
+                this.container.classList.contains('queue-progress-box') ||
+                this.container.tagName === 'TR' ||
+                this.container.tagName === 'TD'
+            );
+            const parentBlock = (!isIsolatedScope && this.container)
+                ? this.container.closest('.alert, .card')
+                : null;
+            const parentLabels = (parentBlock && parentBlock !== this.container)
+                ? Array.from(parentBlock.querySelectorAll('.building-progress-pct'))
+                : [];
+            // Utiliser les labels du bloc parent s'il y en a, sinon ceux du container direct
+            this.pctLabels = parentLabels.length > 0 ? parentLabels : directLabels;
+        }
+
         this.timerEl   = options.timerEl
             || (this.container ? this.container.querySelector('.building-time-remaining, .queue-timer, [data-countdown]') : null);
 
