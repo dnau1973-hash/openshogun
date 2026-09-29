@@ -18,4 +18,3 @@ config/installed.lock
 tmp/
 networks:.yaml
 *.bik
-.antigravity/
