@@ -181,8 +181,133 @@ class SupportEngine {
     }
 
     /**
+     * Sanitise le HTML produit par Quill.js côté serveur (liste blanche de balises sûres).
+     * Supprime tout attribut potentiellement dangereux (on*, href="javascript:…", etc.).
+     *
+     * @param  string $html HTML brut issu de Quill
+     * @return string HTML assaini
+     */
+    public static function sanitizeHtml(string $html): string {
+        // Liste blanche des balises autorisées et de leurs attributs
+        $allowedTags = '<p><br><strong><em><u><s><ol><ul><li><blockquote><pre><code><h1><h2><h3><span><a>';
+
+        // Supprimer d'abord les balises script/style/iframe/object complètes (avec contenu)
+        $html = preg_replace('#<(script|style|iframe|object|embed|form)[^>]*>.*?</\1>#si', '', $html);
+
+        // Retirer les balises non autorisées
+        $html = strip_tags($html, $allowedTags);
+
+        // Supprimer les attributs dangereux sur les balises restantes :
+        // on*, href="javascript:…", src="data:…", style (XSS via expression CSS)
+        $html = preg_replace_callback('/<([a-z][a-z0-9]*)\s+([^>]+)>/i', function ($m) {
+            $tag   = $m[1];
+            $attrs = $m[2];
+
+            // Retirer les handlers d'événements (on*)
+            $attrs = preg_replace('/\s*on\w+\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $attrs);
+            // Retirer href/src contenant javascript: ou data:
+            $attrs = preg_replace('/\s*(href|src)\s*=\s*(?:"javascript:[^"]*"|\'javascript:[^\']*\')/i', '', $attrs);
+            $attrs = preg_replace('/\s*src\s*=\s*(?:"data:[^"]*"|\'data:[^\']*\')/i', '', $attrs);
+            // Retirer les attributs style (peuvent contenir expression())
+            $attrs = preg_replace('/\s*style\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $attrs);
+
+            $attrs = trim($attrs);
+            return $attrs ? "<{$tag} {$attrs}>" : "<{$tag}>";
+        }, $html);
+
+        return trim($html);
+    }
+
+    /**
+     * Retourne les champs éditables d'un ticket si l'utilisateur en est l'auteur.
+     * Utilisé pour pré-remplir le formulaire d'édition.
+     *
+     * @throws RuntimeException si introuvable ou accès interdit
+     */
+    public function getTicketForEdit(int $ticketId, int $userId): array {
+        $stmt = $this->db->prepare("
+            SELECT id, user_id, type, category, severity, title, description, status, updated_at
+            FROM support_tickets
+            WHERE id = ?
+            LIMIT 1
+        ");
+        $stmt->execute([$ticketId]);
+        $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$ticket) {
+            throw new RuntimeException("Ticket #$ticketId introuvable.", 404);
+        }
+        if ((int)$ticket['user_id'] !== $userId) {
+            throw new RuntimeException("Vous n'êtes pas l'auteur de ce ticket.", 403);
+        }
+        if ($ticket['status'] !== 'pending') {
+            throw new RuntimeException("Ce ticket a déjà été pris en charge et ne peut plus être modifié.", 403);
+        }
+
+        return $ticket;
+    }
+
+    /**
+     * Modifie un ticket par son auteur (modification autorisée uniquement si statut = pending).
+     *
+     * @throws RuntimeException si le ticket est introuvable, l'auteur incorrect ou le statut non éditable
+     * @throws InvalidArgumentException si les données envoyées sont invalides
+     */
+    public function updateTicketByAuthor(
+        int    $ticketId,
+        int    $userId,
+        string $title,
+        string $description,
+        string $type,
+        string $category,
+        string $severity = 'medium'
+    ): array {
+        // 1. Vérification d'accès et de statut (lève une RuntimeException si ko)
+        $this->getTicketForEdit($ticketId, $userId);
+
+        // 2. Validation et normalisation des données entrantes
+        $type     = in_array($type,     self::VALID_TYPES,      true) ? $type     : 'bug';
+        $severity = in_array($severity, self::VALID_SEVERITIES, true) ? $severity : 'medium';
+        $category = array_key_exists($category, self::CATEGORIES)     ? $category : 'other';
+
+        $title       = trim($title);
+        $description = self::sanitizeHtml($description); // purification du HTML Quill
+
+        if (mb_strlen($title) < 4 || mb_strlen($title) > 150) {
+            throw new InvalidArgumentException("Le titre doit comporter entre 4 et 150 caractères.");
+        }
+        if (mb_strlen(strip_tags($description)) < 10) {
+            throw new InvalidArgumentException("La description doit comporter au moins 10 caractères de contenu.");
+        }
+
+        // 3. Mise à jour en base
+        $now  = time();
+        $stmt = $this->db->prepare("
+            UPDATE support_tickets
+            SET title = ?, description = ?, type = ?, category = ?, severity = ?, updated_at = ?
+            WHERE id = ? AND user_id = ? AND status = 'pending'
+        ");
+        $stmt->execute([$title, $description, $type, $category, $severity, $now, $ticketId, $userId]);
+
+        if ($stmt->rowCount() === 0) {
+            // Double vérification : si aucune ligne modifiée, le ticket a peut-être changé de statut entre temps
+            throw new RuntimeException("La mise à jour a échoué : le ticket n'est plus éditable ou n'existe plus.", 409);
+        }
+
+        return [
+            'id'         => $ticketId,
+            'title'      => $title,
+            'type'       => $type,
+            'category'   => $category,
+            'severity'   => $severity,
+            'updated_at' => $now,
+        ];
+    }
+
+    /**
      * Traite un ticket : mise à jour du statut, réponse officielle et notification facultative du joueur
      */
+
     public function updateTicketStatus(
         int $ticketId,
         string $status,

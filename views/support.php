@@ -243,6 +243,17 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                                     <span>⏳</span> Votre demande est dans la file de révision des intendants. Une réponse vous sera communiquée ici et par missive en jeu dès son examen.
                                 </div>
                             <?php endif; ?>
+
+                            <!-- Bouton de modification (uniquement si le ticket est encore en attente) -->
+                            <?php if ($t['status'] === 'pending'): ?>
+                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                                    <a href="?page=edit_ticket&ticket_id=<?= (int)$t['id'] ?>"
+                                       class="btn btn-secondary"
+                                       style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.83rem; font-weight: 600;">
+                                        <span>✏️</span> Modifier cette demande
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>

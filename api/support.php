@@ -81,7 +81,65 @@ try {
 
             echo json_encode([
                 'success' => true,
-                'ticket' => $ticket
+                'ticket'  => $ticket
+            ]);
+            break;
+
+        // 4. Récupère les données d'un ticket pour pré-remplir le formulaire d'édition
+        //    GET /api/support.php?action=get_ticket_for_edit&ticket_id=XX
+        case 'get_ticket_for_edit':
+            $ticketId = (int)($_GET['ticket_id'] ?? 0);
+            if ($ticketId <= 0) {
+                throw new InvalidArgumentException("Identifiant de ticket invalide.");
+            }
+            // getTicketForEdit() lève RuntimeException si accès refusé ou statut non-pending
+            $ticket = $supportEngine->getTicketForEdit($ticketId, $userId);
+            echo json_encode([
+                'success' => true,
+                'ticket'  => $ticket,
+                'csrf'    => Auth::csrfToken(), // fournit le jeton pour le formulaire
+            ]);
+            break;
+
+        // 5. Modification d'un ticket par son auteur (statut pending uniquement)
+        //    POST /api/support.php  action=update_ticket
+        case 'update_ticket':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new RuntimeException("Méthode HTTP invalide.", 405);
+            }
+
+            // Validation CSRF
+            $csrfToken = $_POST['csrf_token'] ?? '';
+            if (!Auth::verifyCsrf($csrfToken)) {
+                http_response_code(403);
+                throw new RuntimeException("Jeton de sécurité invalide ou expiré. Rechargez la page et réessayez.", 403);
+            }
+
+            $ticketId   = (int)($_POST['ticket_id'] ?? 0);
+            $title      = $_POST['title']       ?? '';
+            $description = $_POST['description'] ?? '';
+            $type       = $_POST['type']        ?? 'bug';
+            $category   = $_POST['category']    ?? 'other';
+            $severity   = $_POST['severity']    ?? 'medium';
+
+            if ($ticketId <= 0) {
+                throw new InvalidArgumentException("Identifiant de ticket invalide.");
+            }
+
+            $updated = $supportEngine->updateTicketByAuthor(
+                $ticketId,
+                $userId,
+                $title,
+                $description,
+                $type,
+                $category,
+                $severity
+            );
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Votre demande #$ticketId a été modifiée avec succès.",
+                'ticket'  => $updated,
             ]);
             break;
 
