@@ -157,26 +157,39 @@ class BuildingEngine {
         $isSealActive = $sealEngine->isSealActive((int)$planet['user_id']);
 
         $queue = $this->getQueue($planetId);
-        $fieldsInQueue = 0;
-        $buildingsInQueue = 0;
-        $maxFinishesAtCategory = time();
-        $maxFinishesAtGlobal = time();
+        $fieldsInQueue     = 0;
+        $buildingsInQueue  = 0;
+        $fieldsActive      = 0; // chantiers field déjà DÉMARRÉS (started_at <= now)
+        $buildingsActive   = 0; // chantiers building déjà DÉMARRÉS (started_at <= now)
+        $maxFinishesAtField    = time(); // max finishes_at parmi les fields en file
+        $maxFinishesAtBuilding = time(); // max finishes_at parmi les buildings en file
+        $maxFinishesAtGlobal   = time();
+        $now = time();
 
         foreach ($queue as $q) {
-            $qFin = (int)$q['finishes_at'];
+            $qFin   = (int)$q['finishes_at'];
+            $qStart = (int)$q['started_at'];
+
             if ($qFin > $maxFinishesAtGlobal) {
                 $maxFinishesAtGlobal = $qFin;
             }
 
             if ($q['build_category'] === 'field') {
                 $fieldsInQueue++;
-                if ($category === 'field' && $qFin > $maxFinishesAtCategory) {
-                    $maxFinishesAtCategory = $qFin;
+                if ($qFin > $maxFinishesAtField) {
+                    $maxFinishesAtField = $qFin;
+                }
+                // Chantier actif = démarré ET pas encore fini
+                if ($qStart <= $now && $qFin > $now) {
+                    $fieldsActive++;
                 }
             } else {
                 $buildingsInQueue++;
-                if ($category === 'building' && $qFin > $maxFinishesAtCategory) {
-                    $maxFinishesAtCategory = $qFin;
+                if ($qFin > $maxFinishesAtBuilding) {
+                    $maxFinishesAtBuilding = $qFin;
+                }
+                if ($qStart <= $now && $qFin > $now) {
+                    $buildingsActive++;
                 }
             }
 
@@ -186,26 +199,37 @@ class BuildingEngine {
             }
         }
 
+        // Limite simultanée par zone (field = Ressources, building = City)
+        // Sceau impérial : 2 simultanés par zone ; sans sceau : 1 par zone
+        $maxSimultPerZone = ($isSealActive || $faction === 'terran' && $isSealActive) ? 2 : 1;
+
         if ($faction === 'terran') {
-            $maxAllowedPerCategory = $isSealActive ? 2 : 1;
-            if ($category === 'field' && $fieldsInQueue >= $maxAllowedPerCategory) {
-                $msg = $isSealActive 
-                    ? "Votre file de parcelles agricoles et minières est déjà saturée (maximum 2 chantiers enchaînés)." 
-                    : "Une parcelle rurale est déjà en cours d'amélioration. Décrétez le Sceau Impérial pour mettre en file jusqu'à 2 travaux en attente !";
+            // Terran : limites par catégorie, simultanées avec Sceau
+            $maxPerCategory = $isSealActive ? 2 : 1;
+            if ($category === 'field' && $fieldsInQueue >= $maxPerCategory) {
+                $msg = $isSealActive
+                    ? "Vos deux emplacements de parcelles agricoles sont déjà actifs (maximum 2 simultanés)."
+                    : "Une parcelle rurale est déjà en cours d'amélioration. Décrétez le Sceau Impérial pour lancer 2 chantiers simultanément !";
                 throw new Exception($msg);
             }
-            if ($category === 'building' && $buildingsInQueue >= $maxAllowedPerCategory) {
-                $msg = $isSealActive 
-                    ? "Votre file d'infrastructures urbaines est déjà saturée (maximum 2 édifices enchaînés)." 
-                    : "Une infrastructure de la cité est déjà en cours de construction. Décrétez le Sceau Impérial pour enchaîner vos chantiers !";
+            if ($category === 'building' && $buildingsInQueue >= $maxPerCategory) {
+                $msg = $isSealActive
+                    ? "Vos deux emplacements d'infrastructures urbaines sont déjà actifs (maximum 2 simultanés)."
+                    : "Une infrastructure de la cité est déjà en cours de construction. Décrétez le Sceau Impérial pour construire 2 bâtisses simultanément !";
                 throw new Exception($msg);
             }
         } else {
-            $maxAllowedTotal = $isSealActive ? 3 : 1;
-            if (count($queue) >= $maxAllowedTotal) {
-                $msg = $isSealActive 
-                    ? "Votre Architecte de Cour a déjà planifié 3 chantiers simultanés sur ce domaine." 
-                    : "Une construction est déjà en cours sur cette province. Décrétez le Sceau Impérial pour planifier jusqu'à 3 chantiers en file !";
+            // Autres factions : Sceau → max 2 par zone (field ET building indépendamment)
+            if ($category === 'field' && $fieldsInQueue >= $maxSimultPerZone) {
+                $msg = $isSealActive
+                    ? "Vos deux emplacements de parcelles sont déjà actifs (maximum 2 simultanés par zone)."
+                    : "Une parcelle rurale est déjà en cours d'amélioration. Décrétez le Sceau Impérial pour lancer 2 chantiers simultanément !";
+                throw new Exception($msg);
+            }
+            if ($category === 'building' && $buildingsInQueue >= $maxSimultPerZone) {
+                $msg = $isSealActive
+                    ? "Vos deux emplacements de bâtiments urbains sont déjà actifs (maximum 2 simultanés par zone)."
+                    : "Une construction est déjà en cours dans la cité. Décrétez le Sceau Impérial pour construire 2 bâtisses simultanément !";
                 throw new Exception($msg);
             }
         }
@@ -213,7 +237,7 @@ class BuildingEngine {
         // 3. Calcul du coût et de la durée (avec prise en compte de la population)
         $population = (int)($planet['population'] ?? 100);
         $details = $this->getUpgradeDetails($category, $type, $currentLevel, $hqLevel, $population);
-        $cost = $details['cost'];
+        $cost     = $details['cost'];
         $duration = $details['duration'];
 
         // 4. Vérification des ressources disponibles
@@ -229,9 +253,23 @@ class BuildingEngine {
         ");
         $stmtDeduct->execute([$cost['metal'], $cost['crystal'], $cost['deuterium'], $planetId]);
 
-        // 6. Ajout à la file de construction (enchaînement séquentiel si un chantier précédent est en cours)
-        $now = time();
-        $startTime = ($faction === 'terran') ? max($now, $maxFinishesAtCategory) : max($now, $maxFinishesAtGlobal);
+        // 6. Calcul du startTime : simultané si un slot libre dans la zone, séquentiel sinon
+        //
+        // Logique :
+        //   - Si le nombre de chantiers ACTIFS dans la zone < limite simultanée → démarrage MAINTENANT
+        //   - Sinon → enchaînement séquentiel (started_at = fin du dernier chantier de la zone)
+        //
+        $activeInZone = ($category === 'field') ? $fieldsActive : $buildingsActive;
+        $maxFinishesAtZone = ($category === 'field') ? $maxFinishesAtField : $maxFinishesAtBuilding;
+
+        if ($activeInZone < $maxSimultPerZone) {
+            // Slot simultané disponible → démarrage immédiat
+            $startTime = $now;
+        } else {
+            // Pas de slot libre → enchaînement séquentiel derrière le dernier de la zone
+            $startTime = max($now, $maxFinishesAtZone);
+        }
+
         $finishesAt = $startTime + $duration;
 
         $stmtInsert = $this->db->prepare("
