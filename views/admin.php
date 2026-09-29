@@ -49,6 +49,18 @@ $totalAnnouncementsCount = count($allAnnouncements);
 $supportStats = $supportEngine->getStatistics();
 $allSupportTickets = $supportEngine->getAllTickets();
 
+// ─── Routage : vue dédiée de traitement d'un ticket (remplace la modale) ───
+// URL : ?page=admin&tab=support&action=traiter&id=XX&support_page=Y
+if (($currentTab === 'support' || ($_GET['tab'] ?? '') === 'support')
+    && ($_GET['action'] ?? '') === 'traiter'
+) {
+    $traiterTicketId   = (int)($_GET['id'] ?? 0);
+    $traiterSupportPage = (int)($_GET['support_page'] ?? 1);
+    require __DIR__ . '/admin_support_traiter.php';
+    return; // stop : ne pas rendre le reste de admin.php
+}
+
+
 // Statistiques globales
 $totalUsers = (int)$db->query("SELECT COUNT(*) FROM users WHERE is_bot = 0")->fetchColumn();
 $totalBots = (int)$db->query("SELECT COUNT(*) FROM users WHERE is_bot = 1")->fetchColumn();
@@ -2760,9 +2772,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                             <?= date('d/m H:i', $t['created_at']) ?>
                                         </td>
                                         <td class="text-end">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openAdminTicketModal(<?= $t['id'] ?>)">
+                                            <a href="?page=admin&tab=support&action=traiter&id=<?= $t['id'] ?>&support_page=<?= (int)($_GET['support_page'] ?? 1) ?>"
+                                               class="btn btn-sm btn-outline-primary">
                                                 🔍 Traiter
-                                            </button>
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -3223,78 +3236,6 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 </div>
 
 
-<!-- Modale d'Examen et de Traitement d'un Ticket par l'Administrateur (Admin Washi) -->
-<div class="modal-overlay" id="adminTicketModal" onclick="closeAdminTicketModal()">
-    <div class="modal-card modal-card-md" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <div>
-                <h3 id="atm_header_title" class="modal-title">
-                    <span>📮</span> Traitement du Ticket #<span id="atm_ticket_id"></span>
-                </h3>
-                <div id="atm_header_meta" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; font-weight:600;"></div>
-            </div>
-            <button onclick="closeAdminTicketModal()" class="modal-close-btn" title="Fermer">&times;</button>
-        </div>
-
-        <div class="modal-body">
-            <!-- Détails du Joueur & Fief -->
-            <div style="background:#ffffff; border:1px solid var(--border-color); padding:0.85rem 1rem; border-radius:8px; margin-bottom:1.25rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:0.5rem; font-size:0.85rem; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
-                <div><span style="color:var(--text-muted); font-weight:600;">Daimyō :</span> <strong id="atm_user_name" style="color:#1c1917;"></strong></div>
-                <div><span style="color:var(--text-muted); font-weight:600;">Clan :</span> <strong id="atm_user_faction" style="color:#b91c1c; text-transform:uppercase;"></strong></div>
-                <div><span style="color:var(--text-muted); font-weight:600;">Fief :</span> <strong id="atm_user_planet" style="color:#1c1917;"></strong></div>
-                <div><span style="color:var(--text-muted); font-weight:600;">Date :</span> <strong id="atm_created_at" style="color:#1c1917;"></strong></div>
-            </div>
-
-            <!-- Titre & Message du Joueur -->
-            <div class="mb-3">
-                <label class="form-label" style="text-transform:uppercase;">Message du Joueur :</label>
-                <div id="atm_ticket_title" style="font-weight:800; font-size:1.05rem; color:#1c1917; margin:0.25rem 0 0.5rem 0;"></div>
-                <div id="atm_ticket_desc" style="background:#ffffff; border:1px solid var(--border-color); padding:1rem; border-radius:8px; font-size:0.9rem; line-height:1.6; color:#1c1917; white-space:pre-line; max-height:200px; overflow-y:auto; box-shadow:0 1px 3px rgba(60,45,30,0.04);"></div>
-            </div>
-
-            <!-- Formulaire de Traitement Administrateur -->
-            <form id="adminTicketForm" onsubmit="saveAdminTicket(event)">
-                <input type="hidden" id="atm_input_ticket_id" name="ticket_id">
-
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
-                    <div>
-                        <label for="atm_select_status" class="form-label">
-                            Statut de la Demande :
-                        </label>
-                        <select id="atm_select_status" name="status" class="form-select">
-                            <option value="pending">⏳ En attente</option>
-                            <option value="in_progress">🔍 En cours d'examen</option>
-                            <option value="resolved">✅ Résolu / Corrigé</option>
-                            <option value="planned">📌 Retenu (Future MAJ)</option>
-                            <option value="closed">✖️ Fermé / Sans suite</option>
-                        </select>
-                    </div>
-
-                    <div class="d-flex align-items-center pt-3"><label class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" id="atm_notify_user" name="notify_user" value="1" checked><span class="form-check-label fw-bold">Notifier le joueur par missive en jeu</span></label></div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="atm_admin_response" class="form-label">
-                        Réponse Officielle de l'Équipe (visible par le joueur) :
-                    </label>
-                    <textarea id="atm_admin_response" name="admin_response" rows="4" class="form-control" placeholder="Ex: Bonjour, l'anomalie a été identifiée et corrigée dans le dernier patch. Merci pour votre aide précieuse !"></textarea>
-                </div>
-
-                <div class="modal-footer px-0 pb-0" style="background:transparent; border-top:1px solid var(--border-color); margin-top:1rem; padding-top:1rem;">
-                    <button type="button" class="btn btn-outline-danger" onclick="deleteAdminTicketFromModal()">
-                        🗑️ Supprimer
-                    </button>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-secondary" onclick="closeAdminTicketModal()">Annuler</button>
-                        <button type="submit" id="atm_submit_btn" class="btn btn-primary">
-                            💾 Enregistrer & Transmettre
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 
 <script>
@@ -3870,121 +3811,8 @@ async function deleteAnnouncement(id) {
 }
 
 // --- FONCTIONS SUPPORT & TICKETS (ADMIN) ---
-function filterAdminTickets() {
-    const typeVal = document.getElementById('adminTicketFilterType').value;
-    const statusVal = document.getElementById('adminTicketFilterStatus').value;
-    const searchVal = document.getElementById('adminTicketSearchInput').value.toLowerCase().trim();
-
-    const rows = document.querySelectorAll('#adminTicketsTable tbody tr.ticket-row');
-    rows.forEach(row => {
-        const rowType = row.getAttribute('data-type');
-        const rowStatus = row.getAttribute('data-status');
-        const rowSearch = row.getAttribute('data-search') || '';
-
-        const matchType = (typeVal === 'all' || rowType === typeVal);
-        const matchStatus = (statusVal === 'all' || rowStatus === statusVal);
-        const matchSearch = (searchVal === '' || rowSearch.includes(searchVal));
-
-        row.dataset.filteredOut = (matchType && matchStatus && matchSearch) ? 'false' : 'true';
-    });
-
-    currentSupportPage = 1;
-    if (typeof renderSupportPage === 'function') {
-        renderSupportPage(1);
-    }
-}
-
-async function openAdminTicketModal(ticketId) {
-    try {
-        const res = await fetch(`/api/support.php?action=get_ticket&ticket_id=${ticketId}`);
-        const data = await res.json();
-        if (!data.success || !data.ticket) {
-            alert(data.error || "Impossible de charger le ticket.");
-            return;
-        }
-
-        const t = data.ticket;
-        document.getElementById('atm_ticket_id').textContent = t.id;
-        document.getElementById('atm_input_ticket_id').value = t.id;
-        document.getElementById('atm_header_meta').textContent = `${t.type === 'bug' ? '🪲 Dysfonctionnement' : '💡 Suggestion'} • ${t.category} • Sévérité : ${t.severity}`;
-
-        document.getElementById('atm_user_name').textContent = t.username;
-        document.getElementById('atm_user_faction').textContent = t.faction;
-        document.getElementById('atm_user_planet').textContent = t.planet_name ? `${t.planet_name} [${t.coord_x} : ${t.coord_y}]` : 'Non renseigné';
-        document.getElementById('atm_created_at').textContent = new Date(t.created_at * 1000).toLocaleString('fr-FR');
-
-        document.getElementById('atm_ticket_title').textContent = t.title;
-        document.getElementById('atm_ticket_desc').textContent = t.description;
-
-        document.getElementById('atm_select_status').value = t.status;
-        document.getElementById('atm_admin_response').value = t.admin_response || '';
-
-        document.getElementById('adminTicketModal').style.display = 'flex';
-    } catch (e) {
-        alert("Erreur réseau lors de la consultation du ticket.");
-    }
-}
-
-function closeAdminTicketModal() {
-    document.getElementById('adminTicketModal').style.display = 'none';
-}
-
-async function saveAdminTicket(event) {
-    event.preventDefault();
-    const btn = document.getElementById('atm_submit_btn');
-    btn.disabled = true;
-    btn.textContent = 'Enregistrement...';
-
-    const formData = new FormData(document.getElementById('adminTicketForm'));
-    formData.append('action', 'admin_update_ticket');
-
-    try {
-        const res = await fetch('/api/support.php', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success) {
-            alert(data.message || "Ticket mis à jour avec succès !");
-            window.location.reload();
-        } else {
-            alert("Erreur : " + (data.error || "Impossible de sauvegarder."));
-            btn.disabled = false;
-            btn.textContent = '💾 Enregistrer & Transmettre';
-        }
-    } catch (e) {
-        alert("Erreur de communication avec le serveur.");
-        btn.disabled = false;
-        btn.textContent = '💾 Enregistrer & Transmettre';
-    }
-}
-
-async function deleteAdminTicketFromModal() {
-    const ticketId = document.getElementById('atm_input_ticket_id').value;
-    if (!confirm(`Confirmer la suppression définitive du ticket #${ticketId} ?`)) {
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('action', 'admin_delete_ticket');
-    formData.append('ticket_id', ticketId);
-
-    try {
-        const res = await fetch('/api/support.php', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success) {
-            alert(data.message || "Ticket supprimé.");
-            window.location.reload();
-        } else {
-            alert("Erreur : " + (data.error || "Suppression impossible."));
-        }
-    } catch (e) {
-        alert("Erreur de communication avec le serveur.");
-    }
-}
+// Les fonctions openAdminTicketModal / saveAdminTicket ont été remplacées
+// par la vue dédiée views/admin_support_traiter.php
 
 function applyPreset(gSpeed, rSpeed, fSpeed) {
     document.getElementById('game_speed_input').value = gSpeed;
