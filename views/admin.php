@@ -51,10 +51,8 @@ $allSupportTickets = $supportEngine->getAllTickets();
 
 // ─── Routage : vue dédiée de traitement d'un ticket (remplace la modale) ───
 // URL : ?page=admin&tab=support&action=traiter&id=XX&support_page=Y
-if (($currentTab === 'support' || ($_GET['tab'] ?? '') === 'support')
-    && ($_GET['action'] ?? '') === 'traiter'
-) {
-    $traiterTicketId   = (int)($_GET['id'] ?? 0);
+if (($_GET['tab'] ?? '') === 'support' && ($_GET['action'] ?? '') === 'traiter') {
+    $traiterTicketId    = (int)($_GET['id'] ?? 0);
     $traiterSupportPage = (int)($_GET['support_page'] ?? 1);
     require __DIR__ . '/admin_support_traiter.php';
     return; // stop : ne pas rendre le reste de admin.php

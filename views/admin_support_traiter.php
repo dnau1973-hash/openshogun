@@ -28,7 +28,7 @@ $stmtT = Database::getConnection()->prepare("
            p.name AS planet_name, p.coord_x, p.coord_y
     FROM support_tickets t
     JOIN users u ON t.user_id = u.id
-    LEFT JOIN planets p ON p.user_id = u.id AND p.is_main = 1
+    LEFT JOIN planets p ON p.user_id = u.id AND p.is_capital = 1
     WHERE t.id = ?
     LIMIT 1
 ");
