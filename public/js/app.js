@@ -212,10 +212,10 @@ class ProgressBar {
         if (this.pctLabels && this.pctLabels.length > 0) {
             this.pctLabels.forEach(lbl => {
                 switch (state.status) {
-                    case 'pending':    lbl.textContent = 'En attente'; break;
-                    case 'completed':  lbl.textContent = '100%';       break;
-                    case 'timer_only': lbl.textContent = '';           break;
-                    case 'invalid':    lbl.textContent = '';           break;
+                    case 'pending':    lbl.textContent = '⏳ File'; break; // court et non redondant avec le timer
+                    case 'completed':  lbl.textContent = '100%';    break;
+                    case 'timer_only': lbl.textContent = '';         break;
+                    case 'invalid':    lbl.textContent = '';         break;
                     default:           lbl.textContent = state.pct + '%';
                 }
             });
@@ -227,12 +227,10 @@ class ProgressBar {
                 case 'completed':
                     this.timerEl.innerText = 'Terminé !';
                     break;
-                case 'pending': {
-                    // waitTime est toujours >= 0 (garanti par calculateState)
-                    const waitStr = formatTime(Math.max(0, state.waitTime));
-                    this.timerEl.innerText = `⏳ En attente (~${waitStr})`;
-                    break;
-                }
+                case 'pending':
+                    // Pour un item en file : afficher le temps jusqu'à la FIN (pas jusqu'au démarrage)
+                    // → cohérence visuelle avec les items in_progress, évite le double "En attente"
+                    // fall-through intentionnel vers in_progress ↓
                 case 'timer_only':
                 case 'in_progress': {
                     const timeStr = formatTime(Math.max(0, state.remaining));
@@ -240,7 +238,7 @@ class ProgressBar {
                         || this.timerEl.classList.contains('queue-timer')) {
                         this.timerEl.innerText = timeStr;
                     } else {
-                        this.timerEl.innerText = `⏳ Temps restant : ${timeStr}`;
+                        this.timerEl.innerText = `⏳ ${timeStr}`;
                     }
                     break;
                 }
