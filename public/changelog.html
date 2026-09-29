@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.8.3</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.9.0</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,6 +123,127 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.9.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.9.0</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-azure-lt fw-bold">Support &amp; Constructions</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 29 Septembre 2026
+                            </div>
+                        </div>
+
+                        <!-- Bloc 1 : Sceau impérial & constructions simultanées -->
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-success d-flex align-items-center gap-2 mb-3">
+                                <span>⚔️</span> Sceau Impérial — Constructions Vraiment Simultanées
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-danger-lt">Bug Critique</span>
+                                            <span>2e Barre de Progression Figée</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Avec le Sceau impérial actif, la seconde construction recevait un <code>started_at</code> dans le futur (= fin de la première), ce qui la faisait passer en état <em>pending</em> dans le moteur JS. Son timer textuel tournait mais la barre CSS restait figée à 0 %. Cause racine : <code>BuildingEngine::startUpgrade()</code> utilisait systématiquement <code>max($now, $maxFinishesAtGlobal)</code>, produisant un enchaînement séquentiel même lorsque la règle attendait un démarrage parallèle.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-success-lt">Nouvelle Règle</span>
+                                            <span>2 Simultanés par Zone (Ressources / City)</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Refonte de la logique <code>startTime</code> dans <code>BuildingEngine.php</code> : comptage des chantiers <strong>actifs</strong> (<code>started_at &lt;= now AND finishes_at &gt; now</code>) par zone (<em>field</em> = Ressources, <em>building</em> = City). Si un slot simultané est libre (<code>activeInZone &lt; maxSimultPerZone</code>), <code>startTime = now</code>. Sinon enchaînement séquentiel derrière le dernier de la zone. Limite : 2 simultanés par zone avec Sceau impérial, 1 sans. Terran non impacté (logique catégorie inchangée, portée à simultané).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bloc 2 : Modification de ticket par le joueur -->
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary d-flex align-items-center gap-2 mb-3">
+                                <span>✏️</span> Espace Support — Modification de Ticket par le Joueur
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-blue-lt">Nouvelle Vue</span>
+                                            <span><code>edit_ticket.php</code></span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Page dédiée permettant au joueur de modifier son signalement ou sa suggestion (titre, type, catégorie, sévérité, description) tant que le statut est <em>pending</em>. Éditeur <strong>Quill.js</strong> WYSIWYG avec préremplissage du contenu existant. Soumission asynchrone via <code>fetch()</code> avec désactivation du bouton pendant la requête et feedback inline succès/erreur.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-purple-lt">Moteur Métier</span>
+                                            <span><code>SupportEngine</code> +3 méthodes</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Ajout de <code>sanitizeHtml()</code> (liste blanche de balises, suppression des attributs <code>on*</code>, <code>javascript:</code>, <code>style</code>), <code>getTicketForEdit()</code> (vérification auteur + statut pending, lève <code>RuntimeException 403</code>) et <code>updateTicketByAuthor()</code> (double garde <code>WHERE user_id = ? AND status = 'pending'</code>, rowCount 0 → erreur 409 anti-TOCTOU).
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-warning-lt">Sécurité</span>
+                                            <span>CSRF + XSS + PDO</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Jeton CSRF généré à l'affichage de la vue (<code>Auth::csrfToken()</code>), fourni par l'API lors du GET (<code>get_ticket_for_edit</code>), validé avant tout traitement POST (<code>Auth::verifyCsrf()</code>). HTML Quill assaini côté serveur. Toutes les requêtes en PDO préparé. Bouton « ✏️ Modifier » affiché dans l'historique uniquement si <code>status = pending</code>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bloc 3 : Page dédiée traitement admin -->
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-azure d-flex align-items-center gap-2 mb-3">
+                                <span>🛡️</span> Administration — Page Dédiée de Traitement des Tickets (Hors Modale)
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-azure-lt">Refactoring UX</span>
+                                            <span>Modale → Vue Dédiée</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            La boîte modale de traitement admin est définitivement supprimée (<code>adminTicketModal</code> HTML + 4 fonctions JS). Remplacée par <code>admin_support_traiter.php</code>, une page complète accessible via <code>?page=admin&amp;tab=support&amp;action=traiter&amp;id=XX&amp;support_page=Y</code>. Le routage intercepte l'action dans <code>admin.php</code> avant le rendu de la liste, inclut la vue dédiée puis fait <code>return</code>.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-success-lt">Interface Admin</span>
+                                            <span>Quill + Récapitulatif + Flash</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Affichage lecture seule du ticket (auteur, fief, statut, contenu HTML Quill). Formulaire de décision : sélecteur de statut, éditeur <strong>Quill</strong> pour la réponse officielle (préremplissage si réponse existante), toggle notification joueur, bouton « Supprimer » avec confirmation JS. Soumission via formulaire HTML standard → redirect + <code>$_SESSION['flash']</code> → <code>showToast()</code> sur la liste.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
                     <!-- VERSION 1.8.3 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
@@ -130,7 +251,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.8.3</span>
-                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-secondary-lt fw-bold">Version précédente</span>
                                 <span class="badge bg-warning-lt fw-bold">Chantiers &amp; Interface</span>
                             </div>
                             <div class="text-secondary small">
