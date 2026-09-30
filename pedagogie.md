@@ -37,6 +37,14 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 30/09/2026 (Partie 5) — Débogage & Robustesse Objet : Méthodes Statiques vs Instances de Moteur
+- **Concept exploré :** Débogage d'une erreur fatale PHP (`Call to undefined method`), distinction fondamentale en programmation orientée objet entre méthode statique (`Class::method()`) et méthode d'instance (`$obj->method()`), et cycle de vie des données d'un monde de jeu.
+- **Notions pour l'atelier :**
+  - **Analyse d'une trace d'erreur (Stack Trace) :** Apprendre à lire une erreur fatale (`Fatal error: Uncaught Error...`) en repérant immédiatement la classe fautive, la méthode manquante et le numéro de ligne dans le fichier source.
+  - **Méthode Statique vs Méthode d'Instance :** Pourquoi certaines classes peuvent s'appeler directement sans instanciation (`DevTeamEngine::hasRole()`) alors que les moteurs manipulant un état interne ou une connexion de base (`OasisEngine`, `$oasisEngine = new OasisEngine()`) doivent être créés et instanciés avant d'être interrogés.
+  - **Intégrité des requêtes cartographiques :** Comprendre comment indexer les coordonnées de tuiles dans un tableau associatif (`$coords["$x:$y"] = true`) pour effectuer des recherches de présence instantanées en temps constant O(1) plutôt que de parcourir des listes en boucle imbriquée.
+- **Activité pratique suggérée :** Dans l'onglet « Écosystème des Oasis » sous Studio Dev, observer le chargement fluide de la liste des oasis et de leurs garnisons animales, puis tester le générateur d'oasis pour vérifier la synchronisation en temps réel de la cartographie.
+
 ### Session du 30/09/2026 (Partie 4) — Métier Community Manager, RGPD & Communication par Mailing List
 - **Concept exploré :** Métier de Community Manager dans le jeu vidéo, consentement éclairé (RGPD / Privacy by Design) et moteur de communication groupée (Mailing List).
 - **Notions pour l'atelier :**

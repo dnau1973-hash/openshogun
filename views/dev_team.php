@@ -157,7 +157,11 @@ if ($canAccessWorldExpansion) {
         }
     }
 
-    $oasisCoords = OasisEngine::getOasesCoordinatesMap();
+    $stmtOasesCoords = $db->query("SELECT coord_x, coord_y FROM oases");
+    $oasisCoords = [];
+    while ($row = $stmtOasesCoords->fetch(PDO::FETCH_ASSOC)) {
+        $oasisCoords[((int)$row['coord_x']) . ':' . ((int)$row['coord_y'])] = true;
+    }
 
     $mapTileStats = [
         'radius' => $mapRadius,
@@ -289,8 +293,20 @@ if ($canAccessWorldExpansion) {
 }
 
 if ($canAccessOasesEcosystem) {
-    $oasisStats = OasisEngine::getStats();
-    $allOases = OasisEngine::getAllOases();
+    $oasisEngine = new OasisEngine();
+    $oasisStats = $oasisEngine->getOasisStatistics();
+    $allOases = $db->query("
+        SELECT o.*, p.name as owner_planet_name, u.username as owner_username 
+        FROM oases o 
+        LEFT JOIN planets p ON o.owner_planet_id = p.id 
+        LEFT JOIN users u ON p.user_id = u.id 
+        ORDER BY o.owner_planet_id DESC, o.id ASC
+    ")->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($allOases as &$oRow) {
+        $oRow['garrison'] = $oasisEngine->getOasisGarrison((int)$oRow['id']);
+    }
+    unset($oRow);
 }
 
 $requestedTab = trim((string)($_GET['tab'] ?? ''));

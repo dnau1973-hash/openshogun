@@ -4,6 +4,8 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
+### Corrigé
+- **Studio Dev & Écosystème des Oasis :** Correction d'une erreur fatale PHP (`Call to undefined method OasisEngine::getOasesCoordinatesMap()`) lors du chargement des modules d'arpentage et de gestion des oasis dans `views/dev_team.php`. Remplacement des appels statiques inexistants par l'instanciation de `OasisEngine`, la récupération des statistiques via `getOasisStatistics()` et le requêtage direct des coordonnées sur la table `oases`.
 
 ## [1.16.0] - 2026-09-30
 ### Architecture & Game Elevate Designer
