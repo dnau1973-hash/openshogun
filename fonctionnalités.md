@@ -57,4 +57,19 @@
 - **Fichiers modifiés :** `core/DevTeamEngine.php`, `index.php`, `views/dev_team.php`, `api/dev_team.php`, `fonctionnalités.md`
 - **Vérification QA :** Se connecter avec un compte ayant uniquement le métier Narrative Designer : vérifier que seuls les onglets Roster, Lore et Forge s'affichent dans la navigation et que le DOM ne contient aucun élément de QA, Mailing, Sandbox ou Système. Tenter de forcer l'URL `/?page=dev_team&tab=system` et vérifier la redirection automatique vers le premier onglet autorisé avec le bandeau d'alerte. Se connecter en administrateur et vérifier que les 7 onglets sont tous visibles et accessibles.
 
+---
+
+### [2026-09-30] - dev_team : Migration des Modules de Paramétrage vers Studio Dev & Règle Stricte Game Elevate Designer
+- **Module :** `dev_team`
+- **Statut :** `À tester`
+- **Description :** Retrait complet de l'administration générale (`views/admin.php`) des 3 modules de configuration : « Constante et équilibrage de vitesse du jeu », « Arpenté rapporteur du shogunat et expansion des provinces », et « Écosystème des oasis ». Migration sous « Studio Dev » sous forme de 3 onglets dédiés (`game_speeds`, `world_expansion`, `oases_ecosystem`). Application d'une règle de sécurité stricte : ces onglets sont EXCLUSIVEMENT réservés aux titulaires du métier « Game Elevate Designer ». L'administrateur suprême ne les voit pas par défaut (seul l'onglet « Studio / Roster » lui est garanti) ; ils ne lui deviennent visibles que s'il s'est lui-même assigné le métier « Game Elevate Designer ». Sécurisation triple couche (zéro code DOM injecté, redirection serveur HTTP avec alerte, et blocage HTTP 403 des contrôleurs API).
+- **Fichiers modifiés :** `core/DevTeamEngine.php`, `views/dev_team.php`, `views/admin.php`, `api/dev_team.php`, `api/admin.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter avec le compte Administrateur non titulaire du métier Game Elevate Designer : vérifier que dans l'administration générale, les sections vitesses, arpentage et oasis ont disparu et que seuls les 12 Donjons subsistent.
+  2. Ouvrir « Studio Dev » avec ce même compte : constater que les 3 onglets (`Vitesses & Équilibrage`, `Arpentage & Provinces`, `Écosystème des Oasis`) ne sont PAS présents dans la barre d'onglets ni dans le DOM.
+  3. Forcer l'URL `/?page=dev_team&tab=game_speeds` : constater la redirection immédiate vers le premier onglet autorisé avec le bandeau d'accès restreint.
+  4. Via l'onglet « Roster et Métiers », assigner le métier « Game Elevate Designer » au compte Administrateur : constater l'apparition immédiate des 3 nouveaux onglets.
+  5. Tester la modification des constantes de vitesse (avec presets et attribution de 30 XP Forge), le déploiement procédural de nouveaux fiefs (+40 XP), et l'équilibrage/génération des oasis par densité (+35 XP).
+
+
 

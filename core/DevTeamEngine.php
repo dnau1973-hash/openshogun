@@ -12,12 +12,12 @@ class DevTeamEngine {
     public const ROLES = [
         'game_designer' => [
             'id'          => 'game_designer',
-            'title'       => 'Game & Level Designer',
+            'title'       => 'Game Elevate Designer',
             'honor_title' => 'L\'Architecte des Mondes',
             'icon'        => '📐',
             'badge_color' => 'bg-green-lt text-green',
             'category'    => 'Design',
-            'description' => 'Équilibrage des formules de combat et production, arpentage des tuiles de la carte et tables de butin.',
+            'description' => 'Équilibrage des formules de vitesse, constantes de production, arpentage des provinces et gestion de l\'écosystème des oasis.',
             'default_permissions' => [
                 'map.edit',
                 'formulas.tune',
@@ -207,6 +207,27 @@ class DevTeamEngine {
             'icon'        => '🔨',
             'roles'       => [], // Accessible à tous les membres de la Dev Team
             'permissions' => []
+        ],
+        'game_speeds' => [
+            'id'          => 'game_speeds',
+            'title'       => 'Vitesses & Équilibrage',
+            'icon'        => '⚡',
+            'roles'       => ['game_designer'],
+            'permissions' => ['formulas.tune']
+        ],
+        'world_expansion' => [
+            'id'          => 'world_expansion',
+            'title'       => 'Arpentage & Provinces',
+            'icon'        => '🗾',
+            'roles'       => ['game_designer'],
+            'permissions' => ['map.edit']
+        ],
+        'oases_ecosystem' => [
+            'id'          => 'oases_ecosystem',
+            'title'       => 'Écosystème des Oasis',
+            'icon'        => '🌿',
+            'roles'       => ['game_designer'],
+            'permissions' => ['map.edit', 'formulas.tune']
         ]
     ];
 
@@ -537,44 +558,66 @@ class DevTeamEngine {
     }
 
     /**
+     * Vérifie si un utilisateur possède un métier / rôle spécifique
+     */
+    public function hasRole(int $userId, string $roleId): bool {
+        $roles = $this->getUserRoles($userId);
+        $roleIds = array_column($roles, 'id');
+        return in_array($roleId, $roleIds, true);
+    }
+
+    /**
      * Vérifie si un utilisateur a le droit d'accéder à un onglet du Studio Dev Team
+     * Règle stricte : L'administrateur ne possède un passe-droit systématique QUE sur l'onglet 'roster'.
+     * Les modules de configuration 'game_speeds', 'world_expansion', 'oases_ecosystem' sont STRICTEMENT
+     * réservés aux utilisateurs détenant le métier 'game_designer' (Game Elevate Designer).
+     * L'administrateur ne peut les voir que s'il s'est lui-même assigné ce métier.
+     *
      * @param int $userId
-     * @param string $tab Identifiant de l'onglet (roster, qa, mailing, sandbox, system, lore, forge)
+     * @param string $tab Identifiant de l'onglet
      * @param bool $isAdmin
      * @return bool
      */
     public function canAccessTab(int $userId, string $tab, bool $isAdmin = false): bool {
-        // Administrateur : passe-droit total sur tous les onglets du studio
-        if ($isAdmin) {
-            return isset(self::STUDIO_TABS[$tab]);
-        }
-
         if (!isset(self::STUDIO_TABS[$tab])) {
             return false;
         }
 
-        // L'utilisateur doit nécessairement appartenir à la Dev Team
-        if (!$this->isDevTeamMember($userId)) {
+        // L'utilisateur doit nécessairement appartenir à la Dev Team ou être Admin
+        if (!$this->isDevTeamMember($userId) && !$isAdmin) {
             return false;
+        }
+
+        // 1. Règle stricte pour 'roster' : Le seul onglet systématiquement visible pour l'administrateur
+        if ($tab === 'roster') {
+            return true;
+        }
+
+        $userRoles = $this->getUserRoles($userId);
+        $userRoleIds = array_column($userRoles, 'id');
+
+        // 2. Règle stricte pour les 3 modules Game Elevate Designer :
+        // Ces modules sont EXCLUSIVEMENT réservés aux détenteurs du métier "Game Elevate Designer" (game_designer).
+        // L'administrateur NE LES VOIT PAS s'il ne possède pas lui-même ce métier assigné.
+        if (in_array($tab, ['game_speeds', 'world_expansion', 'oases_ecosystem'], true)) {
+            return in_array('game_designer', $userRoleIds, true);
         }
 
         $tabConfig = self::STUDIO_TABS[$tab];
 
-        // Onglet général sans restriction de métier spécifique : accessible à tout membre Dev Team
+        // 3. Onglet sans restriction de métier spécifique (ex: forge)
         if (empty($tabConfig['roles']) && empty($tabConfig['permissions'])) {
             return true;
         }
 
-        // 1. Vérification par métier attribué (Rôles)
-        $userRoles = $this->getUserRoles($userId);
-        $userRoleIds = array_column($userRoles, 'id');
+        // 4. Vérification par métier attribué (Rôles)
         foreach ($tabConfig['roles'] as $r) {
             if (in_array($r, $userRoleIds, true)) {
                 return true;
             }
         }
 
-        // 2. Vérification par permissions directes ou overrides
+        // 5. Vérification par permissions directes ou overrides
         $effectivePerms = $this->getEffectivePermissions($userId);
         foreach ($tabConfig['permissions'] as $p) {
             if (in_array($p, $effectivePerms, true)) {

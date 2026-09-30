@@ -34,9 +34,10 @@ try {
                 throw new Exception("Méthode invalide.");
             }
 
-            $gameSpeed = max(1, min(100, (int)($_POST['game_speed'] ?? 5)));
-            $resourceSpeed = max(1, min(100, (int)($_POST['resource_speed'] ?? 5)));
-            $fleetSpeed = max(1, min(50, (int)($_POST['fleet_speed'] ?? 5)));
+            require_once __DIR__ . '/../core/DevTeamEngine.php';
+            $devTeamEngine = new DevTeamEngine();
+            $isDesigner = $devTeamEngine->hasRole((int)Auth::id(), 'game_designer');
+
             $botsEnabled = !empty($_POST['bots_enabled']) && ($_POST['bots_enabled'] === '1' || $_POST['bots_enabled'] === 'true');
             $botColonize = !empty($_POST['bot_colonize_enabled']) && ($_POST['bot_colonize_enabled'] === '1' || $_POST['bot_colonize_enabled'] === 'true');
             $botMaxPlanets = max(1, min(10, (int)($_POST['bot_max_planets'] ?? 3)));
@@ -48,19 +49,6 @@ try {
             $botSpawnIntervalMin = max(1, min(1440, (int)($_POST['bot_spawn_interval_min'] ?? 15)));
             $botSpawnMaxVillages = max(1, min(200, (int)($_POST['bot_spawn_max_villages'] ?? 50)));
 
-            $oasisDensity = max(0.5, min(20.0, (float)($_POST['oasis_density_percent'] ?? 2.0)));
-            $oasisRespawn = !empty($_POST['oasis_respawn_on_capture']) && ($_POST['oasis_respawn_on_capture'] === '1' || $_POST['oasis_respawn_on_capture'] === 'true');
-            $beginnerProtectionDays = max(0, min(365, (int)($_POST['beginner_protection_days'] ?? 7)));
-
-            $famineEnabled = !empty($_POST['famine_enabled']) && ($_POST['famine_enabled'] === '1' || $_POST['famine_enabled'] === 'true');
-            $famineRate = max(0.5, min(50.0, (float)($_POST['famine_rate'] ?? 3.0)));
-            $famineConsumption = max(0.1, min(20.0, (float)($_POST['famine_flour_consumption'] ?? 1.0)));
-            $heroCageDropRate = max(0, min(100, (int)($_POST['hero_cage_drop_rate'] ?? 25)));
-            $heroXpRate = max(10, min(500, (int)($_POST['hero_xp_rate_percent'] ?? 100)));
-
-            GameConfig::set('game_speed', $gameSpeed);
-            GameConfig::set('resource_speed', $resourceSpeed);
-            GameConfig::set('fleet_speed', $fleetSpeed);
             GameConfig::set('bots_enabled', $botsEnabled);
             GameConfig::set('bot_colonize_enabled', $botColonize);
             GameConfig::set('bot_max_planets', $botMaxPlanets);
@@ -68,14 +56,33 @@ try {
             GameConfig::set('bot_spawn_enabled', $botSpawnEnabled);
             GameConfig::set('bot_spawn_interval_min', $botSpawnIntervalMin);
             GameConfig::set('bot_spawn_max_villages', $botSpawnMaxVillages);
-            GameConfig::set('oasis_density_percent', $oasisDensity);
-            GameConfig::set('oasis_respawn_on_capture', $oasisRespawn);
-            GameConfig::set('beginner_protection_days', $beginnerProtectionDays);
-            GameConfig::set('famine_enabled', $famineEnabled);
-            GameConfig::set('famine_rate', $famineRate);
-            GameConfig::set('famine_flour_consumption', $famineConsumption);
-            GameConfig::set('hero_cage_drop_rate', $heroCageDropRate);
-            GameConfig::set('hero_xp_rate_percent', $heroXpRate);
+
+            if ($isDesigner && isset($_POST['game_speed'])) {
+                $gameSpeed = max(1, min(100, (int)($_POST['game_speed'] ?? 5)));
+                $resourceSpeed = max(1, min(100, (int)($_POST['resource_speed'] ?? 5)));
+                $fleetSpeed = max(1, min(50, (int)($_POST['fleet_speed'] ?? 5)));
+                $oasisDensity = max(0.5, min(20.0, (float)($_POST['oasis_density_percent'] ?? 2.0)));
+                $oasisRespawn = !empty($_POST['oasis_respawn_on_capture']) && ($_POST['oasis_respawn_on_capture'] === '1' || $_POST['oasis_respawn_on_capture'] === 'true');
+                $beginnerProtectionDays = max(0, min(365, (int)($_POST['beginner_protection_days'] ?? 7)));
+
+                $famineEnabled = !empty($_POST['famine_enabled']) && ($_POST['famine_enabled'] === '1' || $_POST['famine_enabled'] === 'true');
+                $famineRate = max(0.5, min(50.0, (float)($_POST['famine_rate'] ?? 3.0)));
+                $famineConsumption = max(0.1, min(20.0, (float)($_POST['famine_flour_consumption'] ?? 1.0)));
+                $heroCageDropRate = max(0, min(100, (int)($_POST['hero_cage_drop_rate'] ?? 25)));
+                $heroXpRate = max(10, min(500, (int)($_POST['hero_xp_rate_percent'] ?? 100)));
+
+                GameConfig::set('game_speed', $gameSpeed);
+                GameConfig::set('resource_speed', $resourceSpeed);
+                GameConfig::set('fleet_speed', $fleetSpeed);
+                GameConfig::set('oasis_density_percent', $oasisDensity);
+                GameConfig::set('oasis_respawn_on_capture', $oasisRespawn);
+                GameConfig::set('beginner_protection_days', $beginnerProtectionDays);
+                GameConfig::set('famine_enabled', $famineEnabled);
+                GameConfig::set('famine_rate', $famineRate);
+                GameConfig::set('famine_flour_consumption', $famineConsumption);
+                GameConfig::set('hero_cage_drop_rate', $heroCageDropRate);
+                GameConfig::set('hero_xp_rate_percent', $heroXpRate);
+            }
 
             echo json_encode([
                 'success' => true,
@@ -271,10 +278,20 @@ try {
             echo json_encode($result);
             break;
 
-        // Générateur de monde procédural
+        // Générateur de monde procédural (Réservé au métier Game Elevate Designer)
         case 'generate_world':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 throw new Exception("Méthode invalide.");
+            }
+            require_once __DIR__ . '/../core/DevTeamEngine.php';
+            $devTeamEngine = new DevTeamEngine();
+            if (!$devTeamEngine->hasRole((int)Auth::id(), 'game_designer')) {
+                http_response_code(403);
+                echo json_encode([
+                    'success' => false,
+                    'error' => "Accès refusé : Ce module a été migré sous « Studio Dev » et est réservé au métier Game Elevate Designer."
+                ]);
+                exit;
             }
             $count = max(1, min(100, (int)($_POST['planet_count'] ?? 12)));
             $radius = max(5, min(50, (int)($_POST['radius'] ?? 10)));
@@ -357,10 +374,20 @@ try {
             echo json_encode(['success' => $ok, 'message' => "Coordonnées mises à jour en [$x : $y]."]);
             break;
 
-        // Rééquilibrer / Générer les oasis selon le pourcentage de densité configuré
+        // Rééquilibrer / Générer les oasis selon le pourcentage de densité configuré (Réservé au métier Game Elevate Designer)
         case 'repopulate_oases':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 throw new Exception("Méthode invalide.");
+            }
+            require_once __DIR__ . '/../core/DevTeamEngine.php';
+            $devTeamEngine = new DevTeamEngine();
+            if (!$devTeamEngine->hasRole((int)Auth::id(), 'game_designer')) {
+                http_response_code(403);
+                echo json_encode([
+                    'success' => false,
+                    'error' => "Accès refusé : Ce module a été migré sous « Studio Dev » et est réservé au métier Game Elevate Designer."
+                ]);
+                exit;
             }
             require_once __DIR__ . '/../core/OasisEngine.php';
             $oasisEngine = new OasisEngine();

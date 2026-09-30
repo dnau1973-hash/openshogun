@@ -10,6 +10,9 @@ require_once __DIR__ . '/../core/BotEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
 require_once __DIR__ . '/../core/FeatureRegistry.php';
 require_once __DIR__ . '/../core/QASyntaxChecker.php';
+require_once __DIR__ . '/../core/GameConfig.php';
+require_once __DIR__ . '/../core/WorldGenerator.php';
+require_once __DIR__ . '/../core/OasisEngine.php';
 
 $auth = new Auth();
 if (!Auth::check()) {
@@ -362,6 +365,94 @@ try {
 
             $history = $mailingEngine->getCampaignHistory(20);
             echo json_encode(['success' => true, 'history' => $history]);
+            break;
+
+        // 16. Enregistrement des constantes et équilibrage des vitesses (Game Elevate Designer)
+        case 'save_game_settings':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            if (!$devEngine->hasRole($currentUserId, 'game_designer')) {
+                http_response_code(403);
+                throw new Exception("Accès interdit : cette configuration est strictement réservée au métier Game Elevate Designer.");
+            }
+
+            $gameSpeed = max(1, min(100, (int)($_POST['game_speed'] ?? 5)));
+            $resourceSpeed = max(1, min(100, (int)($_POST['resource_speed'] ?? 5)));
+            $fleetSpeed = max(1, min(50, (int)($_POST['fleet_speed'] ?? 5)));
+            $oasisDensity = max(0.5, min(20.0, (float)($_POST['oasis_density_percent'] ?? 2.0)));
+            $oasisRespawn = !empty($_POST['oasis_respawn_on_capture']) && ($_POST['oasis_respawn_on_capture'] === '1' || $_POST['oasis_respawn_on_capture'] === 'true');
+            $beginnerProtectionDays = max(0, min(365, (int)($_POST['beginner_protection_days'] ?? 7)));
+
+            $famineEnabled = !empty($_POST['famine_enabled']) && ($_POST['famine_enabled'] === '1' || $_POST['famine_enabled'] === 'true');
+            $famineRate = max(0.5, min(50.0, (float)($_POST['famine_rate'] ?? 3.0)));
+            $famineConsumption = max(0.1, min(20.0, (float)($_POST['famine_flour_consumption'] ?? 1.0)));
+            $heroCageDropRate = max(0, min(100, (int)($_POST['hero_cage_drop_rate'] ?? 25)));
+            $heroXpRate = max(10, min(500, (int)($_POST['hero_xp_rate_percent'] ?? 100)));
+
+            GameConfig::set('game_speed', $gameSpeed);
+            GameConfig::set('resource_speed', $resourceSpeed);
+            GameConfig::set('fleet_speed', $fleetSpeed);
+            GameConfig::set('oasis_density_percent', $oasisDensity);
+            GameConfig::set('oasis_respawn_on_capture', $oasisRespawn ? 1 : 0);
+            GameConfig::set('beginner_protection_days', $beginnerProtectionDays);
+
+            GameConfig::set('famine_enabled', $famineEnabled ? 1 : 0);
+            GameConfig::set('famine_rate', $famineRate);
+            GameConfig::set('famine_flour_consumption', $famineConsumption);
+            GameConfig::set('hero_cage_drop_rate', $heroCageDropRate);
+            GameConfig::set('hero_xp_rate_percent', $heroXpRate);
+
+            $devEngine->addForgeXp($currentUserId, 30, 'game_balance', "Ajustement des constantes et équilibrage des vitesses (Game Elevate Designer)");
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Constantes et équilibrage du jeu sauvegardés avec succès ! (+30 XP Forge)"
+            ]);
+            break;
+
+        // 17. Expansion et arpentage des provinces (Game Elevate Designer)
+        case 'generate_world':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            if (!$devEngine->hasRole($currentUserId, 'game_designer')) {
+                http_response_code(403);
+                throw new Exception("Accès interdit : l'arpentage et l'expansion des provinces sont strictement réservés au métier Game Elevate Designer.");
+            }
+
+            $count = max(1, min(100, (int)($_POST['planet_count'] ?? 12)));
+            $radius = max(5, min(50, (int)($_POST['radius'] ?? 10)));
+            $clearUninhabited = !empty($_POST['clear_uninhabited']) && ($_POST['clear_uninhabited'] === '1' || $_POST['clear_uninhabited'] === 'true');
+            $types = !empty($_POST['types']) && is_array($_POST['types']) ? $_POST['types'] : [];
+
+            $worldGen = new WorldGenerator();
+            $res = $worldGen->generatePlanets($count, $radius, $types, $clearUninhabited);
+
+            if (!empty($res['success'])) {
+                $devEngine->addForgeXp($currentUserId, 40, 'world_expansion', "Arpentage procédural et déploiement de {$res['generated_count']} terres (Game Elevate Designer)");
+            }
+
+            echo json_encode($res);
+            break;
+
+        // 18. Rééquilibrage et génération des oasis (Game Elevate Designer)
+        case 'repopulate_oases':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            if (!$devEngine->hasRole($currentUserId, 'game_designer')) {
+                http_response_code(403);
+                throw new Exception("Accès interdit : la gestion de l'écosystème des oasis est strictement réservée au métier Game Elevate Designer.");
+            }
+
+            $oasisEngine = new OasisEngine();
+            $density = max(0.5, min(20.0, (float)($_POST['density_percent'] ?? GameConfig::get('oasis_density_percent', 2.0))));
+            $radius = max(10, min(50, (int)($_POST['radius'] ?? 28)));
+            $clearUnoccupied = !empty($_POST['clear_unoccupied']) && ($_POST['clear_unoccupied'] === '1' || $_POST['clear_unoccupied'] === 'true');
+
+            GameConfig::set('oasis_density_percent', $density);
+            $res = $oasisEngine->spawnOasesByDensity($density, $radius, $clearUnoccupied);
+
+            if (!empty($res['success'])) {
+                $devEngine->addForgeXp($currentUserId, 35, 'oases_repopulate', "Rééquilibrage de l'écosystème des oasis et de la faune (Game Elevate Designer)");
+            }
+
+            echo json_encode($res);
             break;
 
         default:

@@ -84,6 +84,18 @@
   2. Ouvrir l'inspecteur du navigateur (`F12`), chercher `#tab-system` ou `#tab-qa` et constater qu'aucun nœud HTML n'existe.
   3. Taper manuellement `/?page=dev_team&tab=system` dans la barre d'adresse et observer la redirection immédiate vers l'onglet autorisé avec le bandeau d'alerte.
 
+### Session du 30/09/2026 (Partie 5) — Game Elevate Designer : Migration de Modules & Principe de Moindre Privilège
+- **Concept exploré :** Décentralisation de l'administration vers les espaces métiers, rôle du *Game Designer* dans l'équilibrage de gameplay, et application stricte du **principe de moindre privilège** (*Least Privilege*) même envers les comptes administrateurs.
+- **Notions pour l'atelier :**
+  - **Qu'est-ce qu'un Game Elevate Designer ?** Dans un studio de jeux vidéo, ce n'est pas l'administrateur système qui décide de la vitesse des chantiers ou de la prolifération des oasis sauvages, mais le concepteur de jeu (*Game Designer*). Rapatrier ces modules dans l'espace « Studio Dev » permet à chaque corps de métier d'avoir son établi de travail dédié sans polluer l'administration technique du serveur.
+  - **Le principe de moindre privilège (*Least Privilege*) :** Même un compte administrateur ne doit pas posséder des boutons sensibles activés par défaut s'il n'en a pas le besoin immédiat. En n'affichant les modules de modification du monde qu'après auto-attribution explicite du métier « Game Elevate Designer », on évite les clics accidentels catastrophiques (ex: regénérer un monde en cours de saison ou altérer brutalement les vitesses de jeu).
+  - **Migration architecturale propre :** Comment déplacer des blocs entiers d'une vue (`views/admin.php`) vers une autre (`views/dev_team.php`) tout en maintenant la rétrocompatibilité des contrôleurs (`api/admin.php` et `api/dev_team.php`) et en garantissant qu'aucune porte dérobée (*backdoor*) ne subsiste dans les anciennes routes.
+- **Activité pratique suggérée :**
+  1. Ouvrir l'administration générale : vérifier que les commandes de vitesses, d'arpentage et d'oasis ont bien disparu pour ne laisser place qu'aux prestigieux 12 Donjons Féodaux.
+  2. Aller dans « Studio Dev » avec le compte admin : constater que les onglets de paramétrage monde n'apparaissent pas encore.
+  3. S'attribuer le métier « Game Elevate Designer » dans le Roster : voir s'illuminer les 3 nouveaux onglets ⚡, 🗾 et 🌿 !
+  4. Tester un preset de vitesse éclair (20x) et admirer le gain de +30 XP Forge dans le journal des créateurs.
+
 ---
 
 ## 🛠️ Modèle d'Entrée pour les Prochaines Sessions (Template)

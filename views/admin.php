@@ -758,23 +758,23 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <span class="text-muted small">Cliquez sur une carte pour basculer directement sur le module</span>
         </div>
         <div class="row row-cards mb-4">
-            <!-- Vitesse Active -->
+            <!-- Donjons Sacrés -->
             <div class="col-sm-6 col-lg-3">
-                <div class="card card-sm h-100 shadow-sm" style="cursor: pointer;" onclick="switchAdminTab('world'); setTimeout(() => switchWorldSubSection('speeds'), 50);" title="Configurer les constantes & vitesses">
+                <div class="card card-sm h-100 shadow-sm" style="cursor: pointer;" onclick="switchAdminTab('world');" title="Surveiller les 12 Donjons Authentiques du Japon">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="avatar rounded bg-danger-lt text-danger" style="font-size:1.3rem;">⚡</span>
+                                <span class="avatar rounded bg-warning-lt text-warning" style="font-size:1.3rem;">🏯</span>
                             </div>
                             <div class="col">
-                                <div class="font-weight-medium">Vitesse Active</div>
-                                <div class="text-danger font-weight-bold" style="font-size:1.25rem;">
-                                    x<?= (int)($settings['game_speed'] ?? 5) ?>
+                                <div class="font-weight-medium">Donjons Sacrés</div>
+                                <div class="text-warning font-weight-bold" style="font-size:1.25rem;">
+                                    <?= $spawnedCastlesCount ?> / 12 Déployés
                                 </div>
                             </div>
                         </div>
                         <div class="text-secondary small mt-2">
-                            Prod: x<?= (int)($settings['resource_speed'] ?? 5) ?> | Marche: x<?= (int)($settings['fleet_speed'] ?? 5) ?>
+                            現存十二天守 &bull; Forteresses Impériales
                         </div>
                     </div>
                 </div>
@@ -1173,27 +1173,21 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div>
                         <h3 class="card-title d-flex align-items-center gap-2 m-0 text-success">
                             <span>🗾</span>
-                            <span>Paramétrage Intégral du Monde Féodal &amp; Provinces</span>
+                            <span>Les 12 Donjons Authentiques &amp; Fiefs Féodaux</span>
                         </h3>
                         <div class="text-secondary small mt-1">
-                            Contrôle centralisé du royaume : vitesses de jeu et équilibrage, création et arpentage des fiefs libres, déploiement des 12 donjons authentiques, et écosystème des oasis naturelles &amp; faune sauvage.
+                            Surveillance impériale des provinces féodales et contrôle des 12 donjons authentiques (現存十二天守).
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <span class="badge bg-indigo-lt">
                             🗺️ <?= number_format($mapTileStats['total_tiles']) ?> Tuiles
                         </span>
-                        <span class="badge bg-danger-lt">
-                            ⚡ x<?= (int)($settings['game_speed'] ?? 5) ?> Vitesse
-                        </span>
                         <span class="badge bg-success-lt">
                             🗾 <?= $totalColonies ?> / <?= $totalPlanets ?> Fiefs Occupés
                         </span>
                         <span class="badge bg-warning-lt">
                             🏯 <?= $spawnedCastlesCount ?> / 12 Donjons Déployés
-                        </span>
-                        <span class="badge bg-green-lt">
-                            🌿 <?= $oasisStats['total_oases'] ?> Oasis (<?= $oasisStats['wild_oases'] ?> Sauvages)
                         </span>
                     </div>
                 </div>
@@ -1258,339 +1252,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </div>
                 </div>
 
-                <!-- Pilules de sous-navigation interne -->
-                <ul class="nav nav-pills nav-fill" id="worldSubTabsNav">
-                    <li class="nav-item">
-                        <a href="#worldSection_speeds" class="nav-link active py-2" onclick="switchWorldSubSection('speeds', event)" id="worldSubTab_speeds">
-                            <span>⚡ 1. Vitesses &amp; Équilibrage</span>
-                            <span class="badge bg-danger-lt ms-1">x<?= (int)($settings['game_speed'] ?? 5) ?></span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#worldSection_gen" class="nav-link py-2" onclick="switchWorldSubSection('gen', event)" id="worldSubTab_gen">
-                            <span>🗾 2. Arpentage &amp; Fiefs Libres</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#worldSection_castles" class="nav-link py-2" onclick="switchWorldSubSection('castles', event)" id="worldSubTab_castles">
-                            <span>🏯 3. Les 12 Donjons Authentiques</span>
-                            <span class="badge bg-warning-lt ms-1"><?= $spawnedCastlesCount ?>/12</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#worldSection_oases" class="nav-link py-2" onclick="switchWorldSubSection('oases', event)" id="worldSubTab_oases">
-                            <span>🌿 4. Oasis &amp; Faune Sauvage</span>
-                            <span class="badge bg-green-lt ms-1"><?= $oasisStats['total_oases'] ?></span>
-                        </a>
-                    </li>
-                </ul>
             </div>
         </div>
 
-        <!-- 1. Constantes & Équilibrage des Vitesses de Jeu -->
-        <div class="card mb-4" id="worldSection_speeds" style="border-top: 3px solid #ef4444;">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                    <h3 class="card-title d-flex align-items-center gap-2 m-0 text-danger">
-                        <span>⚡</span> Constantes &amp; Équilibrage des Vitesses de Jeu
-                    </h3>
-                    <div class="text-secondary small mt-1">
-                        Facteurs d'accélération des chantiers, de production des ressources et de marche des armées féodales.
-                    </div>
-                </div>
-                <div class="d-flex gap-1 flex-wrap">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyPreset(1, 1, 1)">1x Classique</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyPreset(5, 5, 5)">5x Standard</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyPreset(20, 20, 10)">20x Éclair</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyPreset(50, 50, 20)">50x Hyper</button>
-                </div>
-            </div>
-            <div class="card-body">
-                <form id="gameSettingsForm" onsubmit="saveSettings(event)">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6 col-lg-3">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>⚡ Vitesse du Jeu (Chantiers &amp; Recherches)</span>
-                                <span class="badge bg-danger-lt" id="badge_game_speed">x<?= (int)($settings['game_speed'] ?? 5) ?></span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="game_speed_range" min="1" max="100" value="<?= (int)($settings['game_speed'] ?? 5) ?>" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('game_speed_input').value = this.value; document.getElementById('badge_game_speed').textContent = 'x' + this.value;">
-                                <input type="number" id="game_speed_input" name="game_speed" min="1" max="100" 
-                                       value="<?= (int)($settings['game_speed'] ?? 5) ?>" class="form-control text-center font-weight-bold" style="width: 75px; min-height: 36px;"
-                                       oninput="document.getElementById('game_speed_range').value = this.value; document.getElementById('badge_game_speed').textContent = 'x' + this.value;">
-                            </div>
-                            <div class="form-hint">Divise le temps nécessaire aux chantiers, Tenshu, académies et entraînements.</div>
-                        </div>
-
-                        <div class="col-md-6 col-lg-3">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>⛏️ Production des Ressources</span>
-                                <span class="badge bg-warning-lt" id="badge_resource_speed">x<?= (int)($settings['resource_speed'] ?? 5) ?></span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="resource_speed_range" min="1" max="100" value="<?= (int)($settings['resource_speed'] ?? 5) ?>" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('resource_speed_input').value = this.value; document.getElementById('badge_resource_speed').textContent = 'x' + this.value;">
-                                <input type="number" id="resource_speed_input" name="resource_speed" min="1" max="100" 
-                                       value="<?= (int)($settings['resource_speed'] ?? 5) ?>" class="form-control text-center font-weight-bold" style="width: 75px; min-height: 36px;"
-                                       oninput="document.getElementById('resource_speed_range').value = this.value; document.getElementById('badge_resource_speed').textContent = 'x' + this.value;">
-                            </div>
-                            <div class="form-hint">Multiplie la production horaire de Bois de Cèdre 🪵, Pierre 🪨 et Koku de Riz 🌾.</div>
-                        </div>
-
-                        <div class="col-md-6 col-lg-3">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>🐎 Marche des Troupes &amp; Expéditions</span>
-                                <span class="badge bg-primary-lt" id="badge_fleet_speed">x<?= (int)($settings['fleet_speed'] ?? 5) ?></span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="fleet_speed_range" min="1" max="50" value="<?= (int)($settings['fleet_speed'] ?? 5) ?>" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('fleet_speed_input').value = this.value; document.getElementById('badge_fleet_speed').textContent = 'x' + this.value;">
-                                <input type="number" id="fleet_speed_input" name="fleet_speed" min="1" max="50" 
-                                       value="<?= (int)($settings['fleet_speed'] ?? 5) ?>" class="form-control text-center font-weight-bold" style="width: 75px; min-height: 36px;"
-                                       oninput="document.getElementById('fleet_speed_range').value = this.value; document.getElementById('badge_fleet_speed').textContent = 'x' + this.value;">
-                            </div>
-                            <div class="form-hint">Accélère les trajets des régiments pour les assauts, convois de tributs et fondations.</div>
-                        </div>
-
-                        <div class="col-md-6 col-lg-3">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>🔰 Durée d'Immunité Débutant</span>
-                                <span class="badge bg-info-lt" id="badge_protection_days"><?= (int)($settings['beginner_protection_days'] ?? 7) ?> j</span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="beginner_protection_days_range" min="0" max="30" value="<?= (int)($settings['beginner_protection_days'] ?? 7) ?>" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('beginner_protection_days_input').value = this.value; document.getElementById('badge_protection_days').textContent = this.value + ' j';">
-                                <div class="input-group" style="width: 85px;">
-                                    <input type="number" id="beginner_protection_days_input" name="beginner_protection_days" min="0" max="60" 
-                                           value="<?= (int)($settings['beginner_protection_days'] ?? 7) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
-                                           oninput="document.getElementById('beginner_protection_days_range').value = this.value; document.getElementById('badge_protection_days').textContent = this.value + ' j';">
-                                    <span class="input-group-text px-1 text-muted">j</span>
-                                </div>
-                            </div>
-                            <div class="form-hint">Durée accordée automatiquement lors de l'inscription (0 pour désactiver).</div>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3 border-top pt-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>🌿 Densité des Oasis sur la Carte (%)</span>
-                                <span class="badge bg-success-lt" id="badge_oasis_density"><?= (float)($settings['oasis_density_percent'] ?? 2.0) ?> %</span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="oasis_density_percent_range" min="0.5" max="15.0" step="0.5" value="<?= (float)($settings['oasis_density_percent'] ?? 2.0) ?>" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('oasis_density_percent_input').value = this.value; document.getElementById('badge_oasis_density').textContent = this.value + ' %';">
-                                <div class="input-group" style="width: 95px;">
-                                    <input type="number" id="oasis_density_percent_input" name="oasis_density_percent" min="0.5" max="20" step="0.5" 
-                                           value="<?= (float)($settings['oasis_density_percent'] ?? 2.0) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
-                                           oninput="document.getElementById('oasis_density_percent_range').value = this.value; document.getElementById('badge_oasis_density').textContent = this.value + ' %';">
-                                    <span class="input-group-text px-1 text-muted">%</span>
-                                </div>
-                            </div>
-                            <div class="form-hint">Proportion de tuiles réservées aux oasis naturelles par rapport à la superficie totale.</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-dark mb-1">
-                                🔄 Réapparition Continue d'Oasis après Capture
-                            </label>
-                            <div class="d-flex align-items-center" style="min-height: 38px;">
-                                <label class="form-check form-switch m-0">
-                                    <input class="form-check-input" type="checkbox" id="oasis_respawn_on_capture" name="oasis_respawn_on_capture" value="1" 
-                                           <?= !empty($settings['oasis_respawn_on_capture']) ? 'checked' : '' ?>>
-                                    <span class="form-check-label fw-medium text-dark">
-                                        Faire éclore une nouvelle oasis sauvage lors de l'annexion d'une oasis par un joueur
-                                    </span>
-                                </label>
-                            </div>
-                            <div class="form-hint">Maintient le réservoir d'oasis sauvages et de faune active pour l'ensemble des seigneurs.</div>
-                        </div>
-                    </div>
-
-                    <!-- Paramètres des Quêtes Féodales & Samouraï Héros (Cages & XP) -->
-                    <div class="row g-3 mb-3 border-top pt-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>🎋 Cages de Capture (Kago) en Quête (%)</span>
-                                <span class="badge bg-green-lt fw-bold" id="badge_hero_cage_drop_rate"><?= (int)($settings['hero_cage_drop_rate'] ?? 25) ?> %</span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="hero_cage_drop_rate_range" min="0" max="100" step="1" 
-                                       value="<?= (int)($settings['hero_cage_drop_rate'] ?? 25) ?>" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('hero_cage_drop_rate_input').value = this.value; document.getElementById('badge_hero_cage_drop_rate').textContent = this.value + ' %';">
-                                <div class="input-group" style="width: 95px;">
-                                    <input type="number" id="hero_cage_drop_rate_input" name="hero_cage_drop_rate" min="0" max="100" step="1" 
-                                           value="<?= (int)($settings['hero_cage_drop_rate'] ?? 25) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
-                                           oninput="document.getElementById('hero_cage_drop_rate_range').value = this.value; document.getElementById('badge_hero_cage_drop_rate').textContent = this.value + ' %';">
-                                    <span class="input-group-text px-1 text-muted">%</span>
-                                </div>
-                            </div>
-                            <div class="form-hint">Probabilité pour le Samouraï de rapporter un lot de Cages (Kago 🎋) pour capturer les bêtes sauvages des oasis sans combat.</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>🥋 Gain d'Expérience (XP) en Aventure (%)</span>
-                                <span class="badge bg-primary-lt fw-bold" id="badge_hero_xp_rate"><?= (int)($settings['hero_xp_rate_percent'] ?? 100) ?> %</span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="hero_xp_rate_percent_range" min="10" max="500" step="5" 
-                                       value="<?= (int)($settings['hero_xp_rate_percent'] ?? 100) ?>" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('hero_xp_rate_percent_input').value = this.value; document.getElementById('badge_hero_xp_rate').textContent = this.value + ' %';">
-                                <div class="input-group" style="width: 95px;">
-                                    <input type="number" id="hero_xp_rate_percent_input" name="hero_xp_rate_percent" min="10" max="500" step="5" 
-                                           value="<?= (int)($settings['hero_xp_rate_percent'] ?? 100) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
-                                           oninput="document.getElementById('hero_xp_rate_percent_range').value = this.value; document.getElementById('badge_hero_xp_rate').textContent = this.value + ' %';">
-                                    <span class="input-group-text px-1 text-muted">%</span>
-                                </div>
-                            </div>
-                            <div class="form-hint">Multiplicateur du gain d'XP du Héros lors des aventures. Diminuez ce pourcentage pour ralentir la montée de niveau du Samouraï.</div>
-                        </div>
-                    </div>
-
-                    <!-- Section Famine & Vivres Féodaux (Optionnel) -->
-                    <div class="row g-3 mb-3 border-top pt-3" style="background: #fef2f2; border-radius: 8px; padding: 1rem; border: 1px solid #fecaca;">
-                        <div class="col-12">
-                            <h4 class="m-0 fw-bold text-danger d-flex align-items-center gap-2">
-                                <span>🌾</span> Mécanisme de Famine &amp; Vivres Féodaux (Optionnel)
-                            </h4>
-                            <div class="text-secondary small mt-1">
-                                Si activé, les régiments d'élite (Tier 2, 3 et 4) exigent un entretien régulier en farine de riz. En cas de pénurie totale (stock de farine à 0), une famine s'abat sur le fief et décime progressivement les troupes d'élite.
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold text-dark mb-1">
-                                ⚠️ Activer la Famine (Disette de Farine)
-                            </label>
-                            <div class="d-flex align-items-center" style="min-height: 38px;">
-                                <label class="form-check form-switch m-0">
-                                    <input class="form-check-input" type="checkbox" id="famine_enabled" name="famine_enabled" value="1" 
-                                           <?= !empty($settings['famine_enabled']) ? 'checked' : '' ?>>
-                                    <span class="form-check-label fw-bold text-danger">
-                                        Activer le péril de la famine
-                                    </span>
-                                </label>
-                            </div>
-                            <div class="form-hint">Désactivé par défaut. Les troupes d'élite ne meurent pas si décoché.</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>💀 Taux de Pertes Horaire en Famine (%)</span>
-                                <span class="badge bg-danger text-white" id="badge_famine_rate"><?= (float)($settings['famine_rate'] ?? 3.0) ?> %</span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="famine_rate_range" min="0.5" max="25.0" step="0.5" value="<?= (float)($settings['famine_rate'] ?? 3.0) ?>" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('famine_rate_input').value = this.value; document.getElementById('badge_famine_rate').textContent = this.value + ' %';">
-                                <div class="input-group" style="width: 95px;">
-                                    <input type="number" id="famine_rate_input" name="famine_rate" min="0.5" max="50" step="0.5" 
-                                           value="<?= (float)($settings['famine_rate'] ?? 3.0) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
-                                           oninput="document.getElementById('famine_rate_range').value = this.value; document.getElementById('badge_famine_rate').textContent = this.value + ' %';">
-                                    <span class="input-group-text px-1 text-muted">%</span>
-                                </div>
-                            </div>
-                            <div class="form-hint">Pourcentage de soldats d'élite mourant de faim ou désertant par heure de rupture de farine.</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>🍚 Rations Requises (Farine / 100 soldats / h)</span>
-                                <span class="badge bg-warning text-dark" id="badge_famine_flour"><?= (float)($settings['famine_flour_consumption'] ?? 1.0) ?></span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="famine_flour_range" min="0.1" max="10.0" step="0.1" value="<?= (float)($settings['famine_flour_consumption'] ?? 1.0) ?>" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('famine_flour_consumption_input').value = this.value; document.getElementById('badge_famine_flour').textContent = this.value;">
-                                <div class="input-group" style="width: 95px;">
-                                    <input type="number" id="famine_flour_consumption_input" name="famine_flour_consumption" min="0.1" max="20" step="0.1" 
-                                           value="<?= (float)($settings['famine_flour_consumption'] ?? 1.0) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
-                                           oninput="document.getElementById('famine_flour_range').value = this.value; document.getElementById('badge_famine_flour').textContent = this.value;">
-                                    <span class="input-group-text px-1 text-muted">🍚</span>
-                                </div>
-                            </div>
-                            <div class="form-hint">Unités de farine consommées par heure pour maintenir 100 troupes d'élite rassasiées.</div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary px-4 fw-bold">
-                            💾 Enregistrer les Constantes de Jeu
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- 2. Arpenteur du Shogunat & Expansion des Provinces -->
-        <div class="card mb-4" id="worldSection_gen" style="border-top: 3px solid #10b981;">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                    <h3 class="card-title d-flex align-items-center gap-2 m-0 text-success">
-                        <span>🗾</span> Arpenteur du Shogunat &amp; Expansion des Provinces
-                    </h3>
-                    <div class="text-secondary small mt-1">Création procédurale de fiefs, vallées et sanctuaires</div>
-                </div>
-            </div>
-            <div class="card-body">
-                <form id="worldGenForm" onsubmit="generateWorld(event)">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>Nombre de Terres &amp; Fiefs à Déployer</span>
-                                <span class="badge bg-success-lt" id="badge_planet_count">12 fiefs</span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="planet_count_range" min="1" max="50" value="12" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('planet_count_input').value = this.value; document.getElementById('badge_planet_count').textContent = this.value + ' fiefs';">
-                                <input type="number" id="planet_count_input" name="planet_count" min="1" max="50" value="12" 
-                                       class="form-control text-center font-weight-bold" style="width: 75px; min-height: 36px;"
-                                       oninput="document.getElementById('planet_count_range').value = this.value; document.getElementById('badge_planet_count').textContent = this.value + ' fiefs';">
-                            </div>
-                            <div class="form-hint">Terres libres prêtes à être explorées, pillées ou inféodées.</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>Rayon de Dispersion Géographique</span>
-                                <span class="badge bg-info-lt" id="badge_radius">&plusmn; 12</span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
-                                <input type="range" id="radius_range" min="5" max="35" value="12" class="form-range flex-grow-1" 
-                                       oninput="document.getElementById('radius_input').value = this.value; document.getElementById('badge_radius').textContent = '± ' + this.value;">
-                                <input type="number" id="radius_input" name="radius" min="5" max="35" value="12" 
-                                       class="form-control text-center font-weight-bold" style="width: 75px; min-height: 36px;"
-                                       oninput="document.getElementById('radius_range').value = this.value; document.getElementById('badge_radius').textContent = '± ' + this.value;">
-                            </div>
-                            <div class="form-hint">Étendue des provinces [-R, +R] autour de la capitale impériale.</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold text-dark mb-1">
-                                Gestion des Terres Inoccupées
-                            </label>
-                            <div class="d-flex align-items-center" style="min-height: 38px;">
-                                <label class="form-check m-0">
-                                    <input class="form-check-input" type="checkbox" name="clear_uninhabited" value="1" id="clear_uninhabited">
-                                    <span class="form-check-label fw-medium text-dark">
-                                        Purger les terres libres inoccupées existantes avant génération
-                                    </span>
-                                </label>
-                            </div>
-                            <div class="form-hint">Ne supprime jamais les fiefs possédés par un Daimyō ou un bot.</div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-success px-4 fw-bold">
-                            🗾 Déployer les Fiefs dans les Provinces
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- 3. Sanctuaires des 12 Donjons Authentiques du Japon (現存十二天守) -->
+        <!-- Sanctuaires des 12 Donjons Authentiques du Japon (現存十二天守) -->
         <div class="card mb-4" id="worldSection_castles" style="border-top: 3px solid #f59e0b;">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
@@ -1690,181 +1355,6 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             </div>
         </div>
 
-        <!-- 4. Arpentage des Oasis Naturelles & Faune Sauvage (Style Travian) -->
-        <div class="card mb-4" id="worldSection_oases" style="border-top: 3px solid #22c55e;">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                    <h3 class="card-title d-flex align-items-center gap-2 m-0 text-green">
-                        <span>🌿</span> Écosystème des Oasis Naturelles &amp; Faune Sauvage (Style Travian)
-                    </h3>
-                    <div class="text-secondary small mt-1">
-                        Gestion du réseau d'oasis sauvages, de la faune hostile (Sangliers, Loups, Ours) et de la réapparition continue après capture.
-                    </div>
-                </div>
-                <div class="d-flex gap-2 align-items-center flex-wrap">
-                    <span class="badge bg-green-lt fw-bold">
-                        <?= $oasisStats['total_oases'] ?> Oasis Totales
-                    </span>
-                    <span class="badge bg-blue-lt fw-bold">
-                        <?= $oasisStats['captured_oases'] ?> Fiefs Annexés
-                    </span>
-                    <span class="badge bg-danger-lt fw-bold">
-                        <?= $oasisStats['wild_oases'] ?> Sauvages Libres
-                    </span>
-                    <span class="badge bg-warning-lt fw-bold">
-                        🐗 <?= number_format($oasisStats['total_wild_animals']) ?> Bêtes Sauvages
-                    </span>
-                </div>
-            </div>
-
-            <div class="card-body">
-                <!-- Panneau de contrôle et rééquilibrage de densité -->
-                <div class="card card-body bg-light border mb-3">
-                    <h4 class="card-title d-flex align-items-center gap-2 text-success mb-2" style="font-size: 0.95rem;">
-                        <span>⚙️</span> Générateur &amp; Rééquilibrage par Pourcentage de Couverture
-                    </h4>
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-4 col-sm-6">
-                            <label class="form-label fw-bold text-dark mb-1">
-                                Pourcentage de Densité Cible (%) :
-                            </label>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="input-group" style="width: 110px;">
-                                    <input type="number" id="repop_density" min="0.5" max="20.0" step="0.5" 
-                                           value="<?= (float)($settings['oasis_density_percent'] ?? 2.0) ?>" class="form-control text-center font-weight-bold">
-                                    <span class="input-group-text px-1 text-muted">%</span>
-                                </div>
-                                <span class="text-secondary small">&approx; 65 oasis à 2.0%</span>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 col-sm-6">
-                            <label class="form-label fw-bold text-dark mb-1">
-                                Rayon de Couverture Carte :
-                            </label>
-                            <div class="input-group" style="width: 110px;">
-                                <input type="number" id="repop_radius" min="10" max="50" value="28" class="form-control text-center font-weight-bold">
-                                <span class="input-group-text px-1 text-muted">tuiles</span>
-                            </div>
-                        </div>
-
-                        <div class="col-md-5 col-sm-12">
-                            <label class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="repop_clear_unoccupied" value="1">
-                                <span class="form-check-label fw-medium text-dark">Remplacer uniquement les oasis sauvages existantes</span>
-                            </label>
-                            <button type="button" onclick="executeRepopulateOases()" class="btn btn-success w-100 fw-bold">
-                                🌿 Appliquer &amp; Générer les Oasis
-                            </button>
-                        </div>
-                    </div>
-                    <div class="text-secondary small mt-2">
-                        ℹ️ Les oasis sont automatiquement réparties de façon équitable entre les 4 quadrants géographiques (NO, NE, SO, SE) sans empiéter sur les fiefs ni les 12 donjons authentiques.
-                    </div>
-                </div>
-
-                <!-- Tableau des Oasis existantes -->
-                <div class="table-responsive" style="max-height: 440px;">
-                    <table class="table card-table table-vcenter table-striped text-nowrap">
-                        <thead class="sticky-top bg-light">
-                            <tr>
-                                <th class="w-1">#</th>
-                                <th>Nom de l'Oasis</th>
-                                <th class="text-center">Coords</th>
-                                <th>Bonus de Récolte</th>
-                                <th>Faune / Garnison</th>
-                                <th class="text-center">Statut Féodal</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($allOases)): ?>
-                                <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">
-                                        Aucune oasis recensée. Utilisez le générateur ci-dessus pour peupler le royaume.
-                                    </td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($allOases as $o): ?>
-                                    <?php 
-                                        $isCaptured = !empty($o['owner_planet_id']);
-                                        $bText = '';
-                                        if ($o['bonus_rice'] > 0) $bText .= "+{$o['bonus_rice']}% 🌾 ";
-                                        if ($o['bonus_wood'] > 0) $bText .= "+{$o['bonus_wood']}% 🪵 ";
-                                        if ($o['bonus_stone'] > 0) $bText .= "+{$o['bonus_stone']}% 🪨 ";
-                                    ?>
-                                    <tr class="oasis-table-row <?= $isCaptured ? 'table-primary-lt' : '' ?>">
-                                        <td class="text-muted fw-bold"><?= $o['id'] ?></td>
-                                        <td>
-                                            <strong class="text-dark"><?= htmlspecialchars($o['name']) ?></strong>
-                                            <div class="text-secondary small">
-                                                🪵 <?= number_format($o['res_wood']) ?> &bull; 🪨 <?= number_format($o['res_stone']) ?> &bull; 🌾 <?= number_format($o['res_rice']) ?>
-                                            </div>
-                                        </td>
-                                        <td class="text-center fw-bold text-azure">
-                                            [<?= $o['coord_x'] ?> : <?= $o['coord_y'] ?>]
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-warning-lt fw-bold"><?= trim($bText) ?></span>
-                                        </td>
-                                        <td>
-                                            <?php if (!empty($o['garrison'])): ?>
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    <?php foreach ($o['garrison'] as $g): ?>
-                                                        <span class="badge bg-dark-lt text-dark border">
-                                                             <?= $g['icon'] ?> <?= htmlspecialchars($g['unit_name']) ?> <strong class="text-warning">x<?= $g['count'] ?></strong>
-                                                        </span>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php else: ?>
-                                                <span class="badge bg-success-lt">🕊️ Pacifiée (Aucune bête)</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td class="text-center">
-                                            <?php if ($isCaptured): ?>
-                                                <span class="badge bg-blue-lt">
-                                                    🛡️ Fief de <?= htmlspecialchars($o['owner_username'] ?? 'Daimyō') ?>
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="badge bg-danger-lt">
-                                                    🐗 Sauvage Libre
-                                                </span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td class="text-end">
-                                            <a href="/?page=map&x=<?= $o['coord_x'] ?>&y=<?= $o['coord_y'] ?>" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                                🗾 Carte
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination du Réseau des Oasis -->
-                <?php if (!empty($allOases)): ?>
-                    <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-2 py-2" id="oasesPaginationContainer">
-                        <p class="m-0 text-secondary small" id="oasesPaginationInfo">
-                            Affichage de <strong id="oasesPaginationStart"><?= min(1, count($allOases)) ?></strong> à <strong id="oasesPaginationEnd"><?= min(15, count($allOases)) ?></strong> sur <strong id="oasesPaginationTotal"><?= count($allOases) ?></strong> oasis
-                        </p>
-                        <div class="d-flex align-items-center gap-2">
-                            <label for="oasesPerPageSelect" class="small text-muted mb-0 d-none d-sm-inline">Par page :</label>
-                            <select id="oasesPerPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changeOasesPerPage(this.value)">
-                                <option value="15" selected>15</option>
-                                <option value="30">30</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
-                            <ul class="pagination pagination-sm m-0" id="oasesPaginationList">
-                                <!-- Rempli en JavaScript -->
-                            </ul>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
     </div>
 
     
@@ -3199,19 +2689,8 @@ function switchAdminTab(tabKey) {
         tabKey = jsTabAliases[tabKey];
     }
 
-    if (tabKey === 'game') {
+    if (tabKey === 'game' || tabKey === 'oases' || tabKey === 'castles') {
         switchAdminTab('world');
-        setTimeout(() => switchWorldSubSection('speeds'), 60);
-        return;
-    }
-    if (tabKey === 'oases') {
-        switchAdminTab('world');
-        setTimeout(() => switchWorldSubSection('oases'), 60);
-        return;
-    }
-    if (tabKey === 'castles') {
-        switchAdminTab('world');
-        setTimeout(() => switchWorldSubSection('castles'), 60);
         return;
     }
 
@@ -3631,22 +3110,6 @@ async function deleteAnnouncement(id) {
 // Les fonctions openAdminTicketModal / saveAdminTicket ont été remplacées
 // par la vue dédiée views/admin_support_traiter.php
 
-function applyPreset(gSpeed, rSpeed, fSpeed) {
-    document.getElementById('game_speed_input').value = gSpeed;
-    document.getElementById('game_speed_range').value = gSpeed;
-    const bG = document.getElementById('badge_game_speed');
-    if (bG) bG.textContent = 'x' + gSpeed;
-
-    document.getElementById('resource_speed_input').value = rSpeed;
-    document.getElementById('resource_speed_range').value = rSpeed;
-    const bR = document.getElementById('badge_resource_speed');
-    if (bR) bR.textContent = 'x' + rSpeed;
-
-    document.getElementById('fleet_speed_input').value = fSpeed;
-    document.getElementById('fleet_speed_range').value = fSpeed;
-    const bF = document.getElementById('badge_fleet_speed');
-    if (bF) bF.textContent = 'x' + fSpeed;
-}
 
 async function saveSettings(event) {
     if (event) event.preventDefault();
@@ -3913,61 +3376,6 @@ function renderBotsPage(page) {
     buildPaginationUI(ul, page, totalPages, 'renderBotsPage');
 }
 
-// 2. PAGINATION DU RÉSEAU DES OASIS NATURELLES (TAB=WORLD)
-let currentOasesPage = 1;
-let oasesPerPage = 15;
-
-function initOasesPagination() {
-    const rows = document.querySelectorAll('.oasis-table-row');
-    if (rows.length === 0) return;
-    const urlParams = new URLSearchParams(window.location.search);
-    const p = parseInt(urlParams.get('oasis_page') || urlParams.get('bot_page'), 10);
-    if (!isNaN(p) && p >= 1) currentOasesPage = p;
-    const select = document.getElementById('oasesPerPageSelect');
-    if (select) oasesPerPage = parseInt(select.value, 10) || 15;
-    renderOasesPage(currentOasesPage);
-}
-
-function changeOasesPerPage(newVal) {
-    oasesPerPage = parseInt(newVal, 10) || 15;
-    currentOasesPage = 1;
-    renderOasesPage(currentOasesPage);
-}
-
-function renderOasesPage(page) {
-    const rows = Array.from(document.querySelectorAll('.oasis-table-row'));
-    const totalOases = rows.length;
-    if (totalOases === 0) return;
-    const totalPages = Math.ceil(totalOases / oasesPerPage) || 1;
-    if (page < 1) page = 1;
-    if (page > totalPages) page = totalPages;
-    currentOasesPage = page;
-
-    try {
-        const url = new URL(window.location.href);
-        if (url.searchParams.get('tab') === 'world') {
-            url.searchParams.set('oasis_page', page);
-            window.history.replaceState({}, '', url.toString());
-        }
-    } catch (e) {}
-
-    const startIndex = (page - 1) * oasesPerPage;
-    const endIndex = Math.min(startIndex + oasesPerPage, totalOases);
-
-    rows.forEach((row, idx) => {
-        row.style.display = (idx >= startIndex && idx < endIndex) ? '' : 'none';
-    });
-
-    const startEl = document.getElementById('oasesPaginationStart');
-    const endEl = document.getElementById('oasesPaginationEnd');
-    const totalEl = document.getElementById('oasesPaginationTotal');
-    if (startEl) startEl.textContent = (totalOases > 0) ? (startIndex + 1) : 0;
-    if (endEl) endEl.textContent = endIndex;
-    if (totalEl) totalEl.textContent = totalOases;
-
-    const ul = document.getElementById('oasesPaginationList');
-    buildPaginationUI(ul, page, totalPages, 'renderOasesPage');
-}
 
 // 3. PAGINATION DU REGISTRE DES DAIMYŌS JOUEURS (TAB=USERS)
 let currentUsersPage = 1;
@@ -4333,40 +3741,6 @@ async function revokeProtection(userId, username) {
     });
 }
 
-async function generateWorld(event) {
-    if (event) event.preventDefault();
-    const count = document.getElementById('planet_count_input').value;
-    const radius = document.getElementById('radius_input').value;
-    const clearUninhabited = document.getElementById('clear_uninhabited').checked ? '1' : '0';
-
-    showModalConfirm("Déploiement Provincial", `Voulez-vous générer <strong>${count}</strong> nouveaux fiefs et terres procédurales dans un rayon de <strong>${radius}</strong> provinces ?`, async () => {
-        try {
-            const formData = new FormData();
-            formData.append('action', 'generate_world');
-            formData.append('planet_count', count);
-            formData.append('radius', radius);
-            formData.append('clear_uninhabited', clearUninhabited);
-
-            const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
-            const data = await res.json();
-
-            if (data.success) {
-                const pList = data.planets.slice(0, 5).map(p => `• <strong>${p.name}</strong> ${p.coords} (${p.type})`).join('<br>');
-                const moreTxt = data.planets.length > 5 ? `<br>... et ${data.planets.length - 5} autres domaines.` : '';
-                showModalAlert(
-                    "Expansion Provinciale Réussie", 
-                    `<strong>${data.generated_count}</strong> terres et fiefs ont été déployés avec succès sur la carte des provinces !<br><br>${pList}${moreTxt}`, 
-                    "success"
-                );
-                setTimeout(() => location.reload(), 2000);
-            } else {
-                showModalAlert("Erreur", data.error || "Impossible d'arpenter les terres.", "danger");
-            }
-        } catch (e) {
-            showModalAlert("Erreur Réseau", "Une erreur est survenue lors de l'arpentage.", "danger");
-        }
-    });
-}
 
 async function awardWeeklyMedals() {
     showModalConfirm(
@@ -4570,34 +3944,6 @@ async function updateCastlePosition(castleId) {
     }
 }
 
-async function executeRepopulateOases() {
-    const density = parseFloat(document.getElementById('repop_density').value) || 2.0;
-    const radius = parseInt(document.getElementById('repop_radius').value, 10) || 28;
-    const clearUnoccupied = document.getElementById('repop_clear_unoccupied').checked ? '1' : '0';
-
-    if (!confirm(`Confirmer la génération d'oasis avec une densité de ${density}% sur un rayon de ${radius} ?`)) {
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('action', 'repopulate_oases');
-    formData.append('density_percent', density);
-    formData.append('radius', radius);
-    formData.append('clear_unoccupied', clearUnoccupied);
-
-    try {
-        const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
-        const data = await res.json();
-        if (data.success) {
-            await showModalAlert("Génération d'Oasis Réussie", data.message, "success");
-            window.location.reload();
-        } else {
-            showModalAlert("Erreur", data.error || "Impossible de générer les oasis.", "danger");
-        }
-    } catch (e) {
-        showModalAlert("Erreur Réseau", "Une erreur est survenue lors de la génération.", "danger");
-    }
-}
 
 // ── Modération & Forum Féodal ──
 async function toggleModerator(userId, username, currentStatus) {
