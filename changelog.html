@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.14.0</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.15.0</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,6 +123,76 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.15.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #206bc4; box-shadow: 0 0 0 2px #206bc4;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.15.0</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-blue-lt fw-bold">Sécurité RBAC</span>
+                                <span class="badge bg-purple-lt fw-bold">Masquage DOM &amp; Routeur</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 30 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary d-flex align-items-center gap-2 mb-3">
+                                <span>🔒</span> Contrôle d'Accès Strict et Masquage DOM des Onglets par Métier
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-purple-lt">Zéro DOM</span>
+                                            <span>Non-Rendu PHP Côté Serveur</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Chaque onglet et panneau de contenu du Studio Dev est conditionné côté serveur. Aucun code HTML ni nœud DOM n'est envoyé au client pour les sections non autorisées, bannissant le simple masquage CSS inspectable.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-danger-lt">Sécurité Routeur</span>
+                                            <span>Interception d'URL &amp; Code HTTP 403</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Interception dès le routeur principal <code>index.php</code> de toute tentative de forçage manuel (<code>?page=dev_team&amp;tab=...</code>) avec redirection propre vers le premier onglet autorisé et bandeau d'avertissement.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-warning-lt">Super-Admin</span>
+                                            <span>Vue Exhaustive et Passe-Droit</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Maintien de l'accès inconditionnel et de la visibilité sur l'ensemble des 7 onglets du studio pour les administrateurs globaux, permettant la supervision complète de la production féodale.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-teal-lt">API REST &amp; Navigation</span>
+                                            <span>Habilitations &amp; Synchronisation URL</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Contrôles de permission renforcés sur les points d'API REST sensibles (contrôle de syntaxe automatisé) et synchronisation transparente de l'URL via <code>history.replaceState</code> lors du changement d'onglet.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
                     <!-- VERSION 1.14.0 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
@@ -130,7 +200,6 @@
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.14.0</span>
-                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
                                 <span class="badge bg-teal-lt fw-bold">Community Manager</span>
                                 <span class="badge bg-azure-lt fw-bold">Mailing List &amp; RGPD</span>
                             </div>

@@ -97,6 +97,30 @@ foreach ($allMembers as $m) {
 $totalPlayersCount = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $totalPlanetsCount = (int)$db->query("SELECT COUNT(*) FROM planets")->fetchColumn();
 $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WHERE finishes_at > " . time())->fetchColumn();
+
+// ── Matrice des onglets autorisés pour l'utilisateur connecté ──────────────────
+$allowedTabs = $devEngine->getAllowedTabs($userId, $auth->isAdmin());
+if (empty($allowedTabs)) {
+    http_response_code(403);
+    ?>
+    <div class="container-xl py-5 text-center">
+        <div class="empty">
+            <div class="empty-icon text-danger" style="font-size: 3rem;">🔒</div>
+            <p class="empty-title">Accès Interdit au Studio</p>
+            <p class="empty-subtitle text-muted">Aucun onglet du studio de développement n'est habilité pour votre profil.</p>
+        </div>
+    </div>
+    <?php
+    return;
+}
+
+$requestedTab = trim((string)($_GET['tab'] ?? ''));
+if ($requestedTab !== '' && in_array($requestedTab, $allowedTabs, true)) {
+    $activeTab = $requestedTab;
+} else {
+    $activeTab = $allowedTabs[0] ?? 'roster';
+}
+$isForbiddenRedirect = !empty($_GET['forbidden']);
 ?>
 
 <div class="container-xl py-4" style="max-width: 1200px;">
@@ -169,55 +193,83 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
         <button type="button" class="btn-close" onclick="document.getElementById('dev-alert').classList.add('d-none');"></button>
     </div>
 
-    <!-- ── ONGLETS DE NAVIGATION DU STUDIO ── -->
+    <!-- ── ALERTE REDIRECTION FORCÉE (ACCÈS INTERDIT À L'ONGLET REQUIS) ── -->
+    <?php if ($isForbiddenRedirect): ?>
+    <div class="alert alert-warning alert-dismissible shadow-sm mb-3" role="alert">
+        <div class="d-flex align-items-center gap-2">
+            <span class="fs-2">🔒</span>
+            <div>
+                <h4 class="alert-title mb-1">Accès Restreint &bull; Métier Requis</h4>
+                <div class="text-muted small">Vous avez été redirigé(e) vers un onglet autorisé car votre profil ne possède pas le métier ou les habilitations nécessaires pour accéder à l'onglet demandé.</div>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+    </div>
+    <?php endif; ?>
+
+    <!-- ── ONGLETS DE NAVIGATION DU STUDIO (CONDITIONNEMENT STRICT PAR MÉTIER) ── -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-header border-bottom">
             <ul class="nav nav-tabs card-header-tabs" id="dev-team-tabs" role="tablist">
+                <?php if (in_array('roster', $allowedTabs, true)): ?>
                 <li class="nav-item">
-                    <a class="nav-link active" id="tab-roster-btn" data-bs-toggle="tab" href="#tab-roster" role="tab" onclick="switchDevTab('roster')">
+                    <a class="nav-link <?= $activeTab === 'roster' ? 'active' : '' ?>" id="tab-roster-btn" data-bs-toggle="tab" href="#tab-roster" role="tab" onclick="switchDevTab('roster')">
                         <span>👥</span> Studio Roster &amp; Métiers
                     </a>
                 </li>
+                <?php endif; ?>
+
+                <?php if (in_array('qa', $allowedTabs, true)): ?>
                 <li class="nav-item">
-                    <a class="nav-link" id="tab-qa-btn" data-bs-toggle="tab" href="#tab-qa" role="tab" onclick="switchDevTab('qa')">
+                    <a class="nav-link <?= $activeTab === 'qa' ? 'active' : '' ?>" id="tab-qa-btn" data-bs-toggle="tab" href="#tab-qa" role="tab" onclick="switchDevTab('qa')">
                         <span>📋</span> QA &amp; Recette
                         <?php if ($qaStats['pending'] > 0): ?>
                             <span class="badge bg-danger text-white ms-1" id="nav-qa-pending-badge"><?= $qaStats['pending'] ?></span>
                         <?php endif; ?>
                     </a>
                 </li>
-                <?php if ($canManageCommunity): ?>
+                <?php endif; ?>
+
+                <?php if (in_array('mailing', $allowedTabs, true)): ?>
                 <li class="nav-item">
-                    <a class="nav-link" id="tab-mailing-btn" data-bs-toggle="tab" href="#tab-mailing" role="tab" onclick="switchDevTab('mailing')">
+                    <a class="nav-link <?= $activeTab === 'mailing' ? 'active' : '' ?>" id="tab-mailing-btn" data-bs-toggle="tab" href="#tab-mailing" role="tab" onclick="switchDevTab('mailing')">
                         <span>📢</span> Mailing List
                         <span class="badge bg-teal-lt text-teal ms-1" id="nav-mailing-count-badge"><?= $mailingStats['newsletter_subscribers'] ?></span>
                     </a>
                 </li>
                 <?php endif; ?>
-                <?php if ($canUseSandbox): ?>
+
+                <?php if (in_array('sandbox', $allowedTabs, true)): ?>
                 <li class="nav-item">
-                    <a class="nav-link" id="tab-sandbox-btn" data-bs-toggle="tab" href="#tab-sandbox" role="tab" onclick="switchDevTab('sandbox')">
-                        <span>🧪</span> Atelier QA & Sandbox
+                    <a class="nav-link <?= $activeTab === 'sandbox' ? 'active' : '' ?>" id="tab-sandbox-btn" data-bs-toggle="tab" href="#tab-sandbox" role="tab" onclick="switchDevTab('sandbox')">
+                        <span>🧪</span> Atelier QA &amp; Sandbox
                     </a>
                 </li>
                 <?php endif; ?>
-                <?php if ($canMonitorSystem || $canTriggerCron): ?>
+
+                <?php if (in_array('system', $allowedTabs, true)): ?>
                 <li class="nav-item">
-                    <a class="nav-link" id="tab-system-btn" data-bs-toggle="tab" href="#tab-system" role="tab" onclick="switchDevTab('system')">
-                        <span>⚙️</span> Live Ops & Serveur
+                    <a class="nav-link <?= $activeTab === 'system' ? 'active' : '' ?>" id="tab-system-btn" data-bs-toggle="tab" href="#tab-system" role="tab" onclick="switchDevTab('system')">
+                        <span>⚙️</span> Live Ops &amp; Serveur
                     </a>
                 </li>
                 <?php endif; ?>
+
+                <?php if (in_array('lore', $allowedTabs, true)): ?>
                 <li class="nav-item">
-                    <a class="nav-link" id="tab-lore-btn" data-bs-toggle="tab" href="#tab-lore" role="tab" onclick="switchDevTab('lore')">
-                        <span>📜</span> Univers & Lore
+                    <a class="nav-link <?= $activeTab === 'lore' ? 'active' : '' ?>" id="tab-lore-btn" data-bs-toggle="tab" href="#tab-lore" role="tab" onclick="switchDevTab('lore')">
+                        <span>📜</span> Univers &amp; Lore
                     </a>
                 </li>
+                <?php endif; ?>
+
+                <?php if (in_array('forge', $allowedTabs, true)): ?>
                 <li class="nav-item">
-                    <a class="nav-link" id="tab-forge-btn" data-bs-toggle="tab" href="#tab-forge" role="tab" onclick="switchDevTab('forge')">
-                        <span>🔨</span> Journal de Forge & Trophées
+                    <a class="nav-link <?= $activeTab === 'forge' ? 'active' : '' ?>" id="tab-forge-btn" data-bs-toggle="tab" href="#tab-forge" role="tab" onclick="switchDevTab('forge')">
+                        <span>🔨</span> Journal de Forge &amp; Trophées
                     </a>
                 </li>
+                <?php endif; ?>
             </ul>
         </div>
 
@@ -227,7 +279,8 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                 <!-- ═══════════════════════════════════════════════════════════════════════
                      ONGLET 1 : ROSTER & LES MÉTIERS DU JEU VIDÉO
                      ═══════════════════════════════════════════════════════════════════════ -->
-                <div class="tab-pane fade show active" id="tab-roster" role="tabpanel">
+                <?php if (in_array('roster', $allowedTabs, true)): ?>
+                <div class="tab-pane fade <?= $activeTab === 'roster' ? 'show active' : '' ?>" id="tab-roster" role="tabpanel">
                     
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
                         <div>
@@ -375,11 +428,13 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                     </div>
 
                 </div>
+                <?php endif; ?>
 
                 <!-- ═══════════════════════════════════════════════════════════════════════
                      ONGLET 2 : QA & RECETTE (FONCTIONNALITÉS & TESTS DE SYNTAXE)
                      ═══════════════════════════════════════════════════════════════════════ -->
-                <div class="tab-pane fade" id="tab-qa" role="tabpanel">
+                <?php if (in_array('qa', $allowedTabs, true)): ?>
+                <div class="tab-pane fade <?= $activeTab === 'qa' ? 'show active' : '' ?>" id="tab-qa" role="tabpanel">
 
                     <!-- En-tête QA & Action Rapide -->
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
@@ -596,12 +651,13 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                     </div>
 
                 </div>
+                <?php endif; ?>
 
                 <!-- ═══════════════════════════════════════════════════════════════════════
                      ONGLET : MAILING LIST & COMMUNAUTÉ
                      ═══════════════════════════════════════════════════════════════════════ -->
-                <?php if ($canManageCommunity): ?>
-                <div class="tab-pane fade" id="tab-mailing" role="tabpanel">
+                <?php if (in_array('mailing', $allowedTabs, true)): ?>
+                <div class="tab-pane fade <?= $activeTab === 'mailing' ? 'show active' : '' ?>" id="tab-mailing" role="tabpanel">
 
                     <!-- En-tête de section -->
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
@@ -909,8 +965,8 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                 <!-- ═══════════════════════════════════════════════════════════════════════
                      ONGLET 3 : ATELIER QA & SANDBOX
                      ═══════════════════════════════════════════════════════════════════════ -->
-                <?php if ($canUseSandbox): ?>
-                <div class="tab-pane fade" id="tab-sandbox" role="tabpanel">
+                <?php if (in_array('sandbox', $allowedTabs, true)): ?>
+                <div class="tab-pane fade <?= $activeTab === 'sandbox' ? 'show active' : '' ?>" id="tab-sandbox" role="tabpanel">
                     
                     <div class="alert alert-warning d-flex align-items-center gap-3 mb-4 shadow-sm">
                         <div class="fs-1">🧪</div>
@@ -977,8 +1033,8 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                 <!-- ═══════════════════════════════════════════════════════════════════════
                      ONGLET 3 : LIVE OPS & SERVEUR
                      ═══════════════════════════════════════════════════════════════════════ -->
-                <?php if ($canMonitorSystem || $canTriggerCron): ?>
-                <div class="tab-pane fade" id="tab-system" role="tabpanel">
+                <?php if (in_array('system', $allowedTabs, true)): ?>
+                <div class="tab-pane fade <?= $activeTab === 'system' ? 'show active' : '' ?>" id="tab-system" role="tabpanel">
 
                     <h3 class="card-title mb-3">Indicateurs de Santé & Opérations Réseau</h3>
 
@@ -1072,7 +1128,8 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                 <!-- ═══════════════════════════════════════════════════════════════════════
                      ONGLET 4 : UNIVERS & LORE
                      ═══════════════════════════════════════════════════════════════════════ -->
-                <div class="tab-pane fade" id="tab-lore" role="tabpanel">
+                <?php if (in_array('lore', $allowedTabs, true)): ?>
+                <div class="tab-pane fade <?= $activeTab === 'lore' ? 'show active' : '' ?>" id="tab-lore" role="tabpanel">
                     
                     <div class="card border mb-3">
                         <div class="card-body">
@@ -1115,11 +1172,13 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                     </div>
 
                 </div>
+                <?php endif; ?>
 
                 <!-- ═══════════════════════════════════════════════════════════════════════
                      ONGLET 5 : JOURNAL DE FORGE & XP
                      ═══════════════════════════════════════════════════════════════════════ -->
-                <div class="tab-pane fade" id="tab-forge" role="tabpanel">
+                <?php if (in_array('forge', $allowedTabs, true)): ?>
+                <div class="tab-pane fade <?= $activeTab === 'forge' ? 'show active' : '' ?>" id="tab-forge" role="tabpanel">
 
                     <!-- Paliers de Progression -->
                     <h3 class="card-title mb-3">🏆 Paliers des Créateurs de la Forge</h3>
@@ -1191,6 +1250,7 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                     </div>
 
                 </div>
+                <?php endif; ?>
 
             </div>
         </div>
@@ -1331,6 +1391,7 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
 </div>
 <?php endif; ?>
 
+<?php if (in_array('mailing', $allowedTabs, true)): ?>
 <!-- ── MODALE : COMPOSITION DE NEWSLETTER / MISSIVE IMPÉRIALE ── -->
 <div class="modal fade" id="modal-compose-newsletter" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -1409,6 +1470,7 @@ Le Conseil impérial se réunit aujourd'hui pour vous annoncer de grandes réfor
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
      MODAL : CONFIRMATION TABLER (Pas de confirm natif)
@@ -1514,6 +1576,12 @@ function switchDevTab(tabId) {
             const target = document.getElementById(`tab-${tabId}`);
             if (target) target.classList.add('show', 'active');
         }
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('tab', tabId);
+            url.searchParams.delete('forbidden');
+            window.history.replaceState({}, '', url.toString());
+        } catch (e) {}
     }
 }
 

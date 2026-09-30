@@ -141,9 +141,28 @@ if ($page === 'admin' && !$auth->isAdmin()) {
 if ($page === 'dev_team') {
     require_once __DIR__ . '/core/DevTeamEngine.php';
     $devEngine = new DevTeamEngine();
-    if (!$devEngine->isDevTeamMember((int)Auth::id())) {
+    $currentDevUserId = (int)Auth::id();
+    $isDevAdmin = $auth->isAdmin();
+
+    if (!$devEngine->isDevTeamMember($currentDevUserId)) {
         header('Location: /?page=resources');
         exit;
+    }
+
+    // Contrôle d'accès strict côté serveur sur l'onglet demandé (?tab=...)
+    $allowedDevTabs = $devEngine->getAllowedTabs($currentDevUserId, $isDevAdmin);
+    if (empty($allowedDevTabs)) {
+        http_response_code(403);
+        die("Accès interdit : aucun onglet autorisé pour votre profil de développement.");
+    }
+
+    if (isset($_GET['tab']) && trim((string)$_GET['tab']) !== '') {
+        $requestedTab = trim((string)$_GET['tab']);
+        if (!in_array($requestedTab, $allowedDevTabs, true)) {
+            $fallbackTab = $allowedDevTabs[0];
+            header('Location: /?page=dev_team&tab=' . urlencode($fallbackTab) . '&forbidden=1');
+            exit;
+        }
     }
 }
 

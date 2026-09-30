@@ -72,8 +72,17 @@
 - **Notions pour l'atelier :**
   - Pourquoi ne jamais stocker un mot de passe en clair (hachage bcrypt / argon2 vs chiffrement réversible AES-256).
   - Comment vérifier la concordance d'un mot de passe en temps réel avant d'envoyer la requête au serveur.
-  - Débogage d'une liste blanche (`allowedTabs` / `validTabs`) : comprendre pourquoi un onglet valide côté vue était refoulé par le contrôleur de routage.
-- **Activité pratique suggérée :** Créer un petit script de test en ligne de commande pour envoyer un message SMTP simulé avec `stream_socket_client`.
+### Session du 30/09/2026 (Partie 4) — Contrôle d'Accès Strict (RBAC) & Masquage DOM des Onglets par Métier
+- **Concept exploré :** Cloisonnement strict des interfaces (Security by Design) et distinction fondamentale entre masquage CSS (`display: none`) et non-rendu côté serveur.
+- **Notions pour l'atelier :**
+  - **Ne jamais faire confiance au client :** Pourquoi masquer un élément en CSS (`display: none`) ne protège rien (n'importe quel joueur peut ouvrir les outils de développement `F12` et inspecter le code HTML ou déclencher un événement JS).
+  - **Non-rendu PHP (Zéro DOM) :** Conditionner l'émission du HTML avec `<?php if (in_array(...)): ?>` empêche totalement la fuite d'informations ou de contrôles sensibles vers le navigateur d'un profil non habilité.
+  - **Protection en profondeur du routeur :** Interception dès le routeur principal `index.php` en amont de l'affichage avec redirection `302` et code `HTTP 403` si un utilisateur modifie manuellement le paramètre `?tab=...` dans la barre d'adresse.
+  - **Passe-droit hiérarchique (Super-Admin) :** Comment un administrateur système hérite naturellement de la visibilité exhaustive sur l'ensemble des modules d'un studio sans altérer les règles propres aux métiers spécialisés.
+- **Activité pratique suggérée :** 
+  1. Se connecter avec un compte doté uniquement du rôle *Narrative Designer*.
+  2. Ouvrir l'inspecteur du navigateur (`F12`), chercher `#tab-system` ou `#tab-qa` et constater qu'aucun nœud HTML n'existe.
+  3. Taper manuellement `/?page=dev_team&tab=system` dans la barre d'adresse et observer la redirection immédiate vers l'onglet autorisé avec le bandeau d'alerte.
 
 ---
 

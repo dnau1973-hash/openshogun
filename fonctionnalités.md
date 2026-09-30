@@ -48,3 +48,13 @@
 - **Fichiers modifiés :** `core/DevTeamEngine.php`, `core/MailingListEngine.php`, `core/Auth.php`, `core/InstallEngine.php`, `install.php`, `index.php`, `views/auth.php`, `views/dev_team.php`, `views/partials/admin_mail.php`, `api/dev_team.php`, `database/schema_complete.sql`, `database/migrate_community_and_newsletter.php`
 - **Vérification QA :** Assigner le métier Community Manager à un joueur, accéder à l'onglet "Mailing List" dans Studio Dev, filtrer les abonnés, exporter en CSV, envoyer une missive de test sur son propre e-mail et vérifier que la case newsletter est bien non cochée par défaut à l'inscription.
 
+---
+
+### [2026-09-30] - dev_team : Contrôle d'Accès Strict et Masquage DOM des Onglets par Métier
+- **Module :** `dev_team`
+- **Statut :** `À tester`
+- **Description :** Conditionnement strict du rendu PHP de chaque onglet du menu et de son panneau associé (aucun nœud généré dans le DOM si métier non possédé), conservation de la vue totale pour les administrateurs globaux, interception et redirection propre côté serveur dans `index.php` avec alerte contextuelle en cas de tentative de forçage d'URL (`?page=dev_team&tab=...`), et sécurisation des points d'API REST.
+- **Fichiers modifiés :** `core/DevTeamEngine.php`, `index.php`, `views/dev_team.php`, `api/dev_team.php`, `fonctionnalités.md`
+- **Vérification QA :** Se connecter avec un compte ayant uniquement le métier Narrative Designer : vérifier que seuls les onglets Roster, Lore et Forge s'affichent dans la navigation et que le DOM ne contient aucun élément de QA, Mailing, Sandbox ou Système. Tenter de forcer l'URL `/?page=dev_team&tab=system` et vérifier la redirection automatique vers le premier onglet autorisé avec le bandeau d'alerte. Se connecter en administrateur et vérifier que les 7 onglets sont tous visibles et accessibles.
+
+

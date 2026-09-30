@@ -230,6 +230,13 @@ try {
         case 'run_syntax_check':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
             
+            $canRunSyntax = $devEngine->hasPermission($currentUserId, 'bugs.manage') 
+                         || $devEngine->hasPermission($currentUserId, 'debug.sandbox') 
+                         || $auth->isAdmin();
+            if (!$canRunSyntax) {
+                throw new Exception("Habilitation QA requise pour exécuter le contrôle de syntaxe.");
+            }
+
             $syntaxResult = QASyntaxChecker::runSyntaxCheck();
             if ($syntaxResult['is_clean']) {
                 $devEngine->addForgeXp($currentUserId, 15, 'syntax_check_clean', "Contrôle technique automatisé réussi (100% propre)");

@@ -1,11 +1,11 @@
 {
     "success": true,
     "is_clean": true,
-    "total_files": 131,
-    "passed_count": 131,
+    "total_files": 132,
+    "passed_count": 132,
     "error_count": 0,
     "errors": [],
-    "duration_ms": 4962.96,
-    "checked_at": "30/09/2026 09:17:43",
-    "timestamp": 1790759863
+    "duration_ms": 4952.95,
+    "checked_at": "30/09/2026 09:37:28",
+    "timestamp": 1790761048
 }

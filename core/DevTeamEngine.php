@@ -157,6 +157,59 @@ class DevTeamEngine {
         'news.manage'        => ['label' => 'Gestion des Annonces & Actualités', 'cat' => 'Communauté', 'desc' => 'Publier et modérer les actualités et dépêches du Shōgunat.']
     ];
 
+    // ── Matrice des onglets du Studio Dev Team et habilitations requises ──────
+    public const STUDIO_TABS = [
+        'roster' => [
+            'id'          => 'roster',
+            'title'       => 'Studio Roster & Métiers',
+            'icon'        => '👥',
+            'roles'       => [], // Accessible à tous les membres de la Dev Team
+            'permissions' => []
+        ],
+        'qa' => [
+            'id'          => 'qa',
+            'title'       => 'QA & Recette',
+            'icon'        => '📋',
+            'roles'       => ['qa_tester', 'producer'],
+            'permissions' => ['bugs.manage', 'debug.sandbox']
+        ],
+        'mailing' => [
+            'id'          => 'mailing',
+            'title'       => 'Mailing List',
+            'icon'        => '📢',
+            'roles'       => ['community_manager', 'producer'],
+            'permissions' => ['community.mailing']
+        ],
+        'sandbox' => [
+            'id'          => 'sandbox',
+            'title'       => 'Atelier QA & Sandbox',
+            'icon'        => '🧪',
+            'roles'       => ['qa_tester', 'backend_dev', 'game_designer', 'producer'],
+            'permissions' => ['debug.sandbox']
+        ],
+        'system' => [
+            'id'          => 'system',
+            'title'       => 'Live Ops & Serveur',
+            'icon'        => '⚙️',
+            'roles'       => ['backend_dev', 'producer'],
+            'permissions' => ['system.monitoring', 'cron.trigger']
+        ],
+        'lore' => [
+            'id'          => 'lore',
+            'title'       => 'Univers & Lore',
+            'icon'        => '📜',
+            'roles'       => ['narrative_designer', 'community_manager', 'producer'],
+            'permissions' => ['lore.publish', 'quests.manage']
+        ],
+        'forge' => [
+            'id'          => 'forge',
+            'title'       => 'Journal de Forge & Trophées',
+            'icon'        => '🔨',
+            'roles'       => [], // Accessible à tous les membres de la Dev Team
+            'permissions' => []
+        ]
+    ];
+
     private PDO $db;
 
     public function __construct(?PDO $db = null) {
@@ -481,6 +534,71 @@ class DevTeamEngine {
             }
             exit;
         }
+    }
+
+    /**
+     * Vérifie si un utilisateur a le droit d'accéder à un onglet du Studio Dev Team
+     * @param int $userId
+     * @param string $tab Identifiant de l'onglet (roster, qa, mailing, sandbox, system, lore, forge)
+     * @param bool $isAdmin
+     * @return bool
+     */
+    public function canAccessTab(int $userId, string $tab, bool $isAdmin = false): bool {
+        // Administrateur : passe-droit total sur tous les onglets du studio
+        if ($isAdmin) {
+            return isset(self::STUDIO_TABS[$tab]);
+        }
+
+        if (!isset(self::STUDIO_TABS[$tab])) {
+            return false;
+        }
+
+        // L'utilisateur doit nécessairement appartenir à la Dev Team
+        if (!$this->isDevTeamMember($userId)) {
+            return false;
+        }
+
+        $tabConfig = self::STUDIO_TABS[$tab];
+
+        // Onglet général sans restriction de métier spécifique : accessible à tout membre Dev Team
+        if (empty($tabConfig['roles']) && empty($tabConfig['permissions'])) {
+            return true;
+        }
+
+        // 1. Vérification par métier attribué (Rôles)
+        $userRoles = $this->getUserRoles($userId);
+        $userRoleIds = array_column($userRoles, 'id');
+        foreach ($tabConfig['roles'] as $r) {
+            if (in_array($r, $userRoleIds, true)) {
+                return true;
+            }
+        }
+
+        // 2. Vérification par permissions directes ou overrides
+        $effectivePerms = $this->getEffectivePermissions($userId);
+        foreach ($tabConfig['permissions'] as $p) {
+            if (in_array($p, $effectivePerms, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Retourne la liste des identifiants d'onglets autorisés pour un utilisateur
+     * @param int $userId
+     * @param bool $isAdmin
+     * @return array<string>
+     */
+    public function getAllowedTabs(int $userId, bool $isAdmin = false): array {
+        $allowed = [];
+        foreach (self::STUDIO_TABS as $tabId => $cfg) {
+            if ($this->canAccessTab($userId, $tabId, $isAdmin)) {
+                $allowed[] = $tabId;
+            }
+        }
+        return $allowed;
     }
 
     // ── GAMIFICATION : FORGE XP & NIVEAUX ──────────────────────────────────────
