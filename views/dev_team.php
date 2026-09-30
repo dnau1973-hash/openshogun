@@ -75,7 +75,7 @@ foreach ($allMembers as $m) {
 // Infos système pour l'onglet Monitoring
 $totalPlayersCount = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $totalPlanetsCount = (int)$db->query("SELECT COUNT(*) FROM planets")->fetchColumn();
-$activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM building_queues WHERE finishes_at > " . time())->fetchColumn();
+$activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WHERE finishes_at > " . time())->fetchColumn();
 ?>
 
 <div class="container-xl py-4" style="max-width: 1200px;">

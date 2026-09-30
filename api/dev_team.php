@@ -106,7 +106,7 @@ try {
                 }
             } elseif ($subAction === 'instant_finish_constructions') {
                 $now = time();
-                $db->exec("UPDATE building_queues SET finishes_at = $now WHERE user_id = $currentUserId AND finishes_at > $now");
+                $db->exec("UPDATE construction_queue SET finishes_at = $now WHERE planet_id IN (SELECT id FROM planets WHERE user_id = $currentUserId) AND finishes_at > $now");
                 $devEngine->addForgeXp($currentUserId, 20, 'sandbox_instant_build', "Achèvement immédiat des chantiers (Debug)");
                 echo json_encode(['success' => true, 'message' => "Tous les chantiers en cours ont été instantanément achevés !"]);
             } else {
