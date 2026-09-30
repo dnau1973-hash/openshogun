@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.9.0</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.9.2</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,6 +123,100 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.9.2 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.9.2</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-primary-lt fw-bold">Navigation &amp; Forum Féodal</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 30 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary d-flex align-items-center gap-2 mb-3">
+                                <span>🏛️</span> Refonte Navigation Administration &amp; Décentralisation du Forum Féodal
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-danger-lt">Nettoyage</span>
+                                            <span>Suppression Onglets Admin</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Suppression définitive des onglets <strong>« Ateliers pédagogiques »</strong> (désormais page autonome 1er niveau <code>/?page=pedagogy</code>) et <strong>« Forum féodal »</strong> de la barre de navigation et du panneau d'administration. Rééquilibrage harmonieux des cartes KPIs en haut du tableau de bord (3 colonnes <code>col-xl-4</code>).
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-success-lt">Espace Forum</span>
+                                            <span>Panneau d'Administration Dédié (<code>views/forum.php</code>)</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Intégration d'un panneau d'administration rétractable réservé aux administrateurs directement dans la vue du forum : gestion complète des catégories (création via modale, modification, tri d'affichage, verrouillage aux décrets Staff, suppression) et boutons de configuration rapide par salon. Conservation intégrale des contrôles de droits <code>$auth->isAdmin()</code> et <code>$auth->isStaff()</code>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.9.1 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.9.1</span>
+                                <span class="badge bg-secondary-lt fw-bold">Version précédente</span>
+                                <span class="badge bg-danger-lt fw-bold">Hotfix Admin</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 29 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-danger d-flex align-items-center gap-2 mb-3">
+                                <span>🩹</span> Correctifs Page de Traitement Admin (<code>admin_support_traiter.php</code>)
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-danger-lt">Fatal Error</span>
+                                            <span>Variable <code>$currentTab</code> Indéfinie</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            L'intercept de routage dans <code>admin.php</code> référençait <code>$currentTab</code> qui n'est calculé que 300 lignes plus bas. Provoquait un <em>Warning: Undefined variable</em> au chargement de toute page admin. Corrigé en lisant directement <code>$_GET['tab'] ?? ''</code> dans la condition.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-danger-lt">Fatal Error</span>
+                                            <span>Colonne <code>p.is_main</code> Inexistante</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            La requête SQL de chargement du ticket dans <code>admin_support_traiter.php</code> joignait la table <code>planets</code> sur <code>p.is_main = 1</code>, colonne absente du schéma. La colonne réelle s'appelle <code>is_capital</code>. Corrigé dans le <code>LEFT JOIN</code>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
                     <!-- VERSION 1.9.0 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
@@ -130,7 +224,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.9.0</span>
-                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-secondary-lt fw-bold">Version précédente</span>
                                 <span class="badge bg-azure-lt fw-bold">Support &amp; Constructions</span>
                             </div>
                             <div class="text-secondary small">
