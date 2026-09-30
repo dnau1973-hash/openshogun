@@ -44,22 +44,39 @@ try {
             echo json_encode(['success' => true, 'members' => $members]);
             break;
 
-        // 3. Attribution d'un rôle métier (Direction / Team manage)
+        // 3. Attribution d'un ou plusieurs rôles métiers (Direction / Team manage)
         case 'assign_role':
+        case 'assign_roles':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
             DevTeamEngine::authorize('team.manage', $currentUserId);
 
             $targetId = (int)($_POST['user_id'] ?? 0);
-            $roleId = (string)($_POST['role_id'] ?? '');
-
-            if ($targetId <= 0 || empty($roleId)) {
-                throw new Exception("Paramètres manquants.");
+            $roleIds = [];
+            if (!empty($_POST['role_ids'])) {
+                $roleIds = is_array($_POST['role_ids']) ? $_POST['role_ids'] : explode(',', (string)$_POST['role_ids']);
+            } elseif (!empty($_POST['role_id'])) {
+                $roleIds = is_array($_POST['role_id']) ? $_POST['role_id'] : [$_POST['role_id']];
             }
 
-            $success = $devEngine->assignRole($targetId, $roleId);
+            if ($targetId <= 0 || empty($roleIds)) {
+                throw new Exception("Veuillez sélectionner un membre et au moins un métier valide.");
+            }
+
+            $assigned = $devEngine->assignRoles($targetId, $roleIds);
+            if (empty($assigned)) {
+                throw new Exception("Aucun nouveau métier n'a été assigné (métiers déjà possédés par le joueur ou invalides).");
+            }
+
+            $updatedRoles = $devEngine->getUserRoles($targetId);
+            $count = count($assigned);
+            $roleTitles = implode(', ', array_map(fn($r) => $r['title'], $assigned));
+
             echo json_encode([
-                'success' => $success,
-                'message' => "Le métier a été assigné avec succès !"
+                'success'        => true,
+                'message'        => ($count === 1) ? "Le métier « {$roleTitles} » a été assigné !" : "{$count} métiers assignés avec succès : {$roleTitles} !",
+                'assigned_roles' => $assigned,
+                'all_roles'      => $updatedRoles,
+                'user_id'        => $targetId
             ]);
             break;
 
@@ -69,16 +86,22 @@ try {
             DevTeamEngine::authorize('team.manage', $currentUserId);
 
             $targetId = (int)($_POST['user_id'] ?? 0);
-            $roleId = (string)($_POST['role_id'] ?? '');
+            $roleId = trim((string)($_POST['role_id'] ?? ''));
 
             if ($targetId <= 0 || empty($roleId)) {
                 throw new Exception("Paramètres manquants.");
             }
 
             $success = $devEngine->removeRole($targetId, $roleId);
+            $updatedRoles = $devEngine->getUserRoles($targetId);
+            $roleTitle = DevTeamEngine::ROLES[$roleId]['title'] ?? $roleId;
+
             echo json_encode([
-                'success' => $success,
-                'message' => "Le métier a été retiré."
+                'success'   => $success,
+                'message'   => "Le métier « {$roleTitle} » a été retiré.",
+                'user_id'   => $targetId,
+                'role_id'   => $roleId,
+                'all_roles' => $updatedRoles
             ]);
             break;
 

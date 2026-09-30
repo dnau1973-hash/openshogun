@@ -72,6 +72,11 @@ foreach ($allMembers as $m) {
     }
 }
 
+$membersRolesMap = [];
+foreach ($allMembers as $m) {
+    $membersRolesMap[$m['user_id']] = array_map(fn($r) => $r['id'], $m['roles']);
+}
+
 // Infos système pour l'onglet Monitoring
 $totalPlayersCount = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $totalPlanetsCount = (int)$db->query("SELECT COUNT(*) FROM planets")->fetchColumn();
@@ -230,12 +235,12 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                                         <!-- Membres actifs détenant le rôle -->
                                         <div class="border-top pt-2 mt-auto">
                                             <div class="text-muted small mb-1" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Membres assignés :</div>
-                                            <div class="d-flex flex-wrap gap-1">
+                                            <div class="d-flex flex-wrap gap-1" id="role-dist-list-<?= $rKey ?>">
                                                 <?php if (empty($assignedUsers)): ?>
-                                                    <span class="text-muted fst-italic small" style="font-size: 0.75rem;">Aucun pour le moment</span>
+                                                    <span class="text-muted fst-italic small no-member-tag" style="font-size: 0.75rem;">Aucun pour le moment</span>
                                                 <?php else: ?>
                                                     <?php foreach ($assignedUsers as $uName): ?>
-                                                        <span class="badge bg-light text-dark border" style="font-size: 0.75rem;">👤 <?= htmlspecialchars($uName) ?></span>
+                                                        <span class="badge bg-light text-dark border dist-user-tag" data-username="<?= htmlspecialchars($uName) ?>" style="font-size: 0.75rem;">👤 <?= htmlspecialchars($uName) ?></span>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>
                                             </div>
@@ -252,26 +257,26 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                             <h4 class="card-title mb-0">Membres Actifs du Studio (<?= count($allMembers) ?>)</h4>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-vcenter card-table table-striped">
+                            <table class="table table-vcenter card-table table-striped" id="dev-roster-table">
                                 <thead>
                                     <tr>
                                         <th>Développeur</th>
                                         <th>Faction</th>
                                         <th>Métiers Assignés</th>
-                                        <th>Rang & Forge XP</th>
+                                        <th>Rang &amp; Forge XP</th>
                                         <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($allMembers as $member): ?>
-                                        <tr>
+                                        <tr id="member-row-<?= $member['user_id'] ?>" data-user-id="<?= $member['user_id'] ?>">
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
                                                     <span class="avatar avatar-sm rounded-circle bg-purple-lt fw-bold">
                                                         <?= strtoupper(substr($member['username'], 0, 1)) ?>
                                                     </span>
                                                     <div>
-                                                        <strong class="text-reset"><?= htmlspecialchars($member['username']) ?></strong>
+                                                        <strong class="text-reset member-name"><?= htmlspecialchars($member['username']) ?></strong>
                                                         <?php if ($member['is_admin']): ?>
                                                             <span class="badge bg-danger-lt ms-1" style="font-size: 0.65rem;">Admin</span>
                                                         <?php endif; ?>
@@ -282,15 +287,24 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                                                 <span class="badge bg-secondary-lt text-capitalize"><?= htmlspecialchars($member['faction']) ?></span>
                                             </td>
                                             <td>
-                                                <div class="d-flex flex-wrap gap-1">
+                                                <div class="d-flex flex-wrap align-items-center gap-1 roles-container" id="user-roles-<?= $member['user_id'] ?>">
                                                     <?php if (empty($member['roles'])): ?>
-                                                        <span class="text-muted small">Aucun rôle</span>
+                                                        <span class="text-muted small fst-italic no-roles-placeholder">Aucun métier</span>
                                                     <?php else: ?>
                                                         <?php foreach ($member['roles'] as $r): ?>
-                                                            <span class="badge <?= DevTeamEngine::ROLES[$r['id']]['badge_color'] ?? 'bg-secondary' ?>" title="<?= htmlspecialchars($r['honor_title'] ?? '') ?>">
-                                                                <?= $r['icon'] ?? '🛠️' ?> <?= htmlspecialchars($r['title']) ?>
-                                                                <?php if ($canManageTeam && !$member['is_admin']): ?>
-                                                                    <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.5rem;" onclick="removeDevRole(<?= $member['user_id'] ?>, '<?= $r['id'] ?>')" title="Retirer ce rôle"></button>
+                                                            <span class="badge <?= DevTeamEngine::ROLES[$r['id']]['badge_color'] ?? 'bg-secondary' ?> d-inline-flex align-items-center gap-1 dev-role-badge shadow-none"
+                                                                  id="badge-role-<?= $member['user_id'] ?>-<?= $r['id'] ?>"
+                                                                  data-user-id="<?= $member['user_id'] ?>"
+                                                                  data-role-id="<?= $r['id'] ?>"
+                                                                  title="<?= htmlspecialchars($r['honor_title'] ?? '') ?>">
+                                                                <span><?= $r['icon'] ?? '🛠️' ?> <?= htmlspecialchars($r['title']) ?></span>
+                                                                <?php if ($canManageTeam): ?>
+                                                                    <button type="button"
+                                                                            class="btn-close btn-close-white ms-1 dev-role-close-btn"
+                                                                            style="font-size: 0.55rem; width: 0.7em; height: 0.7em; opacity: 0.85; cursor: pointer;"
+                                                                            onclick="confirmRemoveDevRole(<?= $member['user_id'] ?>, '<?= $r['id'] ?>', '<?= htmlspecialchars(addslashes($member['username'])) ?>', '<?= htmlspecialchars(addslashes($r['title'])) ?>')"
+                                                                            title="Retirer ce métier">
+                                                                    </button>
                                                                 <?php endif; ?>
                                                             </span>
                                                         <?php endforeach; ?>
@@ -306,11 +320,20 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                                                 </div>
                                             </td>
                                             <td class="text-end">
-                                                <?php if ($canManageSprints): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-warning" onclick="openAwardXpModal(<?= $member['user_id'] ?>, '<?= htmlspecialchars(addslashes($member['username'])) ?>')">
-                                                        <span>⭐</span> Récompenser XP
-                                                    </button>
-                                                <?php endif; ?>
+                                                <div class="btn-list justify-content-end">
+                                                    <?php if ($canManageTeam): ?>
+                                                        <button type="button" class="btn btn-sm btn-outline-purple d-inline-flex align-items-center gap-1"
+                                                                onclick="openAssignRoleModal(<?= $member['user_id'] ?>, '<?= htmlspecialchars(addslashes($member['username'])) ?>')"
+                                                                title="Attribuer des métiers à ce membre">
+                                                            <span>➕</span> <span class="d-none d-md-inline">Métier</span>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                    <?php if ($canManageSprints): ?>
+                                                        <button type="button" class="btn btn-sm btn-outline-warning" onclick="openAwardXpModal(<?= $member['user_id'] ?>, '<?= htmlspecialchars(addslashes($member['username'])) ?>')">
+                                                            <span>⭐</span> Récompenser XP
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -618,39 +641,83 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
      ═══════════════════════════════════════════════════════════════════════════ -->
 <?php if ($canManageTeam): ?>
 <div class="modal fade" id="modal-assign-role" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">🛠️ Assigner un Métier de Développement</h5>
+                <div>
+                    <h5 class="modal-title d-flex align-items-center gap-2 m-0">
+                        <span>🛠️</span> Attribution des Métiers de Développement
+                    </h5>
+                    <div class="text-muted small mt-1">Sélectionnez un membre et les métiers à lui confier. Les métiers déjà détenus sont automatiquement bloqués.</div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <form id="form-assign-role" onsubmit="handleAssignRoleSubmit(event)">
                 <div class="modal-body">
+                    <!-- 1. Sélection du Membre -->
                     <div class="mb-3">
-                        <label class="form-label required">Membre de l'équipe</label>
-                        <select name="user_id" class="form-select" required>
-                            <option value="">Sélectionner un joueur...</option>
+                        <label class="form-label required fw-bold">Membre de l'Équipe</label>
+                        <select name="user_id" id="assign-role-user-id" class="form-select" onchange="onAssignUserChanged(this.value)" required>
+                            <option value="">-- Choisir un joueur ou collaborateur --</option>
                             <?php foreach ($allUsersList as $u): ?>
                                 <option value="<?= (int)$u['id'] ?>"><?= htmlspecialchars($u['username']) ?> (ID: <?= (int)$u['id'] ?>)</option>
                             <?php endforeach; ?>
                         </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label required">Métier de l'Industrie du Jeu Vidéo</label>
-                        <select name="role_id" class="form-select" required>
-                            <option value="">Sélectionner un rôle...</option>
+                    <!-- 2. Aperçu des métiers actuels du joueur -->
+                    <div id="assign-user-current-roles-box" class="p-3 bg-light rounded border mb-3 d-none">
+                        <div class="text-muted small fw-bold mb-2">Métier(s) actuellement détenu(s) par ce joueur :</div>
+                        <div class="d-flex flex-wrap gap-1" id="assign-user-current-roles-list"></div>
+                    </div>
+
+                    <!-- 3. Sélection Multiple des Métiers -->
+                    <div id="assign-roles-selector-block">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label required fw-bold m-0">Métiers Disponibles (Sélection Multiple)</label>
+                            <div class="small">
+                                <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" onclick="selectAllAvailableRoles()">Tout cocher</button>
+                                <span class="text-muted mx-1">&bull;</span>
+                                <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" onclick="clearSelectedRoles()">Tout décocher</button>
+                            </div>
+                        </div>
+
+                        <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column gap-2" id="assign-roles-container">
                             <?php foreach (DevTeamEngine::ROLES as $rKey => $rVal): ?>
-                                <option value="<?= $rKey ?>">
-                                    <?= $rVal['icon'] ?> <?= htmlspecialchars($rVal['title']) ?> (<?= htmlspecialchars($rVal['category']) ?>)
-                                </option>
+                                <label class="form-selectgroup-item w-100" id="assign-role-item-<?= $rKey ?>" style="cursor: pointer; transition: all 0.2s ease;">
+                                    <input type="checkbox" name="role_ids[]" value="<?= $rKey ?>" class="form-selectgroup-input assign-role-checkbox" data-role-id="<?= $rKey ?>" onchange="updateAssignSubmitBtnState()">
+                                    <span class="form-selectgroup-label d-flex align-items-center p-2 text-start">
+                                        <span class="me-3"><span class="form-selectgroup-check"></span></span>
+                                        <span class="fs-2 me-2"><?= $rVal['icon'] ?></span>
+                                        <span class="form-selectgroup-label-content flex-fill">
+                                            <span class="d-flex justify-content-between align-items-center">
+                                                <strong class="text-dark"><?= htmlspecialchars($rVal['title']) ?></strong>
+                                                <span class="badge <?= $rVal['badge_color'] ?>"><?= htmlspecialchars($rVal['category']) ?></span>
+                                            </span>
+                                            <span class="text-muted small d-block" style="font-size: 0.75rem; line-height: 1.3;"><?= htmlspecialchars($rVal['description']) ?></span>
+                                            <span class="badge bg-secondary-lt text-secondary mt-1 role-assigned-tag d-none" style="font-size: 0.7rem;">
+                                                ✓ Déjà assigné à ce joueur
+                                            </span>
+                                        </span>
+                                    </span>
+                                </label>
                             <?php endforeach; ?>
-                        </select>
+                        </div>
+                    </div>
+
+                    <!-- 4. Alerte si tous les rôles sont déjà assignés -->
+                    <div id="assign-all-roles-taken" class="alert alert-info d-none mt-2 py-2 small mb-0">
+                        ℹ️ Ce joueur possède déjà l'ensemble des 8 métiers de la Dev Team.
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-purple" id="btn-submit-assign">Confirmer l'Attribution</button>
+                <div class="modal-footer d-flex justify-content-between align-items-center">
+                    <span class="text-muted small" id="assign-selection-count">0 métier sélectionné</span>
+                    <div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-purple" id="btn-submit-assign" disabled>
+                            <span>➕</span> Assigner les métiers
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -729,6 +796,11 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
      SCRIPTS JAVASCRIPT VANILLA DE LA DEV TEAM
      ═══════════════════════════════════════════════════════════════════════════ -->
 <script>
+// Cache des rôles détenus par utilisateur et métadonnées globales
+const devMembersRoles = <?= json_encode($membersRolesMap, JSON_UNESCAPED_UNICODE) ?>;
+const devAllRolesMeta = <?= json_encode(DevTeamEngine::ROLES, JSON_UNESCAPED_UNICODE) ?>;
+const canManageTeamPermission = <?= $canManageTeam ? 'true' : 'false' ?>;
+
 let pendingConfirmCallback = null;
 
 function showConfirmModal(title, message, callback, btnClass = 'btn-primary', icon = '⚠️') {
@@ -797,7 +869,334 @@ function switchDevTab(tabId) {
     }
 }
 
-// 1. Déclenchement d'une action Sandbox
+// ── GESTION DE L'ASSIGNATION MULTIPLE & BLOCAGE DES DOUBLONS ──────────────
+
+function openAssignRoleModal(userId = null, username = null) {
+    const selectEl = document.getElementById('assign-role-user-id');
+    if (selectEl && userId) {
+        selectEl.value = userId;
+        onAssignUserChanged(userId);
+    } else if (selectEl) {
+        selectEl.value = '';
+        onAssignUserChanged('');
+    }
+
+    const modalEl = document.getElementById('modal-assign-role');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        new bootstrap.Modal(modalEl).show();
+    }
+}
+
+function onAssignUserChanged(userId) {
+    const box = document.getElementById('assign-user-current-roles-box');
+    const badgesList = document.getElementById('assign-user-current-roles-list');
+    const allRolesBlock = document.getElementById('assign-roles-selector-block');
+    const allTakenAlert = document.getElementById('assign-all-roles-taken');
+
+    userId = parseInt(userId, 10);
+    const ownedRoles = (userId && devMembersRoles[userId]) ? devMembersRoles[userId] : [];
+
+    // Afficher l'aperçu des rôles actuels
+    if (userId && box && badgesList) {
+        box.classList.remove('d-none');
+        if (ownedRoles.length === 0) {
+            badgesList.innerHTML = `<span class="text-muted small fst-italic">Aucun métier actif actuellement</span>`;
+        } else {
+            badgesList.innerHTML = ownedRoles.map(rId => {
+                const meta = devAllRolesMeta[rId];
+                if (!meta) return '';
+                return `<span class="badge ${meta.badge_color || 'bg-secondary'} me-1">${meta.icon || '🛠️'} ${meta.title}</span>`;
+            }).join('');
+        }
+    } else if (box) {
+        box.classList.add('d-none');
+    }
+
+    // Mettre à jour chaque case à cocher : bloquer / désactiver les doublons
+    const totalRolesCount = Object.keys(devAllRolesMeta).length;
+    let availableCount = 0;
+
+    Object.keys(devAllRolesMeta).forEach(rKey => {
+        const itemLabel = document.getElementById(`assign-role-item-${rKey}`);
+        const cb = itemLabel ? itemLabel.querySelector('.assign-role-checkbox') : null;
+        const tag = itemLabel ? itemLabel.querySelector('.role-assigned-tag') : null;
+
+        if (!cb || !itemLabel) return;
+
+        cb.checked = false;
+
+        if (!userId) {
+            cb.disabled = true;
+            itemLabel.style.opacity = '0.6';
+            itemLabel.style.cursor = 'not-allowed';
+            if (tag) tag.classList.add('d-none');
+        } else if (ownedRoles.includes(rKey)) {
+            // Rôle déjà possédé : blocage strict
+            cb.disabled = true;
+            itemLabel.style.opacity = '0.55';
+            itemLabel.style.cursor = 'not-allowed';
+            if (tag) tag.classList.remove('d-none');
+        } else {
+            // Rôle libre
+            cb.disabled = false;
+            itemLabel.style.opacity = '1';
+            itemLabel.style.cursor = 'pointer';
+            if (tag) tag.classList.add('d-none');
+            availableCount++;
+        }
+    });
+
+    const isAllTaken = (userId && availableCount === 0);
+    if (allTakenAlert) allTakenAlert.classList.toggle('d-none', !isAllTaken);
+    if (allRolesBlock) allRolesBlock.classList.toggle('d-none', isAllTaken);
+
+    updateAssignSubmitBtnState();
+}
+
+function selectAllAvailableRoles() {
+    document.querySelectorAll('.assign-role-checkbox:not(:disabled)').forEach(cb => {
+        cb.checked = true;
+    });
+    updateAssignSubmitBtnState();
+}
+
+function clearSelectedRoles() {
+    document.querySelectorAll('.assign-role-checkbox').forEach(cb => {
+        cb.checked = false;
+    });
+    updateAssignSubmitBtnState();
+}
+
+function updateAssignSubmitBtnState() {
+    const checked = document.querySelectorAll('.assign-role-checkbox:checked');
+    const count = checked.length;
+    const btn = document.getElementById('btn-submit-assign');
+    const counterText = document.getElementById('assign-selection-count');
+    const userSelect = document.getElementById('assign-role-user-id');
+    const hasUser = userSelect && userSelect.value !== '';
+
+    if (counterText) {
+        counterText.textContent = (count <= 1) ? `${count} métier sélectionné` : `${count} métiers sélectionnés`;
+    }
+
+    if (btn) {
+        btn.disabled = (!hasUser || count === 0);
+    }
+}
+
+// ── SOUMISSION DE L'ATTRIBUTION DES MÉTIERS ──────────────────────────────
+
+async function handleAssignRoleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn = document.getElementById('btn-submit-assign');
+    const originalText = btn.innerHTML;
+
+    const checkedBoxes = form.querySelectorAll('input[name="role_ids[]"]:checked');
+    if (checkedBoxes.length === 0) {
+        showAlert("⚠️ Veuillez cocher au moins un métier à assigner.", "warning");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Attribution en cours...`;
+
+    try {
+        const formData = new FormData(form);
+        formData.append('action', 'assign_roles');
+
+        const res = await fetch('/api/dev_team.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showAlert(`🎉 ${data.message}`, 'success');
+
+            // Fermer la modale Tabler
+            const modalEl = document.getElementById('modal-assign-role');
+            if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                bootstrap.Modal.getInstance(modalEl)?.hide();
+            }
+
+            const targetId = parseInt(data.user_id, 10);
+            const userSelect = document.getElementById('assign-role-user-id');
+            const targetUsername = userSelect?.options[userSelect.selectedIndex]?.text?.replace(/\s*\(ID:.*$/, '') || '';
+
+            // Mettre à jour le cache local des rôles
+            if (!devMembersRoles[targetId]) devMembersRoles[targetId] = [];
+            if (Array.isArray(data.assigned_roles)) {
+                data.assigned_roles.forEach(r => {
+                    if (!devMembersRoles[targetId].includes(r.id)) {
+                        devMembersRoles[targetId].push(r.id);
+                    }
+                });
+            }
+
+            // Mettre à jour le DOM dans la table du Roster
+            const container = document.getElementById(`user-roles-${targetId}`);
+            if (container && Array.isArray(data.assigned_roles)) {
+                const placeholder = container.querySelector('.no-roles-placeholder');
+                if (placeholder) placeholder.remove();
+
+                data.assigned_roles.forEach(role => {
+                    const existingBadge = document.getElementById(`badge-role-${targetId}-${role.id}`);
+                    if (!existingBadge) {
+                        const newBadge = createRoleBadgeElement(targetId, role, targetUsername);
+                        container.appendChild(newBadge);
+                    }
+                    updateRoleDistributionGrid(role.id, targetUsername, 'add');
+                });
+            } else {
+                // Si le joueur n'était pas encore dans la table, rafraîchissement rapide
+                setTimeout(() => window.location.reload(), 600);
+            }
+
+        } else {
+            showAlert(`❌ <strong>Erreur :</strong> ${data.error || 'Échec de l\'attribution'}`, 'danger');
+        }
+    } catch (err) {
+        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+// ── SUPPRESSION / RÉVOCATION D'UN RÔLE ───────────────────────────────────
+
+function confirmRemoveDevRole(userId, roleId, username, roleTitle) {
+    showConfirmModal(
+        'Révocation de Métier',
+        `Voulez-vous vraiment retirer le métier <strong>« ${roleTitle} »</strong> à <strong>${username}</strong> ?`,
+        () => executeRemoveDevRole(userId, roleId, username, roleTitle),
+        'btn-danger',
+        '🗑️'
+    );
+}
+
+async function executeRemoveDevRole(userId, roleId, username, roleTitle) {
+    const badgeEl = document.getElementById(`badge-role-${userId}-${roleId}`);
+    if (badgeEl) {
+        badgeEl.style.opacity = '0.5';
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'remove_role');
+        formData.append('user_id', userId);
+        formData.append('role_id', roleId);
+
+        const res = await fetch('/api/dev_team.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showAlert(`✅ <strong>Succès :</strong> Le métier « ${roleTitle} » a été retiré à ${username}.`, 'info');
+
+            // Animation et suppression du badge dans le DOM
+            if (badgeEl) {
+                badgeEl.style.transition = 'all 0.25s ease';
+                badgeEl.style.opacity = '0';
+                badgeEl.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    badgeEl.remove();
+                    const container = document.getElementById(`user-roles-${userId}`);
+                    if (container && container.querySelectorAll('.dev-role-badge').length === 0) {
+                        container.innerHTML = '<span class="text-muted small fst-italic no-roles-placeholder">Aucun métier</span>';
+                    }
+                }, 250);
+            }
+
+            // Mettre à jour le cache JavaScript
+            if (devMembersRoles[userId]) {
+                devMembersRoles[userId] = devMembersRoles[userId].filter(r => r !== roleId);
+            }
+
+            // Mettre à jour la grille de distribution en haut
+            updateRoleDistributionGrid(roleId, username, 'remove');
+
+        } else {
+            if (badgeEl) badgeEl.style.opacity = '1';
+            showAlert(`❌ <strong>Erreur :</strong> ${data.error || 'Impossible de révoquer ce métier.'}`, 'danger');
+        }
+    } catch (err) {
+        if (badgeEl) badgeEl.style.opacity = '1';
+        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+    }
+}
+
+// ── HELPERS DOM POUR L'AFFICHAGE DYNAMIQUE ────────────────────────────────
+
+function createRoleBadgeElement(userId, role, username) {
+    const span = document.createElement('span');
+    span.className = `badge ${role.badge_color || 'bg-secondary'} d-inline-flex align-items-center gap-1 dev-role-badge shadow-none`;
+    span.id = `badge-role-${userId}-${role.id}`;
+    span.setAttribute('data-user-id', userId);
+    span.setAttribute('data-role-id', role.id);
+    if (role.honor_title) span.title = role.honor_title;
+
+    const label = document.createElement('span');
+    label.textContent = `${role.icon || '🛠️'} ${role.title}`;
+    span.appendChild(label);
+
+    if (canManageTeamPermission) {
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'btn-close btn-close-white ms-1 dev-role-close-btn';
+        closeBtn.style.fontSize = '0.55rem';
+        closeBtn.style.width = '0.7em';
+        closeBtn.style.height = '0.7em';
+        closeBtn.style.opacity = '0.85';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.title = 'Retirer ce métier';
+        closeBtn.addEventListener('click', () => {
+            confirmRemoveDevRole(userId, role.id, username, role.title);
+        });
+        span.appendChild(closeBtn);
+    }
+
+    return span;
+}
+
+function updateRoleDistributionGrid(roleId, username, action) {
+    const distContainer = document.getElementById(`role-dist-list-${roleId}`);
+    if (!distContainer) return;
+
+    if (action === 'remove') {
+        const tags = distContainer.querySelectorAll('.dist-user-tag');
+        tags.forEach(tag => {
+            if (tag.getAttribute('data-username') === username) {
+                tag.remove();
+            }
+        });
+        if (distContainer.querySelectorAll('.dist-user-tag').length === 0) {
+            distContainer.innerHTML = `<span class="text-muted fst-italic small no-member-tag" style="font-size: 0.75rem;">Aucun pour le moment</span>`;
+        }
+    } else if (action === 'add') {
+        const placeholder = distContainer.querySelector('.no-member-tag');
+        if (placeholder) placeholder.remove();
+
+        // Vérifier si pas déjà présent
+        const existing = Array.from(distContainer.querySelectorAll('.dist-user-tag')).some(t => t.getAttribute('data-username') === username);
+        if (!existing && username) {
+            const newTag = document.createElement('span');
+            newTag.className = 'badge bg-light text-dark border dist-user-tag';
+            newTag.setAttribute('data-username', username);
+            newTag.style.fontSize = '0.75rem';
+            newTag.textContent = `👤 ${username}`;
+            distContainer.appendChild(newTag);
+        }
+    }
+}
+
+// ── ACTIONS SANDBOX QA & CRON ────────────────────────────────────────────
+
 function triggerSandboxAction(subAction, btn) {
     showConfirmModal(
         'Commande Sandbox QA',
@@ -838,7 +1237,6 @@ async function executeSandboxAction(subAction, btn) {
     }
 }
 
-// 2. Déclenchement du cycle de Cron / Bot
 async function triggerBotCycle(btn) {
     const originalText = btn.innerHTML;
     btn.disabled = true;
@@ -874,79 +1272,8 @@ async function triggerBotCycle(btn) {
     }
 }
 
-// 3. Soumission de l'attribution d'un rôle
-async function handleAssignRoleSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    const btn = document.getElementById('btn-submit-assign');
-    const originalText = btn.innerHTML;
+// ── RÉCOMPENSES FORGE XP ─────────────────────────────────────────────────
 
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Attribution...`;
-
-    try {
-        const formData = new FormData(form);
-        formData.append('action', 'assign_role');
-
-        const res = await fetch('/api/dev_team.php', {
-            method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json' }
-        });
-        const data = await res.json();
-
-        if (data.success) {
-            showAlert(`🎉 ${data.message}`, 'success');
-            setTimeout(() => window.location.reload(), 800);
-        } else {
-            showAlert(`❌ <strong>Erreur :</strong> ${data.error || 'Échec de l\'attribution'}`, 'danger');
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
-    } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
-}
-
-// 4. Révocation d'un rôle
-function removeDevRole(userId, roleId) {
-    showConfirmModal(
-        'Révocation de Métier',
-        'Voulez-vous retirer ce métier à ce membre de la Dev Team ?',
-        () => executeRemoveDevRole(userId, roleId),
-        'btn-danger',
-        '🗑️'
-    );
-}
-
-async function executeRemoveDevRole(userId, roleId) {
-    try {
-        const formData = new FormData();
-        formData.append('action', 'remove_role');
-        formData.append('user_id', userId);
-        formData.append('role_id', roleId);
-
-        const res = await fetch('/api/dev_team.php', {
-            method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json' }
-        });
-        const data = await res.json();
-
-        if (data.success) {
-            showAlert(`✅ ${data.message}`, 'info');
-            setTimeout(() => window.location.reload(), 800);
-        } else {
-            showAlert(`❌ <strong>Erreur :</strong> ${data.error}`, 'danger');
-        }
-    } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
-    }
-}
-
-// 5. Modal Récompense Forge XP
 function openAwardXpModal(userId, username) {
     document.getElementById('award-user-id').value = userId;
     document.getElementById('award-username').value = username;

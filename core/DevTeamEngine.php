@@ -329,21 +329,47 @@ class DevTeamEngine {
     }
 
     /**
+     * Attribue plusieurs rôles métiers à un joueur en bloquant strictement les doublons
+     * @param int $userId
+     * @param array<string> $roleIds
+     * @return array<array> Liste des rôles nouvellement assignés
+     */
+    public function assignRoles(int $userId, array $roleIds): array {
+        if ($userId <= 0 || empty($roleIds)) return [];
+
+        $assigned = [];
+        $checkStmt = $this->db->prepare("SELECT 1 FROM user_dev_roles WHERE user_id = ? AND role_id = ? LIMIT 1");
+        $insertStmt = $this->db->prepare("
+            INSERT INTO user_dev_roles (user_id, role_id, assigned_at)
+            VALUES (?, ?, ?)
+        ");
+
+        foreach ($roleIds as $rId) {
+            $rId = trim((string)$rId);
+            if (!isset(self::ROLES[$rId])) continue;
+
+            // Bloquer les doublons : vérifier si déjà attribué
+            $checkStmt->execute([$userId, $rId]);
+            if ($checkStmt->fetchColumn()) {
+                continue;
+            }
+
+            if ($insertStmt->execute([$userId, $rId, time()])) {
+                $roleMeta = self::ROLES[$rId];
+                $this->addForgeXp($userId, 50, 'role_assigned', "Attribution du métier '{$roleMeta['title']}'");
+                $assigned[] = $roleMeta;
+            }
+        }
+
+        return $assigned;
+    }
+
+    /**
      * Attribue un rôle métier à un joueur
      */
     public function assignRole(int $userId, string $roleId): bool {
-        if (!isset(self::ROLES[$roleId])) return false;
-
-        $stmt = $this->db->prepare("
-            INSERT IGNORE INTO user_dev_roles (user_id, role_id, assigned_at)
-            VALUES (?, ?, ?)
-        ");
-        $success = $stmt->execute([$userId, $roleId, time()]);
-        if ($success) {
-            $roleTitle = self::ROLES[$roleId]['title'];
-            $this->addForgeXp($userId, 50, 'role_assigned', "Attribution du métier '{$roleTitle}'");
-        }
-        return $success;
+        $res = $this->assignRoles($userId, [$roleId]);
+        return !empty($res);
     }
 
     /**

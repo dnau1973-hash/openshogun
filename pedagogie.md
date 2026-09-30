@@ -37,7 +37,19 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
-### Session du 30/09/2026 — Refonte Inscription, Sécurité SMTP & Débogage de Routage
+### Session du 30/09/2026 (Partie 2) — Roster Dev Team : Attribution Multiple & Suppression Réactive
+- **Concept exploré :** Relations n-à-n (plusieurs-à-plusieurs) en base de données, intégrité applicative anti-doublons et manipulation réactive du DOM en JavaScript Vanilla (Fetch API sans rechargement de page).
+- **Notions pour l'atelier :**
+  - **Table de jonction & Relations N:N :** Comment lier plusieurs métiers à un même utilisateur via la table `user_dev_roles`.
+  - **Blocage des doublons à 2 niveaux :**
+    - *Frontend :* Désactivation des options déjà possédées (`disabled`, `opacity: 0.55`, tag "✓ Déjà assigné") dès la sélection du membre dans la modale.
+    - *Backend :* Requête préparée PDO contrôlant l'existence avant insertion pour immuniser le système contre les soumissions concurrentes ou malveillantes.
+  - **Expérience Utilisateur (UX) Réactive :**
+    - Suppression fluide d'un badge du DOM (`style.opacity = '0'`, `transform: scale(0.8)`) suite à confirmation par modale Tabler.io (zéro popup native du navigateur).
+    - Injection dynamique de nouveaux badges dans le tableau à la volée avec écouteurs d'événements attachés sans recharger la page.
+- **Activité pratique suggérée :** Assigner et retirer des métiers de l'équipe (Game Designer, Sound Designer, QA Tester) sur les comptes de test et observer en direct l'actualisation des badges et de la grille des métiers.
+
+### Session du 30/09/2026 (Partie 1) — Refonte Inscription, Sécurité SMTP & Débogage de Routage
 - **Concept exploré :** Cycle complet d'authentification utilisateur et négociation réseau par sockets.
 - **Notions pour l'atelier :**
   - Pourquoi ne jamais stocker un mot de passe en clair (hachage bcrypt / argon2 vs chiffrement réversible AES-256).
