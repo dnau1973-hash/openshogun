@@ -60,6 +60,13 @@ class Auth {
             if (!in_array('activation_token_expires_at', $cols)) {
                 $db->exec("ALTER TABLE users ADD COLUMN activation_token_expires_at DATETIME NULL DEFAULT NULL AFTER activation_token");
             }
+
+            if (!in_array('newsletter_optin', $cols, true)) {
+                $db->exec("ALTER TABLE users ADD COLUMN newsletter_optin TINYINT(1) NOT NULL DEFAULT 0 AFTER protection_until");
+                try {
+                    $db->exec("ALTER TABLE users ADD INDEX idx_users_newsletter (newsletter_optin)");
+                } catch (Exception $e) {}
+            }
         } catch (Exception $e) {
             // Ignorer silencieusement si la table n'est pas encore créée
         }
@@ -370,7 +377,7 @@ class Auth {
         return ['success' => true];
     }
 
-    public function register(string $username, string $email, string $password, string $faction, string $zone = 'random', ?string $passwordConfirm = null): array {
+    public function register(string $username, string $email, string $password, string $faction, string $zone = 'random', ?string $passwordConfirm = null, bool $newsletterOptin = false): array {
         $username = trim($username);
         $email = trim($email);
 
@@ -425,16 +432,18 @@ class Auth {
             $verifiedAt = null;
         }
 
+        $optinVal = $newsletterOptin ? 1 : 0;
+
         $this->db->beginTransaction();
         try {
             // Durée de protection des nouveaux joueurs en jours (7 jours par défaut)
             $protectionDays = (int)GameConfig::get('beginner_protection_days', 7);
             $protectionUntil = ($protectionDays > 0) ? date('Y-m-d H:i:s', time() + ($protectionDays * 86400)) : null;
 
-            // 1. Créer l'utilisateur avec son état d'activation et immunité
+            // 1. Créer l'utilisateur avec son état d'activation, immunité et choix newsletter
             $stmtUser = $this->db->prepare("
-                INSERT INTO users (username, email, password_hash, faction, created_at, last_active, protection_until, is_active, email_verified_at, activation_token, activation_token_expires_at) 
-                VALUES (?, ?, ?, ?, NOW(), NOW(), ?, ?, ?, ?, ?)
+                INSERT INTO users (username, email, password_hash, faction, created_at, last_active, protection_until, is_active, email_verified_at, activation_token, activation_token_expires_at, newsletter_optin) 
+                VALUES (?, ?, ?, ?, NOW(), NOW(), ?, ?, ?, ?, ?, ?)
             ");
             $stmtUser->execute([
                 $username, 
@@ -445,7 +454,8 @@ class Auth {
                 $isActive, 
                 $verifiedAt, 
                 $hashedToken, 
-                $tokenExpires
+                $tokenExpires,
+                $optinVal
             ]);
             $userId = (int)$this->db->lastInsertId();
 

@@ -617,11 +617,13 @@ CREATE TABLE `users` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `last_active` datetime NOT NULL DEFAULT current_timestamp(),
   `protection_until` datetime DEFAULT NULL,
+  `newsletter_optin` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`),
   KEY `idx_users_protection` (`protection_until`),
-  KEY `idx_users_moderator` (`is_moderator`)
+  KEY `idx_users_moderator` (`is_moderator`),
+  KEY `idx_users_newsletter` (`newsletter_optin`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -735,6 +737,25 @@ CREATE TABLE `craft_queue` (
   KEY `idx_cq_planet` (`planet_id`),
   KEY `idx_cq_finishes` (`finishes_at`),
   CONSTRAINT `fk_cq_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+DROP TABLE IF EXISTS `mailing_campaigns`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `mailing_campaigns` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sender_id` int(10) unsigned NOT NULL,
+  `sender_name` varchar(100) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `target_group` varchar(50) NOT NULL,
+  `recipient_count` int(10) unsigned NOT NULL DEFAULT 0,
+  `body_html` mediumtext NOT NULL,
+  `status` enum('draft','sent','failed') NOT NULL DEFAULT 'sent',
+  `sent_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_mc_sender` (`sender_id`),
+  KEY `idx_mc_sent_at` (`sent_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

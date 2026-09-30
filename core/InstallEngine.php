@@ -299,14 +299,15 @@ class InstallEngine {
         $worldGen->resetUniverse($adminPass, 12, true);
 
         // Mettre à jour le compte administrateur avec les identifiants saisis
+        $adminNewsletterOptin = !empty($params['admin_newsletter_optin']) ? 1 : 0;
         $adminHash = password_hash($adminPass, PASSWORD_BCRYPT);
         $stmtUpAdmin = $pdo->prepare("
             UPDATE users 
-            SET username = ?, email = ?, password_hash = ?, faction = ? 
+            SET username = ?, email = ?, password_hash = ?, faction = ?, newsletter_optin = ? 
             WHERE is_admin = 1 
             ORDER BY id ASC LIMIT 1
         ");
-        $stmtUpAdmin->execute([$adminUser, $adminEmail, $adminHash, $adminFaction]);
+        $stmtUpAdmin->execute([$adminUser, $adminEmail, $adminHash, $adminFaction, $adminNewsletterOptin]);
 
         // Mettre à jour le nom du château capital
         $stmtUpCap = $pdo->prepare("

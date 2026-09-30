@@ -37,6 +37,15 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 30/09/2026 (Partie 4) — Métier Community Manager, RGPD & Communication par Mailing List
+- **Concept exploré :** Métier de Community Manager dans le jeu vidéo, consentement éclairé (RGPD / Privacy by Design) et moteur de communication groupée (Mailing List).
+- **Notions pour l'atelier :**
+  - **Rôle du Community Manager (CM) :** Comprendre que créer un jeu vidéo ne se résume pas au code et au dessin : animer la communauté des joueurs, recueillir leurs retours, annoncer les nouveautés et maintenir le lien émotionnel avec l'univers sont des missions capitales.
+  - **RGPD & Consentement explicite (Opt-in) :** Pourquoi la loi impose que la case d'inscription à une newsletter ne soit **jamais pré-cochée** (principe de l'opt-in libre, actif et révocable). Comprendre la différence entre un e-mail transactionnel obligatoire (activation de compte) et un e-mail promotionnel/informatif soumis à consentement.
+  - **Segmentation d'audience & Ciblage :** Comment filtrer une base de données de joueurs pour envoyer le bon message à la bonne personne (abonnés volontaires, clans spécifiques, membres du studio).
+  - **Génération et flux de données (Exports CSV) :** Comment transformer des enregistrements SQL en un fichier tableur universel (CSV avec encodage UTF-8 BOM pour compatibilité Excel) et l'envoyer au navigateur via des en-têtes HTTP de téléchargement direct (`Content-Disposition: attachment`).
+- **Activité pratique suggérée :** Assigner le métier de Community Manager au profil de test, explorer le nouvel onglet « Mailing List », composer une dépêche impériale pour son clan féodal, et tester l'exportation du fichier CSV des abonnés pour l'ouvrir dans LibreOffice ou Excel.
+
 ### Session du 30/09/2026 (Partie 3) — Contrôle Qualité (QA), Registre des Fonctionnalités & Automatisation Syntaxe
 - **Concept exploré :** Assurance Qualité (QA), industrialisation des tests, parsing de Markdown structuré et vérification statique de code (`php -l`).
 - **Notions pour l'atelier :**

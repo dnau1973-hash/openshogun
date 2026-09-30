@@ -48,7 +48,8 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $passwordConfirm = $_POST['password_confirm'] ?? null;
     $faction = $_POST['faction'] ?? 'terran';
     $zone = $_POST['zone'] ?? 'random';
-    $res = $auth->register($username, $email, $password, $faction, $zone, $passwordConfirm);
+    $newsletterOptin = !empty($_POST['newsletter_optin']);
+    $res = $auth->register($username, $email, $password, $faction, $zone, $passwordConfirm, $newsletterOptin);
     if ($res['success']) {
         if (!empty($res['require_verification'])) {
             header('Location: /?registered_pending=1&email=' . urlencode($res['email']));

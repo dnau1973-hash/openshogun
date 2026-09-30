@@ -810,6 +810,19 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
                                 </div>
                             </div>
 
+                            <!-- Option Newsletter / Diffusion (RGPD : non cochée par défaut) -->
+                            <div style="background: #fdfbf7; border: 1px solid #e7e0d6; border-radius: 8px; padding: 0.9rem 1rem; margin-top: 1.25rem;">
+                                <label style="display: flex; align-items: flex-start; gap: 0.65rem; cursor: pointer; margin: 0; font-size: 0.85rem; color: #1c1917;">
+                                    <input type="checkbox" name="newsletter_optin" id="reg_newsletter_optin" value="1" onchange="updateSummaryNewsletterState(this.checked)" style="margin-top: 0.2rem; width: 1.15rem; height: 1.15rem; accent-color: #b91c1c; cursor: pointer;">
+                                    <span>
+                                        <strong>M'inscrire à la liste de diffusion / newsletter</strong>
+                                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; line-height: 1.35;">
+                                            Recevoir les chroniques féodales, annonces d'événements et récapitulatifs impériaux par e-mail (RGPD : case non cochée par défaut, désinscription en un clic à tout moment).
+                                        </span>
+                                    </span>
+                                </label>
+                            </div>
+
                             <!-- Récapitulatif du Pacte Féodal -->
                             <div class="auth-summary-box">
                                 <div class="auth-summary-item">
@@ -823,6 +836,10 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
                                 <div class="auth-summary-item">
                                     <span>Province Initiale</span>
                                     <strong id="summaryZone" style="color: #b91c1c;">Aléatoire (Équilibré)</strong>
+                                </div>
+                                <div class="auth-summary-item">
+                                    <span>Newsletter Féodale</span>
+                                    <strong id="summaryNewsletter" style="color: #64748b;">Non abonné</strong>
                                 </div>
                             </div>
 
@@ -849,6 +866,19 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
 let currentRegisterStep = 1;
 let selectedClanLabel = 'Clan Oda';
 let selectedZoneLabel = 'Aléatoire (Équilibré)';
+
+function updateSummaryNewsletterState(isChecked) {
+    const el = document.getElementById('summaryNewsletter');
+    if (el) {
+        if (isChecked) {
+            el.textContent = '✓ Abonné';
+            el.style.color = '#15803d';
+        } else {
+            el.textContent = 'Non abonné';
+            el.style.color = '#64748b';
+        }
+    }
+}
 
 function openAuthModal(tab) {
     const modal = document.getElementById('authModal');

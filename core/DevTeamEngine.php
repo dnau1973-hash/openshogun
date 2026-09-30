@@ -117,7 +117,22 @@ class DevTeamEngine {
                 'system.monitoring',
                 'cron.trigger',
                 'debug.sandbox',
-                'bugs.manage'
+                'bugs.manage',
+                'community.mailing'
+            ]
+        ],
+        'community_manager' => [
+            'id'          => 'community_manager',
+            'title'       => 'Community Manager',
+            'honor_title' => 'La Voix du Shōgunat',
+            'icon'        => '📢',
+            'badge_color' => 'bg-teal-lt text-teal',
+            'category'    => 'Communauté',
+            'description' => 'Animation de la communauté, relations joueurs, dépêches impériales, modération et gestion des campagnes de mailing list.',
+            'default_permissions' => [
+                'community.mailing',
+                'lore.publish',
+                'news.manage'
             ]
         ]
     ];
@@ -137,7 +152,9 @@ class DevTeamEngine {
         'debug.sandbox'      => ['label' => 'Commandes Sandbox / Triche', 'cat' => 'QA', 'desc' => 'Accéder aux commandes de test et d\'injection.'],
         'bugs.manage'        => ['label' => 'Gestion Avancée des Bugs', 'cat' => 'QA', 'desc' => 'Qualifier, valider et clôturer les signalements.'],
         'sprints.manage'     => ['label' => 'Gestion de Sprint & Roadmap', 'cat' => 'Direction', 'desc' => 'Piloter le calendrier des releases.'],
-        'team.manage'        => ['label' => 'Gestion de la Dev Team', 'cat' => 'Direction', 'desc' => 'Attribuer et révoquer les métiers de l\'équipe.']
+        'team.manage'        => ['label' => 'Gestion de la Dev Team', 'cat' => 'Direction', 'desc' => 'Attribuer et révoquer les métiers de l\'équipe.'],
+        'community.mailing'  => ['label' => 'Campagnes Mailing List & Newsletter', 'cat' => 'Communauté', 'desc' => 'Composer et expédier les lettres impériales et newsletters aux joueurs.'],
+        'news.manage'        => ['label' => 'Gestion des Annonces & Actualités', 'cat' => 'Communauté', 'desc' => 'Publier et modérer les actualités et dépêches du Shōgunat.']
     ];
 
     private PDO $db;
@@ -236,44 +253,57 @@ class DevTeamEngine {
      * Remplissage automatique des rôles, permissions et associations
      */
     private function seedReferenceData(): void {
-        $countRoles = (int)$this->db->query("SELECT COUNT(*) FROM dev_roles")->fetchColumn();
-        if ($countRoles === 0) {
-            $stmtR = $this->db->prepare("
-                INSERT INTO dev_roles (id, title, honor_title, icon, category, description, display_order)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ");
-            $order = 1;
-            foreach (self::ROLES as $r) {
-                $stmtR->execute([
-                    $r['id'],
-                    $r['title'],
-                    $r['honor_title'],
-                    $r['icon'],
-                    $r['category'],
-                    $r['description'],
-                    $order++
-                ]);
-            }
+        // 1. Synchroniser / insérer tous les rôles définis dans self::ROLES
+        $stmtR = $this->db->prepare("
+            INSERT INTO dev_roles (id, title, honor_title, icon, category, description, display_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+                title = VALUES(title), 
+                honor_title = VALUES(honor_title), 
+                icon = VALUES(icon), 
+                category = VALUES(category), 
+                description = VALUES(description)
+        ");
+        $order = 1;
+        foreach (self::ROLES as $r) {
+            $stmtR->execute([
+                $r['id'],
+                $r['title'],
+                $r['honor_title'],
+                $r['icon'],
+                $r['category'],
+                $r['description'],
+                $order++
+            ]);
+        }
 
-            $stmtP = $this->db->prepare("
-                INSERT INTO dev_permissions (id, label, category, description)
-                VALUES (?, ?, ?, ?)
-            ");
-            foreach (self::PERMISSIONS as $pId => $pData) {
-                $stmtP->execute([$pId, $pData['label'], $pData['cat'], $pData['desc']]);
-            }
+        // 2. Synchroniser / insérer toutes les permissions
+        $stmtP = $this->db->prepare("
+            INSERT INTO dev_permissions (id, label, category, description)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                label = VALUES(label),
+                category = VALUES(category),
+                description = VALUES(description)
+        ");
+        foreach (self::PERMISSIONS as $pId => $pData) {
+            $stmtP->execute([$pId, $pData['label'], $pData['cat'], $pData['desc']]);
+        }
 
-            $stmtRP = $this->db->prepare("
-                INSERT IGNORE INTO dev_role_permissions (role_id, permission_id)
-                VALUES (?, ?)
-            ");
-            foreach (self::ROLES as $rId => $rData) {
-                foreach ($rData['default_permissions'] as $perm) {
-                    $stmtRP->execute([$rId, $perm]);
-                }
+        // 3. Associer les permissions par défaut à leurs rôles
+        $stmtRP = $this->db->prepare("
+            INSERT IGNORE INTO dev_role_permissions (role_id, permission_id)
+            VALUES (?, ?)
+        ");
+        foreach (self::ROLES as $rId => $rData) {
+            foreach ($rData['default_permissions'] as $perm) {
+                $stmtRP->execute([$rId, $perm]);
             }
+        }
 
-            // Associer automatiquement le premier utilisateur / administrateur existant
+        // 4. Initialiser le premier administrateur si aucun rôle n'a encore été attribué
+        $hasAnyAssigned = (int)$this->db->query("SELECT COUNT(*) FROM user_dev_roles")->fetchColumn();
+        if ($hasAnyAssigned === 0) {
             $adminUser = $this->db->query("SELECT id FROM users WHERE is_admin = 1 ORDER BY id ASC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
             if ($adminUser) {
                 $firstAdminId = (int)$adminUser['id'];

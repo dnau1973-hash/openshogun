@@ -174,6 +174,21 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
             </div>
         </div>
 
+        <!-- Carte d'accès Mailing List / Diffusion -->
+        <div class="card border border-teal-subtle bg-teal-lt mb-3">
+            <div class="card-body p-3">
+                <h4 class="text-teal fw-bold mb-1 d-flex align-items-center gap-2">
+                    <span>📢</span> Mailing List &amp; Diffusion Communautaire
+                </h4>
+                <p class="small text-secondary mb-3" style="line-height: 1.5;">
+                    Gérez les abonnés inscrits à la newsletter, filtrez par statut ou faction, et composez des missives groupées avec le gabarit officiel.
+                </p>
+                <a href="/?page=dev_team&tab=mailing" class="btn btn-sm btn-teal text-white w-100 d-flex align-items-center justify-content-center gap-1">
+                    <span>✉️</span> Accéder au Module Mailing List &rarr;
+                </a>
+            </div>
+        </div>
+
         <!-- Note de Sécurité & Protocoles -->
         <div class="card border border-info-subtle bg-info-lt">
             <div class="card-body p-3">

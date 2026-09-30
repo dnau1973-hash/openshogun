@@ -701,6 +701,18 @@ if (file_exists(__DIR__ . '/config/database.php')) {
                             <option value="aethelis">Clan Takeda (Cavalerie de choc légendaire & maîtrise tactique des monts)</option>
                         </select>
                     </div>
+
+                    <div class="form-group col-span-2" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 0.5rem;">
+                        <label style="cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; margin: 0;">
+                            <input type="checkbox" name="admin_newsletter_optin" id="admin_newsletter_optin" value="1" style="width: 1.25rem; height: 1.25rem; accent-color: var(--gold-primary); cursor: pointer; margin-top: 0.15rem;">
+                            <span>
+                                <strong style="color: var(--gold-light); font-size: 0.95rem;">M'inscrire à la liste de diffusion / newsletter</strong>
+                                <span style="display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: normal; margin-top: 0.25rem; line-height: 1.4;">
+                                    Recevoir les dépêches impériales, récapitulatifs des guerres féodales et avis de mise à jour par e-mail (RGPD : case non cochée par défaut, désinscription possible à tout moment).
+                                </span>
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="installer-footer">
@@ -730,6 +742,7 @@ if (file_exists(__DIR__ . '/config/database.php')) {
                         <div><strong style="color:var(--gold-light);">Shogun Administrateur :</strong> <span id="summary-admin-user">nezzar</span></div>
                         <div><strong style="color:var(--gold-light);">Email :</strong> <span id="summary-admin-email">admin@openshogun.local</span></div>
                         <div style="grid-column: span 2;"><strong style="color:var(--gold-light);">Clan Faction :</strong> <span id="summary-admin-faction">Clan Tokugawa</span></div>
+                        <div style="grid-column: span 2;"><strong style="color:var(--gold-light);">Liste de Diffusion :</strong> <span id="summary-admin-newsletter">Non abonné</span></div>
                     </div>
                 </div>
 
@@ -856,6 +869,16 @@ function validateAndGoToStep4() {
 
     const factionSelect = document.getElementById('admin_faction');
     document.getElementById('summary-admin-faction').textContent = factionSelect.options[factionSelect.selectedIndex].text;
+
+    const optinCb = document.getElementById('admin_newsletter_optin');
+    const newsEl = document.getElementById('summary-admin-newsletter');
+    if (newsEl) {
+        if (optinCb && optinCb.checked) {
+            newsEl.innerHTML = '<span style="color: var(--success-color); font-weight: bold;">✓ Abonné aux dépêches & newsletters</span>';
+        } else {
+            newsEl.textContent = 'Non abonné (désactivé par défaut)';
+        }
+    }
 
     goToStep(4);
 }

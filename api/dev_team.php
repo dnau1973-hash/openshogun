@@ -244,6 +244,119 @@ try {
             ]);
             break;
 
+        // 11. Récupération des abonnés et statistiques de la Mailing List
+        case 'get_mailing_subscribers':
+            DevTeamEngine::authorize('community.mailing', $currentUserId);
+            require_once __DIR__ . '/../core/MailingListEngine.php';
+            $mailingEngine = new MailingListEngine();
+
+            $filters = [
+                'search'  => trim((string)($_GET['search'] ?? '')),
+                'optin'   => $_GET['optin'] ?? 'all',
+                'status'  => $_GET['status'] ?? 'all',
+                'role'    => $_GET['role'] ?? 'all',
+                'faction' => $_GET['faction'] ?? 'all'
+            ];
+            $limit = max(1, min(100, (int)($_GET['limit'] ?? 25)));
+            $page = max(1, (int)($_GET['page'] ?? 1));
+            $offset = ($page - 1) * $limit;
+
+            $data = $mailingEngine->getSubscribers($filters, $limit, $offset);
+            $stats = $mailingEngine->getStatistics();
+
+            echo json_encode([
+                'success'     => true,
+                'subscribers' => $data['subscribers'],
+                'total'       => $data['total'],
+                'page'        => $page,
+                'limit'       => $limit,
+                'stats'       => $stats
+            ]);
+            break;
+
+        // 12. Basculer le statut Opt-in d'un abonné (Toggle Newsletter)
+        case 'toggle_subscriber_optin':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            DevTeamEngine::authorize('community.mailing', $currentUserId);
+            require_once __DIR__ . '/../core/MailingListEngine.php';
+            $mailingEngine = new MailingListEngine();
+
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            if ($targetUserId <= 0) throw new Exception("Identifiant utilisateur invalide.");
+
+            $forceState = isset($_POST['optin']) ? (bool)$_POST['optin'] : null;
+            $ok = $mailingEngine->toggleOptin($targetUserId, $forceState);
+            if (!$ok) throw new Exception("Impossible de mettre à jour le statut opt-in.");
+
+            $stats = $mailingEngine->getStatistics();
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Statut d'adhésion à la newsletter mis à jour avec succès !",
+                'stats'   => $stats
+            ]);
+            break;
+
+        // 13. Expédier une campagne de newsletter / missive impériale
+        case 'send_newsletter_campaign':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            DevTeamEngine::authorize('community.mailing', $currentUserId);
+            require_once __DIR__ . '/../core/MailingListEngine.php';
+            $mailingEngine = new MailingListEngine();
+
+            $subject = trim((string)($_POST['subject'] ?? ''));
+            $targetGroup = trim((string)($_POST['target_group'] ?? 'all_optin'));
+            $bodyHtml = trim((string)($_POST['body_html'] ?? ''));
+
+            $currentUser = $auth->getCurrentUser();
+            $senderName = $currentUser['username'] ?? 'Le Shōgunat';
+
+            $result = $mailingEngine->sendCampaign($currentUserId, $senderName, $subject, $targetGroup, $bodyHtml);
+            if (!$result['success']) {
+                throw new Exception($result['error'] ?? "Échec de l'envoi de la campagne.");
+            }
+
+            echo json_encode([
+                'success'         => true,
+                'message'         => $result['message'],
+                'recipient_count' => $result['recipient_count'],
+                'stats'           => $mailingEngine->getStatistics()
+            ]);
+            break;
+
+        // 14. Exporter la liste des abonnés au format CSV
+        case 'export_subscribers_csv':
+            DevTeamEngine::authorize('community.mailing', $currentUserId);
+            require_once __DIR__ . '/../core/MailingListEngine.php';
+            $mailingEngine = new MailingListEngine();
+
+            $filters = [
+                'search'  => trim((string)($_GET['search'] ?? '')),
+                'optin'   => $_GET['optin'] ?? 'all',
+                'status'  => $_GET['status'] ?? 'all',
+                'role'    => $_GET['role'] ?? 'all',
+                'faction' => $_GET['faction'] ?? 'all'
+            ];
+
+            $csv = $mailingEngine->exportCsv($filters);
+
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="openshogun_abonnes_' . date('Y-m-d_His') . '.csv"');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+            echo $csv;
+            exit;
+
+        // 15. Historique des campagnes envoyées
+        case 'get_campaign_history':
+            DevTeamEngine::authorize('community.mailing', $currentUserId);
+            require_once __DIR__ . '/../core/MailingListEngine.php';
+            $mailingEngine = new MailingListEngine();
+
+            $history = $mailingEngine->getCampaignHistory(20);
+            echo json_encode(['success' => true, 'history' => $history]);
+            break;
+
         default:
             throw new Exception("Action Dev Team non reconnue.");
     }
