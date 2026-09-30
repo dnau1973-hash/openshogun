@@ -27,7 +27,7 @@ if (!empty($chatUser['id'])) {
 }
 ?>
 
-<div class="container-xl py-3">
+<div class="container-fluid px-0 py-2">
     <!-- En-tête de la page -->
     <div class="page-header d-print-none mb-3">
         <div class="row align-items-center">

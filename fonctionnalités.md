@@ -5,6 +5,15 @@
 
 ---
 
+### [2026-09-30] - ui/layout : Harmonisation Pleine Largeur Fluide & Alignement Vertical du Corps de Page
+- **Module :** `ui/layout`
+- **Statut :** `À tester`
+- **Description :** Remplacement des conteneurs bridés ou à largeur fixe (`container-xl`, `container`, etc.) par le format fluide calibré `container-fluid px-3 px-lg-4` sur le conteneur principal `.page-body > .container-fluid`, aligné verticalement au pixel près sur la barre de ressources et la navbar. Surcharge CSS globale dans `public/css/style.css` pour neutraliser les conteneurs imbriqués sans régression sur la vue tactique `map`. Adaptation des vues centrales (`views/dev_team.php`, `views/poster.php`, `views/ranking.php`, `views/reports.php`, `views/research.php`, `views/chat.php`, `views/castle.php`, `views/docs.php`, `views/support.php`, `views/edit_ticket.php`, `views/pedagogy.php`, `views/changelog.php`).
+- **Fichiers modifiés :** `views/partials/header.php`, `views/partials/footer.php`, `public/css/style.css`, `views/dev_team.php`, `views/poster.php`, `views/ranking.php`, `views/reports.php`, `views/research.php`, `views/chat.php`, `views/castle.php`, `views/docs.php`, `views/support.php`, `views/edit_ticket.php`, `views/pedagogy.php`, `views/changelog.php`
+- **Vérification QA :** Parcourir les différentes vues du jeu sur écran large (>= 1200px et 1080p/1440p) et vérifier que le corps des pages s'étend harmonieusement sur toute la largeur disponible, avec un alignement vertical parfait des bordures gauche et droite entre la barre de ressources/navbar et les cartes centrales du jeu. S'assurer de l'absence de scroll horizontal non désiré (`overflow-x: hidden`).
+
+---
+
 ### [2026-09-30] - dev_team : Roster & Métiers — Exclusion Stricte des Profils IA / Bots
 - **Module :** `dev_team`
 - **Statut :** `À tester`

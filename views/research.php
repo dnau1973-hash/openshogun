@@ -92,7 +92,7 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
 
 <!-- 🏆 EN-TÊTE DE PAGE TABLER -->
 <div class="page-header d-print-none mb-3">
-    <div class="container-xl">
+    <div class="container-fluid px-0">
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle text-secondary">Traité de Guerre &amp; Savoirs Féodaux</div>
@@ -115,7 +115,7 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
     </div>
 </div>
 
-<div class="container-xl">
+<div class="container-fluid px-0">
     <?php if ($labLvl < 1): ?>
         <!-- ========================================== -->
         <!-- ÉTAT VIDE : ACADÉMIE NON CONSTRUITE        -->

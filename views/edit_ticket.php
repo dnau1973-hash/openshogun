@@ -42,7 +42,7 @@ $csrfToken = Auth::csrfToken();
 <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 
-<div class="edit-ticket-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 3rem;">
+<div class="container-fluid px-0 edit-ticket-container py-2">
 
     <!-- En-tête -->
     <div class="card" style="margin-bottom: 1.5rem; border-top: 5px solid #0891b2; background: var(--bg-surface, #fdfbf7);">

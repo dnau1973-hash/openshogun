@@ -208,7 +208,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
 
 <!-- 🏆 EN-TÊTE DE PAGE TABLER -->
 <div class="page-header d-print-none mb-3">
-    <div class="container-xl">
+    <div class="container-fluid px-0">
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle text-secondary">Honneur &amp; Renommée de l'Archipel</div>
@@ -230,7 +230,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
     </div>
 </div>
 
-<div class="container-xl">
+<div class="container-fluid px-0">
     <!-- 🗂️ BARRE DE NAVIGATION TABLER PAR ONGLETS SÉPARÉS -->
     <div class="card mb-3 bg-white border shadow-sm ranking-navbar-card">
         <div class="card-header border-bottom p-2 bg-white d-flex flex-wrap align-items-center justify-content-between gap-2">

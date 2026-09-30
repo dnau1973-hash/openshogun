@@ -41,7 +41,7 @@ $hasCastleImg = file_exists($castleImgDisk);
 $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?v=' . filemtime($castleImgDisk)) : '/public/assets/shogun_castle_city_bg.jpg';
 ?>
 
-<div class="container castle-view-container" style="max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem;">
+<div class="container-fluid px-0 castle-view-container py-2">
 
     <!-- Barre de Navigation Supérieure -->
     <div class="field-nav-bar" style="margin-bottom: 1.5rem;">

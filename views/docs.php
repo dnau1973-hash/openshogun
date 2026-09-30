@@ -261,7 +261,7 @@ foreach ($allUnits as $u) {
 }
 ?>
 
-<div class="docs-container" style="max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem;">
+<div class="container-fluid px-0 docs-container py-2">
 
     <!-- ==============================================================
          EN-TÊTE DU CODEX & GUIDE OFFICIEL D'OPENSHOGUN

@@ -139,7 +139,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
 }
 ?>
 
-<div class="container-xl my-3">
+<div class="container-fluid px-0 my-2">
 
     <!-- 1. EN-TÊTE DE PAGE TABLER (BREADCRUMB & TITRE) -->
     <div class="page-header d-print-none mb-3">

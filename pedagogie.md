@@ -130,6 +130,18 @@
   3. S'attribuer le métier « Game Elevate Designer » dans le Roster : voir s'illuminer les 3 nouveaux onglets ⚡, 🗾 et 🌿 !
   4. Tester un preset de vitesse éclair (20x) et admirer le gain de +30 XP Forge dans le journal des créateurs.
 
+### Session du 30/09/2026 (Partie 6) — Layout Fluide, Gouttières Responsive & Alignement Vertical Géométrique
+- **Concept exploré :** Conception de layouts réactifs modernes (CSS Grid / Flexbox / Bootstrap & Tabler.io), passage d'un conteneur bridé (`container-xl` fixe) à un conteneur fluide (`container-fluid`), et gestion rigoureuse des gouttières (*gutters / paddings*) pour garantir la cohérence d'alignement vertical entre en-tête et corps de page.
+- **Notions pour l'atelier :**
+  - **Pourquoi abandonner les largeurs fixes bridées sur desktop ?** Sur un écran large (1080p, 1440p ou 4K), un conteneur bridé à 1140px ou 1320px laisse de gigantesques bandes vides sur les côtés, réduisant artificiellement l'espace disponible pour les tableaux tactiques, les arbres de recherche ou les cartes de jeu.
+  - **Le piège des gouttières asymétriques :** Si le header utilise un conteneur avec un espacement latéral de 1.5rem (`px-lg-4`) et que le corps de page utilise une marge différente ou un conteneur fixe, les bordures extérieures des composants ne s'alignent pas verticalement. L'œil humain repère immédiatement ce décalage inélégant.
+  - **L'art de l'imbrication propre (Reset CSS) :** Quand une vue globale fournit déjà les marges latérales via `.page-body > .container-fluid px-3 px-lg-4`, les sous-vues incluses ne doivent pas redéclarer un `container-xl` avec son propre padding interne, sous peine de cumuler les marges (*padding stacking*) ou de provoquer un défilement horizontal parasite (`overflow-x`). L'utilisation conjointe de classes utilitaires (`px-0`) et d'une règle globale de neutralisation dans `style.css` résout définitivement ce problème.
+  - **L'exception stratégique de la carte de jeu :** Certaines vues nécessitent une immersion bord à bord totale (comme la carte du monde provincial Sengoku). Savoir gérer cette exception conditionnelle en PHP (`$page === 'map' ? 'px-0' : 'px-3 px-lg-4'`) sans casser le reste du site est une compétence clé du développeur frontend senior.
+- **Activité pratique suggérée :**
+  1. Redimensionner la fenêtre du navigateur en plein écran sur un écran d'ordinateur de bureau.
+  2. Prendre une règle virtuelle (ou afficher les repères avec l'inspecteur `F12`) et tracer une ligne verticale depuis la première colonne de ressources (Riz) jusqu'au bord gauche de la carte principale : observer l'alignement parfait des bordures !
+  3. Ouvrir l'onglet « Écosystème des oasis » ou « Roster & Métiers » dans Studio Dev et apprécier le confort visuel d'un affichage qui respire et tire parti de toute la largeur de l'écran.
+
 ---
 
 ## 🛠️ Modèle d'Entrée pour les Prochaines Sessions (Template)

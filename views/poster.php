@@ -26,7 +26,7 @@ $profile = $honorEngine->getUserProfile($targetUserId);
 // Si le joueur n'existe pas
 if (!$profile) {
     ?>
-    <div class="container-xl py-4">
+    <div class="container-fluid px-0 py-4">
         <div class="empty">
             <div class="empty-icon"><span class="fs-1">🏯</span></div>
             <p class="empty-title">Daimyō introuvable</p>
@@ -147,7 +147,7 @@ $capitalCoordX = $capitalPlanet['coord_x'] ?? 0;
 $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
 ?>
 
-<div class="container-xl py-3">
+<div class="container-fluid px-0 py-2">
 
     <!-- En-tête de page & fil d'Ariane -->
     <div class="page-header d-print-none mb-3">

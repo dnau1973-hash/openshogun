@@ -130,7 +130,7 @@ endif;
 // Si l'utilisateur est déjà connecté, index.php fournit déjà le header et footer HUD du jeu
 ?>
 
-<div class="container-xl my-3">
+<div class="container-fluid px-0 my-2">
     <!-- Fil d'Ariane & Titre épuré -->
     <div class="page-header d-print-none mb-3">
         <div class="row align-items-center">

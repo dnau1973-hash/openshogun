@@ -318,7 +318,7 @@ if ($requestedTab !== '' && in_array($requestedTab, $allowedTabs, true)) {
 $isForbiddenRedirect = !empty($_GET['forbidden']);
 ?>
 
-<div class="container-xl py-4" style="max-width: 1200px;">
+<div class="container-fluid px-0 py-3">
 
     <!-- ── HÉROS BANNER : STUDIO DEV & PROFIL CRÉATEUR ── -->
     <div class="card mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #1e1e2d 0%, #2a223f 100%); color: #fff; border-radius: 12px; overflow: hidden;">

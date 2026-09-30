@@ -1070,12 +1070,54 @@
 
 
 /* ==========================================================
-   LAYOUT CONTENU
+   HARMONISATION DU LAYOUT GLOBAL FLUIDE (PLEINE LARGEUR)
+   Calé précisément sur les gouttières du header et de la barre de ressources
    ========================================================== */
+.page-body > .container-fluid,
+.page-body > .container-xl,
+.page-body > .container-lg,
+.page-body > .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 1rem !important; /* Calé sur px-3 */
+    padding-right: 1rem !important;
+}
+
+@media (min-width: 992px) {
+    .page-body > .container-fluid,
+    .page-body > .container-xl,
+    .page-body > .container-lg,
+    .page-body > .container {
+        padding-left: 1.5rem !important; /* Calé sur px-lg-4 */
+        padding-right: 1.5rem !important;
+    }
+}
+
+/* Exception pour la carte stratégique plein écran */
+.page-body > .container-fluid.px-0 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Extension fluide des conteneurs internes des pages */
+.page-body .container,
+.page-body .container-xl,
+.page-body .container-lg,
+.page-body .container-md,
+.page-body .castle-view-container,
+.page-body .docs-container,
+.page-body .support-container,
+.page-body .edit-ticket-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
 .container {
-    max-width: 1850px !important;
-    width: 98% !important;
-    margin: 1rem auto;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0.5rem auto;
     padding: 0 1rem;
 }
 
@@ -1083,7 +1125,7 @@
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 0 0.75rem !important;
+    padding: 0 !important;
 }
 
 .grid-main {

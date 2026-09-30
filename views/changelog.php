@@ -57,7 +57,7 @@ if (!$isAuth):
 <body class="antialiased bg-light">
     <div class="page">
         <header class="navbar navbar-expand-md bg-white border-bottom py-2 sticky-top shadow-sm">
-            <div class="container-xl d-flex justify-content-between align-items-center">
+            <div class="container-fluid px-3 px-lg-4 d-flex justify-content-between align-items-center">
                 <a href="/" class="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
                     <span style="font-size: 1.6rem;">📜</span>
                     <div>
@@ -80,13 +80,13 @@ if (!$isAuth):
         </header>
 
         <main class="page-body my-4">
-            <div class="container-xl">
+            <div class="container-fluid px-3 px-lg-4">
                 <?= $changelogBody ?>
             </div>
         </main>
 
         <footer class="footer footer-transparent d-print-none py-3 border-top bg-white mt-auto">
-            <div class="container-xl text-center text-muted small">
+            <div class="container-fluid px-3 px-lg-4 text-center text-muted small">
                 OpenShogun &copy; <?= date('Y') ?> &bull; Jeu de stratégie féodale par navigateur &bull; Moteur Sengoku PHP 8
             </div>
         </footer>

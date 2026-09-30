@@ -1,4 +1,4 @@
-            </div><!-- /container-xl -->
+            </div><!-- /container-fluid -->
         </div><!-- /page-body -->
     </div><!-- /page-wrapper -->
 </div><!-- /page -->

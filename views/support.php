@@ -22,7 +22,7 @@ $myTickets = $supportEngine->getUserTickets($userId);
 $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
 ?>
 
-<div class="support-container" style="max-width: 1100px; margin: 0 auto; padding-bottom: 3rem;">
+<div class="container-fluid px-0 support-container py-2">
 
     <!-- En-tête Héroïque Assistance & Idées -->
     <div class="card" style="margin-bottom: 2rem; border-top: 5px solid #0891b2; background: var(--bg-surface, #fdfbf7); box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
