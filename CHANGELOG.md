@@ -4,7 +4,8 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
-### Ajouté
+- **Affiche Féodale & Fiche Daimyō (`views/poster.php`) :** Migration de l'ancienne modale vers une page dédiée complète (`?page=poster` et alias `?page=profile`), avec hero header immersif aux armoiries du clan (Mon, bannière féodale, statut de présence et trêve sacrée), section narrative complète (contexte Sengoku/Muromachi/Edo, doctrine martiale, arquebuses Tanegashima, libre marché Rakuichi Rakuza, Fūrinkazan, cavalerie d'élite Akazonae, ninjas d'Iga, bastions imprenables), parchemin de la devise du Daimyō avec édition asynchrone AJAX directe, registre des fiefs provinciaux avec coordonnées géographiques cliquables, KPIs de combat hebdomadaires et panthéon des médailles d'honneur.
+- **Navigation & Redirection Globale :** Actualisation du menu « Mon Empire » pour pointer directement vers « Mon Affiche Féodale », et redirection transparente de l'ensemble des boutons de l'application (classements, forum, chat, alliance, cartes) vers la nouvelle page dédiée.
 - **Studio Dev & Roster :** Filtrage strict des membres éligibles à l'attribution des métiers (`WHERE is_bot = 0`) afin d'exclure formellement tous les profils d'IA ou bots du studio de développement.
 - **Module Rapports (Chroniques Militaires) :** Pagination fluide de 15 entrées par page avec contrôles Tabler.io, bouton d'action pour la suppression unitaire d'un rapport, et bouton global pour purger l'ensemble des chroniques avec confirmation via modale Tabler.io (`api/reports.php`).
 - **Module Messages :** Bouton d'action « Supprimer tous les messages » avec modale de confirmation Tabler.io obligatoire et endpoint API dédié supportant le ciblage de boîte (`inbox`, `outbox`, `all`).

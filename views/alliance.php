@@ -176,7 +176,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                                     <tr style="<?= $isMe ? 'background: rgba(194,37,43,0.05);' : '' ?>">
                                         <td class="fw-bold text-muted">#<?= $rank++ ?></td>
                                         <td>
-                                            <a href="javascript:void(0)" onclick="openPlayerProfileModal(<?= $m['id'] ?>)" class="fw-bold text-decoration-none">
+                                            <a href="/?page=poster&id=<?= (int)$m['id'] ?>" class="fw-bold text-decoration-none">
                                                 <?= htmlspecialchars($m['username']) ?>
                                             </a>
                                             <?php if ($isMe): ?>

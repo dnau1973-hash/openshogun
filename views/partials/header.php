@@ -257,9 +257,9 @@ $navItems = [
                                     <span>Alliance</span>
                                 </a>                                    
                                 <div class="dropdown-divider"></div>
-                                <a href="javascript:void(0)" class="dropdown-item d-flex align-items-center gap-2" onclick="openPlayerProfileModal(<?= (int)$user['id'] ?>)">
+                                <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'poster' ? 'active fw-bold' : '' ?>" href="?page=poster">
                                     <span class="dropdown-item-icon">👤</span>
-                                    <span>Ma Fiche</span>
+                                    <span>Mon Affiche Féodale</span>
                                 </a>
                                 <a href="javascript:void(0)" class="dropdown-item d-flex align-items-center gap-2" onclick="openEditMottoModal()">
                                     <span class="dropdown-item-icon">📜</span>

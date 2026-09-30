@@ -447,7 +447,7 @@ $categories = $forumEngine->getCategories();
                         <div class="mb-2">
                             <span style="font-size: 2.5rem;">🏯</span>
                         </div>
-                        <a href="javascript:void(0)" onclick="openPlayerProfileModal(<?= $post['user_id'] ?>)" class="fw-bold fs-5 text-decoration-none text-dark">
+                        <a href="/?page=poster&id=<?= (int)$post['user_id'] ?>" class="fw-bold fs-5 text-decoration-none text-dark" title="Consulter l'Affiche Féodale">
                             <?= htmlspecialchars($post['author_username']) ?>
                         </a>
 

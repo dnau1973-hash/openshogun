@@ -37,6 +37,15 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 30/09/2026 (Partie 7) — Refonte Narrative, Transition UX Modale vers Page Dédiée & Worldbuilding Féodal
+- **Concept exploré :** Évolution ergonomique d'une fenêtre modale éphémère vers une page complète dédiée (`views/poster.php`), narration historique et worldbuilding (ancrage des factions dans l'histoire des époques Sengoku, Muromachi et Edo), édition in-place de devise par requête asynchrone AJAX (`fetch`) et architecture de routage avec alias.
+- **Notions pour l'atelier :**
+  - **Modale vs Page Dédiée (Quand franchir le pas ?) :** Comprendre qu'une fenêtre modale est idéale pour une action éphémère (confirmation, saisie rapide). Dès lors que le contenu s'étoffe (armoiries, chroniques narratives, tableau des fiefs, distinctions de guerre, KPIs hebdomadaires), la modale devient étriquée. Une page dédiée offre l'espace nécessaire pour une expérience immersive, partageable par URL (`?page=poster&id=X`) et respectant l'historique du navigateur.
+  - **Worldbuilding & Narration liée au Gameplay :** Découvrir comment lier l'histoire réelle du Japon féodal aux mécaniques de jeu. Comment les équilibrages de faction (double développement des Oda, furie de la cavalerie rouge des Takeda, forteresse et patience des Tokugawa) s'enracinent dans la réalité historique (Tanegashima, Fūrinkazan, Sekigahara, réseaux d'espionnage d'Iga).
+  - **Édition « In-Place » avec AJAX & Feedback Utilisateur :** Comprendre comment modifier une donnée (la devise du Daimyō) directement sur la page sans recharger l'écran : bascule dynamique formulaire/affichage, appel `fetch` vers l'API REST `/api/profile.php`, mise à jour du nœud DOM en cas de succès et affichage d'un toast Tabler.io non bloquant.
+  - **Routage avec Alias d'URL :** Comprendre le fonctionnement d'un routeur PHP (`index.php`) qui intercepte un paramètre GET (`page=profile` vers `poster`) pour garantir la rétrocompatibilité des liens et offrir une navigation fluide depuis n'importe quel point du jeu (classement, chat, alliance, cartes).
+- **Activité pratique suggérée :** Ouvrir « Mon Affiche Féodale » depuis le menu « Mon Empire », découvrir les armoiries et les 4 piliers historiques de son clan, modifier sa devise personnelle avec enregistrement instantané, puis aller sur la page du classement pour consulter l'affiche féodale d'un seigneur rival et tester les boutons d'actions diplomatiques (missive, carte, expédition).
+
 ### Session du 30/09/2026 (Partie 6) — Ergonomie Fluide, Pagination SQL & Cycle de Vie des Données (Purge & Sécurité)
 - **Concept exploré :** Conception d'interfaces complètes pleine largeur (`container-fluid`), pagination de données volumineuses en base (SQL `LIMIT` & `OFFSET`), cycle de vie et suppression sécurisée d'historiques (soft-delete vs hard-delete) et séparation stricte joueurs réels vs bots.
 - **Notions pour l'atelier :**

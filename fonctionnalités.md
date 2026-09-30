@@ -105,7 +105,18 @@
   2. Ouvrir « Studio Dev » avec ce même compte : constater que les 3 onglets (`Vitesses & Équilibrage`, `Arpentage & Provinces`, `Écosystème des Oasis`) ne sont PAS présents dans la barre d'onglets ni dans le DOM.
   3. Forcer l'URL `/?page=dev_team&tab=game_speeds` : constater la redirection immédiate vers le premier onglet autorisé avec le bandeau d'accès restreint.
   4. Via l'onglet « Roster et Métiers », assigner le métier « Game Elevate Designer » au compte Administrateur : constater l'apparition immédiate des 3 nouveaux onglets.
-  5. Tester la modification des constantes de vitesse (avec presets et attribution de 30 XP Forge), le déploiement procédural de nouveaux fiefs (+40 XP), et l'équilibrage/génération des oasis par densité (+35 XP).
 
 
+---
 
+### [2026-09-30] - poster : Page Dédiée « Mon Affiche Féodale » & Lore Immersif du Clan
+- **Module :** `poster`
+- **Statut :** `À tester`
+- **Description :** Transformation de la fenêtre modale « Mon affiche » / « M'affiche » en une page dédiée complète (`?page=poster` et alias `?page=profile`). Hero header immersif reprenant l'identité visuelle du clan féodal du joueur (Oda, Takeda, Tokugawa ou provincial), Mon/armoiries, bannière stylisée, titre féodal et devise ancestrale. Section narrative détaillée exposant les origines du clan sous les époques Sengoku/Muromachi/Edo, la doctrine militaire et économique (arquebuses de Tanegashima, libre marché Rakuichi Rakuza, Fūrinkazan, cavalerie d'élite Akazonae, ninjas d'Iga, fortifications inexpugnables), parchemins de la devise du Daimyō avec édition asynchrone AJAX, tableau des fiefs provinciaux avec coordonnées cliquables, KPIs de performances hebdomadaires et vitrine des médailles de guerre d'honneur. Intégration de la redirection automatique depuis toutes les vues (ranking, messages, alliance, forum, header).
+- **Fichiers modifiés :** `index.php`, `views/poster.php`, `views/partials/header.php`, `views/partials/footer.php`, `views/ranking.php`, `views/alliance.php`, `views/forum.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Cliquer sur « Mon Affiche Féodale » dans le menu déroulant « Mon Empire » : vérifier l'ouverture directe de la page dédiée `/?page=poster`.
+  2. Vérifier l'en-tête immersif avec les armoiries (Mon) et le titre féodal correspondant au clan du joueur (Clan Oda, Clan Takeda ou Clan Tokugawa).
+  3. Vérifier la section narrative avec le contexte historique (Sengoku/Muromachi/Edo), la doctrine martiale et les 4 piliers illustrés.
+  4. Tester la modification de la devise personnelle via le bouton « Modifier ma Devise » (ou via l'URL avec `?page=poster&edit=1`) et vérifier sa mise à jour instantanée sans rechargement.
+  5. Se rendre sur le classement (`/?page=ranking`) et cliquer sur un Daimyō adverse : vérifier l'affichage de son affiche féodale avec les boutons d'action diplomatique (« Écrire une Missive », « Chuchoter au Salon », « Lancer une Expédition »).

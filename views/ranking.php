@@ -345,9 +345,9 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                                     </td>
                                     <td class="text-truncate">
                                         <div class="d-flex align-items-center gap-2 text-truncate">
-                                            <a href="javascript:void(0)" onclick="openPlayerProfileModal(<?= (int)$p['id'] ?>)" 
+                                            <a href="/?page=poster&id=<?= (int)$p['id'] ?>" 
                                                class="text-reset fw-bold text-decoration-none d-inline-flex align-items-center gap-1 text-truncate" 
-                                               title="Consulter la fiche du Daimyō : <?= htmlspecialchars($p['username']) ?>">
+                                               title="Consulter l'Affiche Féodale du Daimyō : <?= htmlspecialchars($p['username']) ?>">
                                                 <span class="flex-shrink-0">👤</span>
                                                 <span class="text-truncate"><?= htmlspecialchars($p['username']) ?></span>
                                             </a>
@@ -386,11 +386,11 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-list flex-nowrap justify-content-center">
-                                            <button type="button" onclick="openPlayerProfileModal(<?= (int)$p['id'] ?>)" 
-                                                    class="btn btn-sm btn-white d-inline-flex align-items-center gap-1 shadow-sm px-2" 
-                                                    title="Fiche du Daimyō">
-                                                <span>👤</span> <span class="d-none d-md-inline">Fiche</span>
-                                            </button>
+                                            <a href="/?page=poster&id=<?= (int)$p['id'] ?>" 
+                                               class="btn btn-sm btn-white d-inline-flex align-items-center gap-1 shadow-sm px-2" 
+                                               title="Affiche Féodale du Daimyō">
+                                                <span>👤</span> <span class="d-none d-md-inline">Affiche</span>
+                                            </a>
                                             <?php if (!$isCurrent): ?>
                                                 <a href="?page=messages&tab=compose&to=<?= urlencode($p['username']) ?>" 
                                                    class="btn btn-sm btn-white d-inline-flex align-items-center gap-1 shadow-sm px-2" 
@@ -505,7 +505,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                                         </div>
                                     </td>
                                     <td class="text-truncate">
-                                        <a href="javascript:void(0)" onclick="openPlayerProfileModal(<?= (int)$a['leader_id'] ?>)" 
+                                        <a href="/?page=poster&id=<?= (int)$a['leader_id'] ?>" 
                                            class="text-reset text-decoration-none d-inline-flex align-items-center gap-1 fw-semibold text-truncate"
                                            title="Chef : <?= htmlspecialchars($a['leader_name']) ?>">
                                             <span class="flex-shrink-0">👑</span>
