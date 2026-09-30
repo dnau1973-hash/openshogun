@@ -1,0 +1,59 @@
+# ⛩️ Atelier Pédagogique OpenShogun — Carnet de Bord d'Apprentissage
+
+> **Projet Père-Fils & Développement Web Féodal**  
+> Ce document centralise les objectifs d'apprentissage, les notions clés abordées lors des sessions de développement et les pistes d'ateliers interactifs à réaliser ensemble.
+
+---
+
+## 🎯 Objectifs Pédagogiques Globaux
+1. **Comprendre le fonctionnement du Web :** Requêtes HTTP (GET/POST), sessions serveur, rendu côté client vs traitement côté serveur.
+2. **Architecture & Bonnes Pratiques :** Structuration propre du code en PHP natif sans dépendance externe magique, base de données relationnelle (MySQL/PDO) et requêtes sécurisées.
+3. **Game Design & Mécaniques de Jeu :** Équilibrage des ressources, gestion de la boucle de gameplay (game loop), clans IA, rôles d'équipe (Dev Team) et gamification.
+4. **Sécurité Informatique :** Hachage des mots de passe, protection contre les injections SQL, tokens d'activation uniques avec expiration temporelle.
+
+---
+
+## 🧭 Notions Clés Abordées par Thématique
+
+### 1. Programmation Backend & Base de Données
+- **PHP 8.2+ Natif :** Programmation orientée objet, pattern Singleton (`MailService`), validation de formulaires, sessions administrateur.
+- **PDO & Sécurité :** Requêtes préparées (`prepare()` / `execute()`) pour immuniser le jeu contre les injections SQL.
+- **Routage par URL :** Paramètres `page`, `tab`, `action`, compréhension des variables globales `$_GET` et `$_POST`.
+
+### 2. Réseau, Protocoles & Sécurité
+- **Sockets & Protocole SMTP (RFC 5321) :** Comprendre comment deux serveurs se parlent en direct (codes de réponse `220`, `250`, poignée de main `EHLO`, négociation `STARTTLS`).
+- **Cryptographie appliquée :** Jeton de confirmation unique (`random_bytes`), empreinte SHA-256 et chiffrement symétrique AES-256-CBC pour les mots de passe de serveurs.
+- **Validation du Mot de Passe :** Algorithme de calcul de force (entropie, regex de complexité) et synchronisation en temps réel.
+
+### 3. Frontend & Ergonomie (UI / UX)
+- **JavaScript Vanilla :** Événements DOM (`input`, `change`, `click`), manipulation dynamique des classes CSS Tabler.io, zéro dépendance externe.
+- **Templates d'E-mails Responsive :** Conception en HTML tabulaire rétrocompatible, intégration graphique dans un univers féodal sombre.
+
+### 4. Game Design & Métiers du Jeu Vidéo (Dev Team)
+- **Matrice des Rôles :** Game Designer, Développeur Moteur/Rendu, QA Tester, Scénariste, Producteur.
+- **Gamification :** Attribution de compétences thématiques et buffing en jeu selon le profil de contributeur.
+
+---
+
+## 📜 Historique des Évolutions Pédagogiques
+
+### Session du 30/09/2026 — Refonte Inscription, Sécurité SMTP & Débogage de Routage
+- **Concept exploré :** Cycle complet d'authentification utilisateur et négociation réseau par sockets.
+- **Notions pour l'atelier :**
+  - Pourquoi ne jamais stocker un mot de passe en clair (hachage bcrypt / argon2 vs chiffrement réversible AES-256).
+  - Comment vérifier la concordance d'un mot de passe en temps réel avant d'envoyer la requête au serveur.
+  - Débogage d'une liste blanche (`allowedTabs` / `validTabs`) : comprendre pourquoi un onglet valide côté vue était refoulé par le contrôleur de routage.
+- **Activité pratique suggérée :** Créer un petit script de test en ligne de commande pour envoyer un message SMTP simulé avec `stream_socket_client`.
+
+---
+
+## 🛠️ Modèle d'Entrée pour les Prochaines Sessions (Template)
+
+```markdown
+### Session du [JJ/MM/AAAA] — [Titre de la fonctionnalité ou du sujet]
+- **Concept exploré :** [Explication synthétique du concept technique ou ludique]
+- **Notions pour l'atelier :**
+  - [Point d'apprentissage 1]
+  - [Point d'apprentissage 2]
+- **Activité pratique suggérée :** [Exercice, test guidé ou questionnement avec mon fils]
+```
