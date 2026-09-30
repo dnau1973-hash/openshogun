@@ -68,10 +68,10 @@ $mailingStats       = $mailingEngine->getStatistics();
 $initialSubscribers = $canManageCommunity ? $mailingEngine->getSubscribers([], 20, 0) : ['subscribers' => [], 'total' => 0];
 $recentCampaigns    = $canManageCommunity ? $mailingEngine->getCampaignHistory(10) : [];
 
-// Liste de tous les utilisateurs pour le formulaire d'attribution
+// Liste de tous les utilisateurs humains pour le formulaire d'attribution (exclusion stricte des bots/IA)
 $allUsersList = [];
 if ($canManageTeam) {
-    $stmtUsers = $db->query("SELECT id, username FROM users ORDER BY username ASC");
+    $stmtUsers = $db->query("SELECT id, username FROM users WHERE is_bot = 0 ORDER BY username ASC");
     $allUsersList = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
 }
 

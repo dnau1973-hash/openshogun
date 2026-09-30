@@ -5,6 +5,42 @@
 
 ---
 
+### [2026-09-30] - dev_team : Roster & Métiers — Exclusion Stricte des Profils IA / Bots
+- **Module :** `dev_team`
+- **Statut :** `À tester`
+- **Description :** Filtrage SQL strict (`WHERE is_bot = 0`) dans le sélecteur de membres éligibles à l'attribution des métiers de développement et dans le listing de l'équipe, avec blocage applicatif dans `assignRoles()` et le contrôleur d'API pour empêcher toute assignation de rôle à un bot.
+- **Fichiers modifiés :** `views/dev_team.php`, `core/DevTeamEngine.php`, `api/dev_team.php`
+- **Vérification QA :** Ouvrir la modale d'attribution de métiers dans Studio Dev et vérifier que seuls les comptes de joueurs réels figurent dans la liste déroulante (aucun bot PNJ ou IA présent). Tenter d'attribuer un rôle à un bot via l'API et vérifier le rejet avec message explicite.
+
+---
+
+### [2026-09-30] - reports : Pagination du Registre & Suppressions Unitaire et en Masse
+- **Module :** `reports`
+- **Statut :** `À tester`
+- **Description :** Mise en place d'une pagination Tabler.io par page de 15 rapports avec contrôles de navigation réactifs et indicateur de page, ajout d'un bouton d'action unitaire pour supprimer la chronique consultée (ou directement depuis la liste), ajout d'un bouton de purge globale « Supprimer tous les rapports », sécurisation avec confirmation obligatoire via modale Tabler.io (`showModalConfirm`), et création de l'endpoint `api/reports.php`.
+- **Fichiers modifiés :** `views/reports.php`, `api/reports.php`
+- **Vérification QA :** Naviguer sur la page des rapports de combat, vérifier la pagination et les boutons précédent/suivant, supprimer un rapport spécifique et vérifier l'apparition de la modale Tabler ainsi que sa suppression effective, puis tester la purge globale via le bouton supérieur.
+
+---
+
+### [2026-09-30] - messages : Purge Globale des Missives & Confirmation Modale
+- **Module :** `messages`
+- **Statut :** `À tester`
+- **Description :** Ajout du bouton d'action « Supprimer tous les messages » dans l'en-tête de la messagerie, confirmation préalable obligatoire via modale Tabler.io, implémentation de `deleteAllMessages()` dans `MessageEngine` (avec soft-delete selon le scope réception/envoi et hard-delete si purge mutuelle ou système) et point d'API dédié dans `api/messages.php`.
+- **Fichiers modifiés :** `views/messages.php`, `core/MessageEngine.php`, `api/messages.php`
+- **Vérification QA :** Accéder aux missives diplomatiques, cliquer sur « Supprimer tous les messages », vérifier que la boîte de dialogue Tabler prévient de l'irréversibilité de l'action, confirmer la suppression et constater le vidage immédiat de la boîte sans erreur.
+
+---
+
+### [2026-09-30] - layout : Header Pleine Largeur Fluide & Navbar Positionnée Tout en Haut
+- **Module :** `layout`
+- **Statut :** `À tester`
+- **Description :** Repositionnement de la barre de navigation principale tout en haut de la page (`sticky-top`), conversion de tous les conteneurs d'en-tête vers la pleine largeur fluide (`container-fluid` au lieu de `container` ou `container-xl`), intégration harmonieuse des badges (Koban, Sceau, Immunité) et des utilitaires (Studio Dev, Admin, Audio, Fiefs, Héros, Déconnexion) dans la navbar responsive Tabler.io.
+- **Fichiers modifiés :** `views/partials/header.php`
+- **Vérification QA :** Vérifier que la barre de navigation est le premier élément visible en haut de l'écran, qu'elle occupe 100% de la largeur du viewport sans marge latérale superflue, que le logo central et les barres de ressources s'adaptent de manière fluide, et que le menu mobile toggler fonctionne sur petit écran.
+
+---
+
 ### [2026-09-30] - dev_team : Refonte du Roster & Attribution Multiple
 - **Module :** `dev_team`
 - **Statut :** `Validée`

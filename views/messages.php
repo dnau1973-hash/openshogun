@@ -76,6 +76,15 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
                class="btn btn-sm <?= ($tab === 'compose' && !$activeMessage) ? 'btn-primary' : 'btn-outline-secondary' ?>">
                 <span>✍️ Rédiger une Missive</span>
             </a>
+            <?php if ($totalInbox > 0 || $totalOutbox > 0): ?>
+                <button type="button" 
+                        class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 shadow-sm"
+                        onclick="deleteAllMessages('<?= htmlspecialchars($tab) ?>')"
+                        title="Purger définitivement vos missives">
+                    <span>🗑️</span>
+                    <span>Supprimer tous les messages</span>
+                </button>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -484,6 +493,31 @@ async function deleteMessage(messageId) {
         }
     } catch (e) {
         showModalAlert("Erreur réseau.", 'error');
+    }
+}
+
+async function deleteAllMessages(scope = 'all') {
+    const scopeLabel = (scope === 'inbox') ? "de votre boîte de réception" : ((scope === 'outbox') ? "de vos messages envoyés" : "de votre messagerie");
+    const confirmed = await showModalConfirm(
+        `ATTENTION : Vous êtes sur le point de supprimer définitivement l'ensemble des messages ${scopeLabel}.\n\nCette action est irréversible. Confirmez-vous la purge ?`,
+        "Purger les Missives"
+    );
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'delete_all');
+    formData.append('scope', scope);
+
+    try {
+        const res = await fetch('/api/messages.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            window.location.href = `?page=messages&tab=${encodeURIComponent(scope === 'compose' ? 'inbox' : scope)}`;
+        } else {
+            showModalAlert(data.error || "Impossible de purger les messages.", 'error', 'Échec de la purge');
+        }
+    } catch (e) {
+        showModalAlert("Erreur de connexion lors de la purge de vos missives.", 'error', 'Erreur Réseau');
     }
 }
 </script>

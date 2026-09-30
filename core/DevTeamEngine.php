@@ -441,6 +441,14 @@ class DevTeamEngine {
     public function assignRoles(int $userId, array $roleIds): array {
         if ($userId <= 0 || empty($roleIds)) return [];
 
+        // Exclure formellement les bots/IA de l'équipe de développement
+        $stmtBotCheck = $this->db->prepare("SELECT is_bot FROM users WHERE id = ?");
+        $stmtBotCheck->execute([$userId]);
+        $userRow = $stmtBotCheck->fetch(PDO::FETCH_ASSOC);
+        if (!$userRow || !empty($userRow['is_bot'])) {
+            return [];
+        }
+
         $assigned = [];
         $checkStmt = $this->db->prepare("SELECT 1 FROM user_dev_roles WHERE user_id = ? AND role_id = ? LIMIT 1");
         $insertStmt = $this->db->prepare("
@@ -741,8 +749,8 @@ class DevTeamEngine {
         $stmt = $this->db->query("
             SELECT DISTINCT u.id, u.username, u.faction, u.is_admin
             FROM users u
-            WHERE u.is_admin = 1 
-               OR u.id IN (SELECT user_id FROM user_dev_roles)
+            WHERE (u.is_admin = 1 OR u.id IN (SELECT user_id FROM user_dev_roles))
+              AND u.is_bot = 0
             ORDER BY u.id ASC
         ");
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);

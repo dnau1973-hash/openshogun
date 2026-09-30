@@ -29,6 +29,10 @@ try {
         $messageId = (int)($_POST['message_id'] ?? 0);
         $ok = $messageEngine->deleteMessage($messageId, (int)$user['id']);
         echo json_encode(['success' => $ok, 'message' => $ok ? 'Message supprimé.' : 'Impossible de supprimer le message.']);
+    } elseif ($action === 'delete_all') {
+        $scope = trim((string)($_POST['scope'] ?? 'all'));
+        $ok = $messageEngine->deleteAllMessages((int)$user['id'], $scope);
+        echo json_encode(['success' => $ok, 'message' => $ok ? 'Historique des missives purgé avec succès.' : 'Échec de la purge.']);
     } elseif ($action === 'get_unread') {
         $count = $messageEngine->getUnreadCount((int)$user['id']);
         echo json_encode(['success' => true, 'unread_count' => $count]);

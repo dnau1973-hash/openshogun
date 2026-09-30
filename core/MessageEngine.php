@@ -186,6 +186,31 @@ class MessageEngine {
     }
 
     /**
+     * Supprime tous les messages d'un utilisateur (boîte de réception, boîte d'envoi ou l'ensemble)
+     */
+    public function deleteAllMessages(int $userId, string $scope = 'all'): bool {
+        if ($userId <= 0) return false;
+
+        if ($scope === 'inbox') {
+            $this->db->prepare("UPDATE messages SET deleted_by_receiver = 1 WHERE receiver_id = ? AND deleted_by_receiver = 0")->execute([$userId]);
+        } elseif ($scope === 'outbox') {
+            $this->db->prepare("UPDATE messages SET deleted_by_sender = 1 WHERE sender_id = ? AND deleted_by_sender = 0")->execute([$userId]);
+        } else {
+            $this->db->prepare("UPDATE messages SET deleted_by_receiver = 1 WHERE receiver_id = ? AND deleted_by_receiver = 0")->execute([$userId]);
+            $this->db->prepare("UPDATE messages SET deleted_by_sender = 1 WHERE sender_id = ? AND deleted_by_sender = 0")->execute([$userId]);
+        }
+
+        // Nettoyer définitivement les messages où les deux partis l'ont supprimé (ou message système supprimé par le destinataire)
+        $this->db->query("
+            DELETE FROM messages 
+            WHERE (deleted_by_receiver = 1 AND deleted_by_sender = 1) 
+               OR (sender_id IS NULL AND deleted_by_receiver = 1)
+        ");
+
+        return true;
+    }
+
+    /**
      * Récupère la liste de tous les autres commandants pour l'autocomplétion / choix
      */
     public function getAllOtherPlayers(int $currentUserId): array {

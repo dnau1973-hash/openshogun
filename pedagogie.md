@@ -37,6 +37,15 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 30/09/2026 (Partie 6) — Ergonomie Fluide, Pagination SQL & Cycle de Vie des Données (Purge & Sécurité)
+- **Concept exploré :** Conception d'interfaces complètes pleine largeur (`container-fluid`), pagination de données volumineuses en base (SQL `LIMIT` & `OFFSET`), cycle de vie et suppression sécurisée d'historiques (soft-delete vs hard-delete) et séparation stricte joueurs réels vs bots.
+- **Notions pour l'atelier :**
+  - **Pagination SQL & Économie de bande passante :** Pourquoi ne jamais charger des milliers d'enregistrements d'un coup dans le navigateur. Comprendre comment le calcul des pages (`ceil(total / perPage)`), le saut d'enregistrements (`OFFSET`) et la restriction de taille (`LIMIT`) rendent une interface instantanée même avec des années d'archives.
+  - **Confirmation Modale vs Dialogues Bloquants :** Découvrir pourquoi les alertes JavaScript natives (`confirm()`, `alert()`) bloquent tout le navigateur et sont à proscrire au profit de modales stylisées intégrées au DOM (Tabler.io), avec promesses asynchrones (`await showModalConfirm(...)`).
+  - **Stratégie de suppression (Soft-delete vs Hard-delete) :** Pourquoi un message entre deux joueurs ne doit pas disparaître pour le destinataire si l'expéditeur vide sa boîte d'envoi. Comprendre comment combiner des drapeaux booléens (`deleted_by_sender`, `deleted_by_receiver`) avec une suppression définitive uniquement lorsque les deux partis ont confirmé la purge.
+  - **Layout & Ergonomie « Full-Width » :** Comprendre la différence entre un conteneur rigide centré (`container-xl`) et une interface fluide d'application web (`container-fluid`), et comment placer une barre de navigation tout en haut en mode sticky (`sticky-top`) pour maximiser l'espace utile de jeu.
+- **Activité pratique suggérée :** Se rendre sur la page des rapports de combat, tester la pagination d'une page à l'autre, supprimer un rapport spécifique via la modale de confirmation, puis se rendre sur les missives pour tester le vidage de la boîte de réception.
+
 ### Session du 30/09/2026 (Partie 5) — Débogage & Robustesse Objet : Méthodes Statiques vs Instances de Moteur
 - **Concept exploré :** Débogage d'une erreur fatale PHP (`Call to undefined method`), distinction fondamentale en programmation orientée objet entre méthode statique (`Class::method()`) et méthode d'instance (`$obj->method()`), et cycle de vie des données d'un monde de jeu.
 - **Notions pour l'atelier :**

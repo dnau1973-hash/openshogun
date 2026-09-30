@@ -6,7 +6,23 @@
 
 $db = Database::getConnection();
 
-// Récupération des rapports de l'utilisateur (combats et espionnages)
+// Compter le total global de rapports pour l'utilisateur
+$stmtCount = $db->prepare("
+    SELECT COUNT(*) 
+    FROM combat_reports 
+    WHERE attacker_id = ? OR defender_id = ?
+");
+$stmtCount->execute([$user['id'], $user['id']]);
+$totalReportsCount = (int)$stmtCount->fetchColumn();
+
+// Configuration de la pagination (15 rapports par page)
+$perPage = 15;
+$currentPage = max(1, (int)($_GET['p'] ?? 1));
+$totalPages = max(1, (int)ceil($totalReportsCount / $perPage));
+$currentPage = min($currentPage, $totalPages);
+$offset = ($currentPage - 1) * $perPage;
+
+// Récupération de la page courante des rapports de l'utilisateur
 $stmt = $db->prepare("
     SELECT cr.*, u1.username as att_user, u2.username as def_user 
     FROM combat_reports cr 
@@ -14,7 +30,7 @@ $stmt = $db->prepare("
     LEFT JOIN users u2 ON cr.defender_id = u2.id 
     WHERE cr.attacker_id = ? OR cr.defender_id = ? 
     ORDER BY cr.created_at DESC 
-    LIMIT 50
+    LIMIT " . (int)$perPage . " OFFSET " . (int)$offset . "
 ");
 $stmt->execute([$user['id'], $user['id']]);
 $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -40,36 +56,49 @@ $beastsDict = [
 ];
 $unitsDict = array_merge($unitsDict, $beastsDict);
 
-// Calcul des statistiques pour les filtres et KPIs
-$totalReports = count($reports);
+// Calcul des statistiques globales pour les filtres et KPIs
+$totalReports = $totalReportsCount;
 $winCount = 0;
 $lossCount = 0;
 $spyCount = 0;
 
-foreach ($reports as $rep) {
-    $isAtt = ($rep['attacker_id'] == $user['id']);
-    $isDef = ($rep['defender_id'] == $user['id']);
-    $mType = $rep['mission_type'];
-
-    if ($mType === 'spy') {
-        $spyCount++;
-    } else {
-        $isWinner = ($rep['winner'] === 'attacker' && $isAtt) || ($rep['winner'] === 'defender' && $isDef);
-        if ($isWinner) {
-            $winCount++;
-        } else {
-            $lossCount++;
-        }
-    }
-}
+try {
+    $stmtStats = $db->prepare("
+        SELECT 
+            SUM(CASE WHEN mission_type = 'spy' THEN 1 ELSE 0 END) as total_spy,
+            SUM(CASE WHEN mission_type != 'spy' AND ((winner = 'attacker' AND attacker_id = ?) OR (winner = 'defender' AND defender_id = ?)) THEN 1 ELSE 0 END) as total_win,
+            SUM(CASE WHEN mission_type != 'spy' AND ((winner = 'defender' AND attacker_id = ?) OR (winner = 'attacker' AND defender_id = ?)) THEN 1 ELSE 0 END) as total_loss
+        FROM combat_reports
+        WHERE attacker_id = ? OR defender_id = ?
+    ");
+    $stmtStats->execute([$user['id'], $user['id'], $user['id'], $user['id'], $user['id'], $user['id']]);
+    $statsRow = $stmtStats->fetch(PDO::FETCH_ASSOC);
+    $spyCount = (int)($statsRow['total_spy'] ?? 0);
+    $winCount = (int)($statsRow['total_win'] ?? 0);
+    $lossCount = (int)($statsRow['total_loss'] ?? 0);
+} catch (Exception $e) {}
 
 // Rapport sélectionné
 $selectedReportId = isset($_GET['id']) ? (int)$_GET['id'] : ($reports[0]['id'] ?? 0);
 $currentReport = null;
-foreach ($reports as $r) {
-    if ((int)$r['id'] === $selectedReportId) {
-        $currentReport = $r;
-        break;
+if ($selectedReportId > 0) {
+    foreach ($reports as $r) {
+        if ((int)$r['id'] === $selectedReportId) {
+            $currentReport = $r;
+            break;
+        }
+    }
+    // Si le rapport sélectionné n'est pas sur la page actuelle, on le charge directement
+    if (!$currentReport) {
+        $stmtSingle = $db->prepare("
+            SELECT cr.*, u1.username as att_user, u2.username as def_user 
+            FROM combat_reports cr 
+            LEFT JOIN users u1 ON cr.attacker_id = u1.id 
+            LEFT JOIN users u2 ON cr.defender_id = u2.id 
+            WHERE cr.id = ? AND (cr.attacker_id = ? OR cr.defender_id = ?)
+        ");
+        $stmtSingle->execute([$selectedReportId, $user['id'], $user['id']]);
+        $currentReport = $stmtSingle->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 }
 
@@ -144,6 +173,16 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                     <span class="badge bg-info-lt p-2">
                         🥷 <?= $spyCount ?> Infiltration<?= $spyCount > 1 ? 's' : '' ?>
                     </span>
+                    <?php if ($totalReports > 0): ?>
+                        <div class="btn-group ms-2">
+                            <a href="?page=reports&mark_all_read=1" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" title="Marquer toutes les chroniques comme lues">
+                                <span>👁️</span> Tout marquer lu
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" onclick="deleteAllReports()" title="Supprimer définitivement l'ensemble de vos rapports">
+                                <span>🗑️</span> Supprimer tous les rapports
+                            </button>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -266,9 +305,17 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                         <span>
                                             <?= $isAtt ? '⚔️ Assaut lancé' : '🛡️ Attaque subie' ?>
                                         </span>
-                                        <span class="badge bg-secondary-lt text-uppercase font-monospace" style="font-size: 0.65rem;">
-                                            <?= htmlspecialchars($rep['mission_type']) ?>
-                                        </span>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="badge bg-secondary-lt text-uppercase font-monospace" style="font-size: 0.65rem;">
+                                                <?= htmlspecialchars($rep['mission_type']) ?>
+                                            </span>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-ghost-danger p-0 border-0 ms-1" 
+                                                    title="Supprimer cette chronique" 
+                                                    onclick="event.preventDefault(); event.stopPropagation(); deleteSingleReport(<?= (int)$rep['id'] ?>)">
+                                                🗑️
+                                            </button>
+                                        </div>
                                     </div>
                                 </a>
                             <?php endforeach; ?>
@@ -280,6 +327,36 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                         </div>
                     <?php endif; ?>
                 </div>
+
+                <!-- CONTRÔLES DE NAVIGATION & PAGINATION TABLER -->
+                <?php if ($totalPages > 1): ?>
+                    <div class="card-footer d-flex align-items-center justify-content-between p-2 bg-light border-top">
+                        <span class="text-secondary small font-monospace" style="font-size: 0.75rem;">
+                            Page <strong><?= $currentPage ?></strong> sur <strong><?= $totalPages ?></strong>
+                        </span>
+                        <ul class="pagination pagination-sm m-0">
+                            <li class="page-item <?= ($currentPage <= 1) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=reports&p=<?= max(1, $currentPage - 1) ?>" tabindex="-1" aria-disabled="<?= ($currentPage <= 1) ? 'true' : 'false' ?>">
+                                    &lsaquo;
+                                </a>
+                            </li>
+                            <?php
+                            $startPage = max(1, $currentPage - 2);
+                            $endPage = min($totalPages, $currentPage + 2);
+                            for ($i = $startPage; $i <= $endPage; $i++):
+                            ?>
+                                <li class="page-item <?= ($i === $currentPage) ? 'active' : '' ?>">
+                                    <a class="page-link" href="?page=reports&p=<?= $i ?>"><?= $i ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            <li class="page-item <?= ($currentPage >= $totalPages) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=reports&p=<?= min($totalPages, $currentPage + 1) ?>">
+                                    &rsaquo;
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                <?php endif; ?>
 
             </div>
         </div>
@@ -315,7 +392,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                             </div>
                         </div>
 
-                        <!-- Actions diplomatiques rapides -->
+                        <!-- Actions diplomatiques et suppression rapides -->
                         <div class="d-flex align-items-center gap-2">
                             <?php if (!empty($targetDaimyo) && $targetDaimyo !== $user['username']): ?>
                                 <a href="?page=messages&tab=compose&to=<?= urlencode($targetDaimyo) ?>" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm">
@@ -325,6 +402,9 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                             <a href="?page=fleet" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
                                 <span>🏇</span> Expédition
                             </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 shadow-sm" onclick="deleteSingleReport(<?= (int)$currentReport['id'] ?>)" title="Supprimer définitivement ce rapport">
+                                <span>🗑️</span> Supprimer ce rapport
+                            </button>
                         </div>
                     </div>
 
@@ -702,6 +782,58 @@ function applyReportsFilter() {
     const emptyEl = document.getElementById('reportsSearchEmpty');
     if (emptyEl) {
         emptyEl.style.display = (visibleCount === 0) ? 'block' : 'none';
+    }
+}
+
+// Suppression unitaire d'un rapport
+async function deleteSingleReport(reportId) {
+    if (!reportId) return;
+    const confirmed = await showModalConfirm(
+        "Confirmez-vous la destruction définitive de cette chronique militaire ?", 
+        "Suppression du Rapport"
+    );
+    if (!confirmed) return;
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'delete');
+        formData.append('id', reportId);
+
+        const res = await fetch('/api/reports.php', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            window.location.href = '?page=reports';
+        } else {
+            showModalAlert(data.error || "Impossible de supprimer ce rapport.", "Échec de suppression");
+        }
+    } catch (e) {
+        showModalAlert("Erreur réseau lors de la communication avec le Shōgunat.", "Erreur");
+    }
+}
+
+// Purge en masse de tous les rapports
+async function deleteAllReports() {
+    const confirmed = await showModalConfirm(
+        "ATTENTION : Cette action va supprimer définitivement l'ensemble de vos rapports de combat et d'espionnage.\n\nÊtes-vous certain de vouloir purger toutes vos chroniques ?", 
+        "Purger Toutes les Chroniques"
+    );
+    if (!confirmed) return;
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'delete_all');
+
+        const res = await fetch('/api/reports.php', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            window.location.href = '?page=reports';
+        } else {
+            showModalAlert(data.error || "Impossible de purger les rapports.", "Échec de purge");
+        }
+    } catch (e) {
+        showModalAlert("Erreur réseau lors de la purge.", "Erreur");
     }
 }
 </script>

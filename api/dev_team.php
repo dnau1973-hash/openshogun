@@ -67,6 +67,13 @@ try {
                 throw new Exception("Veuillez sélectionner un membre et au moins un métier valide.");
             }
 
+            $checkBot = $db->prepare("SELECT is_bot FROM users WHERE id = ?");
+            $checkBot->execute([$targetId]);
+            $isBotTarget = (int)$checkBot->fetchColumn();
+            if ($isBotTarget) {
+                throw new Exception("Opération impossible : les profils IA / bots ne peuvent pas être intégrés à la Dev Team.");
+            }
+
             $assigned = $devEngine->assignRoles($targetId, $roleIds);
             if (empty($assigned)) {
                 throw new Exception("Aucun nouveau métier n'a été assigné (métiers déjà possédés par le joueur ou invalides).");

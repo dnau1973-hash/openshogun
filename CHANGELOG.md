@@ -4,6 +4,12 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
+### Ajouté
+- **Studio Dev & Roster :** Filtrage strict des membres éligibles à l'attribution des métiers (`WHERE is_bot = 0`) afin d'exclure formellement tous les profils d'IA ou bots du studio de développement.
+- **Module Rapports (Chroniques Militaires) :** Pagination fluide de 15 entrées par page avec contrôles Tabler.io, bouton d'action pour la suppression unitaire d'un rapport, et bouton global pour purger l'ensemble des chroniques avec confirmation via modale Tabler.io (`api/reports.php`).
+- **Module Messages :** Bouton d'action « Supprimer tous les messages » avec modale de confirmation Tabler.io obligatoire et endpoint API dédié supportant le ciblage de boîte (`inbox`, `outbox`, `all`).
+- **Layout & Header Global :** Positionnement de la barre de navigation Tabler tout en haut de l'écran en pleine largeur (`container-fluid px-3 px-lg-4`), avec intégration directe des statuts, outils et sélecteur de fiefs.
+
 ### Corrigé
 - **Studio Dev & Écosystème des Oasis :** Correction d'une erreur fatale PHP (`Call to undefined method OasisEngine::getOasesCoordinatesMap()`) lors du chargement des modules d'arpentage et de gestion des oasis dans `views/dev_team.php`. Remplacement des appels statiques inexistants par l'instanciation de `OasisEngine`, la récupération des statistiques via `getOasisStatistics()` et le requêtage direct des coordonnées sur la table `oases`.
 
