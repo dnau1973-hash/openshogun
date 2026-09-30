@@ -91,7 +91,7 @@ if ($page === 'galaxy') {
     $page = 'pedagogy';
 }
 
-$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog'];
+$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';
@@ -101,6 +101,16 @@ if (!in_array($page, $allowedPages)) {
 if ($page === 'admin' && !$auth->isAdmin()) {
     header('Location: /?page=resources');
     exit;
+}
+
+// Vérifier les droits si la page demandée est le Studio Dev Team
+if ($page === 'dev_team') {
+    require_once __DIR__ . '/core/DevTeamEngine.php';
+    $devEngine = new DevTeamEngine();
+    if (!$devEngine->isDevTeamMember((int)Auth::id())) {
+        header('Location: /?page=resources');
+        exit;
+    }
 }
 
 // Rendu de la vue avec le Layout HUD

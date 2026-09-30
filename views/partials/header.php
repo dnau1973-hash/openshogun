@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../core/MessageEngine.php';
 require_once __DIR__ . '/../../core/QuestEngine.php';
 require_once __DIR__ . '/../../core/HeroEngine.php';
 require_once __DIR__ . '/../../core/ImperialSealEngine.php';
+require_once __DIR__ . '/../../core/DevTeamEngine.php';
 require_once __DIR__ . '/../../core/AiPromptHelper.php';
 require_once __DIR__ . '/../../config/game_constants.php';
 
@@ -88,6 +89,9 @@ $sealEngine = new ImperialSealEngine();
 $sealStatus = $user ? $sealEngine->getSealStatus((int)$user['id']) : null;
 $isSealActive = $sealStatus && !empty($sealStatus['active']);
 $userGoldCoins = $sealStatus ? (int)$sealStatus['gold'] : 0;
+
+$devTeamEngine = new DevTeamEngine();
+$isDevTeamMember = ($user && !empty($user['id'])) ? $devTeamEngine->isDevTeamMember((int)$user['id']) : false;
 
 if ($planet) {
     $planetEngine = new PlanetEngine();
@@ -218,6 +222,16 @@ $navItems = [
                     <span>👑</span>
                     <span><?= $isSealActive ? 'Sceau Actif (' . $sealStatus['remaining_formatted'] . ')' : 'Sceau Impérial' ?></span>
                 </a>
+
+                <?php if ($isDevTeamMember): ?>
+                    <!-- 🛠️ Studio Dev Team -->
+                    <a href="?page=dev_team" 
+                       class="badge bg-purple-lt text-purple d-inline-flex align-items-center gap-1 py-1 px-3 text-decoration-none shadow-sm <?= $page === 'dev_team' ? 'fw-bold border border-purple' : '' ?>"
+                       title="Accéder au Studio Dev Team & Métiers du Jeu Vidéo">
+                        <span>🛠️</span>
+                        <span>Studio Dev</span>
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -233,6 +247,13 @@ $navItems = [
         <!-- ── BARRE UTILITAIRE SUPÉRIEURE (Top-bar discrète alignée à droite au-dessus de la nav) ── -->
         <div class="container-xl d-print-none px-3 px-xl-0 mb-1">
             <div class="d-flex justify-content-end align-items-center gap-3 small">
+                <?php if ($isDevTeamMember): ?>
+                    <a href="?page=dev_team" class="text-purple text-decoration-none d-inline-flex align-items-center gap-1 hover-underline <?= $page === 'dev_team' ? 'fw-bold' : '' ?>" title="Studio Dev Team">
+                        <span>🛠️</span>
+                        <span>Studio Dev</span>
+                    </a>
+                <?php endif; ?>
+
                 <?php if ($auth->isAdmin()): ?>
                     <a href="?page=admin" class="text-secondary text-decoration-none d-inline-flex align-items-center gap-1 hover-underline <?= $page === 'admin' ? 'fw-bold text-primary' : '' ?>" title="Panneau d'administration">
                         <span>⚙️</span>
