@@ -23,11 +23,8 @@ require_once __DIR__ . '/../core/SupportEngine.php';
 require_once __DIR__ . '/../core/AnnouncementEngine.php';
 require_once __DIR__ . '/../core/UpdateEngine.php';
 require_once __DIR__ . '/../core/HeroEngine.php';
-require_once __DIR__ . '/../core/ForumEngine.php';
 require_once __DIR__ . '/../core/ImperialSealEngine.php';
 
-$forumEngine = new ForumEngine();
-$adminForumCategories = $forumEngine->getCategories();
 
 $botEngine = new BotEngine();
 $castleEngine = new CastleEngine();
@@ -306,9 +303,6 @@ $avgPoints = (int)$db->query("SELECT AVG(points) FROM users WHERE is_bot = 0")->
 $avgSessionTime = "24m 30s";
 $avgSessionsPerDay = "3.2";
 
-// Engagement Atelier Pédagogique
-$pedagogyViews = (int)GameConfig::get('pedagogy_views_count', 42);
-$pedagogyEngagementPct = min(100, round(($pedagogyViews / max(1, $totalUsers * 3)) * 100, 1));
 
 // Évolution 30 jours (inscriptions et activité)
 $stats30Days = [];
@@ -353,8 +347,6 @@ $tabAliases = [
     'game' => 'world',
     'oases' => 'world',
     'castles' => 'world',
-    'atelier' => 'pedagogy',
-    'pedago' => 'pedagogy',
     'github-sync' => 'updates',
     'github' => 'updates',
     'sync' => 'updates',
@@ -365,7 +357,7 @@ $tabAliases = [
     'annonces' => 'announcements',
     'medailles' => 'medals',
 ];
-$allowedTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all'];
+$allowedTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'maintenance', 'all'];
 $currentTab = $_GET['tab'] ?? 'dashboard';
 if (isset($tabAliases[$currentTab])) {
     $currentTab = $tabAliases[$currentTab];
@@ -402,20 +394,6 @@ $adminPages = [
         'icon' => '👥',
         'pretitle' => 'Communauté & Droits',
         'desc' => 'Registre des joueurs, attributions de Kobans, rôles d\'administrateur/modérateur et sécurité.',
-    ],
-    'forum' => [
-        'title' => 'Forum Féodal',
-        'short' => 'Forum',
-        'icon' => '💬',
-        'pretitle' => 'Discussions & Échanges',
-        'desc' => 'Administration des salons du forum, modération des sujets et animation de la communauté.',
-    ],
-    'pedagogy' => [
-        'title' => 'Atelier Pédagogique',
-        'short' => 'Atelier Pédago',
-        'icon' => '🎓',
-        'pretitle' => 'Projet Père-Fils & Coulisses',
-        'desc' => 'Présentation, modules algorithmiques « Sous le capot » et Grimoire des prompts IA.',
     ],
     'updates' => [
         'title' => 'GitHub Sync & Mises à Jour',
@@ -597,22 +575,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </a>
                 </li>
 
-                <!-- 5. Forum Féodal -->
-                <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=forum" class="nav-link admin-tab-btn <?= ($currentTab === 'forum') ? 'active' : '' ?>" data-tab="forum" data-bs-target="#tab-forum" role="tab" onclick="switchAdminTab('forum'); return false;">
-                        <span class="me-1">💬</span> Forum Féodal
-                    </a>
-                </li>
-
-                <!-- 6. Atelier Pédagogique -->
-                <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=pedagogy" class="nav-link admin-tab-btn <?= ($currentTab === 'pedagogy') ? 'active' : '' ?>" data-tab="pedagogy" data-bs-target="#tab-pedagogy" role="tab" onclick="switchAdminTab('pedagogy'); return false;">
-                        <span class="me-1">🎓</span> Atelier Pédago
-                        <span class="badge bg-cyan-lt ms-1">Public</span>
-                    </a>
-                </li>
-
-                <!-- 7. GitHub Sync -->
+                <!-- 5. GitHub Sync -->
                 <li class="nav-item admin-nav-item" role="presentation">
                     <a href="?page=admin&tab=updates" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-tab="updates" data-bs-target="#tab-updates" role="tab" onclick="switchAdminTab('updates'); return false;">
                         <span class="me-1">🔄</span> GitHub Sync
@@ -620,7 +583,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </a>
                 </li>
 
-                <!-- 8. Menu Déroulant "Autres Modules ▾" -->
+                <!-- 6. Menu Déroulant "Autres Modules ▾" -->
                 <li class="nav-item dropdown admin-nav-item" role="presentation">
                     <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'maintenance']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                         <span class="me-1">⚡</span> Autres modules
@@ -661,9 +624,6 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             </ul>
 
             <div class="d-none d-xl-flex align-items-center text-secondary small px-2">
-                <a href="/?page=pedagogy" target="_blank" class="btn btn-sm btn-outline-cyan rounded-pill me-2" title="Ouvrir la page publique de l'Atelier Pédagogique">
-                    <span>🎓 Vue Publique ↗</span>
-                </a>
                 <span class="badge bg-light text-secondary border font-monospace"><?= htmlspecialchars($localGitInfo['branch']) ?></span>
             </div>
         </div>
@@ -702,10 +662,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
     </div>
 
-    <!-- ── 4 CARTES KPIS EN HAUT ── -->
+    <!-- ── 3 CARTES KPIS EN HAUT ── -->
     <div class="row row-cards mb-4">
         <!-- 1. Joueurs Actifs -->
-        <div class="col-sm-6 col-xl-3">
+        <div class="col-sm-6 col-xl-4">
             <div class="card card-sm border-start border-1 border-primary shadow-sm h-100">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center">
@@ -726,7 +686,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
 
         <!-- 2. Taux d'Achèvement (Quêtes & Didacticiel) -->
-        <div class="col-sm-6 col-xl-3">
+        <div class="col-sm-6 col-xl-4">
             <div class="card card-sm border-start border-1 border-success shadow-sm h-100">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center">
@@ -750,7 +710,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
 
         <!-- 3. Temps Moyen / Session -->
-        <div class="col-sm-6 col-xl-3">
+        <div class="col-sm-6 col-xl-4">
             <div class="card card-sm border-start border-1 border-warning shadow-sm h-100">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center">
@@ -765,27 +725,6 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top small text-muted">
                         <span>Fréquence quotidienne</span>
                         <span class="text-warning fw-bold"><?= $avgSessionsPerDay ?> sessions/j</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. Engagement Atelier Pédagogique -->
-        <div class="col-sm-6 col-xl-3">
-            <div class="card card-sm border-start border-1 border-cyan shadow-sm h-100" style="cursor: pointer;" onclick="window.open('/?page=pedagogy', '_blank')" title="Ouvrir la page publique de l'Atelier Pédagogique">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <span class="avatar avatar-md rounded bg-cyan-lt text-cyan me-3 fs-2">🎓</span>
-                        <div>
-                            <div class="text-muted small fw-bold text-uppercase">Atelier Pédagogique</div>
-                            <div class="h2 m-0 font-weight-bold text-cyan">
-                                <?= number_format($pedagogyViews) ?> <span class="fs-4 text-muted fw-normal">vues</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top small text-muted">
-                        <span>Page 1er Niveau</span>
-                        <span class="badge bg-cyan-lt fw-bold"><?= $pedagogyEngagementPct ?>% engagement</span>
                     </div>
                 </div>
             </div>
@@ -1193,9 +1132,6 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                             <button type="button" onclick="runBotCycle()" class="btn btn-sm btn-outline-warning">
                                 <span>⚔️</span> Forcer Cycle IA
                             </button>
-                            <a href="/?page=pedagogy" target="_blank" class="btn btn-sm btn-outline-cyan">
-                                <span>🎓</span> Ouvrir Atelier Pédago
-                            </a>
                             <button type="button" onclick="switchAdminTab('updates')" class="btn btn-sm btn-outline-teal">
                                 <span>🔄</span> Vérifier Mises à Jour
                             </button>
@@ -2927,148 +2863,6 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     </div>
 
     
-<!-- Section Forum Féodal : Salons & Administration des Débats -->
-    <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'forum' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-forum" data-tab="forum" role="tabpanel">
-        <div class="card mb-4 border-info">
-            <div class="card-header bg-info-lt d-flex justify-content-between align-items-center">
-                <h3 class="card-title text-info-emphasis d-flex align-items-center gap-2">
-                    <span>💬</span> Gestion des Salons du Forum Féodal
-                </h3>
-                <a href="/?page=forum" target="_blank" class="btn btn-sm btn-outline-info">
-                    Ouvrir le Forum ↗
-                </a>
-            </div>
-            <div class="card-body">
-                <p class="text-muted small">
-                    Administrez les catégories de discussion féodale. Les salons verrouillés (🔒) sont en lecture seule pour les Daimyōs ordinaires : seuls les Administrateurs et Modérateurs peuvent y proclamer des décrets.
-                </p>
-
-                <!-- Tableau des catégories -->
-                <div class="table-responsive mb-4">
-                    <table class="table table-vcenter table-hover">
-                        <thead>
-                            <tr class="bg-light">
-                                <th style="width: 50px;">Icône</th>
-                                <th>Nom du Salon</th>
-                                <th>Description</th>
-                                <th class="text-center" style="width: 80px;">Ordre</th>
-                                <th class="text-center" style="width: 140px;">Statut d'Accès</th>
-                                <th class="text-center" style="width: 100px;">Sujets / Msg</th>
-                                <th class="text-end" style="width: 140px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($adminForumCategories)): ?>
-                                <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">
-                                        Aucun salon configuré. Utilisez le formulaire ci-dessous pour en créer un.
-                                    </td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($adminForumCategories as $fCat): ?>
-                                    <tr>
-                                        <td class="text-center fs-3"><?= htmlspecialchars($fCat['icon']) ?></td>
-                                        <td class="fw-bold">
-                                            <a href="/?page=forum&cat=<?= $fCat['id'] ?>" target="_blank" class="text-reset">
-                                                <?= htmlspecialchars($fCat['name']) ?>
-                                            </a>
-                                        </td>
-                                        <td class="small text-muted"><?= htmlspecialchars($fCat['description'] ?? '') ?></td>
-                                        <td class="text-center fw-bold"><?= $fCat['display_order'] ?></td>
-                                        <td class="text-center">
-                                            <?php if ((int)$fCat['is_locked'] === 1): ?>
-                                                <span class="badge bg-secondary-lt">🔒 Staff Uniquement</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-success-lt">💬 Ouvert à Tous</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td class="text-center small">
-                                            <strong><?= $fCat['topic_count'] ?></strong> suj. / <?= $fCat['post_count'] ?> msg
-                                        </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-primary" 
-                                                    onclick="openEditForumCategoryModal(<?= $fCat['id'] ?>, '<?= htmlspecialchars(addslashes($fCat['name'])) ?>', '<?= htmlspecialchars(addslashes($fCat['description'] ?? '')) ?>', '<?= htmlspecialchars(addslashes($fCat['icon'])) ?>', <?= $fCat['display_order'] ?>, <?= $fCat['is_locked'] ?>)">
-                                                ✏️
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger" 
-                                                    onclick="deleteForumCategory(<?= $fCat['id'] ?>, '<?= htmlspecialchars(addslashes($fCat['name'])) ?>')">
-                                                🗑️
-                                            </button>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Formulaire de création de catégorie -->
-                <div class="card bg-light">
-                    <div class="card-header">
-                        <h4 class="card-title">➕ Fonder un Nouveau Salon de Discussion</h4>
-                    </div>
-                    <div class="card-body">
-                        <form id="formAdminCreateCategory" onsubmit="submitAdminCreateCategory(event)">
-                            <div class="row">
-                                <div class="col-md-2 mb-3">
-                                    <label class="form-label required">Icône (Emoji)</label>
-                                    <input type="text" id="afc_icon" class="form-control text-center" value="💬" required>
-                                </div>
-                                <div class="col-md-5 mb-3">
-                                    <label class="form-label required">Titre du Salon</label>
-                                    <input type="text" id="afc_name" class="form-control" placeholder="Ex: Maison de Thé & Sérénité" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Ordre d'Affichage</label>
-                                    <input type="number" id="afc_order" class="form-control" value="10">
-                                </div>
-                                <div class="col-md-2 mb-3 d-flex align-items-center pt-3">
-                                    <label class="form-check form-switch mt-2">
-                                        <input class="form-check-input" type="checkbox" id="afc_locked">
-                                        <span class="form-check-label small fw-bold">🔒 Décrets Staff</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Description d'Accompagnement</label>
-                                <input type="text" id="afc_desc" class="form-control" placeholder="Brève explication de la thématique du salon...">
-                            </div>
-                            <button type="submit" class="btn btn-primary" id="btnAdminCreateCat">
-                                ➕ Créer le Salon
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    
-<!-- Section Pédagogique : Atelier de Conception Père & Fils -->
-    <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'pedagogy' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-pedagogy" data-tab="pedagogy" role="tabpanel">
-        <div class="card mb-4 border-cyan bg-cyan-lt shadow-sm">
-            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h3 class="m-0 text-cyan d-flex align-items-center gap-2">
-                        <span>🎓</span> Atelier Pédagogique &bull; Section Publique Ouverte à Tous
-                    </h3>
-                    <div class="small text-muted mt-1">
-                        Cette section est désormais une page de premier niveau accessible au grand public et aux joueurs à l'adresse <strong>/?page=pedagogy</strong>.
-                        Vous pouvez continuer à consulter les modules ci-dessous ou prévisualiser le rendu public.
-                    </div>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-cyan text-white p-2">
-                        📊 <?= number_format($pedagogyViews) ?> consultations
-                    </span>
-                    <a href="/?page=pedagogy" target="_blank" class="btn btn-cyan fw-bold d-flex align-items-center gap-1 shadow-sm">
-                        <span>🌐</span> Ouvrir la Page Publique ↗
-                    </a>
-                </div>
-            </div>
-        </div>
-        <?php require __DIR__ . '/partials/admin_pedagogy.php'; ?>
-    </div>
 
     
 <!-- Section Mises à Jour & Déploiement GitHub -->
@@ -3364,8 +3158,6 @@ function switchAdminTab(tabKey) {
         'game': 'world',
         'oases': 'world',
         'castles': 'world',
-        'atelier': 'pedagogy',
-        'pedago': 'pedagogy',
         'github-sync': 'updates',
         'github': 'updates',
         'sync': 'updates',
@@ -3396,7 +3188,7 @@ function switchAdminTab(tabKey) {
         return;
     }
 
-    const validTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'forum', 'pedagogy', 'updates', 'maintenance', 'all'];
+    const validTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'maintenance', 'all'];
     if (!validTabs.includes(tabKey)) tabKey = 'dashboard';
 
     // Mettre à jour dynamiquement le fil d'Ariane et l'en-tête de page Tabler
@@ -4804,141 +4596,7 @@ async function toggleModerator(userId, username, currentStatus) {
     }
 }
 
-async function submitAdminCreateCategory(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btnAdminCreateCat');
-    btn.disabled = true;
 
-    try {
-        const formData = new FormData();
-        formData.append('icon', document.getElementById('afc_icon').value.trim() || '💬');
-        formData.append('name', document.getElementById('afc_name').value.trim());
-        formData.append('description', document.getElementById('afc_desc').value.trim());
-        formData.append('display_order', document.getElementById('afc_order').value || 0);
-        formData.append('is_locked', document.getElementById('afc_locked').checked ? '1' : '0');
-
-        const res = await fetch('/api/forum.php?action=admin_create_category', { method: 'POST', body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-            sessionStorage.setItem('admin_active_tab', 'forum');
-            await showModalAlert("Salon Créé", data.message, "success");
-            window.location.reload();
-        } else {
-            showModalAlert("Erreur", data.error || "Impossible de créer le salon.", "danger");
-            btn.disabled = false;
-        }
-    } catch (err) {
-        showModalAlert("Erreur Réseau", "Erreur lors de la création.", "danger");
-        btn.disabled = false;
-    }
-}
-
-function openEditForumCategoryModal(id, name, desc, icon, order, isLocked) {
-    document.getElementById('edit_afc_id').value = id;
-    document.getElementById('edit_afc_name').value = name;
-    document.getElementById('edit_afc_desc').value = desc;
-    document.getElementById('edit_afc_icon').value = icon;
-    document.getElementById('edit_afc_order').value = order;
-    document.getElementById('edit_afc_locked').checked = (parseInt(isLocked, 10) === 1);
-
-    const modal = new bootstrap.Modal(document.getElementById('modalEditAdminForumCategory'));
-    modal.show();
-}
-
-async function submitAdminEditCategory(e) {
-    e.preventDefault();
-    try {
-        const formData = new FormData();
-        formData.append('category_id', document.getElementById('edit_afc_id').value);
-        formData.append('name', document.getElementById('edit_afc_name').value.trim());
-        formData.append('description', document.getElementById('edit_afc_desc').value.trim());
-        formData.append('icon', document.getElementById('edit_afc_icon').value.trim() || '💬');
-        formData.append('display_order', document.getElementById('edit_afc_order').value || 0);
-        formData.append('is_locked', document.getElementById('edit_afc_locked').checked ? '1' : '0');
-
-        const res = await fetch('/api/forum.php?action=admin_edit_category', { method: 'POST', body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-            sessionStorage.setItem('admin_active_tab', 'forum');
-            window.location.reload();
-        } else {
-            alert(data.error || "Erreur de modification.");
-        }
-    } catch (err) {
-        alert("Erreur réseau.");
-    }
-}
-
-async function deleteForumCategory(catId, name) {
-    if (!confirm(`ATTENTION : Supprimer définitivement le salon '${name}' et TOUS ses sujets et messages ?`)) return;
-
-    try {
-        const formData = new FormData();
-        formData.append('category_id', catId);
-
-        const res = await fetch('/api/forum.php?action=admin_delete_category', { method: 'POST', body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-            sessionStorage.setItem('admin_active_tab', 'forum');
-            window.location.reload();
-        } else {
-            alert(data.error || "Erreur lors de la suppression.");
-        }
-    } catch (err) {
-        alert("Erreur réseau.");
-    }
-}
-</script>
-
-<!-- Modale d'Édition de Catégorie de Forum -->
-<div class="modal modal-blur fade" id="modalEditAdminForumCategory" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <form onsubmit="submitAdminEditCategory(event)">
-                <div class="modal-header">
-                    <h5 class="modal-title">✏️ Édition du Salon Féodal</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="edit_afc_id" value="">
-                    <div class="row">
-                        <div class="col-3 mb-3">
-                            <label class="form-label required">Icône</label>
-                            <input type="text" id="edit_afc_icon" class="form-control text-center" required>
-                        </div>
-                        <div class="col-9 mb-3">
-                            <label class="form-label required">Titre du Salon</label>
-                            <input type="text" id="edit_afc_name" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <input type="text" id="edit_afc_desc" class="form-control">
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label">Ordre d'Affichage</label>
-                            <input type="number" id="edit_afc_order" class="form-control">
-                        </div>
-                        <div class="col-6 mb-3 d-flex align-items-center pt-3">
-                            <label class="form-check form-switch mt-2">
-                                <input class="form-check-input" type="checkbox" id="edit_afc_locked">
-                                <span class="form-check-label small fw-bold">🔒 Décrets Staff</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer les Modifications</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <!-- Modale d'Octroi de Koban Impériaux par l'Administrateur -->
 <div class="modal modal-blur fade" id="modalAdminGiveKoban" tabindex="-1" role="dialog" aria-hidden="true">

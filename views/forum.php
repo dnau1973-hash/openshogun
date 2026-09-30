@@ -28,6 +28,9 @@ if ($action === 'new_topic' && $catId) {
 } elseif ($catId) {
     $currentView = 'category';
 }
+
+// Récupération de l'ensemble des salons du forum
+$categories = $forumEngine->getCategories();
 ?>
 
 <div class="page-header d-print-none mb-3">
@@ -46,9 +49,16 @@ if ($action === 'new_topic' && $catId) {
                     </a>
                 <?php endif; ?>
                 <?php if ($isAdmin): ?>
-                    <a href="/?page=admin#tab-forum" class="btn btn-secondary">
-                        ⚙️ Administration des Salons
-                    </a>
+                    <button type="button" class="btn btn-info text-white d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="collapse" data-bs-target="#adminForumPanel" aria-expanded="false" aria-controls="adminForumPanel">
+                        <span>⚙️</span> Gérer les Salons <span class="badge bg-white text-info ms-1"><?= count($categories) ?></span>
+                    </button>
+                    <button type="button" class="btn btn-primary d-flex align-items-center gap-1 shadow-sm" onclick="openCreateForumCategoryModal()">
+                        <span>➕</span> Nouveau Salon
+                    </button>
+                <?php elseif ($isStaff): ?>
+                    <span class="badge bg-azure-lt px-3 py-2 fs-6 d-flex align-items-center gap-1">
+                        <span>🛡️</span> Modération Féodale Active
+                    </span>
                 <?php endif; ?>
             </div>
         </div>
@@ -57,13 +67,106 @@ if ($action === 'new_topic' && $catId) {
 
 <div id="forumAlertBox"></div>
 
+<?php if ($isAdmin): ?>
+    <!-- ================================================================= -->
+    <!-- PANNEAU RÉTRACTABLE D'ADMINISTRATION & GESTION DES SALONS (ADMIN) -->
+    <!-- ================================================================= -->
+    <div class="collapse mb-4 <?= (isset($_GET['manage_salons'])) ? 'show' : '' ?>" id="adminForumPanel">
+        <div class="card border-info shadow-sm">
+            <div class="card-header bg-info-lt d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h3 class="card-title text-info-emphasis d-flex align-items-center gap-2 m-0">
+                        <span>⚙️</span> Administration &amp; Modération des Salons Féodaux
+                    </h3>
+                    <div class="text-secondary small mt-1">
+                        Gérez l'ordonnancement, les thématiques et les droits d'accès des salons. Les salons verrouillés (🔒) sont réservés aux décrets officiels du Shōgunat.
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="openCreateForumCategoryModal()">
+                        ➕ Créer un Salon
+                    </button>
+                    <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target="#adminForumPanel" aria-label="Fermer"></button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-vcenter table-hover card-table">
+                        <thead>
+                            <tr class="bg-light">
+                                <th style="width: 50px;" class="text-center">Icône</th>
+                                <th>Nom du Salon</th>
+                                <th>Description</th>
+                                <th class="text-center" style="width: 80px;">Ordre</th>
+                                <th class="text-center" style="width: 150px;">Statut d'Accès</th>
+                                <th class="text-center" style="width: 120px;">Sujets / Msg</th>
+                                <th class="text-end" style="width: 140px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($categories)): ?>
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">
+                                        Aucun salon configuré. Cliquez sur « Créer un Salon » ci-dessus.
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($categories as $fCat): ?>
+                                    <tr>
+                                        <td class="text-center fs-3"><?= htmlspecialchars($fCat['icon']) ?></td>
+                                        <td class="fw-bold">
+                                            <a href="/?page=forum&cat=<?= $fCat['id'] ?>" class="text-reset">
+                                                <?= htmlspecialchars($fCat['name']) ?>
+                                            </a>
+                                        </td>
+                                        <td class="small text-muted"><?= htmlspecialchars($fCat['description'] ?? '') ?></td>
+                                        <td class="text-center fw-bold"><?= (int)$fCat['display_order'] ?></td>
+                                        <td class="text-center">
+                                            <?php if ((int)$fCat['is_locked'] === 1): ?>
+                                                <span class="badge bg-secondary-lt">🔒 Staff Uniquement</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-success-lt">💬 Ouvert à Tous</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-center small">
+                                            <strong><?= number_format($fCat['topic_count']) ?></strong> suj. / <?= number_format($fCat['post_count']) ?> msg
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    title="Modifier ce salon"
+                                                    onclick="openEditForumCategoryModal(<?= $fCat['id'] ?>, '<?= htmlspecialchars(addslashes($fCat['name'])) ?>', '<?= htmlspecialchars(addslashes($fCat['description'] ?? '')) ?>', '<?= htmlspecialchars(addslashes($fCat['icon'])) ?>', <?= (int)$fCat['display_order'] ?>, <?= (int)$fCat['is_locked'] ?>)">
+                                                ✏️
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    title="Supprimer ce salon"
+                                                    onclick="deleteForumCategory(<?= $fCat['id'] ?>, '<?= htmlspecialchars(addslashes($fCat['name'])) ?>')">
+                                                🗑️
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php elseif ($isModerator): ?>
+    <!-- Notice d'habilitation Modérateur -->
+    <div class="alert alert-info alert-dismissible d-flex align-items-center gap-2 mb-3" role="alert">
+        <span class="fs-2">🛡️</span>
+        <div>
+            <strong>Rang de Modérateur Féodal :</strong> Vous êtes investi de l'autorité du Shōgunat pour modérer les échanges, épingler les annonces cruciales, verrouiller les débats clos et corriger les outrages.
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
 <?php if ($currentView === 'index'): ?>
     <!-- ========================================== -->
     <!-- 1. INDEX DU FORUM : LISTE DES CATÉGORIES   -->
     <!-- ========================================== -->
-    <?php
-    $categories = $forumEngine->getCategories();
-    ?>
 
     <div class="card">
         <div class="card-header bg-light">
@@ -158,7 +261,12 @@ if ($action === 'new_topic' && $catId) {
                 <?php endif; ?>
             </h3>
         </div>
-        <div>
+        <div class="d-flex align-items-center gap-2">
+            <?php if ($isAdmin): ?>
+                <button type="button" class="btn btn-outline-info" onclick="openEditForumCategoryModal(<?= $cat['id'] ?>, '<?= htmlspecialchars(addslashes($cat['name'])) ?>', '<?= htmlspecialchars(addslashes($cat['description'] ?? '')) ?>', '<?= htmlspecialchars(addslashes($cat['icon'])) ?>', <?= (int)$cat['display_order'] ?>, <?= (int)$cat['is_locked'] ?>)">
+                    ⚙️ Paramètres du Salon
+                </button>
+            <?php endif; ?>
             <?php if ($canCreateTopic): ?>
                 <a href="/?page=forum&action=new_topic&cat=<?= $cat['id'] ?>" class="btn btn-primary">
                     ✍️ Proclamer un Sujet
@@ -502,6 +610,101 @@ if ($action === 'new_topic' && $catId) {
     </div>
 </div>
 
+<?php if ($isAdmin): ?>
+<!-- Modale de Création de Salon Féodal -->
+<div class="modal modal-blur fade" id="modalCreateAdminForumCategory" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form onsubmit="submitAdminCreateCategory(event)">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">➕ Fonder un Nouveau Salon Féodal</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-3 mb-3">
+                            <label class="form-label required">Icône</label>
+                            <input type="text" id="create_afc_icon" class="form-control text-center" value="💬" required>
+                        </div>
+                        <div class="col-9 mb-3">
+                            <label class="form-label required">Titre du Salon</label>
+                            <input type="text" id="create_afc_name" class="form-control" placeholder="Ex: Maison de Thé & Sérénité" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description d'Accompagnement</label>
+                        <input type="text" id="create_afc_desc" class="form-control" placeholder="Brève explication de la thématique du salon...">
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Ordre d'Affichage</label>
+                            <input type="number" id="create_afc_order" class="form-control" value="10">
+                        </div>
+                        <div class="col-6 mb-3 d-flex align-items-center pt-3">
+                            <label class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" id="create_afc_locked">
+                                <span class="form-check-label small fw-bold">🔒 Décrets Staff</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="btnAdminCreateCatModal">Créer le Salon</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modale d'Édition de Catégorie de Forum -->
+<div class="modal modal-blur fade" id="modalEditAdminForumCategory" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form onsubmit="submitAdminEditCategory(event)">
+                <div class="modal-header bg-info-lt">
+                    <h5 class="modal-title">✏️ Édition du Salon Féodal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit_afc_id" value="">
+                    <div class="row">
+                        <div class="col-3 mb-3">
+                            <label class="form-label required">Icône</label>
+                            <input type="text" id="edit_afc_icon" class="form-control text-center" required>
+                        </div>
+                        <div class="col-9 mb-3">
+                            <label class="form-label required">Titre du Salon</label>
+                            <input type="text" id="edit_afc_name" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <input type="text" id="edit_afc_desc" class="form-control">
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Ordre d'Affichage</label>
+                            <input type="number" id="edit_afc_order" class="form-control">
+                        </div>
+                        <div class="col-6 mb-3 d-flex align-items-center pt-3">
+                            <label class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" id="edit_afc_locked">
+                                <span class="form-check-label small fw-bold">🔒 Décrets Staff</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="btnAdminEditCatModal">Enregistrer les Modifications</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- JavaScript d'interaction AJAX du Forum -->
 <script>
 function showForumAlert(message, type = 'success') {
@@ -728,5 +931,115 @@ async function deleteTopic(topicId, catId) {
         alert("Erreur réseau.");
     }
 }
+
+<?php if ($isAdmin): ?>
+// 9. Administration : Ouvrir la modale de création de salon
+function openCreateForumCategoryModal() {
+    document.getElementById('create_afc_icon').value = '💬';
+    document.getElementById('create_afc_name').value = '';
+    document.getElementById('create_afc_desc').value = '';
+    document.getElementById('create_afc_order').value = 10;
+    document.getElementById('create_afc_locked').checked = false;
+
+    const modal = new bootstrap.Modal(document.getElementById('modalCreateAdminForumCategory'));
+    modal.show();
+}
+
+// 10. Administration : Créer un salon féodal
+async function submitAdminCreateCategory(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnAdminCreateCatModal');
+    if (btn) btn.disabled = true;
+
+    try {
+        const formData = new FormData();
+        formData.append('icon', document.getElementById('create_afc_icon').value.trim() || '💬');
+        formData.append('name', document.getElementById('create_afc_name').value.trim());
+        formData.append('description', document.getElementById('create_afc_desc').value.trim());
+        formData.append('display_order', document.getElementById('create_afc_order').value || 0);
+        formData.append('is_locked', document.getElementById('create_afc_locked').checked ? '1' : '0');
+
+        const res = await fetch('/api/forum.php?action=admin_create_category', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            showForumAlert(data.message || "Salon créé avec succès !", "success");
+            setTimeout(() => window.location.href = '/?page=forum', 600);
+        } else {
+            showForumAlert(data.error || "Impossible de créer le salon.", "danger");
+            if (btn) btn.disabled = false;
+        }
+    } catch (err) {
+        showForumAlert("Erreur lors de la communication avec le serveur.", "danger");
+        if (btn) btn.disabled = false;
+    }
+}
+
+// 11. Administration : Ouvrir la modale d'édition de salon
+function openEditForumCategoryModal(id, name, desc, icon, order, isLocked) {
+    document.getElementById('edit_afc_id').value = id;
+    document.getElementById('edit_afc_name').value = name;
+    document.getElementById('edit_afc_desc').value = desc;
+    document.getElementById('edit_afc_icon').value = icon;
+    document.getElementById('edit_afc_order').value = order;
+    document.getElementById('edit_afc_locked').checked = (parseInt(isLocked, 10) === 1);
+
+    const modal = new bootstrap.Modal(document.getElementById('modalEditAdminForumCategory'));
+    modal.show();
+}
+
+// 12. Administration : Modifier un salon féodal
+async function submitAdminEditCategory(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnAdminEditCatModal');
+    if (btn) btn.disabled = true;
+
+    try {
+        const formData = new FormData();
+        formData.append('category_id', document.getElementById('edit_afc_id').value);
+        formData.append('name', document.getElementById('edit_afc_name').value.trim());
+        formData.append('description', document.getElementById('edit_afc_desc').value.trim());
+        formData.append('icon', document.getElementById('edit_afc_icon').value.trim() || '💬');
+        formData.append('display_order', document.getElementById('edit_afc_order').value || 0);
+        formData.append('is_locked', document.getElementById('edit_afc_locked').checked ? '1' : '0');
+
+        const res = await fetch('/api/forum.php?action=admin_edit_category', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            showForumAlert(data.message || "Salon mis à jour avec succès !", "success");
+            setTimeout(() => window.location.reload(), 600);
+        } else {
+            showForumAlert(data.error || "Erreur de modification.", "danger");
+            if (btn) btn.disabled = false;
+        }
+    } catch (err) {
+        showForumAlert("Erreur réseau lors de la mise à jour.", "danger");
+        if (btn) btn.disabled = false;
+    }
+}
+
+// 13. Administration : Supprimer un salon féodal
+async function deleteForumCategory(catId, name) {
+    if (!confirm(`ATTENTION : Supprimer définitivement le salon '${name}' et TOUS ses sujets et messages ?\n\nCette action est irréversible.`)) return;
+
+    try {
+        const formData = new FormData();
+        formData.append('category_id', catId);
+
+        const res = await fetch('/api/forum.php?action=admin_delete_category', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            showForumAlert(data.message || "Salon supprimé avec succès.", "success");
+            setTimeout(() => window.location.href = '/?page=forum', 600);
+        } else {
+            showForumAlert(data.error || "Erreur lors de la suppression.", "danger");
+        }
+    } catch (err) {
+        showForumAlert("Erreur réseau lors de la suppression.", "danger");
+    }
+}
+<?php endif; ?>
 </script>
 
