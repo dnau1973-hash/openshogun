@@ -136,22 +136,25 @@ if ($canAccessWorldExpansion) {
     $mapRadius = 12;
     $totalTilesCount = ($mapRadius * 2 + 1) * ($mapRadius * 2 + 1);
 
-    $stmtVillages = $db->query("SELECT coordinate_x, coordinate_y FROM planets WHERE (user_id IS NOT NULL AND user_id > 0) OR (bot_clan_id IS NOT NULL AND bot_clan_id > 0)");
-    $villageCoords = [];
-    while ($row = $stmtVillages->fetch(PDO::FETCH_ASSOC)) {
-        $villageCoords[$row['coordinate_x'] . ':' . $row['coordinate_y']] = true;
-    }
-
-    $stmtFree = $db->query("SELECT coordinate_x, coordinate_y FROM planets WHERE (user_id IS NULL OR user_id = 0) AND (bot_clan_id IS NULL OR bot_clan_id = 0) AND (is_capital = 0 OR is_capital IS NULL)");
-    $freeLandCoords = [];
-    while ($row = $stmtFree->fetch(PDO::FETCH_ASSOC)) {
-        $freeLandCoords[$row['coordinate_x'] . ':' . $row['coordinate_y']] = true;
-    }
-
     $stmtCastles = $db->query("SELECT coord_x, coord_y FROM authentic_castles WHERE is_spawned = 1");
     $spawnedCastleCoords = [];
     while ($row = $stmtCastles->fetch(PDO::FETCH_ASSOC)) {
         $spawnedCastleCoords[$row['coord_x'] . ':' . $row['coord_y']] = true;
+    }
+
+    $allPlanetsRows = $db->query("SELECT coord_x, coord_y, user_id FROM planets")->fetchAll(PDO::FETCH_ASSOC);
+    $villageCoords = [];
+    $freeLandCoords = [];
+    foreach ($allPlanetsRows as $p) {
+        $k = ((int)$p['coord_x']) . ':' . ((int)$p['coord_y']);
+        if (isset($spawnedCastleCoords[$k])) {
+            continue;
+        }
+        if (!empty($p['user_id'])) {
+            $villageCoords[$k] = true;
+        } else {
+            $freeLandCoords[$k] = true;
+        }
     }
 
     $oasisCoords = OasisEngine::getOasesCoordinatesMap();
