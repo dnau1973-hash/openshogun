@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.12.0</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.13.0</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,6 +123,76 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.13.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #2fb344; box-shadow: 0 0 0 2px #2fb344;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.13.0</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-green-lt fw-bold">QA &amp; Recette</span>
+                                <span class="badge bg-teal-lt fw-bold">Syntax Linter &amp; Registre</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 30 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-success d-flex align-items-center gap-2 mb-3">
+                                <span>📋</span> Module QA &amp; Recette, Registre de Fonctionnalités &amp; Contrôle Syntaxe
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-green-lt">Interface QA</span>
+                                            <span>Sous-onglet Studio Dev &amp; KPIs</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Création d'un espace dédié aux testeurs et chefs de projet dans Studio Dev. Intégration de 4 indicateurs clés (Total, Validées, En attente, Rejetées) et d'un badge de notification temps réel dans la navigation.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-teal-lt">Registre Markdown</span>
+                                            <span>Standard fonctionnalites.md</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Protocole de suivi standardisé consignant chaque fonctionnalité avec son module, sa description et son statut initial (« À tester »). Parsing bidirectionnel et mise à jour en direct via <code>FeatureRegistry.php</code>.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-blue-lt">Syntaxe Automatique</span>
+                                            <span>Scan Linter php -l Intégré</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Vérification statique instantanée de l'intégrité PHP de l'ensemble du projet (129+ fichiers, 100% sans erreur). Feu vert technique exposé dans l'interface QA et déclenchable en 1 clic ou en ligne de commande via <code>scripts/check_syntax.php</code>.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-orange-lt">Gamification &amp; Règle</span>
+                                            <span>XP Forge &amp; Clôture Obligatoire</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Valorisation du rôle QA avec gains d'XP Forge (+25 XP par recette, +15 XP par scan). Intégration de la consigne stricte de consignation dans le protocole de fin de tâche de <code>.antigravityrules.md</code>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
                     <!-- VERSION 1.12.0 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
@@ -130,7 +200,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.12.0</span>
-                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-secondary-lt fw-bold">Version stable</span>
                                 <span class="badge bg-purple-lt fw-bold">Studio Dev Team</span>
                                 <span class="badge bg-indigo-lt fw-bold">Roster &amp; Métiers Réactifs</span>
                             </div>

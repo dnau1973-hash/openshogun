@@ -51,6 +51,14 @@ $canUseSandbox    = $devEngine->hasPermission($userId, 'debug.sandbox') || $auth
 $canTriggerCron   = $devEngine->hasPermission($userId, 'cron.trigger') || $auth->isAdmin();
 $canMonitorSystem = $devEngine->hasPermission($userId, 'system.monitoring') || $auth->isAdmin();
 $canManageSprints = $devEngine->hasPermission($userId, 'sprints.manage') || $auth->isAdmin();
+$canReviewQA      = $devEngine->hasPermission($userId, 'bugs.manage') || $devEngine->hasPermission($userId, 'debug.sandbox') || $auth->isAdmin();
+
+require_once __DIR__ . '/../core/FeatureRegistry.php';
+require_once __DIR__ . '/../core/QASyntaxChecker.php';
+
+$qaFeatures   = FeatureRegistry::getAllFeatures();
+$qaStats      = FeatureRegistry::getStatistics();
+$syntaxStatus = QASyntaxChecker::getLastCheckResult();
 
 // Liste de tous les utilisateurs pour le formulaire d'attribution
 $allUsersList = [];
@@ -159,7 +167,15 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
             <ul class="nav nav-tabs card-header-tabs" id="dev-team-tabs" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link active" id="tab-roster-btn" data-bs-toggle="tab" href="#tab-roster" role="tab" onclick="switchDevTab('roster')">
-                        <span>👥</span> Studio Roster & Métiers
+                        <span>👥</span> Studio Roster &amp; Métiers
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-qa-btn" data-bs-toggle="tab" href="#tab-qa" role="tab" onclick="switchDevTab('qa')">
+                        <span>📋</span> QA &amp; Recette
+                        <?php if ($qaStats['pending'] > 0): ?>
+                            <span class="badge bg-danger text-white ms-1" id="nav-qa-pending-badge"><?= $qaStats['pending'] ?></span>
+                        <?php endif; ?>
                     </a>
                 </li>
                 <?php if ($canUseSandbox): ?>
@@ -345,7 +361,228 @@ $activeQueuesCount = (int)$db->query("SELECT COUNT(*) FROM construction_queue WH
                 </div>
 
                 <!-- ═══════════════════════════════════════════════════════════════════════
-                     ONGLET 2 : ATELIER QA & SANDBOX
+                     ONGLET 2 : QA & RECETTE (FONCTIONNALITÉS & TESTS DE SYNTAXE)
+                     ═══════════════════════════════════════════════════════════════════════ -->
+                <div class="tab-pane fade" id="tab-qa" role="tabpanel">
+
+                    <!-- En-tête QA & Action Rapide -->
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                        <div>
+                            <h3 class="card-title d-flex align-items-center gap-2 mb-1">
+                                <span>📋</span> Registre de Recette QA &amp; Contrôle Qualité
+                            </h3>
+                            <p class="text-muted small mb-0">
+                                Suivi des fonctionnalités consignées dans <code>fonctionnalités.md</code>, validation manuelle par l'équipe QA et contrôle automatisé de la syntaxe PHP (<code>php -l</code>).
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-outline-teal d-flex align-items-center gap-2 shadow-sm" id="btn-run-syntax" onclick="handleRunSyntaxCheck(this)">
+                                <span>⚡</span> <span id="btn-run-syntax-text">Lancer le Contrôle de Syntaxe</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ── INDICATEURS CLÉS QA & ÉTAT TECHNIQUE ── -->
+                    <div class="row row-cards mb-4">
+                        <!-- 1. Feu Vert Technique (Syntaxe Automatisée) -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card h-100 border shadow-none" id="card-syntax-status">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted small fw-bold text-uppercase">Contrôle Syntaxe</span>
+                                        <span class="badge <?= $syntaxStatus['is_clean'] ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger' ?>" id="badge-syntax-status">
+                                            <?= $syntaxStatus['is_clean'] ? '✔ 100% VALIDE' : '✗ ERREURS DÉTECTÉES' ?>
+                                        </span>
+                                    </div>
+                                    <div class="h2 mb-1 font-monospace d-flex align-items-center gap-2" id="text-syntax-summary">
+                                        <span id="icon-syntax-clean"><?= $syntaxStatus['is_clean'] ? '🟢' : '🔴' ?></span>
+                                        <span id="text-syntax-passed"><?= $syntaxStatus['passed_count'] ?></span>
+                                        <span class="text-muted fs-5 fw-normal">/ <span id="text-syntax-total"><?= $syntaxStatus['total_files'] ?></span> fichiers</span>
+                                    </div>
+                                    <div class="text-muted small mt-1" style="font-size: 0.75rem;">
+                                        Dernier scan : <span id="val-syntax-date"><?= htmlspecialchars($syntaxStatus['checked_at'] ?? 'Jamais') ?></span> (<span id="val-syntax-dur"><?= $syntaxStatus['duration_ms'] ?? 0 ?></span> ms)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Fonctionnalités À Tester -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card h-100 border shadow-none">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted small fw-bold text-uppercase">À Tester</span>
+                                        <span class="badge bg-warning-lt text-warning">En attente QA</span>
+                                    </div>
+                                    <div class="h2 mb-1 font-monospace text-warning d-flex align-items-center gap-2">
+                                        <span>⏳</span> <span id="qa-stat-pending"><?= $qaStats['pending'] ?></span>
+                                    </div>
+                                    <div class="text-muted small mt-1" style="font-size: 0.75rem;">
+                                        Nouveautés en attente de recette manuelle
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Fonctionnalités Validées -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card h-100 border shadow-none">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted small fw-bold text-uppercase">Validées</span>
+                                        <span class="badge bg-success-lt text-success">Recette OK</span>
+                                    </div>
+                                    <div class="h2 mb-1 font-monospace text-success d-flex align-items-center gap-2">
+                                        <span>✔</span> <span id="qa-stat-validated"><?= $qaStats['validated'] ?></span>
+                                    </div>
+                                    <div class="text-muted small mt-1" style="font-size: 0.75rem;">
+                                        Fonctionnalités prêtes pour la production
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Fonctionnalités Rejetées -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card h-100 border shadow-none">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted small fw-bold text-uppercase">Rejetées</span>
+                                        <span class="badge bg-danger-lt text-danger">Failles / Bugs</span>
+                                    </div>
+                                    <div class="h2 mb-1 font-monospace text-danger d-flex align-items-center gap-2">
+                                        <span>✗</span> <span id="qa-stat-rejected"><?= $qaStats['rejected'] ?></span>
+                                    </div>
+                                    <div class="text-muted small mt-1" style="font-size: 0.75rem;">
+                                        Nécessite des correctifs du développeur
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rapport d'erreur syntaxe si erreurs détectées -->
+                    <div id="qa-syntax-errors-box" class="alert alert-danger <?= empty($syntaxStatus['errors']) ? 'd-none' : '' ?> mb-4 shadow-sm" role="alert">
+                        <h4 class="alert-title d-flex align-items-center gap-2">
+                            <span>🚨</span> Erreurs de syntaxe PHP détectées lors du scan :
+                        </h4>
+                        <ul class="mb-0 small font-monospace" id="qa-syntax-errors-list">
+                            <?php foreach (($syntaxStatus['errors'] ?? []) as $err): ?>
+                                <li><strong><?= htmlspecialchars($err['file']) ?> :</strong> <?= htmlspecialchars($err['message']) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+
+                    <!-- ── TABLEAU DU REGISTRE DE RECETTE (FONCTIONNALITÉS.MD) ── -->
+                    <div class="card border">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="card-title mb-0">Registre des Fonctionnalités &amp; Historique de Recette</h4>
+                                <div class="text-muted small mt-1">Source synchronisée : <code>fonctionnalités.md</code></div>
+                            </div>
+                            <span class="badge bg-purple-lt" id="qa-features-total-badge"><?= count($qaFeatures) ?> entrée(s)</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-vcenter card-table table-hover" id="table-qa-features">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 120px;">Date &amp; Module</th>
+                                        <th>Fonctionnalité &amp; Spécifications</th>
+                                        <th>Vérification QA Attendue</th>
+                                        <th style="width: 140px;">Statut Actuel</th>
+                                        <th class="text-end" style="width: 180px;">Action de Recette</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="qa-features-tbody">
+                                    <?php if (empty($qaFeatures)): ?>
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-4 fst-italic">
+                                                Aucune fonctionnalité enregistrée dans <code>fonctionnalités.md</code>.
+                                            </td>
+                                        </tr>
+                                    <?php else: ?>
+                                        <?php foreach ($qaFeatures as $f): ?>
+                                            <?php
+                                            $st = mb_strtolower($f['status']);
+                                            if (str_contains($st, 'valid')) {
+                                                $statusBadge = 'bg-success-lt text-success border border-success';
+                                                $statusIcon = '✔';
+                                            } elseif (str_contains($st, 'rejet') || str_contains($st, 'refus')) {
+                                                $statusBadge = 'bg-danger-lt text-danger border border-danger';
+                                                $statusIcon = '✗';
+                                            } else {
+                                                $statusBadge = 'bg-warning-lt text-warning border border-warning';
+                                                $statusIcon = '⏳';
+                                            }
+                                            ?>
+                                            <tr id="feature-row-<?= $f['id'] ?>" data-feature-id="<?= $f['id'] ?>">
+                                                <td>
+                                                    <div class="font-monospace small text-dark fw-bold"><?= htmlspecialchars($f['date']) ?></div>
+                                                    <span class="badge bg-blue-lt text-uppercase font-monospace mt-1" style="font-size: 0.65rem;">
+                                                        <?= htmlspecialchars($f['module']) ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="fw-bold text-dark mb-1" id="feature-title-<?= $f['id'] ?>"><?= htmlspecialchars($f['title']) ?></div>
+                                                    <div class="text-secondary small" style="line-height: 1.4;">
+                                                        <?= htmlspecialchars($f['description']) ?>
+                                                    </div>
+                                                    <?php if (!empty($f['files'])): ?>
+                                                        <div class="text-muted small mt-1 font-monospace" style="font-size: 0.75rem;">
+                                                            📂 <?= htmlspecialchars($f['files']) ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    <?php if (!empty($f['validated_by'])): ?>
+                                                        <div class="text-muted small mt-1 fst-italic" style="font-size: 0.75rem;" id="feature-validator-<?= $f['id'] ?>">
+                                                            👤 Validé par : <?= htmlspecialchars($f['validated_by']) ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <?php if (!empty($f['qa_check'])): ?>
+                                                        <div class="small text-secondary bg-light p-2 rounded border" style="font-size: 0.8rem; line-height: 1.35;">
+                                                            🎯 <?= htmlspecialchars($f['qa_check']) ?>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <span class="text-muted small fst-italic">Non spécifié</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <span class="badge <?= $statusBadge ?> px-2 py-1" id="feature-badge-<?= $f['id'] ?>">
+                                                        <?= $statusIcon ?> <?= htmlspecialchars($f['status']) ?>
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button type="button" class="btn btn-outline-success" 
+                                                                onclick="setFeatureStatus('<?= $f['id'] ?>', 'Validée', '<?= htmlspecialchars(addslashes($f['title'])) ?>')"
+                                                                title="Marquer comme validée">
+                                                            ✔ Valider
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-danger" 
+                                                                onclick="setFeatureStatus('<?= $f['id'] ?>', 'Rejetée', '<?= htmlspecialchars(addslashes($f['title'])) ?>')"
+                                                                title="Rejeter (anomalie détectée)">
+                                                            ✗ Rejeter
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-warning" 
+                                                                onclick="setFeatureStatus('<?= $f['id'] ?>', 'À tester', '<?= htmlspecialchars(addslashes($f['title'])) ?>')"
+                                                                title="Remettre à tester">
+                                                            ⏳ Reset
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════════════
+                     ONGLET 3 : ATELIER QA & SANDBOX
                      ═══════════════════════════════════════════════════════════════════════ -->
                 <?php if ($canUseSandbox): ?>
                 <div class="tab-pane fade" id="tab-sandbox" role="tabpanel">
@@ -1313,6 +1550,142 @@ async function handleAwardXpSubmit(e) {
         }
     } catch (err) {
         showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+// ── GESTION DE LA RECETTE QA & CONTRÔLE DE SYNTAXE ────────────────────────
+
+function setFeatureStatus(featureId, newStatus, featureTitle) {
+    const btnClass = (newStatus === 'Validée') ? 'btn-success' : ((newStatus === 'Rejetée') ? 'btn-danger' : 'btn-warning');
+    const icon = (newStatus === 'Validée') ? '✔' : ((newStatus === 'Rejetée') ? '✗' : '⏳');
+
+    showConfirmModal(
+        `Recette QA : Statut « ${newStatus} »`,
+        `Voulez-vous modifier le statut de la fonctionnalité <strong>« ${featureTitle} »</strong> en <strong>${newStatus}</strong> ?`,
+        () => executeSetFeatureStatus(featureId, newStatus, featureTitle),
+        btnClass,
+        icon
+    );
+}
+
+async function executeSetFeatureStatus(featureId, newStatus, featureTitle) {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'update_feature_status');
+        formData.append('feature_id', featureId);
+        formData.append('new_status', newStatus);
+
+        const res = await fetch('/api/dev_team.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showAlert(`✅ <strong>Recette QA :</strong> ${data.message}`, 'success');
+
+            // Mettre à jour le badge de la fonctionnalité
+            const badgeEl = document.getElementById(`feature-badge-${featureId}`);
+            if (badgeEl) {
+                if (newStatus === 'Validée') {
+                    badgeEl.className = 'badge bg-success-lt text-success border border-success px-2 py-1';
+                    badgeEl.innerHTML = '✔ Validée';
+                } else if (newStatus === 'Rejetée') {
+                    badgeEl.className = 'badge bg-danger-lt text-danger border border-danger px-2 py-1';
+                    badgeEl.innerHTML = '✗ Rejetée';
+                } else {
+                    badgeEl.className = 'badge bg-warning-lt text-warning border border-warning px-2 py-1';
+                    badgeEl.innerHTML = '⏳ À tester';
+                }
+            }
+
+            // Mettre à jour les statistiques de recette dans le bandeau
+            if (data.stats) {
+                const pendingEl = document.getElementById('qa-stat-pending');
+                const validEl = document.getElementById('qa-stat-validated');
+                const rejEl = document.getElementById('qa-stat-rejected');
+                const navBadge = document.getElementById('nav-qa-pending-badge');
+
+                if (pendingEl) pendingEl.textContent = data.stats.pending;
+                if (validEl) validEl.textContent = data.stats.validated;
+                if (rejEl) rejEl.textContent = data.stats.rejected;
+
+                if (navBadge) {
+                    if (data.stats.pending > 0) {
+                        navBadge.textContent = data.stats.pending;
+                        navBadge.classList.remove('d-none');
+                    } else {
+                        navBadge.classList.add('d-none');
+                    }
+                }
+            }
+        } else {
+            showAlert(`❌ <strong>Erreur QA :</strong> ${data.error || 'Impossible de mettre à jour le statut.'}`, 'danger');
+        }
+    } catch (err) {
+        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+    }
+}
+
+async function handleRunSyntaxCheck(btn) {
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Analyse en cours (php -l)...`;
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'run_syntax_check');
+
+        const res = await fetch('/api/dev_team.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (data.success && data.syntax) {
+            const syn = data.syntax;
+            showAlert(`⚡ <strong>Contrôle technique :</strong> ${data.message}`, syn.is_clean ? 'success' : 'danger');
+
+            // Mettre à jour l'indicateur principal
+            const badge = document.getElementById('badge-syntax-status');
+            const icon = document.getElementById('icon-syntax-clean');
+            const passedText = document.getElementById('text-syntax-passed');
+            const totalText = document.getElementById('text-syntax-total');
+            const dateText = document.getElementById('val-syntax-date');
+            const durText = document.getElementById('val-syntax-dur');
+            const errorsBox = document.getElementById('qa-syntax-errors-box');
+            const errorsList = document.getElementById('qa-syntax-errors-list');
+
+            if (badge) {
+                badge.className = `badge ${syn.is_clean ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'}`;
+                badge.textContent = syn.is_clean ? '✔ 100% VALIDE' : '✗ ERREURS DÉTECTÉES';
+            }
+            if (icon) icon.textContent = syn.is_clean ? '🟢' : '🔴';
+            if (passedText) passedText.textContent = syn.passed_count;
+            if (totalText) totalText.textContent = syn.total_files;
+            if (dateText) dateText.textContent = syn.checked_at;
+            if (durText) durText.textContent = syn.duration_ms;
+
+            if (errorsBox) {
+                if (syn.is_clean || syn.errors.length === 0) {
+                    errorsBox.classList.add('d-none');
+                } else {
+                    errorsBox.classList.remove('d-none');
+                    if (errorsList) {
+                        errorsList.innerHTML = syn.errors.map(err => `<li><strong>${err.file} :</strong> ${err.message}</li>`).join('');
+                    }
+                }
+            }
+        } else {
+            showAlert(`❌ <strong>Erreur :</strong> ${data.error || 'Échec du contrôle syntaxique.'}`, 'danger');
+        }
+    } catch (err) {
+        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+    } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
     }

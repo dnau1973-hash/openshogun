@@ -37,6 +37,15 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 30/09/2026 (Partie 3) — Contrôle Qualité (QA), Registre des Fonctionnalités & Automatisation Syntaxe
+- **Concept exploré :** Assurance Qualité (QA), industrialisation des tests, parsing de Markdown structuré et vérification statique de code (`php -l`).
+- **Notions pour l'atelier :**
+  - **Rôle du QA Tester dans l'industrie :** Pourquoi tester ne consiste pas seulement à « jouer », mais à suivre un protocole de recette méthodique avec des critères d'acceptation précis (statuts : *À tester*, *Validée*, *Rejetée*).
+  - **Linter & Contrôle syntaxique automatisé :** Comment la commande CLI `php -l` (lint) permet de vérifier en quelques secondes l'absence d'erreurs de syntaxe sur l'ensemble des fichiers du projet (129+ fichiers scannés sans exécution) avant même de lancer des tests humains.
+  - **Parsing et manipulation de fichiers Markdown :** Comment lire un fichier texte structuré (`fonctionnalités.md`), en extraire des données avec des expressions régulières (Regex) en PHP, calculer des statistiques et persister les modifications de statut de manière transparente.
+  - **Gamification de la recette :** Valoriser le rôle de testeur en récompensant les validations et contrôles de syntaxe par des points d'XP Forge et de progression d'équipe.
+- **Activité pratique suggérée :** Dans l'onglet « QA & Recette » de Studio Dev, déclencher le diagnostic syntaxique automatique (bouton vert « Lancer l'analyse complète »), observer le temps de scan et les compteurs, puis passer en revue les fonctionnalités récentes pour simuler une session de recette officielle.
+
 ### Session du 30/09/2026 (Partie 2) — Roster Dev Team : Attribution Multiple & Suppression Réactive
 - **Concept exploré :** Relations n-à-n (plusieurs-à-plusieurs) en base de données, intégrité applicative anti-doublons et manipulation réactive du DOM en JavaScript Vanilla (Fetch API sans rechargement de page).
 - **Notions pour l'atelier :**

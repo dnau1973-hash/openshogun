@@ -8,6 +8,8 @@ require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/DevTeamEngine.php';
 require_once __DIR__ . '/../core/BotEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
+require_once __DIR__ . '/../core/FeatureRegistry.php';
+require_once __DIR__ . '/../core/QASyntaxChecker.php';
 
 $auth = new Auth();
 if (!Auth::check()) {
@@ -170,6 +172,75 @@ try {
             echo json_encode([
                 'success' => true,
                 'message' => "{$xpAmount} XP de Forge attribués avec mention : '{$reason}' !"
+            ]);
+            break;
+
+        // 8. Récupérer l'état du registre QA et du contrôle syntaxique
+        case 'get_qa_status':
+            $features = FeatureRegistry::getAllFeatures();
+            $stats = FeatureRegistry::getStatistics();
+            $syntax = QASyntaxChecker::getLastCheckResult();
+            echo json_encode([
+                'success'  => true,
+                'features' => $features,
+                'stats'    => $stats,
+                'syntax'   => $syntax
+            ]);
+            break;
+
+        // 9. Mettre à jour le statut d'une fonctionnalité (Recette QA)
+        case 'update_feature_status':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            
+            // Permettre la recette aux profils QA, Game Designers, Producteurs ou Admins
+            $canReview = $devEngine->hasPermission($currentUserId, 'bugs.manage') 
+                      || $devEngine->hasPermission($currentUserId, 'debug.sandbox') 
+                      || $auth->isAdmin();
+            if (!$canReview) {
+                throw new Exception("Habilitation QA requise pour valider ou rejeter une fonctionnalité.");
+            }
+
+            $featureId  = trim((string)($_POST['feature_id'] ?? ''));
+            $newStatus  = trim((string)($_POST['new_status'] ?? ''));
+            $testerName = (string)($_SESSION['username'] ?? 'Testeur QA');
+
+            if (empty($featureId) || empty($newStatus)) {
+                throw new Exception("Paramètres manquants pour la mise à jour du statut QA.");
+            }
+
+            $success = FeatureRegistry::updateStatus($featureId, $newStatus, $testerName);
+            if (!$success) {
+                throw new Exception("Impossible de mettre à jour le statut de cette fonctionnalité dans fonctionnalités.md.");
+            }
+
+            // Récompenser le testeur en XP de Forge
+            $devEngine->addForgeXp($currentUserId, 25, 'qa_review', "Validation QA fonctionnalité (statut: {$newStatus})");
+
+            $updatedStats = FeatureRegistry::getStatistics();
+            echo json_encode([
+                'success'    => true,
+                'message'    => "Statut de la fonctionnalité mis à jour en « {$newStatus} » !",
+                'feature_id' => $featureId,
+                'new_status' => $newStatus,
+                'stats'      => $updatedStats
+            ]);
+            break;
+
+        // 10. Exécuter un contrôle syntaxique automatisé (php -l)
+        case 'run_syntax_check':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            
+            $syntaxResult = QASyntaxChecker::runSyntaxCheck();
+            if ($syntaxResult['is_clean']) {
+                $devEngine->addForgeXp($currentUserId, 15, 'syntax_check_clean', "Contrôle technique automatisé réussi (100% propre)");
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => $syntaxResult['is_clean'] 
+                    ? "Feu vert technique accordé : 0 erreur de syntaxe sur {$syntaxResult['total_files']} fichiers !" 
+                    : "Attention : {$syntaxResult['error_count']} erreur(s) de syntaxe détectée(s).",
+                'syntax'  => $syntaxResult
             ]);
             break;
 

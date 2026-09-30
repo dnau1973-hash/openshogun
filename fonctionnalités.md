@@ -1,0 +1,40 @@
+# 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
+
+> Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
+> Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
+
+---
+
+### [2026-09-30] - dev_team : Refonte du Roster & Attribution Multiple
+- **Module :** `dev_team`
+- **Statut :** `Validée`
+- **Description :** Permet la sélection multiple et l'assignation de plusieurs métiers à un membre avec blocage proactif des doublons, badges visuels réactifs et révocation immédiate sans rechargement.
+- **Fichiers modifiés :** `views/dev_team.php`, `core/DevTeamEngine.php`, `api/dev_team.php`
+- **Vérification QA :** Tester l'attribution de 2 métiers simultanés, vérifier que les métiers possédés sont grisés dans la modale, supprimer un métier via la croix et constater la disparition fluide du badge sans recharger la page.
+
+---
+
+### [2026-09-30] - admin : Routage et Affichage de l'Onglet Messagerie
+- **Module :** `admin`
+- **Statut :** `Validée`
+- **Description :** Autorisation de l'onglet `mail` dans `$allowedTabs` PHP et dans le validateur JS `validTabs` pour permettre l'affichage du module messagerie & SMTP.
+- **Fichiers modifiés :** `views/admin.php`
+- **Vérification QA :** Ouvrir `/admin/mail` ou cliquer sur "Messagerie & SMTP" et vérifier que le panneau s'affiche correctement sans redirection vers le tableau de bord.
+
+---
+
+### [2026-09-30] - auth : Refonte Inscription & Activation par E-mail
+- **Module :** `auth`
+- **Statut :** `Validée`
+- **Description :** Jauge dynamique de mot de passe à 4 niveaux, jetons cryptographiques SHA-256 à expiration 24h, et client SMTP natif RFC 5321 avec chiffrement AES-256-CBC des mots de passe.
+- **Fichiers modifiés :** `core/Auth.php`, `core/MailService.php`, `views/auth.php`, `views/partials/admin_mail.php`
+- **Vérification QA :** Créer un compte, tester la jauge de complexité, vérifier le blocage si mot de passe non concordant, et contrôler la validation par jeton d'activation.
+
+---
+
+### [2026-09-30] - qa : Module de Recette QA & Contrôle de Syntaxe Automatique
+- **Module :** `qa`
+- **Statut :** `À tester`
+- **Description :** Interface dédiée QA & Recette dans Studio Dev, lecteur/gestionnaire de statut des fonctionnalités et exécution automatisée du contrôle de syntaxe `php -l`.
+- **Fichiers modifiés :** `core/FeatureRegistry.php`, `core/QASyntaxChecker.php`, `views/dev_team.php`, `api/dev_team.php`, `fonctionnalités.md`
+- **Vérification QA :** Accéder à l'onglet "Contrôle Qualité & Recette" dans Studio Dev, lancer le contrôle syntaxique, et basculer le statut d'une fonctionnalité entre "À tester", "Validée" et "Rejetée".
