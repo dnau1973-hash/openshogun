@@ -212,7 +212,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle text-secondary">Honneur &amp; Renommée de l'Archipel</div>
-                <h2 class="page-title d-flex align-items-center gap-2">
+                <h2 class="page-title d-flex align-items-center gap-2 font-game">
                     <span class="text-warning">🏆</span> Palmarès &amp; Gloire du Japon
                 </h2>
             </div>

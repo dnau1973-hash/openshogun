@@ -99,7 +99,7 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
                                 📍 <?= htmlspecialchars($castle['province']) ?>
                             </span>
                         </div>
-                        <h1 class="field-title" style="color: #1c1917;">
+                        <h1 class="field-title font-game" style="color: #1c1917;">
                             <?= htmlspecialchars($castle['name']) ?>
                             <span style="font-size: 1.3rem; color: #b45309; font-weight: 600; font-family: serif;">
                                 (<?= htmlspecialchars($castle['japanese_name']) ?> - <?= htmlspecialchars($castle['kanji']) ?>)

@@ -76,7 +76,7 @@ if (file_exists(__DIR__ . '/config/database.php')) {
     <title>Installation & Initialisation — OpenShogun</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Dela+Gothic+One&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-deep: #0e1117;
@@ -93,7 +93,12 @@ if (file_exists(__DIR__ . '/config/database.php')) {
             --success-color: #10b981;
             --error-color: #ef4444;
             --font-title: 'Cinzel', serif;
+            --font-game-title: 'Dela Gothic One', sans-serif;
             --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .font-game, .title-feodal {
+            font-family: var(--font-game-title) !important;
         }
 
         * {

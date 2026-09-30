@@ -120,3 +120,16 @@
   3. Vérifier la section narrative avec le contexte historique (Sengoku/Muromachi/Edo), la doctrine martiale et les 4 piliers illustrés.
   4. Tester la modification de la devise personnelle via le bouton « Modifier ma Devise » (ou via l'URL avec `?page=poster&edit=1`) et vérifier sa mise à jour instantanée sans rechargement.
   5. Se rendre sur le classement (`/?page=ranking`) et cliquer sur un Daimyō adverse : vérifier l'affichage de son affiche féodale avec les boutons d'action diplomatique (« Écrire une Missive », « Chuchoter au Salon », « Lancer une Expédition »).
+
+---
+
+### [2026-09-30] - typography : Intégration Typographique « Dela Gothic One » (Google Fonts)
+- **Module :** `ui/typography`
+- **Statut :** `À tester`
+- **Description :** Intégration de la police Google Fonts « Dela Gothic One » pour renforcer l'identité et l'immersion féodale (Sengoku Jidai) du jeu. Import via balises `<link rel="preconnect">` et `<link href="...">` dans les en-têtes globaux (`views/partials/header.php`, `views/auth.php`, `views/changelog.php`, `views/pedagogy.php`, `install.php`) et via `@import` dans `public/css/style.css`. Déclaration des variables CSS `--font-game-title`, `--font-feodal`, `--tblr-font-game` et de la classe utilitaire réutilisable `.font-game` (avec alias `.title-feodal`). Application ciblée sur les éléments à fort impact : logo et marque (« La Voie du Shogun »), en-tête immersif et titres de l'écran « Mon affiche », titres des cartes de jeu, boutons d'action majeurs et titres des bâtiments/parcelles, tout en préservant la police sans-serif standard (Inter) pour les corps de texte, formulaires et tableaux de données.
+- **Fichiers modifiés :** `public/css/style.css`, `views/partials/header.php`, `views/auth.php`, `views/changelog.php`, `views/pedagogy.php`, `install.php`, `views/poster.php`, `views/ranking.php`, `views/castle.php`, `views/field.php`, `views/building.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Inspecter le réseau dans les outils de développement du navigateur : vérifier que la ressource `fonts.googleapis.com/css2?family=Dela+Gothic+One` est chargée avec succès (HTTP 200).
+  2. Vérifier que le titre de marque dans la barre de navigation supérieure (« La Voie du Shogun ») est stylisé avec Dela Gothic One.
+  3. Ouvrir la page « Mon Affiche Féodale » (`/?page=poster`) : vérifier l'application de la police sur le nom du joueur, le badge du clan, les en-têtes de cartes et les grands compteurs chiffrés des KPIs militaires.
+  4. Vérifier que la lisibilité reste irréprochable sur les paragraphes de texte narratif, les tableaux et les formulaires (police standard Inter).

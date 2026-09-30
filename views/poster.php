@@ -159,7 +159,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                 </div>
                 <h1 class="page-title d-flex align-items-center gap-2">
                     <span>Affiche Féodale :</span>
-                    <span class="text-dark fw-bold"><?= htmlspecialchars($profile['username']) ?></span>
+                    <span class="text-dark fw-bold font-game"><?= htmlspecialchars($profile['username']) ?></span>
                     <?php if ($isSelf): ?>
                         <span class="badge bg-primary text-white ms-2" style="font-size:0.75rem;">Votre Affiche (Vous)</span>
                     <?php endif; ?>
@@ -174,11 +174,11 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                         <a href="/?page=city" class="btn btn-outline-primary">
                             <span class="me-1">🏯</span> Gérer mon Fief
                         </a>
-                        <button type="button" onclick="startMottoEdit()" class="btn btn-primary">
+                        <button type="button" onclick="startMottoEdit()" class="btn btn-primary font-game">
                             <span class="me-1">✏️</span> Modifier ma Devise
                         </button>
                     <?php else: ?>
-                        <a href="/?page=messages&tab=compose&to=<?= urlencode($profile['username']) ?>" class="btn btn-primary">
+                        <a href="/?page=messages&tab=compose&to=<?= urlencode($profile['username']) ?>" class="btn btn-primary font-game">
                             <span class="me-1">✉️</span> Dépêcher une Missive
                         </a>
                         <a href="/?page=map&x=<?= $capitalCoordX ?>&y=<?= $capitalCoordY ?>" class="btn btn-outline-secondary">
@@ -204,7 +204,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                     <div style="width: 110px; height: 110px; border-radius: 50%; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); border: 3px solid rgba(255, 255, 255, 0.4); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); margin: 0 auto;">
                         <?= $clan['mon_symbol'] ?>
                     </div>
-                    <div class="mt-2 text-uppercase fw-bold text-white-50" style="font-size: 0.7rem; letter-spacing: 0.1em;">
+                    <div class="mt-2 text-uppercase fw-bold text-white-50 font-game" style="font-size: 0.72rem; letter-spacing: 0.08em;">
                         <?= htmlspecialchars($clan['mon_name']) ?>
                     </div>
                 </div>
@@ -212,7 +212,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                 <!-- Informations du Daimyō et du Clan -->
                 <div class="col">
                     <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                        <span class="badge" style="background: <?= $clan['banner_badge_bg'] ?>; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+                        <span class="badge font-game" style="background: <?= $clan['banner_badge_bg'] ?>; border: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; padding: 0.35rem 0.75rem;">
                             <?= htmlspecialchars($clan['name']) ?> &bull; <?= $clan['kanji'] ?>
                         </span>
 
@@ -229,11 +229,11 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
 
                         <!-- Privilèges & Titres de modération/admin -->
                         <?php if ($profile['is_admin']): ?>
-                            <span class="badge bg-danger text-white fw-bold" title="Administrateur du Shogunat">
+                            <span class="badge bg-danger text-white fw-bold font-game" title="Administrateur du Shogunat">
                                 👑 Shōgun Suprême
                             </span>
                         <?php elseif ($profile['is_moderator']): ?>
-                            <span class="badge bg-warning text-dark fw-bold" title="Magistrat / Metsuke">
+                            <span class="badge bg-warning text-dark fw-bold font-game" title="Magistrat / Metsuke">
                                 ⚖️ Magistrat Impérial
                             </span>
                         <?php endif; ?>
@@ -246,10 +246,10 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                         <?php endif; ?>
                     </div>
 
-                    <h2 class="display-6 fw-bold mb-1 text-white">
+                    <h2 class="display-6 fw-bold mb-1 text-white font-game" style="letter-spacing:0.02em;">
                         <?= htmlspecialchars($profile['username']) ?>
                     </h2>
-                    <div class="fs-4 text-white-50 mb-3" style="font-family: Georgia, serif; font-style: italic;">
+                    <div class="fs-4 text-white-50 mb-3 font-game" style="font-size: 1.1rem !important; opacity: 0.9;">
                         <?= htmlspecialchars($clan['feudal_title']) ?>
                     </div>
 
@@ -344,11 +344,11 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <!-- PARCHEMIN DE LA DEVISE DU DAIMYŌ -->
             <div class="card shadow-sm mb-4 border-primary">
                 <div class="card-header bg-light-lt d-flex justify-content-between align-items-center">
-                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0">
+                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
                         <span>📜</span> Parchemin &amp; Devise Personnelle du Daimyō
                     </h3>
                     <?php if ($isSelf): ?>
-                        <button type="button" id="btnToggleEditMotto" onclick="toggleMottoEditBox()" class="btn btn-sm btn-outline-primary">
+                        <button type="button" id="btnToggleEditMotto" onclick="toggleMottoEditBox()" class="btn btn-sm btn-outline-primary font-game">
                             ✏️ Éditer ma Devise
                         </button>
                     <?php endif; ?>
@@ -377,7 +377,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                                 <button type="button" onclick="cancelMottoEdit()" class="btn btn-secondary">
                                     Annuler
                                 </button>
-                                <button type="button" id="btnSaveMotto" onclick="saveMottoAjax()" class="btn btn-primary">
+                                <button type="button" id="btnSaveMotto" onclick="saveMottoAjax()" class="btn btn-primary font-game">
                                     <span>💾</span> Enregistrer la Devise
                                 </button>
                             </div>
@@ -389,10 +389,10 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <!-- CHRONIQUE & DOCTRINE DU CLAN (JAPON FÉODAL) -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0">
+                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
                         <span>⛩️</span> Chroniques &amp; Doctrine Militaire du <?= htmlspecialchars($clan['name']) ?>
                     </h3>
-                    <span class="badge text-white" style="background: <?= $clan['accent_color'] ?>;">
+                    <span class="badge text-white font-game" style="background: <?= $clan['accent_color'] ?>;">
                         <?= $clan['kanji'] ?>
                     </span>
                 </div>
@@ -444,7 +444,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <!-- FIEFS & DOMAINES PROVINCIAUX -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0">
+                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
                         <span>🏯</span> Fiefs &amp; Domaines Provinciaux (<?= count($profile['planets']) ?>)
                     </h3>
                     <span class="text-secondary small">Cadastre Impérial</span>
@@ -497,7 +497,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                                                 🗺️ Carte
                                             </a>
                                             <?php if (!$isSelf): ?>
-                                                <a href="/?page=fleet&target_x=<?= (int)$fief['coord_x'] ?>&target_y=<?= (int)$fief['coord_y'] ?>" class="btn btn-sm btn-outline-danger" title="Lancer une armée vers ce fief">
+                                                <a href="/?page=fleet&target_x=<?= (int)$fief['coord_x'] ?>&target_y=<?= (int)$fief['coord_y'] ?>" class="btn btn-sm btn-outline-danger font-game" title="Lancer une armée vers ce fief">
                                                     ⚔️ Expédition
                                                 </a>
                                             <?php else: ?>
@@ -522,10 +522,10 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <!-- STATISTIQUES HEBDOMADAIRES DU SHOGUNAT -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0">
+                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
                         <span>⚔️</span> Campagne Militaire de la Semaine
                     </h3>
-                    <span class="badge bg-primary text-white">Semaine <?= date('W') ?></span>
+                    <span class="badge bg-primary text-white font-game">Semaine <?= date('W') ?></span>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
@@ -533,7 +533,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                         <div class="col-6">
                             <div class="p-3 border rounded-3 text-center bg-white shadow-xs" style="border-top: 3px solid #2563eb !important;">
                                 <div class="text-secondary text-uppercase fw-bold" style="font-size: 0.7rem;">Essor Hebdomadaire</div>
-                                <div class="fs-2 fw-bold text-primary mt-1">
+                                <div class="fs-2 fw-bold text-primary mt-1 font-game">
                                     +<?= number_format($profile['weekly_stats']['progression'] ?? 0, 0, ',', ' ') ?>
                                 </div>
                                 <div class="text-muted small">points gagnés</div>
@@ -544,7 +544,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                         <div class="col-6">
                             <div class="p-3 border rounded-3 text-center bg-white shadow-xs" style="border-top: 3px solid #dc2626 !important;">
                                 <div class="text-secondary text-uppercase fw-bold" style="font-size: 0.7rem;">Points Conquête</div>
-                                <div class="fs-2 fw-bold text-danger mt-1">
+                                <div class="fs-2 fw-bold text-danger mt-1 font-game">
                                     <?= number_format($profile['weekly_stats']['attack_points'] ?? 0, 0, ',', ' ') ?>
                                 </div>
                                 <div class="text-muted small">dégâts infligés</div>
@@ -555,7 +555,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                         <div class="col-6">
                             <div class="p-3 border rounded-3 text-center bg-white shadow-xs" style="border-top: 3px solid #16a34a !important;">
                                 <div class="text-secondary text-uppercase fw-bold" style="font-size: 0.7rem;">Défense Héroïque</div>
-                                <div class="fs-2 fw-bold text-success mt-1">
+                                <div class="fs-2 fw-bold text-success mt-1 font-game">
                                     <?= number_format($profile['weekly_stats']['defense_points'] ?? 0, 0, ',', ' ') ?>
                                 </div>
                                 <div class="text-muted small">dégâts repoussés</div>
@@ -566,7 +566,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                         <div class="col-6">
                             <div class="p-3 border rounded-3 text-center bg-white shadow-xs" style="border-top: 3px solid #9333ea !important;">
                                 <div class="text-secondary text-uppercase fw-bold" style="font-size: 0.7rem;">Riz Pillé Hebdo</div>
-                                <div class="fs-2 fw-bold text-purple mt-1" style="color: #9333ea;">
+                                <div class="fs-2 fw-bold text-purple mt-1 font-game" style="color: #9333ea;">
                                     <?= number_format($profile['weekly_stats']['raid_resources'] ?? 0, 0, ',', ' ') ?>
                                 </div>
                                 <div class="text-muted small">ressources saisies</div>
@@ -579,10 +579,10 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <!-- PANTHÉON DES MÉDAILLES D'HONNEUR (STYLE TRAVIAN) -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0">
+                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
                         <span>🎖️</span> Vitrine des Médailles de Guerre
                     </h3>
-                    <span class="badge bg-warning text-dark fw-bold">
+                    <span class="badge bg-warning text-dark fw-bold font-game">
                         <?= (int)$profile['medals_count'] ?> distinction(s)
                     </span>
                 </div>
@@ -590,7 +590,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                     <?php if (empty($profile['medals'])): ?>
                         <div class="text-center py-4 text-secondary">
                             <span class="fs-1 d-block mb-2">📜</span>
-                            <div class="fw-bold">Aucune médaille de guerre décernée</div>
+                            <div class="fw-bold font-game">Aucune médaille de guerre décernée</div>
                             <div class="small text-muted mt-1">
                                 Les médailles sont remises chaque dimanche soir aux daimyōs figurant dans le Top 10 des catégories militaires et d'essor.
                             </div>
@@ -604,7 +604,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                                     </div>
                                     <div class="flex-fill">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <span class="fw-bold text-dark">
+                                            <span class="fw-bold text-dark font-game">
                                                 <?= htmlspecialchars($medal['category_label']) ?> &bull; Rang #<?= (int)$medal['rank'] ?>
                                             </span>
                                             <span class="badge bg-secondary-lt text-secondary" style="font-size: 0.7rem;">
@@ -628,7 +628,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <!-- REGISTRE DIPLOMATIQUE & RELATIONS -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light">
-                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0">
+                    <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
                         <span>🤝</span> Registre Diplomatique
                     </h3>
                 </div>

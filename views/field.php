@@ -179,7 +179,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
     <div class="row align-items-center">
         <div class="col">
             <div class="page-pretitle">Terroir de <?= htmlspecialchars($planet['name']) ?></div>
-            <h2 class="page-title">
+            <h2 class="page-title font-game">
                 <?= $info['icon'] ?? '🌾' ?> <?= htmlspecialchars($info['name']) ?>
                 <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">Parcelle #<?= $slot ?></span>
                 <?php if ($activeJob): ?>

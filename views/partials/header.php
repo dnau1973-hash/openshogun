@@ -173,6 +173,10 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> - Chroniques Féodales du Sengoku</title>
+    <!-- Google Fonts: Dela Gothic One (Immersion Féodale Sengoku) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet">
     <!-- Tabler UI Framework (local) -->
     <link rel="stylesheet" href="/public/css/tabler/tabler.min.css?v=1.0.0-beta21">
     <!-- HUD Travian Féodal (header circulaire, barres de ressources, alertes) -->
@@ -209,7 +213,7 @@ $navItems = [
                 <!-- Brand / Logo Féodal -->
                 <a href="?page=resources" class="navbar-brand d-inline-flex align-items-center gap-2 me-3 text-decoration-none" title="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>">
                     <span class="fs-2 lh-1">🏯</span>
-                    <span class="fw-bold text-dark font-serif d-none d-sm-inline"><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?></span>
+                    <span class="fw-bold text-dark font-game d-none d-sm-inline" style="letter-spacing:0.04em;"><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?></span>
                 </a>
 
                 <!-- Navigation principale & Menus déroulants -->

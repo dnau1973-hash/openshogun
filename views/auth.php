@@ -12,6 +12,10 @@ $tab = $_GET['tab'] ?? (($action ?? '') === 'register' ? 'register' : 'login');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> - Chroniques Féodales du Shogunat</title>
+    <!-- Google Fonts: Dela Gothic One (Immersion Féodale Sengoku) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/public/css/bootstrap-grid.min.css?v=5.3.3">
     <link rel="stylesheet" href="/public/css/bootstrap-utilities.min.css?v=5.3.3">
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../public/css/style.css') ? filemtime(__DIR__ . '/../public/css/style.css') : time() ?>">

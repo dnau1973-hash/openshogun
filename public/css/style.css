@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap');
+
 /* ==========================================================
-   OPENSHOGUN - STYLE TABLER NATIF
+   OPENSHOGUN - STYLE TABLER NATIF & TYPOGRAPHIE SENGOKU
    ========================================================== */
 
 :root {
@@ -8,6 +10,11 @@
     --bg-card: #ffffff;
     --bg-card-solid: #ffffff;
     --bg-ink: #f8fafc;
+
+    /* Typographie Féodale Sengoku (Dela Gothic One) */
+    --font-game-title: 'Dela Gothic One', cursive, sans-serif;
+    --font-feodal: 'Dela Gothic One', cursive, sans-serif;
+    --tblr-font-game: 'Dela Gothic One', cursive, sans-serif;
 
     /* Bordures & Ombres Tabler */
     --border-color: rgba(98, 105, 118, 0.16);
@@ -30,6 +37,23 @@
     --res-crystal: #206bc4;
     --res-deut: #2fb344;
     --res-energy: #d63939;
+}
+
+/* Classes Utilitaires pour Typographie Féodale */
+.font-game,
+.title-feodal,
+.feudal-title,
+.font-feodal {
+    font-family: var(--font-game-title) !important;
+    letter-spacing: 0.03em;
+}
+
+.brand-game-title,
+.hero-banner-title,
+.feudal-card-header,
+.clan-banner-name {
+    font-family: var(--font-game-title);
+    letter-spacing: 0.025em;
 }
 
 /* ==========================================================

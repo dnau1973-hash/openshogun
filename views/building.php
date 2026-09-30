@@ -281,7 +281,7 @@ if (!$isEmptyPlot) {
     <div class="row align-items-center">
         <div class="col">
             <div class="page-pretitle">Cité Castrale de <?= htmlspecialchars($planet['name']) ?></div>
-            <h2 class="page-title">
+            <h2 class="page-title font-game">
                 <?php if ($isEmptyPlot): ?>
                     ⛳ Terrain Castral #<?= $slot ?>
                     <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">Terrain Libre</span>

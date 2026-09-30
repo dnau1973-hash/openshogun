@@ -37,6 +37,14 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 30/09/2026 (Partie 8) — Direction Artistique Web, Web Fonts & Hiérarchie Typographique (Dela Gothic One)
+- **Concept exploré :** Intégration de polices web tierces (Google Fonts), optimisation du chargement réseau (`preconnect`, `display=swap`), hiérarchie visuelle (polices d'affichage à fort impact vs polices de lecture pour les données) et variables CSS réutilisables.
+- **Notions pour l'atelier :**
+  - **Qu'est-ce qu'une Web Font et comment voyage-t-elle ? :** Comprendre qu'une police personnalisée n'est pas installée par défaut sur la machine du joueur. Le navigateur doit la télécharger via un CDN (Google Fonts). D'où l'importance de `<link rel="preconnect">` qui prépare la négociation TLS/DNS avant même le téléchargement du fichier de police.
+  - **La règle d'or UX de la typographie (Impact vs Lisibilité) :** Pourquoi ne JAMAIS utiliser une police stylisée / lourde comme *Dela Gothic One* pour du texte de paragraphe ou des tableaux ! Une police d'affichage (*display font*) sert d'accroche visuelle pour les logos, bannières et titres majeurs. Pour le contenu informatif (statistiques, textes de lore, formulaires), une police sans-serif sobre (comme *Inter*) garantit un confort de lecture optimal.
+  - **CSS Custom Properties & Classes Utilitaires :** Comprendre l'intérêt de déclarer `--font-game-title: 'Dela Gothic One', sans-serif;` dans `:root` et d'encapsuler cette règle dans une classe `.font-game`. Si demain la direction artistique décide de tester une autre police d'inspiration calligraphique ou bushido, une seule ligne de CSS suffit pour transformer tout le jeu.
+- **Activité pratique suggérée :** Ouvrir l'inspecteur d'éléments (F12) sur le logo « La Voie du Shogun » ou sur l'en-tête de « Mon Affiche Féodale », observer la classe `.font-game` et la variable `--font-game-title`, puis tester temporairement d'autres valeurs de `letter-spacing` pour apprécier l'effet de souffle visuel d'une police gothique japonaise.
+
 ### Session du 30/09/2026 (Partie 7) — Refonte Narrative, Transition UX Modale vers Page Dédiée & Worldbuilding Féodal
 - **Concept exploré :** Évolution ergonomique d'une fenêtre modale éphémère vers une page complète dédiée (`views/poster.php`), narration historique et worldbuilding (ancrage des factions dans l'histoire des époques Sengoku, Muromachi et Edo), édition in-place de devise par requête asynchrone AJAX (`fetch`) et architecture de routage avec alias.
 - **Notions pour l'atelier :**
