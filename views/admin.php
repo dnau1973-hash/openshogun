@@ -359,8 +359,12 @@ $tabAliases = [
     'tickets' => 'support',
     'annonces' => 'announcements',
     'medailles' => 'medals',
+    'email' => 'mail',
+    'emails' => 'mail',
+    'smtp' => 'mail',
+    'messagerie' => 'mail',
 ];
-$allowedTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'maintenance', 'all'];
+$allowedTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'mail', 'maintenance', 'all'];
 $currentTab = $_GET['tab'] ?? 'dashboard';
 if (isset($tabAliases[$currentTab])) {
     $currentTab = $tabAliases[$currentTab];
@@ -432,6 +436,13 @@ $adminPages = [
         'icon' => '🎖️',
         'pretitle' => 'Palmarès Hebdomadaire',
         'desc' => 'Attribution des distinctions honorifiques de la semaine.',
+    ],
+    'mail' => [
+        'title' => 'Service de Messagerie & SMTP',
+        'short' => 'Messagerie',
+        'icon' => '✉️',
+        'pretitle' => 'Communications & E-mails',
+        'desc' => 'Configuration du transporteur d\'e-mails (SMTP / mail local), chiffrement des accès et tests d\'envoi.',
     ],
     'maintenance' => [
         'title' => 'Maintenance Système',
@@ -3178,7 +3189,11 @@ function switchAdminTab(tabKey) {
         'heros': 'heroes',
         'tickets': 'support',
         'annonces': 'announcements',
-        'medailles': 'medals'
+        'medailles': 'medals',
+        'email': 'mail',
+        'emails': 'mail',
+        'smtp': 'mail',
+        'messagerie': 'mail'
     };
     if (jsTabAliases[tabKey]) {
         tabKey = jsTabAliases[tabKey];
@@ -3200,7 +3215,7 @@ function switchAdminTab(tabKey) {
         return;
     }
 
-    const validTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'maintenance', 'all'];
+    const validTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'mail', 'maintenance', 'all'];
     if (!validTabs.includes(tabKey)) tabKey = 'dashboard';
 
     // Mettre à jour dynamiquement le fil d'Ariane et l'en-tête de page Tabler
