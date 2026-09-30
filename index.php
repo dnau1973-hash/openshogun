@@ -22,6 +22,12 @@ $authError = null;
 // Traitement des actions d'authentification
 $action = $_GET['action'] ?? null;
 
+// Routage d'activation /verify-email
+if ($requestUriPath === '/verify-email') {
+    $_GET['action'] = 'verify_email';
+    $action = 'verify_email';
+}
+
 if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -31,19 +37,46 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     } else {
         $authError = $res['error'];
+        if (!empty($res['unverified'])) {
+            $_GET['unverified_email'] = $res['email'] ?? '';
+        }
     }
 } elseif ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
+    $passwordConfirm = $_POST['password_confirm'] ?? null;
     $faction = $_POST['faction'] ?? 'terran';
     $zone = $_POST['zone'] ?? 'random';
-    $res = $auth->register($username, $email, $password, $faction, $zone);
+    $res = $auth->register($username, $email, $password, $faction, $zone, $passwordConfirm);
     if ($res['success']) {
+        if (!empty($res['require_verification'])) {
+            header('Location: /?registered_pending=1&email=' . urlencode($res['email']));
+            exit;
+        }
         header('Location: /');
         exit;
     } else {
         $authError = $res['error'];
+    }
+} elseif ($action === 'verify_email') {
+    $token = $_GET['token'] ?? '';
+    $vRes = $auth->verifyEmailToken($token);
+    if ($vRes['success']) {
+        header('Location: /?verified=1');
+        exit;
+    } else {
+        header('Location: /?verify_error=' . urlencode($vRes['error']));
+        exit;
+    }
+} elseif ($action === 'resend_verification' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $ident = $_POST['identifier'] ?? '';
+    $rRes = $auth->resendVerification($ident);
+    if ($rRes['success']) {
+        header('Location: /?resend_success=' . urlencode($rRes['message']));
+        exit;
+    } else {
+        $authError = $rRes['error'];
     }
 } elseif ($action === 'logout') {
     $auth->logout();

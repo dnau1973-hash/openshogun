@@ -24,6 +24,7 @@ require_once __DIR__ . '/../core/AnnouncementEngine.php';
 require_once __DIR__ . '/../core/UpdateEngine.php';
 require_once __DIR__ . '/../core/HeroEngine.php';
 require_once __DIR__ . '/../core/ImperialSealEngine.php';
+require_once __DIR__ . '/../core/MailService.php';
 
 
 $botEngine = new BotEngine();
@@ -32,6 +33,8 @@ $oasisEngine = new OasisEngine();
 $supportEngine = new SupportEngine();
 $updateEngine = new UpdateEngine();
 $heroEngine = new HeroEngine();
+$mailService = MailService::getInstance();
+$mailConfig = $mailService->getConfig();
 $localGitInfo = $updateEngine->getLocalInfo();
 $db = Database::getConnection();
 $sealEngine = new ImperialSealEngine($db);
@@ -585,7 +588,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
                 <!-- 6. Menu Déroulant "Autres Modules ▾" -->
                 <li class="nav-item dropdown admin-nav-item" role="presentation">
-                    <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'maintenance']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                    <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'mail', 'maintenance']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                         <span class="me-1">⚡</span> Autres modules
                         <?php if ($supportStats['count_pending'] > 0): ?>
                             <span class="badge bg-danger text-white ms-1">!</span>
@@ -610,6 +613,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </a>
                         <a href="?page=admin&tab=medals" class="dropdown-item admin-tab-btn <?= ($currentTab === 'medals') ? 'active' : '' ?>" data-tab="medals" data-bs-target="#tab-medals" onclick="switchAdminTab('medals'); return false;">
                             <span class="me-2">🎖️</span> Médailles Hebdomadaires
+                        </a>
+                        <a href="?page=admin&tab=mail" class="dropdown-item admin-tab-btn <?= ($currentTab === 'mail') ? 'active' : '' ?>" data-tab="mail" data-bs-target="#tab-mail" onclick="switchAdminTab('mail'); return false;">
+                            <span class="me-2">✉️</span> Messagerie &amp; SMTP
+                            <span class="badge bg-blue-lt ms-auto"><?= strtoupper($mailConfig['driver'] ?? 'MAIL') ?></span>
                         </a>
                         <div class="dropdown-divider"></div>
                         <a href="?page=admin&tab=maintenance" class="dropdown-item admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" data-bs-target="#tab-maintenance" onclick="switchAdminTab('maintenance'); return false;">
@@ -2868,6 +2875,11 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 <!-- Section Mises à Jour & Déploiement GitHub -->
     <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'updates' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-updates" data-tab="updates" role="tabpanel">
         <?php require __DIR__ . '/partials/admin_updates.php'; ?>
+    </div>
+
+    <!-- Section Service de Messagerie & Transporteur d'E-mails -->
+    <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'mail' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-mail" data-tab="mail" role="tabpanel">
+        <?php require __DIR__ . '/partials/admin_mail.php'; ?>
     </div>
 
     

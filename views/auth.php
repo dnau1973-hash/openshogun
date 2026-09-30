@@ -544,21 +544,82 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
             </div>
 
         <div style="padding: 2rem;">
+            <!-- Notifications d'activation et de vérification d'e-mail -->
+            <?php if (isset($_GET['verified'])): ?>
+                <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; color: #86efac; padding: 0.85rem 1.1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                    🎉 <strong>Pacte féodal scellé !</strong> Votre compte Daimyō a été activé avec succès. Vous pouvez dès à présent vous connecter à votre domaine.
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['registered_pending'])): ?>
+                <div style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #bae6fd; padding: 0.85rem 1.1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                    📜 <strong>Pacte féodal initié !</strong> Un e-mail contenant votre décret d'activation a été expédié à l'adresse <strong><?= htmlspecialchars($_GET['email'] ?? '') ?></strong>.<br>
+                    <small style="color: #94a3b8;">Veuillez cliquer sur le lien reçu sous 24 heures pour déverrouiller votre domaine castral.</small>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['verify_error'])): ?>
+                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1.1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.92rem;">
+                    ⚠️ <?= htmlspecialchars($_GET['verify_error']) ?>
+                    <div style="margin-top: 8px;">
+                        <a href="#" onclick="toggleResendForm(); return false;" style="color: #fef08a; text-decoration: underline; font-weight: 700;">
+                            Demander un nouvel e-mail d'activation &rarr;
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['resend_success'])): ?>
+                <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; color: #86efac; padding: 0.85rem 1.1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.92rem;">
+                    ✉️ <?= htmlspecialchars($_GET['resend_success']) ?>
+                </div>
+            <?php endif; ?>
+
             <?php if ($error): ?>
                 <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-size: 0.9rem;">
                     ⚠️ <?= htmlspecialchars($error) ?>
+                    <?php if (str_contains($error, 'pas encore activé') || !empty($_GET['unverified_email'])): ?>
+                        <div style="margin-top: 8px;">
+                            <a href="#" onclick="toggleResendForm(); return false;" style="color: #fef08a; text-decoration: underline; font-weight: 700;">
+                                Renvoyer le décret d'activation par e-mail &rarr;
+                            </a>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
+
+            <!-- Formulaire repliable de renvoi d'e-mail d'activation -->
+            <div id="resendFormContainer" style="display: none; background: rgba(15, 23, 42, 0.85); border: 1px solid #475569; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem; color: #f8fafc; display: flex; align-items: center; gap: 0.4rem;">
+                    <span>✉️</span> Renvoi du Décret d'Activation
+                </h4>
+                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: #94a3b8;">
+                    Indiquez votre nom de Daimyō ou l'adresse e-mail renseignée lors de votre inscription :
+                </p>
+                <form method="POST" action="?action=resend_verification">
+                    <div class="form-group" style="margin-bottom: 0.75rem;">
+                        <input type="text" name="identifier" class="form-control" required placeholder="Nom de Daimyō ou e-mail" value="<?= htmlspecialchars($_GET['unverified_email'] ?? '') ?>">
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">
+                            Expédier le lien d'activation &rarr;
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="toggleResendForm()" style="padding: 0.5rem 0.8rem; font-size: 0.85rem;">
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+            </div>
 
             <!-- Formulaire de Connexion -->
             <form id="loginForm" method="POST" action="?action=login" style="display: <?= ($tab === 'login') ? 'block' : 'none' ?>;">
                 <div class="form-group">
                     <label>Nom de Daimyō ou Email</label>
-                    <input type="text" name="username" class="form-control" required placeholder="ex: Nobunaga_Oda">
+                    <input type="text" name="username" class="form-control" required placeholder="ex: Nobunaga_Oda" autocomplete="username">
                 </div>
                 <div class="form-group">
                     <label>Mot de passe</label>
-                    <input type="password" name="password" class="form-control" required placeholder="••••••••">
+                    <input type="password" name="password" class="form-control" required placeholder="••••••••" autocomplete="current-password">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; margin-top: 1rem;">
                     Accéder à mon Fief & Donjon &rarr;
@@ -604,18 +665,55 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
 
                             <div class="form-group">
                                 <label>Nom de Daimyō <span style="color:#b91c1c;">*</span></label>
-                                <input type="text" name="username" id="reg_username" class="form-control" required minlength="3" placeholder="ex: Shingen_Takeda" autocomplete="username" onkeydown="if(event.key==='Enter'){event.preventDefault();nextRegisterStep(1);}">
+                                <input type="text" name="username" id="reg_username" class="form-control" required minlength="3" placeholder="ex: Shingen_Takeda" autocomplete="username">
                                 <div id="username-error" style="display:none; color:#dc2626; font-size:0.78rem; margin-top:4px; font-weight:600;">⚠️ Veuillez saisir un nom de Daimyō d'au moins 3 caractères.</div>
                             </div>
+
                             <div class="form-group">
                                 <label>Email provincial <span style="color:#b91c1c;">*</span></label>
-                                <input type="email" name="email" id="reg_email" class="form-control" required placeholder="daimyo@domaine.local" autocomplete="email" onkeydown="if(event.key==='Enter'){event.preventDefault();nextRegisterStep(1);}">
+                                <input type="email" name="email" id="reg_email" class="form-control" required placeholder="daimyo@domaine.local" autocomplete="email">
                                 <div id="email-error" style="display:none; color:#dc2626; font-size:0.78rem; margin-top:4px; font-weight:600;">⚠️ Veuillez saisir une adresse email valide.</div>
                             </div>
+
                             <div class="form-group">
                                 <label>Mot de passe de protection <span style="color:#b91c1c;">*</span></label>
-                                <input type="password" name="password" id="reg_password" class="form-control" required minlength="6" placeholder="Minimum 6 caractères" autocomplete="new-password" onkeydown="if(event.key==='Enter'){event.preventDefault();nextRegisterStep(1);}">
-                                <div id="password-error" style="display:none; color:#dc2626; font-size:0.78rem; margin-top:4px; font-weight:600;">⚠️ Le mot de passe doit comporter au moins 6 caractères.</div>
+                                <input type="password" name="password" id="reg_password" class="form-control" required minlength="8" placeholder="Minimum 8 caractères" autocomplete="new-password">
+                                
+                                <!-- Jauge Dynamique de Force du Mot de Passe -->
+                                <div class="password-meter-container" style="margin-top: 8px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 0.78rem;">
+                                        <span style="color: var(--text-muted);">Solidité du mot de passe :</span>
+                                        <strong id="password-strength-label" style="color: #94a3b8;">Non renseigné</strong>
+                                    </div>
+                                    <div style="height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; display: flex; gap: 3px;">
+                                        <div id="str-seg-1" style="flex: 1; height: 100%; background: #e2e8f0; border-radius: 2px; transition: background 0.3s ease;"></div>
+                                        <div id="str-seg-2" style="flex: 1; height: 100%; background: #e2e8f0; border-radius: 2px; transition: background 0.3s ease;"></div>
+                                        <div id="str-seg-3" style="flex: 1; height: 100%; background: #e2e8f0; border-radius: 2px; transition: background 0.3s ease;"></div>
+                                        <div id="str-seg-4" style="flex: 1; height: 100%; background: #e2e8f0; border-radius: 2px; transition: background 0.3s ease;"></div>
+                                    </div>
+                                    
+                                    <!-- Liste des critères contextuels -->
+                                    <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px;">
+                                        <span id="crit-len">⚪ 8+ caractères</span>
+                                        <span id="crit-lower">⚪ Minuscule (a-z)</span>
+                                        <span id="crit-upper">⚪ Majuscule (A-Z)</span>
+                                        <span id="crit-digit">⚪ Chiffre (0-9)</span>
+                                        <span id="crit-special">⚪ Symbole (!@#$...)</span>
+                                    </div>
+
+                                    <!-- Conseil contextuel dynamique -->
+                                    <div id="password-tip" style="font-size: 0.75rem; color: #64748b; margin-top: 5px; font-style: italic;">
+                                        💡 Conseil : Utilisez au moins 8 caractères avec un mélange de lettres, chiffres et symboles.
+                                    </div>
+                                </div>
+                                <div id="password-error" style="display:none; color:#dc2626; font-size:0.78rem; margin-top:4px; font-weight:600;">⚠️ Le mot de passe doit comporter au moins 8 caractères et respecter les critères.</div>
+                            </div>
+
+                            <!-- Champ Confirmer le mot de passe -->
+                            <div class="form-group" style="margin-top: 1rem;">
+                                <label>Confirmer le mot de passe <span style="color:#b91c1c;">*</span></label>
+                                <input type="password" name="password_confirm" id="reg_password_confirm" class="form-control" required minlength="8" placeholder="Retapez votre mot de passe à l'identique" autocomplete="new-password">
+                                <div id="password-match-status" style="display:none; font-size:0.78rem; margin-top:4px; font-weight:600;"></div>
                             </div>
 
                             <div class="slide-nav-buttons" style="justify-content: flex-end;">
@@ -804,19 +902,174 @@ function setTab(tab) {
     }
 }
 
-<?php if ($error || isset($_GET['tab'])): ?>
+<?php if ($error || isset($_GET['tab']) || isset($_GET['verified']) || isset($_GET['registered_pending']) || isset($_GET['verify_error']) || isset($_GET['resend_success']) || isset($_GET['unverified_email'])): ?>
 document.addEventListener('DOMContentLoaded', function() {
-    openAuthModal('<?= ($tab === 'register') ? 'register' : 'login' ?>');
+    openAuthModal('<?= ($tab === 'register' && !isset($_GET['verified']) && !isset($_GET['verify_error']) && empty($_GET['unverified_email'])) ? 'register' : 'login' ?>');
 });
 <?php endif; ?>
+
+function toggleResendForm() {
+    const box = document.getElementById('resendFormContainer');
+    if (box) {
+        box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
+    }
+}
+
+// ── Évaluation en temps réel de la force du mot de passe ──
+function evaluatePasswordStrength(password) {
+    const critLen = password.length >= 8;
+    const critLower = /[a-z]/.test(password);
+    const critUpper = /[A-Z]/.test(password);
+    const critDigit = /[0-9]/.test(password);
+    const critSpecial = /[^a-zA-Z0-9]/.test(password);
+
+    // Mise à jour visuelle des puces de critères
+    updateCritTag('crit-len', critLen, '8+ caractères');
+    updateCritTag('crit-lower', critLower, 'Minuscule');
+    updateCritTag('crit-upper', critUpper, 'Majuscule');
+    updateCritTag('crit-digit', critDigit, 'Chiffre');
+    updateCritTag('crit-special', critSpecial, 'Symbole');
+
+    let score = 0;
+    if (critLen) score++;
+    if (critLower && critUpper) score++;
+    if (critDigit) score++;
+    if (critSpecial) score++;
+
+    // Cas où le mot de passe est trop court
+    if (password.length > 0 && password.length < 8) {
+        score = Math.min(score, 1);
+    }
+
+    const segments = [
+        document.getElementById('str-seg-1'),
+        document.getElementById('str-seg-2'),
+        document.getElementById('str-seg-3'),
+        document.getElementById('str-seg-4')
+    ];
+    const label = document.getElementById('password-strength-label');
+    const tip = document.getElementById('password-tip');
+
+    // Réinitialiser les segments
+    segments.forEach(seg => { if (seg) seg.style.background = '#e2e8f0'; });
+
+    if (password.length === 0) {
+        if (label) { label.textContent = 'Non renseigné'; label.style.color = '#94a3b8'; }
+        if (tip) tip.textContent = '💡 Conseil : Utilisez au moins 8 caractères avec un mélange de lettres, chiffres et symboles.';
+        return { valid: false, score: 0 };
+    }
+
+    let color = '#ef4444';
+    let text = 'Faible';
+    let advice = '⚠️ Mot de passe trop vulnérable. Ajoutez des majuscules, chiffres et caractères spéciaux.';
+
+    if (score === 1) {
+        color = '#ef4444'; // Rouge
+        text = 'Faible';
+        advice = '⚠️ Trop court ou trop simple. Visez au moins 8 caractères et variez les caractères.';
+    } else if (score === 2) {
+        color = '#f97316'; // Orange
+        text = 'Moyen';
+        advice = '🔶 Niveau acceptable. Ajoutez des symboles spéciaux (!@#$) pour renforcer la protection.';
+    } else if (score === 3) {
+        color = '#84cc16'; // Vert lime
+        text = 'Fort';
+        advice = '🟢 Bon mot de passe féodal ! Bien protégé contre les assauts.';
+    } else if (score >= 4) {
+        color = '#22c55e'; // Vert émeraude
+        text = 'Très Fort';
+        advice = '🛡️ Excellent ! Votre donjon castral bénéficie d\'un rempart impénétrable.';
+    }
+
+    if (label) {
+        label.textContent = text;
+        label.style.color = color;
+    }
+    if (tip) {
+        tip.textContent = advice;
+    }
+
+    for (let i = 0; i < score; i++) {
+        if (segments[i]) segments[i].style.background = color;
+    }
+
+    return { valid: critLen && score >= 2, score: score };
+}
+
+function updateCritTag(id, isValid, label) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (isValid) {
+        el.textContent = '🟢 ' + label;
+        el.style.color = '#16a34a';
+        el.style.fontWeight = '700';
+    } else {
+        el.textContent = '⚪ ' + label;
+        el.style.color = '#64748b';
+        el.style.fontWeight = 'normal';
+    }
+}
+
+// ── Vérification en temps réel de la concordance des mots de passe ──
+function checkPasswordMatch() {
+    const passInp = document.getElementById('reg_password');
+    const confirmInp = document.getElementById('reg_password_confirm');
+    const statusEl = document.getElementById('password-match-status');
+
+    if (!passInp || !confirmInp || !statusEl) return true;
+
+    const p1 = passInp.value;
+    const p2 = confirmInp.value;
+
+    if (p2.length === 0) {
+        statusEl.style.display = 'none';
+        return false;
+    }
+
+    statusEl.style.display = 'block';
+    if (p1 === p2) {
+        statusEl.innerHTML = '✅ Les mots de passe concordent parfaitement.';
+        statusEl.style.color = '#16a34a';
+        confirmInp.style.borderColor = '#16a34a';
+        return true;
+    } else {
+        statusEl.innerHTML = '⚠️ Les deux mots de passe ne correspondent pas.';
+        statusEl.style.color = '#dc2626';
+        confirmInp.style.borderColor = '#dc2626';
+        return false;
+    }
+}
+
+// Attacher les écouteurs dès le chargement du DOM
+document.addEventListener('DOMContentLoaded', () => {
+    const passInp = document.getElementById('reg_password');
+    const confirmInp = document.getElementById('reg_password_confirm');
+
+    if (passInp) {
+        passInp.addEventListener('input', () => {
+            evaluatePasswordStrength(passInp.value);
+            if (confirmInp && confirmInp.value.length > 0) {
+                checkPasswordMatch();
+            }
+        });
+    }
+
+    if (confirmInp) {
+        confirmInp.addEventListener('input', () => {
+            checkPasswordMatch();
+        });
+    }
+});
 
 function validateStep1() {
     const userInp = document.getElementById('reg_username');
     const emailInp = document.getElementById('reg_email');
     const passInp = document.getElementById('reg_password');
+    const confirmInp = document.getElementById('reg_password_confirm');
 
     let valid = true;
 
+    // 1. Nom d'utilisateur
     if (!userInp.value || userInp.value.trim().length < 3) {
         document.getElementById('username-error').style.display = 'block';
         userInp.focus();
@@ -825,6 +1078,7 @@ function validateStep1() {
         document.getElementById('username-error').style.display = 'none';
     }
 
+    // 2. Email
     if (!emailInp.checkValidity() || !emailInp.value) {
         document.getElementById('email-error').style.display = 'block';
         if (valid) emailInp.focus();
@@ -833,12 +1087,27 @@ function validateStep1() {
         document.getElementById('email-error').style.display = 'none';
     }
 
-    if (!passInp.value || passInp.value.length < 6) {
-        document.getElementById('password-error').style.display = 'block';
+    // 3. Force du mot de passe
+    const evalRes = evaluatePasswordStrength(passInp.value || '');
+    if (!passInp.value || passInp.value.length < 8 || !evalRes.valid) {
+        const errEl = document.getElementById('password-error');
+        errEl.textContent = '⚠️ Le mot de passe doit comporter au moins 8 caractères et combiner majuscules, minuscules et chiffres.';
+        errEl.style.display = 'block';
         if (valid) passInp.focus();
         valid = false;
     } else {
         document.getElementById('password-error').style.display = 'none';
+    }
+
+    // 4. Concordance des mots de passe
+    const matches = checkPasswordMatch();
+    if (!matches || !confirmInp.value) {
+        const statusEl = document.getElementById('password-match-status');
+        statusEl.innerHTML = '⚠️ Veuillez confirmer votre mot de passe à l\'identique.';
+        statusEl.style.color = '#dc2626';
+        statusEl.style.display = 'block';
+        if (valid) confirmInp.focus();
+        valid = false;
     }
 
     return valid;

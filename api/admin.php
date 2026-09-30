@@ -11,6 +11,7 @@ require_once __DIR__ . '/../core/BotEngine.php';
 require_once __DIR__ . '/../core/WorldGenerator.php';
 require_once __DIR__ . '/../core/HonorEngine.php';
 require_once __DIR__ . '/../core/CastleEngine.php';
+require_once __DIR__ . '/../core/MailService.php';
 
 $auth = new Auth();
 
@@ -525,6 +526,40 @@ try {
                     'success' => true,
                     'message' => "La relique « {$item['name']} » ({$item['type']}) a été octroyée au joueur !",
                     'item' => $item
+                ]);
+            }
+            break;
+
+        // Sauvegarde de la configuration du service de messagerie
+        case 'save_mail_settings':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            $mailService = MailService::getInstance();
+            $mailService->saveConfig($_POST);
+            echo json_encode([
+                'success' => true,
+                'message' => "Configuration du transporteur d'e-mails enregistrée avec succès !"
+            ]);
+            break;
+
+        // Envoi d'un e-mail de test administrateur
+        case 'send_test_email':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            $currentUser = $auth->getCurrentUser();
+            $targetEmail = trim((string)($_POST['test_email'] ?? ($currentUser['email'] ?? '')));
+            if ($targetEmail === '') {
+                throw new Exception("Veuillez renseigner une adresse e-mail de destination pour le test.");
+            }
+            $mailService = MailService::getInstance();
+            $result = $mailService->sendTestEmail($targetEmail);
+            if ($result['success']) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => $result['message'] ?? "E-mail de test expédié avec succès à {$targetEmail} !"
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'error'   => "Échec de l'envoi de test : " . ($result['error'] ?? 'erreur inconnue.')
                 ]);
             }
             break;

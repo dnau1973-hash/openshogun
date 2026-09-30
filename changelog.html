@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.10.0</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.11.0</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,6 +123,76 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.11.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #0284c7; box-shadow: 0 0 0 2px #0284c7;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.11.0</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-blue-lt fw-bold">Sécurité &amp; Inscription</span>
+                                <span class="badge bg-indigo-lt fw-bold">Relais SMTP &amp; Activation</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 30 Septembre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary d-flex align-items-center gap-2 mb-3">
+                                <span>✉️</span> Refonte du Workflow d'Inscription, Activation par E-mail &amp; Transporteur SMTP
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-blue-lt">Sécurité Mot de Passe</span>
+                                            <span>Validation Stricte &amp; Jauge Dynamique</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Ajout d'un champ de confirmation obligatoire avec vérification de concordance en temps réel. Mise en place d'une jauge visuelle de solidité (4 niveaux : <em>Faible</em>, <em>Moyen</em>, <em>Fort</em>, <em>Très Fort</em>) évaluant 5 critères (longueur 8+, minuscules, majuscules, chiffres, caractères spéciaux) avec conseils contextuels interactifs.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-indigo-lt">Workflow d'Activation</span>
+                                            <span>Ratification Féodale par Jeton Sécurisé</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Création des comptes en statut <code>is_active = 0</code> avec jeton cryptographique <code>SHA-256</code> expirant à 24 heures. Route de vérification <code>/verify-email?token=...</code>, blocage sécurisé des connexions non activées et formulaire de renvoi d'e-mail instantané.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-warning-lt">Gabarit d'E-mail</span>
+                                            <span>Template Transactionnel Féodal Sengoku</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Conception d'un template HTML responsive compatible avec l'ensemble des clients de messagerie (Gmail, Outlook, Apple Mail), reprenant la direction artistique du jeu (palette sombre, sceau impérial, bouton d'activation stylisé et alternative text/plain).
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-teal-lt">Administration</span>
+                                            <span>Module Messagerie, SMTP &amp; Test Immédiat</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Section d'administration dédiée dans le tableau de bord avec sélecteur de transporteur (<code>SMTP</code> vs <code>mail()</code> locale), support STARTTLS/SSL, chiffrement <code>AES-256-CBC</code> du mot de passe en base et bouton d'envoi de test diagnostique immédiat.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
                     <!-- VERSION 1.10.0 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
@@ -130,7 +200,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.10.0</span>
-                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-secondary-lt fw-bold">Version précédente</span>
                                 <span class="badge bg-purple-lt fw-bold">Studio Dev Team &amp; Métiers</span>
                                 <span class="badge bg-warning-lt fw-bold">Forge XP &amp; Gamification</span>
                             </div>

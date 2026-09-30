@@ -5,11 +5,13 @@
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/VillageFieldGenerator.php';
 require_once __DIR__ . '/GameConfig.php';
+require_once __DIR__ . '/MailService.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 class Auth {
     private PDO $db;
     private static bool $protectionSchemaChecked = false;
+    private static bool $emailVerificationSchemaChecked = false;
 
     public static function initSession(): void {
         if (!headers_sent() && session_status() === PHP_SESSION_NONE) {
@@ -21,6 +23,46 @@ class Auth {
         self::initSession();
         $this->db = Database::getConnection();
         self::ensureProtectionSchema($this->db);
+        self::ensureEmailVerificationSchema($this->db);
+    }
+
+    /**
+     * Garantit automatiquement les colonnes de vérification d'email et activation
+     */
+    public static function ensureEmailVerificationSchema(?PDO $db = null): void {
+        if (self::$emailVerificationSchemaChecked) return;
+        self::$emailVerificationSchemaChecked = true;
+
+        try {
+            $db = $db ?: Database::getConnection();
+            $cols = $db->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+
+            if (!in_array('is_active', $cols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 AFTER password_hash");
+                try {
+                    $db->exec("ALTER TABLE users ADD INDEX idx_users_active (is_active)");
+                } catch (Exception $e) {}
+            }
+
+            if (!in_array('email_verified_at', $cols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN email_verified_at DATETIME NULL DEFAULT NULL AFTER is_active");
+                // Activer rétroactivement tous les comptes déjà existants
+                $db->exec("UPDATE users SET is_active = 1, email_verified_at = created_at WHERE email_verified_at IS NULL");
+            }
+
+            if (!in_array('activation_token', $cols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN activation_token VARCHAR(128) NULL DEFAULT NULL AFTER email_verified_at");
+                try {
+                    $db->exec("ALTER TABLE users ADD INDEX idx_users_act_token (activation_token)");
+                } catch (Exception $e) {}
+            }
+
+            if (!in_array('activation_token_expires_at', $cols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN activation_token_expires_at DATETIME NULL DEFAULT NULL AFTER activation_token");
+            }
+        } catch (Exception $e) {
+            // Ignorer silencieusement si la table n'est pas encore créée
+        }
     }
 
     /**
@@ -273,6 +315,30 @@ class Auth {
         }
     }
 
+    public static function validatePasswordComplexity(string $password): array {
+        $errors = [];
+        if (strlen($password) < 8) {
+            $errors[] = 'Le mot de passe doit comporter au moins 8 caractères.';
+        }
+        if (!preg_match('/[a-z]/', $password)) {
+            $errors[] = 'Le mot de passe doit contenir au moins une lettre minuscule.';
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            $errors[] = 'Le mot de passe doit contenir au moins une lettre majuscule.';
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            $errors[] = 'Le mot de passe doit contenir au moins un chiffre.';
+        }
+        if (!preg_match('/[^a-zA-Z0-9]/', $password)) {
+            $errors[] = 'Le mot de passe doit contenir au moins un caractère spécial (ex: !@#$%^&*).';
+        }
+
+        return [
+            'valid' => empty($errors),
+            'errors' => $errors
+        ];
+    }
+
     public function login(string $username, string $password): array {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
         $stmt->execute([$username, $username]);
@@ -280,6 +346,18 @@ class Auth {
 
         if (!$user || !password_verify($password, $user['password_hash'])) {
             return ['success' => false, 'error' => 'Identifiant ou mot de passe incorrect.'];
+        }
+
+        // Vérification de l'état d'activation du compte
+        if (isset($user['is_active']) && (int)$user['is_active'] === 0) {
+            return [
+                'success' => false,
+                'error' => "Votre compte seigneurial n'est pas encore activé. Veuillez cliquer sur le lien d'activation reçu par e-mail.",
+                'unverified' => true,
+                'user_id' => (int)$user['id'],
+                'email' => $user['email'],
+                'username' => $user['username']
+            ];
         }
 
         $_SESSION['user_id'] = (int)$user['id'];
@@ -292,7 +370,7 @@ class Auth {
         return ['success' => true];
     }
 
-    public function register(string $username, string $email, string $password, string $faction, string $zone = 'random'): array {
+    public function register(string $username, string $email, string $password, string $faction, string $zone = 'random', ?string $passwordConfirm = null): array {
         $username = trim($username);
         $email = trim($email);
 
@@ -302,9 +380,18 @@ class Auth {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return ['success' => false, 'error' => 'Adresse email invalide.'];
         }
-        if (strlen($password) < 6) {
-            return ['success' => false, 'error' => 'Le mot de passe doit comporter au moins 6 caractères.'];
+
+        // 1. Validation de confirmation du mot de passe
+        if ($passwordConfirm !== null && $password !== $passwordConfirm) {
+            return ['success' => false, 'error' => 'Les deux mots de passe saisis ne correspondent pas.'];
         }
+
+        // 2. Validation stricte de la complexité du mot de passe
+        $complexity = self::validatePasswordComplexity($password);
+        if (!$complexity['valid']) {
+            return ['success' => false, 'error' => $complexity['errors'][0]];
+        }
+
         if (!array_key_exists($faction, FACTIONS)) {
             return ['success' => false, 'error' => 'Civilisation galactique invalide.'];
         }
@@ -322,21 +409,47 @@ class Auth {
         require_once __DIR__ . '/HeroEngine.php';
         $heroEngine = new HeroEngine($this->db);
 
+        // Vérification si l'activation par e-mail est requise
+        $requireVerification = (bool)GameConfig::get('mail_require_verification', true);
+        $rawToken = null;
+        $hashedToken = null;
+        $tokenExpires = null;
+        $isActive = 1;
+        $verifiedAt = date('Y-m-d H:i:s');
+
+        if ($requireVerification) {
+            $rawToken = bin2hex(random_bytes(32));
+            $hashedToken = hash('sha256', $rawToken);
+            $tokenExpires = date('Y-m-d H:i:s', time() + 86400); // 24h
+            $isActive = 0;
+            $verifiedAt = null;
+        }
+
         $this->db->beginTransaction();
         try {
             // Durée de protection des nouveaux joueurs en jours (7 jours par défaut)
             $protectionDays = (int)GameConfig::get('beginner_protection_days', 7);
             $protectionUntil = ($protectionDays > 0) ? date('Y-m-d H:i:s', time() + ($protectionDays * 86400)) : null;
 
-            // 1. Créer l'utilisateur avec son immunité féodale de départ
+            // 1. Créer l'utilisateur avec son état d'activation et immunité
             $stmtUser = $this->db->prepare("
-                INSERT INTO users (username, email, password_hash, faction, created_at, last_active, protection_until) 
-                VALUES (?, ?, ?, ?, NOW(), NOW(), ?)
+                INSERT INTO users (username, email, password_hash, faction, created_at, last_active, protection_until, is_active, email_verified_at, activation_token, activation_token_expires_at) 
+                VALUES (?, ?, ?, ?, NOW(), NOW(), ?, ?, ?, ?, ?)
             ");
-            $stmtUser->execute([$username, $email, $hash, $faction, $protectionUntil]);
+            $stmtUser->execute([
+                $username, 
+                $email, 
+                $hash, 
+                $faction, 
+                $protectionUntil, 
+                $isActive, 
+                $verifiedAt, 
+                $hashedToken, 
+                $tokenExpires
+            ]);
             $userId = (int)$this->db->lastInsertId();
 
-            // 2. Trouver un emplacement de coordonnées (X, Y) libre dans le quadrant choisi (Style Travian)
+            // 2. Trouver un emplacement de coordonnées (X, Y) libre dans le quadrant choisi
             $coords = $this->findFreeCoordinates($zone);
 
             // 3. Créer le domaine castral principal
@@ -349,13 +462,11 @@ class Auth {
             $stmtPlanet->execute([$userId, $planetName, $coords['x'], $coords['y']]);
             $planetId = (int)$this->db->lastInsertId();
 
-            // 4. Initialiser les 19 parcelles de ressources de façon procédurale (Style Travian)
+            // 4. Initialiser les 19 parcelles de ressources
             $capArchetype = VillageFieldGenerator::getRandomArchetypeKey(true);
             VillageFieldGenerator::populatePlanetFields($this->db, $planetId, $capArchetype, 0, false);
 
-            // 5. Aucun bâtiment initial pré-placé : tous les slots 19 à 34 sont 100% libres pour le joueur
-
-            // 6. Donner 2 sondes d'espionnage et 1 transporteur léger pour démarrer
+            // 5. Flotte initiale
             $stmtShip = $this->db->prepare("
                 INSERT INTO planet_ships (planet_id, ship_code, count) 
                 VALUES (?, ?, ?)
@@ -363,7 +474,7 @@ class Auth {
             $stmtShip->execute([$planetId, 'spy_probe', 2]);
             $stmtShip->execute([$planetId, 'transporter_light', 1]);
 
-            // 7. Donner une première garnison de soldats (Style Travian)
+            // 6. Garnison initiale
             $starterUnits = [
                 'terran' => ['code' => 'piquier_ashigaru_yari', 'count' => 15],
                 'vorash' => ['code' => 'fantassin_leger_takeda', 'count' => 20],
@@ -376,29 +487,161 @@ class Auth {
             ");
             $stmtUnit->execute([$planetId, $starter['code'], $starter['count']]);
 
-            // 8. Créer le Samouraï Héros initial (Style Travian)
+            // 7. Héros initial
             $heroName = "Samouraï " . ucfirst($username);
             $heroEngine->createHeroForUser($userId, $heroName, $planetId, $coords['x'], $coords['y']);
 
             $this->db->commit();
 
-            // Connecter le joueur
+            // 8. Workflow d'activation ou connexion directe
+            if ($requireVerification && $rawToken !== null) {
+                // Déclencher l'expédition de l'e-mail de confirmation
+                $mailRes = MailService::getInstance()->sendVerificationEmail($email, $username, $rawToken, $faction);
+                
+                return [
+                    'success'              => true,
+                    'require_verification' => true,
+                    'email'                => $email,
+                    'username'             => $username,
+                    'mail_sent'            => $mailRes['success'] ?? false,
+                    'mail_error'           => $mailRes['error'] ?? null,
+                    'message'              => "Votre fief a été fondé ! Un parchemin de confirmation vous a été envoyé à l'adresse <strong>" . htmlspecialchars($email) . "</strong>. Veuillez cliquer sur le lien d'activation sous 24h avant de vous connecter."
+                ];
+            }
+
+            // Si vérification non requise, connecter directement
             $_SESSION['user_id'] = $userId;
             $_SESSION['username'] = $username;
             $_SESSION['faction'] = $faction;
             $_SESSION['current_planet_id'] = $planetId;
 
-            return ['success' => true];
+            return ['success' => true, 'require_verification' => false];
+
         } catch (Throwable $e) {
             if ($this->db->inTransaction()) {
                 try {
                     $this->db->rollBack();
-                } catch (Throwable $re) {
-                    // Ignorer si la transaction a déjà été terminée
-                }
+                } catch (Throwable $re) {}
             }
             return ['success' => false, 'error' => 'Erreur lors de la création du compte : ' . $e->getMessage()];
         }
+    }
+
+    /**
+     * Valide un jeton d'activation reçu par e-mail et active le compte utilisateur
+     */
+    public function verifyEmailToken(string $rawToken): array {
+        $rawToken = trim($rawToken);
+        if ($rawToken === '') {
+            return ['success' => false, 'error' => "Jeton d'activation manquant ou invalide."];
+        }
+
+        $hashedToken = hash('sha256', $rawToken);
+        $stmt = $this->db->prepare("
+            SELECT id, username, email, is_active, activation_token_expires_at 
+            FROM users 
+            WHERE activation_token = ? 
+            LIMIT 1
+        ");
+        $stmt->execute([$hashedToken]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            return [
+                'success' => false,
+                'error'   => "Ce lien d'activation est introuvable ou a déjà été utilisé pour ratifier votre allégeance."
+            ];
+        }
+
+        // Vérification de la date d'expiration (24 heures)
+        if (!empty($user['activation_token_expires_at']) && strtotime($user['activation_token_expires_at']) < time()) {
+            return [
+                'success'  => false,
+                'expired'  => true,
+                'email'    => $user['email'],
+                'username' => $user['username'],
+                'error'    => "Ce décret d'activation a expiré (validité 24 heures). Veuillez solliciter l'envoi d'un nouveau lien."
+            ];
+        }
+
+        // Activation du compte
+        $stmtUp = $this->db->prepare("
+            UPDATE users 
+            SET is_active = 1, 
+                email_verified_at = NOW(), 
+                activation_token = NULL, 
+                activation_token_expires_at = NULL 
+            WHERE id = ?
+        ");
+        $stmtUp->execute([$user['id']]);
+
+        return [
+            'success'  => true,
+            'username' => $user['username'],
+            'email'    => $user['email'],
+            'message'  => "Félicitations noble Seigneur {$user['username']} ! Votre décret a été ratifié par le Shōgunat. Votre compte est désormais actif et prêt au combat."
+        ];
+    }
+
+    /**
+     * Renvoie un e-mail d'activation à un compte inactif
+     */
+    public function resendVerification(string $identifier): array {
+        $identifier = trim($identifier);
+        if ($identifier === '') {
+            return ['success' => false, 'error' => "Veuillez préciser votre nom de Daimyō ou adresse e-mail."];
+        }
+
+        $stmt = $this->db->prepare("
+            SELECT id, username, email, faction, is_active 
+            FROM users 
+            WHERE (username = ? OR email = ?) AND is_bot = 0 
+            LIMIT 1
+        ");
+        $stmt->execute([$identifier, $identifier]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            return ['success' => false, 'error' => "Aucun compte correspondant trouvé pour cet identifiant."];
+        }
+
+        if (!empty($user['is_active'])) {
+            return [
+                'success' => false, 
+                'error'   => "Ce compte seigneurial est déjà pleinement actif ! Vous pouvez vous connecter directement."
+            ];
+        }
+
+        $rawToken = bin2hex(random_bytes(32));
+        $hashedToken = hash('sha256', $rawToken);
+        $expiresAt = date('Y-m-d H:i:s', time() + 86400);
+
+        $stmtUp = $this->db->prepare("
+            UPDATE users 
+            SET activation_token = ?, activation_token_expires_at = ? 
+            WHERE id = ?
+        ");
+        $stmtUp->execute([$hashedToken, $expiresAt, $user['id']]);
+
+        $mailRes = MailService::getInstance()->sendVerificationEmail(
+            $user['email'],
+            $user['username'],
+            $rawToken,
+            $user['faction']
+        );
+
+        if (!$mailRes['success']) {
+            return [
+                'success' => false, 
+                'error'   => "Impossible d'expédier le message : " . ($mailRes['error'] ?? 'erreur du serveur mail.')
+            ];
+        }
+
+        return [
+            'success' => true,
+            'email'   => $user['email'],
+            'message' => "Un nouveau parchemin de confirmation a été expédié à <strong>" . htmlspecialchars($user['email']) . "</strong> (valable 24 heures)."
+        ];
     }
 
     public function logout(): void {
