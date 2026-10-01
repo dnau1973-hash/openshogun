@@ -3,6 +3,24 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-01] - community/newsletter : Refonte de la Missive Impériale, Page Dédiée Split-Screen & Éditeur WYSIWYG
+- **Module :** `community/newsletter`
+- **Statut :** `À tester`
+- **Description :** Transformation complète de l'outil de composition de missives et newsletters d'une fenêtre modale vers une page d'administration dédiée en split-screen (`?page=newsletter_compose`). Intégration d'un éditeur riche WYSIWYG (Quill) avec barre d'outils complète (titres, gras, italique, citations, listes, liens, couleurs féodales) et modèles d'annonces pré-rédigés. Prévisualisation dynamique en direct dans un cadre isolé (`iframe`) reproduisant au pixel près le rendu réel en boîte de réception sur fond clair/parchemin washi, rehaussé de touches Rouge carmin/vermillon et Or impérial. En-tête avec logo officiel centré et pied de page avec sceau impérial du chrysanthème, mentions de conformité RGPD et liens de désinscription automatique. Actions dédiées : enregistrement de brouillons (`status = 'draft'`), planification temporelle, expédition de tests personnels vers l'adresse du Daimyō connecté et envoi de campagne avec attribution d'XP Forge.
+- **Fichiers modifiés :** `views/newsletter_compose.php`, `views/dev_team.php`, `index.php`, `core/MailingListEngine.php`, `core/MailService.php`, `api/dev_team.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter avec le profil Administrateur ou Community Manager et se rendre sur `/?page=dev_team&tab=mailing`.
+  2. Cliquer sur « Composer une Missive » et vérifier la redirection immédiate vers la page dédiée `/?page=newsletter_compose` (et non plus l'ouverture d'une modale).
+  3. Vérifier la disposition split-screen : colonne gauche (sujet, sélecteur de cible avec badges, date d'envoi, éditeur Quill) et colonne droite (prévisualisation instantanée).
+  4. Tester la saisie dans l'éditeur WYSIWYG : vérifier la mise à jour réactive sans latence du rendu dans l'aperçu dynamique.
+  5. Tester les boutons de bascule d'affichage Bureau (640px) et Mobile (380px) de l'aperçu.
+  6. Tester le bouton « Modèles Rapides » et appliquer le modèle « Mobilisation & Siège Féodal » : vérifier l'insertion automatique des blocs formatés.
+  7. Tester le bouton « Enregistrer le Brouillon » : vérifier le retour d'API avec ID de brouillon et l'apparition de l'état sauvegardé.
+  8. Tester « Envoyer un Test » : vérifier la confirmation d'envoi du test sur son propre e-mail.
+  9. Vérifier le gabarit d'e-mail dans l'aperçu : fond clair/parchemin (zéro fond sombre), logo officiel centré en en-tête, badge de clan thématique, corps de texte lisible, bouton CTA rouge carmin/or et bandeau décoratif avec le sceau du chrysanthème en pied de page.
+
+---
+
 ### [2026-10-01] - ui/icons : Harmonisation Visuelle Intégrale & Remplacement des Émojis par Font Awesome 6
 - **Module :** `ui/icons`
 - **Statut :** `À tester`

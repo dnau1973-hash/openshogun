@@ -125,9 +125,11 @@ if ($page === 'galaxy') {
     $page = 'pedagogy';
 } elseif ($page === 'profile') {
     $page = 'poster';
+} elseif ($page === 'newsletter') {
+    $page = 'newsletter_compose';
 }
 
-$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team', 'poster'];
+$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team', 'poster', 'newsletter_compose'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';
@@ -137,6 +139,17 @@ if (!in_array($page, $allowedPages)) {
 if ($page === 'admin' && !$auth->isAdmin()) {
     header('Location: /?page=resources');
     exit;
+}
+
+// Vérifier les droits si la page demandée est la composition de missive impériale
+if ($page === 'newsletter_compose') {
+    require_once __DIR__ . '/core/DevTeamEngine.php';
+    $devEngine = new DevTeamEngine();
+    $currentUserId = (int)Auth::id();
+    if (!$auth->isAdmin() && !$devEngine->hasPermission($currentUserId, 'community.mailing')) {
+        header('Location: /?page=dev_team&tab=mailing&forbidden=1');
+        exit;
+    }
 }
 
 // Vérifier les droits si la page demandée est le Studio Dev Team

@@ -324,11 +324,12 @@ try {
             $subject = trim((string)($_POST['subject'] ?? ''));
             $targetGroup = trim((string)($_POST['target_group'] ?? 'all_optin'));
             $bodyHtml = trim((string)($_POST['body_html'] ?? ''));
+            $draftId = isset($_POST['draft_id']) ? (int)$_POST['draft_id'] : null;
 
             $currentUser = $auth->getCurrentUser();
             $senderName = $currentUser['username'] ?? 'Le Shōgunat';
 
-            $result = $mailingEngine->sendCampaign($currentUserId, $senderName, $subject, $targetGroup, $bodyHtml);
+            $result = $mailingEngine->sendCampaign($currentUserId, $senderName, $subject, $targetGroup, $bodyHtml, $draftId);
             if (!$result['success']) {
                 throw new Exception($result['error'] ?? "Échec de l'envoi de la campagne.");
             }
@@ -338,6 +339,78 @@ try {
                 'message'         => $result['message'],
                 'recipient_count' => $result['recipient_count'],
                 'stats'           => $mailingEngine->getStatistics()
+            ]);
+            break;
+
+        // 13b. Enregistrer un brouillon de missive
+        case 'save_newsletter_draft':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            DevTeamEngine::authorize('community.mailing', $currentUserId);
+            require_once __DIR__ . '/../core/MailingListEngine.php';
+            $mailingEngine = new MailingListEngine();
+
+            $subject = trim((string)($_POST['subject'] ?? ''));
+            $targetGroup = trim((string)($_POST['target_group'] ?? 'all_optin'));
+            $bodyHtml = trim((string)($_POST['body_html'] ?? ''));
+            $scheduledAt = !empty($_POST['scheduled_at']) ? trim((string)$_POST['scheduled_at']) : null;
+            $draftId = isset($_POST['draft_id']) && (int)$_POST['draft_id'] > 0 ? (int)$_POST['draft_id'] : null;
+
+            $currentUser = $auth->getCurrentUser();
+            $senderName = $currentUser['username'] ?? 'Le Shōgunat';
+
+            $savedId = $mailingEngine->saveDraft($currentUserId, $senderName, $subject, $targetGroup, $bodyHtml, $scheduledAt, $draftId);
+
+            echo json_encode([
+                'success'  => true,
+                'draft_id' => $savedId,
+                'message'  => "Brouillon de missive impériale sauvegardé avec succès !"
+            ]);
+            break;
+
+        // 13c. Envoyer une missive de test personnel
+        case 'send_test_newsletter':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            DevTeamEngine::authorize('community.mailing', $currentUserId);
+            require_once __DIR__ . '/../core/MailingListEngine.php';
+            $mailingEngine = new MailingListEngine();
+
+            $subject = trim((string)($_POST['subject'] ?? ''));
+            $bodyHtml = trim((string)($_POST['body_html'] ?? ''));
+
+            $res = $mailingEngine->sendTestEmail($currentUserId, $subject, $bodyHtml);
+            if (!$res['success']) {
+                throw new Exception($res['error'] ?? "Échec de l'envoi de l'e-mail de test.");
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => $res['message'],
+                'email'   => $res['email']
+            ]);
+            break;
+
+        // 13d. Générer le rendu complet d'aperçu de la missive
+        case 'preview_newsletter_template':
+            DevTeamEngine::authorize('community.mailing', $currentUserId);
+            require_once __DIR__ . '/../core/MailingListEngine.php';
+            $mailingEngine = new MailingListEngine();
+
+            $subject = trim((string)($_POST['subject'] ?? ($_GET['subject'] ?? 'Sujet de votre missive')));
+            $targetGroup = trim((string)($_POST['target_group'] ?? ($_GET['target_group'] ?? 'all_optin')));
+            $bodyHtml = (string)($_POST['body_html'] ?? ($_GET['body_html'] ?? '<p>Contenu de votre missive impériale...</p>'));
+
+            $faction = 'terran';
+            if (str_contains($targetGroup, 'vorash')) $faction = 'vorash';
+            elseif (str_contains($targetGroup, 'aethelis')) $faction = 'aethelis';
+
+            $currentUser = $auth->getCurrentUser();
+            $senderName = $currentUser['username'] ?? 'Chancellerie Impériale';
+
+            $html = $mailingEngine->buildNewsletterTemplate($subject, $bodyHtml, $currentUser['username'] ?? 'Daimyō', $faction, $senderName);
+
+            echo json_encode([
+                'success' => true,
+                'html'    => $html
             ]);
             break;
 

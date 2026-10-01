@@ -37,6 +37,17 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 01/10/2026 (Partie 10) — Architecture d'E-Mailing Moderne : Split-Screen Temps Réel, WYSIWYG & Gabarits HTML Compatibles
+- **Concept exploré :** Conception d'un atelier d'e-mailing complet (transition de modale vers page dédiée), intégration d'un éditeur riche WYSIWYG (Quill), isolation CSS via `iframe` (`srcdoc`) pour la prévisualisation instantanée sans latence, et règles strictes de délivrabilité d'e-mails (HTML tabulaire `<table>`, CSS inline, compatibilité Outlook/Gmail/Apple Mail, zéro fond sombre).
+- **Notions pour l'atelier :**
+  - **Pourquoi le HTML d'un e-mail est-il si différent du HTML d'un site web ? :** Sur le web moderne, on utilise CSS Grid, Flexbox et des variables CSS. Mais dans les clients de messagerie (en particulier Microsoft Outlook basé sur le moteur de rendu Word !), ces technologies modernes ne fonctionnent pas. Pour qu'un e-mail s'affiche de manière identique sur 100% des boîtes de réception, on utilise des tableaux imbriqués (`<table role="presentation">`), des largeurs maximales fixes (`max-width: 640px`) et tout le style doit être écrit en CSS inline sur chaque cellule `<td>`.
+  - **L'isolation de style par l'Iframe (`srcdoc`) :** Pourquoi afficher l'aperçu dans une `<iframe>` plutôt que dans une simple `<div>` ? Si l'aperçu était dans une `<div>`, les règles CSS de Tabler.io viendraient écraser et modifier l'apparence de l'e-mail. L'iframe crée un bac à sable (sandbox) totalement hermétique : le rendu affiché dans l'outil d'administration est rigoureusement identique à ce que verra le joueur dans Gmail.
+  - **Le pattern du Split-Screen & Debounce JavaScript :** Comment permettre une frappe fluide sans lag ? Chaque frappe dans l'éditeur WYSIWYG déclenche un minuteur d'attente (debounce de 120ms). L'aperçu ne se recalcule que lorsque le rédacteur marque une micro-pause, évitant ainsi des centaines de recompilations inutiles par seconde.
+  - **Sécurité & Assainissement du WYSIWYG :** Pourquoi ne jamais faire confiance au HTML saisi par un utilisateur, même un administrateur ? Fonction `sanitizeEmailHtml()` pour filtrer les balises dangereuses (`<script>`, `<iframe>`) et bloquer tout attribut JavaScript d'événement (`onclick=...`).
+- **Activité pratique suggérée :** Ouvrir la page de composition de missive (`/?page=newsletter_compose`), choisir un modèle féodal, basculer entre la vue Bureau (640px) et Mobile (380px), taper du texte stylisé dans Quill et observer la synchronisation instantanée dans l'iframe d'aperçu.
+
+---
+
 ### Session du 01/10/2026 (Partie 9) — Iconographie Vectorielle (Font Awesome 6), Standardisation Visuelle & Rendu Offline-First
 - **Concept exploré :** Remplacement des émoticônes Unicode (hétérogénéité d'affichage selon les OS et navigateurs) par une bibliothèque vectorielle professionnelle (Font Awesome 6), hébergement local (*offline-first / self-hosted*), alignement vertical (`align-middle`, espacements Tabler/Bootstrap) et manipulation sécurisée du DOM en JavaScript (`innerHTML` vs `textContent`).
 - **Notions pour l'atelier :**

@@ -892,9 +892,9 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                             <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" onclick="handleExportMailingCsv()">
                                 <i class="fa-solid fa-file-csv me-1"></i>Exporter la Liste (CSV)
                             </button>
-                            <button type="button" class="btn btn-teal text-white d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modal-compose-newsletter">
-                                <i class="fa-solid fa-pen-nib text-primary me-1"></i>Composer une Missive
-                            </button>
+                            <a href="/?page=newsletter_compose" class="btn btn-teal text-white d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-pen-nib me-1"></i>Composer une Missive
+                            </a>
                         </div>
                     </div>
 
@@ -1146,12 +1146,13 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                         <th class="text-center">Destinataires</th>
                                         <th>Héraut / Expéditeur</th>
                                         <th>Statut</th>
+                                        <th class="w-1 text-end">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="mailing-campaigns-tbody">
                                     <?php if (empty($recentCampaigns)): ?>
                                         <tr class="no-campaign-row">
-                                            <td colspan="6" class="text-center text-muted py-4 fst-italic">
+                                            <td colspan="7" class="text-center text-muted py-4 fst-italic">
                                                 Aucune missive groupée n'a encore été expédiée. Utilisez le bouton « Composer une Missive » pour lancer votre première campagne.
                                             </td>
                                         </tr>
@@ -1166,9 +1167,16 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                 <td>
                                                     <?php if ($camp['status'] === 'sent'): ?>
                                                         <span class="badge bg-success-lt text-success"><i class="fa-solid fa-circle-check me-1"></i>Expédiée</span>
+                                                    <?php elseif ($camp['status'] === 'draft'): ?>
+                                                        <span class="badge bg-warning-lt text-warning"><i class="fa-solid fa-pen-ruler me-1"></i>Brouillon</span>
                                                     <?php else: ?>
                                                         <span class="badge bg-danger-lt text-danger"><i class="fa-solid fa-circle-xmark me-1"></i>Échec</span>
                                                     <?php endif; ?>
+                                                </td>
+                                                <td class="text-end">
+                                                    <a href="/?page=newsletter_compose&id=<?= (int)$camp['id'] ?>" class="btn btn-sm btn-outline-secondary" title="Ouvrir dans l'atelier de rédaction">
+                                                        <i class="fa-solid fa-pen-to-square me-1"></i>Éditer
+                                                    </a>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -2190,87 +2198,6 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
 </div>
 <?php endif; ?>
 
-<?php if (in_array('mailing', $allowedTabs, true)): ?>
-<!-- ── MODALE : COMPOSITION DE NEWSLETTER / MISSIVE IMPÉRIALE ── -->
-<div class="modal fade" id="modal-compose-newsletter" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-teal text-white">
-                <h5 class="modal-title d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-bullhorn text-pink me-1"></i>Composer une Missive Impériale / Newsletter
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="form-compose-newsletter" onsubmit="handleSendNewsletter(event)">
-                <div class="modal-body">
-                    
-                    <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
-                        <span class="fs-2 text-primary"><i class="fa-solid fa-torii-gate"></i></span>
-                        <div class="small">
-                            Votre missive sera mise en forme avec le gabarit féodal officiel d'OpenShogun (bannière impériale, blason du clan du joueur et mentions de conformité RGPD).
-                        </div>
-                    </div>
-
-                    <!-- Sujet de l'e-mail -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold required">Sujet de la Missive</label>
-                        <input type="text" class="form-control" name="subject" id="newsletter-subject" required placeholder="ex: Chroniques du Shōgunat : Les Nouvelles Terres Féodales et Événement de Siège" maxlength="150">
-                        <div class="form-hint">Le sujet sous lequel le message apparaîtra dans la boîte de réception des Daimyōs.</div>
-                    </div>
-
-                    <!-- Groupe Cible -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold required">Groupe Cible des Destinataires</label>
-                        <select class="form-select" name="target_group" id="newsletter-target-group" required onchange="updateTargetGroupHint(this.value)">
-                            <option value="all_optin" selected>Tous les Abonnés à la Newsletter (Opt-in actif — Recommandé RGPD)</option>
-                            <option value="all_active">Tous les Joueurs Actifs (Comptes confirmés)</option>
-                            <option value="faction_terran">Clan Tokugawa uniquement (Abonnés)</option>
-                            <option value="faction_vorash">Clan Oda uniquement (Abonnés)</option>
-                            <option value="faction_aethelis">Clan Takeda uniquement (Abonnés)</option>
-                            <option value="dev_team">Membres de la Dev Team uniquement</option>
-                            <option value="test_self">Test personnel (Expédier uniquement sur mon propre e-mail)</option>
-                        </select>
-                        <div class="form-hint" id="target-group-hint">
-                            Les missives seront transmises uniquement aux joueurs ayant explicitement coché la case d'inscription.
-                        </div>
-                    </div>
-
-                    <!-- Corps de la Missive -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold required">Corps de la Missive</label>
-                        <textarea class="form-control" name="body_html" id="newsletter-body" rows="8" required placeholder="Seigneurs et Dames de l'Archipel,
-
-Le Conseil impérial se réunit aujourd'hui pour vous annoncer de grandes réformes dans vos domaines castraux..."></textarea>
-                        <div class="d-flex justify-content-between align-items-center mt-1">
-                            <span class="form-hint">Les sauts de ligne seront automatiquement convertis en paragraphes.</span>
-                            <button type="button" class="btn btn-sm btn-ghost-secondary" onclick="previewNewsletterModal()">
-                                <i class="fa-solid fa-eye me-1"></i>Prévisualiser le Rendu
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Aperçu dynamique -->
-                    <div id="newsletter-preview-container" class="border rounded p-3 bg-light d-none mt-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <strong class="text-dark small">Aperçu du message formaté :</strong>
-                            <button type="button" class="btn-close btn-sm" onclick="document.getElementById('newsletter-preview-container').classList.add('d-none');"></button>
-                        </div>
-                        <div id="newsletter-preview-content" class="p-3 bg-white rounded border small" style="max-height: 250px; overflow-y: auto;"></div>
-                    </div>
-
-                </div>
-                <div class="modal-footer d-flex justify-content-between">
-                    <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-teal text-white d-flex align-items-center gap-2" id="btn-submit-newsletter">
-                        <i class="fa-solid fa-paper-plane me-1"></i>Lancer l'Expédition de la Missive
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
 <!-- ═══════════════════════════════════════════════════════════════════════════
      MODAL : CONFIRMATION TABLER (Pas de confirm natif)
      ═══════════════════════════════════════════════════════════════════════════ -->
@@ -3212,101 +3139,6 @@ function updateTargetGroupHint(targetGroup) {
     }
 }
 
-function previewNewsletterModal() {
-    const bodyText = document.getElementById('newsletter-body')?.value || '';
-    const previewContainer = document.getElementById('newsletter-preview-container');
-    const previewContent = document.getElementById('newsletter-preview-content');
-
-    if (!previewContainer || !previewContent) return;
-
-    if (!bodyText.trim()) {
-        previewContent.innerHTML = `<span class="text-muted fst-italic">Veuillez saisir un texte dans la zone de message pour voir l'aperçu.</span>`;
-    } else {
-        const safeHtml = escapeHtml(bodyText).replace(/\n/g, '<br>');
-        previewContent.innerHTML = `
-            <div style="font-family: serif; color: #1e293b; font-size: 14px; line-height: 1.6;">
-                <p><strong>Salutations, Honorable Daimyō [Nom du Joueur],</strong></p>
-                <div>${safeHtml}</div>
-                <hr style="margin: 15px 0;">
-                <p class="text-muted" style="font-size: 11px;">(Pied de page RGPD & lien de désinscription automatique)</p>
-            </div>
-        `;
-    }
-    previewContainer.classList.remove('d-none');
-}
-
-function handleSendNewsletter(event) {
-    event.preventDefault();
-    const form = document.getElementById('form-compose-newsletter');
-    const subject = document.getElementById('newsletter-subject')?.value.trim();
-    const targetGroup = document.getElementById('newsletter-target-group')?.value;
-    const bodyHtml = document.getElementById('newsletter-body')?.value.trim();
-
-    if (!subject || !bodyHtml) {
-        showAlert("Veuillez renseigner le sujet et le contenu de la missive.", 'warning');
-        return;
-    }
-
-    const groupSelect = document.getElementById('newsletter-target-group');
-    const groupLabel = groupSelect?.options[groupSelect.selectedIndex]?.text || targetGroup;
-
-    showConfirmModal(
-        'Expédition de la Missive Impériale',
-        `Êtes-vous certain de vouloir expédier cette missive au groupe <strong>« ${escapeHtml(groupLabel)} »</strong> ?<br><br>
-         <span class="text-muted small">• Sujet : <em>${escapeHtml(subject)}</em></span>`,
-        () => executeSendNewsletter({ subject, target_group: targetGroup, body_html: bodyHtml }),
-        'btn-teal',
-        '<i class="fa-solid fa-paper-plane"></i>'
-    );
-}
-
-async function executeSendNewsletter(payload) {
-    const btn = document.getElementById('btn-submit-newsletter');
-    const originalText = btn ? btn.innerHTML : '';
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Expédition en cours...`;
-    }
-
-    try {
-        const formData = new FormData();
-        formData.append('action', 'send_newsletter_campaign');
-        formData.append('subject', payload.subject);
-        formData.append('target_group', payload.target_group);
-        formData.append('body_html', payload.body_html);
-
-        const res = await fetch('/api/dev_team.php', {
-            method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json' }
-        });
-        const data = await res.json();
-
-        if (data.success) {
-            // Fermer la modale
-            const modalEl = document.getElementById('modal-compose-newsletter');
-            if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                bootstrap.Modal.getInstance(modalEl)?.hide();
-            }
-            document.getElementById('form-compose-newsletter')?.reset();
-            document.getElementById('newsletter-preview-container')?.classList.add('d-none');
-
-            showAlert(`<i class="fa-solid fa-circle-check text-success me-1"></i><strong>Succès :</strong> ${data.message} (+35 XP Forge accordés)`, 'success');
-            loadMailingSubscribers(currentMailingPage);
-            loadMailingCampaignHistory();
-        } else {
-            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Échec :</strong> ${data.error || 'Erreur lors de l\'envoi de la campagne.'}`, 'danger');
-        }
-    } catch (err) {
-        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
-    }
-}
-
 async function loadMailingCampaignHistory() {
     try {
         const res = await fetch('/api/dev_team.php?action=get_campaign_history', {
@@ -3318,24 +3150,33 @@ async function loadMailingCampaignHistory() {
             if (!tbody) return;
 
             if (data.history.length === 0) {
-                tbody.innerHTML = `<tr class="no-campaign-row"><td colspan="6" class="text-center text-muted py-4 fst-italic">Aucune missive groupée n'a encore été expédiée.</td></tr>`;
+                tbody.innerHTML = `<tr class="no-campaign-row"><td colspan="7" class="text-center text-muted py-4 fst-italic">Aucune missive groupée n'a encore été expédiée.</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = data.history.map(c => `
+            tbody.innerHTML = data.history.map(c => {
+                let statusBadge = '<span class="badge bg-danger-lt text-danger"><i class="fa-solid fa-circle-xmark me-1"></i>Échec</span>';
+                if (c.status === 'sent') {
+                    statusBadge = '<span class="badge bg-success-lt text-success"><i class="fa-solid fa-circle-check me-1"></i>Expédiée</span>';
+                } else if (c.status === 'draft') {
+                    statusBadge = '<span class="badge bg-warning-lt text-warning"><i class="fa-solid fa-pen-ruler me-1"></i>Brouillon</span>';
+                }
+
+                return `
                 <tr>
-                    <td class="small font-monospace">${escapeHtml(c.sent_at)}</td>
-                    <td class="fw-bold text-dark">${escapeHtml(c.subject)}</td>
-                    <td><span class="badge bg-secondary-lt">${escapeHtml(c.target_group)}</span></td>
-                    <td class="text-center font-monospace fw-bold text-teal">${parseInt(c.recipient_count, 10)}</td>
-                    <td class="small">${escapeHtml(c.sender_name)}</td>
-                    <td>
-                        <span class="badge ${c.status === 'sent' ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'}">
-                            ${c.status === 'sent' ? '<i class="fa-solid fa-circle-check text-success me-1"></i>Expédiée' : '<i class="fa-solid fa-circle-xmark text-danger me-1"></i>Échec'}
-                        </span>
+                    <td class="small font-monospace">${escapeHtml(c.sent_at || '')}</td>
+                    <td class="fw-bold text-dark">${escapeHtml(c.subject || '')}</td>
+                    <td><span class="badge bg-secondary-lt">${escapeHtml(c.target_group || '')}</span></td>
+                    <td class="text-center font-monospace fw-bold text-teal">${parseInt(c.recipient_count || 0, 10)}</td>
+                    <td class="small">${escapeHtml(c.sender_name || '')}</td>
+                    <td>${statusBadge}</td>
+                    <td class="text-end">
+                        <a href="/?page=newsletter_compose&id=${c.id}" class="btn btn-sm btn-outline-secondary" title="Ouvrir dans l'atelier de rédaction">
+                            <i class="fa-solid fa-pen-to-square me-1"></i>Éditer
+                        </a>
                     </td>
                 </tr>
-            `).join('');
+            `;}).join('');
         }
     } catch (e) {}
 }

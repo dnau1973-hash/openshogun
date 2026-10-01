@@ -127,6 +127,13 @@ class MailService {
     }
 
     /**
+     * Alias ergonomique de sendEmail()
+     */
+    public function send(string $to, string $subject, string $htmlBody, string $textBody = ''): array {
+        return $this->sendEmail($to, $subject, $htmlBody, $textBody);
+    }
+
+    /**
      * Envoi via la fonction mail() native de PHP avec headers multipart/alternative
      */
     private function sendLocalMail(string $to, string $subject, string $htmlBody, string $textBody, array $config): array {
