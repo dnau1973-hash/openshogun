@@ -37,6 +37,17 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 01/10/2026 (Partie 11) — Ergonomie de Navigation, Sous-barres Contextuelles & Tiroir Offcanvas d'Insertion WYSIWYG
+- **Concept exploré :** Décharge cognitive de la barre de navigation principale (séparation en deux niveaux hiérarchiques), conception de micro-badges à icône seule assistés de tooltips interactifs (Bootstrap/Tabler), et création d'un tiroir latéral coulissant (*Offcanvas*) pour la recherche, la sélection multiple et l'injection dynamique de contenu riche dans un éditeur WYSIWYG.
+- **Notions pour l'atelier :**
+  - **Lois de Miller et Hick en UX Design (Pourquoi diviser une barre de navigation ?) :** La barre de navigation principale accumulait trop d'éléments hétérogènes (liens de jeu, devises, sceaux, boutons d'outils, son). En déportant les utilitaires système et monétaires sur une sous-barre dédiée immédiatement en-dessous, on allège la navigation principale tout en conservant un accès permanent en un clic.
+  - **Micro-badges à icône seule & Infobulles (*Tooltips*) :** Afficher du texte à côté de chaque icône encombre l'écran et force l'œil à lire de longs libellés. En affichant uniquement une icône vectorielle bien reconnaissable complétée par un tooltip déclenché au survol de la souris (`data-bs-toggle="tooltip"` / `title`), on optimise l'espace sur l'écran tout en conservant une accessibilité parfaite pour les joueurs débutants.
+  - **Composant Offcanvas vs Modale :** Pourquoi utiliser un tiroir coulissant latéral (*Offcanvas*) pour insérer les nouveautés du jeu plutôt qu'une modale ? La modale bloque complètement l'écran et masque le document en cours de rédaction. L'Offcanvas glisse sur le côté droit sans recouvrir la totalité de la vue, permettant au rédacteur de continuer à voir son texte et son aperçu en direct pendant qu'il sélectionne ses nouveautés.
+  - **Injection HTML dynamique dans un éditeur WYSIWYG (Quill API) :** Comment insérer du contenu sans écraser le travail de l'utilisateur ? En interrogeant le curseur avec `quill.getSelection()`, puis en injectant le HTML précisément à la position active avec `quill.clipboard.dangerouslyPasteHTML(index, html)`.
+- **Activité pratique suggérée :** Survoler les badges de la sous-barre sous le header pour observer le déclenchement des tooltips, puis ouvrir l'atelier de missive (`/?page=newsletter_compose`), cliquer sur « Insérer des Nouveautés », cocher deux fonctionnalités dans le tiroir latéral et observer leur insertion directe dans le corps du texte à l'emplacement exact de votre curseur.
+
+---
+
 ### Session du 01/10/2026 (Partie 10) — Architecture d'E-Mailing Moderne : Split-Screen Temps Réel, WYSIWYG & Gabarits HTML Compatibles
 - **Concept exploré :** Conception d'un atelier d'e-mailing complet (transition de modale vers page dédiée), intégration d'un éditeur riche WYSIWYG (Quill), isolation CSS via `iframe` (`srcdoc`) pour la prévisualisation instantanée sans latence, et règles strictes de délivrabilité d'e-mails (HTML tabulaire `<table>`, CSS inline, compatibilité Outlook/Gmail/Apple Mail, zéro fond sombre).
 - **Notions pour l'atelier :**

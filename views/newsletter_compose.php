@@ -8,12 +8,15 @@ declare(strict_types=1);
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/DevTeamEngine.php';
 require_once __DIR__ . '/../core/MailingListEngine.php';
+require_once __DIR__ . '/../core/FeatureRegistry.php';
 
 $auth = new Auth();
 if (!Auth::check()) {
     header('Location: /');
     exit;
 }
+
+$allFeatures = FeatureRegistry::getAllFeatures();
 
 $currentUserId = (int)Auth::id();
 $currentUser = $auth->getCurrentUser();
@@ -171,14 +174,19 @@ $currentSenderName = htmlspecialchars($currentUser['username'] ?? 'Chancellerie 
         <div class="col-12 col-xl-6">
             <div class="card h-100 border shadow-sm">
                 
-                <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 px-3">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 px-3 flex-wrap gap-2">
                     <h3 class="card-title mb-0 d-flex align-items-center gap-2 text-dark font-game fs-5">
                         <i class="fa-solid fa-sliders text-danger me-1"></i>Atelier de Rédaction &amp; Paramètres
                     </h3>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fa-solid fa-wand-magic-sparkles me-1 text-warning"></i>Modèles Rapides
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-features">
+                            <i class="fa-solid fa-scroll me-1"></i>Insérer des Nouveautés
+                            <span class="badge bg-danger text-white ms-1"><?= count($allFeatures) ?></span>
                         </button>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-wand-magic-sparkles me-1 text-warning"></i>Modèles Rapides
+                            </button>
                         <div class="dropdown-menu dropdown-menu-end">
                             <h6 class="dropdown-header">Inspirations Féodales</h6>
                             <a class="dropdown-item" href="#" onclick="applyTemplate('war'); return false;">
@@ -271,9 +279,15 @@ $currentSenderName = htmlspecialchars($currentUser['username'] ?? 'Chancellerie 
 
                         <!-- 3. Éditeur WYSIWYG -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold required d-flex justify-content-between align-items-center">
+                            <label class="form-label fw-bold required d-flex justify-content-between align-items-center flex-wrap gap-1">
                                 <span><i class="fa-solid fa-pen-to-square me-1 text-danger"></i>Corps de la Missive (Éditeur Riche)</span>
-                                <span class="badge bg-danger-lt border text-danger">Style Parchemin &amp; Or Actif</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 d-flex align-items-center gap-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-features">
+                                        <i class="fa-solid fa-scroll"></i>
+                                        <span>+ Nouveautés</span>
+                                    </button>
+                                    <span class="badge bg-danger-lt border text-danger">Style Parchemin &amp; Or Actif</span>
+                                </div>
                             </label>
 
                             <!-- Conteneur Quill -->
@@ -361,6 +375,138 @@ $currentSenderName = htmlspecialchars($currentUser['username'] ?? 'Chancellerie 
 
     </div>
 
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TIROIR LATÉRAL (OFFCANVAS) : SÉLECTION & INSERTION DES NOUVEAUTÉS
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="offcanvas offcanvas-end shadow-lg" tabindex="-1" id="offcanvas-features" aria-labelledby="offcanvasFeaturesLabel" style="width: 540px; max-width: 95vw;">
+    <div class="offcanvas-header bg-light border-bottom py-3">
+        <div>
+            <h5 class="offcanvas-title font-game text-danger mb-1 d-flex align-items-center gap-2" id="offcanvasFeaturesLabel">
+                <i class="fa-solid fa-scroll me-1"></i>Nouveautés &amp; Mises à Jour du Shōgunat
+            </h5>
+            <div class="text-muted small">
+                Extraites automatiquement du registre officiel des décrets (<code>fonctionnalités.md</code>).
+            </div>
+        </div>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
+    </div>
+
+    <div class="offcanvas-body p-3">
+        <!-- Recherche et Contrôles Rapides -->
+        <div class="mb-3">
+            <div class="input-icon mb-2">
+                <span class="input-icon-addon">
+                    <i class="fa-solid fa-magnifying-glass text-secondary"></i>
+                </span>
+                <input type="text" class="form-control" id="feature-search-input" placeholder="Rechercher par titre, module, mot-clé..." oninput="filterFeaturesList()">
+            </div>
+            
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-1">
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-secondary" onclick="toggleAllFeatures(true)">
+                        <i class="fa-solid fa-check-double me-1 text-success"></i>Tout cocher
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="toggleAllFeatures(false)">
+                        <i class="fa-solid fa-xmark me-1 text-danger"></i>Tout décocher
+                    </button>
+                </div>
+                <div class="small">
+                    <span id="features-selected-count" class="badge bg-danger-lt border text-danger fw-bold">0 sélectionnée(s)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formatage de l'insertion -->
+        <div class="card bg-light-subtle border mb-3">
+            <div class="card-body p-2">
+                <div class="text-dark small fw-bold mb-1 d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-wand-magic-sparkles text-warning"></i>Style d'insertion dans le WYSIWYG :
+                </div>
+                <div class="d-flex gap-3">
+                    <label class="form-check form-check-inline mb-0 cursor-pointer">
+                        <input class="form-check-input" type="radio" name="feature-insert-format" value="list" checked>
+                        <span class="form-check-label small">Liste à puces claire</span>
+                    </label>
+                    <label class="form-check form-check-inline mb-0 cursor-pointer">
+                        <input class="form-check-input" type="radio" name="feature-insert-format" value="detailed">
+                        <span class="form-check-label small">Blocs immersifs détaillés</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste scrollable des fonctionnalités -->
+        <div id="features-list-container" class="space-y-2" style="max-height: calc(100vh - 300px); overflow-y: auto; padding-right: 4px;">
+            <?php if (empty($allFeatures)): ?>
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-inbox fs-1 mb-2"></i>
+                    <p>Aucune nouveauté répertoriée dans le registre.</p>
+                </div>
+            <?php else: ?>
+                <?php foreach ($allFeatures as $feat): ?>
+                    <?php 
+                        $statusClass = 'bg-secondary-lt';
+                        $statusIcon = 'fa-clock';
+                        if ($feat['status'] === 'Validé') {
+                            $statusClass = 'bg-success text-white';
+                            $statusIcon = 'fa-check';
+                        } elseif ($feat['status'] === 'À tester') {
+                            $statusClass = 'bg-warning text-dark';
+                            $statusIcon = 'fa-flask';
+                        }
+                    ?>
+                    <div class="card card-sm border mb-2 feature-card" 
+                         data-feature-id="<?= htmlspecialchars($feat['id']) ?>"
+                         data-search-text="<?= htmlspecialchars(strtolower($feat['title'] . ' ' . $feat['module'] . ' ' . $feat['description'])) ?>"
+                         data-title="<?= htmlspecialchars($feat['title']) ?>"
+                         data-module="<?= htmlspecialchars($feat['module']) ?>"
+                         data-date="<?= htmlspecialchars($feat['date']) ?>"
+                         data-desc="<?= htmlspecialchars($feat['description']) ?>">
+                        <div class="card-body p-2">
+                            <label class="form-check cursor-pointer mb-0 d-flex align-items-start gap-2">
+                                <input class="form-check-input mt-1 feature-checkbox" type="checkbox" value="<?= htmlspecialchars($feat['id']) ?>" onchange="updateFeatureSelectionCount()">
+                                <div class="form-check-label flex-grow-1">
+                                    <div class="d-flex align-items-center justify-content-between mb-1 gap-2">
+                                        <span class="badge bg-danger-lt border text-uppercase" style="font-size: 10px;">
+                                            <i class="fa-solid fa-cube me-1"></i><?= htmlspecialchars($feat['module']) ?>
+                                        </span>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="badge <?= $statusClass ?>" style="font-size: 10px;">
+                                                <i class="fa-solid <?= $statusIcon ?> me-1"></i><?= htmlspecialchars($feat['status']) ?>
+                                            </span>
+                                            <span class="text-muted small" style="font-size: 11px;">
+                                                <i class="fa-solid fa-calendar me-1"></i><?= htmlspecialchars($feat['date']) ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="fw-bold text-dark small mb-1">
+                                        <?= htmlspecialchars($feat['title']) ?>
+                                    </div>
+                                    <?php if (!empty($feat['description'])): ?>
+                                        <div class="text-muted small" style="max-height: 2.8em; overflow: hidden; line-height: 1.35;" title="<?= htmlspecialchars($feat['description']) ?>">
+                                            <?= htmlspecialchars($feat['description']) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="offcanvas-footer border-top bg-light p-3 d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
+            Fermer
+        </button>
+        <button type="button" class="btn btn-danger d-flex align-items-center gap-2 shadow-sm" id="btn-insert-features" onclick="insertSelectedFeaturesIntoEditor()">
+            <i class="fa-solid fa-feather-pointed me-1"></i>
+            Insérer dans la Missive (<span id="btn-insert-count">0</span>)
+        </button>
+    </div>
 </div>
 
 <!-- MODAL TABLER : CONFIRMATION D'EXPÉDITION D'UNE MISSIVE -->
@@ -1037,5 +1183,135 @@ function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, function(m) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
     });
+}
+
+/**
+ * ══════════════════════════════════════════════════════════════════════════
+ * GESTION DE L'OUTIL D'INSERTION DES NOUVEAUTÉS (OFFCANVAS)
+ * ══════════════════════════════════════════════════════════════════════════
+ */
+
+/**
+ * Filtre la liste des nouveautés par recherche textuelle
+ */
+function filterFeaturesList() {
+    const query = (document.getElementById('feature-search-input')?.value || '').toLowerCase().trim();
+    const cards = document.querySelectorAll('.feature-card');
+    
+    cards.forEach(card => {
+        const text = card.getAttribute('data-search-text') || '';
+        if (!query || text.includes(query)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+/**
+ * Coche ou décoche toutes les nouveautés actuellement visibles
+ */
+function toggleAllFeatures(checked) {
+    const cards = document.querySelectorAll('.feature-card');
+    cards.forEach(card => {
+        if (card.style.display !== 'none') {
+            const checkbox = card.querySelector('.feature-checkbox');
+            if (checkbox) checkbox.checked = checked;
+        }
+    });
+    updateFeatureSelectionCount();
+}
+
+/**
+ * Met à jour le compteur d'éléments sélectionnés
+ */
+function updateFeatureSelectionCount() {
+    const checked = document.querySelectorAll('.feature-checkbox:checked');
+    const count = checked.length;
+    
+    const countEl = document.getElementById('features-selected-count');
+    if (countEl) countEl.textContent = `${count} sélectionnée(s)`;
+    
+    const btnCountEl = document.getElementById('btn-insert-count');
+    if (btnCountEl) btnCountEl.textContent = count;
+}
+
+/**
+ * Construit et insère le HTML des nouveautés sélectionnées dans l'éditeur WYSIWYG
+ */
+function insertSelectedFeaturesIntoEditor() {
+    const checkedBoxes = Array.from(document.querySelectorAll('.feature-checkbox:checked'));
+    if (checkedBoxes.length === 0) {
+        showNotification("Veuillez sélectionner au moins une nouveauté à insérer.", 'warning');
+        return;
+    }
+
+    // Récupération du format choisi
+    const formatRadio = document.querySelector('input[name="feature-insert-format"]:checked');
+    const format = formatRadio ? formatRadio.value : 'list';
+
+    // Extraction des données des cartes sélectionnées
+    const selectedFeatures = checkedBoxes.map(cb => {
+        const card = cb.closest('.feature-card');
+        return {
+            title: card.getAttribute('data-title') || '',
+            module: card.getAttribute('data-module') || '',
+            date: card.getAttribute('data-date') || '',
+            desc: card.getAttribute('data-desc') || ''
+        };
+    });
+
+    let generatedHtml = '';
+
+    if (format === 'list') {
+        generatedHtml += `<h3>📜 Nouveautés &amp; Mises à Jour du Shōgunat</h3>\n`;
+        generatedHtml += `<p>Voici les décrets et perfectionnements récemment déployés au cœur des provinces de l'Archipel :</p>\n`;
+        generatedHtml += `<ul>\n`;
+        selectedFeatures.forEach(item => {
+            const moduleBadge = item.module ? ` [${escapeHtml(item.module)}]` : '';
+            const descText = item.desc ? ` : ${escapeHtml(item.desc)}` : '';
+            generatedHtml += `  <li><strong>${escapeHtml(item.title)}${moduleBadge}</strong>${descText}</li>\n`;
+        });
+        generatedHtml += `</ul>\n`;
+    } else {
+        // Format détaillé par bloc
+        generatedHtml += `<h3>📜 Chroniques &amp; Décrets Récent de l'Empire</h3>\n`;
+        generatedHtml += `<p>Le Conseil impérial vous convie à découvrir les évolutions majeures apportées au Shōgunat :</p>\n`;
+        selectedFeatures.forEach(item => {
+            generatedHtml += `<blockquote>\n`;
+            generatedHtml += `  <h4>⛩️ ${escapeHtml(item.title)} <small style="color: #64748b; font-size: 13px;">(${escapeHtml(item.module)} &bull; ${escapeHtml(item.date)})</small></h4>\n`;
+            if (item.desc) {
+                generatedHtml += `  <p>${escapeHtml(item.desc)}</p>\n`;
+            }
+            generatedHtml += `</blockquote>\n`;
+        });
+    }
+
+    // Insertion dans l'éditeur Quill à la position du curseur
+    if (quill) {
+        const range = quill.getSelection();
+        const index = range ? range.index : quill.getLength();
+        quill.clipboard.dangerouslyPasteHTML(index, generatedHtml);
+        document.getElementById('newsletter-body-input').value = quill.root.innerHTML;
+    } else {
+        const fallback = document.getElementById('newsletter-body-fallback');
+        if (fallback) {
+            fallback.value += '\n\n' + generatedHtml;
+            document.getElementById('newsletter-body-input').value = fallback.value;
+        }
+    }
+
+    // Mise à jour de la prévisualisation en direct
+    triggerPreviewUpdate(true);
+    markUnsavedState();
+
+    // Fermer l'offcanvas
+    const offcanvasEl = document.getElementById('offcanvas-features');
+    if (offcanvasEl) {
+        const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl) || new bootstrap.Offcanvas(offcanvasEl);
+        bsOffcanvas.hide();
+    }
+
+    showNotification(`${selectedFeatures.length} nouveauté(s) insérée(s) dans la missive !`, 'success');
 }
 </script>

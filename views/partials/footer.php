@@ -870,6 +870,16 @@ function updateHudResources(planet) {
 <!-- Tabler JS -->
 <script src="/public/js/tabler/tabler.min.js"></script>
 <script>
+// Initialisation universelle des infobulles Tabler / Bootstrap
+document.addEventListener("DOMContentLoaded", function () {
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl, { boundary: document.body });
+        });
+    }
+});
+
 // Thème clair 100% natif Tabler.io - Nettoyage et verrouillage du thème clair
 (function() {
     try {

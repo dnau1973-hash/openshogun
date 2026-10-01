@@ -352,53 +352,12 @@ $navItems = [
                     <div class="navbar-nav flex-row order-md-last ms-auto align-items-center gap-2 flex-wrap">
                         <?php if ($isUserProtected): ?>
                             <span class="badge bg-success-lt d-inline-flex align-items-center gap-1 py-1 px-2"
+                                  data-bs-toggle="tooltip" data-bs-placement="bottom"
                                   title="Immunité Féodale active jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?>">
                                 <i class="fa-solid fa-shield-halved text-success"></i>
                                 <span class="fw-bold"><?= htmlspecialchars($userProtection['formatted']) ?></span>
                             </span>
                         <?php endif; ?>
-
-                        <!-- Trésor en Koban -->
-                        <a href="?page=privilege" class="badge bg-warning-lt text-warning d-inline-flex align-items-center gap-1 py-1 px-2 text-decoration-none shadow-sm"
-                           title="Trésor Impérial : <?= number_format($userGoldCoins) ?> Koban.">
-                            <i class="fa-solid fa-coins text-warning"></i>
-                            <strong><?= number_format($userGoldCoins) ?></strong>
-                            <span class="text-muted d-none d-xl-inline">Koban</span>
-                        </a>
-
-                        <!-- Sceau Impérial -->
-                        <a href="?page=privilege" 
-                           class="badge <?= $isSealActive ? 'bg-warning text-warning-fg' : 'bg-secondary-lt' ?> d-inline-flex align-items-center gap-1 py-1 px-2 text-decoration-none shadow-sm"
-                           title="<?= $isSealActive ? 'Sceau Impérial Actif : ' . $sealStatus['remaining_formatted'] : 'Décrétez le Sceau Impérial du Shōgun' ?>">
-                            <i class="fa-solid fa-crown text-warning"></i>
-                            <span><?= $isSealActive ? 'Sceau Actif' : 'Sceau Impérial' ?></span>
-                        </a>
-
-                        <?php if ($isDevTeamMember): ?>
-                            <!-- Studio Dev Team -->
-                            <a href="?page=dev_team" 
-                               class="badge bg-purple-lt text-purple d-inline-flex align-items-center gap-1 py-1 px-2 text-decoration-none shadow-sm <?= $page === 'dev_team' ? 'fw-bold border border-purple' : '' ?>"
-                               title="Accéder au Studio Dev Team & Métiers du Jeu Vidéo">
-                                <i class="fa-solid fa-hammer text-purple"></i>
-                                <span class="d-none d-lg-inline">Studio Dev</span>
-                            </a>
-                        <?php endif; ?>
-
-                        <?php if ($auth->isAdmin()): ?>
-                            <!-- Administration -->
-                            <a href="?page=admin" class="badge bg-blue-lt text-primary d-inline-flex align-items-center gap-1 py-1 px-2 text-decoration-none shadow-sm <?= $page === 'admin' ? 'fw-bold border border-primary' : '' ?>" title="Panneau d'administration">
-                                <i class="fa-solid fa-gear text-primary"></i>
-                                <span class="d-none d-lg-inline">Admin</span>
-                            </a>
-                        <?php endif; ?>
-
-                        <!-- Ambiance sonore -->
-                        <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none p-1 d-inline-flex align-items-center shadow-none" 
-                                id="shogun-audio-btn" 
-                                onclick="window.shogunAudio && window.shogunAudio.toggle()" 
-                                title="Activer / Couper la musique et les ambiances">
-                            <i class="fa-solid fa-volume-xmark" id="shogun-audio-icon"></i>
-                        </button>
 
                         <?php
                         $hHp = $heroHeader ? round((float)$heroHeader['health']) : 100;
@@ -479,6 +438,59 @@ $navItems = [
                 </div>
             </div>
         </header>
+
+        <!-- ── SOUS-BARRE DÉDIÉE : STATUTS & OUTILS RAPIDES (Alignée à gauche) ── -->
+        <div class="sub-navbar border-bottom bg-light-subtle py-1 d-print-none shadow-none">
+            <div class="container-fluid px-3 px-lg-4 d-flex align-items-center justify-content-start gap-2 flex-wrap">
+                
+                <!-- 1. Trésor en Koban (Icône seule) -->
+                <a href="?page=privilege" 
+                   class="badge bg-warning-lt text-warning p-2 d-inline-flex align-items-center justify-content-center text-decoration-none shadow-none rounded"
+                   data-bs-toggle="tooltip" data-bs-placement="bottom"
+                   title="Trésor Impérial : <?= number_format($userGoldCoins) ?> Kobans">
+                    <i class="fa-solid fa-coins fs-3"></i>
+                </a>
+
+                <!-- 2. Sceau Impérial Actif (Icône seule) -->
+                <a href="?page=privilege" 
+                   class="badge <?= $isSealActive ? 'bg-warning text-warning-fg' : 'bg-secondary-lt text-secondary' ?> p-2 d-inline-flex align-items-center justify-content-center text-decoration-none shadow-none rounded"
+                   data-bs-toggle="tooltip" data-bs-placement="bottom"
+                   title="<?= $isSealActive ? 'Sceau Impérial Actif (' . htmlspecialchars($sealStatus['remaining_formatted']) . ')' : 'Sceau Impérial Inactif — Décréter le Sceau' ?>">
+                    <i class="fa-solid fa-crown fs-3"></i>
+                </a>
+
+                <?php if ($isDevTeamMember): ?>
+                    <!-- 3. Studio Dev Team (Icône seule) -->
+                    <a href="?page=dev_team" 
+                       class="badge bg-purple-lt text-purple p-2 d-inline-flex align-items-center justify-content-center text-decoration-none shadow-none rounded <?= $page === 'dev_team' ? 'border border-purple' : '' ?>"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom"
+                       title="Studio Dev Team &amp; Métiers du Jeu Vidéo">
+                        <i class="fa-solid fa-hammer fs-3"></i>
+                    </a>
+                <?php endif; ?>
+
+                <?php if ($auth->isAdmin()): ?>
+                    <!-- 4. Panneau d'Administration (Icône seule) -->
+                    <a href="?page=admin" 
+                       class="badge bg-blue-lt text-primary p-2 d-inline-flex align-items-center justify-content-center text-decoration-none shadow-none rounded <?= $page === 'admin' ? 'border border-primary' : '' ?>"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom"
+                       title="Panneau d'Administration Générale">
+                        <i class="fa-solid fa-gear fs-3"></i>
+                    </a>
+                <?php endif; ?>
+
+                <!-- 5. Ambiance Sonore (Icône seule) -->
+                <button type="button" 
+                        class="badge bg-secondary-lt text-secondary p-2 border-0 d-inline-flex align-items-center justify-content-center shadow-none rounded cursor-pointer" 
+                        id="shogun-audio-btn" 
+                        onclick="window.shogunAudio && window.shogunAudio.toggle()" 
+                        data-bs-toggle="tooltip" data-bs-placement="bottom"
+                        title="Ambiance Sonore : Activer / Couper la musique féodale">
+                    <i class="fa-solid fa-volume-xmark fs-3" id="shogun-audio-icon"></i>
+                </button>
+
+            </div>
+        </div>
 
         <!-- ── 2. LOGO FÉODAL CENTRAL DU JEU (Bannière pleine largeur fluide) ── -->
         <div class="container-fluid text-center py-2 d-print-none">

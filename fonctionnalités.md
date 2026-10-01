@@ -3,6 +3,25 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-01] - ui/navbar & community/newsletter : Sous-barre Ergonomique à Badges & Outil d'Insertion des Nouveautés dans la Missive
+- **Module :** `ui/navbar & community/newsletter`
+- **Statut :** `À tester`
+- **Description :** 
+  1. **Réorganisation Ergonomique de la Barre de Navigation (`views/partials/header.php`) :** Extraction hors de la barre principale des éléments Kobans, Sceau actif, Studio Dev, Admin et Ambiance sonore. Positionnement sur une sous-barre dédiée immédiatement sous la barre de navigation principale, alignée à gauche avec le même conteneur fluide (`container-fluid px-3 px-lg-4`). Formatage de chaque élément sous forme de badge ultra-compact contenant **UNIQUEMENT son icône vectorielle Font Awesome**, avec infobulle / tooltip Tabler/Bootstrap (`data-bs-toggle="tooltip"` / `title`) affichant l'intitulé textuel complet et explicatif au survol de la souris. Initialisation globale et réactive des tooltips dans `views/partials/footer.php` et `public/js/app.js`.
+  2. **Insertion Dynamique des Nouveautés du Jeu dans la Missive (`views/newsletter_compose.php`) :** Intégration d'un outil de récupération automatique des dernières nouveautés du jeu directement depuis le registre officiel (`fonctionnalités.md` via `FeatureRegistry`). Ajout d'un bouton d'action « Insérer des Nouveautés » dans le bandeau de l'atelier de rédaction et au-dessus de l'éditeur WYSIWYG. Déploiement d'un tiroir latéral dédié (Offcanvas Tabler) avec champ de recherche en direct, sélection rapide (« Tout cocher » / « Tout décocher »), compteur dynamique, choix du format d'insertion (liste à puces synthétique ou blocs détaillés immersifs avec dates et citations), injection fluide dans l'éditeur Quill à la position du curseur et rafraîchissement immédiat de la prévisualisation en direct.
+- **Fichiers modifiés :** `views/partials/header.php`, `views/partials/footer.php`, `public/js/app.js`, `views/newsletter_compose.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Charger n'importe quelle page du jeu et observer la barre de navigation supérieure : vérifier que la navbar principale est allégée et qu'une sous-barre dédiée apparaît immédiatement en-dessous, alignée à gauche.
+  2. Vérifier que la sous-barre affiche uniquement les icônes Font Awesome pour Kobans (pièce d'or), Sceau actif (tampon/tampon impérial), Studio Dev (boussole/crayon), Admin (bouclier/clé) et Ambiance (haut-parleur).
+  3. Survoler chacun des badges avec la souris : vérifier l'apparition instantanée de l'infobulle (tooltip Bootstrap/Tabler) avec le texte descriptif complet (ex: « Kobans Impériaux : 1,250 », « Sceau Impérial : Aucun sceau actif », etc.).
+  4. Se rendre sur la page de composition de la missive impériale (`/?page=newsletter_compose`).
+  5. Cliquer sur le bouton « Insérer des Nouveautés » : vérifier l'ouverture fluide du tiroir latéral droit (Offcanvas).
+  6. Tester la recherche dans l'Offcanvas (taper par exemple « layout », « icons », « newsletter ») : vérifier le filtrage instantané de la liste.
+  7. Tester les boutons « Tout cocher » et « Tout décocher » et observer la mise à jour des compteurs.
+  8. Sélectionner une ou plusieurs nouveautés, choisir le format (liste à puces ou blocs détaillés) et cliquer sur « Insérer dans la Missive » : vérifier l'insertion automatique du texte formaté dans l'éditeur Quill, la fermeture du tiroir, le toast de notification et l'actualisation instantanée de l'aperçu e-mail dans la colonne de droite.
+
+---
+
 ### [2026-10-01] - community/newsletter : Refonte de la Missive Impériale, Page Dédiée Split-Screen & Éditeur WYSIWYG
 - **Module :** `community/newsletter`
 - **Statut :** `À tester`

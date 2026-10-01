@@ -6,7 +6,20 @@
 document.addEventListener('DOMContentLoaded', () => {
     initResourceTickers();
     initCountdownTimers();
+    initTooltips();
 });
+
+// Initialisation globale des infobulles Tabler / Bootstrap Tooltips
+function initTooltips() {
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach((el) => {
+            try {
+                new bootstrap.Tooltip(el, { boundary: document.body });
+            } catch (e) {}
+        });
+    }
+}
 
 // 1. Tickers de ressources en direct (incrémentation fluide à la seconde)
 function initResourceTickers() {
