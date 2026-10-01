@@ -110,14 +110,14 @@ $csrfToken = Auth::csrfToken();
 // ── Helpers d'affichage ───────────────────────────────────────────────────────
 $isBug      = ($ticket['type'] === 'bug');
 $catLabel   = SupportEngine::CATEGORIES[$ticket['category']] ?? $ticket['category'];
-$sevLabels  = ['low' => '🟢 Faible', 'medium' => '🟡 Moyen', 'high' => '🟠 Élevé', 'critical' => '🔴 Critique'];
+$sevLabels = ['low' => '<i class="fa-solid fa-circle text-success me-1"></i>Faible', 'medium' => '<i class="fa-solid fa-circle text-warning me-1"></i>Moyen', 'high' => '<i class="fa-solid fa-circle text-orange me-1"></i>Élevé', 'critical' => '<i class="fa-solid fa-circle text-danger me-1"></i>Critique'];
 $sevLabel   = $sevLabels[$ticket['severity']] ?? $ticket['severity'];
 $statusColors = [
-    'pending'     => ['label' => '⏳ En attente',         'color' => '#eab308', 'bg' => 'rgba(234,179,8,0.1)'],
-    'in_progress' => ['label' => "🔍 En cours d'examen",  'color' => '#2563eb', 'bg' => 'rgba(37,99,235,0.1)'],
-    'resolved'    => ['label' => '✅ Résolu / Corrigé',   'color' => '#16a34a', 'bg' => 'rgba(22,163,74,0.1)'],
-    'planned'     => ['label' => '📌 Retenu (Future MAJ)','color' => '#7c3aed', 'bg' => 'rgba(124,58,237,0.1)'],
-    'closed'      => ['label' => '✖️ Fermé / Sans suite', 'color' => '#64748b', 'bg' => 'rgba(100,116,139,0.1)'],
+    'pending'     => ['label' => '<i class="fa-solid fa-hourglass-half text-warning me-1"></i>En attente',         'color' => '#eab308', 'bg' => 'rgba(234,179,8,0.1)'],
+    'in_progress' => ['label' => "<i class='fa-solid fa-magnifying-glass text-primary me-1'></i>En cours d'examen",  'color' => '#2563eb', 'bg' => 'rgba(37,99,235,0.1)'],
+    'resolved'    => ['label' => '<i class="fa-solid fa-circle-check text-success me-1"></i>Résolu / Corrigé',   'color' => '#16a34a', 'bg' => 'rgba(22,163,74,0.1)'],
+    'planned'     => ['label' => '<i class="fa-solid fa-thumbtack text-purple me-1"></i>Retenu (Future MAJ)','color' => '#7c3aed', 'bg' => 'rgba(124,58,237,0.1)'],
+    'closed'      => ['label' => '<i class="fa-solid fa-circle-xmark text-secondary me-1"></i>Fermé / Sans suite', 'color' => '#64748b', 'bg' => 'rgba(100,116,139,0.1)'],
 ];
 $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['status'], 'color' => '#64748b', 'bg' => '#f1f5f9'];
 ?>
@@ -136,7 +136,7 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
         background: <?= $flashType === 'success' ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.08)' ?>;
         border: 1px solid <?= $flashType === 'success' ? '#16a34a' : '#dc2626' ?>;
         color: <?= $flashType === 'success' ? '#15803d' : '#b91c1c' ?>;">
-        <?= $flashType === 'success' ? '✅' : '❌' ?>
+        <?= $flashType === 'success' ? '<i class="fa-solid fa-circle-check text-success me-1"></i>' : '<i class="fa-solid fa-circle-exclamation text-danger me-1"></i>' ?>
         <?= htmlspecialchars($flashMsg) ?>
     </div>
     <?php endif; ?>
@@ -154,11 +154,11 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h1 style="font-size: 1.55rem; margin: 0 0 0.3rem 0; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📮</span>
+                        <i class="fa-solid fa-headset me-1"></i>
                         Traitement du Ticket&nbsp;<strong style="color: #206bc4;">#<?= $ticket['id'] ?></strong>
                     </h1>
                     <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">
-                        <?= $isBug ? '🪲 Dysfonctionnement' : '💡 Suggestion' ?> &bull;
+                        <?= $isBug ? '<i class="fa-solid fa-bug text-danger me-1"></i>Dysfonctionnement' : '<i class="fa-solid fa-lightbulb text-warning me-1"></i>Suggestion' ?> &bull;
                         <?= htmlspecialchars($catLabel) ?> &bull;
                         <?= htmlspecialchars($sevLabel) ?>
                     </div>
@@ -181,7 +181,7 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
             <!-- Fiche auteur -->
             <div class="card" style="background: var(--bg-surface,#fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
                 <div style="padding: 0.85rem 1.25rem; background: var(--bg-ink,#ede5d5); border-bottom: 1px solid var(--border-color);">
-                    <strong style="font-size: 0.85rem; color: var(--text-main);">👤 Auteur & Fief</strong>
+                    <strong style="font-size: 0.85rem; color: var(--text-main);"><i class="fa-solid fa-user text-primary me-1"></i>Auteur &amp; Fief</strong>
                 </div>
                 <div style="padding: 1rem 1.25rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.85rem;">
                     <div><span style="color:var(--text-muted); font-weight:600;">Daimyō :</span><br>
@@ -200,7 +200,7 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
             <!-- Statut actuel -->
             <div class="card" style="background: var(--bg-surface,#fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
                 <div style="padding: 0.85rem 1.25rem; background: var(--bg-ink,#ede5d5); border-bottom: 1px solid var(--border-color);">
-                    <strong style="font-size: 0.85rem; color: var(--text-main);">📊 Statut actuel</strong>
+                    <strong style="font-size: 0.85rem; color: var(--text-main);"><i class="fa-solid fa-chart-simple text-info me-1"></i>Statut actuel</strong>
                 </div>
                 <div style="padding: 1rem 1.25rem;">
                     <span style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 1rem;
@@ -222,7 +222,7 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
             <div class="card" style="background: var(--bg-surface,#fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
                 <div style="padding: 0.85rem 1.25rem; background: var(--bg-ink,#ede5d5); border-bottom: 1px solid var(--border-color);">
                     <strong style="font-size: 0.85rem; color: var(--text-main);">
-                        <?= $isBug ? '🪲 Signalement du joueur' : '💡 Suggestion du joueur' ?>
+                        <?= $isBug ? '<i class="fa-solid fa-bug text-danger me-1"></i>Signalement du joueur' : '<i class="fa-solid fa-lightbulb text-warning me-1"></i>Suggestion du joueur' ?>
                     </strong>
                 </div>
                 <div style="padding: 1.25rem;">
@@ -242,7 +242,7 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
             <?php if (!empty($ticket['admin_response'])): ?>
             <div class="card" style="background: rgba(8,145,178,0.04); border: 1px solid #0891b244; border-radius: 12px; overflow: hidden;">
                 <div style="padding: 0.85rem 1.25rem; background: rgba(8,145,178,0.1); border-bottom: 1px solid #0891b244;">
-                    <strong style="font-size: 0.85rem; color: #0891b2;">🛡️ Réponse précédente de l'administration</strong>
+                    <strong style="font-size: 0.85rem; color: #0891b2;"><i class="fa-solid fa-shield-halved text-info me-1"></i>Réponse précédente de l'administration</strong>
                 </div>
                 <div style="padding: 1.25rem; font-size: 0.88rem; line-height: 1.6; color: var(--text-main);">
                     <?= $ticket['admin_response'] ?>
@@ -258,7 +258,7 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
             <div class="card" style="background: var(--bg-surface,#fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; position: sticky; top: 1rem;">
                 <div style="padding: 0.85rem 1.25rem; background: linear-gradient(135deg,rgba(32,107,196,0.08),rgba(253,251,247,0.98));
                             border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 0.5rem;">
-                    <strong style="font-size: 0.9rem; color: var(--text-main);">⚙️ Décision & Réponse du Shogunat</strong>
+                    <strong style="font-size: 0.9rem; color: var(--text-main);"><i class="fa-solid fa-gear text-secondary me-1"></i>Décision &amp; Réponse du Shogunat</strong>
                 </div>
 
                 <form id="adminTraiterForm" method="POST" action="" onsubmit="syncQuillBeforeSubmit(event)">
@@ -275,11 +275,11 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
                             <select id="statusSelect" name="status" class="form-select" style="width: 100%;">
                                 <?php
                                 $statusOptions = [
-                                    'pending'     => '⏳ En attente',
-                                    'in_progress' => "🔍 En cours d'examen",
-                                    'resolved'    => '✅ Résolu / Corrigé',
-                                    'planned'     => '📌 Retenu (Future MAJ)',
-                                    'closed'      => '✖️ Fermé / Sans suite',
+                                    'pending'     => 'En attente',
+                                    'in_progress' => "En cours d'examen",
+                                    'resolved'    => 'Résolu / Corrigé',
+                                    'planned'     => 'Retenu (Future MAJ)',
+                                    'closed'      => 'Fermé / Sans suite',
                                 ];
                                 foreach ($statusOptions as $val => $lbl): ?>
                                 <option value="<?= $val ?>" <?= ($ticket['status'] === $val) ? 'selected' : '' ?>>
@@ -341,7 +341,7 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
                             <button type="button" class="btn btn-outline-danger btn-sm"
                                     onclick="confirmDelete()"
                                     title="Supprimer définitivement ce ticket">
-                                🗑️ Supprimer
+                                <i class="fa-solid fa-trash me-1"></i>Supprimer
                             </button>
                             <div style="display: flex; gap: 0.75rem;">
                                 <a href="<?= htmlspecialchars($backUrl) ?>" class="btn btn-secondary btn-sm">
@@ -349,7 +349,7 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
                                 </a>
                                 <button type="submit" id="adminTraiterSubmitBtn" class="btn btn-primary btn-sm"
                                         style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700;">
-                                    <span>💾</span> Enregistrer & Transmettre
+                                    <i class="fa-solid fa-floppy-disk me-1"></i>Enregistrer &amp; Transmettre
                                 </button>
                             </div>
                         </div>
@@ -388,7 +388,7 @@ function syncQuillBeforeSubmit(event) {
 
     const btn = document.getElementById('adminTraiterSubmitBtn');
     btn.disabled    = true;
-    btn.textContent = '⏳ Enregistrement…';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Enregistrement…';
     // Laisser le formulaire se soumettre normalement (pas de preventDefault)
 }
 

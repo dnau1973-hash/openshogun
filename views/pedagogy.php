@@ -32,6 +32,9 @@ if (!$isAuth):
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 (Icônes vectorielles professionnelles) -->
+    <link rel="stylesheet" href="/public/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <!-- Tabler Core CSS -->
     <link rel="stylesheet" href="/public/css/tabler/tabler.min.css">
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../public/css/style.css') ? filemtime(__DIR__ . '/../public/css/style.css') : time() ?>">
@@ -56,7 +59,7 @@ if (!$isAuth):
         <header class="navbar navbar-expand-md public-pedagogy-header py-2 sticky-top">
             <div class="container-xl">
                 <a href="/" class="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
-                    <span style="font-size: 1.6rem;">🎓</span>
+                    <span class="fs-2 text-cyan"><i class="fa-solid fa-graduation-cap"></i></span>
                     <div>
                         <div class="fw-bold text-dark lh-1" style="font-size: 1.1rem; letter-spacing: 0.5px;">Atelier Pédagogique</div>
                         <div class="text-primary small fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.8px; text-transform: uppercase;">OpenShogun &bull; Conception Jeu Vidéo</div>
@@ -65,13 +68,13 @@ if (!$isAuth):
 
                 <div class="navbar-nav flex-row order-md-last align-items-center gap-2 ms-auto">
                     <a href="/?page=docs" class="btn btn-sm btn-outline-primary d-none d-sm-inline-flex align-items-center gap-1">
-                        <span>📖</span> Règles du jeu
+                        <i class="fa-solid fa-book-open"></i> Règles du jeu
                     </a>
                     <a href="/?action=login" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1">
-                        <span>🏯</span> Connexion
+                        <i class="fa-solid fa-torii-gate"></i> Connexion
                     </a>
                     <a href="/?action=register" class="btn btn-sm btn-primary d-flex align-items-center gap-1">
-                        <span>⚔️</span> Rejoindre l'Archipel
+                        <i class="fa-solid fa-khanda"></i> Rejoindre l'Archipel
                     </a>
                 </div>
             </div>
@@ -83,7 +86,7 @@ if (!$isAuth):
                 <!-- Bandeau d'introduction publique épuré -->
                 <div class="alert alert-info bg-white border border-primary-subtle text-dark d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 p-3 rounded-3 shadow-sm">
                     <div class="d-flex align-items-center gap-3">
-                        <span class="fs-1 text-primary">🌟</span>
+                        <i class="fa-solid fa-star fs-1 text-primary"></i>
                         <div>
                             <strong class="text-dark">Bienvenue dans les coulisses techniques d'un jeu de stratégie en ligne !</strong>
                             <div class="text-secondary small">Découvrez comment fonctionnent l'architecture client/serveur, la boucle d'états, le moteur de règles, l'aléatoire contrôlé (RNG) et la création graphique avec l'IA.</div>
@@ -104,11 +107,11 @@ if (!$isAuth):
         <footer class="footer footer-transparent d-print-none py-3 border-top bg-white">
             <div class="container-xl text-center text-muted small">
                 <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2 small fw-semibold">
-                    <a href="/?page=docs" class="text-decoration-none text-secondary">📖 Règles du jeu</a>
+                    <a href="/?page=docs" class="text-decoration-none text-secondary"><i class="fa-solid fa-book-open me-1"></i>Règles du jeu</a>
                     <span class="text-muted opacity-50">&bull;</span>
-                    <a href="/?page=support" class="text-decoration-none text-secondary">📮 Support &amp; Aide</a>
+                    <a href="/?page=support" class="text-decoration-none text-secondary"><i class="fa-solid fa-life-ring me-1"></i>Support &amp; Aide</a>
                     <span class="text-muted opacity-50">&bull;</span>
-                    <a href="?page=changelog" class="text-decoration-none text-secondary">📜 Changelog</a>
+                    <a href="?page=changelog" class="text-decoration-none text-secondary"><i class="fa-solid fa-scroll me-1"></i>Changelog</a>
                 </div>
                 Projet Éducatif Père &amp; Fils &bull; OpenShogun Engine &bull; <?= date('Y') ?> &bull; Tous droits réservés.
             </div>
@@ -135,9 +138,9 @@ endif;
     <div class="page-header d-print-none mb-3">
         <div class="row align-items-center">
             <div class="col">
-                <div class="page-pretitle text-primary fw-bold">🎓 Savoir &amp; Coulisses Techniques</div>
+                <div class="page-pretitle text-primary fw-bold"><i class="fa-solid fa-graduation-cap me-1"></i>Savoir &amp; Coulisses Techniques</div>
                 <h2 class="page-title d-flex align-items-center gap-2 text-dark">
-                    <span>🎮</span>
+                    <i class="fa-solid fa-gamepad text-primary"></i>
                     <span>Atelier Pédagogique &bull; Studio de Conception</span>
                     <span class="badge bg-primary-lt ms-2">Projet Père-Fils</span>
                 </h2>

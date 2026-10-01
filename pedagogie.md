@@ -37,6 +37,17 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 01/10/2026 (Partie 9) — Iconographie Vectorielle (Font Awesome 6), Standardisation Visuelle & Rendu Offline-First
+- **Concept exploré :** Remplacement des émoticônes Unicode (hétérogénéité d'affichage selon les OS et navigateurs) par une bibliothèque vectorielle professionnelle (Font Awesome 6), hébergement local (*offline-first / self-hosted*), alignement vertical (`align-middle`, espacements Tabler/Bootstrap) et manipulation sécurisée du DOM en JavaScript (`innerHTML` vs `textContent`).
+- **Notions pour l'atelier :**
+  - **Pourquoi remplacer les emojis Unicode par des icônes vectorielles ? :** Un emoji 🌾 ou ⚔️ est rendu différemment selon le système d'exploitation du joueur (Apple, Google Android, Windows, Linux). Les styles visuels ne sont pas harmonisés, les couleurs ne respectent pas la charte graphique et certains emojis récents ne s'affichent pas sur les anciens OS (le fameux "carré blanc" ou *tofu*). Les icônes vectorielles Font Awesome (`.fa-solid`, `.fa-brands`) garantissent un rendu identique au pixel près sur tous les écrans du monde.
+  - **Offline-First vs CDN externe :** Pourquoi héberger Font Awesome directement dans `public/fontawesome/` ? Dépendre d'un CDN externe (ex. `cdnjs` ou `fontawesome.com`) pose des risques : coupure réseau, blocage pare-feu/adblocker, temps de latence DNS ou disparition de l'asset. En local, le jeu fonctionne même hors ligne ou en environnement souverain/intranet.
+  - **Alignement & Hiérarchie Couleur en CSS :** L'importance des classes d'espacement (`me-1`, `me-2`) et d'alignement (`align-middle`) pour que le symbole ne vienne pas écraser ou désaligner le texte. L'utilisation des classes de couleur contextuelle (`text-warning` pour le riz et l'or, `text-danger` pour le saké et les attaques, `text-success` pour le bois et la défense) apporte une lecture immédiate et intuitive.
+  - **Le piège JavaScript du DOM (`textContent` vs `innerHTML`) :** Si un script met à jour un bouton en faisant `btn.textContent = '<i class="fa-solid fa-check"></i> Enregistrer'`, le navigateur affiche littéralement la balise HTML en texte brut au lieu de dessiner l'icône ! Il faut utiliser `.innerHTML` dès lors qu'un fragment HTML est injecté dynamiquement.
+- **Activité pratique suggérée :** Ouvrir la barre des ressources féodales ou la caserne, inspecter une icône de troupe ou de ressource avec l'inspecteur d'éléments (F12), modifier sa couleur ou sa taille (`fa-lg`, `fa-2x`, `text-info`) pour comprendre la flexibilité d'une police d'icônes vectorielle par rapport à une image bitmap PNG.
+
+---
+
 ### Session du 30/09/2026 (Partie 8) — Direction Artistique Web, Web Fonts & Hiérarchie Typographique (Dela Gothic One)
 - **Concept exploré :** Intégration de polices web tierces (Google Fonts), optimisation du chargement réseau (`preconnect`, `display=swap`), hiérarchie visuelle (polices d'affichage à fort impact vs polices de lecture pour les données) et variables CSS réutilisables.
 - **Notions pour l'atelier :**

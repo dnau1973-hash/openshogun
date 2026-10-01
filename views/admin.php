@@ -10,7 +10,7 @@ require_once __DIR__ . '/../core/Database.php';
 $auth = new Auth();
 if (!Auth::check() || !$auth->isAdmin()) {
     echo "<div class='card' style='max-width: 600px; margin: 3rem auto; text-align: center; border-color: #ef4444;'>
-            <h2 style='color: #ef4444;'>⛔ Accès Restreint</h2>
+            <h2 style='color: #ef4444;'><i class='fa-solid fa-ban text-danger me-1'></i>Accès Restreint</h2>
             <p style='margin-top: 1rem;'>Cette zone est réservée au Shogun et aux administrateurs habilités.</p>
             <a href='?page=resources' class='btn btn-primary' style='margin-top: 1.5rem; display: inline-block;'>&larr; Retour au Fief</a>
           </div>";
@@ -202,7 +202,7 @@ $mapTileCategories = [
         'name' => 'Fiefs Occupés',
         'sub' => 'Daimyōs & PNJ',
         'count' => $mapTileStats['villages'],
-        'icon' => '🏯',
+        'icon' => '<i class="fa-solid fa-chess-rook me-1"></i>',
         'badge_bg' => 'bg-purple-lt text-purple',
         'bar_color' => 'bg-purple',
         'img' => '/public/assets/map/tile_village.jpg?v=2',
@@ -212,7 +212,7 @@ $mapTileCategories = [
         'name' => 'Terres Libres',
         'sub' => 'Emplacements arpentés',
         'count' => $mapTileStats['free_lands'],
-        'icon' => '🏳️',
+        'icon' => '<i class="fa-solid fa-flag me-1"></i>',
         'badge_bg' => 'bg-secondary-lt text-secondary',
         'bar_color' => 'bg-secondary',
         'img' => '/public/assets/map/tile_plains.jpg?v=2',
@@ -222,7 +222,7 @@ $mapTileCategories = [
         'name' => 'Donjons Sacrés',
         'sub' => '現存十二天守',
         'count' => $mapTileStats['castles'],
-        'icon' => '👑',
+        'icon' => '<i class="fa-solid fa-crown me-1"></i>',
         'badge_bg' => 'bg-warning-lt text-warning',
         'bar_color' => 'bg-warning',
         'img' => '/public/assets/map/tile_authentic_castle.jpg?v=2',
@@ -232,7 +232,7 @@ $mapTileCategories = [
         'name' => 'Oasis Naturelles',
         'sub' => 'Faune & Bonus',
         'count' => $mapTileStats['oases'],
-        'icon' => '🌿',
+        'icon' => '<i class="fa-solid fa-leaf me-1"></i>',
         'badge_bg' => 'bg-teal-lt text-teal',
         'bar_color' => 'bg-teal',
         'img' => '/public/assets/map/tile_lake.jpg?v=2',
@@ -242,7 +242,7 @@ $mapTileCategories = [
         'name' => 'Plaines Fertiles',
         'sub' => 'Prairies & Terres',
         'count' => $mapTileStats['plains'],
-        'icon' => '🌾',
+        'icon' => '<i class="fa-solid fa-wheat-awn me-1"></i>',
         'badge_bg' => 'bg-lime-lt text-lime',
         'bar_color' => 'bg-lime',
         'img' => '/public/assets/map/tile_plains.jpg?v=2',
@@ -252,7 +252,7 @@ $mapTileCategories = [
         'name' => 'Forêt de Cèdres',
         'sub' => 'Sugi centenaires',
         'count' => $mapTileStats['forest'],
-        'icon' => '🌲',
+        'icon' => '<i class="fa-solid fa-tree me-1"></i>',
         'badge_bg' => 'bg-green-lt text-green',
         'bar_color' => 'bg-green',
         'img' => '/public/assets/map/tile_forest.jpg?v=2',
@@ -262,7 +262,7 @@ $mapTileCategories = [
         'name' => 'Pics & Montagnes',
         'sub' => 'Crêtes rocheuses',
         'count' => $mapTileStats['mountain'],
-        'icon' => '⛰️',
+        'icon' => '<i class="fa-solid fa-mountain me-1"></i>',
         'badge_bg' => 'bg-dark-lt text-dark',
         'bar_color' => 'bg-dark',
         'img' => '/public/assets/map/tile_mountain.jpg?v=2',
@@ -272,7 +272,7 @@ $mapTileCategories = [
         'name' => 'Collines & Coteaux',
         'sub' => 'Cultures en terrasse',
         'count' => $mapTileStats['hills'],
-        'icon' => '🏞️',
+        'icon' => '<i class="fa-solid fa-mound me-1"></i>',
         'badge_bg' => 'bg-orange-lt text-orange',
         'bar_color' => 'bg-orange',
         'img' => '/public/assets/map/tile_hills.jpg?v=2',
@@ -282,7 +282,7 @@ $mapTileCategories = [
         'name' => 'Lacs & Eaux Calmes',
         'sub' => 'Rivières & Bassins',
         'count' => $mapTileStats['lake'],
-        'icon' => '🌊',
+        'icon' => '<i class="fa-solid fa-water me-1"></i>',
         'badge_bg' => 'bg-cyan-lt text-cyan',
         'bar_color' => 'bg-cyan',
         'img' => '/public/assets/map/tile_lake.jpg?v=2',
@@ -377,84 +377,84 @@ $adminPages = [
     'dashboard' => [
         'title' => 'Tableau de Bord Exécutif',
         'short' => 'Dashboard',
-        'icon' => '📊',
+        'icon' => '<i class="fa-solid fa-chart-line text-primary"></i>',
         'pretitle' => 'Vue d\'ensemble & Activité',
         'desc' => 'Indicateurs clés en temps réel, évolution sur 30 jours, alertes et raccourcis du Shōgunat.',
     ],
     'world' => [
         'title' => 'Paramètres du Jeu & Monde',
         'short' => 'Paramètres',
-        'icon' => '⚙️',
+        'icon' => '<i class="fa-solid fa-gear text-secondary"></i>',
         'pretitle' => 'Équilibrage & Cartographie',
         'desc' => 'Configuration des vitesses de production, arpentage de l\'archipel, oasis et donjons authentiques.',
     ],
     'bots' => [
         'title' => 'Clans IA & Daimyōs Autonomes',
         'short' => 'Clans IA',
-        'icon' => '🤖',
+        'icon' => '<i class="fa-solid fa-robot text-indigo"></i>',
         'pretitle' => 'Intelligence Artificielle',
         'desc' => 'Supervision des clans simulés, cycles de décision, apparition et rééquilibrage automatique.',
     ],
     'users' => [
         'title' => 'Gestion des Joueurs & Rôles',
         'short' => 'Joueurs',
-        'icon' => '👥',
+        'icon' => '<i class="fa-solid fa-users text-warning"></i>',
         'pretitle' => 'Communauté & Droits',
         'desc' => 'Registre des joueurs, attributions de Kobans, rôles d\'administrateur/modérateur et sécurité.',
     ],
     'updates' => [
         'title' => 'GitHub Sync & Mises à Jour',
         'short' => 'GitHub Sync',
-        'icon' => '🔄',
+        'icon' => '<i class="fa-solid fa-arrows-rotate text-teal"></i>',
         'pretitle' => 'Déploiement Continu',
         'desc' => 'Suivi des commits Git distants, synchronisation en 1 clic et statut du déploiement.',
     ],
     'heroes' => [
         'title' => 'Samouraïs Héros & Reliques',
         'short' => 'Héros & Reliques',
-        'icon' => '🥋',
+        'icon' => '<i class="fa-solid fa-user-ninja text-purple"></i>',
         'pretitle' => 'Champions du Fief',
         'desc' => 'État de santé, réanimation d\'urgence et distribution de trésors anciens.',
     ],
     'support' => [
         'title' => 'Support & Requêtes',
         'short' => 'Support',
-        'icon' => '📮',
+        'icon' => '<i class="fa-solid fa-headset text-danger"></i>',
         'pretitle' => 'Assistance & Signalements',
         'desc' => 'Traitement des signalements de bugs, suggestions des joueurs et réponses de l\'équipe.',
     ],
     'announcements' => [
         'title' => 'Annonces & Nouveautés',
         'short' => 'Nouveautés',
-        'icon' => '📢',
+        'icon' => '<i class="fa-solid fa-bullhorn text-pink"></i>',
         'pretitle' => 'Communications Officielles',
         'desc' => 'Rédaction et diffusion des parchemins officiels du Shōgunat aux daimyōs.',
     ],
     'medals' => [
         'title' => 'Médailles & Récompenses',
         'short' => 'Médailles',
-        'icon' => '🎖️',
+        'icon' => '<i class="fa-solid fa-medal text-warning"></i>',
         'pretitle' => 'Palmarès Hebdomadaire',
         'desc' => 'Attribution des distinctions honorifiques de la semaine.',
     ],
     'mail' => [
         'title' => 'Service de Messagerie & SMTP',
         'short' => 'Messagerie',
-        'icon' => '✉️',
+        'icon' => '<i class="fa-solid fa-envelope text-blue"></i>',
         'pretitle' => 'Communications & E-mails',
         'desc' => 'Configuration du transporteur d\'e-mails (SMTP / mail local), chiffrement des accès et tests d\'envoi.',
     ],
     'maintenance' => [
         'title' => 'Maintenance Système',
         'short' => 'Maintenance',
-        'icon' => '🛠️',
+        'icon' => '<i class="fa-solid fa-screwdriver-wrench text-danger"></i>',
         'pretitle' => 'Opérations Techniques',
         'desc' => 'Sauvegardes de base de données, vidage des caches et réinitialisations sécurisées.',
     ],
     'all' => [
         'title' => 'Console Globale (Tout Dérouler)',
         'short' => 'Tout Dérouler',
-        'icon' => '📜',
+        'icon' => '<i class="fa-solid fa-scroll text-warning"></i>',
         'pretitle' => 'Vue d\'Ensemble Complète',
         'desc' => 'Affichage continu de l\'ensemble des modules administratifs.',
     ]
@@ -512,7 +512,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     <nav aria-label="breadcrumb" class="mb-2">
         <ol class="breadcrumb breadcrumb-arrows small text-secondary">
             <li class="breadcrumb-item">
-                <a href="/?page=resources" class="text-secondary text-decoration-none">🏯 Le Fief</a>
+                <a href="/?page=resources" class="text-secondary text-decoration-none"><i class="fa-solid fa-chess-rook text-danger me-1"></i>Le Fief</a>
             </li>
             <li class="breadcrumb-item">
                 <a href="?page=admin&tab=dashboard" onclick="switchAdminTab('dashboard'); return false;" class="text-secondary text-decoration-none">Administration</a>
@@ -542,7 +542,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list" id="adminPageActions">
                     <a href="?page=admin&tab=updates" onclick="switchAdminTab('updates'); return false;" class="btn btn-outline-teal d-flex align-items-center gap-1 shadow-sm" title="Mises à jour GitHub &amp; Déploiement en 1 clic">
-                        <span>🔄</span> GitHub Sync
+                        <i class="fa-solid fa-arrows-rotate me-1"></i>GitHub Sync
                         <span class="badge bg-teal text-white ms-1"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
                     </a>
                     <a href="/?page=resources" class="btn btn-outline-secondary d-flex align-items-center gap-1">
@@ -561,14 +561,14 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <!-- 1. Dashboard -->
                 <li class="nav-item admin-nav-item" role="presentation">
                     <a href="?page=admin&tab=dashboard" class="nav-link admin-tab-btn <?= ($currentTab === 'dashboard') ? 'active' : '' ?>" data-tab="dashboard" data-bs-target="#tab-dashboard" role="tab" onclick="switchAdminTab('dashboard'); return false;">
-                        <span class="me-1">📊</span> Dashboard
+                        <i class="fa-solid fa-chart-line text-primary me-1"></i>Dashboard
                     </a>
                 </li>
 
                 <!-- 2. Paramètres du jeu -->
                 <li class="nav-item admin-nav-item" role="presentation">
                     <a href="?page=admin&tab=world" class="nav-link admin-tab-btn <?= ($currentTab === 'world') ? 'active' : '' ?>" data-tab="world" data-bs-target="#tab-world" role="tab" onclick="switchAdminTab('world'); return false;">
-                        <span class="me-1">⚙️</span> Paramètres
+                        <i class="fa-solid fa-gear text-secondary me-1"></i>Paramètres
                         <span class="badge bg-success-lt ms-1">x<?= (int)($settings['game_speed'] ?? 5) ?></span>
                     </a>
                 </li>
@@ -576,7 +576,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <!-- 3. Clans IA -->
                 <li class="nav-item admin-nav-item" role="presentation">
                     <a href="?page=admin&tab=bots" class="nav-link admin-tab-btn <?= ($currentTab === 'bots') ? 'active' : '' ?>" data-tab="bots" data-bs-target="#tab-bots" role="tab" onclick="switchAdminTab('bots'); return false;">
-                        <span class="me-1">🤖</span> Clans IA
+                        <i class="fa-solid fa-robot text-indigo me-1"></i>Clans IA
                         <span class="badge bg-indigo-lt ms-1"><?= $totalBots ?></span>
                     </a>
                 </li>
@@ -584,7 +584,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <!-- 4. Joueurs -->
                 <li class="nav-item admin-nav-item" role="presentation">
                     <a href="?page=admin&tab=users" class="nav-link admin-tab-btn <?= ($currentTab === 'users') ? 'active' : '' ?>" data-tab="users" data-bs-target="#tab-users" role="tab" onclick="switchAdminTab('users'); return false;">
-                        <span class="me-1">👥</span> Joueurs
+                        <i class="fa-solid fa-users text-warning me-1"></i>Joueurs
                         <span class="badge bg-warning-lt ms-1"><?= $totalUsers ?></span>
                     </a>
                 </li>
@@ -592,26 +592,26 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <!-- 5. GitHub Sync -->
                 <li class="nav-item admin-nav-item" role="presentation">
                     <a href="?page=admin&tab=updates" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-tab="updates" data-bs-target="#tab-updates" role="tab" onclick="switchAdminTab('updates'); return false;">
-                        <span class="me-1">🔄</span> GitHub Sync
+                        <i class="fa-solid fa-arrows-rotate text-teal me-1"></i>GitHub Sync
                         <span class="badge bg-teal-lt ms-1"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
                     </a>
                 </li>
 
-                <!-- 6. Menu Déroulant "Autres Modules ▾" -->
+                <!-- 6. Menu Déroulant "Autres Modules" -->
                 <li class="nav-item dropdown admin-nav-item" role="presentation">
                     <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'mail', 'maintenance']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
-                        <span class="me-1">⚡</span> Autres modules
+                        <i class="fa-solid fa-bolt text-warning me-1"></i>Autres modules
                         <?php if ($supportStats['count_pending'] > 0): ?>
                             <span class="badge bg-danger text-white ms-1">!</span>
                         <?php endif; ?>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end shadow-sm admin-dropdown-menu">
                         <a href="?page=admin&tab=heroes" class="dropdown-item admin-tab-btn <?= ($currentTab === 'heroes') ? 'active' : '' ?>" data-tab="heroes" data-bs-target="#tab-heroes" onclick="switchAdminTab('heroes'); return false;">
-                            <span class="me-2">🥋</span> Samouraïs &amp; Reliques
+                            <i class="fa-solid fa-user-ninja text-purple me-2"></i>Samouraïs &amp; Reliques
                             <span class="badge bg-purple-lt ms-auto"><?= $totalHeroes ?></span>
                         </a>
                         <a href="?page=admin&tab=support" class="dropdown-item admin-tab-btn <?= ($currentTab === 'support') ? 'active' : '' ?>" data-tab="support" data-bs-target="#tab-support" onclick="switchAdminTab('support'); return false;">
-                            <span class="me-2">📮</span> Support &amp; Bugs
+                            <i class="fa-solid fa-headset text-danger me-2"></i>Support &amp; Bugs
                             <?php if ($supportStats['count_pending'] > 0): ?>
                                 <span class="badge bg-danger text-white ms-auto"><?= $supportStats['count_pending'] ?></span>
                             <?php else: ?>
@@ -619,19 +619,19 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                             <?php endif; ?>
                         </a>
                         <a href="?page=admin&tab=announcements" class="dropdown-item admin-tab-btn <?= ($currentTab === 'announcements') ? 'active' : '' ?>" data-tab="announcements" data-bs-target="#tab-announcements" onclick="switchAdminTab('announcements'); return false;">
-                            <span class="me-2">📢</span> Nouveautés &amp; Annonces
+                            <i class="fa-solid fa-bullhorn text-pink me-2"></i>Nouveautés &amp; Annonces
                             <span class="badge bg-pink-lt ms-auto"><?= $publishedAnnouncementsCount ?>/<?= $totalAnnouncementsCount ?></span>
                         </a>
                         <a href="?page=admin&tab=medals" class="dropdown-item admin-tab-btn <?= ($currentTab === 'medals') ? 'active' : '' ?>" data-tab="medals" data-bs-target="#tab-medals" onclick="switchAdminTab('medals'); return false;">
-                            <span class="me-2">🎖️</span> Médailles Hebdomadaires
+                            <i class="fa-solid fa-medal text-warning me-2"></i>Médailles Hebdomadaires
                         </a>
                         <a href="?page=admin&tab=mail" class="dropdown-item admin-tab-btn <?= ($currentTab === 'mail') ? 'active' : '' ?>" data-tab="mail" data-bs-target="#tab-mail" onclick="switchAdminTab('mail'); return false;">
-                            <span class="me-2">✉️</span> Messagerie &amp; SMTP
+                            <i class="fa-solid fa-envelope text-blue me-2"></i>Messagerie &amp; SMTP
                             <span class="badge bg-blue-lt ms-auto"><?= strtoupper($mailConfig['driver'] ?? 'MAIL') ?></span>
                         </a>
                         <div class="dropdown-divider"></div>
                         <a href="?page=admin&tab=maintenance" class="dropdown-item admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" data-bs-target="#tab-maintenance" onclick="switchAdminTab('maintenance'); return false;">
-                            <span class="me-2">🛠️</span> Maintenance Système
+                            <i class="fa-solid fa-screwdriver-wrench text-danger me-2"></i>Maintenance Système
                         </a>
                     </div>
                 </li>
@@ -650,7 +650,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="tab-content" id="adminTabsContent">
 
 <!-- ═════════════════════════════════════════════════════════════════ -->
-<!-- SECTION 0 : 📊 TABLEAU DE BORD EXÉCUTIF (DASHBOARD PRINCIPAL)     -->
+<!-- SECTION 0 : TABLEAU DE BORD EXÉCUTIF (DASHBOARD PRINCIPAL) -->
 <!-- ═════════════════════════════════════════════════════════════════ -->
 <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'dashboard' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-dashboard" data-tab="dashboard" role="tabpanel">
     
@@ -658,7 +658,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
             <h3 class="card-title text-primary d-flex align-items-center gap-2 m-0" style="font-size:1.35rem;">
-                <span>📊</span> Tableau de Bord Exécutif du Shōgunat
+                <i class="fa-solid fa-chart-line text-primary me-1"></i>Tableau de Bord Exécutif du Shōgunat
             </h3>
             <div class="text-secondary small mt-1">
                 Supervision globale de l'activité des Daimyōs, progression moyenne des quêtes, santé du serveur et impact pédagogique.
@@ -675,7 +675,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <button type="button" class="btn btn-outline-secondary active" onclick="alert('Filtrage: 30 derniers jours')">30 jours</button>
             </div>
             <button type="button" onclick="location.reload()" class="btn btn-sm btn-outline-primary" title="Actualiser les métriques">
-                <span>🔄 Actualiser</span>
+                <i class="fa-solid fa-arrows-rotate me-1"></i>Actualiser
             </button>
         </div>
     </div>
@@ -687,7 +687,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="card card-sm border-start border-1 border-primary shadow-sm h-100">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <span class="avatar avatar-md rounded bg-primary-lt text-primary me-3 fs-2">👥</span>
+                        <span class="avatar avatar-md rounded bg-primary-lt text-primary me-3 fs-2"><i class="fa-solid fa-users"></i></span>
                         <div>
                             <div class="text-muted small fw-bold text-uppercase">Joueurs Actifs</div>
                             <div class="h2 m-0 font-weight-bold text-dark">
@@ -708,7 +708,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="card card-sm border-start border-1 border-success shadow-sm h-100">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <span class="avatar avatar-md rounded bg-success-lt text-success me-3 fs-2">🎯</span>
+                        <span class="avatar avatar-md rounded bg-success-lt text-success me-3 fs-2"><i class="fa-solid fa-bullseye"></i></span>
                         <div>
                             <div class="text-muted small fw-bold text-uppercase">Progression & Quêtes</div>
                             <div class="h2 m-0 font-weight-bold text-success">
@@ -732,7 +732,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="card card-sm border-start border-1 border-warning shadow-sm h-100">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <span class="avatar avatar-md rounded bg-warning-lt text-warning me-3 fs-2">⏱️</span>
+                        <span class="avatar avatar-md rounded bg-warning-lt text-warning me-3 fs-2"><i class="fa-solid fa-stopwatch"></i></span>
                         <div>
                             <div class="text-muted small fw-bold text-uppercase">Temps Moyen / Session</div>
                             <div class="h2 m-0 font-weight-bold text-warning-emphasis">
@@ -753,7 +753,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     <div class="mb-3">
         <div class="d-flex align-items-center justify-content-between mb-2">
             <h4 class="m-0 text-secondary text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em;">
-                ⚡ Modules &amp; Raccourcis Administratifs
+                <i class="fa-solid fa-bolt text-warning me-1"></i>Modules &amp; Raccourcis Administratifs
             </h4>
             <span class="text-muted small">Cliquez sur une carte pour basculer directement sur le module</span>
         </div>
@@ -764,7 +764,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="avatar rounded bg-warning-lt text-warning" style="font-size:1.3rem;">🏯</span>
+                                <span class="avatar rounded bg-warning-lt text-warning" style="font-size:1.3rem;"><i class="fa-solid fa-chess-rook"></i></span>
                             </div>
                             <div class="col">
                                 <div class="font-weight-medium">Donjons Sacrés</div>
@@ -786,7 +786,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="avatar rounded bg-purple-lt text-purple" style="font-size:1.3rem;">🥋</span>
+                                <span class="avatar rounded bg-purple-lt text-purple" style="font-size:1.3rem;"><i class="fa-solid fa-user-ninja"></i></span>
                             </div>
                             <div class="col">
                                 <div class="font-weight-medium">Samouraïs Héros</div>
@@ -799,7 +799,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                             <span class="<?= ($heroesDead + $heroesReviving > 0) ? 'text-danger font-weight-bold' : '' ?>">
                                 <?= $heroesDead + $heroesReviving ?> en péril
                             </span>
-                            | 🛡️ <?= $totalRelicsFound ?> reliques
+                            | <i class="fa-solid fa-shield-halved text-success me-1"></i><?= $totalRelicsFound ?> reliques
                         </div>
                     </div>
                 </div>
@@ -811,7 +811,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="avatar rounded bg-indigo-lt text-indigo" style="font-size:1.3rem;">🤖</span>
+                                <span class="avatar rounded bg-indigo-lt text-indigo" style="font-size:1.3rem;"><i class="fa-solid fa-robot"></i></span>
                             </div>
                             <div class="col">
                                 <div class="font-weight-medium">Clans IA (Bots)</div>
@@ -833,7 +833,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="card-body">
                         <div class="row align-items-center mb-2">
                             <div class="col-auto">
-                                <span class="avatar rounded bg-success-lt text-success" style="font-size:1.3rem;">🗾</span>
+                                <span class="avatar rounded bg-success-lt text-success" style="font-size:1.3rem;"><i class="fa-solid fa-map-location-dot"></i></span>
                             </div>
                             <div class="col">
                                 <div class="font-weight-medium">Paramétrage du Monde</div>
@@ -863,7 +863,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="avatar rounded bg-warning-lt text-warning" style="font-size:1.3rem;">👥</span>
+                                <span class="avatar rounded bg-warning-lt text-warning" style="font-size:1.3rem;"><i class="fa-solid fa-users"></i></span>
                             </div>
                             <div class="col">
                                 <div class="font-weight-medium">Daimyōs Joueurs</div>
@@ -885,7 +885,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="avatar rounded bg-azure-lt text-azure" style="font-size:1.3rem;">📮</span>
+                                <span class="avatar rounded bg-azure-lt text-azure" style="font-size:1.3rem;"><i class="fa-solid fa-headset"></i></span>
                             </div>
                             <div class="col">
                                 <div class="font-weight-medium">Bugs &amp; Idées</div>
@@ -909,7 +909,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="avatar rounded bg-pink-lt text-pink" style="font-size:1.3rem;">📢</span>
+                                <span class="avatar rounded bg-pink-lt text-pink" style="font-size:1.3rem;"><i class="fa-solid fa-bullhorn"></i></span>
                             </div>
                             <div class="col">
                                 <div class="font-weight-medium">Nouveautés</div>
@@ -931,7 +931,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="avatar rounded bg-teal-lt text-teal" style="font-size:1.3rem;">🔄</span>
+                                <span class="avatar rounded bg-teal-lt text-teal" style="font-size:1.3rem;"><i class="fa-solid fa-arrows-rotate"></i></span>
                             </div>
                             <div class="col">
                                 <div class="font-weight-medium">Mises à Jour Git</div>
@@ -956,7 +956,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="card h-100 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title m-0 d-flex align-items-center gap-2">
-                        <span>📈</span> Évolution des Inscriptions &amp; Activités (30 Jours)
+                        <i class="fa-solid fa-chart-line text-success me-1"></i>Évolution des Inscriptions &amp; Activités (30 Jours)
                     </h4>
                     <span class="badge bg-primary-lt">Moyenne quotidienne</span>
                 </div>
@@ -982,7 +982,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="card h-100 shadow-sm">
                 <div class="card-header">
                     <h4 class="card-title m-0 d-flex align-items-center gap-2">
-                        <span>🍩</span> Répartition des Daimyōs Joueurs
+                        <i class="fa-solid fa-chart-pie text-info me-1"></i>Répartition des Daimyōs Joueurs
                     </h4>
                 </div>
                 <div class="card-body">
@@ -990,7 +990,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="mb-3">
                         <div class="small fw-bold text-muted mb-1">Niveaux de Puissance Militaire :</div>
                         <div class="d-flex justify-content-between small mb-1">
-                            <span>🌱 Débutants (&lt; 500 pts)</span>
+                            <i class="fa-solid fa-seedling text-success me-1"></i>Débutants (&lt; 500 pts)
                             <strong><?= $ptsStrat['debutant'] ?> (<?= round(($ptsStrat['debutant'] / max(1, $totalUsers)) * 100) ?>%)</strong>
                         </div>
                         <div class="progress progress-sm mb-2">
@@ -998,7 +998,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </div>
 
                         <div class="d-flex justify-content-between small mb-1">
-                            <span>🛡️ Établis (500 - 2 000 pts)</span>
+                            <i class="fa-solid fa-shield-halved text-primary me-1"></i>Établis (500 - 2 000 pts)
                             <strong><?= $ptsStrat['intermediaire'] ?> (<?= round(($ptsStrat['intermediaire'] / max(1, $totalUsers)) * 100) ?>%)</strong>
                         </div>
                         <div class="progress progress-sm mb-2">
@@ -1006,7 +1006,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </div>
 
                         <div class="d-flex justify-content-between small mb-1">
-                            <span>👑 Vétérans (&gt; 2 000 pts)</span>
+                            <i class="fa-solid fa-crown text-warning me-1"></i>Vétérans (&gt; 2 000 pts)
                             <strong><?= $ptsStrat['veteran'] ?> (<?= round(($ptsStrat['veteran'] / max(1, $totalUsers)) * 100) ?>%)</strong>
                         </div>
                         <div class="progress progress-sm">
@@ -1018,7 +1018,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="pt-3 border-top">
                         <div class="small fw-bold text-muted mb-2">Répartition par Clan Féodal :</div>
                         <div class="row g-2 text-center">
-                            <?php foreach (['terran' => ['name' => 'Clan Oda', 'icon' => '🦅', 'color' => 'danger'], 'vorash' => ['name' => 'Clan Takeda', 'icon' => '🐅', 'color' => 'warning'], 'aethelis' => ['name' => 'Clan Tokugawa', 'icon' => '🐉', 'color' => 'success']] as $fKey => $fMeta): 
+                            <?php foreach (['terran' => ['name' => 'Clan Oda', 'icon' => '<i class="fa-solid fa-feather text-danger"></i>', 'color' => 'danger'], 'vorash' => ['name' => 'Clan Takeda', 'icon' => '<i class="fa-solid fa-paw text-warning"></i>', 'color' => 'warning'], 'aethelis' => ['name' => 'Clan Tokugawa', 'icon' => '<i class="fa-solid fa-dragon text-success"></i>', 'color' => 'success']] as $fKey => $fMeta): 
                                 $fCount = (int)($factionCounts[$fKey] ?? 0);
                                 $fPct = round(($fCount / max(1, $totalUsers)) * 100);
                             ?>
@@ -1045,7 +1045,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="card h-100 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title m-0 d-flex align-items-center gap-2">
-                        <span>⚡</span> Activités Récentes des Daimyōs
+                        <i class="fa-solid fa-bolt text-warning me-1"></i>Activités Récentes des Daimyōs
                     </h4>
                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="switchAdminTab('users')">
                         Voir tous les joueurs &rarr;
@@ -1070,13 +1070,13 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 ?>
                                     <tr>
                                         <td>
-                                            <div class="fw-bold text-dark">👤 <?= htmlspecialchars($ru['username']) ?></div>
+                                            <div class="fw-bold text-dark"><i class="fa-solid fa-user me-1"></i><?= htmlspecialchars($ru['username']) ?></div>
                                         </td>
                                         <td>
                                             <span class="badge bg-secondary-lt"><?= $fInfo['icon'] ?> <?= htmlspecialchars($fInfo['name']) ?></span>
                                         </td>
                                         <td>
-                                            <span class="badge bg-success-lt">🌱 Inscription & Fief Capital</span>
+                                            <span class="badge bg-success-lt"><i class="fa-solid fa-seedling me-1"></i>Inscription &amp; Fief Capital</span>
                                         </td>
                                         <td class="text-end text-muted small">
                                             <?= date('d/m H:i', strtotime($ru['created_at'])) ?>
@@ -1095,7 +1095,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="card h-100 shadow-sm">
                 <div class="card-header">
                     <h4 class="card-title m-0 d-flex align-items-center gap-2">
-                        <span>🛡️</span> Santé Système &amp; Alertes Techniques
+                        <i class="fa-solid fa-shield-halved text-info me-1"></i>Santé Système &amp; Alertes Techniques
                     </h4>
                 </div>
                 <div class="card-body">
@@ -1103,40 +1103,40 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         <!-- Base de données -->
                         <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
                             <div>
-                                <div class="fw-bold">💾 Base de Données MariaDB</div>
+                                <div class="fw-bold"><i class="fa-solid fa-database text-primary me-1"></i>Base de Données MariaDB</div>
                                 <div class="small text-muted">Stockage : <?= $dbSizeMb ?> Mo &bull; Latence &lt; 5ms</div>
                             </div>
-                            <span class="badge bg-success-lt fw-bold">🟢 OK</span>
+                            <span class="badge bg-success-lt fw-bold"><i class="fa-solid fa-circle-check text-success me-1"></i>OK</span>
                         </div>
 
                         <!-- GameLoop & Bots -->
                         <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
                             <div>
-                                <div class="fw-bold">⚙️ Simulation IA &amp; Game Loop</div>
+                                <div class="fw-bold"><i class="fa-solid fa-gear text-secondary me-1"></i>Simulation IA &amp; Game Loop</div>
                                 <div class="small text-muted"><?= $totalBots ?> Daimyōs IA &bull; Cycle périodique autonome</div>
                             </div>
-                            <span class="badge bg-success-lt fw-bold">🟢 Actif</span>
+                            <span class="badge bg-success-lt fw-bold"><i class="fa-solid fa-circle-check text-success me-1"></i>Actif</span>
                         </div>
 
                         <!-- Support & Bugs -->
                         <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
                             <div>
-                                <div class="fw-bold">📮 File des Tickets Joueurs</div>
+                                <div class="fw-bold"><i class="fa-solid fa-headset text-danger me-1"></i>File des Tickets Joueurs</div>
                                 <div class="small text-muted"><?= $supportStats['total'] ?> tickets reçus au total</div>
                             </div>
                             <?php if ($supportStats['count_pending'] > 0): ?>
                                 <a href="javascript:void(0)" onclick="switchAdminTab('support')" class="badge bg-danger text-white text-decoration-none">
-                                    ⚠️ <?= $supportStats['count_pending'] ?> en attente
+                                    <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i><?= $supportStats['count_pending'] ?> en attente
                                 </a>
                             <?php else: ?>
-                                <span class="badge bg-success-lt fw-bold">🟢 À jour</span>
+                                <span class="badge bg-success-lt fw-bold"><i class="fa-solid fa-circle-check text-success me-1"></i>À jour</span>
                             <?php endif; ?>
                         </div>
 
                         <!-- Git Sync -->
                         <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
                             <div>
-                                <div class="fw-bold">🔄 Version Déployée (Git)</div>
+                                <div class="fw-bold"><i class="fa-solid fa-arrows-rotate text-teal me-1"></i>Version Déployée (Git)</div>
                                 <div class="small text-muted">Branche <?= htmlspecialchars($localGitInfo['branch']) ?> (<?= htmlspecialchars($localGitInfo['short_sha']) ?>)</div>
                             </div>
                             <span class="badge bg-teal-lt fw-bold">Synchronisé</span>
@@ -1148,10 +1148,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         <div class="small fw-bold text-muted mb-2">Actions d'urgence rapides :</div>
                         <div class="d-flex gap-2 flex-wrap">
                             <button type="button" onclick="runBotCycle()" class="btn btn-sm btn-outline-warning">
-                                <span>⚔️</span> Forcer Cycle IA
+                                <i class="fa-solid fa-khanda me-1"></i>Forcer Cycle IA
                             </button>
                             <button type="button" onclick="switchAdminTab('updates')" class="btn btn-sm btn-outline-teal">
-                                <span>🔄</span> Vérifier Mises à Jour
+                                <i class="fa-solid fa-arrows-rotate me-1"></i>Vérifier Mises à Jour
                             </button>
                         </div>
                     </div>
@@ -1162,7 +1162,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 </div>
 
 <!-- ═════════════════════════════════════════════════════════════════ -->
-    <!-- SECTION UNIFIÉE : 🗾 PARAMÉTRAGE DU MONDE FÉODAL & PROVINCES      -->
+    <!-- SECTION UNIFIÉE : PARAMÉTRAGE DU MONDE FÉODAL & PROVINCES -->
     <!-- ═════════════════════════════════════════════════════════════════ -->
     <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'world' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-world" data-tab="world" role="tabpanel">
         
@@ -1172,7 +1172,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                     <div>
                         <h3 class="card-title d-flex align-items-center gap-2 m-0 text-success">
-                            <span>🗾</span>
+                            <i class="fa-solid fa-map-location-dot text-primary"></i>
                             <span>Les 12 Donjons Authentiques &amp; Fiefs Féodaux</span>
                         </h3>
                         <div class="text-secondary small mt-1">
@@ -1181,13 +1181,13 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <span class="badge bg-indigo-lt">
-                            🗺️ <?= number_format($mapTileStats['total_tiles']) ?> Tuiles
+                            <i class="fa-solid fa-map me-1"></i><?= number_format($mapTileStats['total_tiles']) ?> Tuiles
                         </span>
                         <span class="badge bg-success-lt">
-                            🗾 <?= $totalColonies ?> / <?= $totalPlanets ?> Fiefs Occupés
+                            <i class="fa-solid fa-chess-rook me-1"></i><?= $totalColonies ?> / <?= $totalPlanets ?> Fiefs Occupés
                         </span>
                         <span class="badge bg-warning-lt">
-                            🏯 <?= $spawnedCastlesCount ?> / 12 Donjons Déployés
+                            <i class="fa-solid fa-fort-awesome me-1"></i><?= $spawnedCastlesCount ?> / 12 Donjons Déployés
                         </span>
                     </div>
                 </div>
@@ -1196,7 +1196,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <div class="border rounded p-3 bg-body-tertiary mb-3">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="avatar avatar-xs rounded bg-success-lt text-success" style="font-size: 1rem;">🗺️</span>
+                            <span class="avatar avatar-xs rounded bg-success-lt text-success" style="font-size: 1rem;"><i class="fa-solid fa-map"></i></span>
                             <span class="fw-bold text-dark">Répartition des Tuiles du Monde Féodal</span>
                             <span class="text-secondary small">(Grille de <?= ($mapTileStats['radius'] * 2 + 1) ?>&times;<?= ($mapTileStats['radius'] * 2 + 1) ?> cases &bull; Rayon &plusmn;<?= $mapTileStats['radius'] ?>)</span>
                         </div>
@@ -1205,7 +1205,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 <?= number_format($mapTileStats['total_tiles']) ?> Tuiles au total
                             </span>
                             <a href="/?page=map" target="_blank" class="btn btn-xs btn-outline-secondary">
-                                🗾 Ouvrir la Carte &rarr;
+                                <i class="fa-solid fa-map-location-dot me-1"></i>Ouvrir la Carte &rarr;
                             </a>
                         </div>
                     </div>
@@ -1260,7 +1260,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <h3 class="card-title d-flex align-items-center gap-2 m-0 text-warning">
-                        <span>🏯</span> Les 12 Donjons Authentiques du Japon (現存十二天守) &bull; Enjeux de la Bataille Finale
+                        <i class="fa-solid fa-chess-rook text-danger me-1"></i>Les 12 Donjons Authentiques du Japon (現存十二天守) &bull; Enjeux de la Bataille Finale
                     </h3>
                     <div class="text-secondary small mt-1">
                         Forteresses historiques d'époque Sengoku-Edo préservées. Déployez-les sur la carte des provinces pour déclencher les enjeux de la conquête suprême.
@@ -1271,10 +1271,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         <?= $spawnedCastlesCount ?> / 12 Déployés
                     </span>
                     <button type="button" class="btn btn-sm btn-warning fw-bold" onclick="distributeCastlesHomogeneously()" title="Déploie et répartit les 12 forteresses de manière homogène sur les 4 quadrants (rayon ±35)">
-                        🌐 Répartir Homogènement (Rayon &plusmn;35)
+                        <i class="fa-solid fa-globe me-1"></i>Répartir Homogènement (Rayon &plusmn;35)
                     </button>
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="despawnAllCastles()">
-                        🛑 Retirer Tous
+                        <i class="fa-solid fa-circle-stop me-1"></i>Retirer Tous
                     </button>
                 </div>
             </div>
@@ -1301,7 +1301,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 <td class="text-muted fw-bold"><?= $c['id'] ?></td>
                                 <td>
                                     <div class="fw-bold text-dark">
-                                        🏯 <?= htmlspecialchars($c['name']) ?>
+                                        <i class="fa-solid fa-chess-rook text-danger me-1"></i><?= htmlspecialchars($c['name']) ?>
                                     </div>
                                     <div class="small text-warning" style="font-family: serif;">
                                         <?= htmlspecialchars($c['kanji']) ?> &bull; <?= htmlspecialchars($c['japanese_name']) ?>
@@ -1314,11 +1314,11 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 <td class="text-center">
                                     <?php if ($isSpawned): ?>
                                         <span class="badge bg-success-lt fw-bold">
-                                            🟢 En Jeu [<?= $curX ?> : <?= $curY ?>]
+                                            <i class="fa-solid fa-circle-check text-success me-1"></i>En Jeu [<?= $curX ?> : <?= $curY ?>]
                                         </span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary-lt">
-                                            ⚪ En Réserve
+                                            <i class="fa-regular fa-circle text-secondary me-1"></i>En Réserve
                                         </span>
                                     <?php endif; ?>
                                 </td>
@@ -1328,7 +1328,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                         <span class="text-muted">:</span>
                                         <input type="number" id="castle_y_<?= $c['id'] ?>" value="<?= $curY ?>" class="form-control form-control-sm text-center" style="width: 55px;">
                                         <button type="button" onclick="updateCastlePosition(<?= $c['id'] ?>)" class="btn btn-sm btn-outline-secondary px-2" title="Enregistrer les coordonnées">
-                                            📍
+                                            <i class="fa-solid fa-location-dot"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -1336,14 +1336,14 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                     <div class="btn-list justify-content-end">
                                         <button type="button" onclick="toggleCastleSpawn(<?= $c['id'] ?>, <?= $isSpawned ? 0 : 1 ?>)" 
                                                 class="btn btn-sm <?= $isSpawned ? 'btn-outline-danger' : 'btn-success' ?>">
-                                            <?= $isSpawned ? '🔴 Retirer' : '🟢 Poser' ?>
+                                            <?= $isSpawned ? '<i class="fa-solid fa-circle-minus text-danger me-1"></i>Retirer' : '<i class="fa-solid fa-circle-plus text-success me-1"></i>Poser' ?>
                                         </button>
                                         <a href="/?page=castle&code=<?= $c['code'] ?>" target="_blank" class="btn btn-sm btn-outline-secondary" title="Consulter la fiche historique">
-                                            📜 Fiche
+                                            <i class="fa-solid fa-scroll me-1"></i>Fiche
                                         </a>
                                         <?php if ($isSpawned): ?>
                                             <a href="/?page=map&x=<?= $curX ?>&y=<?= $curY ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Voir sur la carte">
-                                                🗾 Carte
+                                                <i class="fa-solid fa-map me-1"></i>Carte
                                             </a>
                                         <?php endif; ?>
                                     </div>
@@ -1364,7 +1364,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <h3 class="card-title d-flex align-items-center gap-2 m-0 text-purple">
-                        <span>🥋</span> Registre des Samouraïs Héros &amp; Reliques Légendaires
+                        <i class="fa-solid fa-user-ninja text-purple me-1"></i>Registre des Samouraïs Héros &amp; Reliques Légendaires
                     </h3>
                     <div class="text-secondary small mt-1">
                         Surveillance de la santé, des quêtes quotidiennes (max 3/j), des reliques uniques (panthéon de 35) et décrets d'urgence shogunaux.
@@ -1373,12 +1373,12 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <span class="badge bg-purple-lt"><?= count($allHeroes) ?> Héros Enregistrés</span>
                     <?php if ($heroesDead > 0): ?>
-                        <span class="badge bg-danger-lt">💀 <?= $heroesDead ?> Tombé(s)</span>
+                        <span class="badge bg-danger-lt"><i class="fa-solid fa-skull me-1"></i><?= $heroesDead ?> Tombé(s)</span>
                     <?php endif; ?>
                     <?php if ($heroesReviving > 0): ?>
-                        <span class="badge bg-warning-lt">⏳ <?= $heroesReviving ?> En Régénération (24h)</span>
+                        <span class="badge bg-warning-lt"><i class="fa-solid fa-hourglass-half me-1"></i><?= $heroesReviving ?> En Régénération (24h)</span>
                     <?php endif; ?>
-                    <span class="badge bg-teal-lt">🏆 <?= $totalRelicsFound ?> Reliques Trouvées</span>
+                    <span class="badge bg-teal-lt"><i class="fa-solid fa-trophy me-1"></i><?= $totalRelicsFound ?> Reliques Trouvées</span>
                 </div>
             </div>
             <div class="table-responsive">
@@ -1411,13 +1411,13 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 $hXpPct = HeroEngine::calculateXpPercent($hLvl, $hXp);
                                 $hStatus = $hRow['status'];
                                 $hStatusLabels = [
-                                    'home' => ['label' => 'Au Domaine', 'badge' => 'bg-success-lt text-success', 'icon' => '🏯'],
-                                    'mission' => ['label' => 'En Marche', 'badge' => 'bg-info-lt text-info', 'icon' => '🚩'],
-                                    'adventure' => ['label' => 'En Aventure', 'badge' => 'bg-purple-lt text-purple', 'icon' => '🗺️'],
-                                    'dead' => ['label' => 'Tombé au Combat', 'badge' => 'bg-danger-lt text-danger', 'icon' => '💀'],
-                                    'reviving' => ['label' => 'Régénération (24h)', 'badge' => 'bg-warning-lt text-warning', 'icon' => '⏳']
+                                    'home' => ['label' => 'Au Domaine', 'badge' => 'bg-success-lt text-success', 'icon' => '<i class="fa-solid fa-chess-rook"></i>'],
+                                    'mission' => ['label' => 'En Marche', 'badge' => 'bg-info-lt text-info', 'icon' => '<i class="fa-solid fa-flag"></i>'],
+                                    'adventure' => ['label' => 'En Aventure', 'badge' => 'bg-purple-lt text-purple', 'icon' => '<i class="fa-solid fa-map-location-dot"></i>'],
+                                    'dead' => ['label' => 'Tombé au Combat', 'badge' => 'bg-danger-lt text-danger', 'icon' => '<i class="fa-solid fa-skull"></i>'],
+                                    'reviving' => ['label' => 'Régénération (24h)', 'badge' => 'bg-warning-lt text-warning', 'icon' => '<i class="fa-solid fa-hourglass-half"></i>']
                                 ];
-                                $hStInfo = $hStatusLabels[$hStatus] ?? ['label' => $hStatus, 'badge' => 'bg-secondary-lt', 'icon' => '❓'];
+                                $hStInfo = $hStatusLabels[$hStatus] ?? ['label' => $hStatus, 'badge' => 'bg-secondary-lt', 'icon' => '<i class="fa-solid fa-question"></i>'];
                                 $dailyAdv = (int)($hRow['daily_adv_count'] ?? 0);
                             ?>
                                 <tr class="hero-table-row">
@@ -1434,7 +1434,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                     </td>
                                     <td>
                                         <div class="font-weight-bold text-dark d-flex align-items-center gap-1">
-                                            <span>⚔️</span>
+                                            <i class="fa-solid fa-khanda text-danger"></i>
                                             <span><?= htmlspecialchars($hRow['name']) ?></span>
                                         </div>
                                         <div class="text-secondary small">
@@ -1479,7 +1479,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="badge bg-teal-lt" title="Reliques équipées / possédées">
-                                                🛡️ <?= (int)$hRow['equipped_count'] ?> / <?= (int)$hRow['relic_count'] ?>
+                                                <i class="fa-solid fa-shield-halved text-success me-1"></i><?= (int)$hRow['equipped_count'] ?> / <?= (int)$hRow['relic_count'] ?>
                                             </span>
                                             <span class="text-secondary small">/ 35 uniques</span>
                                         </div>
@@ -1490,7 +1490,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                             <button type="button" class="btn btn-sm btn-outline-success" 
                                                     onclick="adminHealHero(<?= (int)$hRow['user_id'] ?>, '<?= htmlspecialchars(addslashes($hRow['name'])) ?>')"
                                                     title="Restaure immédiatement la santé à 100%">
-                                                🩺 Soigner
+                                                <i class="fa-solid fa-heart-pulse me-1"></i>Soigner
                                             </button>
 
                                             <!-- Ressusciter instantanément -->
@@ -1498,7 +1498,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                                 <button type="button" class="btn btn-sm btn-warning" 
                                                         onclick="adminReviveHero(<?= (int)$hRow['user_id'] ?>, '<?= htmlspecialchars(addslashes($hRow['name'])) ?>')"
                                                         title="Réincarnation immédiate sans attendre la fin des 24h">
-                                                    ⛩️ Ressusciter
+                                                    <i class="fa-solid fa-torii-gate me-1"></i>Ressusciter
                                                 </button>
                                             <?php endif; ?>
 
@@ -1507,7 +1507,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                                 <button type="button" class="btn btn-sm btn-outline-primary" 
                                                         onclick="adminResetHeroQuota(<?= (int)$hRow['user_id'] ?>, '<?= htmlspecialchars(addslashes($hRow['name'])) ?>')"
                                                         title="Réinitialise le quota quotidien d'aventures à 0/3">
-                                                    🔄 Reset Quota
+                                                    <i class="fa-solid fa-arrows-rotate me-1"></i>Reset Quota
                                                 </button>
                                             <?php endif; ?>
 
@@ -1515,7 +1515,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                             <button type="button" class="btn btn-sm btn-outline-purple" 
                                                     onclick="adminGrantRelic(<?= (int)$hRow['user_id'] ?>, '<?= htmlspecialchars(addslashes($hRow['name'])) ?>')"
                                                     title="Octroie une relique aléatoire inédite (jamais de doublon)">
-                                                🎁 Donner Relique
+                                                <i class="fa-solid fa-gift me-1"></i>Donner Relique
                                             </button>
                                         </div>
                                     </td>
@@ -1560,7 +1560,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title text-indigo d-flex align-items-center gap-2 m-0">
-                    <span>🤖</span> Paramétrage de l'IA & Colonisation des Bots (PNJ)
+                    <i class="fa-solid fa-robot text-indigo me-1"></i>Paramétrage de l'IA &amp; Colonisation des Bots (PNJ)
                 </h3>
                 <span class="badge bg-indigo-lt">
                     <?= count($botsList) ?> Bots Enregistrés
@@ -1574,19 +1574,19 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 Interrupteur Général de l'IA
                             </label>
                             <select name="bots_enabled" class="form-select" id="bots_enabled">
-                                <option value="1" <?= !empty($settings['bots_enabled']) ? 'selected' : '' ?>>🟢 IA Active (Cycles opérationnels)</option>
-                                <option value="0" <?= empty($settings['bots_enabled']) ? 'selected' : '' ?>>🔴 IA En Veille (Bots figés)</option>
+                                <option value="1" <?= !empty($settings['bots_enabled']) ? 'selected' : '' ?>>IA Active (Cycles opérationnels)</option>
+                                <option value="0" <?= empty($settings['bots_enabled']) ? 'selected' : '' ?>>IA En Veille (Bots figés)</option>
                             </select>
                             <div class="form-hint">Permet aux bots d'évoluer, miner et produire des armées.</div>
                         </div>
 
                         <div class="col-md-6 col-lg-3">
                             <label class="form-label fw-bold text-dark mb-1">
-                                🏯 Colonisation Automatique
+                                <i class="fa-solid fa-chess-rook me-1"></i>Colonisation Automatique
                             </label>
                             <select name="bot_colonize_enabled" class="form-select" id="bot_colonize_enabled">
-                                <option value="1" <?= !empty($settings['bot_colonize_enabled']) ? 'selected' : '' ?>>🟢 Autorisée (Conquêtes de fiefs)</option>
-                                <option value="0" <?= empty($settings['bot_colonize_enabled']) ? 'selected' : '' ?>>🔴 Désactivée (Domaine initial)</option>
+                                <option value="1" <?= !empty($settings['bot_colonize_enabled']) ? 'selected' : '' ?>>Autorisée (Conquêtes de fiefs)</option>
+                                <option value="0" <?= empty($settings['bot_colonize_enabled']) ? 'selected' : '' ?>>Désactivée (Domaine initial)</option>
                             </select>
                             <div class="form-hint">Déclenche l'expansion territoriale vers de nouvelles coordonnées.</div>
                         </div>
@@ -1605,9 +1605,9 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 Profil d'Agressivité
                             </label>
                             <select name="bot_aggressiveness" class="form-select" id="bot_aggressiveness">
-                                <option value="peaceful" <?= (($settings['bot_aggressiveness'] ?? '') === 'peaceful') ? 'selected' : '' ?>>🕊️ Pacifique (Mines & Défense)</option>
-                                <option value="moderate" <?= (($settings['bot_aggressiveness'] ?? 'moderate') === 'moderate') ? 'selected' : '' ?>>⚖️ Modéré (Équilibré)</option>
-                                <option value="aggressive" <?= (($settings['bot_aggressiveness'] ?? '') === 'aggressive') ? 'selected' : '' ?>>⚔️ Belliqueux (Armées & Raids)</option>
+                                <option value="peaceful" <?= (($settings['bot_aggressiveness'] ?? '') === 'peaceful') ? 'selected' : '' ?>>Pacifique (Mines & Défense)</option>
+                                <option value="moderate" <?= (($settings['bot_aggressiveness'] ?? 'moderate') === 'moderate') ? 'selected' : '' ?>>Modéré (Équilibré)</option>
+                                <option value="aggressive" <?= (($settings['bot_aggressiveness'] ?? '') === 'aggressive') ? 'selected' : '' ?>>Belliqueux (Armées & Raids)</option>
                             </select>
                             <div class="form-hint">Influence le recrutement et l'armement des PNJ.</div>
                         </div>
@@ -1617,7 +1617,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="card bg-surface-secondary border-primary-subtle mb-3">
                         <div class="card-header bg-primary-lt py-2 d-flex justify-content-between align-items-center">
                             <h4 class="card-title m-0 text-primary fw-bold d-flex align-items-center gap-2">
-                                <span>🌸</span> Éclosion Spontanée de Villages PNJ (Apparition Homogène sur la Carte)
+                                <i class="fa-solid fa-spa text-pink me-1"></i>Éclosion Spontanée de Villages PNJ (Apparition Homogène sur la Carte)
                             </h4>
                             <span class="badge bg-primary text-white">
                                 Toutes les <?= (int)($settings['bot_spawn_interval_min'] ?? 15) ?> min
@@ -1630,15 +1630,15 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                         Mécanisme d'Éclosion Spontanée
                                     </label>
                                     <select name="bot_spawn_enabled" class="form-select" id="bot_spawn_enabled">
-                                        <option value="1" <?= !empty($settings['bot_spawn_enabled']) ? 'selected' : '' ?>>🟢 Éclosion Activée (Automatique)</option>
-                                        <option value="0" <?= empty($settings['bot_spawn_enabled']) ? 'selected' : '' ?>>🔴 Éclosion En Sommeil (Désactivée)</option>
+                                        <option value="1" <?= !empty($settings['bot_spawn_enabled']) ? 'selected' : '' ?>>Éclosion Activée (Automatique)</option>
+                                        <option value="0" <?= empty($settings['bot_spawn_enabled']) ? 'selected' : '' ?>>Éclosion En Sommeil (Désactivée)</option>
                                     </select>
                                     <div class="form-hint">Fait naître de nouveaux villages PNJ à intervalle régulier.</div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold text-dark mb-1">
-                                        ⏱️ Intervalle d'Apparition (Minutes)
+                                        <i class="fa-solid fa-stopwatch me-1"></i>Intervalle d'Apparition (Minutes)
                                     </label>
                                     <div class="input-group">
                                         <input type="number" name="bot_spawn_interval_min" id="bot_spawn_interval_min" min="1" max="1440" 
@@ -1650,7 +1650,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold text-dark mb-1">
-                                        🏯 Plafond Global de Villages PNJ
+                                        <i class="fa-solid fa-chess-rook me-1"></i>Plafond Global de Villages PNJ
                                     </label>
                                     <input type="number" name="bot_spawn_max_villages" id="bot_spawn_max_villages" min="5" max="200" 
                                            value="<?= (int)($settings['bot_spawn_max_villages'] ?? 50) ?>" class="form-control text-center font-weight-bold">
@@ -1662,7 +1662,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary px-4 fw-bold">
-                            💾 Sauvegarder la Directive IA &amp; Éclosions
+                            <i class="fa-solid fa-floppy-disk me-1"></i>Sauvegarder la Directive IA &amp; Éclosions
                         </button>
                     </div>
                 </form>
@@ -1671,7 +1671,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <div class="card mt-4 border shadow-sm">
                     <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-2">
-                            <span style="font-size: 1.3rem;">🗾</span>
+                            <span style="font-size: 1.3rem;"><i class="fa-solid fa-map-location-dot text-primary"></i></span>
                             <div>
                                 <h4 class="card-title m-0 fw-bold">Distribution Spatiale &amp; Prochaine Éclosion Homogène</h4>
                                 <div class="text-secondary small">
@@ -1681,10 +1681,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <button type="button" onclick="triggerSpontaneousSpawn()" class="btn btn-sm btn-success fw-bold">
-                                🌸 Faire Éclore un Fief PNJ Maintenant
+                                <i class="fa-solid fa-spa text-pink me-1"></i>Faire Éclore un Fief PNJ Maintenant
                             </button>
                             <button type="button" onclick="runBotCycle()" class="btn btn-sm btn-outline-primary">
-                                ⚙️ Forcer un Cycle IA
+                                <i class="fa-solid fa-gear me-1"></i>Forcer un Cycle IA
                             </button>
                         </div>
                     </div>
@@ -1696,9 +1696,9 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="text-secondary fw-bold small text-uppercase">Statut d'Éclosion :</span>
                                         <?php if (!empty($botSpawnStatus['enabled'])): ?>
-                                            <span class="badge bg-success-lt fw-bold">🟢 Actif (Toutes les <?= $botSpawnStatus['interval_min'] ?> min)</span>
+                                            <span class="badge bg-success-lt fw-bold"><i class="fa-solid fa-circle-check text-success me-1"></i>Actif (Toutes les <?= $botSpawnStatus['interval_min'] ?> min)</span>
                                         <?php else: ?>
-                                            <span class="badge bg-secondary-lt fw-bold">⚪ En Sommeil</span>
+                                            <span class="badge bg-secondary-lt fw-bold"><i class="fa-solid fa-moon text-secondary me-1"></i>En Sommeil</span>
                                         <?php endif; ?>
                                     </div>
 
@@ -1724,7 +1724,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                             <div class="col-md-8">
                                 <div class="p-3 border rounded bg-surface">
                                     <div class="fw-bold mb-2 small text-uppercase text-secondary d-flex justify-content-between">
-                                        <span>📊 Répartition Actuelle des Fiefs PNJ par Quadrant :</span>
+                                        <span><i class="fa-solid fa-chart-pie me-1"></i>Répartition Actuelle des Fiefs PNJ par Quadrant :</span>
                                         <span class="text-success small fw-medium">Couverture Homogène 360°</span>
                                     </div>
 
@@ -1763,12 +1763,12 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                         <?php $lv = $botSpawnStatus['last_village']; ?>
                                         <div class="mt-3 p-2 bg-success-lt border border-success-subtle rounded small d-flex justify-content-between align-items-center flex-wrap gap-1">
                                             <span>
-                                                🌸 <strong>Dernier Fief Éclos :</strong> 
+                                                <i class="fa-solid fa-spa text-pink me-1"></i><strong>Dernier Fief Éclos :</strong> 
                                                 <?= htmlspecialchars($lv['planet_name']) ?> (<?= htmlspecialchars($lv['username']) ?>) 
                                                 en <strong>[<?= $lv['x'] ?> : <?= $lv['y'] ?>]</strong> &bull; Quadrant <strong><?= $lv['quadrant'] ?></strong>
                                             </span>
                                             <a href="/?page=map&x=<?= $lv['x'] ?>&y=<?= $lv['y'] ?>" target="_blank" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:0.75rem;">
-                                                🗾 Localiser
+                                                <i class="fa-solid fa-map-location-dot me-1"></i>Localiser
                                             </a>
                                         </div>
                                     <?php endif; ?>
@@ -1782,9 +1782,9 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
                 <!-- Tableau des Bots Actifs -->
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="m-0 font-weight-bold">📋 Registre des Daimyōs IA en Activité</h4>
+                    <h4 class="m-0 font-weight-bold"><i class="fa-solid fa-clipboard-list me-1"></i>Registre des Daimyōs IA en Activité</h4>
                     <button onclick="generatePresetBots()" class="btn btn-sm btn-outline-primary">
-                        <span>➕</span> Ajouter 3 Daimyōs Multi-Clans
+                        <i class="fa-solid fa-plus me-1"></i>Ajouter 3 Daimyōs Multi-Clans
                     </button>
                 </div>
 
@@ -1815,7 +1815,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                         <tr class="bot-table-row" data-index="<?= $botIndex ?>" style="<?= $isInitialHidden ? 'display: none;' : '' ?>">
                                             <td>
                                                 <div class="font-weight-medium">
-                                                    🤖 <?= htmlspecialchars($bot['username']) ?>
+                                                    <i class="fa-solid fa-robot text-indigo me-1"></i><?= htmlspecialchars($bot['username']) ?>
                                                 </div>
                                             </td>
                                             <td>
@@ -1834,12 +1834,12 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                                 </span>
                                             </td>
                                             <td class="text-end font-weight-bold text-warning">
-                                                🏆 <?= number_format($bot['points']) ?>
+                                                <i class="fa-solid fa-trophy text-warning me-1"></i><?= number_format($bot['points']) ?>
                                             </td>
                                             <td class="text-end">
                                                 <button onclick="deleteBot(<?= $bot['id'] ?>, '<?= htmlspecialchars(addslashes($bot['username'])) ?>')" 
                                                         class="btn btn-sm btn-outline-danger">
-                                                    🗑️ Purger
+                                                    <i class="fa-solid fa-trash me-1"></i>Purger
                                                 </button>
                                             </td>
                                         </tr>
@@ -1876,7 +1876,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title d-flex align-items-center gap-2 m-0 text-warning">
-                    <span>👥</span> Gestion des Daimyōs Joueurs &amp; Privilèges
+                    <i class="fa-solid fa-users text-warning me-1"></i>Gestion des Daimyōs Joueurs &amp; Privilèges
                 </h3>
                 <span class="badge bg-warning-lt"><?= count($humanUsers) ?> Daimyōs Inscrits</span>
             </div>
@@ -1890,7 +1890,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                             <th>Clan &amp; Faction</th>
                             <th class="text-center">Fiefs Contrôlés</th>
                             <th class="text-end">Honneur &amp; Points</th>
-                            <th class="text-center">🪙 Trésor Koban</th>
+                            <th class="text-center"><i class="fa-solid fa-coins text-warning me-1"></i>Trésor Koban</th>
                             <th class="text-center">Rang Shogunal</th>
                             <th class="text-center">Immunité Débutant</th>
                             <th class="text-end">Commandes</th>
@@ -1926,14 +1926,14 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                     </span>
                                 </td>
                                 <td class="text-end font-weight-bold text-warning">
-                                    🏆 <?= number_format($hUser['points']) ?>
+                                    <i class="fa-solid fa-trophy text-warning me-1"></i><?= number_format($hUser['points']) ?>
                                 </td>
                                 <td class="text-center" id="user-koban-cell-<?= $hUser['id'] ?>">
                                     <div class="fw-bold text-warning" style="font-size:0.95rem;">
-                                        🪙 <span id="user-koban-val-<?= $hUser['id'] ?>"><?= number_format($hUser['gold_coins'] ?? 0) ?></span>
+                                        <i class="fa-solid fa-coins text-warning me-1"></i><span id="user-koban-val-<?= $hUser['id'] ?>"><?= number_format($hUser['gold_coins'] ?? 0) ?></span>
                                     </div>
                                     <?php if ($hSealActive): ?>
-                                        <span class="badge bg-warning text-dark" style="font-size:0.6rem;">👑 Sceau Actif</span>
+                                        <span class="badge bg-warning text-dark" style="font-size:0.6rem;"><i class="fa-solid fa-crown me-1"></i>Sceau Actif</span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary-lt" style="font-size:0.6rem;">Sans Sceau</span>
                                     <?php endif; ?>
@@ -1941,11 +1941,11 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 <td class="text-center">
                                     <?php if ((int)$hUser['is_admin'] === 1): ?>
                                         <span class="badge bg-danger text-white">
-                                            ⭐ ADMINISTRATEUR
+                                            <i class="fa-solid fa-star me-1"></i>ADMINISTRATEUR
                                         </span>
                                     <?php elseif ((int)($hUser['is_moderator'] ?? 0) === 1): ?>
                                         <span class="badge bg-info text-white">
-                                            🛡️ MODÉRATEUR
+                                            <i class="fa-solid fa-shield-halved me-1"></i>MODÉRATEUR
                                         </span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary-lt">
@@ -1956,7 +1956,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 <td class="text-center" id="user-prot-cell-<?= $hUser['id'] ?>">
                                     <?php if ($hIsProt): ?>
                                         <span class="badge bg-success-lt font-weight-bold" title="Immunisé jusqu'au <?= htmlspecialchars($hProt['until_formatted']) ?>">
-                                            🔰 <?= htmlspecialchars($hProt['formatted']) ?>
+                                            <i class="fa-solid fa-shield-halved text-success me-1"></i><?= htmlspecialchars($hProt['formatted']) ?>
                                         </span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary-lt">
@@ -1968,11 +1968,11 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                     <div class="btn-list justify-content-end">
                                         <button onclick="openAdminGiveKobanModal(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', <?= (int)($hUser['gold_coins'] ?? 0) ?>)"
                                                 class="btn btn-sm btn-outline-warning fw-bold" title="Octroyer des Koban (Pièces d'Or)">
-                                            🪙 +Koban
+                                            <i class="fa-solid fa-coins text-warning me-1"></i>+Koban
                                         </button>
                                         <button onclick="extendProtection(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', 7)"
                                                 class="btn btn-sm btn-outline-success" title="Accorder ou prolonger de 7 jours d'immunité">
-                                            +7j 🔰
+                                            +7j <i class="fa-solid fa-shield-halved text-success"></i>
                                         </button>
                                         <?php if ($hIsProt): ?>
                                             <button onclick="revokeProtection(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>')"
@@ -1985,7 +1985,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                                 <button onclick="toggleModerator(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', <?= (int)($hUser['is_moderator'] ?? 0) ?>)"
                                                         class="btn btn-sm <?= ((int)($hUser['is_moderator'] ?? 0) === 1) ? 'btn-outline-info' : 'btn-outline-secondary' ?>"
                                                         title="Nommer ou révoquer le rôle de modérateur">
-                                                    <?= ((int)($hUser['is_moderator'] ?? 0) === 1) ? '🛡️ Dé-modérer' : '🛡️ Modo' ?>
+                                                    <?= ((int)($hUser['is_moderator'] ?? 0) === 1) ? '<i class="fa-solid fa-shield-halved me-1"></i>Dé-modérer' : '<i class="fa-solid fa-shield-halved me-1"></i>Modo' ?>
                                                 </button>
                                             <?php endif; ?>
                                             <button onclick="toggleAdmin(<?= $hUser['id'] ?>, '<?= htmlspecialchars(addslashes($hUser['username'])) ?>', <?= (int)$hUser['is_admin'] ?>)"
@@ -2025,12 +2025,12 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     </div>
 
     
-    <!-- Section 5 : 🎖️ Tableau d'Honneur & Clôture Hebdomadaire des Médailles -->
+    <!-- Section 5 : Tableau d'Honneur & Clôture Hebdomadaire des Médailles -->
     <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'medals' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-medals" data-tab="medals" role="tabpanel">
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h3 class="card-title text-yellow d-flex align-items-center gap-2 m-0">
-                    <span>🎖️</span> Tableau d'Honneur &amp; Clôture Hebdomadaire des Médailles
+                    <i class="fa-solid fa-medal text-warning me-1"></i>Tableau d'Honneur &amp; Clôture Hebdomadaire des Médailles
                 </h3>
                 <span class="badge bg-yellow-lt">
                     Semaine en cours : <strong><?= htmlspecialchars($currentWeekCode) ?></strong>
@@ -2038,7 +2038,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             </div>
             <div class="card-body">
                 <p class="text-secondary mb-3">
-                    Le système de Tableau d'Honneur attribue automatiquement les médailles de prestige (🥇 Or, 🥈 Argent, 🥉 Bronze et 🎖️ Rubans Top 10) aux commandants les plus méritants dans les 4 catégories reines :
+                    Le système de Tableau d'Honneur attribue automatiquement les médailles de prestige (Or [1er], Argent [2e], Bronze [3e] et Rubans Top 10) aux commandants les plus méritants dans les 4 catégories reines :
                     <strong>Progression d'Empire</strong>, <strong>Attaquant de la Semaine</strong>, <strong>Défenseur Héroïque</strong> et <strong>Seigneur du Pillage</strong>.<br>
                     Des dépêches officielles de félicitations sont transmises aux lauréats, et leurs profils sont décorés à vie.
                 </p>
@@ -2048,7 +2048,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         <div class="card card-sm">
                             <div class="card-body text-center">
                                 <div class="text-secondary text-uppercase small">Médailles Historiques Décernées</div>
-                                <div class="h2 text-yellow m-0 mt-1"><?= $totalMedals ?> 🎖️</div>
+                                <div class="h2 text-yellow m-0 mt-1"><?= $totalMedals ?> <i class="fa-solid fa-medal text-warning"></i></div>
                             </div>
                         </div>
                     </div>
@@ -2066,7 +2066,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                 <div class="text-secondary text-uppercase small">Affichage Public</div>
                                 <div class="mt-2">
                                     <a href="?page=ranking&tab=honor" class="btn btn-sm btn-outline-secondary">
-                                        👀 Consulter le Tableau
+                                        <i class="fa-solid fa-eye me-1"></i>Consulter le Tableau
                                     </a>
                                 </div>
                             </div>
@@ -2082,19 +2082,19 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </div>
                     </div>
                     <button type="button" onclick="awardWeeklyMedals()" class="btn btn-warning fw-bold">
-                        🎖️ Clôturer &amp; Décerner les Médailles
+                        <i class="fa-solid fa-medal me-1"></i>Clôturer &amp; Décerner les Médailles
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Section 6 : 📮 Traitement des Dysfonctionnements & Suggestions des Joueurs -->
+    <!-- Section 6 : Traitement des Dysfonctionnements & Suggestions des Joueurs -->
     <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'support' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-support" data-tab="support" role="tabpanel">
         <div class="card mb-4" id="supportAdminSection">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <h3 class="card-title text-azure d-flex align-items-center gap-2 m-0">
-                        <span>📮</span> Traitement des Dysfonctionnements &amp; Suggestions des Joueurs
+                        <i class="fa-solid fa-headset text-danger me-1"></i>Traitement des Dysfonctionnements &amp; Suggestions des Joueurs
                     </h3>
                     <div class="text-secondary small mt-1">
                         Examinez les anomalies signalées et les propositions de la communauté. Répondez officiellement et notifiez les daimyōs.
@@ -2106,7 +2106,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </span>
                     <?php if ($supportStats['count_pending'] > 0): ?>
                         <span class="badge bg-danger text-white">
-                            ⚠️ <?= $supportStats['count_pending'] ?> En attente
+                            <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i><?= $supportStats['count_pending'] ?> En attente
                         </span>
                     <?php endif; ?>
                 </div>
@@ -2121,22 +2121,22 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div class="col-auto">
                         <select id="adminTicketFilterType" class="form-select form-select-sm" onchange="filterAdminTickets()">
                             <option value="all">Tous les Types (Bugs &amp; Idées)</option>
-                            <option value="bug">🪲 Bugs Uniquement</option>
-                            <option value="suggestion">💡 Suggestions Uniquement</option>
+                            <option value="bug">Bugs Uniquement</option>
+                            <option value="suggestion">Suggestions Uniquement</option>
                         </select>
                     </div>
                     <div class="col-auto">
                         <select id="adminTicketFilterStatus" class="form-select form-select-sm" onchange="filterAdminTickets()">
                             <option value="all">Tous les Statuts</option>
-                            <option value="pending">⏳ En attente</option>
-                            <option value="in_progress">🔍 En cours d'examen</option>
-                            <option value="resolved">✅ Résolus / Corrigés</option>
-                            <option value="planned">📌 Retenus (Futures MAJ)</option>
-                            <option value="closed">✖️ Fermés / Sans suite</option>
+                            <option value="pending">En attente</option>
+                            <option value="in_progress">En cours d'examen</option>
+                            <option value="resolved">Résolus / Corrigés</option>
+                            <option value="planned">Retenus (Futures MAJ)</option>
+                            <option value="closed">Fermés / Sans suite</option>
                         </select>
                     </div>
                     <div class="col-md-4 ms-auto">
-                        <input type="text" id="adminTicketSearchInput" class="form-control form-control-sm" placeholder="🔍 Rechercher joueur, titre..." oninput="filterAdminTickets()">
+                        <input type="text" id="adminTicketSearchInput" class="form-control form-control-sm" placeholder="Rechercher joueur, titre..." oninput="filterAdminTickets()">
                     </div>
                 </div>
 
@@ -2167,18 +2167,18 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                     $isBug = ($t['type'] === 'bug');
                                     $catLabel = SupportEngine::CATEGORIES[$t['category']] ?? $t['category'];
                                     $sevLabel = match($t['severity']) {
-                                        'critical' => '<span class="badge bg-danger-lt">🔴 Critique</span>',
-                                        'high' => '<span class="badge bg-orange-lt">🟠 Élevé</span>',
-                                        'medium' => '<span class="badge bg-warning-lt">🟡 Moyen</span>',
-                                        'low' => '<span class="badge bg-success-lt">🟢 Faible</span>',
+                                        'critical' => '<span class="badge bg-danger-lt"><i class="fa-solid fa-circle text-danger me-1"></i>Critique</span>',
+                                        'high' => '<span class="badge bg-orange-lt"><i class="fa-solid fa-circle text-orange me-1"></i>Élevé</span>',
+                                        'medium' => '<span class="badge bg-warning-lt"><i class="fa-solid fa-circle text-warning me-1"></i>Moyen</span>',
+                                        'low' => '<span class="badge bg-success-lt"><i class="fa-solid fa-circle text-success me-1"></i>Faible</span>',
                                         default => ''
                                     };
                                     $statusBadge = match($t['status']) {
-                                        'pending' => '<span class="badge bg-warning-lt">⏳ En attente</span>',
-                                        'in_progress' => '<span class="badge bg-blue-lt">🔍 En cours</span>',
-                                        'resolved' => '<span class="badge bg-success-lt">✅ Résolu</span>',
-                                        'planned' => '<span class="badge bg-purple-lt">📌 Retenu</span>',
-                                        'closed' => '<span class="badge bg-secondary-lt">✖️ Fermé</span>',
+                                        'pending' => '<span class="badge bg-warning-lt"><i class="fa-solid fa-hourglass-half text-warning me-1"></i>En attente</span>',
+                                        'in_progress' => '<span class="badge bg-blue-lt"><i class="fa-solid fa-magnifying-glass text-primary me-1"></i>En cours</span>',
+                                        'resolved' => '<span class="badge bg-success-lt"><i class="fa-solid fa-circle-check text-success me-1"></i>Résolu</span>',
+                                        'planned' => '<span class="badge bg-purple-lt"><i class="fa-solid fa-thumbtack text-purple me-1"></i>Retenu</span>',
+                                        'closed' => '<span class="badge bg-secondary-lt"><i class="fa-solid fa-circle-xmark text-secondary me-1"></i>Fermé</span>',
                                         default => htmlspecialchars($t['status'])
                                     };
                                 ?>
@@ -2186,7 +2186,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                         <td class="text-secondary fw-bold">#<?= $t['id'] ?></td>
                                         <td>
                                             <div class="fw-bold <?= $isBug ? 'text-danger' : 'text-warning' ?>">
-                                                <?= $isBug ? '🪲 Bug' : '💡 Suggestion' ?>
+                                                <?= $isBug ? '<i class="fa-solid fa-bug text-danger me-1"></i>Bug' : '<i class="fa-solid fa-lightbulb text-warning me-1"></i>Suggestion' ?>
                                             </div>
                                             <?php if ($isBug && $sevLabel): ?>
                                                 <div class="mt-1"><?= $sevLabel ?></div>
@@ -2204,7 +2204,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                                 <?= htmlspecialchars($t['title']) ?>
                                             </div>
                                             <?php if (!empty($t['admin_response'])): ?>
-                                                <div class="text-azure small mt-1">💬 Répondu</div>
+                                                <div class="text-azure small mt-1"><i class="fa-solid fa-comment-dots me-1"></i>Répondu</div>
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-center">
@@ -2216,7 +2216,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                         <td class="text-end">
                                             <a href="?page=admin&tab=support&action=traiter&id=<?= $t['id'] ?>&support_page=<?= (int)($_GET['support_page'] ?? 1) ?>"
                                                class="btn btn-sm btn-outline-primary">
-                                                🔍 Traiter
+                                                <i class="fa-solid fa-magnifying-glass me-1"></i>Traiter
                                             </a>
                                         </td>
                                     </tr>
@@ -2249,13 +2249,13 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             </div>
         </div>
     </div>
-<!-- Section 9 : 📢 Nouveautés & Annonces des Fonctionnalités (Stockage JSON) -->
+<!-- Section 9 : Nouveautés & Annonces des Fonctionnalités (Stockage JSON) -->
     <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'announcements' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-announcements" data-tab="announcements" role="tabpanel">
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <h3 class="card-title text-pink d-flex align-items-center gap-2 m-0">
-                        <span>📢</span> Annonces & Nouvelles Fonctionnalités aux Joueurs
+                        <i class="fa-solid fa-bullhorn text-pink me-1"></i>Annonces &amp; Nouvelles Fonctionnalités aux Joueurs
                     </h3>
                     <p class="text-secondary small mt-1 mb-0">
                         Toutes les annonces sont persistées dans <code>config/announcements.json</code>. Validez leur publication pour déclencher la modale d'explication aux daimyōs.
@@ -2263,7 +2263,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 </div>
                 <div style="display: flex; gap: 0.75rem;">
                     <button type="button" class="btn btn-primary fw-bold" onclick="openAnnouncementEditModal()">
-                        <span>➕</span> Rédiger une Annonce
+                        <i class="fa-solid fa-plus me-1"></i>Rédiger une Annonce
                     </button>
                 </div>
             </div>
@@ -2300,7 +2300,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                         <td style="padding: 0.75rem;">
                                             <div style="display: flex; align-items: center; gap: 0.6rem;">
-                                                <span style="font-size: 1.4rem;"><?= htmlspecialchars($ann['icon'] ?? '📜') ?></span>
+                                                <span style="font-size: 1.4rem;"><?= htmlspecialchars($ann['icon'] ?? 'fa-scroll') ?></span>
                                                 <div>
                                                     <div class="fw-bold">
                                                         <?= htmlspecialchars($ann['title'] ?? '') ?>
@@ -2324,11 +2324,11 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                         <td style="padding: 0.75rem; text-align: center;">
                                             <?php if ($isPub): ?>
                                                 <span class="badge bg-success-lt fw-bold">
-                                                    🟢 Validée & Publiée
+                                                    <i class="fa-solid fa-circle-check text-success me-1"></i>Validée &amp; Publiée
                                                 </span>
                                             <?php else: ?>
                                                 <span class="badge bg-warning-lt fw-bold">
-                                                    🟡 Brouillon (En attente)
+                                                    <i class="fa-solid fa-clock text-warning me-1"></i>Brouillon (En attente)
                                                 </span>
                                             <?php endif; ?>
                                         </td>
@@ -2344,19 +2344,19 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                                             <div style="display: flex; gap: 0.4rem; justify-content: flex-end;">
                                                 <!-- Bouton Valider / Dévalider -->
                                                 <button type="button" class="btn btn-sm btn-outline-warning" onclick="toggleAnnouncementPublish('<?= $annId ?>')" title="<?= $isPub ? 'Mettre en brouillon' : 'Valider et diffuser aux joueurs' ?>">
-                                                    <?= $isPub ? '⏸️ Dépublier' : '✓ Valider' ?>
+                                                    <?= $isPub ? '<i class="fa-solid fa-pause me-1"></i>Dépublier' : '<i class="fa-solid fa-check me-1"></i>Valider' ?>
                                                 </button>
                                                 <!-- Bouton Aperçu Modal Joueur -->
                                                 <button type="button" class="btn btn-sm btn-outline-azure" onclick='openAnnouncementPreview(<?= $annJsonEscaped ?>)' title="Prévisualiser la modale joueur">
-                                                    👁️ Aperçu
+                                                    <i class="fa-solid fa-eye me-1"></i>Aperçu
                                                 </button>
                                                 <!-- Bouton Éditer -->
                                                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick='openAnnouncementEditModal(<?= $annJsonEscaped ?>)' title="Modifier le contenu">
-                                                    ✏️
+                                                    <i class="fa-solid fa-pen"></i>
                                                 </button>
                                                 <!-- Bouton Supprimer -->
                                                 <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteAnnouncement('<?= $annId ?>')" title="Supprimer définitivement">
-                                                    🗑️
+                                                    <i class="fa-solid fa-trash"></i>
                                                 </button>
                                             </div>
                                         </td>
@@ -2384,12 +2384,12 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     </div>
 
     
-    <!-- Section 11 : ⚠️ Décret Suprême - Réinitialisation Complète du Monde Féodal -->
+    <!-- Section 11 : Décret Suprême - Réinitialisation Complète du Monde Féodal -->
     <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'maintenance' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-maintenance" data-tab="maintenance" role="tabpanel">
         <div class="card mb-4 border-danger">
             <div class="card-header bg-danger-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title text-danger d-flex align-items-center gap-2 m-0">
-                    <span>⚠️</span> Décret Suprême &mdash; Réinitialisation Complète du Monde Féodal (Reset)
+                    <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Décret Suprême &mdash; Réinitialisation Complète du Monde Féodal (Reset)
                 </h3>
                 <span class="badge bg-danger text-white">
                     DESTRUCTIF
@@ -2401,10 +2401,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     Le monde est alors recréé à neuf avec :
                 </div>
                 <ul class="text-secondary small mb-4">
-                    <li>👑 <strong>Shogun Administrateur par défaut</strong> : Identifiant <strong>nezzar</strong> / Mot de passe <strong>Gabriel125#</strong></li>
-                    <li>🏯 <strong>Château Capital</strong> : <code>Château Nezzar [1 : 1]</code> avec parcelles niveau 2, Tenshu, Dojo, Greniers et garnison de samouraïs.</li>
-                    <li>🌾 <strong>12 terres et fiefs neutres</strong> générés procéduralement prêts pour l'expansion provinciale.</li>
-                    <li>🤖 <strong>3 Daimyōs IA de départ</strong> (Clan Oda, Clan Takeda, Clan Tokugawa) pour un Japon vivant immédiatement.</li>
+                    <li><i class="fa-solid fa-crown text-warning me-1"></i><strong>Shogun Administrateur par défaut</strong> : Identifiant <strong>nezzar</strong> / Mot de passe <strong>Gabriel125#</strong></li>
+                    <li><i class="fa-solid fa-chess-rook text-danger me-1"></i><strong>Château Capital</strong> : <code>Château Nezzar [1 : 1]</code> avec parcelles niveau 2, Tenshu, Dojo, Greniers et garnison de samouraïs.</li>
+                    <li><i class="fa-solid fa-wheat-awn text-warning me-1"></i><strong>12 terres et fiefs neutres</strong> générés procéduralement prêts pour l'expansion provinciale.</li>
+                    <li><i class="fa-solid fa-robot text-indigo me-1"></i><strong>3 Daimyōs IA de départ</strong> (Clan Oda, Clan Takeda, Clan Tokugawa) pour un Japon vivant immédiatement.</li>
                 </ul>
 
                 <div class="card card-body bg-light border-danger d-flex flex-row justify-content-between align-items-center flex-wrap gap-2">
@@ -2413,7 +2413,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         <div class="text-secondary small">Une boîte de dialogue vous demandera de saisir le mot-clé <strong>RESET</strong> avant toute action.</div>
                     </div>
                     <button type="button" onclick="openResetModal()" class="btn btn-danger fw-bold">
-                        💥 Réinitialiser le Monde Féodal
+                        <i class="fa-solid fa-fire text-danger me-1"></i>Réinitialiser le Monde Féodal
                     </button>
                 </div>
             </div>
@@ -2430,7 +2430,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         <div class="modal-card modal-card-lg">
             <div class="modal-header">
                 <h3 id="aem_modal_title" class="modal-title">
-                    <span>📢</span> Rédiger une Annonce
+                    <i class="fa-solid fa-bullhorn text-pink me-1"></i>Rédiger une Annonce
                 </h3>
                 <button type="button" onclick="closeAnnouncementEditModal()" class="modal-close-btn">&times;</button>
             </div>
@@ -2457,17 +2457,17 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr; gap:1rem;">
                         <div>
                             <label class="form-label">Badge Visuel</label>
-                            <input type="text" id="aem_badge" name="badge" class="form-control" placeholder="⭐ MISE À JOUR MAJEURE">
+                            <input type="text" id="aem_badge" name="badge" class="form-control" placeholder="MISE À JOUR MAJEURE">
                         </div>
                         <div>
                             <label class="form-label">Icône Principale</label>
-                            <input type="text" id="aem_icon" name="icon" class="form-control" placeholder="⚔️">
+                            <input type="text" id="aem_icon" name="icon" class="form-control" placeholder="fa-khanda">
                         </div>
                         <div>
                             <label class="form-label">Statut Publication</label>
                             <select id="aem_is_published" name="is_published" class="form-select">
-                                <option value="1">🟢 Validée & Publiée aux joueurs</option>
-                                <option value="0">🟡 Brouillon (En attente)</option>
+                                <option value="1"><i class="fa-solid fa-circle-check text-success me-1"></i>Validée &amp; Publiée aux joueurs</option>
+                                <option value="0"><i class="fa-solid fa-clock text-warning me-1"></i>Brouillon (En attente)</option>
                             </select>
                         </div>
                     </div>
@@ -2481,7 +2481,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label style="font-size:0.9rem; font-weight:800; color:#b45309; margin:0; display:flex; align-items:center; gap:0.4rem;">
-                                <span>🏯</span> Fonctionnalités & Améliorations Détaillées
+                                <i class="fa-solid fa-chess-rook text-danger me-1"></i>Fonctionnalités &amp; Améliorations Détaillées
                             </label>
                             <button type="button" onclick="addFeatureRowToModal()" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.75rem; border-color:#b45309; color:#b45309;">
                                 + Ajouter une nouveauté
@@ -2497,7 +2497,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeAnnouncementEditModal()">Annuler</button>
                     <button type="submit" id="aem_submit_btn" class="btn btn-primary">
-                        💾 Sauvegarder dans le JSON
+                        <i class="fa-solid fa-floppy-disk me-1"></i>Sauvegarder dans le JSON
                     </button>
                 </div>
             </form>
@@ -2510,14 +2510,14 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     <div class="modal-card modal-card-sm">
         <div class="modal-header">
             <h3 class="modal-title d-flex align-items-center gap-2 text-danger">
-                <span>💥</span> Réinitialisation Complète de l'Univers
+                <i class="fa-solid fa-fire text-danger me-1"></i>Réinitialisation Complète de l'Univers
             </h3>
             <button onclick="closeResetModal()" class="modal-close-btn" title="Fermer">&times;</button>
         </div>
         <div class="modal-body">
             <div class="alert alert-danger mb-3">
                 <div class="d-flex">
-                    <div>⚠️</div>
+                    <div><i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i></div>
                     <div class="ms-2">
                         <strong>Attention irréversible !</strong> Toutes les parties, colonies, héros et données seront effacés. Le compte administrateur <strong>nezzar</strong> sera recréé avec son mot de passe initial.
                     </div>
@@ -2534,7 +2534,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeResetModal()">Annuler</button>
             <button type="button" class="btn btn-danger" onclick="executeUniverseReset()">
-                💥 Exécuter le Reset
+                <i class="fa-solid fa-fire text-danger me-1"></i>Exécuter le Reset
             </button>
         </div>
     </div>
@@ -2714,7 +2714,7 @@ function switchAdminTab(tabKey) {
         const bc = document.getElementById('adminBreadcrumbCurrent');
         if (bc) bc.textContent = 'Vue Globale';
         const icon = document.getElementById('adminPageTitleIcon');
-        if (icon) icon.textContent = '📜';
+        if (icon) icon.innerHTML = '<i class="fa-solid fa-scroll"></i>';
         const title = document.getElementById('adminPageTitleText');
         if (title) title.textContent = 'Administration Complète (Vue Globale)';
         const pretitle = document.getElementById('adminPagePretitle');
@@ -2924,13 +2924,13 @@ function openAnnouncementEditModal(ann = null) {
     container.innerHTML = '';
 
     if (ann) {
-        document.getElementById('aem_modal_title').innerHTML = '<span>✏️</span> Modifier l\'Annonce';
+        document.getElementById('aem_modal_title').innerHTML = '<i class="fa-solid fa-pen text-primary me-1"></i>Modifier l\'Annonce';
         document.getElementById('aem_id').value = ann.id || '';
         document.getElementById('aem_version').value = ann.version || 'v1.0';
         document.getElementById('aem_title').value = ann.title || '';
         document.getElementById('aem_date').value = ann.date || new Date().toISOString().split('T')[0];
-        document.getElementById('aem_badge').value = ann.badge || '⭐ NOUVEAUTÉ';
-        document.getElementById('aem_icon').value = ann.icon || '⚔️';
+        document.getElementById('aem_badge').value = ann.badge || 'NOUVEAUTÉ';
+        document.getElementById('aem_icon').value = ann.icon || 'fa-khanda';
         document.getElementById('aem_is_published').value = ann.is_published ? '1' : '0';
         document.getElementById('aem_summary').value = ann.summary || '';
 
@@ -2940,12 +2940,12 @@ function openAnnouncementEditModal(ann = null) {
             addFeatureRowToModal();
         }
     } else {
-        document.getElementById('aem_modal_title').innerHTML = '<span>📢</span> Rédiger une Nouvelle Annonce';
+        document.getElementById('aem_modal_title').innerHTML = '<i class="fa-solid fa-bullhorn text-pink me-1"></i>Rédiger une Nouvelle Annonce';
         document.getElementById('announcementEditForm').reset();
         document.getElementById('aem_id').value = '';
         document.getElementById('aem_date').value = new Date().toISOString().split('T')[0];
-        document.getElementById('aem_badge').value = '⭐ NOUVEAUTÉ';
-        document.getElementById('aem_icon').value = '⚔️';
+        document.getElementById('aem_badge').value = 'NOUVEAUTÉ';
+        document.getElementById('aem_icon').value = 'fa-khanda';
         document.getElementById('aem_is_published').value = '1';
         addFeatureRowToModal();
     }
@@ -2964,7 +2964,7 @@ function addFeatureRowToModal(f = null) {
     row.className = 'aem-feature-row';
     row.style.cssText = 'background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; display:flex; flex-direction:column; gap:0.5rem; box-shadow:0 1px 3px rgba(60,45,30,0.04);';
 
-    const iconVal = f ? (f.icon || '🔹') : '🔹';
+    const iconVal = f ? (f.icon || 'fa-star') : 'fa-star';
     const catVal = f ? (f.category || 'Général') : 'Général';
     const titleVal = f ? (f.title || '') : '';
     const descVal = f ? (f.description || '') : '';
@@ -2998,7 +2998,7 @@ async function saveAnnouncementFromModal(event) {
     const submitBtn = document.getElementById('aem_submit_btn');
     const originalText = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span>⏳</span> Sauvegarde en cours...';
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Sauvegarde en cours...';
 
     const id = document.getElementById('aem_id').value;
     const version = document.getElementById('aem_version').value;
@@ -3018,7 +3018,7 @@ async function saveAnnouncementFromModal(event) {
         const fDesc = row.querySelector('.feature-desc-input').value.trim();
         if (fTitle) {
             features.push({
-                icon: fIcon || '🔹',
+                icon: fIcon || 'fa-star',
                 category: fCat || 'Général',
                 title: fTitle,
                 description: fDesc
@@ -3207,13 +3207,13 @@ async function triggerSpontaneousSpawn() {
                 if (data.success) {
                     const v = data.village;
                     showModalAlert(
-                        "🌸 Nouveau Village PNJ Éclos", 
+                        "Nouveau Village PNJ Éclos", 
                         `Un nouveau domaine a fait son apparition dans l'archipel !<br><br>
-                         🏰 <strong>${v.planet_name}</strong><br>
-                         👤 Seigneur : <strong>${v.username}</strong> (${v.faction})<br>
-                         📍 Coordonnées : <strong>[${v.x} : ${v.y}]</strong> &bull; Quadrant : <strong>${v.quadrant}</strong><br>
-                         ${v.is_new_daimyo ? '👑 <em>Nouveau Daimyō fondateur</em>' : '🏯 <em>Extension territoriale provinciale</em>'}<br><br>
-                         <a href="/?page=map&x=${v.x}&y=${v.y}" target="_blank" class="btn btn-sm btn-primary">🗾 Explorer sur la Carte</a>`,
+                         <i class="fa-solid fa-chess-rook text-danger me-1"></i><strong>${v.planet_name}</strong><br>
+                         <i class="fa-solid fa-user me-1"></i>Seigneur : <strong>${v.username}</strong> (${v.faction})<br>
+                         <i class="fa-solid fa-location-dot me-1"></i>Coordonnées : <strong>[${v.x} : ${v.y}]</strong> &bull; Quadrant : <strong>${v.quadrant}</strong><br>
+                         ${v.is_new_daimyo ? '<i class="fa-solid fa-crown text-warning me-1"></i><em>Nouveau Daimyō fondateur</em>' : '<i class="fa-solid fa-chess-rook text-danger me-1"></i><em>Extension territoriale provinciale</em>'}<br><br>
+                         <a href="/?page=map&x=${v.x}&y=${v.y}" target="_blank" class="btn btn-sm btn-primary"><i class="fa-solid fa-map-location-dot me-1"></i>Explorer sur la Carte</a>`,
                         "success"
                     );
                     setTimeout(() => location.reload(), 2500);
@@ -3239,7 +3239,7 @@ async function runBotCycle() {
                 const rep = data.report;
                 let colonisationsTxt = "";
                 if (rep.colonies_founded && rep.colonies_founded.length > 0) {
-                    colonisationsTxt = "<br><br>🪐 <strong>Nouvelles Colonies Fondées :</strong><br>" + 
+                    colonisationsTxt = "<br><br><i class=\"fa-solid fa-chess-rook text-danger me-1\"></i><strong>Nouvelles Colonies Fondées :</strong><br>" + 
                         rep.colonies_founded.map(c => `• <strong>${c.bot}</strong> : ${c.colony_name} aux coordonnées ${c.coords}`).join('<br>');
                 }
 
@@ -3695,7 +3695,7 @@ async function submitAdminGiveKoban(e) {
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = `🪙 Verser les Koban`;
+            btn.innerHTML = '<i class="fa-solid fa-coins text-warning me-1"></i>Verser les Koban';
         }
     }
 }
@@ -3756,7 +3756,7 @@ async function awardWeeklyMedals() {
                 if (data.success) {
                     let detailsTxt = "";
                     if (data.details && data.details.length > 0) {
-                        detailsTxt = "<br><br>🎖️ <strong>Médailles Décernées :</strong><br>" + 
+                        detailsTxt = "<br><br><i class=\"fa-solid fa-medal text-warning me-1\"></i><strong>Médailles Décernées :</strong><br>" + 
                             data.details.slice(0, 8).map(m => `• <strong>${m.username}</strong> : ${m.medal} (${m.category})`).join('<br>');
                         if (data.details.length > 8) {
                             detailsTxt += `<br>... et ${data.details.length - 8} autres distinctions.`;
@@ -3813,11 +3813,11 @@ async function executeUniverseReset() {
             showModalAlert(
                 "Univers Réinitialisé", 
                 `L'univers a été réinitialisé avec succès !<br><br>
-                 👑 Administrateur : <strong>${data.admin.username}</strong><br>
-                 🔑 Mot de passe : <strong>Gabriel125#</strong><br>
-                 🪐 Planète Capitale : <strong>${data.admin.capital_planet}</strong><br>
-                 🌍 Planètes Neutres : <strong>${data.neutral_planets}</strong><br>
-                 🤖 Bots Déployés : <strong>${data.bots_deployed}</strong><br><br>
+                 <i class="fa-solid fa-crown text-warning me-1"></i>Administrateur : <strong>${data.admin.username}</strong><br>
+                 <i class="fa-solid fa-key text-secondary me-1"></i>Mot de passe : <strong>Gabriel125#</strong><br>
+                 <i class="fa-solid fa-chess-rook text-danger me-1"></i>Fief Capital : <strong>${data.admin.capital_planet}</strong><br>
+                 <i class="fa-solid fa-map text-secondary me-1"></i>Fiefs Neutres : <strong>${data.neutral_planets}</strong><br>
+                 <i class="fa-solid fa-robot text-indigo me-1"></i>Bots Déployés : <strong>${data.bots_deployed}</strong><br><br>
                  Redirection vers le Poste de Commandement...`, 
                 "success"
             );
@@ -3947,7 +3947,7 @@ async function updateCastlePosition(castleId) {
 
 // ── Modération & Forum Féodal ──
 async function toggleModerator(userId, username, currentStatus) {
-    const actionText = currentStatus === 1 ? 'retirer du corps des modérateurs' : 'promouvoir au rang de Modérateur Féodal 🛡️';
+    const actionText = currentStatus === 1 ? 'retirer du corps des modérateurs' : 'promouvoir au rang de Modérateur Féodal';
     if (!confirm(`Voulez-vous ${actionText} le joueur ${username} ?`)) return;
 
     try {
@@ -3977,7 +3977,7 @@ async function toggleModerator(userId, username, currentStatus) {
         <div class="modal-content shadow-lg border-0" style="border-radius:12px; overflow:hidden;">
             <div class="modal-header bg-warning text-dark py-3">
                 <h5 class="modal-title fw-bold d-flex align-items-center gap-2 m-0">
-                    <span>🪙</span> Octroi de Koban Impériaux
+                    <i class="fa-solid fa-coins text-warning me-1"></i>Octroi de Koban Impériaux
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -3985,20 +3985,20 @@ async function toggleModerator(userId, username, currentStatus) {
                 <input type="hidden" id="agk_user_id" name="user_id" value="">
                 <div class="modal-body p-4">
                     <div class="d-flex align-items-center gap-3 p-3 rounded mb-3" style="background:#fffbeb; border:1px solid #fde68a;">
-                        <span class="fs-1">👤</span>
+                        <i class="fa-solid fa-user text-primary fs-1"></i>
                         <div>
                             <div class="text-secondary small fw-bold text-uppercase">Daimyō Destinataire</div>
                             <div class="fs-3 fw-bold text-dark" id="agk_username">---</div>
                             <div class="text-muted small">
-                                Solde actuel : <strong class="text-warning-emphasis" id="agk_current_koban">0</strong> 🪙 Koban
+                                Solde actuel : <strong class="text-warning-emphasis" id="agk_current_koban">0</strong> <i class="fa-solid fa-coins text-warning"></i> Koban
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Montant à octroyer (Koban 🪙)</label>
+                        <label class="form-label fw-bold">Montant à octroyer (Koban <i class="fa-solid fa-coins text-warning"></i>)</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-warning-subtle text-warning-emphasis fw-bold">🪙</span>
+                            <span class="input-group-text bg-warning-subtle text-warning-emphasis fw-bold"><i class="fa-solid fa-coins"></i></span>
                             <input type="number" id="agk_amount" name="amount" class="form-control form-control-lg fw-bold" 
                                    min="1" max="100000" step="1" value="100" required placeholder="Ex: 100">
                         </div>
@@ -4011,18 +4011,18 @@ async function toggleModerator(userId, username, currentStatus) {
                     <div class="mb-2">
                         <label class="form-label small text-muted fw-bold mb-1">Montants Rapides :</label>
                         <div class="d-flex gap-2 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(50)">+50 🪙</button>
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(100)">+100 🪙</button>
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(200)">+200 🪙 (7j)</button>
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(360)">+360 🪙 (14j)</button>
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(600)">+600 🪙 (30j)</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(50)">+50 <i class="fa-solid fa-coins text-warning"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(100)">+100 <i class="fa-solid fa-coins text-warning"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(200)">+200 <i class="fa-solid fa-coins text-warning"></i> (7j)</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(360)">+360 <i class="fa-solid fa-coins text-warning"></i> (14j)</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(600)">+600 <i class="fa-solid fa-coins text-warning"></i> (30j)</button>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="submit" id="btnSubmitGiveKoban" class="btn btn-warning fw-bold px-4 shadow-sm">
-                        🪙 Verser les Koban
+                        <i class="fa-solid fa-coins text-warning me-1"></i>Verser les Koban
                     </button>
                 </div>
             </form>

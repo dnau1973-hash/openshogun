@@ -78,7 +78,7 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
                     <?php if ($hasCastleImg): ?>
                         <img src="<?= $castleImgSrc ?>" alt="<?= htmlspecialchars($castle['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
                     <?php else: ?>
-                        <span style="font-size: 5rem; filter: drop-shadow(0 6px 12px rgba(180, 83, 9, 0.5));">🏯</span>
+                        <span style="font-size: 5rem; filter: drop-shadow(0 6px 12px rgba(180, 83, 9, 0.5));"><i class="fa-solid fa-chess-rook text-warning"></i></span>
                     <?php endif; ?>
                 </div>
                 <div class="field-level-emblem" style="background: linear-gradient(135deg, #d97706, #b45309); border-color: #fde68a;">
@@ -93,10 +93,10 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
                     <div>
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
                             <span class="badge" style="background: #f59e0b; color: #1c1917; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 4px; font-size: 0.75rem;">
-                                👑 <?= htmlspecialchars($castle['classification']) ?>
+                                <i class="fa-solid fa-crown text-warning me-1"></i><?= htmlspecialchars($castle['classification']) ?>
                             </span>
                             <span class="badge" style="background: rgba(185, 28, 28, 0.12); color: #b91c1c; border: 1px solid rgba(185, 28, 28, 0.3); font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 4px; font-size: 0.75rem;">
-                                📍 <?= htmlspecialchars($castle['province']) ?>
+                                <i class="fa-solid fa-location-dot text-danger me-1"></i><?= htmlspecialchars($castle['province']) ?>
                             </span>
                         </div>
                         <h1 class="field-title font-game" style="color: #1c1917;">
@@ -130,11 +130,11 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
                 <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
                     <?php if ($castle['is_spawned']): ?>
                         <a href="/?page=map&x=<?= $castle['coord_x'] ?>&y=<?= $castle['coord_y'] ?>" class="btn btn-primary" style="background: #b91c1c; font-weight: 700;">
-                            🗾 Localiser sur la Carte des Provinces [<?= $castle['coord_x'] ?> : <?= $castle['coord_y'] ?>] &rarr;
+                            <i class="fa-solid fa-map-location-dot me-1"></i>Localiser sur la Carte des Provinces [<?= $castle['coord_x'] ?> : <?= $castle['coord_y'] ?>] &rarr;
                         </a>
                     <?php endif; ?>
                     <a href="#section-final-battle" class="btn btn-warning" style="background: #f59e0b; color: #18181b; font-weight: 800;">
-                        ⚔️ Découvrir l'Enjeu de la Bataille Finale &darr;
+                        <i class="fa-solid fa-khanda text-danger me-1"></i>Découvrir l'Enjeu de la Bataille Finale &darr;
                     </a>
                 </div>
             </div>
@@ -156,7 +156,7 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
                         </h2>
                     </div>
                     <span style="color: #fef3c7; font-size: 0.85rem; font-style: italic; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(254, 243, 199, 0.3);">
-                        📍 <?= htmlspecialchars($castle['province']) ?>
+                        <i class="fa-solid fa-location-dot text-danger me-1"></i><?= htmlspecialchars($castle['province']) ?>
                     </span>
                 </div>
             </div>
@@ -170,7 +170,7 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
         <div class="card" id="section-final-battle" style="border-color: rgba(220, 38, 38, 0.4); background: #ffffff;">
             <div class="card-header" style="background: linear-gradient(135deg, rgba(185, 28, 28, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%); border-bottom: 1px solid rgba(185, 28, 28, 0.2);">
                 <h3 style="color: #b91c1c; display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 1.15rem;">
-                    <span>⚔️</span> L'Enjeu de la Bataille Finale du Shogunat
+                    <span><i class="fa-solid fa-khanda text-danger"></i></span> L'Enjeu de la Bataille Finale du Shogunat
                 </h3>
             </div>
             <div class="card-body" style="padding: 1.5rem;">
@@ -185,7 +185,7 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
 
                 <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(254, 243, 199, 0.4) 100%); border: 1.5px solid rgba(245, 158, 11, 0.5); padding: 1.1rem; border-radius: 8px; margin-bottom: 1.25rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
-                        <span style="font-size: 1.3rem;">✨</span>
+                        <span style="font-size: 1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
                         <strong class="text-warning" style="font-size: 0.95rem;">Bénédiction Sacrée & Relique de Province :</strong>
                     </div>
                     <p class="fw-bold text-muted" style="font-size: 0.9rem; margin: 0;">
@@ -205,7 +205,7 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
                 </div>
 
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-muted);">
-                    💡 <em>Dans la phase finale de conquête du serveur, l'alliance de clans qui tiendra le plus grand nombre de ces 12 donjons authentiques proclamera son Daimyō comme nouveau <strong>Shogun du Japon</strong>.</em>
+                    <i class="fa-solid fa-lightbulb text-warning me-1"></i><em>Dans la phase finale de conquête du serveur, l'alliance de clans qui tiendra le plus grand nombre de ces 12 donjons authentiques proclamera son Daimyō comme nouveau <strong>Shogun du Japon</strong>.</em>
                 </div>
             </div>
         </div>
@@ -214,7 +214,7 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
         <div class="card" style="border-color: var(--border-color); background: #ffffff;">
             <div class="card-header">
                 <h3 style="display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 1.15rem; color: #1c1917;">
-                    <span>📜</span> Histoire Féodale & Architecture d'Origine
+                    <span><i class="fa-solid fa-scroll text-primary"></i></span> Histoire Féodale & Architecture d'Origine
                 </h3>
             </div>
             <div class="card-body" style="padding: 1.5rem;">
@@ -236,7 +236,7 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
     <div class="card" style="border-color: rgba(245, 158, 11, 0.3);">
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
             <h3 class="card-title m-0" style="font-size: 1.1rem;">
-                <span>🏯</span> Les 12 Donjons Authentiques Préservés du Japon (現存十二天守)
+                <span><i class="fa-solid fa-chess-rook text-warning"></i></span> Les 12 Donjons Authentiques Préservés du Japon (現存十二天守)
             </h3>
             <span style="font-size: 0.8rem; color: var(--text-muted);">Cliquez sur une forteresse pour consulter sa fiche historique</span>
         </div>
@@ -257,7 +257,7 @@ $castleImgSrc = $hasCastleImg ? ('/public/assets/castles/' . $castleImgFile . '?
                             <?php if ($cHasImg): ?>
                                 <img src="<?= $cImgSrc ?>" alt="<?= htmlspecialchars($c['name']) ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); flex-shrink: 0;">
                             <?php else: ?>
-                                <div style="width: 50px; height: 50px; border-radius: 6px; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; border: 1px solid var(--border-color);">🏯</div>
+                                <div style="width: 50px; height: 50px; border-radius: 6px; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; border: 1px solid var(--border-color);"><i class="fa-solid fa-chess-rook text-warning"></i></div>
                             <?php endif; ?>
                             <div style="flex: 1; min-width: 0;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">

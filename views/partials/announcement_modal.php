@@ -6,12 +6,12 @@
         <div class="modal-header">
             <div class="d-flex align-items-center gap-3">
                 <div id="announcementIconBox" style="font-size:2.2rem; background:#ffffff; width:52px; height:52px; border-radius:10px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border-color); box-shadow:0 2px 6px rgba(60,45,30,0.06);">
-                    📜
+                    <i class="fa-solid fa-scroll text-warning"></i>
                 </div>
                 <div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <span id="announcementBadge" class="badge badge-danger">
-                            ⭐ NOUVEAUTÉ
+                            <i class="fa-solid fa-star me-1"></i>NOUVEAUTÉ
                         </span>
                         <span id="announcementVersion" style="color:#b45309; font-size:0.85rem; font-weight:800; font-family:monospace;">
                             v1.0.0
@@ -41,7 +41,7 @@
             <!-- Liste détaillée des nouveautés -->
             <div>
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <span style="font-size:1.2rem;">🏯</span>
+                    <span style="font-size:1.2rem;"><i class="fa-solid fa-chess-rook text-danger"></i></span>
                     <h3 style="margin:0; font-size:1rem; font-weight:800; color:#b45309; text-transform:uppercase; letter-spacing:0.5px;">
                         Détails & Bénéfices Stratégiques
                     </h3>
@@ -57,11 +57,11 @@
         <!-- Pied de la modale avec bouton d'acquittement obligatoire -->
         <div class="modal-footer">
             <div style="font-size:0.82rem; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem; font-weight:600;">
-                <span>ℹ️</span> Valider la lecture évite la réapparition de cette annonce.
+                <span><i class="fa-solid fa-circle-info me-1"></i></span> Valider la lecture évite la réapparition de cette annonce.
             </div>
             <div class="d-flex gap-2">
                 <button type="button" id="btnAcknowledgeAnnouncement" onclick="acknowledgeCurrentAnnouncement()" class="btn btn-primary" style="padding:0.65rem 1.5rem; font-weight:800; font-size:0.92rem;">
-                    <span>✓</span> J'ai pris connaissance de ces nouveautés
+                    <i class="fa-solid fa-check text-success me-1"></i>J'ai pris connaissance de ces nouveautés
                 </button>
             </div>
         </div>
@@ -140,8 +140,8 @@ function displayAnnouncementModal(announcement, isPreview = false) {
     if (!modal) return;
 
     // Éléments
-    document.getElementById('announcementIconBox').innerText = announcement.icon || '📜';
-    document.getElementById('announcementBadge').innerText = announcement.badge || '✨ NOUVEAUTÉ';
+    document.getElementById('announcementIconBox').innerHTML = announcement.icon || '<i class="fa-solid fa-scroll text-warning"></i>';
+    document.getElementById('announcementBadge').innerHTML = announcement.badge || '<i class="fa-solid fa-sparkles me-1"></i>NOUVEAUTÉ';
     document.getElementById('announcementVersion').innerText = announcement.version || '';
     document.getElementById('announcementDate').innerText = announcement.date || '';
     document.getElementById('announcementTitle').innerText = announcement.title || 'Mise à jour';
@@ -164,7 +164,7 @@ function displayAnnouncementModal(announcement, isPreview = false) {
             const card = document.createElement('div');
             card.className = 'announcement-feature-card';
             card.innerHTML = `
-                <div class="announcement-feature-icon">${escapeHtml(f.icon || '🔹')}</div>
+                <div class="announcement-feature-icon">${f.icon || '<i class="fa-solid fa-circle-chevron-right text-primary"></i>'}</div>
                 <div style="flex:1;">
                     <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem; flex-wrap:wrap;">
                         <span class="announcement-category-pill">${escapeHtml(f.category || 'Général')}</span>
@@ -183,9 +183,9 @@ function displayAnnouncementModal(announcement, isPreview = false) {
 
     const ackBtn = document.getElementById('btnAcknowledgeAnnouncement');
     if (isPreview) {
-        ackBtn.innerHTML = '<span>👁️</span> Fermer l\'aperçu';
+        ackBtn.innerHTML = '<i class="fa-solid fa-eye me-1"></i>Fermer l\'aperçu';
     } else {
-        ackBtn.innerHTML = '<span>✓</span> J\'ai pris connaissance de ces nouveautés';
+        ackBtn.innerHTML = '<i class="fa-solid fa-check text-success me-1"></i>J\'ai pris connaissance de ces nouveautés';
     }
 
     modal.style.display = 'flex';
@@ -212,7 +212,7 @@ async function acknowledgeCurrentAnnouncement() {
     const btn = document.getElementById('btnAcknowledgeAnnouncement');
     const originalText = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span>⏳</span> Enregistrement...';
+    btn.innerHTML = '<i class="fa-solid fa-hourglass-half me-1"></i>Enregistrement...';
 
     try {
         const formData = new FormData();

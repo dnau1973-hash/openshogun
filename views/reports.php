@@ -50,9 +50,9 @@ try {
 
 // Faune sauvage des oasis
 $beastsDict = [
-    'loup_honshu' => ['name' => 'Loup de Honshū', 'icon' => '🐺'],
-    'ours_hokkaido' => ['name' => 'Ours d\'Hokkaidō', 'icon' => '🐻'],
-    'sanglier_sauvage' => ['name' => 'Sanglier Sauvage', 'icon' => '🐗'],
+    'loup_honshu' => ['name' => 'Loup de Honshū', 'icon' => '<i class="fa-solid fa-paw text-secondary"></i>'],
+    'ours_hokkaido' => ['name' => 'Ours d\'Hokkaidō', 'icon' => '<i class="fa-solid fa-paw text-warning"></i>'],
+    'sanglier_sauvage' => ['name' => 'Sanglier Sauvage', 'icon' => '<i class="fa-solid fa-paw text-danger"></i>'],
 ];
 $unitsDict = array_merge($unitsDict, $beastsDict);
 
@@ -151,8 +151,8 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                         <li class="breadcrumb-item active" aria-current="page"><strong class="text-dark">Chroniques Militaires</strong></li>
                     </ol>
                 </nav>
-                <h2 class="page-title d-flex align-items-center gap-2 text-dark">
-                    <span>📜</span>
+                <h2 class="page-title d-flex align-items-center gap-2 text-dark font-game">
+                    <i class="fa-solid fa-scroll text-warning me-2"></i>
                     <span>Chroniques de Siège &amp; Rapports de Bataille</span>
                 </h2>
                 <div class="text-secondary small mt-1">
@@ -162,24 +162,24 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
             <div class="col-auto ms-auto d-print-none">
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <span class="badge bg-primary-lt p-2">
-                        📊 <?= $totalReports ?> Chronique<?= $totalReports > 1 ? 's' : '' ?>
+                        <i class="fa-solid fa-chart-simple me-1"></i> <?= $totalReports ?> Chronique<?= $totalReports > 1 ? 's' : '' ?>
                     </span>
                     <span class="badge bg-success-lt p-2">
-                        🏆 <?= $winCount ?> Victoire<?= $winCount > 1 ? 's' : '' ?>
+                        <i class="fa-solid fa-trophy text-warning me-1"></i> <?= $winCount ?> Victoire<?= $winCount > 1 ? 's' : '' ?>
                     </span>
                     <span class="badge bg-danger-lt p-2">
-                        💥 <?= $lossCount ?> Défaite<?= $lossCount > 1 ? 's' : '' ?>
+                        <i class="fa-solid fa-burst text-danger me-1"></i> <?= $lossCount ?> Défaite<?= $lossCount > 1 ? 's' : '' ?>
                     </span>
                     <span class="badge bg-info-lt p-2">
-                        🥷 <?= $spyCount ?> Infiltration<?= $spyCount > 1 ? 's' : '' ?>
+                        <i class="fa-solid fa-user-ninja text-info me-1"></i> <?= $spyCount ?> Infiltration<?= $spyCount > 1 ? 's' : '' ?>
                     </span>
                     <?php if ($totalReports > 0): ?>
                         <div class="btn-group ms-2">
                             <a href="?page=reports&mark_all_read=1" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" title="Marquer toutes les chroniques comme lues">
-                                <span>👁️</span> Tout marquer lu
+                                <i class="fa-solid fa-eye me-1"></i> Tout marquer lu
                             </a>
                             <button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" onclick="deleteAllReports()" title="Supprimer définitivement l'ensemble de vos rapports">
-                                <span>🗑️</span> Supprimer tous les rapports
+                                <i class="fa-solid fa-trash-can me-1"></i> Supprimer tous les rapports
                             </button>
                         </div>
                     <?php endif; ?>
@@ -200,7 +200,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                     <div class="w-100">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h3 class="card-title text-dark fw-bold m-0 d-flex align-items-center gap-2">
-                                <span>🗂️</span> Registre des Rapports
+                                <i class="fa-solid fa-folder-open text-primary me-1"></i> Registre des Rapports
                             </h3>
                             <span class="badge bg-light text-secondary border font-monospace" id="reportsVisibleCounter">
                                 <?= $totalReports ?>
@@ -213,13 +213,13 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                 Tous
                             </button>
                             <button type="button" class="nav-link btn btn-sm py-1 px-2 border" data-filter="win" onclick="filterReportsList('win', this)">
-                                🏆 Victoires
+                                <i class="fa-solid fa-trophy text-warning me-1"></i> Victoires
                             </button>
                             <button type="button" class="nav-link btn btn-sm py-1 px-2 border" data-filter="loss" onclick="filterReportsList('loss', this)">
-                                💥 Défaites
+                                <i class="fa-solid fa-burst text-danger me-1"></i> Défaites
                             </button>
                             <button type="button" class="nav-link btn btn-sm py-1 px-2 border" data-filter="spy" onclick="filterReportsList('spy', this)">
-                                🥷 Shinobi
+                                <i class="fa-solid fa-user-ninja text-info me-1"></i> Shinobi
                             </button>
                         </div>
 
@@ -241,14 +241,14 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                 <div class="card-body p-0 flex-fill">
                     <?php if (empty($reports)): ?>
                         <div class="empty p-4">
-                            <div class="empty-icon fs-1">📜</div>
+                            <div class="empty-icon fs-1"><i class="fa-solid fa-scroll text-muted"></i></div>
                             <p class="empty-title fs-3 text-dark">Aucune chronique militaire</p>
                             <p class="empty-subtitle text-secondary">
                                 Vos armées et éclaireurs n'ont encore mené aucun assaut ou mission d'espionnage.
                             </p>
                             <div class="empty-action">
                                 <a href="?page=fleet" class="btn btn-sm btn-primary">
-                                    🏇 Déployer une expédition
+                                    <i class="fa-solid fa-horse me-1"></i> Déployer une expédition
                                 </a>
                             </div>
                         </div>
@@ -270,7 +270,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
 
                                 // Badges d'état
                                 $badgeClass = $isSpy ? 'bg-info-lt text-info' : ($isWin ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger');
-                                $badgeIcon = $isSpy ? '🥷' : ($isWin ? '🏆' : '💥');
+                                $badgeIcon = $isSpy ? '<i class="fa-solid fa-user-ninja"></i>' : ($isWin ? '<i class="fa-solid fa-trophy"></i>' : '<i class="fa-solid fa-burst"></i>');
                                 $badgeLabel = $isSpy ? 'INFILTRATION' : ($isWin ? 'VICTOIRE' : 'DÉFAITE');
                             ?>
                                 <a href="?page=reports&id=<?= $rep['id'] ?>" 
@@ -303,7 +303,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
 
                                     <div class="d-flex justify-content-between align-items-center small text-secondary">
                                         <span>
-                                            <?= $isAtt ? '⚔️ Assaut lancé' : '🛡️ Attaque subie' ?>
+                                            <?= $isAtt ? '<i class="fa-solid fa-khanda text-danger me-1"></i> Assaut lancé' : '<i class="fa-solid fa-shield-halved text-success me-1"></i> Attaque subie' ?>
                                         </span>
                                         <div class="d-flex align-items-center gap-1">
                                             <span class="badge bg-secondary-lt text-uppercase font-monospace" style="font-size: 0.65rem;">
@@ -313,7 +313,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                                     class="btn btn-sm btn-ghost-danger p-0 border-0 ms-1" 
                                                     title="Supprimer cette chronique" 
                                                     onclick="event.preventDefault(); event.stopPropagation(); deleteSingleReport(<?= (int)$rep['id'] ?>)">
-                                                🗑️
+                                                <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -323,7 +323,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
 
                         <!-- État aucun résultat après filtre/recherche -->
                         <div id="reportsSearchEmpty" class="p-4 text-center text-secondary small" style="display: none;">
-                            <span>🔍 Aucun rapport ne correspond à votre recherche.</span>
+                            <span><i class="fa-solid fa-magnifying-glass me-1"></i> Aucun rapport ne correspond à votre recherche.</span>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -382,13 +382,13 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 bg-white border-bottom">
                         <div>
                             <div class="badge bg-<?= $statusColor ?>-lt text-<?= $statusColor ?> fw-bold mb-1">
-                                <?= $isSpy ? '🥷 RAPPORT D\'ESPIONNAGE' : ($isCurWin ? '🏆 VICTOIRE' : '💥 DÉFAITE') ?>
+                                <?= $isSpy ? '<i class="fa-solid fa-user-ninja me-1"></i> RAPPORT D\'ESPIONNAGE' : ($isCurWin ? '<i class="fa-solid fa-trophy me-1"></i> VICTOIRE' : '<i class="fa-solid fa-burst me-1"></i> DÉFAITE') ?>
                             </div>
                             <h3 class="card-title text-dark fw-bold m-0" style="font-size: 1.15rem;">
                                 <?= htmlspecialchars($currentReport['title']) ?>
                             </h3>
                             <div class="text-secondary small mt-1 font-monospace">
-                                📅 <?= $formattedDate ?>
+                                <i class="fa-solid fa-calendar-days me-1"></i> <?= $formattedDate ?>
                             </div>
                         </div>
 
@@ -396,14 +396,14 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                         <div class="d-flex align-items-center gap-2">
                             <?php if (!empty($targetDaimyo) && $targetDaimyo !== $user['username']): ?>
                                 <a href="?page=messages&tab=compose&to=<?= urlencode($targetDaimyo) ?>" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm">
-                                    <span>✉️</span> Contacter <?= htmlspecialchars($targetDaimyo) ?>
+                                    <i class="fa-solid fa-envelope me-1"></i> Contacter <?= htmlspecialchars($targetDaimyo) ?>
                                 </a>
                             <?php endif; ?>
                             <a href="?page=fleet" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
-                                <span>🏇</span> Expédition
+                                <i class="fa-solid fa-horse me-1"></i> Expédition
                             </a>
                             <button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 shadow-sm" onclick="deleteSingleReport(<?= (int)$currentReport['id'] ?>)" title="Supprimer définitivement ce rapport">
-                                <span>🗑️</span> Supprimer ce rapport
+                                <i class="fa-solid fa-trash-can me-1"></i> Supprimer ce rapport
                             </button>
                         </div>
                     </div>
@@ -416,7 +416,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                             <!-- CAS 1 : RAPPORT D'ESPIONNAGE SHINOBI                    -->
                             <!-- ═══════════════════════════════════════════════════════ -->
                             <div class="alert alert-info d-flex align-items-center gap-3 mb-4 shadow-sm">
-                                <span class="fs-1">🥷</span>
+                                <span class="fs-1"><i class="fa-solid fa-user-ninja text-info"></i></span>
                                 <div>
                                     <div class="fw-bold">Rapport d'Infiltration Furtive Shinobi</div>
                                     <div class="small">
@@ -429,12 +429,12 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                             <!-- Ressources détectées dans les greniers -->
                             <div class="mb-4">
                                 <h4 class="text-dark fw-bold d-flex align-items-center gap-2 mb-2">
-                                    <span>🌾</span> Ressources Recensées dans les Greniers du Fief
+                                    <i class="fa-solid fa-wheat-awn text-warning me-1"></i> Ressources Recensées dans les Greniers du Fief
                                 </h4>
                                 <div class="row g-2">
                                     <div class="col-md-4">
                                         <div class="card bg-light border p-3 text-center shadow-none h-100">
-                                            <div class="text-secondary small fw-bold">🪵 Bois de Cèdre</div>
+                                            <div class="text-secondary small fw-bold"><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre</div>
                                             <div class="h2 m-0 text-dark font-monospace">
                                                 <?= number_format($repData['resources']['metal'] ?? 0) ?>
                                             </div>
@@ -442,7 +442,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                     </div>
                                     <div class="col-md-4">
                                         <div class="card bg-light border p-3 text-center shadow-none h-100">
-                                            <div class="text-secondary small fw-bold">🪨 Pierre de Taille</div>
+                                            <div class="text-secondary small fw-bold"><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille</div>
                                             <div class="h2 m-0 text-dark font-monospace">
                                                 <?= number_format($repData['resources']['crystal'] ?? 0) ?>
                                             </div>
@@ -450,7 +450,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                     </div>
                                     <div class="col-md-4">
                                         <div class="card bg-light border p-3 text-center shadow-none h-100">
-                                            <div class="text-secondary small fw-bold">🌾 Riz Impérial (Koku)</div>
+                                            <div class="text-secondary small fw-bold"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial (Koku)</div>
                                             <div class="h2 m-0 text-dark font-monospace">
                                                 <?= number_format($repData['resources']['deuterium'] ?? 0) ?>
                                             </div>
@@ -462,11 +462,11 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                             <!-- Garnison Détectée -->
                             <div class="mb-4">
                                 <h4 class="text-dark fw-bold d-flex align-items-center gap-2 mb-2">
-                                    <span>🏯</span> Garnison Observée dans les Remparts
+                                    <i class="fa-solid fa-chess-rook text-primary me-1"></i> Garnison Observée dans les Remparts
                                 </h4>
                                 <?php if (empty($repData['fleet'])): ?>
                                     <div class="p-3 bg-light rounded border text-muted small text-center">
-                                        ✔ Aucune garnison en faction détectée lors de l'infiltration.
+                                        <i class="fa-solid fa-check text-success me-1"></i> Aucune garnison en faction détectée lors de l'infiltration.
                                     </div>
                                 <?php else: ?>
                                     <div class="table-responsive border rounded">
@@ -479,7 +479,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($repData['fleet'] as $code => $cnt): 
-                                                    $uInfo = $unitsDict[$code] ?? ['name' => ucfirst(str_replace('_', ' ', $code)), 'icon' => '⚔️'];
+                                                    $uInfo = $unitsDict[$code] ?? ['name' => ucfirst(str_replace('_', ' ', $code)), 'icon' => '<i class="fa-solid fa-khanda"></i>'];
                                                 ?>
                                                     <tr>
                                                         <td>
@@ -502,12 +502,12 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                             <?php if (!empty($repData['buildings'])): ?>
                                 <div>
                                     <h4 class="text-dark fw-bold d-flex align-items-center gap-2 mb-2">
-                                        <span>🏗️</span> Bâtiments Observés
+                                        <i class="fa-solid fa-hammer text-primary me-1"></i> Bâtiments Observés
                                     </h4>
                                     <div class="d-flex flex-wrap gap-2">
                                         <?php foreach ($repData['buildings'] as $bCode => $bLvl): ?>
                                             <span class="badge bg-light text-dark border p-2 font-monospace">
-                                                🏯 <?= htmlspecialchars($bCode) ?> : <strong>Niv. <?= $bLvl ?></strong>
+                                                <i class="fa-solid fa-chess-rook text-secondary me-1"></i> <?= htmlspecialchars($bCode) ?> : <strong>Niv. <?= $bLvl ?></strong>
                                             </span>
                                         <?php endforeach; ?>
                                     </div>
@@ -533,7 +533,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                                 Daimyō <?= htmlspecialchars($repData['attacker_name'] ?? 'Inconnu') ?>
                                             </div>
                                             <div class="small text-secondary">
-                                                <?= ($currentReport['attacker_id'] == $user['id']) ? '👑 Votre Armée' : '⚔️ Armée Hostile' ?>
+                                                <?= ($currentReport['attacker_id'] == $user['id']) ? '<i class="fa-solid fa-crown text-warning me-1"></i> Votre Armée' : '<i class="fa-solid fa-khanda text-danger me-1"></i> Armée Hostile' ?>
                                             </div>
                                         </div>
 
@@ -567,7 +567,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                             <!-- Repli Tactique (si applicable) -->
                             <?php if (!empty($repData['evasion_applied'])): ?>
                                 <div class="alert alert-warning d-flex align-items-center gap-3 mb-4 shadow-sm">
-                                    <span class="fs-1">🛡️</span>
+                                    <span class="fs-1"><i class="fa-solid fa-shield-halved text-warning"></i></span>
                                     <div>
                                         <div class="fw-bold">Repli Stratégique Déclenché</div>
                                         <div class="small">
@@ -585,26 +585,26 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                                             <div class="fw-bold text-success d-flex align-items-center gap-2">
-                                                <span>🌾</span> Butin Prélevé en Conquête : <strong>+<?= number_format($totalLoot) ?> ressources</strong>
+                                                <i class="fa-solid fa-wheat-awn text-success me-1"></i> Butin Prélevé en Conquête : <strong>+<?= number_format($totalLoot) ?> ressources</strong>
                                             </div>
                                             <span class="badge bg-success text-white">Saisie de Guerre</span>
                                         </div>
                                         <div class="row g-2">
                                             <div class="col-4">
                                                 <div class="p-2 bg-white rounded border text-center">
-                                                    <div class="text-secondary small fw-bold">🪵 Bois de Cèdre</div>
+                                                    <div class="text-secondary small fw-bold"><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre</div>
                                                     <div class="fw-bold font-monospace text-success">+<?= number_format($repData['looted']['metal'] ?? 0) ?></div>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="p-2 bg-white rounded border text-center">
-                                                    <div class="text-secondary small fw-bold">🪨 Pierre de Taille</div>
+                                                    <div class="text-secondary small fw-bold"><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille</div>
                                                     <div class="fw-bold font-monospace text-success">+<?= number_format($repData['looted']['crystal'] ?? 0) ?></div>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="p-2 bg-white rounded border text-center">
-                                                    <div class="text-secondary small fw-bold">🌾 Riz Impérial</div>
+                                                    <div class="text-secondary small fw-bold"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial</div>
                                                     <div class="fw-bold font-monospace text-success">+<?= number_format($repData['looted']['deuterium'] ?? 0) ?></div>
                                                 </div>
                                             </div>
@@ -620,10 +620,10 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                     <div class="card bg-white border h-100 shadow-none">
                                         <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
                                             <strong class="text-dark d-flex align-items-center gap-1 small">
-                                                <span>⚔️</span> Pertes Attaquant
+                                                <i class="fa-solid fa-khanda text-danger me-1"></i> Pertes Attaquant
                                             </strong>
                                             <?php if (empty($repData['attacker_lost'])): ?>
-                                                <span class="badge bg-success-lt small">✔ Indemne</span>
+                                                <span class="badge bg-success-lt small"><i class="fa-solid fa-check me-1"></i>Indemne</span>
                                             <?php else: ?>
                                                 <span class="badge bg-danger-lt small">-<?= number_format(array_sum($repData['attacker_lost'])) ?> unités</span>
                                             <?php endif; ?>
@@ -631,12 +631,12 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                         <div class="card-body p-3">
                                             <?php if (empty($repData['attacker_lost'])): ?>
                                                 <div class="text-success small fw-semibold text-center py-3">
-                                                    ✔ Aucune perte subie par l'armée attaquante !
+                                                    <i class="fa-solid fa-check text-success me-1"></i> Aucune perte subie par l'armée attaquante !
                                                 </div>
                                             <?php else: ?>
                                                 <div class="d-flex flex-column gap-2">
                                                     <?php foreach ($repData['attacker_lost'] as $code => $cnt): 
-                                                        $uInfo = $unitsDict[$code] ?? ['name' => ucfirst(str_replace('_', ' ', $code)), 'icon' => '⚔️'];
+                                                        $uInfo = $unitsDict[$code] ?? ['name' => ucfirst(str_replace('_', ' ', $code)), 'icon' => '<i class="fa-solid fa-khanda"></i>'];
                                                     ?>
                                                         <div class="d-flex justify-content-between align-items-center p-2 rounded bg-light border-bottom">
                                                             <div class="d-flex align-items-center gap-2">
@@ -659,10 +659,10 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                     <div class="card bg-white border h-100 shadow-none">
                                         <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
                                             <strong class="text-dark d-flex align-items-center gap-1 small">
-                                                <span>🛡️</span> Pertes Défenseur
+                                                <i class="fa-solid fa-shield-halved text-success me-1"></i> Pertes Défenseur
                                             </strong>
                                             <?php if (empty($repData['defender_lost'])): ?>
-                                                <span class="badge bg-success-lt small">✔ Indemne</span>
+                                                <span class="badge bg-success-lt small"><i class="fa-solid fa-check me-1"></i>Indemne</span>
                                             <?php else: ?>
                                                 <span class="badge bg-danger-lt small">-<?= number_format(array_sum($repData['defender_lost'])) ?> unités</span>
                                             <?php endif; ?>
@@ -670,12 +670,12 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                                         <div class="card-body p-3">
                                             <?php if (empty($repData['defender_lost'])): ?>
                                                 <div class="text-success small fw-semibold text-center py-3">
-                                                    ✔ Aucune perte subie par la garnison du fief !
+                                                    <i class="fa-solid fa-check text-success me-1"></i> Aucune perte subie par la garnison du fief !
                                                 </div>
                                             <?php else: ?>
                                                 <div class="d-flex flex-column gap-2">
                                                     <?php foreach ($repData['defender_lost'] as $code => $cnt): 
-                                                        $uInfo = $unitsDict[$code] ?? ['name' => ucfirst(str_replace('_', ' ', $code)), 'icon' => '⚔️'];
+                                                        $uInfo = $unitsDict[$code] ?? ['name' => ucfirst(str_replace('_', ' ', $code)), 'icon' => '<i class="fa-solid fa-khanda"></i>'];
                                                     ?>
                                                         <div class="d-flex justify-content-between align-items-center p-2 rounded bg-light border-bottom">
                                                             <div class="d-flex align-items-center gap-2">
@@ -706,11 +706,11 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                         <div class="d-flex align-items-center gap-2">
                             <?php if (!empty($targetDaimyo) && $targetDaimyo !== $user['username']): ?>
                                 <a href="?page=messages&tab=compose&to=<?= urlencode($targetDaimyo) ?>" class="btn btn-sm btn-primary">
-                                    ✉️ Envoyer une missive à <?= htmlspecialchars($targetDaimyo) ?>
+                                    <i class="fa-solid fa-envelope me-1"></i> Envoyer une missive à <?= htmlspecialchars($targetDaimyo) ?>
                                 </a>
                             <?php endif; ?>
                             <a href="?page=fleet" class="btn btn-sm btn-outline-danger">
-                                🏇 Déployer une armée
+                                <i class="fa-solid fa-horse me-1"></i> Déployer une armée
                             </a>
                         </div>
                     </div>
@@ -721,7 +721,7 @@ if (!empty($_GET['mark_all_read']) && !empty($user['id'])) {
                 <!-- Aucun rapport sélectionné -->
                 <div class="card bg-white border shadow-sm">
                     <div class="empty p-5">
-                        <div class="empty-icon fs-1">📜</div>
+                        <div class="empty-icon fs-1"><i class="fa-solid fa-scroll text-muted"></i></div>
                         <p class="empty-title fs-2 text-dark">Sélectionnez une Chronique Militaire</p>
                         <p class="empty-subtitle text-secondary">
                             Cliquez sur un rapport dans le registre de gauche pour examiner le détail tactique des engagements et des butins saisis.

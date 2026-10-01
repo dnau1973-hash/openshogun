@@ -38,7 +38,7 @@ $categories = $forumEngine->getCategories();
         <div class="col">
             <div class="page-pretitle">Agora & Conseil de Guerre de l'Empire</div>
             <h2 class="page-title d-flex align-items-center gap-2">
-                <span>💬</span> Forum Féodal du Japon
+                <i class="fa-solid fa-comments text-primary me-1"></i>Forum Féodal du Japon
             </h2>
         </div>
         <div class="col-auto ms-auto d-print-none">
@@ -50,14 +50,14 @@ $categories = $forumEngine->getCategories();
                 <?php endif; ?>
                 <?php if ($isAdmin): ?>
                     <button type="button" class="btn btn-info text-white d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="collapse" data-bs-target="#adminForumPanel" aria-expanded="false" aria-controls="adminForumPanel">
-                        <span>⚙️</span> Gérer les Salons <span class="badge bg-white text-info ms-1"><?= count($categories) ?></span>
+                        <i class="fa-solid fa-gear me-1"></i>Gérer les Salons <span class="badge bg-white text-info ms-1"><?= count($categories) ?></span>
                     </button>
                     <button type="button" class="btn btn-primary d-flex align-items-center gap-1 shadow-sm" onclick="openCreateForumCategoryModal()">
-                        <span>➕</span> Nouveau Salon
+                        <i class="fa-solid fa-plus me-1"></i>Nouveau Salon
                     </button>
                 <?php elseif ($isStaff): ?>
                     <span class="badge bg-azure-lt px-3 py-2 fs-6 d-flex align-items-center gap-1">
-                        <span>🛡️</span> Modération Féodale Active
+                        <i class="fa-solid fa-shield-halved text-info me-1"></i>Modération Féodale Active
                     </span>
                 <?php endif; ?>
             </div>
@@ -76,15 +76,15 @@ $categories = $forumEngine->getCategories();
             <div class="card-header bg-info-lt d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <h3 class="card-title text-info-emphasis d-flex align-items-center gap-2 m-0">
-                        <span>⚙️</span> Administration &amp; Modération des Salons Féodaux
+                        <i class="fa-solid fa-gear text-secondary me-1"></i>Administration &amp; Modération des Salons Féodaux
                     </h3>
                     <div class="text-secondary small mt-1">
-                        Gérez l'ordonnancement, les thématiques et les droits d'accès des salons. Les salons verrouillés (🔒) sont réservés aux décrets officiels du Shōgunat.
+                        Gérez l'ordonnancement, les thématiques et les droits d'accès des salons. Les salons verrouillés (<i class="fa-solid fa-lock text-secondary"></i>) sont réservés aux décrets officiels du Shōgunat.
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="btn btn-sm btn-primary" onclick="openCreateForumCategoryModal()">
-                        ➕ Créer un Salon
+                        <i class="fa-solid fa-plus me-1"></i>Créer un Salon
                     </button>
                     <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target="#adminForumPanel" aria-label="Fermer"></button>
                 </div>
@@ -113,7 +113,13 @@ $categories = $forumEngine->getCategories();
                             <?php else: ?>
                                 <?php foreach ($categories as $fCat): ?>
                                     <tr>
-                                        <td class="text-center fs-3"><?= htmlspecialchars($fCat['icon']) ?></td>
+                                        <td class="text-center fs-3">
+                                            <?php if (!empty($fCat['icon']) && (str_starts_with($fCat['icon'], 'fa-') || str_contains($fCat['icon'], 'fa-'))): ?>
+                                                <i class="fa-solid <?= htmlspecialchars($fCat['icon']) ?>"></i>
+                                            <?php else: ?>
+                                                <i class="fa-solid fa-comments text-danger"></i>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="fw-bold">
                                             <a href="/?page=forum&cat=<?= $fCat['id'] ?>" class="text-reset">
                                                 <?= htmlspecialchars($fCat['name']) ?>
@@ -123,9 +129,9 @@ $categories = $forumEngine->getCategories();
                                         <td class="text-center fw-bold"><?= (int)$fCat['display_order'] ?></td>
                                         <td class="text-center">
                                             <?php if ((int)$fCat['is_locked'] === 1): ?>
-                                                <span class="badge bg-secondary-lt">🔒 Staff Uniquement</span>
+                                                <span class="badge bg-secondary-lt"><i class="fa-solid fa-lock me-1"></i>Staff Uniquement</span>
                                             <?php else: ?>
-                                                <span class="badge bg-success-lt">💬 Ouvert à Tous</span>
+                                                <span class="badge bg-success-lt"><i class="fa-solid fa-comments me-1"></i>Ouvert à Tous</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-center small">
@@ -135,12 +141,12 @@ $categories = $forumEngine->getCategories();
                                             <button type="button" class="btn btn-sm btn-outline-primary" 
                                                     title="Modifier ce salon"
                                                     onclick="openEditForumCategoryModal(<?= $fCat['id'] ?>, '<?= htmlspecialchars(addslashes($fCat['name'])) ?>', '<?= htmlspecialchars(addslashes($fCat['description'] ?? '')) ?>', '<?= htmlspecialchars(addslashes($fCat['icon'])) ?>', <?= (int)$fCat['display_order'] ?>, <?= (int)$fCat['is_locked'] ?>)">
-                                                ✏️
+                                                <i class="fa-solid fa-pen"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-outline-danger" 
                                                     title="Supprimer ce salon"
                                                     onclick="deleteForumCategory(<?= $fCat['id'] ?>, '<?= htmlspecialchars(addslashes($fCat['name'])) ?>')">
-                                                🗑️
+                                                <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </td>
                                     </tr>
@@ -155,7 +161,7 @@ $categories = $forumEngine->getCategories();
 <?php elseif ($isModerator): ?>
     <!-- Notice d'habilitation Modérateur -->
     <div class="alert alert-info alert-dismissible d-flex align-items-center gap-2 mb-3" role="alert">
-        <span class="fs-2">🛡️</span>
+        <i class="fa-solid fa-shield-halved text-info fs-2"></i>
         <div>
             <strong>Rang de Modérateur Féodal :</strong> Vous êtes investi de l'autorité du Shōgunat pour modérer les échanges, épingler les annonces cruciales, verrouiller les débats clos et corriger les outrages.
         </div>
@@ -171,7 +177,7 @@ $categories = $forumEngine->getCategories();
     <div class="card">
         <div class="card-header bg-light">
             <h3 class="card-title d-flex align-items-center gap-2">
-                <span>🏯</span> Salons de Discussion & Décrets Impériaux
+                <i class="fa-solid fa-chess-rook text-danger me-1"></i>Salons de Discussion &amp; Décrets Impériaux
             </h3>
         </div>
         <div class="table-responsive">
@@ -189,7 +195,11 @@ $categories = $forumEngine->getCategories();
                     <?php foreach ($categories as $cat): ?>
                         <tr>
                             <td class="text-center" style="font-size: 1.8rem; padding-right: 0;">
-                                <?= $cat['icon'] ?>
+                                <?php if (!empty($cat['icon']) && (str_starts_with($cat['icon'], 'fa-') || str_contains($cat['icon'], 'fa-'))): ?>
+                                    <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?>"></i>
+                                <?php else: ?>
+                                    <i class="fa-solid fa-comments text-danger"></i>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
@@ -197,7 +207,7 @@ $categories = $forumEngine->getCategories();
                                         <?= htmlspecialchars($cat['name']) ?>
                                     </a>
                                     <?php if ((int)$cat['is_locked'] === 1): ?>
-                                        <span class="badge bg-secondary-lt" title="Salon réservé aux proclamations du Shogunat">🔒 Officiel</span>
+                                        <span class="badge bg-secondary-lt" title="Salon réservé aux proclamations du Shogunat"><i class="fa-solid fa-lock me-1"></i>Officiel</span>
                                     <?php endif; ?>
                                 </div>
                                 <div class="text-muted small mt-1">
@@ -257,23 +267,23 @@ $categories = $forumEngine->getCategories();
             <h3 class="mb-0 d-flex align-items-center gap-2">
                 <span><?= $cat['icon'] ?></span> <?= htmlspecialchars($cat['name']) ?>
                 <?php if ((int)$cat['is_locked'] === 1): ?>
-                    <span class="badge bg-secondary-lt fs-6">🔒 Salon Officiel</span>
+                    <span class="badge bg-secondary-lt fs-6"><i class="fa-solid fa-lock me-1"></i>Salon Officiel</span>
                 <?php endif; ?>
             </h3>
         </div>
         <div class="d-flex align-items-center gap-2">
             <?php if ($isAdmin): ?>
                 <button type="button" class="btn btn-outline-info" onclick="openEditForumCategoryModal(<?= $cat['id'] ?>, '<?= htmlspecialchars(addslashes($cat['name'])) ?>', '<?= htmlspecialchars(addslashes($cat['description'] ?? '')) ?>', '<?= htmlspecialchars(addslashes($cat['icon'])) ?>', <?= (int)$cat['display_order'] ?>, <?= (int)$cat['is_locked'] ?>)">
-                    ⚙️ Paramètres du Salon
+                    <i class="fa-solid fa-gear me-1"></i>Paramètres du Salon
                 </button>
             <?php endif; ?>
             <?php if ($canCreateTopic): ?>
                 <a href="/?page=forum&action=new_topic&cat=<?= $cat['id'] ?>" class="btn btn-primary">
-                    ✍️ Proclamer un Sujet
+                    <i class="fa-solid fa-pen-nib me-1"></i>Proclamer un Sujet
                 </a>
             <?php else: ?>
                 <button class="btn btn-secondary disabled" title="Seuls les membres du Shogunat peuvent proclamer des décrets ici">
-                    🔒 Décrets Réservés au Staff
+                    <i class="fa-solid fa-lock me-1"></i>Décrets Réservés au Staff
                 </button>
             <?php endif; ?>
         </div>
@@ -314,11 +324,11 @@ $categories = $forumEngine->getCategories();
                             <tr style="<?= $isPinned ? 'background: rgba(234, 179, 8, 0.05);' : '' ?>">
                                 <td class="text-center fs-4">
                                     <?php if ($isPinned): ?>
-                                        <span title="Sujet Épinglé">📌</span>
+                                        <i class="fa-solid fa-thumbtack text-danger" title="Sujet Épinglé"></i>
                                     <?php elseif ($isLocked): ?>
-                                        <span title="Sujet Verrouillé">🔒</span>
+                                        <i class="fa-solid fa-lock text-secondary" title="Sujet Verrouillé"></i>
                                     <?php else: ?>
-                                        <span class="text-muted">💬</span>
+                                        <i class="fa-solid fa-comment text-muted"></i>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -404,10 +414,10 @@ $categories = $forumEngine->getCategories();
                 </ol>
             </nav>
             <h2 class="mb-0 d-flex align-items-center gap-2">
-                <span><?= ((int)$topic['is_pinned'] === 1) ? '📌' : '💬' ?></span>
+                <span><?= ((int)$topic['is_pinned'] === 1) ? '<i class="fa-solid fa-thumbtack text-danger"></i>' : '<i class="fa-solid fa-comment text-secondary"></i>' ?></span>
                 <?= htmlspecialchars($topic['title']) ?>
                 <?php if ($isTopicLocked): ?>
-                    <span class="badge bg-secondary fs-6">🔒 Verrouillé</span>
+                    <span class="badge bg-secondary fs-6"><i class="fa-solid fa-lock me-1"></i>Verrouillé</span>
                 <?php endif; ?>
             </h2>
         </div>
@@ -417,15 +427,15 @@ $categories = $forumEngine->getCategories();
             <div class="btn-list">
                 <button class="btn btn-sm <?= ((int)$topic['is_pinned'] === 1) ? 'btn-warning' : 'btn-outline-warning' ?>" 
                         onclick="togglePinTopic(<?= $topic['id'] ?>)">
-                    📌 <?= ((int)$topic['is_pinned'] === 1) ? 'Désépingler' : 'Épingler' ?>
+                    <i class="fa-solid fa-thumbtack me-1"></i><?= ((int)$topic['is_pinned'] === 1) ? 'Désépingler' : 'Épingler' ?>
                 </button>
                 <button class="btn btn-sm <?= $isTopicLocked ? 'btn-secondary' : 'btn-outline-secondary' ?>" 
                         onclick="toggleLockTopic(<?= $topic['id'] ?>)">
-                    🔒 <?= $isTopicLocked ? 'Déverrouiller' : 'Verrouiller' ?>
+                    <i class="fa-solid fa-lock me-1"></i><?= $isTopicLocked ? 'Déverrouiller' : 'Verrouiller' ?>
                 </button>
                 <button class="btn btn-sm btn-outline-danger" 
                         onclick="deleteTopic(<?= $topic['id'] ?>, <?= $topic['category_id'] ?>)">
-                    🗑️ Supprimer le Sujet
+                    <i class="fa-solid fa-trash me-1"></i>Supprimer le Sujet
                 </button>
             </div>
         <?php endif; ?>
@@ -445,7 +455,7 @@ $categories = $forumEngine->getCategories();
                     <!-- Volet Auteur -->
                     <div class="col-md-3 p-3 text-center border-end bg-light d-flex flex-column align-items-center justify-content-start">
                         <div class="mb-2">
-                            <span style="font-size: 2.5rem;">🏯</span>
+                            <i class="fa-solid fa-chess-rook text-danger" style="font-size: 2.5rem;"></i>
                         </div>
                         <a href="/?page=poster&id=<?= (int)$post['user_id'] ?>" class="fw-bold fs-5 text-decoration-none text-dark" title="Consulter l'Affiche Féodale">
                             <?= htmlspecialchars($post['author_username']) ?>
@@ -454,9 +464,9 @@ $categories = $forumEngine->getCategories();
                         <!-- Badges de Rang Féodal -->
                         <div class="my-1">
                             <?php if ($postAuthorIsAdmin): ?>
-                                <span class="badge bg-danger text-white">⭐ ADMINISTRATEUR</span>
+                                <span class="badge bg-danger text-white"><i class="fa-solid fa-star me-1"></i>ADMINISTRATEUR</span>
                             <?php elseif ($postAuthorIsMod): ?>
-                                <span class="badge bg-info text-white">🛡️ MODÉRATEUR</span>
+                                <span class="badge bg-info text-white"><i class="fa-solid fa-shield-halved me-1"></i>MODÉRATEUR</span>
                             <?php else: ?>
                                 <span class="badge bg-secondary-lt">Daimyō</span>
                             <?php endif; ?>
@@ -470,8 +480,8 @@ $categories = $forumEngine->getCategories();
 
                         <div class="small text-muted mt-2">
                             <div><?= $authorFaction['icon'] ?> <?= htmlspecialchars($authorFaction['name']) ?></div>
-                            <div>🏆 <?= number_format($post['author_points']) ?> pts</div>
-                            <div>🏰 <?= $post['author_planet_count'] ?> fief(s)</div>
+                            <div><i class="fa-solid fa-trophy text-warning me-1"></i><?= number_format($post['author_points']) ?> pts</div>
+                            <div><i class="fa-solid fa-chess-rook text-danger me-1"></i><?= $post['author_planet_count'] ?> fief(s)</div>
                         </div>
                     </div>
 
@@ -499,19 +509,19 @@ $categories = $forumEngine->getCategories();
                         <div class="pt-3 mt-3 border-top d-flex justify-content-end gap-2">
                             <?php if ($canReply): ?>
                                 <button class="btn btn-sm btn-outline-secondary" onclick="quotePost('<?= htmlspecialchars(addslashes($post['author_username'])) ?>', <?= $post['id'] ?>)">
-                                    💬 Citer
+                                    <i class="fa-solid fa-quote-left me-1"></i>Citer
                                 </button>
                             <?php endif; ?>
 
                             <?php if ($isAuthor || $isStaff): ?>
                                 <button class="btn btn-sm btn-outline-primary" onclick="openEditModal(<?= $post['id'] ?>)">
-                                    ✏️ Éditer
+                                    <i class="fa-solid fa-pen me-1"></i>Éditer
                                 </button>
                             <?php endif; ?>
 
                             <?php if (($isAuthor || $isStaff) && (int)$post['is_first_post'] === 0): ?>
                                 <button class="btn btn-sm btn-outline-danger" onclick="deletePost(<?= $post['id'] ?>)">
-                                    🗑️ Supprimer
+                                    <i class="fa-solid fa-trash me-1"></i>Supprimer
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -526,7 +536,7 @@ $categories = $forumEngine->getCategories();
         <div class="card mb-4" id="replyFormContainer">
             <div class="card-header bg-light">
                 <h4 class="card-title d-flex align-items-center gap-2">
-                    <span>✍️</span> Inscrire une Réponse au Débat
+                    <i class="fa-solid fa-pen-nib text-primary me-1"></i>Inscrire une Réponse au Débat
                 </h4>
             </div>
             <div class="card-body">
@@ -536,7 +546,7 @@ $categories = $forumEngine->getCategories();
                     </div>
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary" id="btnSubmitReply">
-                            📜 Sceller & Publier la Réponse
+                            <i class="fa-solid fa-scroll me-1"></i>Sceller &amp; Publier la Réponse
                         </button>
                     </div>
                 </form>
@@ -544,7 +554,7 @@ $categories = $forumEngine->getCategories();
         </div>
     <?php else: ?>
         <div class="alert alert-secondary text-center py-3">
-            🔒 Ce sujet a été verrouillé par la modération féodale. Les débats sont clos.
+            <i class="fa-solid fa-lock text-secondary me-1"></i>Ce sujet a été verrouillé par la modération féodale. Les débats sont clos.
         </div>
     <?php endif; ?>
 
@@ -563,7 +573,7 @@ $categories = $forumEngine->getCategories();
     <div class="card">
         <div class="card-header bg-light">
             <h3 class="card-title d-flex align-items-center gap-2">
-                <span>✍️</span> Proclamer un Nouveau Sujet dans : <?= htmlspecialchars($cat['name']) ?>
+                <i class="fa-solid fa-pen-nib text-primary me-1"></i>Proclamer un Nouveau Sujet dans : <?= htmlspecialchars($cat['name']) ?>
             </h3>
         </div>
         <div class="card-body">
@@ -581,7 +591,7 @@ $categories = $forumEngine->getCategories();
                         Annuler
                     </a>
                     <button type="submit" class="btn btn-primary" id="btnSubmitTopic">
-                        📢 Proclamer le Sujet sur le Forum
+                        <i class="fa-solid fa-bullhorn me-1"></i>Proclamer le Sujet sur le Forum
                     </button>
                 </div>
             </form>
@@ -595,7 +605,7 @@ $categories = $forumEngine->getCategories();
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">✏️ Édition du Message</h5>
+                <h5 class="modal-title"><i class="fa-solid fa-pen text-primary me-1"></i>Édition du Message</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -617,16 +627,16 @@ $categories = $forumEngine->getCategories();
         <div class="modal-content">
             <form onsubmit="submitAdminCreateCategory(event)">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">➕ Fonder un Nouveau Salon Féodal</h5>
+                    <h5 class="modal-title"><i class="fa-solid fa-plus text-primary me-1"></i>Fonder un Nouveau Salon Féodal</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-3 mb-3">
-                            <label class="form-label required">Icône</label>
-                            <input type="text" id="create_afc_icon" class="form-control text-center" value="💬" required>
+                        <div class="col-4 mb-3">
+                            <label class="form-label required">Icône (Font Awesome)</label>
+                            <input type="text" id="create_afc_icon" class="form-control text-center" value="fa-comments" placeholder="fa-comments" required>
                         </div>
-                        <div class="col-9 mb-3">
+                        <div class="col-8 mb-3">
                             <label class="form-label required">Titre du Salon</label>
                             <input type="text" id="create_afc_name" class="form-control" placeholder="Ex: Maison de Thé & Sérénité" required>
                         </div>
@@ -643,7 +653,7 @@ $categories = $forumEngine->getCategories();
                         <div class="col-6 mb-3 d-flex align-items-center pt-3">
                             <label class="form-check form-switch mt-2">
                                 <input class="form-check-input" type="checkbox" id="create_afc_locked">
-                                <span class="form-check-label small fw-bold">🔒 Décrets Staff</span>
+                                <span class="form-check-label small fw-bold"><i class="fa-solid fa-lock me-1"></i>Décrets Staff</span>
                             </label>
                         </div>
                     </div>
@@ -663,7 +673,7 @@ $categories = $forumEngine->getCategories();
         <div class="modal-content">
             <form onsubmit="submitAdminEditCategory(event)">
                 <div class="modal-header bg-info-lt">
-                    <h5 class="modal-title">✏️ Édition du Salon Féodal</h5>
+                    <h5 class="modal-title"><i class="fa-solid fa-pen text-primary me-1"></i>Édition du Salon Féodal</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -690,7 +700,7 @@ $categories = $forumEngine->getCategories();
                         <div class="col-6 mb-3 d-flex align-items-center pt-3">
                             <label class="form-check form-switch mt-2">
                                 <input class="form-check-input" type="checkbox" id="edit_afc_locked">
-                                <span class="form-check-label small fw-bold">🔒 Décrets Staff</span>
+                                <span class="form-check-label small fw-bold"><i class="fa-solid fa-lock me-1"></i>Décrets Staff</span>
                             </label>
                         </div>
                     </div>
@@ -747,12 +757,12 @@ async function submitNewTopic(e) {
         } else {
             showForumAlert(data.error || "Erreur lors de la création.", 'danger');
             btn.disabled = false;
-            btn.innerText = "📢 Proclamer le Sujet sur le Forum";
+            btn.innerText = "<i class="fa-solid fa-bullhorn me-1"></i>Proclamer le Sujet sur le Forum";
         }
     } catch (err) {
         showForumAlert("Erreur réseau.", 'danger');
         btn.disabled = false;
-        btn.innerText = "📢 Proclamer le Sujet sur le Forum";
+        btn.innerText = "<i class="fa-solid fa-bullhorn me-1"></i>Proclamer le Sujet sur le Forum";
     }
 }
 
@@ -782,12 +792,12 @@ async function submitReply(e) {
         } else {
             showForumAlert(data.error || "Erreur de réponse.", 'danger');
             btn.disabled = false;
-            btn.innerText = "📜 Sceller & Publier la Réponse";
+            btn.innerText = "<i class="fa-solid fa-scroll me-1"></i>Sceller &amp; Publier la Réponse";
         }
     } catch (err) {
         showForumAlert("Erreur réseau.", 'danger');
         btn.disabled = false;
-        btn.innerText = "📜 Sceller & Publier la Réponse";
+        btn.innerText = "<i class="fa-solid fa-scroll me-1"></i>Sceller &amp; Publier la Réponse";
     }
 }
 
@@ -935,7 +945,7 @@ async function deleteTopic(topicId, catId) {
 <?php if ($isAdmin): ?>
 // 9. Administration : Ouvrir la modale de création de salon
 function openCreateForumCategoryModal() {
-    document.getElementById('create_afc_icon').value = '💬';
+    document.getElementById('create_afc_icon').value = 'fa-comments';
     document.getElementById('create_afc_name').value = '';
     document.getElementById('create_afc_desc').value = '';
     document.getElementById('create_afc_order').value = 10;
@@ -953,7 +963,7 @@ async function submitAdminCreateCategory(e) {
 
     try {
         const formData = new FormData();
-        formData.append('icon', document.getElementById('create_afc_icon').value.trim() || '💬');
+        formData.append('icon', document.getElementById('create_afc_icon').value.trim() || 'fa-comments');
         formData.append('name', document.getElementById('create_afc_name').value.trim());
         formData.append('description', document.getElementById('create_afc_desc').value.trim());
         formData.append('display_order', document.getElementById('create_afc_order').value || 0);
@@ -999,7 +1009,7 @@ async function submitAdminEditCategory(e) {
         formData.append('category_id', document.getElementById('edit_afc_id').value);
         formData.append('name', document.getElementById('edit_afc_name').value.trim());
         formData.append('description', document.getElementById('edit_afc_desc').value.trim());
-        formData.append('icon', document.getElementById('edit_afc_icon').value.trim() || '💬');
+        formData.append('icon', document.getElementById('edit_afc_icon').value.trim() || 'fa-comments');
         formData.append('display_order', document.getElementById('edit_afc_order').value || 0);
         formData.append('is_locked', document.getElementById('edit_afc_locked').checked ? '1' : '0');
 

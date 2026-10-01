@@ -47,6 +47,9 @@ if (!$isAuth):
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 (Icônes vectorielles professionnelles) -->
+    <link rel="stylesheet" href="/public/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="/public/css/tabler/tabler.min.css">
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../public/css/style.css') ? filemtime(__DIR__ . '/../public/css/style.css') : time() ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
@@ -59,7 +62,7 @@ if (!$isAuth):
         <header class="navbar navbar-expand-md bg-white border-bottom py-2 sticky-top shadow-sm">
             <div class="container-fluid px-3 px-lg-4 d-flex justify-content-between align-items-center">
                 <a href="/" class="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
-                    <span style="font-size: 1.6rem;">📜</span>
+                    <span class="fs-2 text-primary"><i class="fa-solid fa-scroll"></i></span>
                     <div>
                         <div class="fw-bold text-dark lh-1" style="font-size: 1.15rem; letter-spacing: 0.3px;">OpenShogun &bull; Changelog</div>
                         <div class="text-secondary small fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.6px; text-transform: uppercase;">Chroniques des Mises à Jour &amp; Évolutions</div>
@@ -67,13 +70,13 @@ if (!$isAuth):
                 </a>
                 <div class="d-flex align-items-center gap-2">
                     <a href="/?page=docs" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-flex align-items-center gap-1">
-                        <span>📖</span> Règles du jeu
+                        <i class="fa-solid fa-book-open"></i> Règles du jeu
                     </a>
                     <a href="/?page=support" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-flex align-items-center gap-1">
-                        <span>📮</span> Support &amp; Aide
+                        <i class="fa-solid fa-envelope"></i> Support &amp; Aide
                     </a>
                     <a href="/?page=pedagogy" class="btn btn-sm btn-outline-cyan d-none d-md-inline-flex align-items-center gap-1">
-                        <span>🎓</span> Atelier Pédagogique
+                        <i class="fa-solid fa-graduation-cap"></i> Atelier Pédagogique
                     </a>
                 </div>
             </div>

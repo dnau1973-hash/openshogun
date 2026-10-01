@@ -53,27 +53,27 @@ $nextSlot = ($slot < 34) ? $slot + 1 : 19;
 
 // Secteurs
 $buildingSectors = [
-    'hq' => ['name' => 'Tenshu Donjon', 'sec' => 'sec-hq', 'icon' => '🏯'],
-    'shipyard' => ['name' => 'Écuries & Cavalerie', 'sec' => 'sec-military', 'icon' => '🐎'],
-    'barracks' => ['name' => 'Dojo Militaire', 'sec' => 'sec-military', 'icon' => '🥋'],
-    'radar' => ['name' => 'Poste de Vigie', 'sec' => 'sec-military', 'icon' => '🔭'],
-    'wall' => ['name' => 'Muraille & Remparts', 'sec' => 'sec-military', 'icon' => '🧱'],
-    'research_lab' => ['name' => 'Académie des Savoirs', 'sec' => 'sec-science', 'icon' => '📜'],
-    'embassy' => ['name' => 'Pavillon Diplomatique', 'sec' => 'sec-science', 'icon' => '⛩️'],
-    'storage' => ['name' => 'Greniers de Cèdre & Pierre', 'sec' => 'sec-logistics', 'icon' => '🪵'],
-    'tank' => ['name' => 'Silo à Riz Impérial', 'sec' => 'sec-logistics', 'icon' => '🌾'],
-    'quantum_vault' => ['name' => 'Cachette Secrète', 'sec' => 'sec-logistics', 'icon' => '🔒'],
-    'market' => ['name' => 'Marché Castral', 'sec' => 'sec-logistics', 'icon' => '⚖️'],
-    'sawmill' => ['name' => 'Charpenterie (Kizukuri)', 'sec' => 'sec-logistics', 'icon' => '🪵'],
-    'stonemason' => ['name' => 'Taille de Granit', 'sec' => 'sec-logistics', 'icon' => '🪨'],
-    'grain_mill' => ['name' => 'Meunerie de Riz', 'sec' => 'sec-logistics', 'icon' => '🍶'],
-    'blacksmith' => ['name' => 'Grande Forge Tamahagane', 'sec' => 'sec-military', 'icon' => '⚔️'],
-    'teahouse' => ['name' => 'Pavillon de Thé', 'sec' => 'sec-science', 'icon' => '🍵'],
-    'tournament_square' => ['name' => 'Place d\'Exercices', 'sec' => 'sec-military', 'icon' => '🎯'],
-    'free_plot' => ['name' => 'Terrain Vierge', 'sec' => 'sec-logistics', 'icon' => '⛳'],
+    'hq' => ['name' => 'Tenshu Donjon', 'sec' => 'sec-hq', 'icon' => '<i class="fa-solid fa-chess-rook"></i>'],
+    'shipyard' => ['name' => 'Écuries & Cavalerie', 'sec' => 'sec-military', 'icon' => '<i class="fa-solid fa-horse"></i>'],
+    'barracks' => ['name' => 'Dojo Militaire', 'sec' => 'sec-military', 'icon' => '<i class="fa-solid fa-user-ninja"></i>'],
+    'radar' => ['name' => 'Poste de Vigie', 'sec' => 'sec-military', 'icon' => '<i class="fa-solid fa-eye"></i>'],
+    'wall' => ['name' => 'Muraille & Remparts', 'sec' => 'sec-military', 'icon' => '<i class="fa-solid fa-shield-halved"></i>'],
+    'research_lab' => ['name' => 'Académie des Savoirs', 'sec' => 'sec-science', 'icon' => '<i class="fa-solid fa-scroll"></i>'],
+    'embassy' => ['name' => 'Pavillon Diplomatique', 'sec' => 'sec-science', 'icon' => '<i class="fa-solid fa-torii-gate"></i>'],
+    'storage' => ['name' => 'Greniers de Cèdre & Pierre', 'sec' => 'sec-logistics', 'icon' => '<i class="fa-solid fa-tree"></i>'],
+    'tank' => ['name' => 'Silo à Riz Impérial', 'sec' => 'sec-logistics', 'icon' => '<i class="fa-solid fa-wheat-awn"></i>'],
+    'quantum_vault' => ['name' => 'Cachette Secrète', 'sec' => 'sec-logistics', 'icon' => '<i class="fa-solid fa-lock"></i>'],
+    'market' => ['name' => 'Marché Castral', 'sec' => 'sec-logistics', 'icon' => '<i class="fa-solid fa-scale-balanced"></i>'],
+    'sawmill' => ['name' => 'Charpenterie (Kizukuri)', 'sec' => 'sec-logistics', 'icon' => '<i class="fa-solid fa-hammer"></i>'],
+    'stonemason' => ['name' => 'Taille de Granit', 'sec' => 'sec-logistics', 'icon' => '<i class="fa-solid fa-mountain"></i>'],
+    'grain_mill' => ['name' => 'Meunerie de Riz', 'sec' => 'sec-logistics', 'icon' => '<i class="fa-solid fa-bowl-rice"></i>'],
+    'blacksmith' => ['name' => 'Grande Forge Tamahagane', 'sec' => 'sec-military', 'icon' => '<i class="fa-solid fa-khanda"></i>'],
+    'teahouse' => ['name' => 'Pavillon de Thé', 'sec' => 'sec-science', 'icon' => '<i class="fa-solid fa-mug-hot"></i>'],
+    'tournament_square' => ['name' => 'Place d\'Exercices', 'sec' => 'sec-military', 'icon' => '<i class="fa-solid fa-bullseye"></i>'],
+    'free_plot' => ['name' => 'Terrain Vierge', 'sec' => 'sec-logistics', 'icon' => '<i class="fa-solid fa-flag"></i>'],
 ];
 
-$sectorInfo = $buildingSectors[$code] ?? ['name' => 'Bâtiment Castral', 'sec' => 'sec-logistics', 'icon' => '🏯'];
+$sectorInfo = $buildingSectors[$code] ?? ['name' => 'Bâtiment Castral', 'sec' => 'sec-logistics', 'icon' => '<i class="fa-solid fa-chess-rook"></i>'];
 
 // File active de construction
 $queue = $buildingEngine->getQueue((int)$planet['id']);
@@ -124,7 +124,7 @@ if ($isEmptyPlot) {
                 'info' => $bInfo,
                 'details' => $details,
                 'can_afford' => $canAfford,
-                'sector' => $buildingSectors[$bCode] ?? ['name' => 'Logistique', 'sec' => 'sec-logistics', 'icon' => '📦']
+                'sector' => $buildingSectors[$bCode] ?? ['name' => 'Logistique', 'sec' => 'sec-logistics', 'icon' => '<i class="fa-solid fa-boxes-stacked"></i>']
             ];
         }
     }
@@ -283,13 +283,13 @@ if (!$isEmptyPlot) {
             <div class="page-pretitle">Cité Castrale de <?= htmlspecialchars($planet['name']) ?></div>
             <h2 class="page-title font-game">
                 <?php if ($isEmptyPlot): ?>
-                    ⛳ Terrain Castral #<?= $slot ?>
+                    <i class="fa-solid fa-flag text-danger me-1"></i>Terrain Castral #<?= $slot ?>
                     <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">Terrain Libre</span>
                 <?php else: ?>
-                    <?= $bInfo['icon'] ?? '🏯' ?> <?= htmlspecialchars($bInfo['name']) ?>
+                    <?= $bInfo['icon'] ?? '<i class="fa-solid fa-chess-rook"></i>' ?> <?= htmlspecialchars($bInfo['name']) ?>
                     <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">Slot #<?= $slot ?> · Niv.<?= $lvl ?></span>
                     <?php if ($activeJob): ?>
-                        <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem; vertical-align:middle;">⏳ Chantier en cours</span>
+                        <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem; vertical-align:middle;"><i class="fa-solid fa-hourglass-half me-1"></i>Chantier en cours</span>
                     <?php elseif ($lvl > 0): ?>
                         <span class="badge bg-success ms-1" style="font-size:0.65rem; vertical-align:middle;">Opérationnel</span>
                     <?php else: ?>
@@ -304,7 +304,7 @@ if (!$isEmptyPlot) {
                     ← Slot #<?= $prevSlot ?>
                 </a>
                 <a href="/?page=city" class="btn btn-secondary">
-                    🏯 Vue Cité
+                    <i class="fa-solid fa-chess-rook me-1"></i>Vue Cité
                 </a>
                 <a href="/?page=building&slot=<?= $nextSlot ?>" class="btn btn-outline-secondary">
                     Slot #<?= $nextSlot ?> →
@@ -321,7 +321,7 @@ if (!$isEmptyPlot) {
             <div class="card card-sm h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="row align-items-center w-100 g-2">
-                        <div class="col-auto"><span class="avatar rounded bg-blue-lt" style="font-size:1.3rem;">⛳</span></div>
+                        <div class="col-auto"><span class="avatar rounded bg-blue-lt" style="font-size:1.3rem;"><i class="fa-solid fa-flag text-danger"></i></span></div>
                         <div class="col">
                             <div class="font-weight-medium">Emplacement</div>
                             <div class="text-secondary">Slot Castral #<?= $slot ?> sur 34</div>
@@ -334,7 +334,7 @@ if (!$isEmptyPlot) {
             <div class="card card-sm h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="row align-items-center w-100 g-2">
-                        <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;">✨</span></div>
+                        <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-success"></i></span></div>
                         <div class="col">
                             <div class="font-weight-medium">État du Terrain</div>
                             <div class="text-success">Prêt à bâtir</div>
@@ -347,7 +347,7 @@ if (!$isEmptyPlot) {
             <div class="card card-sm h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="row align-items-center w-100 g-2">
-                        <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;">🏯</span></div>
+                        <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;"><i class="fa-solid fa-chess-rook text-danger"></i></span></div>
                         <div class="col">
                             <div class="font-weight-medium">Tenshu Donjon</div>
                             <div class="text-warning">Niveau <?= $hqLevel ?></div>
@@ -360,7 +360,7 @@ if (!$isEmptyPlot) {
             <div class="card card-sm h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="row align-items-center w-100 g-2">
-                        <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;">🏗️</span></div>
+                        <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;"><i class="fa-solid fa-helmet-safety text-danger"></i></span></div>
                         <div class="col">
                             <div class="font-weight-medium">Édifices Éligibles</div>
                             <div class="text-info"><?= count($availableBuildingsToConstruct) ?> constructibles</div>
@@ -374,7 +374,7 @@ if (!$isEmptyPlot) {
             <div class="card card-sm h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="row align-items-center w-100 g-2">
-                        <div class="col-auto"><span class="avatar rounded" style="background:rgba(220,38,38,0.12); font-size:1.3rem;"><?= $bInfo['icon'] ?? '🏯' ?></span></div>
+                        <div class="col-auto"><span class="avatar rounded" style="background:rgba(220,38,38,0.12); font-size:1.3rem;"><?= $bInfo['icon'] ?? '<i class="fa-solid fa-chess-rook"></i>' ?></span></div>
                         <div class="col">
                             <div class="font-weight-medium"><?= htmlspecialchars($statData['label']) ?></div>
                             <div class="text-secondary"><?= $statData['cur'] ?></div>
@@ -387,7 +387,7 @@ if (!$isEmptyPlot) {
             <div class="card card-sm h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="row align-items-center w-100 g-2">
-                        <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;">📈</span></div>
+                        <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;"><i class="fa-solid fa-chart-line text-success"></i></span></div>
                         <div class="col">
                             <div class="font-weight-medium">Niveau <?= $targetLevel ?> → Rendement</div>
                             <div class="text-success"><?= $statData['next'] ?> <span class="text-muted" style="font-size:0.75rem;">(<?= $statData['gain'] ?>)</span></div>
@@ -400,7 +400,7 @@ if (!$isEmptyPlot) {
             <div class="card card-sm h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="row align-items-center w-100 g-2">
-                        <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;">⏱️</span></div>
+                        <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;"><i class="fa-solid fa-stopwatch text-info"></i></span></div>
                         <div class="col">
                             <div class="font-weight-medium">Temps de construction</div>
                             <div class="text-info font-monospace"><?= gmdate('H:i:s', $duration) ?></div>
@@ -414,7 +414,7 @@ if (!$isEmptyPlot) {
             <div class="card card-sm h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="row align-items-center w-100 g-2">
-                        <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;"><?= $sectorInfo['icon'] ?? '🏯' ?></span></div>
+                        <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;"><?= $sectorInfo['icon'] ?? '<i class="fa-solid fa-chess-rook"></i>' ?></span></div>
                         <div class="col">
                             <div class="font-weight-medium">Secteur Castral</div>
                             <div class="text-warning"><?= htmlspecialchars($sectorInfo['name']) ?></div>
@@ -436,7 +436,7 @@ if (!$isEmptyPlot) {
         <div class="col-lg-4">
             <div class="card mb-3">
                 <div style="height:140px; background:linear-gradient(135deg,rgba(71,85,105,0.15),rgba(30,41,59,0.08)); display:flex; align-items:center; justify-content:center; font-size:3.5rem;">
-                    ⛳
+                    <i class="fa-solid fa-flag text-danger"></i>
                 </div>
                 <div class="card-body">
                     <h3 class="card-title mb-1">Emplacement Castral #<?= $slot ?></h3>
@@ -453,7 +453,7 @@ if (!$isEmptyPlot) {
             <!-- Mini-grille des emplacements de la cité -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">🗺️ Emplacements de la Cité</h3>
+                    <h3 class="card-title"><i class="fa-solid fa-map me-1"></i>Emplacements de la Cité</h3>
                     <div class="card-options text-muted" style="font-size:0.78rem;">Slots #19 à #34</div>
                 </div>
                 <div class="card-body p-2">
@@ -479,7 +479,7 @@ if (!$isEmptyPlot) {
                                             box-shadow:<?= $isCurrent ? '0 0 0 2px rgba(220,38,38,0.3)' : 'none' ?>;
                                             background:rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:center;">
                                     <?php if ($sCode === 'free_plot'): ?>
-                                        <span style="font-size:1.1rem; opacity:0.6;">🏗️</span>
+                                        <span style="font-size:1.1rem; opacity:0.6;"><i class="fa-solid fa-helmet-safety text-danger"></i></span>
                                     <?php else: ?>
                                         <img src="<?= $sTileUrl ?>" alt="" style="width:100%; height:100%; object-fit:cover; opacity:<?= $isCurrent ? '1' : '0.85' ?>;">
                                     <?php endif; ?>
@@ -500,14 +500,14 @@ if (!$isEmptyPlot) {
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <h3 class="card-title">🏗️ Fonder une Nouvelle Structure Féodale</h3>
+                        <h3 class="card-title"><i class="fa-solid fa-helmet-safety text-danger me-1"></i>Fonder une Nouvelle Structure Féodale</h3>
                         <div class="text-muted" style="font-size:0.8rem;">Sélectionnez l'édifice à ériger sur l'emplacement #<?= $slot ?></div>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <?php if (empty($availableBuildingsToConstruct)): ?>
                         <div class="text-center py-4 text-muted">
-                            <span style="font-size:2rem;">🏯</span>
+                            <span style="font-size:2rem;"><i class="fa-solid fa-chess-rook text-danger"></i></span>
                             <p class="mt-2 mb-0">Toutes les structures féodales uniques sont déjà érigées dans votre cité castrale.</p>
                         </div>
                     <?php else: ?>
@@ -534,7 +534,7 @@ if (!$isEmptyPlot) {
                                                 <?php elseif ($constructTileUrl): ?>
                                                     <img src="<?= $constructTileUrl ?>" alt="" style="width:40px; height:40px; object-fit:contain;">
                                                 <?php else: ?>
-                                                    <span style="font-size:1.8rem;"><?= $info['icon'] ?? '🏯' ?></span>
+                                                    <span style="font-size:1.8rem;"><?= $info['icon'] ?? '<i class="fa-solid fa-chess-rook"></i>' ?></span>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
@@ -548,23 +548,23 @@ if (!$isEmptyPlot) {
                                             </p>
                                             <div class="d-flex gap-3 flex-wrap align-items-center" style="font-size:0.8rem;">
                                                 <span class="<?= ($planet['metal'] >= $c['metal']) ? 'text-success' : 'text-danger' ?>">
-                                                    🪵 <?= number_format($c['metal']) ?>
+                                                    <i class="fa-solid fa-tree text-success me-1"></i><?= number_format($c['metal']) ?>
                                                 </span>
                                                 <span class="<?= ($planet['crystal'] >= $c['crystal']) ? 'text-success' : 'text-danger' ?>">
-                                                    🪨 <?= number_format($c['crystal']) ?>
+                                                    <i class="fa-solid fa-mountain text-secondary me-1"></i><?= number_format($c['crystal']) ?>
                                                 </span>
                                                 <span class="<?= ($planet['deuterium'] >= $c['deuterium']) ? 'text-success' : 'text-danger' ?>">
-                                                    🌾 <?= number_format($c['deuterium']) ?>
+                                                    <i class="fa-solid fa-wheat-awn text-warning me-1"></i><?= number_format($c['deuterium']) ?>
                                                 </span>
                                                 <span class="text-muted">
-                                                    ⏱️ <?= $durFormatted ?>
+                                                    <i class="fa-solid fa-stopwatch text-info me-1"></i><?= $durFormatted ?>
                                                 </span>
                                             </div>
                                         </div>
                                         <div class="col-auto">
                                             <?php if ($canAfford && $canQueueNewBuilding): ?>
                                                 <button type="button" class="btn btn-primary" onclick="launchBuildingUpgrade('<?= $bCode ?>', 1, <?= $slot ?>)">
-                                                    🔨 Bâtir
+                                                    <i class="fa-solid fa-hammer me-1"></i>Bâtir
                                                 </button>
                                             <?php elseif (!$canAfford): ?>
                                                 <button type="button" class="btn btn-secondary disabled" disabled>
@@ -602,7 +602,7 @@ if (!$isEmptyPlot) {
                     </div>
                 <?php else: ?>
                     <div style="height:120px; background:linear-gradient(135deg,rgba(185,28,28,0.15),rgba(30,41,59,0.1)); display:flex; align-items:center; justify-content:center; font-size:3rem;">
-                        <?= $bInfo['icon'] ?? '🏯' ?>
+                        <?= $bInfo['icon'] ?? '<i class="fa-solid fa-chess-rook"></i>' ?>
                     </div>
                 <?php endif; ?>
 
@@ -611,7 +611,7 @@ if (!$isEmptyPlot) {
                         <div class="position-relative me-3" style="cursor:pointer; display:inline-block;" onclick="openArtworkModal('<?= $tileUrl ?>', '<?= htmlspecialchars(addslashes($bInfo['name'])) ?> &bull; Bâtiment')" title="Agrandir le bâtiment">
                             <img src="<?= $tileUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:52px; height:52px; border-radius:8px; object-fit:cover; border:2px solid var(--tblr-border-color); display:block;">
                             <span class="badge bg-dark text-white position-absolute" style="bottom:-4px; right:-4px; font-size:0.6rem; padding:2px 4px; border-radius:4px; box-shadow:0 2px 4px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.3); pointer-events:none;" title="Agrandir">
-                                🔍
+                                <i class="fa-solid fa-magnifying-glass"></i>
                             </span>
                         </div>
                         <div>
@@ -626,35 +626,35 @@ if (!$isEmptyPlot) {
                         <div class="d-flex flex-column gap-2 mb-2">
                             <?php if ($code === 'barracks'): ?>
                                 <a href="/?page=barracks" class="btn btn-primary">
-                                    🥋 Ouvrir le Dojo d'Entraînement des Troupes &rarr;
+                                    <i class="fa-solid fa-user-ninja me-1"></i>Ouvrir le Dojo d'Entraînement des Troupes &rarr;
                                 </a>
                             <?php elseif ($code === 'shipyard'): ?>
                                 <a href="/?page=shipyard" class="btn btn-primary">
-                                    🐎 Accéder aux Écuries de Cavalerie & Machines &rarr;
+                                    <i class="fa-solid fa-horse me-1"></i>Accéder aux Écuries de Cavalerie & Machines &rarr;
                                 </a>
                             <?php elseif ($code === 'research_lab'): ?>
                                 <a href="/?page=research" class="btn btn-primary">
-                                    📜 Consulter l'Académie & Savoirs Féodaux &rarr;
+                                    <i class="fa-solid fa-scroll me-1"></i>Consulter l'Académie & Savoirs Féodaux &rarr;
                                 </a>
                             <?php elseif ($code === 'embassy'): ?>
                                 <a href="/?page=alliance" class="btn btn-primary">
-                                    🎌 Ouvrir le Pavillon des Alliances Féodales &rarr;
+                                    <i class="fa-solid fa-flag me-1"></i>Ouvrir le Pavillon des Alliances Féodales &rarr;
                                 </a>
                             <?php elseif ($code === 'grain_mill'): ?>
                                 <a href="#craftSection" class="btn btn-success text-white">
-                                    🍶 Accéder à la Minoterie &amp; Cuves de Saké &darr;
+                                    <i class="fa-solid fa-wine-bottle me-1"></i>Accéder à la Minoterie &amp; Cuves de Saké &darr;
                                 </a>
                             <?php elseif ($code === 'sawmill' && $lvl >= 10): ?>
                                 <a href="#craftSection" class="btn btn-warning text-dark fw-bold">
-                                    🪚 Accéder au Façonnage de Poutres &darr;
+                                    <i class="fa-solid fa-hammer me-1"></i>Accéder au Façonnage de Poutres &darr;
                                 </a>
                             <?php elseif ($code === 'hq'): ?>
                                 <a href="#feastSection" class="btn btn-warning text-dark fw-bold">
-                                    🍶 Salle des Banquets &amp; Célébrations &darr;
+                                    <i class="fa-solid fa-wine-bottle me-1"></i>Salle des Banquets &amp; Célébrations &darr;
                                 </a>
                             <?php elseif ($code === 'market'): ?>
                                 <a href="#marketSection" class="btn btn-warning text-dark fw-bold">
-                                    ⚖️ Accéder au Marché &amp; Convois de Marchandises &darr;
+                                    <i class="fa-solid fa-scale-balanced me-1"></i>Accéder au Marché &amp; Convois de Marchandises &darr;
                                 </a>
                             <?php endif; ?>
                         </div>
@@ -664,7 +664,7 @@ if (!$isEmptyPlot) {
                     <?php if ($code !== 'hq' && $lvl > 0 && !$activeJob): ?>
                         <button type="button" class="btn btn-outline-danger btn-sm w-100"
                                 onclick="confirmDemolishBuilding('<?= $code ?>', <?= $slot ?>, '<?= htmlspecialchars(addslashes($bInfo['name'] ?? $code)) ?>')">
-                            💥 Démanteler le Bâtiment (récupère 30%)
+                            <i class="fa-solid fa-trash-can me-1"></i>Démanteler le Bâtiment (récupère 30%)
                         </button>
                     <?php endif; ?>
                 </div>
@@ -673,7 +673,7 @@ if (!$isEmptyPlot) {
             <!-- Mini-grille des emplacements de la cité -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">🗺️ Emplacements de la Cité</h3>
+                    <h3 class="card-title"><i class="fa-solid fa-map me-1"></i>Emplacements de la Cité</h3>
                     <div class="card-options text-muted" style="font-size:0.78rem;">Slots #19 à #34</div>
                 </div>
                 <div class="card-body p-2">
@@ -699,7 +699,7 @@ if (!$isEmptyPlot) {
                                             box-shadow:<?= $isCurrent ? '0 0 0 2px rgba(220,38,38,0.3)' : 'none' ?>;
                                             background:rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:center;">
                                     <?php if ($sCode === 'free_plot'): ?>
-                                        <span style="font-size:1.1rem; opacity:0.6;">🏗️</span>
+                                        <span style="font-size:1.1rem; opacity:0.6;"><i class="fa-solid fa-helmet-safety text-danger"></i></span>
                                     <?php else: ?>
                                         <img src="<?= $sTileUrl ?>" alt="" style="width:100%; height:100%; object-fit:cover; opacity:<?= $isCurrent ? '1' : '0.85' ?>;">
                                     <?php endif; ?>
@@ -739,7 +739,7 @@ if (!$isEmptyPlot) {
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
                     <div>
                         <h3 class="card-title text-primary d-flex align-items-center gap-2 m-0">
-                            <span>👥</span> Démographie &amp; Ouvriers du Domaine Castral
+                            <span><i class="fa-solid fa-users text-primary"></i></span> Démographie &amp; Ouvriers du Domaine Castral
                         </h3>
                         <div class="text-secondary small mt-1">
                             La population d'artisans, bûcherons et fermiers est logée par vos édifices et soutenue par la farine de riz.
@@ -757,12 +757,12 @@ if (!$isEmptyPlot) {
                             <div class="text-muted small">/ <?= number_format($popMax) ?> logements</div>
                         </div>
                         <div class="col-sm-4 text-center border-end">
-                            <div class="text-secondary small">⚡ Bonus Bâtisseurs</div>
+                            <div class="text-secondary small"><i class="fa-solid fa-bolt text-warning me-1"></i>Bonus Bâtisseurs</div>
                             <div class="fs-3 fw-bold text-success">+<?= $popBonus ?>%</div>
                             <div class="text-muted small">vitesse de construction</div>
                         </div>
                         <div class="col-sm-4 text-center">
-                            <div class="text-secondary small">🍚 Rations de Farine</div>
+                            <div class="text-secondary small"><i class="fa-solid fa-bowl-rice text-warning me-1"></i>Rations de Farine</div>
                             <div class="fs-3 fw-bold text-dark"><?= number_format((int)($planet['rice_flour'] ?? 0)) ?></div>
                             <div class="text-muted small">subsistance assurée</div>
                         </div>
@@ -778,14 +778,14 @@ if (!$isEmptyPlot) {
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
                         <h3 class="card-title text-warning d-flex align-items-center gap-2 m-0">
-                            <span>🍶</span> Salle des Banquets &amp; Célébrations Féodales du Tenshu
+                            <span><i class="fa-solid fa-wine-bottle text-warning"></i></span> Salle des Banquets &amp; Célébrations Féodales du Tenshu
                         </h3>
                         <div class="text-secondary small mt-1">
                             Organisez des réceptions et fêtes grâce à vos réserves de Saké. Les festivités et leurs bienfaits sont intimement corrélés à l'élévation de votre Tenshu (Niveau <?= $tenshuLvl ?>).
                         </div>
                     </div>
                     <span class="badge bg-warning-lt fw-bold">
-                        Stock Saké : <?= number_format((int)$currentSake) ?> 🍶
+                        Stock Saké : <?= number_format((int)$currentSake) ?> <i class="fa-solid fa-wine-bottle text-danger"></i>
                     </span>
                 </div>
                 <div class="card-body">
@@ -793,11 +793,11 @@ if (!$isEmptyPlot) {
                     <?php if ($activeFeast): ?>
                         <?php
                             $feastNames = [
-                                'matsuri' => ['Matsuri Populaire des Saisons', '🏮', 'bg-warning-lt text-warning'],
-                                'warriors' => ['Banquet des Guerriers (Kanpai)', '⚔️', 'bg-danger-lt text-danger'],
-                                'imperial' => ['Grand Banquet Impérial & Diplomatique', '👑', 'bg-purple-lt text-purple']
+                                'matsuri' => ['Matsuri Populaire des Saisons', '<i class="fa-solid fa-fan text-warning"></i>', 'bg-warning-lt text-warning'],
+                                'warriors' => ['Banquet des Guerriers (Kanpai)', '<i class="fa-solid fa-khanda text-danger"></i>', 'bg-danger-lt text-danger'],
+                                'imperial' => ['Grand Banquet Impérial & Diplomatique', '<i class="fa-solid fa-crown text-purple"></i>', 'bg-purple-lt text-purple']
                             ];
-                            $fInfo = $feastNames[$activeFeast['feast_type']] ?? ['Festivités en cours', '🎉', 'bg-warning-lt text-warning'];
+                            $fInfo = $feastNames[$activeFeast['feast_type']] ?? ['Festivités en cours', '<i class="fa-solid fa-champagne-glasses text-warning"></i>', 'bg-warning-lt text-warning'];
                         ?>
                         <div class="alert alert-warning border border-warning shadow-sm mb-3">
                             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -827,7 +827,7 @@ if (!$isEmptyPlot) {
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
-                                            <span>🏮</span> Matsuri Saisonnier
+                                            <span><i class="fa-solid fa-fan text-warning"></i></span> Matsuri Saisonnier
                                         </h4>
                                         <span class="badge bg-success-lt">Niv. 1+</span>
                                     </div>
@@ -835,19 +835,19 @@ if (!$isEmptyPlot) {
                                         Ferveur populaire, danses et offrandes aux Kamis pour la prospérité des récoltes.
                                     </p>
                                     <div class="bg-white p-2 rounded border small mb-2">
-                                        <div>🪵🪨🌾 Prod : <strong class="text-success">+<?= 5 + $tenshuLvl ?>%</strong></div>
-                                        <div>⛩️ Sérénité : <strong class="text-info">+<?= 10 + ($tenshuLvl * 2) ?></strong></div>
-                                        <div>⏱️ Durée : <strong>8 heures</strong></div>
+                                        <div><i class="fa-solid fa-cubes text-secondary me-1"></i>Prod : <strong class="text-success">+<?= 5 + $tenshuLvl ?>%</strong></div>
+                                        <div><i class="fa-solid fa-torii-gate text-danger me-1"></i>Sérénité : <strong class="text-info">+<?= 10 + ($tenshuLvl * 2) ?></strong></div>
+                                        <div><i class="fa-solid fa-stopwatch text-info me-1"></i>Durée : <strong>8 heures</strong></div>
                                     </div>
                                     <div class="text-muted small mb-3">
-                                        Coût : <strong class="<?= ($currentSake >= $matsuriCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($matsuriCost) ?> Saké 🍶</strong>
+                                        Coût : <strong class="<?= ($currentSake >= $matsuriCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($matsuriCost) ?> Saké <i class="fa-solid fa-wine-bottle text-danger"></i></strong>
                                     </div>
                                 </div>
 
                                 <button type="button" class="btn btn-warning w-100 text-dark fw-bold btn-sm"
                                         onclick="submitTenshuFeast('matsuri')"
                                         <?= ($activeFeast || $currentSake < $matsuriCost) ? 'disabled' : '' ?>>
-                                    🏮 Célébrer le Matsuri
+                                    <i class="fa-solid fa-fan me-1"></i>Célébrer le Matsuri
                                 </button>
                             </div>
                         </div>
@@ -858,29 +858,29 @@ if (!$isEmptyPlot) {
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
-                                            <span>⚔️</span> Banquet Guerriers
+                                            <span><i class="fa-solid fa-khanda text-danger"></i></span> Banquet Guerriers
                                         </h4>
                                         <span class="badge <?= ($tenshuLvl >= 5) ? 'bg-danger-lt text-danger' : 'bg-secondary text-white' ?>">
-                                            <?= ($tenshuLvl >= 5) ? 'Niv. 5+' : '🔒 Niv. 5 requis' ?>
+                                            <?= ($tenshuLvl >= 5) ? 'Niv. 5+' : '<i class="fa-solid fa-lock text-muted me-1"></i>Niv. 5 requis' ?>
                                         </span>
                                     </div>
                                     <p class="text-secondary small mb-2">
                                         Toast d'honneur (Kanpai) aux samouraïs et vétérans pour galvaniser le moral des troupes.
                                     </p>
                                     <div class="bg-white p-2 rounded border small mb-2">
-                                        <div>🥋 Dojo &amp; Écuries : <strong class="text-danger">-<?= 10 + $tenshuLvl ?>% durée</strong></div>
-                                        <div>⚔️ Attaque Garnison : <strong class="text-danger">+5%</strong></div>
-                                        <div>⏱️ Durée : <strong>6 heures</strong></div>
+                                        <div><i class="fa-solid fa-user-ninja text-danger me-1"></i>Dojo &amp; Écuries : <strong class="text-danger">-<?= 10 + $tenshuLvl ?>% durée</strong></div>
+                                        <div><i class="fa-solid fa-khanda text-danger me-1"></i>Attaque Garnison : <strong class="text-danger">+5%</strong></div>
+                                        <div><i class="fa-solid fa-stopwatch text-info me-1"></i>Durée : <strong>6 heures</strong></div>
                                     </div>
                                     <div class="text-muted small mb-3">
-                                        Coût : <strong class="<?= ($currentSake >= $warriorsCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($warriorsCost) ?> Saké 🍶</strong>
+                                        Coût : <strong class="<?= ($currentSake >= $warriorsCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($warriorsCost) ?> Saké <i class="fa-solid fa-wine-bottle text-danger"></i></strong>
                                     </div>
                                 </div>
 
                                 <button type="button" class="btn btn-danger w-100 fw-bold btn-sm"
                                         onclick="submitTenshuFeast('warriors')"
                                         <?= ($activeFeast || $tenshuLvl < 5 || $currentSake < $warriorsCost) ? 'disabled' : '' ?>>
-                                    ⚔️ Lever le Kanpai
+                                    <i class="fa-solid fa-khanda me-1"></i>Lever le Kanpai
                                 </button>
                             </div>
                         </div>
@@ -891,29 +891,29 @@ if (!$isEmptyPlot) {
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
-                                            <span>👑</span> Banquet Impérial
+                                            <span><i class="fa-solid fa-crown text-purple"></i></span> Banquet Impérial
                                         </h4>
                                         <span class="badge <?= ($tenshuLvl >= 10) ? 'bg-purple-lt' : 'bg-secondary text-white' ?>">
-                                            <?= ($tenshuLvl >= 10) ? 'Niv. 10+' : '🔒 Niv. 10 requis' ?>
+                                            <?= ($tenshuLvl >= 10) ? 'Niv. 10+' : '<i class="fa-solid fa-lock text-muted me-1"></i>Niv. 10 requis' ?>
                                         </span>
                                     </div>
                                     <p class="text-secondary small mb-2">
                                         Réception somptueuse pour les émissaires impériaux et dignitaires des clans alliés.
                                     </p>
                                     <div class="bg-white p-2 rounded border small mb-2">
-                                        <div>🎌 Prestige : <strong class="text-purple">+<?= 50 + ($tenshuLvl * 5) ?> Honneur</strong></div>
-                                        <div>📜 Savoirs &amp; Alliances : <strong>Éclat suprême</strong></div>
-                                        <div>⏱️ Durée : <strong>12 heures</strong></div>
+                                        <div><i class="fa-solid fa-flag text-purple me-1"></i>Prestige : <strong class="text-purple">+<?= 50 + ($tenshuLvl * 5) ?> Honneur</strong></div>
+                                        <div><i class="fa-solid fa-scroll text-primary me-1"></i>Savoirs &amp; Alliances : <strong>Éclat suprême</strong></div>
+                                        <div><i class="fa-solid fa-stopwatch text-info me-1"></i>Durée : <strong>12 heures</strong></div>
                                     </div>
                                     <div class="text-muted small mb-3">
-                                        Coût : <strong class="<?= ($currentSake >= $imperialCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($imperialCost) ?> Saké 🍶</strong>
+                                        Coût : <strong class="<?= ($currentSake >= $imperialCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($imperialCost) ?> Saké <i class="fa-solid fa-wine-bottle text-danger"></i></strong>
                                     </div>
                                 </div>
 
                                 <button type="button" class="btn btn-purple w-100 text-white fw-bold btn-sm" style="background:#7c3aed;"
                                         onclick="submitTenshuFeast('imperial')"
                                         <?= ($activeFeast || $tenshuLvl < 10 || $currentSake < $imperialCost) ? 'disabled' : '' ?>>
-                                    👑 Décréter le Banquet
+                                    <i class="fa-solid fa-crown me-1"></i>Décréter le Banquet
                                 </button>
                             </div>
                         </div>
@@ -943,7 +943,7 @@ if (!$isEmptyPlot) {
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
                         <h3 class="card-title text-success d-flex align-items-center gap-2 m-0">
-                            <span>🍶</span> Minoterie &amp; Brasserie Féodale (Sakagura)
+                            <span><i class="fa-solid fa-wine-bottle text-success"></i></span> Minoterie &amp; Brasserie Féodale (Sakagura)
                         </h3>
                         <div class="text-secondary small mt-1">
                             Raffinez le riz brut récolté dans vos rizières pour élaborer de la farine fine et du saké traditionnel d'exception.
@@ -952,11 +952,11 @@ if (!$isEmptyPlot) {
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <?php if ($isSealActive): ?>
                             <span class="badge bg-warning text-dark fw-bold shadow-sm" title="File de tâches automatique active grâce au Sceau Impérial">
-                                👑 Sceau Impérial : File de raffinage (<?= count($craftQueue) ?>/4)
+                                <i class="fa-solid fa-crown text-warning me-1"></i>Sceau Impérial : File de raffinage (<?= count($craftQueue) ?>/4)
                             </span>
                         <?php else: ?>
                             <a href="?page=privilege" class="badge bg-secondary-lt fw-bold text-decoration-none" title="Décrétez le Sceau Impérial pour débloquer jusqu'à 4 commandes en file continue !">
-                                ⛩️ File Simple : <?= count($craftQueue) ?>/1 (👑 Sceau : File x4)
+                                <i class="fa-solid fa-torii-gate text-secondary me-1"></i>File Simple : <?= count($craftQueue) ?>/1 (<i class="fa-solid fa-crown text-warning"></i> Sceau : File x4)
                             </a>
                         <?php endif; ?>
                         <span class="badge bg-success-lt fw-bold">
@@ -967,7 +967,7 @@ if (!$isEmptyPlot) {
                         </span>
                         <?php if ($famineUpkeep['famine_enabled']): ?>
                             <span class="badge bg-danger-lt fw-bold" title="Rations horaires requises pour maintenir vos troupes d'élite">
-                                🍚 Rations Élite : <?= $famineUpkeep['flour_consumption_per_hour'] ?> farine/h
+                                <i class="fa-solid fa-bowl-rice text-warning me-1"></i>Rations Élite : <?= $famineUpkeep['flour_consumption_per_hour'] ?> farine/h
                             </span>
                         <?php endif; ?>
                     </div>
@@ -976,9 +976,9 @@ if (!$isEmptyPlot) {
                     <?php if ($famineUpkeep['famine_enabled'] && !empty($planet['famine_active'])): ?>
                     <div class="alert alert-danger mb-3 p-3 border-danger shadow-sm" style="border-left: 5px solid #dc2626; background: #fef2f2;">
                         <div class="d-flex align-items-center gap-3">
-                            <span class="fs-1">💀</span>
+                            <span class="fs-1"><i class="fa-solid fa-skull text-danger"></i></span>
                             <div>
-                                <h4 class="m-0 fw-bold text-danger">⚠️ Famine Déclarée : Rations Épuisées !</h4>
+                                <h4 class="m-0 fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Famine Déclarée : Rations Épuisées !</h4>
                                 <div class="text-dark small mt-1">
                                     Vos réserves de farine de riz sont tombées à zéro. Vos <strong><?= $famineUpkeep['elite_units_count'] ?> soldats d'élite</strong> subissent actuellement <strong>-<?= $famineUpkeep['famine_rate'] ?>% de pertes par heure</strong> (morts de faim et désertions).
                                     Lancez sans attendre une mouture de farine pour rétablir les vivres !
@@ -989,8 +989,8 @@ if (!$isEmptyPlot) {
                     <?php elseif ($famineUpkeep['famine_enabled'] && $famineUpkeep['elite_units_count'] > 0): ?>
                     <div class="alert alert-light mb-3 p-2 border small d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-2 text-dark">
-                            <span>🛡️</span>
-                            <span><strong>Régiments d'élite en garnison :</strong> <?= $famineUpkeep['elite_units_count'] ?> guerriers (consommation : <strong><?= $famineUpkeep['flour_consumption_per_hour'] ?> farine 🍚 / heure</strong>).</span>
+                            <span><i class="fa-solid fa-shield-halved text-primary"></i></span>
+                            <span><strong>Régiments d'élite en garnison :</strong> <?= $famineUpkeep['elite_units_count'] ?> guerriers (consommation : <strong><?= $famineUpkeep['flour_consumption_per_hour'] ?> farine <i class="fa-solid fa-bowl-rice text-warning"></i> / heure</strong>).</span>
                         </div>
                         <span class="badge bg-warning text-dark">Péril de Famine Actif</span>
                     </div>
@@ -1001,7 +1001,7 @@ if (!$isEmptyPlot) {
                     <div class="alert alert-primary mb-3 p-3 border-primary shadow-sm" style="border-left: 5px solid #206bc4; background: #f0f7ff;">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
                             <div class="d-flex align-items-center gap-3">
-                                <span class="fs-1"><?= $activeCraft['product'] === 'sake' ? '🍶' : '🍚' ?></span>
+                                <span class="fs-1"><?= $activeCraft['product'] === 'sake' ? '<i class="fa-solid fa-wine-bottle text-danger"></i>' : '<i class="fa-solid fa-bowl-rice text-warning"></i>' ?></span>
                                 <div>
                                     <div class="d-flex align-items-center gap-2">
                                         <h4 class="m-0 fw-bold text-dark">
@@ -1010,17 +1010,17 @@ if (!$isEmptyPlot) {
                                         <span class="badge bg-primary text-white">Lot Actif (#1)</span>
                                     </div>
                                     <div class="text-secondary small mt-1">
-                                        Production prévue : <strong class="text-primary">+<?= number_format((int)$activeCraft['produced_amount']) ?> <?= $activeCraft['product'] === 'sake' ? 'Saké 🍶' : 'Farine 🍚' ?></strong>
-                                        &bull; Riz engagé : <strong><?= number_format((int)$activeCraft['rice_amount']) ?> 🌾</strong>
+                                        Production prévue : <strong class="text-primary">+<?= number_format((int)$activeCraft['produced_amount']) ?> <?= $activeCraft['product'] === 'sake' ? 'Saké <i class=\"fa-solid fa-wine-bottle text-danger\"></i>' : 'Farine <i class=\"fa-solid fa-bowl-rice text-warning\"></i>' ?></strong>
+                                        &bull; Riz engagé : <strong><?= number_format((int)$activeCraft['rice_amount']) ?> <i class="fa-solid fa-wheat-awn text-warning"></i></strong>
                                     </div>
                                 </div>
                             </div>
                             <div class="text-end d-flex flex-column align-items-end gap-1">
                                 <span class="badge bg-primary text-white font-monospace fs-5 py-2 px-3 shadow-sm" data-countdown="<?= $activeCraft['finishes_at'] ?>">
-                                    ⏳ En cours...
+                                    <i class="fa-solid fa-hourglass-half me-1"></i>En cours...
                                 </span>
                                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="cancelRiceCraft(<?= (int)$activeCraft['id'] ?>)">
-                                    ✕ Annuler (Remboursement 80%)
+                                    <i class="fa-solid fa-xmark me-1"></i>Annuler (Remboursement 80%)
                                 </button>
                             </div>
                         </div>
@@ -1042,22 +1042,22 @@ if (!$isEmptyPlot) {
                     <div class="card mb-3 border shadow-none" style="background:#fcfcfc;">
                         <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
                             <span class="fw-bold small text-dark d-flex align-items-center gap-2">
-                                <span>📋</span> Lots en file d'attente automatique (<?= count($pendingCrafts) ?>)
+                                <span><i class="fa-solid fa-clipboard-list text-primary"></i></span> Lots en file d'attente automatique (<?= count($pendingCrafts) ?>)
                             </span>
-                            <span class="badge bg-warning-lt text-warning fw-bold">👑 Privilège du Shōgun</span>
+                            <span class="badge bg-warning-lt text-warning fw-bold"><i class="fa-solid fa-crown text-warning me-1"></i>Privilège du Shōgun</span>
                         </div>
                         <div class="list-group list-group-flush">
                             <?php foreach ($pendingCrafts as $qIdx => $pCraft): ?>
                             <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
                                 <div class="d-flex align-items-center gap-3">
                                     <span class="badge bg-secondary-lt fw-bold">#<?= $qIdx + 2 ?></span>
-                                    <span class="fs-2"><?= $pCraft['product'] === 'sake' ? '🍶' : '🍚' ?></span>
+                                    <span class="fs-2"><?= $pCraft['product'] === 'sake' ? '<i class="fa-solid fa-wine-bottle text-danger"></i>' : '<i class="fa-solid fa-bowl-rice text-warning"></i>' ?></span>
                                     <div>
                                         <div class="fw-bold text-dark">
                                             <?= $pCraft['product'] === 'sake' ? 'Brassage de Saké Impérial' : 'Mouture de Farine de Riz' ?>
                                         </div>
                                         <div class="text-muted small">
-                                            Rendement : <strong class="text-success">+<?= number_format((int)$pCraft['produced_amount']) ?></strong> &bull; Riz réservé : <strong><?= number_format((int)$pCraft['rice_amount']) ?> 🌾</strong>
+                                            Rendement : <strong class="text-success">+<?= number_format((int)$pCraft['produced_amount']) ?></strong> &bull; Riz réservé : <strong><?= number_format((int)$pCraft['rice_amount']) ?> <i class="fa-solid fa-wheat-awn text-warning"></i></strong>
                                         </div>
                                     </div>
                                 </div>
@@ -1069,7 +1069,7 @@ if (!$isEmptyPlot) {
                                         </div>
                                     </div>
                                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="cancelRiceCraft(<?= (int)$pCraft['id'] ?>)" title="Annuler ce lot en attente">
-                                        ✕ Annuler
+                                        <i class="fa-solid fa-xmark me-1"></i>Annuler
                                     </button>
                                 </div>
                             </div>
@@ -1082,20 +1082,20 @@ if (!$isEmptyPlot) {
                     <div class="row g-2 mb-3">
                         <div class="col-4">
                             <div class="p-2 border rounded text-center bg-light">
-                                <div class="text-secondary small">🌾 Riz Brut Disponible</div>
+                                <div class="text-secondary small"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Brut Disponible</div>
                                 <div class="fs-4 fw-bold text-success" id="craft_avail_rice"><?= number_format((int)$planet['deuterium']) ?></div>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="p-2 border rounded text-center bg-light">
-                                <div class="text-secondary small">🍚 Farine en Réserve</div>
+                                <div class="text-secondary small"><i class="fa-solid fa-bowl-rice text-warning me-1"></i>Farine en Réserve</div>
                                 <div class="fs-4 fw-bold text-dark" id="craft_avail_flour"><?= number_format((int)($planet['rice_flour'] ?? 0)) ?></div>
                                 <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['rice_flour_max'] ?? 10000)) ?> max</div>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="p-2 border rounded text-center bg-light">
-                                <div class="text-secondary small">🍶 Saké en Réserve</div>
+                                <div class="text-secondary small"><i class="fa-solid fa-wine-bottle text-danger me-1"></i>Saké en Réserve</div>
                                 <div class="fs-4 fw-bold text-warning" id="craft_avail_sake"><?= number_format((int)($planet['sake'] ?? 0)) ?></div>
                                 <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['sake_max'] ?? 10000)) ?> max</div>
                             </div>
@@ -1110,7 +1110,7 @@ if (!$isEmptyPlot) {
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
-                                            <span>🍚</span> Mouture de Farine
+                                            <span><i class="fa-solid fa-bowl-rice text-warning"></i></span> Mouture de Farine
                                         </h4>
                                         <span class="badge bg-secondary-lt">5 Riz &rarr; 1 Farine</span>
                                     </div>
@@ -1137,22 +1137,22 @@ if (!$isEmptyPlot) {
                                     <div class="alert alert-info py-2 px-3 small mb-3">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span>Production estimée :</span>
-                                            <strong class="text-primary fs-5" id="preview_flour_gain">+20 🍚</strong>
+                                            <strong class="text-primary fs-5" id="preview_flour_gain">+20 <i class="fa-solid fa-bowl-rice text-warning"></i></strong>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.8rem;">
                                             <span>Durée de mouture :</span>
-                                            <span class="fw-bold font-monospace" id="preview_flour_time">⏱️ --</span>
+                                            <span class="fw-bold font-monospace" id="preview_flour_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <?php if (!$canEnqueue): ?>
                                 <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
-                                    ⏳ File saturée (<?= count($craftQueue) ?>/<?= $maxCraftQueue ?> lots)
+                                    <i class="fa-solid fa-hourglass-half text-warning me-1"></i>File saturée (<?= count($craftQueue) ?>/<?= $maxCraftQueue ?> lots)
                                 </button>
                                 <?php else: ?>
                                 <button type="button" class="btn btn-success w-100 fw-bold" onclick="submitRiceCraft('rice_flour')">
-                                    <?= empty($craftQueue) ? '🍚 Lancer la Mouture de Farine' : '➕ Ajouter à la File (#'.(count($craftQueue)+1).'/'.$maxCraftQueue.')' ?>
+                                    <?= empty($craftQueue) ? '<i class="fa-solid fa-bowl-rice me-1"></i>Lancer la Mouture de Farine' : '<i class="fa-solid fa-plus me-1"></i>Ajouter à la File (#'.(count($craftQueue)+1).'/'.$maxCraftQueue.')' ?>
                                 </button>
                                 <?php endif; ?>
                             </div>
@@ -1164,7 +1164,7 @@ if (!$isEmptyPlot) {
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
-                                            <span>🍶</span> Cuves de Saké (Sakagura)
+                                            <span><i class="fa-solid fa-wine-bottle text-danger"></i></span> Cuves de Saké (Sakagura)
                                         </h4>
                                         <span class="badge bg-warning-lt text-warning">10 Riz &rarr; 1 Saké</span>
                                     </div>
@@ -1191,22 +1191,22 @@ if (!$isEmptyPlot) {
                                     <div class="alert alert-warning py-2 px-3 small mb-3">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span>Production estimée :</span>
-                                            <strong class="text-warning fs-5" id="preview_sake_gain">+10 🍶</strong>
+                                            <strong class="text-warning fs-5" id="preview_sake_gain">+10 <i class="fa-solid fa-wine-bottle text-danger"></i></strong>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.8rem;">
                                             <span>Durée de fermentation :</span>
-                                            <span class="fw-bold font-monospace" id="preview_sake_time">⏱️ --</span>
+                                            <span class="fw-bold font-monospace" id="preview_sake_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <?php if (!$canEnqueue): ?>
                                 <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
-                                    ⏳ File saturée (<?= count($craftQueue) ?>/<?= $maxCraftQueue ?> lots)
+                                    <i class="fa-solid fa-hourglass-half text-warning me-1"></i>File saturée (<?= count($craftQueue) ?>/<?= $maxCraftQueue ?> lots)
                                 </button>
                                 <?php else: ?>
                                 <button type="button" class="btn btn-warning w-100 fw-bold text-dark" onclick="submitRiceCraft('sake')">
-                                    <?= empty($craftQueue) ? '🍶 Déclencher le Brassage du Saké' : '➕ Ajouter à la File (#'.(count($craftQueue)+1).'/'.$maxCraftQueue.')' ?>
+                                    <?= empty($craftQueue) ? '<i class="fa-solid fa-wine-bottle me-1"></i>Déclencher le Brassage du Saké' : '<i class="fa-solid fa-plus me-1"></i>Ajouter à la File (#'.(count($craftQueue)+1).'/'.$maxCraftQueue.')' ?>
                                 </button>
                                 <?php endif; ?>
                             </div>
@@ -1236,7 +1236,7 @@ if (!$isEmptyPlot) {
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
                         <h3 class="card-title text-warning-emphasis d-flex align-items-center gap-2 m-0">
-                            <span>🪚</span> Atelier de Charpenterie &amp; Façonnage de Poutres (Kizukuri)
+                            <span><i class="fa-solid fa-hammer text-warning"></i></span> Atelier de Charpenterie &amp; Façonnage de Poutres (Kizukuri)
                         </h3>
                         <div class="text-secondary small mt-1">
                             Façonnez le Bois de Cèdre brut en poutres maîtresses et madriers d'exception pour vos chantiers monumentaux et fortifications.
@@ -1244,24 +1244,24 @@ if (!$isEmptyPlot) {
                     </div>
                     <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap ms-auto">
                         <span class="badge bg-warning text-dark fw-bold shadow-sm" title="Étage / Niveau actuel du bâtiment">
-                            🏛️ Étage <?= $lvl ?> (Niveau <?= $lvl ?>)
+                            <i class="fa-solid fa-landmark text-primary me-1"></i>Étage <?= $lvl ?> (Niveau <?= $lvl ?>)
                         </span>
                         <?php if ($lvl < 10): ?>
                             <span class="badge bg-secondary text-white fw-bold">
-                                🔒 Poutres : Niveau 10 requis (<?= $lvl ?>/10)
+                                <i class="fa-solid fa-lock text-muted me-1"></i>Poutres : Niveau 10 requis (<?= $lvl ?>/10)
                             </span>
                         <?php else: ?>
                             <span class="badge bg-success-lt fw-bold">
-                                ✓ Façonnage de Poutres Actif
+                                <i class="fa-solid fa-check text-success me-1"></i>Façonnage de Poutres Actif
                             </span>
                         <?php endif; ?>
                         <?php if ($isSealActive): ?>
                             <span class="badge bg-warning text-dark fw-bold shadow-sm" title="File de tâches automatique active grâce au Sceau Impérial">
-                                👑 Sceau Impérial : File de charpente (<?= count($woodCraftQueue) ?>/4)
+                                <i class="fa-solid fa-crown text-warning me-1"></i>Sceau Impérial : File de charpente (<?= count($woodCraftQueue) ?>/4)
                             </span>
                         <?php else: ?>
                             <a href="?page=privilege" class="badge bg-secondary-lt fw-bold text-decoration-none" title="Décrétez le Sceau Impérial pour débloquer jusqu'à 4 commandes en file continue !">
-                                ⛩️ File Simple : <?= count($woodCraftQueue) ?>/1 (👑 Sceau : File x4)
+                                <i class="fa-solid fa-torii-gate text-secondary me-1"></i>File Simple : <?= count($woodCraftQueue) ?>/1 (<i class="fa-solid fa-crown text-warning"></i> Sceau : File x4)
                             </a>
                         <?php endif; ?>
                         <span class="badge bg-warning-lt fw-bold">
@@ -1278,7 +1278,7 @@ if (!$isEmptyPlot) {
                     <div class="alert alert-warning mb-3 p-3 border-warning shadow-sm" style="border-left: 5px solid #d97706; background: #fffbeb;">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
                             <div class="d-flex align-items-center gap-3">
-                                <span class="fs-1">🪵</span>
+                                <span class="fs-1"><i class="fa-solid fa-tree text-success"></i></span>
                                 <div>
                                     <div class="d-flex align-items-center gap-2">
                                         <h4 class="m-0 fw-bold text-dark">
@@ -1287,17 +1287,17 @@ if (!$isEmptyPlot) {
                                         <span class="badge bg-warning text-dark fw-bold">Lot Actif (#1)</span>
                                     </div>
                                     <div class="text-secondary small mt-1">
-                                        Production prévue : <strong class="text-warning-emphasis">+<?= number_format((int)$activeWoodCraft['produced_amount']) ?> Poutres en bois 🪵</strong>
-                                        &bull; Bois engagé : <strong><?= number_format((int)($activeWoodCraft['cost_amount'] ?: $activeWoodCraft['rice_amount'])) ?> 🪵</strong>
+                                        Production prévue : <strong class="text-warning-emphasis">+<?= number_format((int)$activeWoodCraft['produced_amount']) ?> Poutres en bois <i class="fa-solid fa-tree text-success"></i></strong>
+                                        &bull; Bois engagé : <strong><?= number_format((int)($activeWoodCraft['cost_amount'] ?: $activeWoodCraft['rice_amount'])) ?> <i class="fa-solid fa-tree text-success"></i></strong>
                                     </div>
                                 </div>
                             </div>
                             <div class="text-end d-flex flex-column align-items-end gap-1">
                                 <span class="badge bg-warning text-dark fw-bold font-monospace fs-5 py-2 px-3 shadow-sm" data-countdown="<?= $activeWoodCraft['finishes_at'] ?>">
-                                    ⏳ En cours...
+                                    <i class="fa-solid fa-hourglass-half me-1"></i>En cours...
                                 </span>
                                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="cancelWoodCraft(<?= (int)$activeWoodCraft['id'] ?>)">
-                                    ✕ Annuler (Remboursement 80%)
+                                    <i class="fa-solid fa-xmark me-1"></i>Annuler (Remboursement 80%)
                                 </button>
                             </div>
                         </div>
@@ -1319,22 +1319,22 @@ if (!$isEmptyPlot) {
                     <div class="card mb-3 border shadow-none" style="background:#fcfcfc;">
                         <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
                             <span class="fw-bold small text-dark d-flex align-items-center gap-2">
-                                <span>📋</span> Lots en file d'attente automatique (<?= count($pendingWoodCrafts) ?>)
+                                <span><i class="fa-solid fa-clipboard-list text-primary"></i></span> Lots en file d'attente automatique (<?= count($pendingWoodCrafts) ?>)
                             </span>
-                            <span class="badge bg-warning-lt text-warning fw-bold">👑 Privilège du Shōgun</span>
+                            <span class="badge bg-warning-lt text-warning fw-bold"><i class="fa-solid fa-crown text-warning me-1"></i>Privilège du Shōgun</span>
                         </div>
                         <div class="list-group list-group-flush">
                             <?php foreach ($pendingWoodCrafts as $qIdx => $pCraft): ?>
                             <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
                                 <div class="d-flex align-items-center gap-3">
                                     <span class="badge bg-secondary-lt fw-bold">#<?= $qIdx + 2 ?></span>
-                                    <span class="fs-2">🪵</span>
+                                    <span class="fs-2"><i class="fa-solid fa-tree text-success"></i></span>
                                     <div>
                                         <div class="fw-bold text-dark">
                                             Façonnage de Poutres en bois
                                         </div>
                                         <div class="text-muted small">
-                                            Rendement : <strong class="text-success">+<?= number_format((int)$pCraft['produced_amount']) ?> 🪵</strong> &bull; Bois réservé : <strong><?= number_format((int)($pCraft['cost_amount'] ?: $pCraft['rice_amount'])) ?> 🪵</strong>
+                                            Rendement : <strong class="text-success">+<?= number_format((int)$pCraft['produced_amount']) ?> <i class="fa-solid fa-tree text-success"></i></strong> &bull; Bois réservé : <strong><?= number_format((int)($pCraft['cost_amount'] ?: $pCraft['rice_amount'])) ?> <i class="fa-solid fa-tree text-success"></i></strong>
                                         </div>
                                     </div>
                                 </div>
@@ -1346,7 +1346,7 @@ if (!$isEmptyPlot) {
                                         </div>
                                     </div>
                                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="cancelWoodCraft(<?= (int)$pCraft['id'] ?>)" title="Annuler ce lot en attente">
-                                        ✕ Annuler
+                                        <i class="fa-solid fa-xmark me-1"></i>Annuler
                                     </button>
                                 </div>
                             </div>
@@ -1359,14 +1359,14 @@ if (!$isEmptyPlot) {
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <div class="p-2 border rounded text-center bg-light">
-                                <div class="text-secondary small">🪵 Bois de Cèdre Brut Disponible</div>
+                                <div class="text-secondary small"><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre Brut Disponible</div>
                                 <div class="fs-4 fw-bold text-warning" id="craft_avail_metal"><?= number_format((int)$planet['metal']) ?></div>
                                 <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)$planet['metal_max']) ?> max</div>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="p-2 border rounded text-center bg-light">
-                                <div class="text-secondary small">🪵 Poutres en bois en Réserve</div>
+                                <div class="text-secondary small"><i class="fa-solid fa-tree text-success me-1"></i>Poutres en bois en Réserve</div>
                                 <div class="fs-4 fw-bold text-dark" id="craft_avail_beams"><?= number_format((int)($planet['wooden_beams'] ?? 0)) ?></div>
                                 <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['wooden_beams_max'] ?? 10000)) ?> max</div>
                             </div>
@@ -1378,7 +1378,7 @@ if (!$isEmptyPlot) {
                     <div class="card card-sm border-dashed bg-light-lt p-4 mb-3">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                             <div class="d-flex align-items-center gap-3">
-                                <span class="fs-1">🔒</span>
+                                <span class="fs-1"><i class="fa-solid fa-lock text-muted"></i></span>
                                 <div>
                                     <h4 class="m-0 fw-bold text-dark">
                                         Façonnage de Poutres en bois Verrouillé
@@ -1405,7 +1405,7 @@ if (!$isEmptyPlot) {
                     <div class="border rounded p-3" style="background:#fafaf9;">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
-                                <span>🪚</span> Façonnage de Poutres en bois
+                                <span><i class="fa-solid fa-hammer text-warning"></i></span> Façonnage de Poutres en bois
                             </h4>
                             <span class="badge bg-warning-lt text-warning">10 Bois de Cèdre &rarr; 1 Poutre</span>
                         </div>
@@ -1418,7 +1418,7 @@ if (!$isEmptyPlot) {
                                 <label class="form-label fw-bold text-dark small mb-1">Quantité de Bois de Cèdre à façonner :</label>
                                 <div class="input-group mb-2">
                                     <input type="number" id="wood_amount_beams" min="10" step="10" value="100" class="form-control fw-bold text-center" oninput="calcBeamsPreview()" <?= !$canEnqueueWood ? 'disabled' : '' ?>>
-                                    <span class="input-group-text small">Bois 🪵</span>
+                                    <span class="input-group-text small">Bois <i class="fa-solid fa-tree text-success"></i></span>
                                 </div>
                                 <!-- Boutons raccourcis -->
                                 <div class="btn-group btn-group-sm w-100">
@@ -1432,20 +1432,20 @@ if (!$isEmptyPlot) {
                                 <div class="alert alert-warning py-2 px-3 small mb-2">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <span>Production estimée :</span>
-                                        <strong class="text-warning-emphasis fs-5" id="preview_beams_gain">+10 🪵</strong>
+                                        <strong class="text-warning-emphasis fs-5" id="preview_beams_gain">+10 <i class="fa-solid fa-tree text-success"></i></strong>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.8rem;">
                                         <span>Durée de façonnage :</span>
-                                        <span class="fw-bold font-monospace" id="preview_beams_time">⏱️ --</span>
+                                        <span class="fw-bold font-monospace" id="preview_beams_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
                                     </div>
                                 </div>
                                 <?php if (!$canEnqueueWood): ?>
                                 <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
-                                    ⏳ File saturée (<?= count($woodCraftQueue) ?>/<?= $maxWoodCraftQueue ?> lots)
+                                    <i class="fa-solid fa-hourglass-half text-warning me-1"></i>File saturée (<?= count($woodCraftQueue) ?>/<?= $maxWoodCraftQueue ?> lots)
                                 </button>
                                 <?php else: ?>
                                 <button type="button" class="btn btn-warning w-100 fw-bold text-dark" onclick="submitWoodCraft('wooden_beams')">
-                                    <?= empty($woodCraftQueue) ? '🪚 Lancer le Façonnage de Poutres' : '➕ Ajouter à la File (#'.(count($woodCraftQueue)+1).'/'.$maxWoodCraftQueue.')' ?>
+                                    <?= empty($woodCraftQueue) ? '<i class="fa-solid fa-hammer me-1"></i>Lancer le Façonnage de Poutres' : '<i class="fa-solid fa-plus me-1"></i>Ajouter à la File (#'.(count($woodCraftQueue)+1).'/'.$maxWoodCraftQueue.')' ?>
                                 </button>
                                 <?php endif; ?>
                             </div>
@@ -1487,7 +1487,7 @@ if (!$isEmptyPlot) {
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
                         <h3 class="card-title text-warning-emphasis d-flex align-items-center gap-2 m-0">
-                            <span>⚖️</span> Marché Féodal &amp; Caravanes de Marchandises
+                            <span><i class="fa-solid fa-scale-balanced text-warning"></i></span> Marché Féodal &amp; Caravanes de Marchandises
                         </h3>
                         <div class="text-secondary small mt-1">
                             Affrétez des convois logistiques pour ravitailler vos autres fiefs ou vos alliés, gérez vos routes commerciales et effectuez du troc.
@@ -1513,18 +1513,18 @@ if (!$isEmptyPlot) {
                     <ul class="nav nav-tabs card-header-tabs px-3" data-bs-toggle="tabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <a href="#tab-market-dispatch" class="nav-link active fw-bold text-dark d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="true" role="tab">
-                                <span>📦</span> Expédier des Marchandises
+                                <span><i class="fa-solid fa-boxes-stacked text-warning"></i></span> Expédier des Marchandises
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
                             <a href="#tab-market-routes" class="nav-link fw-bold text-cyan d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="false" role="tab">
-                                <span>🛣️</span> Routes Commerciales
+                                <span><i class="fa-solid fa-route text-primary"></i></span> Routes Commerciales
                                 <span class="badge bg-cyan text-white ms-1"><?= count($marketRoutes) ?></span>
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
                             <a href="#tab-market-npc" class="nav-link fw-bold text-purple d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="false" role="tab">
-                                <span>⚖️</span> Intendant du Marché (Troc 1:1:1)
+                                <span><i class="fa-solid fa-scale-balanced text-warning"></i></span> Intendant du Marché (Troc 1:1:1)
                             </a>
                         </li>
                     </ul>
@@ -1538,7 +1538,7 @@ if (!$isEmptyPlot) {
                             <div class="alert alert-warning mb-3 p-3 border-warning shadow-sm">
                                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                                     <div class="d-flex align-items-center gap-3">
-                                        <span class="fs-1">🐎</span>
+                                        <span class="fs-1"><i class="fa-solid fa-horse text-danger"></i></span>
                                         <div>
                                             <h4 class="m-0 fw-bold text-dark">Aucun chariot de ravitaillement disponible</h4>
                                             <div class="text-secondary small mt-1">
@@ -1547,7 +1547,7 @@ if (!$isEmptyPlot) {
                                         </div>
                                     </div>
                                     <a href="/?page=shipyard" class="btn btn-warning text-dark fw-bold">
-                                        🐎 Forger des Convois aux Écuries &rarr;
+                                        <i class="fa-solid fa-horse me-1"></i>Forger des Convois aux Écuries &rarr;
                                     </a>
                                 </div>
                             </div>
@@ -1558,7 +1558,7 @@ if (!$isEmptyPlot) {
                                 <div class="col-lg-7">
                                     <div class="border rounded p-3 bg-light mb-3">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <label class="form-label fw-bold text-dark m-0">🏯 Fief Destinataire :</label>
+                                            <label class="form-label fw-bold text-dark m-0"><i class="fa-solid fa-chess-rook text-danger me-1"></i>Fief Destinataire :</label>
                                             <div class="form-check form-switch m-0">
                                                 <input class="form-check-input" type="checkbox" id="mkt_manual_coords_toggle" onchange="toggleMarketDestMode()">
                                                 <label class="form-check-label small text-muted" for="mkt_manual_coords_toggle">Saisir coordonnées [X|Y]</label>
@@ -1571,7 +1571,7 @@ if (!$isEmptyPlot) {
                                                 <select id="mkt_target_planet_select" class="form-select fw-bold" onchange="updateMarketCalculations()">
                                                     <?php foreach ($otherVillages as $v): ?>
                                                         <option value="<?= $v['id'] ?>" data-x="<?= $v['coord_x'] ?>" data-y="<?= $v['coord_y'] ?>">
-                                                            🏯 <?= htmlspecialchars($v['name']) ?> &bull; Coordonnées [<?= $v['coord_x'] ?>|<?= $v['coord_y'] ?>]
+                                                            <i class="fa-solid fa-chess-rook text-danger me-1"></i><?= htmlspecialchars($v['name']) ?> &bull; Coordonnées [<?= $v['coord_x'] ?>|<?= $v['coord_y'] ?>]
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
@@ -1606,12 +1606,12 @@ if (!$isEmptyPlot) {
 
                                     <!-- Saisie des cargaisons -->
                                     <div class="border rounded p-3 bg-white">
-                                        <h4 class="fw-bold text-dark mb-3">📦 Chargement des Marchandises</h4>
+                                        <h4 class="fw-bold text-dark mb-3"><i class="fa-solid fa-boxes-stacked text-warning me-1"></i>Chargement des Marchandises</h4>
 
                                         <!-- Bois -->
                                         <div class="mb-3">
                                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <label class="form-label fw-bold text-dark small m-0">🪵 Bois de Cèdre</label>
+                                                <label class="form-label fw-bold text-dark small m-0"><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre</label>
                                                 <span class="text-muted small">Disponible : <strong class="text-success" id="mkt_max_wood_label"><?= number_format((int)$planet['metal']) ?></strong></span>
                                             </div>
                                             <div class="input-group mb-1">
@@ -1629,7 +1629,7 @@ if (!$isEmptyPlot) {
                                         <!-- Pierre -->
                                         <div class="mb-3">
                                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <label class="form-label fw-bold text-dark small m-0">🪨 Pierre de Taille</label>
+                                                <label class="form-label fw-bold text-dark small m-0"><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille</label>
                                                 <span class="text-muted small">Disponible : <strong class="text-success" id="mkt_max_stone_label"><?= number_format((int)$planet['crystal']) ?></strong></span>
                                             </div>
                                             <div class="input-group mb-1">
@@ -1647,7 +1647,7 @@ if (!$isEmptyPlot) {
                                         <!-- Riz -->
                                         <div>
                                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <label class="form-label fw-bold text-dark small m-0">🌾 Riz Impérial</label>
+                                                <label class="form-label fw-bold text-dark small m-0"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial</label>
                                                 <span class="text-muted small">Disponible : <strong class="text-success" id="mkt_max_rice_label"><?= number_format((int)$planet['deuterium']) ?></strong></span>
                                             </div>
                                             <div class="input-group mb-1">
@@ -1669,7 +1669,7 @@ if (!$isEmptyPlot) {
                                     <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light">
                                         <div>
                                             <h4 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                                                <span>📋</span> Feuille de Route du Convoi
+                                                <span><i class="fa-solid fa-clipboard-list text-primary"></i></span> Feuille de Route du Convoi
                                             </h4>
 
                                             <div class="list-group list-group-flush border rounded mb-3 bg-white" style="font-size:0.875rem;">
@@ -1687,11 +1687,11 @@ if (!$isEmptyPlot) {
                                                 </div>
                                                 <div class="list-group-item d-flex justify-content-between align-items-center py-2">
                                                     <span class="text-muted">Ravitaillement de marche :</span>
-                                                    <span class="fw-bold text-warning" id="mkt_fuel_needed_display">~5 Koku 🌾</span>
+                                                    <span class="fw-bold text-warning" id="mkt_fuel_needed_display">~5 Koku <i class="fa-solid fa-wheat-awn text-warning"></i></span>
                                                 </div>
                                                 <div class="list-group-item d-flex justify-content-between align-items-center py-2">
                                                     <span class="text-muted">Durée estimée aller :</span>
-                                                    <span class="fw-bold font-monospace text-dark" id="mkt_duration_display">⏱️ ~calcul...</span>
+                                                    <span class="fw-bold font-monospace text-dark" id="mkt_duration_display"><i class="fa-solid fa-stopwatch text-info me-1"></i>~calcul...</span>
                                                 </div>
                                             </div>
 
@@ -1701,7 +1701,7 @@ if (!$isEmptyPlot) {
                                         </div>
 
                                         <button type="button" class="btn btn-warning text-dark fw-bold w-100 py-3 shadow-sm" id="btnDispatchMarketCargo" onclick="submitMarketCargoDispatch()">
-                                            🚀 Affréter et Expédier le Convoi
+                                            <i class="fa-solid fa-paper-plane me-1"></i>Affréter et Expédier le Convoi
                                         </button>
                                     </div>
                                 </div>
@@ -1712,12 +1712,12 @@ if (!$isEmptyPlot) {
                         <div class="tab-pane" id="tab-market-routes" role="tabpanel">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                                 <div>
-                                    <h4 class="m-0 fw-bold text-dark">🛣️ Routes Commerciales liées à ce Marché</h4>
+                                    <h4 class="m-0 fw-bold text-dark"><i class="fa-solid fa-route text-primary me-1"></i>Routes Commerciales liées à ce Marché</h4>
                                     <div class="text-muted small">Convois de ravitaillement programmés au départ ou à destination de ce fief.</div>
                                 </div>
                                 <?php if ($isSealActive): ?>
                                     <a href="/?page=privilege#sectionTradeRoutes" class="btn btn-cyan text-white fw-bold btn-sm">
-                                        ➕ Gérer les Routes dans la Cour du Shōgun &rarr;
+                                        <i class="fa-solid fa-plus me-1"></i>Gérer les Routes dans la Cour du Shōgun &rarr;
                                     </a>
                                 <?php endif; ?>
                             </div>
@@ -1725,25 +1725,25 @@ if (!$isEmptyPlot) {
                             <?php if (!$isSealActive): ?>
                                 <div class="alert alert-warning p-3 border-warning">
                                     <div class="d-flex align-items-center gap-3">
-                                        <span class="fs-1">👑</span>
+                                        <span class="fs-1"><i class="fa-solid fa-crown text-warning"></i></span>
                                         <div>
                                             <h4 class="m-0 fw-bold text-dark">Privilège du Sceau Impérial Requis</h4>
                                             <div class="text-secondary small mt-1">
                                                 L'automatisation des routes commerciales permet de programmer des convois logistiques récurrents toutes les 1h, 2h, 4h, 8h, etc. sans aucune action manuelle requise.
                                             </div>
                                             <a href="/?page=privilege" class="btn btn-warning text-dark fw-bold btn-sm mt-2">
-                                                👑 Décréter le Sceau Impérial &rarr;
+                                                <i class="fa-solid fa-crown me-1"></i>Décréter le Sceau Impérial &rarr;
                                             </a>
                                         </div>
                                     </div>
                                 </div>
                             <?php elseif (empty($marketRoutes)): ?>
                                 <div class="text-center py-4 text-muted bg-light rounded border">
-                                    <div class="fs-1 mb-1">🛣️</div>
+                                    <div class="fs-1 mb-1"><i class="fa-solid fa-route text-primary"></i></div>
                                     <div class="fw-bold text-dark">Aucune route commerciale active sur ce fief</div>
                                     <div class="small mb-3">Définissez des livraisons récurrentes pour alimenter automatiquement vos provinces.</div>
                                     <a href="/?page=privilege#sectionTradeRoutes" class="btn btn-outline-cyan btn-sm fw-bold">
-                                        ➕ Établir une Route Commerciale
+                                        <i class="fa-solid fa-plus me-1"></i>Établir une Route Commerciale
                                     </a>
                                 </div>
                             <?php else: ?>
@@ -1765,15 +1765,15 @@ if (!$isEmptyPlot) {
                                             <tr>
                                                 <td>
                                                     <span class="badge <?= $isDepart ? 'bg-primary-lt' : 'bg-success-lt' ?> me-1">
-                                                        <?= $isDepart ? 'Départ 🛫' : 'Arrivée 🛬' ?>
+                                                        <?= $isDepart ? 'Départ <i class="fa-solid fa-arrow-up-right-from-square text-info"></i>' : 'Arrivée <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-success"></i>' ?>
                                                     </span>
                                                     <strong><?= htmlspecialchars($tr['source_name']) ?></strong> &rarr; <strong><?= htmlspecialchars($tr['target_name']) ?></strong>
                                                 </td>
                                                 <td>
                                                     <span class="small">
-                                                        <?php if ($tr['wood'] > 0): ?>🪵 <?= number_format($tr['wood']) ?> <?php endif; ?>
-                                                        <?php if ($tr['stone'] > 0): ?>🪨 <?= number_format($tr['stone']) ?> <?php endif; ?>
-                                                        <?php if ($tr['rice'] > 0): ?>🌾 <?= number_format($tr['rice']) ?> <?php endif; ?>
+                                                        <?php if ($tr['wood'] > 0): ?><i class="fa-solid fa-tree text-success me-1"></i><?= number_format($tr['wood']) ?> <?php endif; ?>
+                                                        <?php if ($tr['stone'] > 0): ?><i class="fa-solid fa-mountain text-secondary me-1"></i><?= number_format($tr['stone']) ?> <?php endif; ?>
+                                                        <?php if ($tr['rice'] > 0): ?><i class="fa-solid fa-wheat-awn text-warning me-1"></i><?= number_format($tr['rice']) ?> <?php endif; ?>
                                                     </span>
                                                 </td>
                                                 <td>
@@ -1791,7 +1791,7 @@ if (!$isEmptyPlot) {
                                                 </td>
                                                 <td class="text-end">
                                                     <a href="/?page=privilege#sectionTradeRoutes" class="btn btn-outline-secondary btn-sm">
-                                                        ⚙️ Gérer &rarr;
+                                                        <i class="fa-solid fa-gear me-1"></i>Gérer &rarr;
                                                     </a>
                                                 </td>
                                             </tr>
@@ -1807,18 +1807,18 @@ if (!$isEmptyPlot) {
                             <div class="p-3 border rounded bg-light">
                                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        <span class="fs-1">⚖️</span>
+                                        <span class="fs-1"><i class="fa-solid fa-scale-balanced text-warning"></i></span>
                                         <div>
                                             <h4 class="m-0 fw-bold text-dark">Intendant du Marché Castral (Troc 1:1:1)</h4>
                                             <div class="text-secondary small mt-1" style="max-width:600px;">
-                                                L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au ratio parfait de <strong>1:1:1</strong> sans aucune taxe de déperdition pour un tribut de <strong>3 Koban 🪙</strong>.
+                                                L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au ratio parfait de <strong>1:1:1</strong> sans aucune taxe de déperdition pour un tribut de <strong>3 Koban <i class="fa-solid fa-coins text-warning"></i></strong>.
                                             </div>
                                         </div>
                                     </div>
                                     <div>
                                         <button type="button" class="btn btn-purple text-white fw-bold shadow-sm" style="background:#7c3aed;"
                                                 onclick="openNpcExchangeModal(<?= $planet['id'] ?>, '<?= htmlspecialchars(addslashes($planet['name'])) ?>', <?= (int)$planet['metal'] ?>, <?= (int)$planet['crystal'] ?>, <?= (int)$planet['deuterium'] ?>, <?= (int)$planet['metal_max'] ?>, <?= (int)$planet['crystal_max'] ?>, <?= (int)$planet['deuterium_max'] ?>)">
-                                            ⚖️ Procéder au Troc 1:1:1 de ce Fief &rarr;
+                                            <i class="fa-solid fa-scale-balanced me-1"></i>Procéder au Troc 1:1:1 de ce Fief &rarr;
                                         </button>
                                     </div>
                                 </div>
@@ -1832,15 +1832,15 @@ if (!$isEmptyPlot) {
             <!-- Coûts d'amélioration -->
             <div class="card mb-3">
                 <div class="card-header">
-                    <h3 class="card-title">🧱 Coûts d'Amélioration &bull; Niveau <?= $targetLevel ?></h3>
+                    <h3 class="card-title"><i class="fa-solid fa-cubes text-secondary me-1"></i>Coûts d'Amélioration &bull; Niveau <?= $targetLevel ?></h3>
                     <div class="card-options text-muted" style="font-size:0.78rem;">Stock disponible dans vos greniers</div>
                 </div>
                 <div class="card-body">
                     <?php
                     $resources = [
-                        ['icon'=>'🪵', 'name'=>'Bois de Cèdre',   'req'=>$cost['metal'],     'stock'=>$planet['metal'],     'ok'=>$hasMetal],
-                        ['icon'=>'🪨', 'name'=>'Pierre de Taille', 'req'=>$cost['crystal'],   'stock'=>$planet['crystal'],   'ok'=>$hasCrystal],
-                        ['icon'=>'🌾', 'name'=>'Riz Impérial',     'req'=>$cost['deuterium'], 'stock'=>$planet['deuterium'], 'ok'=>$hasDeut],
+                        ['icon'=>'<i class="fa-solid fa-tree text-success"></i>', 'name'=>'Bois de Cèdre',   'req'=>$cost['metal'],     'stock'=>$planet['metal'],     'ok'=>$hasMetal],
+                        ['icon'=>'<i class="fa-solid fa-mountain text-secondary"></i>', 'name'=>'Pierre de Taille', 'req'=>$cost['crystal'],   'stock'=>$planet['crystal'],   'ok'=>$hasCrystal],
+                        ['icon'=>'<i class="fa-solid fa-wheat-awn text-warning"></i>', 'name'=>'Riz Impérial',     'req'=>$cost['deuterium'], 'stock'=>$planet['deuterium'], 'ok'=>$hasDeut],
                     ];
                     foreach ($resources as $r):
                         $pct = ($r['req'] > 0) ? min(100, ($r['stock'] / $r['req']) * 100) : 100;
@@ -1859,7 +1859,7 @@ if (!$isEmptyPlot) {
                             </div>
                         </div>
                         <span class="badge <?= $r['ok'] ? 'bg-success' : 'bg-danger' ?>" style="min-width:1.5rem;">
-                            <?= $r['ok'] ? '✓' : '✗' ?>
+                            <?= $r['ok'] ? '<i class="fa-solid fa-check text-success"></i>' : '<i class="fa-solid fa-xmark text-danger"></i>' ?>
                         </span>
                     </div>
                     <?php endforeach; ?>
@@ -1867,7 +1867,7 @@ if (!$isEmptyPlot) {
                     <!-- Durée -->
                     <div class="alert alert-info mt-3 mb-0" style="padding:0.6rem 0.85rem;">
                         <div class="d-flex align-items-center justify-content-between">
-                            <span>⏱️ Durée des travaux :</span>
+                            <span><i class="fa-solid fa-stopwatch text-info me-1"></i>Durée des travaux :</span>
                             <strong class="font-monospace"><?= gmdate('H:i:s', $duration) ?></strong>
                         </div>
                     </div>
@@ -1877,7 +1877,7 @@ if (!$isEmptyPlot) {
             <!-- Décret de Construction -->
             <div class="card mb-3">
                 <div class="card-header">
-                    <h3 class="card-title">🔨 Décret de Construction Castral</h3>
+                    <h3 class="card-title"><i class="fa-solid fa-hammer text-danger me-1"></i>Décret de Construction Castral</h3>
                     <?php if ($isTerran): ?>
                         <div class="card-options"><span class="badge bg-blue-lt">Clan Oda &bull; Double Chantier</span></div>
                     <?php endif; ?>
@@ -1897,7 +1897,7 @@ if (!$isEmptyPlot) {
                         <div class="alert alert-<?= $isDemolishingJob ? 'danger' : 'warning' ?> mb-3">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <div class="d-flex align-items-center gap-2">
-                                    <span style="font-size:1.3rem;">🏗️</span>
+                                    <span style="font-size:1.3rem;"><i class="fa-solid fa-helmet-safety text-danger"></i></span>
                                     <div>
                                         <strong><?= $isDemolishingJob ? 'Démantèlement en cours' : 'Travaux en cours' ?></strong> &rarr;
                                         <span class="badge bg-<?= $isDemolishingJob ? 'danger' : 'warning' ?> text-dark fw-bold">
@@ -1918,7 +1918,7 @@ if (!$isEmptyPlot) {
                             <!-- Barre de progression des travaux de construction -->
                             <div class="building-progress-wrapper p-2 bg-white rounded border shadow-sm my-2">
                                 <div class="d-flex justify-content-between align-items-center mb-1 text-secondary small">
-                                    <span class="fw-semibold d-flex align-items-center gap-1"><span>🚧</span> Avancement du chantier</span>
+                                    <span class="fw-semibold d-flex align-items-center gap-1"><span><i class="fa-solid fa-triangle-exclamation text-warning"></i></span> Avancement du chantier</span>
                                     <span class="badge bg-<?= $isDemolishingJob ? 'danger' : 'warning' ?>-lt fw-bold font-monospace building-progress-pct"><?= $jobPct ?>%</span>
                                 </div>
                                 <div class="progress mb-2" style="height: 12px; background-color: #e2e8f0; border-radius: 6px; overflow: hidden;">
@@ -1934,7 +1934,7 @@ if (!$isEmptyPlot) {
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center text-secondary small">
-                                    <span>⏱️ Compte à rebours :</span>
+                                    <span><i class="fa-solid fa-stopwatch text-info me-1"></i>Compte à rebours :</span>
                                     <span class="font-monospace fw-bold text-dark fs-4 building-time-remaining" data-countdown="<?= $jobEnd ?>">
                                         Calcul...
                                     </span>
@@ -1942,12 +1942,12 @@ if (!$isEmptyPlot) {
                             </div>
                         </div>
                         <button type="button" class="btn btn-outline-danger w-100" onclick="cancelBuildingBuild(<?= (int)$activeJob['id'] ?>)">
-                            🛑 <?= $isDemolishingJob ? 'Interrompre le démantèlement' : 'Interrompre les travaux (80% remboursé)' ?>
+                            <i class="fa-solid fa-ban text-danger me-1"></i><?= $isDemolishingJob ? 'Interrompre le démantèlement' : 'Interrompre les travaux (80% remboursé)' ?>
                         </button>
 
                     <?php elseif (!$canQueueNewBuilding): ?>
                         <div class="alert alert-secondary mb-3">
-                            <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">🏗️</div>
+                            <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;"><i class="fa-solid fa-helmet-safety text-danger"></i></div>
                             <h4 class="alert-title">Chantier Castral Déjà Mobilisé</h4>
                             <p class="text-muted mb-0" style="font-size:0.85rem;">
                                 <?php if ($isTerran): ?>
@@ -1961,31 +1961,31 @@ if (!$isEmptyPlot) {
 
                     <?php elseif (!$canAfford): ?>
                         <div class="alert alert-warning mb-3">
-                            <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">⚠️</div>
+                            <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;"><i class="fa-solid fa-triangle-exclamation text-danger"></i></div>
                             <h4 class="alert-title">Matériaux Insuffisants</h4>
                             <p class="text-muted mb-0" style="font-size:0.85rem;">
                                 Vos greniers ne disposent pas encore de la quantité requise de bois, de pierre ou de riz pour ce chantier castral.
                             </p>
                             <?php if ($missingWaitSeconds > 0): ?>
                                 <div class="mt-2 text-center">
-                                    <span class="badge bg-warning text-dark">⏳ Matériaux réunis dans : <?= gmdate('H:i:s', $missingWaitSeconds) ?></span>
+                                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-half me-1"></i>Matériaux réunis dans : <?= gmdate('H:i:s', $missingWaitSeconds) ?></span>
                                 </div>
                             <?php endif; ?>
                         </div>
                         <button type="button" class="btn btn-primary w-100" disabled style="opacity:0.5; cursor:not-allowed;">
-                            <?= ($lvl === 0) ? '🔨 Construire au Niveau 1' : '⚡ Améliorer au Niveau ' . $targetLevel ?>
+                            <?= ($lvl === 0) ? '<i class="fa-solid fa-hammer me-1"></i>Construire au Niveau 1' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Améliorer au Niveau ' . $targetLevel ?>
                         </button>
 
                     <?php else: ?>
                         <div class="alert alert-success mb-3">
-                            <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">🏯</div>
+                            <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;"><i class="fa-solid fa-chess-rook text-danger"></i></div>
                             <h4 class="alert-title">Ordre de Travaux Prêt</h4>
                             <p class="text-muted mb-0" style="font-size:0.85rem;">
                                 Les maîtres-artisans ont dressé les plans. Vous pouvez ordonner l'élévation du <strong>Niveau <?= $targetLevel ?></strong>.
                             </p>
                         </div>
                         <button type="button" class="btn btn-primary btn-lg w-100" id="btnLaunchBuildingUpgrade" onclick="launchBuildingUpgrade('<?= $code ?>', <?= $targetLevel ?>, <?= $slot ?>)">
-                            <?= ($lvl === 0) ? '🔨 Ériger au Niveau 1' : '⚡ Élever au Niveau ' . $targetLevel ?>
+                            <?= ($lvl === 0) ? '<i class="fa-solid fa-hammer me-1"></i>Ériger au Niveau 1' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Élever au Niveau ' . $targetLevel ?>
                         </button>
                     <?php endif; ?>
 
@@ -2000,11 +2000,11 @@ if (!$isEmptyPlot) {
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-danger fw-bold" style="font-size:0.75rem; text-transform:uppercase;">🏯 Siège du Commandement</div>
-                            <h3 class="card-title mb-0">📜 Devise & Chronique du Daimyō</h3>
+                            <div class="text-danger fw-bold" style="font-size:0.75rem; text-transform:uppercase;"><i class="fa-solid fa-chess-rook me-1"></i>Siège du Commandement</div>
+                            <h3 class="card-title mb-0"><i class="fa-solid fa-scroll me-1"></i>Devise & Chronique du Daimyō</h3>
                         </div>
                         <button type="button" onclick="openEditMottoModal()" class="btn btn-danger btn-sm">
-                            ✏️ Modifier ma Devise
+                            <i class="fa-solid fa-pen me-1"></i>Modifier ma Devise
                         </button>
                     </div>
                     <div class="card-body">
@@ -2032,7 +2032,7 @@ if (!$isEmptyPlot) {
                     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
                         <div>
                             <h3 class="card-title text-success d-flex align-items-center gap-2 m-0">
-                                <span>⛩️</span> Expansion Coloniale : Pionniers Féodaux (Colons)
+                                <span><i class="fa-solid fa-torii-gate text-danger"></i></span> Expansion Coloniale : Pionniers Féodaux (Colons)
                             </h3>
                             <div class="text-secondary small mt-1">
                                 Le Tenshu permet de former des <strong>Pionniers Féodaux</strong> aux paliers de niveau <strong>10, 15 et 20</strong> pour annexer de nouveaux villages.
@@ -2048,19 +2048,19 @@ if (!$isEmptyPlot) {
                             <div class="col-4">
                                 <div class="p-2 rounded border <?= ($tenshuLvl >= 10) ? 'border-success bg-success-lt' : 'bg-light text-muted' ?>">
                                     <div class="fw-bold" style="font-size:0.8rem;">1er Fief</div>
-                                    <div class="small"><?= ($tenshuLvl >= 10) ? '🔓 Débloqué (Niv. 10)' : '🔒 Tenshu Niv. 10' ?></div>
+                                    <div class="small"><?= ($tenshuLvl >= 10) ? '<i class="fa-solid fa-lock-open text-success me-1"></i>Débloqué (Niv. 10)' : '<i class="fa-solid fa-lock text-muted me-1"></i>Tenshu Niv. 10' ?></div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="p-2 rounded border <?= ($tenshuLvl >= 15) ? 'border-success bg-success-lt' : 'bg-light text-muted' ?>">
                                     <div class="fw-bold" style="font-size:0.8rem;">2e Fief</div>
-                                    <div class="small"><?= ($tenshuLvl >= 15) ? '🔓 Débloqué (Niv. 15)' : '🔒 Tenshu Niv. 15' ?></div>
+                                    <div class="small"><?= ($tenshuLvl >= 15) ? '<i class="fa-solid fa-lock-open text-success me-1"></i>Débloqué (Niv. 15)' : '<i class="fa-solid fa-lock text-muted me-1"></i>Tenshu Niv. 15' ?></div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="p-2 rounded border <?= ($tenshuLvl >= 20) ? 'border-success bg-success-lt' : 'bg-light text-muted' ?>">
                                     <div class="fw-bold" style="font-size:0.8rem;">3e Fief</div>
-                                    <div class="small"><?= ($tenshuLvl >= 20) ? '🔓 Débloqué (Niv. 20)' : '🔒 Tenshu Niv. 20' ?></div>
+                                    <div class="small"><?= ($tenshuLvl >= 20) ? '<i class="fa-solid fa-lock-open text-success me-1"></i>Débloqué (Niv. 20)' : '<i class="fa-solid fa-lock text-muted me-1"></i>Tenshu Niv. 20' ?></div>
                                 </div>
                             </div>
                         </div>
@@ -2069,7 +2069,7 @@ if (!$isEmptyPlot) {
                         <div class="bg-surface p-3 rounded border mb-3 small">
                             <div class="row g-2">
                                 <div class="col-sm-6">
-                                    <div>🏯 Fiefs annexés par ce Tenshu : <strong><?= $colonStatus['colonies_count'] ?></strong></div>
+                                    <div><i class="fa-solid fa-chess-rook text-danger me-1"></i>Fiefs annexés par ce Tenshu : <strong><?= $colonStatus['colonies_count'] ?></strong></div>
                                     <?php if (!empty($colonStatus['founded_colonies'])): ?>
                                         <ul class="mb-0 ps-3 mt-1 text-muted" style="font-size:0.75rem;">
                                             <?php foreach ($colonStatus['founded_colonies'] as $fc): ?>
@@ -2079,10 +2079,10 @@ if (!$isEmptyPlot) {
                                     <?php endif; ?>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div>⛩️ Colons en garnison dans ce fief : <strong><?= $colonStatus['stationed_colons'] ?></strong></div>
-                                    <div>🏇 Colons en marche / expédition : <strong><?= $colonStatus['in_mission_colons'] ?></strong></div>
+                                    <div><i class="fa-solid fa-torii-gate text-danger me-1"></i>Colons en garnison dans ce fief : <strong><?= $colonStatus['stationed_colons'] ?></strong></div>
+                                    <div><i class="fa-solid fa-horse text-danger me-1"></i>Colons en marche / expédition : <strong><?= $colonStatus['in_mission_colons'] ?></strong></div>
                                     <?php if ($colonStatus['queued_colons'] > 0): ?>
-                                        <div>⏳ Colons en cours de formation : <strong><?= $colonStatus['queued_colons'] ?></strong></div>
+                                        <div><i class="fa-solid fa-hourglass-half text-info me-1"></i>Colons en cours de formation : <strong><?= $colonStatus['queued_colons'] ?></strong></div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -2093,16 +2093,16 @@ if (!$isEmptyPlot) {
                             <div class="border rounded p-3 bg-light">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <strong class="text-dark">Équiper 1 Pionnier Féodal</strong>
-                                    <span class="text-muted small">⏳ <?= gmdate("H:i:s", $colonStatus['train_time']) ?> de préparation</span>
+                                    <span class="text-muted small"><i class="fa-solid fa-hourglass-half text-info me-1"></i><?= gmdate("H:i:s", $colonStatus['train_time']) ?> de préparation</span>
                                 </div>
                                 <div class="d-flex flex-wrap gap-2 mb-3" style="font-size:0.8rem;">
-                                    <span class="badge bg-secondary-lt">🪵 <?= number_format($cCosts['metal']) ?> Bois</span>
-                                    <span class="badge bg-secondary-lt">🪨 <?= number_format($cCosts['crystal']) ?> Pierre</span>
-                                    <span class="badge bg-secondary-lt">🌾 <?= number_format($cCosts['deuterium']) ?> Riz</span>
-                                    <span class="badge bg-secondary-lt">🌾 <?= number_format($cCosts['rice_flour']) ?> Farine de Riz</span>
+                                    <span class="badge bg-secondary-lt"><i class="fa-solid fa-tree text-success me-1"></i><?= number_format($cCosts['metal']) ?> Bois</span>
+                                    <span class="badge bg-secondary-lt"><i class="fa-solid fa-mountain text-secondary me-1"></i><?= number_format($cCosts['crystal']) ?> Pierre</span>
+                                    <span class="badge bg-secondary-lt"><i class="fa-solid fa-wheat-awn text-warning me-1"></i><?= number_format($cCosts['deuterium']) ?> Riz</span>
+                                    <span class="badge bg-secondary-lt"><i class="fa-solid fa-bowl-rice text-warning me-1"></i><?= number_format($cCosts['rice_flour']) ?> Farine de Riz</span>
                                 </div>
                                 <button type="button" class="btn btn-success w-100 fw-bold" onclick="trainColonizer()" <?= !$canAffordColon ? 'disabled' : '' ?>>
-                                    ⛩️ Former 1 Pionnier Féodal (Colon)
+                                    <i class="fa-solid fa-torii-gate me-1"></i>Former 1 Pionnier Féodal (Colon)
                                 </button>
                                 <?php if (!$canAffordColon): ?>
                                     <div class="text-danger small mt-1 text-center">Ressources ou farine de riz insuffisantes dans vos réserves.</div>
@@ -2125,10 +2125,10 @@ if (!$isEmptyPlot) {
                 <div class="card mb-3" style="border-top: 3px solid #f59e0b;">
                     <div class="card-header d-flex justify-content-between align-items-center py-2">
                         <h3 class="card-title text-warning d-flex align-items-center gap-2 m-0">
-                            <span>👑</span> Statut &amp; Souveraineté du Fief
+                            <span><i class="fa-solid fa-crown text-warning"></i></span> Statut &amp; Souveraineté du Fief
                         </h3>
                         <?php if (!empty($planet['is_capital'])): ?>
-                            <span class="badge bg-warning text-dark fw-bold">👑 Capitale Officielle</span>
+                            <span class="badge bg-warning text-dark fw-bold"><i class="fa-solid fa-crown me-1"></i>Capitale Officielle</span>
                         <?php else: ?>
                             <span class="badge bg-secondary">Fief Secondaire</span>
                         <?php endif; ?>
@@ -2141,7 +2141,7 @@ if (!$isEmptyPlot) {
                                 <div class="input-group">
                                     <input type="text" id="villageNewName" class="form-control form-control-sm" value="<?= htmlspecialchars($planet['name']) ?>" maxlength="40">
                                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="renameVillage()">
-                                        ✏️ Renommer
+                                        <i class="fa-solid fa-pen me-1"></i>Renommer
                                     </button>
                                 </div>
                                 <div class="form-text small" style="font-size:0.72rem;">Entre 2 et 40 caractères. Visible sur la carte du monde.</div>
@@ -2158,11 +2158,11 @@ if (!$isEmptyPlot) {
                                 <div>
                                     <?php if (!empty($planet['is_capital'])): ?>
                                         <button type="button" class="btn btn-sm btn-success w-100" disabled>
-                                            ✓ Ce fief est votre Capitale
+                                            <i class="fa-solid fa-check text-success me-1"></i>Ce fief est votre Capitale
                                         </button>
                                     <?php else: ?>
                                         <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold" onclick="proclaimCapital()">
-                                            👑 Définir comme Capitale Officielle
+                                            <i class="fa-solid fa-crown me-1"></i>Définir comme Capitale Officielle
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -2206,14 +2206,14 @@ async function launchBuildingUpgrade(buildingCode, targetLevel, slot = null) {
             showModalAlert(data.error || 'Impossible d\'ordonner ce chantier.', 'error');
             if (btn) {
                 btn.disabled = false;
-                btn.innerText = (targetLevel === 1 ? '🔨 Ériger au Niveau 1' : '⚡ Élever au Niveau ' + targetLevel);
+                btn.innerHTML = (targetLevel === 1 ? '<i class="fa-solid fa-hammer me-1"></i>Ériger au Niveau 1' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Élever au Niveau ' + targetLevel);
             }
         }
     } catch (e) {
         showModalAlert('Erreur de communication avec le serveur castral.', 'error');
         if (btn) {
             btn.disabled = false;
-            btn.innerText = (targetLevel === 1 ? '🔨 Ériger au Niveau 1' : '⚡ Élever au Niveau ' + targetLevel);
+            btn.innerHTML = (targetLevel === 1 ? '<i class="fa-solid fa-hammer me-1"></i>Ériger au Niveau 1' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Élever au Niveau ' + targetLevel);
         }
     }
 }
@@ -2324,14 +2324,14 @@ function calcFlourPreview() {
     const rice = Math.max(0, parseFloat(input.value) || 0);
     const efficiency = 1 + (grainMillLevel * 0.02);
     const gain = Math.floor((rice / 5) * efficiency);
-    if (previewGain) previewGain.textContent = '+' + gain.toLocaleString('fr-FR') + ' 🍚';
+    if (previewGain) previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' <i class="fa-solid fa-bowl-rice text-warning"></i>';
 
     if (previewTime) {
         if (rice <= 0) {
-            previewTime.textContent = '⏱️ --';
+            previewTime.textContent = '<i class="fa-solid fa-stopwatch text-info me-1"></i>--';
         } else {
             const duration = Math.max(10, Math.round((rice * 0.4) / (1 + (grainMillLevel * 0.15)) / (gameSpeed || 1)));
-            previewTime.textContent = '⏱️ ' + formatCraftDuration(duration);
+            previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
         }
     }
 }
@@ -2344,14 +2344,14 @@ function calcSakePreview() {
     const rice = Math.max(0, parseFloat(input.value) || 0);
     const efficiency = 1 + (grainMillLevel * 0.02);
     const gain = Math.floor((rice / 10) * efficiency);
-    if (previewGain) previewGain.textContent = '+' + gain.toLocaleString('fr-FR') + ' 🍶';
+    if (previewGain) previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' <i class="fa-solid fa-wine-bottle text-danger"></i>';
 
     if (previewTime) {
         if (rice <= 0) {
-            previewTime.textContent = '⏱️ --';
+            previewTime.textContent = '<i class="fa-solid fa-stopwatch text-info me-1"></i>--';
         } else {
             const duration = Math.max(15, Math.round((rice * 0.8) / (1 + (grainMillLevel * 0.15)) / (gameSpeed || 1)));
-            previewTime.textContent = '⏱️ ' + formatCraftDuration(duration);
+            previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
         }
     }
 }
@@ -2493,14 +2493,14 @@ function calcBeamsPreview() {
     const wood = Math.max(0, parseFloat(input.value) || 0);
     const efficiency = 1 + (sawmillLevel * 0.02);
     const gain = Math.floor((wood / 10) * efficiency);
-    if (previewGain) previewGain.textContent = '+' + gain.toLocaleString('fr-FR') + ' 🪵';
+    if (previewGain) previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' <i class="fa-solid fa-tree text-success"></i>';
 
     if (previewTime) {
         if (wood <= 0) {
-            previewTime.textContent = '⏱️ --';
+            previewTime.textContent = '<i class="fa-solid fa-stopwatch text-info me-1"></i>--';
         } else {
             const duration = Math.max(10, Math.round((wood * 0.5) / (1 + (sawmillLevel * 0.15)) / (gameSpeed || 1)));
-            previewTime.textContent = '⏱️ ' + formatCraftDuration(duration);
+            previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
         }
     }
 }
@@ -2626,9 +2626,9 @@ async function submitTenshuFeast(feastType) {
 
 async function trainColonizer() {
     const confirmed = await showModalConfirm(
-        "⛩️ Mobilisation de Pionniers Féodaux",
+        "Mobilisation de Pionniers Féodaux",
         "Voulez-vous mobiliser vos maîtres bâtisseurs et artisans pour équiper un Pionnier Féodal (Colon) ? Il permettra d'aller annexer un nouveau territoire vierge sur la carte.",
-        "⛩️ Former le Colon",
+        "Former le Colon",
         "Annuler"
     );
     if (!confirmed) return;
@@ -2680,9 +2680,9 @@ async function renameVillage() {
 
 async function proclaimCapital() {
     const confirmed = await showModalConfirm(
-        "👑 Proclamation de la Capitale",
+        "Proclamation de la Capitale",
         "Êtes-vous certain de vouloir déplacer la Capitale officielle de votre clan vers ce fief ? L'ancien fief capitale deviendra un fief secondaire.",
-        "👑 Déclarer Capitale",
+        "Déclarer Capitale",
         "Annuler"
     );
     if (!confirmed) return;
@@ -2832,14 +2832,14 @@ function updateMarketCalculations() {
     const totalShips = needHeavy + needLight;
     const effectiveMarches = Math.max(1, totalShips);
     const fuelReq = Math.max(5, Math.round(distance * effectiveMarches * 1.2));
-    fuelNeededDisplay.innerText = `~${fuelReq.toLocaleString('fr-FR')} Koku 🌾`;
+    fuelNeededDisplay.innerHTML = `~${fuelReq.toLocaleString('fr-FR')} Koku <i class="fa-solid fa-wheat-awn text-warning"></i>`;
 
     // Durée estimée (vitesse de base convoi = 4000)
     const speed = 4000;
     const durSec = Math.max(3, Math.round((3500 * distance) / (speed * 5)));
     const mins = Math.floor(durSec / 60);
     const secs = durSec % 60;
-    durationDisplay.innerText = `⏱️ ~${mins}m ${secs < 10 ? '0' : ''}${secs}s (Dist. ${distance})`;
+    durationDisplay.innerHTML = `<i class="fa-solid fa-stopwatch text-info me-1"></i>~${mins}m ${secs < 10 ? '0' : ''}${secs}s (Dist. ${distance})`;
 
     // Validation du bouton
     if (totalCargo <= 0) {
@@ -3073,13 +3073,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="modal-content">
             <div class="modal-header bg-warning-subtle">
                 <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                    <span>⚖️</span> Intendant du Marché Castral (Troc 1:1:1)
+                    <span><i class="fa-solid fa-scale-balanced text-warning"></i></span> Intendant du Marché Castral (Troc 1:1:1)
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="text-secondary small mb-3">
-                    L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au taux parfait de <strong>1:1:1</strong> pour un tribut de <strong>3 Koban 🪙</strong>.
+                    L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au taux parfait de <strong>1:1:1</strong> pour un tribut de <strong>3 Koban <i class="fa-solid fa-coins text-warning"></i></strong>.
                 </div>
 
                 <div class="p-2 bg-light border rounded mb-3 text-center">
@@ -3093,7 +3093,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span>🪵 Bois de Cèdre :</span>
+                        <span><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre :</span>
                         <span id="npc_wood_val" class="font-monospace text-primary">0</span>
                     </label>
                     <input type="range" class="form-range" id="npc_range_wood" oninput="onNpcRangeChange('wood')">
@@ -3102,7 +3102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span>🪨 Pierre de Taille :</span>
+                        <span><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille :</span>
                         <span id="npc_stone_val" class="font-monospace text-primary">0</span>
                     </label>
                     <input type="range" class="form-range" id="npc_range_stone" oninput="onNpcRangeChange('stone')">
@@ -3111,7 +3111,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span>🌾 Riz Impérial :</span>
+                        <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial :</span>
                         <span id="npc_rice_val" class="font-monospace text-primary">0</span>
                     </label>
                     <input type="range" class="form-range" id="npc_range_rice" oninput="onNpcRangeChange('rice')">
@@ -3120,7 +3120,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div class="d-flex gap-2 mb-2">
                     <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="distributeEvenly()">
-                        ⚖️ Répartir Équitablement (1/3 chacun)
+                        <i class="fa-solid fa-scale-balanced me-1"></i>Répartir Équitablement (1/3 chacun)
                     </button>
                 </div>
 
@@ -3133,7 +3133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="button" class="btn btn-warning fw-bold" id="btnSubmitNpcExchange" onclick="submitNpcExchange()">
-                        🪙 Sceller le Troc (3 Koban)
+                        <i class="fa-solid fa-coins me-1"></i>Sceller le Troc (3 Koban)
                     </button>
                 </div>
             </div>
@@ -3145,7 +3145,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <div id="artworkModal" class="modal-overlay" style="display:none;" onclick="closeArtworkModal(event)">
     <div class="modal-card modal-card-lg" style="max-width:960px; padding:1.5rem;" onclick="event.stopPropagation()">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--tblr-border-color); padding-bottom:0.75rem; margin-bottom:1rem;">
-            <h3 id="artworkModalTitle" style="margin:0; font-size:1.1rem; font-weight:800;">🎨 Estampe Féodale Authentique</h3>
+            <h3 id="artworkModalTitle" style="margin:0; font-size:1.1rem; font-weight:800;"><i class="fa-solid fa-palette text-info me-1"></i>Estampe Féodale Authentique</h3>
             <button type="button" class="btn-close" onclick="closeArtworkModal()"></button>
         </div>
         <div style="text-align:center;">

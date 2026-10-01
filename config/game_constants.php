@@ -11,7 +11,7 @@ const FACTIONS = [
     'terran' => [
         'name' => 'Clan Oda',
         'subname' => 'L\'Ambition & la Discipline',
-        'icon' => '🏯',
+        'icon' => '<i class="fa-solid fa-chess-rook text-primary"></i>',
         'color' => '#3b82f6', // Bleu nuit & or
         'description' => 'Maîtres de l\'organisation et pionniers des armes à feu (Tanegashima). Capacité unique : double développement simultané (1 rizière/carrière rurale + 1 bâtiment urbain en même temps).',
         'special_ability' => 'Double développement simultané (parcelle rurale + bâtiment urbain)',
@@ -20,7 +20,7 @@ const FACTIONS = [
     'vorash' => [
         'name' => 'Clan Takeda',
         'subname' => 'La Furie de la Cavalerie Rouge',
-        'icon' => '🐎',
+        'icon' => '<i class="fa-solid fa-horse text-danger"></i>',
         'color' => '#ef4444', // Rouge écarlate de Kai
         'description' => 'Seigneurs des plaines et de la légendaire cavalerie rouge (Akazonae). Troupes montées vives et redoutables, bonus de pillage pénétrant les réserves adverses.',
         'special_ability' => 'Cavalerie -20% temps d\'entraînement & +25% de butin en raid',
@@ -29,7 +29,7 @@ const FACTIONS = [
     'aethelis' => [
         'name' => 'Clan Tokugawa',
         'subname' => 'La Patience & la Forteresse',
-        'icon' => '⛩️',
+        'icon' => '<i class="fa-solid fa-torii-gate text-warning"></i>',
         'color' => '#8b5cf6', // Pourpre impérial & vert pin
         'description' => 'Seigneurs stratèges réputés pour leur résilience et châteaux imprenables. Cachettes secrètes doublées, vitesse de marche supérieure et défenses fortifiées.',
         'special_ability' => 'Cachettes secrètes x2 & Vitesse de marche des troupes +20%',
@@ -87,7 +87,7 @@ const FIELD_TYPES = [
     'metal_mine' => [
         'name' => 'Camp de Bûcherons',
         'res_name' => 'Bois de Cèdre',
-        'icon' => '🪵',
+        'icon' => '<i class="fa-solid fa-tree text-success"></i>',
         'description' => 'Exploitation forestière taillant les nobles cèdres des forêts montagneuses du fief. Le bois est la matière première indispensable pour dresser les charpentes de vos donjons, vos palissades fortifiées et fabriquer les arcs et armes d\'hast de vos bataillons.',
         'base_cost' => ['metal' => 60, 'crystal' => 15, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
@@ -98,7 +98,7 @@ const FIELD_TYPES = [
     'crystal_mine' => [
         'name' => 'Carrière de Pierre',
         'res_name' => 'Pierre de Taille',
-        'icon' => '🪨',
+        'icon' => '<i class="fa-solid fa-mountain text-secondary"></i>',
         'description' => 'Carrière à ciel ouvert extrayant les blocs de granit et roches volcaniques des coteaux. Les pierres taillées permettent d\'édifier les fondations cyclopéennes (Nozura-zumi) de vos remparts, vos fossés et vos forteresses imprenables.',
         'base_cost' => ['metal' => 48, 'crystal' => 24, 'deuterium' => 0],
         'cost_multiplier' => 1.6,
@@ -109,7 +109,7 @@ const FIELD_TYPES = [
     'deuterium_synth' => [
         'name' => 'Rizière Inondée',
         'res_name' => 'Riz Impérial (Koku)',
-        'icon' => '🌾',
+        'icon' => '<i class="fa-solid fa-wheat-awn text-warning"></i>',
         'description' => 'Vastes rizières aménagées en terrasses irriguées par les canaux fluviaux. Le riz est la véritable monnaie du Japon féodal (mesurée en Koku) : il nourrit votre population, entretient vos garnisons samouraïs et finance vos campagnes militaires.',
         'base_cost' => ['metal' => 225, 'crystal' => 75, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
@@ -120,7 +120,7 @@ const FIELD_TYPES = [
     'solar_plant' => [
         'name' => 'Sanctuaire Shintō & Moulin',
         'res_name' => 'Ferveur & Sérénité',
-        'icon' => '⛩️',
+        'icon' => '<i class="fa-solid fa-torii-gate text-danger"></i>',
         'description' => 'Lieu sacré érigé sous les pins ancestraux avec torii vermillon et roue à aubes fluviale. Il honore les esprits tutélaires (Kami), maintenant l\'harmonie spirituelle et l\'énergie indispensable au rendement de toutes les parcelles du domaine.',
         'base_cost' => ['metal' => 75, 'crystal' => 30, 'deuterium' => 0],
         'cost_multiplier' => 1.5,
@@ -134,7 +134,7 @@ const FIELD_TYPES = [
 const BUILDINGS = [
     'hq' => [
         'name' => 'Tenshu (Donjon Castral)',
-        'icon' => '🏯',
+        'icon' => '<i class="fa-solid fa-chess-rook text-danger"></i>',
         'tile_img' => 'tile_tenshu.png',
         'description' => 'Le donjon fortifié et palais du Daimyō. Réduit la durée de construction de tous les bâtiments urbains et parcelles rurales du fief.',
         'base_cost' => ['metal' => 100, 'crystal' => 80, 'deuterium' => 40],
@@ -144,7 +144,7 @@ const BUILDINGS = [
     ],
     'storage' => [
         'name' => 'Entrepôt de Matériaux (Bois & Pierre)',
-        'icon' => '🪵',
+        'icon' => '<i class="fa-solid fa-warehouse text-warning"></i>',
         'tile_img' => 'tile_storage.png',
         'description' => 'Augmente la capacité de stockage maximale de Bois de Cèdre et de Pierre de Taille.',
         'base_cost' => ['metal' => 120, 'crystal' => 60, 'deuterium' => 0],
@@ -154,7 +154,7 @@ const BUILDINGS = [
     ],
     'tank' => [
         'name' => 'Grenier à Riz Fortifié (Kura)',
-        'icon' => '🌾',
+        'icon' => '<i class="fa-solid fa-wheat-awn text-warning"></i>',
         'tile_img' => 'tile_tank.png',
         'description' => 'Augmente la capacité de stockage maximale des récoltes de riz (Koku).',
         'base_cost' => ['metal' => 100, 'crystal' => 100, 'deuterium' => 0],
@@ -164,7 +164,7 @@ const BUILDINGS = [
     ],
     'shipyard' => [
         'name' => 'Atelier de Siège & Écuries',
-        'icon' => '🐎',
+        'icon' => '<i class="fa-solid fa-horse text-danger"></i>',
         'tile_img' => 'tile_shipyard.png',
         'description' => 'Permet d\'élever la cavalerie de guerre, les convois de transport et de fabriquer béliers et trébuchets.',
         'base_cost' => ['metal' => 400, 'crystal' => 200, 'deuterium' => 100],
@@ -174,7 +174,7 @@ const BUILDINGS = [
     ],
     'research_lab' => [
         'name' => 'Académie des Savoirs & Forge',
-        'icon' => '📜',
+        'icon' => '<i class="fa-solid fa-scroll text-info"></i>',
         'tile_img' => 'tile_research_lab.png',
         'description' => 'Permet de perfectionner la métallurgie du tamahagane, l\'art de la guerre et les tactiques militaires.',
         'base_cost' => ['metal' => 200, 'crystal' => 400, 'deuterium' => 200],
@@ -184,7 +184,7 @@ const BUILDINGS = [
     ],
     'radar' => [
         'name' => 'Tour de Guet Yagura & Feux d\'Alarme',
-        'icon' => '🏮',
+        'icon' => '<i class="fa-solid fa-eye text-primary"></i>',
         'tile_img' => 'tile_radar.png',
         'description' => 'Surveille les vallées et détecte les armées et espions ennemis en marche vers votre fief.',
         'base_cost' => ['metal' => 150, 'crystal' => 250, 'deuterium' => 100],
@@ -194,7 +194,7 @@ const BUILDINGS = [
     ],
     'quantum_vault' => [
         'name' => 'Cachette Secrète Sous Terre',
-        'icon' => '🕳️',
+        'icon' => '<i class="fa-solid fa-lock text-secondary"></i>',
         'tile_img' => 'tile_quantum_vault.png',
         'description' => 'Protège une réserve secrète de vivres et matériaux contre les pillages adverses (capacité doublée pour le Clan Tokugawa).',
         'base_cost' => ['metal' => 100, 'crystal' => 100, 'deuterium' => 50],
@@ -204,7 +204,7 @@ const BUILDINGS = [
     ],
     'market' => [
         'name' => 'Marché Féodal & Caravanes',
-        'icon' => '🏪',
+        'icon' => '<i class="fa-solid fa-scale-balanced text-warning"></i>',
         'tile_img' => 'tile_market.png',
         'description' => 'Permet d\'échanger des ressources avec les marchands itinérants et autres daimyōs provinciaux.',
         'base_cost' => ['metal' => 300, 'crystal' => 200, 'deuterium' => 150],
@@ -214,7 +214,7 @@ const BUILDINGS = [
     ],
     'embassy' => [
         'name' => 'Pavillon Diplomatique des Clans',
-        'icon' => '🎌',
+        'icon' => '<i class="fa-solid fa-building-columns text-primary"></i>',
         'tile_img' => 'tile_embassy.png',
         'description' => 'Permet de sceller ou rejoindre un pacte d\'alliance entre daimyōs.',
         'base_cost' => ['metal' => 180, 'crystal' => 130, 'deuterium' => 70],
@@ -224,7 +224,7 @@ const BUILDINGS = [
     ],
     'barracks' => [
         'name' => 'Dojo & Quartier Militaire',
-        'icon' => '🥋',
+        'icon' => '<i class="fa-solid fa-khanda text-danger"></i>',
         'tile_img' => 'tile_barracks.png',
         'description' => 'Entraîne les fantassins Ashigarus, archers Yumi, arquebusiers et samouraïs d\'élite pour la défense et les conquêtes.',
         'base_cost' => ['metal' => 200, 'crystal' => 150, 'deuterium' => 50],
@@ -234,7 +234,7 @@ const BUILDINGS = [
     ],
     'wall' => [
         'name' => 'Muraille & Remparts de Cité',
-        'icon' => '🧱',
+        'icon' => '<i class="fa-solid fa-shield-halved text-success"></i>',
         'tile_img' => 'tile_wall.png',
         'description' => 'Enceinte fortifiée en pierre de taille, palissades en cèdre et douves protégeant le fief. Confère une défense structurelle de base et un puissant bonus défensif multiplicateur (+4% par niveau) à l\'ensemble des guerriers stationnés en garnison face aux assauts ennemis.',
         'base_cost' => ['metal' => 110, 'crystal' => 160, 'deuterium' => 90],
@@ -244,7 +244,7 @@ const BUILDINGS = [
     ],
     'sawmill' => [
         'name' => 'Atelier de Charpenterie (Kizukuri)',
-        'icon' => '🪚',
+        'icon' => '<i class="fa-solid fa-tree text-success"></i>',
         'tile_img' => 'tile_sawmill.png',
         'description' => 'Atelier des maîtres charpentiers. Augmente la production de Bois de Cèdre de votre fief de +5% par niveau. Débloque au Niveau 10 le façonnage de Poutres en bois pour les chantiers monumentaux.',
         'base_cost' => ['metal' => 180, 'crystal' => 140, 'deuterium' => 60],
@@ -254,7 +254,7 @@ const BUILDINGS = [
     ],
     'stonemason' => [
         'name' => 'Taille de Granit & Maçonnerie (Ishizukuri)',
-        'icon' => '⛏️',
+        'icon' => '<i class="fa-solid fa-hammer text-secondary"></i>',
         'tile_img' => 'tile_stonemason.png',
         'description' => 'Atelier des tailleurs de pierre taillant les blocs cyclopéens. Augmente la production de Pierre de Taille de +5% par niveau et renforce la résistance des édifices.',
         'base_cost' => ['metal' => 130, 'crystal' => 190, 'deuterium' => 70],
@@ -264,7 +264,7 @@ const BUILDINGS = [
     ],
     'grain_mill' => [
         'name' => 'Meunerie & Brasserie de Riz (Sakagura)',
-        'icon' => '🍶',
+        'icon' => '<i class="fa-solid fa-wine-bottle text-warning"></i>',
         'tile_img' => 'tile_grain_mill.png',
         'description' => 'Brasserie et meunerie artisanale traitant les récoltes de riz. Augmente la production de Koku de Riz de +5% par niveau.',
         'base_cost' => ['metal' => 160, 'crystal' => 150, 'deuterium' => 100],
@@ -274,7 +274,7 @@ const BUILDINGS = [
     ],
     'blacksmith' => [
         'name' => 'Grande Forge du Tamahagane (Kaji-ba)',
-        'icon' => '⚔️',
+        'icon' => '<i class="fa-solid fa-fire text-danger"></i>',
         'tile_img' => 'tile_blacksmith.png',
         'description' => 'Forge des maîtres armuriers façonnant le tamahagane. Confère un bonus de +2% en puissance martiale et résistance d\'armure à toutes vos troupes par niveau.',
         'base_cost' => ['metal' => 220, 'crystal' => 180, 'deuterium' => 90],
@@ -284,7 +284,7 @@ const BUILDINGS = [
     ],
     'teahouse' => [
         'name' => 'Pavillon de Thé & Sérénité (Chashitsu)',
-        'icon' => '🍵',
+        'icon' => '<i class="fa-solid fa-mug-hot text-success"></i>',
         'tile_img' => 'tile_teahouse.png',
         'description' => 'Pavillon de méditation et cérémonie du thé entouré d\'un jardin zen. Augmente la Sérénité & Ferveur de votre domaine de +5% par niveau.',
         'base_cost' => ['metal' => 140, 'crystal' => 120, 'deuterium' => 80],
@@ -294,7 +294,7 @@ const BUILDINGS = [
     ],
     'tournament_square' => [
         'name' => 'Place d\'Exercices & Relais (Shurenjo)',
-        'icon' => '🎯',
+        'icon' => '<i class="fa-solid fa-bullseye text-danger"></i>',
         'tile_img' => 'tile_tournament_square.png',
         'description' => 'Terrain de manœuvres et relais de cavalerie. Augmente la vitesse de déplacement des armées de +10% par niveau lors des marches à longue distance (> 20 provinces).',
         'base_cost' => ['metal' => 250, 'crystal' => 200, 'deuterium' => 150],

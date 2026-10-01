@@ -26,11 +26,11 @@ $activeQuest = $questSummary['active_quest'];
         <?php $isClaimable = $activeQuest['is_claimable']; ?>
         <div class="card-header">
             <h3 class="card-title" style="font-size: 1rem;">
-                <span>📜</span> Didacticiel du Daimyō
+                <span><i class="fa-solid fa-scroll text-primary me-1"></i></span> Didacticiel du Daimyō
             </h3>
             <?php if ($isClaimable): ?>
                 <span class="badge " style="background: #15803d; color: #ffffff; font-size: 0.7rem; padding: 0.15rem 0.45rem; font-weight: 800; border-radius: 4px;">
-                    ✨ Objectif atteint !
+                    <i class="fa-solid fa-sparkles text-warning me-1"></i>Objectif atteint !
                 </span>
             <?php else: ?>
                 <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">
@@ -73,19 +73,19 @@ $activeQuest = $questSummary['active_quest'];
                 <div style="color: var(--text-muted); font-weight: 700; margin-bottom: 0.2rem;">Récompense :</div>
                 <div style="display: flex; flex-wrap: wrap; gap: 0.35rem 0.6rem;">
                     <?php if (!empty($activeQuest['rewards']['metal'])): ?>
-                        <span style="color: var(--res-metal); font-weight: 600;">🪵 +<?= number_format($activeQuest['rewards']['metal']) ?> Bois</span>
+                        <span style="color: var(--res-metal); font-weight: 600;"><i class="fa-solid fa-tree text-success me-1"></i>+<?= number_format($activeQuest['rewards']['metal']) ?> Bois</span>
                     <?php endif; ?>
                     <?php if (!empty($activeQuest['rewards']['crystal'])): ?>
-                        <span style="color: var(--res-crystal); font-weight: 600;">🪨 +<?= number_format($activeQuest['rewards']['crystal']) ?> Pierre</span>
+                        <span style="color: var(--res-crystal); font-weight: 600;"><i class="fa-solid fa-mountain text-secondary me-1"></i>+<?= number_format($activeQuest['rewards']['crystal']) ?> Pierre</span>
                     <?php endif; ?>
                     <?php if (!empty($activeQuest['rewards']['deuterium'])): ?>
-                        <span style="color: var(--res-deut); font-weight: 600;">🌾 +<?= number_format($activeQuest['rewards']['deuterium']) ?> Riz</span>
+                        <span style="color: var(--res-deut); font-weight: 600;"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>+<?= number_format($activeQuest['rewards']['deuterium']) ?> Riz</span>
                     <?php endif; ?>
                     <?php if (!empty($activeQuest['rewards']['points'])): ?>
-                        <span style="color: #b45309; font-weight: 600;">⛩️ +<?= $activeQuest['rewards']['points'] ?> Honneur</span>
+                        <span style="color: #b45309; font-weight: 600;"><i class="fa-solid fa-torii-gate text-danger me-1"></i>+<?= $activeQuest['rewards']['points'] ?> Honneur</span>
                     <?php endif; ?>
                     <?php if (!empty($activeQuest['rewards']['bonus_units'])): ?>
-                        <span style="color: var(--red-primary, #c2252b); font-weight: 700;">⚔️ +<?= $activeQuest['rewards']['bonus_units'] ?> Recrues</span>
+                        <span style="color: var(--red-primary, #c2252b); font-weight: 700;"><i class="fa-solid fa-khanda text-danger me-1"></i>+<?= $activeQuest['rewards']['bonus_units'] ?> Recrues</span>
                     <?php endif; ?>
                 </div>
             </div>
@@ -96,7 +96,7 @@ $activeQuest = $questSummary['active_quest'];
                         onclick="claimQuestReward('<?= $activeQuest['key'] ?>')" 
                         class="btn btn-primary" 
                         style="width: 100%; background: #15803d; border-color: #166534; color: #ffffff; font-weight: 800; font-size: 0.85rem; padding: 0.55rem; border-radius: 6px; cursor: pointer; text-align: center; margin-bottom: 0.6rem;">
-                    ✨ Réclamer ma Récompense
+                    <i class="fa-solid fa-sparkles text-warning me-1"></i>Réclamer ma Récompense
                 </button>
             <?php else: ?>
                 <?php if (str_starts_with($activeQuest['action_url'], 'javascript:')): ?>
@@ -124,7 +124,7 @@ $activeQuest = $questSummary['active_quest'];
                     <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; font-family: monospace;"><?= $questSummary['overall_percent'] ?>%</span>
                 </div>
                 <button type="button" onclick="openQuestModal()" style="background: transparent; border: none; color: var(--text-muted); font-size: 0.74rem; cursor: pointer; text-decoration: underline; padding: 0; white-space: nowrap;">
-                    📜 Codex (<?= $questSummary['claimed_count'] ?>/12)
+                    <i class="fa-solid fa-scroll me-1"></i>Codex (<?= $questSummary['claimed_count'] ?>/12)
                 </button>
             </div>
         </div>

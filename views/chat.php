@@ -34,7 +34,7 @@ if (!empty($chatUser['id'])) {
             <div class="col">
                 <div class="page-pretitle text-muted">Échanges &amp; Diplomatie en Direct</div>
                 <h2 class="page-title d-flex align-items-center gap-2" style="color:#b45309; font-weight:800;">
-                    <span>🏮</span>
+                    <i class="fa-solid fa-comments text-warning"></i>
                     <span>Taverne du Shōgunat — Salon des Daimyōs</span>
                 </h2>
                 <div class="text-secondary small mt-1">
@@ -45,21 +45,21 @@ if (!empty($chatUser['id'])) {
                 <div class="btn-list">
                     <!-- Bouton Son -->
                     <button type="button" id="fullChatSoundToggleBtn" class="btn btn-outline-secondary d-flex align-items-center gap-2" onclick="toggleFullChatSound()">
-                        <span id="fullChatSoundIcon">🔔</span>
+                        <i id="fullChatSoundIcon" class="fa-solid fa-bell"></i>
                         <span id="fullChatSoundText">Son Activé</span>
                     </button>
 
                     <?php if ($hasAlliance): ?>
                         <a href="/?page=alliance" class="btn btn-outline-warning d-flex align-items-center gap-2">
-                            <span>🎌</span> Mon Alliance [<?= htmlspecialchars($allianceTag) ?>]
+                            <i class="fa-solid fa-flag text-warning"></i> Mon Alliance [<?= htmlspecialchars($allianceTag) ?>]
                         </a>
                     <?php else: ?>
                         <a href="/?page=alliance" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-                            <span>🎌</span> Rejoindre un Clan
+                            <i class="fa-solid fa-flag text-secondary"></i> Rejoindre un Clan
                         </a>
                     <?php endif; ?>
                     <a href="/?page=resources" class="btn btn-secondary">
-                        &larr; Retour au Fief
+                        <i class="fa-solid fa-arrow-left me-1"></i> Retour au Fief
                     </a>
                 </div>
             </div>
@@ -76,7 +76,7 @@ if (!empty($chatUser['id'])) {
             <div class="card mb-2 shadow-sm border-0">
                 <div class="card-body p-2">
                     <input type="text" id="fullQueueFilterInput" class="form-control form-control-sm"
-                           placeholder="🔍 Filtrer les conversations..." oninput="filterFullQueue(this.value)"
+                           placeholder="Filtrer les conversations..." oninput="filterFullQueue(this.value)"
                            style="font-size:0.8rem; border-color:#d6d3d1;">
                 </div>
             </div>
@@ -85,7 +85,7 @@ if (!empty($chatUser['id'])) {
             <div class="card mb-3 shadow-sm border-0" style="border-top:3px solid #b45309 !important;">
                 <div class="card-header py-2 d-flex align-items-center justify-content-between">
                     <h4 class="card-title m-0 d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                        <span>🗂️</span>
+                        <i class="fa-solid fa-folder-open text-primary"></i>
                         <span>File des Canaux</span>
                     </h4>
                     <span class="status-dot status-dot-animated bg-success" title="Rafraîchissement automatique actif (2.5s)"></span>
@@ -95,7 +95,7 @@ if (!empty($chatUser['id'])) {
                     <a href="javascript:void(0)" onclick="setFullChatChannel('global')" id="fullChannelBtn_global"
                        class="list-group-item list-group-item-action py-2 d-flex align-items-center justify-content-between active">
                         <div class="d-flex align-items-center gap-2 text-truncate" style="max-width:210px;">
-                            <span style="font-size:1.4rem;">🏯</span>
+                            <span class="fs-2 text-danger"><i class="fa-solid fa-chess-rook"></i></span>
                             <div class="text-truncate">
                                 <div class="d-flex align-items-center gap-1">
                                     <span class="font-weight-bold" style="font-size:0.84rem;">Général</span>
@@ -113,12 +113,12 @@ if (!empty($chatUser['id'])) {
                     <a href="javascript:void(0)" onclick="setFullChatChannel('alliance')" id="fullChannelBtn_alliance"
                        class="list-group-item list-group-item-action py-2 d-flex align-items-center justify-content-between <?= !$hasAlliance ? 'disabled opacity-50' : '' ?>">
                         <div class="d-flex align-items-center gap-2 text-truncate" style="max-width:210px;">
-                            <span style="font-size:1.4rem;">🎌</span>
+                            <span class="fs-2 text-indigo"><i class="fa-solid fa-flag"></i></span>
                             <div class="text-truncate">
                                 <div class="d-flex align-items-center gap-1">
                                     <span class="font-weight-bold" style="font-size:0.84rem;">Clan Féodal</span>
                                     <span class="badge <?= $hasAlliance ? 'bg-indigo-lt text-indigo' : 'bg-secondary-lt text-secondary' ?>" style="font-size:0.58rem;">
-                                        <?= $hasAlliance ? htmlspecialchars($allianceTag ? "[$allianceTag]" : 'Clan') : '🔒 Aucun Clan' ?>
+                                        <?= $hasAlliance ? htmlspecialchars($allianceTag ? "[$allianceTag]" : 'Clan') : '<i class="fa-solid fa-lock me-1"></i> Aucun Clan' ?>
                                     </span>
                                 </div>
                                 <div class="text-muted small text-truncate" id="fullQueueLastMsg_alliance" style="font-size:0.7rem;">
@@ -134,7 +134,7 @@ if (!empty($chatUser['id'])) {
             <!-- Conversations Privées (Chuchotements en Direct) -->
             <div class="card mb-3 shadow-sm border-0" style="border-top:3px solid #6366f1 !important;">
                 <div class="card-header py-2 d-flex align-items-center justify-content-between">
-                    <h4 class="card-title m-0" style="font-size:0.9rem;">✉️ Chuchotements Privés</h4>
+                    <h4 class="card-title m-0" style="font-size:0.9rem;"><i class="fa-solid fa-envelope text-indigo me-1"></i> Chuchotements Privés</h4>
                     <span class="badge bg-indigo-lt" id="fullWhisperCountBadge"><?= count($conversations) ?></span>
                 </div>
                 <div class="list-group list-group-flush" id="chatFullWhispersList" style="max-height:260px; overflow-y:auto;">
@@ -149,10 +149,10 @@ if (!empty($chatUser['id'])) {
                                id="fullWhisperBtn_<?= (int)$c['user_id'] ?>"
                                class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2">
                                 <div class="d-flex align-items-center gap-2 text-truncate" style="max-width:210px;">
-                                    <span style="font-size:0.8rem;"><?= $c['is_online'] ? '🟢' : '⚪' ?></span>
+                                    <span style="font-size:0.75rem;"><?= $c['is_online'] ? '<i class="fa-solid fa-circle text-success"></i>' : '<i class="fa-solid fa-circle text-secondary"></i>' ?></span>
                                     <div class="text-truncate">
                                         <div class="font-weight-bold text-truncate" style="font-size:0.82rem;">
-                                            <span><?= $c['faction_icon'] ?? '🏯' ?></span>
+                                            <span><?= $c['faction_icon'] ?? '<i class="fa-solid fa-chess-rook"></i>' ?></span>
                                             <?= htmlspecialchars($c['username']) ?>
                                             <?php if ($c['alliance_tag']): ?>
                                                 <span class="badge bg-dark text-white ms-1" style="font-size:0.58rem;">[<?= htmlspecialchars($c['alliance_tag']) ?>]</span>
@@ -192,16 +192,16 @@ if (!empty($chatUser['id'])) {
                                     <span class="badge bg-secondary-lt ms-1" style="font-size:0.58rem;">[<?= htmlspecialchars($ou['alliance_tag']) ?>]</span>
                                 <?php endif; ?>
                                 <?php if ($ou['is_admin']): ?>
-                                    <span class="badge bg-warning text-dark ms-1" style="font-size:0.55rem;">⭐ Admin</span>
+                                    <span class="badge bg-warning text-dark ms-1" style="font-size:0.55rem;"><i class="fa-solid fa-star me-1"></i>Admin</span>
                                 <?php elseif ($ou['is_moderator']): ?>
-                                    <span class="badge bg-primary text-white ms-1" style="font-size:0.55rem;">🛡️ Modo</span>
+                                    <span class="badge bg-primary text-white ms-1" style="font-size:0.55rem;"><i class="fa-solid fa-shield-halved me-1"></i>Modo</span>
                                 <?php endif; ?>
                             </div>
                             <?php if ((int)$ou['id'] !== (int)$chatUser['id']): ?>
                                 <button type="button" class="btn btn-sm btn-ghost-primary p-0 px-2"
                                         title="Chuchoter à <?= htmlspecialchars($ou['username']) ?>"
                                         onclick="setFullChatWhisper(<?= (int)$ou['id'] ?>, '<?= htmlspecialchars(addslashes($ou['username'])) ?>')">
-                                    ✉️
+                                    <i class="fa-solid fa-envelope"></i>
                                 </button>
                             <?php else: ?>
                                 <span class="badge bg-light text-muted" style="font-size:0.6rem;">Vous</span>
@@ -220,7 +220,7 @@ if (!empty($chatUser['id'])) {
                 <!-- En-tête du Fil de Discussion -->
                 <div class="card-header py-3 d-flex align-items-center justify-content-between bg-primary text-white">
                     <div class="d-flex align-items-center gap-3">
-                        <span id="fullChatChannelIcon" style="font-size:1.8rem;">🏯</span>
+                        <span id="fullChatChannelIcon" class="fs-1"><i class="fa-solid fa-chess-rook"></i></span>
                         <div>
                             <h3 class="m-0 fw-bold text-white" id="fullChatChannelTitle" style="font-size:1.15rem;">
                                 Canal Général du Shōgunat
@@ -235,7 +235,7 @@ if (!empty($chatUser['id'])) {
                         <span class="small d-none d-sm-inline text-white-50" style="font-size:0.75rem;">En direct</span>
                         <button type="button" class="btn btn-sm btn-outline-light d-flex align-items-center gap-1 ms-2"
                                 onclick="fetchFullMessages()" title="Actualiser instantanément">
-                            <span>🔄</span> Rafraîchir
+                            <i class="fa-solid fa-rotate me-1"></i> Rafraîchir
                         </button>
                     </div>
                 </div>
@@ -244,23 +244,23 @@ if (!empty($chatUser['id'])) {
                 <div id="fullChatMessagesContainer" class="card-body p-3 flex-grow-1"
                      style="overflow-y:auto; max-height:520px; display:flex; flex-direction:column; gap:0.65rem;">
                     <div class="text-center py-5 text-muted">
-                        <span>🏮 Connexion au salon féodal...</span>
+                        <span><i class="fa-solid fa-comments text-warning me-2"></i>Connexion au salon féodal...</span>
                     </div>
                 </div>
 
                 <!-- Barre d'Emojis Féodaux Rapides -->
                 <div class="px-3 py-1 bg-light border-top d-flex gap-2 align-items-center overflow-x-auto" style="scrollbar-width:none;">
-                    <span class="text-muted small" style="font-size:0.75rem;">Émoticônes :</span>
-                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('⚔️')">⚔️</button>
-                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🏯')">🏯</button>
-                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🎌')">🎌</button>
-                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🍵')">🍵</button>
-                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🍶')">🍶</button>
-                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🥷')">🥷</button>
-                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('📜')">📜</button>
-                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🌾')">🌾</button>
-                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🔥')">🔥</button>
-                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🛡️')">🛡️</button>
+                    <span class="text-muted small" style="font-size:0.75rem;">Raccourcis :</span>
+                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('⚔️')" title="Bataille"><i class="fa-solid fa-khanda text-danger"></i></button>
+                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🏯')" title="Tenshu"><i class="fa-solid fa-chess-rook text-primary"></i></button>
+                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🎌')" title="Clan"><i class="fa-solid fa-flag text-warning"></i></button>
+                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🍵')" title="Thé"><i class="fa-solid fa-mug-hot text-success"></i></button>
+                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🍶')" title="Sake"><i class="fa-solid fa-wine-bottle text-secondary"></i></button>
+                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🥷')" title="Shinobi"><i class="fa-solid fa-user-ninja text-dark"></i></button>
+                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('📜')" title="Parchemin"><i class="fa-solid fa-scroll text-warning"></i></button>
+                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🌾')" title="Riz"><i class="fa-solid fa-wheat-awn text-warning"></i></button>
+                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🔥')" title="Feu"><i class="fa-solid fa-fire text-danger"></i></button>
+                    <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-2" onclick="insertFullEmoji('🛡️')" title="Défense"><i class="fa-solid fa-shield-halved text-success"></i></button>
                 </div>
 
                 <!-- Zone de Saisie & Envoi -->
@@ -313,10 +313,10 @@ function updateFullSoundBtnUI() {
     const text = document.getElementById('fullChatSoundText');
     if (icon && text) {
         if (fullSoundEnabled) {
-            icon.innerText = '🔔';
+            icon.className = 'fa-solid fa-bell';
             text.innerText = 'Son Activé';
         } else {
-            icon.innerText = '🔕';
+            icon.className = 'fa-solid fa-bell-slash';
             text.innerText = 'Son Coupé';
         }
     }
@@ -369,12 +369,12 @@ function setFullChatChannel(ch) {
     const inp = document.getElementById('fullChatInput');
 
     if (ch === 'global') {
-        icon.innerText = '🏯';
+        icon.innerHTML = '<i class="fa-solid fa-chess-rook"></i>';
         title.innerText = 'Canal Général du Shōgunat';
         sub.innerText = 'Salon public ouvert à tous les Daimyōs de l\'archipel &bull; Rafraîchissement automatique toutes les 2.5s';
         inp.placeholder = 'Rédigez votre proclamation à l\'ensemble du Shōgunat...';
     } else if (ch === 'alliance') {
-        icon.innerText = '🎌';
+        icon.innerHTML = '<i class="fa-solid fa-flag"></i>';
         title.innerText = 'Canal du Clan Féodal';
         sub.innerText = 'Salon secret réservé exclusivement aux membres de votre clan &bull; Rafraîchissement automatique toutes les 2.5s';
         inp.placeholder = 'Rédigez votre message secret à vos frères d\'armes...';
@@ -394,7 +394,7 @@ function setFullChatWhisper(targetId, targetName) {
     const wBtn = document.getElementById(`fullWhisperBtn_${targetId}`);
     if (wBtn) wBtn.classList.add('active');
 
-    document.getElementById('fullChatChannelIcon').innerText = '✉️';
+    document.getElementById('fullChatChannelIcon').innerHTML = '<i class="fa-solid fa-envelope"></i>';
     document.getElementById('fullChatChannelTitle').innerText = `Chuchotement avec ${targetName}`;
     document.getElementById('fullChatChannelSubtitle').innerText = `Conversation privée confidentielle en tête-à-tête &bull; Rafraîchissement automatique toutes les 2.5s`;
     document.getElementById('fullChatInput').placeholder = `Chuchoter un message privé à ${targetName}...`;
@@ -458,7 +458,7 @@ async function fetchFullMessages() {
                     playFullChatChime();
                     if (document.hidden) {
                         fullUnreadTitleActive = true;
-                        document.title = `(🔔 Nouveau message) ${originalFullTitle}`;
+                        document.title = `(Nouveau message) ${originalFullTitle}`;
                     }
                 }
             } else if (fullLastId === 0 && fullRenderedIds.size === 0) {
@@ -515,10 +515,10 @@ function updateFullThreadsQueue(threads) {
                        id="fullWhisperBtn_${w.user_id}"
                        class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2 ${isActive ? 'active' : ''}">
                         <div class="d-flex align-items-center gap-2 text-truncate" style="max-width:210px;">
-                            <span style="font-size:0.8rem;">${w.is_online ? '🟢' : '⚪'}</span>
+                            <span style="font-size:0.75rem;">${w.is_online ? '<i class="fa-solid fa-circle text-success"></i>' : '<i class="fa-solid fa-circle text-secondary"></i>'}</span>
                             <div class="text-truncate">
                                 <div class="font-weight-bold text-truncate" style="font-size:0.82rem;">
-                                    <span>${w.faction_icon || '🏯'}</span>
+                                    <span>${w.faction_icon || '<i class="fa-solid fa-chess-rook"></i>'}</span>
                                     ${escapeFullHtml(w.username)}
                                     ${w.alliance_tag ? `<span class="badge bg-dark text-white ms-1" style="font-size:0.58rem;">[${escapeFullHtml(w.alliance_tag)}]</span>` : ''}
                                 </div>
@@ -544,20 +544,20 @@ function updateFullThreadsQueue(threads) {
             return `
                 <div class="list-group-item d-flex align-items-center justify-content-between py-1 px-3">
                     <div class="d-flex align-items-center gap-1 text-truncate" style="max-width:210px;">
-                        <span>${ou.faction_icon || '🏯'}</span>
+                        <span>${ou.faction_icon || '<i class="fa-solid fa-chess-rook"></i>'}</span>
                         <a href="javascript:void(0)" onclick="openPlayerProfileModal(${ou.id})"
                            class="font-weight-bold text-dark text-decoration-none hover-underline text-truncate" style="font-size:0.8rem;">
                             ${escapeFullHtml(ou.username)}
                         </a>
                         ${ou.alliance_tag ? `<span class="badge bg-secondary-lt ms-1" style="font-size:0.58rem;">[${escapeFullHtml(ou.alliance_tag)}]</span>` : ''}
-                        ${ou.is_admin ? '<span class="badge bg-warning text-dark ms-1" style="font-size:0.55rem;">⭐ Admin</span>' : ''}
-                        ${ou.is_moderator ? '<span class="badge bg-primary text-white ms-1" style="font-size:0.55rem;">🛡️ Modo</span>' : ''}
+                        ${ou.is_admin ? '<span class="badge bg-warning text-dark ms-1" style="font-size:0.55rem;"><i class="fa-solid fa-star me-1"></i>Admin</span>' : ''}
+                        ${ou.is_moderator ? '<span class="badge bg-primary text-white ms-1" style="font-size:0.55rem;"><i class="fa-solid fa-shield-halved me-1"></i>Modo</span>' : ''}
                     </div>
                     ${!isMe ? `
                         <button type="button" class="btn btn-sm btn-ghost-primary p-0 px-2"
                                 title="Chuchoter à ${escapeFullHtml(ou.username)}"
                                 onclick="setFullChatWhisper(${ou.id}, '${escapeFullHtml(ou.username)}')">
-                            ✉️
+                            <i class="fa-solid fa-envelope"></i>
                         </button>
                     ` : '<span class="badge bg-light text-muted" style="font-size:0.6rem;">Vous</span>'}
                 </div>
@@ -600,29 +600,29 @@ function renderFullMessages(messages) {
 
         let roleBadge = '';
         if (m.sender_is_admin) {
-            roleBadge = '<span class="badge bg-warning text-dark ms-2">⭐ Administrateur</span>';
+            roleBadge = '<span class="badge bg-warning text-dark ms-2"><i class="fa-solid fa-star me-1"></i>Administrateur</span>';
         } else if (m.sender_is_moderator) {
-            roleBadge = '<span class="badge bg-primary text-white ms-2">🛡️ Modérateur</span>';
+            roleBadge = '<span class="badge bg-primary text-white ms-2"><i class="fa-solid fa-shield-halved me-1"></i>Modérateur</span>';
         }
 
         let clanBadge = m.sender_alliance_tag ? `<span class="badge bg-dark text-white ms-2">[${escapeFullHtml(m.sender_alliance_tag)}]</span>` : '';
 
         let delBtn = m.can_delete ? `
             <button type="button" class="btn btn-sm btn-ghost-danger p-0 ms-2" title="Supprimer ce message" onclick="deleteFullChatMessage(${m.id})">
-                🗑️
+                <i class="fa-solid fa-trash-can"></i>
             </button>
         ` : '';
 
         let whisperBtn = !m.is_self ? `
             <button type="button" class="btn btn-sm btn-ghost-secondary p-0 ms-2" title="Chuchoter en privé" onclick="setFullChatWhisper(${m.sender_id}, '${escapeFullHtml(m.sender_username)}')">
-                ✉️
+                <i class="fa-solid fa-envelope"></i>
             </button>
         ` : '';
 
         msgEl.innerHTML = `
             <div class="d-flex align-items-center justify-content-between mb-1">
                 <div class="d-flex align-items-center flex-wrap">
-                    <span class="me-2" style="font-size:1.1rem;">${m.sender_faction_icon || '🏯'}</span>
+                    <span class="me-2" style="font-size:1.1rem;">${m.sender_faction_icon || '<i class="fa-solid fa-chess-rook"></i>'}</span>
                     <a href="javascript:void(0)" onclick="openPlayerProfileModal(${m.sender_id})"
                        class="fw-bold text-decoration-none text-dark hover-underline" style="font-size:0.92rem;">
                         ${escapeFullHtml(m.sender_username)}

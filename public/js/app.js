@@ -212,7 +212,7 @@ class ProgressBar {
         if (this.pctLabels && this.pctLabels.length > 0) {
             this.pctLabels.forEach(lbl => {
                 switch (state.status) {
-                    case 'pending':    lbl.textContent = '⏳ File'; break; // court et non redondant avec le timer
+                    case 'pending':    lbl.innerHTML = '<i class="fa-solid fa-hourglass-half me-1"></i>File'; break; // court et non redondant avec le timer
                     case 'completed':  lbl.textContent = '100%';    break;
                     case 'timer_only': lbl.textContent = '';         break;
                     case 'invalid':    lbl.textContent = '';         break;
@@ -238,7 +238,7 @@ class ProgressBar {
                         || this.timerEl.classList.contains('queue-timer')) {
                         this.timerEl.innerText = timeStr;
                     } else {
-                        this.timerEl.innerText = `⏳ ${timeStr}`;
+                        this.timerEl.innerHTML = `<i class="fa-solid fa-hourglass-half me-1"></i>${timeStr}`;
                     }
                     break;
                 }
@@ -427,10 +427,10 @@ function showToast(param1, param2 = 'info', param3 = null, duration = 4500) {
     }
 
     const typeConfig = {
-        success: { color: 'success', icon: '✅', defaultTitle: 'Ordre Exécuté' },
-        danger:  { color: 'danger',  icon: '⚠️', defaultTitle: 'Alerte Système' },
-        warning: { color: 'warning', icon: '⚡', defaultTitle: 'Avertissement' },
-        info:    { color: 'info',    icon: 'ℹ️', defaultTitle: 'Transmission Féodale' }
+        success: { color: 'success', icon: '<i class="fa-solid fa-circle-check text-success"></i>', defaultTitle: 'Ordre Exécuté' },
+        danger:  { color: 'danger',  icon: '<i class="fa-solid fa-circle-xmark text-danger"></i>', defaultTitle: 'Alerte Système' },
+        warning: { color: 'warning', icon: '<i class="fa-solid fa-triangle-exclamation text-warning"></i>', defaultTitle: 'Avertissement' },
+        info:    { color: 'info',    icon: '<i class="fa-solid fa-circle-info text-info"></i>', defaultTitle: 'Transmission Féodale' }
     };
 
     const cfg = typeConfig[type] || typeConfig.info;
@@ -522,18 +522,18 @@ function showModalConfirm(message, title = 'Ordre de Commandement', callback = n
         const isDemolish = /raser|démant|démol/i.test(title + ' ' + message);
         const isCancelAction = /interruption|annul|suspend/i.test(title + ' ' + message);
 
-        let icon = '❓';
+        let icon = '<i class="fa-solid fa-circle-question text-info"></i>';
         let confirmLabel = 'Confirmer';
         if (isDemolish) {
-            icon = '💥';
-            confirmLabel = /bâtiment/i.test(title + ' ' + message) ? '💥 Démanteler le bâtiment' : '💥 Raser l\'exploitation';
+            icon = '<i class="fa-solid fa-fire text-danger"></i>';
+            confirmLabel = /bâtiment/i.test(title + ' ' + message) ? 'Démanteler le bâtiment' : 'Raser l\'exploitation';
         } else if (isCancelAction) {
-            icon = '🛑';
+            icon = '<i class="fa-solid fa-circle-stop text-danger"></i>';
             confirmLabel = 'Confirmer l\'interruption';
         }
 
         titleEl.innerText = title;
-        iconEl.innerText = icon;
+        iconEl.innerHTML = icon;
         textEl.innerHTML = (typeof message === 'string') ? message.replace(/\n/g, '<br>') : message;
 
         actionsEl.innerHTML = `

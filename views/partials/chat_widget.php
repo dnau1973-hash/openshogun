@@ -20,7 +20,7 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
     <button type="button" id="feudalChatToggleBtn" onclick="window.feudalChat && window.feudalChat.toggle()"
             class="btn shadow-lg d-flex align-items-center gap-2"
             style="background:linear-gradient(135deg, #1c1917 0%, #292524 100%); color:#fbbf24; border:2px solid #b45309; border-radius:30px; padding:0.5rem 1rem; font-weight:700; font-size:0.85rem; transition:transform 0.2s, box-shadow 0.2s;">
-        <span style="font-size:1.1rem;">🏮</span>
+        <i class="fa-solid fa-comments"></i>
         <span>Chat Féodal</span>
         <span id="feudalChatUnreadBadge" class="badge bg-danger text-white rounded-pill d-none" style="font-size:0.7rem; padding:0.25rem 0.5rem;">0</span>
     </button>
@@ -39,7 +39,7 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
                     <span>&larr;</span> <span>File</span>
                 </button>
 
-                <span id="feudalChatHeaderIcon" style="font-size:1.15rem;">🏮</span>
+                <span id="feudalChatHeaderIcon"><i class="fa-solid fa-comments"></i></span>
                 <div class="text-truncate">
                     <h5 id="feudalChatHeaderTitle" class="m-0 fw-bold text-truncate text-white" style="font-size:0.88rem;">
                         Taverne du Shōgunat
@@ -57,13 +57,13 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
                 <button type="button" id="feudalChatQueueToggleBtn" class="btn btn-sm btn-icon text-muted"
                         onclick="window.feudalChat.toggleQueueView()" title="File des discussions"
                         style="color:#d6d3d1 !important;">
-                    <span style="font-size:0.95rem;">🗂️</span>
+                    <i class="fa-solid fa-folder-open"></i>
                 </button>
                 <!-- Bouton Son Activé / Coupé -->
                 <button type="button" id="feudalChatSoundBtn" class="btn btn-sm btn-icon text-muted"
                         onclick="window.feudalChat.toggleSound()" title="Notifications sonores (activé)"
                         style="color:#d6d3d1 !important;">
-                    <span id="feudalChatSoundIcon" style="font-size:0.95rem;">🔔</span>
+                    <i id="feudalChatSoundIcon" class="fa-solid fa-bell"></i>
                 </button>
                 <!-- Agrandir en Plein Écran -->
                 <a href="/?page=chat" class="btn btn-sm btn-icon text-muted" title="Ouvrir le salon en plein écran" style="color:#d6d3d1 !important;">
@@ -83,7 +83,7 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
             <!-- Barre de Recherche Rapide -->
             <div class="p-2 border-bottom bg-light">
                 <input type="text" id="feudalChatQueueFilter" class="form-control form-control-sm"
-                       placeholder="🔍 Filtrer les conversations ou Daimyōs..." oninput="window.feudalChat.filterQueue(this.value)"
+                       placeholder="Filtrer les conversations ou Daimyōs..." oninput="window.feudalChat.filterQueue(this.value)"
                        style="font-size:0.78rem; border-color:#d6d3d1;">
             </div>
 
@@ -97,7 +97,7 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
                    class="list-group-item list-group-item-action py-2 px-3 d-flex align-items-center justify-content-between hover-bg"
                    id="feudalQueueItem_global">
                     <div class="d-flex align-items-center gap-2 text-truncate" style="max-width:260px;">
-                        <span style="font-size:1.3rem;">🏯</span>
+                        <span class="fs-2 text-danger"><i class="fa-solid fa-chess-rook"></i></span>
                         <div class="text-truncate">
                             <div class="d-flex align-items-center gap-1">
                                 <span class="fw-bold" style="font-size:0.83rem; color:#1c1917;">Général</span>
@@ -116,12 +116,12 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
                    class="list-group-item list-group-item-action py-2 px-3 d-flex align-items-center justify-content-between hover-bg <?= !$hasAlliance ? 'disabled opacity-60' : '' ?>"
                    id="feudalQueueItem_alliance">
                     <div class="d-flex align-items-center gap-2 text-truncate" style="max-width:260px;">
-                        <span style="font-size:1.3rem;">🎌</span>
+                        <span class="fs-2 text-indigo"><i class="fa-solid fa-flag"></i></span>
                         <div class="text-truncate">
                             <div class="d-flex align-items-center gap-1">
                                 <span class="fw-bold" style="font-size:0.83rem; color:#1c1917;">Clan Féodal</span>
                                 <span class="badge <?= $hasAlliance ? 'bg-indigo-lt text-indigo' : 'bg-secondary-lt text-secondary' ?>" style="font-size:0.6rem;">
-                                    <?= $hasAlliance ? 'Alliance' : '🔒 Aucun Clan' ?>
+                                    <?= $hasAlliance ? 'Alliance' : '<i class="fa-solid fa-lock me-1"></i> Aucun Clan' ?>
                                 </span>
                             </div>
                             <div class="text-muted small text-truncate" id="feudalQueueLastMsg_alliance" style="font-size:0.72rem;">
@@ -150,7 +150,7 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
             <!-- Section : Daimyōs Connectés (Accès Rapide) -->
             <div class="px-2 pt-2 pb-1 d-flex align-items-center justify-content-between">
                 <span class="text-uppercase text-muted fw-bold" style="font-size:0.65rem; letter-spacing:0.5px;">
-                    🟢 Daimyōs en Ligne
+                    <i class="fa-solid fa-circle text-success me-1" style="font-size:0.6rem;"></i> Daimyōs en Ligne
                 </span>
                 <span class="badge bg-success-lt" id="feudalQueueOnlineCount" style="font-size:0.65rem;">0</span>
             </div>
@@ -170,18 +170,18 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
                 <ul class="nav nav-tabs nav-fill card-header-tabs" id="feudalChatTabs" style="margin:0; border-bottom:none;">
                     <li class="nav-item">
                         <button class="nav-link active py-1 px-2 small font-weight-bold" id="chatTabGlobal" onclick="window.feudalChat.setChannel('global')">
-                            <span>🏯 Général</span>
+                            <span><i class="fa-solid fa-chess-rook me-1 text-danger"></i> Général</span>
                         </button>
                     </li>
                     <li class="nav-item">
                         <button class="nav-link py-1 px-2 small font-weight-bold <?= !$hasAlliance ? 'text-muted' : '' ?>" id="chatTabAlliance" onclick="window.feudalChat.setChannel('alliance')" title="<?= $hasAlliance ? 'Canal de votre Clan' : 'Rejoignez un clan féodal pour accéder à ce canal' ?>">
-                            <span>🎌 Clan</span>
-                            <?php if (!$hasAlliance): ?><span style="font-size:0.7rem;">🔒</span><?php endif; ?>
+                            <span><i class="fa-solid fa-flag me-1 text-indigo"></i> Clan</span>
+                            <?php if (!$hasAlliance): ?><i class="fa-solid fa-lock ms-1" style="font-size:0.7rem;"></i><?php endif; ?>
                         </button>
                     </li>
                     <li class="nav-item">
                         <button class="nav-link py-1 px-2 small font-weight-bold position-relative" id="chatTabWhisper" onclick="window.feudalChat.setChannel('whisper')">
-                            <span>✉️ Privé</span>
+                            <span><i class="fa-solid fa-envelope me-1 text-primary"></i> Privé</span>
                             <span id="feudalWhisperUnreadDot" class="badge bg-danger rounded-circle p-1 d-none position-absolute" style="top:2px; right:4px;"></span>
                         </button>
                     </li>
@@ -203,22 +203,22 @@ $userAllianceId = $hasAlliance ? (int)$chatUser['alliance_id'] : 0;
             <div id="feudalChatMessages" class="flex-grow-1 p-2"
                  style="overflow-y:auto; background:#fafaf9; font-size:0.82rem; display:flex; flex-direction:column; gap:0.45rem;">
                 <div class="text-center py-4 text-muted small">
-                    <span>🏮 Connexion au salon féodal...</span>
+                    <span><i class="fa-solid fa-comments text-warning me-2"></i>Connexion au salon féodal...</span>
                 </div>
             </div>
 
             <!-- Raccourcis Emojis Rapides Féodaux -->
             <div class="px-2 py-1 bg-light border-top d-flex gap-1 overflow-x-auto" style="scrollbar-width:none; font-size:0.85rem;">
-                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('⚔️')">⚔️</button>
-                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🏯')">🏯</button>
-                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🎌')">🎌</button>
-                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🍵')">🍵</button>
-                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🍶')">🍶</button>
-                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🥷')">🥷</button>
-                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('📜')">📜</button>
-                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🌾')">🌾</button>
-                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🔥')">🔥</button>
-                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🛡️')">🛡️</button>
+                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('⚔️')" title="Bataille"><i class="fa-solid fa-khanda text-danger"></i></button>
+                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🏯')" title="Tenshu"><i class="fa-solid fa-chess-rook text-primary"></i></button>
+                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🎌')" title="Clan"><i class="fa-solid fa-flag text-warning"></i></button>
+                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🍵')" title="Thé"><i class="fa-solid fa-mug-hot text-success"></i></button>
+                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🍶')" title="Sake"><i class="fa-solid fa-wine-bottle text-secondary"></i></button>
+                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🥷')" title="Shinobi"><i class="fa-solid fa-user-ninja text-dark"></i></button>
+                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('📜')" title="Parchemin"><i class="fa-solid fa-scroll text-warning"></i></button>
+                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🌾')" title="Riz"><i class="fa-solid fa-wheat-awn text-warning"></i></button>
+                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🔥')" title="Feu"><i class="fa-solid fa-fire text-danger"></i></button>
+                <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1" onclick="window.feudalChat.insertEmoji('🛡️')" title="Défense"><i class="fa-solid fa-shield-halved text-success"></i></button>
             </div>
 
             <!-- Barre de Saisie & Envoi -->
@@ -311,7 +311,7 @@ class FeudalChatClient {
         // Mettre à jour l'en-tête
         document.getElementById('feudalChatBackBtn').classList.add('d-none');
         document.getElementById('feudalChatBackBtn').classList.remove('d-inline-flex');
-        document.getElementById('feudalChatHeaderIcon').innerText = '🗂️';
+        document.getElementById('feudalChatHeaderIcon').innerHTML = '<i class="fa-solid fa-folder-open"></i>';
         document.getElementById('feudalChatHeaderTitle').innerText = 'File des Discussions';
 
         // Re-rendre la file si données dispo
@@ -352,13 +352,13 @@ class FeudalChatClient {
         const title = document.getElementById('feudalChatHeaderTitle');
 
         if (this.channel === 'global') {
-            icon.innerText = '🏯';
+            icon.innerHTML = '<i class="fa-solid fa-chess-rook"></i>';
             title.innerText = 'Canal Général';
         } else if (this.channel === 'alliance') {
-            icon.innerText = '🎌';
+            icon.innerHTML = '<i class="fa-solid fa-flag"></i>';
             title.innerText = 'Canal du Clan';
         } else if (this.channel === 'whisper') {
-            icon.innerText = '✉️';
+            icon.innerHTML = '<i class="fa-solid fa-envelope"></i>';
             title.innerText = `Chuchotement: ${this.whisperTargetName || 'Daimyō'}`;
         }
     }
@@ -570,10 +570,10 @@ class FeudalChatClient {
                         <a href="javascript:void(0)" onclick="window.feudalChat.openThread('whisper', ${w.user_id}, '${this.escapeHtml(w.username)}')"
                            class="list-group-item list-group-item-action py-2 px-3 d-flex align-items-center justify-content-between hover-bg ${isCurrent ? 'active' : ''}">
                             <div class="d-flex align-items-center gap-2 text-truncate" style="max-width:260px;">
-                                <span style="font-size:0.8rem;">${w.is_online ? '🟢' : '⚪'}</span>
+                                <span style="font-size:0.75rem;">${w.is_online ? '<i class="fa-solid fa-circle text-success"></i>' : '<i class="fa-solid fa-circle text-secondary"></i>'}</span>
                                 <div class="text-truncate">
                                     <div class="d-flex align-items-center gap-1">
-                                        <span style="font-size:0.85rem;">${w.faction_icon || '🏯'}</span>
+                                        <span style="font-size:0.85rem;">${w.faction_icon || '<i class="fa-solid fa-chess-rook"></i>'}</span>
                                         <span class="fw-bold" style="font-size:0.82rem;">${this.escapeHtml(w.username)}</span>
                                         ${w.alliance_tag ? `<span class="badge bg-dark text-white" style="font-size:0.58rem;">[${this.escapeHtml(w.alliance_tag)}]</span>` : ''}
                                     </div>
@@ -599,18 +599,18 @@ class FeudalChatClient {
                 return `
                     <div class="list-group-item py-1 px-3 d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center gap-1 text-truncate">
-                            <span>${u.faction_icon || '🏯'}</span>
+                            <span>${u.faction_icon || '<i class="fa-solid fa-chess-rook"></i>'}</span>
                             <a href="javascript:void(0)" onclick="openPlayerProfileModal(${u.id})" class="fw-bold text-dark text-decoration-none hover-underline" style="font-size:0.8rem;">
                                 ${this.escapeHtml(u.username)}
                             </a>
                             ${u.alliance_tag ? `<span class="badge bg-secondary-lt" style="font-size:0.58rem;">[${this.escapeHtml(u.alliance_tag)}]</span>` : ''}
-                            ${u.is_admin ? '<span class="badge bg-warning text-dark" style="font-size:0.55rem;">⭐ Admin</span>' : ''}
-                            ${u.is_moderator ? '<span class="badge bg-primary text-white" style="font-size:0.55rem;">🛡️ Modo</span>' : ''}
+                            ${u.is_admin ? '<span class="badge bg-warning text-dark" style="font-size:0.55rem;"><i class="fa-solid fa-star me-1"></i>Admin</span>' : ''}
+                            ${u.is_moderator ? '<span class="badge bg-primary text-white" style="font-size:0.55rem;"><i class="fa-solid fa-shield-halved me-1"></i>Modo</span>' : ''}
                         </div>
                         ${!isMe ? `
                             <button type="button" class="btn btn-sm btn-ghost-primary p-0 px-2" title="Chuchoter en direct"
                                     onclick="window.feudalChat.openThread('whisper', ${u.id}, '${this.escapeHtml(u.username)}')">
-                                ✉️
+                                <i class="fa-solid fa-envelope"></i>
                             </button>
                         ` : '<span class="badge bg-light text-muted" style="font-size:0.6rem;">Vous</span>'}
                     </div>
@@ -654,29 +654,29 @@ class FeudalChatClient {
 
             let roleBadge = '';
             if (m.sender_is_admin) {
-                roleBadge = '<span class="badge bg-warning text-dark ms-1" style="font-size:0.6rem;">⭐ Admin</span>';
+                roleBadge = '<span class="badge bg-warning text-dark ms-1" style="font-size:0.6rem;"><i class="fa-solid fa-star me-1"></i>Admin</span>';
             } else if (m.sender_is_moderator) {
-                roleBadge = '<span class="badge bg-primary text-white ms-1" style="font-size:0.6rem;">🛡️ Modo</span>';
+                roleBadge = '<span class="badge bg-primary text-white ms-1" style="font-size:0.6rem;"><i class="fa-solid fa-shield-halved me-1"></i>Modo</span>';
             }
 
             let clanBadge = m.sender_alliance_tag ? `<span class="badge bg-dark text-white ms-1" style="font-size:0.6rem;">[${this.escapeHtml(m.sender_alliance_tag)}]</span>` : '';
 
             let delBtn = m.can_delete ? `
                 <button type="button" class="btn btn-link btn-sm text-danger p-0 ms-1 opacity-75 hover-opacity-100" title="Supprimer ce message" onclick="window.feudalChat.deleteMessage(${m.id})">
-                    &times;
+                    <i class="fa-solid fa-trash-can" style="font-size:0.7rem;"></i>
                 </button>
             ` : '';
 
             let whisperBtn = !m.is_self ? `
                 <button type="button" class="btn btn-link btn-sm text-muted p-0 ms-1" title="Chuchoter en privé" onclick="window.feudalChat.whisperToUser(${m.sender_id}, '${this.escapeHtml(m.sender_username)}')">
-                    ✉️
+                    <i class="fa-solid fa-envelope" style="font-size:0.7rem;"></i>
                 </button>
             ` : '';
 
             msgEl.innerHTML = `
                 <div class="d-flex align-items-center justify-content-between mb-1" style="font-size:0.75rem;">
                     <div class="d-flex align-items-center flex-wrap">
-                        <span class="me-1">${m.sender_faction_icon || '🏯'}</span>
+                        <span class="me-1">${m.sender_faction_icon || '<i class="fa-solid fa-chess-rook"></i>'}</span>
                         <a href="javascript:void(0)" onclick="openPlayerProfileModal(${m.sender_id})" class="fw-bold text-decoration-none text-dark hover-underline">
                             ${this.escapeHtml(m.sender_username)}
                         </a>
@@ -822,10 +822,10 @@ class FeudalChatClient {
         const btn = document.getElementById('feudalChatSoundBtn');
         if (icon && btn) {
             if (this.soundEnabled) {
-                icon.innerText = '🔔';
+                icon.className = 'fa-solid fa-bell';
                 btn.title = "Notifications sonores (activées - cliquer pour couper)";
             } else {
-                icon.innerText = '🔕';
+                icon.className = 'fa-solid fa-bell-slash';
                 btn.title = "Notifications sonores (coupées - cliquer pour réactiver)";
             }
         }
@@ -833,7 +833,7 @@ class FeudalChatClient {
 
     notifyDocumentTitle() {
         this.unreadTitleActive = true;
-        document.title = `(🔔 Nouveau message) ${this.originalDocumentTitle}`;
+        document.title = `(Nouveau message) ${this.originalDocumentTitle}`;
     }
 
     addUnread(count) {

@@ -11,7 +11,7 @@ $localInfo = $updateEngine->getLocalInfo();
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
-            <span class="avatar bg-teal-lt text-teal">🔄</span>
+            <span class="avatar bg-teal-lt text-teal"><i class="fa-solid fa-arrows-rotate"></i></span>
             <div>
                 <h3 class="card-title text-teal m-0">Centre de Mises à Jour &amp; Déploiement GitHub</h3>
                 <div class="text-secondary small">Contrôle des versions, inspection des commits et synchronisation en un clic</div>
@@ -19,8 +19,8 @@ $localInfo = $updateEngine->getLocalInfo();
         </div>
         <div class="d-flex gap-2 align-items-center">
             <button type="button" class="btn btn-outline-teal" onclick="checkGitHubUpdates(true)" id="btn-check-updates">
-                <span id="spinner-check" style="display: none;" class="spinner-border spinner-border-sm me-1">⏳</span>
-                <span>🔍 Contrôler les Mises à Jour</span>
+                <span id="spinner-check" style="display: none;" class="spinner-border spinner-border-sm me-1"></span>
+                <i class="fa-solid fa-magnifying-glass me-1"></i>Contrôler les Mises à Jour
             </button>
         </div>
     </div>
@@ -29,7 +29,7 @@ $localInfo = $updateEngine->getLocalInfo();
         <!-- BANNIÈRE DYNAMIQUE DE STATUT -->
         <div id="update-status-banner" class="alert alert-info d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
             <div class="d-flex align-items-center gap-3">
-                <div id="banner-icon" style="font-size: 1.8rem;">📡</div>
+                <div id="banner-icon" style="font-size: 1.8rem;"><i class="fa-solid fa-tower-broadcast text-primary"></i></div>
                 <div>
                     <div id="banner-title" class="fw-bold">
                         Version Locale Actuelle : <code class="text-teal"><?= htmlspecialchars($localInfo['short_sha']) ?></code>
@@ -53,7 +53,7 @@ $localInfo = $updateEngine->getLocalInfo();
                 <div class="card card-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <strong class="d-flex align-items-center gap-2">
-                            <span>🏯</span> Serveur Local (Fief)
+                            <i class="fa-solid fa-server text-secondary me-1"></i>Serveur Local (Fief)
                         </strong>
                         <span class="badge bg-secondary-lt">
                             <?= htmlspecialchars($localInfo['branch']) ?>
@@ -77,11 +77,11 @@ $localInfo = $updateEngine->getLocalInfo();
                                 <span class="text-secondary">Arbre de Travail :</span>
                                 <?php if ($localInfo['is_clean']): ?>
                                     <span class="badge bg-success-lt">
-                                        ✔ Propre (Clean)
+                                        <i class="fa-solid fa-circle-check text-success me-1"></i>Propre (Clean)
                                     </span>
                                 <?php else: ?>
                                     <span class="badge bg-warning-lt" title="<?= htmlspecialchars(implode(', ', $localInfo['dirty_files'])) ?>">
-                                        ⚠️ Modifié (<?= count($localInfo['dirty_files']) ?>)
+                                        <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i>Modifié (<?= count($localInfo['dirty_files']) ?>)
                                     </span>
                                 <?php endif; ?>
                             </div>
@@ -95,7 +95,7 @@ $localInfo = $updateEngine->getLocalInfo();
                 <div class="card card-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <strong class="d-flex align-items-center gap-2">
-                            <span>🐙</span> Dépôt GitHub Officiel
+                            <i class="fa-brands fa-github text-dark me-1"></i>Dépôt GitHub Officiel
                         </strong>
                         <a href="https://github.com/<?= htmlspecialchars($localInfo['repo_owner'] . '/' . $localInfo['repo_name']) ?>" target="_blank" rel="noopener" class="small text-decoration-none">
                             Ouvrir sur GitHub &nearr;
@@ -132,15 +132,15 @@ $localInfo = $updateEngine->getLocalInfo();
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
                     <h4 class="text-purple card-title d-flex align-items-center gap-2 m-0">
-                        <span>✨</span> Nouveaux Commits Disponibles sur GitHub
+                        <i class="fa-solid fa-wand-magic-sparkles text-warning me-1"></i>Nouveaux Commits Disponibles sur GitHub
                     </h4>
                     <div id="update-behind-text" class="text-secondary small mt-1">
                         Votre version locale a des commits de retard par rapport à la branche principale.
                     </div>
                 </div>
                 <button type="button" class="btn btn-primary fw-bold" onclick="installGitHubUpdate()" id="btn-install-update">
-                    <span id="spinner-install" style="display: none;" class="spinner-border spinner-border-sm me-1">⏳</span>
-                    <span>🚀 Télécharger &amp; Déployer la Mise à Jour</span>
+                    <span id="spinner-install" style="display: none;" class="spinner-border spinner-border-sm me-1"></span>
+                    <i class="fa-solid fa-cloud-arrow-down me-1"></i>Télécharger &amp; Déployer la Mise à Jour
                 </button>
             </div>
 
@@ -176,7 +176,7 @@ $localInfo = $updateEngine->getLocalInfo();
         <div class="mb-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <strong class="d-flex align-items-center gap-2 text-secondary small">
-                    <span>💻</span> Console d'Exécution &amp; Journal Système
+                    <i class="fa-solid fa-terminal text-success me-1"></i>Console d'Exécution &amp; Journal Système
                 </strong>
                 <button type="button" onclick="clearUpdateLogs()" class="btn btn-sm btn-outline-secondary">Effacer la console</button>
             </div>
@@ -186,7 +186,7 @@ $localInfo = $updateEngine->getLocalInfo();
         <!-- FORMULAIRE DE CONFIGURATION GITHUB -->
         <div class="card card-body bg-light border">
             <h4 class="card-title d-flex align-items-center gap-2 mb-3">
-                <span>⚙️</span> Paramètres de Connexion GitHub
+                <i class="fa-solid fa-gear text-secondary me-1"></i>Paramètres de Connexion GitHub
             </h4>
             <form id="github-settings-form" onsubmit="saveGitHubSettings(event)">
                 <div class="row g-3">
@@ -208,7 +208,7 @@ $localInfo = $updateEngine->getLocalInfo();
                     </div>
                     <div class="col-12 d-flex justify-content-end mt-2">
                         <button type="submit" class="btn btn-primary fw-bold">
-                            💾 Sauvegarder les Paramètres GitHub
+                            <i class="fa-solid fa-floppy-disk me-1"></i>Sauvegarder les Paramètres GitHub
                         </button>
                     </div>
                 </div>
@@ -232,20 +232,20 @@ function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.style.cssText = 'padding: 12px 18px; border-radius: 8px; color: #fff; font-size: 0.9rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); pointer-events: auto; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; transform: translateY(16px) scale(0.95); display: flex; align-items: center; gap: 10px;';
 
-    let icon = 'ℹ️';
+    let icon = '<i class="fa-solid fa-circle-info text-info me-1"></i>';
     let bg = 'rgba(15, 23, 42, 0.95)';
     let borderColor = 'rgba(56, 189, 248, 0.4)';
 
     if (type === 'success') {
-        icon = '✅';
+        icon = '<i class="fa-solid fa-circle-check text-success me-1"></i>';
         bg = 'rgba(6, 44, 33, 0.95)';
         borderColor = 'rgba(34, 197, 94, 0.5)';
     } else if (type === 'warning') {
-        icon = '⚠️';
+        icon = '<i class="fa-solid fa-triangle-exclamation text-warning me-1"></i>';
         bg = 'rgba(69, 26, 3, 0.95)';
         borderColor = 'rgba(245, 158, 11, 0.5)';
     } else if (type === 'error' || type === 'danger') {
-        icon = '❌';
+        icon = '<i class="fa-solid fa-circle-xmark text-danger me-1"></i>';
         bg = 'rgba(69, 10, 10, 0.95)';
         borderColor = 'rgba(239, 68, 68, 0.5)';
     }
@@ -322,12 +322,12 @@ async function checkGitHubUpdates(showNotification = true) {
             // Mettre à jour la bannière en mode NOUVELLE VERSION
             bannerBox.style.background = 'rgba(45, 26, 15, 0.85)';
             bannerBox.style.borderColor = 'rgba(245, 158, 11, 0.5)';
-            bannerIcon.textContent = '⚡';
+            bannerIcon.innerHTML = '<i class="fa-solid fa-bolt text-warning"></i>';
             bannerTitle.innerHTML = `<span style="color: #fbbf24;">Mise à jour disponible ! (${data.behind_by} nouveau${data.behind_by > 1 ? 'x' : ''} commit${data.behind_by > 1 ? 's' : ''})</span>`;
             bannerDesc.textContent = `Dernier commit distant : "${data.remote ? data.remote.message : 'Nouveaux ajouts'}"`;
 
             if (navBadge) {
-                navBadge.textContent = `⚡ +${data.behind_by}`;
+                navBadge.innerHTML = `<i class="fa-solid fa-bolt me-1"></i>+${data.behind_by}`;
                 navBadge.style.background = '#f59e0b';
                 navBadge.style.color = '#000';
                 navBadge.style.fontWeight = 'bold';
@@ -361,7 +361,7 @@ async function checkGitHubUpdates(showNotification = true) {
             // Mettre à jour la bannière en mode À JOUR
             bannerBox.style.background = 'rgba(6, 44, 33, 0.85)';
             bannerBox.style.borderColor = 'rgba(34, 197, 94, 0.4)';
-            bannerIcon.textContent = '✨';
+            bannerIcon.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles text-warning"></i>';
             bannerTitle.innerHTML = `<span style="color: #4ade80;">OpenShogun est à jour !</span>`;
             bannerDesc.textContent = `Votre version locale (${data.local.short_sha}) est synchronisée avec la branche ${data.local.target_branch}.`;
 
@@ -424,7 +424,7 @@ async function installGitHubUpdate() {
         }
 
         showToast(data.message, 'success');
-        logToConsole(`🎉 Succès : Version installée ${data.current_commit} !`);
+        logToConsole(`Succès : Version installée ${data.current_commit} !`);
 
         setTimeout(() => {
             alert(`Mise à jour réussie !\nLe jeu a été mis à jour vers le commit ${data.current_commit}.\nLa page va s'actualiser.`);

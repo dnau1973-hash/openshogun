@@ -52,8 +52,8 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
     <!-- En-tête de la Messagerie avec boutons d'actions alignés à droite -->
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
-            <h2 class="card-title d-flex align-items-center gap-2 m-0 text-dark">
-                <span>📜</span> Messagers &amp; Missives Féodales
+            <h2 class="card-title d-flex align-items-center gap-2 m-0 text-dark font-game">
+                <i class="fa-solid fa-scroll text-warning me-2"></i> Messagers &amp; Missives Féodales
             </h2>
             <div class="text-secondary small mt-1">
                 Centre des correspondances diplomatiques, traités de paix et dépêches du Shogunat.
@@ -62,26 +62,26 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
         <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
             <a href="?page=messages&tab=inbox" 
                class="btn btn-sm <?= ($tab === 'inbox' && !$activeMessage) ? 'btn-primary' : 'btn-outline-secondary' ?>">
-                <span>📥 Réception</span>
+                <i class="fa-solid fa-inbox me-1"></i> Réception
                 <?php if ($unreadCount > 0): ?>
                     <span class="badge bg-danger text-white ms-1"><?= $unreadCount ?></span>
                 <?php endif; ?>
             </a>
             <a href="?page=messages&tab=outbox" 
                class="btn btn-sm <?= ($tab === 'outbox' && !$activeMessage) ? 'btn-primary' : 'btn-outline-secondary' ?>">
-                <span>📤 Envoyés</span>
+                <i class="fa-solid fa-paper-plane me-1"></i> Envoyés
                 <span class="badge bg-secondary-lt ms-1"><?= $totalOutbox ?></span>
             </a>
             <a href="?page=messages&tab=compose" 
                class="btn btn-sm <?= ($tab === 'compose' && !$activeMessage) ? 'btn-primary' : 'btn-outline-secondary' ?>">
-                <span>✍️ Rédiger une Missive</span>
+                <i class="fa-solid fa-pen-to-square me-1"></i> Rédiger une Missive
             </a>
             <?php if ($totalInbox > 0 || $totalOutbox > 0): ?>
                 <button type="button" 
                         class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 shadow-sm"
                         onclick="deleteAllMessages('<?= htmlspecialchars($tab) ?>')"
                         title="Purger définitivement vos missives">
-                    <span>🗑️</span>
+                    <i class="fa-solid fa-trash-can me-1"></i>
                     <span>Supprimer tous les messages</span>
                 </button>
             <?php endif; ?>
@@ -140,13 +140,13 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
                     <?php if ($activeMessage['sender_id'] && (int)$activeMessage['sender_id'] !== $userId): ?>
                         <a href="?page=messages&tab=compose&to=<?= urlencode($activeMessage['sender_name']) ?>&subject=<?= urlencode('Re: ' . $activeMessage['subject']) ?>" 
                            class="btn btn-primary btn-sm">
-                            ↩️ Répondre
+                            <i class="fa-solid fa-reply me-1"></i> Répondre
                         </a>
                     <?php endif; ?>
                 </div>
                 <div>
                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteMessage(<?= (int)$activeMessage['id'] ?>)">
-                        🗑️ Supprimer cette missive
+                        <i class="fa-solid fa-trash-can me-1"></i> Supprimer cette missive
                     </button>
                 </div>
             </div>
@@ -158,7 +158,7 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
              ======================================================== -->
         <?php if (empty($inbox)): ?>
             <div class="card-body text-center py-5">
-                <div class="display-3 mb-2">📭</div>
+                <div class="display-3 mb-2"><i class="fa-solid fa-inbox text-muted"></i></div>
                 <h3 class="fw-bold text-dark">Votre boîte de réception est vide</h3>
                 <p class="text-secondary small">Aucune missive reçue pour le moment.</p>
             </div>
@@ -183,12 +183,12 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
                                     <?php if (!$m['is_read']): ?>
                                         <span class="badge bg-danger rounded-circle p-1" title="Non lu" style="display:inline-block; width:8px; height:8px;"></span>
                                     <?php else: ?>
-                                        <span class="text-muted" style="opacity:0.4;">✉️</span>
+                                        <i class="fa-solid fa-envelope text-muted" style="opacity:0.4;"></i>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <span class="fs-4"><?= $m['sender_faction'] ? (FACTIONS[$m['sender_faction']]['icon'] ?? '👤') : '🤖' ?></span>
+                                        <span class="fs-4"><?= $m['sender_faction'] ? (FACTIONS[$m['sender_faction']]['icon'] ?? '<i class="fa-solid fa-user"></i>') : '<i class="fa-solid fa-robot"></i>' ?></span>
                                         <div>
                                             <div class="text-dark fw-bold"><?= $m['sender_name'] ? htmlspecialchars($m['sender_name']) : 'Mandat Impérial' ?></div>
                                             <?php if (!empty($m['sender_faction'])): ?>
@@ -207,7 +207,7 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
                                 </td>
                                 <td class="text-end" onclick="event.stopPropagation();">
                                     <button type="button" class="btn btn-sm btn-ghost-danger" onclick="deleteMessage(<?= $m['id'] ?>)" title="Supprimer la missive">
-                                        🗑️
+                                        <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -249,7 +249,7 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
              ======================================================== -->
         <?php if (empty($outbox)): ?>
             <div class="card-body text-center py-5">
-                <div class="display-3 mb-2">📤</div>
+                <div class="display-3 mb-2"><i class="fa-solid fa-paper-plane text-muted"></i></div>
                 <h3 class="fw-bold text-dark">Aucune missive envoyée</h3>
                 <p class="text-secondary small">Vos correspondances diplomatiques expédiées apparaîtront ici.</p>
             </div>
@@ -268,10 +268,10 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
                     <tbody>
                         <?php foreach ($pagedOutbox as $m): ?>
                             <tr onclick="window.location.href='?page=messages&tab=outbox&msg_id=<?= $m['id'] ?>'" style="cursor:pointer;">
-                                <td class="text-center text-muted" style="opacity:0.6;">📤</td>
+                                <td class="text-center text-muted" style="opacity:0.6;"><i class="fa-solid fa-paper-plane"></i></td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <span class="fs-4"><?= $m['receiver_faction'] ? (FACTIONS[$m['receiver_faction']]['icon'] ?? '👤') : '👤' ?></span>
+                                        <span class="fs-4"><?= $m['receiver_faction'] ? (FACTIONS[$m['receiver_faction']]['icon'] ?? '<i class="fa-solid fa-user"></i>') : '<i class="fa-solid fa-user"></i>' ?></span>
                                         <div>
                                             <div class="text-dark fw-bold"><?= htmlspecialchars($m['receiver_name']) ?></div>
                                             <?php if (!empty($m['receiver_faction'])): ?>
@@ -290,7 +290,7 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
                                 </td>
                                 <td class="text-end" onclick="event.stopPropagation();">
                                     <button type="button" class="btn btn-sm btn-ghost-danger" onclick="deleteMessage(<?= $m['id'] ?>)" title="Supprimer la copie de la missive">
-                                        🗑️
+                                        <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -332,27 +332,27 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
              ======================================================== -->
         <div class="card-body p-4">
             <div style="max-width: 720px; margin: 0 auto;">
-                <h3 class="mb-3 fs-3 fw-bold d-flex align-items-center gap-2 text-dark">
-                    <span>✍️</span> Rédiger une Missive Diplomatique
+                <h3 class="mb-3 fs-3 fw-bold d-flex align-items-center gap-2 text-dark font-game">
+                    <i class="fa-solid fa-pen-to-square text-primary me-2"></i> Rédiger une Missive Diplomatique
                 </h3>
 
                 <!-- Modèles Diplomatiques Rapides -->
                 <div class="mb-3 p-3 rounded border bg-light-subtle">
                     <span class="form-label text-secondary small fw-bold mb-2 d-block">
-                        ⚡ Modèles diplomatiques rapides :
+                        <i class="fa-solid fa-bolt text-warning me-1"></i> Modèles diplomatiques rapides :
                     </span>
                     <div class="d-flex flex-wrap gap-2">
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyTemplate('pact')">
-                            🤝 Pacte de Non-Agression
+                            <i class="fa-solid fa-handshake text-success me-1"></i> Pacte de Non-Agression
                         </button>
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyTemplate('trade')">
-                            ⚖️ Accord Commercial
+                            <i class="fa-solid fa-scale-balanced text-primary me-1"></i> Accord Commercial
                         </button>
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyTemplate('alliance')">
-                            🎌 Recrutement d'Alliance
+                            <i class="fa-solid fa-flag text-danger me-1"></i> Recrutement d'Alliance
                         </button>
                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="applyTemplate('warning')">
-                            ⚠️ Avertissement Militaire
+                            <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i> Avertissement Militaire
                         </button>
                     </div>
                 </div>
@@ -405,7 +405,7 @@ $pagedOutbox = array_slice($outbox, $outboxOffset, $perPage);
                             Annuler
                         </a>
                         <button type="submit" id="btn-submit-msg" class="btn btn-primary fw-bold">
-                            📜 Dépêcher le Messager
+                            <i class="fa-solid fa-scroll me-1"></i> Dépêcher le Messager
                         </button>
                     </div>
                 </form>
@@ -444,7 +444,7 @@ async function handleSendMessage(e) {
     e.preventDefault();
     const btn = document.getElementById('btn-submit-msg');
     btn.disabled = true;
-    btn.innerText = 'Dépêche en cours...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Dépêche en cours...';
 
     const receiver = document.getElementById('msg-receiver').value;
     const subject = document.getElementById('msg-subject').value;
@@ -466,12 +466,12 @@ async function handleSendMessage(e) {
         } else {
             showModalAlert(data.error || "Erreur lors de l'envoi de la missive.", 'error', 'Échec de transmission');
             btn.disabled = false;
-            btn.innerText = '📜 Dépêcher le Messager';
+            btn.innerHTML = '<i class="fa-solid fa-scroll me-1"></i> Dépêcher le Messager';
         }
     } catch (err) {
         showModalAlert("Erreur de transmission avec vos coursiers.", 'error');
         btn.disabled = false;
-        btn.innerText = '📜 Dépêcher le Messager';
+        btn.innerHTML = '<i class="fa-solid fa-scroll me-1"></i> Dépêcher le Messager';
     }
 }
 

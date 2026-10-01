@@ -90,24 +90,24 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
 }
 ?>
 
-<!-- 🏆 EN-TÊTE DE PAGE TABLER -->
+<!-- EN-TÊTE DE PAGE TABLER -->
 <div class="page-header d-print-none mb-3">
     <div class="container-fluid px-0">
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle text-secondary">Traité de Guerre &amp; Savoirs Féodaux</div>
                 <h2 class="page-title d-flex align-items-center gap-2">
-                    <span class="text-primary">📜</span> Académie des Savoirs &amp; Forge Militaire
+                    <span class="text-primary"><i class="fa-solid fa-scroll"></i></span> Académie des Savoirs &amp; Forge Militaire
                     <span class="badge bg-purple-lt text-purple ms-1" title="Niveau actuel de l'Académie dans ce fief">Niveau <?= $labLvl ?></span>
                 </h2>
             </div>
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
                     <a href="?page=city" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1 shadow-sm">
-                        <span>🏯</span> Cité Castrale
+                        <span><i class="fa-solid fa-chess-rook text-danger me-1"></i></span> Cité Castrale
                     </a>
                     <button type="button" onclick="window.location.reload()" class="btn btn-white d-inline-flex align-items-center gap-1 shadow-sm" title="Actualiser la liste">
-                        <span>🔄</span> Actualiser
+                        <span><i class="fa-solid fa-rotate me-1"></i></span> Actualiser
                     </button>
                 </div>
             </div>
@@ -123,14 +123,14 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="empty py-5">
-                    <div class="empty-icon fs-1 text-secondary">🏯</div>
+                    <div class="empty-icon fs-1 text-secondary"><i class="fa-solid fa-chess-rook"></i></div>
                     <p class="empty-title fs-2">Académie des Savoirs non érigée</p>
                     <p class="empty-subtitle text-secondary">
                         Vous devez bâtir une <strong>Académie des Savoirs</strong> dans votre cité castrale pour perfectionner la métallurgie du Tamahagane, l'art du tir et les tactiques militaires.
                     </p>
                     <div class="empty-action">
                         <a href="?page=city" class="btn btn-primary d-inline-flex align-items-center gap-1 shadow-sm">
-                            <span>🏯</span> Bâtir l'Académie dans la Cité Castrale
+                            <span><i class="fa-solid fa-chess-rook me-1"></i></span> Bâtir l'Académie dans la Cité Castrale
                         </a>
                     </div>
                 </div>
@@ -147,7 +147,7 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                 <div class="card-body p-3">
                     <div class="row align-items-center g-3">
                         <div class="col-auto">
-                            <span class="avatar avatar-md bg-purple text-white rounded shadow-sm fs-2">📜</span>
+                            <span class="avatar avatar-md bg-purple text-white rounded shadow-sm fs-2"><i class="fa-solid fa-scroll"></i></span>
                         </div>
                         <div class="col">
                             <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
@@ -170,7 +170,7 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                             <div class="d-flex justify-content-between align-items-center text-secondary small flex-wrap gap-2">
                                 <span>Progression : <strong id="researchProgressText"><?= (int)$activeResearch['progress_pct'] ?>%</strong></span>
                                 <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark font-monospace fs-4">
-                                    ⏱️ <span class="queue-timer" data-countdown="<?= (int)$activeResearch['finishes_at'] ?>"><?= $activeResearch['remaining_formatted'] ?></span>
+                                    <i class="fa-solid fa-stopwatch text-info me-1"></i><span class="queue-timer" data-countdown="<?= (int)$activeResearch['finishes_at'] ?>"><?= $activeResearch['remaining_formatted'] ?></span>
                                 </span>
                             </div>
                         </div>
@@ -191,7 +191,7 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                     <!-- Recherche textuelle -->
                     <div class="col-12 col-md-4 col-lg-3">
                         <div class="input-icon">
-                            <span class="input-icon-addon">🔍</span>
+                            <span class="input-icon-addon"><i class="fa-solid fa-magnifying-glass"></i></span>
                             <input type="text" name="search" class="form-control" placeholder="Nom ou description..." value="<?= htmlspecialchars($filters['search']) ?>" aria-label="Recherche">
                         </div>
                     </div>
@@ -229,19 +229,19 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                     <!-- Boutons d'Action & Bascule Vue Grille / Vue Tableau -->
                     <div class="col-6 col-md-auto ms-auto d-flex align-items-center gap-1 justify-content-end">
                         <button type="submit" class="btn btn-primary shadow-sm d-inline-flex align-items-center gap-1" title="Appliquer les filtres">
-                            <span>🔍</span> <span class="d-none d-sm-inline">Filtrer</span>
+                            <span><i class="fa-solid fa-magnifying-glass me-1"></i></span> <span class="d-none d-sm-inline">Filtrer</span>
                         </button>
                         <?php if ($filters['search'] !== '' || $filters['category'] !== 'all' || $filters['affordable_only'] || $filters['sort'] !== 'default'): ?>
                             <a href="?page=research&view=<?= urlencode($filters['view']) ?>" class="btn btn-white shadow-sm" title="Réinitialiser les filtres">
-                                <span>✕</span>
+                                <span><i class="fa-solid fa-xmark"></i></span>
                             </a>
                         <?php endif; ?>
                         <div class="btn-group ms-1" role="group">
                             <button type="button" class="btn btn-sm <?= ($filters['view'] === 'grid') ? 'btn-primary' : 'btn-white' ?>" onclick="setViewMode('grid')" title="Vue en grille">
-                                🔲
+                                <i class="fa-solid fa-grip"></i>
                             </button>
                             <button type="button" class="btn btn-sm <?= ($filters['view'] === 'table') ? 'btn-primary' : 'btn-white' ?>" onclick="setViewMode('table')" title="Vue en tableau">
-                                📄
+                                <i class="fa-solid fa-bars"></i>
                             </button>
                         </div>
                     </div>
@@ -257,14 +257,14 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <div class="empty py-5">
-                        <div class="empty-icon fs-1 text-secondary">🔍</div>
+                        <div class="empty-icon fs-1 text-secondary"><i class="fa-solid fa-magnifying-glass"></i></div>
                         <p class="empty-title fs-2">Aucun savoir trouvé</p>
                         <p class="empty-subtitle text-secondary">
                             Aucune technologie ne correspond à vos filtres de recherche actuels.
                         </p>
                         <div class="empty-action">
                             <a href="?page=research&view=<?= urlencode($filters['view']) ?>" class="btn btn-primary d-inline-flex align-items-center gap-1 shadow-sm">
-                                <span>🔄</span> Réinitialiser les filtres
+                                <span><i class="fa-solid fa-rotate me-1"></i></span> Réinitialiser les filtres
                             </a>
                         </div>
                     </div>
@@ -313,13 +313,13 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                         </div>
                                         <div class="d-flex justify-content-between gap-1 flex-wrap">
                                             <span class="badge <?= ($r->missingMetal > 0) ? 'bg-danger-lt text-danger' : 'bg-white text-dark border' ?> px-2 py-1" title="Bois requis : <?= number_format($r->costMetal) ?>">
-                                                🪵 <?= number_format($r->costMetal) ?>
+                                                <i class="fa-solid fa-tree text-success me-1"></i><?= number_format($r->costMetal) ?>
                                             </span>
                                             <span class="badge <?= ($r->missingCrystal > 0) ? 'bg-danger-lt text-danger' : 'bg-white text-dark border' ?> px-2 py-1" title="Pierre requise : <?= number_format($r->costCrystal) ?>">
-                                                🪨 <?= number_format($r->costCrystal) ?>
+                                                <i class="fa-solid fa-mountain text-secondary me-1"></i><?= number_format($r->costCrystal) ?>
                                             </span>
                                             <span class="badge <?= ($r->missingDeuterium > 0) ? 'bg-danger-lt text-danger' : 'bg-white text-dark border' ?> px-2 py-1" title="Riz requis : <?= number_format($r->costDeuterium) ?>">
-                                                🌾 <?= number_format($r->costDeuterium) ?>
+                                                <i class="fa-solid fa-wheat-awn text-warning me-1"></i><?= number_format($r->costDeuterium) ?>
                                             </span>
                                         </div>
                                     </div>
@@ -327,7 +327,7 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                     <!-- Pied de carte : Durée (corrigée) & Bouton d'action -->
                                     <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                                         <span class="text-secondary small d-inline-flex align-items-center gap-1 font-monospace" title="Durée de recherche : <?= $r->getHumanDuration() ?>">
-                                            <span>⏱️</span> <?= $r->getFormattedDuration() ?>
+                                            <i class="fa-solid fa-stopwatch text-info me-1"></i><?= $r->getFormattedDuration() ?>
                                         </span>
                                         <?php if ($activeResearch): ?>
                                             <button type="button" class="btn btn-sm btn-secondary" disabled title="Une recherche est déjà en cours dans l'Académie">
@@ -391,18 +391,18 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                         <td>
                                             <div class="d-flex gap-1 flex-wrap">
                                                 <span class="badge <?= ($r->missingMetal > 0) ? 'bg-danger-lt text-danger' : 'bg-light text-dark' ?>">
-                                                    🪵 <?= number_format($r->costMetal) ?>
+                                                    <i class="fa-solid fa-tree text-success me-1"></i><?= number_format($r->costMetal) ?>
                                                 </span>
                                                 <span class="badge <?= ($r->missingCrystal > 0) ? 'bg-danger-lt text-danger' : 'bg-light text-dark' ?>">
-                                                    🪨 <?= number_format($r->costCrystal) ?>
+                                                    <i class="fa-solid fa-mountain text-secondary me-1"></i><?= number_format($r->costCrystal) ?>
                                                 </span>
                                                 <span class="badge <?= ($r->missingDeuterium > 0) ? 'bg-danger-lt text-danger' : 'bg-light text-dark' ?>">
-                                                    🌾 <?= number_format($r->costDeuterium) ?>
+                                                    <i class="fa-solid fa-wheat-awn text-warning me-1"></i><?= number_format($r->costDeuterium) ?>
                                                 </span>
                                             </div>
                                         </td>
                                         <td class="text-center font-monospace small">
-                                            ⏱️ <?= $r->getFormattedDuration() ?>
+                                            <i class="fa-solid fa-stopwatch text-info me-1"></i><?= $r->getFormattedDuration() ?>
                                         </td>
                                         <td class="text-end">
                                             <?php if ($activeResearch): ?>

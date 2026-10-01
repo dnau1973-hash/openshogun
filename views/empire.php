@@ -33,12 +33,12 @@ $unitsDb = $empireData['units_db'];
         <div class="col">
             <div class="text-muted small">Domaine Suprême du Clan <?= htmlspecialchars(ucfirst($user['faction'])) ?></div>
             <h2 class="page-title d-flex align-items-center gap-2">
-                <span>👑</span> Grand Tableau de Bord de l'Empire
+                <span><i class="fa-solid fa-crown text-warning me-1"></i></span> Grand Tableau de Bord de l'Empire
                 <?php if ($isSealActive): ?>
-                    <span class="badge bg-warning text-dark fs-5 shadow-sm">👑 Sceau Impérial Actif</span>
+                    <span class="badge bg-warning text-dark fs-5 shadow-sm"><i class="fa-solid fa-crown me-1"></i>Sceau Impérial Actif</span>
                 <?php else: ?>
                     <a href="/?page=privilege" class="btn btn-sm btn-outline-warning">
-                        👑 Activer le Sceau Impérial
+                        <i class="fa-solid fa-crown me-1"></i>Activer le Sceau Impérial
                     </a>
                 <?php endif; ?>
             </h2>
@@ -46,10 +46,10 @@ $unitsDb = $empireData['units_db'];
         <div class="col-auto ms-auto d-print-none">
             <div class="d-flex align-items-center gap-2">
                 <a href="/?page=privilege" class="badge bg-dark text-warning p-2 fs-5 border border-warning text-decoration-none" title="Accéder aux Privilèges">
-                    🪙 <?= number_format($goldCoins) ?> Koban
+                    <i class="fa-solid fa-coins text-warning me-1"></i><?= number_format($goldCoins) ?> Koban
                 </a>
                 <a href="/?page=privilege" class="btn btn-warning fw-bold">
-                    📜 Privilèges du Shōgun
+                    <i class="fa-solid fa-scroll me-1"></i>Privilèges du Shōgun
                 </a>
             </div>
         </div>
@@ -61,7 +61,7 @@ $unitsDb = $empireData['units_db'];
 <div class="alert alert-warning mb-4 shadow-sm" style="border-left: 5px solid #f59e0b; background: linear-gradient(90deg, #fffbeb 0%, #ffffff 100%);">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div class="d-flex align-items-center gap-3">
-            <span class="fs-1">🏯</span>
+            <span class="fs-1"><i class="fa-solid fa-chess-rook text-secondary"></i></span>
             <div>
                 <h4 class="alert-title fw-bold text-dark m-0">Privilège du Shōgun : Débloquez la Puissance Impériale</h4>
                 <div class="text-secondary small mt-1">
@@ -73,7 +73,7 @@ $unitsDb = $empireData['units_db'];
         </div>
         <div>
             <a href="/?page=privilege" class="btn btn-warning fw-bold px-3 py-2 shadow-sm">
-                👑 Investir dans le Sceau (dès 200 Koban)
+                <i class="fa-solid fa-crown me-1"></i>Investir dans le Sceau (dès 200 Koban)
             </a>
         </div>
     </div>
@@ -87,7 +87,7 @@ $unitsDb = $empireData['units_db'];
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="avatar rounded bg-primary-lt fs-2">🏯</span>
+                        <span class="avatar rounded bg-primary-lt fs-2"><i class="fa-solid fa-chess-rook"></i></span>
                     </div>
                     <div class="col">
                         <div class="font-weight-medium">Fiefs Féodaux</div>
@@ -102,7 +102,7 @@ $unitsDb = $empireData['units_db'];
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="avatar rounded bg-success-lt fs-2">👥</span>
+                        <span class="avatar rounded bg-success-lt fs-2"><i class="fa-solid fa-users"></i></span>
                     </div>
                     <div class="col">
                         <div class="font-weight-medium">Population Impériale</div>
@@ -117,7 +117,7 @@ $unitsDb = $empireData['units_db'];
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="avatar rounded bg-warning-lt fs-2">🌾</span>
+                        <span class="avatar rounded bg-warning-lt fs-2"><i class="fa-solid fa-wheat-awn"></i></span>
                     </div>
                     <div class="col">
                         <div class="font-weight-medium">Production Totale / h</div>
@@ -132,7 +132,7 @@ $unitsDb = $empireData['units_db'];
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="avatar rounded bg-info-lt fs-2">🔨</span>
+                        <span class="avatar rounded bg-info-lt fs-2"><i class="fa-solid fa-hammer"></i></span>
                     </div>
                     <div class="col">
                         <div class="font-weight-medium">Chantiers Actifs</div>
@@ -150,27 +150,27 @@ $unitsDb = $empireData['units_db'];
         <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <a href="#tab-resources" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab">
-                    🌾 Terroirs &amp; Réserves
+                    <i class="fa-solid fa-wheat-awn me-1"></i>Terroirs &amp; Réserves
                 </a>
             </li>
             <li class="nav-item" role="presentation">
                 <a href="#tab-constructions" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab" tabindex="-1">
-                    🔨 Chantiers de l'Empire (<?= $totals['active_constructions_count'] ?>)
+                    <i class="fa-solid fa-helmet-safety me-1"></i>Chantiers de l'Empire (<?= $totals['active_constructions_count'] ?>)
                 </a>
             </li>
             <li class="nav-item" role="presentation">
                 <a href="#tab-military" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab" tabindex="-1">
-                    ⚔️ Forces Militaires
+                    <i class="fa-solid fa-khanda me-1"></i>Forces Militaires
                 </a>
             </li>
             <li class="nav-item" role="presentation">
                 <a href="#tab-culture" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab" tabindex="-1">
-                    ⛩️ Culture &amp; Banquets
+                    <i class="fa-solid fa-torii-gate me-1"></i>Culture &amp; Banquets
                 </a>
             </li>
             <li class="nav-item" role="presentation">
                 <a href="#tab-evasion" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab" tabindex="-1">
-                    🛡️ Repli Tactique
+                    <i class="fa-solid fa-shield-halved me-1"></i>Repli Tactique
                 </a>
             </li>
         </ul>
@@ -185,12 +185,12 @@ $unitsDb = $empireData['units_db'];
                         <thead>
                             <tr class="text-muted" style="font-size:0.8rem; background:rgba(0,0,0,0.02);">
                                 <th>Fief Castral</th>
-                                <th>🪵 Bois de Cèdre</th>
-                                <th>🪨 Pierre de Taille</th>
-                                <th>🌾 Riz Impérial</th>
-                                <th>🍚 Farine &amp; Vivres</th>
-                                <th>🍶 Saké d'Apparat</th>
-                                <th>🪵 Poutres en bois</th>
+                                <th><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre</th>
+                                <th><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille</th>
+                                <th><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial</th>
+                                <th><i class="fa-solid fa-bowl-rice text-warning me-1"></i>Farine &amp; Vivres</th>
+                                <th><i class="fa-solid fa-wine-bottle text-danger me-1"></i>Saké d'Apparat</th>
+                                <th><i class="fa-solid fa-tree text-success me-1"></i>Poutres en bois</th>
                                 <th class="text-end">Action</th>
                             </tr>
                         </thead>
@@ -205,7 +205,7 @@ $unitsDb = $empireData['units_db'];
                             <tr class="<?= $isCur ? 'table-warning-subtle' : '' ?>">
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <span class="fs-3"><?= !empty($p['is_capital']) ? '👑' : '🏯' ?></span>
+                                        <span class="fs-3"><?= !empty($p['is_capital']) ? '<i class="fa-solid fa-crown text-warning"></i>' : '<i class="fa-solid fa-chess-rook text-danger"></i>' ?></span>
                                         <div>
                                             <div class="fw-bold d-flex align-items-center gap-1">
                                                 <a href="?switch_planet=<?= $p['id'] ?>&page=resources" class="text-reset text-decoration-none">
@@ -219,7 +219,7 @@ $unitsDb = $empireData['units_db'];
                                                 <?php endif; ?>
                                             </div>
                                             <div class="text-muted font-monospace small">
-                                                [<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>] &bull; 👥 <?= number_format($p['population'] ?? 100) ?> hab.
+                                                [<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>] &bull; <i class="fa-solid fa-users text-primary me-1"></i><?= number_format($p['population'] ?? 100) ?> hab.
                                             </div>
                                         </div>
                                     </div>
@@ -246,7 +246,7 @@ $unitsDb = $empireData['units_db'];
                                     <div class="text-success small">+<?= number_format($p['prod_rates']['deuterium']) ?>/h</div>
                                 </td>
                                 <td>
-                                    <div class="fw-bold"><?= number_format((int)($p['rice_flour'] ?? 0)) ?> 🍚</div>
+                                    <div class="fw-bold"><?= number_format((int)($p['rice_flour'] ?? 0)) ?> <i class="fa-solid fa-bowl-rice text-warning"></i></div>
                                     <?php if (!empty($item['famine']['flour_consumption_per_hour'])): ?>
                                         <div class="text-danger small" title="Consommation par les troupes d'élite">
                                             -<?= $item['famine']['flour_consumption_per_hour'] ?> farine/h
@@ -256,18 +256,18 @@ $unitsDb = $empireData['units_db'];
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <div class="fw-bold text-warning"><?= number_format((int)($p['sake'] ?? 0)) ?> 🍶</div>
+                                    <div class="fw-bold text-warning"><?= number_format((int)($p['sake'] ?? 0)) ?> <i class="fa-solid fa-wine-bottle text-danger"></i></div>
                                     <div class="text-muted small">/ <?= number_format((int)($p['sake_max'] ?? 10000)) ?> max</div>
                                 </td>
                                 <td>
-                                    <div class="fw-bold text-dark"><?= number_format((int)($p['wooden_beams'] ?? 0)) ?> 🪵</div>
+                                    <div class="fw-bold text-dark"><?= number_format((int)($p['wooden_beams'] ?? 0)) ?> <i class="fa-solid fa-tree text-success"></i></div>
                                     <div class="text-muted small">/ <?= number_format((int)($p['wooden_beams_max'] ?? 10000)) ?> max</div>
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-sm btn-outline-warning"
                                                 onclick="openNpcExchangeModal(<?= $p['id'] ?>, '<?= htmlspecialchars(addslashes($p['name'])) ?>', <?= (int)$p['metal'] ?>, <?= (int)$p['crystal'] ?>, <?= (int)$p['deuterium'] ?>, <?= (int)$p['metal_max'] ?>, <?= (int)$p['crystal_max'] ?>, <?= (int)$p['deuterium_max'] ?>)">
-                                            ⚖️ Intendant
+                                            <i class="fa-solid fa-scale-balanced me-1"></i>Intendant
                                         </button>
                                         <a href="?switch_planet=<?= $p['id'] ?>&page=resources" class="btn btn-sm btn-outline-secondary">
                                             Visiter
@@ -293,14 +293,14 @@ $unitsDb = $empireData['units_db'];
                                     <div class="text-success small">+<?= number_format($totals['prod_deuterium']) ?>/h</div>
                                 </td>
                                 <td>
-                                    <div><?= number_format($totals['rice_flour']) ?> 🍚</div>
+                                    <div><?= number_format($totals['rice_flour']) ?> <i class="fa-solid fa-bowl-rice text-warning"></i></div>
                                     <div class="text-danger small">-<?= $totals['elite_upkeep_flour'] ?>/h</div>
                                 </td>
                                 <td>
-                                    <div class="text-warning"><?= number_format($totals['sake']) ?> 🍶</div>
+                                    <div class="text-warning"><?= number_format($totals['sake']) ?> <i class="fa-solid fa-wine-bottle text-danger"></i></div>
                                 </td>
                                 <td>
-                                    <div class="text-dark"><?= number_format($totals['wooden_beams']) ?> 🪵</div>
+                                    <div class="text-dark"><?= number_format($totals['wooden_beams']) ?> <i class="fa-solid fa-tree text-success"></i></div>
                                 </td>
                                 <td class="text-end">
                                     <span class="badge bg-warning text-dark"><?= count($villages) ?> Domaines</span>
@@ -325,7 +325,7 @@ $unitsDb = $empireData['units_db'];
                         <div class="card mb-3 border">
                             <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background:#fafaf9;">
                                 <div class="d-flex align-items-center gap-2">
-                                    <span class="fs-4"><?= !empty($p['is_capital']) ? '👑' : '🏯' ?></span>
+                                    <span class="fs-4"><?= !empty($p['is_capital']) ? '<i class="fa-solid fa-crown text-warning"></i>' : '<i class="fa-solid fa-chess-rook text-danger"></i>' ?></span>
                                     <strong><?= htmlspecialchars($p['name']) ?> [<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>]</strong>
                                 </div>
                                 <a href="?switch_planet=<?= $p['id'] ?>&page=city" class="btn btn-sm btn-outline-primary">
@@ -352,7 +352,7 @@ $unitsDb = $empireData['units_db'];
                                         <tr>
                                             <td>
                                                 <div class="fw-bold d-flex align-items-center gap-2">
-                                                    <span><?= $job['build_category'] === 'field' ? '🌾' : '🏗️' ?></span>
+                                                    <span><?= $job['build_category'] === 'field' ? '<i class="fa-solid fa-wheat-awn text-warning"></i>' : '<i class="fa-solid fa-helmet-safety text-danger"></i>' ?></span>
                                                     <span><?= htmlspecialchars($bName) ?></span>
                                                     <?php if ($isDemolish): ?>
                                                         <span class="badge bg-danger text-white">Démantèlement</span>
@@ -399,7 +399,7 @@ $unitsDb = $empireData['units_db'];
 
                     <?php if (!$hasAnyJob): ?>
                         <div class="text-center py-5 text-muted">
-                            <div class="fs-1 mb-2">🔨</div>
+                            <div class="fs-1 mb-2"><i class="fa-solid fa-helmet-safety text-secondary"></i></div>
                             <h3>Aucun chantier en cours dans l'Empire</h3>
                             <p class="small">Vos maîtres d'œuvre et bâtisseurs sont au repos. Lancez de nouvelles améliorations depuis vos fiefs !</p>
                         </div>
@@ -427,14 +427,14 @@ $unitsDb = $empireData['units_db'];
                                 ?>
                                 <tr>
                                     <td>
-                                        <div class="fw-bold"><?= !empty($p['is_capital']) ? '👑 ' : '🏯 ' ?><?= htmlspecialchars($p['name']) ?></div>
+                                        <div class="fw-bold"><?= !empty($p['is_capital']) ? '<i class="fa-solid fa-crown text-warning me-1"></i>' : '<i class="fa-solid fa-chess-rook text-danger me-1"></i>' ?><?= htmlspecialchars($p['name']) ?></div>
                                         <div class="text-muted font-monospace small">[<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>]</div>
                                     </td>
                                     <td>
                                         <?php if (!empty($garrison)): ?>
                                             <div class="d-flex flex-wrap gap-2">
                                                 <?php foreach ($garrison as $gu):
-                                                    $uInfo = $unitsDb[$gu['unit_code']] ?? ['name' => $gu['unit_code'], 'icon' => '⚔️'];
+                                                    $uInfo = $unitsDb[$gu['unit_code']] ?? ['name' => $gu['unit_code'], 'icon' => '<i class="fa-solid fa-khanda text-danger"></i>'];
                                                 ?>
                                                     <span class="badge bg-light text-dark border p-1 px-2 d-flex align-items-center gap-1">
                                                         <span><?= $uInfo['icon'] ?></span>
@@ -449,7 +449,7 @@ $unitsDb = $empireData['units_db'];
                                     <td>
                                         <?php if (!empty($item['famine']['flour_consumption_per_hour'])): ?>
                                             <span class="badge bg-danger-lt">
-                                                🍚 <?= $item['famine']['flour_consumption_per_hour'] ?> farine/h
+                                                <i class="fa-solid fa-bowl-rice text-warning me-1"></i><?= $item['famine']['flour_consumption_per_hour'] ?> farine/h
                                             </span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary-lt">0 ration</span>
@@ -457,7 +457,7 @@ $unitsDb = $empireData['units_db'];
                                     </td>
                                     <td class="text-end">
                                         <a href="?switch_planet=<?= $p['id'] ?>&page=fleet" class="btn btn-sm btn-outline-danger">
-                                            ⚔️ Manœuvres
+                                            <i class="fa-solid fa-khanda me-1"></i>Manœuvres
                                         </a>
                                     </td>
                                 </tr>
@@ -479,20 +479,20 @@ $unitsDb = $empireData['units_db'];
                         <div class="col-md-6 col-lg-4">
                             <div class="card h-100 border">
                                 <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background:#fafaf9;">
-                                    <strong><?= !empty($p['is_capital']) ? '👑 ' : '🏯 ' ?><?= htmlspecialchars($p['name']) ?></strong>
+                                    <strong><?= !empty($p['is_capital']) ? '<i class="fa-solid fa-crown text-warning me-1"></i>' : '<i class="fa-solid fa-chess-rook text-danger me-1"></i>' ?><?= htmlspecialchars($p['name']) ?></strong>
                                     <span class="badge bg-secondary font-monospace">[<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>]</span>
                                 </div>
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <div class="text-secondary small">Saké en cave :</div>
-                                        <div class="fs-3 fw-bold text-warning"><?= number_format((int)($p['sake'] ?? 0)) ?> 🍶</div>
+                                        <div class="fs-3 fw-bold text-warning"><?= number_format((int)($p['sake'] ?? 0)) ?> <i class="fa-solid fa-wine-bottle text-danger"></i></div>
                                     </div>
                                     <div>
                                         <div class="text-secondary small mb-1">Célébration Castrale :</div>
                                         <?php if ($feast): ?>
                                             <div class="alert alert-success p-2 mb-0 small">
-                                                <div class="fw-bold">🎉 <?= htmlspecialchars($feast['name']) ?></div>
-                                                <div class="mt-1" data-countdown="<?= $feast['finishes_at'] ?>">⏳ En cours...</div>
+                                                <div class="fw-bold"><i class="fa-solid fa-champagne-glasses text-warning me-1"></i><?= htmlspecialchars($feast['name']) ?></div>
+                                                <div class="mt-1" data-countdown="<?= $feast['finishes_at'] ?>"><i class="fa-solid fa-hourglass-half text-info me-1"></i>En cours...</div>
                                             </div>
                                         <?php else: ?>
                                             <div class="alert alert-light border p-2 mb-0 small text-muted">
@@ -503,7 +503,7 @@ $unitsDb = $empireData['units_db'];
                                 </div>
                                 <div class="card-footer p-2 text-end bg-white">
                                     <a href="?switch_planet=<?= $p['id'] ?>&page=building&code=hq" class="btn btn-sm btn-outline-warning w-100">
-                                        🏯 Décréter un Banquet (Tenshu)
+                                        <i class="fa-solid fa-chess-rook me-1"></i>Décréter un Banquet (Tenshu)
                                     </a>
                                 </div>
                             </div>
@@ -518,7 +518,7 @@ $unitsDb = $empireData['units_db'];
                 <div class="p-3">
                     <div class="alert alert-info mb-3">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="fs-2">⛩️</span>
+                            <span class="fs-2"><i class="fa-solid fa-torii-gate text-danger"></i></span>
                             <div>
                                 <strong>Principe de l'Ordre de Repli Tactique (Privilège du Shōgun) :</strong>
                                 <div class="small mt-1">
@@ -546,13 +546,13 @@ $unitsDb = $empireData['units_db'];
                                 ?>
                                 <tr>
                                     <td>
-                                        <div class="fw-bold"><?= !empty($p['is_capital']) ? '👑 ' : '🏯 ' ?><?= htmlspecialchars($p['name']) ?></div>
+                                        <div class="fw-bold"><?= !empty($p['is_capital']) ? '<i class="fa-solid fa-crown text-warning me-1"></i>' : '<i class="fa-solid fa-chess-rook text-danger me-1"></i>' ?><?= htmlspecialchars($p['name']) ?></div>
                                         <div class="text-muted font-monospace small">[<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>]</div>
                                     </td>
                                     <td>
                                         <?php if ($isEvasion): ?>
                                             <span class="badge bg-success-lt fw-bold fs-6">
-                                                ✓ Repli Tactique Activé
+                                                <i class="fa-solid fa-check text-success me-1"></i>Repli Tactique Activé
                                             </span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary-lt">
@@ -569,7 +569,7 @@ $unitsDb = $empireData['units_db'];
                                         <button type="button"
                                                 class="btn btn-sm <?= $isEvasion ? 'btn-success' : 'btn-outline-secondary' ?>"
                                                 onclick="toggleEvasion(<?= $p['id'] ?>)">
-                                            <?= $isEvasion ? '🛡️ Activé (Cliquez pour désactiver)' : '⛩️ Activer le Repli' ?>
+                                            <?= $isEvasion ? '<i class="fa-solid fa-shield-halved text-success me-1"></i>Activé (Cliquez pour désactiver)' : '<i class="fa-solid fa-torii-gate me-1"></i>Activer le Repli' ?>
                                         </button>
                                     </td>
                                 </tr>
@@ -590,13 +590,13 @@ $unitsDb = $empireData['units_db'];
         <div class="modal-content">
             <div class="modal-header bg-warning-subtle">
                 <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                    <span>⚖️</span> Intendant du Marché Castral
+                    <span><i class="fa-solid fa-scale-balanced text-warning"></i></span> Intendant du Marché Castral
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="text-secondary small mb-3">
-                    L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au taux parfait de <strong>1:1:1</strong> pour un tribut de <strong>3 Koban 🪙</strong>.
+                    L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au taux parfait de <strong>1:1:1</strong> pour un tribut de <strong>3 Koban <i class="fa-solid fa-coins text-warning"></i></strong>.
                 </div>
 
                 <div class="p-2 bg-light border rounded mb-3 text-center">
@@ -610,7 +610,7 @@ $unitsDb = $empireData['units_db'];
 
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span>🪵 Bois de Cèdre :</span>
+                        <span><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre :</span>
                         <span id="npc_wood_val" class="font-monospace text-primary">0</span>
                     </label>
                     <input type="range" class="form-range" id="npc_range_wood" oninput="onNpcRangeChange('wood')">
@@ -619,7 +619,7 @@ $unitsDb = $empireData['units_db'];
 
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span>🪨 Pierre de Taille :</span>
+                        <span><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille :</span>
                         <span id="npc_stone_val" class="font-monospace text-primary">0</span>
                     </label>
                     <input type="range" class="form-range" id="npc_range_stone" oninput="onNpcRangeChange('stone')">
@@ -628,7 +628,7 @@ $unitsDb = $empireData['units_db'];
 
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span>🌾 Riz Impérial :</span>
+                        <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial :</span>
                         <span id="npc_rice_val" class="font-monospace text-primary">0</span>
                     </label>
                     <input type="range" class="form-range" id="npc_range_rice" oninput="onNpcRangeChange('rice')">
@@ -637,7 +637,7 @@ $unitsDb = $empireData['units_db'];
 
                 <div class="d-flex gap-2 mb-2">
                     <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="distributeEvenly()">
-                        ⚖️ Répartir Équitablement (1/3 chacun)
+                        <i class="fa-solid fa-scale-balanced me-1"></i>Répartir Équitablement (1/3 chacun)
                     </button>
                 </div>
 
@@ -650,7 +650,7 @@ $unitsDb = $empireData['units_db'];
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="button" class="btn btn-warning fw-bold" id="btnSubmitNpcExchange" onclick="submitNpcExchange()">
-                        🪙 Sceller le Troc (3 Koban)
+                        <i class="fa-solid fa-coins me-1"></i>Sceller le Troc (3 Koban)
                     </button>
                 </div>
             </div>

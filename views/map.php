@@ -18,17 +18,17 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
         <div class="col">
             <div class="page-pretitle">Exploration panoramique & Provinces</div>
             <h2 class="page-title">
-                🗾 Carte des Provinces &amp; Fiefs
+                <i class="fa-solid fa-map me-1"></i>Carte des Provinces &amp; Fiefs
                 <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">[<?= (int)$planet['coord_x'] ?> : <?= (int)$planet['coord_y'] ?>]</span>
             </h2>
         </div>
         <div class="col-auto ms-auto d-print-none">
             <div class="btn-list">
                 <a href="/?page=resources" class="btn btn-secondary">
-                    🌾 Terroir
+                    <i class="fa-solid fa-wheat-awn me-1"></i>Terroir
                 </a>
                 <a href="/?page=station" class="btn btn-secondary">
-                    🏯 Cité Castrale
+                    <i class="fa-solid fa-chess-rook me-1"></i>Cité Castrale
                 </a>
             </div>
         </div>
@@ -38,7 +38,7 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
 <div class="card card-map-fullwidth mb-3" style="width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 18px rgba(0,0,0,0.05);">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
         <div class="d-flex align-items-center gap-2">
-            <span style="font-size: 1.5rem;">🗾</span>
+            <span style="font-size: 1.5rem;"><i class="fa-solid fa-map-location-dot text-danger"></i></span>
             <div>
                 <h3 class="card-title m-0 font-weight-bold" style="font-size: 1.15rem;">
                     Provinces &amp; Fiefs du Japon Féodal
@@ -61,7 +61,7 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
             </form>
 
             <div class="badge bg-danger-lt border border-danger-subtle py-2 px-2 text-danger">
-                🖐️ <em>Glissez la carte (Drag &amp; Drop) ou flèches clavier.</em>
+                <i class="fa-solid fa-hand me-1"></i><em>Glissez la carte (Drag &amp; Drop) ou flèches clavier.</em>
             </div>
         </div>
     </div>
@@ -69,7 +69,7 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
     <!-- Légende des Terroirs & Saut de Quadrants (Style Travian) -->
     <div class="card-body bg-surface-secondary border-bottom py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
         <div class="d-flex align-items-center gap-3 flex-wrap">
-            <span class="font-weight-bold text-secondary text-uppercase" style="letter-spacing: 0.5px;">🗾 Terroirs :</span>
+            <span class="font-weight-bold text-secondary text-uppercase" style="letter-spacing: 0.5px;"><i class="fa-solid fa-map me-1"></i>Terroirs :</span>
             <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_plains.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Plaines</span>
             <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_forest.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Forêt de Cèdres</span>
             <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_mountain.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Montagnes</span>
@@ -77,16 +77,16 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
             <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_hills.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Collines</span>
             <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_village.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Fief Castral</span>
             <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_authentic_castle.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Donjon Sacré</span>
-            <span class="d-inline-flex align-items-center gap-1"><span class="badge bg-success-lt" style="font-size:0.68rem; padding:2px 4px;">🌾+25%</span> Oasis</span>
+            <span class="d-inline-flex align-items-center gap-1"><span class="badge bg-success-lt" style="font-size:0.68rem; padding:2px 4px;"><i class="fa-solid fa-wheat-awn me-1"></i>+25%</span> Oasis</span>
         </div>
 
         <div class="d-flex align-items-center gap-1">
             <span class="font-weight-bold text-secondary me-1">Saut de Zone :</span>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, 16)" title="Nord-Ouest [- / +]">↖️ N-O</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, 16)" title="Nord-Est [+ / +]">↗️ N-E</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, -16)" title="Sud-Ouest [- / -]">↙️ S-O</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, -16)" title="Sud-Est [+ / -]">↘️ S-E</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(0, 0)" title="Centre Impérial [0 : 0]">⛩️ Centre</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, 16)" title="Nord-Ouest [- / +]"><i class="fa-solid fa-arrow-trend-up me-1"></i>N-O</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, 16)" title="Nord-Est [+ / +]"><i class="fa-solid fa-arrow-trend-up me-1"></i>N-E</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, -16)" title="Sud-Ouest [- / -]"><i class="fa-solid fa-arrow-trend-down me-1"></i>S-O</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, -16)" title="Sud-Est [+ / -]"><i class="fa-solid fa-arrow-trend-down me-1"></i>S-E</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(0, 0)" title="Centre Impérial [0 : 0]"><i class="fa-solid fa-torii-gate me-1"></i>Centre</button>
         </div>
     </div>
 
@@ -191,12 +191,12 @@ window.selectPlanetTile = function(data) {
 
     // ── Terres Vierges Naturelles (Plaines, Collines, etc.) ────────────────────
     if (data.empty) {
-        title.innerHTML = `🏞️ <span style="color:#15803d;">${data.terrain_name || 'Terres Vierges'}</span> <span class="text-secondary small font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
+        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.terrain_name || 'Terres Vierges'}</span> <span class="text-secondary small font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <div style="width:58px; height:58px; border-radius:8px; overflow:hidden; border:2px solid #cbd5e1; flex-shrink:0; background:#f1f5f9;">
-                        ${data.terrain_img ? `<img src="${data.terrain_img}" alt="" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:2rem; display:flex; align-items:center; justify-content:center; height:100%;">🌾</span>'}
+                        ${data.terrain_img ? `<img src="${data.terrain_img}" alt="" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:2rem; display:flex; align-items:center; justify-content:center; height:100%;"><i class="fa-solid fa-wheat-awn text-warning"></i></span>'}
                     </div>
                     <div>
                         <div style="font-weight:700; color:#1e293b; font-size:1.1rem;">
@@ -209,10 +209,10 @@ window.selectPlanetTile = function(data) {
                 </div>
 
                 <div class="alert alert-success d-flex align-items-center gap-2 m-0 p-2" style="font-size:0.85rem; border-radius:6px;">
-                    <span style="font-size:1.3rem;">✨</span>
+                    <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
                     <div>
                         <strong>Emplacement Disponible pour Nouveau Fief !</strong><br>
-                        Vous pouvez y dépêcher une expédition avec un <strong>Pionnier Féodal (Colon ⛩️)</strong> pour y fonder votre prochain domaine castral.
+                        Vous pouvez y dépêcher une expédition avec un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour y fonder votre prochain domaine castral.
                     </div>
                 </div>
             </div>
@@ -220,7 +220,7 @@ window.selectPlanetTile = function(data) {
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
                 <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
-                    🏯 Fonder un Fief ici avec un Pionnier &rarr;
+                    <i class="fa-solid fa-chess-rook me-1"></i>Fonder un Fief ici avec un Pionnier &rarr;
                 </a>
             </div>
         `;
@@ -230,14 +230,14 @@ window.selectPlanetTile = function(data) {
 
     // ── Donjons Authentiques (現存十二天守) ─────────────────────
     if (data.is_authentic_castle) {
-        title.innerHTML = `🏯 <span style="color:#b45309;">${data.castle_name}</span> <span class="text-secondary small">${data.castle_kanji || ''}</span>`;
+        title.innerHTML = `<i class="fa-solid fa-chess-rook text-warning me-1"></i> <span style="color:#b45309;">${data.castle_name}</span> <span class="text-secondary small">${data.castle_kanji || ''}</span>`;
         body.innerHTML = `
             <div class="card card-sm bg-warning-lt p-3 mb-3 border border-warning">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                     <span class="badge bg-warning text-warning-fg fw-bold">
-                        👑 TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE (現存十二天守)
+                        <i class="fa-solid fa-crown text-warning me-1"></i>TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE (現存十二天守)
                     </span>
-                    <span class="fw-bold small text-muted">📍 ${data.castle_province || 'Province Historique'}</span>
+                    <span class="fw-bold small text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i>${data.castle_province || 'Province Historique'}</span>
                 </div>
                 <p class="small mb-2">
                     Ce donjon d'époque Sengoku-Edo est l'une des 12 forteresses d'origine préservées du Japon.
@@ -251,12 +251,12 @@ window.selectPlanetTile = function(data) {
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <a href="/?page=castle&code=${encodeURIComponent(data.castle_code || '')}"
                    class="btn btn-warning text-dark font-weight-bold">
-                    📜 Découvrir l'Histoire &rarr;
+                    <i class="fa-solid fa-scroll me-1"></i>Découvrir l'Histoire &rarr;
                 </a>
                 <div class="d-flex gap-2">
                     ${data.planet_id ? `
-                        <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"  class="btn btn-outline-secondary">🥷 Sonder</a>
-                        <a href="?page=fleet&target_id=${data.planet_id}&mission=raid" class="btn btn-danger">⚔️ Assaillir</a>
+                        <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"  class="btn btn-outline-secondary"><i class="fa-solid fa-user-ninja me-1"></i>Sonder</a>
+                        <a href="?page=fleet&target_id=${data.planet_id}&mission=raid" class="btn btn-danger"><i class="fa-solid fa-khanda me-1"></i>Assaillir</a>
                     ` : `<span class="text-secondary small align-self-center">Sanctuaire Inviolé</span>`}
                 </div>
             </div>
@@ -274,19 +274,19 @@ window.selectPlanetTile = function(data) {
 
         let statusBadge = '';
         if (isOwn) {
-            statusBadge = '<span class="badge bg-success text-white font-weight-bold" style="font-size:0.75rem;">🌿 VOTRE FIEF NATUREL ANNEXÉ</span>';
+            statusBadge = '<span class="badge bg-success text-white font-weight-bold" style="font-size:0.75rem;"><i class="fa-solid fa-seedling me-1"></i>VOTRE FIEF NATUREL ANNEXÉ</span>';
         } else if (isOccupied) {
-            statusBadge = `<span class="badge bg-primary text-white font-weight-bold" style="font-size:0.75rem;">🛡️ OCCUPÉE PAR ${data.username || 'UN DAIMYŌ'}</span>`;
+            statusBadge = `<span class="badge bg-primary text-white font-weight-bold" style="font-size:0.75rem;"><i class="fa-solid fa-shield-halved me-1"></i>OCCUPÉE PAR ${data.username || 'UN DAIMYŌ'}</span>`;
         } else if (hasWildBeasts) {
-            statusBadge = '<span class="badge bg-danger text-white font-weight-bold" style="font-size:0.75rem;">🐗 OASIS SAUVAGE — FAUNE HOSTILE</span>';
+            statusBadge = '<span class="badge bg-danger text-white font-weight-bold" style="font-size:0.75rem;"><i class="fa-solid fa-paw me-1"></i>OASIS SAUVAGE — FAUNE HOSTILE</span>';
         } else {
-            statusBadge = '<span class="badge bg-teal text-white font-weight-bold" style="font-size:0.75rem;">✨ OASIS LIBRE D\'OCCUPATION</span>';
+            statusBadge = '<span class="badge bg-teal text-white font-weight-bold" style="font-size:0.75rem;"><i class="fa-solid fa-sparkles me-1"></i>OASIS LIBRE D\'OCCUPATION</span>';
         }
 
         let bonusBadgesHtml = '';
-        if (data.bonus_rice  > 0) bonusBadgesHtml += `<span class="badge bg-warning-lt border border-warning" style="font-size:0.78rem;">🌾 +${data.bonus_rice}% Riz</span>`;
-        if (data.bonus_wood  > 0) bonusBadgesHtml += `<span class="badge bg-success-lt border border-success" style="font-size:0.78rem;">🪵 +${data.bonus_wood}% Bois</span>`;
-        if (data.bonus_stone > 0) bonusBadgesHtml += `<span class="badge bg-primary-lt border border-primary" style="font-size:0.78rem;">🪨 +${data.bonus_stone}% Pierre</span>`;
+        if (data.bonus_rice  > 0) bonusBadgesHtml += `<span class="badge bg-warning-lt border border-warning" style="font-size:0.78rem;"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>+${data.bonus_rice}% Riz</span>`;
+        if (data.bonus_wood  > 0) bonusBadgesHtml += `<span class="badge bg-success-lt border border-success" style="font-size:0.78rem;"><i class="fa-solid fa-tree text-success me-1"></i>+${data.bonus_wood}% Bois</span>`;
+        if (data.bonus_stone > 0) bonusBadgesHtml += `<span class="badge bg-primary-lt border border-primary" style="font-size:0.78rem;"><i class="fa-solid fa-mountain text-primary me-1"></i>+${data.bonus_stone}% Pierre</span>`;
 
         let unitsHtml = '';
         if (units.length > 0) {
@@ -296,7 +296,7 @@ window.selectPlanetTile = function(data) {
                 if (uCount <= 0) return;
                 unitsHtml += `
                     <div class="d-flex align-items-center gap-2 bg-white border rounded px-2 py-1 small">
-                        <span style="font-size:1.1rem;">${u.icon || (u.is_wild == 1 ? '🐗' : '⚔️')}</span>
+                        <span style="font-size:1.1rem;">${u.icon || (u.is_wild == 1 ? '<i class="fa-solid fa-paw text-warning"></i>' : '<i class="fa-solid fa-khanda text-danger"></i>')}</span>
                         <span class="font-weight-medium" style="color:#1e293b;">${u.unit_name || u.name}</span>
                         <strong class="text-danger ms-1">x${uCount}</strong>
                     </div>
@@ -304,10 +304,10 @@ window.selectPlanetTile = function(data) {
             });
             unitsHtml += '</div>';
         } else {
-            unitsHtml = '<p class="text-success small my-2">🕊️ Aucun animal sauvage ni soldat en garnison. L\'oasis est entièrement pacifiée !</p>';
+            unitsHtml = '<p class="text-success small my-2"><i class="fa-solid fa-dove me-1"></i>Aucun animal sauvage ni soldat en garnison. L\'oasis est entièrement pacifiée !</p>';
         }
 
-        title.innerHTML = `🌿 <span style="color:#15803d;">${data.oasis_name}</span> <span class="text-secondary small">${data.bonus_label || ''}</span>`;
+        title.innerHTML = `<i class="fa-solid fa-seedling text-success me-1"></i> <span style="color:#15803d;">${data.oasis_name}</span> <span class="text-secondary small">${data.bonus_label || ''}</span>`;
         body.innerHTML = `
             <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
@@ -321,9 +321,9 @@ window.selectPlanetTile = function(data) {
                 <div class="bg-white border rounded p-2 mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
                     <span class="text-secondary font-weight-medium">Récoltes accumulées :</span>
                     <div class="d-flex gap-3">
-                        <span style="color:#b45309;">🪵 <strong>${(data.res_wood  || 0).toLocaleString()}</strong></span>
-                        <span style="color:#2563eb;">🪨 <strong>${(data.res_stone || 0).toLocaleString()}</strong></span>
-                        <span style="color:#15803d;">🌾 <strong>${(data.res_rice  || 0).toLocaleString()}</strong></span>
+                        <span style="color:#b45309;"><i class="fa-solid fa-tree text-success me-1"></i><strong>${(data.res_wood  || 0).toLocaleString()}</strong></span>
+                        <span style="color:#2563eb;"><i class="fa-solid fa-mountain text-secondary me-1"></i><strong>${(data.res_stone || 0).toLocaleString()}</strong></span>
+                        <span style="color:#15803d;"><i class="fa-solid fa-wheat-awn text-warning me-1"></i><strong>${(data.res_rice  || 0).toLocaleString()}</strong></span>
                     </div>
                 </div>
                 <div class="mt-2">
@@ -333,16 +333,16 @@ window.selectPlanetTile = function(data) {
             </div>
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=raid"   class="btn btn-warning font-weight-bold">⚔️ Piller l'Oasis</a>
-                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=attack" class="btn btn-danger font-weight-bold">💥 Nettoyer</a>
+                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=raid"   class="btn btn-warning font-weight-bold"><i class="fa-solid fa-khanda me-1"></i>Piller l'Oasis</a>
+                    <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=attack" class="btn btn-danger font-weight-bold"><i class="fa-solid fa-bomb me-1"></i>Nettoyer</a>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
                     ${isOwn ? `
-                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-primary">🛡️ Renforcer</a>
-                        <button onclick="abandonOasisDirect(${data.oasis_id})" class="btn btn-outline-danger">🏳️ Abandonner</button>
+                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-primary"><i class="fa-solid fa-shield-halved me-1"></i>Renforcer</a>
+                        <button onclick="abandonOasisDirect(${data.oasis_id})" class="btn btn-outline-danger"><i class="fa-solid fa-flag text-danger me-1"></i>Abandonner</button>
                     ` : `
-                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-success font-weight-bold">🚩 Occuper</a>
-                        ${!hasWildBeasts ? `<button onclick="annexOasisDirect(${data.oasis_id})" class="btn btn-primary font-weight-bold">✨ Annexion Directe</button>` : ''}
+                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-success font-weight-bold"><i class="fa-solid fa-flag me-1"></i>Occuper</a>
+                        ${!hasWildBeasts ? `<button onclick="annexOasisDirect(${data.oasis_id})" class="btn btn-primary font-weight-bold"><i class="fa-solid fa-sparkles me-1"></i>Annexion Directe</button>` : ''}
                     `}
                 </div>
             </div>
@@ -353,16 +353,16 @@ window.selectPlanetTile = function(data) {
 
     // ── Terres Neutres (planète sans joueur) ────────────────────
     if (!data.user_id) {
-        title.innerText = `🏞️ Terres Neutres`;
+        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-secondary me-1"></i> Terres Neutres`;
         body.innerHTML = `
             <div class="border rounded p-3 bg-surface mb-3">
                 <h4 class="font-weight-bold mb-1" style="color:#1e293b;">${data.planet_name || 'Domaine inconnu'}</h4>
                 <p class="text-secondary mb-1">Terrain : <strong style="color:#1e293b;">${data.planet_type || '—'}</strong></p>
-                <p class="text-success font-weight-medium mb-0">✨ Terres fertiles libres pour un nouveau fief !</p>
+                <p class="text-success font-weight-medium mb-0"><i class="fa-solid fa-sparkles me-1"></i>Terres fertiles libres pour un nouveau fief !</p>
             </div>
             <div class="d-flex justify-content-end gap-2 flex-wrap">
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=colonize" class="btn btn-primary">🏯 Établir un Fief</a>
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"     class="btn btn-outline-danger">⚔️ Piller</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=colonize" class="btn btn-primary"><i class="fa-solid fa-chess-rook me-1"></i>Établir un Fief</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"     class="btn btn-outline-danger"><i class="fa-solid fa-khanda me-1"></i>Piller</a>
             </div>
         `;
         openMapModal();
@@ -376,11 +376,11 @@ window.selectPlanetTile = function(data) {
     const pts   = (data.points != null) ? Number(data.points).toLocaleString() : '0';
     const targetUserId = parseInt(data.user_id, 10) || 0;
 
-    title.innerText = `🏯 ${data.planet_name} — ${data.username || 'Daimyō'}`;
+    title.innerHTML = `<i class="fa-solid fa-chess-rook text-danger me-1"></i> ${data.planet_name} — ${data.username || 'Daimyō'}`;
     body.innerHTML = `
         ${data.is_protected ? `
             <div style="background:#f0fdf4; border:1px solid #86efac; padding:0.75rem 1rem; border-radius:8px; margin-bottom:1.1rem; display:flex; align-items:center; gap:0.75rem;">
-                <span style="font-size:1.6rem; flex-shrink:0;">🔰</span>
+                <span style="font-size:1.6rem; flex-shrink:0;"><i class="fa-solid fa-shield-halved text-success"></i></span>
                 <div>
                     <strong style="color:#15803d; font-size:0.9rem;">Immunité Féodale des Nouveaux Joueurs</strong>
                     <div style="color:#166534; font-size:0.8rem; margin-top:0.15rem;">Ce daimyō est protégé jusqu'au ${data.protection_until || '7 jours'}${data.protection_remaining ? ' (encore ' + data.protection_remaining + ')' : ''}. Les assauts, pillages et espionnages shinobi sont neutralisés.</div>
@@ -389,16 +389,16 @@ window.selectPlanetTile = function(data) {
         ` : ''}
         <div style="background:#fef2f2; border:1px solid #fecaca; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
             <div class="d-flex align-items-center gap-3 mb-3">
-                <div style="width:44px; height:44px; border-radius:50%; background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.25); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">🏯</div>
+                <div style="width:44px; height:44px; border-radius:50%; background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.25); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;"><i class="fa-solid fa-chess-rook text-danger"></i></div>
                 <div>
                     <div style="font-weight:700; color:#1e293b; font-size:1.05rem;">
                         ${data.planet_name}
-                        ${data.is_protected ? '<span class="badge bg-success-lt ms-2" style="font-size:0.7rem;">🔰 Protégé</span>' : ''}
+                        ${data.is_protected ? '<span class="badge bg-success-lt ms-2" style="font-size:0.7rem;"><i class="fa-solid fa-shield-halved text-success me-1"></i>Protégé</span>' : ''}
                     </div>
                     <div class="small text-secondary">Fief du Daimyō
                         <a href="javascript:void(0)" onclick="openPlayerProfileModal(${targetUserId})"
                            class="font-weight-bold text-danger text-decoration-none ms-1">
-                            👤 ${data.username || 'Daimyō'}
+                            <i class="fa-solid fa-user me-1"></i>${data.username || 'Daimyō'}
                         </a>
                         ${data.alliance_tag ? `<span class="badge bg-warning-lt ms-1">[${data.alliance_tag}]</span>` : ''}
                     </div>
@@ -411,22 +411,22 @@ window.selectPlanetTile = function(data) {
         </div>
         <div class="d-flex gap-2 flex-wrap justify-content-end align-items-center">
             <button type="button" onclick="openPlayerProfileModal(${targetUserId})" class="btn btn-outline-danger">
-                👤 Fiche Daimyō
+                <i class="fa-solid fa-user me-1"></i>Fiche Daimyō
             </button>
             ${!isOwn ? (data.is_protected ? `
                 <span class="badge bg-success-lt font-weight-bold py-2 px-3" title="Ce fief est inviolable sous immunité débutant">
-                    🔰 Fief sous Immunité
+                    <i class="fa-solid fa-shield-halved text-warning me-1"></i>Fief sous Immunité
                 </span>
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=transport" class="btn btn-outline-secondary">🐂 Convoi</a>
-                <a href="?page=messages&tab=compose&to=${encodeURIComponent(data.username || '')}" class="btn btn-outline-secondary">✉️ Missive</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=transport" class="btn btn-outline-secondary"><i class="fa-solid fa-boxes-stacked me-1"></i>Convoi</a>
+                <a href="?page=messages&tab=compose&to=${encodeURIComponent(data.username || '')}" class="btn btn-outline-secondary"><i class="fa-solid fa-envelope me-1"></i>Missive</a>
             ` : `
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"       class="btn btn-outline-secondary">🥷 Espionner</a>
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"      class="btn btn-danger">⚔️ Raid</a>
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=transport" class="btn btn-outline-secondary">🐂 Convoi</a>
-                <a href="?page=messages&tab=compose&to=${encodeURIComponent(data.username || '')}" class="btn btn-outline-secondary">✉️ Missive</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=spy"       class="btn btn-outline-secondary"><i class="fa-solid fa-user-ninja me-1"></i>Espionner</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"      class="btn btn-danger"><i class="fa-solid fa-khanda me-1"></i>Raid</a>
+                <a href="?page=fleet&target_id=${data.planet_id}&mission=transport" class="btn btn-outline-secondary"><i class="fa-solid fa-boxes-stacked me-1"></i>Convoi</a>
+                <a href="?page=messages&tab=compose&to=${encodeURIComponent(data.username || '')}" class="btn btn-outline-secondary"><i class="fa-solid fa-envelope me-1"></i>Missive</a>
             `) : `
                 <span class="badge bg-success-lt font-weight-bold py-2 px-3">
-                    🏯 Votre propre domaine castral
+                    <i class="fa-solid fa-chess-rook text-primary me-1"></i>Votre propre domaine castral
                 </span>
             `}
         </div>

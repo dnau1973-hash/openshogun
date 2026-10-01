@@ -155,38 +155,38 @@ foreach (BUILDINGS as $code => $bInfo) {
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
             <div>
                 <h2 class="card-title d-flex align-items-center gap-2">
-                    <span>🏯 Cité Castrale & Palais du Daimyō - <?= htmlspecialchars($planet['name']) ?></span>
+                    <span><i class="fa-solid fa-chess-rook text-danger me-1"></i> Cité Castrale & Palais du Daimyō - <?= htmlspecialchars($planet['name']) ?></span>
                     <?php if (!empty($planet['is_capital'])): ?>
-                        <span class="badge bg-warning text-dark fw-bold" style="font-size:0.72rem;">👑 Capitale</span>
+                        <span class="badge bg-warning text-dark fw-bold" style="font-size:0.72rem;"><i class="fa-solid fa-crown me-1"></i>Capitale</span>
                     <?php endif; ?>
                     <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" title="Renommer ce fief" onclick="openCityRenamePrompt()" style="font-size:0.75rem;">
-                        ✏️ Renommer
+                        <i class="fa-solid fa-pen me-1"></i>Renommer
                     </button>
                 </h2>
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
                     Forteresse Principale : <strong style="color:var(--border-highlight, #c2252b);">Tenshu Niveau <?= $hqLevel ?></strong>
-                    <span style="opacity:0.85;">&bull; 👥 <strong><?= number_format($pop) ?></strong>/<?= number_format($popMax) ?> Habitants (<span class="text-success">+<?= $popBonus ?>% vitesse chantiers</span>)</span>
+                    <span style="opacity:0.85;">&bull; <i class="fa-solid fa-users text-primary me-1"></i><strong><?= number_format($pop) ?></strong>/<?= number_format($popMax) ?> Habitants (<span class="text-success">+<?= $popBonus ?>% vitesse chantiers</span>)</span>
                 </div>
             </div>
             <div style="display:flex; gap:0.5rem; align-items:center;">
-                <button class="btn btn-secondary" onclick="toggleCityViewMode()" id="btn-toggle-view" style="font-size:0.8rem; padding:0.35rem 0.75rem;">📋 Fiches Détaillées</button>
-                <a href="?page=resources" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">🌾 Vers les Terroirs Ruraux &rarr;</a>
+                <button class="btn btn-secondary" onclick="toggleCityViewMode()" id="btn-toggle-view" style="font-size:0.8rem; padding:0.35rem 0.75rem;"><i class="fa-solid fa-clipboard-list me-1"></i>Fiches Détaillées</button>
+                <a href="?page=resources" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;"><i class="fa-solid fa-wheat-awn me-1"></i>Vers les Terroirs Ruraux &rarr;</a>
             </div>
         </div>
         <div class="card-body">
             <?php if (!empty($planet['famine_active']) && !empty($planet['famine_enabled'])): ?>
                 <div style="background:#fef2f2; border:2px solid #ef4444; border-radius:8px; padding:0.6rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
                     <div style="display:flex; align-items:center; gap:0.6rem; color:#991b1b; font-size:0.85rem; font-weight:700;">
-                        <span style="font-size:1.4rem;">⚠️</span>
+                        <span style="font-size:1.4rem;"><i class="fa-solid fa-triangle-exclamation text-danger"></i></span>
                         <div>
-                            <span>Disette Féodale : Vos greniers sont à sec de Farine de Riz 🍚 !</span>
+                            <span>Disette Féodale : Vos greniers sont à sec de Farine de Riz <i class="fa-solid fa-bowl-rice text-warning"></i> !</span>
                             <div style="font-size:0.75rem; font-weight:400; color:#b91c1c;">
                                 Vos régiments d'élite meurent de faim ou désertent (-<?= (float)GameConfig::get('famine_rate', 3.0) ?>%/heure). Approvisionnez d'urgence votre Meunerie !
                             </div>
                         </div>
                     </div>
                     <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-sm btn-danger fw-bold" style="font-size:0.75rem; padding:0.3rem 0.8rem;">
-                        🍚 Moudre de la Farine d'Urgence &rarr;
+                        <i class="fa-solid fa-bowl-rice me-1"></i>Moudre de la Farine d'Urgence &rarr;
                     </a>
                 </div>
             <?php endif; ?>
@@ -194,11 +194,11 @@ foreach (BUILDINGS as $code => $bInfo) {
             <?php if ($activeFeast): ?>
                 <?php
                     $feastLabels = [
-                        'matsuri' => ['Matsuri Populaire des Saisons', '🏮', '#fef9c3', '#ca8a04'],
-                        'warriors' => ['Banquet des Guerriers (Kanpai)', '⚔️', '#fee2e2', '#dc2626'],
-                        'imperial' => ['Grand Banquet Impérial', '👑', '#ede9fe', '#7c3aed']
+                        'matsuri' => ['Matsuri Populaire des Saisons', '<i class="fa-solid fa-fan text-warning"></i>', '#fef9c3', '#ca8a04'],
+                        'warriors' => ['Banquet des Guerriers (Kanpai)', '<i class="fa-solid fa-khanda text-danger"></i>', '#fee2e2', '#dc2626'],
+                        'imperial' => ['Grand Banquet Impérial', '<i class="fa-solid fa-crown text-purple"></i>', '#ede9fe', '#7c3aed']
                     ];
-                    $fData = $feastLabels[$activeFeast['feast_type']] ?? ['Célébration', '🎉', '#fef9c3', '#ca8a04'];
+                    $fData = $feastLabels[$activeFeast['feast_type']] ?? ['Célébration', '<i class="fa-solid fa-champagne-glasses text-warning"></i>', '#fef9c3', '#ca8a04'];
                 ?>
                 <div style="background:<?= $fData[2] ?>; border:1px solid <?= $fData[3] ?>; border-radius:8px; padding:0.5rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
                     <div style="display:flex; align-items:center; gap:0.6rem; color:#1f2937; font-size:0.85rem; font-weight:600;">
@@ -213,12 +213,12 @@ foreach (BUILDINGS as $code => $bInfo) {
 
             <!-- Barre de Filtres Tactiques de la Cité -->
             <div class="rts-sector-bar">
-                <button class="sector-btn active" id="btn-city-all" onclick="filterCitySector('all')">🌐 Vue Globale Cité</button>
-                <button class="sector-btn filter-hq" id="btn-city-hq" onclick="filterCitySector('hq')">🏯 Tenshu Donjon</button>
-                <button class="sector-btn filter-military" id="btn-city-military" onclick="filterCitySector('military')">🥋 Dojo, Cavalerie & Remparts</button>
-                <button class="sector-btn filter-science" id="btn-city-science" onclick="filterCitySector('science')">📜 Savoirs & Forge</button>
-                <button class="sector-btn filter-logistics" id="btn-city-logistics" onclick="filterCitySector('logistics')">📦 Greniers & Réserves</button>
-                <button class="sector-btn filter-gateway" id="btn-city-gateway" onclick="window.location.href='?page=resources'">🌾 Porte du Terroir</button>
+                <button class="sector-btn active" id="btn-city-all" onclick="filterCitySector('all')"><i class="fa-solid fa-globe me-1"></i>Vue Globale Cité</button>
+                <button class="sector-btn filter-hq" id="btn-city-hq" onclick="filterCitySector('hq')"><i class="fa-solid fa-chess-rook me-1"></i>Tenshu Donjon</button>
+                <button class="sector-btn filter-military" id="btn-city-military" onclick="filterCitySector('military')"><i class="fa-solid fa-khanda me-1"></i>Dojo, Cavalerie & Remparts</button>
+                <button class="sector-btn filter-science" id="btn-city-science" onclick="filterCitySector('science')"><i class="fa-solid fa-scroll me-1"></i>Savoirs & Forge</button>
+                <button class="sector-btn filter-logistics" id="btn-city-logistics" onclick="filterCitySector('logistics')"><i class="fa-solid fa-boxes-stacked me-1"></i>Greniers & Réserves</button>
+                <button class="sector-btn filter-gateway" id="btn-city-gateway" onclick="window.location.href='?page=resources'"><i class="fa-solid fa-wheat-awn me-1"></i>Porte du Terroir</button>
             </div>
 
             <!-- Viewport RTS de la Cité Castrale (shogun_castle_city_bg.jpg) -->
@@ -226,9 +226,9 @@ foreach (BUILDINGS as $code => $bInfo) {
                 <!-- Porte fortifiée vers les terroirs ruraux (en bas à droite avec Mon) -->
                 <div class="rts-hotspot sector-gateway hotspot-city-slot-gateway"
                      data-sector="gateway"
-                     title="🌾 Grande Porte Castrale (Retour aux Terroirs Ruraux)"
+                     title="Grande Porte Castrale (Retour aux Terroirs Ruraux)"
                      onclick="window.location.href='?page=resources'">
-                    <div class="rts-level-bubble rts-gateway-bubble" title="🌾 Vers le Terroir">🌾</div>
+                    <div class="rts-level-bubble rts-gateway-bubble" title="Vers le Terroir"><i class="fa-solid fa-wheat-awn text-warning"></i></div>
                 </div>
 
                 <!-- Boucle sur les 16 Bâtiments de la Cité Féodale (Slots 19 à 34) -->
@@ -264,9 +264,9 @@ foreach (BUILDINGS as $code => $bInfo) {
                             <?php if ($isLevelZero): ?>
                                 +
                             <?php elseif ($isUnderConstruction || $isUpgrading): ?>
-                                <span class="bubble-pulse">⏳</span>
+                                <span class="bubble-pulse"><i class="fa-solid fa-hourglass-half"></i></span>
                             <?php elseif ($isDemolishing): ?>
-                                <span class="bubble-pulse">🗑️</span>
+                                <span class="bubble-pulse"><i class="fa-solid fa-trash-can"></i></span>
                             <?php else: ?>
                                 <?= $lvl ?>
                             <?php endif; ?>
@@ -276,7 +276,7 @@ foreach (BUILDINGS as $code => $bInfo) {
             </div>
 
             <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted); text-align:center;">
-                💡 <strong>Cité Castrale & Village Féodal :</strong> Cliquez sur une bâtisse ou un emplacement pour l'élever au niveau supérieur, ou accédez directement au dojo, aux écuries et à l'académie de recherche.
+                <i class="fa-solid fa-lightbulb text-warning me-1"></i> <strong>Cité Castrale & Village Féodal :</strong> Cliquez sur une bâtisse ou un emplacement pour l'élever au niveau supérieur, ou accédez directement au dojo, aux écuries et à l'académie de recherche.
             </p>
 
             <!-- Vue Grille des Cartes Détaillées (Repliable) -->
@@ -308,19 +308,19 @@ foreach (BUILDINGS as $code => $bInfo) {
 
                         <div style="width:100%; display:flex; flex-direction:column; gap:0.5rem;">
                             <?php if ($code === 'shipyard' && $lvl > 0): ?>
-                                <a href="?page=shipyard" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🐎 Mobiliser Cavalerie & Siège</a>
+                                <a href="?page=shipyard" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-horse me-1"></i>Mobiliser Cavalerie & Siège</a>
                             <?php elseif ($code === 'barracks' && $lvl > 0): ?>
-                                <a href="?page=barracks" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🥋 Entraîner Soldats (Dojo)</a>
+                                <a href="?page=barracks" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-user-ninja me-1"></i>Entraîner Soldats (Dojo)</a>
                             <?php elseif ($code === 'research_lab' && $lvl > 0): ?>
-                                <a href="?page=research" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">📜 Académie des Savoirs</a>
+                                <a href="?page=research" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-scroll me-1"></i>Académie des Savoirs</a>
                             <?php elseif ($code === 'grain_mill' && $lvl > 0): ?>
-                                <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🍶 Raffiner Saké &amp; Farine</a>
+                                <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-wine-bottle me-1"></i>Raffiner Saké &amp; Farine</a>
                             <?php elseif ($code === 'sawmill' && $lvl >= 10): ?>
-                                <a href="/?page=building&code=sawmill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">🪚 Façonner Poutres</a>
+                                <a href="/?page=building&code=sawmill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-hammer me-1"></i>Façonner Poutres</a>
                             <?php endif; ?>
 
                             <a href="/?page=building&code=<?= $code ?>" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">
-                                <?= ($lvl === 0) ? '🔨 Construire' : '⚡ Améliorer le niveau' ?>
+                                <?= ($lvl === 0) ? '<i class="fa-solid fa-hammer me-1"></i>Construire' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Améliorer le niveau' ?>
                             </a>
                         </div>
                     </div>
@@ -337,7 +337,7 @@ foreach (BUILDINGS as $code => $bInfo) {
         <!-- File Urbaine -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">🏗️ Chantiers Urbains</h3>
+                <h3 class="card-title"><i class="fa-solid fa-helmet-safety me-1"></i>Chantiers Urbains</h3>
             </div>
             <div class="card-body">
                 <?php if (empty($queue)): ?>
@@ -365,7 +365,7 @@ foreach (BUILDINGS as $code => $bInfo) {
                                 <div class="queue-info">
                                     <h4 class="mb-0 fw-bold" style="font-size:0.9rem;"><?= htmlspecialchars($name) ?></h4>
                                     <?php if ($isDemolish): ?>
-                                        <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;">🗑️ Démolition</span>
+                                        <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;"><i class="fa-solid fa-trash-can me-1"></i>Démolition</span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary-lt" style="font-size:0.7rem;">Niveau <?= $q['target_level'] ?></span>
                                     <?php endif; ?>
@@ -409,7 +409,7 @@ foreach (BUILDINGS as $code => $bInfo) {
         <div class="card-header" style="background:rgba(15,23,42,0.95); padding:1rem 1.25rem; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
             <div>
                 <h3 class="card-title" style="margin:0; font-size:1.2rem; color:#f8fafc; display:flex; align-items:center; gap:0.5rem;">
-                    <span>🏗️</span> Fonder une Structure Féodale — Emplacement #<span id="modal-slot-title" style="color:#ef4444;">19</span>
+                    <span><i class="fa-solid fa-helmet-safety text-danger"></i></span> Fonder une Structure Féodale — Emplacement #<span id="modal-slot-title" style="color:#ef4444;">19</span>
                 </h3>
                 <span style="font-size:0.8rem; color:#94a3b8;">Choisissez l'édifice à bâtir sur ce terrain disponible de votre forteresse.</span>
             </div>
@@ -418,17 +418,17 @@ foreach (BUILDINGS as $code => $bInfo) {
 
         <!-- Filtres par catégorie -->
         <div style="display:flex; gap:0.5rem; padding:0.75rem 1.25rem; background:rgba(0,0,0,0.25); border-bottom:1px solid #1e293b; flex-wrap:wrap;">
-            <button class="btn btn-secondary modal-filter-btn active" onclick="filterModalBuildings('all')" id="modal-filter-all" style="font-size:0.8rem; padding:0.3rem 0.75rem;">🌐 Toutes (<?= count($availableBuildingsToConstruct) ?>)</button>
-            <button class="btn btn-secondary modal-filter-btn" onclick="filterModalBuildings('military')" id="modal-filter-military" style="font-size:0.8rem; padding:0.3rem 0.75rem;">🥋 Militaire & Défense</button>
-            <button class="btn btn-secondary modal-filter-btn" onclick="filterModalBuildings('science')" id="modal-filter-science" style="font-size:0.8rem; padding:0.3rem 0.75rem;">📜 Savoirs & Diplomatie</button>
-            <button class="btn btn-secondary modal-filter-btn" onclick="filterModalBuildings('logistics')" id="modal-filter-logistics" style="font-size:0.8rem; padding:0.3rem 0.75rem;">📦 Logistique & Marché</button>
+            <button class="btn btn-secondary modal-filter-btn active" onclick="filterModalBuildings('all')" id="modal-filter-all" style="font-size:0.8rem; padding:0.3rem 0.75rem;"><i class="fa-solid fa-globe me-1"></i>Toutes (<?= count($availableBuildingsToConstruct) ?>)</button>
+            <button class="btn btn-secondary modal-filter-btn" onclick="filterModalBuildings('military')" id="modal-filter-military" style="font-size:0.8rem; padding:0.3rem 0.75rem;"><i class="fa-solid fa-khanda me-1"></i>Militaire & Défense</button>
+            <button class="btn btn-secondary modal-filter-btn" onclick="filterModalBuildings('science')" id="modal-filter-science" style="font-size:0.8rem; padding:0.3rem 0.75rem;"><i class="fa-solid fa-scroll me-1"></i>Savoirs & Diplomatie</button>
+            <button class="btn btn-secondary modal-filter-btn" onclick="filterModalBuildings('logistics')" id="modal-filter-logistics" style="font-size:0.8rem; padding:0.3rem 0.75rem;"><i class="fa-solid fa-boxes-stacked me-1"></i>Logistique & Marché</button>
         </div>
 
         <!-- Corps avec défilement de la liste des bâtiments -->
         <div class="card-body" style="padding:1rem 1.25rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.75rem;">
             <?php if (empty($availableBuildingsToConstruct)): ?>
                 <div style="text-align:center; padding:3rem 1rem; color:#94a3b8;">
-                    <div style="font-size:2.5rem; margin-bottom:0.75rem;">🏯</div>
+                    <div style="font-size:2.5rem; margin-bottom:0.75rem;"><i class="fa-solid fa-chess-rook text-secondary"></i></div>
                     <h4 style="color:#f8fafc; margin-bottom:0.5rem;">Toutes les structures féodales sont déjà érigées !</h4>
                     <p style="font-size:0.85rem; max-width:450px; margin:0 auto;">Vous avez déjà fondé l'ensemble des bâtiments uniques du clan. Vous pouvez améliorer leurs niveaux depuis la vue générale de la cité.</p>
                 </div>
@@ -470,16 +470,16 @@ foreach (BUILDINGS as $code => $bInfo) {
                             <!-- Coûts Niveau 1 -->
                             <div style="display:flex; gap:0.75rem; font-size:0.82rem; font-weight:600;">
                                 <span style="color:<?= ($planet['metal'] >= $c['metal']) ? '#4ade80' : '#ef4444' ?>;" title="Bois de Cèdre">
-                                    🪵 <?= number_format($c['metal']) ?>
+                                    <i class="fa-solid fa-tree me-1"></i><?= number_format($c['metal']) ?>
                                 </span>
                                 <span style="color:<?= ($planet['crystal'] >= $c['crystal']) ? '#4ade80' : '#ef4444' ?>;" title="Pierre de Taille">
-                                    🪨 <?= number_format($c['crystal']) ?>
+                                    <i class="fa-solid fa-mountain me-1"></i><?= number_format($c['crystal']) ?>
                                 </span>
                                 <span style="color:<?= ($planet['deuterium'] >= $c['deuterium']) ? '#4ade80' : '#ef4444' ?>;" title="Koku de Riz">
-                                    🌾 <?= number_format($c['deuterium']) ?>
+                                    <i class="fa-solid fa-wheat-awn me-1"></i><?= number_format($c['deuterium']) ?>
                                 </span>
                                 <span style="color:#94a3b8;" title="Durée des travaux">
-                                    ⏳ <?= $durFormatted ?>
+                                    <i class="fa-solid fa-hourglass-half me-1"></i><?= $durFormatted ?>
                                 </span>
                             </div>
 
@@ -487,15 +487,15 @@ foreach (BUILDINGS as $code => $bInfo) {
                             <div>
                                 <?php if ($canAfford && $canQueueNewBuilding): ?>
                                     <button type="button" class="btn btn-primary" onclick="confirmBuildOnSlot('<?= $bCode ?>')" style="font-size:0.85rem; padding:0.45rem 0.9rem; font-weight:600; background:linear-gradient(135deg, #b91c1c, #dc2626); border-color:#ef4444; white-space:nowrap;">
-                                        🔨 Bâtir (Niveau 1)
+                                        <i class="fa-solid fa-hammer me-1"></i>Bâtir (Niveau 1)
                                     </button>
                                 <?php elseif (!$canAfford): ?>
                                     <button type="button" class="btn btn-secondary" disabled style="font-size:0.8rem; padding:0.45rem 0.75rem; opacity:0.6; cursor:not-allowed; white-space:nowrap;" title="Ressources insuffisantes dans vos réserves">
-                                        ⚠️ Ressources insuffisantes
+                                        <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i>Ressources insuffisantes
                                     </button>
                                 <?php else: ?>
                                     <button type="button" class="btn btn-secondary" disabled style="font-size:0.8rem; padding:0.45rem 0.75rem; opacity:0.6; cursor:not-allowed; white-space:nowrap;" title="Chantier déjà en cours dans la forteresse">
-                                        ⏳ Chantier en cours
+                                        <i class="fa-solid fa-hourglass-half me-1"></i>Chantier en cours
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -508,7 +508,7 @@ foreach (BUILDINGS as $code => $bInfo) {
         <!-- Pied de modale -->
         <div style="background:rgba(15,23,42,0.95); padding:0.75rem 1.25rem; border-top:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
             <span style="font-size:0.8rem; color:#64748b;">
-                💡 Un édifice peut être érigé sur n'importe quel emplacement disponible de votre forteresse.
+                <i class="fa-solid fa-lightbulb text-warning me-1"></i>Un édifice peut être érigé sur n'importe quel emplacement disponible de votre forteresse.
             </span>
             <button class="btn btn-secondary" onclick="closeBuildModal()" style="font-size:0.8rem; padding:0.35rem 0.75rem;">Fermer</button>
         </div>
@@ -635,11 +635,11 @@ function toggleCityViewMode() {
 
     if (cardsGrid.style.display === 'none') {
         cardsGrid.style.display = 'grid';
-        toggleBtn.innerText = '🗺️ Masquer les Fiches';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-map me-1"></i>Masquer les Fiches';
         cardsGrid.scrollIntoView({ behavior: 'smooth' });
     } else {
         cardsGrid.style.display = 'none';
-        toggleBtn.innerText = '📋 Fiches Détaillées';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-clipboard-list me-1"></i>Fiches Détaillées';
     }
 }
 

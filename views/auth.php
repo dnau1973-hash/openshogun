@@ -16,6 +16,9 @@ $tab = $_GET['tab'] ?? (($action ?? '') === 'register' ? 'register' : 'login');
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 (Icônes vectorielles professionnelles) -->
+    <link rel="stylesheet" href="/public/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="/public/css/bootstrap-grid.min.css?v=5.3.3">
     <link rel="stylesheet" href="/public/css/bootstrap-utilities.min.css?v=5.3.3">
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../public/css/style.css') ? filemtime(__DIR__ . '/../public/css/style.css') : time() ?>">
@@ -507,16 +510,16 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
     <div class="landing-actions flex-column align-items-center">
         <div class="d-flex gap-3 justify-content-center w-100" style="flex-wrap: wrap;">
             <button type="button" class="landing-btn landing-btn-login" onclick="openAuthModal('login')">
-                <span class="landing-btn-icon">⚔️</span>
+                <span class="landing-btn-icon"><i class="fa-solid fa-right-to-bracket"></i></span>
                 <span>CONNEXION</span>
             </button>
             <button type="button" class="landing-btn landing-btn-register" onclick="openAuthModal('register')">
-                <span class="landing-btn-icon">📜</span>
+                <span class="landing-btn-icon"><i class="fa-solid fa-user-plus"></i></span>
                 <span>INSCRIPTION</span>
             </button>
         </div>
         <a href="/?page=pedagogy" class="text-decoration-none mt-2 px-3 py-1 rounded-pill small text-center" style="color: #67e8f9; background: rgba(8, 145, 178, 0.25); border: 1px solid rgba(6, 182, 212, 0.5); font-size: 0.82rem; letter-spacing: 0.5px; backdrop-filter: blur(4px);">
-            <span>🎓</span> Découvrir l'Atelier Pédagogique &bull; Coulisses de Conception &rarr;
+            <i class="fa-solid fa-graduation-cap me-1"></i>Découvrir l'Atelier Pédagogique &bull; Coulisses de Conception &rarr;
         </a>
     </div>
 </div>
@@ -540,10 +543,10 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
 
             <div class="auth-tabs">
                 <button type="button" id="tabBtnLogin" class="auth-tab-btn <?= ($tab === 'login') ? 'active' : '' ?>" onclick="setTab('login')">
-                    ⚔️ Connexion
+                    <i class="fa-solid fa-right-to-bracket me-1"></i>Connexion
                 </button>
                 <button type="button" id="tabBtnRegister" class="auth-tab-btn <?= ($tab === 'register') ? 'active' : '' ?>" onclick="setTab('register')">
-                    📜 Prêter Allégeance (Inscription)
+                    <i class="fa-solid fa-user-plus me-1"></i>Prêter Allégeance (Inscription)
                 </button>
             </div>
 
@@ -551,20 +554,20 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
             <!-- Notifications d'activation et de vérification d'e-mail -->
             <?php if (isset($_GET['verified'])): ?>
                 <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; color: #86efac; padding: 0.85rem 1.1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.95rem;">
-                    🎉 <strong>Pacte féodal scellé !</strong> Votre compte Daimyō a été activé avec succès. Vous pouvez dès à présent vous connecter à votre domaine.
+                    <i class="fa-solid fa-circle-check text-success me-1"></i><strong>Pacte féodal scellé !</strong> Votre compte Daimyō a été activé avec succès. Vous pouvez dès à présent vous connecter à votre domaine.
                 </div>
             <?php endif; ?>
 
             <?php if (isset($_GET['registered_pending'])): ?>
                 <div style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #bae6fd; padding: 0.85rem 1.1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.95rem;">
-                    📜 <strong>Pacte féodal initié !</strong> Un e-mail contenant votre décret d'activation a été expédié à l'adresse <strong><?= htmlspecialchars($_GET['email'] ?? '') ?></strong>.<br>
+                    <i class="fa-solid fa-scroll text-warning me-1"></i><strong>Pacte féodal initié !</strong> Un e-mail contenant votre décret d'activation a été expédié à l'adresse <strong><?= htmlspecialchars($_GET['email'] ?? '') ?></strong>.<br>
                     <small style="color: #94a3b8;">Veuillez cliquer sur le lien reçu sous 24 heures pour déverrouiller votre domaine castral.</small>
                 </div>
             <?php endif; ?>
 
             <?php if (isset($_GET['verify_error'])): ?>
                 <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1.1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.92rem;">
-                    ⚠️ <?= htmlspecialchars($_GET['verify_error']) ?>
+                    <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i><?= htmlspecialchars($_GET['verify_error']) ?>
                     <div style="margin-top: 8px;">
                         <a href="#" onclick="toggleResendForm(); return false;" style="color: #fef08a; text-decoration: underline; font-weight: 700;">
                             Demander un nouvel e-mail d'activation &rarr;
@@ -575,13 +578,13 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
 
             <?php if (isset($_GET['resend_success'])): ?>
                 <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; color: #86efac; padding: 0.85rem 1.1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.92rem;">
-                    ✉️ <?= htmlspecialchars($_GET['resend_success']) ?>
+                    <i class="fa-solid fa-envelope text-info me-1"></i><?= htmlspecialchars($_GET['resend_success']) ?>
                 </div>
             <?php endif; ?>
 
             <?php if ($error): ?>
                 <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-size: 0.9rem;">
-                    ⚠️ <?= htmlspecialchars($error) ?>
+                    <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i><?= htmlspecialchars($error) ?>
                     <?php if (str_contains($error, 'pas encore activé') || !empty($_GET['unverified_email'])): ?>
                         <div style="margin-top: 8px;">
                             <a href="#" onclick="toggleResendForm(); return false;" style="color: #fef08a; text-decoration: underline; font-weight: 700;">
@@ -595,7 +598,7 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
             <!-- Formulaire repliable de renvoi d'e-mail d'activation -->
             <div id="resendFormContainer" style="display: none; background: rgba(15, 23, 42, 0.85); border: 1px solid #475569; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
                 <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem; color: #f8fafc; display: flex; align-items: center; gap: 0.4rem;">
-                    <span>✉️</span> Renvoi du Décret d'Activation
+                    <i class="fa-solid fa-envelope text-info me-1"></i>Renvoi du Décret d'Activation
                 </h4>
                 <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: #94a3b8;">
                     Indiquez votre nom de Daimyō ou l'adresse e-mail renseignée lors de votre inscription :
@@ -659,7 +662,7 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
                         <div class="auth-slide-step" id="slide-step-1">
                             <div style="margin-bottom: 1.5rem;">
                                 <h3 style="margin: 0 0 0.35rem 0; font-size: 1.15rem; color: #1c1917; display: flex; align-items: center; gap: 0.5rem;">
-                                    <span>📜</span>
+                                    <i class="fa-solid fa-scroll text-warning"></i>
                                     <span>Étape 1 sur 3 : Identité de votre Daimyō</span>
                                 </h3>
                                 <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
@@ -670,13 +673,13 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
                             <div class="form-group">
                                 <label>Nom de Daimyō <span style="color:#b91c1c;">*</span></label>
                                 <input type="text" name="username" id="reg_username" class="form-control" required minlength="3" placeholder="ex: Shingen_Takeda" autocomplete="username">
-                                <div id="username-error" style="display:none; color:#dc2626; font-size:0.78rem; margin-top:4px; font-weight:600;">⚠️ Veuillez saisir un nom de Daimyō d'au moins 3 caractères.</div>
+                                <div id="username-error" style="display:none; color:#dc2626; font-size:0.78rem; margin-top:4px; font-weight:600;"><i class="fa-solid fa-triangle-exclamation me-1"></i>Veuillez saisir un nom de Daimyō d'au moins 3 caractères.</div>
                             </div>
 
                             <div class="form-group">
                                 <label>Email provincial <span style="color:#b91c1c;">*</span></label>
                                 <input type="email" name="email" id="reg_email" class="form-control" required placeholder="daimyo@domaine.local" autocomplete="email">
-                                <div id="email-error" style="display:none; color:#dc2626; font-size:0.78rem; margin-top:4px; font-weight:600;">⚠️ Veuillez saisir une adresse email valide.</div>
+                                <div id="email-error" style="display:none; color:#dc2626; font-size:0.78rem; margin-top:4px; font-weight:600;"><i class="fa-solid fa-triangle-exclamation me-1"></i>Veuillez saisir une adresse email valide.</div>
                             </div>
 
                             <div class="form-group">
@@ -698,19 +701,19 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
                                     
                                     <!-- Liste des critères contextuels -->
                                     <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px;">
-                                        <span id="crit-len">⚪ 8+ caractères</span>
-                                        <span id="crit-lower">⚪ Minuscule (a-z)</span>
-                                        <span id="crit-upper">⚪ Majuscule (A-Z)</span>
-                                        <span id="crit-digit">⚪ Chiffre (0-9)</span>
-                                        <span id="crit-special">⚪ Symbole (!@#$...)</span>
+                                        <span id="crit-len"><i class="fa-regular fa-circle text-muted me-1"></i>8+ caractères</span>
+                                        <span id="crit-lower"><i class="fa-regular fa-circle text-muted me-1"></i>Minuscule (a-z)</span>
+                                        <span id="crit-upper"><i class="fa-regular fa-circle text-muted me-1"></i>Majuscule (A-Z)</span>
+                                        <span id="crit-digit"><i class="fa-regular fa-circle text-muted me-1"></i>Chiffre (0-9)</span>
+                                        <span id="crit-special"><i class="fa-regular fa-circle text-muted me-1"></i>Symbole (!@#$...)</span>
                                     </div>
 
                                     <!-- Conseil contextuel dynamique -->
                                     <div id="password-tip" style="font-size: 0.75rem; color: #64748b; margin-top: 5px; font-style: italic;">
-                                        💡 Conseil : Utilisez au moins 8 caractères avec un mélange de lettres, chiffres et symboles.
+                                        <i class="fa-solid fa-lightbulb text-warning me-1"></i>Conseil : Utilisez au moins 8 caractères avec un mélange de lettres, chiffres et symboles.
                                     </div>
                                 </div>
-                                <div id="password-error" style="display:none; color:#dc2626; font-size:0.78rem; margin-top:4px; font-weight:600;">⚠️ Le mot de passe doit comporter au moins 8 caractères et respecter les critères.</div>
+                                <div id="password-error" style="display:none; color:#dc2626; font-size:0.78rem; margin-top:4px; font-weight:600;"><i class="fa-solid fa-triangle-exclamation me-1"></i>Le mot de passe doit comporter au moins 8 caractères et respecter les critères.</div>
                             </div>
 
                             <!-- Champ Confirmer le mot de passe -->
@@ -731,7 +734,7 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
                         <div class="auth-slide-step" id="slide-step-2">
                             <div style="margin-bottom: 1.5rem;">
                                 <h3 style="margin: 0 0 0.35rem 0; font-size: 1.15rem; color: #1c1917; display: flex; align-items: center; gap: 0.5rem;">
-                                    <span>⚔️</span>
+                                    <i class="fa-solid fa-khanda text-danger"></i>
                                     <span>Étape 2 sur 3 : Choix de votre Clan Féodal</span>
                                 </h3>
                                 <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
@@ -756,7 +759,7 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
                                             <?= htmlspecialchars($fData['description']) ?>
                                         </p>
                                         <div style="font-size: 0.75rem; color: #b45309; font-weight: 700; background: #fef3c7; border: 1px solid #fde68a; padding: 0.3rem 0.5rem; border-radius: 4px;">
-                                            ★ <?= htmlspecialchars($fData['special_ability']) ?>
+                                            <i class="fa-solid fa-star text-warning me-1"></i><?= htmlspecialchars($fData['special_ability']) ?>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -776,7 +779,7 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
                         <div class="auth-slide-step" id="slide-step-3">
                             <div style="margin-bottom: 1.5rem;">
                                 <h3 style="margin: 0 0 0.35rem 0; font-size: 1.15rem; color: #1c1917; display: flex; align-items: center; gap: 0.5rem;">
-                                    <span>🗾</span>
+                                    <i class="fa-solid fa-map-location-dot text-primary"></i>
                                     <span>Étape 3 sur 3 : Province de Fondation du Domaine</span>
                                 </h3>
                                 <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
@@ -788,7 +791,7 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
 
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.65rem;">
                                 <div class="zone-choice-card selected" id="zone-card-random" onclick="selectZone('random', 'Aléatoire (Équilibré)')">
-                                    <div style="font-size: 1.4rem;">🎲</div>
+                                    <div style="font-size: 1.4rem;"><i class="fa-solid fa-dice text-danger"></i></div>
                                     <strong style="font-size: 0.85rem; color: #b91c1c;">Aléatoire</strong>
                                     <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">Recommandé</div>
                                 </div>
@@ -852,7 +855,7 @@ $hasLoopVideo = file_exists(__DIR__ . '/..' . $loopVideoMp4);
                                     &larr; Retour (Clan)
                                 </button>
                                 <button type="submit" class="btn btn-primary" style="padding: 0.9rem 1.8rem; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);">
-                                    🏯 Fonder mon Fief Castral &rarr;
+                                    <i class="fa-solid fa-chess-rook text-danger me-1"></i>Fonder mon Fief Castral &rarr;
                                 </button>
                             </div>
                         </div>
@@ -875,7 +878,7 @@ function updateSummaryNewsletterState(isChecked) {
     const el = document.getElementById('summaryNewsletter');
     if (el) {
         if (isChecked) {
-            el.textContent = '✓ Abonné';
+            el.innerHTML = '<i class="fa-solid fa-check me-1"></i>Abonné';
             el.style.color = '#15803d';
         } else {
             el.textContent = 'Non abonné';
@@ -989,30 +992,30 @@ function evaluatePasswordStrength(password) {
 
     if (password.length === 0) {
         if (label) { label.textContent = 'Non renseigné'; label.style.color = '#94a3b8'; }
-        if (tip) tip.textContent = '💡 Conseil : Utilisez au moins 8 caractères avec un mélange de lettres, chiffres et symboles.';
+        if (tip) tip.textContent = '<i class="fa-solid fa-lightbulb text-warning me-1"></i>Conseil : Utilisez au moins 8 caractères avec un mélange de lettres, chiffres et symboles.';
         return { valid: false, score: 0 };
     }
 
     let color = '#ef4444';
     let text = 'Faible';
-    let advice = '⚠️ Mot de passe trop vulnérable. Ajoutez des majuscules, chiffres et caractères spéciaux.';
+    let advice = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Mot de passe trop vulnérable. Ajoutez des majuscules, chiffres et caractères spéciaux.';
 
     if (score === 1) {
         color = '#ef4444'; // Rouge
         text = 'Faible';
-        advice = '⚠️ Trop court ou trop simple. Visez au moins 8 caractères et variez les caractères.';
+        advice = '<i class="fa-solid fa-triangle-exclamation text-warning me-1"></i>Trop court ou trop simple. Visez au moins 8 caractères et variez les caractères.';
     } else if (score === 2) {
         color = '#f97316'; // Orange
         text = 'Moyen';
-        advice = '🔶 Niveau acceptable. Ajoutez des symboles spéciaux (!@#$) pour renforcer la protection.';
+        advice = '<i class="fa-solid fa-shield text-info me-1"></i>Niveau acceptable. Ajoutez des symboles spéciaux (!@#$) pour renforcer la protection.';
     } else if (score === 3) {
         color = '#84cc16'; // Vert lime
         text = 'Fort';
-        advice = '🟢 Bon mot de passe féodal ! Bien protégé contre les assauts.';
+        advice = '<i class="fa-solid fa-circle-check text-success me-1"></i>Bon mot de passe féodal ! Bien protégé contre les assauts.';
     } else if (score >= 4) {
         color = '#22c55e'; // Vert émeraude
         text = 'Très Fort';
-        advice = '🛡️ Excellent ! Votre donjon castral bénéficie d\'un rempart impénétrable.';
+        advice = '<i class="fa-solid fa-shield-halved text-success me-1"></i>Excellent ! Votre donjon castral bénéficie d\'un rempart impénétrable.';
     }
 
     if (label) {
@@ -1034,11 +1037,11 @@ function updateCritTag(id, isValid, label) {
     const el = document.getElementById(id);
     if (!el) return;
     if (isValid) {
-        el.textContent = '🟢 ' + label;
+        el.innerHTML = '<i class="fa-solid fa-circle-check text-success me-1"></i>' + label;
         el.style.color = '#16a34a';
         el.style.fontWeight = '700';
     } else {
-        el.textContent = '⚪ ' + label;
+        el.innerHTML = '<i class="fa-regular fa-circle text-muted me-1"></i>' + label;
         el.style.color = '#64748b';
         el.style.fontWeight = 'normal';
     }
@@ -1062,12 +1065,12 @@ function checkPasswordMatch() {
 
     statusEl.style.display = 'block';
     if (p1 === p2) {
-        statusEl.innerHTML = '✅ Les mots de passe concordent parfaitement.';
+        statusEl.innerHTML = '<i class="fa-solid fa-circle-check text-success me-1"></i>Les mots de passe concordent parfaitement.';
         statusEl.style.color = '#16a34a';
         confirmInp.style.borderColor = '#16a34a';
         return true;
     } else {
-        statusEl.innerHTML = '⚠️ Les deux mots de passe ne correspondent pas.';
+        statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Les deux mots de passe ne correspondent pas.';
         statusEl.style.color = '#dc2626';
         confirmInp.style.borderColor = '#dc2626';
         return false;
@@ -1125,7 +1128,7 @@ function validateStep1() {
     const evalRes = evaluatePasswordStrength(passInp.value || '');
     if (!passInp.value || passInp.value.length < 8 || !evalRes.valid) {
         const errEl = document.getElementById('password-error');
-        errEl.textContent = '⚠️ Le mot de passe doit comporter au moins 8 caractères et combiner majuscules, minuscules et chiffres.';
+        errEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Le mot de passe doit comporter au moins 8 caractères et combiner majuscules, minuscules et chiffres.';
         errEl.style.display = 'block';
         if (valid) passInp.focus();
         valid = false;
@@ -1137,7 +1140,7 @@ function validateStep1() {
     const matches = checkPasswordMatch();
     if (!matches || !confirmInp.value) {
         const statusEl = document.getElementById('password-match-status');
-        statusEl.innerHTML = '⚠️ Veuillez confirmer votre mot de passe à l\'identique.';
+        statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Veuillez confirmer votre mot de passe à l\'identique.';
         statusEl.style.color = '#dc2626';
         statusEl.style.display = 'block';
         if (valid) confirmInp.focus();
@@ -1177,7 +1180,7 @@ function goToRegisterStep(targetStep, doValidate = true) {
 
         if (i < targetStep) {
             ind.className = 'step-indicator completed';
-            bubble.textContent = '✓';
+            bubble.innerHTML = '<i class="fa-solid fa-check"></i>';
         } else if (i === targetStep) {
             ind.className = 'step-indicator active';
             bubble.textContent = i;

@@ -19,7 +19,7 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <div>
                     <h3 class="card-title text-primary d-flex align-items-center gap-2 m-0">
-                        <span>✉️</span> Service de Messagerie &amp; Transporteur d'E-mails
+                        <i class="fa-solid fa-envelope text-primary me-1"></i>Service de Messagerie &amp; Transporteur d'E-mails
                     </h3>
                     <div class="text-secondary small mt-1">
                         Configurez l'expédition des e-mails pour l'activation des nouveaux Daimyōs, les notifications féodales et alertes impériales.
@@ -50,7 +50,7 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
                                         <span class="form-selectgroup-check"></span>
                                     </span>
                                     <span class="form-selectgroup-label-content">
-                                        <span class="font-weight-medium d-block text-dark fw-bold">📮 Fonction mail() Locale</span>
+                                        <span class="font-weight-medium d-block text-dark fw-bold"><i class="fa-solid fa-inbox text-secondary me-1"></i>Fonction mail() Locale</span>
                                         <span class="text-secondary small">Utilise le service sendmail/Postfix de l'hôte Linux. Aucune authentification requise.</span>
                                     </span>
                                 </span>
@@ -63,7 +63,7 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
                                         <span class="form-selectgroup-check"></span>
                                     </span>
                                     <span class="form-selectgroup-label-content">
-                                        <span class="font-weight-medium d-block text-dark fw-bold">⚡ Serveur SMTP Distant</span>
+                                        <span class="font-weight-medium d-block text-dark fw-bold"><i class="fa-solid fa-bolt text-warning me-1"></i>Serveur SMTP Distant</span>
                                         <span class="text-secondary small">Recommandé en production (Gmail, Infomaniak, Brevo, Mailgun, OVH) avec chiffrement TLS/SSL.</span>
                                     </span>
                                 </span>
@@ -74,7 +74,7 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
                     <!-- 2. Bloc Paramètres SMTP (repliable si driver == mail) -->
                     <div id="smtp-settings-block" style="display: <?= ($mailCfg['driver'] === 'smtp') ? 'block' : 'none' ?>;" class="p-3 bg-light rounded border mb-4">
                         <h4 class="text-dark fw-bold mb-3 d-flex align-items-center gap-2">
-                            <span>🔐</span> Paramètres du Relais SMTP
+                            <i class="fa-solid fa-lock text-primary me-1"></i>Paramètres du Relais SMTP
                         </h4>
 
                         <div class="row g-3">
@@ -109,7 +109,7 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
 
                     <!-- 3. Expéditeur & Validation des Joueurs -->
                     <h4 class="text-dark fw-bold mb-3 d-flex align-items-center gap-2">
-                        <span>🪶</span> Identité de l'Expéditeur Impérial
+                        <i class="fa-solid fa-feather text-secondary me-1"></i>Identité de l'Expéditeur Impérial
                     </h4>
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
@@ -137,7 +137,7 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
 
                 <div class="card-footer bg-light d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary d-flex align-items-center gap-2" id="btn-save-mail-config">
-                        <span>💾</span> Enregistrer la Configuration de Messagerie
+                        <i class="fa-solid fa-floppy-disk me-1"></i>Enregistrer la Configuration de Messagerie
                     </button>
                 </div>
             </form>
@@ -149,7 +149,7 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
         <div class="card mb-4 border">
             <div class="card-header bg-light">
                 <h3 class="card-title text-indigo d-flex align-items-center gap-2 m-0">
-                    <span>🚀</span> Diagnostic &amp; Test d'Expédition
+                    <i class="fa-solid fa-paper-plane text-info me-1"></i>Diagnostic &amp; Test d'Expédition
                 </h3>
             </div>
             <div class="card-body">
@@ -165,7 +165,7 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
                     </div>
 
                     <button type="submit" class="btn btn-indigo w-100 d-flex align-items-center justify-content-center gap-2" id="btn-send-test-email">
-                        <span>📤</span> Lancer l'Envoi de Test
+                        <i class="fa-solid fa-paper-plane me-1"></i>Lancer l'Envoi de Test
                     </button>
                 </form>
 
@@ -178,13 +178,13 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
         <div class="card border border-teal-subtle bg-teal-lt mb-3">
             <div class="card-body p-3">
                 <h4 class="text-teal fw-bold mb-1 d-flex align-items-center gap-2">
-                    <span>📢</span> Mailing List &amp; Diffusion Communautaire
+                    <i class="fa-solid fa-bullhorn text-warning me-1"></i>Mailing List &amp; Diffusion Communautaire
                 </h4>
                 <p class="small text-secondary mb-3" style="line-height: 1.5;">
                     Gérez les abonnés inscrits à la newsletter, filtrez par statut ou faction, et composez des missives groupées avec le gabarit officiel.
                 </p>
                 <a href="/?page=dev_team&tab=mailing" class="btn btn-sm btn-teal text-white w-100 d-flex align-items-center justify-content-center gap-1">
-                    <span>✉️</span> Accéder au Module Mailing List &rarr;
+                    <i class="fa-solid fa-envelope me-1"></i>Accéder au Module Mailing List &rarr;
                 </a>
             </div>
         </div>
@@ -193,7 +193,7 @@ $adminEmail = $adminUser['email'] ?? 'admin@domaine.local';
         <div class="card border border-info-subtle bg-info-lt">
             <div class="card-body p-3">
                 <h4 class="text-info fw-bold mb-1 d-flex align-items-center gap-2">
-                    <span>🛡️</span> Sécurité &amp; Conformité RFC
+                    <i class="fa-solid fa-shield-halved text-success me-1"></i>Sécurité &amp; Conformité RFC
                 </h4>
                 <p class="small text-secondary m-0" style="line-height: 1.5;">
                     Ce moteur implémente une communication SMTP native via sockets PHP sécurisés (RFC 5321 / 821) sans dépendre d'aucune bibliothèque externe lourde. Les mots de passe sont scellés par chiffrement <code>AES-256-CBC</code> et les jetons d'activation sont hachés en <code>SHA-256</code> en base de données.
@@ -238,12 +238,12 @@ async function handleSaveMailConfig(e) {
         const data = await res.json();
 
         alertBox.className = `alert alert-${data.success ? 'success' : 'danger'} alert-dismissible mb-3`;
-        alertText.innerHTML = data.success ? `✅ <strong>Succès :</strong> ${data.message}` : `❌ <strong>Erreur :</strong> ${data.error || 'Échec de la sauvegarde'}`;
+        alertText.innerHTML = data.success ? `<i class="fa-solid fa-circle-check text-success me-1"></i><strong>Succès :</strong> ${data.message}` : `<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || 'Échec de la sauvegarde'}`;
         alertBox.classList.remove('d-none');
 
     } catch (err) {
         alertBox.className = 'alert alert-danger alert-dismissible mb-3';
-        alertText.innerHTML = `❌ <strong>Erreur réseau :</strong> ${err.message}`;
+        alertText.innerHTML = `<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`;
         alertBox.classList.remove('d-none');
     } finally {
         btn.disabled = false;
@@ -263,7 +263,7 @@ async function handleSendTestEmail(e) {
 
     resBox.classList.remove('d-none', 'bg-success-lt', 'bg-danger-lt', 'text-success', 'text-danger');
     resBox.classList.add('bg-light', 'text-muted');
-    resBox.innerHTML = `⏳ Négociation du transporteur en cours vers ${targetEmail}...`;
+    resBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i>Négociation du transporteur en cours vers ${targetEmail}...`;
 
     try {
         const formData = new FormData();
@@ -280,15 +280,15 @@ async function handleSendTestEmail(e) {
         resBox.classList.remove('bg-light', 'text-muted');
         if (data.success) {
             resBox.classList.add('bg-success-lt', 'text-success');
-            resBox.innerHTML = `✔ <strong>Succès :</strong> ${data.message}`;
+            resBox.innerHTML = `<i class="fa-solid fa-circle-check text-success me-1"></i><strong>Succès :</strong> ${data.message}`;
         } else {
             resBox.classList.add('bg-danger-lt', 'text-danger');
-            resBox.innerHTML = `✗ <strong>Échec du test :</strong><br>${data.error || 'Erreur inconnue.'}`;
+            resBox.innerHTML = `<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Échec du test :</strong><br>${data.error || 'Erreur inconnue.'}`;
         }
     } catch (err) {
         resBox.classList.remove('bg-light', 'text-muted');
         resBox.classList.add('bg-danger-lt', 'text-danger');
-        resBox.innerHTML = `✗ <strong>Erreur réseau :</strong> ${err.message}`;
+        resBox.innerHTML = `<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`;
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;

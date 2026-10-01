@@ -30,9 +30,9 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="col">
             <div class="text-muted small">Cour Suprême du Shogunat &bull; Intendance Impériale</div>
             <h2 class="page-title d-flex align-items-center gap-2">
-                <span>👑</span> Les Privilèges du Shōgun (Sceau Impérial)
+                <i class="fa-solid fa-crown text-warning me-1"></i>Les Privilèges du Shōgun (Sceau Impérial)
                 <?php if ($isSealActive): ?>
-                    <span class="badge bg-warning text-dark fs-5 shadow-sm">👑 Sceau Actif</span>
+                    <span class="badge bg-warning text-dark fs-5 shadow-sm"><i class="fa-solid fa-crown me-1"></i>Sceau Actif</span>
                 <?php else: ?>
                     <span class="badge bg-secondary-lt fs-5">Régime Ordinaire</span>
                 <?php endif; ?>
@@ -41,10 +41,10 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="col-auto ms-auto">
             <div class="d-flex align-items-center gap-2">
                 <span class="badge bg-dark text-warning p-2 fs-5 border border-warning shadow-sm">
-                    🪙 <?= number_format($goldCoins) ?> Koban
+                    <i class="fa-solid fa-coins text-warning me-1"></i><?= number_format($goldCoins) ?> Koban
                 </span>
                 <a href="?page=empire" class="btn btn-outline-warning">
-                    👑 Grand Tableau de Bord
+                    <i class="fa-solid fa-crown text-warning me-1"></i>Grand Tableau de Bord
                 </a>
             </div>
         </div>
@@ -63,7 +63,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                         <span class="badge bg-warning text-dark fw-bold text-uppercase" style="letter-spacing:1px;">
                             <?= $isSealActive ? 'Investiture Active' : 'Sceau Inactif' ?>
                         </span>
-                        <span class="fs-1">👑</span>
+                        <i class="fa-solid fa-crown text-warning fs-1"></i>
                     </div>
                     <h3 class="card-title text-white fs-2 mb-2">
                         <?= $isSealActive ? 'Sceau Impérial en Vigueur' : 'Aucun Sceau Proclamé' ?>
@@ -100,7 +100,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="badge bg-warning-lt text-warning fw-bold text-uppercase">Monnaie du Shogunat</span>
-                        <span class="fs-1">🪙</span>
+                        <i class="fa-solid fa-coins text-warning fs-1"></i>
                     </div>
                     <h3 class="card-title text-dark fs-2 mb-1">
                         <?= number_format($goldCoins) ?> Koban
@@ -113,19 +113,19 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                 <div class="d-flex flex-column gap-2">
                     <div class="p-3 rounded bg-light border d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div>
-                            <strong class="d-block text-dark">🎁 Tribut Quotidien de Fidélité</strong>
+                            <strong class="d-block text-dark"><i class="fa-solid fa-gift text-danger me-1"></i>Tribut Quotidien de Fidélité</strong>
                             <span class="small text-muted">+5 Koban offerts chaque jour de connexion</span>
                         </div>
                         <?php if (!empty($sealStatus['can_claim_daily'])): ?>
                             <button type="button" class="btn btn-warning fw-bold shadow-sm" id="btnClaimDailyGold" onclick="claimDailyGold()">
-                                🪙 Réclamer mon Tribut (+5 Koban)
+                                <i class="fa-solid fa-coins text-warning me-1"></i>Réclamer mon Tribut (+5 Koban)
                             </button>
                         <?php else: ?>
-                            <span class="badge bg-success-lt p-2">✓ Tribut déjà perçu aujourd'hui</span>
+                            <span class="badge bg-success-lt p-2"><i class="fa-solid fa-check me-1"></i>Tribut déjà perçu aujourd'hui</span>
                         <?php endif; ?>
                     </div>
                     <div class="small text-muted italic text-center">
-                        🎖️ <strong>Exploits de Guerre :</strong> Chaque médaille d'honneur remportée vous rapporte <strong>+100 Koban</strong> !
+                        <i class="fa-solid fa-medal text-warning me-1"></i><strong>Exploits de Guerre :</strong> Chaque médaille d'honneur remportée vous rapporte <strong>+100 Koban</strong> !
                     </div>
                 </div>
             </div>
@@ -137,7 +137,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
 <div class="card mb-4 shadow-sm border" style="overflow: visible;">
     <div class="card-header bg-warning-subtle py-3">
         <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0">
-            <span>📜</span> Décréter ou Prolonger le Sceau Impérial
+            <i class="fa-solid fa-scroll text-warning me-1"></i>Décréter ou Prolonger le Sceau Impérial
         </h3>
         <div class="card-options text-muted small">Aucun paiement en argent réel requis</div>
     </div>
@@ -150,10 +150,10 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                     <div>
                         <div class="mb-3" style="min-height: 26px;">
                             <span class="badge bg-secondary-lt text-secondary fw-bold px-3 py-1" style="letter-spacing:0.5px; font-size:0.75rem;">
-                                ⛩️ DÉCOUVERTE &bull; SPRINT
+                                <i class="fa-solid fa-torii-gate text-primary me-1"></i>DÉCOUVERTE &bull; SPRINT
                             </span>
                         </div>
-                        <div class="fs-2 mb-1">⛩️</div>
+                        <div class="fs-2 mb-1"><i class="fa-solid fa-torii-gate text-primary"></i></div>
                         <div class="text-secondary small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Découverte</div>
                         <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">7 Jours</div>
                         <div class="fs-2 fw-bold text-warning mb-1">200 Koban</div>
@@ -166,19 +166,19 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                         <div class="p-3 rounded text-start small mb-3" style="background: rgba(0,0,0,0.02); border: 1px dashed rgba(0,0,0,0.1);">
                             <div class="text-dark fw-bold mb-2 small text-uppercase" style="font-size:0.7rem; color:#64748b;">Avantages garantis :</div>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span>File de construction <strong>4 chantiers</strong></span>
                             </div>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span><strong>Carnet de Raids</strong> illimité en 1 clic</span>
                             </div>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span><strong>Troc de Marché 1:1:1</strong> débloqué</span>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span>Ordre de <strong>Repli Samouraï</strong></span>
                             </div>
                         </div>
@@ -186,7 +186,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
 
                     <div class="pt-2">
                         <button type="button" class="btn btn-outline-warning w-100 fw-bold py-2 shadow-sm" onclick="activateSeal(7)">
-                            👑 Proclamer pour 7 Jours
+                            <i class="fa-solid fa-crown text-warning me-1"></i>Proclamer pour 7 Jours
                         </button>
                     </div>
                 </div>
@@ -199,10 +199,10 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                     <div>
                         <div class="mb-3" style="min-height: 26px;">
                             <span class="badge bg-warning text-dark fw-bold px-3 py-1 shadow-sm" style="letter-spacing:0.5px; font-size:0.75rem;">
-                                ⭐ ÉCONOMIE -10% &bull; RECOMMANDÉ
+                                <i class="fa-solid fa-star text-warning me-1"></i>ÉCONOMIE -10% &bull; RECOMMANDÉ
                             </span>
                         </div>
-                        <div class="fs-2 mb-1">🏯</div>
+                        <div class="fs-2 mb-1"><i class="fa-solid fa-chess-rook text-danger"></i></div>
                         <div class="text-warning small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Royale</div>
                         <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">14 Jours</div>
                         <div class="fs-2 fw-bold text-warning mb-1">360 Koban</div>
@@ -215,19 +215,19 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                         <div class="p-3 rounded text-start small mb-3" style="background: rgba(245,158,11,0.06); border: 1px dashed rgba(245,158,11,0.3);">
                             <div class="text-dark fw-bold mb-2 small text-uppercase" style="font-size:0.7rem; color:#b45309;">Avantages garantis :</div>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span>File de construction <strong>4 chantiers</strong></span>
                             </div>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span><strong>Carnet de Raids</strong> illimité en 1 clic</span>
                             </div>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span><strong>Troc de Marché 1:1:1</strong> débloqué</span>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span>Ordre de <strong>Repli Samouraï</strong></span>
                             </div>
                         </div>
@@ -235,7 +235,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
 
                     <div class="pt-2">
                         <button type="button" class="btn btn-warning w-100 fw-bold py-2 shadow" onclick="activateSeal(14)">
-                            👑 Proclamer pour 14 Jours
+                            <i class="fa-solid fa-crown text-warning me-1"></i>Proclamer pour 14 Jours
                         </button>
                     </div>
                 </div>
@@ -248,10 +248,10 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                     <div>
                         <div class="mb-3" style="min-height: 26px;">
                             <span class="badge bg-purple text-white fw-bold px-3 py-1 shadow-sm" style="letter-spacing:0.5px; font-size:0.75rem;">
-                                👑 PRESTIGE &bull; -25% D'OR
+                                <i class="fa-solid fa-crown text-warning me-1"></i>PRESTIGE &bull; -25% D'OR
                             </span>
                         </div>
-                        <div class="fs-2 mb-1">👑</div>
+                        <div class="fs-2 mb-1"><i class="fa-solid fa-crown text-warning"></i></div>
                         <div class="text-purple small fw-bold text-uppercase" style="letter-spacing:0.5px;">Investiture Mensuelle</div>
                         <div class="fs-1 fw-bold text-dark my-2" style="font-size:2.2rem !important;">30 Jours</div>
                         <div class="fs-2 fw-bold text-warning mb-1">600 Koban</div>
@@ -264,19 +264,19 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                         <div class="p-3 rounded text-start small mb-3" style="background: rgba(107,33,168,0.04); border: 1px dashed rgba(107,33,168,0.25);">
                             <div class="text-dark fw-bold mb-2 small text-uppercase" style="font-size:0.7rem; color:#6b21a8;">Avantages garantis :</div>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span>File de construction <strong>4 chantiers</strong></span>
                             </div>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span><strong>Carnet de Raids</strong> illimité en 1 clic</span>
                             </div>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span><strong>Troc de Marché 1:1:1</strong> débloqué</span>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="text-success fw-bold">✓</span>
+                                <i class="fa-solid fa-check text-success"></i>
                                 <span>Ordre de <strong>Repli Samouraï</strong></span>
                             </div>
                         </div>
@@ -284,7 +284,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
 
                     <div class="pt-2">
                         <button type="button" class="btn btn-outline-warning w-100 fw-bold py-2 shadow-sm" onclick="activateSeal(30)">
-                            👑 Proclamer pour 30 Jours
+                            <i class="fa-solid fa-crown text-warning me-1"></i>Proclamer pour 30 Jours
                         </button>
                     </div>
                 </div>
@@ -296,7 +296,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
 <!-- ================= PRÉSENTATION DES 8 GRANDS PRIVILÈGES IMPÉRIAUX ================= -->
 <div class="mb-4">
     <h3 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-        <span>⭐</span> Guide des 8 Grands Privilèges du Shōgun
+        <i class="fa-solid fa-star text-warning me-1"></i>Guide des 8 Grands Privilèges du Shōgun
     </h3>
 
     <div class="row g-3">
@@ -304,7 +304,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #3b82f6 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="fs-1">🔨</span>
+                    <i class="fa-solid fa-hammer text-primary fs-1"></i>
                     <div>
                         <h4 class="m-0 text-dark fw-bold">1. Architecte de Cour</h4>
                         <span class="badge bg-blue-lt">File Étendue (x4)</span>
@@ -315,7 +315,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                 </p>
                 <div class="mt-auto">
                     <a href="?page=city" class="btn btn-sm btn-outline-primary w-100">
-                        🏯 Gérer les Bâtisseurs &rarr;
+                        <i class="fa-solid fa-chess-rook text-danger me-1"></i>Gérer les Bâtisseurs &rarr;
                     </a>
                 </div>
             </div>
@@ -325,18 +325,18 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #166534 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="fs-1">🍶</span>
+                    <i class="fa-solid fa-wine-bottle text-danger fs-1"></i>
                     <div>
                         <h4 class="m-0 text-dark fw-bold">2. Raffinage Sakagura</h4>
                         <span class="badge bg-success-lt">File x4 Commandes</span>
                     </div>
                 </div>
                 <p class="text-secondary small mb-3" style="line-height:1.55;">
-                    Programmez jusqu'à <strong>4 commandes en chaîne</strong> dans votre Meunerie (Farine de Riz 🍚 et Saké 🍶). Les cuves et meules s'enchaînent jour et nuit sans interruption !
+                    Programmez jusqu'à <strong>4 commandes en chaîne</strong> dans votre Meunerie (Farine de Riz <i class="fa-solid fa-bowl-rice text-warning"></i> et Saké <i class="fa-solid fa-wine-bottle text-danger"></i>). Les cuves et meules s'enchaînent jour et nuit sans interruption !
                 </p>
                 <div class="mt-auto">
                     <a href="?page=building&slot=31" class="btn btn-sm btn-outline-success w-100">
-                        🍶 Ouvrir la Meunerie &rarr;
+                        <i class="fa-solid fa-wine-bottle text-danger me-1"></i>Ouvrir la Meunerie &rarr;
                     </a>
                 </div>
             </div>
@@ -346,18 +346,18 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #0891b2 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="fs-1">🛣️</span>
+                    <i class="fa-solid fa-route text-primary fs-1"></i>
                     <div>
                         <h4 class="m-0 text-dark fw-bold">3. Routes Commerciales</h4>
                         <span class="badge bg-cyan-lt">Convois Autonomes</span>
                     </div>
                 </div>
                 <p class="text-secondary small mb-3" style="line-height:1.55;">
-                    Automatisez les livraisons régulières de Bois 🪵, Pierre 🪨 et Riz 🌾 entre vos fiefs. Vos convois partent à heure fixe sans action manuelle requise !
+                    Automatisez les livraisons régulières de Bois <i class="fa-solid fa-tree text-success"></i>, Pierre <i class="fa-solid fa-mountain text-secondary"></i> et Riz <i class="fa-solid fa-wheat-awn text-warning"></i> entre vos fiefs. Vos convois partent à heure fixe sans action manuelle requise !
                 </p>
                 <div class="mt-auto">
                     <a href="#sectionTradeRoutes" class="btn btn-sm btn-outline-cyan w-100">
-                        🛣️ Gérer les Routes &darr;
+                        <i class="fa-solid fa-route text-primary me-1"></i>Gérer les Routes &darr;
                     </a>
                 </div>
             </div>
@@ -367,7 +367,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #f59e0b !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="fs-1">👑</span>
+                    <i class="fa-solid fa-crown text-warning fs-1"></i>
                     <div>
                         <h4 class="m-0 text-dark fw-bold">4. Tableau Impérial</h4>
                         <span class="badge bg-warning-lt">Multi-Fiefs</span>
@@ -378,7 +378,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                 </p>
                 <div class="mt-auto">
                     <a href="?page=empire" class="btn btn-sm btn-outline-warning w-100">
-                        👑 Consulter l'Empire &rarr;
+                        <i class="fa-solid fa-crown text-warning me-1"></i>Consulter l'Empire &rarr;
                     </a>
                 </div>
             </div>
@@ -388,7 +388,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #10b981 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="fs-1">📜</span>
+                    <i class="fa-solid fa-scroll text-warning fs-1"></i>
                     <div>
                         <h4 class="m-0 text-dark fw-bold">5. Carnet de Raids</h4>
                         <span class="badge bg-success-lt">Attaque en 1 Clic</span>
@@ -399,7 +399,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                 </p>
                 <div class="mt-auto">
                     <a href="?page=fleet#tab-farm-lists" class="btn btn-sm btn-outline-success w-100">
-                        ⚔️ Ouvrir le Carnet &rarr;
+                        <i class="fa-solid fa-khanda text-danger me-1"></i>Ouvrir le Carnet &rarr;
                     </a>
                 </div>
             </div>
@@ -409,7 +409,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #8b5cf6 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="fs-1">⚖️</span>
+                    <i class="fa-solid fa-scale-balanced text-warning fs-1"></i>
                     <div>
                         <h4 class="m-0 text-dark fw-bold">6. Intendant du Marché</h4>
                         <span class="badge bg-purple-lt">Troc 1:1:1 Immédiat</span>
@@ -421,7 +421,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                 <div class="mt-auto">
                     <button type="button" class="btn btn-sm btn-outline-purple w-100" 
                             onclick="openNpcExchangeModal(<?= $planet['id'] ?>, '<?= htmlspecialchars(addslashes($planet['name'])) ?>', <?= (int)$planet['metal'] ?>, <?= (int)$planet['crystal'] ?>, <?= (int)$planet['deuterium'] ?>, <?= (int)$planet['metal_max'] ?>, <?= (int)$planet['crystal_max'] ?>, <?= (int)$planet['deuterium_max'] ?>)">
-                        ⚖️ Troc Rapide &rarr;
+                        <i class="fa-solid fa-scale-balanced text-warning me-1"></i>Troc Rapide &rarr;
                     </button>
                 </div>
             </div>
@@ -431,7 +431,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #ef4444 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="fs-1">⛩️</span>
+                    <i class="fa-solid fa-torii-gate text-primary fs-1"></i>
                     <div>
                         <h4 class="m-0 text-dark fw-bold">7. Repli Tactique</h4>
                         <span class="badge bg-danger-lt">Évasion Nocturne</span>
@@ -442,7 +442,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                 </p>
                 <div class="mt-auto">
                     <a href="?page=empire#tab-evasion" class="btn btn-sm btn-outline-danger w-100">
-                        🛡️ Configurer le Repli &rarr;
+                        <i class="fa-solid fa-shield-halved text-success me-1"></i>Configurer le Repli &rarr;
                     </a>
                 </div>
             </div>
@@ -452,7 +452,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="col-md-6 col-lg-3">
             <div class="card h-100 border p-3" style="border-left: 4px solid #d97706 !important;">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="fs-1">🎖️</span>
+                    <i class="fa-solid fa-medal text-warning fs-1"></i>
                     <div>
                         <h4 class="m-0 text-dark fw-bold">8. Médailles d'Honneur</h4>
                         <span class="badge bg-warning-lt">+100 Koban / Médaille</span>
@@ -463,7 +463,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                 </p>
                 <div class="mt-auto">
                     <a href="?page=ranking" class="btn btn-sm btn-outline-warning w-100">
-                        🏆 Voir le Classement &rarr;
+                        <i class="fa-solid fa-trophy text-warning me-1"></i>Voir le Classement &rarr;
                     </a>
                 </div>
             </div>
@@ -476,7 +476,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
     <div class="card-header bg-cyan-subtle py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0">
-                <span>🛣️</span> Routes Commerciales &amp; Convois Féodaux Automatisés
+                <i class="fa-solid fa-route text-primary me-1"></i>Routes Commerciales &amp; Convois Féodaux Automatisés
             </h3>
             <div class="text-secondary small mt-1">
                 Programmez des rotations logistiques régulières entre vos fiefs sans aucune intervention manuelle.
@@ -485,11 +485,11 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="d-flex align-items-center gap-2">
             <?php if ($isSealActive): ?>
                 <button type="button" class="btn btn-cyan text-white fw-bold shadow-sm" onclick="openCreateTradeRouteModal()">
-                    ➕ Établir une Route Commerciale
+                    <i class="fa-solid fa-plus me-1"></i>Établir une Route Commerciale
                 </button>
             <?php else: ?>
                 <a href="#decretSection" class="btn btn-outline-secondary fw-bold" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                    👑 Sceau Impérial Requis
+                    <i class="fa-solid fa-crown text-warning me-1"></i>Sceau Impérial Requis
                 </a>
             <?php endif; ?>
         </div>
@@ -498,7 +498,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <?php if (!$isSealActive): ?>
             <div class="alert alert-warning mb-0 p-3 border-warning">
                 <div class="d-flex align-items-center gap-3">
-                    <span class="fs-1">👑</span>
+                    <i class="fa-solid fa-crown text-warning fs-1"></i>
                     <div>
                         <h4 class="m-0 fw-bold text-dark">Privilège Exclusif du Sceau Impérial</h4>
                         <div class="text-secondary small mt-1">
@@ -509,13 +509,13 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
             </div>
         <?php elseif (empty($tradeRoutes)): ?>
             <div class="text-center py-5 text-muted">
-                <div class="fs-1 mb-2">🛣️</div>
+                <div class="fs-1 mb-2"><i class="fa-solid fa-route text-primary"></i></div>
                 <h4 class="text-dark fw-bold mb-1">Aucune Route Commerciale Active</h4>
                 <p class="small text-secondary mb-3" style="max-width: 500px; margin: 0 auto;">
                     Vous n'avez pas encore défini de route de ravitaillement automatique entre vos fiefs. Cliquez sur le bouton ci-dessous pour planifier votre premier convoi récurrent.
                 </p>
                 <button type="button" class="btn btn-outline-cyan fw-bold" onclick="openCreateTradeRouteModal()">
-                    ➕ Définir ma première route commerciale
+                    <i class="fa-solid fa-plus me-1"></i>Définir ma première route commerciale
                 </button>
             </div>
         <?php else: ?>
@@ -539,14 +539,14 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                                 <div class="d-flex align-items-center gap-2">
                                     <div>
                                         <a href="?page=overview&planet=<?= $tr['source_planet_id'] ?>" class="fw-bold text-dark">
-                                            🏯 <?= htmlspecialchars($tr['source_name']) ?>
+                                            <i class="fa-solid fa-chess-rook text-danger me-1"></i><?= htmlspecialchars($tr['source_name']) ?>
                                         </a>
                                         <div class="text-muted" style="font-size:0.75rem;">(<?= $tr['source_x'] ?>|<?= $tr['source_y'] ?>)</div>
                                     </div>
                                     <span class="text-muted fs-4">&rarr;</span>
                                     <div>
                                         <a href="?page=overview&planet=<?= $tr['target_planet_id'] ?>" class="fw-bold text-primary">
-                                            🏯 <?= htmlspecialchars($tr['target_name']) ?>
+                                            <i class="fa-solid fa-chess-rook text-danger me-1"></i><?= htmlspecialchars($tr['target_name']) ?>
                                         </a>
                                         <div class="text-muted" style="font-size:0.75rem;">(<?= $tr['target_x'] ?>|<?= $tr['target_y'] ?>)</div>
                                     </div>
@@ -555,20 +555,20 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                             <td>
                                 <div class="d-flex align-items-center gap-2 flex-wrap" style="font-size:0.85rem;">
                                     <?php if ($tr['wood'] > 0): ?>
-                                        <span class="badge bg-light text-dark border">🪵 <?= number_format($tr['wood']) ?></span>
+                                        <span class="badge bg-light text-dark border"><i class="fa-solid fa-tree text-success me-1"></i><?= number_format($tr['wood']) ?></span>
                                     <?php endif; ?>
                                     <?php if ($tr['stone'] > 0): ?>
-                                        <span class="badge bg-light text-dark border">🪨 <?= number_format($tr['stone']) ?></span>
+                                        <span class="badge bg-light text-dark border"><i class="fa-solid fa-mountain text-secondary me-1"></i><?= number_format($tr['stone']) ?></span>
                                     <?php endif; ?>
                                     <?php if ($tr['rice'] > 0): ?>
-                                        <span class="badge bg-light text-dark border">🌾 <?= number_format($tr['rice']) ?></span>
+                                        <span class="badge bg-light text-dark border"><i class="fa-solid fa-wheat-awn text-warning me-1"></i><?= number_format($tr['rice']) ?></span>
                                     <?php endif; ?>
                                     <span class="text-muted" style="font-size:0.75rem;">(Total : <?= number_format($tr['total_cargo']) ?>)</span>
                                 </div>
                             </td>
                             <td>
                                 <span class="badge bg-cyan-lt fw-bold">
-                                    ⏱️ Toutes les <?= $tr['interval_hours'] ?>h
+                                    <i class="fa-solid fa-stopwatch text-info me-1"></i>Toutes les <?= $tr['interval_hours'] ?>h
                                 </span>
                             </td>
                             <td>
@@ -576,7 +576,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                                     <span class="badge bg-secondary-lt">En pause</span>
                                 <?php elseif ($tr['is_due']): ?>
                                     <span class="badge bg-warning text-dark font-monospace animate-pulse">
-                                        ⚡ Échu (convoi imminent)
+                                        <i class="fa-solid fa-bolt text-warning me-1"></i>Échu (convoi imminent)
                                     </span>
                                 <?php else: ?>
                                     <span class="font-monospace text-dark fw-bold small" data-countdown="<?= strtotime($tr['next_run_at']) ?>">
@@ -586,7 +586,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                             </td>
                             <td>
                                 <span class="badge bg-light text-dark border">
-                                    📦 <?= (int)$tr['deliveries_count'] ?> convois
+                                    <i class="fa-solid fa-box text-secondary me-1"></i><?= (int)$tr['deliveries_count'] ?> convois
                                 </span>
                             </td>
                             <td>
@@ -602,13 +602,13 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
                                     <button type="button" class="btn btn-outline-primary" onclick="executeTradeRouteNow(<?= $tr['id'] ?>)" title="Expédier immédiatement un convoi">
-                                        🚀 Expédier
+                                        <i class="fa-solid fa-paper-plane me-1"></i>Expédier
                                     </button>
                                     <button type="button" class="btn btn-outline-secondary" onclick="toggleTradeRoute(<?= $tr['id'] ?>)" title="<?= $tr['is_active'] ? 'Mettre en pause' : 'Réactiver' ?>">
-                                        <?= $tr['is_active'] ? '⏸️' : '▶️' ?>
+                                        <?= $tr['is_active'] ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>' ?>
                                     </button>
                                     <button type="button" class="btn btn-outline-danger" onclick="deleteTradeRoute(<?= $tr['id'] ?>)" title="Supprimer la route">
-                                        🗑️
+                                        <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
                             </td>
@@ -627,7 +627,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="modal-content">
             <div class="modal-header bg-cyan-subtle">
                 <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                    <span>🛣️</span> Établir une Route Commerciale Féodale
+                    <i class="fa-solid fa-route text-primary me-1"></i>Établir une Route Commerciale Féodale
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -663,15 +663,15 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                     <label class="form-label fw-bold text-dark small mb-2">Chargement par expédition :</label>
                     <div class="row g-2">
                         <div class="col-4">
-                            <label class="form-label small text-muted mb-1">🪵 Bois</label>
+                            <label class="form-label small text-muted mb-1"><i class="fa-solid fa-tree text-success me-1"></i>Bois</label>
                             <input type="number" id="tr_wood" class="form-control text-center fw-bold" value="1000" min="0" step="500">
                         </div>
                         <div class="col-4">
-                            <label class="form-label small text-muted mb-1">🪨 Pierre</label>
+                            <label class="form-label small text-muted mb-1"><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre</label>
                             <input type="number" id="tr_stone" class="form-control text-center fw-bold" value="1000" min="0" step="500">
                         </div>
                         <div class="col-4">
-                            <label class="form-label small text-muted mb-1">🌾 Riz</label>
+                            <label class="form-label small text-muted mb-1"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz</label>
                             <input type="number" id="tr_rice" class="form-control text-center fw-bold" value="1000" min="0" step="500">
                         </div>
                     </div>
@@ -700,13 +700,13 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                 </div>
 
                 <div class="alert alert-info py-2 px-3 small mb-0">
-                    ℹ️ <strong>Règle Féodale :</strong> Le fief d'expédition doit posséder un <strong>Marché Castral</strong> (Niveau 1+) et les transporteurs requis en garnison lors du passage horaire.
+                    <i class="fa-solid fa-circle-info text-info me-1"></i><strong>Règle Féodale :</strong> Le fief d'expédition doit posséder un <strong>Marché Castral</strong> (Niveau 1+) et les transporteurs requis en garnison lors du passage horaire.
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
                 <button type="button" class="btn btn-cyan text-white fw-bold" id="btnSubmitCreateTradeRoute" onclick="submitCreateTradeRoute()">
-                    🛣️ Déployer la Route Commerciale
+                    <i class="fa-solid fa-route text-light me-1"></i>Déployer la Route Commerciale
                 </button>
             </div>
         </div>
@@ -719,13 +719,13 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
         <div class="modal-content">
             <div class="modal-header bg-warning-subtle">
                 <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                    <span>⚖️</span> Intendant du Marché Castral
+                    <i class="fa-solid fa-scale-balanced text-warning me-1"></i>Intendant du Marché Castral
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="text-secondary small mb-3">
-                    L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au taux parfait de <strong>1:1:1</strong> pour un tribut de <strong>3 Koban 🪙</strong>.
+                    L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au taux parfait de <strong>1:1:1</strong> pour un tribut de <strong>3 Koban <i class="fa-solid fa-coins text-warning"></i></strong>.
                 </div>
 
                 <div class="p-2 bg-light border rounded mb-3 text-center">
@@ -739,7 +739,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
 
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span>🪵 Bois de Cèdre :</span>
+                        <span><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre :</span>
                         <span id="npc_wood_val" class="font-monospace text-primary">0</span>
                     </label>
                     <input type="range" class="form-range" id="npc_range_wood" oninput="onNpcRangeChange('wood')">
@@ -748,7 +748,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
 
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span>🪨 Pierre de Taille :</span>
+                        <span><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille :</span>
                         <span id="npc_stone_val" class="font-monospace text-primary">0</span>
                     </label>
                     <input type="range" class="form-range" id="npc_range_stone" oninput="onNpcRangeChange('stone')">
@@ -757,7 +757,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
 
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span>🌾 Riz Impérial :</span>
+                        <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial :</span>
                         <span id="npc_rice_val" class="font-monospace text-primary">0</span>
                     </label>
                     <input type="range" class="form-range" id="npc_range_rice" oninput="onNpcRangeChange('rice')">
@@ -766,7 +766,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
 
                 <div class="d-flex gap-2 mb-2">
                     <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="distributeEvenly()">
-                        ⚖️ Répartir Équitablement (1/3 chacun)
+                        <i class="fa-solid fa-scale-balanced text-warning me-1"></i>Répartir Équitablement (1/3 chacun)
                     </button>
                 </div>
 
@@ -779,7 +779,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="button" class="btn btn-warning fw-bold" id="btnSubmitNpcExchange" onclick="submitNpcExchange()">
-                        🪙 Sceller le Troc (3 Koban)
+                        <i class="fa-solid fa-coins text-warning me-1"></i>Sceller le Troc (3 Koban)
                     </button>
                 </div>
             </div>

@@ -10,7 +10,7 @@
         <!-- En-tête de la modale -->
         <div class="ai-modal-header">
             <div class="ai-modal-header-title">
-                <span class="ai-modal-sparkle">✨</span>
+                <span class="ai-modal-sparkle"><i class="fa-solid fa-sparkles text-warning"></i></span>
                 <h3 id="aiModalTitle" class="ai-modal-title">Détails de Génération IA</h3>
             </div>
             <button type="button" class="ai-modal-close-btn" id="aiModalCloseBtn" aria-label="Fermer la fenêtre">
@@ -28,9 +28,9 @@
             <!-- 2. Bloc Prompt Original en Anglais -->
             <div class="ai-prompt-block">
                 <div class="ai-prompt-block-header">
-                    <span class="ai-prompt-lang-badge">🇬🇧 Prompt Original (English)</span>
+                    <span class="ai-prompt-lang-badge"><i class="fa-solid fa-language me-1"></i>Prompt Original (English)</span>
                     <button type="button" class="ai-copy-btn" id="aiCopyPromptBtn" title="Copier le prompt">
-                        📋 Copier
+                        <i class="fa-solid fa-clipboard me-1"></i>Copier
                     </button>
                 </div>
                 <div class="ai-prompt-code" id="aiModalPrompt"></div>
@@ -39,7 +39,7 @@
             <!-- 3. Bloc Traduction Française -->
             <div class="ai-prompt-block ai-prompt-block-fr">
                 <div class="ai-prompt-block-header">
-                    <span class="ai-prompt-lang-badge ai-badge-fr">🇫🇷 Traduction en Français</span>
+                    <span class="ai-prompt-lang-badge ai-badge-fr"><i class="fa-solid fa-language me-1"></i>Traduction en Français</span>
                 </div>
                 <div class="ai-prompt-translation" id="aiModalTranslation"></div>
             </div>
@@ -48,7 +48,7 @@
         <!-- Pied de modale : Mention légale obligatoire -->
         <div class="ai-modal-footer">
             <div class="ai-modal-disclaimer">
-                <span class="ai-gemini-icon">✦</span>
+                <i class="fa-solid fa-wand-magic-sparkles text-info me-1"></i>
                 <span class="ai-disclaimer-text">
                     Cette image a été générée par l'intelligence artificielle Gemini de Google.
                 </span>

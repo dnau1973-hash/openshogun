@@ -59,7 +59,7 @@ $resourceBuildings = [
     'metal_mine' => [
         'name' => 'Camp de Bûcherons',
         'sub' => 'Exploitation Forestière (Bois)',
-        'icon' => '🪵',
+        'icon' => '<i class="fa-solid fa-tree text-success"></i>',
         'sprite' => 'tile_bucheron.png',
         'desc' => 'Défrichage et abattage sylvicole. Fournit le bois indispensable à toutes les charpentes et armes féodales.',
         'details' => $buildingEngine->getUpgradeDetails('field', 'metal_mine', 0, $hqLevel)
@@ -67,7 +67,7 @@ $resourceBuildings = [
     'crystal_mine' => [
         'name' => 'Carrière de Granit',
         'sub' => 'Extraction Minérale (Pierre)',
-        'icon' => '🪨',
+        'icon' => '<i class="fa-solid fa-mountain text-secondary"></i>',
         'sprite' => 'tile_carriere.png',
         'desc' => 'Carrières à ciel ouvert taillant la pierre pour bâtir donjons, remparts, tours et murailles de forteresse.',
         'details' => $buildingEngine->getUpgradeDetails('field', 'crystal_mine', 0, $hqLevel)
@@ -75,7 +75,7 @@ $resourceBuildings = [
     'deuterium_synth' => [
         'name' => 'Terrasses Rizicoles',
         'sub' => 'Culture du Riz Inondé (Riz)',
-        'icon' => '🌾',
+        'icon' => '<i class="fa-solid fa-wheat-awn text-warning"></i>',
         'sprite' => 'tile_riziere.png',
         'desc' => 'Bassins étagés et canaux d\'irrigation produisant le riz (Koku) pour nourrir paysans et armées de samouraïs.',
         'details' => $buildingEngine->getUpgradeDetails('field', 'deuterium_synth', 0, $hqLevel)
@@ -83,7 +83,7 @@ $resourceBuildings = [
     'solar_plant' => [
         'name' => 'Sanctuaire d\'Inari',
         'sub' => 'Temple Sacré & Torii (Énergie)',
-        'icon' => '⛩️',
+        'icon' => '<i class="fa-solid fa-torii-gate text-danger"></i>',
         'sprite' => 'tile_sanctuaire.png',
         'desc' => 'Pavillon sacré avec portiques Torii apportant sérénité et énergie spirituelle pour maximiser le rendement du domaine.',
         'details' => $buildingEngine->getUpgradeDetails('field', 'solar_plant', 0, $hqLevel)
@@ -173,10 +173,10 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
     <div class="card">
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
             <div>
-                <h2 class="card-title">🌾 Terroir Agricole & Domaines Ruraux - <?= htmlspecialchars($planet['name']) ?></h2>
+                <h2 class="card-title"><i class="fa-solid fa-wheat-awn text-warning me-2"></i>Terroir Agricole & Domaines Ruraux - <?= htmlspecialchars($planet['name']) ?></h2>
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
                     Terroir : <strong style="color:var(--border-highlight, #dc2626);"><?= $terroir['icon'] ?> <?= htmlspecialchars($terroir['name']) ?></strong>
-                    <span style="opacity:0.85;">(<?= $fieldCounts['metal_mine'] ?> 🪵 Bois, <?= $fieldCounts['crystal_mine'] ?> 🪨 Pierre, <?= $fieldCounts['deuterium_synth'] ?> 🌾 Riz, <?= $fieldCounts['solar_plant'] ?> ⛩️ Sanctuaires)</span>
+                    <span style="opacity:0.85;">(<?= $fieldCounts['metal_mine'] ?> <i class="fa-solid fa-tree text-success"></i> Bois, <?= $fieldCounts['crystal_mine'] ?> <i class="fa-solid fa-mountain text-secondary"></i> Pierre, <?= $fieldCounts['deuterium_synth'] ?> <i class="fa-solid fa-wheat-awn text-warning"></i> Riz, <?= $fieldCounts['solar_plant'] ?> <i class="fa-solid fa-torii-gate text-danger"></i> Sanctuaires)</span>
                 </div>
             </div>
             <a href="?page=city" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">Aller à la Cité Castrale &rarr;</a>
@@ -184,12 +184,12 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
         <div class="card-body">
             <!-- Barre de sélection et filtres tactiques des secteurs -->
             <div class="rts-sector-bar">
-                <button class="sector-btn active" id="btn-sec-all" onclick="filterSector('all')">🌐 Vue Globale</button>
-                <button class="sector-btn filter-metal" id="btn-sec-metal_mine" onclick="filterSector('metal_mine')">🪵 Bûcherons (<?= $fieldCounts['metal_mine'] ?>)</button>
-                <button class="sector-btn filter-crystal" id="btn-sec-crystal_mine" onclick="filterSector('crystal_mine')">🪨 Carrières (<?= $fieldCounts['crystal_mine'] ?>)</button>
-                <button class="sector-btn filter-deut" id="btn-sec-deuterium_synth" onclick="filterSector('deuterium_synth')">🌾 Rizières (<?= $fieldCounts['deuterium_synth'] ?>)</button>
-                <button class="sector-btn filter-energy" id="btn-sec-solar_plant" onclick="filterSector('solar_plant')">⛩️ Sanctuaires (<?= $fieldCounts['solar_plant'] ?>)</button>
-                <button class="sector-btn filter-hq" id="btn-sec-hq" onclick="filterSector('hq')">🏯 Tenshu Donjon (Centre)</button>
+                <button class="sector-btn active" id="btn-sec-all" onclick="filterSector('all')"><i class="fa-solid fa-globe me-1"></i> Vue Globale</button>
+                <button class="sector-btn filter-metal" id="btn-sec-metal_mine" onclick="filterSector('metal_mine')"><i class="fa-solid fa-tree text-success me-1"></i> Bûcherons (<?= $fieldCounts['metal_mine'] ?>)</button>
+                <button class="sector-btn filter-crystal" id="btn-sec-crystal_mine" onclick="filterSector('crystal_mine')"><i class="fa-solid fa-mountain text-secondary me-1"></i> Carrières (<?= $fieldCounts['crystal_mine'] ?>)</button>
+                <button class="sector-btn filter-deut" id="btn-sec-deuterium_synth" onclick="filterSector('deuterium_synth')"><i class="fa-solid fa-wheat-awn text-warning me-1"></i> Rizières (<?= $fieldCounts['deuterium_synth'] ?>)</button>
+                <button class="sector-btn filter-energy" id="btn-sec-solar_plant" onclick="filterSector('solar_plant')"><i class="fa-solid fa-torii-gate text-danger me-1"></i> Sanctuaires (<?= $fieldCounts['solar_plant'] ?>)</button>
+                <button class="sector-btn filter-hq" id="btn-sec-hq" onclick="filterSector('hq')"><i class="fa-solid fa-chess-rook text-danger me-1"></i> Tenshu Donjon (Centre)</button>
             </div>
 
             <!-- Viewport RTS de la Surface Rurale -->
@@ -197,7 +197,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                 <!-- Tenshu & Donjon Central (Centre Cité) -->
                 <div class="rts-hotspot sector-hq hotspot-bunker-hq"
                      data-sector="hq"
-                     title="🏯 Tenshu Donjon & Cité Castrale (Niveau <?= $hqLevel ?>)"
+                     title="Tenshu Donjon &amp; Cité Castrale (Niveau <?= $hqLevel ?>)"
                      onclick="window.location.href='?page=city'">
                     <div class="rts-level-bubble rts-tenshu-bubble" title="Tenshu (Niveau <?= $hqLevel ?>)">
                         <?= $hqLevel ?>
@@ -225,9 +225,9 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                             <?php if ($lvl === 0 && !$isUpgrading && !$isDemolishing): ?>
                                 +
                             <?php elseif ($isDemolishing): ?>
-                                <span class="bubble-pulse">🗑️</span>
+                                <span class="bubble-pulse"><i class="fa-solid fa-trash-can"></i></span>
                             <?php elseif ($isUpgrading): ?>
-                                <span class="bubble-pulse">⏳</span>
+                                <span class="bubble-pulse"><i class="fa-solid fa-hourglass-half"></i></span>
                             <?php else: ?>
                                 <?= $lvl ?>
                             <?php endif; ?>
@@ -237,7 +237,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
             </div>
 
             <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted); text-align:center;">
-                💡 <strong>Gestion du Terroir Féodal :</strong> Cliquez sur une exploitation existante ou un emplacement rural (Niv. 0) pour l'élever, ou sur le Tenshu central pour visiter votre cité castrale.
+                <i class="fa-solid fa-lightbulb text-warning me-1"></i> <strong>Gestion du Terroir Féodal :</strong> Cliquez sur une exploitation existante ou un emplacement rural (Niv. 0) pour l'élever, ou sur le Tenshu central pour visiter votre cité castrale.
             </p>
         </div>
     </div>
@@ -250,7 +250,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
         <!-- File de Construction Active -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">🏗️ Chantiers du Domaine</h3>
+                <h3 class="card-title"><i class="fa-solid fa-trowel-bricks me-2 text-warning"></i>Chantiers du Domaine</h3>
             </div>
             <div class="card-body">
                 <?php if (empty($queue)): ?>
@@ -278,7 +278,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                                 <div class="queue-info">
                                     <h4 class="mb-0 fw-bold" style="font-size:0.9rem;"><?= htmlspecialchars($name) ?></h4>
                                     <?php if ($isDemolish): ?>
-                                        <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;">🗑️ Démantèlement</span>
+                                        <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;"><i class="fa-solid fa-trash-can me-1"></i>Démantèlement</span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary-lt" style="font-size:0.7rem;">Niveau <?= $q['target_level'] ?></span>
                                     <?php endif; ?>
@@ -312,12 +312,12 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
         <!-- Récapitulatif de la Production -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">📊 Récoltes & Sérénité</h3>
+                <h3 class="card-title"><i class="fa-solid fa-chart-column me-2 text-primary"></i>Récoltes & Sérénité</h3>
             </div>
             <div class="card-body" style="font-size:0.9rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
                     <span>
-                        🪵 Bois de Cèdre :
+                        <i class="fa-solid fa-tree text-success me-1"></i> Bois de Cèdre :
                         <?php if (!empty($oasisBonuses['wood'])): ?>
                             <small style="color:#4ade80; font-size:0.75rem;">(+<?= $oasisBonuses['wood'] ?>% Oasis)</small>
                         <?php endif; ?>
@@ -326,7 +326,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
                     <span>
-                        🪨 Pierre de Taille :
+                        <i class="fa-solid fa-mountain text-secondary me-1"></i> Pierre de Taille :
                         <?php if (!empty($oasisBonuses['stone'])): ?>
                             <small style="color:#60a5fa; font-size:0.75rem;">(+<?= $oasisBonuses['stone'] ?>% Oasis)</small>
                         <?php endif; ?>
@@ -335,7 +335,7 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
                     <span>
-                        🌾 Riz Impérial :
+                        <i class="fa-solid fa-wheat-awn text-warning me-1"></i> Riz Impérial :
                         <?php if (!empty($oasisBonuses['rice'])): ?>
                             <small style="color:#fde047; font-size:0.75rem;">(+<?= $oasisBonuses['rice'] ?>% Oasis)</small>
                         <?php endif; ?>
@@ -344,29 +344,29 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                 </div>
                 <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:0.75rem 0;">
                 <div style="display:flex; justify-content:space-between;">
-                    <span>⛩️ Ferveur & Sérénité :</span>
+                    <span><i class="fa-solid fa-torii-gate text-danger me-1"></i> Ferveur & Sérénité :</span>
                     <strong><?= $planet['energy_used'] ?> / <?= $planet['energy_max'] ?></strong>
                 </div>
                 <?php if ($planet['prod_rates']['energy_ratio'] < 1.0): ?>
                     <p style="color:#ef4444; font-size:0.75rem; margin-top:0.4rem; font-weight:700;">
-                        ⚠️ Sérénité insuffisante : Les récoltes du domaine ne fonctionnent qu'à 10%.
+                        <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i> Sérénité insuffisante : Les récoltes du domaine ne fonctionnent qu'à 10%.
                     </p>
                 <?php endif; ?>
 
                 <?php if (!empty($annexedOases)): ?>
                     <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:0.75rem 0;">
                     <div style="font-size:0.8rem; color:#86efac; font-weight:700; margin-bottom:0.4rem; display:flex; justify-content:space-between; align-items:center;">
-                        <span>🌿 Oasis Annexées (<?= count($annexedOases) ?> / 3)</span>
+                        <span><i class="fa-solid fa-seedling text-success me-1"></i> Oasis Annexées (<?= count($annexedOases) ?> / 3)</span>
                         <a href="?page=map" style="color:var(--accent-color); text-decoration:none; font-size:0.75rem;">Carte Provinciale &rarr;</a>
                     </div>
                     <?php foreach ($annexedOases as $ao):
                         $bLabel = '';
-                        if ($ao['bonus_rice'] > 0) $bLabel .= "+{$ao['bonus_rice']}% 🌾 ";
-                        if ($ao['bonus_wood'] > 0) $bLabel .= "+{$ao['bonus_wood']}% 🪵 ";
-                        if ($ao['bonus_stone'] > 0) $bLabel .= "+{$ao['bonus_stone']}% 🪨 ";
+                        if ($ao['bonus_rice'] > 0) $bLabel .= "+{$ao['bonus_rice']}% <i class=\"fa-solid fa-wheat-awn text-warning\"></i> ";
+                        if ($ao['bonus_wood'] > 0) $bLabel .= "+{$ao['bonus_wood']}% <i class=\"fa-solid fa-tree text-success\"></i> ";
+                        if ($ao['bonus_stone'] > 0) $bLabel .= "+{$ao['bonus_stone']}% <i class=\"fa-solid fa-mountain text-secondary\"></i> ";
                     ?>
                         <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border:1px solid rgba(34,197,94,0.2); padding:0.4rem 0.6rem; border-radius:6px; margin-bottom:0.4rem; font-size:0.8rem;">
-                            <span>🌿 <?= htmlspecialchars($ao['name']) ?> [<?= $ao['coord_x'] ?> : <?= $ao['coord_y'] ?>]</span>
+                            <span><i class="fa-solid fa-seedling text-success me-1"></i> <?= htmlspecialchars($ao['name']) ?> [<?= $ao['coord_x'] ?> : <?= $ao['coord_y'] ?>]</span>
                             <strong style="color:#fde047;"><?= trim($bLabel) ?></strong>
                         </div>
                     <?php endforeach; ?>

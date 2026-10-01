@@ -19,7 +19,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                  style="background: linear-gradient(135deg, #1c1917 0%, #292524 50%, #451a03 100%); border-bottom: 2px solid #f59e0b !important;">
                 <div class="d-flex align-items-center gap-3">
                     <span class="fs-1 p-2 rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center shadow" style="width: 54px; height: 54px;">
-                        👑
+                        <i class="fa-solid fa-crown"></i>
                     </span>
                     <div>
                         <div class="text-warning text-uppercase fw-bold small" style="letter-spacing:1px;">Privilège du Shōgun &bull; Sengoku Plus</div>
@@ -38,7 +38,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                                 <div class="text-secondary small fw-bold text-uppercase">Statut Impérial Actuel</div>
                                 <div class="fs-3 fw-bold mt-1 d-flex align-items-center gap-2">
                                     <?php if ($isSealActiveModal): ?>
-                                        <span class="text-success">👑 Sceau Actif</span>
+                                        <span class="text-success"><i class="fa-solid fa-crown me-1"></i>Sceau Actif</span>
                                     <?php else: ?>
                                         <span class="text-muted">Inactif</span>
                                     <?php endif; ?>
@@ -62,7 +62,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                             <div>
                                 <div class="text-secondary small fw-bold text-uppercase">Trésor en Koban (Pièces d'Or)</div>
                                 <div class="fs-2 fw-bold text-warning mt-1 d-flex align-items-center gap-2">
-                                    <span>🪙</span>
+                                    <span><i class="fa-solid fa-coins text-warning"></i></span>
                                     <span id="seal_gold_display"><?= number_format($goldCoinsModal) ?></span>
                                     <span class="fs-5 text-dark fw-normal">Koban</span>
                                 </div>
@@ -73,11 +73,11 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                             <div class="mt-2">
                                 <?php if (!empty($sealStatusModal['can_claim_daily'])): ?>
                                     <button type="button" class="btn btn-sm btn-warning w-100 fw-bold shadow-sm" id="btnClaimDailyGold" onclick="claimDailyGold()">
-                                        🎁 Réclamer le Tribut du Jour (+5 Koban Gratuits)
+                                        <i class="fa-solid fa-gift me-1"></i>Réclamer le Tribut du Jour (+5 Koban Gratuits)
                                     </button>
                                 <?php else: ?>
                                     <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>
-                                        ✓ Tribut du Jour déjà perçu (Revenez demain)
+                                        <i class="fa-solid fa-check text-success me-1"></i>Tribut du Jour déjà perçu (Revenez demain)
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -88,7 +88,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                 <!-- 3 CARTES D'ACTIVATION / PROLONGATION -->
                 <div class="mb-4">
                     <h4 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                        <span>📜</span> Décréter ou Prolonger le Sceau Impérial
+                        <span><i class="fa-solid fa-scroll text-warning"></i></span> Décréter ou Prolonger le Sceau Impérial
                     </h4>
                     <div class="row g-3">
                         <!-- 7 Jours -->
@@ -99,7 +99,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                                 <div class="fs-4 fw-bold text-warning mb-2">200 Koban</div>
                                 <p class="text-muted small mb-3">Idéal pour un sprint stratégique ou fonder vos premières colonies.</p>
                                 <button type="button" class="btn btn-outline-warning w-100 fw-bold" onclick="activateSeal(7)">
-                                    👑 Décréter (7j)
+                                    <i class="fa-solid fa-crown me-1"></i>Décréter (7j)
                                 </button>
                             </div>
                         </div>
@@ -108,14 +108,14 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                         <div class="col-md-4">
                             <div class="card h-100 border border-warning text-center p-3 position-relative shadow-sm" style="background:#fffdfa;">
                                 <span class="badge bg-warning text-dark position-absolute top-0 start-50 translate-middle fw-bold">
-                                    ⭐ ÉCONOMIE -10%
+                                    <i class="fa-solid fa-star me-1"></i>ÉCONOMIE -10%
                                 </span>
                                 <div class="text-secondary small fw-bold text-uppercase mt-1">Investiture Royale</div>
                                 <div class="fs-2 fw-bold text-dark my-1">14 Jours</div>
                                 <div class="fs-4 fw-bold text-warning mb-2">360 Koban</div>
                                 <p class="text-muted small mb-3">Le meilleur équilibre pour orchestrer la consolidation de vos domaines.</p>
                                 <button type="button" class="btn btn-warning w-100 fw-bold shadow-sm" onclick="activateSeal(14)">
-                                    👑 Décréter (14j)
+                                    <i class="fa-solid fa-crown me-1"></i>Décréter (14j)
                                 </button>
                             </div>
                         </div>
@@ -124,14 +124,14 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                         <div class="col-md-4">
                             <div class="card h-100 border text-center p-3 hover-shadow" style="transition: transform 0.15s ease;">
                                 <span class="badge bg-purple-lt text-purple position-absolute top-0 start-50 translate-middle fw-bold">
-                                    👑 SOUVERAIN -25%
+                                    <i class="fa-solid fa-crown me-1"></i>SOUVERAIN -25%
                                 </span>
                                 <div class="text-secondary small fw-bold text-uppercase mt-1">Investiture Mensuelle</div>
                                 <div class="fs-2 fw-bold text-dark my-1">30 Jours</div>
                                 <div class="fs-4 fw-bold text-warning mb-2">600 Koban</div>
                                 <p class="text-muted small mb-3">La paix royale pour tout un mois de conquête et de développement continu.</p>
                                 <button type="button" class="btn btn-outline-warning w-100 fw-bold" onclick="activateSeal(30)">
-                                    👑 Décréter (30j)
+                                    <i class="fa-solid fa-crown me-1"></i>Décréter (30j)
                                 </button>
                             </div>
                         </div>
@@ -141,12 +141,12 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
                 <!-- LISTE DES 6 GRANDS PRIVILÈGES IMPÉRIAUX -->
                 <div>
                     <h4 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                        <span>⭐</span> Les 6 Grands Privilèges du Shōgun
+                        <span><i class="fa-solid fa-star text-warning"></i></span> Les 6 Grands Privilèges du Shōgun
                     </h4>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="d-flex gap-3 p-2 rounded border bg-light h-100">
-                                <span class="fs-2">🔨</span>
+                                <span class="fs-2"><i class="fa-solid fa-hammer text-warning"></i></span>
                                 <div>
                                     <strong class="text-dark">Architecte de Cour (File Étendue)</strong>
                                     <div class="text-secondary small mt-1">
@@ -158,7 +158,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
 
                         <div class="col-md-6">
                             <div class="d-flex gap-3 p-2 rounded border bg-light h-100">
-                                <span class="fs-2">👑</span>
+                                <span class="fs-2"><i class="fa-solid fa-crown text-warning"></i></span>
                                 <div>
                                     <strong class="text-dark">Grand Tableau de Bord de l'Empire</strong>
                                     <div class="text-secondary small mt-1">
@@ -170,7 +170,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
 
                         <div class="col-md-6">
                             <div class="d-flex gap-3 p-2 rounded border bg-light h-100">
-                                <span class="fs-2">📜</span>
+                                <span class="fs-2"><i class="fa-solid fa-scroll text-primary"></i></span>
                                 <div>
                                     <strong class="text-dark">Carnet de Raids (Farm List)</strong>
                                     <div class="text-secondary small mt-1">
@@ -182,7 +182,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
 
                         <div class="col-md-6">
                             <div class="d-flex gap-3 p-2 rounded border bg-light h-100">
-                                <span class="fs-2">⚖️</span>
+                                <span class="fs-2"><i class="fa-solid fa-scale-balanced text-warning"></i></span>
                                 <div>
                                     <strong class="text-dark">Intendant du Marché (Troc 1:1:1)</strong>
                                     <div class="text-secondary small mt-1">
@@ -194,7 +194,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
 
                         <div class="col-md-6">
                             <div class="d-flex gap-3 p-2 rounded border bg-light h-100">
-                                <span class="fs-2">⛩️</span>
+                                <span class="fs-2"><i class="fa-solid fa-torii-gate text-danger"></i></span>
                                 <div>
                                     <strong class="text-dark">Ordre de Repli Tactique (Évasion)</strong>
                                     <div class="text-secondary small mt-1">
@@ -206,7 +206,7 @@ $goldCoinsModal = $sealStatusModal ? (int)$sealStatusModal['gold'] : 0;
 
                         <div class="col-md-6">
                             <div class="d-flex gap-3 p-2 rounded border bg-light h-100">
-                                <span class="fs-2">⚡</span>
+                                <span class="fs-2"><i class="fa-solid fa-bolt text-warning"></i></span>
                                 <div>
                                     <strong class="text-dark">Raccourcis &amp; Suivi Prioritaire</strong>
                                     <div class="text-secondary small mt-1">

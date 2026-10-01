@@ -34,7 +34,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
         <h3 class="card-title m-0" style="font-size: 0.95rem;">
-            <span>⚔️</span> Garnison du Domaine
+            <span><i class="fa-solid fa-khanda text-danger me-1"></i></span> Garnison du Domaine
         </h3>
         <a href="?page=barracks" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Accéder au Dojo Militaire">
             Dojo &rarr;
@@ -93,7 +93,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
             </div>
             <div class="d-flex justify-content-between pt-1 border-top border-dashed align-items-center">
                 <a href="/?page=building&code=wall" class="text-decoration-none text-muted" title="Accéder aux Remparts Féodaux">
-                    <span style="font-size:0.75rem;">🧱 Remparts (Niv. <?= $wallLevel ?>) :</span>
+                    <span style="font-size:0.75rem;"><i class="fa-solid fa-shield-halved text-secondary me-1"></i>Remparts (Niv. <?= $wallLevel ?>) :</span>
                 </a>
                 <strong class="text-primary" style="font-size:0.82rem;">
                     <?= ($wallLevel > 0) ? ('+' . ($wallLevel * $wallMultPct) . '% (' . number_format($totalFortifiedDefense) . ')') : '<a href="/?page=building&code=wall" class="text-decoration-underline text-warning small">Non Bâti</a>' ?>
@@ -106,7 +106,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
             <div class="mt-2 pt-2 border-top">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <span class="text-danger fw-bold" style="font-size:0.75rem;">
-                        ⏳ Entraînement (au fil de l'eau) :
+                        <i class="fa-solid fa-hourglass-half text-danger me-1"></i>Entraînement (au fil de l'eau) :
                     </span>
                     <span class="badge bg-danger-lt" style="font-size:0.65rem;">
                         <?= count($trainingQueue) ?> lot(s)
@@ -122,7 +122,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                         </div>
                         <!-- Barre 1 : Unité actuelle -->
                         <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.65rem; margin-bottom:2px;">
-                            <span>⚡ Guerrier <?= $tq['current_unit_number'] ?>/<?= $tq['total_count'] ?></span>
+                            <span><i class="fa-solid fa-bolt text-warning me-1"></i>Guerrier <?= $tq['current_unit_number'] ?>/<?= $tq['total_count'] ?></span>
                             <span class="font-monospace text-danger fw-bold"><?= $tq['unit_pct'] ?>%</span>
                         </div>
                         <div class="progress mb-1" style="height:4px; background:rgba(0,0,0,0.06);">
@@ -130,7 +130,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                         </div>
                         <!-- Barre 2 : Lot global -->
                         <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.65rem; margin-bottom:2px;">
-                            <span>📦 Lot global</span>
+                            <span><i class="fa-solid fa-boxes-stacked text-primary me-1"></i>Lot global</span>
                             <span class="font-monospace text-primary fw-bold"><?= $tq['lot_pct'] ?>%</span>
                         </div>
                         <div class="progress" style="height:5px; background:rgba(0,0,0,0.06);">

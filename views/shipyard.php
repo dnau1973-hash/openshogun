@@ -17,10 +17,10 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
 
 <div class="card">
     <div class="card-header">
-        <h2 class="card-title">🐎 Atelier de Siège & Écuries Provinciales - Niveau <?= $shipyardLvl ?></h2>
+        <h2 class="card-title"><i class="fa-solid fa-horse text-danger me-1"></i>Atelier de Siège & Écuries Provinciales - Niveau <?= $shipyardLvl ?></h2>
         <?php if ($user['faction'] === 'vorash'): ?>
             <span style="font-size:0.8rem; color:#fca5a5; background:rgba(239,68,68,0.2); padding:0.2rem 0.5rem; border-radius:4px;">
-                ⚡ Bonus Clan Takeda : Entraînement accéléré (-20% temps)
+                <i class="fa-solid fa-bolt text-warning me-1"></i>Bonus Clan Takeda : Entraînement accéléré (-20% temps)
             </span>
         <?php endif; ?>
     </div>
@@ -37,7 +37,7 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
                 <div class="card mb-4 shadow-sm" style="border-top: 4px solid #dc2626; background:var(--bg-surface, #ffffff); border-radius:10px;">
                     <div class="card-header py-3 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:linear-gradient(to right, rgba(220,38,38,0.06), transparent);">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="fs-2">🐎</span>
+                            <span class="fs-2"><i class="fa-solid fa-horse text-danger"></i></span>
                             <div>
                                 <h3 class="card-title m-0 fw-bold" style="font-size:1.05rem; color:var(--text-main);">
                                     Atelier de Siège & Écuries — Mobilisation Active
@@ -66,7 +66,7 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
                                     <!-- Entête de la commande -->
                                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="fs-2 lh-1">🐎</span>
+                                            <span class="fs-2 lh-1"><i class="fa-solid fa-horse text-danger"></i></span>
                                             <div>
                                                 <h4 class="m-0 fw-bold text-dark fs-3 d-flex align-items-center gap-2">
                                                     <span><?= htmlspecialchars($q['ship_name']) ?></span>
@@ -92,7 +92,7 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
                                     <div class="p-2 rounded mb-2" style="background: rgba(220, 38, 38, 0.04); border: 1px solid rgba(220, 38, 38, 0.15);">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="small text-dark fw-bold d-flex align-items-center gap-1">
-                                                <span>⚡</span>
+                                                <span><i class="fa-solid fa-bolt text-warning"></i></span>
                                                 <span>Unité en cours d'assemblage (<span class="queue-current-unit-num"><?= $q['current_unit_number'] ?></span>/<?= $q['total_count'] ?>) :</span>
                                                 <strong class="queue-unit-countdown font-monospace text-danger ms-1">--:--</strong>
                                             </span>
@@ -112,7 +112,7 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
                                     <div class="p-2 rounded" style="background: rgba(32, 107, 196, 0.04); border: 1px solid rgba(32, 107, 196, 0.15);">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="small text-dark fw-bold d-flex align-items-center gap-1">
-                                                <span>📦</span>
+                                                <span><i class="fa-solid fa-boxes-stacked text-warning"></i></span>
                                                 <span>Progression globale du lot :</span>
                                                 <span class="text-secondary fw-normal queue-lot-status ms-1">
                                                     <strong><span class="queue-lot-ready"><?= $q['completed_count'] ?></span></strong> sur <strong><?= $q['total_count'] ?></strong> engins mobilisés
@@ -132,8 +132,8 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
 
                                     <!-- Note au fil de l'eau -->
                                     <div class="d-flex align-items-center justify-content-between mt-2 pt-1 text-secondary" style="font-size: 0.78rem;">
-                                        <span>💧 <em>Production au fil de l'eau : chaque engin achevé est immédiatement transféré dans votre flotte active.</em></span>
-                                        <span class="badge bg-success-lt fw-semibold">✔ Disponibilité instantanée</span>
+                                        <span><i class="fa-solid fa-droplet text-info me-1"></i><em>Production au fil de l'eau : chaque engin achevé est immédiatement transféré dans votre flotte active.</em></span>
+                                        <span class="badge bg-success-lt fw-semibold"><i class="fa-solid fa-check text-success me-1"></i>Disponibilité instantanée</span>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -157,10 +157,10 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
 
                         // Déterminer le badge de faction
                         $clanBadge = match($s['faction']) {
-                            'terran' => ['name' => 'Clan Oda', 'color' => '#3b82f6', 'icon' => '🏯'],
-                            'vorash' => ['name' => 'Clan Takeda', 'color' => '#ef4444', 'icon' => '🐎'],
-                            'aethelis' => ['name' => 'Clan Tokugawa', 'color' => '#8b5cf6', 'icon' => '⛩️'],
-                            default => ['name' => 'Logistique Impériale', 'color' => '#16a34a', 'icon' => '📦']
+                            'terran' => ['name' => 'Clan Oda', 'color' => '#3b82f6', 'icon' => '<i class="fa-solid fa-chess-rook"></i>'],
+                            'vorash' => ['name' => 'Clan Takeda', 'color' => '#ef4444', 'icon' => '<i class="fa-solid fa-horse"></i>'],
+                            'aethelis' => ['name' => 'Clan Tokugawa', 'color' => '#8b5cf6', 'icon' => '<i class="fa-solid fa-torii-gate"></i>'],
+                            default => ['name' => 'Logistique Impériale', 'color' => '#16a34a', 'icon' => '<i class="fa-solid fa-boxes-stacked"></i>']
                         };
 
                         // Calcul du max finançable
@@ -185,7 +185,7 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
 
                             <!-- Badge Effectif Écuries / Parc -->
                             <div style="position:absolute; top:10px; right:46px; background:rgba(253,251,247,0.95); backdrop-filter:blur(6px); border:1px solid rgba(220,38,38,0.5); border-radius:6px; padding:3px 10px; font-size:0.75rem; font-weight:800; color:#dc2626; box-shadow:0 2px 6px rgba(0,0,0,0.12);">
-                                🐎 Disponibles : <?= number_format($s['stationed_count']) ?>
+                                <i class="fa-solid fa-horse text-danger me-1"></i>Disponibles : <?= number_format($s['stationed_count']) ?>
                             </div>
 
                             <!-- Badge Transparence IA Prompts (« ? ») -->
@@ -193,7 +193,7 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
 
                             <!-- Bouton Agrandir Loupe -->
                             <div style="position:absolute; bottom:8px; right:8px; background:rgba(28,25,23,0.75); backdrop-filter:blur(4px); color:#ffffff; border-radius:4px; padding:3px 8px; font-size:0.7rem; display:flex; align-items:center; gap:4px; border:1px solid rgba(255,255,255,0.2);">
-                                🔍 Agrandir
+                                <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                             </div>
                         </div>
 
@@ -217,19 +217,19 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
 
                             <!-- Caractéristiques Martiales & Logistiques -->
                             <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.5rem; font-size:0.75rem; background:var(--bg-ink, #ede5d5); padding:0.6rem; border-radius:6px; margin-bottom:0.85rem; border:1px solid var(--border-color); color:var(--text-main);">
-                                <div title="Puissance d'assaut">⚔️ Attaque : <strong style="color:var(--red-primary, #dc2626);"><?= $s['attack'] ?></strong></div>
-                                <div title="Pavois et défenses mobiles">🛡️ Pavois : <strong><?= $s['shield'] ?></strong></div>
-                                <div title="Blindage et structure">🧱 Blindage : <strong><?= $s['defense'] ?></strong></div>
-                                <div title="Vitesse de déplacement provincial">🐎 Vitesse : <strong><?= $s['speed'] ?></strong></div>
-                                <div title="Capacité de transport de vivres et butin">🎒 Fret : <strong><?= $s['cargo_capacity'] ?></strong></div>
-                                <div title="Temps de fabrication unitaire">⏱️ Vitesse : <strong><?= $s['effective_build_time'] ?>s</strong></div>
+                                <div title="Puissance d'assaut"><i class="fa-solid fa-khanda text-danger me-1"></i>Attaque : <strong style="color:var(--red-primary, #dc2626);"><?= $s['attack'] ?></strong></div>
+                                <div title="Pavois et défenses mobiles"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Pavois : <strong><?= $s['shield'] ?></strong></div>
+                                <div title="Blindage et structure"><i class="fa-solid fa-cubes text-secondary me-1"></i>Blindage : <strong><?= $s['defense'] ?></strong></div>
+                                <div title="Vitesse de déplacement provincial"><i class="fa-solid fa-horse text-danger me-1"></i>Vitesse : <strong><?= $s['speed'] ?></strong></div>
+                                <div title="Capacité de transport de vivres et butin"><i class="fa-solid fa-sack-dollar text-warning me-1"></i>Fret : <strong><?= $s['cargo_capacity'] ?></strong></div>
+                                <div title="Temps de fabrication unitaire"><i class="fa-solid fa-stopwatch text-info me-1"></i>Vitesse : <strong><?= $s['effective_build_time'] ?>s</strong></div>
                             </div>
 
                             <!-- Coût en Matériaux -->
                             <div class="cost-row" style="margin:0.25rem 0 0.85rem 0; display:flex; gap:0.75rem; font-size:0.85rem; font-weight:600;">
-                                <div class="cost-item" style="color:<?= ($planet['metal'] >= $s['metal_cost']) ? 'var(--res-metal)' : '#ef4444' ?>;" title="Bois de Cèdre"><span style="color:var(--res-metal);">🪵</span> <?= number_format($s['metal_cost']) ?></div>
-                                <div class="cost-item" style="color:<?= ($planet['crystal'] >= $s['crystal_cost']) ? 'var(--res-crystal)' : '#ef4444' ?>;" title="Pierre de Taille"><span style="color:var(--res-crystal);">🪨</span> <?= number_format($s['crystal_cost']) ?></div>
-                                <div class="cost-item" style="color:<?= ($planet['deuterium'] >= $s['deuterium_cost']) ? 'var(--res-deut)' : '#ef4444' ?>;" title="Riz Impérial"><span style="color:var(--res-deut);">🌾</span> <?= number_format($s['deuterium_cost']) ?></div>
+                                <div class="cost-item" style="color:<?= ($planet['metal'] >= $s['metal_cost']) ? 'var(--res-metal)' : '#ef4444' ?>;" title="Bois de Cèdre"><span style="color:var(--res-metal);"><i class="fa-solid fa-tree text-success"></i></span> <?= number_format($s['metal_cost']) ?></div>
+                                <div class="cost-item" style="color:<?= ($planet['crystal'] >= $s['crystal_cost']) ? 'var(--res-crystal)' : '#ef4444' ?>;" title="Pierre de Taille"><span style="color:var(--res-crystal);"><i class="fa-solid fa-mountain text-secondary"></i></span> <?= number_format($s['crystal_cost']) ?></div>
+                                <div class="cost-item" style="color:<?= ($planet['deuterium'] >= $s['deuterium_cost']) ? 'var(--res-deut)' : '#ef4444' ?>;" title="Riz Impérial"><span style="color:var(--res-deut);"><i class="fa-solid fa-wheat-awn text-warning"></i></span> <?= number_format($s['deuterium_cost']) ?></div>
                             </div>
 
                             <!-- Formulaire de Mobilisation -->
@@ -324,7 +324,7 @@ async function orderShips(shipCode) {
     }
 }
 
-// ⏱️ Mise à jour en temps réel de la Double Barre de Progression (Chantier / Cavalerie)
+// Mise à jour en temps réel de la Double Barre de Progression (Chantier / Cavalerie)
 function formatTime(seconds) {
     if (seconds <= 0) return "00:00";
     const h = Math.floor(seconds / 3600);

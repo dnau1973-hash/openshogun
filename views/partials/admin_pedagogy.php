@@ -18,10 +18,10 @@
             <div class="row align-items-center g-4">
                 <div class="col-lg-8">
                     <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-primary-lt text-primary fw-bold small mb-3 border border-primary-subtle">
-                        <span>👨‍👦</span> Projet Éducatif Père &amp; Fils &bull; Studio d'Apprentissage
+                        <i class="fa-solid fa-graduation-cap text-primary me-1"></i>Projet Éducatif Père &amp; Fils &bull; Studio d'Apprentissage
                     </div>
                     <h1 class="display-6 fw-bold text-dark mb-2">
-                        🎮 Les Secrets de Fabrication d'OpenShogun
+                        <i class="fa-solid fa-gamepad text-primary me-1"></i>Les Secrets de Fabrication d'OpenShogun
                     </h1>
                     <p class="text-secondary fs-3 mb-4" style="line-height: 1.6; max-width: 760px;">
                         Bienvenue dans notre atelier partagé ! Découvrez comment fonctionne un jeu vidéo de stratégie en ligne depuis ses fondations : 
@@ -31,16 +31,16 @@
                     <!-- Raccourcis d'ancres fluides -->
                     <div class="d-flex flex-wrap gap-2">
                         <a href="#section-qui-sommes-nous" class="btn btn-outline-primary rounded-pill">
-                            <span>👨‍👦</span> 1. Qui sommes-nous ?
+                            <i class="fa-solid fa-user-group text-primary me-1"></i>1. Qui sommes-nous ?
                         </a>
                         <a href="#section-algorithmes" class="btn btn-outline-azure rounded-pill">
-                            <span>⚙️</span> 2. Sous le capot (Algorithmes)
+                            <i class="fa-solid fa-gears text-secondary me-1"></i>2. Sous le capot (Algorithmes)
                         </a>
                         <a href="#section-ia-gemini" class="btn btn-outline-warning rounded-pill">
-                            <span>✨</span> 3. L'Univers Visuel &amp; Gemini
+                            <i class="fa-solid fa-wand-magic-sparkles text-warning me-1"></i>3. L'Univers Visuel &amp; Gemini
                         </a>
                         <a href="#section-grimoire" class="btn btn-outline-secondary rounded-pill" onclick="toggleGrimoireCatalog(true)">
-                            <span>📖</span> 4. Le Grimoire des 80 Prompts
+                            <i class="fa-solid fa-book-open text-info me-1"></i>4. Le Grimoire des 80 Prompts
                         </a>
                     </div>
                 </div>
@@ -75,7 +75,7 @@
     <!-- ===================================================================== -->
     <section id="section-qui-sommes-nous" class="mb-5 pt-2">
         <div class="d-flex align-items-center gap-2 mb-3">
-            <span class="fs-1">👨‍👦</span>
+            <i class="fa-solid fa-graduation-cap text-primary fs-1"></i>
             <div>
                 <h2 class="h1 fw-bold text-dark mb-0">1. Qui sommes-nous ?</h2>
                 <div class="text-secondary">L'origine du projet et le choix d'une architecture accessible, solide et sans artifice.</div>
@@ -103,7 +103,7 @@
 
                         <div class="alert alert-info bg-azure-lt border border-azure-subtle mt-4 mb-0">
                             <div class="d-flex gap-3 align-items-start">
-                                <span class="fs-1 text-primary">💡</span>
+                                <i class="fa-solid fa-lightbulb text-warning fs-1"></i>
                                 <div>
                                     <strong class="text-dark d-block mb-1">Le crédo pédagogique du projet :</strong>
                                     Un jeu n'est pas une boîte noire magique. C'est un assemblage patient d'idées logiques, de structures de données et de règles équitables qu'un enfant peut comprendre, manipuler et réinventer.
@@ -128,7 +128,7 @@
                         <div class="list-group list-group-flush">
                             <div class="list-group-item bg-transparent px-0 py-3 border-secondary-subtle">
                                 <div class="d-flex align-items-center gap-3">
-                                    <span class="avatar bg-blue-lt text-blue rounded fw-bold fs-3">🐘</span>
+                                    <span class="avatar bg-blue-lt text-blue rounded fw-bold fs-3"><i class="fa-brands fa-php fs-2"></i></span>
                                     <div>
                                         <div class="fw-bold text-dark">PHP 8 (Le Moteur Serveur &amp; l'Arbitre)</div>
                                         <div class="text-secondary small mt-1">
@@ -140,7 +140,7 @@
 
                             <div class="list-group-item bg-transparent px-0 py-3 border-secondary-subtle">
                                 <div class="d-flex align-items-center gap-3">
-                                    <span class="avatar bg-yellow-lt text-yellow rounded fw-bold fs-3">⚡</span>
+                                    <span class="avatar bg-yellow-lt text-yellow rounded fw-bold fs-3"><i class="fa-brands fa-js fs-2"></i></span>
                                     <div>
                                         <div class="fw-bold text-dark">JavaScript Vanilla (Les Réflexes Client)</div>
                                         <div class="text-secondary small mt-1">
@@ -152,7 +152,7 @@
 
                             <div class="list-group-item bg-transparent px-0 py-3 border-secondary-subtle">
                                 <div class="d-flex align-items-center gap-3">
-                                    <span class="avatar bg-orange-lt text-orange rounded fw-bold fs-3">🐬</span>
+                                    <span class="avatar bg-orange-lt text-orange rounded fw-bold fs-3"><i class="fa-solid fa-database fs-2"></i></span>
                                     <div>
                                         <div class="fw-bold text-dark">MySQL / MariaDB (La Mémoire Permanente)</div>
                                         <div class="text-secondary small mt-1">
@@ -164,7 +164,7 @@
 
                             <div class="list-group-item bg-transparent px-0 py-3 border-secondary-subtle">
                                 <div class="d-flex align-items-center gap-3">
-                                    <span class="avatar bg-cyan-lt text-cyan rounded fw-bold fs-3">🎨</span>
+                                    <span class="avatar bg-cyan-lt text-cyan rounded fw-bold fs-3"><i class="fa-solid fa-palette fs-2"></i></span>
                                     <div>
                                         <div class="fw-bold text-dark">Bootstrap &amp; Tabler.io (L'Habillage UI/UX)</div>
                                         <div class="text-secondary small mt-1">
@@ -262,7 +262,7 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             <div class="d-flex align-items-center gap-3">
                 <div class="avatar avatar-md bg-azure-lt text-azure rounded-circle fw-bold fs-2 shadow-sm flex-shrink-0">
-                    ⚙️
+                    <i class="fa-solid fa-gear"></i>
                 </div>
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
@@ -287,7 +287,7 @@
                 <div class="row g-2 align-items-center text-center">
                     <div class="col-12 col-md-4">
                         <div class="p-3 rounded-3 bg-azure-lt border border-azure-subtle d-flex align-items-center gap-3 text-start flex-nowrap">
-                            <span class="fs-1 flex-shrink-0">⏳</span>
+                            <span class="fs-1 flex-shrink-0 text-azure"><i class="fa-solid fa-hourglass-half"></i></span>
                             <div class="flex-grow-1 min-w-0" style="min-width: 0;">
                                 <div class="fw-bold text-azure small text-uppercase">Étape 1 &bull; Temps</div>
                                 <div class="fw-bold text-dark">Boucle &amp; &Delta;t (Temps)</div>
@@ -297,7 +297,7 @@
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="p-3 rounded-3 bg-indigo-lt border border-indigo-subtle d-flex align-items-center gap-3 text-start flex-nowrap">
-                            <span class="fs-1 flex-shrink-0">⚖️</span>
+                            <span class="fs-1 flex-shrink-0 text-indigo"><i class="fa-solid fa-scale-balanced"></i></span>
                             <div class="flex-grow-1 min-w-0" style="min-width: 0;">
                                 <div class="fw-bold text-indigo small text-uppercase">Étape 2 &bull; Arbitrage</div>
                                 <div class="fw-bold text-dark">Moteur de Règles</div>
@@ -307,7 +307,7 @@
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="p-3 rounded-3 bg-yellow-lt border border-yellow-subtle d-flex align-items-center gap-3 text-start flex-nowrap">
-                            <span class="fs-1 flex-shrink-0">🎲</span>
+                            <span class="fs-1 flex-shrink-0 text-yellow"><i class="fa-solid fa-dice"></i></span>
                             <div class="flex-grow-1 min-w-0" style="min-width: 0;">
                                 <div class="fw-bold text-yellow small text-uppercase">Étape 3 &bull; Résolution</div>
                                 <div class="fw-bold text-dark">Aléatoire Contrôlé</div>
@@ -339,7 +339,7 @@
                             <!-- Callout Analogie Pédagogique -->
                             <div class="alert alert-light border border-azure-subtle bg-azure-lt p-3 rounded-3 mb-4">
                                 <div class="d-flex align-items-start gap-2">
-                                    <span class="fs-2 text-azure">⏳</span>
+                                    <span class="fs-2 text-azure"><i class="fa-solid fa-hourglass-half"></i></span>
                                     <div>
                                         <strong class="text-dark d-block mb-1">L'analogie du sablier d'échecs et du robinet ouvert :</strong>
                                         <p class="text-secondary small mb-0" style="line-height: 1.5;">
@@ -385,7 +385,7 @@
                         </div>
 
                         <div class="border-top pt-3 text-secondary small">
-                            💡 <strong>Secret de conception :</strong> Cette approche événementielle permet à un simple serveur web de gérer des milliers de châteaux simultanés sans jamais surchauffer.
+                            <i class="fa-solid fa-lightbulb text-warning me-1"></i><strong>Secret de conception :</strong> Cette approche événementielle permet à un simple serveur web de gérer des milliers de châteaux simultanés sans jamais surchauffer.
                         </div>
                     </div>
 
@@ -426,7 +426,7 @@ derniere_visite = heure_actuelle();
 
                             <!-- Pied de fenêtre IDE : Explication variables -->
                             <div class="bg-black bg-opacity-50 p-3 border-top border-secondary small text-light-subtle">
-                                <div class="fw-bold text-white mb-1">🔍 Décomposition des variables clés :</div>
+                                <div class="fw-bold text-white mb-1"><i class="fa-solid fa-magnifying-glass me-1"></i>Décomposition des variables clés :</div>
                                 <div class="font-monospace text-azure small">&bull; delta_t : Secondes passées hors-ligne (ex: 28 800 s pour 8h)</div>
                                 <div class="font-monospace text-warning small">&bull; MIN(...) : Empêche de stocker plus de riz que le grenier n'en contient</div>
                             </div>
@@ -457,7 +457,7 @@ derniere_visite = heure_actuelle();
                             <!-- Callout Analogie Pédagogique -->
                             <div class="alert alert-light border border-indigo-subtle bg-indigo-lt p-3 rounded-3 mb-4">
                                 <div class="d-flex align-items-start gap-2">
-                                    <span class="fs-2 text-indigo">⚖️</span>
+                                    <span class="fs-2 text-indigo"><i class="fa-solid fa-scale-balanced"></i></span>
                                     <div>
                                         <strong class="text-dark d-block mb-1">L'analogie du passage en douane et de l'arbitre intraitable :</strong>
                                         <p class="text-secondary small mb-0" style="line-height: 1.5;">
@@ -496,7 +496,7 @@ derniere_visite = heure_actuelle();
                         </div>
 
                         <div class="border-top pt-3 text-secondary small">
-                            🛡️ <strong>Sécurité absolue :</strong> Même si un joueur modifie le code HTML dans l'inspecteur de son navigateur, le moteur PHP rejette l'ordre en une fraction de milliseconde.
+                            <i class="fa-solid fa-shield-halved text-success me-1"></i><strong>Sécurité absolue :</strong> Même si un joueur modifie le code HTML dans l'inspecteur de son navigateur, le moteur PHP rejette l'ordre en une fraction de milliseconde.
                         </div>
                     </div>
 
@@ -539,7 +539,7 @@ valider_transaction_sql();
 
                             <!-- Pied de fenêtre IDE : Explication variables -->
                             <div class="bg-black bg-opacity-50 p-3 border-top border-secondary small text-light-subtle">
-                                <div class="fw-bold text-white mb-1">🔍 Ce que Gabriel a retenu :</div>
+                                <div class="fw-bold text-white mb-1"><i class="fa-solid fa-magnifying-glass me-1"></i>Ce que Gabriel a retenu :</div>
                                 <div class="font-monospace text-indigo-lt small">&bull; Transaction SQL : « Tout passe ou rien ne passe » (évite les pertes de ressources en cas de panne)</div>
                                 <div class="font-monospace text-danger small">&bull; REJETER : Stoppe immédiatement l'exécution sans toucher aux données</div>
                             </div>
@@ -570,7 +570,7 @@ valider_transaction_sql();
                             <!-- Callout Analogie Pédagogique -->
                             <div class="alert alert-light border border-yellow-subtle bg-yellow-lt p-3 rounded-3 mb-4">
                                 <div class="d-flex align-items-start gap-2">
-                                    <span class="fs-2 text-yellow">🎲</span>
+                                    <span class="fs-2 text-yellow"><i class="fa-solid fa-dice"></i></span>
                                     <div>
                                         <strong class="text-dark d-block mb-1">L'analogie du dé à 100 faces équilibré et bienveillant :</strong>
                                         <p class="text-secondary small mb-0" style="line-height: 1.5;">
@@ -609,7 +609,7 @@ valider_transaction_sql();
                         </div>
 
                         <div class="border-top pt-3 text-secondary small">
-                            🎯 <strong>Plaisir de jeu garanti :</strong> L'aléatoire contrôlé crée du suspense et des moments d'euphorie sans jamais donner le sentiment d'une injustice algorithmique.
+                            <i class="fa-solid fa-bullseye text-danger me-1"></i><strong>Plaisir de jeu garanti :</strong> L'aléatoire contrôlé crée du suspense et des moments d'euphorie sans jamais donner le sentiment d'une injustice algorithmique.
                         </div>
                     </div>
 
@@ -641,7 +641,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
 <span class="text-info fw-bold">SI</span> (tirage &lt;= seuil_final) :
     joueur.inventaire.ajouter(<span class="text-warning">"cage_fer_authentique"</span>, 1);
     joueur.echecs_consecutifs = 0; <span class="text-secondary">// Réinitialisation</span>
-    <span class="text-info fw-bold">NOTIFIER</span>(<span class="text-success">"🎉 Capture réussie ! Tirage : "</span> + tirage + <span class="text-success">" / "</span> + seuil_final);
+    <span class="text-info fw-bold">NOTIFIER</span>(<span class="text-success">"Capture réussie ! Tirage : "</span> + tirage + <span class="text-success">" / "</span> + seuil_final);
 <span class="text-info fw-bold">SINON</span> :
     joueur.echecs_consecutifs += 1; <span class="text-secondary">// Augmente la chance pour la prochaine fois</span>
     attribuer_xp(heros, 50);
@@ -650,7 +650,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
 
                             <!-- Pied de fenêtre IDE : Explication variables -->
                             <div class="bg-black bg-opacity-50 p-3 border-top border-secondary small text-light-subtle">
-                                <div class="fw-bold text-white mb-1">🔍 La leçon de Game Design :</div>
+                                <div class="fw-bold text-white mb-1"><i class="fa-solid fa-magnifying-glass me-1"></i>La leçon de Game Design :</div>
                                 <div class="font-monospace text-warning small">&bull; bonus_pitié : Mécanisme invisible qui transforme la frustration en fidélité</div>
                                 <div class="font-monospace text-success small">&bull; random_int() : Sécurisé côté serveur, impossible à manipuler par le joueur</div>
                             </div>
@@ -668,7 +668,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
     <!-- ===================================================================== -->
     <section id="section-ia-gemini" class="mb-5 pt-2">
         <div class="d-flex align-items-center gap-2 mb-3">
-            <span class="fs-1">✨</span>
+            <i class="fa-solid fa-wand-magic-sparkles text-warning fs-1"></i>
             <div>
                 <h2 class="h1 fw-bold text-dark mb-0">3. L'Univers Visuel et Gemini</h2>
                 <div class="text-secondary">Concevoir plus de 80 illustrations épiques grâce au prompt engineering avec Google Gemini.</div>
@@ -690,7 +690,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
                         </p>
                         
                         <div class="alert alert-light border border-secondary-subtle p-3 mt-3 mb-0">
-                            <div class="fw-bold text-dark mb-1">🔍 Plus de 80 images sur mesure intégrées au moteur :</div>
+                            <div class="fw-bold text-dark mb-1"><i class="fa-solid fa-magnifying-glass me-1"></i>Plus de 80 images sur mesure intégrées au moteur :</div>
                             <div class="text-secondary small">
                                 Les 12 guerriers du Dojo, les 13 engins de siège et cavaleries, les 17 bâtiments de cité, les parcelles de ressources et les bêtes sauvages.
                             </div>
@@ -727,7 +727,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
                             </div>
 
                             <div class="text-secondary small text-center">
-                                👆 <strong>Faites le test !</strong> Cliquez sur l'icône <code>?</code> en haut à droite de l'image pour ouvrir la modale, découvrir le prompt original en anglais et sa traduction française intégrale.
+                                <i class="fa-solid fa-hand-pointer text-primary me-1"></i><strong>Faites le test !</strong> Cliquez sur l'icône <code>?</code> en haut à droite de l'image pour ouvrir la modale, découvrir le prompt original en anglais et sa traduction française intégrale.
                             </div>
                         </div>
                     </div>
@@ -737,7 +737,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
             <!-- Pied de section : Transparence et Mention Google Gemini -->
             <div class="card-footer bg-light border-top p-4">
                 <div class="d-flex align-items-start gap-3">
-                    <span class="fs-1 text-primary">✦</span>
+                    <i class="fa-solid fa-wand-magic-sparkles text-primary fs-1"></i>
                     <div>
                         <h4 class="text-dark mb-1">Notre engagement d'éthique et de transparence totale</h4>
                         <p class="text-secondary small mb-2">
@@ -760,7 +760,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
         <div class="card bg-white border shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center p-4">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="fs-1">📖</span>
+                    <i class="fa-solid fa-book-open text-info fs-1"></i>
                     <div>
                         <h3 class="card-title fs-2 text-dark mb-0">Le Grimoire Complet des 80 Prompts</h3>
                         <div class="text-secondary small">Explorez, filtrez et copiez l'intégralité des descriptions textuelles d'OpenShogun.</div>
@@ -768,7 +768,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
                 </div>
                 <div>
                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleGrimoireCatalog()">
-                        <span id="grimoireToggleIcon">📂</span> <span id="grimoireToggleLabel">Afficher l'Album Complet</span>
+                        <span id="grimoireToggleIcon"><i class="fa-solid fa-folder-open me-1"></i></span><span id="grimoireToggleLabel">Afficher l'Album Complet</span>
                     </button>
                 </div>
             </div>
@@ -787,7 +787,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
             <div class="card-status-top bg-yellow"></div>
             <div class="card-body p-4">
                 <div class="badge bg-yellow-lt mb-2">Exercices d'application</div>
-                <h3 class="card-title fs-2 text-dark mb-3">🚀 4 Défis Pratiques à réaliser à quatre mains</h3>
+                <h3 class="card-title fs-2 text-dark mb-3"><i class="fa-solid fa-rocket text-primary me-1"></i>4 Défis Pratiques à réaliser à quatre mains</h3>
                 <p class="text-secondary small mb-4">
                     La meilleure façon d'apprendre la programmation, c'est d'expérimenter, de modifier de petites variables, et d'observer le résultat immédiat !
                 </p>
@@ -795,30 +795,30 @@ seuil_final   = seuil_de_base + bonus_pitié;
                 <div class="row row-cards g-3">
                     <div class="col-md-6 col-lg-3">
                         <div class="card bg-light border p-3 h-100 shadow-none">
-                            <h4 class="text-dark mb-2">🎯 1. La Vitesse Lumière</h4>
+                            <h4 class="text-dark mb-2"><i class="fa-solid fa-bullseye text-danger me-1"></i>1. La Vitesse Lumière</h4>
                             <p class="text-secondary small mb-2">Modifiez la vitesse du serveur à <code>x10</code> ou <code>x20</code> dans la configuration.</p>
-                            <div class="text-primary small mt-auto font-monospace fw-semibold">💡 Découvrir les constantes globales</div>
+                            <div class="text-primary small mt-auto font-monospace fw-semibold"><i class="fa-solid fa-lightbulb text-primary me-1"></i>Découvrir les constantes globales</div>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-3">
                         <div class="card bg-light border p-3 h-100 shadow-none">
-                            <h4 class="text-dark mb-2">🎯 2. Équilibrer une Troupe</h4>
+                            <h4 class="text-dark mb-2"><i class="fa-solid fa-bullseye text-danger me-1"></i>2. Équilibrer une Troupe</h4>
                             <p class="text-secondary small mb-2">Passez l'attaque du Piquier Ashigaru à 999 en base SQL pour tester les extrêmes.</p>
-                            <div class="text-azure small mt-auto font-monospace fw-semibold">💡 Comprendre le Game Balancing</div>
+                            <div class="text-azure small mt-auto font-monospace fw-semibold"><i class="fa-solid fa-lightbulb text-azure me-1"></i>Comprendre le Game Balancing</div>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-3">
                         <div class="card bg-light border p-3 h-100 shadow-none">
-                            <h4 class="text-dark mb-2">🎯 3. Créer un Monstre</h4>
+                            <h4 class="text-dark mb-2"><i class="fa-solid fa-bullseye text-danger me-1"></i>3. Créer un Monstre</h4>
                             <p class="text-secondary small mb-2">Rédigez un nouveau prompt pour un <em>Tigre Sacré</em> et intégrez son visuel.</p>
-                            <div class="text-teal small mt-auto font-monospace fw-semibold">💡 Chaîne d'intégration d'assets</div>
+                            <div class="text-teal small mt-auto font-monospace fw-semibold"><i class="fa-solid fa-lightbulb text-teal me-1"></i>Chaîne d'intégration d'assets</div>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-3">
                         <div class="card bg-light border p-3 h-100 shadow-none">
-                            <h4 class="text-dark mb-2">🎯 4. Robots Testeurs</h4>
-                            <p class="text-secondary small mb-2">Lancez <code>php tests/test_barracks.php</code> et observez les tests unitaires <code>✔</code>.</p>
-                            <div class="text-green small mt-auto font-monospace fw-semibold">💡 Assurance qualité &amp; tests</div>
+                            <h4 class="text-dark mb-2"><i class="fa-solid fa-bullseye text-danger me-1"></i>4. Robots Testeurs</h4>
+                            <p class="text-secondary small mb-2">Lancez <code>php tests/test_barracks.php</code> et observez les tests unitaires <code>OK</code>.</p>
+                            <div class="text-green small mt-auto font-monospace fw-semibold"><i class="fa-solid fa-lightbulb text-green me-1"></i>Assurance qualité &amp; tests</div>
                         </div>
                     </div>
                 </div>
@@ -839,11 +839,11 @@ function toggleGrimoireCatalog(forceOpen = null) {
     if (shouldOpen) {
         cont.style.display = 'block';
         if (label) label.textContent = 'Replier le Grimoire';
-        if (icon) icon.textContent = '📁';
+        if (icon) icon.innerHTML = '<i class="fa-solid fa-folder me-1"></i>';
     } else {
         cont.style.display = 'none';
         if (label) label.textContent = 'Afficher l\'Album Complet';
-        if (icon) icon.textContent = '📂';
+        if (icon) icon.innerHTML = '<i class="fa-solid fa-folder-open me-1"></i>';
     }
 }
 

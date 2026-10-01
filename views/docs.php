@@ -219,8 +219,8 @@ $clansMeta = [
         'color' => '#3b82f6',
         'border' => '#2563eb',
         'bg_gradient' => 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(253, 251, 247, 0.98) 100%)',
-        'badge' => '⚡ Double développement simultané & Maîtrise des Armes à Feu',
-        'icon' => '🏯'
+        'badge' => '<i class="fa-solid fa-bolt text-warning me-1"></i>Double développement simultané & Maîtrise des Armes à Feu',
+        'icon' => '<i class="fa-solid fa-chess-rook text-danger"></i>'
     ],
     'vorash' => [
         'id' => 'vorash',
@@ -232,8 +232,8 @@ $clansMeta = [
         'color' => '#ef4444',
         'border' => '#dc2626',
         'bg_gradient' => 'linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(253, 251, 247, 0.98) 100%)',
-        'badge' => '🐎 Cavalerie d\'assaut rapide, -20% temps Dojo & +25% de butin en raid',
-        'icon' => '🐎'
+        'badge' => '<i class="fa-solid fa-horse text-danger me-1"></i>Cavalerie d\'assaut rapide, -20% temps Dojo & +25% de butin en raid',
+        'icon' => '<i class="fa-solid fa-horse text-danger"></i>'
     ],
     'aethelis' => [
         'id' => 'aethelis',
@@ -245,8 +245,8 @@ $clansMeta = [
         'color' => '#8b5cf6',
         'border' => '#7c3aed',
         'bg_gradient' => 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(253, 251, 247, 0.98) 100%)',
-        'badge' => '⛩️ Cachettes secrètes doublées, vitesse de marche +20% & Défenses imprenables',
-        'icon' => '⛩️'
+        'badge' => '<i class="fa-solid fa-torii-gate text-primary me-1"></i>Cachettes secrètes doublées, vitesse de marche +20% & Défenses imprenables',
+        'icon' => '<i class="fa-solid fa-torii-gate text-primary"></i>'
     ]
 ];
 
@@ -272,12 +272,12 @@ foreach ($allUnits as $u) {
                 <div style="max-width: 880px;">
                     <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
                         <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--red-primary); background: rgba(194,37,43,0.1); padding: 3px 10px; border-radius: 4px;">
-                            📜 Documentation Officielle du Joueur
+                            <i class="fa-solid fa-scroll text-warning me-1"></i>Documentation Officielle du Joueur
                         </span>
                         <span style="color: var(--text-muted); font-size: 0.85rem;">&bull; Manuel Stratégique & Chroniques du Shogunat</span>
                     </div>
                     <h1 style="font-size: 2.2rem; margin: 0 0 0.75rem 0; color: var(--text-main); display: flex; align-items: center; gap: 0.75rem;">
-                        <span>📖</span> Grande Encyclopédie & Guide du Daimyō
+                        <i class="fa-solid fa-book-open text-primary me-1"></i>Grande Encyclopédie &amp; Guide du Daimyō
                     </h1>
                     <p style="font-size: 1.05rem; line-height: 1.6; color: var(--text-muted); margin: 0;">
                         Bienvenue dans les archives impériales du Japon féodal de l'ère Sengoku. Ce codex interactif réunit l'ensemble des règles fondamentales du jeu : 
@@ -297,55 +297,55 @@ foreach ($allUnits as $u) {
             <!-- Sommaire & Navigation entre Chapitres de la Documentation -->
             <div style="display: flex; gap: 0.5rem; margin-top: 1.75rem; overflow-x: auto; padding-bottom: 0.25rem; flex-wrap: wrap;">
                 <a href="?page=docs&tab=overview" class="btn <?= ($tab === 'overview') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>📜</span> Vue d'Ensemble
+                    <i class="fa-solid fa-scroll text-warning me-1"></i>Vue d'Ensemble
                 </a>
                 <a href="?page=docs&tab=hero" class="btn <?= ($tab === 'hero') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>⚔️</span> Ch. 1 : Héros & 35 Reliques
+                    <i class="fa-solid fa-khanda text-danger me-1"></i>Ch. 1 : Héros &amp; 35 Reliques
                 </a>
                 <a href="?page=docs&tab=resources" class="btn <?= ($tab === 'resources') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🌾</span> Ch. 2 : Terroir (1-18)
+                    <i class="fa-solid fa-wheat-awn text-warning me-1"></i>Ch. 2 : Terroir (1-18)
                 </a>
                 <a href="?page=docs&tab=city" class="btn <?= ($tab === 'city') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🏯</span> Ch. 3 : Cité Castrale (19-34)
+                    <i class="fa-solid fa-chess-rook text-danger me-1"></i>Ch. 3 : Cité Castrale (19-34)
                 </a>
                 <a href="?page=docs&tab=troops" class="btn <?= ($tab === 'troops') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🥋</span> Ch. 4 : Troupes du Dojo (12)
+                    <i class="fa-solid fa-user-ninja text-danger me-1"></i>Ch. 4 : Troupes du Dojo (12)
                 </a>
                 <a href="?page=docs&tab=siege" class="btn <?= ($tab === 'siege') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🐎</span> Ch. 5 : Siège & Écuries (13)
+                    <i class="fa-solid fa-horse text-danger me-1"></i>Ch. 5 : Siège &amp; Écuries (13)
                 </a>
                 <a href="?page=docs&tab=oasis" class="btn <?= ($tab === 'oasis') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🌴</span> Ch. 6 : Oasis & Faune
+                    <i class="fa-solid fa-leaf text-success me-1"></i>Ch. 6 : Oasis &amp; Faune
                 </a>
                 <a href="?page=docs&tab=quests" class="btn <?= ($tab === 'quests') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🎯</span> Ch. 7 : Quêtes & Didacticiel
+                    <i class="fa-solid fa-bullseye text-primary me-1"></i>Ch. 7 : Quêtes &amp; Didacticiel
                 </a>
                 <a href="?page=docs&tab=map" class="btn <?= ($tab === 'map') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🗺️</span> Ch. 8 : Carte Féodale
+                    <i class="fa-solid fa-map-location-dot text-primary me-1"></i>Ch. 8 : Carte Féodale
                 </a>
                 <a href="?page=docs&tab=castles" class="btn <?= ($tab === 'castles') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🏯</span> Ch. 9 : 12 Donjons Historiques
+                    <i class="fa-solid fa-fort-awesome text-warning me-1"></i>Ch. 9 : 12 Donjons Historiques
                 </a>
                 <a href="?page=docs&tab=combat" class="btn <?= ($tab === 'combat') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>⚔️</span> Ch. 10 : Combat & Sièges
+                    <i class="fa-solid fa-shield-halved text-danger me-1"></i>Ch. 10 : Combat &amp; Sièges
                 </a>
                 <a href="?page=docs&tab=alliances" class="btn <?= ($tab === 'alliances') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🚩</span> Ch. 11 : Alliances & Diplomatie
+                    <i class="fa-solid fa-flag text-danger me-1"></i>Ch. 11 : Alliances &amp; Diplomatie
                 </a>
                 <a href="?page=docs&tab=craft" class="btn <?= ($tab === 'craft') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🍶</span> Ch. 12 : Artisanat & Banquets
+                    <i class="fa-solid fa-wine-bottle text-danger me-1"></i>Ch. 12 : Artisanat &amp; Banquets
                 </a>
                 <a href="?page=docs&tab=cages" class="btn <?= ($tab === 'cages') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>🦊</span> Ch. 13 : Cages & Faune Sauvage
+                    <i class="fa-solid fa-paw text-warning me-1"></i>Ch. 13 : Cages &amp; Faune Sauvage
                 </a>
                 <a href="?page=docs&tab=social" class="btn <?= ($tab === 'social') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap;">
-                    <span>💬</span> Ch. 14 : Chat & Forum
+                    <i class="fa-solid fa-comments text-primary me-1"></i>Ch. 14 : Chat &amp; Forum
                 </a>
                 <a href="?page=docs&tab=seal" class="btn <?= ($tab === 'seal') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap; border-color: #f59e0b; color: #b45309;">
-                    <span>👑</span> Ch. 15 : Sceau Impérial &amp; Empire
+                    <i class="fa-solid fa-crown text-warning me-1"></i>Ch. 15 : Sceau Impérial &amp; Empire
                 </a>
                 <a href="?page=docs&tab=all" class="btn <?= ($tab === 'all') ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 0.9rem; border-radius: 8px; white-space:nowrap; background: rgba(194,37,43,0.1); border-color: var(--red-primary); color: var(--red-primary);">
-                    <span>📚</span> Tout Dérouler (1-15)
+                    <i class="fa-solid fa-book text-secondary me-1"></i>Tout Dérouler (1-15)
                 </a>
             </div>
         </div>
@@ -360,7 +360,7 @@ foreach ($allUnits as $u) {
         <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(220,38,38,0.05) 0%, rgba(253,251,247,0.98) 100%); border-left: 6px solid var(--red-primary); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
             <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap;">
                 <div style="font-size: 3.5rem; line-height: 1; background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 16px; border: 2px solid var(--border-color); flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                    🥋
+                    <i class="fa-solid fa-user-ninja text-danger"></i>
                 </div>
                 <div style="flex: 1; min-width: 300px;">
                     <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
@@ -370,7 +370,7 @@ foreach ($allUnits as $u) {
                         <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">Système Héroïque Sengoku &bull; Travian-Style</span>
                     </div>
                     <h2 style="margin: 0 0 0.75rem 0; font-size: 1.6rem; color: var(--text-main);">
-                        ⚔️ Le Héros Samouraï & la Voie du Bushidō (武士道)
+                        <i class="fa-solid fa-khanda text-danger me-1"></i>Le Héros Samouraï & la Voie du Bushidō (武士道)
                     </h2>
                     <p style="font-size: 0.98rem; line-height: 1.7; color: var(--text-main); margin-bottom: 1rem; text-align: justify;">
                         Le <strong>Héros Samouraï</strong> est l'incarnation vivante de votre lignée féodale et le cœur battant de votre puissance provinciale. 
@@ -388,10 +388,10 @@ foreach ($allUnits as $u) {
                     </p>
                     <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                         <a href="?page=docs&tab=hero" class="btn btn-primary" style="font-size: 0.85rem; font-weight: 700; padding: 0.45rem 1rem;">
-                            📖 Découvrir le Chapitre Complet du Héros &rarr;
+                            <i class="fa-solid fa-book-open me-1"></i>Découvrir le Chapitre Complet du Héros &rarr;
                         </a>
                         <a href="?page=hero" class="btn btn-secondary" style="font-size: 0.85rem; font-weight: 700; padding: 0.45rem 1rem;">
-                            🥋 Gérer mon Héros Samouraï
+                            <i class="fa-solid fa-user-ninja text-purple me-1"></i>Gérer mon Héros Samouraï
                         </a>
                     </div>
                 </div>
@@ -405,7 +405,7 @@ foreach ($allUnits as $u) {
             <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                        <span style="font-size: 2rem;">🌾</span>
+                        <span style="font-size: 2rem;"><i class="fa-solid fa-wheat-awn text-warning"></i></span>
                         <span style="background: rgba(34,197,94,0.1); color: #15803d; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
                             Choix Libre &bull; Slots #1 à #18
                         </span>
@@ -416,7 +416,7 @@ foreach ($allUnits as $u) {
                     <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 1rem 0;">
                         Finie la rigidité des domaines imposés ! Sur vos <strong>18 parcelles de ressources</strong>, tout terrain vacant (niveau 0) vous permet, 
                         d'un simple clic ouvrant la modale interactive de sélection, de choisir librement le bâtiment à ériger : 
-                        <strong>🪵 Camp de Bûcherons</strong>, <strong>🪨 Carrière de Granit</strong>, <strong>🌾 Rizières Inondées</strong> ou <strong>⛩️ Sanctuaire d'Inari</strong>.
+                        <strong><i class="fa-solid fa-tree text-success me-1"></i>Camp de Bûcherons</strong>, <strong><i class="fa-solid fa-mountain text-secondary me-1"></i>Carrière de Granit</strong>, <strong><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Rizières Inondées</strong> ou <strong><i class="fa-solid fa-torii-gate text-primary me-1"></i>Sanctuaire d'Inari</strong>.
                         Vous pouvez ainsi spécialiser votre principauté selon votre stratégie (surplus de riz pour les grandes armées Takeda, bois massif pour le génie Oda, ou carrières pour les murailles Tokugawa).
                     </p>
                 </div>
@@ -429,7 +429,7 @@ foreach ($allUnits as $u) {
             <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                        <span style="font-size: 2rem;">🏯</span>
+                        <span style="font-size: 2rem;"><i class="fa-solid fa-chess-rook text-danger"></i></span>
                         <span style="background: rgba(59,130,246,0.1); color: #1d4ed8; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
                             Architecture Libre &bull; Slots #19 à #34
                         </span>
@@ -452,7 +452,7 @@ foreach ($allUnits as $u) {
             <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                        <span style="font-size: 2rem;">🌴</span>
+                        <span style="font-size: 2rem;"><i class="fa-solid fa-leaf text-success"></i></span>
                         <span style="background: rgba(245,158,11,0.1); color: #b45309; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
                             Monde Ouvert & Quêtes
                         </span>
@@ -476,7 +476,7 @@ foreach ($allUnits as $u) {
             <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #ef4444;">
                 <div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                        <span style="font-size: 2rem;">🗑️</span>
+                        <span style="font-size: 2rem;"><i class="fa-solid fa-trash text-secondary"></i></span>
                         <span style="background: rgba(239,68,68,0.1); color: #ef4444; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
                             Stratégie & Dynastie
                         </span>
@@ -485,7 +485,7 @@ foreach ($allUnits as $u) {
                         Démantèlement Temporisé & Devise Officielle
                     </h3>
                     <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 1rem 0;">
-                        Adaptez librement votre domaine face aux crises : chaque bâtiment urbain ou parcelle rurale peut être <strong>démantelé</strong> avec un compte à rebours de démolition (50% de la durée). Durant les travaux, la bâtisse reste visible avec un badge <code>🗑️</code>, annulable à tout instant sans frais, et vous récupérez <strong>30% des matériaux</strong> à l'achèvement pour libérer l'emplacement !<br>
+                        Adaptez librement votre domaine face aux crises : chaque bâtiment urbain ou parcelle rurale peut être <strong>démantelé</strong> avec un compte à rebours de démolition (50% de la durée). Durant les travaux, la bâtisse reste visible avec un badge <code>Démolition</code>, annulable à tout instant sans frais, et vous récupérez <strong>30% des matériaux</strong> à l'achèvement pour libérer l'emplacement !<br>
                         Depuis le Donjon Tenshu, proclamez également la <strong>Devise officielle</strong> de votre dynastie qui guidera vos samouraïs sur tout l'archipel.
                     </p>
                 </div>
@@ -512,16 +512,16 @@ foreach ($allUnits as $u) {
                      onclick="openDocsLightbox('Cavalier Éclaireur Takeda', '<?= $takedaCavSrc ?>', 'Reconnaissance & Raids de Kai', 'Monté sur les agiles coursiers Kiso des montagnes escarpées de Kai, ce cavalier léger repère les positions fortifiées adverses et lance des assauts fulgurants.', '« Rapide comme le vent, silencieux comme la forêt. »')">
                     <img src="<?= $takedaCavSrc ?>" alt="Cavalier Éclaireur Takeda" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #ef4444; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                        🐎 Clan Takeda &bull; Atelier & Écuries
+                        <i class="fa-solid fa-horse text-danger me-1"></i>Clan Takeda &bull; Atelier & Écuries
                     </span>
                     <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                        🔍 Agrandir
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                     </span>
                 </div>
                 <div style="flex: 1; min-width: 260px;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                         <span style="background: #ef4444; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
-                            ✨ Nouvelle Illustration Intégrée
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Nouvelle Illustration Intégrée
                         </span>
                         <span style="font-size: 0.8rem; color: #ef4444; font-weight: 700;">Écuries & Atelier de Siège (Rang I)</span>
                     </div>
@@ -533,13 +533,13 @@ foreach ($allUnits as $u) {
                     </p>
                     <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                         <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; background: var(--bg-ink, #ede5d5); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
-                            <span style="color: #dc2626; font-weight: 800;">⚔️ 55 Atq</span> &bull;
-                            <span style="color: #2563eb; font-weight: 700;">🛡️ 310 Déf</span> &bull;
-                            <span style="color: #16a34a; font-weight: 800;">⚡ 13 000 Vitesse</span> &bull;
-                            <span style="color: #b45309; font-weight: 700;">🎒 80 Fret</span>
+                            <span style="color: #dc2626; font-weight: 800;"><i class="fa-solid fa-khanda text-danger me-1"></i>55 Atq</span> &bull;
+                            <span style="color: #2563eb; font-weight: 700;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>310 Déf</span> &bull;
+                            <span style="color: #16a34a; font-weight: 800;"><i class="fa-solid fa-bolt text-warning me-1"></i>13 000 Vitesse</span> &bull;
+                            <span style="color: #b45309; font-weight: 700;"><i class="fa-solid fa-sack-dollar text-warning me-1"></i>80 Fret</span>
                         </div>
                         <a href="?page=docs&tab=siege" class="btn btn-primary" style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem;">
-                            🐎 Voir au Chapitre 5 (Engins & Cavalerie) &rarr;
+                            <i class="fa-solid fa-horse text-danger me-1"></i>Voir au Chapitre 5 (Engins & Cavalerie) &rarr;
                         </a>
                     </div>
                 </div>
@@ -557,16 +557,16 @@ foreach ($allUnits as $u) {
                      onclick="openDocsLightbox('Bélier Titanesque du Dragon de Kai', '<?= $dragonRamSrc ?>', 'Engin de Siège Colossal & Démolition', 'Monumental bélier d\'assaut orné d\'une tête de dragon crachant braises et flammèches. Poussé sous un charriot blindé en poutres de cèdre et cuir ignifuge, il broie les portes castrales les plus massives.', '« Le rugissement du dragon fait plier la pierre et trembler les tyrans. »')">
                     <img src="<?= $dragonRamSrc ?>" alt="Bélier Titanesque du Dragon de Kai" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #f97316; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                        🐉 Clan Takeda &bull; Atelier de Siège
+                        <i class="fa-solid fa-dragon me-1"></i>Clan Takeda &bull; Atelier de Siège
                     </span>
                     <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                        🔍 Agrandir
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                     </span>
                 </div>
                 <div style="flex: 1; min-width: 260px;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                         <span style="background: #b91c1c; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
-                            ✨ Nouvelle Illustration Intégrée
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Nouvelle Illustration Intégrée
                         </span>
                         <span style="font-size: 0.8rem; color: #b91c1c; font-weight: 700;">Atelier de Siège Provincial (Rang V &bull; Élite)</span>
                     </div>
@@ -578,13 +578,13 @@ foreach ($allUnits as $u) {
                     </p>
                     <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                         <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; background: var(--bg-ink, #ede5d5); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
-                            <span style="color: #dc2626; font-weight: 800;">⚔️ 1 100 Atq</span> &bull;
-                            <span style="color: #2563eb; font-weight: 700;">🛡️ 7 450 Blindage</span> &bull;
-                            <span style="color: #16a34a; font-weight: 800;">⚡ 6 000 Vitesse</span> &bull;
-                            <span style="color: #b45309; font-weight: 700;">🎒 3 000 Fret</span>
+                            <span style="color: #dc2626; font-weight: 800;"><i class="fa-solid fa-khanda text-danger me-1"></i>1 100 Atq</span> &bull;
+                            <span style="color: #2563eb; font-weight: 700;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>7 450 Blindage</span> &bull;
+                            <span style="color: #16a34a; font-weight: 800;"><i class="fa-solid fa-bolt text-warning me-1"></i>6 000 Vitesse</span> &bull;
+                            <span style="color: #b45309; font-weight: 700;"><i class="fa-solid fa-sack-dollar text-warning me-1"></i>3 000 Fret</span>
                         </div>
                         <a href="?page=docs&tab=siege" class="btn btn-primary" style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem;">
-                            🏯 Voir au Chapitre 5 (Atelier de Siège) &rarr;
+                            <i class="fa-solid fa-chess-rook text-danger me-1"></i>Voir au Chapitre 5 (Atelier de Siège) &rarr;
                         </a>
                     </div>
                 </div>
@@ -602,16 +602,16 @@ foreach ($allUnits as $u) {
                      onclick="openDocsLightbox('Embuscade Shinobi Montée', '<?= $shinobiSrc ?>', 'Troupe Furtive de Raid Nocturne & Assassinat', 'Ombres ninja montant des coursiers noirs aux sabots étouffés de feutre. Surgissant des forêts de bambous dans un nuage de fumée pour frapper l\'arrière-garde adverse.', '« Vous entendrez le souffle du destrier au moment précis où le ninjato frappera. »')">
                     <img src="<?= $shinobiSrc ?>" alt="Embuscade Shinobi Montée" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #a78bfa; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                        ⛩️ Clan Tokugawa &bull; Écuries Furtives
+                        <i class="fa-solid fa-torii-gate me-1"></i>Clan Tokugawa &bull; Écuries Furtives
                     </span>
                     <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                        🔍 Agrandir
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                     </span>
                 </div>
                 <div style="flex: 1; min-width: 260px;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                         <span style="background: #8b5cf6; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
-                            ✨ Nouvelle Illustration Intégrée
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Nouvelle Illustration Intégrée
                         </span>
                         <span style="font-size: 0.8rem; color: #8b5cf6; font-weight: 700;">Écuries & Haras Provinciaux (Vitesse Suprême)</span>
                     </div>
@@ -623,13 +623,13 @@ foreach ($allUnits as $u) {
                     </p>
                     <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                         <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; background: var(--bg-ink, #ede5d5); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
-                            <span style="color: #dc2626; font-weight: 800;">⚔️ 65 Atq</span> &bull;
-                            <span style="color: #2563eb; font-weight: 700;">🛡️ 400 Blindage</span> &bull;
-                            <span style="color: #8b5cf6; font-weight: 800;">⚡ 14 000 Vitesse (Max)</span> &bull;
-                            <span style="color: #b45309; font-weight: 700;">🎒 60 Fret</span>
+                            <span style="color: #dc2626; font-weight: 800;"><i class="fa-solid fa-khanda text-danger me-1"></i>65 Atq</span> &bull;
+                            <span style="color: #2563eb; font-weight: 700;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>400 Blindage</span> &bull;
+                            <span style="color: #8b5cf6; font-weight: 800;"><i class="fa-solid fa-bolt text-warning me-1"></i>14 000 Vitesse (Max)</span> &bull;
+                            <span style="color: #b45309; font-weight: 700;"><i class="fa-solid fa-sack-dollar text-warning me-1"></i>60 Fret</span>
                         </div>
                         <a href="?page=docs&tab=siege" class="btn btn-primary" style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem;">
-                            🐎 Voir au Chapitre 5 (Écuries & Siège) &rarr;
+                            <i class="fa-solid fa-horse text-danger me-1"></i>Voir au Chapitre 5 (Écuries & Siège) &rarr;
                         </a>
                     </div>
                 </div>
@@ -647,16 +647,16 @@ foreach ($allUnits as $u) {
                      onclick="openDocsLightbox('Catapulte Flamboyante Horokubiya', '<?= $catapultSrc ?>', 'Artillerie Incendiaire de Siège & Bombardement', 'Machine de jet projetant des jarres de grès remplies de poudre noire et de résine enflammée (Horokubiya). L\'impact embrase les toitures et les palissades en bois des citadelles.', '« Une seule jarre de feu allume le bûcher d\'une forteresse tout entière. »')">
                     <img src="<?= $catapultSrc ?>" alt="Catapulte Flamboyante Horokubiya" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #ea580c; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                        🔥 Clan Tokugawa &bull; Atelier d'Artillerie
+                        <i class="fa-solid fa-fire text-danger me-1"></i>Clan Tokugawa &bull; Atelier d'Artillerie
                     </span>
                     <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                        🔍 Agrandir
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                     </span>
                 </div>
                 <div style="flex: 1; min-width: 260px;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                         <span style="background: #ea580c; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
-                            ✨ Nouvelle Illustration Intégrée
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Nouvelle Illustration Intégrée
                         </span>
                         <span style="font-size: 0.8rem; color: #ea580c; font-weight: 700;">Atelier de Siège Provincial (Dégâts de Zone Incendiaires)</span>
                     </div>
@@ -668,13 +668,13 @@ foreach ($allUnits as $u) {
                     </p>
                     <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                         <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; background: var(--bg-ink, #ede5d5); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
-                            <span style="color: #dc2626; font-weight: 800;">⚔️ 450 Atq (Feu)</span> &bull;
-                            <span style="color: #2563eb; font-weight: 700;">🛡️ 2 450 Blindage</span> &bull;
-                            <span style="color: #16a34a; font-weight: 800;">⚡ 9 000 Vitesse</span> &bull;
-                            <span style="color: #b45309; font-weight: 700;">🎒 900 Fret</span>
+                            <span style="color: #dc2626; font-weight: 800;"><i class="fa-solid fa-khanda text-danger me-1"></i>450 Atq (Feu)</span> &bull;
+                            <span style="color: #2563eb; font-weight: 700;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>2 450 Blindage</span> &bull;
+                            <span style="color: #16a34a; font-weight: 800;"><i class="fa-solid fa-bolt text-warning me-1"></i>9 000 Vitesse</span> &bull;
+                            <span style="color: #b45309; font-weight: 700;"><i class="fa-solid fa-sack-dollar text-warning me-1"></i>900 Fret</span>
                         </div>
                         <a href="?page=docs&tab=siege" class="btn btn-primary" style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem;">
-                            🏯 Voir au Chapitre 5 (Atelier de Siège) &rarr;
+                            <i class="fa-solid fa-chess-rook text-danger me-1"></i>Voir au Chapitre 5 (Atelier de Siège) &rarr;
                         </a>
                     </div>
                 </div>
@@ -692,16 +692,16 @@ foreach ($allUnits as $u) {
                      onclick="openDocsLightbox('Forteresse Roulante Blindée', '<?= $fortressSrc ?>', 'Bastion Mobile Imprenable & Siège Lourd', 'Château mobile à plusieurs étages surmonté d\'un toit en pagode et blindé de plaques de fer forgé. Il abrite tireurs et officiers sous un feu nourri d\'arquebuses.', '« La patience d\'un roc, la force d\'une montagne qui marche. » — Tokugawa Ieyasu')">
                     <img src="<?= $fortressSrc ?>" alt="Forteresse Roulante Blindée" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #c084fc; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                        ⛩️ Clan Tokugawa &bull; Bastion Suprême
+                        <i class="fa-solid fa-torii-gate me-1"></i>Clan Tokugawa &bull; Bastion Suprême
                     </span>
                     <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                        🔍 Agrandir
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                     </span>
                 </div>
                 <div style="flex: 1; min-width: 260px;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                         <span style="background: #6d28d9; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
-                            ✨ Nouvelle Illustration Intégrée
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Nouvelle Illustration Intégrée
                         </span>
                         <span style="font-size: 0.8rem; color: #6d28d9; font-weight: 700;">Atelier de Siège Provincial (Blindage Suprême du Jeu)</span>
                     </div>
@@ -713,13 +713,13 @@ foreach ($allUnits as $u) {
                     </p>
                     <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                         <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; background: var(--bg-ink, #ede5d5); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
-                            <span style="color: #dc2626; font-weight: 800;">⚔️ 1 300 Atq</span> &bull;
-                            <span style="color: #2563eb; font-weight: 800;">🛡️ 8 400 Blindage (Record)</span> &bull;
-                            <span style="color: #16a34a; font-weight: 800;">⚡ 6 500 Vitesse</span> &bull;
-                            <span style="color: #b45309; font-weight: 700;">🎒 2 500 Fret</span>
+                            <span style="color: #dc2626; font-weight: 800;"><i class="fa-solid fa-khanda text-danger me-1"></i>1 300 Atq</span> &bull;
+                            <span style="color: #2563eb; font-weight: 800;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>8 400 Blindage (Record)</span> &bull;
+                            <span style="color: #16a34a; font-weight: 800;"><i class="fa-solid fa-bolt text-warning me-1"></i>6 500 Vitesse</span> &bull;
+                            <span style="color: #b45309; font-weight: 700;"><i class="fa-solid fa-sack-dollar text-warning me-1"></i>2 500 Fret</span>
                         </div>
                         <a href="?page=docs&tab=siege" class="btn btn-primary" style="font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.85rem;">
-                            🏯 Voir au Chapitre 5 (Atelier de Siège) &rarr;
+                            <i class="fa-solid fa-chess-rook text-danger me-1"></i>Voir au Chapitre 5 (Atelier de Siège) &rarr;
                         </a>
                     </div>
                 </div>
@@ -731,7 +731,7 @@ foreach ($allUnits as $u) {
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
                 <div>
                     <h3 style="margin: 0; font-size: 1.3rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                        <span>⚔️</span> Les Deux Pôles Militaires du Shogunat (25 Régiments & Engins)
+                        <i class="fa-solid fa-khanda text-danger me-1"></i>Les Deux Pôles Militaires du Shogunat (25 Régiments & Engins)
                     </h3>
                     <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-muted);">
                         La puissance militaire d'OpenShogun s'articule autour de deux édifices castraux complémentaires, chacun illustré en haute définition :
@@ -741,7 +741,7 @@ foreach ($allUnits as $u) {
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <h4 style="margin: 0; color: #2563eb; font-size: 1.1rem;">🥋 Le Dojo Militaire (12 Troupes)</h4>
+                        <h4 style="margin: 0; color: #2563eb; font-size: 1.1rem;"><i class="fa-solid fa-user-ninja text-purple me-1"></i>Le Dojo Militaire (12 Troupes)</h4>
                         <span style="font-size: 0.75rem; font-weight: 700; background: rgba(37,99,235,0.1); color: #2563eb; padding: 2px 8px; border-radius: 4px;">Infanterie & Tir</span>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 1rem 0;">
@@ -755,7 +755,7 @@ foreach ($allUnits as $u) {
 
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <h4 style="margin: 0; color: #dc2626; font-size: 1.1rem;">🐎 L'Atelier de Siège & Écuries (13 Engins)</h4>
+                        <h4 style="margin: 0; color: #dc2626; font-size: 1.1rem;"><i class="fa-solid fa-horse text-danger me-1"></i>L'Atelier de Siège & Écuries (13 Engins)</h4>
                         <span style="font-size: 0.75rem; font-weight: 700; background: rgba(220,38,38,0.1); color: #dc2626; padding: 2px 8px; border-radius: 4px;">Cavalerie & Machines</span>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 1rem 0;">
@@ -781,7 +781,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: var(--red-primary); text-transform: uppercase; letter-spacing: 1px;">Chapitre 1</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🥋</span> Le Héros Samouraï : Guide Intégral & Voie du Guerrier
+                        <i class="fa-solid fa-user-ninja text-danger me-1"></i>Le Héros Samouraï : Guide Intégral &amp; Voie du Guerrier
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Directement inspiré des seigneurs de guerre de l'époque Sengoku et des mécaniques héroïques classiques de Travian, 
@@ -801,12 +801,12 @@ foreach ($allUnits as $u) {
                      title="Cliquer pour admirer l'illustration en grand format">
                     <img src="/public/assets/hero_samurai.jpg" alt="Le Héros Samouraï" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                        🔍 Agrandir
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                     </span>
                 </div>
                 <div style="flex: 1; min-width: 280px;">
                     <span style="display: inline-block; background: rgba(220,38,38,0.1); color: var(--red-primary); font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; margin-bottom: 0.5rem; border: 1px solid rgba(220,38,38,0.2);">
-                        🥋 CHAMPION DU DOMAINE CASTAL
+                        <i class="fa-solid fa-user-ninja text-purple me-1"></i>CHAMPION DU DOMAINE CASTAL
                     </span>
                     <h3 style="margin: 0 0 0.5rem 0; font-size: 1.3rem; color: var(--text-main);">
                         Le Daimyō Champion & La Voie du Katana
@@ -816,10 +816,10 @@ foreach ($allUnits as $u) {
                     </p>
                     <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                         <div style="background: var(--bg-surface); padding: 0.5rem 0.85rem; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.8rem;">
-                            <strong style="color: #dc2626;">⚔️ Polyvalence Totale :</strong> Combats personnels, raids, sièges & bonus économiques
+                            <strong style="color: #dc2626;"><i class="fa-solid fa-khanda text-danger me-1"></i>Polyvalence Totale :</strong> Combats personnels, raids, sièges & bonus économiques
                         </div>
                         <div style="background: var(--bg-surface); padding: 0.5rem 0.85rem; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.8rem;">
-                            <strong style="color: #ea580c;">🗺️ Aventures Périlleuses :</strong> Découverte d'XP, vivres et reliques légendaires
+                            <strong style="color: #ea580c;"><i class="fa-solid fa-map-location-dot text-primary me-1"></i>Aventures Périlleuses :</strong> Découverte d'XP, vivres et reliques légendaires
                         </div>
                     </div>
                 </div>
@@ -827,12 +827,12 @@ foreach ($allUnits as $u) {
 
             <!-- Les 4 Piliers d'Attributs -->
             <h3 style="margin: 0 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                <span>📊</span> 1. Les Quatre Piliers d'Attributs Martiaux
+                <i class="fa-solid fa-chart-simple text-primary me-1"></i>1. Les Quatre Piliers d'Attributs Martiaux
             </h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #dc2626;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                        <strong style="color: #dc2626; font-size: 1rem;">⚔️ Force Martiale</strong>
+                        <strong style="color: #dc2626; font-size: 1rem;"><i class="fa-solid fa-khanda text-danger me-1"></i>Force Martiale</strong>
                         <span style="font-size: 0.75rem; font-weight: 800; background: rgba(220,38,38,0.1); color: #dc2626; padding: 2px 6px; border-radius: 4px;">+80 Puissance / pt</span>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
@@ -842,7 +842,7 @@ foreach ($allUnits as $u) {
 
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #ea580c;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                        <strong style="color: #ea580c; font-size: 1rem;">🚩 Commandement Offensif</strong>
+                        <strong style="color: #ea580c; font-size: 1rem;"><i class="fa-solid fa-flag text-danger me-1"></i>Commandement Offensif</strong>
                         <span style="font-size: 0.75rem; font-weight: 800; background: rgba(234,88,12,0.1); color: #ea580c; padding: 2px 6px; border-radius: 4px;">+0.2% Attaque / pt</span>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
@@ -852,7 +852,7 @@ foreach ($allUnits as $u) {
 
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #2563eb;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                        <strong style="color: #2563eb; font-size: 1rem;">🛡️ Maîtrise Défensive</strong>
+                        <strong style="color: #2563eb; font-size: 1rem;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Maîtrise Défensive</strong>
                         <span style="font-size: 0.75rem; font-weight: 800; background: rgba(37,99,235,0.1); color: #2563eb; padding: 2px 6px; border-radius: 4px;">+0.2% Défense / pt</span>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
@@ -862,7 +862,7 @@ foreach ($allUnits as $u) {
 
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #16a34a;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                        <strong style="color: #16a34a; font-size: 1rem;">🌾 Gouvernance Féodale</strong>
+                        <strong style="color: #16a34a; font-size: 1rem;"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Gouvernance Féodale</strong>
                         <span style="font-size: 0.75rem; font-weight: 800; background: rgba(22,163,74,0.1); color: #16a34a; padding: 2px 6px; border-radius: 4px;">Spécialisation Terroir</span>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
@@ -875,7 +875,7 @@ foreach ($allUnits as $u) {
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
                     <h4 style="margin: 0 0 0.5rem 0; color: var(--red-primary); font-size: 1rem;">
-                        🗺️ 2. Aventures en Carte du Monde
+                        <i class="fa-solid fa-map-location-dot text-primary me-1"></i>2. Aventures en Carte du Monde
                     </h4>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.5rem 0;">
                         Des aventures apparaissent dynamiquement sur la carte provinciale. En envoyant votre héros en expédition, il affronte des embuscades, 
@@ -885,22 +885,22 @@ foreach ($allUnits as $u) {
                         <em>Attention : chaque aventure inflige une perte de santé calculée selon la difficulté du terrain et la Force martiale de votre samouraï !</em>
                     </p>
                     <p style="font-size: 0.82rem; color: #d97706; margin: 0; font-weight: 600;">
-                        ⏳ <strong>Quota féodal :</strong> Votre Samouraï peut accomplir <strong>au maximum 3 aventures par jour</strong>. Le quota se réinitialise chaque nuit à minuit.
+                        <i class="fa-solid fa-hourglass-half text-warning me-1"></i><strong>Quota féodal :</strong> Votre Samouraï peut accomplir <strong>au maximum 3 aventures par jour</strong>. Le quota se réinitialise chaque nuit à minuit.
                     </p>
                 </div>
 
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
                     <h4 style="margin: 0 0 0.5rem 0; color: #7c3aed; font-size: 1rem;">
-                        ⛩️ 3. Arsenal, Reliques & Résurrection
+                        <i class="fa-solid fa-torii-gate text-primary me-1"></i>3. Arsenal, Reliques &amp; Résurrection
                     </h4>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.5rem 0;">
                         Votre héros possède 5 emplacements d'inventaire : <strong>Arme de poing</strong>, <strong>Casque Kabuto</strong>, <strong>Cuirasse &amp; Armure</strong>, <strong>Monture &amp; Destrier</strong> et <strong>Talisman Shintō</strong>.
                     </p>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.4rem 0;">
-                        ⛩️ <strong>Règle des Reliques Uniques :</strong> Chaque relique du Japon féodal est unique. <strong>Vous ne pouvez jamais obtenir deux fois la même relique</strong> dans vos aventures.
+                        <i class="fa-solid fa-torii-gate text-primary me-1"></i><strong>Règle des Reliques Uniques :</strong> Chaque relique du Japon féodal est unique. <strong>Vous ne pouvez jamais obtenir deux fois la même relique</strong> dans vos aventures.
                     </p>
                     <p style="font-size: 0.82rem; color: #dc2626; margin: 0; font-weight: 600;">
-                        💀 <strong>Régénération Post-Mortem :</strong> En cas de décès au combat, vous ne perdez <strong>jamais</strong> son niveau ni ses points. La <strong>régénération du héros après sa mort dure 24 heures</strong>, à l'issue desquelles il recouvrira l'intégralité de ses points de vie (100% PV).
+                        <i class="fa-solid fa-skull text-danger me-1"></i><strong>Régénération Post-Mortem :</strong> En cas de décès au combat, vous ne perdez <strong>jamais</strong> son niveau ni ses points. La <strong>régénération du héros après sa mort dure 24 heures</strong>, à l'issue desquelles il recouvrira l'intégralité de ses points de vie (100% PV).
                     </p>
                 </div>
             </div>
@@ -910,7 +910,7 @@ foreach ($allUnits as $u) {
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
                     <div>
                         <h4 style="margin: 0; font-size: 1.15rem; color: var(--red-primary); display: flex; align-items: center; gap: 0.5rem;">
-                            <span>🏆</span> 4. Le Panthéon Sacré des 35 Reliques Féodales Uniques
+                            <i class="fa-solid fa-trophy text-warning me-1"></i>4. Le Panthéon Sacré des 35 Reliques Féodales Uniques
                         </h4>
                         <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
                             35 reliques réparties équitablement en 5 familles de 7 reliques chacune. Chaque objet confère des bonus passifs majeurs.
@@ -925,7 +925,7 @@ foreach ($allUnits as $u) {
                     <!-- 1. Armes -->
                     <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); border-top: 3px solid #dc2626;">
                         <strong style="color: #dc2626; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
-                            🗡️ Armes du Samouraï (7)
+                            <i class="fa-solid fa-khanda text-danger me-1"></i>Armes du Samouraï (7)
                         </strong>
                         <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
                             <em>Katana Tamahagane, Yari Ancestrale, Gunbai Impérial, Nodachi Tempête, Naginata Bugeisha, Grand Arc Yumi, Tantō Masamune.</em>
@@ -938,7 +938,7 @@ foreach ($allUnits as $u) {
                     <!-- 2. Casques -->
                     <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); border-top: 3px solid #f59e0b;">
                         <strong style="color: #f59e0b; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
-                            🪖 Casques &amp; Masques Kabuto (7)
+                            <i class="fa-solid fa-helmet-safety text-primary me-1"></i>Casques &amp; Masques Kabuto (7)
                         </strong>
                         <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
                             <em>Cornes d'Or du Shōgun, Croissant de Sendai, Menpō Oni, Dragon de Kai, Kasa Shinobi, Soleil Levant, Cornes de Cerf Sanada.</em>
@@ -951,7 +951,7 @@ foreach ($allUnits as $u) {
                     <!-- 3. Armures -->
                     <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); border-top: 3px solid #2563eb;">
                         <strong style="color: #2563eb; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
-                            🥋 Armures &amp; Cuirasses Ō-Yoroi (7)
+                            <i class="fa-solid fa-user-ninja text-purple me-1"></i>Armures &amp; Cuirasses Ō-Yoroi (7)
                         </strong>
                         <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
                             <em>Cuirasse Ō-Yoroi, Armure Dō-Maru, Plastron Nanban, Armure Écarlate Ii Naomasa, Jimbaori Damassé, Haramaki Léger, Armure d'Ébène Takeda.</em>
@@ -964,7 +964,7 @@ foreach ($allUnits as $u) {
                     <!-- 4. Montures -->
                     <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); border-top: 3px solid #0891b2;">
                         <strong style="color: #0891b2; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
-                            🐎 Montures &amp; Destriers (7)
+                            <i class="fa-solid fa-horse text-danger me-1"></i>Montures &amp; Destriers (7)
                         </strong>
                         <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
                             <em>Étalon de Kai, Destrier Noir de Kiso, Destrier au Bamen de Fer, Cheval Bai de Musashi, Étalon Blanc Benzaiten, Pur-Sang Date, Destrier Ambré de Kyoto.</em>
@@ -977,7 +977,7 @@ foreach ($allUnits as $u) {
                     <!-- 5. Talismans -->
                     <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); border-top: 3px solid #16a34a;">
                         <strong style="color: #16a34a; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
-                            📿 Talismans &amp; Trésors Sacrés (7)
+                            <i class="fa-solid fa-gem text-warning me-1"></i>Talismans &amp; Trésors Sacrés (7)
                         </strong>
                         <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
                             <em>Omamori Inari, Miroir Sacré de Yata, Magatama en Jade, Clochette Kagura, Parchemin Dokkōdō, Perle de Marée Ryūjin, Sceau du Chrysanthème.</em>
@@ -1000,7 +1000,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #16a34a; text-transform: uppercase; letter-spacing: 1px;">Chapitre 2</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🌾</span> Terroir Féodal & Choix Libre des 18 Parcelles
+                        <i class="fa-solid fa-wheat-awn text-warning me-1"></i>Terroir Féodal &amp; Choix Libre des 18 Parcelles
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Le terroir entourant votre donjon comporte 18 parcelles de production (numérotées de #1 à #18). 
@@ -1015,7 +1015,7 @@ foreach ($allUnits as $u) {
 
             <!-- Explication du Système de Slot Libre -->
             <div style="background: rgba(22,163,74,0.06); border: 1px solid rgba(22,163,74,0.2); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.9rem; color: var(--text-main);">
-                <strong>🌟 Comment fonctionne la sélection libre de ressource ?</strong><br>
+                <strong><i class="fa-solid fa-star text-warning me-1"></i>Comment fonctionne la sélection libre de ressource ?</strong><br>
                 Sur la page <em>Terroir & Ressources</em>, chaque parcelle non développée (niveau 0) apparaît sous forme de terrain agricole vacant arborant une puce <code>+</code>. 
                 En cliquant sur cette parcelle, une fenêtre modale s'ouvre pour vous permettre de sélectionner le type d'édifice souhaité :
                 scierie, carrière, rizière ou sanctuaire. Une fois le chantier initié, la parcelle adopte ce type. En cas d'annulation avant le niveau 1, le terrain est immédiatement libéré !
@@ -1027,9 +1027,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 130px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Camp de Bûcherons', '/public/assets/resources/ressource_bois_cedre.jpg', 'Ressource Primaire : Bois de Cèdre', 'Abat et débite les cèdres centenaires dans les forêts de montagne. Indispensable pour dresser les charpentes de vos donjons, palissades fortifiées, béliers et armes d\'hast.', '« Les cèdres millénaires portent les toits de nos châteaux. »')">
                             <img src="/public/assets/resources/ressource_bois_cedre.jpg" alt="Bois de Cèdre" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-metal);">🪵 Camp de Bûcherons (Bois de Cèdre)</h4>
+                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-metal);"><i class="fa-solid fa-tree text-success me-1"></i>Camp de Bûcherons (Bois de Cèdre)</h4>
                         <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
                             Abat et débite les cèdres centenaires. Ressource première pour ériger les charpentes de châteaux, bâtir les béliers et tailler les lances des fantassins.
                         </p>
@@ -1041,9 +1041,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 130px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Carrière de Granit', '/public/assets/resources/ressource_pierre_taille.jpg', 'Ressource Primaire : Pierre de Taille', 'Extrait les blocs de roche et de granit pour monter les remparts cyclopéens (Nozura-zumi) et les fondations imprenables des donjons historiques.', '« Une muraille sans faille résiste à mille assauts. »')">
                             <img src="/public/assets/resources/ressource_pierre_taille.jpg" alt="Pierre de Taille" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-crystal);">🪨 Carrière de Granit (Pierre de Taille)</h4>
+                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-crystal);"><i class="fa-solid fa-mountain text-secondary me-1"></i>Carrière de Granit (Pierre de Taille)</h4>
                         <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
                             Extrait les blocs de roche pour monter les remparts cyclopéens (Nozura-zumi) et les fondations imprenables des donjons historiques.
                         </p>
@@ -1055,9 +1055,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 130px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Rizières Inondées', '/public/assets/resources/ressource_riz_imperial.jpg', 'Ressource Impériale : Riz (Koku)', 'Base nourricière de toute la principauté mesurée en koku. Chaque soldat, monture et engin formé exige des rations de riz pour sa subsistance.', '« Le koku de riz est l\'or véritable du Shogunat. »')">
                             <img src="/public/assets/resources/ressource_riz_imperial.jpg" alt="Riz Impérial" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-deut);">🌾 Rizières Inondées (Riz Impérial / Koku)</h4>
+                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-deut);"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Rizières Inondées (Riz Impérial / Koku)</h4>
                         <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
                             Base nourricière de toute la principauté. Chaque soldat, monture et engin formé exige des rations de riz pour sa subsistance et son entraînement.
                         </p>
@@ -1069,9 +1069,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 130px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Sanctuaire Shintō & Torii', '/public/assets/resources/ressource_ferveur_shinto.jpg', 'Énergie Divine : Ferveur & Sérénité', 'Honore les esprits tutélaires Kami. Maintient l\'harmonie spirituelle et l\'énergie indispensable au rendement de toutes les parcelles du domaine.', '« La paix de l\'esprit féconde la terre des ancêtres. »')">
                             <img src="/public/assets/resources/ressource_ferveur_shinto.jpg" alt="Sanctuaire Shinto" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-energy);">⛩️ Sanctuaire d'Inari (Sérénité Spirituelle)</h4>
+                        <h4 style="margin:0 0 0.5rem 0; color: var(--res-energy);"><i class="fa-solid fa-torii-gate me-1"></i>Sanctuaire d'Inari (Sérénité Spirituelle)</h4>
                         <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color: var(--text-muted);">
                             Diffuse la ferveur et l'énergie spirituelle sur le terroir. <em>Attention : si la consommation dépasse la production des sanctuaires, vos récoltes chutent à 10% !</em>
                         </p>
@@ -1083,7 +1083,7 @@ foreach ($allUnits as $u) {
             <!-- Démantèlement & Réinitialisation d'une Parcelle -->
             <div style="background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; padding: 1.25rem; margin-top: 1.5rem; line-height: 1.6; font-size: 0.9rem; color: var(--text-main);">
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <span style="font-size: 1.25rem;">🗑️</span>
+                    <span style="font-size: 1.25rem;"><i class="fa-solid fa-trash text-secondary"></i></span>
                     <strong style="color: #ef4444; font-size: 1rem;">Démanteler une Exploitation Rurale (Changement de Terroir)</strong>
                 </div>
                 <p style="margin: 0 0 0.5rem 0; font-size: 0.88rem; color: var(--text-muted);">
@@ -1091,9 +1091,9 @@ foreach ($allUnits as $u) {
                     Chaque exploitation développée (niveau 1 ou supérieur) peut être <strong>rasée</strong> depuis sa vue détaillée.
                 </p>
                 <ul style="padding-left: 1.25rem; margin: 0; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;">
-                    <li>⏳ <strong>Compte à rebours de démolition :</strong> Les travaux prennent 50% de la durée de construction du niveau. Pendant ce temps, la parcelle affiche un badge <code>🗑️</code> et reste visible sur votre domaine.</li>
-                    <li>🛑 <strong>Annulation sans risque :</strong> Vous pouvez interrompre le démantèlement à tout instant pour préserver votre exploitation intacte.</li>
-                    <li>💰 <strong>Remboursement de 30% :</strong> Dès que le chrono expire, 30% des matériaux du niveau sont immédiatement recrédités dans vos greniers et la parcelle redevient un terrain vierge (<code>+</code>), prête à accueillir une autre ressource de votre choix !</li>
+                    <li><i class="fa-solid fa-hourglass-half text-warning me-1"></i><strong>Compte à rebours de démolition :</strong> Les travaux prennent 50% de la durée de construction du niveau. Pendant ce temps, la parcelle affiche un badge <code>Démolition</code> et reste visible sur votre domaine.</li>
+                    <li><i class="fa-solid fa-circle-stop text-danger me-1"></i><strong>Annulation sans risque :</strong> Vous pouvez interrompre le démantèlement à tout instant pour préserver votre exploitation intacte.</li>
+                    <li><i class="fa-solid fa-coins text-warning me-1"></i><strong>Remboursement de 30% :</strong> Dès que le chrono expire, 30% des matériaux du niveau sont immédiatement recrédités dans vos greniers et la parcelle redevient un terrain vierge (<code>+</code>), prête à accueillir une autre ressource de votre choix !</li>
                 </ul>
             </div>
         </div>
@@ -1108,7 +1108,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 1px;">Chapitre 3</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🏯</span> Cité Castrale & Silos Modulaires Libres (Slots 19 à 34)
+                        <i class="fa-solid fa-chess-rook text-danger me-1"></i>Cité Castrale &amp; Silos Modulaires Libres (Slots 19 à 34)
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Le cœur urbain de votre domaine comporte 16 emplacements castraux (numérotés de #19 à #34). 
@@ -1122,7 +1122,7 @@ foreach ($allUnits as $u) {
             </div>
 
             <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.2); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.9rem; color: var(--text-main);">
-                <strong>🏗️ Comment construire librement dans la cité ?</strong><br>
+                <strong><i class="fa-solid fa-hammer text-primary me-1"></i>Comment construire librement dans la cité ?</strong><br>
                 Sur la vue de la Cité Castrale, tout terrain non construit affiche une puce <code>+</code>. 
                 En cliquant sur l'emplacement libre de votre choix (slots #19 à #33), le modal féodal vous présente tous les bâtiments disponibles à la construction. 
                 Vous pouvez bâtir plusieurs entrepôts, greniers ou ateliers de siège selon vos ambitions dynastiques ! Le slot #34 est réservé à la Muraille pour encercler la forteresse.
@@ -1134,9 +1134,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Tenshu (Donjon Castral)', '/public/assets/buildings/building_tenshu.jpg', 'Siège du Commandement & Palais du Daimyō', 'Le donjon fortifié et palais du Daimyō. Réduit la durée de construction de tous les bâtiments urbains et parcelles rurales du fief.', '« Du haut du Tenshu, le regard du Daimyō embrasse la province. »')">
                             <img src="/public/assets/buildings/building_tenshu.jpg" alt="Tenshu" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: var(--red-primary);">🏯 Tenshu (Donjon Castral)</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: var(--red-primary);"><i class="fa-solid fa-chess-rook me-1"></i>Tenshu (Donjon Castral)</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Cœur du commandement. Réduit le temps de construction de tous les édifices urbains.</p>
                     </div>
                 </div>
@@ -1146,9 +1146,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Entrepôt de Matériaux', '/public/assets/buildings/building_storage.jpg', 'Logistique : Bois & Pierre', 'Augmente la capacité de stockage maximale de Bois de Cèdre et de Pierre de Taille pour alimenter les chantiers monumentaux.', '« Une armée sans vivres et sans bois ne peut tenir l\'hiver. »')">
                             <img src="/public/assets/buildings/building_storage.jpg" alt="Entrepôt" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: var(--res-metal);">🪵 Entrepôt de Matériaux (Bois & Pierre)</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: var(--res-metal);"><i class="fa-solid fa-tree text-success me-1"></i>Entrepôt de Matériaux (Bois & Pierre)</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Stocke le bois de cèdre et les pierres de taille nécessaires aux chantiers d'envergure.</p>
                     </div>
                 </div>
@@ -1158,9 +1158,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Grenier à Riz Fortifié (Kura)', '/public/assets/buildings/building_tank.jpg', 'Silos à Grains Ignifugés', 'Augmente la capacité de stockage maximale des récoltes de riz impérial (koku) et protège les surplus contre l\'humidité.', '« Les greniers pleins font les daimyōs puissants. »')">
                             <img src="/public/assets/buildings/building_tank.jpg" alt="Grenier Kura" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: var(--res-deut);">🌾 Grenier à Riz Fortifié (Kura)</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: var(--res-deut);"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Grenier à Riz Fortifié (Kura)</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Préserve les récoltes de riz impérial contre les pillages et soutient les armées.</p>
                     </div>
                 </div>
@@ -1170,9 +1170,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Dojo Militaire & Caserne', '/public/assets/buildings/building_barracks.jpg', 'Caserne & Enrôlement Féodal', 'Entraîne les fantassins Ashigarus, archers Yumi, arquebusiers Tanegashima et samouraïs d\'élite pour la défense et les conquêtes.', '« La discipline forge la lame, l\'honneur guide le coup. »')">
                             <img src="/public/assets/buildings/building_barracks.jpg" alt="Dojo Militaire" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: #2563eb;">🥋 Dojo Militaire & Caserne</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: #2563eb;"><i class="fa-solid fa-user-ninja text-purple me-1"></i>Dojo Militaire & Caserne</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Entraîne et arme vos fantassins, piquiers, archers et samouraïs d'assaut.</p>
                     </div>
                 </div>
@@ -1182,9 +1182,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Atelier de Siège & Écuries', '/public/assets/buildings/building_shipyard.jpg', 'Génie Militaire & Cavalerie', 'Permet d\'élever la cavalerie de guerre montées, convois de ravitaillement et de fabriquer béliers géants et catapultes de siège.', '« Le tonnerre des sabots annonce l\'effondrement des portes ennemies. »')">
                             <img src="/public/assets/buildings/building_shipyard.jpg" alt="Atelier de Siège" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: #dc2626;">🐎 Atelier de Siège & Écuries</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: #dc2626;"><i class="fa-solid fa-horse text-danger me-1"></i>Atelier de Siège & Écuries</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Fabrique les catapultes, béliers de siège et destriers caparaçonnés de cavalerie.</p>
                     </div>
                 </div>
@@ -1194,9 +1194,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Marché Féodal & Caravanes', '/public/assets/buildings/building_market.jpg', 'Commerce Provincial & Convois', 'Permet d\'échanger des ressources avec les marchands itinérants et autres daimyōs provinciaux via des convois de marchands.', '« L\'or et le riz circulent là où la paix règne. »')">
                             <img src="/public/assets/buildings/building_market.jpg" alt="Marché Féodal" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: #b45309;">⚖️ Marché Féodal & Caravanes</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: #b45309;"><i class="fa-solid fa-scale-balanced me-1"></i>Marché Féodal &amp; Caravanes</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Organise les échanges commerciaux et envoie des caravanes de vivres aux alliés.</p>
                     </div>
                 </div>
@@ -1206,9 +1206,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Académie des Savoirs & Forge', '/public/assets/buildings/building_research_lab.jpg', 'Recherche Stratégique & Tamahagane', 'Permet de perfectionner la métallurgie du tamahagane, l\'art de la guerre et les tactiques militaires secrètes.', '« Le savoir des anciens aiguise l\'acier de demain. »')">
                             <img src="/public/assets/buildings/building_research_lab.jpg" alt="Académie des Savoirs" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: #7c3aed;">📜 Académie des Savoirs & Forge</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: #7c3aed;"><i class="fa-solid fa-scroll me-1"></i>Académie des Savoirs &amp; Forge</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Développe les technologies d'armement, métallurgie et art de la guerre.</p>
                     </div>
                 </div>
@@ -1218,9 +1218,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Tour de Guet Yagura', '/public/assets/buildings/building_radar.jpg', 'Vigie & Feux d\'Alarme', 'Surveille les vallées et détecte à l\'avance les armées et espions ennemis en marche vers votre forteresse.', '« L\'œil qui veille au crépuscule prévient le massacre de l\'aube. »')">
                             <img src="/public/assets/buildings/building_radar.jpg" alt="Tour de Guet" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: #0891b2;">🔭 Tour de Guet Yagura</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: #0891b2;"><i class="fa-solid fa-eye me-1"></i>Tour de Guet Yagura</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Détecte à l'avance les mouvements de troupes ennemies marchant vers votre fief.</p>
                     </div>
                 </div>
@@ -1230,9 +1230,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Cachette Secrète Sous Terre', '/public/assets/buildings/building_quantum_vault.jpg', 'Caveau Inviolable Anti-Pillage', 'Protège une réserve secrète de vivres et matériaux contre les pillages adverses (capacité doublée pour le Clan Tokugawa).', '« Ce que l\'œil de l\'ennemi ne voit pas ne peut être dérobé. »')">
                             <img src="/public/assets/buildings/building_quantum_vault.jpg" alt="Cachette Secrète" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: #475569;">🕳️ Cachette Secrète Sous Terre</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: #475569;"><i class="fa-solid fa-shield-halved me-1"></i>Cachette Secrète Sous Terre</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Met vos précieuses ressources à l'abri des pillages lors des raids ennemis.</p>
                     </div>
                 </div>
@@ -1242,9 +1242,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Pavillon Diplomatique des Clans', '/public/assets/buildings/building_embassy.jpg', 'Maison de Thé & Traités d\'Alliance', 'Permet de sceller ou rejoindre un pacte d\'alliance entre daimyōs sous les auspices des cérémonies du thé.', '« Une alliance scellée dans l\'honneur vaut cent divisions d\'infanterie. »')">
                             <img src="/public/assets/buildings/building_embassy.jpg" alt="Pavillon Diplomatique" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: #059669;">⛩️ Pavillon Diplomatique</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: #059669;"><i class="fa-solid fa-torii-gate me-1"></i>Pavillon Diplomatique</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Permet de fonder ou rejoindre une alliance entre puissants seigneurs féodaux.</p>
                     </div>
                 </div>
@@ -1254,9 +1254,9 @@ foreach ($allUnits as $u) {
                     <div>
                         <div style="width: 100%; height: 110px; border-radius: 6px; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid var(--border-color); cursor: pointer; position: relative;" onclick="openDocsLightbox('Muraille & Remparts de Cité', '/public/assets/buildings/building_wall.jpg', 'Enceinte Fortifiée & Douves (Slot #34)', 'Enceinte fortifiée en pierre de taille, palissades en cèdre et douves protégeant le fief (+4% défense garnison par niveau).', '« Nos remparts sont le roc où se brisent les vagues ennemies. »')">
                             <img src="/public/assets/buildings/building_wall.jpg" alt="Muraille & Remparts" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;">🔍 Agrandir</span>
+                            <span style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fde047; font-size: 0.68rem; padding: 1px 5px; border-radius: 3px;"><i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir</span>
                         </div>
-                        <h4 style="margin:0 0 0.4rem 0; color: #16a34a;">🧱 Muraille & Remparts de Cité (Slot #34)</h4>
+                        <h4 style="margin:0 0 0.4rem 0; color: #16a34a;"><i class="fa-solid fa-shield-halved me-1"></i>Muraille &amp; Remparts de Cité (Slot #34)</h4>
                         <p style="margin:0; font-size:0.83rem; color: var(--text-muted); line-height: 1.4;">Protège l'enceinte entière et décuple l'efficacité défensive de votre garnison (+4% par niveau).</p>
                     </div>
                 </div>
@@ -1267,7 +1267,7 @@ foreach ($allUnits as $u) {
                 <!-- Devise du Daimyō -->
                 <div style="background: linear-gradient(135deg, rgba(30, 27, 75, 0.08) 0%, rgba(253, 251, 247, 0.98) 100%); border: 1px solid rgba(220, 38, 38, 0.35); border-radius: 8px; padding: 1.25rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.3rem;">📜</span>
+                        <span style="font-size: 1.3rem;"><i class="fa-solid fa-scroll text-warning"></i></span>
                         <h4 style="margin: 0; color: var(--red-primary); font-size: 1rem;">Devise & Chronique Officielle du Daimyō</h4>
                     </div>
                     <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
@@ -1279,7 +1279,7 @@ foreach ($allUnits as $u) {
                 <!-- Démantèlement Urbain -->
                 <div style="background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; padding: 1.25rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.3rem;">🗑️</span>
+                        <span style="font-size: 1.3rem;"><i class="fa-solid fa-trash text-secondary"></i></span>
                         <h4 style="margin: 0; color: #ef4444; font-size: 1rem;">Démanteler une Bâtisse (Libérer un Slot)</h4>
                     </div>
                     <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
@@ -1301,7 +1301,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 1px;">Chapitre 4</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🥋</span> Troupes du Dojo & Infanterie des Trois Grands Clans
+                        <i class="fa-solid fa-user-ninja text-danger me-1"></i>Troupes du Dojo &amp; Infanterie des Trois Grands Clans
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Entraînées au Dojo militaire, ces 12 unités d'infanterie et de tir constituent la ligne de front de chaque clan féodal.
@@ -1355,9 +1355,9 @@ foreach ($allUnits as $u) {
                                         <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: var(--text-main);"><?= htmlspecialchars($u['name']) ?></h4>
                                         <div style="font-size: 0.75rem; color: <?= $clan['color'] ?>; font-weight: 700; margin-bottom: 0.5rem;"><?= htmlspecialchars($tactics['role']) ?></div>
                                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 0.75rem; text-align: center; margin-bottom: 0.75rem; background: var(--bg-ink); padding: 6px; border-radius: 6px;">
-                                            <div><span style="color:#dc2626; font-weight:800;">⚔️ <?= $u['attack'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Attaque</span></div>
-                                            <div><span style="color:#2563eb; font-weight:700;">🛡️ <?= $u['def_infantry'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Déf. Inf</span></div>
-                                            <div><span style="color:#16a34a; font-weight:700;">🐎 <?= $u['def_mech'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Déf. Cav</span></div>
+                                            <div><span style="color:#dc2626; font-weight:800;"><i class="fa-solid fa-khanda text-danger me-1"></i><?= $u['attack'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Attaque</span></div>
+                                            <div><span style="color:#2563eb; font-weight:700;"><i class="fa-solid fa-shield-halved text-primary me-1"></i><?= $u['def_infantry'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Déf. Inf</span></div>
+                                            <div><span style="color:#16a34a; font-weight:700;"><i class="fa-solid fa-horse text-danger me-1"></i><?= $u['def_mech'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Déf. Cav</span></div>
                                         </div>
                                     </div>
                                     <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
@@ -1381,7 +1381,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #dc2626; text-transform: uppercase; letter-spacing: 1px;">Chapitre 5</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🐎</span> Atelier de Siège & Écuries Provinciales (13 Unités)
+                        <i class="fa-solid fa-horse text-danger me-1"></i>Atelier de Siège &amp; Écuries Provinciales (13 Unités)
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Construits à l'Atelier de Siège et aux Écuries, ces 13 engins massifs, destriers cuirassés et convois logistiques 
@@ -1409,10 +1409,10 @@ foreach ($allUnits as $u) {
                     $diskPath = __DIR__ . '/../public/assets/units/' . $imgFile;
                     $imgSrc = '/public/assets/units/' . $imgFile . (file_exists($diskPath) ? '?v=' . filemtime($diskPath) : '');
                     $clanBadge = match($s['faction']) {
-                        'terran' => ['name' => 'Clan Oda', 'color' => '#3b82f6', 'icon' => '🏯'],
-                        'vorash' => ['name' => 'Clan Takeda', 'color' => '#ef4444', 'icon' => '🐎'],
-                        'aethelis' => ['name' => 'Clan Tokugawa', 'color' => '#8b5cf6', 'icon' => '⛩️'],
-                        default => ['name' => 'Logistique & Convois', 'color' => '#16a34a', 'icon' => '📦']
+                        'terran' => ['name' => 'Clan Oda', 'color' => '#3b82f6', 'icon' => '<i class="fa-solid fa-chess-rook text-danger"></i>'],
+                        'vorash' => ['name' => 'Clan Takeda', 'color' => '#ef4444', 'icon' => '<i class="fa-solid fa-horse text-danger"></i>'],
+                        'aethelis' => ['name' => 'Clan Tokugawa', 'color' => '#8b5cf6', 'icon' => '<i class="fa-solid fa-torii-gate text-primary"></i>'],
+                        default => ['name' => 'Logistique & Convois', 'color' => '#16a34a', 'icon' => '<i class="fa-solid fa-box text-success"></i>']
                     };
                 ?>
                     <div class="card" style="margin: 0; background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
@@ -1429,9 +1429,9 @@ foreach ($allUnits as $u) {
                                 <h4 style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--text-main);"><?= htmlspecialchars($s['name']) ?></h4>
                                 <div style="font-size: 0.8rem; color: <?= $clanBadge['color'] ?>; font-weight: 700; margin-bottom: 0.75rem;"><?= htmlspecialchars($meta['role']) ?></div>
                                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-size: 0.8rem; text-align: center; margin-bottom: 0.75rem; background: var(--bg-ink); padding: 8px; border-radius: 6px;">
-                                    <div><span style="color:#dc2626; font-weight:800;">⚔️ <?= $s['attack'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Attaque</span></div>
-                                    <div><span style="color:#2563eb; font-weight:700;">🛡️ <?= ($s['defense'] + $s['shield']) ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Blindage</span></div>
-                                    <div><span style="color:#b45309; font-weight:700;">🎒 <?= $s['cargo_capacity'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Fret</span></div>
+                                    <div><span style="color:#dc2626; font-weight:800;"><i class="fa-solid fa-khanda text-danger me-1"></i><?= $s['attack'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Attaque</span></div>
+                                    <div><span style="color:#2563eb; font-weight:700;"><i class="fa-solid fa-shield-halved text-primary me-1"></i><?= ($s['defense'] + $s['shield']) ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Blindage</span></div>
+                                    <div><span style="color:#b45309; font-weight:700;"><i class="fa-solid fa-sack-dollar text-warning me-1"></i><?= $s['cargo_capacity'] ?></span><br><span style="font-size:0.65rem; color:var(--text-muted);">Fret</span></div>
                                 </div>
                             </div>
                             <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
@@ -1453,7 +1453,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 1px;">Chapitre 6</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🌴</span> Oasis Sauvages, Faune Hostile & Conquête Économique
+                        <i class="fa-solid fa-leaf text-success me-1"></i>Oasis Sauvages, Faune Hostile &amp; Conquête Économique
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Inspirées du système classique de Travian, les oasis parsèment la carte des provinces et constituent des nœuds stratégiques cruciaux.
@@ -1467,7 +1467,7 @@ foreach ($allUnits as $u) {
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin: 0 0 0.5rem 0; color: #b45309;">🐾 1. Faune Sauvage Protectrice</h4>
+                    <h4 style="margin: 0 0 0.5rem 0; color: #b45309;"><i class="fa-solid fa-paw me-1"></i>1. Faune Sauvage Protectrice</h4>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
                         Chaque oasis inoccupée est peuplée par des bêtes sauvages (sangliers des monts, meutes de loups féroces, ours géants d'Hokkaido). 
                         Leur puissance défensive protège les richesses naturelles de l'oasis contre les prédateurs.
@@ -1475,7 +1475,7 @@ foreach ($allUnits as $u) {
                 </div>
 
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin: 0 0 0.5rem 0; color: #dc2626;">⚔️ 2. Raids de Pillage & Butins</h4>
+                    <h4 style="margin: 0 0 0.5rem 0; color: #dc2626;"><i class="fa-solid fa-khanda text-danger me-1"></i>2. Raids de Pillage & Butins</h4>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
                         Tant que des animaux y subsistent, envoyer vos troupes ou votre Héros Samouraï permet d'éliminer la faune et de 
                         dérober instantanément les ressources stockées (bois, pierre, riz). Idéal pour accélérer le développement initial.
@@ -1483,7 +1483,7 @@ foreach ($allUnits as $u) {
                 </div>
 
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h4 style="margin: 0 0 0.5rem 0; color: #16a34a;">🏰 3. Annexion & Bonus Permanents</h4>
+                    <h4 style="margin: 0 0 0.5rem 0; color: #16a34a;"><i class="fa-solid fa-chess-rook me-1"></i>3. Annexion &amp; Bonus Permanents</h4>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
                         Une fois tous les animaux terrassés, y dépêcher une armée avec votre Héros Samouraï permet d'annexer l'oasis à votre fief. 
                         Elle octroie alors un bonus permanent de <strong>+25% ou +50%</strong> sur la production horaire de votre domaine !
@@ -1499,7 +1499,7 @@ foreach ($allUnits as $u) {
                     <div>
                         <span style="font-size: 0.75rem; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 1px;">Bestiaire des Provinces</span>
                         <h3 style="margin: 0.2rem 0 0.4rem 0; font-size: 1.4rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                            <span>🐾</span> Faune Hostile & Bêtes Sauvages des Oasis
+                            <i class="fa-solid fa-paw text-warning me-1"></i>Faune Hostile &amp; Bêtes Sauvages des Oasis
                         </h3>
                         <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">
                             Avant de pouvoir annexer une oasis ou récolter ses précieux tributs, tout seigneur doit purger la faune féroce qui la défend. Chaque espèce possède ses propres caractéristiques martiales et sensibilités tactiques.
@@ -1527,10 +1527,10 @@ foreach ($allUnits as $u) {
                              onclick="openDocsLightbox('Sanglier Enragé des Monts', '<?= $sanglierSrc ?>', 'Bête Sauvage & Gardien des Sources (Tier 1)', 'Bête sauvage agressive chargeant en furie quiconque s\'approche de sa tanière. Ses défenses acérées brisent les premières lignes d\'infanterie avec violence.', '« Rien ne résiste à la charge aveugle du sanglier protecteur des sources. »')">
                             <img src="<?= $sanglierSrc ?>" alt="Sanglier Enragé des Monts" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                             <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #f59e0b; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                                🐗 Tier 1 &bull; Chargeur Brutal
+                                <i class="fa-solid fa-paw text-warning me-1"></i>Tier 1 &bull; Chargeur Brutal
                             </span>
                             <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                                🔍 Agrandir
+                                <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                             </span>
                         </div>
                         <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
@@ -1546,20 +1546,20 @@ foreach ($allUnits as $u) {
                             <div>
                                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; font-size: 0.8rem; margin-bottom: 0.75rem;">
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #dc2626; font-weight: 800;">⚔️ Atq :</span> <strong>35</strong>
+                                        <span style="color: #dc2626; font-weight: 800;"><i class="fa-solid fa-khanda text-danger me-1"></i>Atq :</span> <strong>35</strong>
                                     </div>
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #2563eb; font-weight: 800;">🛡️ Déf Inf :</span> <strong>40</strong>
+                                        <span style="color: #2563eb; font-weight: 800;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Déf Inf :</span> <strong>40</strong>
                                     </div>
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #0891b2; font-weight: 800;">🛡️ Déf Cav :</span> <strong>20</strong>
+                                        <span style="color: #0891b2; font-weight: 800;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Déf Cav :</span> <strong>20</strong>
                                     </div>
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #16a34a; font-weight: 800;">⚡ Vitesse :</span> <strong>7</strong>
+                                        <span style="color: #16a34a; font-weight: 800;"><i class="fa-solid fa-bolt text-warning me-1"></i>Vitesse :</span> <strong>7</strong>
                                     </div>
                                 </div>
                                 <div style="font-size: 0.75rem; color: #b45309; background: rgba(180, 83, 9, 0.08); padding: 6px 10px; border-radius: 6px; border-left: 3px solid #b45309;">
-                                    💡 <em>Vulnérable face aux charges rapides de cavalerie et aux flèches d'archers montés.</em>
+                                    <i class="fa-solid fa-lightbulb text-warning me-1"></i><em>Vulnérable face aux charges rapides de cavalerie et aux flèches d'archers montés.</em>
                                 </div>
                             </div>
                         </div>
@@ -1571,10 +1571,10 @@ foreach ($allUnits as $u) {
                              onclick="openDocsLightbox('Loup Vicieux de Honshu', '<?= $loupSrc ?>', 'Prédateur Vicieux & Chasseur en Meute (Tier 2)', 'Prédateur rusé chassant en meute coordonnée dans les forêts et collines. Rapide et létal, il fond sur les flancs des colonnes militaires.', '« Leurs yeux dorés percent la brume avant que leurs crocs ne déchirent la chair. »')">
                             <img src="<?= $loupSrc ?>" alt="Loup Vicieux de Honshu" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                             <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #38bdf8; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                                🐺 Tier 2 &bull; Traqueur Agile
+                                <i class="fa-solid fa-dog text-secondary me-1"></i>Tier 2 &bull; Traqueur Agile
                             </span>
                             <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                                🔍 Agrandir
+                                <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                             </span>
                         </div>
                         <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
@@ -1590,20 +1590,20 @@ foreach ($allUnits as $u) {
                             <div>
                                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; font-size: 0.8rem; margin-bottom: 0.75rem;">
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #dc2626; font-weight: 800;">⚔️ Atq :</span> <strong>60</strong>
+                                        <span style="color: #dc2626; font-weight: 800;"><i class="fa-solid fa-khanda text-danger me-1"></i>Atq :</span> <strong>60</strong>
                                     </div>
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #2563eb; font-weight: 800;">🛡️ Déf Inf :</span> <strong>35</strong>
+                                        <span style="color: #2563eb; font-weight: 800;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Déf Inf :</span> <strong>35</strong>
                                     </div>
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #0891b2; font-weight: 800;">🛡️ Déf Cav :</span> <strong>55</strong>
+                                        <span style="color: #0891b2; font-weight: 800;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Déf Cav :</span> <strong>55</strong>
                                     </div>
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #16a34a; font-weight: 800;">⚡ Vitesse :</span> <strong>9</strong>
+                                        <span style="color: #16a34a; font-weight: 800;"><i class="fa-solid fa-bolt text-warning me-1"></i>Vitesse :</span> <strong>9</strong>
                                     </div>
                                 </div>
                                 <div style="font-size: 0.75rem; color: #0284c7; background: rgba(2, 132, 199, 0.08); padding: 6px 10px; border-radius: 6px; border-left: 3px solid #0284c7;">
-                                    💡 <em>Privilégiez les lignes de lanciers Yari Ashigaru et Samouraïs d'élite pour contrer leur agilité.</em>
+                                    <i class="fa-solid fa-lightbulb text-warning me-1"></i><em>Privilégiez les lignes de lanciers Yari Ashigaru et Samouraïs d'élite pour contrer leur agilité.</em>
                                 </div>
                             </div>
                         </div>
@@ -1615,10 +1615,10 @@ foreach ($allUnits as $u) {
                              onclick="openDocsLightbox('Grand Ours Brun de Hokkaido', '<?= $oursSrc ?>', 'Colosse Septentrional & Terreur des Sommets (Tier 3)', 'Colosse sauvage des contrées glacées d\'Ezo, doué d\'une force brute titanesque capable de balayer un bataillon entier d\'un coup de patte.', '« Face au maître colosse d\'Ezo, même les lances des plus braves samouraïs volent en éclats. »')">
                             <img src="<?= $oursSrc ?>" alt="Grand Ours Brun de Hokkaido" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                             <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #ef4444; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                                🐻 Tier 3 &bull; Colosse Apex
+                                <i class="fa-solid fa-paw text-danger me-1"></i>Tier 3 &bull; Colosse Apex
                             </span>
                             <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                                🔍 Agrandir
+                                <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                             </span>
                         </div>
                         <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
@@ -1634,20 +1634,20 @@ foreach ($allUnits as $u) {
                             <div>
                                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; font-size: 0.8rem; margin-bottom: 0.75rem;">
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #dc2626; font-weight: 800;">⚔️ Atq :</span> <strong>140</strong>
+                                        <span style="color: #dc2626; font-weight: 800;"><i class="fa-solid fa-khanda text-danger me-1"></i>Atq :</span> <strong>140</strong>
                                     </div>
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #2563eb; font-weight: 800;">🛡️ Déf Inf :</span> <strong>130</strong>
+                                        <span style="color: #2563eb; font-weight: 800;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Déf Inf :</span> <strong>130</strong>
                                     </div>
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #0891b2; font-weight: 800;">🛡️ Déf Cav :</span> <strong>110</strong>
+                                        <span style="color: #0891b2; font-weight: 800;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Déf Cav :</span> <strong>110</strong>
                                     </div>
                                     <div style="background: var(--bg-ink, #ede5d5); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                                        <span style="color: #16a34a; font-weight: 800;">⚡ Vitesse :</span> <strong>6</strong>
+                                        <span style="color: #16a34a; font-weight: 800;"><i class="fa-solid fa-bolt text-warning me-1"></i>Vitesse :</span> <strong>6</strong>
                                     </div>
                                 </div>
                                 <div style="font-size: 0.75rem; color: #dc2626; background: rgba(220, 38, 38, 0.08); padding: 6px 10px; border-radius: 6px; border-left: 3px solid #dc2626;">
-                                    💡 <em>Ne jamais l'attaquer sans un Héros Samouraï doté d'une forte Puissance Martiale ou d'une armée conséquente.</em>
+                                    <i class="fa-solid fa-lightbulb text-warning me-1"></i><em>Ne jamais l'attaquer sans un Héros Samouraï doté d'une forte Puissance Martiale ou d'une armée conséquente.</em>
                                 </div>
                             </div>
                         </div>
@@ -1658,7 +1658,7 @@ foreach ($allUnits as $u) {
                 <!-- TABLEAU DES ARCHÉTYPES D'OASIS ET RÉPARTITION DE LA FAUNE -->
                 <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem;">
                     <h4 style="margin: 0 0 0.75rem 0; font-size: 1.05rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📋</span> Répartition de la Faune par Archétype d'Oasis
+                        <i class="fa-solid fa-clipboard-list text-primary me-1"></i>Répartition de la Faune par Archétype d'Oasis
                     </h4>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem 0;">
                         Lors de la génération de la carte du Shogunat, chaque type d'oasis abrite une garnison sauvage prédéterminée protégeant ses richesses :
@@ -1669,9 +1669,9 @@ foreach ($allUnits as $u) {
                                 <tr style="background: rgba(0,0,0,0.04);">
                                     <th style="padding: 8px 12px;">Type d'Oasis</th>
                                     <th style="padding: 8px 12px; text-align: center;">Bonus Économique</th>
-                                    <th style="padding: 8px 12px; text-align: center;">🐗 Sangliers</th>
-                                    <th style="padding: 8px 12px; text-align: center;">🐺 Loups</th>
-                                    <th style="padding: 8px 12px; text-align: center;">🐻 Ours</th>
+                                    <th style="padding: 8px 12px; text-align: center;"><i class="fa-solid fa-paw text-warning me-1"></i>Sangliers</th>
+                                    <th style="padding: 8px 12px; text-align: center;"><i class="fa-solid fa-dog text-secondary me-1"></i>Loups</th>
+                                    <th style="padding: 8px 12px; text-align: center;"><i class="fa-solid fa-paw text-danger me-1"></i>Ours</th>
                                     <th style="padding: 8px 12px; text-align: center;">Niveau de Menace</th>
                                 </tr>
                             </thead>
@@ -1741,7 +1741,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #0891b2; text-transform: uppercase; letter-spacing: 1px;">Chapitre 7</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🎯</span> Didacticiel & Voie des 12 Quêtes Féodales
+                        <i class="fa-solid fa-bullseye text-primary me-1"></i>Didacticiel &amp; Voie des 12 Quêtes Féodales
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Pour guider les nouveaux seigneurs féodaux, le maître d'armes Katsumoto propose une série ordonnée de 12 quêtes 
@@ -1804,7 +1804,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px;">Chapitre 8</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🗺️</span> Carte Féodale & les Quatre Provinces Cardinaux
+                        <i class="fa-solid fa-map-location-dot text-primary me-1"></i>Carte Féodale &amp; les Quatre Provinces Cardinaux
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         L'archipel féodal d'OpenShogun s'étend sur une grille cartographique continue divisée en 4 grandes régions géographiques.
@@ -1818,19 +1818,19 @@ foreach ($allUnits as $u) {
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                    <h4 style="margin:0 0 0.5rem 0; color: #3b82f6;">❄️ 1. Province du Nord (Mutsu & Dewa)</h4>
+                    <h4 style="margin:0 0 0.5rem 0; color: #3b82f6;"><i class="fa-solid fa-snowflake me-1"></i>1. Province du Nord (Mutsu &amp; Dewa)</h4>
                     <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Terres boréales accidentées, forêts de résineux denses et reliefs montagneux réputés pour leurs gisements de pierre et leurs hardes d'ours sauvages.</p>
                 </div>
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #ef4444;">
-                    <h4 style="margin:0 0 0.5rem 0; color: #ef4444;">🌋 2. Province du Sud (Kyūshū & Shikoku)</h4>
+                    <h4 style="margin:0 0 0.5rem 0; color: #ef4444;"><i class="fa-solid fa-volcano me-1"></i>2. Province du Sud (Kyūshū &amp; Shikoku)</h4>
                     <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Climat tempéré favorable aux rizières abondantes, proximité maritime et routes commerciales animées par les caravanes de vivres.</p>
                 </div>
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                    <h4 style="margin:0 0 0.5rem 0; color: #8b5cf6;">🌅 3. Province de l'Est (Plaines du Kantō & Mikawa)</h4>
+                    <h4 style="margin:0 0 0.5rem 0; color: #8b5cf6;"><i class="fa-solid fa-sun me-1"></i>3. Province de l'Est (Plaines du Kantō &amp; Mikawa)</h4>
                     <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Vastes plaines fertiles idéales pour déployer les charges de cavalerie et bâtir d'immenses cités castrales fortifiées.</p>
                 </div>
                 <div style="background: var(--bg-ink); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #10b981;">
-                    <h4 style="margin:0 0 0.5rem 0; color: #10b981;">🏯 4. Province de l'Ouest (Kansai & Chūgoku)</h4>
+                    <h4 style="margin:0 0 0.5rem 0; color: #10b981;"><i class="fa-solid fa-chess-rook me-1"></i>4. Province de l'Ouest (Kansai &amp; Chūgoku)</h4>
                     <p style="margin:0; font-size:0.85rem; color: var(--text-muted);">Cœur historique de l'archipel impérial abritant les forteresses légendaires d'Azuchi et d'Osaka, berceau des traités diplomatiques.</p>
                 </div>
             </div>
@@ -1846,7 +1846,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: var(--red-primary); text-transform: uppercase; letter-spacing: 1px;">Chapitre 9</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🏯</span> Les 12 Donjons Authentiques du Japon (現存十二天守)
+                        <i class="fa-solid fa-chess-rook text-danger me-1"></i>Les 12 Donjons Authentiques du Japon (現存十二天守)
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Disséminés sur la Carte des Provinces, les 12 donjons authentiques ayant survécu depuis l'époque féodale 
@@ -1861,40 +1861,40 @@ foreach ($allUnits as $u) {
 
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; font-size: 0.9rem;">
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château de Himeji</strong> (Harima) &bull; Le Héron Blanc
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château de Himeji</strong> (Harima) &bull; Le Héron Blanc
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château de Matsumoto</strong> (Shinano) &bull; Le Corbeau Noir
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château de Matsumoto</strong> (Shinano) &bull; Le Corbeau Noir
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château d'Inuyama</strong> (Owari) &bull; Le plus ancien donjon
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château d'Inuyama</strong> (Owari) &bull; Le plus ancien donjon
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château de Hikone</strong> (Ōmi) &bull; Trésor National
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château de Hikone</strong> (Ōmi) &bull; Trésor National
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château de Matsue</strong> (Izumo) &bull; Le Pluvier Noir
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château de Matsue</strong> (Izumo) &bull; Le Pluvier Noir
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château de Kōchi</strong> (Tosa) &bull; Bastion de Shikoku
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château de Kōchi</strong> (Tosa) &bull; Bastion de Shikoku
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château de Marugame</strong> (Sanuki) &bull; Murailles en éventail
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château de Marugame</strong> (Sanuki) &bull; Murailles en éventail
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château de Maruoka</strong> (Echizen) &bull; Toiture de tuiles en pierre
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château de Maruoka</strong> (Echizen) &bull; Toiture de tuiles en pierre
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château de Bitchū Matsuyama</strong> &bull; La Forteresse des Nuages
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château de Bitchū Matsuyama</strong> &bull; La Forteresse des Nuages
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château de Matsuyama</strong> (Iyo) &bull; Complexe Castral
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château de Matsuyama</strong> (Iyo) &bull; Complexe Castral
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château d'Uwajima</strong> (Iyo) &bull; Bastion Côtier
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château d'Uwajima</strong> (Iyo) &bull; Bastion Côtier
                 </div>
                 <div style="background: var(--bg-ink); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <strong>🏯 Château de Hirosaki</strong> (Mutsu) &bull; Donjon Septentrional
+                    <strong><i class="fa-solid fa-chess-rook text-danger me-1"></i>Château de Hirosaki</strong> (Mutsu) &bull; Donjon Septentrional
                 </div>
             </div>
         </div>
@@ -1909,7 +1909,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 1px;">Chapitre 10</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>⚔️</span> Système de Combat, Murailles & Formules Martiales
+                        <i class="fa-solid fa-shield-halved text-danger me-1"></i>Système de Combat, Murailles &amp; Formules Martiales
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Comprendre les calculs d'affrontement pour mener vos sièges avec succès et défendre vos courtines.
@@ -1938,7 +1938,7 @@ foreach ($allUnits as $u) {
 
                 <div style="background: rgba(22, 163, 74, 0.06); padding: 1.25rem; border-radius: 8px; border: 1px solid rgba(22, 163, 74, 0.35); margin: 1.5rem 0; color: var(--text-main);">
                     <h4 style="margin: 0 0 0.5rem 0; color: #15803d; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🔰</span> Immunité Féodale des Nouveaux Joueurs (Protection de 7 Jours)
+                        <i class="fa-solid fa-shield-halved text-success me-1"></i>Immunité Féodale des Nouveaux Joueurs (Protection de 7 Jours)
                     </h4>
                     <p style="margin-bottom: 0.75rem; font-size: 0.92rem; line-height: 1.55;">
                         Afin de permettre à chaque jeune Daimyō de bâtir ses rizières, d'élever ses remparts et de recruter ses premiers bataillons sans craindre les incursions dévastatrices de seigneurs plus aguerris ou des armées de bots, le Shogunat octroie une <strong>immunité inviolable de 7 jours</strong> dès la création du domaine castral.
@@ -1963,7 +1963,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 1px;">Chapitre 11</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🚩</span> Alliances Féodales, Pavillon Diplomatique & Guerres de Clans
+                        <i class="fa-solid fa-flag text-danger me-1"></i>Alliances Féodales, Pavillon Diplomatique &amp; Guerres de Clans
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Dans le tourbillon de l'époque Sengoku, nul daimyō ne peut prétendre unifier le Japon en combattant seul. Les Alliances féodales permettent de coaliser vos forces militaires, de sécuriser vos frontières grâce à des pactes de non-agression, d'échanger des vivres d'urgence et de coordonner de gigantesques opérations de siège.
@@ -1985,10 +1985,10 @@ foreach ($allUnits as $u) {
                      onclick="openDocsLightbox('Pavillon Diplomatique', '<?= $embassySrc ?>', 'Bâtiment Urbain Castral (Emplacements 19-34)', 'Lieu solennel de réception des émissaires impériaux et ambassadeurs des clans rivaux. C\'est ici que se négocient les pactes, se ratifient les trêves et s\'élaborent les traités d\'alliance.', '« La plume de l\'ambassadeur prévient souvent ce que mille sabres ne peuvent réparer. »')">
                     <img src="<?= $embassySrc ?>" alt="Pavillon Diplomatique" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #2563eb; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                        🏛️ Pavillon Diplomatique
+                        <i class="fa-solid fa-torii-gate me-1"></i>Pavillon Diplomatique
                     </span>
                     <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                        🔍 Agrandir
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                     </span>
                 </div>
                 <div style="flex: 1; min-width: 280px;">
@@ -2014,7 +2014,7 @@ foreach ($allUnits as $u) {
 
             <!-- HIÉRARCHIE & RANGS DE L'ALLIANCE -->
             <h3 style="margin: 1.5rem 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                <span>👑</span> Hiérarchie, Rôles & Prérogatives Féodales
+                <i class="fa-solid fa-crown text-warning me-1"></i>Hiérarchie, Rôles &amp; Prérogatives Féodales
             </h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #b91c1c;">
@@ -2049,12 +2049,12 @@ foreach ($allUnits as $u) {
 
             <!-- RELATIONS DIPLOMATIQUES -->
             <h3 style="margin: 1.5rem 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                <span>🕊️</span> Les Trois Traités Diplomatiques
+                <i class="fa-solid fa-handshake text-primary me-1"></i>Les Trois Traités Diplomatiques
             </h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                 <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.25); border-radius: 8px; padding: 1.25rem;">
                     <h4 style="margin: 0 0 0.5rem 0; color: #2563eb; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🤝</span> Pacte de Non-Agression (PNA)
+                        <i class="fa-solid fa-handshake text-success me-1"></i>Pacte de Non-Agression (PNA)
                     </h4>
                     <p style="font-size: 0.88rem; line-height: 1.5; margin: 0; color: var(--text-main);">
                         Signé mutuellement entre deux clans pour sceller une trêve d'honneur. Il empêche les attaques fortuites et les raids de pillage entre membres des deux alliances, facilitant une cohabitation sereine sur les frontières provinciales.
@@ -2062,7 +2062,7 @@ foreach ($allUnits as $u) {
                 </div>
                 <div style="background: rgba(22,163,74,0.06); border: 1px solid rgba(22,163,74,0.25); border-radius: 8px; padding: 1.25rem;">
                     <h4 style="margin: 0 0 0.5rem 0; color: #16a34a; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🛡️</span> Confédération & Assistance Totale
+                        <i class="fa-solid fa-shield-halved text-primary me-1"></i>Confédération &amp; Assistance Totale
                     </h4>
                     <p style="font-size: 0.88rem; line-height: 1.5; margin: 0; color: var(--text-main);">
                         Alliance suprême fusionnant les intérêts stratégiques des deux clans. Permet de stationner des garnisons défensives dans les forteresses amies pour contrer un assaut ennemi et d'accélérer les convois d'approvisionnement.
@@ -2070,7 +2070,7 @@ foreach ($allUnits as $u) {
                 </div>
                 <div style="background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.25); border-radius: 8px; padding: 1.25rem;">
                     <h4 style="margin: 0 0 0.5rem 0; color: #dc2626; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>⚔️</span> Déclaration de Guerre Ouverte
+                        <i class="fa-solid fa-khanda text-danger me-1"></i>Déclaration de Guerre Ouverte
                     </h4>
                     <p style="font-size: 0.88rem; line-height: 1.5; margin: 0; color: var(--text-main);">
                         Officialise un état de belligérance impitoyable. Débloque le registre des affrontements de guerre (troupes terrassées, donjons assiégés, butins conquis) et motive les régiments pour écraser le rival.
@@ -2089,7 +2089,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 1px;">Chapitre 12</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🍶</span> Artisanat du Moulin, Banquets au Tenshu, Colons & Famine
+                        <i class="fa-solid fa-wine-bottle text-danger me-1"></i>Artisanat du Moulin, Banquets au Tenshu, Colons &amp; Famine
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         L'art de gouverner ne se limite pas à lever des sabres : il réside dans la prospérité des récoltes et le raffinement de l'intendance. Le Moulin permet de transformer le riz en Farine pure et en Saké impérial, indispensables pour célébrer les Banquets au Donjon Tenshu et accumuler les précieux Points de Culture (CP) requis pour fonder de nouvelles provinces.
@@ -2111,10 +2111,10 @@ foreach ($allUnits as $u) {
                      onclick="openDocsLightbox('Moulin à Grains & Raffinage', '<?= $millSrc ?>', 'Atelier d\'Artisanat Féodal (Emplacement Urbain)', 'Actionné par le courant des cours d\'eau ou la force du vent, le Moulin broie le riz brut en fine farine et abrite les cuves de fermentation pour brasser le précieux Saké des dieux.', '« Chaque grain moulu sous la meule prépare la grandeur des banquets futurs. »')">
                     <img src="<?= $millSrc ?>" alt="Moulin à Grains" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #d97706; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                        🌾 Moulin d'Artisanat
+                        <i class="fa-solid fa-wheat-awn text-warning me-1"></i>Moulin d'Artisanat
                     </span>
                     <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                        🔍 Agrandir
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                     </span>
                 </div>
                 <div style="flex: 1; min-width: 280px;">
@@ -2132,13 +2132,13 @@ foreach ($allUnits as $u) {
                     </p>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
                         <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                            <div style="font-weight: 800; color: #b45309; font-size: 0.9rem;">🌾 Farine de Riz (米粉 - Komeko)</div>
+                            <div style="font-weight: 800; color: #b45309; font-size: 0.9rem;"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Farine de Riz (米粉 - Komeko)</div>
                             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
                                 Obtenue par broyage mécanique. Aliment de base pour les festivités provinciales et les réserves de longue conservation.
                             </div>
                         </div>
                         <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                            <div style="font-weight: 800; color: #b91c1c; font-size: 0.9rem;">🍶 Saké Impérial (日本酒 - Nihonshu)</div>
+                            <div style="font-weight: 800; color: #b91c1c; font-size: 0.9rem;"><i class="fa-solid fa-wine-bottle text-danger me-1"></i>Saké Impérial (日本酒 - Nihonshu)</div>
                             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
                                 Boisson sacrée issue d'une fermentation patiente. Offerte aux sanctuaires et bue lors des grands banquets au Tenshu.
                             </div>
@@ -2149,7 +2149,7 @@ foreach ($allUnits as $u) {
 
             <!-- LES BANQUETS DU TENSHU & POINTS DE CULTURE -->
             <h3 style="margin: 1.5rem 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                <span>🍱</span> Banquets au Tenshu & Rayonnement Culturel (CP)
+                <i class="fa-solid fa-bowl-rice text-warning me-1"></i>Banquets au Tenshu &amp; Rayonnement Culturel (CP)
             </h3>
             <p style="font-size: 0.92rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1rem;">
                 Pour fonder ou conquérir de nouveaux villages sur la Carte des Provinces, votre domaine doit accumuler des <strong>Points de Culture (CP)</strong>. Si chaque bâtiment érigé en génère passivement chaque jour, organiser des <strong>Banquets</strong> au sommet du Donjon Tenshu accélère considérablement cette marche vers l'hégémonie :
@@ -2157,7 +2157,7 @@ foreach ($allUnits as $u) {
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #f59e0b;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <h4 style="margin: 0; color: #b45309; font-size: 1.1rem;">🏮 Petit Banquet Populaire</h4>
+                        <h4 style="margin: 0; color: #b45309; font-size: 1.1rem;"><i class="fa-solid fa-wine-bottle me-1"></i>Petit Banquet Populaire</h4>
                         <span style="font-size: 0.75rem; font-weight: 700; background: rgba(245,158,11,0.15); color: #b45309; padding: 2px 8px; border-radius: 4px;">Tenshu Niv. 1+</span>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.75rem 0;">
@@ -2172,7 +2172,7 @@ foreach ($allUnits as $u) {
 
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #dc2626;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <h4 style="margin: 0; color: #b91c1c; font-size: 1.1rem;">🏯 Grand Banquet Impérial</h4>
+                        <h4 style="margin: 0; color: #b91c1c; font-size: 1.1rem;"><i class="fa-solid fa-crown me-1"></i>Grand Banquet Impérial</h4>
                         <span style="font-size: 0.75rem; font-weight: 700; background: rgba(220,38,38,0.15); color: #b91c1c; padding: 2px 8px; border-radius: 4px;">Tenshu Niv. 10+</span>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 0.75rem 0;">
@@ -2189,7 +2189,7 @@ foreach ($allUnits as $u) {
             <!-- COLONISATION & RISQUE DE FAMINE -->
             <div style="background: rgba(220, 38, 38, 0.05); padding: 1.25rem; border-radius: 8px; border: 1px solid rgba(220, 38, 38, 0.35); margin-top: 1rem;">
                 <h4 style="margin: 0 0 0.5rem 0; color: #b91c1c; display: flex; align-items: center; gap: 0.5rem;">
-                    <span>⚠️</span> Entretien des Armées (Upkeep) & Risque de Famine Déserteuse
+                    <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Entretien des Armées (Upkeep) &amp; Risque de Famine Déserteuse
                 </h4>
                 <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-main); margin-bottom: 0.75rem;">
                     Dans OpenShogun, chaque guerrier du Dojo, cavalier et équipage de siège consomme une part de grain chaque heure pour sa subsistance (<strong>1 sac de riz / heure par soldat</strong>) :
@@ -2213,7 +2213,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #15803d; text-transform: uppercase; letter-spacing: 1px;">Chapitre 13</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>🦊</span> Cages de Capture & Domestication de la Faune Sauvage
+                        <i class="fa-solid fa-paw text-warning me-1"></i>Cages de Capture &amp; Domestication de la Faune Sauvage
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Directement inspirées des tactiques ancestrales de dressage et des chasses en forêt primaire, les <strong>Cages de Capture en fer forgé</strong> permettent à votre Héros Samouraï de capturer vivantes les créatures sauvages qui peuplent les Oasis indépendantes sans verser une goutte de sang, pour en faire des sentinelles féroces et gratuites sur vos remparts.
@@ -2235,10 +2235,10 @@ foreach ($allUnits as $u) {
                      onclick="openDocsLightbox('Cages de Capture de Faune Sauvage', '<?= $cagesSrc ?>', 'Équipement Consommable du Héros Samouraï', 'Forgées en barreaux d\'acier trempé munis de déclencheurs à contrepoids, ces cages permettent de capturer vivants ours géants, loups des forêts et sangliers lors des assauts sur les oasis.', '« Pourquoi abattre une bête féroce quand elle peut garder vos remparts jusqu\'à son dernier souffle ? »')">
                     <img src="<?= $cagesSrc ?>" alt="Cages de Capture" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #15803d; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                        ⛓️ Objet d'Inventaire
+                        <i class="fa-solid fa-link me-1"></i>Objet d'Inventaire
                     </span>
                     <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                        🔍 Agrandir
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                     </span>
                 </div>
                 <div style="flex: 1; min-width: 280px;">
@@ -2265,7 +2265,7 @@ foreach ($allUnits as $u) {
 
             <!-- LE BESTIAIRE FÉODAL EN DÉFENSE -->
             <h3 style="margin: 1.5rem 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                <span>🐺</span> Le Bestiaire Protecteur : Des Défenseurs d'Élite Gratuits
+                <i class="fa-solid fa-dog text-secondary me-1"></i>Le Bestiaire Protecteur : Des Défenseurs d'Élite Gratuits
             </h3>
             <p style="font-size: 0.92rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1rem;">
                 L'atout suprême de la faune sauvage réside dans sa totale autonomie vivrière : <strong>les bêtes ne consomment AUCUN sac de riz d'entretien horaire (0 Upkeep)</strong> ! Elles constituent un bouclier idéal contre les raids de cavalerie et les pillages nocturnes.
@@ -2273,35 +2273,35 @@ foreach ($allUnits as $u) {
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #4b5563;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                        <span style="font-size: 1.1rem; font-weight: 800; color: var(--text-main);">🐺 Loup des Bois</span>
+                        <span style="font-size: 1.1rem; font-weight: 800; color: var(--text-main);"><i class="fa-solid fa-dog text-secondary me-1"></i>Loup des Bois</span>
                         <span style="font-size: 0.75rem; font-weight: 800; background: rgba(75,85,99,0.15); padding: 2px 6px; border-radius: 4px;">Anti-Infanterie</span>
                     </div>
                     <p style="font-size: 0.85rem; line-height: 1.5; margin: 0 0 0.5rem 0; color: var(--text-muted);">
                         Chasse en meute serrée. Ses crocs déchiquètent les éclaireurs ennemis et perturbent les conscrits peu armés.
                     </p>
-                    <div style="font-size: 0.8rem; font-weight: 700; color: #2563eb;">🛡️ Déf. Infanterie : 30 &bull; Cavalerie : 15</div>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #2563eb;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Déf. Infanterie : 30 &bull; Cavalerie : 15</div>
                 </div>
 
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #b45309;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                        <span style="font-size: 1.1rem; font-weight: 800; color: #b45309;">🐗 Sanglier Cuirassé</span>
+                        <span style="font-size: 1.1rem; font-weight: 800; color: #b45309;"><i class="fa-solid fa-paw text-warning me-1"></i>Sanglier Cuirassé</span>
                         <span style="font-size: 0.75rem; font-weight: 800; background: rgba(180,83,9,0.15); padding: 2px 6px; border-radius: 4px;">Anti-Cavalerie</span>
                     </div>
                     <p style="font-size: 0.85rem; line-height: 1.5; margin: 0 0 0.5rem 0; color: var(--text-muted);">
                         Doté d'une peau épaisse et de défenses effilées. Sa charge brutale brise l'élan des chevaux et cavaliers adverses.
                     </p>
-                    <div style="font-size: 0.8rem; font-weight: 700; color: #2563eb;">🛡️ Déf. Infanterie : 35 &bull; Cavalerie : 60</div>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #2563eb;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Déf. Infanterie : 35 &bull; Cavalerie : 60</div>
                 </div>
 
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #b91c1c;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                        <span style="font-size: 1.1rem; font-weight: 800; color: #b91c1c;">🐻 Ours Brun Géant</span>
+                        <span style="font-size: 1.1rem; font-weight: 800; color: #b91c1c;"><i class="fa-solid fa-paw text-danger me-1"></i>Ours Brun Géant</span>
                         <span style="font-size: 0.75rem; font-weight: 800; background: rgba(185,28,28,0.15); padding: 2px 6px; border-radius: 4px;">Colosse Suprême</span>
                     </div>
                     <p style="font-size: 0.85rem; line-height: 1.5; margin: 0 0 0.5rem 0; color: var(--text-muted);">
                         Titan des cimes du mont Fuji. Encaisse des volées entières de flèches et fauche plusieurs assaillants d'un revers de patte.
                     </p>
-                    <div style="font-size: 0.8rem; font-weight: 700; color: #2563eb;">🛡️ Déf. Infanterie : 140 &bull; Cavalerie : 200</div>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #2563eb;"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Déf. Infanterie : 140 &bull; Cavalerie : 200</div>
                 </div>
             </div>
         </div>
@@ -2316,7 +2316,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px;">Chapitre 14</span>
                     <h2 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>💬</span> Communication Féodale : Chat en Temps Réel & Forum du Royaume
+                        <i class="fa-solid fa-comments text-primary me-1"></i>Communication Féodale : Chat en Temps Réel &amp; Forum du Royaume
                     </h2>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
                         Une communauté active et respectueuse est le pilier d'un empire durable. OpenShogun intègre un dispositif complet de communication en direct (chat multi-canaux avec widget persistant) ainsi qu'un grand forum du shogunat pour débattre des grandes affaires de l'archipel.
@@ -2338,10 +2338,10 @@ foreach ($allUnits as $u) {
                      onclick="openDocsLightbox('Maison de Thé & Salons de Discussion', '<?= $teahouseSrc ?>', 'Lieu de Parole & de Diplomatie Féodale', 'Autour d\'un bol de thé matcha ou d\'une coupe de saké, les seigneurs se rencontrent pour échanger nouvelles du front, négocier des trêves ou conter leurs exploits martiaux.', '« Dans le silence du salon de thé, les plus grandes alliances prennent naissance. »')">
                     <img src="<?= $teahouseSrc ?>" alt="Maison de Thé" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #7c3aed; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
-                        🍵 Salon de Discussion
+                        <i class="fa-solid fa-comments me-1"></i>Salon de Discussion
                     </span>
                     <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                        🔍 Agrandir
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
                     </span>
                 </div>
                 <div style="flex: 1; min-width: 280px;">
@@ -2367,23 +2367,23 @@ foreach ($allUnits as $u) {
 
             <!-- FORUM DU SHOGUNAT -->
             <h3 style="margin: 1.5rem 0 1rem 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                <span>📜</span> Le Forum Officiel du Shogunat (<code>?page=forum</code>)
+                <i class="fa-solid fa-scroll text-warning me-1"></i>Le Forum Officiel du Shogunat (<code>?page=forum</code>)
             </h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #b91c1c;">
-                    <h4 style="margin: 0 0 0.5rem 0; color: #b91c1c; font-size: 1.05rem;">📢 Annonces & Édits Impériaux</h4>
+                    <h4 style="margin: 0 0 0.5rem 0; color: #b91c1c; font-size: 1.05rem;"><i class="fa-solid fa-bullhorn me-1"></i>Annonces &amp; Édits Impériaux</h4>
                     <p style="font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--text-muted);">
                         Communications solennelles de l'administration du jeu : annonces d'événements saisonniers, notes de mise à jour, équilibrages et tournois martiaux.
                     </p>
                 </div>
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #2563eb;">
-                    <h4 style="margin: 0 0 0.5rem 0; color: #2563eb; font-size: 1.05rem;">⚔️ Chroniques de Guerre & Rapports</h4>
+                    <h4 style="margin: 0 0 0.5rem 0; color: #2563eb; font-size: 1.05rem;"><i class="fa-solid fa-khanda text-danger me-1"></i>Chroniques de Guerre & Rapports</h4>
                     <p style="font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--text-muted);">
                         Publication des rapports de bataille historiques, déclarations d'hostilités solennelles entre clans et récits d'assauts mémorables.
                     </p>
                 </div>
                 <div style="background: var(--bg-ink, #ede5d5); padding: 1.25rem; border-radius: 8px; border-left: 4px solid #16a34a;">
-                    <h4 style="margin: 0 0 0.5rem 0; color: #16a34a; font-size: 1.05rem;">🍵 La Maison de Thé (Taverne RP)</h4>
+                    <h4 style="margin: 0 0 0.5rem 0; color: #16a34a; font-size: 1.05rem;"><i class="fa-solid fa-mug-hot me-1"></i>La Maison de Thé (Taverne RP)</h4>
                     <p style="font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--text-muted);">
                         Espace de convivialité, récits de fiction à l'époque Sengoku, poèmes haïkus et échanges libres dans le respect de l'honneur féodal.
                     </p>
@@ -2392,7 +2392,7 @@ foreach ($allUnits as $u) {
 
             <div style="background: rgba(124, 58, 237, 0.06); padding: 1.25rem; border-radius: 8px; border: 1px solid rgba(124, 58, 237, 0.3); margin-top: 1rem;">
                 <h4 style="margin: 0 0 0.5rem 0; color: #6d28d9; display: flex; align-items: center; gap: 0.5rem;">
-                    <span>🛡️</span> Charte de Conduite & Code du Bushidō
+                    <i class="fa-solid fa-shield-halved text-success me-1"></i>Charte de Conduite &amp; Code du Bushidō
                 </h4>
                 <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--text-main);">
                     Sur les salons de chat comme sur les coursives du forum, chaque daimyō s'engage à respecter la courtoisie féodale. Les insultes, le harcèlement et les comportements déloyaux sont réprimandés par le Grand Chambellan sous peine de bannissement des canaux publics.
@@ -2410,7 +2410,7 @@ foreach ($allUnits as $u) {
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 1px;">Privilège du Shōgun &bull; Sengoku Plus</span>
                     <h2 style="margin: 0.25rem 0 0 0; font-size: 1.75rem; color: var(--text-main); font-weight: 900; display: flex; align-items: center; gap: 0.6rem;">
-                        <span>👑</span> Chapitre 15 : Le Sceau Impérial &amp; l'Empire
+                        <i class="fa-solid fa-crown text-warning me-1"></i>Chapitre 15 : Le Sceau Impérial &amp; l'Empire
                     </h2>
                 </div>
                 <span class="badge" style="background: rgba(245,158,11,0.15); color: #b45309; border: 1px solid rgba(245,158,11,0.4); font-size: 0.85rem; padding: 0.4rem 0.8rem; border-radius: 6px;">
@@ -2428,112 +2428,112 @@ foreach ($allUnits as $u) {
                 <!-- 1. ARCHITECTE DE COUR -->
                 <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #3b82f6;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">🔨</span>
+                        <span style="font-size: 1.5rem;"><i class="fa-solid fa-hammer text-primary"></i></span>
                         <h3 style="margin: 0; font-size: 1.1rem; color: #1d4ed8; font-weight: 800;">1. Architecte de Cour (File Étendue)</h3>
                     </div>
                     <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
                         Planifiez vos chantiers castraux jour et nuit. Les maîtres bâtisseurs enchaînent jusqu'à <strong>4 constructions</strong> (jusqu'à 2 parcelles agricoles et 2 infrastructures urbaines pour Oda, et 3 chantiers consécutifs pour les autres clans).
                     </p>
                     <div style="font-size: 0.78rem; font-weight: 700; color: #1e40af;">
-                        ⚡ Enchaînement automatique : le 2e chantier démarre dès la pose de la dernière pierre du premier !
+                        <i class="fa-solid fa-bolt text-warning me-1"></i>Enchaînement automatique : le 2e chantier démarre dès la pose de la dernière pierre du premier !
                     </div>
                 </div>
 
                 <!-- 2. FILE DE RAFFINAGE SAKAGURA (NOUVEAU) -->
                 <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #166534;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">🍶</span>
+                        <span style="font-size: 1.5rem;"><i class="fa-solid fa-wine-bottle text-danger"></i></span>
                         <h3 style="margin: 0; font-size: 1.1rem; color: #166534; font-weight: 800;">2. File de Raffinage Meunerie (Sakagura)</h3>
                     </div>
                     <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
-                        Enchaînez jusqu'à <strong>4 commandes de raffinage</strong> dans vos ateliers (Mouture de Farine de Riz 🍚 et Brassage de Saké 🍶). Vos meules et cuves tournent sans interruption même pendant votre sommeil !
+                        Enchaînez jusqu'à <strong>4 commandes de raffinage</strong> dans vos ateliers (Mouture de Farine de Riz <i class="fa-solid fa-bowl-rice text-warning me-1"></i>et Brassage de Saké <i class="fa-solid fa-wine-bottle text-danger"></i>). Vos meules et cuves tournent sans interruption même pendant votre sommeil !
                     </p>
                     <div style="font-size: 0.78rem; font-weight: 700; color: #14532d;">
-                        🍚 Vivres garantis pour éviter la famine de vos troupes d'élite et alimenter vos banquets.
+                        <i class="fa-solid fa-bowl-rice text-warning me-1"></i>Vivres garantis pour éviter la famine de vos troupes d'élite et alimenter vos banquets.
                     </div>
                 </div>
 
                 <!-- 3. ROUTES COMMERCIALES AUTOMATISÉES (NOUVEAU) -->
                 <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #0891b2;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">🛣️</span>
+                        <span style="font-size: 1.5rem;"><i class="fa-solid fa-route text-primary"></i></span>
                         <h3 style="margin: 0; font-size: 1.1rem; color: #0891b2; font-weight: 800;">3. Routes Commerciales Automatisées</h3>
                     </div>
                     <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
                         Définissez des routes logistiques permanentes entre vos fiefs avec fréquence au choix (toutes les 1h, 2h, 4h, 8h, 12h ou 24h). Vos chariots de ravitaillement partent automatiquement sans clic manuel !
                     </p>
                     <div style="font-size: 0.78rem; font-weight: 700; color: #0e7490;">
-                        📦 Ravitaillement continu de vos nouveaux fiefs en Bois, Pierre et Riz.
+                        <i class="fa-solid fa-box text-secondary me-1"></i>Ravitaillement continu de vos nouveaux fiefs en Bois, Pierre et Riz.
                     </div>
                 </div>
 
                 <!-- 4. TABLEAU DE BORD EMPIRE -->
                 <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #f59e0b;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">👑</span>
+                        <span style="font-size: 1.5rem;"><i class="fa-solid fa-crown text-warning"></i></span>
                         <h3 style="margin: 0; font-size: 1.1rem; color: #b45309; font-weight: 800;">4. Grand Tableau de Bord de l'Empire</h3>
                     </div>
                     <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
                         Accessible via la page <code>?page=empire</code> ou la barre de navigation. Consolidation complète de tous vos villages : jauges de stockage en temps réel, productions nettes horaires, totaux impériaux et surveillance du péril de famine.
                     </p>
                     <div style="font-size: 0.78rem; font-weight: 700; color: #92400e;">
-                        🌾 Vue globale de tous les chantiers et banquets de célébration de l'Archipel.
+                        <i class="fa-solid fa-wheat-awn text-warning me-1"></i>Vue globale de tous les chantiers et banquets de célébration de l'Archipel.
                     </div>
                 </div>
 
                 <!-- 5. CARNET DE RAIDS -->
                 <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #10b981;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">📜</span>
+                        <span style="font-size: 1.5rem;"><i class="fa-solid fa-scroll text-warning"></i></span>
                         <h3 style="margin: 0; font-size: 1.1rem; color: #047857; font-weight: 800;">5. Carnet de Raids (Farm List)</h3>
                     </div>
                     <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
-                        Créez vos listes de cibles régulières (oasis sauvages, provinces inactives) et assignez à chacune une composition d'armée dédiée. Un simple clic sur le bouton vert <strong>« ⚡ Lancer la Tournée »</strong> déploie instantanément toutes vos vagues.
+                        Créez vos listes de cibles régulières (oasis sauvages, provinces inactives) et assignez à chacune une composition d'armée dédiée. Un simple clic sur le bouton vert <strong>« <i class="fa-solid fa-bolt text-warning me-1"></i>Lancer la Tournée »</strong> déploie instantanément toutes vos vagues.
                     </p>
                     <div style="font-size: 0.78rem; font-weight: 700; color: #065f46;">
-                        🏇 Gain de temps phénoménal : plus besoin de recomposer vos régiments manuellement.
+                        <i class="fa-solid fa-horse text-danger me-1"></i>Gain de temps phénoménal : plus besoin de recomposer vos régiments manuellement.
                     </div>
                 </div>
 
                 <!-- 6. INTENDANT DU MARCHÉ -->
                 <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #8b5cf6;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">⚖️</span>
+                        <span style="font-size: 1.5rem;"><i class="fa-solid fa-scale-balanced text-warning"></i></span>
                         <h3 style="margin: 0; font-size: 1.1rem; color: #6d28d9; font-weight: 800;">6. Intendant du Marché (Troc 1:1:1)</h3>
                     </div>
                     <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
                         Vos greniers débordent de Bois mais manquent cruellement de Pierre ou de Riz pour ériger votre Donjon ? L'Intendant rééquilibre immédiatement vos réserves au ratio d'or <strong>1:1:1</strong> sans aucune taxe de perte, pour un tribut symbolique de 3 Koban.
                     </p>
                     <div style="font-size: 0.78rem; font-weight: 700; color: #5b21b6;">
-                        🎯 Curseur interactif et bouton « Répartir équitablement en tiers » en 1 clic.
+                        <i class="fa-solid fa-bullseye text-primary me-1"></i>Curseur interactif et bouton « Répartir équitablement en tiers » en 1 clic.
                     </div>
                 </div>
 
                 <!-- 7. ORDRE DE REPLI TACTIQUE -->
                 <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #ef4444;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">⛩️</span>
+                        <span style="font-size: 1.5rem;"><i class="fa-solid fa-torii-gate text-primary"></i></span>
                         <h3 style="margin: 0; font-size: 1.1rem; color: #b91c1c; font-weight: 800;">7. Ordre de Repli Tactique (Évasion)</h3>
                     </div>
                     <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
                         Activez l'ordre de repli tactique sur vos châteaux pour ordonner à votre garnison et à votre Samouraï Héros d'évacuer discrètement dans les sous-bois lors d'une attaque ennemie. Vos troupes évitent le massacre nocturne et demeurent indemnes.
                     </p>
                     <div style="font-size: 0.78rem; font-weight: 700; color: #991b1b;">
-                        🛡️ L'assaillant ne combat personne et ne pille que les ressources non protégées par vos Cachettes.
+                        <i class="fa-solid fa-shield-halved text-primary me-1"></i>L'assaillant ne combat personne et ne pille que les ressources non protégées par vos Cachettes.
                     </div>
                 </div>
 
                 <!-- 8. MONNAIE FÉODALE (KOBAN) -->
                 <div style="background: var(--bg-ink, #ede5d5); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; border-left: 4px solid #d97706;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">🪙</span>
+                        <span style="font-size: 1.5rem;"><i class="fa-solid fa-coins text-warning"></i></span>
                         <h3 style="margin: 0; font-size: 1.1rem; color: #b45309; font-weight: 800;">8. Trésor en Koban &amp; Économie Équitable</h3>
                     </div>
                     <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); margin: 0 0 0.5rem 0;">
                         Le Koban est la pièce d'or ovale officielle du Shogunat. Les formules d'investiture du Sceau Impérial sont accessibles à tous les seigneurs : <strong>7 jours (200 Koban)</strong>, <strong>14 jours (360 Koban, -10%)</strong> ou <strong>30 jours (600 Koban, -25%)</strong>.
                     </p>
                     <div style="font-size: 0.78rem; font-weight: 700; color: #78350f;">
-                        🎁 100 Koban offerts à la création &bull; +5 Koban offerts chaque jour de fidélité &bull; +100 Koban par médaille !
+                        <i class="fa-solid fa-gift text-danger me-1"></i>100 Koban offerts à la création &bull; +5 Koban offerts chaque jour de fidélité &bull; +100 Koban par médaille !
                     </div>
                 </div>
 
@@ -2541,7 +2541,7 @@ foreach ($allUnits as $u) {
 
             <!-- TABLEAU COMPARATIF : SANS SCEAU VS AVEC LE SCEAU IMPÉRIAL -->
             <h3 style="font-size: 1.2rem; color: var(--text-main); font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                <span>⚖️</span> Tableau Comparatif : Régime Féodal Ordinaire vs Sceau Impérial
+                <i class="fa-solid fa-scale-balanced text-warning me-1"></i>Tableau Comparatif : Régime Féodal Ordinaire vs Sceau Impérial
             </h3>
             <div style="overflow-x: auto;">
                 <table class="docs-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
@@ -2549,7 +2549,7 @@ foreach ($allUnits as $u) {
                         <tr style="background: var(--bg-ink, #ede5d5); text-align: left;">
                             <th style="padding: 0.75rem 1rem; border: 1px solid var(--border-color);">Fonctionnalité Martiale</th>
                             <th style="padding: 0.75rem 1rem; border: 1px solid var(--border-color);">Daimyō Ordinaire</th>
-                            <th style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); background: rgba(245,158,11,0.15); color: #b45309; font-weight: 800;">Sous le Sceau Impérial 👑</th>
+                            <th style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); background: rgba(245,158,11,0.15); color: #b45309; font-weight: 800;">Sous le Sceau Impérial <i class="fa-solid fa-crown text-warning"></i></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2561,7 +2561,7 @@ foreach ($allUnits as $u) {
                         <tr>
                             <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); font-weight: 700;">File Meunerie &amp; Brasserie</td>
                             <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); color: var(--text-muted);">1 commande de raffinage à la fois (bloquante)</td>
-                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); background: rgba(245,158,11,0.05); font-weight: 700; color: #15803d;">File étendue : jusqu'à 4 commandes enchaînées automatiquement (Farine 🍚 &amp; Saké 🍶)</td>
+                            <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); background: rgba(245,158,11,0.05); font-weight: 700; color: #15803d;">File étendue : jusqu'à 4 commandes enchaînées automatiquement (Farine <i class="fa-solid fa-bowl-rice text-warning me-1"></i>&amp; Saké <i class="fa-solid fa-wine-bottle text-danger"></i>)</td>
                         </tr>
                         <tr>
                             <td style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); font-weight: 700;">Routes Commerciales</td>

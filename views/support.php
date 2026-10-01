@@ -31,12 +31,12 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                 <div>
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
                         <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #0891b2; background: rgba(8,145,178,0.1); padding: 2px 8px; border-radius: 4px;">
-                            🏛️ Assistance & Boîte à Idées
+                            <i class="fa-solid fa-headset me-1"></i>Assistance &amp; Boîte à Idées
                         </span>
                         <span style="color: var(--text-muted); font-size: 0.8rem;">&bull; Dialogue Direct Joueurs & Développeurs</span>
                     </div>
                     <h1 style="font-size: 1.8rem; margin: 0 0 0.5rem 0; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
-                        <span>📮</span> Remontées de Dysfonctionnements & Suggestions
+                        <i class="fa-solid fa-inbox text-primary me-1"></i>Remontées de Dysfonctionnements &amp; Suggestions
                     </h1>
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; max-width: 800px;">
                         Vous constatez un comportement inattendu, une anomalie ou un calcul incorrect ? Ou vous avez une idée novatrice pour enrichir l'expérience féodale d'OpenShogun ? Transmettez directement vos retours à l'équipe de développement.
@@ -54,10 +54,10 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
             <!-- Onglets de Bascule -->
             <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
                 <button type="button" class="btn <?= ($activeTab === 'new') ? 'btn-primary' : 'btn-secondary' ?>" onclick="switchSupportTab('new')" id="btn-tab-new" style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700;">
-                    <span>📝</span> Soumettre une Demande
+                    <i class="fa-solid fa-pen-to-square me-1"></i>Soumettre une Demande
                 </button>
                 <button type="button" class="btn <?= ($activeTab === 'history') ? 'btn-primary' : 'btn-secondary' ?>" onclick="switchSupportTab('history')" id="btn-tab-history" style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700;">
-                    <span>📋</span> Suivi de mes Demandes (<?= count($myTickets) ?>)
+                    <i class="fa-solid fa-clipboard-list me-1"></i>Suivi de mes Demandes (<?= count($myTickets) ?>)
                 </button>
             </div>
         </div>
@@ -69,7 +69,7 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
     <div id="section-support-new" style="display: <?= ($activeTab === 'new') ? 'block' : 'none' ?>;">
         <div class="card" style="background: var(--bg-surface, #fdfbf7); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
             <h2 style="margin: 0 0 1.5rem 0; font-size: 1.3rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                <span>✍️</span> Rédiger un Signalement ou une Suggestion
+                <i class="fa-solid fa-pen-nib text-primary me-1"></i>Rédiger un Signalement ou une Suggestion
             </h2>
 
             <form id="supportTicketForm" onsubmit="submitSupportTicket(event)">
@@ -84,7 +84,7 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                             <input type="radio" name="type" value="bug" checked onchange="toggleTypeFields()" style="margin-top: 4px; accent-color: #ef4444;">
                             <div>
                                 <strong style="color: #dc2626; font-size: 1rem; display: flex; align-items: center; gap: 0.4rem;">
-                                    <span>🪲</span> Dysfonctionnement / Bug
+                                    <i class="fa-solid fa-bug text-danger me-1"></i>Dysfonctionnement / Bug
                                 </strong>
                                 <p style="margin: 0.25rem 0 0 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
                                     Une erreur technique, une action qui ne s'exécute pas, un souci d'affichage ou un calcul incohérent.
@@ -97,7 +97,7 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                             <input type="radio" name="type" value="suggestion" onchange="toggleTypeFields()" style="margin-top: 4px; accent-color: #f59e0b;">
                             <div>
                                 <strong style="color: #b45309; font-size: 1rem; display: flex; align-items: center; gap: 0.4rem;">
-                                    <span>💡</span> Suggestion / Boîte à Idées
+                                    <i class="fa-solid fa-lightbulb text-warning me-1"></i>Suggestion / Boîte à Idées
                                 </strong>
                                 <p style="margin: 0.25rem 0 0 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
                                     Une proposition d'amélioration ergonomique, une idée de nouvelle unité, d'édifice ou de quête.
@@ -125,10 +125,10 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                             Degré de Gêne / Sévérité :
                         </label>
                         <select name="severity" id="ticket_severity" class="form-control" style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main);">
-                            <option value="low">🟢 Faible (détail esthétique ou mineur)</option>
-                            <option value="medium" selected>🟡 Moyen (anomalie notable mais non bloquante)</option>
-                            <option value="high">🟠 Élevé (fonctionnalité majeure perturbée)</option>
-                            <option value="critical">🔴 Critique / Bloquant (jeu inaccessible ou action bloquée)</option>
+                            <option value="low">Faible (détail esthétique ou mineur)</option>
+                            <option value="medium" selected>Moyen (anomalie notable mais non bloquante)</option>
+                            <option value="high">Élevé (fonctionnalité majeure perturbée)</option>
+                            <option value="critical">Critique / Bloquant (jeu inaccessible ou action bloquée)</option>
                         </select>
                     </div>
                 </div>
@@ -148,14 +148,14 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                     </label>
                     <textarea name="description" id="ticket_description" rows="6" class="form-control" placeholder="Pour un bug : Décrivez ce que vous faisiez, ce qui s'est produit et le résultat attendu.&#10;Pour une suggestion : Présentez votre idée, son intérêt pour le jeu et comment vous l'imaginez." minlength="10" required style="width: 100%; padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.9rem; line-height: 1.5;"></textarea>
                     <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.3rem; display: block;">
-                        💡 Les coordonnées de votre fief actuel [<?= $planet['coord_x'] ?? 0 ?> : <?= $planet['coord_y'] ?? 0 ?>] et votre clan seront automatiquement joints à la demande pour faciliter l'analyse.
+                        <i class="fa-solid fa-lightbulb text-warning me-1"></i>Les coordonnées de votre fief actuel [<?= $planet['coord_x'] ?? 0 ?> : <?= $planet['coord_y'] ?? 0 ?>] et votre clan seront automatiquement joints à la demande pour faciliter l'analyse.
                     </small>
                 </div>
 
                 <!-- Bouton de Soumission -->
                 <div style="display: flex; justify-content: flex-end; gap: 1rem; align-items: center;">
                     <button type="submit" id="submitTicketBtn" class="btn btn-primary" style="padding: 0.75rem 2rem; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🚀</span> Transmettre la Demande
+                        <i class="fa-solid fa-paper-plane me-1"></i>Transmettre la Demande
                     </button>
                 </div>
             </form>
@@ -168,13 +168,13 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
     <div id="section-support-history" style="display: <?= ($activeTab === 'history') ? 'block' : 'none' ?>;">
         <?php if (empty($myTickets)): ?>
             <div class="card" style="text-align: center; padding: 3rem 1.5rem; background: var(--bg-surface, #fdfbf7); border: 1px dashed var(--border-color); border-radius: 12px;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                <div style="font-size: 3rem; margin-bottom: 1rem;"><i class="fa-solid fa-inbox text-secondary"></i></div>
                 <h3 style="margin: 0 0 0.5rem 0; color: var(--text-main);">Aucune demande enregistrée</h3>
                 <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 500px; margin: 0 auto 1.5rem auto;">
                     Vous n'avez pas encore soumis de dysfonctionnement ou de suggestion. Dès que vous en transmettez une, vous pourrez suivre ici l'état d'examen et les retours des développeurs.
                 </p>
                 <button type="button" class="btn btn-primary" onclick="switchSupportTab('new')">
-                    📝 Déposer ma Première Remontée
+                    <i class="fa-solid fa-pen-to-square me-1"></i>Déposer ma Première Remontée
                 </button>
             </div>
         <?php else: ?>
@@ -182,12 +182,12 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                 <?php foreach ($myTickets as $t): 
                     $isBug = ($t['type'] === 'bug');
                     $statusConfig = match($t['status']) {
-                        'pending' => ['label' => 'En attente d\'examen', 'color' => '#eab308', 'bg' => 'rgba(234, 179, 8, 0.1)', 'icon' => '⏳'],
-                        'in_progress' => ['label' => 'En cours d\'analyse', 'color' => '#2563eb', 'bg' => 'rgba(37, 99, 235, 0.1)', 'icon' => '🔍'],
-                        'resolved' => ['label' => 'Résolu / Corrigé', 'color' => '#16a34a', 'bg' => 'rgba(22, 163, 74, 0.1)', 'icon' => '✅'],
-                        'planned' => ['label' => 'Retenu (Future Version)', 'color' => '#7c3aed', 'bg' => 'rgba(124, 58, 237, 0.1)', 'icon' => '📌'],
-                        'closed' => ['label' => 'Classé sans suite', 'color' => '#64748b', 'bg' => 'rgba(100, 116, 139, 0.1)', 'icon' => '✖️'],
-                        default => ['label' => $t['status'], 'color' => '#64748b', 'bg' => 'rgba(100, 116, 139, 0.1)', 'icon' => '•']
+                        'pending' => ['label' => 'En attente d\'examen', 'color' => '#eab308', 'bg' => 'rgba(234, 179, 8, 0.1)', 'icon' => '<i class="fa-solid fa-hourglass-half"></i>'],
+                        'in_progress' => ['label' => 'En cours d\'analyse', 'color' => '#2563eb', 'bg' => 'rgba(37, 99, 235, 0.1)', 'icon' => '<i class="fa-solid fa-magnifying-glass"></i>'],
+                        'resolved' => ['label' => 'Résolu / Corrigé', 'color' => '#16a34a', 'bg' => 'rgba(22, 163, 74, 0.1)', 'icon' => '<i class="fa-solid fa-circle-check"></i>'],
+                        'planned' => ['label' => 'Retenu (Future Version)', 'color' => '#7c3aed', 'bg' => 'rgba(124, 58, 237, 0.1)', 'icon' => '<i class="fa-solid fa-thumbtack"></i>'],
+                        'closed' => ['label' => 'Classé sans suite', 'color' => '#64748b', 'bg' => 'rgba(100, 116, 139, 0.1)', 'icon' => '<i class="fa-solid fa-circle-xmark"></i>'],
+                        default => ['label' => $t['status'], 'color' => '#64748b', 'bg' => 'rgba(100, 116, 139, 0.1)', 'icon' => '<i class="fa-solid fa-circle-info"></i>']
                     };
                     $categoryLabel = SupportEngine::CATEGORIES[$t['category']] ?? $t['category'];
                 ?>
@@ -195,7 +195,7 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                         <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); background: var(--bg-ink, #ede5d5); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
                             <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
                                 <span style="font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; background: <?= $isBug ? 'rgba(220,38,38,0.1)' : 'rgba(245,158,11,0.1)' ?>; color: <?= $isBug ? '#dc2626' : '#b45309' ?>; border: 1px solid <?= $isBug ? '#dc262633' : '#b4530933' ?>;">
-                                    <?= $isBug ? '🪲 Dysfonctionnement' : '💡 Suggestion' ?>
+                                    <?= $isBug ? '<i class="fa-solid fa-bug text-danger me-1"></i>Dysfonctionnement' : '<i class="fa-solid fa-lightbulb text-warning me-1"></i>Suggestion' ?>
                                 </span>
                                 <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
                                     #<?= $t['id'] ?> &bull; <?= htmlspecialchars($categoryLabel) ?>
@@ -226,7 +226,7 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                                 <div style="background: rgba(8, 145, 178, 0.06); border-left: 4px solid #0891b2; padding: 1.25rem; border-radius: 8px; margin-top: 1rem;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                                         <strong style="color: #0891b2; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem;">
-                                            <span>🛡️</span> Réponse Officielle des Développeurs / Shogunat :
+                                            <i class="fa-solid fa-shield-halved text-info me-1"></i>Réponse Officielle des Développeurs / Shogunat :
                                         </strong>
                                         <?php if (!empty($t['responded_at'])): ?>
                                             <span style="font-size: 0.75rem; color: var(--text-muted);">
@@ -240,7 +240,7 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                                 </div>
                             <?php else: ?>
                                 <div style="font-size: 0.8rem; color: var(--text-muted); font-style: italic; display: flex; align-items: center; gap: 0.4rem;">
-                                    <span>⏳</span> Votre demande est dans la file de révision des intendants. Une réponse vous sera communiquée ici et par missive en jeu dès son examen.
+                                    <i class="fa-solid fa-hourglass-half text-warning me-1"></i>Votre demande est dans la file de révision des intendants. Une réponse vous sera communiquée ici et par missive en jeu dès son examen.
                                 </div>
                             <?php endif; ?>
 
@@ -250,7 +250,7 @@ $activeTab = $_GET['tab'] ?? (empty($myTickets) ? 'new' : 'history');
                                     <a href="?page=edit_ticket&ticket_id=<?= (int)$t['id'] ?>"
                                        class="btn btn-secondary"
                                        style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.83rem; font-weight: 600;">
-                                        <span>✏️</span> Modifier cette demande
+                                        <i class="fa-solid fa-pen me-1"></i>Modifier cette demande
                                     </a>
                                 </div>
                             <?php endif; ?>
@@ -327,12 +327,12 @@ async function submitSupportTicket(event) {
         } else {
             alert("Erreur : " + (data.error || "Impossible d'enregistrer la demande."));
             btn.disabled = false;
-            btn.innerHTML = '<span>🚀</span> Transmettre la Demande';
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>Transmettre la Demande';
         }
     } catch (e) {
         alert("Erreur réseau lors de l'envoi de la demande.");
         btn.disabled = false;
-        btn.innerHTML = '<span>🚀</span> Transmettre la Demande';
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>Transmettre la Demande';
     }
 }
 </script>

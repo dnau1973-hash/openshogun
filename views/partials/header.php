@@ -101,7 +101,7 @@ if ($planet) {
     $fleetEngine->processFleetMissions();
     $planet = $planetEngine->updatePlanet((int)$planet['id']);
     
-    // ⚔️ Simulation autonome des PNJ / Bots (espionnage, raids, chantiers)
+    // Simulation autonome des PNJ / Bots (espionnage, raids, chantiers)
     require_once __DIR__ . '/../../core/BotEngine.php';
     $botEngine = new BotEngine();
     $botEngine->tickPeriodicSimulation();
@@ -177,6 +177,9 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 (Icônes vectorielles professionnelles) -->
+    <link rel="stylesheet" href="/public/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <!-- Tabler UI Framework (local) -->
     <link rel="stylesheet" href="/public/css/tabler/tabler.min.css?v=1.0.0-beta21">
     <!-- HUD Travian Féodal (header circulaire, barres de ressources, alertes) -->
@@ -189,10 +192,10 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
 
 <?php
 $navItems = [
-    ['page' => 'resources', 'match' => ['resources','field'], 'icon' => '🌾', 'label' => 'Terroir Féodal',     'title' => 'Terroir & Récoltes'],
-    ['page' => 'city',      'match' => ['city','building'],   'icon' => '🏯', 'label' => 'Cité Castrale',      'title' => 'Bâtiments & Châteaux'],
-    ['page' => 'map',       'match' => ['map','galaxy'],      'icon' => '🗾', 'label' => 'Carte',               'title' => 'Carte des Provinces'],
-    ['page' => 'ranking',   'match' => ['ranking'],           'icon' => '🏆', 'label' => 'Classement',          'title' => 'Classement des Daimyōs & Alliances'],
+    ['page' => 'resources', 'match' => ['resources','field'], 'icon' => '<i class="fa-solid fa-wheat-awn text-success"></i>',      'label' => 'Terroir Féodal', 'title' => 'Terroir & Récoltes'],
+    ['page' => 'city',      'match' => ['city','building'],   'icon' => '<i class="fa-solid fa-torii-gate text-primary"></i>',     'label' => 'Cité Castrale',  'title' => 'Bâtiments & Châteaux'],
+    ['page' => 'map',       'match' => ['map','galaxy'],      'icon' => '<i class="fa-solid fa-map-location-dot text-info"></i>', 'label' => 'Carte',          'title' => 'Carte des Provinces'],
+    ['page' => 'ranking',   'match' => ['ranking'],           'icon' => '<i class="fa-solid fa-trophy text-warning"></i>',        'label' => 'Classement',     'title' => 'Classement des Daimyōs & Alliances'],
 ];
 ?>
 
@@ -212,7 +215,7 @@ $navItems = [
 
                 <!-- Brand / Logo Féodal -->
                 <a href="?page=resources" class="navbar-brand d-inline-flex align-items-center gap-2 me-3 text-decoration-none" title="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>">
-                    <span class="fs-2 lh-1">🏯</span>
+                    <span class="fs-2 lh-1 text-danger"><i class="fa-solid fa-torii-gate"></i></span>
                     <span class="fw-bold text-dark font-game d-none d-sm-inline" style="letter-spacing:0.04em;"><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?></span>
                 </a>
 
@@ -244,36 +247,36 @@ $navItems = [
                                role="button" 
                                aria-expanded="<?= $isEmpireActive ? 'true' : 'false' ?>"
                                title="Mon Empire &amp; Puissance Féodale">
-                                <span class="nav-link-icon d-md-none d-lg-inline-block">👑</span>
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa-solid fa-crown text-warning"></i></span>
                                 <span class="nav-link-title">Mon Empire</span>
                             </a>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'fleet' ? 'active fw-bold' : '' ?>" href="?page=fleet">
-                                    <span class="dropdown-item-icon">⚔️</span>
+                                    <span class="dropdown-item-icon"><i class="fa-solid fa-khanda text-danger"></i></span>
                                     <span>Armée</span>
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'hero' ? 'active fw-bold' : '' ?>" href="?page=hero">
-                                    <span class="dropdown-item-icon">🥋</span>
+                                    <span class="dropdown-item-icon"><i class="fa-solid fa-user-ninja text-primary"></i></span>
                                     <span>Héros</span>
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'alliance' ? 'active fw-bold' : '' ?>" href="?page=alliance">
-                                    <span class="dropdown-item-icon">🎌</span>
+                                    <span class="dropdown-item-icon"><i class="fa-solid fa-flag text-danger"></i></span>
                                     <span>Alliance</span>
                                 </a>                                    
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'poster' ? 'active fw-bold' : '' ?>" href="?page=poster">
-                                    <span class="dropdown-item-icon">👤</span>
+                                    <span class="dropdown-item-icon"><i class="fa-solid fa-user-shield text-info"></i></span>
                                     <span>Mon Affiche Féodale</span>
                                 </a>
                                 <a href="javascript:void(0)" class="dropdown-item d-flex align-items-center gap-2" onclick="openEditMottoModal()">
-                                    <span class="dropdown-item-icon">📜</span>
+                                    <span class="dropdown-item-icon"><i class="fa-solid fa-scroll text-warning"></i></span>
                                     <span>Ma Devise</span>
                                 </a>
                                 <?php if ($isSealActive): ?>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'empire' ? 'active fw-bold' : '' ?>" href="?page=empire">
                                         <span class="d-flex align-items-center gap-2">
-                                            <span class="dropdown-item-icon">👑</span>
+                                            <span class="dropdown-item-icon"><i class="fa-solid fa-crown text-warning"></i></span>
                                             <span>Tableau de bord de l'empire</span>
                                         </span>
                                         <span class="badge bg-warning text-warning-fg ms-2" style="font-size:0.6rem;">Sceau Actif</span>
@@ -294,7 +297,7 @@ $navItems = [
                                role="button" 
                                aria-expanded="<?= $isCommActive ? 'true' : 'false' ?>"
                                title="Espace de Communication Féodale">
-                                <span class="nav-link-icon d-md-none d-lg-inline-block">💬</span>
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa-solid fa-comments text-primary"></i></span>
                                 <span class="nav-link-title">Communication</span>
                                 <?php if ($totalUnreadComm > 0): ?>
                                     <span class="badge bg-danger text-white rounded-pill ms-1" style="font-size:0.65rem; padding: 2px 6px;">
@@ -305,7 +308,7 @@ $navItems = [
                             <div class="dropdown-menu">
                                 <a class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'messages' ? 'active fw-bold' : '' ?>" href="?page=messages">
                                     <span class="d-flex align-items-center gap-2">
-                                        <span class="dropdown-item-icon">📬</span>
+                                        <span class="dropdown-item-icon"><i class="fa-solid fa-envelope text-info"></i></span>
                                         <span>Missives &amp; Messages</span>
                                     </span>
                                     <?php if ($unreadMessagesCount > 0): ?>
@@ -316,7 +319,7 @@ $navItems = [
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'reports' ? 'active fw-bold' : '' ?>" href="?page=reports">
                                     <span class="d-flex align-items-center gap-2">
-                                        <span class="dropdown-item-icon">📜</span>
+                                        <span class="dropdown-item-icon"><i class="fa-solid fa-scroll text-danger"></i></span>
                                         <span>Chroniques de Siège &amp; Rapports</span>
                                     </span>
                                     <?php if ($unreadReportsCount > 0): ?>
@@ -327,7 +330,7 @@ $navItems = [
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center justify-content-between <?= $page === 'chat' ? 'active fw-bold' : '' ?>" href="?page=chat">
                                     <span class="d-flex align-items-center gap-2">
-                                        <span class="dropdown-item-icon">⚔️</span>
+                                        <span class="dropdown-item-icon"><i class="fa-solid fa-shield-halved text-warning"></i></span>
                                         <span>Conseil de Guerre (Général)</span>
                                     </span>
                                     <?php if ($unreadChatCount > 0): ?>
@@ -338,7 +341,7 @@ $navItems = [
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'forum' ? 'active fw-bold' : '' ?>" href="?page=forum">
-                                    <span class="dropdown-item-icon">🏛️</span>
+                                    <span class="dropdown-item-icon"><i class="fa-solid fa-building-columns text-secondary"></i></span>
                                     <span>Archives &amp; Chroniques Féodales</span>
                                 </a>
                             </div>
@@ -349,42 +352,42 @@ $navItems = [
                     <div class="navbar-nav flex-row order-md-last ms-auto align-items-center gap-2 flex-wrap">
                         <?php if ($isUserProtected): ?>
                             <span class="badge bg-success-lt d-inline-flex align-items-center gap-1 py-1 px-2"
-                                  title="🔰 Immunité Féodale active jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?>">
-                                <span>🔰</span>
+                                  title="Immunité Féodale active jusqu'au <?= htmlspecialchars($userProtection['until_formatted']) ?>">
+                                <i class="fa-solid fa-shield-halved text-success"></i>
                                 <span class="fw-bold"><?= htmlspecialchars($userProtection['formatted']) ?></span>
                             </span>
                         <?php endif; ?>
 
-                        <!-- 🪙 Trésor en Koban -->
+                        <!-- Trésor en Koban -->
                         <a href="?page=privilege" class="badge bg-warning-lt text-warning d-inline-flex align-items-center gap-1 py-1 px-2 text-decoration-none shadow-sm"
                            title="Trésor Impérial : <?= number_format($userGoldCoins) ?> Koban.">
-                            <span>🪙</span>
+                            <i class="fa-solid fa-coins text-warning"></i>
                             <strong><?= number_format($userGoldCoins) ?></strong>
                             <span class="text-muted d-none d-xl-inline">Koban</span>
                         </a>
 
-                        <!-- 👑 Sceau Impérial -->
+                        <!-- Sceau Impérial -->
                         <a href="?page=privilege" 
                            class="badge <?= $isSealActive ? 'bg-warning text-warning-fg' : 'bg-secondary-lt' ?> d-inline-flex align-items-center gap-1 py-1 px-2 text-decoration-none shadow-sm"
                            title="<?= $isSealActive ? 'Sceau Impérial Actif : ' . $sealStatus['remaining_formatted'] : 'Décrétez le Sceau Impérial du Shōgun' ?>">
-                            <span>👑</span>
+                            <i class="fa-solid fa-crown text-warning"></i>
                             <span><?= $isSealActive ? 'Sceau Actif' : 'Sceau Impérial' ?></span>
                         </a>
 
                         <?php if ($isDevTeamMember): ?>
-                            <!-- 🛠️ Studio Dev Team -->
+                            <!-- Studio Dev Team -->
                             <a href="?page=dev_team" 
                                class="badge bg-purple-lt text-purple d-inline-flex align-items-center gap-1 py-1 px-2 text-decoration-none shadow-sm <?= $page === 'dev_team' ? 'fw-bold border border-purple' : '' ?>"
                                title="Accéder au Studio Dev Team & Métiers du Jeu Vidéo">
-                                <span>🛠️</span>
+                                <i class="fa-solid fa-hammer text-purple"></i>
                                 <span class="d-none d-lg-inline">Studio Dev</span>
                             </a>
                         <?php endif; ?>
 
                         <?php if ($auth->isAdmin()): ?>
-                            <!-- ⚙️ Administration -->
+                            <!-- Administration -->
                             <a href="?page=admin" class="badge bg-blue-lt text-primary d-inline-flex align-items-center gap-1 py-1 px-2 text-decoration-none shadow-sm <?= $page === 'admin' ? 'fw-bold border border-primary' : '' ?>" title="Panneau d'administration">
-                                <span>⚙️</span>
+                                <i class="fa-solid fa-gear text-primary"></i>
                                 <span class="d-none d-lg-inline">Admin</span>
                             </a>
                         <?php endif; ?>
@@ -394,7 +397,7 @@ $navItems = [
                                 id="shogun-audio-btn" 
                                 onclick="window.shogunAudio && window.shogunAudio.toggle()" 
                                 title="Activer / Couper la musique et les ambiances">
-                            <span id="shogun-audio-icon">🔇</span>
+                            <i class="fa-solid fa-volume-xmark" id="shogun-audio-icon"></i>
                         </button>
 
                         <?php
@@ -407,8 +410,8 @@ $navItems = [
                         <!-- Sélecteur de Fiefs -->
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link d-flex align-items-center gap-2 text-reset p-1 rounded border bg-light-subtle"
-                               data-bs-toggle="dropdown" aria-expanded="false" title="Changer de fief féodal">
-                                <span class="fs-3 lh-1 ps-1"><?= !empty($planet['is_capital']) ? '👑' : '🏯' ?></span>
+                                data-bs-toggle="dropdown" aria-expanded="false" title="Changer de fief féodal">
+                                <span class="fs-3 lh-1 ps-1"><?= !empty($planet['is_capital']) ? '<i class="fa-solid fa-crown text-warning"></i>' : '<i class="fa-solid fa-torii-gate text-secondary"></i>' ?></span>
                                 <div class="d-none d-sm-block text-start lh-1">
                                     <div class="fw-bold text-dark text-truncate" style="font-size:0.82rem; max-width:130px;">
                                         <?= htmlspecialchars($planet['name'] ?? 'Fief') ?>
@@ -422,7 +425,7 @@ $navItems = [
                             <div class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width:240px; z-index:1050;">
                                 <?php if ($isUserProtected): ?>
                                     <div class="dropdown-item-text small bg-success-lt text-success fw-bold">
-                                        🔰 Immunité active : <?= htmlspecialchars($userProtection['formatted']) ?>
+                                        <i class="fa-solid fa-shield-halved me-1"></i> Immunité active : <?= htmlspecialchars($userProtection['formatted']) ?>
                                     </div>
                                     <div class="dropdown-divider"></div>
                                 <?php endif; ?>
@@ -435,8 +438,8 @@ $navItems = [
                                 ?>
                                     <a class="dropdown-item d-flex justify-content-between align-items-center py-2 <?= $isCurrent ? 'active' : '' ?>" href="?switch_planet=<?= (int)$p['id'] ?>">
                                         <div>
-                                            <div class="fw-bold" style="font-size:0.85rem;">
-                                                <?= !empty($p['is_capital']) ? '👑' : '🏯' ?> <?= htmlspecialchars($p['name']) ?>
+                                            <div class="fw-bold d-flex align-items-center gap-1" style="font-size:0.85rem;">
+                                                <?= !empty($p['is_capital']) ? '<i class="fa-solid fa-crown text-warning me-1"></i>' : '<i class="fa-solid fa-torii-gate text-secondary me-1"></i>' ?> <?= htmlspecialchars($p['name']) ?>
                                             </div>
                                             <div class="text-secondary small font-monospace" style="font-size:0.72rem;">
                                                 [<?= $p['coord_x'] ?>|<?= $p['coord_y'] ?>] <?= !empty($p['is_capital']) ? '<span class="text-warning">Capitale</span>' : '' ?>
@@ -470,7 +473,7 @@ $navItems = [
 
                         <!-- Déconnexion -->
                         <a href="?action=logout" class="btn btn-sm btn-icon btn-ghost-danger border-0 p-1" title="Fermer la session">
-                            <span>🚪</span>
+                            <i class="fa-solid fa-arrow-right-from-bracket fs-3"></i>
                         </a>
                     </div>
                 </div>
@@ -518,7 +521,7 @@ $navItems = [
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
-                                    <span style="font-size:0.95rem;">🪵</span>
+                                    <i class="fa-solid fa-tree text-warning" style="font-size:0.95rem;"></i>
                                     <strong class="text-warning" style="font-size:0.80rem;">Bois</strong>
                                     <span class="text-muted" style="font-size:0.65rem;">(+<?= number_format($planet['prod_rates']['metal']) ?>/h)</span>
                                 </div>
@@ -546,7 +549,7 @@ $navItems = [
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
-                                    <span style="font-size:0.95rem;">🪨</span>
+                                    <i class="fa-solid fa-mountain text-primary" style="font-size:0.95rem;"></i>
                                     <strong class="text-primary" style="font-size:0.80rem;">Pierre</strong>
                                     <span class="text-muted" style="font-size:0.65rem;">(+<?= number_format($planet['prod_rates']['crystal']) ?>/h)</span>
                                 </div>
@@ -574,7 +577,7 @@ $navItems = [
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
-                                    <span style="font-size:0.95rem;">🌾</span>
+                                    <i class="fa-solid fa-wheat-awn text-success" style="font-size:0.95rem;"></i>
                                     <strong class="text-success" style="font-size:0.80rem;">Riz</strong>
                                     <span class="text-muted" style="font-size:0.65rem;">(+<?= number_format($planet['prod_rates']['deuterium']) ?>/h)</span>
                                 </div>
@@ -602,7 +605,7 @@ $navItems = [
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
-                                    <span style="font-size:0.95rem;">🍚</span>
+                                    <i class="fa-solid fa-bowl-rice text-secondary" style="font-size:0.95rem;"></i>
                                     <strong class="text-secondary" style="font-size:0.80rem;">Farine</strong>
                                 </div>
                                 <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
@@ -628,7 +631,7 @@ $navItems = [
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
-                                    <span style="font-size:0.95rem;">🍶</span>
+                                    <i class="fa-solid fa-wine-bottle text-purple" style="font-size:0.95rem;"></i>
                                     <strong class="text-purple" style="font-size:0.80rem;">Saké</strong>
                                 </div>
                                 <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
@@ -654,7 +657,7 @@ $navItems = [
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
-                                    <span style="font-size:0.95rem;">🪵</span>
+                                    <i class="fa-solid fa-hammer text-orange" style="font-size:0.95rem;"></i>
                                     <strong class="text-orange" style="font-size:0.80rem;">Poutres</strong>
                                 </div>
                                 <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
@@ -680,7 +683,7 @@ $navItems = [
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-1 text-truncate">
-                                    <span style="font-size:0.95rem;">⛩️</span>
+                                    <i class="fa-solid fa-torii-gate <?= $eOk ? 'text-teal' : 'text-danger' ?>" style="font-size:0.95rem;"></i>
                                     <strong class="<?= $eOk ? 'text-teal' : 'text-danger' ?>" style="font-size:0.80rem;">Sérénité</strong>
                                     <span class="badge <?= $eOk ? 'bg-teal-lt text-teal' : 'bg-danger-lt text-danger' ?>" style="font-size:0.58rem; padding:1px 4px;">
                                         <?= $eOk ? 'OK' : 'Déficit' ?>
@@ -718,22 +721,22 @@ $navItems = [
                  title="Cliquer pour afficher le registre de la Tour de Guet (<?= count($activeMissions) ?> mouvements)">
                 <div class="alert-banner-left">
                     <?php if ($hasHostile): ?>
-                        <span class="alert-status-badge threat">🚨 TOUR DE GUET</span>
+                        <span class="alert-status-badge threat"><i class="fa-solid fa-triangle-exclamation text-danger me-1"></i> TOUR DE GUET</span>
                         <span class="alert-headline"><strong><?= count($incomingHostile) ?> incursion(s) armée(s)</strong> en approche !</span>
                         <span class="alert-countdown-chip">Impact dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
                     <?php elseif ($hasSpy): ?>
-                        <span class="alert-status-badge spy">🥷 TOUR DE GUET</span>
+                        <span class="alert-status-badge spy"><i class="fa-solid fa-user-ninja text-warning me-1"></i> TOUR DE GUET</span>
                         <span class="alert-headline"><strong>Infiltration Shinobi détectée</strong> vers votre domaine !</span>
                         <span class="alert-countdown-chip">Arrivée dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
                     <?php else: ?>
-                        <span class="alert-status-badge info">🐎 EXPÉDITIONS</span>
+                        <span class="alert-status-badge info"><i class="fa-solid fa-horse text-info me-1"></i> EXPÉDITIONS</span>
                         <span class="alert-headline"><strong><?= count($outgoingMissions) ?> troupe(s)</strong> en marche sur les provinces.</span>
                         <span class="alert-countdown-chip">Retour dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
                     <?php endif; ?>
                 </div>
                 <div class="alert-banner-right">
                     <span class="alert-cta-btn">
-                        <span>📜 Détails (<?= count($activeMissions) ?>)</span>
+                        <span><i class="fa-solid fa-scroll me-1"></i> Détails (<?= count($activeMissions) ?>)</span>
                         <span class="alert-cta-arrow">&rarr;</span>
                     </span>
                 </div>

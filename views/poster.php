@@ -28,7 +28,7 @@ if (!$profile) {
     ?>
     <div class="container-fluid px-0 py-4">
         <div class="empty">
-            <div class="empty-icon"><span class="fs-1">🏯</span></div>
+            <div class="empty-icon"><i class="fa-solid fa-torii-gate text-secondary fs-1"></i></div>
             <p class="empty-title">Daimyō introuvable</p>
             <p class="empty-subtitle text-secondary">
                 Ce seigneur n'est répertorié dans aucun registre féodal ni chronique du Shogunat.
@@ -50,7 +50,7 @@ $clanLoreData = [
         'name' => 'Clan Oda',
         'kanji' => '織田氏',
         'mon_name' => 'Oda Mokkō (織田木瓜)',
-        'mon_symbol' => '🌸',
+        'mon_symbol' => '<i class="fa-solid fa-certificate text-warning"></i>',
         'feudal_title' => 'Suzerain d\'Owari & Champion de l\'Unification',
         'historic_context' => "Issu de la province maritime d'Owari, le clan Oda était à l'origine une modeste lignée de gouverneurs délégués (shugodai) au service du clan Shiba durant l'époque Muromachi. Émergeant dans les fracas du Sengoku Jidai sous le commandement impétueux d'Oda Nobunaga, le clan a renversé l'ordre féodal traditionnel par la devise « Tenka Fubu » (天下布武 - Le royaume sous un seul sabre). De la victoire foudroyante d'Okehazama en 1560 à l'édification de l'imprenable forteresse d'Azuchi sur les rives du lac Biwa, les Oda ont brisé les frontières féodales et ouvert la voie vers l'unification du Japon.",
         'doctrine' => "Révolutionnaires militaires et économiques, les Oda furent les premiers à systématiser les armes à feu occidentales (Teppo) apportées à Tanegashima, perfectionnant le tir continu en salve rotative à la bataille de Nagashino (1575). Sur le plan économique, leur édit du Rakuichi Rakuza a aboli les péages et les corporations marchandes étouffantes, créant des marchés libres florissants. Leur organisation martiale permet la synergie exemplaire d'un double développement rural et urbain simultané.",
@@ -61,17 +61,17 @@ $clanLoreData = [
         'accent_color' => '#2563eb',
         'light_bg' => '#eff6ff',
         'pillars' => [
-            ['icon' => '⚡', 'title' => 'Tenka Fubu', 'desc' => 'Unification sans merci et autorité centrale'],
-            ['icon' => '💥', 'title' => 'Arquebuses Tanegashima', 'desc' => 'Tir rotatif synchronisé et domination balistique'],
-            ['icon' => '⚖️', 'title' => 'Rakuichi Rakuza', 'desc' => 'Marchés libres, fin des péages et essor du commerce'],
-            ['icon' => '🏗️', 'title' => 'Double Développement', 'desc' => 'Bâtiment urbain et domaine rural érigés de concert']
+            ['icon' => '<i class="fa-solid fa-bolt text-warning"></i>', 'title' => 'Tenka Fubu', 'desc' => 'Unification sans merci et autorité centrale'],
+            ['icon' => '<i class="fa-solid fa-fire text-danger"></i>', 'title' => 'Arquebuses Tanegashima', 'desc' => 'Tir rotatif synchronisé et domination balistique'],
+            ['icon' => '<i class="fa-solid fa-scale-balanced text-primary"></i>', 'title' => 'Rakuichi Rakuza', 'desc' => 'Marchés libres, fin des péages et essor du commerce'],
+            ['icon' => '<i class="fa-solid fa-hammer text-info"></i>', 'title' => 'Double Développement', 'desc' => 'Bâtiment urbain et domaine rural érigés de concert']
         ]
     ],
     'vorash' => [
         'name' => 'Clan Takeda',
         'kanji' => '武田氏',
         'mon_name' => 'Takeda Bishi (武田菱)',
-        'mon_symbol' => '🐎',
+        'mon_symbol' => '<i class="fa-solid fa-horse text-white"></i>',
         'feudal_title' => 'Tigre de Kai & Seigneur Suprême de Shinano',
         'historic_context' => "Descendants directs de la glorieuse lignée Seiwa Genji par Minamoto no Yoshimitsu, les Takeda ont régné d'une poigne d'acier sur la rude province de Kai depuis l'époque Kamakura. Sous la houlette de Takeda Shingen, le clan s'est forgé la réputation de force terrestre la plus redoutable de tout l'archipel féodal. Rejetant les murailles de pierre conventionnelles, Shingen professait : « Les hommes sont le château, les hommes sont les murailles, les hommes sont les douves, la bienveillance est l'amie et la haine est l'ennemie. »",
         'doctrine' => "La doctrine martiale Takeda incarne le célèbre étendard du Fūrinkazan (風林火山), inspiré de Sun Tzu : rapides comme le vent, silencieux comme la forêt, dévorants comme le feu, inébranlables comme la montagne. Leur cavalerie rouge d'élite (Akazonae), parée d'armures laquées d'écarlate vif et guidée par les célèbres 24 Généraux de Takeda, transperçait les rangs ennemis lors de charges dévastatrices. Les Takeda sont maîtres des offensives surprises et des razzias pénétrant au cœur des réserves de riz adverses.",
@@ -82,17 +82,17 @@ $clanLoreData = [
         'accent_color' => '#dc2626',
         'light_bg' => '#fef2f2',
         'pillars' => [
-            ['icon' => '🌪️', 'title' => 'Fūrinkazan', 'desc' => 'Vent véloce, forêt secrète, feu dévorant, montagne d\'airain'],
-            ['icon' => '🐎', 'title' => 'Cavalerie Akazonae', 'desc' => 'Charges d\'assaut montées en armures rouges écarlates'],
-            ['icon' => '🌾', 'title' => 'Razzias Pénétrantes', 'desc' => '+25% de riz pillé et temps de dressage écourté (-20%)'],
-            ['icon' => '🛡️', 'title' => 'La Muraille Humaine', 'desc' => 'Cohésion sans faille et loyauté absolue des samouraïs']
+            ['icon' => '<i class="fa-solid fa-wind text-info"></i>', 'title' => 'Fūrinkazan', 'desc' => 'Vent véloce, forêt secrète, feu dévorant, montagne d\'airain'],
+            ['icon' => '<i class="fa-solid fa-horse text-danger"></i>', 'title' => 'Cavalerie Akazonae', 'desc' => 'Charges d\'assaut montées en armures rouges écarlates'],
+            ['icon' => '<i class="fa-solid fa-wheat-awn text-success"></i>', 'title' => 'Razzias Pénétrantes', 'desc' => '+25% de riz pillé et temps de dressage écourté (-20%)'],
+            ['icon' => '<i class="fa-solid fa-shield-halved text-warning"></i>', 'title' => 'La Muraille Humaine', 'desc' => 'Cohésion sans faille et loyauté absolue des samouraïs']
         ]
     ],
     'aethelis' => [
         'name' => 'Clan Tokugawa',
         'kanji' => '徳川氏',
         'mon_name' => 'Mitsuba Aoi (三つ葉葵)',
-        'mon_symbol' => '⛩️',
+        'mon_symbol' => '<i class="fa-solid fa-torii-gate text-white"></i>',
         'feudal_title' => 'Généralissime de Mikawa & Fondateur du Shōgunat d\'Edo',
         'historic_context' => "Issu de la noble maison Matsudaira de la province disputée de Mikawa, le clan Tokugawa a façonné son destin à travers l'endurance, la diplomatie avisée et la patience face aux tempêtes du Sengoku Jidai. Conduit par le génie politique de Tokugawa Ieyasu, le clan triompha à la bataille décisive de Sekigahara en 1600. Investi du titre suprême de Shōgun en 1603, Ieyasu déplaça le cœur du pouvoir vers Edo (Tokyo) et instaura deux siècles et demi de paix ininterrompue sous la Pax Tokugawa.",
         'doctrine' => "Le clan Tokugawa est le maître incontesté de la résilience, du renseignement d'État et des fortifications inviolables. Leurs bastions disposent de doubles murailles, de douves inondables et de réseaux de cachettes souterraines doublées déjouant tout siège prolongé. Sous les ordres d'Hattori Hanzō, les légendaires Shinobis d'Iga veillent dans l'ombre pour protéger le clan, saboter les complots et accélérer les mouvements de troupes grâce à des sentiers secrets.",
@@ -103,10 +103,10 @@ $clanLoreData = [
         'accent_color' => '#7c3aed',
         'light_bg' => '#f5f3ff',
         'pillars' => [
-            ['icon' => '⏳', 'title' => 'Voie de la Patience', 'desc' => 'Triomphe durable par l\'endurance et la stratégie politique'],
-            ['icon' => '🏯', 'title' => 'Bastions Inviolables', 'desc' => 'Cachettes secrètes x2 et défenses fortifiées'],
-            ['icon' => '🥷', 'title' => 'Shinobis d\'Iga', 'desc' => 'Réseaux de renseignement et protection d\'Hattori Hanzō'],
-            ['icon' => '⛩️', 'title' => 'Pax Tokugawa', 'desc' => 'Marche rapide des armées (+20%) et paix civile prospère']
+            ['icon' => '<i class="fa-solid fa-hourglass-half text-warning"></i>', 'title' => 'Voie de la Patience', 'desc' => 'Triomphe durable par l\'endurance et la stratégie politique'],
+            ['icon' => '<i class="fa-solid fa-torii-gate text-purple"></i>', 'title' => 'Bastions Inviolables', 'desc' => 'Cachettes secrètes x2 et défenses fortifiées'],
+            ['icon' => '<i class="fa-solid fa-user-ninja text-dark"></i>', 'title' => 'Shinobis d\'Iga', 'desc' => 'Réseaux de renseignement et protection d\'Hattori Hanzō'],
+            ['icon' => '<i class="fa-solid fa-place-of-worship text-teal"></i>', 'title' => 'Pax Tokugawa', 'desc' => 'Marche rapide des armées (+20%) et paix civile prospère']
         ]
     ]
 ];
@@ -116,7 +116,7 @@ $clan = $clanLoreData[$factionKey] ?? [
     'name' => $profile['faction_name'] ?? 'Clan Féodal',
     'kanji' => '武家',
     'mon_name' => 'Tomoe Céleste (三つ巴)',
-    'mon_symbol' => '🏯',
+    'mon_symbol' => '<i class="fa-solid fa-shield-halved text-white"></i>',
     'feudal_title' => 'Seigneur Féodal des Terres Provinciales',
     'historic_context' => "Gardiens respectés de leurs domaines provinciaux et héritiers de l'art martial du sabre, les daimyōs de cette bannière défendent l'honneur de leurs ancêtres dans le strict respect du Bushidō et des lois promulguées par le Shogunat.",
     'doctrine' => "Équilibre martial entre piétons ashigaru et cavaliers samouraïs, combiné à une administration rigoureuse des récoltes de riz et des forteresses frontalières.",
@@ -127,8 +127,8 @@ $clan = $clanLoreData[$factionKey] ?? [
     'accent_color' => '#4b5563',
     'light_bg' => '#f9fafb',
     'pillars' => [
-        ['icon' => '⚔️', 'title' => 'Code du Bushidō', 'desc' => 'Loyauté, bravoure et respect des traditions ancestrales'],
-        ['icon' => '🌾', 'title' => 'Terres Fertiles', 'desc' => 'Réserves régulières de riz et approvisionnement maîtrisé']
+        ['icon' => '<i class="fa-solid fa-khanda text-danger"></i>', 'title' => 'Code du Bushidō', 'desc' => 'Loyauté, bravoure et respect des traditions ancestrales'],
+        ['icon' => '<i class="fa-solid fa-wheat-awn text-success"></i>', 'title' => 'Terres Fertiles', 'desc' => 'Réserves régulières de riz et approvisionnement maîtrisé']
     ]
 ];
 
@@ -154,7 +154,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
         <div class="row align-items-center">
             <div class="col">
                 <div class="page-pretitle text-secondary">
-                    <span>🏯 Chroniques Féodales du Shogunat</span> &bull; 
+                    <span><i class="fa-solid fa-chess-rook text-danger me-1"></i>Chroniques Féodales du Shogunat</span> &bull; 
                     <span>Registre Officiel des Daimyōs</span>
                 </div>
                 <h1 class="page-title d-flex align-items-center gap-2">
@@ -168,21 +168,21 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
                     <a href="/?page=ranking" class="btn btn-outline-secondary">
-                        <span class="me-1">📜</span> Registre des Rangs
+                        <i class="fa-solid fa-scroll text-warning me-1"></i> Registre des Rangs
                     </a>
                     <?php if ($isSelf): ?>
                         <a href="/?page=city" class="btn btn-outline-primary">
-                            <span class="me-1">🏯</span> Gérer mon Fief
+                            <i class="fa-solid fa-chess-rook text-danger me-1"></i> Gérer mon Fief
                         </a>
                         <button type="button" onclick="startMottoEdit()" class="btn btn-primary font-game">
-                            <span class="me-1">✏️</span> Modifier ma Devise
+                            <i class="fa-solid fa-pen-nib text-light me-1"></i> Modifier ma Devise
                         </button>
                     <?php else: ?>
                         <a href="/?page=messages&tab=compose&to=<?= urlencode($profile['username']) ?>" class="btn btn-primary font-game">
-                            <span class="me-1">✉️</span> Dépêcher une Missive
+                            <i class="fa-solid fa-envelope text-light me-1"></i> Dépêcher une Missive
                         </a>
                         <a href="/?page=map&x=<?= $capitalCoordX ?>&y=<?= $capitalCoordY ?>" class="btn btn-outline-secondary">
-                            <span class="me-1">🗺️</span> Localiser sur la Carte
+                            <i class="fa-solid fa-map-location-dot text-success me-1"></i> Localiser sur la Carte
                         </a>
                     <?php endif; ?>
                 </div>
@@ -223,25 +223,25 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                             </span>
                         <?php else: ?>
                             <span class="badge bg-secondary-lt text-white-50 d-inline-flex align-items-center gap-1" style="background: rgba(255, 255, 255, 0.1) !important;">
-                                <span>🌙</span> Absent des terres
+                                <i class="fa-solid fa-moon text-white-50"></i> Absent des terres
                             </span>
                         <?php endif; ?>
 
                         <!-- Privilèges & Titres de modération/admin -->
                         <?php if ($profile['is_admin']): ?>
                             <span class="badge bg-danger text-white fw-bold font-game" title="Administrateur du Shogunat">
-                                👑 Shōgun Suprême
+                                <i class="fa-solid fa-crown text-warning me-1"></i> Shōgun Suprême
                             </span>
                         <?php elseif ($profile['is_moderator']): ?>
                             <span class="badge bg-warning text-dark fw-bold font-game" title="Magistrat / Metsuke">
-                                ⚖️ Magistrat Impérial
+                                <i class="fa-solid fa-scale-balanced text-dark me-1"></i> Magistrat Impérial
                             </span>
                         <?php endif; ?>
 
                         <!-- Statut de protection débutant -->
                         <?php if ($profile['is_protected']): ?>
                             <span class="badge bg-teal text-white fw-bold d-inline-flex align-items-center gap-1" title="<?= htmlspecialchars($profile['protection_info']['label'] ?? 'Trêve sacrée') ?>">
-                                🛡️ Édit de Trêve Sacrée (Protégé)
+                                <i class="fa-solid fa-shield-halved text-white me-1"></i> Édit de Trêve Sacrée (Protégé)
                             </span>
                         <?php endif; ?>
                     </div>
@@ -299,20 +299,20 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                     <div class="d-flex flex-wrap flex-lg-column gap-2 justify-content-start justify-content-lg-end">
                         <?php if (!$isSelf): ?>
                             <a href="/?page=messages&tab=compose&to=<?= urlencode($profile['username']) ?>" class="btn btn-light shadow-sm text-dark fw-bold">
-                                <span class="me-1">📜</span> Écrire une Missive
+                                <i class="fa-solid fa-envelope me-1"></i> Écrire une Missive
                             </a>
                             <a href="/?page=chat&whisper=<?= urlencode($profile['username']) ?>" class="btn btn-outline-light">
-                                <span class="me-1">💬</span> Chuchoter au Salon
+                                <i class="fa-solid fa-comments me-1"></i> Chuchoter au Salon
                             </a>
                             <a href="/?page=fleet&target_x=<?= $capitalCoordX ?>&target_y=<?= $capitalCoordY ?>" class="btn btn-danger shadow-sm fw-bold">
-                                <span class="me-1">⚔️</span> Lancer une Expédition
+                                <i class="fa-solid fa-khanda me-1"></i> Lancer une Expédition
                             </a>
                         <?php else: ?>
                             <button type="button" onclick="startMottoEdit()" class="btn btn-light text-dark fw-bold shadow-sm">
-                                <span class="me-1">✏️</span> Modifier ma Devise
+                                <i class="fa-solid fa-pen-to-square me-1"></i> Modifier ma Devise
                             </button>
                             <a href="/?page=empire" class="btn btn-outline-light">
-                                <span class="me-1">👑</span> Bilan de l'Empire
+                                <i class="fa-solid fa-crown me-1"></i> Bilan de l'Empire
                             </a>
                         <?php endif; ?>
                     </div>
@@ -323,7 +323,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
         <!-- Citation & Philosophie du Clan -->
         <div class="px-4 py-3 border-top border-white-20 d-flex flex-wrap align-items-center justify-content-between gap-3" style="background: rgba(0, 0, 0, 0.2);">
             <div class="d-flex align-items-center gap-2">
-                <span class="fs-3">🏮</span>
+                <span class="fs-3 text-warning"><i class="fa-solid fa-torii-gate"></i></span>
                 <div>
                     <span class="fw-bold text-warning me-2">Maxime Ancestrale :</span>
                     <span class="fst-italic text-white"><?= htmlspecialchars($clan['motto_quote']) ?></span>
@@ -345,11 +345,11 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <div class="card shadow-sm mb-4 border-primary">
                 <div class="card-header bg-light-lt d-flex justify-content-between align-items-center">
                     <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
-                        <span>📜</span> Parchemin &amp; Devise Personnelle du Daimyō
+                        <i class="fa-solid fa-scroll text-primary"></i> Parchemin &amp; Devise Personnelle du Daimyō
                     </h3>
                     <?php if ($isSelf): ?>
                         <button type="button" id="btnToggleEditMotto" onclick="toggleMottoEditBox()" class="btn btn-sm btn-outline-primary font-game">
-                            ✏️ Éditer ma Devise
+                            <i class="fa-solid fa-pen-to-square me-1"></i> Éditer ma Devise
                         </button>
                     <?php endif; ?>
                 </div>
@@ -378,7 +378,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                                     Annuler
                                 </button>
                                 <button type="button" id="btnSaveMotto" onclick="saveMottoAjax()" class="btn btn-primary font-game">
-                                    <span>💾</span> Enregistrer la Devise
+                                    <i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer la Devise
                                 </button>
                             </div>
                         </div>
@@ -390,7 +390,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
-                        <span>⛩️</span> Chroniques &amp; Doctrine Militaire du <?= htmlspecialchars($clan['name']) ?>
+                        <i class="fa-solid fa-torii-gate text-primary"></i> Chroniques &amp; Doctrine Militaire du <?= htmlspecialchars($clan['name']) ?>
                     </h3>
                     <span class="badge text-white font-game" style="background: <?= $clan['accent_color'] ?>;">
                         <?= $clan['kanji'] ?>
@@ -445,7 +445,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
-                        <span>🏯</span> Fiefs &amp; Domaines Provinciaux (<?= count($profile['planets']) ?>)
+                        <i class="fa-solid fa-chess-rook text-primary"></i> Fiefs &amp; Domaines Provinciaux (<?= count($profile['planets']) ?>)
                     </h3>
                     <span class="text-secondary small">Cadastre Impérial</span>
                 </div>
@@ -464,7 +464,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="fs-3"><?= !empty($fief['is_capital']) ? '🏯' : '🌾' ?></span>
+                                            <span class="fs-3"><?= !empty($fief['is_capital']) ? '<i class="fa-solid fa-crown text-warning"></i>' : '<i class="fa-solid fa-wheat-awn text-success"></i>' ?></span>
                                             <div>
                                                 <div class="fw-bold text-dark">
                                                     <?= htmlspecialchars($fief['name']) ?>
@@ -478,7 +478,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                                     <td>
                                         <?php if (!empty($fief['is_capital'])): ?>
                                             <span class="badge bg-warning text-dark fw-bold">
-                                                👑 Capitale Provinciale
+                                                <i class="fa-solid fa-crown text-warning me-1"></i> Capitale Provinciale
                                             </span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary-lt text-secondary">
@@ -494,15 +494,15 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                                     <td class="text-end">
                                         <div class="btn-list justify-content-end">
                                             <a href="/?page=map&x=<?= (int)$fief['coord_x'] ?>&y=<?= (int)$fief['coord_y'] ?>" class="btn btn-sm btn-outline-secondary" title="Centrer la carte">
-                                                🗺️ Carte
+                                                <i class="fa-solid fa-map-location-dot me-1"></i> Carte
                                             </a>
                                             <?php if (!$isSelf): ?>
                                                 <a href="/?page=fleet&target_x=<?= (int)$fief['coord_x'] ?>&target_y=<?= (int)$fief['coord_y'] ?>" class="btn btn-sm btn-outline-danger font-game" title="Lancer une armée vers ce fief">
-                                                    ⚔️ Expédition
+                                                    <i class="fa-solid fa-khanda me-1"></i> Expédition
                                                 </a>
                                             <?php else: ?>
                                                 <a href="/?page=city" class="btn btn-sm btn-outline-primary" title="Visiter ce domaine">
-                                                    🏯 Visiter
+                                                    <i class="fa-solid fa-torii-gate me-1"></i> Visiter
                                                 </a>
                                             <?php endif; ?>
                                         </div>
@@ -523,7 +523,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
-                        <span>⚔️</span> Campagne Militaire de la Semaine
+                        <i class="fa-solid fa-shield-halved text-danger"></i> Campagne Militaire de la Semaine
                     </h3>
                     <span class="badge bg-primary text-white font-game">Semaine <?= date('W') ?></span>
                 </div>
@@ -580,7 +580,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
-                        <span>🎖️</span> Vitrine des Médailles de Guerre
+                        <i class="fa-solid fa-medal text-warning"></i> Vitrine des Médailles de Guerre
                     </h3>
                     <span class="badge bg-warning text-dark fw-bold font-game">
                         <?= (int)$profile['medals_count'] ?> distinction(s)
@@ -589,7 +589,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                 <div class="card-body">
                     <?php if (empty($profile['medals'])): ?>
                         <div class="text-center py-4 text-secondary">
-                            <span class="fs-1 d-block mb-2">📜</span>
+                            <i class="fa-solid fa-scroll fs-1 d-block mb-2 text-secondary"></i>
                             <div class="fw-bold font-game">Aucune médaille de guerre décernée</div>
                             <div class="small text-muted mt-1">
                                 Les médailles sont remises chaque dimanche soir aux daimyōs figurant dans le Top 10 des catégories militaires et d'essor.
@@ -629,7 +629,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light">
                     <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
-                        <span>🤝</span> Registre Diplomatique
+                        <i class="fa-solid fa-handshake text-primary me-1"></i> Registre Diplomatique
                     </h3>
                 </div>
                 <div class="card-body">
@@ -705,7 +705,7 @@ async function saveMottoAjax() {
 
     const newBio = input.value.trim();
     btn.disabled = true;
-    btn.innerHTML = "<span>⏳</span> Enregistrement...";
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Enregistrement...';
 
     try {
         const formData = new FormData();
@@ -745,7 +745,7 @@ async function saveMottoAjax() {
         }
     } finally {
         btn.disabled = false;
-        btn.innerHTML = "<span>💾</span> Enregistrer la Devise";
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer la Devise';
     }
 }
 

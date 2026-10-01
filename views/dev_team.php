@@ -22,7 +22,7 @@ if (!$devEngine->isDevTeamMember($userId)) {
     ?>
     <div class="container-xl py-5 text-center">
         <div class="empty">
-            <div class="empty-icon text-danger" style="font-size: 3rem;">🔒</div>
+            <div class="empty-icon text-danger" style="font-size: 3rem;"><i class="fa-solid fa-lock"></i></div>
             <p class="empty-title">Accès Réservé au Studio de Développement</p>
             <p class="empty-subtitle text-muted">
                 Cet espace est strictement réservé aux membres de la <strong>Dev Team</strong> d'OpenShogun.<br>
@@ -105,7 +105,7 @@ if (empty($allowedTabs)) {
     ?>
     <div class="container-xl py-5 text-center">
         <div class="empty">
-            <div class="empty-icon text-danger" style="font-size: 3rem;">🔒</div>
+            <div class="empty-icon text-danger" style="font-size: 3rem;"><i class="fa-solid fa-lock"></i></div>
             <p class="empty-title">Accès Interdit au Studio</p>
             <p class="empty-subtitle text-muted">Aucun onglet du studio de développement n'est habilité pour votre profil.</p>
         </div>
@@ -203,7 +203,7 @@ if ($canAccessWorldExpansion) {
             'name' => 'Fiefs Occupés',
             'sub' => 'Daimyōs & PNJ',
             'count' => $mapTileStats['villages'],
-            'icon' => '🏯',
+            'icon' => '<i class="fa-solid fa-chess-rook me-1"></i>',
             'badge_bg' => 'bg-purple-lt text-purple',
             'bar_color' => 'bg-purple',
             'img' => '/public/assets/map/tile_village.jpg?v=2',
@@ -213,7 +213,7 @@ if ($canAccessWorldExpansion) {
             'name' => 'Terres Libres',
             'sub' => 'Emplacements arpentés',
             'count' => $mapTileStats['free_lands'],
-            'icon' => '🏳️',
+            'icon' => '<i class="fa-solid fa-flag me-1"></i>',
             'badge_bg' => 'bg-secondary-lt text-secondary',
             'bar_color' => 'bg-secondary',
             'img' => '/public/assets/map/tile_plains.jpg?v=2',
@@ -223,7 +223,7 @@ if ($canAccessWorldExpansion) {
             'name' => 'Donjons Sacrés',
             'sub' => '現存十二天守',
             'count' => $mapTileStats['castles'],
-            'icon' => '👑',
+            'icon' => '<i class="fa-solid fa-crown me-1"></i>',
             'badge_bg' => 'bg-warning-lt text-warning',
             'bar_color' => 'bg-warning',
             'img' => '/public/assets/map/tile_authentic_castle.jpg?v=2',
@@ -233,7 +233,7 @@ if ($canAccessWorldExpansion) {
             'name' => 'Oasis Naturelles',
             'sub' => 'Faune & Bonus',
             'count' => $mapTileStats['oases'],
-            'icon' => '🌿',
+            'icon' => '<i class="fa-solid fa-leaf me-1"></i>',
             'badge_bg' => 'bg-teal-lt text-teal',
             'bar_color' => 'bg-teal',
             'img' => '/public/assets/map/tile_lake.jpg?v=2',
@@ -243,7 +243,7 @@ if ($canAccessWorldExpansion) {
             'name' => 'Plaines Fertiles',
             'sub' => 'Prairies & Terres',
             'count' => $mapTileStats['plains'],
-            'icon' => '🌾',
+            'icon' => '<i class="fa-solid fa-wheat-awn me-1"></i>',
             'badge_bg' => 'bg-lime-lt text-lime',
             'bar_color' => 'bg-lime',
             'img' => '/public/assets/map/tile_plains.jpg?v=2',
@@ -253,7 +253,7 @@ if ($canAccessWorldExpansion) {
             'name' => 'Forêt de Cèdres',
             'sub' => 'Sugi centenaires',
             'count' => $mapTileStats['forest'],
-            'icon' => '🌲',
+            'icon' => '<i class="fa-solid fa-tree me-1"></i>',
             'badge_bg' => 'bg-green-lt text-green',
             'bar_color' => 'bg-green',
             'img' => '/public/assets/map/tile_forest.jpg?v=2',
@@ -263,7 +263,7 @@ if ($canAccessWorldExpansion) {
             'name' => 'Pics & Montagnes',
             'sub' => 'Crêtes rocheuses',
             'count' => $mapTileStats['mountain'],
-            'icon' => '⛰️',
+            'icon' => '<i class="fa-solid fa-mountain me-1"></i>',
             'badge_bg' => 'bg-dark-lt text-dark',
             'bar_color' => 'bg-dark',
             'img' => '/public/assets/map/tile_mountain.jpg?v=2',
@@ -273,7 +273,7 @@ if ($canAccessWorldExpansion) {
             'name' => 'Collines & Coteaux',
             'sub' => 'Cultures en terrasse',
             'count' => $mapTileStats['hills'],
-            'icon' => '🏞️',
+            'icon' => '<i class="fa-solid fa-mound me-1"></i>',
             'badge_bg' => 'bg-orange-lt text-orange',
             'bar_color' => 'bg-orange',
             'img' => '/public/assets/map/tile_hills.jpg?v=2',
@@ -283,7 +283,7 @@ if ($canAccessWorldExpansion) {
             'name' => 'Lacs & Eaux Calmes',
             'sub' => 'Rivières & Bassins',
             'count' => $mapTileStats['lake'],
-            'icon' => '🌊',
+            'icon' => '<i class="fa-solid fa-water me-1"></i>',
             'badge_bg' => 'bg-cyan-lt text-cyan',
             'bar_color' => 'bg-cyan',
             'img' => '/public/assets/map/tile_lake.jpg?v=2',
@@ -326,19 +326,19 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
             <div class="row align-items-center g-3">
                 <div class="col-auto">
                     <div class="avatar avatar-xl rounded-circle shadow" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); font-size: 2rem; border: 3px solid rgba(255,255,255,0.2);">
-                        🛠️
+                        <i class="fa-solid fa-hammer text-white"></i>
                     </div>
                 </div>
                 <div class="col">
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                         <span class="badge bg-purple-lt text-white px-2 py-1" style="background: rgba(139, 92, 246, 0.3) !important;">
-                            🎮 OpenShogun Studio Lab
+                            <i class="fa-solid fa-gamepad me-1"></i> OpenShogun Studio Lab
                         </span>
                         <span class="badge bg-warning text-dark fw-bold">
                             Niveau <?= $levelInfo['level'] ?> &bull; <?= htmlspecialchars($levelInfo['title']) ?>
                         </span>
                         <?php if ($auth->isAdmin()): ?>
-                            <span class="badge bg-danger">👑 Administrateur Suprême</span>
+                            <span class="badge bg-danger"><i class="fa-solid fa-crown text-warning me-1"></i> Administrateur Suprême</span>
                         <?php endif; ?>
                     </div>
                     <h1 class="h2 mb-1 text-white fw-bold d-flex align-items-center gap-2">
@@ -352,7 +352,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                         <?php else: ?>
                             <?php foreach ($myRoles as $r): ?>
                                 <span class="badge bg-dark text-light border border-secondary" title="<?= htmlspecialchars($r['honor_title'] ?? '') ?>">
-                                    <?= $r['icon'] ?? '🛠️' ?> <?= htmlspecialchars($r['title']) ?>
+                                    <?= $r['icon'] ?? '<i class="fa-solid fa-hammer"></i>' ?> <?= htmlspecialchars($r['title']) ?>
                                 </span>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -363,7 +363,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <div class="col-12 col-md-4">
                     <div class="p-3 rounded" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
                         <div class="d-flex justify-content-between align-items-center mb-1 small text-white-50">
-                            <span>🔨 Forge XP : <strong><?= number_format($levelInfo['xp']) ?> XP</strong></span>
+                            <span><i class="fa-solid fa-hammer me-1 text-warning"></i> Forge XP : <strong><?= number_format($levelInfo['xp']) ?> XP</strong></span>
                             <?php if ($levelInfo['next_min_xp']): ?>
                                 <span>Suivant : <?= number_format($levelInfo['next_min_xp']) ?> XP</span>
                             <?php else: ?>
@@ -392,7 +392,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
     <?php if ($isForbiddenRedirect): ?>
     <div class="alert alert-warning alert-dismissible shadow-sm mb-3" role="alert">
         <div class="d-flex align-items-center gap-2">
-            <span class="fs-2">🔒</span>
+            <span class="fs-2 text-warning"><i class="fa-solid fa-lock"></i></span>
             <div>
                 <h4 class="alert-title mb-1">Accès Restreint &bull; Métier Requis</h4>
                 <div class="text-muted small">Vous avez été redirigé(e) vers un onglet autorisé car votre profil ne possède pas le métier ou les habilitations nécessaires pour accéder à l'onglet demandé.</div>
@@ -409,7 +409,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <?php if (in_array('roster', $allowedTabs, true)): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $activeTab === 'roster' ? 'active' : '' ?>" id="tab-roster-btn" data-bs-toggle="tab" href="#tab-roster" role="tab" onclick="switchDevTab('roster')">
-                        <span>👥</span> Studio Roster &amp; Métiers
+                        <i class="fa-solid fa-users text-primary me-1"></i> Studio Roster &amp; Métiers
                     </a>
                 </li>
                 <?php endif; ?>
@@ -417,7 +417,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <?php if (in_array('qa', $allowedTabs, true)): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $activeTab === 'qa' ? 'active' : '' ?>" id="tab-qa-btn" data-bs-toggle="tab" href="#tab-qa" role="tab" onclick="switchDevTab('qa')">
-                        <span>📋</span> QA &amp; Recette
+                        <i class="fa-solid fa-clipboard-check text-danger me-1"></i> QA &amp; Recette
                         <?php if ($qaStats['pending'] > 0): ?>
                             <span class="badge bg-danger text-white ms-1" id="nav-qa-pending-badge"><?= $qaStats['pending'] ?></span>
                         <?php endif; ?>
@@ -428,7 +428,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <?php if (in_array('mailing', $allowedTabs, true)): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $activeTab === 'mailing' ? 'active' : '' ?>" id="tab-mailing-btn" data-bs-toggle="tab" href="#tab-mailing" role="tab" onclick="switchDevTab('mailing')">
-                        <span>📢</span> Mailing List
+                        <i class="fa-solid fa-bullhorn text-teal me-1"></i> Mailing List
                         <span class="badge bg-teal-lt text-teal ms-1" id="nav-mailing-count-badge"><?= $mailingStats['newsletter_subscribers'] ?></span>
                     </a>
                 </li>
@@ -437,7 +437,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <?php if (in_array('sandbox', $allowedTabs, true)): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $activeTab === 'sandbox' ? 'active' : '' ?>" id="tab-sandbox-btn" data-bs-toggle="tab" href="#tab-sandbox" role="tab" onclick="switchDevTab('sandbox')">
-                        <span>🧪</span> Atelier QA &amp; Sandbox
+                        <i class="fa-solid fa-flask text-warning me-1"></i> Atelier QA &amp; Sandbox
                     </a>
                 </li>
                 <?php endif; ?>
@@ -445,7 +445,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <?php if (in_array('system', $allowedTabs, true)): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $activeTab === 'system' ? 'active' : '' ?>" id="tab-system-btn" data-bs-toggle="tab" href="#tab-system" role="tab" onclick="switchDevTab('system')">
-                        <span>⚙️</span> Live Ops &amp; Serveur
+                        <i class="fa-solid fa-gears text-cyan me-1"></i> Live Ops &amp; Serveur
                     </a>
                 </li>
                 <?php endif; ?>
@@ -453,7 +453,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <?php if (in_array('lore', $allowedTabs, true)): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $activeTab === 'lore' ? 'active' : '' ?>" id="tab-lore-btn" data-bs-toggle="tab" href="#tab-lore" role="tab" onclick="switchDevTab('lore')">
-                        <span>📜</span> Univers &amp; Lore
+                        <i class="fa-solid fa-scroll text-yellow me-1"></i> Univers &amp; Lore
                     </a>
                 </li>
                 <?php endif; ?>
@@ -461,7 +461,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <?php if (in_array('forge', $allowedTabs, true)): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $activeTab === 'forge' ? 'active' : '' ?>" id="tab-forge-btn" data-bs-toggle="tab" href="#tab-forge" role="tab" onclick="switchDevTab('forge')">
-                        <span>🔨</span> Journal de Forge &amp; Trophées
+                        <i class="fa-solid fa-hammer text-orange me-1"></i> Journal de Forge &amp; Trophées
                     </a>
                 </li>
                 <?php endif; ?>
@@ -469,7 +469,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <?php if (in_array('game_speeds', $allowedTabs, true)): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $activeTab === 'game_speeds' ? 'active' : '' ?>" id="tab-game_speeds-btn" data-bs-toggle="tab" href="#tab-game_speeds" role="tab" onclick="switchDevTab('game_speeds')">
-                        <span>⚡</span> Vitesses &amp; Équilibrage
+                        <i class="fa-solid fa-bolt text-warning me-1"></i> Vitesses &amp; Équilibrage
                     </a>
                 </li>
                 <?php endif; ?>
@@ -477,7 +477,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <?php if (in_array('world_expansion', $allowedTabs, true)): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $activeTab === 'world_expansion' ? 'active' : '' ?>" id="tab-world_expansion-btn" data-bs-toggle="tab" href="#tab-world_expansion" role="tab" onclick="switchDevTab('world_expansion')">
-                        <span>🗾</span> Arpentage &amp; Provinces
+                        <i class="fa-solid fa-map-location-dot text-success me-1"></i> Arpentage &amp; Provinces
                     </a>
                 </li>
                 <?php endif; ?>
@@ -485,7 +485,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <?php if (in_array('oases_ecosystem', $allowedTabs, true)): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $activeTab === 'oases_ecosystem' ? 'active' : '' ?>" id="tab-oases_ecosystem-btn" data-bs-toggle="tab" href="#tab-oases_ecosystem" role="tab" onclick="switchDevTab('oases_ecosystem')">
-                        <span>🌿</span> Écosystème des Oasis
+                        <i class="fa-solid fa-seedling text-teal me-1"></i> Écosystème des Oasis
                     </a>
                 </li>
                 <?php endif; ?>
@@ -509,7 +509,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                         <?php if ($canManageTeam): ?>
                         <div>
                             <button type="button" class="btn btn-purple d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modal-assign-role">
-                                <span>➕</span> Assigner un Métier
+                                <i class="fa-solid fa-plus me-1"></i>Assigner un Métier
                             </button>
                         </div>
                         <?php endif; ?>
@@ -544,7 +544,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                     <span class="text-muted fst-italic small no-member-tag" style="font-size: 0.75rem;">Aucun pour le moment</span>
                                                 <?php else: ?>
                                                     <?php foreach ($assignedUsers as $uName): ?>
-                                                        <span class="badge bg-light text-dark border dist-user-tag" data-username="<?= htmlspecialchars($uName) ?>" style="font-size: 0.75rem;">👤 <?= htmlspecialchars($uName) ?></span>
+                                                        <span class="badge bg-light text-dark border dist-user-tag" data-username="<?= htmlspecialchars($uName) ?>" style="font-size: 0.75rem;"><i class="fa-solid fa-user me-1"></i><?= htmlspecialchars($uName) ?></span>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>
                                             </div>
@@ -601,7 +601,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                                   data-user-id="<?= $member['user_id'] ?>"
                                                                   data-role-id="<?= $r['id'] ?>"
                                                                   title="<?= htmlspecialchars($r['honor_title'] ?? '') ?>">
-                                                                <span><?= $r['icon'] ?? '🛠️' ?> <?= htmlspecialchars($r['title']) ?></span>
+                                                                <span><i class="fa-solid fa-hammer me-1"></i><?= htmlspecialchars($r['title']) ?></span>
                                                                 <?php if ($canManageTeam): ?>
                                                                     <button type="button"
                                                                             class="btn-close btn-close-white ms-1 dev-role-close-btn"
@@ -629,12 +629,12 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                         <button type="button" class="btn btn-sm btn-outline-purple d-inline-flex align-items-center gap-1"
                                                                 onclick="openAssignRoleModal(<?= $member['user_id'] ?>, '<?= htmlspecialchars(addslashes($member['username'])) ?>')"
                                                                 title="Attribuer des métiers à ce membre">
-                                                            <span>➕</span> <span class="d-none d-md-inline">Métier</span>
+                                                            <i class="fa-solid fa-plus me-1"></i><span class="d-none d-md-inline">Métier</span>
                                                         </button>
                                                     <?php endif; ?>
                                                     <?php if ($canManageSprints): ?>
                                                         <button type="button" class="btn btn-sm btn-outline-warning" onclick="openAwardXpModal(<?= $member['user_id'] ?>, '<?= htmlspecialchars(addslashes($member['username'])) ?>')">
-                                                            <span>⭐</span> Récompenser XP
+                                                            <i class="fa-solid fa-star text-warning me-1"></i>Récompenser XP
                                                         </button>
                                                     <?php endif; ?>
                                                 </div>
@@ -659,7 +659,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
                         <div>
                             <h3 class="card-title d-flex align-items-center gap-2 mb-1">
-                                <span>📋</span> Registre de Recette QA &amp; Contrôle Qualité
+                                <i class="fa-solid fa-clipboard-check text-primary me-1"></i>Registre de Recette QA &amp; Contrôle Qualité
                             </h3>
                             <p class="text-muted small mb-0">
                                 Suivi des fonctionnalités consignées dans <code>fonctionnalités.md</code>, validation manuelle par l'équipe QA et contrôle automatisé de la syntaxe PHP (<code>php -l</code>).
@@ -667,7 +667,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <button type="button" class="btn btn-outline-teal d-flex align-items-center gap-2 shadow-sm" id="btn-run-syntax" onclick="handleRunSyntaxCheck(this)">
-                                <span>⚡</span> <span id="btn-run-syntax-text">Lancer le Contrôle de Syntaxe</span>
+                                <i class="fa-solid fa-bolt text-warning me-1"></i><span id="btn-run-syntax-text">Lancer le Contrôle de Syntaxe</span>
                             </button>
                         </div>
                     </div>
@@ -681,11 +681,11 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="text-muted small fw-bold text-uppercase">Contrôle Syntaxe</span>
                                         <span class="badge <?= $syntaxStatus['is_clean'] ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger' ?>" id="badge-syntax-status">
-                                            <?= $syntaxStatus['is_clean'] ? '✔ 100% VALIDE' : '✗ ERREURS DÉTECTÉES' ?>
+                                            <?= $syntaxStatus['is_clean'] ? '100% VALIDE' : 'ERREURS DÉTECTÉES' ?>
                                         </span>
                                     </div>
                                     <div class="h2 mb-1 font-monospace d-flex align-items-center gap-2" id="text-syntax-summary">
-                                        <span id="icon-syntax-clean"><?= $syntaxStatus['is_clean'] ? '🟢' : '🔴' ?></span>
+                                        <span id="icon-syntax-clean"><?= $syntaxStatus['is_clean'] ? '<i class="fa-solid fa-circle-check text-success"></i>' : '<i class="fa-solid fa-circle-xmark text-danger"></i>' ?></span>
                                         <span id="text-syntax-passed"><?= $syntaxStatus['passed_count'] ?></span>
                                         <span class="text-muted fs-5 fw-normal">/ <span id="text-syntax-total"><?= $syntaxStatus['total_files'] ?></span> fichiers</span>
                                     </div>
@@ -705,7 +705,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                         <span class="badge bg-warning-lt text-warning">En attente QA</span>
                                     </div>
                                     <div class="h2 mb-1 font-monospace text-warning d-flex align-items-center gap-2">
-                                        <span>⏳</span> <span id="qa-stat-pending"><?= $qaStats['pending'] ?></span>
+                                        <i class="fa-solid fa-hourglass-half text-warning me-1"></i><span id="qa-stat-pending"><?= $qaStats['pending'] ?></span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.75rem;">
                                         Nouveautés en attente de recette manuelle
@@ -723,7 +723,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                         <span class="badge bg-success-lt text-success">Recette OK</span>
                                     </div>
                                     <div class="h2 mb-1 font-monospace text-success d-flex align-items-center gap-2">
-                                        <span>✔</span> <span id="qa-stat-validated"><?= $qaStats['validated'] ?></span>
+                                        <i class="fa-solid fa-circle-check text-success me-1"></i><span id="qa-stat-validated"><?= $qaStats['validated'] ?></span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.75rem;">
                                         Fonctionnalités prêtes pour la production
@@ -741,7 +741,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                         <span class="badge bg-danger-lt text-danger">Failles / Bugs</span>
                                     </div>
                                     <div class="h2 mb-1 font-monospace text-danger d-flex align-items-center gap-2">
-                                        <span>✗</span> <span id="qa-stat-rejected"><?= $qaStats['rejected'] ?></span>
+                                        <i class="fa-solid fa-circle-xmark text-danger me-1"></i><span id="qa-stat-rejected"><?= $qaStats['rejected'] ?></span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.75rem;">
                                         Nécessite des correctifs du développeur
@@ -754,7 +754,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                     <!-- Rapport d'erreur syntaxe si erreurs détectées -->
                     <div id="qa-syntax-errors-box" class="alert alert-danger <?= empty($syntaxStatus['errors']) ? 'd-none' : '' ?> mb-4 shadow-sm" role="alert">
                         <h4 class="alert-title d-flex align-items-center gap-2">
-                            <span>🚨</span> Erreurs de syntaxe PHP détectées lors du scan :
+                            <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Erreurs de syntaxe PHP détectées lors du scan :
                         </h4>
                         <ul class="mb-0 small font-monospace" id="qa-syntax-errors-list">
                             <?php foreach (($syntaxStatus['errors'] ?? []) as $err): ?>
@@ -796,13 +796,13 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                             $st = mb_strtolower($f['status']);
                                             if (str_contains($st, 'valid')) {
                                                 $statusBadge = 'bg-success-lt text-success border border-success';
-                                                $statusIcon = '✔';
+                                                $statusIcon = '<i class="fa-solid fa-check text-success me-1"></i>';
                                             } elseif (str_contains($st, 'rejet') || str_contains($st, 'refus')) {
                                                 $statusBadge = 'bg-danger-lt text-danger border border-danger';
-                                                $statusIcon = '✗';
+                                                $statusIcon = '<i class="fa-solid fa-xmark text-danger me-1"></i>';
                                             } else {
                                                 $statusBadge = 'bg-warning-lt text-warning border border-warning';
-                                                $statusIcon = '⏳';
+                                                $statusIcon = '<i class="fa-solid fa-hourglass-half text-warning me-1"></i>';
                                             }
                                             ?>
                                             <tr id="feature-row-<?= $f['id'] ?>" data-feature-id="<?= $f['id'] ?>">
@@ -819,19 +819,19 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                     </div>
                                                     <?php if (!empty($f['files'])): ?>
                                                         <div class="text-muted small mt-1 font-monospace" style="font-size: 0.75rem;">
-                                                            📂 <?= htmlspecialchars($f['files']) ?>
+                                                            <i class="fa-solid fa-folder-open text-primary me-1"></i><?= htmlspecialchars($f['files']) ?>
                                                         </div>
                                                     <?php endif; ?>
                                                     <?php if (!empty($f['validated_by'])): ?>
                                                         <div class="text-muted small mt-1 fst-italic" style="font-size: 0.75rem;" id="feature-validator-<?= $f['id'] ?>">
-                                                            👤 Validé par : <?= htmlspecialchars($f['validated_by']) ?>
+                                                            <i class="fa-solid fa-user-check me-1"></i>Validé par : <?= htmlspecialchars($f['validated_by']) ?>
                                                         </div>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
                                                     <?php if (!empty($f['qa_check'])): ?>
                                                         <div class="small text-secondary bg-light p-2 rounded border" style="font-size: 0.8rem; line-height: 1.35;">
-                                                            🎯 <?= htmlspecialchars($f['qa_check']) ?>
+                                                            <i class="fa-solid fa-bullseye text-danger me-1"></i><?= htmlspecialchars($f['qa_check']) ?>
                                                         </div>
                                                     <?php else: ?>
                                                         <span class="text-muted small fst-italic">Non spécifié</span>
@@ -847,17 +847,17 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                         <button type="button" class="btn btn-outline-success" 
                                                                 onclick="setFeatureStatus('<?= $f['id'] ?>', 'Validée', '<?= htmlspecialchars(addslashes($f['title'])) ?>')"
                                                                 title="Marquer comme validée">
-                                                            ✔ Valider
+                                                            <i class="fa-solid fa-check me-1"></i>Valider
                                                         </button>
                                                         <button type="button" class="btn btn-outline-danger" 
                                                                 onclick="setFeatureStatus('<?= $f['id'] ?>', 'Rejetée', '<?= htmlspecialchars(addslashes($f['title'])) ?>')"
                                                                 title="Rejeter (anomalie détectée)">
-                                                            ✗ Rejeter
+                                                            <i class="fa-solid fa-xmark me-1"></i>Rejeter
                                                         </button>
                                                         <button type="button" class="btn btn-outline-warning" 
                                                                 onclick="setFeatureStatus('<?= $f['id'] ?>', 'À tester', '<?= htmlspecialchars(addslashes($f['title'])) ?>')"
                                                                 title="Remettre à tester">
-                                                            ⏳ Reset
+                                                            <i class="fa-solid fa-rotate-left me-1"></i>Reset
                                                         </button>
                                                     </div>
                                                 </td>
@@ -882,7 +882,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
                         <div>
                             <h3 class="card-title mb-1 d-flex align-items-center gap-2">
-                                <span>📢</span> Mailing List &amp; Diffusion Communautaire
+                                <i class="fa-solid fa-bullhorn text-pink me-1"></i>Mailing List &amp; Diffusion Communautaire
                             </h3>
                             <p class="text-muted small mb-0">
                                 Gestion des abonnés aux chroniques impériales, composition de missives officielles et campagnes ciblées par faction ou statut.
@@ -890,10 +890,10 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                         </div>
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" onclick="handleExportMailingCsv()">
-                                <span>📥</span> Exporter la Liste (CSV)
+                                <i class="fa-solid fa-file-csv me-1"></i>Exporter la Liste (CSV)
                             </button>
                             <button type="button" class="btn btn-teal text-white d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modal-compose-newsletter">
-                                <span>✍️</span> Composer une Missive
+                                <i class="fa-solid fa-pen-nib text-primary me-1"></i>Composer une Missive
                             </button>
                         </div>
                     </div>
@@ -908,7 +908,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                         <span class="badge bg-secondary-lt text-secondary">Base Globale</span>
                                     </div>
                                     <div class="h2 mb-1 font-monospace text-dark d-flex align-items-center gap-2">
-                                        <span>👥</span> <span id="kpi-mailing-total"><?= $mailingStats['total_users'] ?></span>
+                                        <i class="fa-solid fa-users text-primary me-1"></i><span id="kpi-mailing-total"><?= $mailingStats['total_users'] ?></span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.75rem;">
                                         Tous les joueurs humains enregistrés
@@ -925,7 +925,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                         <span class="badge bg-teal-lt text-teal">Opt-in Actif</span>
                                     </div>
                                     <div class="h2 mb-1 font-monospace text-teal d-flex align-items-center gap-2">
-                                        <span>📬</span> <span id="kpi-mailing-optin"><?= $mailingStats['newsletter_subscribers'] ?></span>
+                                        <i class="fa-solid fa-envelope-open text-success me-1"></i><span id="kpi-mailing-optin"><?= $mailingStats['newsletter_subscribers'] ?></span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.75rem;">
                                         Joueurs ayant consenti à la diffusion
@@ -942,7 +942,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                         <span class="badge bg-cyan-lt text-cyan">Conformité RGPD</span>
                                     </div>
                                     <div class="h2 mb-1 font-monospace text-cyan d-flex align-items-center gap-2">
-                                        <span>📊</span> <span id="kpi-mailing-rate"><?= $mailingStats['optin_rate_percent'] ?>%</span>
+                                        <i class="fa-solid fa-percent text-info me-1"></i><span id="kpi-mailing-rate"><?= $mailingStats['optin_rate_percent'] ?>%</span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.75rem;">
                                         Proportion d'abonnés volontaires
@@ -959,7 +959,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                         <span class="badge bg-purple-lt text-purple">Historique</span>
                                     </div>
                                     <div class="h2 mb-1 font-monospace text-purple d-flex align-items-center gap-2">
-                                        <span>📜</span> <span id="kpi-mailing-campaigns"><?= $mailingStats['total_campaigns'] ?></span>
+                                        <i class="fa-solid fa-paper-plane text-purple me-1"></i><span id="kpi-mailing-campaigns"><?= $mailingStats['total_campaigns'] ?></span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.75rem;">
                                         Campagnes envoyées depuis la fondation
@@ -975,15 +975,15 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                             <form id="mailing-filter-form" onsubmit="event.preventDefault(); loadMailingSubscribers(1);" class="row g-2 align-items-center">
                                 <div class="col-md-3">
                                     <div class="input-icon">
-                                        <span class="input-icon-addon">🔍</span>
+                                        <span class="input-icon-addon"><i class="fa-solid fa-magnifying-glass"></i></span>
                                         <input type="text" class="form-control" id="filter-mailing-search" placeholder="Daimyō ou adresse e-mail..." oninput="debounceMailingSearch()">
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-md-2">
                                     <select class="form-select" id="filter-mailing-optin" onchange="loadMailingSubscribers(1)">
                                         <option value="all">Diffusion : Tous</option>
-                                        <option value="1">✓ Abonnés (Opt-in)</option>
-                                        <option value="0">✗ Non abonnés</option>
+                                        <option value="1">Abonnés (Opt-in)</option>
+                                        <option value="0">Non abonnés</option>
                                     </select>
                                 </div>
                                 <div class="col-sm-6 col-md-2">
@@ -1012,7 +1012,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 </div>
                                 <div class="col-md-1 text-end">
                                     <button type="button" class="btn btn-outline-secondary w-100" onclick="resetMailingFilters()" title="Réinitialiser les filtres">
-                                        🔄
+                                        <i class="fa-solid fa-arrows-rotate"></i>
                                     </button>
                                 </div>
                             </form>
@@ -1050,7 +1050,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                             <tr id="subscriber-row-<?= $s['id'] ?>">
                                                 <td>
                                                     <div class="d-flex align-items-center gap-2">
-                                                        <span class="avatar avatar-sm bg-blue-lt">👤</span>
+                                                        <span class="avatar avatar-sm bg-blue-lt"><i class="fa-solid fa-user"></i></span>
                                                         <div>
                                                             <div class="fw-bold text-dark"><?= htmlspecialchars($s['username']) ?></div>
                                                             <div class="text-muted small font-monospace">ID #<?= $s['id'] ?></div>
@@ -1060,9 +1060,9 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                 <td>
                                                     <div class="text-dark font-monospace small"><?= htmlspecialchars($s['email']) ?></div>
                                                     <?php if ($s['is_active']): ?>
-                                                        <span class="badge bg-success-lt" style="font-size: 0.68rem;">✔ Confirmé</span>
+                                                        <span class="badge bg-success-lt" style="font-size: 0.68rem;"><i class="fa-solid fa-circle-check text-success me-1"></i>Confirmé</span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-warning-lt" style="font-size: 0.68rem;">⏳ En attente</span>
+                                                        <span class="badge bg-warning-lt" style="font-size: 0.68rem;"><i class="fa-solid fa-hourglass-half text-warning me-1"></i>En attente</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
@@ -1077,10 +1077,10 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                 <td>
                                                     <div class="d-flex flex-wrap gap-1">
                                                         <?php if ($s['is_admin']): ?>
-                                                            <span class="badge bg-danger text-white">👑 Admin</span>
+                                                            <span class="badge bg-danger text-white"><i class="fa-solid fa-crown me-1"></i>Admin</span>
                                                         <?php endif; ?>
                                                         <?php if ($s['is_moderator']): ?>
-                                                            <span class="badge bg-warning text-white">🛡️ Modo</span>
+                                                            <span class="badge bg-warning text-white"><i class="fa-solid fa-shield-halved me-1"></i>Modo</span>
                                                         <?php endif; ?>
                                                         <?php if (empty($s['dev_roles']) && !$s['is_admin'] && !$s['is_moderator']): ?>
                                                             <span class="badge bg-light text-muted">Joueur</span>
@@ -1094,11 +1094,11 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                 <td class="text-center" id="subscriber-optin-cell-<?= $s['id'] ?>">
                                                     <?php if ($s['newsletter_optin']): ?>
                                                         <span class="badge bg-success-lt text-success" title="Inscrit volontairement à la newsletter">
-                                                            ✓ Abonné
+                                                            <i class="fa-solid fa-check text-success me-1"></i>Abonné
                                                         </span>
                                                     <?php else: ?>
                                                         <span class="badge bg-secondary-lt text-muted" title="Non inscrit">
-                                                            ✗ Non abonné
+                                                            <i class="fa-solid fa-xmark text-secondary me-1"></i>Non abonné
                                                         </span>
                                                     <?php endif; ?>
                                                 </td>
@@ -1133,7 +1133,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                     <div class="card border">
                         <div class="card-header bg-light">
                             <h4 class="card-title mb-0 d-flex align-items-center gap-2">
-                                <span>📜</span> Dernières Missives Expédiées
+                                <i class="fa-solid fa-scroll text-warning me-1"></i>Dernières Missives Expédiées
                             </h4>
                         </div>
                         <div class="table-responsive">
@@ -1165,9 +1165,9 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                 <td class="small"><?= htmlspecialchars($camp['sender_name']) ?></td>
                                                 <td>
                                                     <?php if ($camp['status'] === 'sent'): ?>
-                                                        <span class="badge bg-success-lt text-success">✔ Expédiée</span>
+                                                        <span class="badge bg-success-lt text-success"><i class="fa-solid fa-circle-check me-1"></i>Expédiée</span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-danger-lt text-danger">✗ Échec</span>
+                                                        <span class="badge bg-danger-lt text-danger"><i class="fa-solid fa-circle-xmark me-1"></i>Échec</span>
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>
@@ -1188,7 +1188,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <div class="tab-pane fade <?= $activeTab === 'sandbox' ? 'show active' : '' ?>" id="tab-sandbox" role="tabpanel">
                     
                     <div class="alert alert-warning d-flex align-items-center gap-3 mb-4 shadow-sm">
-                        <div class="fs-1">🧪</div>
+                        <div class="fs-1 text-primary"><i class="fa-solid fa-flask"></i></div>
                         <div>
                             <h4 class="alert-title mb-1">Console Sandbox & Débogage QA</h4>
                             <div class="small">
@@ -1204,7 +1204,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                             <div class="card h-100 border">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center gap-2 mb-3">
-                                        <span class="fs-2">🌾</span>
+                                        <span class="fs-2 text-warning"><i class="fa-solid fa-wheat-awn"></i></span>
                                         <div>
                                             <h3 class="card-title mb-0">Approvisionnement Rapide (QA Test)</h3>
                                             <span class="text-muted small">Injection directe sur votre fief actuel</span>
@@ -1215,7 +1215,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                     </p>
                                     <div class="mt-4">
                                         <button type="button" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" onclick="triggerSandboxAction('give_resources', this)">
-                                            <span>⚡</span> Injecter +100 000 Ressources
+                                            <i class="fa-solid fa-bolt text-warning me-1"></i>Injecter +100 000 Ressources
                                         </button>
                                     </div>
                                 </div>
@@ -1227,7 +1227,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                             <div class="card h-100 border">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center gap-2 mb-3">
-                                        <span class="fs-2">🏯</span>
+                                        <span class="fs-2 text-danger"><i class="fa-solid fa-chess-rook"></i></span>
                                         <div>
                                             <h3 class="card-title mb-0">Achèvement Instantané des Chantiers</h3>
                                             <span class="text-muted small">Passage forcé à zéro du temps d'attente</span>
@@ -1238,7 +1238,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                     </p>
                                     <div class="mt-4">
                                         <button type="button" class="btn btn-warning w-100 d-flex align-items-center justify-content-center gap-2 text-dark" onclick="triggerSandboxAction('instant_finish_constructions', this)">
-                                            <span>⏩</span> Achever Immédiatement les Chantiers
+                                            <i class="fa-solid fa-forward-fast me-1"></i>Achever Immédiatement les Chantiers
                                         </button>
                                     </div>
                                 </div>
@@ -1263,7 +1263,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 <div class="card-body">
                                     <div class="row align-items-center">
                                         <div class="col-auto">
-                                            <span class="bg-primary text-white avatar">🐘</span>
+                                            <span class="bg-primary text-white avatar"><i class="fa-brands fa-php fs-2"></i></span>
                                         </div>
                                         <div class="col">
                                             <div class="font-weight-medium">Version Moteur PHP</div>
@@ -1279,7 +1279,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 <div class="card-body">
                                     <div class="row align-items-center">
                                         <div class="col-auto">
-                                            <span class="bg-success text-white avatar">👥</span>
+                                            <span class="bg-success text-white avatar"><i class="fa-solid fa-users fs-2"></i></span>
                                         </div>
                                         <div class="col">
                                             <div class="font-weight-medium"><?= number_format($totalPlayersCount) ?> Joueurs</div>
@@ -1295,7 +1295,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 <div class="card-body">
                                     <div class="row align-items-center">
                                         <div class="col-auto">
-                                            <span class="bg-warning text-white avatar">🏗️</span>
+                                            <span class="bg-warning text-white avatar"><i class="fa-solid fa-hammer fs-2"></i></span>
                                         </div>
                                         <div class="col">
                                             <div class="font-weight-medium"><?= number_format($activeQueuesCount) ?> Chantiers Actifs</div>
@@ -1311,7 +1311,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 <div class="card-body">
                                     <div class="row align-items-center">
                                         <div class="col-auto">
-                                            <span class="bg-danger text-white avatar">🧠</span>
+                                            <span class="bg-danger text-white avatar"><i class="fa-solid fa-brain fs-2"></i></span>
                                         </div>
                                         <div class="col">
                                             <div class="font-weight-medium">Mémoire Utilisée</div>
@@ -1329,11 +1329,11 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div>
-                                    <h4 class="card-title mb-1">🤖 Déclenchement Forcé de la Boucle d'IA & Crons</h4>
+                                    <h4 class="card-title mb-1"><i class="fa-solid fa-robot text-indigo me-1"></i>Déclenchement Forcé de la Boucle d'IA &amp; Crons</h4>
                                     <p class="text-muted small mb-0">Exécute immédiatement le cycle autonome de réflexion des bots PNJ, calcul des flottes et mise à jour de la carte.</p>
                                 </div>
                                 <button type="button" class="btn btn-indigo d-flex align-items-center gap-2" onclick="triggerBotCycle(this)">
-                                    <span>🔄</span> Forcer le Cycle IA
+                                    <i class="fa-solid fa-arrows-rotate me-1"></i>Forcer le Cycle IA
                                 </button>
                             </div>
                             <div id="bot-cycle-log" class="mt-3 font-monospace p-3 bg-dark text-light rounded small d-none" style="max-height: 250px; overflow-y: auto;"></div>
@@ -1352,7 +1352,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                     
                     <div class="card border mb-3">
                         <div class="card-body">
-                            <h3 class="card-title mb-2">📜 La Charte Narrative du Sengoku Céleste</h3>
+                            <h3 class="card-title mb-2"><i class="fa-solid fa-scroll text-warning me-1"></i>La Charte Narrative du Sengoku Céleste</h3>
                             <p class="text-muted">
                                 Bienvenue dans l'espace réservé au <strong>Narrative Designer</strong> et à la cohérence de l'univers féodal d'OpenShogun. 
                                 Le projet allie le réalisme historique de l'ère Sengoku (Daimyōs, Samouraïs, Châteaux forts, Ronins) à une touche de mystère et de poésie shintoïste.
@@ -1361,7 +1361,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                             <div class="row g-3 mt-2">
                                 <div class="col-md-4">
                                     <div class="p-3 bg-light rounded border h-100">
-                                        <h4 class="fw-bold mb-1">🏯 Les 3 Factions</h4>
+                                        <h4 class="fw-bold mb-1"><i class="fa-solid fa-chess-rook text-danger me-1"></i>Les 3 Factions</h4>
                                         <p class="small text-muted mb-0">
                                             <strong>Oda (Terran) :</strong> Maîtres de la poudre noire, de la stratégie agressive et de l'innovation militaire.<br>
                                             <strong>Takeda (Cyborg) :</strong> Cavalerie légendaire, rigueur martiale et fortifications montagnardes inexpugnables.<br>
@@ -1371,7 +1371,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 </div>
                                 <div class="col-md-4">
                                     <div class="p-3 bg-light rounded border h-100">
-                                        <h4 class="fw-bold mb-1">⚔️ Ton & Vocabulaire</h4>
+                                        <h4 class="fw-bold mb-1"><i class="fa-solid fa-khanda text-danger me-1"></i>Ton &amp; Vocabulaire</h4>
                                         <p class="small text-muted mb-0">
                                             Privilégier le lexique d'époque : <em>Koban, Fiefs, Terroir, Cité Castrale, Dojo, Ronins, Seppuku, Daimyō, Shōgun</em>.
                                             Éviter les anachronismes ou anglicismes non traduits pour maintenir l'immersion des joueurs.
@@ -1380,7 +1380,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 </div>
                                 <div class="col-md-4">
                                     <div class="p-3 bg-light rounded border h-100">
-                                        <h4 class="fw-bold mb-1">🎯 Quêtes & Chroniques</h4>
+                                        <h4 class="fw-bold mb-1"><i class="fa-solid fa-bullseye text-primary me-1"></i>Quêtes &amp; Chroniques</h4>
                                         <p class="small text-muted mb-0">
                                             Chaque quête doit raconter l'ascension d'un jeune seigneur de province jusqu'au trône de Kyōto, entre intrigues de cour et batailles épiques.
                                         </p>
@@ -1400,7 +1400,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <div class="tab-pane fade <?= $activeTab === 'forge' ? 'show active' : '' ?>" id="tab-forge" role="tabpanel">
 
                     <!-- Paliers de Progression -->
-                    <h3 class="card-title mb-3">🏆 Paliers des Créateurs de la Forge</h3>
+                    <h3 class="card-title mb-3"><i class="fa-solid fa-trophy text-warning me-1"></i>Paliers des Créateurs de la Forge</h3>
                     <div class="row row-cards mb-4">
                         <?php 
                         $tiersDisplay = [
@@ -1480,11 +1480,11 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="badge bg-purple-lt text-purple fw-bold">🎮 Game Elevate Designer</span>
-                                    <span class="badge bg-danger-lt fw-bold">⚡ Constantes Monde</span>
+                                    <span class="badge bg-purple-lt text-purple fw-bold"><i class="fa-solid fa-gamepad me-1"></i>Game Elevate Designer</span>
+                                    <span class="badge bg-danger-lt fw-bold"><i class="fa-solid fa-bolt me-1"></i>Constantes Monde</span>
                                 </div>
                                 <h3 class="card-title d-flex align-items-center gap-2 m-0 text-danger">
-                                    <span>⚡</span> Constantes &amp; Équilibrage des Vitesses de Jeu
+                                    <i class="fa-solid fa-bolt text-warning me-1"></i>Constantes &amp; Équilibrage des Vitesses de Jeu
                                 </h3>
                                 <div class="text-secondary small mt-1">
                                     Facteurs d'accélération des chantiers, de production des ressources et de marche des armées féodales.
@@ -1502,7 +1502,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6 col-lg-3">
                                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                            <span>⚡ Vitesse du Jeu (Chantiers &amp; Recherches)</span>
+                                            <span><i class="fa-solid fa-bolt text-warning me-1"></i>Vitesse du Jeu (Chantiers &amp; Recherches)</span>
                                             <span class="badge bg-danger-lt" id="dev_badge_game_speed">x<?= (int)($gameSettings['game_speed'] ?? 5) ?></span>
                                         </label>
                                         <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
@@ -1517,7 +1517,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
 
                                     <div class="col-md-6 col-lg-3">
                                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                            <span>⛏️ Production des Ressources</span>
+                                            <span><i class="fa-solid fa-hammer text-primary me-1"></i>Production des Ressources</span>
                                             <span class="badge bg-warning-lt" id="dev_badge_resource_speed">x<?= (int)($gameSettings['resource_speed'] ?? 5) ?></span>
                                         </label>
                                         <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
@@ -1527,12 +1527,12 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                    value="<?= (int)($gameSettings['resource_speed'] ?? 5) ?>" class="form-control text-center font-weight-bold" style="width: 75px; min-height: 36px;"
                                                    oninput="document.getElementById('dev_resource_speed_range').value = this.value; document.getElementById('dev_badge_resource_speed').textContent = 'x' + this.value;">
                                         </div>
-                                        <div class="form-hint">Multiplie la production horaire de Bois de Cèdre 🪵, Pierre 🪨 et Koku de Riz 🌾.</div>
+                                        <div class="form-hint">Multiplie la production horaire de Bois de Cèdre <i class="fa-solid fa-tree text-success"></i>, Pierre <i class="fa-solid fa-mountain text-secondary"></i> et Koku de Riz <i class="fa-solid fa-wheat-awn text-warning"></i>.</div>
                                     </div>
 
                                     <div class="col-md-6 col-lg-3">
                                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                            <span>🐎 Marche des Troupes &amp; Expéditions</span>
+                                            <span><i class="fa-solid fa-horse text-danger me-1"></i>Marche des Troupes &amp; Expéditions</span>
                                             <span class="badge bg-primary-lt" id="dev_badge_fleet_speed">x<?= (int)($gameSettings['fleet_speed'] ?? 5) ?></span>
                                         </label>
                                         <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
@@ -1547,7 +1547,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
 
                                     <div class="col-md-6 col-lg-3">
                                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                            <span>🔰 Durée d'Immunité Débutant</span>
+                                            <span><i class="fa-solid fa-shield-halved text-success me-1"></i>Durée d'Immunité Débutant</span>
                                             <span class="badge bg-info-lt" id="dev_badge_protection_days"><?= (int)($gameSettings['beginner_protection_days'] ?? 7) ?> j</span>
                                         </label>
                                         <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
@@ -1567,7 +1567,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 <div class="row g-3 mb-3 border-top pt-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                            <span>🌿 Densité des Oasis sur la Carte (%)</span>
+                                            <span><i class="fa-solid fa-leaf text-success me-1"></i>Densité des Oasis sur la Carte (%)</span>
                                             <span class="badge bg-success-lt" id="dev_badge_oasis_density"><?= (float)($gameSettings['oasis_density_percent'] ?? 2.0) ?> %</span>
                                         </label>
                                         <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
@@ -1585,7 +1585,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
 
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold text-dark mb-1">
-                                            🔄 Réapparition Continue d'Oasis après Capture
+                                            <i class="fa-solid fa-arrows-rotate me-1"></i>Réapparition Continue d'Oasis après Capture
                                         </label>
                                         <div class="d-flex align-items-center" style="min-height: 38px;">
                                             <label class="form-check form-switch m-0">
@@ -1604,7 +1604,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 <div class="row g-3 mb-3 border-top pt-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                            <span>🎋 Cages de Capture (Kago) en Quête (%)</span>
+                                            <span><i class="fa-solid fa-box text-warning me-1"></i>Cages de Capture (Kago) en Quête (%)</span>
                                             <span class="badge bg-green-lt fw-bold" id="dev_badge_hero_cage_drop_rate"><?= (int)($gameSettings['hero_cage_drop_rate'] ?? 25) ?> %</span>
                                         </label>
                                         <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
@@ -1618,12 +1618,12 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                 <span class="input-group-text px-1 text-muted">%</span>
                                             </div>
                                         </div>
-                                        <div class="form-hint">Probabilité pour le Samouraï de rapporter un lot de Cages (Kago 🎋) pour capturer les bêtes sauvages des oasis sans combat.</div>
+                                        <div class="form-hint">Probabilité pour le Samouraï de rapporter un lot de Cages (Kago) pour capturer les bêtes sauvages des oasis sans combat.</div>
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                            <span>🥋 Gain d'Expérience (XP) en Aventure (%)</span>
+                                            <span><i class="fa-solid fa-user-ninja text-purple me-1"></i>Gain d'Expérience (XP) en Aventure (%)</span>
                                             <span class="badge bg-primary-lt fw-bold" id="dev_badge_hero_xp_rate"><?= (int)($gameSettings['hero_xp_rate_percent'] ?? 100) ?> %</span>
                                         </label>
                                         <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
@@ -1645,7 +1645,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                 <div class="row g-3 mb-3 border-top pt-3" style="background: #fef2f2; border-radius: 8px; padding: 1rem; border: 1px solid #fecaca;">
                                     <div class="col-12">
                                         <h4 class="m-0 fw-bold text-danger d-flex align-items-center gap-2">
-                                            <span>🌾</span> Mécanisme de Famine &amp; Vivres Féodaux (Optionnel)
+                                            <i class="fa-solid fa-wheat-awn text-warning me-1"></i>Mécanisme de Famine &amp; Vivres Féodaux (Optionnel)
                                         </h4>
                                         <div class="text-secondary small mt-1">
                                             Si activé, les régiments d'élite (Tier 2, 3 et 4) exigent un entretien régulier en farine de riz. En cas de pénurie totale (stock de farine à 0), une famine s'abat sur le fief et décime progressivement les troupes d'élite.
@@ -1654,7 +1654,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
 
                                     <div class="col-md-4">
                                         <label class="form-label fw-bold text-dark mb-1">
-                                            ⚠️ Activer la Famine (Disette de Farine)
+                                            <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Activer la Famine (Disette de Farine)
                                         </label>
                                         <div class="d-flex align-items-center" style="min-height: 38px;">
                                             <label class="form-check form-switch m-0">
@@ -1670,7 +1670,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
 
                                     <div class="col-md-4">
                                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                            <span>💀 Taux de Pertes Horaire en Famine (%)</span>
+                                            <span><i class="fa-solid fa-skull text-danger me-1"></i>Taux de Pertes Horaire en Famine (%)</span>
                                             <span class="badge bg-danger text-white" id="dev_badge_famine_rate"><?= (float)($gameSettings['famine_rate'] ?? 3.0) ?> %</span>
                                         </label>
                                         <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
@@ -1688,7 +1688,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
 
                                     <div class="col-md-4">
                                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                            <span>🍚 Rations Requises (Farine / 100 soldats / h)</span>
+                                            <span><i class="fa-solid fa-bowl-rice text-warning me-1"></i>Rations Requises (Farine / 100 soldats / h)</span>
                                             <span class="badge bg-warning text-dark" id="dev_badge_famine_flour"><?= (float)($gameSettings['famine_flour_consumption'] ?? 1.0) ?></span>
                                         </label>
                                         <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
@@ -1698,7 +1698,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                 <input type="number" id="dev_famine_flour_consumption_input" name="famine_flour_consumption" min="0.1" max="20" step="0.1" 
                                                        value="<?= (float)($gameSettings['famine_flour_consumption'] ?? 1.0) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
                                                        oninput="document.getElementById('dev_famine_flour_range').value = this.value; document.getElementById('dev_badge_famine_flour').textContent = this.value;">
-                                                <span class="input-group-text px-1 text-muted">🍚</span>
+                                                <span class="input-group-text px-1 text-muted"><i class="fa-solid fa-bowl-rice"></i></span>
                                             </div>
                                         </div>
                                         <div class="form-hint">Unités de farine consommées par heure pour maintenir 100 troupes d'élite rassasiées.</div>
@@ -1707,7 +1707,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
 
                                 <div class="d-flex justify-content-end">
                                     <button type="submit" class="btn btn-primary px-4 fw-bold">
-                                        💾 Enregistrer les Constantes de Jeu
+                                        <i class="fa-solid fa-floppy-disk me-1"></i>Enregistrer les Constantes de Jeu
                                     </button>
                                 </div>
                             </form>
@@ -1728,11 +1728,11 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="badge bg-purple-lt text-purple fw-bold">🎮 Game Elevate Designer</span>
-                                    <span class="badge bg-indigo-lt fw-bold">🗺️ Carte Féodale</span>
+                                    <span class="badge bg-purple-lt text-purple fw-bold"><i class="fa-solid fa-gamepad me-1"></i>Game Elevate Designer</span>
+                                    <span class="badge bg-indigo-lt fw-bold"><i class="fa-solid fa-map me-1"></i>Carte Féodale</span>
                                 </div>
                                 <h3 class="card-title d-flex align-items-center gap-2 m-0 text-dark">
-                                    <span>🗺️</span> Répartition des Tuiles du Monde Féodal
+                                    <i class="fa-solid fa-map text-primary me-1"></i>Répartition des Tuiles du Monde Féodal
                                 </h3>
                                 <div class="text-secondary small mt-1">
                                     Grille de <?= ($mapTileStats['radius'] * 2 + 1) ?>&times;<?= ($mapTileStats['radius'] * 2 + 1) ?> cases &bull; Rayon &plusmn;<?= $mapTileStats['radius'] ?>
@@ -1743,7 +1743,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                     <?= number_format($mapTileStats['total_tiles']) ?> Tuiles au total
                                 </span>
                                 <a href="/?page=map" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                    🗾 Ouvrir la Carte &rarr;
+                                    <i class="fa-solid fa-map-location-dot me-1"></i>Ouvrir la Carte &rarr;
                                 </a>
                             </div>
                         </div>
@@ -1797,7 +1797,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <h3 class="card-title d-flex align-items-center gap-2 m-0 text-success">
-                                    <span>🗾</span> Arpenteur du Shogunat &amp; Expansion des Provinces
+                                    <i class="fa-solid fa-map-location-dot text-primary me-1"></i>Arpenteur du Shogunat &amp; Expansion des Provinces
                                 </h3>
                                 <div class="text-secondary small mt-1">Création procédurale de fiefs, vallées et sanctuaires</div>
                             </div>
@@ -1853,7 +1853,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
 
                                 <div class="d-flex justify-content-end">
                                     <button type="submit" class="btn btn-success px-4 fw-bold">
-                                        🗾 Déployer les Fiefs dans les Provinces
+                                        <i class="fa-solid fa-map-location-dot me-1"></i>Déployer les Fiefs dans les Provinces
                                     </button>
                                 </div>
                             </form>
@@ -1873,11 +1873,11 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="badge bg-purple-lt text-purple fw-bold">🎮 Game Elevate Designer</span>
-                                    <span class="badge bg-green-lt fw-bold">🌿 Faune &amp; Oasis</span>
+                                    <span class="badge bg-purple-lt text-purple fw-bold"><i class="fa-solid fa-gamepad me-1"></i>Game Elevate Designer</span>
+                                    <span class="badge bg-green-lt fw-bold"><i class="fa-solid fa-leaf me-1"></i>Faune &amp; Oasis</span>
                                 </div>
                                 <h3 class="card-title d-flex align-items-center gap-2 m-0 text-green">
-                                    <span>🌿</span> Écosystème des Oasis Naturelles &amp; Faune Sauvage (Style Travian)
+                                    <i class="fa-solid fa-leaf text-success me-1"></i>Écosystème des Oasis Naturelles &amp; Faune Sauvage (Style Travian)
                                 </h3>
                                 <div class="text-secondary small mt-1">
                                     Gestion du réseau d'oasis sauvages, de la faune hostile (Sangliers, Loups, Ours) et de la réapparition continue après capture.
@@ -1894,7 +1894,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                     <?= $oasisStats['wild_oases'] ?> Sauvages Libres
                                 </span>
                                 <span class="badge bg-warning-lt fw-bold">
-                                    🐗 <?= number_format($oasisStats['total_wild_animals']) ?> Bêtes Sauvages
+                                    <i class="fa-solid fa-paw text-warning me-1"></i><?= number_format($oasisStats['total_wild_animals']) ?> Bêtes Sauvages
                                 </span>
                             </div>
                         </div>
@@ -1903,7 +1903,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                             <!-- Panneau de contrôle et rééquilibrage de densité -->
                             <div class="card card-body bg-light border mb-3">
                                 <h4 class="card-title d-flex align-items-center gap-2 text-success mb-2" style="font-size: 0.95rem;">
-                                    <span>⚙️</span> Générateur &amp; Rééquilibrage par Pourcentage de Couverture
+                                    <i class="fa-solid fa-gear text-secondary me-1"></i>Générateur &amp; Rééquilibrage par Pourcentage de Couverture
                                 </h4>
                                 <div class="row g-3 align-items-end">
                                     <div class="col-md-4 col-sm-6">
@@ -1936,12 +1936,12 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                             <span class="form-check-label fw-medium text-dark">Remplacer uniquement les oasis sauvages existantes</span>
                                         </label>
                                         <button type="button" onclick="executeDevRepopulateOases()" class="btn btn-success w-100 fw-bold">
-                                            🌿 Appliquer &amp; Générer les Oasis
+                                            <i class="fa-solid fa-leaf me-1"></i>Appliquer &amp; Générer les Oasis
                                         </button>
                                     </div>
                                 </div>
                                 <div class="text-secondary small mt-2">
-                                    ℹ️ Les oasis sont automatiquement réparties de façon équitable entre les 4 quadrants géographiques (NO, NE, SO, SE) sans empiéter sur les fiefs ni les 12 donjons authentiques.
+                                    <i class="fa-solid fa-circle-info text-info me-1"></i>Les oasis sont automatiquement réparties de façon équitable entre les 4 quadrants géographiques (NO, NE, SO, SE) sans empiéter sur les fiefs ni les 12 donjons authentiques.
                                 </div>
                             </div>
 
@@ -1971,16 +1971,16 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                 <?php 
                                                     $isCaptured = !empty($o['owner_planet_id']);
                                                     $bText = '';
-                                                    if ($o['bonus_rice'] > 0) $bText .= "+{$o['bonus_rice']}% 🌾 ";
-                                                    if ($o['bonus_wood'] > 0) $bText .= "+{$o['bonus_wood']}% 🪵 ";
-                                                    if ($o['bonus_stone'] > 0) $bText .= "+{$o['bonus_stone']}% 🪨 ";
+                                                    if ($o['bonus_rice'] > 0) $bText .= "+{$o['bonus_rice']}% (Riz) ";
+                                                    if ($o['bonus_wood'] > 0) $bText .= "+{$o['bonus_wood']}% (Bois) ";
+                                                    if ($o['bonus_stone'] > 0) $bText .= "+{$o['bonus_stone']}% (Pierre) ";
                                                 ?>
                                                 <tr class="dev-oasis-table-row <?= $isCaptured ? 'table-primary-lt' : '' ?>">
                                                     <td class="text-muted fw-bold"><?= $o['id'] ?></td>
                                                     <td>
                                                         <strong class="text-dark"><?= htmlspecialchars($o['name']) ?></strong>
                                                         <div class="text-secondary small">
-                                                            🪵 <?= number_format($o['res_wood']) ?> &bull; 🪨 <?= number_format($o['res_stone']) ?> &bull; 🌾 <?= number_format($o['res_rice']) ?>
+                                                            <i class="fa-solid fa-tree text-success me-1"></i><?= number_format($o['res_wood']) ?> &bull; <i class="fa-solid fa-mountain text-secondary me-1"></i><?= number_format($o['res_stone']) ?> &bull; <i class="fa-solid fa-wheat-awn text-warning me-1"></i><?= number_format($o['res_rice']) ?>
                                                         </div>
                                                     </td>
                                                     <td class="text-center fw-bold text-azure">
@@ -1999,23 +1999,23 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                                                 <?php endforeach; ?>
                                                             </div>
                                                         <?php else: ?>
-                                                            <span class="badge bg-success-lt">🕊️ Pacifiée (Aucune bête)</span>
+                                                            <span class="badge bg-success-lt"><i class="fa-solid fa-circle-check text-success me-1"></i>Pacifiée (Aucune bête)</span>
                                                         <?php endif; ?>
                                                     </td>
                                                     <td class="text-center">
                                                         <?php if ($isCaptured): ?>
                                                             <span class="badge bg-blue-lt">
-                                                                🛡️ Fief de <?= htmlspecialchars($o['owner_username'] ?? 'Daimyō') ?>
+                                                                <i class="fa-solid fa-shield-halved text-primary me-1"></i>Fief de <?= htmlspecialchars($o['owner_username'] ?? 'Daimyō') ?>
                                                             </span>
                                                         <?php else: ?>
                                                             <span class="badge bg-danger-lt">
-                                                                🐗 Sauvage Libre
+                                                                <i class="fa-solid fa-paw text-warning me-1"></i>Sauvage Libre
                                                             </span>
                                                         <?php endif; ?>
                                                     </td>
                                                     <td class="text-end">
                                                         <a href="/?page=map&x=<?= $o['coord_x'] ?>&y=<?= $o['coord_y'] ?>" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                                            🗾 Carte
+                                                            <i class="fa-solid fa-map me-1"></i>Carte
                                                         </a>
                                                     </td>
                                                 </tr>
@@ -2067,7 +2067,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
             <div class="modal-header">
                 <div>
                     <h5 class="modal-title d-flex align-items-center gap-2 m-0">
-                        <span>🛠️</span> Attribution des Métiers de Développement
+                        <i class="fa-solid fa-hammer text-primary me-1"></i>Attribution des Métiers de Développement
                     </h5>
                     <div class="text-muted small mt-1">Sélectionnez un membre et les métiers à lui confier. Les métiers déjà détenus sont automatiquement bloqués.</div>
                 </div>
@@ -2117,7 +2117,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                                             </span>
                                             <span class="text-muted small d-block" style="font-size: 0.75rem; line-height: 1.3;"><?= htmlspecialchars($rVal['description']) ?></span>
                                             <span class="badge bg-secondary-lt text-secondary mt-1 role-assigned-tag d-none" style="font-size: 0.7rem;">
-                                                ✓ Déjà assigné à ce joueur
+                                                <i class="fa-solid fa-check text-success me-1"></i>Déjà assigné à ce joueur
                                             </span>
                                         </span>
                                     </span>
@@ -2128,7 +2128,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
 
                     <!-- 4. Alerte si tous les rôles sont déjà assignés -->
                     <div id="assign-all-roles-taken" class="alert alert-info d-none mt-2 py-2 small mb-0">
-                        ℹ️ Ce joueur possède déjà l'ensemble des 8 métiers de la Dev Team.
+                        <i class="fa-solid fa-circle-info text-info me-1"></i>Ce joueur possède déjà l'ensemble des 8 métiers de la Dev Team.
                     </div>
                 </div>
                 <div class="modal-footer d-flex justify-content-between align-items-center">
@@ -2136,7 +2136,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                     <div>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                         <button type="submit" class="btn btn-purple" id="btn-submit-assign" disabled>
-                            <span>➕</span> Assigner les métiers
+                            <i class="fa-solid fa-plus me-1"></i>Assigner les métiers
                         </button>
                     </div>
                 </div>
@@ -2154,7 +2154,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">⭐ Récompenser une Contribution (Forge XP)</h5>
+                <h5 class="modal-title"><i class="fa-solid fa-star text-warning me-1"></i>Récompenser une Contribution (Forge XP)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <form id="form-award-xp" onsubmit="handleAwardXpSubmit(event)">
@@ -2197,7 +2197,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
         <div class="modal-content">
             <div class="modal-header bg-teal text-white">
                 <h5 class="modal-title d-flex align-items-center gap-2">
-                    <span>📢</span> Composer une Missive Impériale / Newsletter
+                    <i class="fa-solid fa-bullhorn text-pink me-1"></i>Composer une Missive Impériale / Newsletter
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -2205,7 +2205,7 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                 <div class="modal-body">
                     
                     <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
-                        <span class="fs-2">⛩️</span>
+                        <span class="fs-2 text-primary"><i class="fa-solid fa-torii-gate"></i></span>
                         <div class="small">
                             Votre missive sera mise en forme avec le gabarit féodal officiel d'OpenShogun (bannière impériale, blason du clan du joueur et mentions de conformité RGPD).
                         </div>
@@ -2222,13 +2222,13 @@ $isForbiddenRedirect = !empty($_GET['forbidden']);
                     <div class="mb-3">
                         <label class="form-label fw-bold required">Groupe Cible des Destinataires</label>
                         <select class="form-select" name="target_group" id="newsletter-target-group" required onchange="updateTargetGroupHint(this.value)">
-                            <option value="all_optin" selected>📬 Tous les Abonnés à la Newsletter (Opt-in actif — Recommandé RGPD)</option>
-                            <option value="all_active">👥 Tous les Joueurs Actifs (Comptes confirmés)</option>
-                            <option value="faction_terran">🛡️ Clan Tokugawa uniquement (Abonnés)</option>
-                            <option value="faction_vorash">⚔️ Clan Oda uniquement (Abonnés)</option>
-                            <option value="faction_aethelis">🏹 Clan Takeda uniquement (Abonnés)</option>
-                            <option value="dev_team">🛠️ Membres de la Dev Team uniquement</option>
-                            <option value="test_self">🧪 Test personnel (Expédier uniquement sur mon propre e-mail)</option>
+                            <option value="all_optin" selected>Tous les Abonnés à la Newsletter (Opt-in actif — Recommandé RGPD)</option>
+                            <option value="all_active">Tous les Joueurs Actifs (Comptes confirmés)</option>
+                            <option value="faction_terran">Clan Tokugawa uniquement (Abonnés)</option>
+                            <option value="faction_vorash">Clan Oda uniquement (Abonnés)</option>
+                            <option value="faction_aethelis">Clan Takeda uniquement (Abonnés)</option>
+                            <option value="dev_team">Membres de la Dev Team uniquement</option>
+                            <option value="test_self">Test personnel (Expédier uniquement sur mon propre e-mail)</option>
                         </select>
                         <div class="form-hint" id="target-group-hint">
                             Les missives seront transmises uniquement aux joueurs ayant explicitement coché la case d'inscription.
@@ -2244,7 +2244,7 @@ Le Conseil impérial se réunit aujourd'hui pour vous annoncer de grandes réfor
                         <div class="d-flex justify-content-between align-items-center mt-1">
                             <span class="form-hint">Les sauts de ligne seront automatiquement convertis en paragraphes.</span>
                             <button type="button" class="btn btn-sm btn-ghost-secondary" onclick="previewNewsletterModal()">
-                                👁️ Prévisualiser le Rendu
+                                <i class="fa-solid fa-eye me-1"></i>Prévisualiser le Rendu
                             </button>
                         </div>
                     </div>
@@ -2262,7 +2262,7 @@ Le Conseil impérial se réunit aujourd'hui pour vous annoncer de grandes réfor
                 <div class="modal-footer d-flex justify-content-between">
                     <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="submit" class="btn btn-teal text-white d-flex align-items-center gap-2" id="btn-submit-newsletter">
-                        <span>🚀</span> Lancer l'Expédition de la Missive
+                        <i class="fa-solid fa-paper-plane me-1"></i>Lancer l'Expédition de la Missive
                     </button>
                 </div>
             </form>
@@ -2278,7 +2278,7 @@ Le Conseil impérial se réunit aujourd'hui pour vous annoncer de grandes réfor
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-body text-center py-4">
-                <div class="text-warning mb-2" id="confirm-icon" style="font-size: 2.5rem;">⚠️</div>
+                <div class="text-warning mb-2" id="confirm-icon" style="font-size: 2.5rem;"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 <h3 class="mb-1" id="confirm-title">Confirmation</h3>
                 <div class="text-muted small" id="confirm-message">Êtes-vous certain de vouloir effectuer cette action ?</div>
             </div>
@@ -2305,7 +2305,7 @@ const canManageTeamPermission = <?= $canManageTeam ? 'true' : 'false' ?>;
 
 let pendingConfirmCallback = null;
 
-function showConfirmModal(title, message, callback, btnClass = 'btn-primary', icon = '⚠️') {
+function showConfirmModal(title, message, callback, btnClass = 'btn-primary', icon = '!') {
     const modalEl = document.getElementById('modal-confirm');
     if (!modalEl) {
         callback();
@@ -2313,7 +2313,7 @@ function showConfirmModal(title, message, callback, btnClass = 'btn-primary', ic
     }
     document.getElementById('confirm-title').innerText = title;
     document.getElementById('confirm-message').innerHTML = message;
-    document.getElementById('confirm-icon').innerText = icon;
+    document.getElementById('confirm-icon').innerHTML = icon;
     const confirmBtn = document.getElementById('btn-confirm-action');
     if (confirmBtn) {
         confirmBtn.className = `btn ${btnClass} w-100`;
@@ -2420,7 +2420,7 @@ function onAssignUserChanged(userId) {
             badgesList.innerHTML = ownedRoles.map(rId => {
                 const meta = devAllRolesMeta[rId];
                 if (!meta) return '';
-                return `<span class="badge ${meta.badge_color || 'bg-secondary'} me-1">${meta.icon || '🛠️'} ${meta.title}</span>`;
+                return `<span class="badge ${meta.badge_color || 'bg-secondary'} me-1">${meta.icon || '<i class="fa-solid fa-hammer me-1"></i>'} ${meta.title}</span>`;
             }).join('');
         }
     } else if (box) {
@@ -2509,7 +2509,7 @@ async function handleAssignRoleSubmit(e) {
 
     const checkedBoxes = form.querySelectorAll('input[name="role_ids[]"]:checked');
     if (checkedBoxes.length === 0) {
-        showAlert("⚠️ Veuillez cocher au moins un métier à assigner.", "warning");
+        showAlert("<i class=\"fa-solid fa-triangle-exclamation text-warning me-1\"></i>Veuillez cocher au moins un métier à assigner.", "warning");
         return;
     }
 
@@ -2528,7 +2528,7 @@ async function handleAssignRoleSubmit(e) {
         const data = await res.json();
 
         if (data.success) {
-            showAlert(`🎉 ${data.message}`, 'success');
+            showAlert(`<i class="fa-solid fa-circle-check text-success me-1"></i>${data.message}`, 'success');
 
             // Fermer la modale Tabler
             const modalEl = document.getElementById('modal-assign-role');
@@ -2570,10 +2570,10 @@ async function handleAssignRoleSubmit(e) {
             }
 
         } else {
-            showAlert(`❌ <strong>Erreur :</strong> ${data.error || 'Échec de l\'attribution'}`, 'danger');
+            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || 'Échec de l\'attribution'}`, 'danger');
         }
     } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -2588,7 +2588,7 @@ function confirmRemoveDevRole(userId, roleId, username, roleTitle) {
         `Voulez-vous vraiment retirer le métier <strong>« ${roleTitle} »</strong> à <strong>${username}</strong> ?`,
         () => executeRemoveDevRole(userId, roleId, username, roleTitle),
         'btn-danger',
-        '🗑️'
+        '<i class="fa-solid fa-trash"></i>'
     );
 }
 
@@ -2612,7 +2612,7 @@ async function executeRemoveDevRole(userId, roleId, username, roleTitle) {
         const data = await res.json();
 
         if (data.success) {
-            showAlert(`✅ <strong>Succès :</strong> Le métier « ${roleTitle} » a été retiré à ${username}.`, 'info');
+            showAlert(`<i class="fa-solid fa-circle-check text-success me-1"></i><strong>Succès :</strong> Le métier « ${roleTitle} » a été retiré à ${username}.`, 'info');
 
             // Animation et suppression du badge dans le DOM
             if (badgeEl) {
@@ -2638,11 +2638,11 @@ async function executeRemoveDevRole(userId, roleId, username, roleTitle) {
 
         } else {
             if (badgeEl) badgeEl.style.opacity = '1';
-            showAlert(`❌ <strong>Erreur :</strong> ${data.error || 'Impossible de révoquer ce métier.'}`, 'danger');
+            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || 'Impossible de révoquer ce métier.'}`, 'danger');
         }
     } catch (err) {
         if (badgeEl) badgeEl.style.opacity = '1';
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
     }
 }
 
@@ -2657,7 +2657,7 @@ function createRoleBadgeElement(userId, role, username) {
     if (role.honor_title) span.title = role.honor_title;
 
     const label = document.createElement('span');
-    label.textContent = `${role.icon || '🛠️'} ${role.title}`;
+    label.textContent = `${role.title}`;
     span.appendChild(label);
 
     if (canManageTeamPermission) {
@@ -2704,7 +2704,7 @@ function updateRoleDistributionGrid(roleId, username, action) {
             newTag.className = 'badge bg-light text-dark border dist-user-tag';
             newTag.setAttribute('data-username', username);
             newTag.style.fontSize = '0.75rem';
-            newTag.textContent = `👤 ${username}`;
+            newTag.innerHTML = `<i class="fa-solid fa-user me-1"></i>${username}`;
             distContainer.appendChild(newTag);
         }
     }
@@ -2718,7 +2718,7 @@ function triggerSandboxAction(subAction, btn) {
         'Exécuter cette commande de test directe sur votre fief ?',
         () => executeSandboxAction(subAction, btn),
         'btn-warning',
-        '🧪'
+        '<i class="fa-solid fa-flask"></i>'
     );
 }
 
@@ -2740,12 +2740,12 @@ async function executeSandboxAction(subAction, btn) {
         const data = await res.json();
 
         if (data.success) {
-            showAlert(`✅ <strong>Succès QA :</strong> ${data.message}`, 'success');
+            showAlert(`<i class="fa-solid fa-circle-check text-success me-1"></i><strong>Succès QA :</strong> ${data.message}`, 'success');
         } else {
-            showAlert(`❌ <strong>Erreur :</strong> ${data.error || 'Échec de la commande'}`, 'danger');
+            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || 'Échec de la commande'}`, 'danger');
         }
     } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -2771,16 +2771,16 @@ async function triggerBotCycle(btn) {
         const data = await res.json();
 
         if (data.success) {
-            showAlert(`✅ <strong>Live Ops :</strong> ${data.message}`, 'success');
+            showAlert(`<i class="fa-solid fa-circle-check text-success me-1"></i><strong>Live Ops :</strong> ${data.message}`, 'success');
             if (logBox) {
                 logBox.classList.remove('d-none');
                 logBox.innerHTML = `<strong>[${new Date().toLocaleTimeString()}] Résultat du cycle :</strong>\n` + JSON.stringify(data.details, null, 2);
             }
         } else {
-            showAlert(`❌ <strong>Erreur :</strong> ${data.error || 'Échec du cycle'}`, 'danger');
+            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || 'Échec du cycle'}`, 'danger');
         }
     } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -2819,15 +2819,15 @@ async function handleAwardXpSubmit(e) {
         const data = await res.json();
 
         if (data.success) {
-            showAlert(`⭐ ${data.message}`, 'success');
+            showAlert(`<i class="fa-solid fa-star text-warning me-1"></i>${data.message}`, 'success');
             setTimeout(() => window.location.reload(), 800);
         } else {
-            showAlert(`❌ <strong>Erreur :</strong> ${data.error}`, 'danger');
+            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error}`, 'danger');
             btn.disabled = false;
             btn.innerHTML = originalText;
         }
     } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
         btn.disabled = false;
         btn.innerHTML = originalText;
     }
@@ -2837,7 +2837,7 @@ async function handleAwardXpSubmit(e) {
 
 function setFeatureStatus(featureId, newStatus, featureTitle) {
     const btnClass = (newStatus === 'Validée') ? 'btn-success' : ((newStatus === 'Rejetée') ? 'btn-danger' : 'btn-warning');
-    const icon = (newStatus === 'Validée') ? '✔' : ((newStatus === 'Rejetée') ? '✗' : '⏳');
+    const icon = (newStatus === 'Validée') ? '<i class="fa-solid fa-check text-success"></i>' : ((newStatus === 'Rejetée') ? '<i class="fa-solid fa-xmark text-danger"></i>' : '<i class="fa-solid fa-hourglass-half text-warning"></i>');
 
     showConfirmModal(
         `Recette QA : Statut « ${newStatus} »`,
@@ -2863,20 +2863,20 @@ async function executeSetFeatureStatus(featureId, newStatus, featureTitle) {
         const data = await res.json();
 
         if (data.success) {
-            showAlert(`✅ <strong>Recette QA :</strong> ${data.message}`, 'success');
+            showAlert(`<i class="fa-solid fa-circle-check text-success me-1"></i><strong>Recette QA :</strong> ${data.message}`, 'success');
 
             // Mettre à jour le badge de la fonctionnalité
             const badgeEl = document.getElementById(`feature-badge-${featureId}`);
             if (badgeEl) {
                 if (newStatus === 'Validée') {
                     badgeEl.className = 'badge bg-success-lt text-success border border-success px-2 py-1';
-                    badgeEl.innerHTML = '✔ Validée';
+                    badgeEl.innerHTML = '<i class="fa-solid fa-check text-success me-1"></i>Validée';
                 } else if (newStatus === 'Rejetée') {
                     badgeEl.className = 'badge bg-danger-lt text-danger border border-danger px-2 py-1';
-                    badgeEl.innerHTML = '✗ Rejetée';
+                    badgeEl.innerHTML = '<i class="fa-solid fa-xmark text-danger me-1"></i>Rejetée';
                 } else {
                     badgeEl.className = 'badge bg-warning-lt text-warning border border-warning px-2 py-1';
-                    badgeEl.innerHTML = '⏳ À tester';
+                    badgeEl.innerHTML = '<i class="fa-solid fa-hourglass-half text-warning me-1"></i>À tester';
                 }
             }
 
@@ -2901,10 +2901,10 @@ async function executeSetFeatureStatus(featureId, newStatus, featureTitle) {
                 }
             }
         } else {
-            showAlert(`❌ <strong>Erreur QA :</strong> ${data.error || 'Impossible de mettre à jour le statut.'}`, 'danger');
+            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur QA :</strong> ${data.error || 'Impossible de mettre à jour le statut.'}`, 'danger');
         }
     } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
     }
 }
 
@@ -2926,7 +2926,7 @@ async function handleRunSyntaxCheck(btn) {
 
         if (data.success && data.syntax) {
             const syn = data.syntax;
-            showAlert(`⚡ <strong>Contrôle technique :</strong> ${data.message}`, syn.is_clean ? 'success' : 'danger');
+            showAlert(`<i class="fa-solid fa-bolt text-warning me-1"></i><strong>Contrôle technique :</strong> ${data.message}`, syn.is_clean ? 'success' : 'danger');
 
             // Mettre à jour l'indicateur principal
             const badge = document.getElementById('badge-syntax-status');
@@ -2940,9 +2940,9 @@ async function handleRunSyntaxCheck(btn) {
 
             if (badge) {
                 badge.className = `badge ${syn.is_clean ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'}`;
-                badge.textContent = syn.is_clean ? '✔ 100% VALIDE' : '✗ ERREURS DÉTECTÉES';
+                badge.textContent = syn.is_clean ? '100% VALIDE' : 'ERREURS DÉTECTÉES';
             }
-            if (icon) icon.textContent = syn.is_clean ? '🟢' : '🔴';
+            if (icon) icon.innerHTML = syn.is_clean ? '<i class="fa-solid fa-circle-check text-success"></i>' : '<i class="fa-solid fa-circle-xmark text-danger"></i>';
             if (passedText) passedText.textContent = syn.passed_count;
             if (totalText) totalText.textContent = syn.total_files;
             if (dateText) dateText.textContent = syn.checked_at;
@@ -2959,10 +2959,10 @@ async function handleRunSyntaxCheck(btn) {
                 }
             }
         } else {
-            showAlert(`❌ <strong>Erreur :</strong> ${data.error || 'Échec du contrôle syntaxique.'}`, 'danger');
+            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || 'Échec du contrôle syntaxique.'}`, 'danger');
         }
     } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -3062,10 +3062,10 @@ async function loadMailingSubscribers(page = 1) {
             if (nextBtn) nextBtn.disabled = (data.page >= totalPages);
 
         } else {
-            if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">❌ ${data.error || 'Erreur lors du chargement des abonnés.'}</td></tr>`;
+            if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger"><i class="fa-solid fa-circle-xmark text-danger me-1"></i>${data.error || 'Erreur lors du chargement des abonnés.'}</td></tr>`;
         }
     } catch (err) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">❌ Erreur réseau : ${err.message}</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger"><i class="fa-solid fa-circle-xmark text-danger me-1"></i>Erreur réseau : ${err.message}</td></tr>`;
     }
 }
 
@@ -3088,22 +3088,22 @@ function renderSubscribersTable(subscribers) {
         const fac = factionMap[s.faction] || { label: s.faction, color: 'bg-secondary-lt text-secondary' };
         
         let rolesBadges = '';
-        if (s.is_admin) rolesBadges += `<span class="badge bg-danger text-white">👑 Admin</span> `;
-        if (s.is_moderator) rolesBadges += `<span class="badge bg-warning text-white">🛡️ Modo</span> `;
+        if (s.is_admin) rolesBadges += `<span class="badge bg-danger text-white"><i class="fa-solid fa-crown me-1"></i>Admin</span> `;
+        if (s.is_moderator) rolesBadges += `<span class="badge bg-warning text-white"><i class="fa-solid fa-shield-halved me-1"></i>Modo</span> `;
         if (Array.isArray(s.dev_roles) && s.dev_roles.length > 0) {
-            rolesBadges += s.dev_roles.map(dr => `<span class="badge bg-purple-lt">${dr.icon || '🛠️'} ${dr.title}</span>`).join(' ');
+            rolesBadges += s.dev_roles.map(dr => `<span class="badge bg-purple-lt">${dr.title}</span>`).join(' ');
         }
         if (!rolesBadges) {
             rolesBadges = `<span class="badge bg-light text-muted">Joueur</span>`;
         }
 
         const activeBadge = s.is_active 
-            ? `<span class="badge bg-success-lt" style="font-size: 0.68rem;">✔ Confirmé</span>`
-            : `<span class="badge bg-warning-lt" style="font-size: 0.68rem;">⏳ En attente</span>`;
+            ? `<span class="badge bg-success-lt" style="font-size: 0.68rem;"><i class="fa-solid fa-circle-check text-success me-1"></i>Confirmé</span>`
+            : `<span class="badge bg-warning-lt" style="font-size: 0.68rem;"><i class="fa-solid fa-hourglass-half text-warning me-1"></i>En attente</span>`;
 
         const optinBadge = s.newsletter_optin
-            ? `<span class="badge bg-success-lt text-success">✓ Abonné</span>`
-            : `<span class="badge bg-secondary-lt text-muted">✗ Non abonné</span>`;
+            ? `<span class="badge bg-success-lt text-success"><i class="fa-solid fa-check text-success me-1"></i>Abonné</span>`
+            : `<span class="badge bg-secondary-lt text-muted"><i class="fa-solid fa-xmark text-secondary me-1"></i>Non abonné</span>`;
 
         const actionBtnText = s.newsletter_optin ? 'Désinscrire' : 'Abonner';
 
@@ -3111,7 +3111,7 @@ function renderSubscribersTable(subscribers) {
             <tr id="subscriber-row-${s.id}">
                 <td>
                     <div class="d-flex align-items-center gap-2">
-                        <span class="avatar avatar-sm bg-blue-lt">👤</span>
+                        <span class="avatar avatar-sm bg-blue-lt"><i class="fa-solid fa-user"></i></span>
                         <div>
                             <div class="fw-bold text-dark">${escapeHtml(s.username)}</div>
                             <div class="text-muted small font-monospace">ID #${s.id}</div>
@@ -3153,7 +3153,7 @@ function toggleSubscriberOptin(userId, username, currentOptin) {
         `Voulez-vous vraiment <strong>${actionLabel}</strong> la liste de diffusion le joueur <strong>${username}</strong> ?`,
         () => executeToggleSubscriberOptin(userId),
         currentOptin ? 'btn-danger' : 'btn-teal',
-        '📢'
+        '<i class="fa-solid fa-bullhorn"></i>'
     );
 }
 
@@ -3171,13 +3171,13 @@ async function executeToggleSubscriberOptin(userId) {
         const data = await res.json();
 
         if (data.success) {
-            showAlert(`✔ <strong>Mailing List :</strong> ${data.message}`, 'success');
+            showAlert(`<i class="fa-solid fa-circle-check text-success me-1"></i><strong>Mailing List :</strong> ${data.message}`, 'success');
             loadMailingSubscribers(currentMailingPage);
         } else {
-            showAlert(`❌ <strong>Erreur :</strong> ${data.error || 'Impossible de modifier le statut.'}`, 'danger');
+            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || 'Impossible de modifier le statut.'}`, 'danger');
         }
     } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
     }
 }
 
@@ -3256,7 +3256,7 @@ function handleSendNewsletter(event) {
          <span class="text-muted small">• Sujet : <em>${escapeHtml(subject)}</em></span>`,
         () => executeSendNewsletter({ subject, target_group: targetGroup, body_html: bodyHtml }),
         'btn-teal',
-        '🚀'
+        '<i class="fa-solid fa-paper-plane"></i>'
     );
 }
 
@@ -3291,14 +3291,14 @@ async function executeSendNewsletter(payload) {
             document.getElementById('form-compose-newsletter')?.reset();
             document.getElementById('newsletter-preview-container')?.classList.add('d-none');
 
-            showAlert(`🎉 <strong>Succès :</strong> ${data.message} (+35 XP Forge accordés)`, 'success');
+            showAlert(`<i class="fa-solid fa-circle-check text-success me-1"></i><strong>Succès :</strong> ${data.message} (+35 XP Forge accordés)`, 'success');
             loadMailingSubscribers(currentMailingPage);
             loadMailingCampaignHistory();
         } else {
-            showAlert(`❌ <strong>Échec :</strong> ${data.error || 'Erreur lors de l\'envoi de la campagne.'}`, 'danger');
+            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Échec :</strong> ${data.error || 'Erreur lors de l\'envoi de la campagne.'}`, 'danger');
         }
     } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
     } finally {
         if (btn) {
             btn.disabled = false;
@@ -3331,7 +3331,7 @@ async function loadMailingCampaignHistory() {
                     <td class="small">${escapeHtml(c.sender_name)}</td>
                     <td>
                         <span class="badge ${c.status === 'sent' ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'}">
-                            ${c.status === 'sent' ? '✔ Expédiée' : '✗ Échec'}
+                            ${c.status === 'sent' ? '<i class="fa-solid fa-circle-check text-success me-1"></i>Expédiée' : '<i class="fa-solid fa-circle-xmark text-danger me-1"></i>Échec'}
                         </span>
                     </td>
                 </tr>
@@ -3413,12 +3413,12 @@ async function saveDevGameSettings(event) {
         });
         const data = await res.json();
         if (data.success) {
-            showAlert(`💾 <strong>Succès :</strong> ${data.message} (+30 XP Forge accordés)`, 'success');
+            showAlert(`<i class="fa-solid fa-floppy-disk text-success me-1"></i><strong>Succès :</strong> ${data.message} (+30 XP Forge accordés)`, 'success');
         } else {
-            showAlert(`❌ <strong>Erreur :</strong> ${data.error || "Impossible d'enregistrer les paramètres."}`, 'danger');
+            showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || "Impossible d'enregistrer les paramètres."}`, 'danger');
         }
     } catch (err) {
-        showAlert(`❌ <strong>Erreur réseau :</strong> ${err.message}`, 'danger');
+        showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`, 'danger');
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -3454,19 +3454,19 @@ async function generateDevWorld(event) {
                     const pList = (data.planets || []).slice(0, 5).map(p => `• <strong>${escapeHtml(p.name)}</strong> ${escapeHtml(p.coords)} (${escapeHtml(p.type)})`).join('<br>');
                     const moreTxt = (data.planets || []).length > 5 ? `<br>... et ${(data.planets || []).length - 5} autres domaines.` : '';
                     showAlert(
-                        `🗾 <strong>Expansion Réussie :</strong> <strong>${data.generated_count}</strong> terres et fiefs ont été déployés (+40 XP Forge accordés) !<br><br>${pList}${moreTxt}`,
+                        `<i class="fa-solid fa-map-location-dot text-primary me-1"></i><strong>Expansion Réussie :</strong> <strong>${data.generated_count}</strong> terres et fiefs ont été déployés (+40 XP Forge accordés) !<br><br>${pList}${moreTxt}`,
                         'success'
                     );
                     setTimeout(() => location.reload(), 2500);
                 } else {
-                    showAlert(`❌ <strong>Erreur :</strong> ${data.error || "Impossible d'arpenter les terres."}`, 'danger');
+                    showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || "Impossible d'arpenter les terres."}`, 'danger');
                 }
             } catch (e) {
-                showAlert(`❌ <strong>Erreur réseau :</strong> ${e.message}`, 'danger');
+                showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${e.message}`, 'danger');
             }
         },
         'btn-success',
-        '🗾'
+        '<i class="fa-solid fa-map-location-dot"></i>'
     );
 }
 
@@ -3493,17 +3493,17 @@ async function executeDevRepopulateOases() {
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showAlert(`🌿 <strong>Succès :</strong> ${data.message} (+35 XP Forge accordés)`, 'success');
+                    showAlert(`<i class="fa-solid fa-leaf text-success me-1"></i><strong>Succès :</strong> ${data.message} (+35 XP Forge accordés)`, 'success');
                     setTimeout(() => location.reload(), 2000);
                 } else {
-                    showAlert(`❌ <strong>Erreur :</strong> ${data.error || "Impossible de générer les oasis."}`, 'danger');
+                    showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || "Impossible de générer les oasis."}`, 'danger');
                 }
             } catch (e) {
-                showAlert(`❌ <strong>Erreur réseau :</strong> ${e.message}`, 'danger');
+                showAlert(`<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${e.message}`, 'danger');
             }
         },
         'btn-success',
-        '🌿'
+        '<i class="fa-solid fa-leaf"></i>'
     );
 }
 

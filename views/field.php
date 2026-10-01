@@ -180,10 +180,10 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         <div class="col">
             <div class="page-pretitle">Terroir de <?= htmlspecialchars($planet['name']) ?></div>
             <h2 class="page-title font-game">
-                <?= $info['icon'] ?? '🌾' ?> <?= htmlspecialchars($info['name']) ?>
+                <?= $info['icon'] ?? '<i class="fa-solid fa-wheat-awn text-warning"></i>' ?> <?= htmlspecialchars($info['name']) ?>
                 <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">Parcelle #<?= $slot ?></span>
                 <?php if ($activeJob): ?>
-                    <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem; vertical-align:middle;">⏳ Chantier en cours</span>
+                    <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem; vertical-align:middle;"><i class="fa-solid fa-hourglass-half me-1"></i>Chantier en cours</span>
                 <?php endif; ?>
             </h2>
         </div>
@@ -193,7 +193,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                     ← Parcelle #<?= $prevSlot ?>
                 </a>
                 <a href="/?page=resources" class="btn btn-secondary">
-                    🌾 Vue Terroir
+                    <i class="fa-solid fa-wheat-awn text-warning me-1"></i> Vue Terroir
                 </a>
                 <a href="/?page=field&slot=<?= $nextSlot ?>" class="btn btn-outline-secondary">
                     Parcelle #<?= $nextSlot ?> →
@@ -209,7 +209,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         <div class="card card-sm h-100">
             <div class="card-body d-flex align-items-center">
                 <div class="row align-items-center w-100 g-2">
-                    <div class="col-auto"><span class="avatar rounded" style="background:rgba(146,64,14,0.12); font-size:1.3rem;"><?= $info['icon'] ?? '🪵' ?></span></div>
+                    <div class="col-auto"><span class="avatar rounded" style="background:rgba(146,64,14,0.12); font-size:1.3rem;"><?= $info['icon'] ?? '<i class="fa-solid fa-tree text-success"></i>' ?></span></div>
                     <div class="col">
                         <div class="font-weight-medium">Production actuelle</div>
                         <div class="text-secondary"><?= number_format($curProd) ?> <small><?= $unitLabel ?></small></div>
@@ -222,7 +222,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         <div class="card card-sm h-100">
             <div class="card-body d-flex align-items-center">
                 <div class="row align-items-center w-100 g-2">
-                    <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;">📈</span></div>
+                    <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;"><i class="fa-solid fa-chart-line text-success"></i></span></div>
                     <div class="col">
                         <div class="font-weight-medium">Niveau <?= $targetLevel ?> → production</div>
                         <div class="text-success"><?= number_format($nextProd) ?> <small><?= $unitLabel ?></small> <span class="text-muted" style="font-size:0.75rem;">(+<?= number_format($diffProd) ?>)</span></div>
@@ -235,7 +235,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         <div class="card card-sm h-100">
             <div class="card-body d-flex align-items-center">
                 <div class="row align-items-center w-100 g-2">
-                    <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;">⏱️</span></div>
+                    <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;"><i class="fa-solid fa-stopwatch text-info"></i></span></div>
                     <div class="col">
                         <div class="font-weight-medium">Temps de construction</div>
                         <div class="text-info font-monospace"><?= gmdate('H:i:s', $duration) ?></div>
@@ -249,7 +249,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         <div class="card card-sm h-100">
             <div class="card-body d-flex align-items-center">
                 <div class="row align-items-center w-100 g-2">
-                    <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;">⛩️</span></div>
+                    <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;"><i class="fa-solid fa-torii-gate text-warning"></i></span></div>
                     <div class="col">
                         <div class="font-weight-medium">Sérénité requise (Niv.<?= $targetLevel ?>)</div>
                         <div><?php if ($type !== 'solar_plant' && $info['base_energy_cons'] > 0): ?>
@@ -277,7 +277,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
             </div>
             <?php else: ?>
             <div style="height:120px; background:linear-gradient(135deg,rgba(146,64,14,0.15),rgba(22,101,52,0.1)); display:flex; align-items:center; justify-content:center; font-size:3rem;">
-                <?= $info['icon'] ?? '🌾' ?>
+                <?= $info['icon'] ?? '<i class="fa-solid fa-wheat-awn text-warning"></i>' ?>
             </div>
             <?php endif; ?>
             <div class="card-body">
@@ -285,7 +285,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                     <div class="position-relative me-3" style="cursor:pointer; display:inline-block;" onclick="openArtworkModal('<?= $tileUrl ?>', '<?= htmlspecialchars(addslashes($info['name'])) ?> &bull; Parcelle')" title="Agrandir la tuile">
                         <img src="<?= $tileUrl ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:52px; height:52px; border-radius:8px; object-fit:cover; border:2px solid var(--tblr-border-color); display:block;">
                         <span class="badge bg-dark text-white position-absolute" style="bottom:-4px; right:-4px; font-size:0.6rem; padding:2px 4px; border-radius:4px; box-shadow:0 2px 4px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.3); pointer-events:none;" title="Agrandir">
-                            🔍
+                            <i class="fa-solid fa-magnifying-glass-plus"></i>
                         </span>
                     </div>
                     <div>
@@ -298,7 +298,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                 <?php if ($lvl > 0 && !$activeJob): ?>
                 <button type="button" class="btn btn-outline-danger btn-sm w-100"
                         onclick="confirmDemolishField(<?= $slot ?>, '<?= htmlspecialchars(addslashes($info['name'] ?? $type)) ?>')">
-                    💥 Raser l'Exploitation (récupère 30%)
+                    <i class="fa-solid fa-burst text-danger me-1"></i> Raser l'Exploitation (récupère 30%)
                 </button>
                 <?php endif; ?>
             </div>
@@ -307,7 +307,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         <!-- Sélecteur rapide de toutes les parcelles -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">🗺️ Toutes les Parcelles</h3>
+                <h3 class="card-title"><i class="fa-solid fa-map-location-dot me-2 text-primary"></i>Toutes les Parcelles</h3>
                 <div class="card-options text-muted" style="font-size:0.78rem;">Cliquez pour naviguer</div>
             </div>
             <div class="card-body p-2">
@@ -353,15 +353,15 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         <!-- Coûts d'amélioration -->
         <div class="card mb-3">
             <div class="card-header">
-                <h3 class="card-title">🪵 Coûts d'Amélioration — Niveau <?= $targetLevel ?></h3>
+                <h3 class="card-title"><i class="fa-solid fa-coins me-2 text-warning"></i>Coûts d'Amélioration — Niveau <?= $targetLevel ?></h3>
                 <div class="card-options text-muted" style="font-size:0.78rem;">Stock disponible dans vos greniers</div>
             </div>
             <div class="card-body">
                 <?php
                 $resources = [
-                    ['icon'=>'🪵', 'name'=>'Bois de Cèdre',   'req'=>$cost['metal'],     'stock'=>$planet['metal'],     'ok'=>$hasMetal],
-                    ['icon'=>'🪨', 'name'=>'Pierre de Taille', 'req'=>$cost['crystal'],   'stock'=>$planet['crystal'],   'ok'=>$hasCrystal],
-                    ['icon'=>'🌾', 'name'=>'Riz Impérial',     'req'=>$cost['deuterium'], 'stock'=>$planet['deuterium'], 'ok'=>$hasDeut],
+                    ['icon'=>'<i class="fa-solid fa-tree text-success"></i>', 'name'=>'Bois de Cèdre',   'req'=>$cost['metal'],     'stock'=>$planet['metal'],     'ok'=>$hasMetal],
+                    ['icon'=>'<i class="fa-solid fa-mountain text-secondary"></i>', 'name'=>'Pierre de Taille', 'req'=>$cost['crystal'],   'stock'=>$planet['crystal'],   'ok'=>$hasCrystal],
+                    ['icon'=>'<i class="fa-solid fa-wheat-awn text-warning"></i>', 'name'=>'Riz Impérial',     'req'=>$cost['deuterium'], 'stock'=>$planet['deuterium'], 'ok'=>$hasDeut],
                 ];
                 foreach ($resources as $r):
                     $pct = ($r['req'] > 0) ? min(100, ($r['stock'] / $r['req']) * 100) : 100;
@@ -380,7 +380,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                         </div>
                     </div>
                     <span class="badge <?= $r['ok'] ? 'bg-success' : 'bg-danger' ?>" style="min-width:1.5rem;">
-                        <?= $r['ok'] ? '✓' : '✗' ?>
+                        <?= $r['ok'] ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>' ?>
                     </span>
                 </div>
                 <?php endforeach; ?>
@@ -388,7 +388,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                 <!-- Durée -->
                 <div class="alert alert-info mt-3 mb-0" style="padding:0.6rem 0.85rem;">
                     <div class="d-flex align-items-center justify-content-between">
-                        <span>⏱️ Durée des travaux :</span>
+                        <span><i class="fa-solid fa-stopwatch me-1"></i> Durée des travaux :</span>
                         <strong class="font-monospace"><?= gmdate('H:i:s', $duration) ?></strong>
                     </div>
                 </div>
@@ -398,7 +398,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
         <!-- Zone d'action : lancer / bloqié / en cours -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">🔨 Ordre de Construction</h3>
+                <h3 class="card-title"><i class="fa-solid fa-hammer me-2 text-warning"></i>Ordre de Construction</h3>
                 <?php if ($isTerran): ?>
                     <div class="card-options"><span class="badge bg-blue-lt">Clan Oda — Double Chantier</span></div>
                 <?php endif; ?>
@@ -418,7 +418,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                     <div class="alert alert-<?= $isDemolishingJob ? 'danger' : 'warning' ?> mb-3">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <div class="d-flex align-items-center gap-2">
-                                <span style="font-size:1.3rem;">🌾</span>
+                                <span style="font-size:1.3rem;"><?= $info['icon'] ?? '<i class="fa-solid fa-wheat-awn text-warning"></i>' ?></span>
                                 <div>
                                     <strong><?= $isDemolishingJob ? 'Démantèlement en cours' : 'Travaux en cours' ?></strong> →
                                     <span class="badge bg-<?= $isDemolishingJob ? 'danger' : 'warning' ?> text-dark fw-bold">
@@ -439,7 +439,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                         <!-- Barre de progression des travaux de construction -->
                         <div class="building-progress-wrapper p-2 bg-white rounded border shadow-sm my-2">
                             <div class="d-flex justify-content-between align-items-center mb-1 text-secondary small">
-                                <span class="fw-semibold d-flex align-items-center gap-1"><span>🚧</span> Avancement du chantier</span>
+                                <span class="fw-semibold d-flex align-items-center gap-1"><i class="fa-solid fa-person-digging text-warning me-1"></i> Avancement du chantier</span>
                                 <span class="badge bg-<?= $isDemolishingJob ? 'danger' : 'warning' ?>-lt fw-bold font-monospace building-progress-pct"><?= $jobPct ?>%</span>
                             </div>
                             <div class="progress mb-2" style="height: 12px; background-color: #e2e8f0; border-radius: 6px; overflow: hidden;">
@@ -455,7 +455,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center text-secondary small">
-                                <span>⏱️ Compte à rebours :</span>
+                                <span><i class="fa-solid fa-stopwatch me-1"></i> Compte à rebours :</span>
                                 <span class="font-monospace fw-bold text-dark fs-4 building-time-remaining" data-countdown="<?= $jobEnd ?>">
                                     Calcul...
                                 </span>
@@ -464,12 +464,12 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                     </div>
                     <button type="button" class="btn btn-outline-danger w-100"
                             onclick="cancelFieldBuild(<?= (int)$activeJob['id'] ?>)">
-                        🛑 <?= $isDemolishingJob ? 'Interrompre le démantèlement' : 'Interrompre les travaux (80% remboursé)' ?>
+                        <i class="fa-solid fa-ban me-1"></i> <?= $isDemolishingJob ? 'Interrompre le démantèlement' : 'Interrompre les travaux (80% remboursé)' ?>
                     </button>
 
                 <?php elseif (!$canQueueNewField): ?>
                     <div class="alert alert-secondary mb-3">
-                        <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">🏗️</div>
+                        <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;"><i class="fa-solid fa-trowel-bricks text-muted"></i></div>
                         <h4 class="alert-title">Maîtres d'œuvre déjà mobilisés</h4>
                         <p class="text-muted mb-0" style="font-size:0.85rem;">
                             <?php if ($isTerran): ?>
@@ -479,28 +479,28 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                             <?php endif; ?>
                         </p>
                     </div>
-                    <a href="/?page=resources" class="btn btn-secondary w-100">← Voir les chantiers en cours</a>
+                    <a href="/?page=resources" class="btn btn-secondary w-100"><i class="fa-solid fa-arrow-left me-1"></i> Voir les chantiers en cours</a>
 
                 <?php elseif (!$canAfford): ?>
                     <div class="alert alert-warning mb-3">
-                        <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">⚠️</div>
+                        <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;"><i class="fa-solid fa-triangle-exclamation text-warning"></i></div>
                         <h4 class="alert-title">Ressources Insuffisantes</h4>
                         <p class="text-muted mb-0" style="font-size:0.85rem;">
                             Vos greniers ne disposent pas des matériaux nécessaires.
                         </p>
                         <?php if ($missingWaitSeconds > 0): ?>
                         <div class="mt-2 text-center">
-                            <span class="badge bg-warning text-dark">⏳ Ressources réunies dans : <?= gmdate('H:i:s', $missingWaitSeconds) ?></span>
+                            <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-half me-1"></i> Ressources réunies dans : <?= gmdate('H:i:s', $missingWaitSeconds) ?></span>
                         </div>
                         <?php endif; ?>
                     </div>
                     <button class="btn btn-primary w-100" disabled>
-                        🔨 Améliorer au Niveau <?= $targetLevel ?>
+                        <i class="fa-solid fa-hammer me-1"></i> Améliorer au Niveau <?= $targetLevel ?>
                     </button>
 
                 <?php else: ?>
                     <div class="alert alert-success mb-3">
-                        <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;">✨</div>
+                        <div style="font-size:1.5rem; text-align:center; margin-bottom:0.5rem;"><i class="fa-solid fa-star text-success"></i></div>
                         <h4 class="alert-title">Ordre de Travaux Prêt</h4>
                         <p class="text-muted mb-0" style="font-size:0.85rem;">
                             Matériaux prêts. Vos maîtres-charpentiers attendent votre décret pour ériger le <strong>Niveau <?= $targetLevel ?></strong>.
@@ -508,12 +508,12 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                     </div>
                     <button type="button" class="btn btn-primary btn-lg w-100" id="btnLaunchUpgrade"
                             onclick="launchFieldUpgrade(<?= $slot ?>, <?= $targetLevel ?>)">
-                        🔨 Lancer l'Amélioration au Niveau <?= $targetLevel ?>
+                        <i class="fa-solid fa-hammer me-1"></i> Lancer l'Amélioration au Niveau <?= $targetLevel ?>
                     </button>
                 <?php endif; ?>
 
                 <div class="mt-3 text-center">
-                    <a href="/?page=resources" class="text-muted" style="font-size:0.8rem;">← Revenir à la vue générale des 20 parcelles</a>
+                    <a href="/?page=resources" class="text-muted" style="font-size:0.8rem;"><i class="fa-solid fa-arrow-left me-1"></i> Revenir à la vue générale des 20 parcelles</a>
                 </div>
             </div>
         </div>
@@ -537,11 +537,11 @@ async function launchFieldUpgrade(slot, targetLvl, fieldType = null) {
             window.location.reload();
         } else {
             showModalAlert(data.error || 'Erreur lors du lancement des travaux.', 'error');
-            if (btn) { btn.disabled = false; btn.innerText = `🔨 Lancer l'Amélioration au Niveau ${targetLvl}`; }
+            if (btn) { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-hammer me-1"></i> Lancer l'Amélioration au Niveau ${targetLvl}`; }
         }
     } catch (err) {
         showModalAlert('Erreur réseau lors de la communication avec le fief.', 'error');
-        if (btn) { btn.disabled = false; btn.innerText = `🔨 Lancer l'Amélioration au Niveau ${targetLvl}`; }
+        if (btn) { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-hammer me-1"></i> Lancer l'Amélioration au Niveau ${targetLvl}`; }
     }
 }
 
@@ -594,7 +594,7 @@ function closeArtworkModal(e) {
 <div id="artworkModal" class="modal-overlay" style="display:none;" onclick="closeArtworkModal(event)">
     <div class="modal-card modal-card-lg" style="max-width:960px; padding:1.5rem;" onclick="event.stopPropagation()">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--tblr-border-color); padding-bottom:0.75rem; margin-bottom:1rem;">
-            <h3 id="artworkModalTitle" style="margin:0; font-size:1.1rem; font-weight:800;">🎨 Estampe Féodale</h3>
+            <h3 id="artworkModalTitle" style="margin:0; font-size:1.1rem; font-weight:800;"><i class="fa-solid fa-palette text-danger me-2"></i>Estampe Féodale</h3>
             <button type="button" class="btn-close" onclick="closeArtworkModal()"></button>
         </div>
         <div style="text-align:center;">

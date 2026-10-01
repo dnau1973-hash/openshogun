@@ -65,23 +65,23 @@ if (!is_array($dailyQuota)) {
 }
 
 $factionIcons = [
-    'terran' => '🏯',
-    'vorash' => '🐎',
-    'aethelis' => '⛩️'
+    'terran' => '<i class="fa-solid fa-chess-rook"></i>',
+    'vorash' => '<i class="fa-solid fa-horse"></i>',
+    'aethelis' => '<i class="fa-solid fa-torii-gate"></i>'
 ];
-$fIcon = $factionIcons[$user['faction'] ?? 'terran'] ?? '⚔️';
+$fIcon = $factionIcons[$user['faction'] ?? 'terran'] ?? '<i class="fa-solid fa-khanda"></i>';
 
 $health = round((float)($hero['health'] ?? 100));
 $healthBadgeClass = ($health >= 60) ? 'bg-success' : (($health >= 25) ? 'bg-warning' : 'bg-danger');
 
 $statusLabels = [
-    'home' => ['label' => 'Au Domaine (Garnison)', 'color' => '#22c55e', 'badge_class' => 'bg-success text-white', 'icon' => '🏯'],
-    'mission' => ['label' => 'En Marche Militaire', 'color' => '#3b82f6', 'badge_class' => 'bg-info text-white', 'icon' => '🚩'],
-    'adventure' => ['label' => 'En Aventure Féodale', 'color' => '#a855f7', 'badge_class' => 'bg-purple text-white', 'icon' => '🗺️'],
-    'dead' => ['label' => 'Tombé au Combat', 'color' => '#ef4444', 'badge_class' => 'bg-danger text-white', 'icon' => '💀'],
-    'reviving' => ['label' => 'Régénération en cours (24h)', 'color' => '#f59e0b', 'badge_class' => 'bg-warning text-dark', 'icon' => '✨']
+    'home' => ['label' => 'Au Domaine (Garnison)', 'color' => '#22c55e', 'badge_class' => 'bg-success text-white', 'icon' => '<i class="fa-solid fa-chess-rook"></i>'],
+    'mission' => ['label' => 'En Marche Militaire', 'color' => '#3b82f6', 'badge_class' => 'bg-info text-white', 'icon' => '<i class="fa-solid fa-flag"></i>'],
+    'adventure' => ['label' => 'En Aventure Féodale', 'color' => '#a855f7', 'badge_class' => 'bg-purple text-white', 'icon' => '<i class="fa-solid fa-map"></i>'],
+    'dead' => ['label' => 'Tombé au Combat', 'color' => '#ef4444', 'badge_class' => 'bg-danger text-white', 'icon' => '<i class="fa-solid fa-skull"></i>'],
+    'reviving' => ['label' => 'Régénération en cours (24h)', 'color' => '#f59e0b', 'badge_class' => 'bg-warning text-dark', 'icon' => '<i class="fa-solid fa-sparkles"></i>']
 ];
-$st = $statusLabels[$hero['status'] ?? 'home'] ?? ['label' => 'Inconnu', 'color' => '#94a3b8', 'badge_class' => 'bg-secondary text-white', 'icon' => '❓'];
+$st = $statusLabels[$hero['status'] ?? 'home'] ?? ['label' => 'Inconnu', 'color' => '#94a3b8', 'badge_class' => 'bg-secondary text-white', 'icon' => '<i class="fa-solid fa-question"></i>'];
 
 if (!function_exists('renderRelicBonusesHtml')) {
     function renderRelicBonusesHtml($bonusData): string {
@@ -118,7 +118,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                     $badges[] = '<span class="badge bg-secondary-lt text-secondary border border-secondary-lt">+' . (int)$v . ' Pierre/h</span>';
                     break;
                 case 'cages_count':
-                    $badges[] = '<span class="badge bg-success-lt text-success border border-success-lt fw-bold">🎋 ' . (int)$v . ' Cages de capture</span>';
+                    $badges[] = '<span class="badge bg-success-lt text-success border border-success-lt fw-bold"><i class="fa-solid fa-box text-success me-1"></i>' . (int)$v . ' Cages de capture</span>';
                     break;
                 default:
                     $badges[] = '<span class="badge bg-secondary-lt">+' . htmlspecialchars((string)$v) . ' ' . htmlspecialchars($k) . '</span>';
@@ -154,7 +154,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 <div class="row align-items-center">
                     <div class="col-auto">
                         <span class="avatar rounded <?= ($health >= 60) ? 'bg-success-lt text-success' : (($health >= 25) ? 'bg-warning-lt text-warning' : 'bg-danger-lt text-danger') ?>" style="font-size:1.3rem;">
-                            ❤️
+                            <i class="fa-solid fa-heart text-danger"></i>
                         </span>
                     </div>
                     <div class="col">
@@ -168,7 +168,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                     <div class="progress-bar <?= ($health >= 60) ? 'bg-success' : (($health >= 25) ? 'bg-warning' : 'bg-danger') ?>" style="width: <?= $health ?>%"></div>
                 </div>
                 <div class="text-secondary small mt-1 d-flex justify-content-between">
-                    <span><?= ($hero['status'] === 'dead') ? '💀 Héros tombé' : (($hero['status'] === 'reviving') ? '⏳ En régénération' : 'Régénération +15%/j') ?></span>
+                    <span><?= ($hero['status'] === 'dead') ? '<i class="fa-solid fa-skull text-danger me-1"></i>Héros tombé' : (($hero['status'] === 'reviving') ? '<i class="fa-solid fa-hourglass-half text-warning me-1"></i>En régénération' : 'Régénération +15%/j') ?></span>
                     <span>Max 100%</span>
                 </div>
             </div>
@@ -182,7 +182,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 <div class="row align-items-center">
                     <div class="col-auto">
                         <span class="avatar rounded bg-primary-lt text-primary" style="font-size:1.3rem;">
-                            🥋
+                            <i class="fa-solid fa-user-ninja"></i>
                         </span>
                     </div>
                     <div class="col">
@@ -210,7 +210,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 <div class="row align-items-center">
                     <div class="col-auto">
                         <span class="avatar rounded bg-danger-lt text-danger" style="font-size:1.3rem;">
-                            ⚔️
+                            <i class="fa-solid fa-khanda"></i>
                         </span>
                     </div>
                     <div class="col">
@@ -234,7 +234,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 <div class="row align-items-center">
                     <div class="col-auto">
                         <span class="avatar rounded bg-purple-lt text-purple" style="font-size:1.3rem;">
-                            🗺️
+                            <i class="fa-solid fa-map"></i>
                         </span>
                     </div>
                     <div class="col">
@@ -263,7 +263,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
 <?php if ($hero['status'] === 'dead'): ?>
     <div class="alert alert-danger d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <div class="d-flex align-items-center gap-2">
-            <span style="font-size: 1.8rem;">💀</span>
+            <span style="font-size: 1.8rem;"><i class="fa-solid fa-skull text-danger"></i></span>
             <div>
                 <h4 class="alert-title m-0">Votre Samouraï est tombé au champ d'honneur !</h4>
                 <div class="text-secondary small mt-1">
@@ -273,14 +273,14 @@ if (!function_exists('renderRelicBonusesHtml')) {
         </div>
         <div>
             <button type="button" onclick="executeReviveHero(<?= (int)$planet['id'] ?>)" class="btn btn-danger font-weight-bold">
-                ✨ Lancer la Régénération (24h)
+                <i class="fa-solid fa-sparkles me-1"></i>Lancer la Régénération (24h)
             </button>
         </div>
     </div>
 <?php elseif ($hero['status'] === 'reviving'): ?>
     <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <div class="d-flex align-items-center gap-2">
-            <span style="font-size: 1.8rem;">⏳</span>
+            <span style="font-size: 1.8rem;"><i class="fa-solid fa-hourglass-half text-warning"></i></span>
             <div>
                 <h4 class="alert-title m-0">Régénération sacrée en cours (durée : 24 heures)</h4>
                 <div class="text-secondary small mt-1">
@@ -304,7 +304,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
         <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
             <li class="nav-item">
                 <a href="?page=hero&tab=attributes" class="nav-link <?= ($activeTab === 'attributes') ? 'active' : '' ?>">
-                    <span class="me-1">🥋</span> Compétences &amp; Attributs
+                    <span class="me-1"><i class="fa-solid fa-user-ninja"></i></span> Compétences &amp; Attributs
                     <?php if ($hero['unassigned_points'] > 0): ?>
                         <span class="badge bg-warning text-dark ms-2">+<?= $hero['unassigned_points'] ?></span>
                     <?php endif; ?>
@@ -312,13 +312,13 @@ if (!function_exists('renderRelicBonusesHtml')) {
             </li>
             <li class="nav-item">
                 <a href="?page=hero&tab=adventures" class="nav-link <?= ($activeTab === 'adventures') ? 'active' : '' ?>">
-                    <span class="me-1">🗺️</span> Aventures Provinciales
+                    <span class="me-1"><i class="fa-solid fa-map"></i></span> Aventures Provinciales
                     <span class="badge bg-purple-lt ms-2"><?= $dailyQuota['count'] ?>/<?= $dailyQuota['max'] ?></span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="?page=hero&tab=inventory" class="nav-link <?= ($activeTab === 'inventory') ? 'active' : '' ?>">
-                    <span class="me-1">🗡️</span> Arsenal &amp; Reliques
+                    <span class="me-1"><i class="fa-solid fa-shield-halved"></i></span> Arsenal &amp; Reliques
                     <?php if (count($inventory) > 0): ?>
                         <span class="badge bg-secondary-lt ms-2"><?= count($inventory) ?></span>
                     <?php endif; ?>
@@ -350,7 +350,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                             <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div style="flex:1; min-width: 200px;">
                                     <div class="d-flex align-items-center gap-2 mb-1">
-                                        <span class="fs-3">⚔️</span>
+                                        <span class="fs-3"><i class="fa-solid fa-khanda text-danger"></i></span>
                                         <strong class="fs-5">Force Personnelle</strong>
                                     </div>
                                     <p class="text-secondary small mb-1">
@@ -381,7 +381,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                             <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div style="flex:1; min-width: 200px;">
                                     <div class="d-flex align-items-center gap-2 mb-1">
-                                        <span class="fs-3">🏹</span>
+                                        <span class="fs-3"><i class="fa-solid fa-person-military-pointing text-warning"></i></span>
                                         <strong class="fs-5">Bonus Offensif d'Armée</strong>
                                     </div>
                                     <p class="text-secondary small mb-1">
@@ -409,7 +409,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                             <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div style="flex:1; min-width: 200px;">
                                     <div class="d-flex align-items-center gap-2 mb-1">
-                                        <span class="fs-3">🛡️</span>
+                                        <span class="fs-3"><i class="fa-solid fa-shield-halved text-success"></i></span>
                                         <strong class="fs-5">Bonus Défensif d'Armée</strong>
                                     </div>
                                     <p class="text-secondary small mb-1">
@@ -437,7 +437,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                             <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div style="flex:1; min-width: 200px;">
                                     <div class="d-flex align-items-center gap-2 mb-1">
-                                        <span class="fs-3">🌾</span>
+                                        <span class="fs-3"><i class="fa-solid fa-wheat-awn text-primary"></i></span>
                                         <strong class="fs-5">Bénédiction de Récolte</strong>
                                     </div>
                                     <p class="text-secondary small mb-1">
@@ -467,19 +467,19 @@ if (!function_exists('renderRelicBonusesHtml')) {
                         <div class="d-flex align-items-center gap-3 flex-wrap">
                             <label class="form-check form-check-inline m-0">
                                 <input class="form-check-input" type="radio" name="prod_type" value="balanced" <?= ($hero['production_type'] === 'balanced') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
-                                <span class="form-check-label">⚖️ Équilibrée (Tous)</span>
+                                <span class="form-check-label"><i class="fa-solid fa-scale-balanced me-1"></i>Équilibrée (Tous)</span>
                             </label>
                             <label class="form-check form-check-inline m-0">
                                 <input class="form-check-input" type="radio" name="prod_type" value="metal" <?= ($hero['production_type'] === 'metal') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
-                                <span class="form-check-label" style="color:var(--tblr-warning-emphasis, #b45309);">🪵 Bois de Cèdre pur</span>
+                                <span class="form-check-label" style="color:var(--tblr-warning-emphasis, #b45309);"><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre pur</span>
                             </label>
                             <label class="form-check form-check-inline m-0">
                                 <input class="form-check-input" type="radio" name="prod_type" value="crystal" <?= ($hero['production_type'] === 'crystal') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
-                                <span class="form-check-label" style="color:var(--tblr-primary, #2563eb);">🪨 Pierre de Taille pure</span>
+                                <span class="form-check-label" style="color:var(--tblr-primary, #2563eb);"><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille pure</span>
                             </label>
                             <label class="form-check form-check-inline m-0">
                                 <input class="form-check-input" type="radio" name="prod_type" value="deuterium" <?= ($hero['production_type'] === 'deuterium') ? 'checked' : '' ?> onchange="changeProductionType(this.value)">
-                                <span class="form-check-label" style="color:var(--tblr-success, #16a34a);">🌾 Riz Impérial pur</span>
+                                <span class="form-check-label" style="color:var(--tblr-success, #16a34a);"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial pur</span>
                             </label>
                         </div>
                     </div>
@@ -489,7 +489,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 <div class="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
                     <button type="button" class="btn btn-secondary" onclick="resetPoints()">Réinitialiser</button>
                     <button type="submit" class="btn btn-primary" id="savePointsBtn">
-                        ✨ Enregistrer les Attributs
+                        <i class="fa-solid fa-sparkles me-1"></i>Enregistrer les Attributs
                     </button>
                 </div>
             </form>
@@ -500,7 +500,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
                 <div>
-                    <h3 class="card-title m-0">🗺️ Expéditions &amp; Aventures Provinciales</h3>
+                    <h3 class="card-title m-0"><i class="fa-solid fa-map me-1"></i>Expéditions &amp; Aventures Provinciales</h3>
                     <div class="text-secondary small mt-1">
                         Envoyez votre Samouraï explorer les sanctuaires oubliés et ruines antiques pour acquérir de l'XP, du butin et des reliques uniques.
                     </div>
@@ -518,7 +518,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
                     <div>
                         <div class="font-weight-bold <?= ($dailyQuota['remaining'] > 0) ? 'text-purple' : 'text-danger' ?>">
-                            <?= ($dailyQuota['remaining'] > 0) ? '⏳ Règle Féodale : 3 aventures par jour maximum' : '🔒 Quota quotidien épuisé (3 / 3 aventures)' ?>
+                            <?= ($dailyQuota['remaining'] > 0) ? '<i class="fa-solid fa-hourglass-half me-1"></i>Règle Féodale : 3 aventures par jour maximum' : '<i class="fa-solid fa-lock me-1"></i>Quota quotidien épuisé (3 / 3 aventures)' ?>
                         </div>
                         <div class="small text-secondary mt-1">
                             <?php if ($dailyQuota['remaining'] > 0): ?>
@@ -531,9 +531,9 @@ if (!function_exists('renderRelicBonusesHtml')) {
                     <div class="d-flex gap-2 align-items-center">
                         <?php for ($i = 1; $i <= $dailyQuota['max']; $i++): ?>
                             <?php if ($i <= $dailyQuota['count']): ?>
-                                <span class="badge bg-success text-white py-1 px-2">✓ Aventure <?= $i ?></span>
+                                <span class="badge bg-success text-white py-1 px-2"><i class="fa-solid fa-check me-1"></i>Aventure <?= $i ?></span>
                             <?php else: ?>
-                                <span class="badge bg-surface border text-secondary py-1 px-2">○ Aventure <?= $i ?></span>
+                                <span class="badge bg-surface border text-secondary py-1 px-2"><i class="fa-solid fa-circle-dot me-1"></i>Aventure <?= $i ?></span>
                             <?php endif; ?>
                         <?php endfor; ?>
                     </div>
@@ -542,7 +542,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
 
             <?php if (empty($adventures)): ?>
                 <div class="text-center py-5 border rounded bg-surface">
-                    <div class="fs-1 mb-2">📜</div>
+                    <div class="fs-1 mb-2"><i class="fa-solid fa-scroll text-secondary"></i></div>
                     <h4 class="font-weight-bold">Aucune aventure n'est disponible pour l'instant</h4>
                     <p class="text-secondary small max-w-sm mx-auto mb-0">
                         De nouvelles rumeurs et pistes d'aventures apparaissent régulièrement à mesure que vos éclaireurs sillonnent les provinces.
@@ -568,7 +568,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                         <span class="badge bg-secondary-lt font-monospace">[<?= $adv['coord_x'] ?> : <?= $adv['coord_y'] ?>]</span>
                                     </div>
                                     <h4 class="card-title font-weight-bold mb-2">
-                                        ⛩️ <?= htmlspecialchars($adv['name']) ?>
+                                        <i class="fa-solid fa-torii-gate text-danger me-1"></i><?= htmlspecialchars($adv['name']) ?>
                                     </h4>
                                     <div class="bg-surface-secondary border rounded p-2 small text-secondary d-flex justify-content-between mb-2">
                                         <span>Distance : <strong><?= $adv['distance'] ?></strong> lieues</span>
@@ -589,7 +589,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                             $btnReason = 'Indisponible';
                                             $btnTitle = '';
                                             if (!$dailyQuota['can_adventure']) {
-                                                $btnReason = '🔒 Quota atteint (3/3)';
+                                                $btnReason = '<i class="fa-solid fa-lock me-1"></i>Quota atteint (3/3)';
                                                 $btnTitle = 'Quota quotidien de 3 aventures atteint. Réinitialisation à minuit.';
                                             } elseif ($hero['status'] !== 'home') {
                                                 $btnReason = 'Indisponible (En route)';
@@ -616,7 +616,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
                 <div>
-                    <h3 class="card-title m-0">🗡️ Arsenal &amp; Reliques Ancestrales</h3>
+                    <h3 class="card-title m-0"><i class="fa-solid fa-shield-halved me-1"></i>Arsenal &amp; Reliques Ancestrales</h3>
                     <div class="text-secondary small mt-1">
                         Équipez votre Samouraï des armes légendaires et trésors sacrés découverts lors de ses expéditions.
                     </div>
@@ -628,14 +628,14 @@ if (!function_exists('renderRelicBonusesHtml')) {
 
             <!-- Règle des Reliques Uniques -->
             <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center gap-2">
-                <span class="fs-4">⛩️</span>
+                <span class="fs-4"><i class="fa-solid fa-torii-gate text-secondary"></i></span>
                 <div class="small">
                     <strong>Règle Féodale des Reliques :</strong> Chaque relique du Japon féodal est unique. <strong>Vous ne pouvez jamais obtenir deux fois la même relique</strong> au cours de vos aventures.
                 </div>
             </div>
 
             <!-- Mannequin du Héros & 5 Emplacements d'Équipement -->
-            <h4 class="font-weight-bold mb-2">🥋 Équipement Actuel du Champion</h4>
+            <h4 class="font-weight-bold mb-2"><i class="fa-solid fa-user-ninja text-danger me-1"></i>Équipement Actuel du Champion</h4>
             <div class="row g-3 mb-4 align-items-stretch">
                 <!-- Portrait / Mannequin -->
                 <div class="col-md-4 col-lg-3">
@@ -657,11 +657,11 @@ if (!function_exists('renderRelicBonusesHtml')) {
                     <div class="row g-2 h-100">
                         <?php 
                             $slots = [
-                                'weapon' => ['label' => 'Arme de Poing', 'icon' => '🗡️', 'field' => 'equipped_weapon'],
-                                'helmet' => ['label' => 'Casque Kabuto', 'icon' => '🪖', 'field' => 'equipped_helmet'],
-                                'armor' => ['label' => 'Armure O-Yoroi', 'icon' => '🥋', 'field' => 'equipped_armor'],
-                                'horse' => ['label' => 'Monture & Destrier', 'icon' => '🐎', 'field' => 'equipped_horse'],
-                                'talisman' => ['label' => 'Talisman Shintō', 'icon' => '📿', 'field' => 'equipped_talisman']
+                                'weapon' => ['label' => 'Arme de Poing', 'icon' => '<i class="fa-solid fa-khanda"></i>', 'field' => 'equipped_weapon'],
+                                'helmet' => ['label' => 'Casque Kabuto', 'icon' => '<i class="fa-solid fa-helmet-safety"></i>', 'field' => 'equipped_helmet'],
+                                'armor' => ['label' => 'Armure O-Yoroi', 'icon' => '<i class="fa-solid fa-shield-halved"></i>', 'field' => 'equipped_armor'],
+                                'horse' => ['label' => 'Monture & Destrier', 'icon' => '<i class="fa-solid fa-horse"></i>', 'field' => 'equipped_horse'],
+                                'talisman' => ['label' => 'Talisman Shintō', 'icon' => '<i class="fa-solid fa-gem"></i>', 'field' => 'equipped_talisman']
                             ];
                         ?>
                         <?php foreach ($slots as $slotKey => $sl): ?>
@@ -693,7 +693,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                                      style="object-fit: cover; cursor: pointer;"
                                                      onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($equippedItem), ENT_QUOTES, 'UTF-8') ?>)"
                                                      title="Examiner la relique">
-                                                <span class="position-absolute bottom-0 end-0 badge bg-dark p-1 rounded-circle" style="transform: translate(20%, 20%); font-size: 8px; line-height: 1;">🔍</span>
+                                                <span class="position-absolute bottom-0 end-0 badge bg-dark p-1 rounded-circle" style="transform: translate(20%, 20%); font-size: 8px; line-height: 1;"><i class="fa-solid fa-magnifying-glass"></i></span>
                                             </div>
                                             <div class="overflow-hidden">
                                                 <div class="text-secondary text-uppercase fw-bold" style="font-size: 0.65rem;"><?= $sl['icon'] ?> <?= $sl['label'] ?></div>
@@ -729,7 +729,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
 
             <!-- Grille d'Inventaire / Coffre de Reliques -->
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                <h4 class="font-weight-bold mb-0">📦 Coffre &amp; Reliques Féodales Collectées (<?= count($inventory) ?>/35)</h4>
+                <h4 class="font-weight-bold mb-0"><i class="fa-solid fa-boxes-stacked text-warning me-1"></i>Coffre &amp; Reliques Féodales Collectées (<?= count($inventory) ?>/35)</h4>
                 <div class="text-secondary small">
                     Cliquez sur une illustration pour l'admirer en grand format.
                 </div>
@@ -737,7 +737,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
 
             <?php if (empty($inventory)): ?>
                 <div class="text-center py-5 border rounded bg-surface">
-                    <div class="fs-1 mb-2">⛩️</div>
+                    <div class="fs-1 mb-2"><i class="fa-solid fa-torii-gate text-secondary"></i></div>
                     <h4 class="text-dark fw-bold">Votre coffre de reliques est vide</h4>
                     <p class="text-secondary mb-0 max-w-md mx-auto small">
                         Envoyez votre Samouraï en aventure féodale chaque jour (jusqu'à 3 expéditions quotidiennes) pour exhumer des katanas mythiques, des kabutos ornés et des trésors sacrés !
@@ -757,13 +757,13 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                 $it['bonus_data'] = json_decode($it['bonus_data'], true) ?: [];
                             }
                             $slotLabels = [
-                                'weapon' => ['label' => 'Arme', 'icon' => '🗡️'],
-                                'helmet' => ['label' => 'Casque', 'icon' => '🪖'],
-                                'armor' => ['label' => 'Armure', 'icon' => '🥋'],
-                                'horse' => ['label' => 'Monture', 'icon' => '🐎'],
-                                'talisman' => ['label' => 'Talisman', 'icon' => '📿']
+                                'weapon' => ['label' => 'Arme', 'icon' => '<i class="fa-solid fa-khanda"></i>'],
+                                'helmet' => ['label' => 'Casque', 'icon' => '<i class="fa-solid fa-helmet-safety"></i>'],
+                                'armor' => ['label' => 'Armure', 'icon' => '<i class="fa-solid fa-shield-halved"></i>'],
+                                'horse' => ['label' => 'Monture', 'icon' => '<i class="fa-solid fa-horse"></i>'],
+                                'talisman' => ['label' => 'Talisman', 'icon' => '<i class="fa-solid fa-gem"></i>']
                             ];
-                            $slInfo = $slotLabels[$itemSlot] ?? ['label' => ucfirst((string)$itemSlot), 'icon' => '🛡️'];
+                            $slInfo = $slotLabels[$itemSlot] ?? ['label' => ucfirst((string)$itemSlot), 'icon' => '<i class="fa-solid fa-shield-halved"></i>'];
                         ?>
                         <div class="col-md-6 col-xl-4">
                             <div class="card h-100 border <?= $isEq ? 'border-primary bg-primary-lt' : 'bg-surface' ?> shadow-sm">
@@ -785,7 +785,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                                         style="width: 20px; height: 20px; font-size: 9px; padding: 0;"
                                                         onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($it), ENT_QUOTES, 'UTF-8') ?>)"
                                                         title="Agrandir">
-                                                    🔍
+                                                    <i class="fa-solid fa-magnifying-glass"></i>
                                                 </button>
                                             </div>
 
@@ -796,7 +796,7 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                                         <?= $slInfo['icon'] ?> <?= $slInfo['label'] ?>
                                                     </span>
                                                     <?php if ($isEq): ?>
-                                                        <span class="badge bg-primary text-white" style="font-size: 0.7rem;">✓ Équipé</span>
+                                                        <span class="badge bg-primary text-white" style="font-size: 0.7rem;"><i class="fa-solid fa-check me-1"></i>Équipé</span>
                                                     <?php endif; ?>
                                                 </div>
                                                 <strong class="text-dark d-block text-truncate fs-4" style="cursor: pointer;" onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($it), ENT_QUOTES, 'UTF-8') ?>)">
@@ -817,13 +817,13 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                     <!-- Pied de Carte / Actions -->
                                     <div class="d-flex justify-content-between align-items-center pt-2 border-top">
                                         <button type="button" class="btn btn-sm btn-ghost-secondary px-2" onclick="openItemDetailModal(<?= htmlspecialchars(json_encode($it), ENT_QUOTES, 'UTF-8') ?>)">
-                                            🔍 Examiner
+                                            <i class="fa-solid fa-magnifying-glass me-1"></i>Examiner
                                         </button>
                                         <div>
                                             <?php if ($it['item_type'] === 'consumable'): ?>
                                                 <?php $cCount = (int)($it['bonus_data']['cages_count'] ?? 0); ?>
                                                 <span class="badge bg-success-lt text-success fw-bold" style="font-size:0.75rem;">
-                                                    🎋 En réserve : <?= $cCount ?>
+                                                    <i class="fa-solid fa-box text-success me-1"></i>En réserve : <?= $cCount ?>
                                                 </span>
                                             <?php elseif ($isEq): ?>
                                                 <button type="button" onclick="executeUnequip('<?= htmlspecialchars($itemSlot) ?>')" class="btn btn-sm btn-outline-danger">
@@ -867,11 +867,11 @@ if (!function_exists('renderRelicBonusesHtml')) {
             <div class="col-md-6 d-flex flex-column justify-content-between">
                 <div>
                     <div class="mb-3">
-                        <label class="form-label text-muted text-uppercase small font-weight-bold mb-1">📜 Récit &amp; Origine Féodale</label>
+                        <label class="form-label text-muted text-uppercase small font-weight-bold mb-1"><i class="fa-solid fa-scroll me-1"></i>Récit &amp; Origine Féodale</label>
                         <p id="itemModalDesc" class="text-secondary fs-4 fst-italic bg-surface p-3 rounded border" style="line-height: 1.5;"></p>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label text-muted text-uppercase small font-weight-bold mb-1">⚡ Pouvoirs &amp; Bénédictions</label>
+                        <label class="form-label text-muted text-uppercase small font-weight-bold mb-1"><i class="fa-solid fa-bolt text-warning me-1"></i>Pouvoirs &amp; Bénédictions</label>
                         <div id="itemModalBonuses" class="d-flex flex-wrap gap-1"></div>
                     </div>
                 </div>
@@ -1089,12 +1089,12 @@ function openItemDetailModal(item) {
     document.getElementById('itemModalDesc').innerText = item.description || '';
 
     const slotLabels = {
-        'weapon': '🗡️ Arme de Poing',
-        'helmet': '🪖 Casque Kabuto',
-        'armor': '🥋 Armure O-Yoroi',
-        'horse': '🐎 Monture & Destrier',
-        'talisman': '📿 Talisman Shintō',
-        'consumable': '🎋 Consommable Féodal'
+        'weapon': 'Arme de Poing',
+        'helmet': 'Casque Kabuto',
+        'armor': 'Armure O-Yoroi',
+        'horse': 'Monture & Destrier',
+        'talisman': 'Talisman Shintō',
+        'consumable': 'Consommable Féodal'
     };
     const slotCode = item.slot || item.item_type || 'weapon';
     const slotName = slotLabels[slotCode] || slotCode || 'Relique';
@@ -1102,7 +1102,7 @@ function openItemDetailModal(item) {
 
     document.getElementById('itemModalSubtitle').innerHTML = `
         <span class="badge bg-secondary-lt me-2">${slotName}</span>
-        ${isEquipped ? '<span class="badge bg-primary text-white">✓ Équipé sur votre Samouraï</span>' : '<span class="badge bg-light text-muted">Dans le coffre</span>'}
+        ${isEquipped ? '<span class="badge bg-primary text-white"><i class="fa-solid fa-check me-1"></i>Équipé sur votre Samouraï</span>' : '<span class="badge bg-light text-muted">Dans le coffre</span>'}
     `;
 
     const bonusesContainer = document.getElementById('itemModalBonuses');
@@ -1122,7 +1122,7 @@ function openItemDetailModal(item) {
             else if (k === 'production_rice') badgeHtml = `<span class="badge bg-green-lt text-green border border-green-lt fs-5 px-2 py-1">+${v} Riz/h</span>`;
             else if (k === 'production_wood') badgeHtml = `<span class="badge bg-teal-lt text-teal border border-teal-lt fs-5 px-2 py-1">+${v} Bois/h</span>`;
             else if (k === 'production_stone') badgeHtml = `<span class="badge bg-secondary-lt text-secondary border border-secondary-lt fs-5 px-2 py-1">+${v} Pierre/h</span>`;
-            else if (k === 'cages_count') badgeHtml = `<span class="badge bg-success-lt text-success border border-success-lt fs-5 px-2 py-1 fw-bold">🎋 ${v} Cages disponibles</span>`;
+            else if (k === 'cages_count') badgeHtml = `<span class="badge bg-success-lt text-success border border-success-lt fs-5 px-2 py-1 fw-bold"><i class="fa-solid fa-box text-success me-1"></i>${v} Cages disponibles</span>`;
             else badgeHtml = `<span class="badge bg-secondary-lt fs-5 px-2 py-1">+${v} ${k}</span>`;
             bonusesContainer.innerHTML += badgeHtml;
         }
@@ -1134,7 +1134,7 @@ function openItemDetailModal(item) {
     if (slotCode === 'consumable' || item.item_type === 'consumable') {
         const cCount = (bData && bData.cages_count) ? bData.cages_count : 0;
         actionsContainer.innerHTML = `
-            <div class="small text-muted">🎋 Consommable automatique lors des raids et attaques d'oasis (Stock : <strong>${cCount}</strong>)</div>
+            <div class="small text-muted"><i class="fa-solid fa-box text-success me-1"></i>Consommable automatique lors des raids et attaques d'oasis (Stock : <strong>${cCount}</strong>)</div>
             <button type="button" class="btn btn-secondary" onclick="closeItemDetailModal()">
                 Fermer
             </button>
@@ -1151,7 +1151,7 @@ function openItemDetailModal(item) {
     } else {
         actionsContainer.innerHTML = `
             <button type="button" class="btn btn-primary" onclick="executeEquip(${item.id})">
-                🗡️ Équiper cette Relique
+                <i class="fa-solid fa-shield-halved me-1"></i>Équiper cette Relique
             </button>
             <button type="button" class="btn btn-secondary" onclick="closeItemDetailModal()">
                 Fermer

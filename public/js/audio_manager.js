@@ -176,12 +176,11 @@ class ShogunAudioManager {
         const trackInfo = this.getCurrentTrackInfo();
 
         if (iconEl) {
+            iconEl.textContent = '';
             if (isPlaying) {
-                iconEl.textContent = '🔊';
-                iconEl.classList.add('audio-playing');
+                iconEl.className = 'fa-solid fa-volume-high text-success audio-playing';
             } else {
-                iconEl.textContent = '🔇';
-                iconEl.classList.remove('audio-playing');
+                iconEl.className = 'fa-solid fa-volume-xmark text-secondary';
             }
         }
 

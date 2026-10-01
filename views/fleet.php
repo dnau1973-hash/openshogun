@@ -199,15 +199,15 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                 </ol>
             </div>
             <h2 class="page-title d-flex align-items-center gap-2">
-                <span class="text-danger">🏇</span> Expéditions Féodales &amp; Mouvements de Troupes
+                <span class="text-danger"><i class="fa-solid fa-horse"></i></span> Expéditions Féodales &amp; Mouvements de Troupes
             </h2>
         </div>
         <div class="col-auto ms-auto d-flex align-items-center gap-2">
             <span class="badge bg-blue-lt px-2 py-1 fs-5">
-                🏰 Fief : <strong><?= htmlspecialchars($planet['name']) ?></strong> [<?= $planet['coord_x'] ?>:<?= $planet['coord_y'] ?>]
+                <i class="fa-solid fa-chess-rook text-danger me-1"></i>Fief : <strong><?= htmlspecialchars($planet['name']) ?></strong> [<?= $planet['coord_x'] ?>:<?= $planet['coord_y'] ?>]
             </span>
             <span class="badge bg-secondary-lt px-2 py-1 fs-5">
-                🏇 <?= count($activeMissions) ?> marche(s) active(s)
+                <i class="fa-solid fa-horse text-primary me-1"></i><?= count($activeMissions) ?> marche(s) active(s)
             </span>
         </div>
     </div>
@@ -218,12 +218,12 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
     <ul class="nav nav-tabs" data-bs-toggle="tabs" role="tablist">
         <li class="nav-item" role="presentation">
             <a href="#tab-manual-fleet" class="nav-link active fw-bold d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="true" role="tab">
-                <span>🚩</span> Expédition &amp; Manœuvres
+                <span><i class="fa-solid fa-flag text-danger"></i></span> Expédition &amp; Manœuvres
             </a>
         </li>
         <li class="nav-item" role="presentation">
             <a href="#tab-farm-lists" class="nav-link fw-bold text-warning d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="false" role="tab">
-                <span>📜</span> Carnet de Raids (Farm List)
+                <span><i class="fa-solid fa-scroll text-primary"></i></span> Carnet de Raids (Farm List)
                 <span class="badge bg-warning text-dark ms-1"><?= count($allFarmLists) ?></span>
                 <?php if ($isSealActive): ?>
                     <span class="badge bg-dark text-warning border border-warning ms-1" style="font-size:0.65rem;">Sceau Actif</span>
@@ -232,13 +232,13 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
         </li>
         <li class="nav-item" role="presentation">
             <a href="#tab-active-missions" class="nav-link fw-bold d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="false" role="tab">
-                <span>🏇</span> Marches Actives
+                <span><i class="fa-solid fa-horse text-danger"></i></span> Marches Actives
                 <span class="badge bg-secondary ms-1"><?= count($activeMissions) ?></span>
             </a>
         </li>
         <li class="nav-item ms-auto" role="presentation">
             <a href="?page=privilege#sectionTradeRoutes" class="nav-link text-primary fw-bold d-flex align-items-center gap-1">
-                <span>🛣️</span> Routes Commerciales Féodales &rarr;
+                <span><i class="fa-solid fa-route text-primary me-1"></i></span> Routes Commerciales Féodales &rarr;
             </a>
         </li>
     </ul>
@@ -255,7 +255,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                 <div class="card shadow-sm border">
                     <div class="card-header bg-light-subtle d-flex justify-content-between align-items-center">
                         <div>
-                            <h3 class="card-title fw-bold text-dark mb-0">🚩 Préparation de l'Expédition &amp; Ordre de Marche</h3>
+                            <h3 class="card-title fw-bold text-dark mb-0"><i class="fa-solid fa-flag text-danger me-1"></i>Préparation de l'Expédition &amp; Ordre de Marche</h3>
                             <div class="text-secondary small">Garnison actuelle de rattachement : <strong><?= htmlspecialchars($planet['name']) ?></strong></div>
                         </div>
                         <div class="card-actions">
@@ -265,41 +265,41 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                     <div class="card-body">
                         <?php if ($isMyProtectionActive): ?>
                             <div class="alert alert-success d-flex align-items-center gap-3 mb-4">
-                                <span class="fs-1 flex-shrink-0">🔰</span>
+                                <span class="fs-1 flex-shrink-0"><i class="fa-solid fa-shield-halved text-success"></i></span>
                                 <div class="small">
                                     <strong class="text-success d-block mb-1">Immunité Féodale des Nouveaux Joueurs Active (Jusqu'au <?= htmlspecialchars($myProtection['until_formatted']) ?> — encore <?= htmlspecialchars($myProtection['formatted']) ?>)</strong>
                                     Vos domaines et fiefs sont protégés contre tout raid de pillage, assaut de siège et infiltration shinobi adverse.<br>
-                                    <span class="text-warning-emphasis fw-bold">⚔️ Règle martiale :</span> Vous pouvez librement explorer les aventures du Héros et pacifier les oasis sauvages. En revanche, si vous lancez un raid, un assaut ou un espionnage contre un <strong>autre seigneur joueur</strong>, votre immunité sera <strong>définitivement levée</strong>.
+                                    <span class="text-warning-emphasis fw-bold"><i class="fa-solid fa-khanda text-danger me-1"></i>Règle martiale :</span> Vous pouvez librement explorer les aventures du Héros et pacifier les oasis sauvages. En revanche, si vous lancez un raid, un assaut ou un espionnage contre un <strong>autre seigneur joueur</strong>, votre immunité sera <strong>définitivement levée</strong>.
                                 </div>
                             </div>
                         <?php endif; ?>
 
                         <?php if (empty($stationedShips) && empty($stationedUnits) && !$canDeployHero): ?>
                             <div class="text-center py-5">
-                                <div class="text-secondary mb-2" style="font-size:2.5rem;">🏯</div>
+                                <div class="text-secondary mb-2" style="font-size:2.5rem;"><i class="fa-solid fa-chess-rook text-secondary"></i></div>
                                 <h4>Garnison Indisponible</h4>
                                 <p class="text-secondary mb-3">Aucun régiment de guerriers, engin de siège ni héros samouraï n'est disponible dans votre garnison.</p>
                                 <div class="d-flex justify-content-center gap-2">
-                                    <a href="?page=shipyard" class="btn btn-primary">🔨 Atelier de Siège &amp; Écuries</a>
-                                    <a href="?page=barracks" class="btn btn-outline-secondary">⚔️ Dojo Militaire</a>
+                                    <a href="?page=shipyard" class="btn btn-primary"><i class="fa-solid fa-hammer me-1"></i>Atelier de Siège &amp; Écuries</a>
+                                    <a href="?page=barracks" class="btn btn-outline-secondary"><i class="fa-solid fa-khanda me-1"></i>Dojo Militaire</a>
                                 </div>
                             </div>
                         <?php else: ?>
                             <form id="fleetForm" onsubmit="event.preventDefault(); submitFleet();">
                                 <?php if ($preselectedMission === 'colonize' && !$hasColonistAvailable): ?>
                                     <div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
-                                        <span class="fs-1 flex-shrink-0">⛩️</span>
+                                        <span class="fs-1 flex-shrink-0"><i class="fa-solid fa-torii-gate text-danger"></i></span>
                                         <div class="flex-fill">
-                                            <strong class="d-block mb-1">Aucun Pionnier Féodal (Colon ⛩️) en garnison !</strong>
+                                            <strong class="d-block mb-1">Aucun Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>) en garnison !</strong>
                                             <p class="mb-2 small">
                                                 Pour ériger votre nouveau fief, vous devez d'abord former un <strong>Pionnier Féodal</strong>. Il est disponible au <strong>Donjon Tenshu</strong> (déblocage aux paliers de niveau 10, 15 et 20) ou à l'<strong>Atelier de Siège</strong>.
                                             </p>
                                             <div class="d-flex gap-2 flex-wrap align-items-center">
                                                 <a href="?page=building&code=hq" class="btn btn-sm btn-success fw-bold">
-                                                    🏯 Former au Donjon Tenshu (Niv. 10+) &rarr;
+                                                    <i class="fa-solid fa-chess-rook me-1"></i>Former au Donjon Tenshu (Niv. 10+) &rarr;
                                                 </a>
                                                 <a href="?page=shipyard" class="btn btn-sm btn-outline-secondary">
-                                                    🔨 Atelier de Siège &amp; Écuries
+                                                    <i class="fa-solid fa-hammer me-1"></i>Atelier de Siège &amp; Écuries
                                                 </a>
                                             </div>
                                         </div>
@@ -311,7 +311,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                     <div class="mb-4">
                                         <div class="d-flex align-items-center gap-2 mb-2">
                                             <span class="badge bg-blue text-white rounded-pill px-2">1</span>
-                                            <h4 class="fw-bold text-dark m-0">🐎 Cavalerie, Convois &amp; Engins de Siège</h4>
+                                            <h4 class="fw-bold text-dark m-0"><i class="fa-solid fa-horse text-danger me-1"></i>Cavalerie, Convois &amp; Engins de Siège</h4>
                                         </div>
                                         <div class="list-group list-group-flush border rounded">
                                             <?php foreach ($stationedShips as $s): ?>
@@ -320,7 +320,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                                 ?>
                                                 <div class="list-group-item d-flex align-items-center justify-content-between p-2">
                                                     <div class="d-flex align-items-center gap-2">
-                                                        <span class="avatar avatar-sm bg-blue-lt">🐎</span>
+                                                        <span class="avatar avatar-sm bg-blue-lt"><i class="fa-solid fa-horse text-primary"></i></span>
                                                         <div>
                                                             <div class="fw-bold text-dark small"><?= htmlspecialchars($s['name']) ?></div>
                                                             <div class="text-secondary" style="font-size:0.75rem;">
@@ -349,7 +349,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                     <div class="mb-4">
                                         <div class="d-flex align-items-center gap-2 mb-2">
                                             <span class="badge bg-danger text-white rounded-pill px-2">2</span>
-                                            <h4 class="fw-bold text-dark m-0">⚔️ Régiments de Guerriers &amp; Samouraïs du Dojo</h4>
+                                            <h4 class="fw-bold text-dark m-0"><i class="fa-solid fa-khanda text-danger me-1"></i>Régiments de Guerriers &amp; Samouraïs du Dojo</h4>
                                         </div>
                                         <div class="list-group list-group-flush border rounded">
                                             <?php foreach ($stationedUnits as $u): ?>
@@ -387,22 +387,22 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                     <div class="mb-4">
                                         <div class="d-flex align-items-center gap-2 mb-2">
                                             <span class="badge bg-warning text-dark rounded-pill px-2">3</span>
-                                            <h4 class="fw-bold text-dark m-0">🥋 Champion Samouraï (Héros de Guerre)</h4>
+                                            <h4 class="fw-bold text-dark m-0"><i class="fa-solid fa-user-ninja text-warning me-1"></i>Champion Samouraï (Héros de Guerre)</h4>
                                         </div>
                                         <div class="card bg-warning-subtle border-warning-subtle p-3 shadow-none">
                                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                                 <div class="d-flex align-items-center gap-3">
-                                                    <span class="avatar avatar-md rounded-circle bg-warning text-dark fs-2 border border-warning">🥋</span>
+                                                    <span class="avatar avatar-md rounded-circle bg-warning text-dark fs-2 border border-warning"><i class="fa-solid fa-user-ninja"></i></span>
                                                     <div>
                                                         <div class="fw-bold text-dark fs-4">
                                                             <?= htmlspecialchars($heroData['name']) ?>
                                                             <span class="badge bg-warning text-dark ms-1">Niv. <?= $heroData['level'] ?></span>
                                                         </div>
                                                         <div class="d-flex flex-wrap gap-2 mt-1">
-                                                            <span class="badge bg-danger-lt">⚔️ Force : <?= $heroEffectiveStats['combat_strength'] ?></span>
-                                                            <span class="badge bg-orange-lt">🔥 Attaque : +<?= $heroEffectiveStats['offense_bonus_pct'] ?? 0 ?>%</span>
-                                                            <span class="badge bg-teal-lt">🛡️ Défense : +<?= $heroEffectiveStats['defense_bonus_pct'] ?? 0 ?>%</span>
-                                                            <span class="badge bg-green-lt">❤️ Santé : <?= $heroData['health'] ?>%</span>
+                                                            <span class="badge bg-danger-lt"><i class="fa-solid fa-khanda me-1"></i>Force : <?= $heroEffectiveStats['combat_strength'] ?></span>
+                                                            <span class="badge bg-orange-lt"><i class="fa-solid fa-fire me-1"></i>Attaque : +<?= $heroEffectiveStats['offense_bonus_pct'] ?? 0 ?>%</span>
+                                                            <span class="badge bg-teal-lt"><i class="fa-solid fa-shield-halved me-1"></i>Défense : +<?= $heroEffectiveStats['defense_bonus_pct'] ?? 0 ?>%</span>
+                                                            <span class="badge bg-green-lt"><i class="fa-solid fa-heart me-1"></i>Santé : <?= $heroData['health'] ?>%</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -417,14 +417,14 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                     </div>
                                 <?php elseif ($heroData && $heroData['status'] !== 'home'): ?>
                                     <div class="alert alert-secondary d-flex align-items-center gap-2 py-2 mb-4">
-                                        <span class="fs-4">🥋</span>
+                                        <span class="fs-4"><i class="fa-solid fa-user-ninja text-warning"></i></span>
                                         <div class="small text-secondary">
                                             Champion Samouraï <strong><?= htmlspecialchars($heroData['name']) ?></strong> : Indisponible (En cours de marche ou en aventure).
                                         </div>
                                     </div>
                                 <?php elseif ($heroData && (int)$heroData['health'] <= 0): ?>
                                     <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-4">
-                                        <span class="fs-4">💀</span>
+                                        <span class="fs-4"><i class="fa-solid fa-skull text-danger"></i></span>
                                         <div class="small">
                                             Champion Samouraï <strong><?= htmlspecialchars($heroData['name']) ?></strong> est tombé au combat. <a href="?page=hero" class="alert-link fw-bold">Accomplir le rituel de résurrection &rarr;</a>
                                         </div>
@@ -435,17 +435,17 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                 <div class="mb-4">
                                     <div class="d-flex align-items-center gap-2 mb-2">
                                         <span class="badge bg-secondary text-white rounded-pill px-2">4</span>
-                                        <h4 class="fw-bold text-dark m-0">🗾 Fief ou Oasis de Destination</h4>
+                                        <h4 class="fw-bold text-dark m-0"><i class="fa-solid fa-map-location-dot text-primary me-1"></i>Fief ou Oasis de Destination</h4>
                                     </div>
                                     <select id="targetSelect" class="form-select form-select-lg">
                                         <option value="">-- Sélectionner une destination féodale ou oasis --</option>
-                                        <optgroup label="🏯 Fiefs &amp; Domaines Provinciaux">
+                                        <optgroup label="Fiefs &amp; Domaines Provinciaux">
                                             <?php 
                                                 $targetFoundInList = false;
                                                 foreach ($knownPlanets as $kp): 
                                                     $isSelected = ($preselectedTargetType === 'planet' && $preselectedTarget === (int)$kp['id']);
                                                     if ($isSelected) $targetFoundInList = true;
-                                                    $protLabel = !empty($kp['is_protected']) ? ' [🔰 Protégé]' : ''; 
+                                                    $protLabel = !empty($kp['is_protected']) ? ' [Protégé]' : ''; 
                                             ?>
                                                 <option value="planet:<?= $kp['id'] ?>" data-protected="<?= !empty($kp['is_protected']) ? '1' : '0' ?>" <?= $isSelected ? 'selected' : '' ?>>
                                                     <?= htmlspecialchars($kp['name']) ?> [<?= $kp['coord_x'] ?> : <?= $kp['coord_y'] ?>]<?= $protLabel ?>
@@ -458,11 +458,11 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                                 if ($sp):
                                             ?>
                                                 <option value="planet:<?= $sp['id'] ?>" selected>
-                                                    <?= htmlspecialchars($sp['name']) ?> [<?= $sp['coord_x'] ?> : <?= $sp['coord_y'] ?>] <?= empty($sp['user_id']) ? '(Terre Vierge Libre ⛩️)' : '' ?>
+                                                    <?= htmlspecialchars($sp['name']) ?> [<?= $sp['coord_x'] ?> : <?= $sp['coord_y'] ?>] <?= empty($sp['user_id']) ? '(Terre Vierge Libre)' : '' ?>
                                                 </option>
                                             <?php endif; endif; ?>
                                         </optgroup>
-                                        <optgroup label="🌿 Oasis Naturelles Sauvages (Récoltes &amp; Animaux)">
+                                        <optgroup label="Oasis Naturelles Sauvages (Récoltes &amp; Animaux)">
                                             <?php foreach ($knownOases as $ko): 
                                                 $bText = '';
                                                 if ($ko['bonus_rice'] > 0) $bText .= "+{$ko['bonus_rice']}% Riz ";
@@ -471,7 +471,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                                 $statusOasis = !empty($ko['owner_planet_id']) ? ' [Occupée]' : ' [Sauvage]';
                                             ?>
                                                 <option value="oasis:<?= $ko['id'] ?>" <?= ($preselectedTargetType === 'oasis' && $preselectedTarget === (int)$ko['id']) ? 'selected' : '' ?>>
-                                                    🌿 <?= htmlspecialchars($ko['name']) ?> [<?= $ko['coord_x'] ?> : <?= $ko['coord_y'] ?>] (<?= trim($bText) ?>)<?= $statusOasis ?>
+                                                    <?= htmlspecialchars($ko['name']) ?> [<?= $ko['coord_x'] ?> : <?= $ko['coord_y'] ?>] (<?= trim($bText) ?>)<?= $statusOasis ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </optgroup>
@@ -482,14 +482,14 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                 <div class="mb-4">
                                     <div class="d-flex align-items-center gap-2 mb-2">
                                         <span class="badge bg-secondary text-white rounded-pill px-2">5</span>
-                                        <h4 class="fw-bold text-dark m-0">⚔️ Ordre Tactique de Marche</h4>
+                                        <h4 class="fw-bold text-dark m-0"><i class="fa-solid fa-khanda text-danger me-1"></i>Ordre Tactique de Marche</h4>
                                     </div>
                                     <div class="form-selectgroup form-selectgroup-pills row g-2">
                                         <div class="col-6 col-md-4">
                                             <label class="form-selectgroup-item w-100">
                                                 <input type="radio" name="mission_type" value="raid" class="form-selectgroup-input" <?= ($preselectedMission === 'raid') ? 'checked' : '' ?>>
                                                 <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2">
-                                                    <span>⚔️</span> Raid de Pillage
+                                                    <span><i class="fa-solid fa-khanda text-danger"></i></span> Raid de Pillage
                                                 </span>
                                             </label>
                                         </div>
@@ -497,7 +497,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                             <label class="form-selectgroup-item w-100">
                                                 <input type="radio" name="mission_type" value="attack" class="form-selectgroup-input" <?= ($preselectedMission === 'attack') ? 'checked' : '' ?>>
                                                 <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2">
-                                                    <span>💥</span> Assaut de Siège
+                                                    <span><i class="fa-solid fa-bomb text-danger"></i></span> Assaut de Siège
                                                 </span>
                                             </label>
                                         </div>
@@ -505,7 +505,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                             <label class="form-selectgroup-item w-100">
                                                 <input type="radio" name="mission_type" value="occupy" class="form-selectgroup-input" <?= ($preselectedMission === 'occupy') ? 'checked' : '' ?>>
                                                 <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2">
-                                                    <span>🚩</span> Occuper / Garnison
+                                                    <span><i class="fa-solid fa-flag text-danger"></i></span> Occuper / Garnison
                                                 </span>
                                             </label>
                                         </div>
@@ -513,7 +513,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                             <label class="form-selectgroup-item w-100">
                                                 <input type="radio" name="mission_type" value="spy" class="form-selectgroup-input" <?= ($preselectedMission === 'spy') ? 'checked' : '' ?>>
                                                 <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2">
-                                                    <span>🥷</span> Infiltration Shinobi
+                                                    <span><i class="fa-solid fa-user-ninja text-secondary"></i></span> Infiltration Shinobi
                                                 </span>
                                             </label>
                                         </div>
@@ -521,7 +521,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                             <label class="form-selectgroup-item w-100">
                                                 <input type="radio" name="mission_type" value="transport" class="form-selectgroup-input" <?= ($preselectedMission === 'transport') ? 'checked' : '' ?>>
                                                 <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2">
-                                                    <span>🐂</span> Convoi de Vivres
+                                                    <span><i class="fa-solid fa-boxes-stacked text-warning"></i></span> Convoi de Vivres
                                                 </span>
                                             </label>
                                         </div>
@@ -529,7 +529,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                             <label class="form-selectgroup-item w-100">
                                                 <input type="radio" name="mission_type" value="colonize" class="form-selectgroup-input" <?= ($preselectedMission === 'colonize') ? 'checked' : '' ?>>
                                                 <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2">
-                                                    <span>🏯</span> Fonder un Fief
+                                                    <span><i class="fa-solid fa-chess-rook text-primary"></i></span> Fonder un Fief
                                                 </span>
                                             </label>
                                         </div>
@@ -542,19 +542,19 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                     <div class="row g-2">
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <span class="input-group-text bg-white">🪵 Bois</span>
+                                                <span class="input-group-text bg-white"><i class="fa-solid fa-tree text-success me-1"></i>Bois</span>
                                                 <input type="number" id="cargo_metal" class="form-control text-center font-monospace" min="0" value="0">
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <span class="input-group-text bg-white">🪨 Pierre</span>
+                                                <span class="input-group-text bg-white"><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre</span>
                                                 <input type="number" id="cargo_crystal" class="form-control text-center font-monospace" min="0" value="0">
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <span class="input-group-text bg-white">🌾 Riz</span>
+                                                <span class="input-group-text bg-white"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz</span>
                                                 <input type="number" id="cargo_deuterium" class="form-control text-center font-monospace" min="0" value="0">
                                             </div>
                                         </div>
@@ -562,7 +562,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                 </div>
 
                                 <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
-                                    <span>🚩</span> Lancer l'Expédition Féodale
+                                    <span><i class="fa-solid fa-flag me-1"></i></span> Lancer l'Expédition Féodale
                                 </button>
                             </form>
                         <?php endif; ?>
@@ -574,13 +574,13 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
             <div class="col-lg-4">
                 <div class="card shadow-sm border mb-3">
                     <div class="card-header bg-light-subtle d-flex justify-content-between align-items-center">
-                        <h3 class="card-title fw-bold text-dark mb-0">🏇 Marches en Cours</h3>
+                        <h3 class="card-title fw-bold text-dark mb-0"><i class="fa-solid fa-horse text-danger me-1"></i>Marches en Cours</h3>
                         <span class="badge bg-secondary-lt"><?= count($activeMissions) ?> active(s)</span>
                     </div>
                     <div class="card-body p-0">
                         <?php if (empty($activeMissions)): ?>
                             <div class="text-center py-5 text-secondary p-3">
-                                <div class="fs-1 mb-2">🚩</div>
+                                <div class="fs-1 mb-2"><i class="fa-solid fa-flag text-danger"></i></div>
                                 <div class="fw-bold">Aucune troupe en marche</div>
                                 <div class="small">Toutes vos forces sont en garnison.</div>
                             </div>
@@ -592,12 +592,12 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                         $targetTime = $isOutbound ? $m['arrival_time'] : $m['return_time'];
                                         $fleetData = json_decode($m['fleet_data'], true) ?: [];
                                         $missionLabel = match($m['mission_type']) {
-                                            'raid' => '⚔️ RAID',
-                                            'attack' => '💥 SIÈGE',
-                                            'occupy' => '🚩 OCCUPATION',
-                                            'spy' => '🥷 SHINOBI',
-                                            'transport' => '🐂 CONVOI',
-                                            'colonize' => '🏯 EXPANSION',
+                                            'raid' => '<i class="fa-solid fa-khanda text-danger me-1"></i>RAID',
+                                            'attack' => '<i class="fa-solid fa-bomb text-danger me-1"></i>SIÈGE',
+                                            'occupy' => '<i class="fa-solid fa-flag text-danger me-1"></i>OCCUPATION',
+                                            'spy' => '<i class="fa-solid fa-user-ninja text-secondary me-1"></i>SHINOBI',
+                                            'transport' => '<i class="fa-solid fa-boxes-stacked text-warning me-1"></i>CONVOI',
+                                            'colonize' => '<i class="fa-solid fa-chess-rook text-primary me-1"></i>EXPANSION',
                                             default => strtoupper($m['mission_type'])
                                         };
                                     ?>
@@ -616,7 +616,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                         <div class="text-secondary small d-flex align-items-center gap-2 mt-1">
                                             <span>Effectif : <strong><?= array_sum($fleetData) ?></strong> unités</span>
                                             <?php if (!empty($m['has_hero'])): ?>
-                                                <span class="badge bg-warning-lt text-dark border border-warning" style="font-size:0.65rem;">🥋 Héros</span>
+                                                <span class="badge bg-warning-lt text-dark border border-warning" style="font-size:0.65rem;"><i class="fa-solid fa-user-ninja me-1"></i>Héros</span>
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -630,7 +630,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                 <div class="card bg-blue-lt border-blue-lt shadow-none">
                     <div class="card-body">
                         <div class="d-flex align-items-start gap-3">
-                            <span class="fs-1 text-primary">💡</span>
+                            <span class="fs-1 text-primary"><i class="fa-solid fa-lightbulb text-warning"></i></span>
                             <div>
                                 <h4 class="fw-bold text-primary mb-1">Stratégie Martiale Féodale</h4>
                                 <p class="small text-secondary mb-0">
@@ -652,7 +652,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
             <div class="card-header bg-light-subtle d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
                 <div>
                     <h3 class="card-title text-warning fw-bold d-flex align-items-center gap-2 m-0">
-                        <span>📜</span> Carnet de Raids Automatisé (Farm List Féodale)
+                        <span><i class="fa-solid fa-scroll text-primary"></i></span> Carnet de Raids Automatisé (Farm List Féodale)
                     </h3>
                     <div class="text-secondary small mt-1">
                         Enregistrez vos cibles favorites (oasis d'animaux, domaines inactifs) et déployez des vagues coordonnées en 1 clic.
@@ -660,11 +660,11 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="btn btn-warning fw-bold btn-sm shadow-sm" onclick="openCreateFarmListModal()">
-                        ➕ Nouvelle Liste de Raids
+                        <i class="fa-solid fa-plus me-1"></i>Nouvelle Liste de Raids
                     </button>
                     <?php if (!$isSealActive): ?>
                         <a href="/?page=privilege" class="btn btn-outline-warning btn-sm">
-                            👑 Sceau Impérial
+                            <i class="fa-solid fa-crown text-warning me-1"></i>Sceau Impérial
                         </a>
                     <?php endif; ?>
                 </div>
@@ -672,13 +672,13 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
             <div class="card-body">
                 <?php if (empty($allFarmLists)): ?>
                     <div class="text-center py-5">
-                        <div class="text-warning mb-2" style="font-size:3rem;">📜</div>
+                        <div class="text-warning mb-2" style="font-size:3rem;"><i class="fa-solid fa-scroll text-warning"></i></div>
                         <h3 class="fw-bold text-dark">Votre Carnet de Raids est vierge</h3>
                         <p class="text-secondary small mb-3">
                             Créez votre première liste de raids pour automatiser le pillage de vos cibles sans recomposer vos armées manuellement.
                         </p>
                         <button type="button" class="btn btn-warning fw-bold shadow-sm" onclick="openCreateFarmListModal()">
-                            ➕ Créer ma première Liste de Raids
+                            <i class="fa-solid fa-plus me-1"></i>Créer ma première Liste de Raids
                         </button>
                     </div>
                 <?php else: ?>
@@ -687,7 +687,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                             <div class="card border shadow-sm">
                                 <div class="card-header py-2 d-flex justify-content-between align-items-center flex-wrap gap-2 bg-body-tertiary">
                                     <div class="d-flex align-items-center gap-2">
-                                        <span class="fs-2">⚔️</span>
+                                        <span class="fs-2"><i class="fa-solid fa-khanda text-danger"></i></span>
                                         <div>
                                             <strong class="text-dark fs-3"><?= htmlspecialchars($fl['name']) ?></strong>
                                             <div class="text-secondary small">
@@ -700,13 +700,13 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                         <button type="button" class="btn btn-success fw-bold btn-sm shadow-sm" 
                                                 onclick="runFullFarmList(<?= $fl['id'] ?>, '<?= htmlspecialchars(addslashes($fl['name'])) ?>')"
                                                 <?= empty($fl['entries']) ? 'disabled' : '' ?>>
-                                            ⚡ Lancer la Tournée (<?= count($fl['entries']) ?> raids)
+                                            <i class="fa-solid fa-bolt text-warning me-1"></i>Lancer la Tournée (<?= count($fl['entries']) ?> raids)
                                         </button>
                                         <button type="button" class="btn btn-outline-primary btn-sm" onclick="openAddFarmEntryModal(<?= $fl['id'] ?>)">
-                                            ➕ Ajouter Cible
+                                            <i class="fa-solid fa-plus me-1"></i>Ajouter Cible
                                         </button>
                                         <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteFarmList(<?= $fl['id'] ?>)" title="Supprimer la liste">
-                                            🗑️
+                                            <i class="fa-solid fa-trash-can"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -725,7 +725,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                             <?php if (empty($fl['entries'])): ?>
                                                 <tr>
                                                     <td colspan="5" class="text-center py-4 text-secondary small">
-                                                        Aucune cible dans cette liste. Cliquez sur « ➕ Ajouter Cible » pour commencer votre carnet.
+                                                        Aucune cible dans cette liste. Cliquez sur « <i class="fa-solid fa-plus me-1"></i>Ajouter Cible » pour commencer votre carnet.
                                                     </td>
                                                 </tr>
                                             <?php else: ?>
@@ -733,7 +733,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                                     <tr>
                                                         <td>
                                                             <div class="fw-bold text-dark d-flex align-items-center gap-1">
-                                                                <span><?= $entry['target_type'] === 'oasis' ? '🌴' : '🏯' ?></span>
+                                                                <span><?= $entry['target_type'] === 'oasis' ? '<i class="fa-solid fa-seedling text-success"></i>' : '<i class="fa-solid fa-chess-rook text-danger"></i>' ?></span>
                                                                 <span><?= htmlspecialchars($entry['target_name']) ?></span>
                                                             </div>
                                                             <div class="text-secondary font-monospace small">
@@ -765,12 +765,12 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                                                 <button type="button" class="btn btn-sm btn-success fw-bold" 
                                                                         onclick="runFarmEntry(<?= $entry['id'] ?>, '<?= htmlspecialchars(addslashes($entry['target_name'])) ?>')"
                                                                         title="Lancer le raid maintenant">
-                                                                    ⚔️ Raid
+                                                                    <i class="fa-solid fa-khanda me-1"></i>Raid
                                                                 </button>
                                                                 <button type="button" class="btn btn-sm btn-outline-danger" 
                                                                         onclick="deleteFarmEntry(<?= $entry['id'] ?>)"
                                                                         title="Retirer de la liste">
-                                                                    ✕
+                                                                    <i class="fa-solid fa-xmark"></i>
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -794,13 +794,13 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
     <div class="tab-pane" id="tab-active-missions" role="tabpanel">
         <div class="card shadow-sm border">
             <div class="card-header bg-light-subtle d-flex justify-content-between align-items-center">
-                <h3 class="card-title fw-bold text-dark mb-0">🏇 Toutes les Marches et Expéditions Féodales en Cours</h3>
+                <h3 class="card-title fw-bold text-dark mb-0"><i class="fa-solid fa-horse text-danger me-1"></i>Toutes les Marches et Expéditions Féodales en Cours</h3>
                 <span class="badge bg-secondary-lt"><?= count($activeMissions) ?> active(s)</span>
             </div>
             <div class="card-body p-0">
                 <?php if (empty($activeMissions)): ?>
                     <div class="text-center py-5 text-secondary">
-                        <div class="fs-1 mb-2">🚩</div>
+                        <div class="fs-1 mb-2"><i class="fa-solid fa-flag text-danger"></i></div>
                         <h4 class="fw-bold text-dark">Aucune troupe en marche</h4>
                         <p class="small text-secondary mb-0">Toutes vos armées sont actuellement stationnées dans vos garnisons castrales.</p>
                     </div>
@@ -839,7 +839,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                         <div class="small">
                                             <strong><?= array_sum($fleetData) ?></strong> unités
                                             <?php if (!empty($m['has_hero'])): ?>
-                                                <span class="badge bg-warning text-dark ms-1">🥋 Héros</span>
+                                                <span class="badge bg-warning text-dark ms-1"><i class="fa-solid fa-user-ninja me-1"></i>Héros</span>
                                             <?php endif; ?>
                                         </div>
                                     </td>
@@ -870,7 +870,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
         <div class="modal-content">
             <div class="modal-header bg-warning-subtle">
                 <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                    <span>📜</span> Fonder une Nouvelle Liste de Raids
+                    <span><i class="fa-solid fa-scroll text-primary"></i></span> Fonder une Nouvelle Liste de Raids
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -893,7 +893,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                 <button type="button" class="btn btn-warning fw-bold shadow-sm" onclick="submitCreateFarmList()">
-                    📜 Établir la Liste
+                    <i class="fa-solid fa-scroll me-1"></i>Établir la Liste
                 </button>
             </div>
         </div>
@@ -908,7 +908,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
         <div class="modal-content">
             <div class="modal-header bg-warning-subtle">
                 <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                    <span>🎯</span> Ajouter une Cible de Raid au Carnet
+                    <span><i class="fa-solid fa-bullseye text-danger"></i></span> Ajouter une Cible de Raid au Carnet
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -918,14 +918,14 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                 <div class="mb-3">
                     <label class="form-label fw-bold">Sélectionner la Cible Féodale :</label>
                     <select class="form-select" id="farm_entry_target_select" onchange="onFarmTargetSelectChange()">
-                        <optgroup label="🌐 Cibles enregistrées sur vos cartes">
+                        <optgroup label="Cibles enregistrées sur vos cartes">
                             <?php foreach ($targetOptions as $to): ?>
                                 <option value="<?= $to['type'] ?>:<?= $to['id'] ?>:<?= htmlspecialchars($to['name']) ?>:<?= $to['x'] ?>:<?= $to['y'] ?>">
                                     <?= htmlspecialchars($to['name']) ?> [<?= $to['x'] ?>|<?= $to['y'] ?>] &bull; <?= $to['distance'] ?> cases
                                 </option>
                             <?php endforeach; ?>
                         </optgroup>
-                        <option value="custom">✏️ Saisie manuelle de coordonnées [X|Y]</option>
+                        <option value="custom">Saisie manuelle de coordonnées [X|Y]</option>
                     </select>
                 </div>
 
@@ -967,7 +967,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                         <?php foreach ($stationedShips as $s): ?>
                             <div class="d-flex align-items-center justify-content-between p-2 border rounded bg-light">
                                 <div class="d-flex align-items-center gap-2">
-                                    <span class="fs-3">🐎</span>
+                                    <span class="fs-3"><i class="fa-solid fa-horse text-danger"></i></span>
                                     <div>
                                         <strong class="small text-dark"><?= htmlspecialchars($s['name']) ?></strong>
                                         <div class="text-secondary" style="font-size:0.75rem;">Dispo en garnison : <?= $s['count'] ?></div>
@@ -986,7 +986,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                 <button type="button" class="btn btn-warning fw-bold shadow-sm" onclick="submitAddFarmEntry()">
-                    🎯 Enregistrer dans la Liste
+                    <i class="fa-solid fa-bullseye me-1"></i>Enregistrer dans la Liste
                 </button>
             </div>
         </div>
@@ -1009,7 +1009,7 @@ async function submitFleet() {
         const colonizerCnt = parseInt(document.getElementById('ship-colonizer')?.value || '0', 10);
         const colonyShipCnt = parseInt(document.getElementById('ship-colony_ship')?.value || '0', 10);
         if (colonizerCnt <= 0 && colonyShipCnt <= 0) {
-            showModalAlert("Une expédition de colonisation nécessite d'inclure au moins 1 Pionnier Féodal (Colon ⛩️). Si vous n'en avez pas encore en garnison, vous devez d'abord en former un au Donjon Tenshu (Niv. 10+) ou à l'Atelier de Siège.", "warning", "Pionnier Requis");
+            showModalAlert("Une expédition de colonisation nécessite d'inclure au moins 1 Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>). Si vous n'en avez pas encore en garnison, vous devez d'abord en former un au Donjon Tenshu (Niv. 10+) ou à l'Atelier de Siège.", "warning", "Pionnier Requis");
             return;
         }
     }

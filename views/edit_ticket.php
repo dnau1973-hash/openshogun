@@ -50,12 +50,12 @@ $csrfToken = Auth::csrfToken();
             <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
                 <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
                              color: #0891b2; background: rgba(8,145,178,0.1); padding: 2px 8px; border-radius: 4px;">
-                    🏛️ Assistance & Boîte à Idées
+                    <i class="fa-solid fa-headset me-1"></i>Assistance &amp; Boîte à Idées
                 </span>
                 <span style="color: var(--text-muted); font-size: 0.8rem;">• Modification de Demande #<?= $ticketId ?></span>
             </div>
             <h1 style="font-size: 1.6rem; margin: 0 0 0.5rem 0; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                <span>✏️</span> Modifier votre Demande
+                <i class="fa-solid fa-pen text-primary me-1"></i>Modifier votre Demande
             </h1>
             <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">
                 Vous pouvez modifier votre signalement ou suggestion tant qu'il n'a pas encore été pris en charge par l'administration.
@@ -72,7 +72,7 @@ $csrfToken = Auth::csrfToken();
     <!-- ===================== ACCÈS INTERDIT ===================== -->
     <div class="card" style="padding: 2.5rem; text-align: center; background: var(--bg-surface, #fdfbf7);
                               border: 1px solid #fee2e2; border-radius: 12px;">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+        <div style="font-size: 3rem; margin-bottom: 1rem;"><i class="fa-solid fa-lock text-secondary"></i></div>
         <h2 style="margin: 0 0 0.75rem 0; color: #dc2626;">Modification impossible</h2>
         <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 520px; margin: 0 auto 1.5rem auto;">
             <?= htmlspecialchars($accessError ?? "Ce ticket ne peut pas être modifié.") ?>
@@ -102,7 +102,7 @@ $csrfToken = Auth::csrfToken();
                     1. Nature de la demande :
                 </label>
                 <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <?php foreach (['bug' => ['🪲', 'Dysfonctionnement'], 'suggestion' => ['💡', 'Suggestion']] as $val => [$ico, $lbl]): ?>
+                    <?php foreach (['bug' => ['<i class="fa-solid fa-bug text-danger me-1"></i>', 'Dysfonctionnement'], 'suggestion' => ['<i class="fa-solid fa-lightbulb text-warning me-1"></i>', 'Suggestion']] as $val => [$ico, $lbl]): ?>
                     <label id="card-type-<?= $val ?>" style="flex: 1; min-width: 180px; border: 2px solid var(--border-color);
                            border-radius: 10px; padding: 1rem; cursor: pointer; transition: all .15s;
                            background: var(--bg-ink, #ede5d5);
@@ -141,10 +141,10 @@ $csrfToken = Auth::csrfToken();
                 </label>
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                     <?php foreach ([
-                        'low'      => ['🟢', 'Mineur',   '#16a34a'],
-                        'medium'   => ['🟡', 'Modéré',   '#ca8a04'],
-                        'high'     => ['🟠', 'Important','#ea580c'],
-                        'critical' => ['🔴', 'Critique', '#dc2626'],
+                        'low'      => ['<i class="fa-solid fa-circle text-success me-1"></i>', 'Mineur',   '#16a34a'],
+                        'medium'   => ['<i class="fa-solid fa-circle text-warning me-1"></i>', 'Modéré',   '#ca8a04'],
+                        'high'     => ['<i class="fa-solid fa-circle text-orange me-1"></i>', 'Important','#ea580c'],
+                        'critical' => ['<i class="fa-solid fa-circle text-danger me-1"></i>', 'Critique', '#dc2626'],
                     ] as $sval => [$sico, $slbl, $scol]): ?>
                     <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem;
                                   border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer;
@@ -188,7 +188,7 @@ $csrfToken = Auth::csrfToken();
                 <a href="?page=support&tab=history" class="btn btn-secondary">Annuler</a>
                 <button type="submit" id="editTicketSubmitBtn" class="btn btn-primary"
                         style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700;">
-                    <span>💾</span> Enregistrer les modifications
+                    <i class="fa-solid fa-floppy-disk me-1"></i>Enregistrer les modifications
                 </button>
             </div>
         </form>
@@ -259,18 +259,18 @@ async function submitEditTicket(event) {
     // Validation minimale côté client (texte brut sans balises)
     const plainText = editQuill.getText().trim();
     if (plainText.length < 10) {
-        showFeedback('error', "⚠️ La description doit comporter au moins 10 caractères.");
+        showFeedback('error', "La description doit comporter au moins 10 caractères.");
         return;
     }
     const title = document.getElementById('editTitle').value.trim();
     if (title.length < 4) {
-        showFeedback('error', "⚠️ Le titre doit comporter au moins 4 caractères.");
+        showFeedback('error', "Le titre doit comporter au moins 4 caractères.");
         return;
     }
 
     // Désactivation du bouton pendant la requête
     btn.disabled    = true;
-    btn.textContent = '⏳ Enregistrement…';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Enregistrement…';
 
     const formData = new FormData(document.getElementById('editTicketForm'));
     formData.set('action', 'update_ticket');
@@ -280,20 +280,20 @@ async function submitEditTicket(event) {
         const data = await res.json();
 
         if (data.success) {
-            showFeedback('success', "✅ " + (data.message || "Demande modifiée avec succès !"));
+            showFeedback('success', data.message || "Demande modifiée avec succès !");
             // Redirection différée vers l'historique
             setTimeout(() => {
                 window.location.href = '?page=support&tab=history';
             }, 1800);
         } else {
-            showFeedback('error', "❌ " + (data.error || "Une erreur est survenue."));
+            showFeedback('error', data.error || "Une erreur est survenue.");
             btn.disabled    = false;
-            btn.innerHTML   = '<span>💾</span> Enregistrer les modifications';
+            btn.innerHTML   = '<i class="fa-solid fa-floppy-disk me-1"></i>Enregistrer les modifications';
         }
     } catch (err) {
-        showFeedback('error', "❌ Erreur réseau. Vérifiez votre connexion et réessayez.");
+        showFeedback('error', "Erreur réseau. Vérifiez votre connexion et réessayez.");
         btn.disabled  = false;
-        btn.innerHTML = '<span>💾</span> Enregistrer les modifications';
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i>Enregistrer les modifications';
     }
 }
 

@@ -32,7 +32,7 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
             </div>
             <div>
                 <h2 class="card-title" style="margin:0; font-size:1.3rem; display:flex; align-items:center; gap:0.6rem; color:var(--text-main);">
-                    <span>🥋 Dojo Militaire & Caserne de Fief</span>
+                    <span><i class="fa-solid fa-user-ninja text-danger me-1"></i>Dojo Militaire & Caserne de Fief</span>
                     <span style="font-size:0.8rem; font-weight:700; padding:2px 8px; border-radius:12px; background:var(--red-soft, rgba(194,37,43,0.1)); border:1px solid var(--border-highlight, #c2252b); color:var(--red-primary, #c2252b);">
                         Niveau <?= $barracksLvl ?>
                     </span>
@@ -46,19 +46,19 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
         <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
             <?php if ($famineUpkeep['famine_enabled']): ?>
                 <span style="font-size:0.8rem; font-weight:700; color:<?= !empty($planet['famine_active']) ? '#b91c1c' : '#854d0e' ?>; background:<?= !empty($planet['famine_active']) ? '#fee2e2' : '#fef3c7' ?>; border:1px solid <?= !empty($planet['famine_active']) ? '#ef4444' : '#f59e0b' ?>; padding:0.35rem 0.75rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem;">
-                    <?= !empty($planet['famine_active']) ? '💀 Famine Active (-' . $famineUpkeep['famine_rate'] . '%/h)' : '🍚 Vivres Élite : ' . $famineUpkeep['flour_consumption_per_hour'] . ' farine/h' ?>
+                    <?= !empty($planet['famine_active']) ? '<i class="fa-solid fa-skull text-danger me-1"></i>Famine Active (-' . $famineUpkeep['famine_rate'] . '%/h)' : '<i class="fa-solid fa-bowl-rice text-warning me-1"></i>Vivres Élite : ' . $famineUpkeep['flour_consumption_per_hour'] . ' farine/h' ?>
                 </span>
             <?php endif; ?>
 
             <?php if ($activeFeast && $activeFeast['feast_type'] === 'warriors'): ?>
                 <span style="font-size:0.8rem; font-weight:700; color:#854d0e; background:#fef9c3; border:1px solid #facc15; padding:0.35rem 0.75rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem; box-shadow:0 2px 6px rgba(234,179,8,0.2);">
-                    🍶 Banquet des Guerriers Actif &bull; Entraînement -<?= 10 + (int)$activeFeast['tenshu_level'] ?>%
+                    <i class="fa-solid fa-wine-bottle text-danger me-1"></i>Banquet des Guerriers Actif &bull; Entraînement -<?= 10 + (int)$activeFeast['tenshu_level'] ?>%
                 </span>
             <?php endif; ?>
 
             <?php if ($user['faction'] === 'vorash'): ?>
                 <span style="font-size:0.8rem; font-weight:700; color:#991b1b; background:rgba(153,27,27,0.1); border:1px solid rgba(153,27,27,0.3); padding:0.35rem 0.75rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem;">
-                    ⚡ Bonus Takeda : Vitesse d'entraînement +20%
+                    <i class="fa-solid fa-bolt text-warning me-1"></i>Bonus Takeda : Vitesse d'entraînement +20%
                 </span>
             <?php endif; ?>
         </div>
@@ -69,23 +69,23 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
             <div class="alert alert-danger mb-3 p-3 border-danger shadow-sm" style="border-left: 5px solid #dc2626; background: #fef2f2; border-radius:8px;">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <div class="d-flex align-items-center gap-3">
-                        <span class="fs-1">💀</span>
+                        <span class="fs-1"><i class="fa-solid fa-skull text-danger"></i></span>
                         <div>
-                            <h4 class="m-0 fw-bold text-danger">⚠️ Alerte Stratégique : Famine Féodale au Dojo !</h4>
+                            <h4 class="m-0 fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Alerte Stratégique : Famine Féodale au Dojo !</h4>
                             <div class="text-dark small mt-1">
-                                Vos stocks de Farine de Riz 🍚 sont réduits à néant. Sans vivres d'élite, vos <strong><?= $famineUpkeep['elite_units_count'] ?> soldats d'élite</strong> meurent de faim ou désertent (<strong>-<?= $famineUpkeep['famine_rate'] ?>% par heure</strong>).
+                                Vos stocks de Farine de Riz <i class="fa-solid fa-bowl-rice text-warning"></i> sont réduits à néant. Sans vivres d'élite, vos <strong><?= $famineUpkeep['elite_units_count'] ?> soldats d'élite</strong> meurent de faim ou désertent (<strong>-<?= $famineUpkeep['famine_rate'] ?>% par heure</strong>).
                             </div>
                         </div>
                     </div>
                     <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-sm btn-danger fw-bold" style="padding:0.4rem 0.9rem;">
-                        🍚 Moudre de la Farine à la Meunerie &rarr;
+                        <i class="fa-solid fa-bowl-rice me-1"></i>Moudre de la Farine à la Meunerie &rarr;
                     </a>
                 </div>
             </div>
         <?php endif; ?>
         <?php if ($barracksLvl < 1): ?>
             <div style="text-align:center; padding:2.5rem; background:rgba(239,68,68,0.06); border:1px dashed var(--red-primary, #c2252b); border-radius:10px;">
-                <div style="font-size:2.5rem; margin-bottom:0.5rem;">🏯</div>
+                <div style="font-size:2.5rem; margin-bottom:0.5rem;"><i class="fa-solid fa-chess-rook text-secondary"></i></div>
                 <h3 style="color:var(--red-primary, #c2252b); margin-bottom:0.5rem;">Dojo Militaire non construit</h3>
                 <p style="color:var(--text-muted); margin-bottom:1.25rem; max-width:500px; margin-left:auto; margin-right:auto;">
                     Vous devez bâtir un Dojo Militaire dans votre cité pour forger des armes et entraîner les guerriers de votre domaine.
@@ -100,7 +100,7 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                 <div class="card mb-4 shadow-sm" style="border-top: 4px solid var(--red-primary, #c2252b); background:var(--bg-surface, #ffffff); border-radius:10px;">
                     <div class="card-header py-3 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:linear-gradient(to right, rgba(194,37,43,0.06), transparent);">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="fs-2">⏳</span>
+                            <span class="fs-2"><i class="fa-solid fa-hourglass-half text-info"></i></span>
                             <div>
                                 <h3 class="card-title m-0 fw-bold" style="font-size:1.05rem; color:var(--text-main);">
                                     Régiments en cours de formation au Dojo
@@ -155,7 +155,7 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                                     <div class="p-2 rounded mb-2" style="background: rgba(194, 37, 43, 0.04); border: 1px solid rgba(194, 37, 43, 0.15);">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="small text-dark fw-bold d-flex align-items-center gap-1">
-                                                <span>⚡</span>
+                                                <span><i class="fa-solid fa-bolt text-warning"></i></span>
                                                 <span>Guerrier en cours de formation (<span class="queue-current-unit-num"><?= $q['current_unit_number'] ?></span>/<?= $q['total_count'] ?>) :</span>
                                                 <strong class="queue-unit-countdown font-monospace text-danger ms-1">--:--</strong>
                                             </span>
@@ -175,7 +175,7 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                                     <div class="p-2 rounded" style="background: rgba(32, 107, 196, 0.04); border: 1px solid rgba(32, 107, 196, 0.15);">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="small text-dark fw-bold d-flex align-items-center gap-1">
-                                                <span>📦</span>
+                                                <span><i class="fa-solid fa-boxes-stacked text-warning"></i></span>
                                                 <span>Progression globale du lot :</span>
                                                 <span class="text-secondary fw-normal queue-lot-status ms-1">
                                                     <strong><span class="queue-lot-ready"><?= $q['completed_count'] ?></span></strong> sur <strong><?= $q['total_count'] ?></strong> guerriers mobilisés
@@ -195,8 +195,8 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
 
                                     <!-- Note au fil de l'eau -->
                                     <div class="d-flex align-items-center justify-content-between mt-2 pt-1 text-secondary" style="font-size: 0.78rem;">
-                                        <span>💧 <em>Mobilisation au fil de l'eau : chaque guerrier achevé rejoint directement votre garnison sans attendre la fin du lot de <?= $q['total_count'] ?>.</em></span>
-                                        <span class="badge bg-success-lt fw-semibold">✔ Déploiement instantané</span>
+                                        <span><i class="fa-solid fa-droplet text-info me-1"></i><em>Mobilisation au fil de l'eau : chaque guerrier achevé rejoint directement votre garnison sans attendre la fin du lot de <?= $q['total_count'] ?>.</em></span>
+                                        <span class="badge bg-success-lt fw-semibold"><i class="fa-solid fa-check text-success me-1"></i>Déploiement instantané</span>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -250,7 +250,7 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
 
                             <!-- Badge Effectif Garnison -->
                             <div style="position:absolute; top:10px; right:46px; background:rgba(253,251,247,0.95); backdrop-filter:blur(6px); border:1px solid rgba(22,101,52,0.5); border-radius:6px; padding:3px 10px; font-size:0.75rem; font-weight:800; color:#166534; box-shadow:0 2px 6px rgba(0,0,0,0.12);">
-                                🛡️ Garnison : <?= number_format($u['stationed_count']) ?>
+                                <i class="fa-solid fa-shield-halved text-success me-1"></i>Garnison : <?= number_format($u['stationed_count']) ?>
                             </div>
 
                             <!-- Badge Transparence IA Prompts -->
@@ -258,7 +258,7 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
 
                             <!-- Bouton Agrandir Loupe -->
                             <div style="position:absolute; bottom:8px; right:8px; background:rgba(28,25,23,0.75); backdrop-filter:blur(4px); color:#ffffff; border-radius:4px; padding:3px 8px; font-size:0.7rem; display:flex; align-items:center; gap:4px; border:1px solid rgba(255,255,255,0.2);">
-                                🔍 Vue détaillée
+                                <i class="fa-solid fa-magnifying-glass me-1"></i>Vue détaillée
                             </div>
                         </div>
 
@@ -282,24 +282,24 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
 
                             <!-- Caractéristiques Militaire Travian-Style -->
                             <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.5rem; font-size:0.75rem; background:var(--bg-ink, #ede5d5); padding:0.6rem; border-radius:6px; margin-bottom:0.85rem; border:1px solid var(--border-color); color:var(--text-main);">
-                                <div title="Puissance d'attaque en bataille">⚔️ Attaque : <strong style="color:var(--red-primary);"><?= $u['attack'] ?></strong></div>
-                                <div title="Défense contre l'infanterie">🛡️ Df Infan : <strong><?= $u['def_infantry'] ?></strong></div>
-                                <div title="Défense contre la cavalerie">🐎 Df Caval : <strong><?= $u['def_mech'] ?></strong></div>
-                                <div title="Vitesse de marche sur la carte">🏃 Vitesse : <strong><?= $u['speed'] ?></strong></div>
-                                <div title="Capacité d'emport de ressources pillées">🎒 Fret : <strong><?= $u['cargo_capacity'] ?></strong></div>
-                                <div title="Temps d'entraînement unitaire">⏱️ Vitesse : <strong><?= $u['effective_train_time'] ?>s</strong></div>
+                                <div title="Puissance d'attaque en bataille"><i class="fa-solid fa-khanda text-danger me-1"></i>Attaque : <strong style="color:var(--red-primary);"><?= $u['attack'] ?></strong></div>
+                                <div title="Défense contre l'infanterie"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Df Infan : <strong><?= $u['def_infantry'] ?></strong></div>
+                                <div title="Défense contre la cavalerie"><i class="fa-solid fa-horse text-danger me-1"></i>Df Caval : <strong><?= $u['def_mech'] ?></strong></div>
+                                <div title="Vitesse de marche sur la carte"><i class="fa-solid fa-person-running text-info me-1"></i>Vitesse : <strong><?= $u['speed'] ?></strong></div>
+                                <div title="Capacité d'emport de ressources pillées"><i class="fa-solid fa-sack-dollar text-warning me-1"></i>Fret : <strong><?= $u['cargo_capacity'] ?></strong></div>
+                                <div title="Temps d'entraînement unitaire"><i class="fa-solid fa-stopwatch text-info me-1"></i>Vitesse : <strong><?= $u['effective_train_time'] ?>s</strong></div>
                             </div>
 
                             <!-- Coût de Recrutement -->
                             <div class="cost-row" style="margin:0.25rem 0 0.85rem 0; display:flex; gap:0.75rem; font-size:0.85rem; font-weight:600; flex-wrap:wrap;">
-                                <div class="cost-item" title="Bois de Cèdre"><span style="color:var(--res-metal);">🪵</span> <?= number_format($u['metal_cost']) ?></div>
-                                <div class="cost-item" title="Pierre de Taille"><span style="color:var(--res-crystal);">🪨</span> <?= number_format($u['crystal_cost']) ?></div>
-                                <div class="cost-item" title="Riz Impérial"><span style="color:var(--res-deut);">🌾</span> <?= number_format($u['deuterium_cost']) ?></div>
+                                <div class="cost-item" title="Bois de Cèdre"><span style="color:var(--res-metal);"><i class="fa-solid fa-tree text-success"></i></span> <?= number_format($u['metal_cost']) ?></div>
+                                <div class="cost-item" title="Pierre de Taille"><span style="color:var(--res-crystal);"><i class="fa-solid fa-mountain text-secondary"></i></span> <?= number_format($u['crystal_cost']) ?></div>
+                                <div class="cost-item" title="Riz Impérial"><span style="color:var(--res-deut);"><i class="fa-solid fa-wheat-awn text-warning"></i></span> <?= number_format($u['deuterium_cost']) ?></div>
                                 <?php if (!empty($u['rice_flour_cost'])):
                                     $hasEnoughFlour = (($planet['rice_flour'] ?? 0) >= $u['rice_flour_cost']);
                                 ?>
                                     <div class="cost-item <?= !$hasEnoughFlour ? 'text-danger' : '' ?>" title="Farine de Riz (Rations de campagne)">
-                                        <span style="color:#0284c7;">🍚</span> <?= number_format($u['rice_flour_cost']) ?>
+                                        <span style="color:#0284c7;"><i class="fa-solid fa-bowl-rice text-warning"></i></span> <?= number_format($u['rice_flour_cost']) ?>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -320,13 +320,13 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                                                    style="width:75px; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-main); padding:0.45rem; border-radius:6px; text-align:center; font-weight:bold; font-size:0.9rem;">
                                             <button class="btn btn-primary" style="flex:1; font-size:0.85rem; font-weight:700; padding:0.45rem 0.75rem; display:flex; align-items:center; justify-content:center; gap:0.4rem;"
                                                     onclick="trainTroops('<?= $u['code'] ?>')">
-                                                <span>🥋</span> Entraîner
+                                                <span><i class="fa-solid fa-user-ninja me-1"></i></span> Entraîner
                                             </button>
                                         </div>
                                     </div>
                                 <?php else: ?>
                                     <div style="text-align:center; padding:0.6rem; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:6px; font-size:0.8rem; color:var(--red-primary, #c2252b); font-weight:700;">
-                                        🔒 Requiert Dojo Niveau <?= $u['required_barracks_level'] ?>
+                                        <i class="fa-solid fa-lock text-muted me-1"></i>Requiert Dojo Niveau <?= $u['required_barracks_level'] ?>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -424,7 +424,7 @@ async function trainTroops(unitCode) {
     }
 }
 
-// ⏱️ Mise à jour en temps réel de la Double Barre de Progression (Unité en cours & Lot Global)
+// Mise à jour en temps réel de la Double Barre de Progression (Unité en cours & Lot Global)
 function formatTime(seconds) {
     if (seconds <= 0) return "00:00";
     const h = Math.floor(seconds / 3600);

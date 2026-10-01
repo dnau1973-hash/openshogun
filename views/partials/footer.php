@@ -15,9 +15,9 @@
             
             <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">Ressources requises :</div>
             <div class="cost-row">
-                <div class="cost-item"><span style="color:var(--res-metal);">🪵</span> <span id="modalCostMetal">0</span></div>
-                <div class="cost-item"><span style="color:var(--res-crystal);">🪨</span> <span id="modalCostCrystal">0</span></div>
-                <div class="cost-item"><span style="color:var(--res-deut);">🌾</span> <span id="modalCostDeut">0</span></div>
+                <div class="cost-item"><span style="color:var(--res-metal);"><i class="fa-solid fa-tree text-success me-1"></i></span> <span id="modalCostMetal">0</span></div>
+                <div class="cost-item"><span style="color:var(--res-crystal);"><i class="fa-solid fa-mountain text-secondary me-1"></i></span> <span id="modalCostCrystal">0</span></div>
+                <div class="cost-item"><span style="color:var(--res-deut);"><i class="fa-solid fa-wheat-awn text-warning me-1"></i></span> <span id="modalCostDeut">0</span></div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin:1rem 0; font-size:0.9rem;">
@@ -42,7 +42,7 @@
         </div>
         <div class="card-body">
             <div class="alert-modal-content">
-                <span class="alert-modal-icon" id="customAlertIcon">ℹ️</span>
+                <span class="alert-modal-icon" id="customAlertIcon"><i class="fa-solid fa-circle-info text-primary"></i></span>
                 <p class="alert-modal-text" id="customAlertText"></p>
             </div>
             <div class="alert-modal-actions" id="customAlertActions">
@@ -68,7 +68,7 @@
         <!-- En-tête Profil -->
         <div class="modal-header">
             <div class="d-flex align-items-center gap-3">
-                <span id="profAvatar" style="font-size:2.5rem; filter:drop-shadow(0 2px 6px rgba(185,28,28,0.3));">🏯</span>
+                <span id="profAvatar" style="font-size:2.5rem; filter:drop-shadow(0 2px 6px rgba(185,28,28,0.3));"><i class="fa-solid fa-chess-rook text-danger"></i></span>
                 <div>
                     <div class="d-flex align-items-center gap-2">
                         <h2 id="profUsername" style="font-size:1.35rem; font-weight:800; color:#1c1917; margin:0;">Daimyō</h2>
@@ -92,7 +92,7 @@
             <div class="mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h3 style="color:#b45309; font-size:1rem; font-weight:800; margin:0; display:flex; align-items:center; gap:0.4rem;">
-                        <span>🎖️</span> Vitrine des Médailles d'Honneur
+                        <i class="fa-solid fa-medal text-warning me-1"></i> Vitrine des Médailles d'Honneur
                     </h3>
                     <span id="profMedalsCount" style="font-size:0.78rem; color:var(--text-muted); font-weight:600;">0 distinction(s)</span>
                 </div>
@@ -105,10 +105,10 @@
             <div class="mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h3 style="color:#b91c1c; font-size:1rem; font-weight:800; margin:0; display:flex; align-items:center; gap:0.4rem;">
-                        <span>📜</span> Devise & Chronique du Daimyō
+                        <i class="fa-solid fa-scroll text-danger me-1"></i> Devise &amp; Chronique du Daimyō
                     </h3>
                     <button id="profEditBioBtn" onclick="toggleBioEdit()" class="btn btn-secondary" style="display:none; font-size:0.75rem; padding:0.25rem 0.65rem; border-color:#b91c1c; color:#b91c1c;">
-                        ✏️ Modifier ma devise
+                        <i class="fa-solid fa-pen-to-square me-1"></i> Modifier ma devise
                     </button>
                 </div>
                 <div id="profBioView" style="background:#ffffff; border:1px solid var(--border-color); border-left:4px solid #b91c1c; padding:0.85rem 1rem; border-radius:0 8px 8px 0; color:#1c1917; font-size:0.9rem; line-height:1.6; font-style:italic; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
@@ -146,7 +146,7 @@
             <!-- Territoire & Fiefs Recensés -->
             <div>
                 <h3 style="color:#1c1917; font-size:1rem; font-weight:800; margin:0 0 0.75rem 0; display:flex; align-items:center; gap:0.4rem;">
-                    <span>🏯</span> Fiefs & Domaines Provinciaux
+                    <i class="fa-solid fa-chess-rook text-primary me-1"></i> Fiefs &amp; Domaines Provinciaux
                 </h3>
                 <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px; background:#ffffff;">
                     <table class="table" style="margin:0;">
@@ -182,10 +182,10 @@
         <!-- En-tête -->
         <div class="modal-header">
             <div class="d-flex align-items-center gap-3">
-                <span style="font-size:2rem; filter:drop-shadow(0 2px 6px rgba(185,28,28,0.3));">🎯</span>
+                <span style="font-size:2rem; filter:drop-shadow(0 2px 6px rgba(185,28,28,0.3));"><i class="fa-solid fa-bullseye text-danger"></i></span>
                 <div>
-                    <h2 class="modal-title">
-                        Codex des Quêtes & Didacticiel du Daimyō
+                    <h2 class="modal-title font-game">
+                        Codex des Quêtes &amp; Didacticiel du Daimyō
                     </h2>
                     <div class="d-flex align-items-center gap-3 mt-1" style="font-size:0.85rem; color:var(--text-muted);">
                         <span id="questModalProgressText" style="font-weight:700; color:#1c1917;">0/12 Quêtes Accomplies</span> &bull; 
@@ -212,25 +212,25 @@
         <!-- Pied de page -->
         <div class="modal-footer">
             <div style="font-size:0.85rem; color:var(--text-muted);">
-                🥋 <em>Guide de l'art de la guerre enseigné par Katsumoto, Maître d'Armes</em>
+                <i class="fa-solid fa-khanda text-danger me-1"></i> <em>Guide de l'art de la guerre enseigné par Katsumoto, Maître d'Armes</em>
             </div>
             <button class="btn btn-secondary" onclick="closeQuestModal()">Fermer le Codex</button>
         </div>
     </div>
 </div>
 
-<!-- 🏯 Modale de la Tour de Guet (Registre Détaillé des Raids et Mouvements Tactiques) -->
+<!-- Modale de la Tour de Guet (Registre Détaillé des Raids et Mouvements Tactiques) -->
 <div class="modal-overlay" id="watchtowerModal" style="display:none;" onclick="if(event.target===this)closeWatchtowerModal()">
     <div class="modal-card modal-card-lg watchtower-modal-card">
         <!-- En-tête -->
         <div class="modal-header">
             <div class="d-flex align-items-center gap-3">
-                <span style="font-size:2rem; filter:drop-shadow(0 2px 5px rgba(185,28,28,0.4));">🏯</span>
+                <span style="font-size:2rem; filter:drop-shadow(0 2px 5px rgba(185,28,28,0.4));"><i class="fa-solid fa-chess-rook text-danger"></i></span>
                 <div>
-                    <h2 style="font-size:1.25rem; font-weight:800; color:#1c1917; margin:0; display:flex; align-items:center; gap:0.5rem;">
+                    <h2 style="font-size:1.25rem; font-weight:800; color:#1c1917; margin:0; display:flex; align-items:center; gap:0.5rem;" class="font-game">
                         <span>Tour de Guet &bull; Registre Stratégique</span>
                         <?php if (!empty($incomingHostile)): ?>
-                            <span class="badge-threat-pulse">🚨 Incursions en Approche</span>
+                            <span class="badge-threat-pulse"><i class="fa-solid fa-triangle-exclamation me-1"></i> Incursions en Approche</span>
                         <?php endif; ?>
                     </h2>
                     <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">
@@ -245,7 +245,7 @@
         <div class="modal-body" style="max-height:600px; overflow-y:auto; padding:1.25rem;">
             <?php if (($watchtowerLevel ?? 0) < 1): ?>
                 <div class="alert alert-warning mb-3 d-flex align-items-center gap-2">
-                    <span class="fs-2">🏮</span>
+                    <span class="fs-2"><i class="fa-solid fa-torii-gate text-warning"></i></span>
                     <div class="small">
                         <strong>Tour de Guet non érigée :</strong> Sans Tour de Guet Yagura (Niveau 1 minimum) sur ce fief, vos vigies ne peuvent pas repérer les armées ennemies ni détecter les infiltrations de Shinobis à l'approche de vos murailles. Seules vos propres expéditions sont répertoriées.
                     </div>
@@ -254,21 +254,21 @@
             <!-- Barre KPI Synthétique -->
             <div class="watchtower-kpi-bar">
                 <div class="watchtower-kpi-item <?= !empty($incomingHostile) ? 'threat' : '' ?>">
-                    <span class="kpi-icon">🚨</span>
+                    <span class="kpi-icon"><i class="fa-solid fa-triangle-exclamation text-danger"></i></span>
                     <div class="kpi-data">
                         <span class="kpi-num"><?= count($incomingHostile ?? []) ?></span>
                         <span class="kpi-label">Incursions Armées</span>
                     </div>
                 </div>
                 <div class="watchtower-kpi-item <?= !empty($incomingSpy) ? 'spy' : '' ?>">
-                    <span class="kpi-icon">🥷</span>
+                    <span class="kpi-icon"><i class="fa-solid fa-user-ninja text-info"></i></span>
                     <div class="kpi-data">
                         <span class="kpi-num"><?= count($incomingSpy ?? []) ?></span>
                         <span class="kpi-label">Missions Shinobi</span>
                     </div>
                 </div>
                 <div class="watchtower-kpi-item info">
-                    <span class="kpi-icon">🐎</span>
+                    <span class="kpi-icon"><i class="fa-solid fa-horse text-primary"></i></span>
                     <div class="kpi-data">
                         <span class="kpi-num"><?= count($outgoingMissions ?? []) ?></span>
                         <span class="kpi-label">Expéditions du Clan</span>
@@ -277,10 +277,10 @@
             </div>
 
             <!-- SECTION 1 : INCURSIONS & RAIDS ENNEMIS EN APPROCHE -->
-            <?php if (!empty($incomingHostile)): ?>
+            <            <?php if (!empty($incomingHostile)): ?>
                 <div class="watchtower-section">
                     <div class="watchtower-section-title threat">
-                        <span>⚔️ Incursions et Raids Ennemis en Approche (<?= count($incomingHostile) ?>)</span>
+                        <span><i class="fa-solid fa-khanda text-danger me-1"></i> Incursions et Raids Ennemis en Approche (<?= count($incomingHostile) ?>)</span>
                     </div>
                     <div class="watchtower-cards-list">
                         <?php foreach ($incomingHostile as $m): ?>
@@ -292,7 +292,7 @@
                             <div class="watchtower-mission-card threat">
                                 <div class="wt-card-header">
                                     <div class="wt-card-title">
-                                        <span class="wt-type-badge threat">🚨 <?= $missionLabel ?></span>
+                                        <span class="wt-type-badge threat"><i class="fa-solid fa-triangle-exclamation me-1"></i> <?= $missionLabel ?></span>
                                         <span class="wt-impact-target">Cible : <strong><?= htmlspecialchars($m['target_planet_name'] ?? $planet['name']) ?></strong> [<?= $m['target_coord_x'] ?>|<?= $m['target_coord_y'] ?>]</span>
                                     </div>
                                     <div class="wt-card-timer">
@@ -303,7 +303,7 @@
                                 <div class="wt-card-body">
                                     <div class="wt-detail-grid">
                                         <div class="wt-detail-col">
-                                            <div class="wt-col-label">👤 Aggresseur Détecté :</div>
+                                            <div class="wt-col-label"><i class="fa-solid fa-user me-1"></i> Aggresseur Détecté :</div>
                                             <div class="wt-col-val">
                                                 <strong><?= htmlspecialchars($m['sender_username'] ?? 'Daimyō Inconnu') ?></strong>
                                                 <?php if (!empty($m['sender_faction'])): ?>
@@ -316,11 +316,11 @@
                                         </div>
 
                                         <div class="wt-detail-col">
-                                            <div class="wt-col-label">⚔️ Forces Repérées :</div>
+                                            <div class="wt-col-label"><i class="fa-solid fa-khanda me-1"></i> Forces Repérées :</div>
                                             <div class="wt-col-val">
                                                 <strong>~<?= number_format($totalWarriors) ?></strong> combattants & engins
                                                 <?php if (!empty($m['has_hero'])): ?>
-                                                    <span class="wt-hero-tag">🥋 Samouraï Héros</span>
+                                                    <span class="wt-hero-tag"><i class="fa-solid fa-award me-1"></i> Samouraï Héros</span>
                                                 <?php endif; ?>
                                             </div>
                                             <?php if (!empty($fleetData)): ?>
@@ -328,7 +328,7 @@
                                                     <?php foreach ($fleetData as $uCode => $uCount): ?>
                                                         <?php 
                                                             $uName = $unitsMap[$uCode]['name'] ?? ($shipsMap[$uCode]['name'] ?? $uCode);
-                                                            $uIco = $unitsMap[$uCode]['icon'] ?? '🛡️';
+                                                            $uIco = $unitsMap[$uCode]['icon'] ?? '<i class="fa-solid fa-shield-halved"></i>';
                                                         ?>
                                                         <span class="wt-unit-badge" title="<?= htmlspecialchars($uName) ?>">
                                                             <?= $uIco ?> <?= $uCount ?> <?= htmlspecialchars($uName) ?>
@@ -349,14 +349,14 @@
             <?php if (!empty($incomingSpy)): ?>
                 <div class="watchtower-section">
                     <div class="watchtower-section-title spy">
-                        <span>🥷 Infiltrations Shinobi & Espionnage Détectés (<?= count($incomingSpy) ?>)</span>
+                        <span><i class="fa-solid fa-user-ninja text-info me-1"></i> Infiltrations Shinobi &amp; Espionnage Détectés (<?= count($incomingSpy) ?>)</span>
                     </div>
                     <div class="watchtower-cards-list">
                         <?php foreach ($incomingSpy as $m): ?>
                             <div class="watchtower-mission-card spy">
                                 <div class="wt-card-header">
                                     <div class="wt-card-title">
-                                        <span class="wt-type-badge spy">🥷 RECONNAISSANCE FURTIVE</span>
+                                        <span class="wt-type-badge spy"><i class="fa-solid fa-user-ninja me-1"></i> RECONNAISSANCE FURTIVE</span>
                                         <span class="wt-impact-target">Cible : <strong><?= htmlspecialchars($m['target_planet_name'] ?? $planet['name']) ?></strong></span>
                                     </div>
                                     <div class="wt-card-timer">
@@ -367,7 +367,7 @@
                                 <div class="wt-card-body">
                                     <div class="wt-detail-grid">
                                         <div class="wt-detail-col">
-                                            <div class="wt-col-label">👤 Commanditaire :</div>
+                                            <div class="wt-col-label"><i class="fa-solid fa-user me-1"></i> Commanditaire :</div>
                                             <div class="wt-col-val">
                                                 <strong><?= htmlspecialchars($m['sender_username'] ?? 'Ombre Inconnue') ?></strong>
                                             </div>
@@ -376,7 +376,7 @@
                                             </div>
                                         </div>
                                         <div class="wt-detail-col">
-                                            <div class="wt-col-label">🔍 Rapport Vigies :</div>
+                                            <div class="wt-col-label"><i class="fa-solid fa-magnifying-glass me-1"></i> Rapport Vigies :</div>
                                             <div class="wt-col-val" style="color:var(--text-muted); font-size:0.85rem;">
                                                 Des éclaireurs et espions shinobi tentent de sonder vos entrepôts et garnisons.
                                             </div>
@@ -393,7 +393,7 @@
             <?php if (!empty($outgoingMissions)): ?>
                 <div class="watchtower-section">
                     <div class="watchtower-section-title info">
-                        <span>🐎 Expéditions et Marches de Vos Troupes (<?= count($outgoingMissions) ?>)</span>
+                        <span><i class="fa-solid fa-horse text-primary me-1"></i> Expéditions et Marches de Vos Troupes (<?= count($outgoingMissions) ?>)</span>
                     </div>
                     <div class="watchtower-cards-list">
                         <?php foreach ($outgoingMissions as $m): ?>
@@ -415,7 +415,7 @@
                             <div class="watchtower-mission-card info">
                                 <div class="wt-card-header">
                                     <div class="wt-card-title">
-                                        <span class="wt-type-badge info"><?= $isOutbound ? '↗️ ' : '↙️ ' ?><?= $missionTypeLabel ?></span>
+                                        <span class="wt-type-badge info"><i class="fa-solid <?= $isOutbound ? 'fa-arrow-up-right-from-square' : 'fa-arrow-down-left-and-up-right-to-center' ?> me-1"></i><?= $missionTypeLabel ?></span>
                                         <span class="wt-impact-target">
                                             <?= $isOutbound ? 'Vers : ' : 'Retour vers : ' ?>
                                             <strong><?= htmlspecialchars($m['target_planet_name'] ?? 'Fief') ?></strong> [<?= $m['target_coord_x'] ?>|<?= $m['target_coord_y'] ?>]
@@ -429,17 +429,17 @@
                                 <div class="wt-card-body">
                                     <div class="wt-detail-grid">
                                         <div class="wt-detail-col">
-                                            <div class="wt-col-label">📍 Itinéraire :</div>
+                                            <div class="wt-col-label"><i class="fa-solid fa-location-dot me-1"></i> Itinéraire :</div>
                                             <div class="wt-col-sub">
                                                 <?= htmlspecialchars($m['source_planet_name'] ?? 'Votre Fief') ?> &rarr; <?= htmlspecialchars($m['target_planet_name'] ?? 'Destination') ?>
                                             </div>
                                         </div>
                                         <div class="wt-detail-col">
-                                            <div class="wt-col-label">⚔️ Effectifs mobilisés :</div>
+                                            <div class="wt-col-label"><i class="fa-solid fa-khanda me-1"></i> Effectifs mobilisés :</div>
                                             <div class="wt-col-val">
                                                 <strong><?= number_format($totalWarriors) ?></strong> combattants
                                                 <?php if (!empty($m['has_hero'])): ?>
-                                                    <span class="wt-hero-tag">🥋 Samouraï Héros</span>
+                                                    <span class="wt-hero-tag"><i class="fa-solid fa-award me-1"></i> Samouraï Héros</span>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
@@ -453,7 +453,7 @@
 
             <?php if (empty($incomingHostile) && empty($incomingSpy) && empty($outgoingMissions)): ?>
                 <div style="text-align:center; padding:3rem 1.5rem; background:#faf8f5; border:1px dashed var(--border-color); border-radius:8px;">
-                    <div style="font-size:3rem; margin-bottom:1rem;">⛩️</div>
+                    <div style="font-size:3rem; margin-bottom:1rem;"><i class="fa-solid fa-torii-gate text-muted"></i></div>
                     <h3 style="color:#1c1917; font-weight:800; font-size:1.1rem; margin-bottom:0.4rem;">Paix sur vos Terres</h3>
                     <p style="color:var(--text-muted); font-size:0.9rem; max-width:450px; margin:0 auto;">
                         Les vigies et éclaireurs ne signalent aucun mouvement militaire en approche ni armée en marche. Votre domaine est pour l'heure en sécurité.
@@ -466,10 +466,10 @@
         <!-- Pied de page de la modale -->
         <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
             <div style="font-size:0.8rem; color:var(--text-muted);">
-                💡 <em>Astuce : Renforcez votre Muraille d'Enceinte pour accroître la valeur défensive de vos troupes.</em>
+                <i class="fa-solid fa-lightbulb text-warning me-1"></i> <em>Astuce : Renforcez votre Muraille d'Enceinte pour accroître la valeur défensive de vos troupes.</em>
             </div>
             <div style="display:flex; gap:0.5rem;">
-                <a href="?page=fleet" class="btn btn-primary" style="font-size:0.85rem; padding:0.4rem 1rem;">🏇 Gérer les Troupes</a>
+                <a href="?page=fleet" class="btn btn-primary" style="font-size:0.85rem; padding:0.4rem 1rem;"><i class="fa-solid fa-horse me-1"></i> Gérer les Troupes</a>
                 <button class="btn btn-secondary" onclick="closeWatchtowerModal()" style="font-size:0.85rem; padding:0.4rem 1rem;">Fermer</button>
             </div>
         </div>
@@ -481,19 +481,19 @@
         <!-- Liens rapides de navigation et d'assistance -->
         <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2" style="font-weight: 600;">
             <a href="?page=docs" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
-                <span>📖</span> Règles du jeu
+                <i class="fa-solid fa-book-open me-1"></i> Règles du jeu
             </a>
             <span class="text-muted opacity-50">&bull;</span>
             <a href="?page=support" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
-                <span>📮</span> Support &amp; Aide
+                <i class="fa-solid fa-headset me-1"></i> Support &amp; Aide
             </a>
             <span class="text-muted opacity-50">&bull;</span>
             <a href="?page=changelog" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
-                <span>📜</span> Changelog
+                <i class="fa-solid fa-scroll me-1"></i> Changelog
             </a>
             <span class="text-muted opacity-50">&bull;</span>
             <a href="?page=pedagogy" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
-                <span>🎓</span> Atelier Pédagogique
+                <i class="fa-solid fa-graduation-cap me-1"></i> Atelier Pédagogique
             </a>            
         </div>
         <p class="m-0"><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> &copy; <?= date('Y') ?> &mdash; Jeu de stratégie féodale japonaise par navigateur inspiré de Travian.</p>
@@ -665,9 +665,9 @@ function renderQuestModal() {
             let borderStyle = isSelected ? 'border: 2px solid #b91c1c; background: #fee2e2; box-shadow: 0 2px 8px rgba(185,28,28,0.12);' : 'border: 1px solid var(--border-color); background: #ffffff;';
 
             if (isClaimed) {
-                statusBadge = '<span class="badge badge-success">✓ Perçue</span>';
+                statusBadge = '<span class="badge badge-success"><i class="fa-solid fa-check me-1"></i>Perçue</span>';
             } else if (isClaimable) {
-                statusBadge = '<span class="badge badge-warning">✨ Prête !</span>';
+                statusBadge = '<span class="badge badge-warning"><i class="fa-solid fa-star me-1"></i>Prête !</span>';
                 if (!isSelected) {
                     borderStyle = 'border: 1px solid #15803d; background: #dcfce7;';
                 }
@@ -704,13 +704,13 @@ function renderQuestModal() {
         if (isClaimed) {
             actionButtonHtml = `
                 <div style="background:#dcfce7; border:1px solid #86efac; color:#15803d; padding:0.75rem 1.25rem; border-radius:8px; font-weight:700; display:flex; align-items:center; gap:0.6rem; justify-content:center;">
-                    <span>✓</span> Récompense perçue avec honneur le ${currentQ.claimed_at ? currentQ.claimed_at.substring(0, 16) : 'récemment'}.
+                    <i class="fa-solid fa-check me-1"></i> Récompense perçue avec honneur le ${currentQ.claimed_at ? currentQ.claimed_at.substring(0, 16) : 'récemment'}.
                 </div>
             `;
         } else if (isClaimable) {
             actionButtonHtml = `
                 <button type="button" onclick="claimQuestReward('${currentQ.key}')" class="btn btn-primary pulse-btn" style="width:100%; background:linear-gradient(135deg, #15803d 0%, #166534 100%); border-color:#14532d; color:#fff; font-weight:800; font-size:1.05rem; padding:0.85rem; border-radius:8px; cursor:pointer; box-shadow:0 4px 20px rgba(21,128,61,0.35);">
-                    ✨ Réclamer ma Récompense Immédiatement
+                    <i class="fa-solid fa-star me-1"></i> Réclamer ma Récompense Immédiatement
                 </button>
             `;
         } else {
@@ -731,19 +731,19 @@ function renderQuestModal() {
 
         let rewardsHtml = '';
         if (currentQ.rewards.metal) {
-            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:var(--res-metal,#78350f); font-size:1.2rem;">🪵</span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Bois de Cèdre</div><div style="font-size:0.95rem; font-weight:800; color:#1c1917;">+${Number(currentQ.rewards.metal).toLocaleString()}</div></div>`;
+            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:var(--res-metal,#78350f); font-size:1.2rem;"><i class="fa-solid fa-tree text-success"></i></span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Bois de Cèdre</div><div style="font-size:0.95rem; font-weight:800; color:#1c1917;">+${Number(currentQ.rewards.metal).toLocaleString()}</div></div>`;
         }
         if (currentQ.rewards.crystal) {
-            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:var(--res-crystal,#334155); font-size:1.2rem;">🪨</span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Pierre de Taille</div><div style="font-size:0.95rem; font-weight:800; color:#1c1917;">+${Number(currentQ.rewards.crystal).toLocaleString()}</div></div>`;
+            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:var(--res-crystal,#334155); font-size:1.2rem;"><i class="fa-solid fa-mountain text-secondary"></i></span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Pierre de Taille</div><div style="font-size:0.95rem; font-weight:800; color:#1c1917;">+${Number(currentQ.rewards.crystal).toLocaleString()}</div></div>`;
         }
         if (currentQ.rewards.deuterium) {
-            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:var(--res-deut,#b45309); font-size:1.2rem;">🌾</span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Riz Impérial</div><div style="font-size:0.95rem; font-weight:800; color:#1c1917;">+${Number(currentQ.rewards.deuterium).toLocaleString()}</div></div>`;
+            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:var(--res-deut,#b45309); font-size:1.2rem;"><i class="fa-solid fa-wheat-awn text-warning"></i></span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Riz Impérial</div><div style="font-size:0.95rem; font-weight:800; color:#1c1917;">+${Number(currentQ.rewards.deuterium).toLocaleString()}</div></div>`;
         }
         if (currentQ.rewards.points) {
-            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:#b45309; font-size:1.2rem;">⛩️</span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Honneur</div><div style="font-size:0.95rem; font-weight:800; color:#b45309;">+${Number(currentQ.rewards.points).toLocaleString()} pts</div></div>`;
+            rewardsHtml += `<div style="background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:95px; box-shadow:0 1px 3px rgba(60,45,30,0.04);"><span style="color:#b45309; font-size:1.2rem;"><i class="fa-solid fa-torii-gate text-danger"></i></span><div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Honneur</div><div style="font-size:0.95rem; font-weight:800; color:#b45309;">+${Number(currentQ.rewards.points).toLocaleString()} pts</div></div>`;
         }
         if (currentQ.rewards.bonus_units) {
-            rewardsHtml += `<div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:115px;"><span style="color:#b91c1c; font-size:1.2rem;">⚔️</span><div style="font-size:0.72rem; color:#b91c1c; font-weight:700;">Garnison</div><div style="font-size:0.95rem; font-weight:800; color:#b91c1c;">+${currentQ.rewards.bonus_units} Guerriers</div></div>`;
+            rewardsHtml += `<div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:115px;"><span style="color:#b91c1c; font-size:1.2rem;"><i class="fa-solid fa-khanda text-danger"></i></span><div style="font-size:0.72rem; color:#b91c1c; font-weight:700;">Garnison</div><div style="font-size:0.95rem; font-weight:800; color:#b91c1c;">+${currentQ.rewards.bonus_units} Guerriers</div></div>`;
         }
 
         detailContainer.innerHTML = `
@@ -757,14 +757,14 @@ function renderQuestModal() {
                         </h2>
                     </div>
                     <span class="badge ${isClaimed ? 'badge-success' : (isClaimable ? 'badge-warning' : '')}" style="${!isClaimed && !isClaimable ? 'background:#f5f5f4; color:#57534e; border-color:#e7e5e4;' : ''}; font-size:0.85rem; padding:0.35rem 0.75rem;">
-                        ${isClaimed ? '✓ Accompli' : (isClaimable ? '✨ Prêt à réclamer' : 'En cours')}
+                        ${isClaimed ? '<i class="fa-solid fa-check me-1"></i>Accompli' : (isClaimable ? '<i class="fa-solid fa-star me-1"></i>Prêt à réclamer' : 'En cours')}
                     </span>
                 </div>
 
                 <!-- Dialogue du Conseiller Katsumoto -->
                 <div style="background:#fdfbf7; border:1px solid var(--border-color); border-left:4px solid #b91c1c; border-radius:0 8px 8px 0; padding:1.1rem; margin-bottom:1.25rem; box-shadow:0 1px 3px rgba(60,45,30,0.04);">
                     <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
-                        <span style="font-size:1.2rem;">🥋</span>
+                        <span style="font-size:1.2rem;"><i class="fa-solid fa-khanda text-danger"></i></span>
                         <strong style="color:#b45309; font-size:0.9rem;">${escapeHtmlModal(currentQ.mentor_name)} :</strong>
                     </div>
                     <p style="margin:0; font-size:0.92rem; color:#292524; line-height:1.6; font-style:italic;">
@@ -777,10 +777,10 @@ function renderQuestModal() {
                     <div class="text-muted small fw-bold text-uppercase mb-1">Objectif à atteindre :</div>
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                         <span class="fs-3 fw-bold ${isClaimable || isClaimed ? 'text-success' : ''}">
-                            ${isClaimable || isClaimed ? '✓ ' : '🎯 '} ${escapeHtmlModal(currentQ.objective)}
+                            ${isClaimable || isClaimed ? '<i class="fa-solid fa-check text-success me-1"></i>' : '<i class="fa-solid fa-bullseye text-danger me-1"></i>'} ${escapeHtmlModal(currentQ.objective)}
                         </span>
                         <span class="badge bg-white border text-muted">
-                            📍 ${escapeHtmlModal(currentQ.target_slot_hint || 'Fief')}
+                            <i class="fa-solid fa-location-dot me-1"></i> ${escapeHtmlModal(currentQ.target_slot_hint || 'Fief')}
                         </span>
                     </div>
                 </div>
@@ -823,11 +823,11 @@ async function claimQuestReward(questKey) {
             }
 
             let rewardDetailMsg = '';
-            if (data.rewards.metal) rewardDetailMsg += `+${Number(data.rewards.metal).toLocaleString()} 🪵 Bois, `;
-            if (data.rewards.crystal) rewardDetailMsg += `+${Number(data.rewards.crystal).toLocaleString()} 🪨 Pierre, `;
-            if (data.rewards.deuterium) rewardDetailMsg += `+${Number(data.rewards.deuterium).toLocaleString()} 🌾 Riz, `;
-            if (data.rewards.points) rewardDetailMsg += `+${data.rewards.points} ⛩️ Honneur, `;
-            if (data.bonus_units) rewardDetailMsg += `+${data.bonus_units} ⚔️ ${data.rewarded_unit_name}, `;
+            if (data.rewards.metal) rewardDetailMsg += `+${Number(data.rewards.metal).toLocaleString()} Bois, `;
+            if (data.rewards.crystal) rewardDetailMsg += `+${Number(data.rewards.crystal).toLocaleString()} Pierre, `;
+            if (data.rewards.deuterium) rewardDetailMsg += `+${Number(data.rewards.deuterium).toLocaleString()} Riz, `;
+            if (data.rewards.points) rewardDetailMsg += `+${data.rewards.points} Honneur, `;
+            if (data.bonus_units) rewardDetailMsg += `+${data.bonus_units} ${data.rewarded_unit_name}, `;
             rewardDetailMsg = rewardDetailMsg.replace(/, $/, '');
 
             showModalAlert("Récompense de Daimyō Perçue !", `${data.message}\n\nVos coffres reçoivent : ${rewardDetailMsg}`, "success");

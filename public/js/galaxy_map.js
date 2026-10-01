@@ -51,20 +51,20 @@ class GalaxyMapController {
         this.container.innerHTML = `
             <div class="galaxy-hud-overlay">
                 <div class="hud-coords-badge">
-                    <span id="hudQuadrantDisplay">🧭 Provinces</span>
+                    <span id="hudQuadrantDisplay"><i class="fa-solid fa-compass me-1"></i>Provinces</span>
                     <strong id="hudCoordsDisplay">[${this.centerX} : ${this.centerY}]</strong>
                 </div>
 
                 <div class="hud-quadrants-nav">
-                    <button class="hud-btn" id="btnQuadrantNO" title="Sauter vers les Terres du Nord-Ouest [- / +]">↖️ N-O</button>
-                    <button class="hud-btn" id="btnQuadrantNE" title="Sauter vers les Terres du Nord-Est [+ / +]">↗️ N-E</button>
-                    <button class="hud-btn" id="btnQuadrantSO" title="Sauter vers les Terres du Sud-Ouest [- / -]">↙️ S-O</button>
-                    <button class="hud-btn" id="btnQuadrantSE" title="Sauter vers les Terres du Sud-Est [+ / -]">↘️ S-E</button>
-                    <button class="hud-btn" id="btnQuadrantKyoto" title="Sauter vers la Capitale Impériale [0 : 0]">⛩️ Centre</button>
+                    <button class="hud-btn" id="btnQuadrantNO" title="Sauter vers les Terres du Nord-Ouest [- / +]">N-O</button>
+                    <button class="hud-btn" id="btnQuadrantNE" title="Sauter vers les Terres du Nord-Est [+ / +]">N-E</button>
+                    <button class="hud-btn" id="btnQuadrantSO" title="Sauter vers les Terres du Sud-Ouest [- / -]">S-O</button>
+                    <button class="hud-btn" id="btnQuadrantSE" title="Sauter vers les Terres du Sud-Est [+ / -]">S-E</button>
+                    <button class="hud-btn" id="btnQuadrantKyoto" title="Sauter vers la Capitale Impériale [0 : 0]"><i class="fa-solid fa-torii-gate me-1"></i>Centre</button>
                 </div>
 
                 <div class="hud-controls-group">
-                    <button class="hud-btn" id="btnRecenterColony" title="Centrer sur mon fief">🏯 Mon Fief</button>
+                    <button class="hud-btn" id="btnRecenterColony" title="Centrer sur mon fief"><i class="fa-solid fa-chess-rook me-1"></i>Mon Fief</button>
                     <button class="hud-btn" id="btnZoomIn" title="Zoom avant">+</button>
                     <button class="hud-btn" id="btnZoomOut" title="Zoom arrière">&minus;</button>
                 </div>
@@ -75,7 +75,7 @@ class GalaxyMapController {
                     <!-- Les tuiles seront générées dynamiquement -->
                 </div>
                 <div class="galaxy-drag-hint">
-                    <span>🖐️ Glissez (Drag & Drop) pour explorer le Japon féodal</span>
+                    <span><i class="fa-solid fa-hand me-1"></i>Glissez (Drag &amp; Drop) pour explorer le Japon féodal</span>
                 </div>
             </div>
         `;
@@ -305,13 +305,13 @@ class GalaxyMapController {
                     } else if (planet.is_oasis) {
                         let resBadges = '';
                         if (planet.bonus_rice > 0) {
-                            resBadges += `<span class="tile-res-badge res-rice" title="Riz +${planet.bonus_rice}%">🌾+${planet.bonus_rice}%</span>`;
+                            resBadges += `<span class="tile-res-badge res-rice" title="Riz +${planet.bonus_rice}%"><i class="fa-solid fa-wheat-awn me-1"></i>+${planet.bonus_rice}%</span>`;
                         }
                         if (planet.bonus_wood > 0) {
-                            resBadges += `<span class="tile-res-badge res-wood" title="Bois +${planet.bonus_wood}%">🪵+${planet.bonus_wood}%</span>`;
+                            resBadges += `<span class="tile-res-badge res-wood" title="Bois +${planet.bonus_wood}%"><i class="fa-solid fa-tree me-1"></i>+${planet.bonus_wood}%</span>`;
                         }
                         if (planet.bonus_stone > 0) {
-                            resBadges += `<span class="tile-res-badge res-stone" title="Pierre +${planet.bonus_stone}%">🪨+${planet.bonus_stone}%</span>`;
+                            resBadges += `<span class="tile-res-badge res-stone" title="Pierre +${planet.bonus_stone}%"><i class="fa-solid fa-mountain me-1"></i>+${planet.bonus_stone}%</span>`;
                         }
 
                         const ownerHtml = (planet.is_occupied && planet.owner_planet_name)
@@ -327,7 +327,7 @@ class GalaxyMapController {
                     } else if (planet.user_id) {
                         const ownerName = planet.planet_name || planet.username || 'Fief';
                         const protectedBadge = (planet.is_protected == 1)
-                            ? `<span class="tile-authentic-badge" style="background:rgba(22,163,74,0.9); color:#fff; border-color:#86efac;" title="Fief sous immunité féodale débutant">🔰 PROTÉGÉ</span>` 
+                            ? `<span class="tile-authentic-badge" style="background:rgba(22,163,74,0.9); color:#fff; border-color:#86efac;" title="Fief sous immunité féodale débutant"><i class="fa-solid fa-shield-halved me-1"></i>PROTÉGÉ</span>` 
                             : '';
                         contentHtml = `
                             ${protectedBadge}
@@ -347,7 +347,7 @@ class GalaxyMapController {
                     } else if (planet.is_oasis) {
                         tileTooltip = `${planet.bonus_label || 'Oasis'} ${planet.is_occupied ? '(Occupée par ' + (planet.owner_planet_name || 'Fief') + ')' : '(Sauvage)'}`;
                     } else {
-                        tileTooltip = (planet.planet_name || 'Fief') + (planet.is_protected == 1 ? ' [🔰 Immunité active]' : '');
+                        tileTooltip = (planet.planet_name || 'Fief') + (planet.is_protected == 1 ? ' [Immunité active]' : '');
                     }
                 }
 

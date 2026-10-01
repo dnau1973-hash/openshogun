@@ -142,9 +142,9 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
             default => 'bg-secondary-lt text-secondary'
         };
         $medalLabel = match ($pos) {
-            1 => '🥇 1',
-            2 => '🥈 2',
-            3 => '🥉 3',
+            1 => '<i class="fa-solid fa-medal text-warning me-1"></i>1',
+            2 => '<i class="fa-solid fa-medal text-secondary me-1"></i>2',
+            3 => '<i class="fa-solid fa-medal text-amber me-1"></i>3',
             default => '#' . $pos
         };
         $fInfo = FACTIONS[$row['faction']] ?? FACTIONS['terran'];
@@ -206,23 +206,23 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
 }
 </style>
 
-<!-- 🏆 EN-TÊTE DE PAGE TABLER -->
+<!-- EN-TÊTE DE PAGE TABLER -->
 <div class="page-header d-print-none mb-3">
     <div class="container-fluid px-0">
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle text-secondary">Honneur &amp; Renommée de l'Archipel</div>
                 <h2 class="page-title d-flex align-items-center gap-2 font-game">
-                    <span class="text-warning">🏆</span> Palmarès &amp; Gloire du Japon
+                    <i class="fa-solid fa-trophy text-warning"></i> Palmarès &amp; Gloire du Japon
                 </h2>
             </div>
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
                     <a href="?page=alliance" class="btn btn-outline-danger d-none d-sm-inline-flex align-items-center gap-1">
-                        <span>🎌</span> Pavillon des Alliances
+                        <i class="fa-solid fa-flag text-danger me-1"></i> Pavillon des Alliances
                     </a>
                     <button type="button" onclick="window.location.reload()" class="btn btn-white d-inline-flex align-items-center gap-1 shadow-sm" title="Actualiser le classement">
-                        <span>🔄</span> Actualiser
+                        <i class="fa-solid fa-rotate me-1"></i> Actualiser
                     </button>
                 </div>
             </div>
@@ -231,7 +231,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
 </div>
 
 <div class="container-fluid px-0">
-    <!-- 🗂️ BARRE DE NAVIGATION TABLER PAR ONGLETS SÉPARÉS -->
+    <!-- BARRE DE NAVIGATION TABLER PAR ONGLETS SÉPARÉS -->
     <div class="card mb-3 bg-white border shadow-sm ranking-navbar-card">
         <div class="card-header border-bottom p-2 bg-white d-flex flex-wrap align-items-center justify-content-between gap-2">
             <ul class="nav nav-pills flex-wrap gap-1 align-items-center m-0 p-0 border-0" id="rankingTabsNav" role="tablist">
@@ -243,7 +243,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                        onclick="switchRankingTab('general'); return false;"
                        role="tab" 
                        aria-selected="<?= ($tab === 'general') ? 'true' : 'false' ?>">
-                        <span class="me-1">🏆</span> Classement Général
+                        <i class="fa-solid fa-trophy text-warning me-1"></i> Classement Général
                         <span class="badge bg-primary-lt ms-2"><?= number_format($totalPlayers) ?></span>
                     </a>
                 </li>
@@ -255,7 +255,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                        onclick="switchRankingTab('alliances'); return false;"
                        role="tab" 
                        aria-selected="<?= ($tab === 'alliances') ? 'true' : 'false' ?>">
-                        <span class="me-1">🎌</span> Alliances Féodales
+                        <i class="fa-solid fa-flag text-danger me-1"></i> Alliances Féodales
                         <span class="badge bg-danger-lt ms-2"><?= number_format($totalAlliances) ?></span>
                     </a>
                 </li>
@@ -267,7 +267,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                        onclick="switchRankingTab('honor'); return false;"
                        role="tab" 
                        aria-selected="<?= ($tab === 'honor') ? 'true' : 'false' ?>">
-                        <span class="me-1">🎖️</span> Tableau d'Honneur
+                        <i class="fa-solid fa-medal text-warning me-1"></i> Tableau d'Honneur
                         <span class="badge bg-warning-lt ms-2">Semaine <?= $currentWeek ?></span>
                     </a>
                 </li>
@@ -334,11 +334,11 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                                 <tr class="<?= $isCurrent ? 'table-warning' : '' ?>" style="cursor: pointer;" onclick="if (!event.target.closest('button, a')) openPlayerProfileModal(<?= (int)$p['id'] ?>)" title="Consulter la fiche du Daimyō : <?= htmlspecialchars($p['username']) ?>">
                                     <td class="text-center">
                                         <?php if ($curRank === 1): ?>
-                                            <span class="badge bg-warning text-dark fw-bold fs-4 px-2 py-1 shadow-sm">🥇 #1</span>
+                                            <span class="badge bg-warning text-dark fw-bold fs-4 px-2 py-1 shadow-sm"><i class="fa-solid fa-medal me-1"></i>#1</span>
                                         <?php elseif ($curRank === 2): ?>
-                                            <span class="badge bg-secondary text-white fw-bold fs-4 px-2 py-1 shadow-sm">🥈 #2</span>
+                                            <span class="badge bg-secondary text-white fw-bold fs-4 px-2 py-1 shadow-sm"><i class="fa-solid fa-medal me-1"></i>#2</span>
                                         <?php elseif ($curRank === 3): ?>
-                                            <span class="badge bg-amber text-white fw-bold fs-4 px-2 py-1 shadow-sm">🥉 #3</span>
+                                            <span class="badge bg-amber text-white fw-bold fs-4 px-2 py-1 shadow-sm"><i class="fa-solid fa-medal me-1"></i>#3</span>
                                         <?php else: ?>
                                             <span class="text-secondary fw-bold fs-4">#<?= $curRank ?></span>
                                         <?php endif; ?>
@@ -348,14 +348,14 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                                             <a href="/?page=poster&id=<?= (int)$p['id'] ?>" 
                                                class="text-reset fw-bold text-decoration-none d-inline-flex align-items-center gap-1 text-truncate" 
                                                title="Consulter l'Affiche Féodale du Daimyō : <?= htmlspecialchars($p['username']) ?>">
-                                                <span class="flex-shrink-0">👤</span>
+                                                <i class="fa-solid fa-user text-secondary flex-shrink-0"></i>
                                                 <span class="text-truncate"><?= htmlspecialchars($p['username']) ?></span>
                                             </a>
                                             <?php if (Auth::isUserProtected($p)): ?>
-                                                <span class="badge bg-success-lt flex-shrink-0" title="Immunité Féodale des Nouveaux Joueurs Active">🔰 Trêve</span>
+                                                <span class="badge bg-success-lt flex-shrink-0" title="Immunité Féodale des Nouveaux Joueurs Active"><i class="fa-solid fa-shield-halved text-success me-1"></i>Trêve</span>
                                             <?php endif; ?>
                                             <?php if (!empty($p['is_bot'])): ?>
-                                                <span class="badge bg-secondary-lt flex-shrink-0" title="Daimyō IA Autonome">🤖 IA</span>
+                                                <span class="badge bg-secondary-lt flex-shrink-0" title="Daimyō IA Autonome"><i class="fa-solid fa-robot me-1"></i>IA</span>
                                             <?php endif; ?>
                                             <?php if ($isCurrent): ?>
                                                 <span class="badge bg-red text-white fw-bold flex-shrink-0">Vous</span>
@@ -389,13 +389,13 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                                             <a href="/?page=poster&id=<?= (int)$p['id'] ?>" 
                                                class="btn btn-sm btn-white d-inline-flex align-items-center gap-1 shadow-sm px-2" 
                                                title="Affiche Féodale du Daimyō">
-                                                <span>👤</span> <span class="d-none d-md-inline">Affiche</span>
+                                                <i class="fa-solid fa-id-card me-1 text-primary"></i> <span class="d-none d-md-inline">Affiche</span>
                                             </a>
                                             <?php if (!$isCurrent): ?>
                                                 <a href="?page=messages&tab=compose&to=<?= urlencode($p['username']) ?>" 
                                                    class="btn btn-sm btn-white d-inline-flex align-items-center gap-1 shadow-sm px-2" 
                                                    title="Envoyer une missive">
-                                                    <span>✉️</span>
+                                                    <i class="fa-solid fa-envelope"></i>
                                                 </a>
                                             <?php endif; ?>
                                         </div>
@@ -432,7 +432,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                 </div>
                 <div>
                     <a href="/?page=alliance" class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1 shadow-sm">
-                        <span>🏛️</span> Pavillon Diplomatique
+                        <i class="fa-solid fa-building-columns me-1"></i> Pavillon Diplomatique
                     </a>
                 </div>
             </div>
@@ -464,12 +464,12 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                             <tr>
                                 <td colspan="7" class="p-0">
                                     <div class="empty py-5">
-                                        <div class="empty-icon fs-1 text-secondary">🎌</div>
+                                        <div class="empty-icon fs-1 text-secondary"><i class="fa-solid fa-flag text-muted"></i></div>
                                         <p class="empty-title">Aucune alliance n'a encore été proclamée</p>
                                         <p class="empty-subtitle text-secondary">Rendez-vous au Pavillon Diplomatique pour fonder la première ligue souveraine du Japon !</p>
                                         <div class="empty-action">
                                             <a href="/?page=alliance" class="btn btn-primary d-inline-flex align-items-center gap-1">
-                                                <span>🏛️</span> Fonder une Alliance
+                                                <i class="fa-solid fa-building-columns me-1"></i> Fonder une Alliance
                                             </a>
                                         </div>
                                     </div>
@@ -484,11 +484,11 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                                 <tr class="<?= $isMyAlly ? 'table-warning' : '' ?>">
                                     <td class="text-center">
                                         <?php if ($curAllyRank === 1): ?>
-                                            <span class="badge bg-warning text-dark fw-bold fs-4 px-2 py-1 shadow-sm">🥇 #1</span>
+                                            <span class="badge bg-warning text-dark fw-bold fs-4 px-2 py-1 shadow-sm"><i class="fa-solid fa-medal me-1"></i>#1</span>
                                         <?php elseif ($curAllyRank === 2): ?>
-                                            <span class="badge bg-secondary text-white fw-bold fs-4 px-2 py-1 shadow-sm">🥈 #2</span>
+                                            <span class="badge bg-secondary text-white fw-bold fs-4 px-2 py-1 shadow-sm"><i class="fa-solid fa-medal me-1"></i>#2</span>
                                         <?php elseif ($curAllyRank === 3): ?>
-                                            <span class="badge bg-amber text-white fw-bold fs-4 px-2 py-1 shadow-sm">🥉 #3</span>
+                                            <span class="badge bg-amber text-white fw-bold fs-4 px-2 py-1 shadow-sm"><i class="fa-solid fa-medal me-1"></i>#3</span>
                                         <?php else: ?>
                                             <span class="text-secondary fw-bold fs-4">#<?= $curAllyRank ?></span>
                                         <?php endif; ?>
@@ -508,7 +508,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                                         <a href="/?page=poster&id=<?= (int)$a['leader_id'] ?>" 
                                            class="text-reset text-decoration-none d-inline-flex align-items-center gap-1 fw-semibold text-truncate"
                                            title="Chef : <?= htmlspecialchars($a['leader_name']) ?>">
-                                            <span class="flex-shrink-0">👑</span>
+                                            <i class="fa-solid fa-crown text-warning flex-shrink-0"></i>
                                             <span class="text-truncate"><?= htmlspecialchars($a['leader_name']) ?></span>
                                         </a>
                                     </td>
@@ -561,17 +561,17 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                 <div class="row align-items-center g-3">
                     <div class="col">
                         <h3 class="card-title text-warning fw-bold d-flex align-items-center gap-2 mb-1 fs-2">
-                            <span>🎖️</span> Tableau d'Honneur Féodal — Semaine <?= $currentWeek ?> / <?= $currentYear ?>
+                            <i class="fa-solid fa-medal text-warning"></i> Tableau d'Honneur Féodal — Semaine <?= $currentWeek ?> / <?= $currentYear ?>
                         </h3>
                         <p class="text-secondary mb-0">
                             Les 10 plus illustres daimyōs récompensés chaque semaine par décret impérial du Shogunat.<br>
-                            Médailles &amp; Dotations : <strong>🥇 Or (1er) +100 Koban</strong>, <strong>🥈 Argent (2ème) +50 Koban</strong>, <strong>🥉 Bronze (3ème) +25 Koban</strong> et <strong>🎖️ Rubans Top 10</strong>.
-                            <span class="d-block mt-1 text-muted small"><span class="badge bg-secondary-lt">ℹ️ Règle impériale</span> Seuls les commandants humains sont classés et peuvent recevoir des décorations impériales (les daimyōs IA en sont exclus).</span>
+                            Médailles &amp; Dotations : <strong><i class="fa-solid fa-medal text-warning me-1"></i>Or (1er) +100 Koban</strong>, <strong><i class="fa-solid fa-medal text-secondary me-1"></i>Argent (2ème) +50 Koban</strong>, <strong><i class="fa-solid fa-medal text-amber me-1"></i>Bronze (3ème) +25 Koban</strong> et <strong><i class="fa-solid fa-award text-primary me-1"></i>Rubans Top 10</strong>.
+                            <span class="d-block mt-1 text-muted small"><span class="badge bg-secondary-lt"><i class="fa-solid fa-circle-info me-1"></i>Règle impériale</span> Seuls les commandants humains sont classés et peuvent recevoir des décorations impériales (les daimyōs IA en sont exclus).</span>
                         </p>
                     </div>
                     <div class="col-auto">
                         <span class="badge bg-warning text-dark fw-bold px-3 py-2 fs-4 shadow-sm">
-                            🏆 DÉCRET DU SHOGUNAT
+                            <i class="fa-solid fa-trophy me-1"></i> DÉCRET DU SHOGUNAT
                         </span>
                     </div>
                 </div>
@@ -587,7 +587,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                     <div class="card-header border-bottom py-2">
                         <div>
                             <h4 class="card-title text-danger fw-bold mb-0 d-flex align-items-center gap-1">
-                                <span>📈</span> Top Progression
+                                <i class="fa-solid fa-chart-line text-danger me-1"></i> Top Progression
                             </h4>
                             <div class="text-secondary small">Puissance acquise cette semaine</div>
                         </div>
@@ -603,7 +603,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                     <div class="card-header border-bottom py-2">
                         <div>
                             <h4 class="card-title text-red fw-bold mb-0 d-flex align-items-center gap-1">
-                                <span>⚔️</span> Top Conquérants
+                                <i class="fa-solid fa-khanda text-red me-1"></i> Top Conquérants
                             </h4>
                             <div class="text-secondary small">Sièges victorieux &amp; garnisons vaincues</div>
                         </div>
@@ -619,7 +619,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                     <div class="card-header border-bottom py-2">
                         <div>
                             <h4 class="card-title text-success fw-bold mb-0 d-flex align-items-center gap-1">
-                                <span>🛡️</span> Top Défenseurs
+                                <i class="fa-solid fa-shield-halved text-success me-1"></i> Top Défenseurs
                             </h4>
                             <div class="text-secondary small">Assauts ennemis repoussés</div>
                         </div>
@@ -635,7 +635,7 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
                     <div class="card-header border-bottom py-2">
                         <div>
                             <h4 class="card-title text-purple fw-bold mb-0 d-flex align-items-center gap-1">
-                                <span>🌾</span> Top Pillards de Riz
+                                <i class="fa-solid fa-wheat-awn text-warning me-1"></i> Top Pillards de Riz
                             </h4>
                             <div class="text-secondary small">Récoltes et vivres saisis en raid</div>
                         </div>

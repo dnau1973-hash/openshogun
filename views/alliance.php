@@ -29,7 +29,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
         <div class="col">
             <div class="page-pretitle">Affaires Extérieures & Diplomatie Féodale</div>
             <h2 class="page-title d-flex align-items-center gap-2">
-                <span>🎌</span>
+                <i class="fa-solid fa-flag text-danger"></i>
                 <?php if ($myAlliance): ?>
                     Alliance [<?= htmlspecialchars($myAlliance['tag']) ?>] <?= htmlspecialchars($myAlliance['name']) ?>
                 <?php else: ?>
@@ -40,10 +40,10 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
         <div class="col-auto ms-auto d-print-none">
             <div class="btn-list">
                 <a href="/?page=building&code=embassy" class="btn btn-outline-secondary">
-                    ⛩️ Mon Pavillon Diplomatique (Niv.<?= $userEmbassyLevel ?>)
+                    <i class="fa-solid fa-torii-gate text-primary me-1"></i>Mon Pavillon Diplomatique (Niv.<?= $userEmbassyLevel ?>)
                 </a>
                 <a href="/?page=ranking&tab=alliances" class="btn btn-secondary">
-                    🏆 Classement des Clans
+                    <i class="fa-solid fa-trophy text-warning me-1"></i>Classement des Clans
                 </a>
             </div>
         </div>
@@ -69,7 +69,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
             <div class="row align-items-center">
                 <div class="col-md-7">
                     <div class="d-flex align-items-center gap-3">
-                        <div style="font-size: 2.8rem; line-height: 1;">🎌</div>
+                        <div style="font-size: 2.8rem; line-height: 1;"><i class="fa-solid fa-flag text-danger"></i></div>
                         <div>
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <h2 class="mb-0" style="font-weight: 800; color: #1e293b;">
@@ -79,7 +79,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                                     [<?= htmlspecialchars($myAlliance['tag']) ?>]
                                 </span>
                                 <?php if ($isLeader): ?>
-                                    <span class="badge bg-warning text-dark">👑 Vous êtes le Chef</span>
+                                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-crown me-1"></i>Vous êtes le Chef</span>
                                 <?php endif; ?>
                             </div>
                             <div class="text-secondary small">
@@ -117,29 +117,29 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
             <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
                 <li class="nav-item">
                     <a href="#tab-members" class="nav-link active fw-bold" data-bs-toggle="tab">
-                        👥 Membres du Clan (<?= count($members) ?>)
+                        <i class="fa-solid fa-users me-1"></i>Membres du Clan (<?= count($members) ?>)
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="#tab-charter" class="nav-link fw-bold" data-bs-toggle="tab">
-                        📜 Charte & Serment d'Honneur
+                        <i class="fa-solid fa-scroll me-1"></i>Charte &amp; Serment d'Honneur
                     </a>
                 </li>
                 <?php if ($isLeader): ?>
                     <li class="nav-item">
                         <a href="#tab-recruitment" class="nav-link fw-bold" data-bs-toggle="tab">
-                            ✉️ Recrutement & Invitations (<?= count($pendingSentInvites) ?>)
+                            <i class="fa-solid fa-envelope me-1"></i>Recrutement &amp; Invitations (<?= count($pendingSentInvites) ?>)
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-management" class="nav-link fw-bold text-danger" data-bs-toggle="tab">
-                            ⚙️ Conseil de Guerre & Commandement
+                            <i class="fa-solid fa-gear me-1"></i>Conseil de Guerre &amp; Commandement
                         </a>
                     </li>
                 <?php endif; ?>
                 <li class="nav-item ms-auto">
                     <a href="#tab-alliances-list" class="nav-link text-secondary" data-bs-toggle="tab">
-                        🔍 Autres Alliances
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Autres Alliances
                     </a>
                 </li>
             </ul>
@@ -183,14 +183,14 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                                                 <span class="badge bg-danger-lt ms-1">Vous</span>
                                             <?php endif; ?>
                                             <?php if (Auth::isUserProtected($m)): ?>
-                                                <span class="badge bg-success-lt ms-1" title="Immunité débutant active">🔰</span>
+                                                <span class="badge bg-success-lt ms-1" title="Immunité débutant active"><i class="fa-solid fa-shield-halved text-success"></i></span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
                                             <?php if ($m['is_leader']): ?>
-                                                <span class="badge bg-warning text-dark">👑 Chef Suprême</span>
+                                                <span class="badge bg-warning text-dark"><i class="fa-solid fa-crown me-1"></i>Chef Suprême</span>
                                             <?php else: ?>
-                                                <span class="badge bg-secondary-lt">⚔️ Frère d'Armes</span>
+                                                <span class="badge bg-secondary-lt"><i class="fa-solid fa-khanda me-1"></i>Frère d'Armes</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
@@ -231,7 +231,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                     <?php if (!$isLeader): ?>
                         <div class="mt-4 pt-3 border-top text-end">
                             <button class="btn btn-outline-danger" onclick="leaveAlliance()">
-                                🚪 Quitter l'Alliance Féodale
+                                <i class="fa-solid fa-door-open me-1"></i>Quitter l'Alliance Féodale
                             </button>
                         </div>
                     <?php endif; ?>
@@ -243,7 +243,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                         <div class="col-lg-8">
                             <div class="p-4 rounded border bg-light">
                                 <h3 class="fw-bold mb-3 d-flex align-items-center gap-2">
-                                    <span>📜</span> Charte d'Honneur du Clan [<?= htmlspecialchars($myAlliance['tag']) ?>]
+                                    <i class="fa-solid fa-scroll text-warning me-1"></i>Charte d'Honneur du Clan [<?= htmlspecialchars($myAlliance['tag']) ?>]
                                 </h3>
                                 <div style="font-size: 0.95rem; line-height: 1.7; color: #334155; white-space: pre-line;">
                                     <?= !empty($myAlliance['description']) ? htmlspecialchars($myAlliance['description']) : "<em>Aucune charte féodale n'a encore été proclamée par le Chef de clan.</em>" ?>
@@ -264,7 +264,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                                                 <textarea id="charterText" class="form-control" rows="8" placeholder="Exprimez ici les principes directeurs, pactes et ambitions de votre alliance..."><?= htmlspecialchars($myAlliance['description'] ?? '') ?></textarea>
                                             </div>
                                             <button type="submit" class="btn btn-primary w-100" id="btnSaveCharter">
-                                                💾 Sauvegarder la Charte
+                                                <i class="fa-solid fa-floppy-disk me-1"></i>Sauvegarder la Charte
                                             </button>
                                         </form>
                                     </div>
@@ -282,7 +282,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                                 <div class="card mb-3">
                                     <div class="card-header bg-light">
                                         <h4 class="card-title d-flex align-items-center gap-2">
-                                            <span>✉️</span> Transmettre une Invitation
+                                            <i class="fa-solid fa-envelope text-primary me-1"></i>Transmettre une Invitation
                                         </h4>
                                     </div>
                                     <div class="card-body">
@@ -302,7 +302,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                                                     <input type="text" id="inviteMessage" class="form-control" placeholder="Rejoignez notre bannière féodale !">
                                                 </div>
                                                 <button type="submit" class="btn btn-primary w-100" id="btnSendInvite">
-                                                    🎌 Sceller & Expédier l'Invitation
+                                                    <i class="fa-solid fa-paper-plane me-1"></i>Sceller &amp; Expédier l'Invitation
                                                 </button>
                                             </form>
                                         <?php endif; ?>
@@ -360,7 +360,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                             <div class="col-md-6 mb-3">
                                 <div class="card border-warning">
                                     <div class="card-header bg-warning-lt">
-                                        <h4 class="card-title text-warning-emphasis">👑 Cession du Titre de Chef Suprême</h4>
+                                        <h4 class="card-title text-warning-emphasis"><i class="fa-solid fa-crown text-warning me-1"></i>Cession du Titre de Chef Suprême</h4>
                                     </div>
                                     <div class="card-body">
                                         <p class="small text-muted">
@@ -379,7 +379,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                                                 </select>
                                             </div>
                                             <button type="submit" class="btn btn-warning w-100" id="btnTransferLeader">
-                                                📜 Transmettre le Commandement
+                                                <i class="fa-solid fa-scroll me-1"></i>Transmettre le Commandement
                                             </button>
                                         </form>
                                     </div>
@@ -389,14 +389,14 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                             <div class="col-md-6 mb-3">
                                 <div class="card border-danger">
                                     <div class="card-header bg-danger-lt">
-                                        <h4 class="card-title text-danger">☠️ Dissolution du Pacte d'Alliance</h4>
+                                        <h4 class="card-title text-danger"><i class="fa-solid fa-skull-crossbones text-danger me-1"></i>Dissolution du Pacte d'Alliance</h4>
                                     </div>
                                     <div class="card-body">
                                         <p class="small text-danger">
                                             <strong>Attention :</strong> La dissolution est irréversible. Tous les membres retrouveront leur statut indépendant et l'alliance sera effacée des registres impériaux.
                                         </p>
                                         <button class="btn btn-danger w-100 mt-3" onclick="disbandAlliance()">
-                                            💥 Dissoudre Définitivement l'Alliance
+                                            <i class="fa-solid fa-fire text-danger me-1"></i>Dissoudre Définitivement l'Alliance
                                         </button>
                                     </div>
                                 </div>
@@ -451,7 +451,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title d-flex align-items-center gap-2">
-                        <span>⛩️</span> Statut de votre Pavillon Diplomatique
+                        <i class="fa-solid fa-torii-gate text-primary me-1"></i>Statut de votre Pavillon Diplomatique
                     </h3>
                     <span class="badge <?= ($userEmbassyLevel >= ALLIANCE_CREATION_MIN_EMBASSY_LEVEL) ? 'bg-success' : (($userEmbassyLevel >= ALLIANCE_JOIN_MIN_EMBASSY_LEVEL) ? 'bg-warning text-dark' : 'bg-secondary') ?>">
                         Niveau <?= $userEmbassyLevel ?>
@@ -460,7 +460,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                 <div class="card-body">
                     <?php if ($userEmbassyLevel < ALLIANCE_JOIN_MIN_EMBASSY_LEVEL): ?>
                         <div class="alert alert-secondary d-flex align-items-center gap-3">
-                            <div style="font-size: 2rem;">🏗️</div>
+                            <div style="font-size: 2rem;"><i class="fa-solid fa-hammer text-primary"></i></div>
                             <div>
                                 <strong>Pavillon Diplomatique non bâti.</strong><br>
                                 Vous devez construire le Pavillon Diplomatique (Niveau <?= ALLIANCE_JOIN_MIN_EMBASSY_LEVEL ?>) dans votre Cité Castrale pour pouvoir sceller des pactes et rejoindre une alliance.
@@ -472,7 +472,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
 
                     <?php elseif ($userEmbassyLevel < ALLIANCE_CREATION_MIN_EMBASSY_LEVEL): ?>
                         <div class="alert alert-info d-flex align-items-center gap-3">
-                            <div style="font-size: 2rem;">📜</div>
+                            <div style="font-size: 2rem;"><i class="fa-solid fa-scroll text-warning"></i></div>
                             <div>
                                 <strong>Pavillon Diplomatique de Niveau <?= $userEmbassyLevel ?>/<?= ALLIANCE_CREATION_MIN_EMBASSY_LEVEL ?>.</strong><br>
                                 Vous pouvez <strong>rejoindre</strong> une alliance féodale existante dès maintenant. Pour avoir l'autorité d'en <strong>fonder une nouvelle</strong>, vous devez élever ce bâtiment au <strong>Niveau <?= ALLIANCE_CREATION_MIN_EMBASSY_LEVEL ?></strong>.
@@ -484,7 +484,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
 
                     <?php else: ?>
                         <div class="alert alert-success d-flex align-items-center gap-3">
-                            <div style="font-size: 2rem;">🎌</div>
+                            <div style="font-size: 2rem;"><i class="fa-solid fa-flag text-danger"></i></div>
                             <div>
                                 <strong>Pavillon Diplomatique de Rang Supérieur (Niveau <?= $userEmbassyLevel ?>).</strong><br>
                                 Vos émissaires sont prêts ! Vous avez le prestige nécessaire pour proclamer une nouvelle alliance féodale pouvant accueillir <strong><?= $potentialCapacity ?> Daimyōs</strong> dès sa création (+3 places par niveau jusqu'à 60 max).
@@ -508,7 +508,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
         <div class="col-md-5 mt-3 mt-md-0">
             <div class="card h-100" style="border: 1px solid <?= ($userEmbassyLevel >= ALLIANCE_CREATION_MIN_EMBASSY_LEVEL) ? 'rgba(194,37,43,0.3)' : 'rgba(0,0,0,0.1)' ?>;">
                 <div class="card-header <?= ($userEmbassyLevel >= ALLIANCE_CREATION_MIN_EMBASSY_LEVEL) ? 'bg-danger-lt text-danger fw-bold' : '' ?>">
-                    <h3 class="card-title">🎌 Fonder une Alliance Féodale</h3>
+                    <h3 class="card-title"><i class="fa-solid fa-flag text-danger me-1"></i>Fonder une Alliance Féodale</h3>
                 </div>
                 <div class="card-body">
                     <?php if ($userEmbassyLevel >= ALLIANCE_CREATION_MIN_EMBASSY_LEVEL): ?>
@@ -528,12 +528,12 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                                 <textarea id="createDesc" class="form-control" rows="3" placeholder="Devise d'honneur ou serment de fidélité..."></textarea>
                             </div>
                             <button type="submit" class="btn btn-danger w-100" id="btnCreateAlliance">
-                                🎌 Sceller le Traité & Fonder l'Alliance
+                                <i class="fa-solid fa-flag text-danger me-1"></i>Sceller le Traité &amp; Fonder l'Alliance
                             </button>
                         </form>
                     <?php else: ?>
                         <div class="text-center py-4 text-muted">
-                            <div style="font-size: 3rem; opacity: 0.5;">🔒</div>
+                            <div style="font-size: 3rem; opacity: 0.5;"><i class="fa-solid fa-lock text-secondary"></i></div>
                             <h4 class="mt-2">Création Verrouillée</h4>
                             <p class="small">
                                 Votre Pavillon Diplomatique doit atteindre le <strong>Niveau <?= ALLIANCE_CREATION_MIN_EMBASSY_LEVEL ?></strong> pour pouvoir fonder un clan féodal.
@@ -552,7 +552,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
     <div class="card mb-4">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
             <h3 class="card-title d-flex align-items-center gap-2">
-                <span>📬</span> Invitations Reçues des Autres Clans (<?= count($pendingReceivedInvites) ?>)
+                <i class="fa-solid fa-inbox text-info me-1"></i>Invitations Reçues des Autres Clans (<?= count($pendingReceivedInvites) ?>)
             </h3>
         </div>
         <div class="card-body p-0">
@@ -601,11 +601,11 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                                                 </button>
                                             <?php else: ?>
                                                 <button class="btn btn-sm btn-success" onclick="respondInvitation(<?= $inv['id'] ?>, 'accept')">
-                                                    ✅ Prêter Serment
+                                                    <i class="fa-solid fa-check me-1"></i>Prêter Serment
                                                 </button>
                                             <?php endif; ?>
                                             <button class="btn btn-sm btn-outline-danger" onclick="respondInvitation(<?= $inv['id'] ?>, 'reject')">
-                                                ❌ Décliner
+                                                <i class="fa-solid fa-xmark me-1"></i>Décliner
                                             </button>
                                         </div>
                                     </td>
@@ -621,7 +621,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
     <!-- Répertoire & Recherche des Alliances Existantes -->
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">🔍 Registre des Clans Féodaux du Japon</h3>
+            <h3 class="card-title"><i class="fa-solid fa-magnifying-glass me-1"></i>Registre des Clans Féodaux du Japon</h3>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -661,7 +661,7 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
                                     <td class="text-end fw-bold text-danger"><?= number_format($r['total_points']) ?></td>
                                     <td class="text-center">
                                         <a href="?page=messages&tab=compose&to=<?= urlencode($r['leader_name']) ?>" class="btn btn-sm btn-outline-secondary" title="Envoyer une missive au chef">
-                                            ✉️ Contacter
+                                            <i class="fa-solid fa-envelope me-1"></i>Contacter
                                         </a>
                                     </td>
                                 </tr>
@@ -725,12 +725,12 @@ async function createAlliance(e) {
         } else {
             showAlert(data.error || "Erreur lors de la création.", 'danger');
             btn.disabled = false;
-            btn.innerText = "🎌 Sceller le Traité & Fonder l'Alliance";
+            btn.innerHTML = '<i class="fa-solid fa-flag text-danger me-1"></i>Sceller le Traité &amp; Fonder l\'Alliance';
         }
     } catch (err) {
         showAlert("Erreur réseau de communication.", 'danger');
         btn.disabled = false;
-        btn.innerText = "🎌 Sceller le Traité & Fonder l'Alliance";
+        btn.innerHTML = '<i class="fa-solid fa-flag text-danger me-1"></i>Sceller le Traité &amp; Fonder l\'Alliance';
     }
 }
 
@@ -763,12 +763,12 @@ async function sendInvitation(e) {
         } else {
             showAlert(data.error || "Erreur lors de l'invitation.", 'danger');
             btn.disabled = false;
-            btn.innerText = "🎌 Sceller & Expédier l'Invitation";
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>Sceller &amp; Expédier l\'Invitation';
         }
     } catch (err) {
         showAlert("Erreur de connexion.", 'danger');
         btn.disabled = false;
-        btn.innerText = "🎌 Sceller & Expédier l'Invitation";
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>Sceller &amp; Expédier l\'Invitation';
     }
 }
 
@@ -945,12 +945,12 @@ async function updateCharter(e) {
         } else {
             showAlert(data.error || "Erreur de sauvegarde.", 'danger');
             btn.disabled = false;
-            btn.innerText = "💾 Sauvegarder la Charte";
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i>Sauvegarder la Charte';
         }
     } catch (err) {
         showAlert("Erreur réseau.", 'danger');
         btn.disabled = false;
-        btn.innerText = "💾 Sauvegarder la Charte";
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i>Sauvegarder la Charte';
     }
 }
 </script>
