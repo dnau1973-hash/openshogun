@@ -171,7 +171,7 @@ $currentSenderName = htmlspecialchars($currentUser['username'] ?? 'Chancellerie 
         <!-- ══════════════════════════════════════════════════════════════════
              COLONNE GAUCHE : OUTILS, PARAMÈTRES & ÉDITION WYSIWYG
              ══════════════════════════════════════════════════════════════════ -->
-        <div class="col-12 col-xl-6">
+        <div class="col-12 col-lg-6 col-xl-6">
             <div class="card h-100 border shadow-sm">
                 
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 px-3 flex-wrap gap-2">
@@ -187,21 +187,22 @@ $currentSenderName = htmlspecialchars($currentUser['username'] ?? 'Chancellerie 
                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="fa-solid fa-wand-magic-sparkles me-1 text-warning"></i>Modèles Rapides
                             </button>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <h6 class="dropdown-header">Inspirations Féodales</h6>
-                            <a class="dropdown-item" href="#" onclick="applyTemplate('war'); return false;">
-                                <i class="fa-solid fa-khanda text-danger me-2"></i>Mobilisation &amp; Siège Féodal
-                            </a>
-                            <a class="dropdown-item" href="#" onclick="applyTemplate('patch'); return false;">
-                                <i class="fa-solid fa-arrows-rotate text-teal me-2"></i>Mise à Jour &amp; Équilibrage du Monde
-                            </a>
-                            <a class="dropdown-item" href="#" onclick="applyTemplate('peace'); return false;">
-                                <i class="fa-solid fa-torii-gate text-primary me-2"></i>Célébration &amp; Trêve Sacrée
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-danger" href="#" onclick="clearEditor(); return false;">
-                                <i class="fa-solid fa-trash me-2"></i>Effacer le contenu
-                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <h6 class="dropdown-header">Inspirations Féodales</h6>
+                                <a class="dropdown-item" href="#" onclick="applyTemplate('war'); return false;">
+                                    <i class="fa-solid fa-khanda text-danger me-2"></i>Mobilisation &amp; Siège Féodal
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="applyTemplate('patch'); return false;">
+                                    <i class="fa-solid fa-arrows-rotate text-teal me-2"></i>Mise à Jour &amp; Équilibrage du Monde
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="applyTemplate('peace'); return false;">
+                                    <i class="fa-solid fa-torii-gate text-primary me-2"></i>Célébration &amp; Trêve Sacrée
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger" href="#" onclick="clearEditor(); return false;">
+                                    <i class="fa-solid fa-trash me-2"></i>Effacer le contenu
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -320,7 +321,7 @@ $currentSenderName = htmlspecialchars($currentUser['username'] ?? 'Chancellerie 
         <!-- ══════════════════════════════════════════════════════════════════
              COLONNE DROITE : PRÉVISUALISATION DYNAMIQUE EN DIRECT
              ══════════════════════════════════════════════════════════════════ -->
-        <div class="col-12 col-xl-6">
+        <div class="col-12 col-lg-6 col-xl-6">
             <div class="card h-100 border shadow-sm">
                 
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 px-3">
@@ -359,7 +360,7 @@ $currentSenderName = htmlspecialchars($currentUser['username'] ?? 'Chancellerie 
 
                     <!-- Cadre de l'e-mail (iframe pour isolation totale de style) -->
                     <div class="email-preview-frame-wrapper rounded-bottom" id="preview-frame-wrapper" style="max-width: 640px;">
-                        <iframe id="newsletter-preview-iframe" class="email-preview-frame" sandbox="allow-same-origin"></iframe>
+                        <iframe id="newsletter-preview-iframe" class="email-preview-frame" sandbox="allow-same-origin allow-scripts"></iframe>
                     </div>
                 </div>
 
@@ -665,7 +666,12 @@ function triggerPreviewUpdate(immediate = false) {
 function renderLiveEmailPreview() {
     const subject = document.getElementById('newsletter-subject')?.value.trim() || 'Chroniques du Shōgunat • Décret Féodal';
     const targetGroup = document.getElementById('newsletter-target-group')?.value || 'all_optin';
-    const bodyHtml = getEditorHtml() || '<p>Contenu en cours de rédaction...</p>';
+    let rawBody = getEditorHtml() || '<p>Contenu en cours de rédaction...</p>';
+    // Assainissement e-mail : exclusion stricte des balises script et gestionnaires JS inline
+    const bodyHtml = rawBody
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/\son\w+="[^"]*"/gi, '')
+        .replace(/\son\w+='[^']*'/gi, '');
 
     // Mise à jour de l'en-tête client faux
     const fauxSubject = document.getElementById('preview-subject-text');

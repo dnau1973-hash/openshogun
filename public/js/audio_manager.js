@@ -178,16 +178,24 @@ class ShogunAudioManager {
         if (iconEl) {
             iconEl.textContent = '';
             if (isPlaying) {
-                iconEl.className = 'fa-solid fa-volume-high text-success audio-playing';
+                iconEl.className = 'fa-solid fa-volume-high text-success fs-3 audio-playing';
             } else {
-                iconEl.className = 'fa-solid fa-volume-xmark text-secondary';
+                iconEl.className = 'fa-solid fa-volume-xmark text-secondary fs-3';
             }
         }
 
         if (btnEl) {
-            btnEl.title = isPlaying 
+            const newTitle = isPlaying 
                 ? `Ambiance « ${trackInfo.title} » active (${Math.round(this.volume * 100)}%) — Cliquer pour couper` 
                 : `Ambiance « ${trackInfo.title} » coupée — Cliquer pour activer`;
+            btnEl.setAttribute('title', newTitle);
+            btnEl.setAttribute('data-bs-original-title', newTitle);
+            if (window.bootstrap && window.bootstrap.Tooltip) {
+                const tooltipInst = window.bootstrap.Tooltip.getInstance(btnEl);
+                if (tooltipInst && typeof tooltipInst.setContent === 'function') {
+                    tooltipInst.setContent({ '.tooltip-inner': newTitle });
+                }
+            }
             btnEl.classList.toggle('active', isPlaying);
         }
     }

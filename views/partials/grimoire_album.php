@@ -19,6 +19,7 @@ $categoryCounts = [
     'siege' => 0,
     'hero' => 0,
     'castles' => 0,
+    'clans' => 0,
 ];
 
 foreach ($promptsCatalog as $p) {
@@ -109,15 +110,15 @@ foreach ($promptsCatalog as $p) {
                         📜 Grimoire d'Art &bull; Prompt Engineering Sengoku Jidai
                     </span>
                     <h2 class="card-title fs-2 text-dark d-flex align-items-center gap-2 mb-2">
-                        <span>🎨</span> Le Grimoire des 80 Prompts d'OpenShogun
+                        <span>🎨</span> Le Grimoire des <?= count($promptsCatalog) ?> Prompts d'OpenShogun
                     </h2>
                     <p class="text-secondary small mb-3" style="line-height: 1.6; max-width: 820px;">
-                        Explorez l'intégralité des <strong>80 requêtes génératrices d'art</strong> ayant façonné les panoramas, héros, forteresses, engins et armées féodales du jeu. 
+                        Explorez l'intégralité des <strong><?= count($promptsCatalog) ?> requêtes génératrices d'art</strong> ayant façonné les panoramas, héros, forteresses, engins, doctrines de clans et armées féodales du jeu. 
                         Copiez les prompts en un clic, inspectez les fichiers cibles et découvrez les secrets de direction artistique (Ukiyo-e, précision vectorielle 2.5D et palette d'époque).
                     </p>
                     <div class="d-flex gap-2 flex-wrap align-items-center">
                         <span class="badge bg-teal-lt p-2">
-                            <span class="me-1">📊</span> 80 Assets Authentiques Actifs
+                            <span class="me-1">📊</span> <?= count($promptsCatalog) ?> Assets Authentiques Actifs
                         </span>
                         <span class="badge bg-yellow-lt p-2">
                             <span class="me-1">🛡️</span> 100% Prompts Vérifiés
@@ -197,6 +198,9 @@ foreach ($promptsCatalog as $p) {
                 </button>
                 <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="castles" onclick="filterGrimoireCategory('castles', this)">
                     🏯 12 Châteaux <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['castles'] ?></span>
+                </button>
+                <button type="button" class="nav-link btn btn-sm grimoire-pill-btn py-1 px-2 border" data-filter="clans" onclick="filterGrimoireCategory('clans', this)">
+                    📜 Chroniques des Clans <span class="badge bg-secondary-lt ms-1"><?= $categoryCounts['clans'] ?? 0 ?></span>
                 </button>
             </div>
         </div>
@@ -560,7 +564,7 @@ function copyModalPromptTabler() {
 // Exporter l'intégralité du Grimoire en Markdown
 function exportGrimoireMarkdown() {
     const cards = document.querySelectorAll('.prompt-album-col');
-    let md = '# 📜 Le Grimoire des 80 Prompts d\'Art Féodal (OpenShogun)\n\n';
+    let md = '# 📜 Le Grimoire des ' + cards.length + ' Prompts d\'Art Féodal (OpenShogun)\n\n';
     md += '> Généré automatiquement depuis l\'Atelier Pédagogique d\'OpenShogun (Design System Tabler.io).\n\n';
 
     cards.forEach(c => {
@@ -577,7 +581,7 @@ function exportGrimoireMarkdown() {
     });
 
     navigator.clipboard.writeText(md).then(() => {
-        triggerGrimoireToast('Grimoire complet (80 prompts en Markdown) copié !', 'success');
+        triggerGrimoireToast('Grimoire complet (' + cards.length + ' prompts en Markdown) copié !', 'success');
     }).catch(err => {
         alert('Erreur lors de la copie du Grimoire.');
     });

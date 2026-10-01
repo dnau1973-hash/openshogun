@@ -5,6 +5,7 @@
  */
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/HonorEngine.php';
+require_once __DIR__ . '/../core/AiPromptHelper.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $auth = new Auth();
@@ -60,6 +61,8 @@ $clanLoreData = [
         'banner_badge_bg' => '#1e40af',
         'accent_color' => '#2563eb',
         'light_bg' => '#eff6ff',
+        'illustration' => '/public/assets/clans/clan_oda_war_council.jpg',
+        'illustration_file' => 'clans/clan_oda_war_council.jpg',
         'pillars' => [
             ['icon' => '<i class="fa-solid fa-bolt text-warning"></i>', 'title' => 'Tenka Fubu', 'desc' => 'Unification sans merci et autorité centrale'],
             ['icon' => '<i class="fa-solid fa-fire text-danger"></i>', 'title' => 'Arquebuses Tanegashima', 'desc' => 'Tir rotatif synchronisé et domination balistique'],
@@ -81,6 +84,8 @@ $clanLoreData = [
         'banner_badge_bg' => '#991b1b',
         'accent_color' => '#dc2626',
         'light_bg' => '#fef2f2',
+        'illustration' => '/public/assets/clans/clan_takeda_cavalry_charge.jpg',
+        'illustration_file' => 'clans/clan_takeda_cavalry_charge.jpg',
         'pillars' => [
             ['icon' => '<i class="fa-solid fa-wind text-info"></i>', 'title' => 'Fūrinkazan', 'desc' => 'Vent véloce, forêt secrète, feu dévorant, montagne d\'airain'],
             ['icon' => '<i class="fa-solid fa-horse text-danger"></i>', 'title' => 'Cavalerie Akazonae', 'desc' => 'Charges d\'assaut montées en armures rouges écarlates'],
@@ -102,6 +107,8 @@ $clanLoreData = [
         'banner_badge_bg' => '#5b21b6',
         'accent_color' => '#7c3aed',
         'light_bg' => '#f5f3ff',
+        'illustration' => '/public/assets/clans/clan_tokugawa_covert_scout.jpg',
+        'illustration_file' => 'clans/clan_tokugawa_covert_scout.jpg',
         'pillars' => [
             ['icon' => '<i class="fa-solid fa-hourglass-half text-warning"></i>', 'title' => 'Voie de la Patience', 'desc' => 'Triomphe durable par l\'endurance et la stratégie politique'],
             ['icon' => '<i class="fa-solid fa-torii-gate text-purple"></i>', 'title' => 'Bastions Inviolables', 'desc' => 'Cachettes secrètes x2 et défenses fortifiées'],
@@ -199,12 +206,37 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             </div>
 
             <div class="row align-items-center position-relative" style="z-index: 2;">
-                <!-- Mon / Emblème du Clan -->
+                <!-- Avatar du Daimyō & Mon / Emblème du Clan -->
                 <div class="col-auto text-center mb-3 mb-md-0">
-                    <div style="width: 110px; height: 110px; border-radius: 50%; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); border: 3px solid rgba(255, 255, 255, 0.4); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); margin: 0 auto;">
-                        <?= $clan['mon_symbol'] ?>
+                    <div class="position-relative d-inline-block">
+                        <?php 
+                        $avatarPath = !empty($profile['avatar']) ? $profile['avatar'] : '/public/assets/hero_samurai.jpg';
+                        ?>
+                        <!-- Médaillon Avatar Circulaire avec bordure dorée/clan -->
+                        <div id="daimyo-avatar-container" 
+                             style="width: 120px; height: 120px; border-radius: 50%; background-image: url('<?= htmlspecialchars($avatarPath) ?>'); background-size: cover; background-position: center; border: 3px solid rgba(255, 255, 255, 0.6); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); margin: 0 auto; position: relative;"
+                             title="Avatar officiel de <?= htmlspecialchars($profile['username']) ?>">
+                            
+                            <!-- Médaillon Mon du Clan incrusté en bas à droite -->
+                            <div style="position: absolute; bottom: -2px; right: -2px; background: <?= $clan['banner_badge_bg'] ?>; border: 2px solid #ffffff; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: 0 2px 8px rgba(0,0,0,0.5);" 
+                                 title="Mon du Clan : <?= htmlspecialchars($clan['mon_name']) ?>">
+                                <?= $clan['mon_symbol'] ?>
+                            </div>
+                        </div>
+
+                        <?php if ($isSelf): ?>
+                            <!-- Zone d'action pour le téléversement d'un avatar personnalisé -->
+                            <div class="mt-2 text-center">
+                                <label for="avatar-file-input" class="btn btn-sm btn-light border-0 shadow-sm font-game d-inline-flex align-items-center gap-1 cursor-pointer py-1 px-2" style="font-size: 0.75rem; background: rgba(255, 255, 255, 0.95); color: #1e293b;" title="Téléverser un avatar personnalisé (JPEG, PNG, WEBP max 2 Mo)">
+                                    <i class="fa-solid fa-camera text-danger"></i>
+                                    <span>Changer l'Avatar</span>
+                                </label>
+                                <input type="file" id="avatar-file-input" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handleAvatarUpload(this)">
+                                <div id="avatar-upload-status"></div>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                    <div class="mt-2 text-uppercase fw-bold text-white-50 font-game" style="font-size: 0.72rem; letter-spacing: 0.08em;">
+                    <div class="mt-1 text-uppercase fw-bold text-white-50 font-game" style="font-size: 0.72rem; letter-spacing: 0.08em;">
                         <?= htmlspecialchars($clan['mon_name']) ?>
                     </div>
                 </div>
@@ -217,7 +249,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                         </span>
 
                         <!-- Statut de présence -->
-                        <?php if ($profile['is_online']): ?>
+                        <?php if (!empty($profile['is_online'])): ?>
                             <span class="badge bg-success-lt text-white fw-bold d-inline-flex align-items-center gap-1" style="background: rgba(34, 197, 94, 0.25) !important; border: 1px solid #4ade80;">
                                 <span class="status-dot status-dot-animated bg-success"></span> Présent au château
                             </span>
@@ -228,18 +260,18 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                         <?php endif; ?>
 
                         <!-- Privilèges & Titres de modération/admin -->
-                        <?php if ($profile['is_admin']): ?>
+                        <?php if (!empty($profile['is_admin'])): ?>
                             <span class="badge bg-danger text-white fw-bold font-game" title="Administrateur du Shogunat">
                                 <i class="fa-solid fa-crown text-warning me-1"></i> Shōgun Suprême
                             </span>
-                        <?php elseif ($profile['is_moderator']): ?>
+                        <?php elseif (!empty($profile['is_moderator'])): ?>
                             <span class="badge bg-warning text-dark fw-bold font-game" title="Magistrat / Metsuke">
                                 <i class="fa-solid fa-scale-balanced text-dark me-1"></i> Magistrat Impérial
                             </span>
                         <?php endif; ?>
 
-                        <!-- Statut de protection débutant -->
-                        <?php if ($profile['is_protected']): ?>
+                        <!-- Statut de protection débutant (sécurisé) -->
+                        <?php if (!empty($profile['is_protected'])): ?>
                             <span class="badge bg-teal text-white fw-bold d-inline-flex align-items-center gap-1" title="<?= htmlspecialchars($profile['protection_info']['label'] ?? 'Trêve sacrée') ?>">
                                 <i class="fa-solid fa-shield-halved text-white me-1"></i> Édit de Trêve Sacrée (Protégé)
                             </span>
@@ -387,7 +419,7 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
             </div>
 
             <!-- CHRONIQUE & DOCTRINE DU CLAN (JAPON FÉODAL) -->
-            <div class="card shadow-sm mb-4">
+            <div class="card shadow-sm mb-4 overflow-hidden">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
                         <i class="fa-solid fa-torii-gate text-primary"></i> Chroniques &amp; Doctrine Militaire du <?= htmlspecialchars($clan['name']) ?>
@@ -396,6 +428,36 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                         <?= $clan['kanji'] ?>
                     </span>
                 </div>
+
+                <?php if (!empty($clan['illustration'])): ?>
+                    <div class="position-relative overflow-hidden border-bottom" style="max-height: 280px; background: #0f172a;">
+                        <img src="<?= htmlspecialchars($clan['illustration']) ?>" 
+                             alt="Chroniques &amp; Doctrine Martiale du <?= htmlspecialchars($clan['name']) ?>" 
+                             class="w-100 object-fit-cover" 
+                             style="max-height: 280px; object-position: center 30%; display: block;">
+                        
+                        <!-- Overlay en dégradé féodal avec devise & titre -->
+                        <div class="position-absolute bottom-0 start-0 end-0 p-3" style="background: linear-gradient(to top, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.4) 60%, transparent 100%);">
+                            <div class="d-flex align-items-end justify-content-between flex-wrap gap-2">
+                                <div>
+                                    <div class="text-white fw-bold font-game fs-3 mb-0" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
+                                        <?= htmlspecialchars($clan['feudal_title']) ?>
+                                    </div>
+                                    <div class="text-white-50 small font-game fst-italic">
+                                        <?= htmlspecialchars($clan['motto_quote']) ?>
+                                    </div>
+                                </div>
+                                <span class="badge bg-dark-lt text-white border border-white-50 small font-game px-2 py-1">
+                                    <i class="fa-solid fa-scroll me-1 text-warning"></i> Chronique Officielle
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Badge Circulaire Transparence IA Prompts (« ? ») -->
+                        <?= class_exists('AiPromptHelper') ? AiPromptHelper::renderBadge($clan['illustration_file'], 'Chroniques Féodales du ' . $clan['name'], $clan['illustration']) : '' ?>
+                    </div>
+                <?php endif; ?>
+
                 <div class="card-body">
                     <!-- Origines et Contexte Historique -->
                     <div class="mb-4">
@@ -747,6 +809,82 @@ async function saveMottoAjax() {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer la Devise';
     }
+}
+
+/**
+ * Téléversement et prévisualisation instantanée de l'avatar personnalisé
+ */
+function handleAvatarUpload(input) {
+    if (!input || !input.files || input.files.length === 0) return;
+    const file = input.files[0];
+
+    // Contrôle préliminaire côté client
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        alert("Format non supporté. Veuillez sélectionner une image JPEG, PNG ou WEBP.");
+        input.value = '';
+        return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+        alert("L'image de l'avatar est trop volumineuse (limite : 2 Mo).");
+        input.value = '';
+        return;
+    }
+
+    const avatarContainer = document.getElementById('daimyo-avatar-container');
+    const statusEl = document.getElementById('avatar-upload-status');
+    const previousBg = avatarContainer ? avatarContainer.style.backgroundImage : '';
+
+    // 1. Prévisualisation instantanée via FileReader API
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        if (avatarContainer) {
+            avatarContainer.style.backgroundImage = `url('${e.target.result}')`;
+        }
+    };
+    reader.readAsDataURL(file);
+
+    if (statusEl) {
+        statusEl.innerHTML = '<span class="spinner-border spinner-border-sm text-light me-1"></span> <span class="text-white-50" style="font-size:0.7rem;">Envoi...</span>';
+    }
+
+    // 2. Téléversement asynchrone AJAX sécurisé
+    const formData = new FormData();
+    formData.append('action', 'upload_avatar');
+    formData.append('avatar', file);
+
+    fetch('/api/profile.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            if (avatarContainer) {
+                avatarContainer.style.backgroundImage = `url('${data.avatar_url}')`;
+            }
+            if (statusEl) {
+                statusEl.innerHTML = '<span class="text-warning fw-bold" style="font-size:0.72rem;"><i class="fa-solid fa-check me-1"></i>Avatar établi !</span>';
+                setTimeout(() => { statusEl.innerHTML = ''; }, 4000);
+            }
+        } else {
+            throw new Error(data.error || "Échec de l'enregistrement de l'avatar.");
+        }
+    })
+    .catch(err => {
+        if (avatarContainer) {
+            avatarContainer.style.backgroundImage = previousBg;
+        }
+        if (statusEl) {
+            statusEl.innerHTML = `<span class="text-danger fw-bold" style="font-size:0.7rem;"><i class="fa-solid fa-triangle-exclamation me-1"></i>Erreur</span>`;
+            setTimeout(() => { statusEl.innerHTML = ''; }, 4000);
+        }
+        alert("Erreur de téléversement : " + err.message);
+    })
+    .finally(() => {
+        input.value = '';
+    });
 }
 
 // Déclenchement automatique au chargement si ?edit=1

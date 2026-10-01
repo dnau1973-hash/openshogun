@@ -3,6 +3,42 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-01] - profile/poster : Upload d'Avatar Joueur & Sécurisation des Clés de Protection
+- **Module :** `profile/poster`
+- **Statut :** `À tester`
+- **Description :** 
+  1. **Résolution du Warning PHP (`views/poster.php`) :** Sécurisation de l'évaluation de la clé `'is_protected'` et des statuts du joueur via `!empty($profile['is_protected'])` pour éliminer l'avertissement PHP 8.x `Undefined array key 'is_protected'`.
+  2. **Module de Téléversement d'Avatar Personnalisé (`views/poster.php`, `api/profile.php`, `core/HonorEngine.php`) :**
+     - Intégration sur l'affiche féodale d'un médaillon circulaire noble affichant l'avatar personnalisé du Daimyō avec superposition de l'emblème Mon du clan.
+     - Bouton interactif « Changer l'Avatar » (uniquement visible sur sa propre affiche) permettant de sélectionner une image.
+     - Prévisualisation instantanée via l'API JavaScript `FileReader` sans rechargement de page.
+     - Contrôle strict côté backend dans `api/profile.php` : types MIME acceptés (`image/jpeg`, `image/png`, `image/webp`), limite de taille à 2 Mo, génération d'un nom de fichier haché unique (`avatar_{userId}_{timestamp}_{hash}.{ext}`), enregistrement sécurisé dans `/public/assets/uploads/avatars/` et persistance du chemin en base de données dans la table `users`.
+- **Fichiers modifiés :** `views/poster.php`, `api/profile.php`, `core/HonorEngine.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se rendre sur son affiche féodale (`/?page=poster` ou `/?page=profile`) : vérifier l'absence totale de Warning PHP en haut de page ou dans les logs.
+  2. Vérifier la présence du médaillon avatar avec l'insigne du clan et le bouton « Changer l'Avatar ».
+  3. Cliquer sur « Changer l'Avatar » et sélectionner une image locale (JPEG, PNG ou WEBP < 2 Mo) : vérifier la prévisualisation instantanée dans le cercle, l'indicateur de chargement et le toast de confirmation « Avatar établi ! ».
+  4. Rafraîchir la page (F5) et vérifier que le nouvel avatar reste affiché et persiste en base de données.
+  5. Consulter le profil d'un autre seigneur (`/?page=poster&id=...`) : vérifier que le bouton d'upload est masqué et que son avatar/emblème est rendu correctement.
+
+---
+
+### [2026-10-01] - ui/newsletter & ui/header : Correctif de Grille Split-Screen 2 Colonnes, Iframe Sandbox & Alignement Droite Sous-barre
+- **Module :** `ui/newsletter & ui/header`
+- **Statut :** `À tester`
+- **Description :** 
+  1. **Résolution du layout 2 colonnes (`views/newsletter_compose.php`) :** Correction d'une balise `</div>` manquante dans le header de la carte gauche qui cassait l'arbre DOM et forçait la colonne de prévisualisation à passer sous l'atelier de rédaction. Remplacement des classes de colonnes par `col-12 col-lg-6 col-xl-6` pour garantir que l'éditeur et l'aperçu dynamique restent côte à côte sur tous les écrans desktop dès le breakpoint `lg` (992px+).
+  2. **Résolution de l'erreur JavaScript Sandbox Iframe (`views/newsletter_compose.php`) :** Ajout de la permission `allow-scripts` sur l'attribut sandbox de l'iframe de prévisualisation (`sandbox="allow-same-origin allow-scripts"`) pour éliminer l'erreur console « Blocked script execution in about:srcdoc », combiné avec un assainissement regex strict de `bodyHtml` (suppression de toute balise `<script>` ou gestionnaire JS `on*` inline injecté).
+  3. **Ajustement de la sous-barre du Header (`views/partials/header.php`, `public/js/audio_manager.js`) :** Alignement de l'ensemble des badges et boutons (Kobans, Sceaux, Studio Dev, Admin, Ambiance) complètement à droite via `justify-content-end`. Remplacement définitif de toute émoticône sur le bouton Ambiance par l'icône Font Awesome `<i class="fa-solid fa-volume-high"></i>` (avec bascule dynamique `audio-playing` et préservation de la taille `fs-3`), avec infobulle interactive Bootstrap/Tabler mise à jour en temps réel.
+- **Fichiers modifiés :** `views/newsletter_compose.php`, `views/partials/header.php`, `public/js/audio_manager.js`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Ouvrir la page de composition de missive (`/?page=newsletter_compose`) sur écran desktop (largeur >= 992px) : vérifier que l'atelier de rédaction et le cadre de prévisualisation dynamique sont affichés côte à côte de manière fluide.
+  2. Ouvrir les outils de développement (Console F12) et saisir du texte dans l'éditeur : vérifier qu'aucune erreur `Blocked script execution in about:srcdoc` n'apparaît dans la console.
+  3. Observer la sous-barre sous le header : vérifier que tous les badges compacts sont bien calés à l'extrémité droite de l'écran.
+  4. Vérifier le bouton d'Ambiance sonore : vérifier la présence exclusive de l'icône Font Awesome (`fa-volume-high`), tester le survol pour afficher l'infobulle et cliquer pour lancer/couper la musique féodale.
+
+---
+
 ### [2026-10-01] - ui/navbar & community/newsletter : Sous-barre Ergonomique à Badges & Outil d'Insertion des Nouveautés dans la Missive
 - **Module :** `ui/navbar & community/newsletter`
 - **Statut :** `À tester`
@@ -186,3 +222,22 @@
   2. Vérifier que le titre de marque dans la barre de navigation supérieure (« La Voie du Shogun ») est stylisé avec Dela Gothic One.
   3. Ouvrir la page « Mon Affiche Féodale » (`/?page=poster`) : vérifier l'application de la police sur le nom du joueur, le badge du clan, les en-têtes de cartes et les grands compteurs chiffrés des KPIs militaires.
   4. Vérifier que la lisibilité reste irréprochable sur les paragraphes de texte narratif, les tableaux et les formulaires (police standard Inter).
+
+---
+
+### [2026-10-01] - clans : Intégration des Illustrations de Doctrines Martiales & Enrichissement du Grimoire des Prompts (83 Prompts)
+- **Module :** `poster / grimoire`
+- **Statut :** `À tester`
+- **Description :** 
+  1. Intégration des 3 œuvres d'art haute résolution (2752×1536) dans l'arborescence officielle (`public/assets/clans/`) illustrant les chroniques et doctrines martiales de chaque clan féodal :
+     - Clan Oda (`clan_oda_war_council.jpg`) : Conseil de guerre stratégique au sommet du donjon d'Azuchi, Oda Nobunaga et ses généraux avec cartes tactiques en papier washi et bannières du clan.
+     - Clan Takeda (`clan_takeda_cavalry_charge.jpg`) : Charge héroïque de la cavalerie rouge Akazonae à l'aube sur les plaines de Kawanakajima avec étendards du Fūrinkazan.
+     - Clan Tokugawa (`clan_tokugawa_covert_scout.jpg`) : Ruse et reconnaissance nocturne d'un shinobi d'Iga observant une puissante forteresse sous la brume et la pluie.
+  2. Intégration visuelle dans la page « Mon Affiche Féodale » (`views/poster.php`) : Bannière d'illustration haute fidélité insérée dans la carte « Chroniques & Doctrine Militaire du Clan », avec titre féodal, devise ancestrale et badge circulaire interactif de transparence IA (`AiPromptHelper::renderBadge`).
+  3. Enrichissement du Grimoire des Prompts (`views/partials/grimoire_prompts_data.php` et `views/partials/grimoire_album.php`) : Ajout de la nouvelle catégorie `clans` (« 📜 Chroniques des Clans »), passage dynamique du catalogue à 83 prompts IA, bouton de filtre nav-pill dédié et mise à jour de l'export Markdown.
+- **Fichiers modifiés :** `public/assets/clans/clan_oda_war_council.jpg`, `public/assets/clans/clan_takeda_cavalry_charge.jpg`, `public/assets/clans/clan_tokugawa_covert_scout.jpg`, `views/poster.php`, `views/partials/grimoire_prompts_data.php`, `views/partials/grimoire_album.php`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Se rendre sur la page « Mon Affiche Féodale » (`/?page=poster`) avec un compte de chaque clan (Oda, Takeda, Tokugawa) : vérifier la présence de l'illustration correspondante au-dessus de la section narrative avec l'overlay féodal.
+  2. Cliquer sur le badge « ? » en haut à droite de l'illustration : vérifier l'ouverture de la modale de transparence IA affichant le prompt anglais complet, la traduction française et les détails de l'image.
+  3. Se rendre sur la page Pédagogie / Grimoire des Prompts (`/?page=pedagogy`) : constater la présence du compteur à 83 prompts et du filtre « 📜 Chroniques des Clans ». Cliquer sur ce filtre et vérifier l'affichage des 3 nouvelles cartes avec copie en un clic du prompt et vue grand format.
+

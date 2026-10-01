@@ -24,10 +24,13 @@ class HonorEngine {
         self::$schemaChecked = true;
 
         try {
-            // 1. Colonne bio dans users
+            // 1. Colonne bio et avatar dans users
             $userCols = $this->db->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
             if (!in_array('bio', $userCols)) {
                 $this->db->exec("ALTER TABLE users ADD COLUMN bio TEXT NULL AFTER alliance_id");
+            }
+            if (!in_array('avatar', $userCols)) {
+                $this->db->exec("ALTER TABLE users ADD COLUMN avatar VARCHAR(255) NULL AFTER bio");
             }
 
             // 2. Table user_weekly_stats
@@ -264,7 +267,7 @@ class HonorEngine {
     public function getUserProfile(int $userId): ?array {
         // 1. Informations de base
         $stmtUser = $this->db->prepare("
-            SELECT u.id, u.username, u.email, u.faction, u.points, u.bio, u.is_admin, u.is_moderator, u.is_bot, u.created_at, u.last_active, u.protection_until,
+            SELECT u.id, u.username, u.email, u.faction, u.points, u.bio, u.avatar, u.is_admin, u.is_moderator, u.is_bot, u.created_at, u.last_active, u.protection_until,
                    a.name as alliance_name, a.tag as alliance_tag
             FROM users u
             LEFT JOIN alliances a ON u.alliance_id = a.id
@@ -430,5 +433,14 @@ class HonorEngine {
         }
         $stmt = $this->db->prepare("UPDATE users SET bio = ? WHERE id = ?");
         return $stmt->execute([$bio, $userId]);
+    }
+
+    /**
+     * Met à jour l'avatar personnalisé d'un joueur
+     */
+    public function updateAvatar(int $userId, string $avatarUrl): bool {
+        $avatarUrl = trim($avatarUrl);
+        $stmt = $this->db->prepare("UPDATE users SET avatar = ? WHERE id = ?");
+        return $stmt->execute([$avatarUrl, $userId]);
     }
 }

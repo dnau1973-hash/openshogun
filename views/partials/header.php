@@ -439,9 +439,9 @@ $navItems = [
             </div>
         </header>
 
-        <!-- ── SOUS-BARRE DÉDIÉE : STATUTS & OUTILS RAPIDES (Alignée à gauche) ── -->
+        <!-- ── SOUS-BARRE DÉDIÉE : STATUTS & OUTILS RAPIDES (Alignée à droite) ── -->
         <div class="sub-navbar border-bottom bg-light-subtle py-1 d-print-none shadow-none">
-            <div class="container-fluid px-3 px-lg-4 d-flex align-items-center justify-content-start gap-2 flex-wrap">
+            <div class="container-fluid px-3 px-lg-4 d-flex align-items-center justify-content-end gap-2 flex-wrap">
                 
                 <!-- 1. Trésor en Koban (Icône seule) -->
                 <a href="?page=privilege" 
@@ -479,14 +479,14 @@ $navItems = [
                     </a>
                 <?php endif; ?>
 
-                <!-- 5. Ambiance Sonore (Icône seule) -->
+                <!-- 5. Ambiance Sonore (Icône seule Font Awesome) -->
                 <button type="button" 
                         class="badge bg-secondary-lt text-secondary p-2 border-0 d-inline-flex align-items-center justify-content-center shadow-none rounded cursor-pointer" 
                         id="shogun-audio-btn" 
                         onclick="window.shogunAudio && window.shogunAudio.toggle()" 
                         data-bs-toggle="tooltip" data-bs-placement="bottom"
                         title="Ambiance Sonore : Activer / Couper la musique féodale">
-                    <i class="fa-solid fa-volume-xmark fs-3" id="shogun-audio-icon"></i>
+                    <i class="fa-solid fa-volume-high fs-3" id="shogun-audio-icon"></i>
                 </button>
 
             </div>

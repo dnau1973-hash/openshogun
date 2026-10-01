@@ -52,6 +52,62 @@ try {
             ]);
             break;
 
+        // Téléverser un avatar personnalisé pour le Daimyō
+        case 'upload_avatar':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Méthode de requête non autorisée.");
+            }
+            if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+                $errorCode = $_FILES['avatar']['error'] ?? 'AUCUN_FICHIER';
+                throw new Exception("Aucun fichier d'avatar valide n'a été transmis (code: {$errorCode}).");
+            }
+
+            $file = $_FILES['avatar'];
+            $maxSize = 2 * 1024 * 1024; // 2 Mo
+            if ($file['size'] > $maxSize) {
+                throw new Exception("L'image de l'avatar est trop volumineuse (maximum 2 Mo).");
+            }
+
+            // Vérification stricte du type MIME
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($file['tmp_name']);
+            $allowedMimes = [
+                'image/jpeg' => 'jpg',
+                'image/png'  => 'png',
+                'image/webp' => 'webp'
+            ];
+
+            if (!isset($allowedMimes[$mimeType])) {
+                throw new Exception("Format d'image non supporté ({$mimeType}). Seuls les formats JPEG, PNG et WEBP sont acceptés.");
+            }
+
+            $currentUserId = (int)Auth::id();
+            $ext = $allowedMimes[$mimeType];
+            $uniqueName = sprintf('avatar_%d_%d_%s.%s', $currentUserId, time(), bin2hex(random_bytes(6)), $ext);
+
+            // Répertoire de destination
+            $uploadDir = __DIR__ . '/../public/assets/uploads/avatars/';
+            if (!is_dir($uploadDir)) {
+                if (!mkdir($uploadDir, 0755, true)) {
+                    throw new Exception("Impossible de créer le répertoire d'enregistrement des avatars.");
+                }
+            }
+
+            $destPath = $uploadDir . $uniqueName;
+            if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+                throw new Exception("Échec de l'enregistrement de l'avatar sur le serveur.");
+            }
+
+            $webUrl = '/assets/uploads/avatars/' . $uniqueName;
+            $success = $honorEngine->updateAvatar($currentUserId, $webUrl);
+
+            echo json_encode([
+                'success' => $success,
+                'message' => "Votre avatar personnalisé a été établi avec honneur !",
+                'avatar_url' => $webUrl
+            ]);
+            break;
+
         // Récupérer le Tableau d'Honneur de la semaine
         case 'get_honor_roll':
             $honorRoll = $honorEngine->getFullHonorRoll(10);
