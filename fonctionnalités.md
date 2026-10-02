@@ -3,6 +3,28 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - admin/analytics-engine : Nettoyage Header & Moteur de Graphiques Résilient
+- **Module :** `admin/analytics-engine`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Nettoyage de la Barre de Navigation (`views/partials/header.php`) :**
+     - Retrait définitif du bouton/badge « Statistiques » (`?page=admin&tab=dashboard`) dans la deuxième sous-barre du header afin de préserver la sobriété visuelle et de centraliser l'accès aux métriques exclusivement dans l'espace d'Administration (`views/admin.php`).
+     - Restauration de l'état actif propre du bouton d'Administration générale (`fa-gear`).
+  2. **Diagnostic & Résolution du Non-Affichage des Graphiques (`views/admin.php`) :**
+     - **Cause racine 1 (Collision asynchrone) :** Détection d'un double appel concurrent (`switchAdminTab` à 60ms et `DOMContentLoaded` à 80ms) entraînant l'appel de `updateOptions()` sur une instance ApexCharts en cours d'initialisation asynchrone (`render()` Promise non résolue), provoquant une exception bloquante dans la console. Résolu via un déboucleur unique `requestRenderAnalyticsCharts()` annulant tout timer antérieur.
+     - **Cause racine 2 (Dimensions nulles 0px x 0px) :** Résolution des erreurs de rendu SVG lors de l'initialisation sur conteneur en cours de reflow ou onglet masqué via détection de visibilité (`offsetParent`), vérification de `clientWidth > 0` et repli sur `requestAnimationFrame`.
+     - **Cause racine 3 (Division par zéro sur séries vides) :** Normalisation stricte de `$cleanTimeline`, `$cleanTopPages`, `$cleanHourly` garantissant des valeurs `(int)` et des bornes minimales d'axes (`forceNiceScale: true`, `max: Math.max(10, ...)`), empêchant les plantages d'échelle lorsque toutes les valeurs sont à 0.
+     - **Moteur de Secours Canvas HD Autonome :** Si la bibliothèque externe est indisponible (offline, bloqueur de script ou échec CDN), bascule automatique transparente sur 3 moteurs de dessin Canvas 2D natifs (`renderCanvasTrend`, `renderCanvasTopPages`, `renderCanvasHourly`) garantissant qu'aucun graphique ne reste vide ou invisible.
+- **Fichiers modifiés :** `views/partials/header.php`, `views/admin.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Vérifier la deuxième barre de navigation du header : le bouton vert sarcelle `fa-chart-line` a bien disparu ; seul le bouton d'engrenage `fa-gear` est présent pour l'administration.
+  2. Ouvrir la console du navigateur sur la page d'administration (`/?page=admin&tab=dashboard`) : vérifier l'absence totale d'exception JS bloquante (`TypeError`, `Uncaught in promise`).
+  3. Vérifier que les 3 graphiques (Évolution temporelle, Top 8 des modules, Heures de pointe) s'affichent instantanément et distinctement, même si la base ne contient encore que peu ou pas de logs.
+  4. Basculer vers un autre onglet (ex. « Joueurs », « Paramètres ») puis revenir sur « Dashboard » : vérifier que les graphiques se redessinent immédiatement et proprement sans déformation.
+  5. Couper la connexion réseau ou bloquer le CDN `jsdelivr.net` : vérifier que le moteur Canvas HD prend immédiatement le relais et dessine les courbes et barres sans écran blanc.
+
+---
+
 ### [2026-10-02] - telemetry/analytics-suite : Suite Télémétrique & Débogage du Graphique d'Activité
 - **Module :** `telemetry/analytics-suite`
 - **Statut :** `À tester`

@@ -43,6 +43,71 @@ $topPages = ActivityTracker::getTopPages(8, $analyticsPeriod);
 $hourlyActivity = ActivityTracker::getHourlyDistribution($analyticsPeriod);
 $topActiveUsers = ActivityTracker::getTopActiveUsers(8, $analyticsPeriod);
 
+// Normalisation et typage strict des séries de données pour injection JS sécurisée
+$cleanTimeline = [];
+if (!empty($timelineTrend)) {
+    foreach ($timelineTrend as $pt) {
+        $cleanTimeline[] = [
+            'date'          => (string)($pt['date'] ?? ''),
+            'label'         => (string)($pt['label'] ?? ''),
+            'views'         => (int)($pt['views'] ?? 0),
+            'unique_users'  => (int)($pt['unique_users'] ?? 0),
+            'registrations' => (int)($pt['registrations'] ?? 0),
+            'missions'      => (int)($pt['missions'] ?? 0),
+        ];
+    }
+}
+if (count($cleanTimeline) < 2) {
+    $now = time();
+    $firstPoint = $cleanTimeline[0] ?? [
+        'date' => date('Y-m-d', $now), 'label' => date('d/m', $now),
+        'views' => 0, 'unique_users' => 0, 'registrations' => 0, 'missions' => 0
+    ];
+    $cleanTimeline = [
+        [
+            'date'          => date('Y-m-d', $now - 86400),
+            'label'         => date('d/m', $now - 86400),
+            'views'         => 0,
+            'unique_users'  => 0,
+            'registrations' => 0,
+            'missions'      => 0,
+        ],
+        [
+            'date'          => (string)($firstPoint['date'] ?: date('Y-m-d', $now)),
+            'label'         => (string)($firstPoint['label'] ?: date('d/m', $now)),
+            'views'         => (int)($firstPoint['views'] ?? 0),
+            'unique_users'  => (int)($firstPoint['unique_users'] ?? 0),
+            'registrations' => (int)($firstPoint['registrations'] ?? 0),
+            'missions'      => (int)($firstPoint['missions'] ?? 0),
+        ]
+    ];
+}
+
+$cleanTopPages = [];
+if (!empty($topPages)) {
+    foreach ($topPages as $tp) {
+        $cleanTopPages[] = [
+            'page_slug' => (string)($tp['page_slug'] ?? ''),
+            'label'     => (string)($tp['label'] ?? 'Autre'),
+            'hit_count' => (int)($tp['hit_count'] ?? 0),
+            'percent'   => (float)($tp['percent'] ?? 0.0),
+        ];
+    }
+}
+if (empty($cleanTopPages)) {
+    $cleanTopPages = [
+        ['page_slug' => 'resources', 'label' => 'Terroir Féodal', 'hit_count' => 0, 'percent' => 0.0],
+        ['page_slug' => 'city', 'label' => 'Cité Castrale', 'hit_count' => 0, 'percent' => 0.0],
+        ['page_slug' => 'map', 'label' => 'Carte des Provinces', 'hit_count' => 0, 'percent' => 0.0],
+        ['page_slug' => 'barracks', 'label' => 'Caserne', 'hit_count' => 0, 'percent' => 0.0],
+    ];
+}
+
+$cleanHourly = [];
+for ($h = 0; $h < 24; $h++) {
+    $cleanHourly[] = (int)($hourlyActivity[$h] ?? 0);
+}
+
 $botEngine = new BotEngine();
 $castleEngine = new CastleEngine();
 $oasisEngine = new OasisEngine();
@@ -325,11 +390,11 @@ $avgSessionsPerDay = "3.2";
 
 // Évolution 30 jours (série continue alimentée par ActivityTracker)
 $stats30Days = [];
-foreach ($timelineTrend as $point) {
+foreach ($cleanTimeline as $point) {
     $stats30Days[$point['date']] = [
         'day' => $point['label'],
-        'users' => $point['registrations'],
-        'sessions' => $point['views'] > 0 ? $point['views'] : $point['missions'],
+        'users' => (int)$point['registrations'],
+        'sessions' => $point['views'] > 0 ? (int)$point['views'] : (int)$point['missions'],
     ];
 }
 
@@ -994,21 +1059,23 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <span class="badge bg-primary-lt">Période : <?= strtoupper($analyticsPeriod) ?></span>
                 </div>
                 <div class="card-body p-2 p-md-3">
-                    <!-- ApexCharts Spline Area Chart avec canvas fallback -->
-                    <div id="adminApexTrendChart" style="min-height: 270px; width: 100%;"></div>
-                    <div id="adminTrendChartFallback" style="display: none; position: relative; height: 260px; width: 100%;">
-                        <canvas id="adminTrendChart" style="width: 100%; height: 100%;"></canvas>
+                    <!-- Conteneur Graphique 1 (ApexCharts + Canvas de repli direct) -->
+                    <div id="chart-activity" style="min-height: 270px; width: 100%;">
+                        <div id="adminApexTrendChart" style="min-height: 270px; width: 100%;"></div>
+                        <div id="adminTrendChartFallback" style="display: none; position: relative; height: 260px; width: 100%;">
+                            <canvas id="adminTrendChart" style="width: 100%; height: 100%;"></canvas>
+                        </div>
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-around text-center py-2 bg-light small flex-wrap gap-2">
                     <div>
-                        <span class="badge badge-dot bg-primary me-1"></span> Pages Vues : <strong><?= number_format(array_sum(array_column($timelineTrend, 'views'))) ?></strong>
+                        <span class="badge badge-dot bg-primary me-1"></span> Pages Vues : <strong><?= number_format(array_sum(array_column($cleanTimeline, 'views'))) ?></strong>
                     </div>
                     <div>
-                        <span class="badge badge-dot bg-success me-1"></span> Daimyōs Actifs : <strong><?= number_format(max(array_column($timelineTrend, 'unique_users') ?: [0])) ?> pic/j</strong>
+                        <span class="badge badge-dot bg-success me-1"></span> Daimyōs Actifs : <strong><?= number_format(max(array_column($cleanTimeline, 'unique_users') ?: [0])) ?> pic/j</strong>
                     </div>
                     <div>
-                        <span class="badge badge-dot bg-warning me-1"></span> Inscriptions : <strong><?= number_format(array_sum(array_column($timelineTrend, 'registrations'))) ?> daimyōs</strong>
+                        <span class="badge badge-dot bg-warning me-1"></span> Inscriptions : <strong><?= number_format(array_sum(array_column($cleanTimeline, 'registrations'))) ?> daimyōs</strong>
                     </div>
                 </div>
             </div>
@@ -1087,7 +1154,13 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <span class="badge bg-info-lt">Pages Vues</span>
                 </div>
                 <div class="card-body p-2 p-md-3">
-                    <div id="adminApexTopPagesChart" style="min-height: 280px; width: 100%;"></div>
+                    <!-- Conteneur Graphique 2 (ApexCharts + Canvas de repli direct) -->
+                    <div id="chart-top-pages" style="min-height: 280px; width: 100%;">
+                        <div id="adminApexTopPagesChart" style="min-height: 280px; width: 100%;"></div>
+                        <div id="adminTopPagesFallback" style="display: none; position: relative; height: 260px; width: 100%;">
+                            <canvas id="adminTopPagesChart" style="width: 100%; height: 100%;"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1102,7 +1175,13 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <span class="badge bg-warning-lt">Affluence Globale</span>
                 </div>
                 <div class="card-body p-2 p-md-3">
-                    <div id="adminApexHourlyChart" style="min-height: 280px; width: 100%;"></div>
+                    <!-- Conteneur Graphique 3 (ApexCharts + Canvas de repli direct) -->
+                    <div id="chart-hourly" style="min-height: 280px; width: 100%;">
+                        <div id="adminApexHourlyChart" style="min-height: 280px; width: 100%;"></div>
+                        <div id="adminHourlyFallback" style="display: none; position: relative; height: 260px; width: 100%;">
+                            <canvas id="adminHourlyChart" style="width: 100%; height: 100%;"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2709,229 +2788,246 @@ function switchWorldSubSection(subKey, event) {
     if (activeBtn) activeBtn.classList.add('active');
 }
 
-// --- ANALYTICS & TÉLÉMÉTRIE DU DASHBOARD (APEXCHARTS + FALLBACK CANVAS) ---
+// --- ANALYTICS & TÉLÉMÉTRIE DU DASHBOARD (APEXCHARTS + FALLBACK CANVAS HD) ---
 let trendApexChart = null;
 let topPagesApexChart = null;
 let hourlyApexChart = null;
+let chartRenderTimer = null;
 
 const telemetryData = {
-    timeline: <?= json_encode($timelineTrend, JSON_UNESCAPED_UNICODE) ?>,
-    topPages: <?= json_encode($topPages, JSON_UNESCAPED_UNICODE) ?>,
-    hourly: <?= json_encode(array_values($hourlyActivity), JSON_UNESCAPED_UNICODE) ?>
+    timeline: <?= json_encode($cleanTimeline, JSON_UNESCAPED_UNICODE) ?>,
+    topPages: <?= json_encode($cleanTopPages, JSON_UNESCAPED_UNICODE) ?>,
+    hourly: <?= json_encode($cleanHourly, JSON_UNESCAPED_UNICODE) ?>
 };
 
+function requestRenderAnalyticsCharts() {
+    if (chartRenderTimer) clearTimeout(chartRenderTimer);
+    chartRenderTimer = setTimeout(() => {
+        renderAnalyticsCharts();
+    }, 40);
+}
+
 function renderAnalyticsCharts() {
-    const trendContainer = document.getElementById('adminApexTrendChart');
-    const fallbackContainer = document.getElementById('adminTrendChartFallback');
-
-    if (!trendContainer) return;
-
-    if (typeof ApexCharts === 'undefined') {
-        if (fallbackContainer) fallbackContainer.style.display = 'block';
-        trendContainer.style.display = 'none';
-        renderAdminTrendChart();
+    const dashPane = document.getElementById('tab-dashboard');
+    // Si l'onglet dashboard n'est pas actif/visible, différer le rendu
+    if (dashPane && dashPane.style.display === 'none' && !dashPane.classList.contains('active')) {
         return;
     }
 
-    // Graphique 1 : Spline Area Chart (Pages Vues / Daimyōs Uniques / Inscriptions)
-    const trendCategories = telemetryData.timeline.map(item => item.label);
-    const viewsSeries = telemetryData.timeline.map(item => item.views);
-    const usersSeries = telemetryData.timeline.map(item => item.unique_users);
-    const regSeries = telemetryData.timeline.map(item => item.registrations);
+    const trendTarget = document.getElementById('adminApexTrendChart') || document.getElementById('chart-activity');
+    if (!trendTarget) return;
 
-    const trendOptions = {
-        series: [
-            { name: 'Pages Vues', data: viewsSeries },
-            { name: 'Daimyōs Actifs', data: usersSeries },
-            { name: 'Inscriptions', data: regSeries }
-        ],
-        chart: {
-            type: 'area',
-            height: 270,
-            toolbar: { show: false },
-            fontFamily: 'inherit',
-            animations: { enabled: true, easing: 'easeinout', speed: 600 }
-        },
-        colors: ['#206bc4', '#2fb344', '#f59f00'],
-        stroke: { curve: 'smooth', width: [2.5, 2.5, 2] },
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.45,
-                opacityTo: 0.05,
-                stops: [0, 90, 100]
-            }
-        },
-        dataLabels: { enabled: false },
-        grid: {
-            borderColor: 'rgba(148, 163, 184, 0.15)',
-            strokeDashArray: 4,
-            padding: { top: 0, right: 15, bottom: 0, left: 10 }
-        },
-        xaxis: {
-            categories: trendCategories,
-            labels: { style: { colors: '#64748b', fontSize: '11px' } },
-            axisBorder: { show: false },
-            axisTicks: { show: false }
-        },
-        yaxis: {
-            min: 0,
-            labels: {
-                style: { colors: '#64748b', fontSize: '11px' },
-                formatter: (val) => Math.round(val)
-            }
-        },
-        tooltip: {
-            shared: true,
-            intersect: false,
-            theme: 'light'
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'right',
-            labels: { colors: '#475569' }
+    // Si le conteneur n'a pas encore de largeur calculée (reflow en cours), attendre une frame d'animation
+    if (trendTarget.clientWidth <= 0) {
+        requestAnimationFrame(() => {
+            requestRenderAnalyticsCharts();
+        });
+        return;
+    }
+
+    // Tenter le rendu ApexCharts si la bibliothèque est chargée
+    if (typeof ApexCharts !== 'undefined') {
+        try {
+            renderApexChartsSuite();
+            return;
+        } catch (err) {
+            console.warn("Erreur d'initialisation ApexCharts, bascule sur le moteur Canvas HD :", err);
         }
-    };
+    }
 
+    // Si ApexCharts est absent ou a échoué, basculer vers les Canvas HD
+    renderCanvasFallbackCharts();
+}
+
+function renderApexChartsSuite() {
+    // Destruction propre des instances antérieures pour recalculer le viewBox SVG
     if (trendApexChart) {
-        trendApexChart.updateOptions(trendOptions);
-    } else {
+        try { trendApexChart.destroy(); } catch (e) {}
+        trendApexChart = null;
+    }
+    if (topPagesApexChart) {
+        try { topPagesApexChart.destroy(); } catch (e) {}
+        topPagesApexChart = null;
+    }
+    if (hourlyApexChart) {
+        try { hourlyApexChart.destroy(); } catch (e) {}
+        hourlyApexChart = null;
+    }
+
+    // Réinitialiser la visibilité des conteneurs
+    const cTrend = document.getElementById('adminApexTrendChart');
+    const fTrend = document.getElementById('adminTrendChartFallback');
+    if (cTrend) cTrend.style.display = 'block';
+    if (fTrend) fTrend.style.display = 'none';
+
+    const cTop = document.getElementById('adminApexTopPagesChart');
+    const fTop = document.getElementById('adminTopPagesFallback');
+    if (cTop) cTop.style.display = 'block';
+    if (fTop) fTop.style.display = 'none';
+
+    const cHour = document.getElementById('adminApexHourlyChart');
+    const fHour = document.getElementById('adminHourlyFallback');
+    if (cHour) cHour.style.display = 'block';
+    if (fHour) fHour.style.display = 'none';
+
+    // ── GRAPHIQUE 1 : Évolution Vues, Actifs, Inscriptions (Spline Area) ──
+    const trendContainer = document.getElementById('adminApexTrendChart');
+    if (trendContainer) {
+        const categories = telemetryData.timeline.map(d => String(d.label || ''));
+        const viewsData = telemetryData.timeline.map(d => Number(d.views) || 0);
+        const usersData = telemetryData.timeline.map(d => Number(d.unique_users) || 0);
+        const regData = telemetryData.timeline.map(d => Number(d.registrations) || 0);
+        const maxVal = Math.max(10, ...viewsData, ...usersData, ...regData);
+
+        const trendOptions = {
+            series: [
+                { name: 'Pages Vues', data: viewsData },
+                { name: 'Daimyōs Actifs', data: usersData },
+                { name: 'Inscriptions', data: regData }
+            ],
+            chart: {
+                type: 'area',
+                height: 270,
+                toolbar: { show: false },
+                fontFamily: 'inherit',
+                animations: { enabled: true, easing: 'easeinout', speed: 400 }
+            },
+            colors: ['#206bc4', '#2fb344', '#f59f00'],
+            stroke: { curve: viewsData.length <= 2 ? 'straight' : 'smooth', width: [2.5, 2.5, 2] },
+            fill: {
+                type: 'gradient',
+                gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.05, stops: [0, 90, 100] }
+            },
+            dataLabels: { enabled: false },
+            grid: {
+                borderColor: 'rgba(148, 163, 184, 0.15)',
+                strokeDashArray: 4,
+                padding: { top: 0, right: 15, bottom: 0, left: 10 }
+            },
+            xaxis: {
+                categories: categories,
+                labels: { style: { colors: '#64748b', fontSize: '11px' } },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                min: 0,
+                max: Math.ceil(maxVal * 1.15),
+                forceNiceScale: true,
+                labels: {
+                    style: { colors: '#64748b', fontSize: '11px' },
+                    formatter: (val) => Math.round(val || 0)
+                }
+            },
+            tooltip: { shared: true, intersect: false, theme: 'light' },
+            legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#475569' } }
+        };
         trendApexChart = new ApexCharts(trendContainer, trendOptions);
         trendApexChart.render();
     }
 
-    // Graphique 2 : Horizontal Bar Chart (Top 8 Pages / Modules)
-    const topPagesContainer = document.getElementById('adminApexTopPagesChart');
-    if (topPagesContainer && telemetryData.topPages.length > 0) {
-        const pageLabels = telemetryData.topPages.map(p => p.label);
-        const pageHits = telemetryData.topPages.map(p => p.hit_count);
+    // ── GRAPHIQUE 2 : Top 8 Modules & Pages (Horizontal Bar) ──
+    const topContainer = document.getElementById('adminApexTopPagesChart');
+    if (topContainer) {
+        const pageLabels = telemetryData.topPages.map(p => String(p.label || 'Autre'));
+        const pageHits = telemetryData.topPages.map(p => Number(p.hit_count) || 0);
+        const maxHits = Math.max(5, ...pageHits);
 
-        const topPagesOptions = {
+        const topOptions = {
             series: [{ name: 'Consultations', data: pageHits }],
-            chart: {
-                type: 'bar',
-                height: 280,
-                toolbar: { show: false },
-                fontFamily: 'inherit'
-            },
+            chart: { type: 'bar', height: 280, toolbar: { show: false }, fontFamily: 'inherit' },
             plotOptions: {
-                bar: {
-                    horizontal: true,
-                    borderRadius: 4,
-                    barHeight: '55%',
-                    distributed: false
-                }
+                bar: { horizontal: true, borderRadius: 4, barHeight: '55%', distributed: false }
             },
             colors: ['#4299e1'],
             dataLabels: {
                 enabled: true,
-                formatter: (val) => val + ' vues',
+                formatter: (val) => (val || 0) + ' vues',
                 style: { fontSize: '11px', colors: ['#ffffff'] }
             },
             xaxis: {
                 categories: pageLabels,
+                max: Math.ceil(maxHits * 1.15),
                 labels: { style: { colors: '#64748b', fontSize: '11px' } }
             },
             yaxis: {
                 labels: { style: { colors: '#475569', fontSize: '12px', fontWeight: 600 } }
             },
-            grid: {
-                borderColor: 'rgba(148, 163, 184, 0.15)',
-                strokeDashArray: 4
-            },
-            tooltip: {
-                theme: 'light',
-                y: { formatter: (val) => val + ' vues enregistrées' }
-            }
+            grid: { borderColor: 'rgba(148, 163, 184, 0.15)', strokeDashArray: 4 },
+            tooltip: { theme: 'light', y: { formatter: (val) => (val || 0) + ' consultations' } }
         };
-
-        if (topPagesApexChart) {
-            topPagesApexChart.updateOptions(topPagesOptions);
-        } else {
-            topPagesApexChart = new ApexCharts(topPagesContainer, topPagesOptions);
-            topPagesApexChart.render();
-        }
+        topPagesApexChart = new ApexCharts(topContainer, topOptions);
+        topPagesApexChart.render();
     }
 
-    // Graphique 3 : Bar Chart Affluence Horaire (0h à 23h)
-    const hourlyContainer = document.getElementById('adminApexHourlyChart');
-    if (hourlyContainer) {
+    // ── GRAPHIQUE 3 : Heures de Pointe 0h - 23h (Column Bar) ──
+    const hourContainer = document.getElementById('adminApexHourlyChart');
+    if (hourContainer) {
         const hourCategories = ['0h','1h','2h','3h','4h','5h','6h','7h','8h','9h','10h','11h','12h','13h','14h','15h','16h','17h','18h','19h','20h','21h','22h','23h'];
-        const hourlyOptions = {
-            series: [{ name: 'Interactions', data: telemetryData.hourly }],
-            chart: {
-                type: 'bar',
-                height: 280,
-                toolbar: { show: false },
-                fontFamily: 'inherit'
-            },
-            plotOptions: {
-                bar: {
-                    borderRadius: 3,
-                    columnWidth: '65%'
-                }
-            },
+        const hourData = telemetryData.hourly.map(v => Number(v) || 0);
+        const maxH = Math.max(5, ...hourData);
+
+        const hourOptions = {
+            series: [{ name: 'Interactions', data: hourData }],
+            chart: { type: 'bar', height: 280, toolbar: { show: false }, fontFamily: 'inherit' },
+            plotOptions: { bar: { borderRadius: 3, columnWidth: '65%' } },
             colors: ['#f59f00'],
             dataLabels: { enabled: false },
-            xaxis: {
-                categories: hourCategories,
-                labels: { style: { colors: '#64748b', fontSize: '10px' } }
-            },
+            xaxis: { categories: hourCategories, labels: { style: { colors: '#64748b', fontSize: '10px' } } },
             yaxis: {
                 min: 0,
-                labels: {
-                    style: { colors: '#64748b', fontSize: '11px' },
-                    formatter: (val) => Math.round(val)
-                }
+                max: Math.ceil(maxH * 1.15),
+                forceNiceScale: true,
+                labels: { style: { colors: '#64748b', fontSize: '11px' }, formatter: (val) => Math.round(val || 0) }
             },
-            grid: {
-                borderColor: 'rgba(148, 163, 184, 0.15)',
-                strokeDashArray: 4
-            },
-            tooltip: {
-                theme: 'light',
-                y: { formatter: (val) => val + ' requêtes / actions' }
-            }
+            grid: { borderColor: 'rgba(148, 163, 184, 0.15)', strokeDashArray: 4 },
+            tooltip: { theme: 'light', y: { formatter: (val) => (val || 0) + ' requêtes / actions' } }
         };
-
-        if (hourlyApexChart) {
-            hourlyApexChart.updateOptions(hourlyOptions);
-        } else {
-            hourlyApexChart = new ApexCharts(hourlyContainer, hourlyOptions);
-            hourlyApexChart.render();
-        }
+        hourlyApexChart = new ApexCharts(hourContainer, hourOptions);
+        hourlyApexChart.render();
     }
 }
 
-// Fallback natif Canvas stylisé si ApexCharts n'est pas chargé
-function renderAdminTrendChart() {
+// ── MOTEUR DE SECOURS CANVAS HD AUTONOME (ZÉRO DÉPENDANCE) ──
+function renderCanvasFallbackCharts() {
+    renderCanvasTrend();
+    renderCanvasTopPages();
+    renderCanvasHourly();
+}
+
+function renderCanvasTrend() {
     const canvas = document.getElementById('adminTrendChart');
+    const container = document.getElementById('adminApexTrendChart');
+    const fallback = document.getElementById('adminTrendChartFallback');
     if (!canvas) return;
+    if (fallback) fallback.style.display = 'block';
+    if (container) container.style.display = 'none';
+
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
+    const parentW = canvas.parentElement ? canvas.parentElement.clientWidth : 600;
+    const w = Math.max(300, parentW || 600);
+    const h = 260;
+
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
     ctx.scale(dpr, dpr);
 
-    const w = rect.width;
-    const h = rect.height;
     const padLeft = 40;
     const padRight = 20;
     const padTop = 20;
     const padBottom = 30;
 
-    const data = <?= json_encode(array_values($stats30Days)) ?>;
+    const data = telemetryData.timeline;
     if (!data || data.length === 0) return;
 
-    const maxUsers = Math.max(2, ...data.map(d => d.users));
-    const maxSessions = Math.max(5, ...data.map(d => d.sessions));
-    const maxVal = Math.max(maxUsers, maxSessions, 5) * 1.15;
+    const maxVal = Math.max(10, ...data.map(d => Number(d.views) || 0), ...data.map(d => Number(d.unique_users) || 0), ...data.map(d => Number(d.registrations) || 0)) * 1.15;
 
     ctx.clearRect(0, 0, w, h);
 
+    // Grille horizontale
     ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
     ctx.lineWidth = 1;
     ctx.fillStyle = '#94a3b8';
@@ -2955,7 +3051,7 @@ function renderAdminTrendChart() {
         const points = [];
         data.forEach((d, idx) => {
             const x = padLeft + idx * stepX;
-            const y = padTop + chartH * (1 - ((d[key] || 0) / maxVal));
+            const y = padTop + chartH * (1 - ((Number(d[key]) || 0) / maxVal));
             points.push({x, y});
         });
 
@@ -2978,7 +3074,7 @@ function renderAdminTrendChart() {
 
         ctx.fillStyle = strokeCol;
         points.forEach((p, idx) => {
-            if (idx % 4 === 0 || idx === points.length - 1) {
+            if (idx % 3 === 0 || idx === points.length - 1) {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
                 ctx.fill();
@@ -2986,23 +3082,159 @@ function renderAdminTrendChart() {
         });
     }
 
-    drawLineSeries('sessions', '#2fb344', 'rgba(47, 179, 68, 0.08)');
-    drawLineSeries('users', '#206bc4', 'rgba(32, 107, 196, 0.12)');
+    drawLineSeries('views', '#206bc4', 'rgba(32, 107, 196, 0.12)');
+    drawLineSeries('unique_users', '#2fb344', 'rgba(47, 179, 68, 0.08)');
+    drawLineSeries('registrations', '#f59f00', 'rgba(245, 159, 0, 0.08)');
 
     ctx.fillStyle = '#64748b';
     data.forEach((d, idx) => {
-        if (idx % 5 === 0 || idx === data.length - 1) {
+        if (idx % Math.max(1, Math.ceil(data.length / 8)) === 0 || idx === data.length - 1) {
             const x = padLeft + idx * stepX;
-            ctx.fillText(d.day, x - 12, h - 8);
+            ctx.fillText(String(d.label || ''), x - 12, h - 8);
         }
     });
 }
-window.addEventListener('resize', () => {
-    if (typeof renderAnalyticsCharts === 'function') {
-        renderAnalyticsCharts();
-    } else if (typeof renderAdminTrendChart === 'function') {
-        renderAdminTrendChart();
+
+function renderCanvasTopPages() {
+    const canvas = document.getElementById('adminTopPagesChart');
+    const container = document.getElementById('adminApexTopPagesChart');
+    const fallback = document.getElementById('adminTopPagesFallback');
+    if (!canvas) return;
+    if (fallback) fallback.style.display = 'block';
+    if (container) container.style.display = 'none';
+
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const parentW = canvas.parentElement ? canvas.parentElement.clientWidth : 400;
+    const w = Math.max(300, parentW || 400);
+    const h = 260;
+
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.scale(dpr, dpr);
+
+    ctx.clearRect(0, 0, w, h);
+
+    const items = telemetryData.topPages.slice(0, 7);
+    if (!items || items.length === 0) return;
+
+    const maxVal = Math.max(5, ...items.map(i => Number(i.hit_count) || 0)) * 1.15;
+    const labelW = 110;
+    const padRight = 50;
+    const padTop = 15;
+    const barAreaW = w - labelW - padRight;
+    const barH = 22;
+    const gap = 12;
+
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+    items.forEach((item, idx) => {
+        const y = padTop + idx * (barH + gap);
+        const val = Number(item.hit_count) || 0;
+        const barW = Math.max(4, (val / maxVal) * barAreaW);
+
+        // Label
+        ctx.fillStyle = '#475569';
+        ctx.textAlign = 'right';
+        ctx.fillText(String(item.label || '').substring(0, 16), labelW - 10, y + 15);
+
+        // Background barre
+        ctx.fillStyle = 'rgba(66, 153, 225, 0.12)';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(labelW, y, barAreaW, barH, 4) : ctx.rect(labelW, y, barAreaW, barH);
+        ctx.fill();
+
+        // Barre active
+        ctx.fillStyle = '#4299e1';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(labelW, y, barW, barH, 4) : ctx.rect(labelW, y, barW, barH);
+        ctx.fill();
+
+        // Valeur
+        ctx.fillStyle = '#1e293b';
+        ctx.textAlign = 'left';
+        ctx.fillText(val + ' v.', labelW + barW + 8, y + 15);
+    });
+}
+
+function renderCanvasHourly() {
+    const canvas = document.getElementById('adminHourlyChart');
+    const container = document.getElementById('adminApexHourlyChart');
+    const fallback = document.getElementById('adminHourlyFallback');
+    if (!canvas) return;
+    if (fallback) fallback.style.display = 'block';
+    if (container) container.style.display = 'none';
+
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const parentW = canvas.parentElement ? canvas.parentElement.clientWidth : 400;
+    const w = Math.max(300, parentW || 400);
+    const h = 260;
+
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.scale(dpr, dpr);
+
+    ctx.clearRect(0, 0, w, h);
+
+    const data = telemetryData.hourly;
+    if (!data || data.length === 0) return;
+
+    const maxVal = Math.max(5, ...data.map(v => Number(v) || 0)) * 1.2;
+    const padLeft = 30;
+    const padRight = 15;
+    const padTop = 20;
+    const padBottom = 25;
+    const chartW = w - padLeft - padRight;
+    const chartH = h - padTop - padBottom;
+    const colW = (chartW / 24) * 0.7;
+    const stepX = chartW / 24;
+
+    ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+    // Grille 3 étapes
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)';
+    ctx.fillStyle = '#94a3b8';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 3; i++) {
+        const y = padTop + chartH * (1 - i / 3);
+        ctx.beginPath();
+        ctx.moveTo(padLeft, y);
+        ctx.lineTo(w - padRight, y);
+        ctx.stroke();
+        ctx.fillText(Math.round((maxVal * i) / 3), padLeft - 6, y + 3);
     }
+
+    // Colonnes
+    data.forEach((val, hour) => {
+        const v = Number(val) || 0;
+        const barH = (v / maxVal) * chartH;
+        const x = padLeft + hour * stepX + (stepX - colW) / 2;
+        const y = padTop + chartH - barH;
+
+        ctx.fillStyle = '#f59f00';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(x, y, colW, barH, [3, 3, 0, 0]) : ctx.rect(x, y, colW, barH);
+        ctx.fill();
+
+        if (hour % 3 === 0) {
+            ctx.fillStyle = '#64748b';
+            ctx.textAlign = 'center';
+            ctx.fillText(hour + 'h', x + colW / 2, h - 8);
+        }
+    });
+}
+
+function renderAdminTrendChart() {
+    renderCanvasTrend();
+}
+
+window.addEventListener('resize', () => {
+    requestRenderAnalyticsCharts();
 });
 
 const adminPagesMeta = <?= json_encode($adminPages, JSON_UNESCAPED_UNICODE) ?>;
@@ -3109,11 +3341,7 @@ function switchAdminTab(tabKey) {
     }
 
     if (tabKey === 'dashboard' || tabKey === 'all') {
-        if (typeof renderAnalyticsCharts === 'function') {
-            setTimeout(renderAnalyticsCharts, 60);
-        } else if (typeof renderAdminTrendChart === 'function') {
-            setTimeout(renderAdminTrendChart, 60);
-        }
+        requestRenderAnalyticsCharts();
     }
 
     if (tabKey === 'world' || tabKey === 'all') {
@@ -3270,11 +3498,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (typeof renderAnalyticsCharts === 'function') {
-        setTimeout(renderAnalyticsCharts, 80);
-    } else if (typeof renderAdminTrendChart === 'function') {
-        setTimeout(renderAdminTrendChart, 80);
-    }
+    requestRenderAnalyticsCharts();
 });
 
 // --- FONCTIONS DE GESTION DES ANNONCES & NOUVEAUTÉS (ADMIN) ---
