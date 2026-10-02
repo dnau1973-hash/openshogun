@@ -235,6 +235,13 @@ class DevTeamEngine {
             'icon'        => '⚔️',
             'roles'       => ['game_designer'],
             'permissions' => ['formulas.tune', 'debug.sandbox']
+        ],
+        'village_simulator' => [
+            'id'          => 'village_simulator',
+            'title'       => 'Simulateur de Vie du Village',
+            'icon'        => '🌾',
+            'roles'       => ['game_designer'],
+            'permissions' => ['formulas.tune', 'debug.sandbox']
         ]
     ];
 
@@ -277,6 +284,12 @@ class DevTeamEngine {
                     'title' => 'Simulateur de Combat',
                     'icon'  => '<i class="fa-solid fa-shield-halved text-danger me-1"></i>',
                     'file'  => 'game-elevate-designer/combat-simulator.php'
+                ],
+                'village-life-simulator' => [
+                    'slug'  => 'village-life-simulator',
+                    'title' => 'Vie du Village (Sandbox)',
+                    'icon'  => '<i class="fa-solid fa-people-roof text-primary me-1"></i>',
+                    'file'  => 'game-elevate-designer/village-life-simulator.php'
                 ],
                 'speed-balancing' => [
                     'slug'  => 'speed-balancing',
@@ -753,7 +766,7 @@ class DevTeamEngine {
 
         // 2. Règle pour les modules Game Elevate Designer :
         // Réservés aux détenteurs du métier "Game Elevate Designer" (game_designer) ou à l'administrateur.
-        if (in_array($tab, ['game_speeds', 'world_expansion', 'oases_ecosystem', 'combat_simulator'], true)) {
+        if (in_array($tab, ['game_speeds', 'world_expansion', 'oases_ecosystem', 'combat_simulator', 'village_simulator'], true)) {
             return in_array('game_designer', $userRoleIds, true) || $isAdmin;
         }
 

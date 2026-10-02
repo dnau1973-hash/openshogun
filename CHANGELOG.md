@@ -5,6 +5,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Simulateur de Vie dans un Village & Bac à Sable Démographique (`views/studio/game-elevate-designer/village-life-simulator.php`, `core/AuthManager.php`, `core/DevTeamEngine.php`) :**
+  * Module d'équilibrage et de simulation démographique interactif réservé au métier Game Elevate Designer (contrôle strict `AuthManager::hasJob`).
+  * Horloge d'accélération temporelle de x1 à x100 avec contrôles Play, Pause, Réinitialiser et pas à pas horaire (+1h, +24h).
+  * Curseurs interactifs des flux de production horaire (Riz, Farine, Saké, Sérénité) et 4 scénarios d'équilibrage en 1 clic.
+  * Moniteur temps réel avec 4 jauges KPI dynamiques et graphique multi-courbes ApexCharts (avec fallback Canvas HD).
+  * Chronique événementielle en direct (Ticker) et générateur d'export JSON pour les bilans de game design.
 - **Système de Population, Main-d'Œuvre, Règle Asymétrique du Saké & Mécanique d'Exode (`core/PopulationEngine.php`, `core/PlanetEngine.php`, `views/partials/header.php`, `views/building.php`, `views/field.php`, `views/city.php`, `views/resources.php`) :**
   * Quotas d'ouvriers requis par niveau pour les 4 parcelles rurales et 16 structures urbaines.
   * Malus proportionnel automatique sur le rendement horaire des récoltes en cas de sous-effectif global.

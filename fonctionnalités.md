@@ -519,3 +519,26 @@
   4. Vider les réserves de farine et de riz : constater la chute du contentement en dessous de 25%, l'apparition du statut « Exode Imminent ! », le clignotement pulsant rouge du cadre et le début de perte d'habitants par cycle.
   5. Consulter une fiche de bâtiment (`/?page=building&slot=...`) ou de parcelle (`/?page=field&slot=...`) : vérifier l'affichage du badge d'ouvriers requis et de l'indicateur d'effectif complet ou sous-effectif.
 
+---
+
+### [2026-10-02] - village-life-simulator : Simulateur de Vie dans un Village & Bac à Sable Démographique (Studio Dev)
+- **Module :** `studio / game-elevate-designer`
+- **Statut :** `À tester`
+- **Description :** Création du module d'équilibrage et de simulation démographique « Simulateur de Vie dans un Village » (`views/studio/game-elevate-designer/village-life-simulator.php`) pour le métier Game Elevate Designer dans Studio Dev :
+  - **Sécurité serveur :** Verrouillage strict de l'accès via le helper `AuthManager::hasJob('game-elevate-designer')` avec renvoi d'une erreur HTTP 403 et écran de verrouillage si l'utilisateur ne possède pas ce métier (avec passe-droit administrateur).
+  - **Contrôle temporel accéléré :** Horloge féodale réglable avec facteur d'accélération de x1 à x100 (x1, x5, x10, x25, x50, x100), boutons Play, Pause, Réinitialiser et pas à pas (+1h, +24h).
+  - **Paramètres de flux & Presets en 1 clic :** Curseurs interactifs pour la population initiale, la capacité des habitations, les postes de travail ouverts, et les flux horaires entrants de Riz, Farine, Saké et Sérénité passive Shinto. 4 scénarios prédéfinis prêts à tester : « Pénurie critique de riz », « Prospérité sous saké », « Surpopulation sans emplois », « Équilibre parfait ».
+  - **Moniteur temps réel & Visualisation :** 4 cartes KPI dynamiques (Satisfaction féodale avec alerte clignotante d'exode `< 25%`, Population/Logements, Main-d'œuvre/Emplois, Stocks du grenier). Graphique interactif multi-courbes en temps réel (ApexCharts avec canvas HD de secours) traçant simultanément la population, le riz, la farine, le saké et le contentement.
+  - **Chronique d'événements en direct :** Journal horodaté (Ticker) capturant les naissances, exodes de crise, ruptures de farine et célébrations de saké.
+  - **Exportation :** Générateur de rapport d'équilibrage JSON complet téléchargeable en un clic avec séries chronologiques et recommandations pour les constantes de jeu.
+- **Fichiers modifiés :** `core/AuthManager.php`, `core/DevTeamEngine.php`, `views/dev_team.php`, `views/studio/game-elevate-designer/village-life-simulator.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter avec un compte Game Elevate Designer (ou Administrateur) et accéder à `/?page=dev_team&metier=game-elevate-designer` : constater la présence du nouveau sous-module « Vie du Village (Sandbox) » dans les pills de navigation.
+  2. Cliquer sur l'onglet : vérifier l'affichage fluide du layout 2 colonnes avec l'horloge et les 4 cartes KPI initialisées.
+  3. Lancer la simulation (Play) à vitesse x10 ou x25 : observer le défilement de l'horloge, l'animation du graphique et les entrées du journal d'événements.
+  4. Tester le scénario « Pénurie critique » : constater l'effondrement rapide du stock de farine, la chute du moral sous 25%, le passage au statut « Exode Imminent ! », le clignotement rouge du cadre et les départs de villageois dans le journal.
+  5. Tester le scénario « Prospérité sous saké » : constater l'activation du bonus +15% de saké et la croissance démographique continue jusqu'au plafond de logements.
+  6. Cliquer sur « Exporter Scénario JSON » : vérifier le téléchargement effectif du fichier `.json` structuré.
+  7. Tester la sécurité avec un compte membre ne détenant pas le métier Game Elevate Designer : tenter d'accéder au module et constater le refus d'accès HTTP 403.
+
+

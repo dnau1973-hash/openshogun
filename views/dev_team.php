@@ -124,6 +124,7 @@ $tabToMetierMap = [
     'world_expansion'  => ['metier' => 'game-elevate-designer', 'module' => 'shogunat-survey'],
     'oases_ecosystem'  => ['metier' => 'game-elevate-designer', 'module' => 'oasis-ecosystem'],
     'combat_simulator' => ['metier' => 'game-elevate-designer', 'module' => 'combat-simulator'],
+    'village_simulator'=> ['metier' => 'game-elevate-designer', 'module' => 'village-life-simulator'],
     'mailing'          => ['metier' => 'community-manager', 'module' => 'mailing-list'],
     'qa'               => ['metier' => 'qa-tester', 'module' => 'qa-validation'],
     'sandbox'          => ['metier' => 'qa-tester', 'module' => 'sandbox'],
