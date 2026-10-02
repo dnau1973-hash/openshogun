@@ -3,6 +3,23 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - admin/js-syntax-error : Correction de la Balise Script & Modale Koban
+- **Module :** `admin/js-syntax-error`
+- **Statut :** `À tester`
+- **Description :**
+  - **Cause racine de l'erreur JavaScript console :** Lors d'un commit précédent ajoutant la modale d'octroi de Koban (`#modalAdminGiveKoban`), le bloc HTML de la modale avait été inséré en fin de fichier à l'intérieur de la balise `<script>` sans balise fermante `</script>`. Le parseur JavaScript du navigateur levait immédiatement `Uncaught SyntaxError: Unexpected token '<'`, empêchant l'évaluation de l'ensemble du JavaScript de la page d'administration (`switchAdminTab`, `renderAnalyticsCharts`, paginations, soumissions de formulaires, etc.).
+  - **Correctif :** 
+    1. Déplacement de la modale HTML `#modalAdminGiveKoban` dans la section des modales (au-dessus du bloc `<script>`).
+    2. Fermeture rigoureuse de la balise `<script>` avec `</script>` à la fin de la fonction `toggleModerator()`.
+    3. Validation de la syntaxe JavaScript via analyseur AST (zéro erreur).
+- **Fichiers modifiés :** `views/admin.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Ouvrir la console développeur (F12) et charger la page d'administration (`/?page=admin`).
+  2. Vérifier l'absence totale de l'erreur `Uncaught SyntaxError: Unexpected token '<'`.
+  3. Vérifier que la navigation par onglets (`switchAdminTab`), les graphiques statistiques et le bouton d'octroi de Koban (`openAdminGiveKobanModal`) fonctionnent immédiatement sans incident.
+
+---
+
 ### [2026-10-02] - admin/analytics-engine : Nettoyage Header & Moteur de Graphiques Résilient
 - **Module :** `admin/analytics-engine`
 - **Statut :** `À tester`

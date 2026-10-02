@@ -2769,8 +2769,64 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     </div>
 </div>
 
+<!-- Modale d'Octroi de Koban Impériaux par l'Administrateur -->
+<div class="modal modal-blur fade" id="modalAdminGiveKoban" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content shadow-lg border-0" style="border-radius:12px; overflow:hidden;">
+            <div class="modal-header bg-warning text-dark py-3">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2 m-0">
+                    <i class="fa-solid fa-coins text-warning me-1"></i>Octroi de Koban Impériaux
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formAdminGiveKoban" onsubmit="submitAdminGiveKoban(event)">
+                <input type="hidden" id="agk_user_id" name="user_id" value="">
+                <div class="modal-body p-4">
+                    <div class="d-flex align-items-center gap-3 p-3 rounded mb-3" style="background:#fffbeb; border:1px solid #fde68a;">
+                        <i class="fa-solid fa-user text-primary fs-1"></i>
+                        <div>
+                            <div class="text-secondary small fw-bold text-uppercase">Daimyō Destinataire</div>
+                            <div class="fs-3 fw-bold text-dark" id="agk_username">---</div>
+                            <div class="text-muted small">
+                                Solde actuel : <strong class="text-warning-emphasis" id="agk_current_koban">0</strong> <i class="fa-solid fa-coins text-warning"></i> Koban
+                            </div>
+                        </div>
+                    </div>
 
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Montant à octroyer (Koban <i class="fa-solid fa-coins text-warning"></i>)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-warning-subtle text-warning-emphasis fw-bold"><i class="fa-solid fa-coins"></i></span>
+                            <input type="number" id="agk_amount" name="amount" class="form-control form-control-lg fw-bold" 
+                                   min="1" max="100000" step="1" value="100" required placeholder="Ex: 100">
+                        </div>
+                        <div class="form-text small text-muted">
+                            Ce montant sera immédiatement ajouté au trésor du joueur et une missive officielle lui sera transmise.
+                        </div>
+                    </div>
 
+                    <!-- Raccourcis de montants rapides -->
+                    <div class="mb-2">
+                        <label class="form-label small text-muted fw-bold mb-1">Montants Rapides :</label>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(50)">+50 <i class="fa-solid fa-coins text-warning"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(100)">+100 <i class="fa-solid fa-coins text-warning"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(200)">+200 <i class="fa-solid fa-coins text-warning"></i> (7j)</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(360)">+360 <i class="fa-solid fa-coins text-warning"></i> (14j)</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(600)">+600 <i class="fa-solid fa-coins text-warning"></i> (30j)</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" id="btnSubmitGiveKoban" class="btn btn-warning fw-bold px-4 shadow-sm">
+                        <i class="fa-solid fa-coins text-warning me-1"></i>Verser les Koban
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- Script CDN ApexCharts pour les visualisations interactives du Shogunat -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -4552,65 +4608,5 @@ async function toggleModerator(userId, username, currentStatus) {
         showModalAlert("Erreur Réseau", "Erreur lors de l'opération.", "danger");
     }
 }
-
-
-
-<!-- Modale d'Octroi de Koban Impériaux par l'Administrateur -->
-<div class="modal modal-blur fade" id="modalAdminGiveKoban" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content shadow-lg border-0" style="border-radius:12px; overflow:hidden;">
-            <div class="modal-header bg-warning text-dark py-3">
-                <h5 class="modal-title fw-bold d-flex align-items-center gap-2 m-0">
-                    <i class="fa-solid fa-coins text-warning me-1"></i>Octroi de Koban Impériaux
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="formAdminGiveKoban" onsubmit="submitAdminGiveKoban(event)">
-                <input type="hidden" id="agk_user_id" name="user_id" value="">
-                <div class="modal-body p-4">
-                    <div class="d-flex align-items-center gap-3 p-3 rounded mb-3" style="background:#fffbeb; border:1px solid #fde68a;">
-                        <i class="fa-solid fa-user text-primary fs-1"></i>
-                        <div>
-                            <div class="text-secondary small fw-bold text-uppercase">Daimyō Destinataire</div>
-                            <div class="fs-3 fw-bold text-dark" id="agk_username">---</div>
-                            <div class="text-muted small">
-                                Solde actuel : <strong class="text-warning-emphasis" id="agk_current_koban">0</strong> <i class="fa-solid fa-coins text-warning"></i> Koban
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Montant à octroyer (Koban <i class="fa-solid fa-coins text-warning"></i>)</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-warning-subtle text-warning-emphasis fw-bold"><i class="fa-solid fa-coins"></i></span>
-                            <input type="number" id="agk_amount" name="amount" class="form-control form-control-lg fw-bold" 
-                                   min="1" max="100000" step="1" value="100" required placeholder="Ex: 100">
-                        </div>
-                        <div class="form-text small text-muted">
-                            Ce montant sera immédiatement ajouté au trésor du joueur et une missive officielle lui sera transmise.
-                        </div>
-                    </div>
-
-                    <!-- Raccourcis de montants rapides -->
-                    <div class="mb-2">
-                        <label class="form-label small text-muted fw-bold mb-1">Montants Rapides :</label>
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(50)">+50 <i class="fa-solid fa-coins text-warning"></i></button>
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(100)">+100 <i class="fa-solid fa-coins text-warning"></i></button>
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(200)">+200 <i class="fa-solid fa-coins text-warning"></i> (7j)</button>
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(360)">+360 <i class="fa-solid fa-coins text-warning"></i> (14j)</button>
-                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="setAdminKobanPreset(600)">+600 <i class="fa-solid fa-coins text-warning"></i> (30j)</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" id="btnSubmitGiveKoban" class="btn btn-warning fw-bold px-4 shadow-sm">
-                        <i class="fa-solid fa-coins text-warning me-1"></i>Verser les Koban
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+</script>
 
