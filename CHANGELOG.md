@@ -5,6 +5,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Carte Interactive du Terroir Rural & Vues Dédiées 5 Slots par Ressource (`views/resources.php`, `views/view_resource.php`, `views/view_village.php`, `core/TerroirEngine.php`, `api/terroir.php`) :**
+  * Nouvelle carte panoramique du terroir féodal (`1696x2528 px`) avec 7 badges interactifs positionnés en pourcentages CSS sur les repères du décor (Montagne, Forêt, Argile, Rizières, Thé, Soja, Village).
+  * Effets de survol enrichis : zoom contextuel, halo lumineux pulsant (`zone-badge-beacon`), tooltips Tabler.io avec cadences horaires et redirection directe.
+  * Vues thématiques dédiées par ressource avec fond d'écran haute définition et composition spatiale ergonomique de 5 slots de développement.
+  * Grille de cartes Tabler.io affichant niveau, ouvriers affectés par type de métier, cadence horaire et bouton d'élévation asynchrone AJAX (`api/terroir.php`).
+  * Vue dédiée au Village central avec 3 widgets KPI Tabler (Démographie, Affectation de la main-d'œuvre, Contentement) et 5 infrastructures de vie (Minka, Nagaya, Sanctuaires, Moulin hydraulique, Brasserie de Saké).
+  * Bascule fluide 1-clic entre la Carte Interactive et la vue classique des 18 parcelles.
 - **Simulateur de Vie dans un Village & Bac à Sable Démographique (`views/studio/game-elevate-designer/village-life-simulator.php`, `core/AuthManager.php`, `core/DevTeamEngine.php`) :**
   * Module d'équilibrage et de simulation démographique interactif réservé au métier Game Elevate Designer (contrôle strict `AuthManager::hasJob`).
   * Horloge d'accélération temporelle de x1 à x100 avec contrôles Play, Pause, Réinitialiser et pas à pas horaire (+1h, +24h).

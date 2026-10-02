@@ -147,9 +147,12 @@ if ($page === 'galaxy') {
     $page = 'poster';
 } elseif ($page === 'newsletter') {
     $page = 'newsletter_compose';
+} elseif ($page === 'view_village') {
+    $_GET['type'] = 'village';
+    $page = 'view_resource';
 }
 
-$allowedPages = ['resources', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team', 'poster', 'newsletter_compose'];
+$allowedPages = ['resources', 'view_resource', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team', 'poster', 'newsletter_compose'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';

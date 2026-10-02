@@ -3,6 +3,43 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - rural-terroir-interactive : Carte Interactive du Terroir Rural & Vues Dédiées 5 Slots
+- **Module :** `rural-terroir-interactive`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Déploiement de l'Illustration Panoramique Maîtresse :**
+     - Récupération de l'image de référence haute résolution (`1696x2528 px`) depuis `tmp/` et déploiement dans les assets publics sous `public/assets/shogun_rural_terroir_bg.jpg` (avec sauvegarde du fond historique sous `shogun_rural_terroir_bg_legacy.jpg`).
+     - Génération d'assets thématiques dédiés haute définition pour les 7 zones du fief (`terroir_wood.jpg`, `terroir_stone.jpg`, `terroir_clay.jpg`, `terroir_rice.jpg`, `terroir_tea.jpg`, `terroir_soybean.jpg`, `terroir_village.jpg`) dans `public/assets/resources/`.
+  2. **Carte Interactive du Terroir Rural (`views/resources.php`) :**
+     - Intégration de la carte panoramique avec ratio d'aspect strict `1696 / 2528` et positionnement en pourcentages CSS de badges interactifs enrichis (pins/hotspots) avec icônes Font Awesome, balises lumineuses pulsantes (`zone-badge-beacon`), tooltips Tabler.io natifs, affichage dynamique de la cadence horaire ou du statut démographique, et redirection au clic :
+       * ⛰️ **Montagne** (`left: 58%, top: 25%`) : Extraction de pierre de taille (`?page=view_resource&type=stone`).
+       * 🌲 **Forêt** (`left: 21%, top: 38%`) : Bois de cèdre et sylviculture (`?page=view_resource&type=wood`).
+       * 🏺 **Argile** (`left: 81%, top: 51%`) : Gisement alluvial et cuisson de tuiles Kawara (`?page=view_resource&type=clay`).
+       * 🌾 **Rizières** (`left: 52%, top: 62%`) : Terrasses inondées de riz impérial Koku (`?page=view_resource&type=rice`).
+       * 🍵 **Thé** (`left: 20%, top: 54%`) : Champs étagés de thé vert et matcha (`?page=view_resource&type=tea`).
+       * 🫘 **Soja** (`left: 19%, top: 72%`) : Légumineuses, farine et pâte miso (`?page=view_resource&type=soybean`).
+       * ⛩️ **Village central** (`left: 53%, top: 90%`) : Logements, sanctuaires shinto et meuneries (`?page=view_resource&type=village`).
+       * 🏯 **Tenshu** (`left: 50%, top: 34%`) : Donjon central et cité castrale (`?page=city`).
+     - Bouton bascule ergonomique permettant de permuter à tout moment entre la « Carte Interactive du Terroir » et la « Vue 18 Parcelles Travian ».
+  3. **Architecture des Vues de Gestion par Ressource (5 Slots) (`views/view_resource.php`, `core/TerroirEngine.php`) :**
+     - Routage modulaire dédié `?page=view_resource&type=wood|stone|clay|rice|tea|soybean|village` déclaré dans `index.php`.
+     - Scène thématique haute définition (format 16/9) avec 5 emplacements interactifs positionnés précisément sur les repères visuels du décor.
+     - Grille de 5 cartes Tabler.io détaillant pour chaque slot : niveau, main-d'œuvre/villageois affectés (avec type de métier spécialisé), cadence horaire, coût d'élévation multi-ressources et bouton d'action asynchrone branché sur `api/terroir.php`.
+  4. **Vue Dédiée au Village Central (`views/view_resource.php?type=village`, `views/view_village.php`) :**
+     - En-tête enrichi avec 3 widgets Tabler.io de suivi : Population totale & Capacité libre d'accueil, Affectation de la main-d'œuvre (ouvriers requis vs affectés vs inactifs), et Jauge de Contentement féodale avec bonus asymétrique de Saké (+15%).
+     - 5 emplacements réservés aux infrastructures rurales : Logements traditionnels (Minka), Maisons communes d'artisans (Nagaya), Sanctuaire Shintō & Torii, Moulin à eau fluvial (Suisha), Brasserie de Riz (Sakagura).
+- **Fichiers modifiés / créés :** `views/resources.php`, `views/view_resource.php`, `views/view_village.php`, `core/TerroirEngine.php`, `api/terroir.php`, `database/migrate_terroir_slots.php`, `index.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter et accéder à la page des ressources (`/?page=resources`).
+  2. Vérifier l'affichage de la carte panoramique féodale avec ses 7 badges interactifs positionnés précisément sur les zones.
+  3. Survoler les badges : observer l'animation de halo, le zoom progressif et l'infobulle Tooltip Tabler affichant la cadence.
+  4. Cliquer sur chaque badge (Montagne, Forêt, Argile, Rizières, Thé, Soja, Village) : vérifier la redirection fluide vers la vue dédiée 5 slots correspondante.
+  5. Sur chaque vue de ressource, vérifier les 5 slots positionnés sur le décor et les 5 cartes d'action en contrebas (avec niveau, ouvriers, cadence horaire et bouton d'élévation).
+  6. Tester l'élévation d'un slot de ressource et vérifier la déduction des ressources et la mise à jour immédiate.
+  7. Sur la vue Village (`?page=view_resource&type=village`), vérifier la présence des 3 widgets Tabler (Démographie, Main-d'œuvre, Contentement) et des 5 édifices villageois.
+
+---
+
 ### [2026-10-02] - admin/js-syntax-error : Correction de la Balise Script & Modale Koban
 - **Module :** `admin/js-syntax-error`
 - **Statut :** `À tester`
