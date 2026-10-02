@@ -19,6 +19,28 @@ $isAuth = Auth::check();
 $auth = new Auth();
 $user = $isAuth ? $auth->getCurrentUser() : null;
 
+// Registre des leçons de l'École du Backend
+$backendLessons = [
+    'php-poo-singleton' => [
+        'title' => "PHP & POO : La Forge de Sabres et le Facteur Impérial Unique",
+        'badge' => "Backend &bull; Leçon 01",
+        'file' => __DIR__ . '/atelier-pedagogique/backend/php-poo-singleton.php',
+    ],
+    'pdo-sql-injection' => [
+        'title' => "PDO & Sécurité : Le Coffre-Fort du Shogun et les Parchemins Piégés",
+        'badge' => "Sécurité &bull; Leçon 02",
+        'file' => __DIR__ . '/atelier-pedagogique/backend/pdo-sql-injection.php',
+    ],
+    'routing-get-post' => [
+        'title' => "Routage & Messagers : Les Panneaux de Kyoto, Cartes Postales et Ninjas",
+        'badge' => "Réseau &bull; Leçon 03",
+        'file' => __DIR__ . '/atelier-pedagogique/backend/routing-get-post.php',
+    ],
+];
+
+$requestedLesson = trim((string)($_GET['lesson'] ?? $_GET['course'] ?? ''));
+$currentLesson = $backendLessons[$requestedLesson] ?? null;
+
 // Si l'utilisateur n'est pas connecté, afficher le template complet public Tabler.io en thème clair
 if (!$isAuth):
 ?>
@@ -27,7 +49,7 @@ if (!$isAuth):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atelier Pédagogique &bull; Les Coulisses de Conception d'OpenShogun</title>
+    <title><?= $currentLesson ? htmlspecialchars($currentLesson['title']) . ' &bull; Atelier Pédagogique' : 'Atelier Pédagogique &bull; Les Coulisses de Conception d\'OpenShogun' ?></title>
     <!-- Google Fonts: Dela Gothic One -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,7 +80,7 @@ if (!$isAuth):
         <!-- Barre de navigation publique en thème clair -->
         <header class="navbar navbar-expand-md public-pedagogy-header py-2 sticky-top">
             <div class="container-xl">
-                <a href="/" class="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
+                <a href="/?page=pedagogy" class="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
                     <span class="fs-2 text-cyan"><i class="fa-solid fa-graduation-cap"></i></span>
                     <div>
                         <div class="fw-bold text-dark lh-1" style="font-size: 1.1rem; letter-spacing: 0.5px;">Atelier Pédagogique</div>
@@ -83,23 +105,27 @@ if (!$isAuth):
         <!-- Contenu de l'Atelier Pédagogique -->
         <main class="page-wrapper py-4">
             <div class="container-xl">
-                <!-- Bandeau d'introduction publique épuré -->
-                <div class="alert alert-info bg-white border border-primary-subtle text-dark d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 p-3 rounded-3 shadow-sm">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="fa-solid fa-star fs-1 text-primary"></i>
+                <?php if ($currentLesson): ?>
+                    <?php require $currentLesson['file']; ?>
+                <?php else: ?>
+                    <!-- Bandeau d'introduction publique épuré -->
+                    <div class="alert alert-info bg-white border border-primary-subtle text-dark d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 p-3 rounded-3 shadow-sm">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fa-solid fa-star fs-1 text-primary"></i>
+                            <div>
+                                <strong class="text-dark">Bienvenue dans les coulisses techniques d'un jeu de stratégie en ligne !</strong>
+                                <div class="text-secondary small">Découvrez comment fonctionnent l'architecture client/serveur, la boucle d'états, le moteur de règles, la programmation backend et la création graphique avec l'IA.</div>
+                            </div>
+                        </div>
                         <div>
-                            <strong class="text-dark">Bienvenue dans les coulisses techniques d'un jeu de stratégie en ligne !</strong>
-                            <div class="text-secondary small">Découvrez comment fonctionnent l'architecture client/serveur, la boucle d'états, le moteur de règles, l'aléatoire contrôlé (RNG) et la création graphique avec l'IA.</div>
+                            <a href="/?action=register" class="btn btn-sm btn-primary fw-bold">
+                                Créer un fief et tester le moteur &rarr;
+                            </a>
                         </div>
                     </div>
-                    <div>
-                        <a href="/?action=register" class="btn btn-sm btn-primary fw-bold">
-                            Créer un fief et tester le moteur &rarr;
-                        </a>
-                    </div>
-                </div>
 
-                <?php require __DIR__ . '/partials/admin_pedagogy.php'; ?>
+                    <?php require __DIR__ . '/partials/admin_pedagogy.php'; ?>
+                <?php endif; ?>
             </div>
         </main>
 
@@ -107,6 +133,8 @@ if (!$isAuth):
         <footer class="footer footer-transparent d-print-none py-3 border-top bg-white">
             <div class="container-xl text-center text-muted small">
                 <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2 small fw-semibold">
+                    <a href="/?page=pedagogy" class="text-decoration-none text-secondary"><i class="fa-solid fa-graduation-cap me-1"></i>Atelier Pédagogique</a>
+                    <span class="text-muted opacity-50">&bull;</span>
                     <a href="/?page=docs" class="text-decoration-none text-secondary"><i class="fa-solid fa-book-open me-1"></i>Règles du jeu</a>
                     <span class="text-muted opacity-50">&bull;</span>
                     <a href="/?page=support" class="text-decoration-none text-secondary"><i class="fa-solid fa-life-ring me-1"></i>Support &amp; Aide</a>
@@ -134,29 +162,58 @@ endif;
 ?>
 
 <div class="container-fluid px-0 my-2">
-    <!-- Fil d'Ariane & Titre épuré -->
-    <div class="page-header d-print-none mb-3">
-        <div class="row align-items-center">
-            <div class="col">
-                <div class="page-pretitle text-primary fw-bold"><i class="fa-solid fa-graduation-cap me-1"></i>Savoir &amp; Coulisses Techniques</div>
-                <h2 class="page-title d-flex align-items-center gap-2 text-dark">
-                    <i class="fa-solid fa-gamepad text-primary"></i>
-                    <span>Atelier Pédagogique &bull; Studio de Conception</span>
-                    <span class="badge bg-primary-lt ms-2">Projet Père-Fils</span>
-                </h2>
-                <div class="text-secondary small mt-1">
-                    Explorez les rouages du moteur de jeu : architecture réseau, états logiques, algorithmes de combat et génération créative.
+    <?php if ($currentLesson): ?>
+        <!-- En-tête HUD pour une leçon spécifique -->
+        <div class="page-header d-print-none mb-3">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="page-pretitle text-primary fw-bold">
+                        <a href="/?page=pedagogy" class="text-decoration-none"><i class="fa-solid fa-graduation-cap me-1"></i>Atelier Pédagogique</a> &rsaquo; <?= $currentLesson['badge'] ?>
+                    </div>
+                    <h2 class="page-title d-flex align-items-center gap-2 text-dark">
+                        <i class="fa-solid fa-book-bookmark text-primary"></i>
+                        <span><?= htmlspecialchars($currentLesson['title']) ?></span>
+                    </h2>
                 </div>
-            </div>
-            <div class="col-auto ms-auto d-print-none">
-                <div class="btn-list">                    
-                    <a href="?page=resources" class="btn btn-sm btn-secondary">
-                        &larr; Retour au Fief
-                    </a>
+                <div class="col-auto ms-auto d-print-none">
+                    <div class="btn-list">                    
+                        <a href="/?page=pedagogy#section-cours-backend" class="btn btn-sm btn-outline-primary">
+                            <i class="fa-solid fa-list me-1"></i> Sommaire Atelier
+                        </a>
+                        <a href="/?page=resources" class="btn btn-sm btn-secondary">
+                            &larr; Retour au Fief
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <?php require __DIR__ . '/partials/admin_pedagogy.php'; ?>
+        <?php require $currentLesson['file']; ?>
+    <?php else: ?>
+        <!-- Fil d'Ariane & Titre épuré du sommaire principal -->
+        <div class="page-header d-print-none mb-3">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="page-pretitle text-primary fw-bold"><i class="fa-solid fa-graduation-cap me-1"></i>Savoir &amp; Coulisses Techniques</div>
+                    <h2 class="page-title d-flex align-items-center gap-2 text-dark">
+                        <i class="fa-solid fa-gamepad text-primary"></i>
+                        <span>Atelier Pédagogique &bull; Studio de Conception</span>
+                        <span class="badge bg-primary-lt ms-2">Projet Père-Fils</span>
+                    </h2>
+                    <div class="text-secondary small mt-1">
+                        Explorez les rouages du moteur de jeu : architecture réseau, états logiques, algorithmes de combat, cours de programmation backend et génération créative.
+                    </div>
+                </div>
+                <div class="col-auto ms-auto d-print-none">
+                    <div class="btn-list">                    
+                        <a href="?page=resources" class="btn btn-sm btn-secondary">
+                            &larr; Retour au Fief
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <?php require __DIR__ . '/partials/admin_pedagogy.php'; ?>
+    <?php endif; ?>
 </div>

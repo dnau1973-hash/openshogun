@@ -85,8 +85,29 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
+// Détection des routes d'administration (/admin ou /admin/{section})
+$requestUriPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+if (preg_match('#^/admin(?:/([a-zA-Z0-9_-]+))?/?$#', $requestUriPath, $adminMatches)) {
+    $_GET['page'] = 'admin';
+    if (!empty($adminMatches[1])) {
+        $_GET['tab'] = $adminMatches[1];
+    }
+} elseif (preg_match('#^/atelier(?:-pedagogique)?(?:/backend/([a-zA-Z0-9_-]+))?/?$#', $requestUriPath, $atelierMatches)) {
+    $_GET['page'] = 'pedagogy';
+    if (!empty($atelierMatches[1])) {
+        $_GET['lesson'] = $atelierMatches[1];
+    }
+}
+
 // Détecter si la page demandée est publique (ex: Atelier Pédagogique ou Changelog accessible à tous)
-if ($reqPage === 'pedagogy' || $reqPage === 'atelier') {
+$reqPage = $_GET['page'] ?? 'resources';
+if (in_array($reqPage, ['php-poo-singleton', 'pdo-sql-injection', 'routing-get-post'], true)) {
+    $_GET['lesson'] = $reqPage;
+    $reqPage = 'pedagogy';
+    $_GET['page'] = 'pedagogy';
+}
+
+if ($reqPage === 'pedagogy' || $reqPage === 'atelier' || $reqPage === 'atelier-pedagogique') {
     $page = 'pedagogy';
     if (!Auth::check()) {
         require __DIR__ . '/views/pedagogy.php';
@@ -106,22 +127,16 @@ if (!Auth::check()) {
     exit;
 }
 
-// Détection des routes d'administration (/admin ou /admin/{section})
-$requestUriPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
-if (preg_match('#^/admin(?:/([a-zA-Z0-9_-]+))?/?$#', $requestUriPath, $adminMatches)) {
-    $_GET['page'] = 'admin';
-    if (!empty($adminMatches[1])) {
-        $_GET['tab'] = $adminMatches[1];
-    }
-}
-
 // Récupérer la page demandée
 $page = $_GET['page'] ?? 'resources';
 if ($page === 'galaxy') {
     $page = 'map';
 } elseif ($page === 'plus') {
     $page = 'privilege';
-} elseif ($page === 'atelier') {
+} elseif ($page === 'atelier' || $page === 'atelier-pedagogique') {
+    $page = 'pedagogy';
+} elseif (in_array($page, ['php-poo-singleton', 'pdo-sql-injection', 'routing-get-post'], true)) {
+    $_GET['lesson'] = $page;
     $page = 'pedagogy';
 } elseif ($page === 'profile') {
     $page = 'poster';

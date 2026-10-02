@@ -42,6 +42,9 @@
                         <a href="#section-grimoire" class="btn btn-outline-secondary rounded-pill" onclick="toggleGrimoireCatalog(true)">
                             <i class="fa-solid fa-book-open text-info me-1"></i>4. Le Grimoire des 80 Prompts
                         </a>
+                        <a href="#section-cours-backend" class="btn btn-outline-success rounded-pill">
+                            <i class="fa-solid fa-graduation-cap text-success me-1"></i>5. École du Backend (3 Cours)
+                        </a>
                     </div>
                 </div>
 
@@ -780,7 +783,136 @@ seuil_final   = seuil_de_base + bonus_pitié;
     </section>
 
     <!-- ===================================================================== -->
-    <!-- SECTION 5 : DÉFIS PRATIQUES PÈRE-FILS                                -->
+    <!-- SECTION 5 : L'ÉCOLE DU BACKEND (COURS ILLUSTRÉS POUR DÉBUTANTS)      -->
+    <!-- ===================================================================== -->
+    <section id="section-cours-backend" class="mb-5 pt-2">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="avatar avatar-md bg-success-lt text-success rounded-circle fw-bold fs-2 shadow-sm flex-shrink-0">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-success text-white text-uppercase tracking-wider fw-bold px-2 py-1" style="font-size: 0.7rem; letter-spacing: 0.05em;">Section 05</span>
+                        <span class="badge bg-success-lt text-success fw-semibold">Spécial Débutants &bull; 12 ans &amp; +</span>
+                    </div>
+                    <h2 class="h1 fw-bold text-dark mb-0" style="font-family: 'Dela Gothic One', cursive, sans-serif; letter-spacing: 0.5px;">
+                        L'École du Backend : Les Cours Illustrés
+                    </h2>
+                </div>
+            </div>
+            <div class="text-secondary small d-none d-md-block text-end" style="max-width: 360px;">
+                Des métaphores du quotidien et de l'univers féodal japonais pour tout comprendre sans aucun jargon incompréhensible !
+            </div>
+        </div>
+
+        <!-- Bannière d'introduction au module backend -->
+        <div class="card bg-white border shadow-sm mb-4">
+            <div class="card-status-top bg-success"></div>
+            <div class="card-body p-4">
+                <div class="row align-items-center g-3">
+                    <div class="col-lg-8">
+                        <h3 class="fs-2 text-dark mb-2"><i class="fa-solid fa-book-open-reader text-success me-2"></i>La Programmation Serveur expliquée simplement</h3>
+                        <p class="text-secondary mb-0" style="line-height: 1.6;">
+                            Dans un jeu multijoueur, le <strong>Backend</strong> est le grand cerveau invisible qui fait tourner le monde. Chaque cours ci-dessous est conçu comme une aventure guidée avec des métaphores amusantes, des exemples de code commentés et un <strong>mini-quiz interactif</strong> pour valider tes connaissances !
+                        </p>
+                    </div>
+                    <div class="col-lg-4 text-lg-end">
+                        <span class="badge bg-success-lt text-success p-2 fs-4">
+                            <i class="fa-solid fa-trophy text-warning me-1"></i> 3 Niveaux &bull; 6 Défis Quiz
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grille des 3 Cartes de Cours -->
+        <div class="row row-cards g-4">
+            <!-- Cours 1 : POO & Singleton -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 bg-white border shadow-sm hover-shadow d-flex flex-column">
+                    <div class="card-status-top bg-primary"></div>
+                    <div class="card-body p-4 d-flex flex-column flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge bg-primary-lt text-primary fw-bold">Niveau 01 &bull; Débutant</span>
+                            <span class="text-muted small"><i class="fa-solid fa-clock me-1"></i>7 min</span>
+                        </div>
+                        <div class="avatar avatar-lg bg-primary-lt text-primary rounded-circle mb-3 fs-2">
+                            <i class="fa-brands fa-php"></i>
+                        </div>
+                        <h3 class="card-title fs-2 text-dark mb-2" style="font-family: 'Dela Gothic One', cursive, sans-serif; font-size: 1.05rem;">
+                            PHP &amp; POO : La Forge et le Facteur Unique
+                        </h3>
+                        <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.6;">
+                            Comprends enfin ce qu'est un Objet avec l'atelier de forge de sabres, découvre le patron <strong>Singleton</strong> avec le Facteur Impérial, et perce le secret du <strong>Sceau de Cire des Sessions</strong>.
+                        </p>
+                        <div class="border-top pt-3 mt-auto">
+                            <a href="/?page=pedagogy&lesson=php-poo-singleton" class="btn btn-primary w-100 fw-bold">
+                                Suivre le Cours 01 &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cours 2 : PDO & Injections SQL -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 bg-white border shadow-sm hover-shadow d-flex flex-column">
+                    <div class="card-status-top bg-danger"></div>
+                    <div class="card-body p-4 d-flex flex-column flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge bg-danger-lt text-danger fw-bold">Niveau 02 &bull; Sécurité</span>
+                            <span class="text-muted small"><i class="fa-solid fa-clock me-1"></i>8 min</span>
+                        </div>
+                        <div class="avatar avatar-lg bg-danger-lt text-danger rounded-circle mb-3 fs-2">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <h3 class="card-title fs-2 text-dark mb-2" style="font-family: 'Dela Gothic One', cursive, sans-serif; font-size: 1.05rem;">
+                            PDO &amp; Sécurité : Le Coffre-Fort du Shogun
+                        </h3>
+                        <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.6;">
+                            Découvre comment les bandits ninjas tentent de pirater le royaume avec des <strong>parchemins piégés</strong> (Injections SQL) et comment la <strong>boîte aux lettres blindée PDO</strong> protège nos trésors.
+                        </p>
+                        <div class="border-top pt-3 mt-auto">
+                            <a href="/?page=pedagogy&lesson=pdo-sql-injection" class="btn btn-danger w-100 fw-bold">
+                                Suivre le Cours 02 &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cours 3 : Routage, $_GET & $_POST -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 bg-white border shadow-sm hover-shadow d-flex flex-column">
+                    <div class="card-status-top bg-success"></div>
+                    <div class="card-body p-4 d-flex flex-column flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge bg-success-lt text-success fw-bold">Niveau 03 &bull; Réseau</span>
+                            <span class="text-muted small"><i class="fa-solid fa-clock me-1"></i>7 min</span>
+                        </div>
+                        <div class="avatar avatar-lg bg-success-lt text-success rounded-circle mb-3 fs-2">
+                            <i class="fa-solid fa-signs-post"></i>
+                        </div>
+                        <h3 class="card-title fs-2 text-dark mb-2" style="font-family: 'Dela Gothic One', cursive, sans-serif; font-size: 1.05rem;">
+                            Routage &amp; Messagers : Cartes Postales et Ninjas
+                        </h3>
+                        <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.6;">
+                            Comment <code>index.php</code> lit les panneaux de Kyoto pour t'orienter, pourquoi <strong>$_GET</strong> est une carte postale transparente et pourquoi <strong>$_POST</strong> est la missive secrète du ninja.
+                        </p>
+                        <div class="border-top pt-3 mt-auto">
+                            <a href="/?page=pedagogy&lesson=routing-get-post" class="btn btn-success w-100 fw-bold">
+                                Suivre le Cours 03 &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 6 : DÉFIS PRATIQUES PÈRE-FILS                                -->
     <!-- ===================================================================== -->
     <section class="mb-4">
         <div class="card bg-white border shadow-sm">

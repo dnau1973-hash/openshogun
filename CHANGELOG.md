@@ -5,6 +5,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **École du Backend & 3 Cours Illustrés pour Débutants (`views/atelier-pedagogique/backend/`) :**
+  * Conception d'un module d'apprentissage vulgarisé pour les 12 ans et débutants avec métaphores du Japon féodal, encadrés « Le savais-tu ? » et typographie Dela Gothic One.
+  * **Cours 01 (`php-poo-singleton.php`) :** POO expliquée via l'atelier de forge (Classe = plan, Objet = sabre forgé), le patron de conception Singleton via le Facteur Impérial Unique (`MailService`), et la persistance utilisateur via le Sceau de Cire des Sessions (`$_SESSION`).
+  * **Cours 02 (`pdo-sql-injection.php`) :** Base de données expliquée comme le Coffre-Fort du Shogun, injection SQL illustrée par le Parchemin Piégé d'un bandit ninja, et sécurisation par requêtes préparées PDO (`prepare`/`execute`) comme une boîte aux lettres à fente blindée.
+  * **Cours 03 (`routing-get-post.php`) :** Routage d'URL expliqué par les Panneaux indicateurs de Kyoto (`index.php`), méthode `$_GET` comparée à une Carte Postale transparente, et méthode `$_POST` comparée à la Missive Secrète Scellée portée par un ninja.
+  * Mini-quiz interactifs en JavaScript Vanilla (2 questions par cours) avec validation instantanée et félicitations du score.
+  * Section 5 « L'École du Backend » ajoutée au sommaire de l'Atelier Pédagogique (`views/partials/admin_pedagogy.php`) avec boutons d'accès et mise à jour du routeur (`index.php`, `views/pedagogy.php`).
 - **Moteur de Siège & Dégradation des Bâtiments Féodaux (`core/CombatEngine.php`) :**
   * Distinction et calcul spécifique de la force de sape des unités de siège (`terran_cruiser`, `terran_dreadnought`, `vorash_leviathan`, `aethelis_prism`, `aethelis_titan`).
   * Réduction prioritaire sur le niveau de la muraille du village défenseur (250 PV structurels par niveau).

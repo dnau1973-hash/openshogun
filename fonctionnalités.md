@@ -3,6 +3,45 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - pedagogy/backend-school : École du Backend & 3 Cours Illustrés (POO/Singleton, PDO/SQLi, Routage GET/POST)
+- **Module :** `pedagogy/backend-school`
+- **Statut :** `À tester`
+- **Description :** 
+  1. **Création de l'arborescence et des 3 vues de cours dédiées (`views/atelier-pedagogique/backend/`) :**
+     - `php-poo-singleton.php` (Niveau 1) : La Classe et l'Objet expliqués via l'Atelier de Forge de sabres / le moule à gâteaux, le patron Singleton via le Facteur Impérial Unique (`MailService`), et les sessions PHP (`$_SESSION`) via le Sceau de Cire tamponné sur la main du joueur.
+     - `pdo-sql-injection.php` (Niveau 2) : La base de données expliquée comme le Coffre-Fort des trésors du Shogun, l'injection SQL comme le Parchemin Piégé d'un bandit ninja, et les requêtes préparées (`prepare` / `execute`) comme la Boîte aux Lettres Magique avec fente blindée qui dissocie l'ordre de la donnée.
+     - `routing-get-post.php` (Niveau 3) : L'adresse URL et le Routeur (`index.php`) comparés aux Panneaux directionnels dans les ruelles de Kyoto, le messager `$_GET` à la Carte Postale transparente lisible par tous dans la rue, et `$_POST` à la Lettre Secrète Scellée portée discrètement par un ninja.
+  2. **Composants d'Apprentissage & Interactivité :**
+     - Mise en forme épurée Tabler.io avec la typographie féodale Dela Gothic One pour les grands titres de leçons.
+     - Encarts culturels et techniques « Le savais-tu ? » (Little Bobby Tables, flèche `->`, limite de taille d'URL).
+     - Mini-quiz interactifs en JavaScript Vanilla (2 questions par cours) avec feedback visuel instantané sans rechargement de page, messages explicatifs et célébration du score.
+     - Fil d'Ariane et boutons de navigation fluide (« Cours Précédent », « Sommaire de l'Atelier », « Cours Suivant »).
+  3. **Routage & Intégration Sommaire :**
+     - Prise en charge des routes publiques et privées dans `index.php` (gestion des URLs `/atelier-pedagogique/backend/<lesson>` et des paramètres `?page=pedagogy&lesson=<lesson>`).
+     - Ajout de la Section 5 « L'École du Backend : Les Cours Illustrés » dans le sommaire principal (`views/partials/admin_pedagogy.php`) avec 3 cartes de synthèse colorées et bouton d'ancrage rapide dans le Hero banner.
+- **Fichiers modifiés :** `views/atelier-pedagogique/backend/php-poo-singleton.php`, `views/atelier-pedagogique/backend/pdo-sql-injection.php`, `views/atelier-pedagogique/backend/routing-get-post.php`, `views/pedagogy.php`, `views/partials/admin_pedagogy.php`, `index.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. **Accès et Sommaire :**
+     - Aller sur `/?page=pedagogy` (en visiteur déconnecté puis connecté) : vérifier la présence de la Section 5 « L'École du Backend » et du bouton raccourci n°5 dans l'en-tête Hero.
+     - Vérifier la bonne disposition des 3 cartes avec badges de niveau, temps de lecture et résumés des métaphores.
+  2. **Leçon 1 (POO & Singleton) :**
+     - Cliquer sur le bouton « Suivre le Cours 01 » ou ouvrir `/?page=pedagogy&lesson=php-poo-singleton`.
+     - Vérifier l'affichage complet du cours, du bloc de code Katana et de l'explication du Facteur Unique `MailService::getInstance()`.
+     - Tester le quiz interactif : cliquer sur « Valider » sans sélectionner d'option (message d'avertissement), sélectionner de mauvaises réponses (retours rouges d'explication), sélectionner les bonnes réponses (retours verts et trophée 2/2).
+  3. **Leçon 2 (PDO & Injections SQL) :**
+     - Cliquer sur « Cours Suivant » : vérifier l'ouverture de `/?page=pedagogy&lesson=pdo-sql-injection`.
+     - Vérifier les encarts Coffre-Fort, Parchemin Piégé, Boîte Blindée et l'histoire de Little Bobby Tables.
+     - Tester et valider le mini-quiz sécurité (2/2).
+  4. **Leçon 3 (Routage, $_GET & $_POST) :**
+     - Cliquer sur « Cours Suivant » : vérifier l'ouverture de `/?page=pedagogy&lesson=routing-get-post`.
+     - Vérifier le tableau comparatif « Carte Postale ($_GET) vs Missive Ninja ($_POST) ».
+     - Tester et valider le mini-quiz réseau (2/2).
+     - Cliquer sur « Retour à l'Atelier Pédagogique » et vérifier le retour au sommaire.
+  5. **Contrôle d'accès et réécriture :**
+     - Tester l'URL propre `/atelier-pedagogique/backend/php-poo-singleton` ou `/?page=atelier&lesson=pdo-sql-injection` : vérifier qu'elle affiche bien le cours sans redirection d'erreur.
+
+---
+
 ### [2026-10-02] - admin/updates & combat-engine : Débogage Mises à Jour & Dégâts de Siège aux Bâtiments
 - **Module :** `admin/updates & combat-engine`
 - **Statut :** `À tester`
