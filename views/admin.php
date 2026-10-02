@@ -593,7 +593,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <li class="nav-item admin-nav-item" role="presentation">
                     <a href="?page=admin&tab=updates" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-tab="updates" data-bs-target="#tab-updates" role="tab" onclick="switchAdminTab('updates'); return false;">
                         <i class="fa-solid fa-arrows-rotate text-teal me-1"></i>GitHub Sync
-                        <span class="badge bg-teal-lt ms-1"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
+                        <span class="badge bg-teal-lt ms-1" id="admin-update-nav-badge"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
                     </a>
                 </li>
 

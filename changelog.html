@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.17.0</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.18.0</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,10 +123,74 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
-                    <!-- VERSION 1.17.0 -->
+                    <!-- VERSION 1.18.0 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
                         <div class="timeline-badge-dot" style="background: #b91c1c; box-shadow: 0 0 0 2px #b91c1c;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.18.0</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-danger-lt fw-bold">Dégâts de Siège &amp; Bâtiments</span>
+                                <span class="badge bg-teal-lt fw-bold">Débogage Mises à Jour</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 2 Octobre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-danger-emphasis d-flex align-items-center gap-2 mb-3">
+                                <span>🏯</span> Dégâts de Siège &amp; Dégradation des Bâtiments &bull; Débogage du Centre de Mises à Jour
+                            </h4>
+                            <div class="row g-3">
+                                <!-- 🚀 Nouvelles fonctionnalités (Added) -->
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-danger text-white">🚀 Ajouté</span>
+                                            <span>Moteur de Siège &amp; Sape des Bâtiments (`CombatEngine.php`)</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Prise en compte des armes de siège (béliers d'acier, catapultes Horokubiya, balistes, forteresses roulantes) dans le calcul de combat. Si l'attaquant l'emporte : <strong>réduction prioritaire de la muraille</strong> (250 PV/niv). En cas de brèche (niveau 0), <strong>report des dégâts résiduels sur les bâtiments du fief</strong> (Tenshu, caserne, entrepôts, grenier Kura, forge) avec prise en compte de la destruction totale (niveau 0 / ruine à reconstruire).
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-purple text-white">🚀 Ajouté</span>
+                                            <span>Simulateur Étendu &amp; Rapport d'Infrastructure</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Configuration des 8 édifices du village cible dans le simulateur de Studio Dev. Encart de référence exposant les constantes d'équilibrage de siège. Section dédiée dans le rapport : <strong>« Dégâts aux Infrastructures &amp; État des Bâtiments »</strong> avec transition de la muraille, matrice complète des dégradations par bâtiment (badges Détruit, Endommagé, Intact) et export Markdown enrichi.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- 🐛 Correctifs & Sécurité (Fixed) -->
+                                <div class="col-12">
+                                    <div class="p-3 bg-light rounded border">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-success text-white">🐛 Sécurité &amp; Correctifs</span>
+                                            <span>Débogage du Bouton « Mise à jour » dans l'Administration</span>
+                                        </div>
+                                        <ul class="text-secondary small m-0 ps-3" style="line-height: 1.6;">
+                                            <li><strong>Éradication du crash JS :</strong> Correction de l'erreur <code>TypeError: Cannot read properties of undefined</code> sur <code>data.local.short_sha</code> et <code>target_branch</code> lors de l'appel GitHub.</li>
+                                            <li><strong>Vérifications défensives DOM :</strong> Sécurisation systématique des éléments <code>bannerBox</code>, <code>bannerTitle</code>, <code>bannerDesc</code>, <code>bannerIcon</code> et synchronisation via <code>#admin-update-nav-badge</code>.</li>
+                                            <li><strong>Conformité Tabler.io :</strong> Remplacement des dialogues natifs bloquants <code>confirm()</code> et <code>alert()</code> par une modale Tabler.io moderne (<code>#modal-confirm-update-deploy</code>) et des toasts d'état non intrusifs.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.17.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #64748b; box-shadow: 0 0 0 2px #64748b;"></div>
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.17.0</span>

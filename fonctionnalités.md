@@ -3,7 +3,40 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
-### [2026-10-02] - studio/game-elevate-designer : Correctif d'Affichage du Simulateur de Combat & Déverrouillage d'Accès Admin
+### [2026-10-02] - admin/updates & combat-engine : Débogage Mises à Jour & Dégâts de Siège aux Bâtiments
+- **Module :** `admin/updates & combat-engine`
+- **Statut :** `À tester`
+- **Description :** 
+  1. **Débogage du bouton « Mise à jour » dans l'Administration (`views/partials/admin_updates.php`, `views/admin.php`) :**
+     - Sécurisation intégrale de `checkGitHubUpdates()` et `installGitHubUpdate()` contre les exceptions JavaScript (`TypeError: Cannot read properties of undefined` sur `data.local.short_sha` ou `data.local.target_branch`).
+     - Vérification défensive systématique de la présence des éléments du DOM (`bannerBox`, `bannerTitle`, `bannerDesc`, `bannerIcon`, `navBadge`, etc.).
+     - Remplacement des fonctions bloquantes natives `confirm()` et `alert()` au profit d'une modale interactive Tabler.io (`#modal-confirm-update-deploy`) conforme à `.antigravityrules.md`.
+     - Gestion robuste des promesses réseau et codes HTTP avec retours utilisateurs propres via toasts Tabler.io.
+     - Ajout de l'identifiant `#admin-update-nav-badge` sur le bouton de navigation pour mise à jour réactive.
+  2. **Dégâts de Siège & Dégradation des Bâtiments (`core/CombatEngine.php`) :**
+     - Prise en compte active des unités de siège (`terran_cruiser`, `terran_dreadnought`, `vorash_leviathan`, `aethelis_prism`, `aethelis_titan`) dans les assauts victorieux.
+     - Réduction prioritaire sur le niveau de la muraille du village défenseur (250 PV structurels par niveau).
+     - En cas d'effondrement ou de brèche totale (niveau 0), report proportionnel des dégâts de siège résiduels sur les bâtiments du fief selon l'ordre de priorité tactique (Tenshu, Dojo/Caserne, Entrepôt, Grenier Kura, Forge, etc.).
+     - Prise en compte de la destruction totale d'édifice (niveau 0 / ruine à reconstruire) et mise à jour effective en BDD dans `planet_buildings`.
+     - Intégration des détails de dégradation structurelle dans `$reportData['infrastructure_damage']` et mise à jour du titre du rapport de combat.
+  3. **Simulateur de Combat Studio Dev (`views/studio/game-elevate-designer/combat-simulator.php`) :**
+     - Ajout de la configuration des 8 édifices castraux du village cible (Tenshu, Dojo, Entrepôt, Grenier, Forge, Tour, Atelier, Maçonnerie).
+     - Encart de référence technique exposant clairement les constantes d'équilibrage de siège (PV muraille, PV bâtiments, renfort Maçonnerie, dégâts et multiplicateurs des béliers et catapultes).
+     - Section dédiée dans le rapport instantané : « Dégâts aux Infrastructures & État des Bâtiments du Fief » avec transition de la muraille, tableau complet des bâtiments endommagés/détruits, jauges et statuts visuels.
+     - Intégration des données d'infrastructures dans l'export Markdown et la sauvegarde d'historique de simulation (+15 XP Forge).
+- **Fichiers modifiés :** `views/partials/admin_updates.php`, `views/admin.php`, `core/CombatEngine.php`, `views/studio/game-elevate-designer/combat-simulator.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. **Administration / Mises à jour :**
+     - Aller sur `/admin` ou `/?page=admin&tab=updates`.
+     - Cliquer sur le bouton « Contrôler les Mises à Jour » ou « Vérifier Mises à Jour » du Dashboard : vérifier qu'aucune exception `TypeError` n'apparaît dans la console et qu'un toast de statut s'affiche.
+     - Tester le bouton « Télécharger & Déployer la Mise à Jour » : vérifier l'ouverture de la modale Tabler.io au lieu du `confirm()` natif du navigateur.
+  2. **Simulateur de Combat :**
+     - Aller sur `/?page=dev_team&metier=game-elevate-designer&module=combat-simulator`.
+     - Vérifier la présence du volet « Infrastructures du Fief (Siège) » avec les 8 édifices et la carte de référence des constantes d'équilibrage.
+     - Tester les 3 préréglages (Mur 0, Mur 8, Mur 20) : vérifier le bon remplissage des niveaux de bâtiments.
+     - Lancer une simulation avec béliers et catapultes contre un village ouvert ou en forçant une brèche : vérifier l'apparition de la section « Dégâts aux Infrastructures » avec le détail des niveaux perdus et le badge rouge « Détruit (Niv 0) » le cas échéant.
+     - Tester la copie Markdown et vérifier la présence du tableau des bâtiments dans le texte copié.
+
 - **Module :** `studio/game-elevate-designer`
 - **Statut :** `À tester`
 - **Description :** 

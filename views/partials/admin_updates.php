@@ -220,7 +220,15 @@ $localInfo = $updateEngine->getLocalInfo();
 <script>
 // --- LOGIQUE CLIENT DU CENTRE DE MISES À JOUR ---
 
-function showToast(message, type = 'info') {
+function showUpdateToast(message, type = 'info') {
+    if (typeof window.showToast === 'function') {
+        try {
+            window.showToast(message, type);
+            return;
+        } catch (e) {
+            // fallback
+        }
+    }
     let container = document.getElementById('admin-toast-container');
     if (!container) {
         container = document.createElement('div');
@@ -267,7 +275,6 @@ function showToast(message, type = 'info') {
         setTimeout(() => toast.remove(), 350);
     }, 4500);
 }
-window.showToast = showToast;
 
 function logToConsole(message, type = 'info') {
     const consoleEl = document.getElementById('update-console-log');
@@ -303,31 +310,41 @@ async function checkGitHubUpdates(showNotification = true) {
 
     try {
         const response = await fetch('/api/admin.php?action=check_github_updates');
+        if (!response.ok) {
+            throw new Error(`Erreur serveur HTTP ${response.status}`);
+        }
         const data = await response.json();
 
-        if (!data.success) {
-            throw new Error(data.error || "Erreur lors de la vérification.");
+        if (!data || !data.success) {
+            const errMsg = (data && data.error) ? data.error : "Impossible de contacter l'API GitHub.";
+            throw new Error(errMsg);
         }
 
-        logToConsole(`Contrôle terminé avec succès. Statut GitHub : ${data.status} (Retard: ${data.behind_by} commit(s))`);
+        const behindBy = Number(data.behind_by) || 0;
+        logToConsole(`Contrôle terminé avec succès. Statut GitHub : ${data.status || 'OK'} (Retard: ${behindBy} commit(s))`);
 
         if (pillRemote && data.remote) {
-            pillRemote.textContent = data.remote.short_sha;
+            pillRemote.textContent = data.remote.short_sha || 'GitHub';
             pillRemote.className = 'badge';
             pillRemote.style.background = 'rgba(56, 189, 248, 0.2)';
             pillRemote.style.color = '#38bdf8';
         }
 
+        const localShortSha = (data.local && data.local.short_sha) ? data.local.short_sha : 'Actuel';
+        const localBranch = (data.local && data.local.target_branch) ? data.local.target_branch : 'main';
+
         if (data.has_update) {
             // Mettre à jour la bannière en mode NOUVELLE VERSION
-            bannerBox.style.background = 'rgba(45, 26, 15, 0.85)';
-            bannerBox.style.borderColor = 'rgba(245, 158, 11, 0.5)';
-            bannerIcon.innerHTML = '<i class="fa-solid fa-bolt text-warning"></i>';
-            bannerTitle.innerHTML = `<span style="color: #fbbf24;">Mise à jour disponible ! (${data.behind_by} nouveau${data.behind_by > 1 ? 'x' : ''} commit${data.behind_by > 1 ? 's' : ''})</span>`;
-            bannerDesc.textContent = `Dernier commit distant : "${data.remote ? data.remote.message : 'Nouveaux ajouts'}"`;
+            if (bannerBox) {
+                bannerBox.style.background = 'rgba(45, 26, 15, 0.85)';
+                bannerBox.style.borderColor = 'rgba(245, 158, 11, 0.5)';
+            }
+            if (bannerIcon) bannerIcon.innerHTML = '<i class="fa-solid fa-bolt text-warning"></i>';
+            if (bannerTitle) bannerTitle.innerHTML = `<span style="color: #fbbf24;">Mise à jour disponible ! (${behindBy} nouveau${behindBy > 1 ? 'x' : ''} commit${behindBy > 1 ? 's' : ''})</span>`;
+            if (bannerDesc) bannerDesc.textContent = `Dernier commit distant : "${data.remote ? data.remote.message : 'Nouveaux ajouts'}"`;
 
             if (navBadge) {
-                navBadge.innerHTML = `<i class="fa-solid fa-bolt me-1"></i>+${data.behind_by}`;
+                navBadge.innerHTML = `<i class="fa-solid fa-bolt me-1"></i>+${behindBy}`;
                 navBadge.style.background = '#f59e0b';
                 navBadge.style.color = '#000';
                 navBadge.style.fontWeight = 'bold';
@@ -341,9 +358,9 @@ async function checkGitHubUpdates(showNotification = true) {
                     const tr = document.createElement('tr');
                     tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
                     tr.innerHTML = `
-                        <td style="padding: 0.5rem 0.75rem; font-family: monospace; color: #a855f7;">${c.short_sha}</td>
-                        <td style="padding: 0.5rem 0.75rem; color: #fff; font-weight: 500;">${escapeHtml(c.message)}</td>
-                        <td style="padding: 0.5rem 0.75rem; color: #cbd5e1;">${escapeHtml(c.author_name)}</td>
+                        <td style="padding: 0.5rem 0.75rem; font-family: monospace; color: #a855f7;">${escapeHtml(c.short_sha || '')}</td>
+                        <td style="padding: 0.5rem 0.75rem; color: #fff; font-weight: 500;">${escapeHtml(c.message || '')}</td>
+                        <td style="padding: 0.5rem 0.75rem; color: #cbd5e1;">${escapeHtml(c.author_name || '')}</td>
                         <td style="padding: 0.5rem 0.75rem; text-align: right;">
                             ${c.html_url ? `<a href="${c.html_url}" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: none;">Voir &nearr;</a>` : ''}
                         </td>
@@ -355,18 +372,20 @@ async function checkGitHubUpdates(showNotification = true) {
             if (actionBox) actionBox.style.display = 'block';
 
             if (showNotification) {
-                showToast(`Nouvelle version disponible ! (${data.behind_by} commit(s))`, 'warning');
+                showUpdateToast(`Nouvelle version disponible ! (${behindBy} commit(s))`, 'warning');
             }
         } else {
             // Mettre à jour la bannière en mode À JOUR
-            bannerBox.style.background = 'rgba(6, 44, 33, 0.85)';
-            bannerBox.style.borderColor = 'rgba(34, 197, 94, 0.4)';
-            bannerIcon.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles text-warning"></i>';
-            bannerTitle.innerHTML = `<span style="color: #4ade80;">OpenShogun est à jour !</span>`;
-            bannerDesc.textContent = `Votre version locale (${data.local.short_sha}) est synchronisée avec la branche ${data.local.target_branch}.`;
+            if (bannerBox) {
+                bannerBox.style.background = 'rgba(6, 44, 33, 0.85)';
+                bannerBox.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+            }
+            if (bannerIcon) bannerIcon.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles text-warning"></i>';
+            if (bannerTitle) bannerTitle.innerHTML = `<span style="color: #4ade80;">OpenShogun est à jour !</span>`;
+            if (bannerDesc) bannerDesc.textContent = `Votre version locale (${localShortSha}) est synchronisée avec la branche ${localBranch}.`;
 
             if (navBadge) {
-                navBadge.textContent = data.local.short_sha;
+                navBadge.textContent = localShortSha;
                 navBadge.style.background = 'rgba(34, 197, 94, 0.2)';
                 navBadge.style.color = '#4ade80';
             }
@@ -374,13 +393,13 @@ async function checkGitHubUpdates(showNotification = true) {
             if (actionBox) actionBox.style.display = 'none';
 
             if (showNotification) {
-                showToast("Votre royaume féodal est parfaitement à jour !", 'success');
+                showUpdateToast("Votre royaume féodal est parfaitement à jour !", 'success');
             }
         }
     } catch (err) {
         logToConsole(`Erreur : ${err.message}`, 'error');
         if (showNotification) {
-            showToast(`Erreur de contrôle : ${err.message}`, 'error');
+            showUpdateToast(`Erreur de contrôle : ${err.message}`, 'error');
         }
     } finally {
         if (btnCheck) btnCheck.disabled = false;
@@ -388,10 +407,22 @@ async function checkGitHubUpdates(showNotification = true) {
     }
 }
 
-// 2. Installation de la mise à jour (git pull)
-async function installGitHubUpdate() {
-    if (!confirm("Voulez-vous lancer le téléchargement et l'installation de la mise à jour maintenant ?")) {
-        return;
+// 2. Installation de la mise à jour (git pull) avec confirmation modale Tabler
+function installGitHubUpdate() {
+    const modalEl = document.getElementById('modal-confirm-update-deploy');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    } else {
+        executeInstallGitHubUpdate();
+    }
+}
+
+async function executeInstallGitHubUpdate() {
+    const modalEl = document.getElementById('modal-confirm-update-deploy');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
     }
 
     const btnInstall = document.getElementById('btn-install-update');
@@ -413,27 +444,30 @@ async function installGitHubUpdate() {
             body: formData
         });
 
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP ${response.status}`);
+        }
+
         const data = await response.json();
 
-        if (Array.isArray(data.logs)) {
+        if (data && Array.isArray(data.logs)) {
             data.logs.forEach(l => logToConsole(l));
         }
 
-        if (!data.success) {
-            throw new Error(data.message || "Échec de l'installation.");
+        if (!data || !data.success) {
+            throw new Error((data && data.message) ? data.message : "Échec de l'installation.");
         }
 
-        showToast(data.message, 'success');
-        logToConsole(`Succès : Version installée ${data.current_commit} !`);
+        showUpdateToast(data.message || "Mise à jour installée avec succès !", 'success');
+        logToConsole(`Succès : Version installée ${data.current_commit || ''} !`);
 
         setTimeout(() => {
-            alert(`Mise à jour réussie !\nLe jeu a été mis à jour vers le commit ${data.current_commit}.\nLa page va s'actualiser.`);
             window.location.reload();
-        }, 1500);
+        }, 1200);
 
     } catch (err) {
         logToConsole(`Erreur lors du déploiement : ${err.message}`, 'error');
-        showToast(`Erreur : ${err.message}`, 'error');
+        showUpdateToast(`Erreur : ${err.message}`, 'error');
     } finally {
         if (btnInstall) btnInstall.disabled = false;
         if (spinnerInstall) spinnerInstall.style.display = 'none';
@@ -452,33 +486,72 @@ async function saveGitHubSettings(event) {
             method: 'POST',
             body: formData
         });
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP ${response.status}`);
+        }
         const data = await response.json();
 
-        if (!data.success) {
-            throw new Error(data.error || "Erreur de sauvegarde.");
+        if (!data || !data.success) {
+            throw new Error((data && data.error) ? data.error : "Erreur de sauvegarde.");
         }
 
-        showToast(data.message, 'success');
+        showUpdateToast(data.message || "Paramètres enregistrés.", 'success');
         logToConsole("Paramètres GitHub mis à jour avec succès.");
-        form.querySelector('input[name="github_token"]').value = '';
+        const tokInput = form.querySelector('input[name="github_token"]');
+        if (tokInput) tokInput.value = '';
         checkGitHubUpdates(false);
     } catch (err) {
-        showToast(`Erreur : ${err.message}`, 'error');
+        showUpdateToast(`Erreur : ${err.message}`, 'error');
     }
 }
 
 function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 // Lancement automatique du contrôle discret au chargement de l'onglet
 document.addEventListener('DOMContentLoaded', () => {
     // Si l'onglet actif est 'updates', on vérifie automatiquement
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('tab') === 'updates') {
-        checkGitHubUpdates(false);
+    try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('tab') === 'updates') {
+            checkGitHubUpdates(false);
+        }
+    } catch (e) {
+        console.warn("Erreur contrôle auto updates:", e);
     }
 });
 </script>
+
+<!-- MODALE DE CONFIRMATION DE DÉPLOIEMENT TABLER.IO -->
+<div class="modal modal-blur fade" id="modal-confirm-update-deploy" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-status bg-primary"></div>
+            <div class="modal-body text-center py-4">
+                <i class="fa-solid fa-cloud-arrow-down text-primary mb-2" style="font-size: 2.5rem;"></i>
+                <h3>Confirmer la Mise à Jour</h3>
+                <div class="text-secondary">
+                    Voulez-vous lancer le téléchargement (<code>git pull</code>) et l'installation de la nouvelle version maintenant ?
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="w-100">
+                    <div class="row">
+                        <div class="col">
+                            <button type="button" class="btn w-100" data-bs-dismiss="modal">Annuler</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-primary w-100" onclick="executeInstallGitHubUpdate()">
+                                <i class="fa-solid fa-check me-1"></i>Déployer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 

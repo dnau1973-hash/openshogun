@@ -324,6 +324,162 @@ class CombatEngine {
             ")->execute([$looted['metal'], $looted['crystal'], $looted['deuterium'], $targetPlanetId]);
         }
 
+        // ═══════════════════════════════════════════════════════════════════════
+        // 🏯 ÉVOLUTION TACTIQUE : DÉGÂTS DE SIÈGE & DÉGRADATION DES BÂTIMENTS
+        // ═══════════════════════════════════════════════════════════════════════
+        $infrastructureDamage = [
+            'has_siege' => false,
+            'total_siege_power' => 0,
+            'wall' => [
+                'initial_level' => $wallLvl,
+                'final_level' => $wallLvl,
+                'damage_absorbed' => 0,
+                'status' => ($wallLvl === 0 ? 'none' : 'intact')
+            ],
+            'buildings' => [],
+            'residual_damage' => 0
+        ];
+
+        // Définition des engins de siège Sengoku et de leur puissance destructrice
+        $siegeWeapons = [
+            'terran_cruiser'     => ['name' => "Bélier Blindé à Éperon d'Acier", 'base_dmg' => 150, 'wall_mult' => 3.0],
+            'terran_dreadnought' => ['name' => "Grande Tour de Siège & Baliste", 'base_dmg' => 450, 'wall_mult' => 4.0],
+            'vorash_leviathan'   => ['name' => "Bélier Titanesque du Dragon de Kai", 'base_dmg' => 400, 'wall_mult' => 3.5],
+            'aethelis_prism'     => ['name' => "Catapulte Flamboyante Horokubiya", 'base_dmg' => 200, 'wall_mult' => 3.0],
+            'aethelis_titan'     => ['name' => "Forteresse Roulante Blindée", 'base_dmg' => 600, 'wall_mult' => 4.0],
+        ];
+
+        // L'assaut de siège n'opère que si l'attaquant remporte le combat et conserve des armes de siège
+        if ($winner === 'attacker' && $totalAttRemaining > 0) {
+            $totalSiegeBaseDmg = 0;
+            $totalWallDmgPotential = 0;
+
+            foreach ($currentAttFleet as $shipCode => $count) {
+                if ($count > 0 && isset($siegeWeapons[$shipCode])) {
+                    $sw = $siegeWeapons[$shipCode];
+                    $totalSiegeBaseDmg += $count * $sw['base_dmg'];
+                    $totalWallDmgPotential += (int)round($count * $sw['base_dmg'] * $sw['wall_mult']);
+                }
+            }
+
+            if ($totalSiegeBaseDmg > 0) {
+                $infrastructureDamage['has_siege'] = true;
+                $infrastructureDamage['total_siege_power'] = $totalSiegeBaseDmg;
+
+                // 1. Réduction prioritaire sur le niveau de la muraille
+                $initialWall = $wallLvl;
+                $finalWall = $wallLvl;
+                $wallHp = $initialWall * 250; // 250 PV par niveau de muraille
+                $residualSiegeDmg = 0;
+                $wallDmgAbsorbed = 0;
+
+                if ($initialWall > 0) {
+                    if ($totalWallDmgPotential >= $wallHp) {
+                        // Effondrement total des remparts (Niveau 0 / Brèche)
+                        $wallDmgAbsorbed = $wallHp;
+                        $finalWall = 0;
+                        $excessRatio = max(0.0, ($totalWallDmgPotential - $wallHp) / max(1, $totalWallDmgPotential));
+                        $residualSiegeDmg = (int)round($totalSiegeBaseDmg * $excessRatio);
+                        $wallStatus = 'breached';
+                    } else {
+                        // Dommages partiels sans effondrement complet
+                        $wallDmgAbsorbed = $totalWallDmgPotential;
+                        $remainingWallHp = $wallHp - $totalWallDmgPotential;
+                        $finalWall = max(1, (int)ceil($remainingWallHp / 250));
+                        $residualSiegeDmg = 0;
+                        $wallStatus = ($finalWall < $initialWall) ? 'damaged' : 'intact';
+                    }
+
+                    // Mise à jour du niveau de muraille en BDD
+                    if ($finalWall !== $initialWall) {
+                        $this->db->prepare("UPDATE planet_buildings SET level = ? WHERE planet_id = ? AND building_type = 'wall'")
+                            ->execute([$finalWall, $targetPlanetId]);
+                    }
+
+                    $infrastructureDamage['wall'] = [
+                        'initial_level' => $initialWall,
+                        'final_level' => $finalWall,
+                        'damage_absorbed' => $wallDmgAbsorbed,
+                        'status' => $wallStatus
+                    ];
+                } else {
+                    // Aucune muraille : les dégâts de siège frappent directement les édifices
+                    $residualSiegeDmg = $totalSiegeBaseDmg;
+                    $infrastructureDamage['wall'] = [
+                        'initial_level' => 0,
+                        'final_level' => 0,
+                        'damage_absorbed' => 0,
+                        'status' => 'none'
+                    ];
+                }
+
+                // 2. Report des dégâts de siège résiduels sur les autres bâtiments si la muraille est enfoncée
+                $damagedBuildings = [];
+                if ($finalWall === 0 && $residualSiegeDmg > 0) {
+                    $targetBuildings = $this->planetEngine->getBuildings($targetPlanetId);
+                    
+                    // Résistance par niveau de bâtiment (350 PV base, augmentée par la Maçonnerie Ishizukuri)
+                    $stonemasonLvl = (int)($targetBuildings['stonemason'] ?? 0);
+                    $hpPerLvl = (int)round(350 * (1.0 + ($stonemasonLvl * 0.05)));
+
+                    // Ordre de ciblage tactique des édifices
+                    $targetOrder = [
+                        'hq'            => "Tenshu (Donjon Castral)",
+                        'barracks'      => "Dojo & Quartier Militaire",
+                        'storage'       => "Entrepôt de Matériaux",
+                        'tank'          => "Grenier à Riz Fortifié (Kura)",
+                        'shipyard'      => "Atelier de Siège & Écuries",
+                        'blacksmith'    => "Grande Forge du Tamahagane",
+                        'radar'         => "Tour de Guet Yagura",
+                        'market'        => "Marché Féodal & Caravanes",
+                        'research_lab'  => "Académie des Savoirs & Forge",
+                        'sawmill'       => "Atelier de Charpenterie",
+                        'grain_mill'    => "Meunerie & Brasserie de Riz",
+                        'teahouse'      => "Pavillon de Thé & Sérénité",
+                        'embassy'       => "Pavillon Diplomatique",
+                        'stonemason'    => "Taille de Granit Ishizukuri"
+                    ];
+
+                    foreach ($targetOrder as $bCode => $bName) {
+                        if ($residualSiegeDmg <= 0) break;
+                        $curLvl = (int)($targetBuildings[$bCode] ?? 0);
+                        if ($curLvl <= 0) continue;
+
+                        $buildingTotalHp = $curLvl * $hpPerLvl;
+                        $dmgApplied = min($residualSiegeDmg, $buildingTotalHp);
+
+                        if ($dmgApplied >= $buildingTotalHp) {
+                            $newLvl = 0; // Destruction totale : niveau 0 / ruine à reconstruire
+                            $residualSiegeDmg -= $buildingTotalHp;
+                            $status = 'destroyed';
+                        } else {
+                            $levelsLost = max(1, (int)floor($dmgApplied / $hpPerLvl));
+                            $newLvl = max(0, $curLvl - $levelsLost);
+                            $residualSiegeDmg -= ($levelsLost * $hpPerLvl);
+                            $status = ($newLvl === 0) ? 'destroyed' : 'damaged';
+                        }
+
+                        if ($newLvl !== $curLvl) {
+                            $this->db->prepare("UPDATE planet_buildings SET level = ? WHERE planet_id = ? AND building_type = ?")
+                                ->execute([$newLvl, $targetPlanetId, $bCode]);
+
+                            $damagedBuildings[] = [
+                                'code' => $bCode,
+                                'name' => $bName,
+                                'initial_level' => $curLvl,
+                                'final_level' => $newLvl,
+                                'levels_lost' => $curLvl - $newLvl,
+                                'status' => $status
+                            ];
+                        }
+                    }
+                }
+
+                $infrastructureDamage['buildings'] = $damagedBuildings;
+                $infrastructureDamage['residual_damage'] = max(0, $residualSiegeDmg);
+            }
+        }
+
         // Création du rapport de combat
         $reportData = [
             'attacker_name' => $attackerUser['username'],
@@ -340,12 +496,22 @@ class CombatEngine {
             'looted' => $looted,
             'rounds' => $roundLogs,
             'winner' => $winner,
-            'evasion_applied' => $evasionApplied
+            'evasion_applied' => $evasionApplied,
+            'infrastructure_damage' => $infrastructureDamage
         ];
 
         $title = $evasionApplied 
             ? "Repli Tactique Féodal en ({$targetPlanet['coord_x']}, {$targetPlanet['coord_y']}) : Garnison de " . ($defenderUser['username'] ?? 'défense') . " indemne"
             : "Bataille provinciale en ({$targetPlanet['coord_x']}, {$targetPlanet['coord_y']}) : Victoire de " . ($winner === 'attacker' ? $attackerUser['username'] : ($defenderUser['username'] ?? 'la Garnison'));
+        
+        if (!empty($infrastructureDamage['has_siege'])) {
+            if ($infrastructureDamage['wall']['status'] === 'breached') {
+                $title .= " [Brèche des Remparts]";
+            }
+            if (!empty($infrastructureDamage['buildings'])) {
+                $title .= " (" . count($infrastructureDamage['buildings']) . " édifice(s) touché(s))";
+            }
+        }
 
         $stmtReport = $this->db->prepare("
             INSERT INTO combat_reports 

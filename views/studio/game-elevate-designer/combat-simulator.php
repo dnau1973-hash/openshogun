@@ -343,6 +343,122 @@
                     </div>
                 </div>
 
+                <!-- 4. Édifices & Bâtiments du Village (Cibles de Siège) -->
+                <div class="card mb-3 border-secondary-subtle shadow-xs">
+                    <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapse-defender-buildings">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar avatar-xs bg-dark text-white rounded"><i class="fa-solid fa-city"></i></span>
+                            <span class="fw-bold text-dark small text-uppercase">Infrastructures du Fief (Siège)</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-secondary-lt font-monospace" id="badge-total-bld-levels">8 édifices</span>
+                            <i class="fa-solid fa-chevron-down text-muted small"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="collapse-defender-buildings">
+                        <div class="card-body p-2 bg-light">
+                            <div class="row g-2">
+                                <!-- Tenshu -->
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center justify-content-between p-1 px-2 bg-white rounded border">
+                                        <div>
+                                            <div class="fw-bold small d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-chess-rook text-danger"></i> Tenshu (Donjon)
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.68rem;">Résistance: 350 PV/niv</div>
+                                        </div>
+                                        <input type="number" id="def-bld-hq" class="form-control form-control-sm text-end font-monospace" min="0" max="20" value="10" style="width: 65px;" oninput="updateWallMetrics()">
+                                    </div>
+                                </div>
+                                <!-- Dojo / Caserne -->
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center justify-content-between p-1 px-2 bg-white rounded border">
+                                        <div>
+                                            <div class="fw-bold small d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-khanda text-danger"></i> Dojo Militaire
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.68rem;">Caserne &amp; Troupes</div>
+                                        </div>
+                                        <input type="number" id="def-bld-barracks" class="form-control form-control-sm text-end font-monospace" min="0" max="20" value="8" style="width: 65px;" oninput="updateWallMetrics()">
+                                    </div>
+                                </div>
+                                <!-- Entrepôt Bois & Pierre -->
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center justify-content-between p-1 px-2 bg-white rounded border">
+                                        <div>
+                                            <div class="fw-bold small d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-warehouse text-warning"></i> Entrepôt Matériaux
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.68rem;">Stockage Bois/Pierre</div>
+                                        </div>
+                                        <input type="number" id="def-bld-storage" class="form-control form-control-sm text-end font-monospace" min="0" max="20" value="8" style="width: 65px;" oninput="updateWallMetrics()">
+                                    </div>
+                                </div>
+                                <!-- Grenier à Riz Kura -->
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center justify-content-between p-1 px-2 bg-white rounded border">
+                                        <div>
+                                            <div class="fw-bold small d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-wheat-awn text-warning"></i> Grenier à Riz
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.68rem;">Réserves Koku</div>
+                                        </div>
+                                        <input type="number" id="def-bld-tank" class="form-control form-control-sm text-end font-monospace" min="0" max="20" value="8" style="width: 65px;" oninput="updateWallMetrics()">
+                                    </div>
+                                </div>
+                                <!-- Grande Forge -->
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center justify-content-between p-1 px-2 bg-white rounded border">
+                                        <div>
+                                            <div class="fw-bold small d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-fire text-danger"></i> Grande Forge
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.68rem;">Tamahagane</div>
+                                        </div>
+                                        <input type="number" id="def-bld-blacksmith" class="form-control form-control-sm text-end font-monospace" min="0" max="20" value="6" style="width: 65px;" oninput="updateWallMetrics()">
+                                    </div>
+                                </div>
+                                <!-- Tour de Guet Yagura -->
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center justify-content-between p-1 px-2 bg-white rounded border">
+                                        <div>
+                                            <div class="fw-bold small d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-eye text-primary"></i> Tour de Guet
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.68rem;">Guet &amp; Détection</div>
+                                        </div>
+                                        <input type="number" id="def-bld-radar" class="form-control form-control-sm text-end font-monospace" min="0" max="15" value="5" style="width: 65px;" oninput="updateWallMetrics()">
+                                    </div>
+                                </div>
+                                <!-- Atelier de Siège & Écuries -->
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center justify-content-between p-1 px-2 bg-white rounded border">
+                                        <div>
+                                            <div class="fw-bold small d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-horse text-danger"></i> Atelier de Siège
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.68rem;">Écuries de Choc</div>
+                                        </div>
+                                        <input type="number" id="def-bld-shipyard" class="form-control form-control-sm text-end font-monospace" min="0" max="20" value="4" style="width: 65px;" oninput="updateWallMetrics()">
+                                    </div>
+                                </div>
+                                <!-- Taille de Granit Ishizukuri -->
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center justify-content-between p-1 px-2 bg-white rounded border">
+                                        <div>
+                                            <div class="fw-bold small d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-hammer text-secondary"></i> Maçonnerie Granit
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.68rem;">+5% PV édifices/niv</div>
+                                        </div>
+                                        <input type="number" id="def-bld-stonemason" class="form-control form-control-sm text-end font-monospace" min="0" max="20" value="3" style="width: 65px;" oninput="updateWallMetrics()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Résumé Statistique Défenseur -->
                 <div class="d-flex justify-content-between align-items-center p-2 rounded bg-white border">
                     <span class="small text-muted">Défense Effective Finale (avec Muraille) :</span>
@@ -353,6 +469,47 @@
         </div>
     </div>
 
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     RÉFÉRENCE TECHNIQUE : VARIABLES D'ÉQUILIBRAGE DE SIÈGE & RÉSISTANCE
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="card mb-3 border-0 bg-light shadow-xs">
+    <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+            <strong class="d-flex align-items-center gap-2 small text-uppercase text-secondary">
+                <i class="fa-solid fa-sliders text-danger"></i>
+                <span>Constantes &amp; Variables d'Équilibrage de Siège (Game Designer Ref)</span>
+            </strong>
+            <span class="badge bg-purple-lt text-purple font-monospace">Formules Moteur Sengoku</span>
+        </div>
+        <div class="row g-2 small text-secondary">
+            <div class="col-sm-6 col-lg-3">
+                <div class="p-2 bg-white rounded border h-100">
+                    <span class="fw-bold text-dark d-block mb-1"><i class="fa-solid fa-shield-halved text-success me-1"></i>Muraille :</span>
+                    <span><strong>250 PV</strong> / niveau &bull; Multiplicateur défense <strong>+3.5% à +5%</strong> / niv &bull; Meurtrières : <strong>15 pts riposte</strong> / niv</span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="p-2 bg-white rounded border h-100">
+                    <span class="fw-bold text-dark d-block mb-1"><i class="fa-solid fa-city text-primary me-1"></i>Bâtiments :</span>
+                    <span><strong>350 PV</strong> / niveau de base &bull; Renforcement Maçonnerie Granit : <strong>+5% PV</strong> / niv &bull; Dégradation si Muraille à 0</span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="p-2 bg-white rounded border h-100">
+                    <span class="fw-bold text-dark d-block mb-1"><i class="fa-solid fa-hammer text-danger me-1"></i>Bélier d'Acier :</span>
+                    <span>Attaque <strong>400</strong> &bull; Dégâts Siège <strong>150 pts</strong> &bull; Multiplicateur Muraille <strong>x3.0</strong></span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="p-2 bg-white rounded border h-100">
+                    <span class="fw-bold text-dark d-block mb-1"><i class="fa-solid fa-bomb text-danger me-1"></i>Catapulte / Baliste :</span>
+                    <span>Attaque <strong>800</strong> &bull; Dégâts Siège <strong>450 pts</strong> &bull; Multiplicateur Muraille <strong>x4.0</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
@@ -454,7 +611,54 @@
             </div>
         </div>
 
-        <!-- 3. Tableau Bilan Régiment par Régiment -->
+        <!-- 3. ⭐ SECTION DÉDIÉE : DÉGÂTS AUX INFRASTRUCTURES & ÉDIFICES -->
+        <div class="card mb-4 border shadow-xs" id="sim-infra-damage-card">
+            <div class="card-header bg-danger-lt py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h4 class="card-title m-0 small fw-bold text-uppercase text-danger d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-hammer"></i>
+                    <span>Dégâts aux Infrastructures &amp; État des Bâtiments du Fief</span>
+                </h4>
+                <span class="badge bg-danger text-white font-monospace" id="infra-total-damage-badge">0 PV structurels infligés</span>
+            </div>
+            <div class="card-body p-3">
+                <!-- Transition Muraille -->
+                <div class="alert alert-light border mb-3 p-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar avatar-sm bg-success text-white rounded"><i class="fa-solid fa-shield-halved"></i></span>
+                            <div>
+                                <div class="fw-bold text-dark">Muraille &amp; Remparts de Cité</div>
+                                <div class="text-secondary small font-monospace" id="infra-wall-transition-text">Niveau 8 ➔ Niveau 8</div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge" id="infra-wall-status-pill">Intacte</span>
+                            <div class="small text-muted font-monospace mt-1" id="infra-wall-hp-details">2,000 / 2,000 PV</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grille / Tableau des Bâtiments Affectés -->
+                <div class="table-responsive">
+                    <table class="table table-vcenter table-sm card-table table-hover">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>Édifice du Fief</th>
+                                <th class="text-center">Niveau Initial</th>
+                                <th class="text-center">Niveau Final</th>
+                                <th class="text-center text-danger">Dégradation</th>
+                                <th class="text-end">Statut Final</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sim-infra-buildings-table-body">
+                            <!-- Rempli dynamiquement par JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Tableau Bilan Régiment par Régiment -->
         <div class="card mb-4 border shadow-xs">
             <div class="card-header bg-light py-2 px-3">
                 <h4 class="card-title m-0 small fw-bold text-uppercase text-secondary">
@@ -510,8 +714,8 @@ const UNIT_STATS = {
     'att-samurai':     { name: 'Samouraïs au Katana (Attaque)', side: 'att', attack: 85, defense: 75, isSiege: false },
     'att-cavalry':     { name: 'Cavalerie de Choc Akazonae', side: 'att', attack: 95, defense: 60, isSiege: false },
     'att-hatamoto':    { name: 'Garde Hatamoto Lourde', side: 'att', attack: 210, defense: 270, isSiege: false },
-    'att-ram':         { name: 'Béliers Blindés de Siège', side: 'att', attack: 400, defense: 2650, isSiege: true, wallDmgMult: 3 },
-    'att-catapult':    { name: 'Catapultes Ôzutsu & Tours', side: 'att', attack: 800, defense: 4500, isSiege: true, wallDmgMult: 4 },
+    'att-ram':         { name: 'Béliers Blindés de Siège', side: 'att', attack: 400, defense: 2650, isSiege: true, baseSiegeDmg: 150, wallDmgMult: 3 },
+    'att-catapult':    { name: 'Catapultes Ôzutsu & Tours', side: 'att', attack: 800, defense: 4500, isSiege: true, baseSiegeDmg: 450, wallDmgMult: 4 },
 
     'def-sentinel':    { name: 'Sentinelles Yari (Défense)', side: 'def', attack: 42, defense: 63, isSiege: false },
     'def-archer':      { name: 'Archers Protecteurs de Muraille', side: 'def', attack: 70, defense: 72, isSiege: false },
@@ -519,9 +723,21 @@ const UNIT_STATS = {
     'def-hatamoto':    { name: 'Hatamotos Gardiens des Remparts', side: 'def', attack: 200, defense: 300, isSiege: false }
 };
 
+// Configuration des Bâtiments Défensifs du Fief
+const DEFENDER_BUILDINGS = [
+    { id: 'def-bld-hq',         code: 'hq',         name: 'Tenshu (Donjon Castral)',        icon: 'fa-chess-rook text-danger' },
+    { id: 'def-bld-barracks',   code: 'barracks',   name: 'Dojo & Quartier Militaire',      icon: 'fa-khanda text-danger' },
+    { id: 'def-bld-storage',    code: 'storage',    name: 'Entrepôt de Matériaux',          icon: 'fa-warehouse text-warning' },
+    { id: 'def-bld-tank',       code: 'tank',       name: 'Grenier à Riz Fortifié (Kura)',   icon: 'fa-wheat-awn text-warning' },
+    { id: 'def-bld-blacksmith', code: 'blacksmith', name: 'Grande Forge du Tamahagane',     icon: 'fa-fire text-danger' },
+    { id: 'def-bld-radar',      code: 'radar',      name: 'Tour de Guet Yagura',            icon: 'fa-eye text-primary' },
+    { id: 'def-bld-shipyard',   code: 'shipyard',   name: 'Atelier de Siège & Écuries',     icon: 'fa-horse text-danger' },
+    { id: 'def-bld-stonemason', code: 'stonemason', name: 'Taille de Granit Ishizukuri',    icon: 'fa-hammer text-secondary' }
+];
+
 let lastSimulationResult = null;
 
-// Mise à jour réactive des caractéristiques de la muraille
+// Mise à jour réactive des caractéristiques de la muraille et des édifices
 function updateWallMetrics() {
     const wallInput = document.getElementById('def-wall-level');
     const wallLvl = parseInt(wallInput ? wallInput.value : 0, 10) || 0;
@@ -553,6 +769,15 @@ function updateWallMetrics() {
 
     const riposteEl = document.getElementById('wall-riposte-power');
     if (riposteEl) riposteEl.textContent = `${riposteDmg} pts/rd`;
+
+    // Compteur de niveaux des édifices
+    let totalBldLvls = 0;
+    DEFENDER_BUILDINGS.forEach(b => {
+        const inp = document.getElementById(b.id);
+        totalBldLvls += parseInt(inp ? inp.value : 0, 10) || 0;
+    });
+    const bldBadge = document.getElementById('badge-total-bld-levels');
+    if (bldBadge) bldBadge.textContent = `${totalBldLvls} niv cumulés`;
 
     calculateArmyTotals();
 }
@@ -635,13 +860,23 @@ function applyPreset(presetName) {
         document.getElementById('att-samurai').value = 20;
         document.getElementById('att-cavalry').value = 15;
         document.getElementById('att-hatamoto').value = 0;
-        document.getElementById('att-ram').value = 0;
-        document.getElementById('att-catapult').value = 0;
+        document.getElementById('att-ram').value = 4;
+        document.getElementById('att-catapult').value = 1;
 
         document.getElementById('def-sentinel').value = 40;
         document.getElementById('def-archer').value = 20;
         document.getElementById('def-samurai').value = 10;
         document.getElementById('def-hatamoto').value = 0;
+
+        // Bâtiments modestes
+        document.getElementById('def-bld-hq').value = 4;
+        document.getElementById('def-bld-barracks').value = 3;
+        document.getElementById('def-bld-storage').value = 4;
+        document.getElementById('def-bld-tank').value = 4;
+        document.getElementById('def-bld-blacksmith').value = 2;
+        document.getElementById('def-bld-radar').value = 2;
+        document.getElementById('def-bld-shipyard').value = 1;
+        document.getElementById('def-bld-stonemason').value = 1;
     } else if (presetName === 'fortified_town') {
         document.getElementById('def-wall-level').value = 8;
         document.getElementById('att-ashigaru').value = 250;
@@ -656,6 +891,16 @@ function applyPreset(presetName) {
         document.getElementById('def-archer').value = 110;
         document.getElementById('def-samurai').value = 60;
         document.getElementById('def-hatamoto').value = 20;
+
+        // Bâtiments intermédiaires
+        document.getElementById('def-bld-hq').value = 10;
+        document.getElementById('def-bld-barracks').value = 8;
+        document.getElementById('def-bld-storage').value = 8;
+        document.getElementById('def-bld-tank').value = 8;
+        document.getElementById('def-bld-blacksmith').value = 6;
+        document.getElementById('def-bld-radar').value = 5;
+        document.getElementById('def-bld-shipyard').value = 4;
+        document.getElementById('def-bld-stonemason').value = 3;
     } else if (presetName === 'imperial_fortress') {
         document.getElementById('def-wall-level').value = 20;
         document.getElementById('att-ashigaru').value = 800;
@@ -670,6 +915,16 @@ function applyPreset(presetName) {
         document.getElementById('def-archer').value = 350;
         document.getElementById('def-samurai').value = 200;
         document.getElementById('def-hatamoto').value = 80;
+
+        // Bâtiments avancés
+        document.getElementById('def-bld-hq').value = 20;
+        document.getElementById('def-bld-barracks').value = 18;
+        document.getElementById('def-bld-storage').value = 18;
+        document.getElementById('def-bld-tank').value = 18;
+        document.getElementById('def-bld-blacksmith').value = 15;
+        document.getElementById('def-bld-radar').value = 12;
+        document.getElementById('def-bld-shipyard').value = 12;
+        document.getElementById('def-bld-stonemason').value = 10;
     }
     updateWallMetrics();
 }
@@ -695,6 +950,27 @@ function runTacticalSimulation() {
     let multPerLvl = (defClan === 'aethelis') ? 0.05 : ((defClan === 'vorash') ? 0.035 : 0.04);
     let factionShieldBonus = (defClan === 'aethelis') ? 15 : 0;
 
+    // Récupération des niveaux initiaux des bâtiments
+    const buildingsState = [];
+    const stonemasonInput = document.getElementById('def-bld-stonemason');
+    const stonemasonLvl = parseInt(stonemasonInput ? stonemasonInput.value : 0, 10) || 0;
+    const hpPerBldLvl = Math.round(350 * (1.0 + (stonemasonLvl * 0.05)));
+
+    DEFENDER_BUILDINGS.forEach(b => {
+        const inp = document.getElementById(b.id);
+        const lvl = Math.max(0, parseInt(inp ? inp.value : 0, 10) || 0);
+        buildingsState.push({
+            id: b.id,
+            code: b.code,
+            name: b.name,
+            icon: b.icon,
+            initialLvl: lvl,
+            finalLvl: lvl,
+            levelsLost: 0,
+            status: 'intact'
+        });
+    });
+
     // Récupération des effectifs initiaux
     const unitsData = {};
     let attInitialCount = 0;
@@ -710,6 +986,7 @@ function runTacticalSimulation() {
             attack: stats.attack,
             defense: stats.defense,
             isSiege: stats.isSiege,
+            baseSiegeDmg: stats.baseSiegeDmg || 0,
             wallDmgMult: stats.wallDmgMult || 1,
             initialCount: count,
             currentCount: count,
@@ -720,7 +997,7 @@ function runTacticalSimulation() {
     }
 
     if (attInitialCount === 0 && defInitialCount === 0) {
-        alert("Veuillez saisir au moins quelques unités dans chaque camp pour lancer la simulation.");
+        showDevAlert("Veuillez saisir au moins quelques régiments dans chaque camp pour lancer la simulation.", "warning");
         return;
     }
 
@@ -734,21 +1011,30 @@ function runTacticalSimulation() {
     // 1. Pilonnage de la muraille par les engins de siège
     const rams = unitsData['att-ram'].currentCount;
     const catapults = unitsData['att-catapult'].currentCount;
-    let siegeWallDmg = (rams * 400 * 3) + (catapults * 800 * 4);
+    let siegeWallDmg = (rams * 150 * 3) + (catapults * 450 * 4);
     if (doctrine === 'siege_master') siegeWallDmg = Math.round(siegeWallDmg * 1.25);
 
+    let excessWallDmg = 0;
+    let totalStructuralDmgToWall = 0;
+
     if (currentWallHp > 0 && siegeWallDmg > 0) {
-        currentWallHp = Math.max(0, currentWallHp - siegeWallDmg);
-        combatLog.push(`[SIÈGE] ${rams} Béliers et ${catapults} Catapultes pilonnent les remparts et infligent ${siegeWallDmg.toLocaleString()} dégâts structurels.`);
-        if (currentWallHp === 0) {
+        if (siegeWallDmg >= currentWallHp) {
+            totalStructuralDmgToWall = currentWallHp;
+            excessWallDmg = siegeWallDmg - currentWallHp;
+            currentWallHp = 0;
             currentWallLvl = 0;
-            combatLog.push(`💥 [BRÈCHE CRITIQUE] Les remparts s'effondrent sous les coups de boutoir ! La muraille est percée !`);
+            combatLog.push(`[SIÈGE] ${rams} Béliers et ${catapults} Catapultes pilonnent les remparts et infligent ${siegeWallDmg.toLocaleString()} dégâts structurels.`);
+            combatLog.push(`💥 [BRÈCHE CRITIQUE] Les remparts s'effondrent sous les coups de boutoir ! La muraille est totalement anéantie (Niveau 0) !`);
         } else {
-            currentWallLvl = Math.ceil(currentWallHp / 250);
+            totalStructuralDmgToWall = siegeWallDmg;
+            currentWallHp -= siegeWallDmg;
+            currentWallLvl = Math.max(1, Math.ceil(currentWallHp / 250));
+            combatLog.push(`[SIÈGE] ${rams} Béliers et ${catapults} Catapultes pilonnent les remparts et infligent ${siegeWallDmg.toLocaleString()} dégâts structurels.`);
             combatLog.push(`[MURAILLE] Les remparts tiennent bon mais sont fissurés : ${currentWallHp.toLocaleString()} PV restants (Équivalent Niv ${currentWallLvl}).`);
         }
     } else if (currentWallHp === 0) {
-        combatLog.push(`[MURAILLE] Aucune fortification ne protège le village. Les troupes s'élancent à découvert.`);
+        excessWallDmg = siegeWallDmg;
+        combatLog.push(`[MURAILLE] Aucune fortification ne protège le village. Les engins de siège ciblent directement le cœur de la cité.`);
     }
 
     // 2. Tirs des archers défenseurs et riposte des meurtrières
@@ -787,7 +1073,6 @@ function runTacticalSimulation() {
     let attLossRatio = Math.min(0.75, defP2 / (attP2 + defP2 + 1));
     let defLossRatio = Math.min(0.75, attP2 / (attP2 + defP2 + 1));
 
-    // Si muraille encore debout, la défense subit 35% de pertes en moins
     if (currentWallLvl > 5) {
         defLossRatio *= 0.65;
         combatLog.push(`🛡️ [PROTECTION DES REMPARTS] La muraille absorbe l'onde de choc et réduit les pertes de la garnison.`);
@@ -803,23 +1088,20 @@ function runTacticalSimulation() {
     let defP3 = calculateRemainingPower(unitsData, 'def') * (1.0 + (currentWallLvl * 0.02));
 
     if (attP3 > defP3 * 1.5) {
-        // Balayage attaquant
         applyLossesToSide(unitsData, 'def', 0.85, combatLog);
         applyLossesToSide(unitsData, 'att', 0.10, combatLog);
         combatLog.push(`⚔️ [PERCÉE DÉCISIVE] L'armée attaquante submerge le donjon et anéantit la résistance.`);
     } else if (defP3 > attP3 * 1.5) {
-        // Échec du siège
         applyLossesToSide(unitsData, 'att', 0.70, combatLog);
         applyLossesToSide(unitsData, 'def', 0.15, combatLog);
         combatLog.push(`🛡️ [REPLI FORCÉ] L'armée attaquante est décimée au pied des remparts et bat en retraite.`);
     } else {
-        // Combat équilibré féroce
         applyLossesToSide(unitsData, 'att', 0.40, combatLog);
         applyLossesToSide(unitsData, 'def', 0.45, combatLog);
         combatLog.push(`⚔️ [LUTTE ACHARNÉE] Les corps-à-corps font rage dans les ruelles du bourg fortifié.`);
     }
 
-    // ── BILAN FINAL & VERDICT ────────────────────────────────────────────────
+    // ── BILAN MILITAIRE & VERDICT ────────────────────────────────────────────
     let attFinalRemaining = 0;
     let attTotalLosses = 0;
     let defFinalRemaining = 0;
@@ -882,6 +1164,53 @@ function runTacticalSimulation() {
         }
     }
 
+    // ═════════════════════════════════════════════════════════════════════════
+    // 🏯 CALCUL DES DÉGÂTS AUX INFRASTRUCTURES & BÂTIMENTS
+    // ═════════════════════════════════════════════════════════════════════════
+    let totalInfraDamageInflicted = totalStructuralDmgToWall;
+    const survivingRams = unitsData['att-ram'].currentCount;
+    const survivingCatapults = unitsData['att-catapult'].currentCount;
+
+    // Report des dégâts résiduels sur les bâtiments si la muraille est enfoncée (currentWallLvl === 0)
+    // et que l'attaquant a remporté l'assaut avec des armes de siège
+    if (verdict.isAttackerWin && (survivingRams > 0 || survivingCatapults > 0)) {
+        if (currentWallLvl === 0) {
+            combatLog.push(`\n═════ PHASE DE SAPE & DÉGRADATION DES INFRASTRUCTURES ═════`);
+            
+            // Calcul des dégâts de siège résiduels
+            let residualSiegeDmg = Math.round(excessWallDmg / 3.5) + (survivingRams * 150) + (survivingCatapults * 450);
+            if (doctrine === 'siege_master') residualSiegeDmg = Math.round(residualSiegeDmg * 1.25);
+
+            combatLog.push(`🔥 [ASSAUT URBAIN] La muraille étant détruite, ${residualSiegeDmg.toLocaleString()} dégâts de siège résiduels frappent les édifices du village.`);
+
+            buildingsState.forEach(b => {
+                if (residualSiegeDmg <= 0 || b.initialLvl <= 0) return;
+                const bldTotalHp = b.initialLvl * hpPerBldLvl;
+                const applied = Math.min(residualSiegeDmg, bldTotalHp);
+
+                if (applied >= bldTotalHp) {
+                    b.finalLvl = 0;
+                    b.levelsLost = b.initialLvl;
+                    b.status = 'destroyed';
+                    residualSiegeDmg -= bldTotalHp;
+                    totalInfraDamageInflicted += bldTotalHp;
+                    combatLog.push(`💥 [DESTRUCTION TOTALE] ${b.name} : Niveau ${b.initialLvl} ➔ DÉTRUIT (Niveau 0 / À reconstruire) !`);
+                } else {
+                    const lost = Math.max(1, Math.floor(applied / hpPerBldLvl));
+                    b.finalLvl = Math.max(0, b.initialLvl - lost);
+                    b.levelsLost = lost;
+                    b.status = (b.finalLvl === 0) ? 'destroyed' : 'damaged';
+                    const usedHp = lost * hpPerBldLvl;
+                    residualSiegeDmg -= usedHp;
+                    totalInfraDamageInflicted += usedHp;
+                    combatLog.push(`⚠️ [DÉGRADATION] ${b.name} : Niveau ${b.initialLvl} ➔ Niveau ${b.finalLvl} (-${lost} niv).`);
+                }
+            });
+        } else {
+            combatLog.push(`\n🛡️ [REMPARTS INFRANCHIS] La muraille a résisté à l'effondrement : tous les bâtiments intérieurs du village sont épargnés.`);
+        }
+    }
+
     combatLog.push(`\n[VERDICT] ${verdict.title} : Pertes Attaquant ${attLossPct}% | Pertes Défenseur ${defLossPct}% | Muraille finale : ${currentWallHp.toLocaleString()} PV.`);
 
     // Sauvegarde en mémoire du dernier résultat pour Markdown et API
@@ -892,6 +1221,8 @@ function runTacticalSimulation() {
         currentWallLvl: currentWallLvl,
         initialWallHp: initialWallHp,
         currentWallHp: currentWallHp,
+        totalInfraDamage: totalInfraDamageInflicted,
+        buildingsState: buildingsState,
         attInitial: attInitialCount,
         attLosses: attTotalLosses,
         attLossPct: attLossPct,
@@ -957,7 +1288,7 @@ function renderSimulationResults(data, verdict) {
     document.getElementById('def-initial-total').textContent = `${data.defInitial.toLocaleString()} défenseurs`;
     document.getElementById('def-losses-total').textContent = `-${data.defLosses.toLocaleString()} tués`;
 
-    // Muraille
+    // Muraille KPI
     const wallHpPct = data.initialWallHp > 0 ? Math.round((data.currentWallHp / data.initialWallHp) * 100) : 0;
     document.getElementById('wall-hp-bar').style.width = `${wallHpPct}%`;
     document.getElementById('wall-hp-text').textContent = `${data.currentWallHp.toLocaleString()} / ${data.initialWallHp.toLocaleString()} PV`;
@@ -971,7 +1302,7 @@ function renderSimulationResults(data, verdict) {
         breachText.textContent = "Terrain ouvert";
         breachText.className = "text-secondary";
     } else if (data.currentWallHp === 0) {
-        statusBadge.className = "badge bg-danger-lt text-danger";
+        statusBadge.className = "badge bg-danger text-white";
         statusBadge.textContent = "Brèche Totale";
         breachText.textContent = "Effondrée !";
         breachText.className = "text-danger fw-bold";
@@ -985,6 +1316,76 @@ function renderSimulationResults(data, verdict) {
         statusBadge.textContent = "Intacte";
         breachText.textContent = "Tient bon";
         breachText.className = "text-success";
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // SECTION DÉGÂTS AUX INFRASTRUCTURES
+    // ═════════════════════════════════════════════════════════════════════════
+    const infraTotalDmgEl = document.getElementById('infra-total-damage-badge');
+    if (infraTotalDmgEl) {
+        infraTotalDmgEl.textContent = `${(data.totalInfraDamage || 0).toLocaleString()} PV structurels infligés`;
+    }
+
+    const wallTransitionEl = document.getElementById('infra-wall-transition-text');
+    if (wallTransitionEl) {
+        wallTransitionEl.textContent = `Niveau ${data.initialWallLvl} ➔ Niveau ${data.currentWallLvl}`;
+    }
+
+    const wallPillEl = document.getElementById('infra-wall-status-pill');
+    if (wallPillEl) {
+        if (data.initialWallLvl === 0) {
+            wallPillEl.className = 'badge bg-secondary-lt text-secondary';
+            wallPillEl.textContent = 'Aucune (Mur 0)';
+        } else if (data.currentWallLvl === 0) {
+            wallPillEl.className = 'badge bg-danger text-white';
+            wallPillEl.textContent = '💥 Brèche Totale / Effondrée';
+        } else if (data.currentWallLvl < data.initialWallLvl) {
+            wallPillEl.className = 'badge bg-warning-lt text-warning';
+            wallPillEl.textContent = `⚠️ Endommagée (-${data.initialWallLvl - data.currentWallLvl} niv)`;
+        } else {
+            wallPillEl.className = 'badge bg-success-lt text-success';
+            wallPillEl.textContent = '✅ Intacte / Tient bon';
+        }
+    }
+
+    const wallHpDetailsEl = document.getElementById('infra-wall-hp-details');
+    if (wallHpDetailsEl) {
+        wallHpDetailsEl.textContent = `${data.currentWallHp.toLocaleString()} / ${data.initialWallHp.toLocaleString()} PV structurels`;
+    }
+
+    // Tableau des Bâtiments
+    const infraTbody = document.getElementById('sim-infra-buildings-table-body');
+    if (infraTbody && Array.isArray(data.buildingsState)) {
+        infraTbody.innerHTML = '';
+        data.buildingsState.forEach(b => {
+            const tr = document.createElement('tr');
+            let statusPill = '';
+            if (b.status === 'destroyed') {
+                statusPill = '<span class="badge bg-danger text-white"><i class="fa-solid fa-fire me-1"></i>Détruit (Niv 0)</span>';
+            } else if (b.status === 'damaged') {
+                statusPill = `<span class="badge bg-warning-lt text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i>Endommagé (-${b.levelsLost})</span>`;
+            } else {
+                statusPill = '<span class="badge bg-success-lt text-success"><i class="fa-solid fa-circle-check me-1"></i>Intact</span>';
+            }
+
+            const lossDisplay = b.levelsLost > 0 
+                ? `<span class="text-danger fw-bold">-${b.levelsLost} niveau${b.levelsLost > 1 ? 'x' : ''}</span>`
+                : `<span class="text-muted">—</span>`;
+
+            tr.innerHTML = `
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid ${b.icon}"></i>
+                        <span class="fw-medium">${escapeHtml(b.name)}</span>
+                    </div>
+                </td>
+                <td class="text-center font-monospace">Niv ${b.initialLvl}</td>
+                <td class="text-center font-monospace fw-bold ${b.finalLvl === 0 && b.initialLvl > 0 ? 'text-danger' : (b.finalLvl < b.initialLvl ? 'text-warning' : '')}">Niv ${b.finalLvl}</td>
+                <td class="text-center font-monospace">${lossDisplay}</td>
+                <td class="text-end">${statusPill}</td>
+            `;
+            infraTbody.appendChild(tr);
+        });
     }
 
     // Tableau régiments
@@ -1029,7 +1430,21 @@ function copyMarkdownReport() {
     md += `|---|---|---|\n`;
     md += `| **Effectifs Engagés** | ${r.attInitial.toLocaleString()} | ${r.defInitial.toLocaleString()} |\n`;
     md += `| **Pertes Humaines** | -${r.attLosses.toLocaleString()} (${r.attLossPct}%) | -${r.defLosses.toLocaleString()} (${r.defLossPct}%) |\n`;
-    md += `| **Muraille Cible** | — | Niv ${r.initialWallLvl} ➔ Niv ${r.currentWallLvl} (${r.currentWallHp.toLocaleString()} / ${r.initialWallHp.toLocaleString()} PV) |\n\n`;
+    md += `| **Muraille Cible** | — | Niv ${r.initialWallLvl} ➔ Niv ${r.currentWallLvl} (${r.currentWallHp.toLocaleString()} / ${r.initialWallHp.toLocaleString()} PV) |\n`;
+    md += `| **Dégâts Structurels** | ${(r.totalInfraDamage || 0).toLocaleString()} PV infligés | Résistance de Garnison |\n\n`;
+
+    md += `#### 💥 Dégâts aux Infrastructures & Bâtiments\n`;
+    md += `| Édifice | Niveau Initial | Niveau Final | Dégradation | Statut |\n`;
+    md += `|---|---|---|---|---|\n`;
+    md += `| Muraille & Remparts | Niv ${r.initialWallLvl} | Niv ${r.currentWallLvl} | -${r.initialWallLvl - r.currentWallLvl} | ${r.currentWallLvl === 0 ? '💥 Brèche Totale' : (r.currentWallLvl < r.initialWallLvl ? '⚠️ Endommagée' : '✅ Intacte')} |\n`;
+    if (Array.isArray(r.buildingsState)) {
+        r.buildingsState.forEach(b => {
+            const statusLabel = b.status === 'destroyed' ? '❌ Détruit' : (b.status === 'damaged' ? '⚠️ Endommagé' : '✅ Intact');
+            md += `| ${b.name} | Niv ${b.initialLvl} | Niv ${b.finalLvl} | -${b.levelsLost} | ${statusLabel} |\n`;
+        });
+    }
+    md += `\n`;
+
     md += `#### Détail des Régiments\n`;
     md += `| Camp | Unité | Engagés | Pertes | Survivants |\n`;
     md += `|---|---|---|---|---|\n`;
@@ -1080,8 +1495,17 @@ function showDevAlert(message, type) {
         alertBox.classList.remove('d-none');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-        alert(message);
+        if (typeof showUpdateToast === 'function') {
+            showUpdateToast(message, type);
+        } else if (typeof window.showToast === 'function') {
+            window.showToast(message, type);
+        }
     }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 // Initialisation au chargement immédiat et réactif
