@@ -3,6 +3,48 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - rural-terroir-40-illustrated-map : Carte Illustrée des 40 Parcelles Féodales (Panorama 16:9 Ukiyo-e & Viewport Grab-and-Pan)
+- **Module :** `rural-terroir-40-illustrated-map`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Nouvelle Illustration Panoramique Originale Haute Définition 16:9 (`public/assets/terroir_panoramic_16_9.jpg`) :**
+     - Création originale complète (format widescreen 16:9, 1376×768 px) sans réutilisation directe ni altération de l'image précédente.
+     - Signature graphique : Peinture numérique semi-réaliste et inspiration estampe japonaise ukiyo-e (traits fins, encrage précis, textures d'aquarelle et aplats texturés, lumière dorée d'aurore filtrant à travers une brume matinale légère).
+     - Vue plongeante isométrique (bird's-eye view) stratégique articulant 8 biomes bien distincts reliés par des sentiers de terre et un cours d'eau :
+       * ⛰️ **Carrière de Pierre (Nord / Massif rocheux)** : 5 plateformes de granit étagées avec blocs taillés et échafaudages en bois.
+       * 🌲 **Forêt d'Exploitation (Nord-Est)** : 5 clairières de coupe au milieu de grands cèdres et cyprès du Japon.
+       * 🏺 **Berges d'Argile (Est / Cours d'eau)** : 5 fosses d'extraction alluviale et berges argileuses le long de la rivière.
+       * 🌾 **Rizières en Terrasses (Centre-Sud)** : 5 bassins inondés en gradins avec reflets d'eau et diguettes.
+       * 🍵 **Collines de Thé (Sud-Est)** : 5 paliers ondulés formés de buissons de théiers bien taillés.
+       * 🫘 **Champs de Soja (Sud-Ouest)** : 5 parcelles agricoles plates avec rangs de culture et claies de séchage.
+       * ⛩️ **Sanctuaires Shinto (Ouest / Colline sacrée)** : 5 clairières surélevées ornées de torii vermillon, lanternes de pierre et cordes shimenawa.
+       * 🛖 **Cœur du Village (Centre)** : 5 emplacements spacieux réservés aux habitations traditionnelles (minka) et roue à aubes.
+     - Coordonnées spatiales relatives précises (% left, % top) calculées et déclarées dans `TerroirEngine::SLOT_MAP_COORDS`.
+  2. **Moteur de Navigation Viewport 16:9 Fluide (Grab-and-Pan & Zoom) :**
+     - Système de glissement ergonomique direct au curseur et tactile (drag-to-scroll / grab-and-pan en JavaScript Vanilla) avec gestion des états `cursor: grab` et `cursor: grabbing`.
+     - Zoom progressif à la molette centré sur le curseur avec bornes de clampage adaptées au format 16:9 (0.5x à 2.2x).
+     - Barre de commandes flottante : Zoom avant (+), Zoom arrière (-), Ajustement 100%, Recentrage rapide, et Mode Plein Écran HTML5.
+     - Déplacement cinématique caméra avec lissage CSS (`cubic-bezier`) lors du clic sur l'un des filtres de catégories.
+     - Bascule fluide 1-clic entre la « 🗺️ Carte Illustrée (40) » et la « 📊 Grille Tactique (40) ».
+  3. **Superposition des 40 Slots Interactifs & Modale d'Élévation :**
+     - Tokens circulaires style jeu de stratégie avec liseré thématique lumineux, pastille de niveau (`N.1`), compteur de travailleurs requis et affichage des cadences.
+     - Détection visuelle des chantiers actifs avec halo ambré pulsant et marteau animé.
+     - Infobulles enrichies au survol (nom, rôle de l'ouvrier, production horaire, invite d'action).
+     - Modale d'élévation interactive (`#parcelUpgradeModal`) présentant vignette, comparatif Niveau N ➔ N+1, tags de coûts multi-ressources colorés (vert si disponible, rouge si manquant) et bouton d'action AJAX direct.
+  4. **Traçabilité & Grimoire des Prompts :**
+     - Ajout de la fiche descriptive `pano_terroir_16_9` dans `views/partials/grimoire_prompts_data.php`.
+- **Fichiers modifiés :** `public/assets/terroir_panoramic_16_9.jpg`, `core/TerroirEngine.php`, `views/partials/grimoire_prompts_data.php`, `views/resources.php`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Se rendre sur la page des ressources (`/?page=resources`) : vérifier l'affichage par défaut de la carte panoramique des 40 parcelles.
+  2. Tester le Grab-and-Pan : cliquer et faire glisser la souris dans le viewport, vérifier l'absence d'à-coups et la fluidité du déplacement.
+  3. Tester le zoom : molette de la souris, boutons `+`, `-`, `100%` et `Recentrer`.
+  4. Tester le filtrage des catégories (ex: `🌲 Bois (5)`, `🌾 Riz (5)`, `🛖 Habitations (5)`) : vérifier que la caméra effectue un travelling fluide vers la zone ciblée et que les pins non sélectionnés sont estompés.
+  5. Cliquer sur un pin de parcelle : vérifier l'ouverture de la modale `#parcelUpgradeModal` avec les métriques et les coûts.
+  6. Cliquer sur « 📊 Grille Tactique (40) » : vérifier la bascule instantanée vers la vue des cartes récapitulatives.
+  7. Cliquer sur le badge « Généré par IA » : vérifier l'ouverture de la modale de transparence avec le prompt du modèle Google Gemini Imagen 3.
+
+---
+
 ### [2026-10-02] - rural-terroir-40-grid : Grille des 40 Parcelles & Simplification des Habitations
 - **Module :** `rural-terroir-40-grid`
 - **Statut :** `À tester`

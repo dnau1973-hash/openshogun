@@ -220,6 +220,74 @@ class TerroirEngine {
         ]
     ];
 
+    // Coordonnées spatiales précises (% left, % top) des 40 parcelles sur l'illustration panoramique 16:9
+    public const SLOT_MAP_COORDS = [
+        // 1. Carrière de Pierre (Nord / Massif rocheux)
+        'stone' => [
+            1 => ['left' => 22.0, 'top' => 9.0],
+            2 => ['left' => 17.5, 'top' => 15.0],
+            3 => ['left' => 24.5, 'top' => 17.5],
+            4 => ['left' => 32.5, 'top' => 13.5],
+            5 => ['left' => 26.0, 'top' => 32.0],
+        ],
+        // 2. Forêt d'Exploitation (Nord-Est)
+        'wood' => [
+            1 => ['left' => 73.0, 'top' => 13.0],
+            2 => ['left' => 62.0, 'top' => 19.0],
+            3 => ['left' => 57.0, 'top' => 24.0],
+            4 => ['left' => 65.0, 'top' => 31.0],
+            5 => ['left' => 74.0, 'top' => 24.0],
+        ],
+        // 3. Berges d'Argile (Est / Rivière)
+        'clay' => [
+            1 => ['left' => 89.5, 'top' => 33.0],
+            2 => ['left' => 82.0, 'top' => 43.0],
+            3 => ['left' => 93.0, 'top' => 42.0],
+            4 => ['left' => 89.5, 'top' => 50.0],
+            5 => ['left' => 95.0, 'top' => 54.0],
+        ],
+        // 4. Rizières en Terrasses (Centre-Sud)
+        'rice' => [
+            1 => ['left' => 64.0, 'top' => 63.0],
+            2 => ['left' => 53.0, 'top' => 66.0],
+            3 => ['left' => 59.0, 'top' => 71.0],
+            4 => ['left' => 63.0, 'top' => 77.0],
+            5 => ['left' => 56.0, 'top' => 81.0],
+        ],
+        // 5. Collines de Thé (Sud-Est)
+        'tea' => [
+            1 => ['left' => 94.0, 'top' => 68.0],
+            2 => ['left' => 87.0, 'top' => 75.0],
+            3 => ['left' => 94.0, 'top' => 81.0],
+            4 => ['left' => 85.0, 'top' => 88.0],
+            5 => ['left' => 92.0, 'top' => 93.0],
+        ],
+        // 6. Champs de Soja (Sud-Ouest)
+        'soybean' => [
+            1 => ['left' => 18.0, 'top' => 76.0],
+            2 => ['left' => 28.0, 'top' => 74.0],
+            3 => ['left' => 35.0, 'top' => 82.0],
+            4 => ['left' => 12.0, 'top' => 90.0],
+            5 => ['left' => 28.0, 'top' => 90.0],
+        ],
+        // 7. Sanctuaires Shintō (Ouest / Colline Sacrée)
+        'shrine' => [
+            1 => ['left' => 8.0,  'top' => 46.0],
+            2 => ['left' => 10.5, 'top' => 50.0],
+            3 => ['left' => 18.5, 'top' => 47.0],
+            4 => ['left' => 15.0, 'top' => 57.0],
+            5 => ['left' => 19.0, 'top' => 64.0],
+        ],
+        // 8. Cœur du Village & Habitations (Centre)
+        'housing' => [
+            1 => ['left' => 37.0, 'top' => 50.0],
+            2 => ['left' => 41.0, 'top' => 45.0],
+            3 => ['left' => 46.0, 'top' => 40.0],
+            4 => ['left' => 54.0, 'top' => 39.0],
+            5 => ['left' => 59.5, 'top' => 46.0],
+        ],
+    ];
+
     public function __construct(?PDO $db = null) {
         try {
             $this->db = $db ?? Database::getConnection();
@@ -463,6 +531,7 @@ class TerroirEngine {
                     'is_upgrading'    => $isUpgrading,
                     'queue_item'      => $activeQueueItem,
                     'spatial_pos'     => $pos,
+                    'map_coords'      => self::SLOT_MAP_COORDS[$resourceType][$i] ?? ['left' => 50.0, 'top' => 50.0],
                     'tile_img'        => $zDef['tile_img'] ?? '/public/assets/tiles/tile_bucheron.png'
                 ];
             } else {
@@ -499,6 +568,7 @@ class TerroirEngine {
                     'is_upgrading'    => false,
                     'queue_item'      => null,
                     'spatial_pos'     => $pos,
+                    'map_coords'      => self::SLOT_MAP_COORDS[$resourceType][$i] ?? ['left' => 50.0, 'top' => 50.0],
                     'tile_img'        => $zDef['tile_img'] ?? '/public/assets/tiles/tile_storage.png'
                 ];
             }

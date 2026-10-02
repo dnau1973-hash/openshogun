@@ -5,6 +5,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Carte Illustrée des 40 Parcelles Féodales — Panorama 16:9 Ukiyo-e & Viewport Grab-and-Pan (`views/resources.php`, `core/TerroirEngine.php`, `public/assets/terroir_panoramic_16_9.jpg`, `views/partials/grimoire_prompts_data.php`) :**
+  * Nouvelle création picturale originale haute définition au format widescreen 16:9 (`1376×768 px`), inspirée des estampes ukiyo-e et de la peinture numérique semi-réaliste féodale (encrage fin, textures d'aquarelle, lumière dorée d'aurore et brume matinale).
+  * Composition spatiale isométrique distribuant 40 clairières et plateformes d'exploitation réparties sur 8 biomes stratégiques interconnectés (Carrières de pierre au nord, Forêt de cèdres au nord-est, Berges d'argile à l'est, Rizières en terrasses au centre-sud, Collines de thé au sud-est, Champs de soja au sud-ouest, Sanctuaires shintō à l'ouest, Cœur du village au centre).
+  * Moteur de navigation tactile et souris fluide (« Grab-and-Pan » direct en JavaScript Vanilla) avec zoom à la molette (0.5x à 2.2x), travelling cinématique par catégorie et barre d'outils flottante.
+  * Superposition des 40 tokens interactifs avec niveau, ouvriers et flux horaires, reliés à la modale d'élévation rapide (`#parcelUpgradeModal`).
+  * Enregistrement de la fiche descriptive et du prompt source `pano_terroir_16_9` dans le Grimoire des Prompts avec badge de transparence IA.
 - **Grille des 40 Parcelles du Domaine Rural & Simplification des Habitations (`views/resources.php`, `core/TerroirEngine.php`) :**
   * Restructuration ergonomique complète de la vue des ressources : transition vers une grille de 40 parcelles ordonnées en 8 catégories thématiques de 5 slots chacune (Bois, Pierre, Argile, Riz, Thé, Soja, Sérénité/Sanctuaires, Habitations).
   * Simplification du système de logement : suppression des sous-types complexes et déploiement d'un modèle unique « Habitation » (Niveaux 1 à N) avec capacité totale calculée dynamiquement selon la formule $\text{Capacité Totale} = 75 \text{ (base)} + (\sum_{i=1}^5 \text{Niveau}(H_i) \times 5)$.

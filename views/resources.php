@@ -1,7 +1,8 @@
 <?php
 /**
  * Vue des 40 Parcelles de Ressources & Terroir Féodal (OpenShogun)
- * Grille complète de 40 parcelles (8 catégories × 5 parcelles)
+ * Vue hybride : Grande illustration panoramique interactive avec Grab-and-Pan + Grille tactique des 40 parcelles
+ * 8 catégories thématiques × 5 parcelles dédiées (Bois, Pierre, Argile, Riz, Thé, Soja, Sérénité, Habitations)
  * Simplification du système de logement : Modèle unique « Habitation » (Capacité = 75 + Somme des niveaux × 5)
  */
 require_once __DIR__ . '/../core/BuildingEngine.php';
@@ -123,6 +124,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 .filter-category-bar {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.5rem;
     background: var(--tblr-card-bg, #ffffff);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -144,7 +146,236 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     box-shadow: 0 0 10px rgba(234, 179, 8, 0.35);
 }
 
-/* Sections des 8 Catégories Thématiques */
+/* ========================================================
+   VUE 1 : CARTE ILLUSTRÉE PANORAMIQUE & VIEWPORT DRAG-TO-PAN
+   ======================================================== */
+.terroir-viewport-wrapper {
+    position: relative;
+    width: 100%;
+    height: 720px;
+    background: #0f172a;
+    border-radius: 12px;
+    overflow: hidden;
+    user-select: none;
+    cursor: grab;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.7), 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.terroir-viewport-wrapper.is-dragging {
+    cursor: grabbing !important;
+}
+
+.terroir-viewport-wrapper:fullscreen {
+    height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+}
+
+/* Scène panoramique contenant l'illustration 16:9 */
+.terroir-stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1376px;
+    height: 768px;
+    background-image: url('/public/assets/terroir_panoramic_16_9.jpg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+.terroir-stage.is-animating {
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.25, 1) !important;
+}
+
+/* Barre d'outils flottante du viewport */
+.terroir-map-toolbar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.terroir-map-toolbar > * {
+    pointer-events: auto;
+}
+
+.terroir-controls-cluster {
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 0.25rem;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.terroir-controls-cluster .btn {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+/* Tokens / Pins Interactifs des 40 Parcelles */
+.map-parcel-pin {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.94);
+    backdrop-filter: blur(6px);
+    border: 2.5px solid var(--pin-color, #ffffff);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 14px var(--pin-glow, rgba(255, 255, 255, 0.4));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    transform: translate(-50%, -50%) scale(1);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, opacity 0.25s ease;
+    z-index: 20;
+}
+
+.map-parcel-pin:hover {
+    transform: translate(-50%, -50%) scale(1.25);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8), 0 0 25px var(--pin-color, #ffffff);
+    z-index: 40;
+}
+
+.map-parcel-pin.is-dimmed {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(0.8);
+    pointer-events: none;
+}
+
+.map-parcel-pin.is-highlighted {
+    transform: translate(-50%, -50%) scale(1.35);
+    box-shadow: 0 0 25px var(--pin-color, #ffffff), 0 0 45px var(--pin-color, #ffffff);
+    z-index: 45;
+    animation: pinPulseGlow 1.2s infinite alternate ease-in-out;
+}
+
+@keyframes pinPulseGlow {
+    0% { transform: translate(-50%, -50%) scale(1.25); box-shadow: 0 0 15px var(--pin-color, #ffffff); }
+    100% { transform: translate(-50%, -50%) scale(1.42); box-shadow: 0 0 35px var(--pin-color, #ffffff); }
+}
+
+.map-parcel-pin.is-upgrading {
+    border-color: #f59e0b !important;
+    animation: upgradingHalo 1.4s infinite;
+}
+
+@keyframes upgradingHalo {
+    0% { box-shadow: 0 0 8px #f59e0b; }
+    50% { box-shadow: 0 0 25px #f59e0b, 0 0 35px rgba(245, 158, 11, 0.6); }
+    100% { box-shadow: 0 0 8px #f59e0b; }
+}
+
+.pin-level-badge {
+    position: absolute;
+    top: -9px;
+    right: -10px;
+    background: #0f172a;
+    border: 1.5px solid var(--pin-color, #ffffff);
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 0.05rem 0.35rem;
+    border-radius: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.pin-workers-badge {
+    position: absolute;
+    bottom: -9px;
+    left: -10px;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #cbd5e1;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.05rem 0.3rem;
+    border-radius: 10px;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.pin-rate-pill {
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #f8fafc;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 0.05rem 0.4rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+
+.pin-hammer-anim {
+    position: absolute;
+    top: -14px;
+    left: -12px;
+    color: #f59e0b;
+    font-size: 0.85rem;
+    animation: hammerSwing 0.8s infinite ease-in-out alternate;
+}
+
+@keyframes hammerSwing {
+    0% { transform: rotate(-25deg); }
+    100% { transform: rotate(25deg); }
+}
+
+/* Pin Donjon Tenshu au centre */
+.map-castle-pin {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 25;
+    text-decoration: none !important;
+}
+
+.castle-pin-inner {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 2.5px solid #38bdf8;
+    color: #38bdf8;
+    padding: 0.35rem 0.75rem;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7), 0 0 16px rgba(56, 189, 248, 0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.map-castle-pin:hover .castle-pin-inner {
+    transform: scale(1.12);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 26px rgba(56, 189, 248, 0.8);
+    color: #ffffff;
+}
+
+/* ========================================================
+   VUE 2 : GRILLE TACTIQUE DES 40 PARCELLES (CARTES TABLER)
+   ======================================================== */
 .terroir-category-section {
     background: var(--tblr-card-bg, #ffffff);
     border: 1.5px solid rgba(255, 255, 255, 0.08);
@@ -185,7 +416,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     font-size: 1.35rem;
 }
 
-/* Grille de 5 Parcelles par Catégorie */
 .terroir-category-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -204,7 +434,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     }
 }
 
-/* Tuile d'une Parcelle (Parcel Card) */
 .parcel-tile-card {
     border-radius: 10px;
     border: 1.5px solid rgba(255, 255, 255, 0.08);
@@ -226,7 +455,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     box-shadow: 0 0 15px rgba(245, 158, 11, 0.3) !important;
 }
 
-/* En-tête de la tuile */
 .parcel-card-header {
     padding: 0.5rem 0.65rem;
     display: flex;
@@ -254,7 +482,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     max-width: 140px;
 }
 
-/* Vignette visuelle de la parcelle */
 .parcel-visual-box {
     position: relative;
     width: 100%;
@@ -294,7 +521,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     gap: 0.25rem;
 }
 
-/* Corps d'informations de la tuile */
 .parcel-card-body {
     padding: 0.65rem;
     display: flex;
@@ -314,7 +540,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     border-radius: 6px;
 }
 
-/* Coûts et Durée */
 .parcel-cost-row {
     display: flex;
     flex-wrap: wrap;
@@ -343,7 +568,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     font-weight: 800;
 }
 
-/* Boutons d'action */
 .btn-upgrade-parcel {
     font-size: 0.78rem;
     font-weight: 700;
@@ -361,15 +585,25 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
                 <div>
                     <h2 class="card-title mb-1 fs-2">
-                        <i class="fa-solid fa-table-cells-large text-warning me-2"></i>Domaine Rural Féodal &mdash; <?= htmlspecialchars($planet['name']) ?>
+                        <i class="fa-solid fa-map-location-dot text-warning me-2"></i>Domaine Rural Féodal &mdash; <?= htmlspecialchars($planet['name']) ?>
                     </h2>
                     <div class="text-muted" style="font-size:0.82rem;">
                         Terroir : <strong class="text-danger"><?= $terroir['icon'] ?> <?= htmlspecialchars($terroir['name']) ?></strong>
-                        &bull; <strong>40 Parcelles de Production &amp; d'Accueil</strong> (8 Catégories &times; 5 Parcelles)
+                        &bull; <strong>40 Parcelles d'Exploitation &amp; d'Accueil</strong> (8 Catégories &times; 5 Parcelles)
                     </div>
                 </div>
                 
                 <div class="d-flex align-items-center gap-2">
+                    <!-- Sélecteur de mode d'affichage : Carte Illustrée vs Grille Tactique -->
+                    <div class="btn-group" role="group" aria-label="Bascule de vue">
+                        <button type="button" class="btn btn-sm btn-dark active" id="btnModeMap" onclick="switchTerroirView('map')">
+                            <i class="fa-solid fa-map me-1 text-warning"></i> Carte Illustrée (40)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnModeGrid" onclick="switchTerroirView('grid')">
+                            <i class="fa-solid fa-table-cells me-1"></i> Grille Tactique (40)
+                        </button>
+                    </div>
+
                     <a href="?page=city" class="btn btn-sm btn-primary">
                         <i class="fa-solid fa-chess-rook me-1"></i> Cité Castrale &rarr;
                     </a>
@@ -572,10 +806,12 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 
             </div>
 
-            <!-- 3. Barre de filtrage rapide des 8 Catégories Thématiques -->
+            <!-- 3. Barre de filtrage rapide des 8 Catégories Thématiques & Recentrage -->
             <div class="card-footer py-2 px-3">
                 <div class="filter-category-bar">
-                    <span class="text-muted fw-bold me-2 align-self-center" style="font-size:0.75rem;">Filtrer :</span>
+                    <span class="text-muted fw-bold me-2 align-self-center" style="font-size:0.75rem;">
+                        <i class="fa-solid fa-filter me-1"></i>Filtrer &amp; Cibler :
+                    </span>
                     <button type="button" class="btn-filter-cat btn-dark active" onclick="filterCategory('all', this)">
                         <i class="fa-solid fa-globe me-1"></i> Tout afficher (40)
                     </button>
@@ -607,8 +843,135 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             </div>
         </div>
 
-        <!-- 4. GRILLE DES 40 PARCELLES (8 Catégories × 5 Parcelles) -->
-        <div id="terroir-40-container">
+        <!-- ========================================================
+             VUE 1 : CARTE ILLUSTRÉE PANORAMIQUE AVEC LES 40 SLOTS
+             ======================================================== -->
+        <div id="terroirIllustratedMapView" class="card shadow-sm mb-3 overflow-hidden">
+            <div class="terroir-viewport-wrapper" id="terroirViewport">
+                
+                <!-- Barre d'outils flottante du viewport -->
+                <div class="terroir-map-toolbar">
+                    <div class="d-flex align-items-center gap-2">
+                        <?= AiPromptHelper::renderBadge('terroir_panoramic_16_9.jpg', 'Panorama 16:9 des 40 Parcelles Féodales', '/public/assets/terroir_panoramic_16_9.jpg', '', true) ?>
+                        <span class="badge bg-dark-lt text-white d-none d-lg-inline-block shadow-sm">
+                            <i class="fa-solid fa-arrows-up-down-left-right me-1 text-warning"></i> Glisser pour explorer &bull; Molette pour zoomer
+                        </span>
+                    </div>
+                    
+                    <div class="terroir-controls-cluster">
+                        <button type="button" class="btn btn-dark text-white" onclick="zoomTerroirMap(0.18)" title="Zoomer avant (+)">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        </button>
+                        <button type="button" class="btn btn-dark text-white font-monospace" onclick="resetTerroirMapZoom()" title="Ajuster la vue">
+                            <span id="zoomLevelIndicator">100%</span>
+                        </button>
+                        <button type="button" class="btn btn-dark text-white" onclick="zoomTerroirMap(-0.18)" title="Zoomer arrière (-)">
+                            <i class="fa-solid fa-magnifying-glass-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-dark text-white" onclick="centerTerroirMap()" title="Recentrer le fief">
+                            <i class="fa-solid fa-crosshairs"></i>
+                        </button>
+                        <button type="button" class="btn btn-dark text-white" onclick="toggleTerroirFullscreen()" title="Plein écran (⛶)">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scène interactive contenant l'illustration HD et les 40 pins -->
+                <div class="terroir-stage" id="terroirMapStage">
+                    
+                    <!-- Donjon Central Tenshu -->
+                    <a href="?page=city" class="map-castle-pin" style="left: 33.0%; top: 38.0%;" title="Tenshu &mdash; Cité Castrale & Cœur du Fief (Cliquer pour entrer)">
+                        <div class="castle-pin-inner">
+                            <i class="fa-solid fa-chess-rook"></i>
+                            <span>Tenshu</span>
+                        </div>
+                    </a>
+
+                    <!-- Les 40 Slots / Parcelles d'Exploitation -->
+                    <?php foreach ($all40Slots as $catKey => $catGroup): ?>
+                        <?php
+                            $cMeta = $catGroup['meta'];
+                            $cSlots = $catGroup['slots'];
+                        ?>
+                        <?php foreach ($cSlots as $slotIdx => $s): ?>
+                            <?php
+                                $isUp = !empty($s['is_upgrading']);
+                                $canAfford = !empty($s['can_afford']);
+                                $cost = $s['cost'];
+                                $coords = $s['map_coords'] ?? ['left' => 50, 'top' => 50];
+                                $tooltipTitle = '<strong>' . htmlspecialchars($s['name']) . '</strong> (Niv. ' . $s['level'] . ')<br>' .
+                                                '<span class="text-warning">' . htmlspecialchars($s['prod_label']) . '</span><br>' .
+                                                '<small class="text-muted">' . htmlspecialchars($s['worker_role']) . ' : ' . $s['workers'] . ' ouvriers<br><em>Cliquer pour gérer &amp; élever</em></small>';
+                            ?>
+                            <div class="map-parcel-pin <?= $isUp ? 'is-upgrading' : '' ?>"
+                                 id="map-pin-<?= $catKey ?>-<?= $slotIdx ?>"
+                                 style="left: <?= $coords['left'] ?>%; top: <?= $coords['top'] ?>%; --pin-color: <?= $cMeta['color'] ?>; --pin-glow: <?= $cMeta['color'] ?>80;"
+                                 data-cat="<?= $catKey ?>"
+                                 data-slot-idx="<?= $slotIdx ?>"
+                                 data-global-idx="<?= $s['global_index'] ?>"
+                                 data-res-type="<?= $catKey ?>"
+                                 data-name="<?= htmlspecialchars($s['name']) ?>"
+                                 data-jp-name="<?= htmlspecialchars($cMeta['jp_name']) ?>"
+                                 data-category-name="<?= htmlspecialchars($cMeta['name']) ?>"
+                                 data-desc="<?= htmlspecialchars($s['desc']) ?>"
+                                 data-level="<?= $s['level'] ?>"
+                                 data-workers="<?= $s['workers'] ?>"
+                                 data-worker-role="<?= htmlspecialchars($s['worker_role']) ?>"
+                                 data-prod-label="<?= htmlspecialchars($s['prod_label']) ?>"
+                                 data-tile-img="<?= htmlspecialchars($s['tile_img']) ?>"
+                                 data-bg-img="<?= htmlspecialchars($cMeta['bg_image']) ?>"
+                                 data-cost-wood="<?= (int)($cost['metal'] ?? 0) ?>"
+                                 data-cost-stone="<?= (int)($cost['crystal'] ?? 0) ?>"
+                                 data-cost-clay="<?= (int)($cost['clay'] ?? 0) ?>"
+                                 data-cost-rice="<?= (int)($cost['deuterium'] ?? 0) ?>"
+                                 data-duration="<?= (int)($s['duration'] ?? 60) ?>"
+                                 data-can-afford="<?= $canAfford ? '1' : '0' ?>"
+                                 data-is-upgrading="<?= $isUp ? '1' : '0' ?>"
+                                 data-color-class="<?= $cMeta['color_class'] ?>"
+                                 data-color="<?= $cMeta['color'] ?>"
+                                 data-icon="<?= $cMeta['icon'] ?>"
+                                 data-bs-toggle="tooltip"
+                                 data-bs-html="true"
+                                 data-bs-placement="top"
+                                 title="<?= $tooltipTitle ?>"
+                                 onclick="handlePinClick(this, event)">
+                                
+                                <?php if ($isUp): ?>
+                                    <span class="pin-hammer-anim"><i class="fa-solid fa-hammer"></i></span>
+                                <?php endif; ?>
+
+                                <i class="<?= $cMeta['icon'] ?> fs-4"></i>
+                                
+                                <span class="pin-level-badge <?= $isUp ? 'border-warning text-warning' : '' ?>">
+                                    <?= $isUp ? 'N.' . ($s['level'] + 1) : 'N.' . $s['level'] ?>
+                                </span>
+                                
+                                <?php if ($catKey !== 'housing'): ?>
+                                    <span class="pin-workers-badge">
+                                        <i class="fa-solid fa-person-digging text-warning"></i> <?= $s['workers'] ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="pin-workers-badge text-indigo">
+                                        <i class="fa-solid fa-people-roof"></i> #<?= $slotIdx ?>
+                                    </span>
+                                <?php endif; ?>
+
+                                <span class="pin-rate-pill d-none d-sm-block">
+                                    <?= $s['prod_label'] ?>
+                                </span>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endforeach; ?>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================
+             VUE 2 : GRILLE TACTIQUE DES 40 PARCELLES (MASQUÉE PAR DÉFAUT)
+             ======================================================== -->
+        <div id="terroirTacticalGridView" style="display: none;">
             <?php foreach ($all40Slots as $catKey => $catGroup): ?>
                 <?php
                     $cMeta = $catGroup['meta'];
@@ -636,7 +999,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 
                         <div>
                             <span class="badge bg-dark-lt text-white px-3 py-2 fw-bold" style="font-size:0.8rem;">
-                                5 Parcelles aménageables &bull; Bénéfice : <strong class="text-<?= $cMeta['color_class'] ?>"><?= $cMeta['res_name'] ?></strong>
+                                5 Parcelles &bull; Bénéfice : <strong class="text-<?= $cMeta['color_class'] ?>"><?= $cMeta['res_name'] ?></strong>
                             </span>
                         </div>
                     </div>
@@ -687,7 +1050,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                                     <!-- Coûts d'élévation -->
                                     <div class="parcel-cost-row">
                                         <span class="cost-chip <?= ($planet['metal'] >= $cost['metal']) ? 'affordable' : 'missing' ?>" title="Bois de Cèdre">
-                                            <i class="fa-solid fa-tree text-success"></i> <?= number_format($cost['metal']) ?>
+                                             <i class="fa-solid fa-tree text-success"></i> <?= number_format($cost['metal']) ?>
                                         </span>
                                         <span class="cost-chip <?= ($planet['crystal'] >= $cost['crystal']) ? 'affordable' : 'missing' ?>" title="Pierre de Taille">
                                             <i class="fa-solid fa-mountain text-secondary"></i> <?= number_format($cost['crystal']) ?>
@@ -831,9 +1194,354 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     </div>
 </div>
 
+<!-- ========================================================
+     MODALE D'AMÉLIORATION INTERACTIVE D'UNE PARCELLE
+     ======================================================== -->
+<div class="modal fade" id="parcelUpgradeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header py-2" id="modalHeaderBg">
+                <h4 class="modal-title d-flex align-items-center gap-2 mb-0 fs-3">
+                    <span id="modalIconAvatar" class="avatar avatar-sm rounded text-white bg-dark"></span>
+                    <div>
+                        <span id="modalTitle">Parcelle</span>
+                        <div class="text-muted font-monospace" style="font-size:0.72rem;" id="modalJpSubtitle"></div>
+                    </div>
+                </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            
+            <div class="modal-body p-3">
+                <!-- Visuel & Statut -->
+                <div class="d-flex gap-3 mb-3">
+                    <div id="modalVisualThumb" class="rounded border shadow-sm flex-shrink-0" style="width: 100px; height: 100px; background-size: cover; background-position: center;"></div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary fw-bold" id="modalLevelBadge">Niveau 1</span>
+                            <span class="badge bg-dark-lt text-white" id="modalCategoryBadge">Catégorie</span>
+                        </div>
+                        <p class="text-muted mb-2" style="font-size:0.82rem;" id="modalDesc"></p>
+                        <div class="d-flex align-items-center gap-2 text-muted" style="font-size:0.78rem;">
+                            <i class="fa-solid fa-person-digging text-warning"></i>
+                            <span><strong id="modalWorkerRole">Ouvriers</strong> : <strong class="text-body" id="modalWorkersCount">2</strong> requis</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bénéfices / Production -->
+                <div class="p-2 mb-3 rounded bg-surface-secondary border">
+                    <div class="d-flex justify-content-between align-items-center" style="font-size:0.85rem;">
+                        <span class="text-muted"><i class="fa-solid fa-chart-line text-success me-1"></i> Rendement / Apport actuel :</span>
+                        <strong class="text-success" id="modalCurrentProd">+30 / h</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-1" style="font-size:0.85rem;">
+                        <span class="text-muted"><i class="fa-solid fa-arrow-trend-up text-primary me-1"></i> Prochain niveau :</span>
+                        <strong class="text-primary" id="modalNextProd">+45 / h</strong>
+                    </div>
+                </div>
+
+                <!-- Coûts requis pour l'élévation -->
+                <div class="mb-3">
+                    <label class="form-label mb-2 fw-bold text-muted" style="font-size:0.75rem;">COÛTS REQUIS POUR L'ÉLÉVATION :</label>
+                    <div class="d-flex flex-wrap gap-2" id="modalCostTags"></div>
+                </div>
+
+                <!-- Durée du chantier -->
+                <div class="d-flex justify-content-between align-items-center text-muted mb-3" style="font-size:0.8rem;">
+                    <span><i class="fa-regular fa-clock me-1"></i> Durée estimée du chantier :</span>
+                    <strong class="font-monospace text-body" id="modalDuration">00:01:30</strong>
+                </div>
+
+                <!-- Bouton d'action -->
+                <div id="modalActionContainer">
+                    <button type="button" class="btn btn-primary w-100" id="btnModalUpgrade">
+                        <i class="fa-solid fa-arrow-up me-1"></i> Améliorer la parcelle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-// Filtrage dynamique des 8 Catégories Thématiques de Parcelles
+// Stocks du joueur pour vérification dynamique des coûts
+const playerStocks = {
+    metal: <?= (int)$planet['metal'] ?>,
+    crystal: <?= (int)$planet['crystal'] ?>,
+    deuterium: <?= (int)$planet['deuterium'] ?>
+};
+
+// Coordonnées de centrage automatique par zone (pour le panoramique immersif 16:9)
+const zoneCenters = {
+    'stone':   { left: 24.5, top: 17.5 },
+    'wood':    { left: 66.0, top: 22.0 },
+    'clay':    { left: 89.5, top: 44.0 },
+    'rice':    { left: 59.0, top: 72.0 },
+    'tea':     { left: 90.0, top: 81.0 },
+    'soybean': { left: 24.0, top: 82.0 },
+    'shrine':  { left: 14.0, top: 53.0 },
+    'housing': { left: 47.5, top: 44.0 },
+    'all':     { left: 50.0, top: 50.0 }
+};
+
+// État du moteur de grab-and-pan 16:9
+const terroirMapState = {
+    stageWidth: 1376,
+    stageHeight: 768,
+    scale: 0.85,
+    minScale: 0.5,
+    maxScale: 2.2,
+    x: 0,
+    y: 0,
+    isDragging: false,
+    dragStartX: 0,
+    dragStartY: 0,
+    hasMoved: false,
+    activeCategory: 'all'
+};
+
+const viewportEl = document.getElementById('terroirViewport');
+const stageEl = document.getElementById('terroirMapStage');
+const zoomIndicator = document.getElementById('zoomLevelIndicator');
+
+// Initialisation du Viewport
+function initTerroirViewport() {
+    if (!viewportEl || !stageEl) return;
+
+    // Calcul de l'échelle initiale pour adapter la largeur
+    const vpW = viewportEl.clientWidth || 1100;
+    const initialScale = Math.min(1.2, Math.max(0.65, vpW / 1376));
+    terroirMapState.scale = initialScale;
+
+    // Centrage initial sur le cœur du terroir
+    centerOnZone('all', false);
+
+    // Écouteurs de la souris pour le Grab-and-Pan
+    viewportEl.addEventListener('mousedown', (e) => {
+        // Ignorer si clic sur un bouton d'action ou lien
+        if (e.target.closest('.terroir-map-toolbar') || e.target.closest('.map-castle-pin')) return;
+        
+        terroirMapState.isDragging = true;
+        terroirMapState.hasMoved = false;
+        terroirMapState.dragStartX = e.clientX - terroirMapState.x;
+        terroirMapState.dragStartY = e.clientY - terroirMapState.y;
+        viewportEl.classList.add('is-dragging');
+        stageEl.classList.remove('is-animating');
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!terroirMapState.isDragging) return;
+        const newX = e.clientX - terroirMapState.dragStartX;
+        const newY = e.clientY - terroirMapState.dragStartY;
+
+        // Détection de mouvement effectif (pour distinguer clic d'un glissement)
+        if (Math.abs(newX - terroirMapState.x) > 4 || Math.abs(newY - terroirMapState.y) > 4) {
+            terroirMapState.hasMoved = true;
+        }
+
+        terroirMapState.x = newX;
+        terroirMapState.y = newY;
+        clampMapCoordinates();
+        renderMapTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (terroirMapState.isDragging) {
+            terroirMapState.isDragging = false;
+            viewportEl.classList.remove('is-dragging');
+        }
+    });
+
+    // Support tactile (Touch events)
+    let touchStartDist = 0;
+    let initialTouchScale = 1;
+
+    viewportEl.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.terroir-map-toolbar') || e.target.closest('.map-castle-pin')) return;
+
+        if (e.touches.length === 1) {
+            terroirMapState.isDragging = true;
+            terroirMapState.hasMoved = false;
+            terroirMapState.dragStartX = e.touches[0].clientX - terroirMapState.x;
+            terroirMapState.dragStartY = e.touches[0].clientY - terroirMapState.y;
+            stageEl.classList.remove('is-animating');
+        } else if (e.touches.length === 2) {
+            terroirMapState.isDragging = false;
+            touchStartDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialTouchScale = terroirMapState.scale;
+        }
+    }, { passive: true });
+
+    viewportEl.addEventListener('touchmove', (e) => {
+        if (terroirMapState.isDragging && e.touches.length === 1) {
+            const newX = e.touches[0].clientX - terroirMapState.dragStartX;
+            const newY = e.touches[0].clientY - terroirMapState.dragStartY;
+            if (Math.abs(newX - terroirMapState.x) > 4 || Math.abs(newY - terroirMapState.y) > 4) {
+                terroirMapState.hasMoved = true;
+            }
+            terroirMapState.x = newX;
+            terroirMapState.y = newY;
+            clampMapCoordinates();
+            renderMapTransform();
+        } else if (e.touches.length === 2 && touchStartDist > 0) {
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const factor = dist / touchStartDist;
+            terroirMapState.scale = Math.min(terroirMapState.maxScale, Math.max(terroirMapState.minScale, initialTouchScale * factor));
+            renderMapTransform();
+        }
+    }, { passive: true });
+
+    viewportEl.addEventListener('touchend', () => {
+        terroirMapState.isDragging = false;
+    });
+
+    // Zoom à la molette
+    viewportEl.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.12 : -0.12;
+        zoomAtCursor(delta, e.clientX, e.clientY);
+    }, { passive: false });
+}
+
+// Application du transform CSS sur la scène
+function renderMapTransform() {
+    if (!stageEl) return;
+    stageEl.style.transform = `translate(${terroirMapState.x}px, ${terroirMapState.y}px) scale(${terroirMapState.scale})`;
+    if (zoomIndicator) {
+        zoomIndicator.textContent = Math.round(terroirMapState.scale * 100) + '%';
+    }
+}
+
+// Limiter les coordonnées pour ne pas perdre la carte
+function clampMapCoordinates() {
+    const vpW = viewportEl.clientWidth;
+    const vpH = viewportEl.clientHeight;
+    const scaledW = terroirMapState.stageWidth * terroirMapState.scale;
+    const scaledH = terroirMapState.stageHeight * terroirMapState.scale;
+
+    const minX = vpW - scaledW - 200;
+    const maxX = 200;
+    const minY = vpH - scaledH - 200;
+    const maxY = 200;
+
+    terroirMapState.x = Math.min(maxX, Math.max(minX, terroirMapState.x));
+    terroirMapState.y = Math.min(maxY, Math.max(minY, terroirMapState.y));
+}
+
+// Zoom centré sur une position
+function zoomAtCursor(delta, clientX, clientY) {
+    const rect = viewportEl.getBoundingClientRect();
+    const cursorX = clientX - rect.left;
+    const cursorY = clientY - rect.top;
+
+    const oldScale = terroirMapState.scale;
+    let newScale = oldScale + delta;
+    newScale = Math.min(terroirMapState.maxScale, Math.max(terroirMapState.minScale, newScale));
+
+    if (newScale === oldScale) return;
+
+    // Conserver le point sous le curseur stable
+    const stageX = (cursorX - terroirMapState.x) / oldScale;
+    const stageY = (cursorY - terroirMapState.y) / oldScale;
+
+    terroirMapState.scale = newScale;
+    terroirMapState.x = cursorX - (stageX * newScale);
+    terroirMapState.y = cursorY - (stageY * newScale);
+
+    clampMapCoordinates();
+    stageEl.classList.remove('is-animating');
+    renderMapTransform();
+}
+
+// Boutons de zoom (+/-)
+function zoomTerroirMap(delta) {
+    const vpW = viewportEl.clientWidth;
+    const vpH = viewportEl.clientHeight;
+    zoomAtCursor(delta, viewportEl.getBoundingClientRect().left + vpW / 2, viewportEl.getBoundingClientRect().top + vpH / 2);
+}
+
+// Réinitialiser le zoom (100% ou adaptation)
+function resetTerroirMapZoom() {
+    const vpW = viewportEl.clientWidth || 1100;
+    terroirMapState.scale = Math.min(1.2, Math.max(0.65, vpW / 1376));
+    centerOnZone(terroirMapState.activeCategory, true);
+}
+
+// Recentrer le domaine
+function centerTerroirMap() {
+    centerOnZone('all', true);
+}
+
+// Déplacement cinématique vers une zone cible
+function centerOnZone(zoneKey, animate = true) {
+    const center = zoneCenters[zoneKey] || zoneCenters['all'];
+    const vpW = viewportEl.clientWidth;
+    const vpH = viewportEl.clientHeight;
+
+    const targetX = terroirMapState.stageWidth * (center.left / 100);
+    const targetY = terroirMapState.stageHeight * (center.top / 100);
+
+    terroirMapState.x = (vpW / 2) - (targetX * terroirMapState.scale);
+    terroirMapState.y = (vpH / 2) - (targetY * terroirMapState.scale);
+
+    clampMapCoordinates();
+
+    if (animate) {
+        stageEl.classList.add('is-animating');
+        renderMapTransform();
+        setTimeout(() => {
+            stageEl.classList.remove('is-animating');
+        }, 500);
+    } else {
+        renderMapTransform();
+    }
+}
+
+// Plein écran
+function toggleTerroirFullscreen() {
+    if (!document.fullscreenElement) {
+        viewportEl.requestFullscreen().catch(err => alert("Erreur d'activation plein écran"));
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+// Bascule d'affichage : Carte Illustrée vs Grille Tactique
+function switchTerroirView(mode) {
+    const mapContainer = document.getElementById('terroirIllustratedMapView');
+    const gridContainer = document.getElementById('terroirTacticalGridView');
+    const btnMap = document.getElementById('btnModeMap');
+    const btnGrid = document.getElementById('btnModeGrid');
+
+    if (mode === 'map') {
+        mapContainer.style.display = 'block';
+        gridContainer.style.display = 'none';
+        btnMap.classList.add('btn-dark', 'active');
+        btnMap.classList.remove('btn-outline-secondary');
+        btnGrid.classList.remove('btn-dark', 'active');
+        btnGrid.classList.add('btn-outline-secondary');
+        centerOnZone(terroirMapState.activeCategory, false);
+    } else {
+        mapContainer.style.display = 'none';
+        gridContainer.style.display = 'block';
+        btnGrid.classList.add('btn-dark', 'active');
+        btnGrid.classList.remove('btn-outline-secondary');
+        btnMap.classList.remove('btn-dark', 'active');
+        btnMap.classList.add('btn-outline-secondary');
+    }
+}
+
+// Filtrage et ciblage des 8 Catégories Thématiques
 function filterCategory(catKey, btn) {
+    terroirMapState.activeCategory = catKey;
+
+    // Mise à jour de l'apparence des boutons de filtre
     document.querySelectorAll('.btn-filter-cat').forEach(b => {
         b.classList.remove('active', 'btn-dark');
         if (!b.classList.contains('btn-outline-success') && 
@@ -851,15 +1559,134 @@ function filterCategory(catKey, btn) {
         btn.classList.add('active');
     }
 
+    // 1. Filtrage sur la Carte Illustrée : Mise en surbrillance des pins correspondants
+    const allPins = document.querySelectorAll('.map-parcel-pin');
+    allPins.forEach(pin => {
+        pin.classList.remove('is-dimmed', 'is-highlighted');
+        if (catKey === 'all') {
+            // Tous visibles
+        } else if (pin.dataset.cat === catKey) {
+            pin.classList.add('is-highlighted');
+        } else {
+            pin.classList.add('is-dimmed');
+        }
+    });
+
+    // Recentrage caméra sur la zone sélectionnée
+    centerOnZone(catKey, true);
+
+    // 2. Filtrage sur la Grille Tactique
     const sections = document.querySelectorAll('.terroir-category-section');
     sections.forEach(sec => {
         if (catKey === 'all' || sec.dataset.cat === catKey) {
             sec.style.display = 'block';
-            sec.style.opacity = '1';
         } else {
             sec.style.display = 'none';
         }
     });
+}
+
+// Gestion du clic sur un Pin de la carte
+function handlePinClick(pinEl, e) {
+    // Si l'utilisateur était en train de glisser la carte, ne pas ouvrir la modale
+    if (terroirMapState.hasMoved) {
+        return;
+    }
+    openParcelUpgradeModal(pinEl);
+}
+
+// Ouverture et remplissage dynamique de la Modale d'Amélioration
+function openParcelUpgradeModal(pinEl) {
+    const d = pinEl.dataset;
+    const modalEl = document.getElementById('parcelUpgradeModal');
+    if (!modalEl) return;
+
+    // Titre et icône
+    document.getElementById('modalTitle').textContent = d.name;
+    document.getElementById('modalJpSubtitle').textContent = d.jpName;
+    document.getElementById('modalLevelBadge').textContent = 'Niveau ' + d.level;
+    document.getElementById('modalCategoryBadge').textContent = d.categoryName;
+    document.getElementById('modalCategoryBadge').className = 'badge bg-' + d.colorClass + '-lt fw-bold';
+    document.getElementById('modalDesc').textContent = d.desc;
+
+    // Avatar
+    const avatar = document.getElementById('modalIconAvatar');
+    avatar.className = 'avatar avatar-sm rounded text-white bg-' + d.colorClass;
+    avatar.innerHTML = `<i class="${d.icon}"></i>`;
+
+    // Vignette
+    const thumb = document.getElementById('modalVisualThumb');
+    thumb.style.backgroundImage = `url('${d.tileImg}')`;
+
+    // Ouvriers
+    document.getElementById('modalWorkerRole').textContent = d.workerRole;
+    document.getElementById('modalWorkersCount').textContent = d.workers;
+
+    // Rendements
+    document.getElementById('modalCurrentProd').textContent = d.prodLabel;
+    const nextLvl = parseInt(d.level, 10) + 1;
+    let nextProdText = '+?? / h';
+    if (d.resType === 'housing') {
+        nextProdText = '+' + (nextLvl * 5) + ' hab. (Niv. ' + nextLvl + ' × 5)';
+    } else if (d.resType === 'shrine') {
+        nextProdText = '+' + (nextLvl * 25) + ' Sérénité';
+    } else {
+        const curProd = parseInt(d.prodLabel.replace(/[^0-9]/g, ''), 10) || 30;
+        nextProdText = '+' + Math.round(curProd * 1.35) + ' / h';
+    }
+    document.getElementById('modalNextProd').textContent = nextProdText;
+
+    // Coûts
+    const costContainer = document.getElementById('modalCostTags');
+    costContainer.innerHTML = '';
+
+    const costWood = parseInt(d.costWood, 10) || 0;
+    const costStone = parseInt(d.costStone, 10) || 0;
+    const costRice = parseInt(d.costRice, 10) || 0;
+
+    const addCostTag = (icon, name, costVal, playerStock) => {
+        if (costVal <= 0) return;
+        const isOk = playerStock >= costVal;
+        const tag = document.createElement('span');
+        tag.className = 'cost-chip ' + (isOk ? 'affordable' : 'missing');
+        tag.innerHTML = `<i class="${icon}"></i> ${name} : <strong>${costVal.toLocaleString()}</strong>`;
+        costContainer.appendChild(tag);
+    };
+
+    addCostTag('fa-solid fa-tree text-success', 'Bois', costWood, playerStocks.metal);
+    addCostTag('fa-solid fa-mountain text-secondary', 'Pierre', costStone, playerStocks.crystal);
+    addCostTag('fa-solid fa-wheat-awn text-warning', 'Riz', costRice, playerStocks.deuterium);
+
+    // Durée
+    const durSec = parseInt(d.duration, 10) || 60;
+    const mins = Math.floor(durSec / 60);
+    const secs = durSec % 60;
+    document.getElementById('modalDuration').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+    // Bouton d'action
+    const actionContainer = document.getElementById('modalActionContainer');
+    const isUpgrading = d.isUpgrading === '1';
+    const canAfford = d.canAfford === '1';
+
+    if (isUpgrading) {
+        actionContainer.innerHTML = `
+            <button type="button" class="btn btn-warning w-100 disabled" style="font-size:0.85rem;">
+                <i class="fa-solid fa-hourglass-half fa-spin me-1"></i> Chantier en cours d'exécution...
+            </button>`;
+    } else if (canAfford) {
+        actionContainer.innerHTML = `
+            <button type="button" class="btn btn-${d.colorClass} w-100 fw-bold" onclick="upgradeTerroirSlot('${d.resType}', ${d.slotIdx}, this)">
+                <i class="fa-solid fa-arrow-up me-1"></i> Élever au Niveau ${nextLvl}
+            </button>`;
+    } else {
+        actionContainer.innerHTML = `
+            <button type="button" class="btn btn-outline-secondary w-100 disabled" style="font-size:0.85rem;">
+                <i class="fa-solid fa-lock me-1"></i> Ressources insuffisantes pour cette élévation
+            </button>`;
+    }
+
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
 }
 
 // Action asynchrone AJAX pour élever une parcelle du domaine
@@ -925,4 +1752,9 @@ async function cancelBuild(queueId) {
         alert('Erreur réseau lors de l\'annulation.');
     }
 }
+
+// Initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+    initTerroirViewport();
+});
 </script>
