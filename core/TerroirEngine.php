@@ -73,11 +73,11 @@ class TerroirEngine {
                 5 => ['name' => 'Atelier de Concassage & Pavage', 'desc' => 'Préparation de ballast pour les chemins de ronde et fortifications.']
             ],
             'spatial_coords' => [
-                1 => ['top' => 22.0, 'left' => 25.0],
-                2 => ['top' => 28.0, 'left' => 54.0],
-                3 => ['top' => 30.0, 'left' => 80.0],
-                4 => ['top' => 66.0, 'left' => 32.0],
-                5 => ['top' => 68.0, 'left' => 70.0]
+                1 => ['top' => 45.0, 'left' => 28.0],
+                2 => ['top' => 22.0, 'left' => 52.0],
+                3 => ['top' => 32.0, 'left' => 72.0],
+                4 => ['top' => 64.0, 'left' => 84.0],
+                5 => ['top' => 74.0, 'left' => 24.0]
             ]
         ],
         'clay' => [
@@ -135,11 +135,11 @@ class TerroirEngine {
                 5 => ['name' => 'Terrasses Fertiles du Méandre', 'desc' => 'Riches terres bordières garantissant d\'abondantes récoltes annuelles.']
             ],
             'spatial_coords' => [
-                1 => ['top' => 24.0, 'left' => 35.0],
-                2 => ['top' => 36.0, 'left' => 68.0],
-                3 => ['top' => 52.0, 'left' => 45.0],
-                4 => ['top' => 70.0, 'left' => 26.0],
-                5 => ['top' => 72.0, 'left' => 66.0]
+                1 => ['top' => 22.0, 'left' => 52.0],
+                2 => ['top' => 28.0, 'left' => 18.0],
+                3 => ['top' => 52.0, 'left' => 44.0],
+                4 => ['top' => 76.0, 'left' => 54.0],
+                5 => ['top' => 38.0, 'left' => 85.0]
             ]
         ],
         'tea' => [
@@ -166,11 +166,11 @@ class TerroirEngine {
                 5 => ['name' => 'Meule de Granit à Poudre Matcha', 'desc' => 'Broyage lent sous pierre meulière pour une poudre verte d\'une finesse impériale.']
             ],
             'spatial_coords' => [
-                1 => ['top' => 25.0, 'left' => 28.0],
-                2 => ['top' => 35.0, 'left' => 65.0],
-                3 => ['top' => 55.0, 'left' => 24.0],
-                4 => ['top' => 62.0, 'left' => 55.0],
-                5 => ['top' => 74.0, 'left' => 75.0]
+                1 => ['top' => 62.0, 'left' => 16.0],
+                2 => ['top' => 46.0, 'left' => 78.0],
+                3 => ['top' => 46.0, 'left' => 48.0],
+                4 => ['top' => 18.0, 'left' => 44.0],
+                5 => ['top' => 78.0, 'left' => 84.0]
             ]
         ],
         'soybean' => [
@@ -197,11 +197,11 @@ class TerroirEngine {
                 5 => ['name' => 'Cave de Fermentation du Miso', 'desc' => 'Fûts de cèdre où le soja vieillit avec le sel pour développer son umami.']
             ],
             'spatial_coords' => [
-                1 => ['top' => 25.0, 'left' => 30.0],
-                2 => ['top' => 38.0, 'left' => 66.0],
-                3 => ['top' => 58.0, 'left' => 22.0],
-                4 => ['top' => 68.0, 'left' => 52.0],
-                5 => ['top' => 72.0, 'left' => 78.0]
+                1 => ['top' => 78.0, 'left' => 14.0],
+                2 => ['top' => 35.0, 'left' => 42.0],
+                3 => ['top' => 46.0, 'left' => 64.0],
+                4 => ['top' => 78.0, 'left' => 88.0],
+                5 => ['top' => 28.0, 'left' => 85.0]
             ]
         ],
         'village' => [
