@@ -228,6 +228,153 @@ class DevTeamEngine {
             'icon'        => '🌿',
             'roles'       => ['game_designer'],
             'permissions' => ['map.edit', 'formulas.tune']
+        ],
+        'combat_simulator' => [
+            'id'          => 'combat_simulator',
+            'title'       => 'Simulateur de Combat',
+            'icon'        => '⚔️',
+            'roles'       => ['game_designer'],
+            'permissions' => ['formulas.tune', 'debug.sandbox']
+        ]
+    ];
+
+    // ── Matrice des Métiers du Studio Dev et de leurs sous-modules dédiés ─────
+    public const STUDIO_METIERS = [
+        'roster' => [
+            'slug'        => 'roster',
+            'role_id'     => null, // Accessible à tous les membres et admin
+            'title'       => 'Studio & Roster',
+            'honor_title' => 'Direction de l\'Équipe',
+            'icon'        => '<i class="fa-solid fa-users text-primary"></i>',
+            'badge_color' => 'bg-primary-lt text-primary',
+            'default_module' => 'members',
+            'modules'     => [
+                'members' => [
+                    'slug'  => 'members',
+                    'title' => 'Roster & Métiers',
+                    'icon'  => '<i class="fa-solid fa-users me-1"></i>',
+                    'file'  => 'roster/members.php'
+                ],
+                'forge-journal' => [
+                    'slug'  => 'forge-journal',
+                    'title' => 'Journal de Forge & Trophées',
+                    'icon'  => '<i class="fa-solid fa-hammer me-1"></i>',
+                    'file'  => 'forge/forge-journal.php'
+                ]
+            ]
+        ],
+        'game-elevate-designer' => [
+            'slug'        => 'game-elevate-designer',
+            'role_id'     => 'game_designer', // Règle stricte : réservé aux détenteurs de ce métier
+            'title'       => 'Game Elevate Designer',
+            'honor_title' => 'L\'Architecte des Mondes',
+            'icon'        => '<i class="fa-solid fa-compass-drafting text-success"></i>',
+            'badge_color' => 'bg-green-lt text-green',
+            'default_module' => 'combat-simulator',
+            'modules'     => [
+                'combat-simulator' => [
+                    'slug'  => 'combat-simulator',
+                    'title' => 'Simulateur de Combat',
+                    'icon'  => '<i class="fa-solid fa-shield-halved text-danger me-1"></i>',
+                    'file'  => 'game-elevate-designer/combat-simulator.php'
+                ],
+                'speed-balancing' => [
+                    'slug'  => 'speed-balancing',
+                    'title' => 'Vitesses & Équilibrage',
+                    'icon'  => '<i class="fa-solid fa-bolt text-warning me-1"></i>',
+                    'file'  => 'game-elevate-designer/speed-balancing.php'
+                ],
+                'shogunat-survey' => [
+                    'slug'  => 'shogunat-survey',
+                    'title' => 'Arpentage & Provinces',
+                    'icon'  => '<i class="fa-solid fa-map-location-dot text-success me-1"></i>',
+                    'file'  => 'game-elevate-designer/shogunat-survey.php'
+                ],
+                'oasis-ecosystem' => [
+                    'slug'  => 'oasis-ecosystem',
+                    'title' => 'Écosystème des Oasis',
+                    'icon'  => '<i class="fa-solid fa-seedling text-teal me-1"></i>',
+                    'file'  => 'game-elevate-designer/oasis-ecosystem.php'
+                ]
+            ]
+        ],
+        'community-manager' => [
+            'slug'        => 'community-manager',
+            'role_id'     => 'community_manager',
+            'perm'        => 'community.mailing',
+            'title'       => 'Community Manager',
+            'honor_title' => 'La Voix du Shōgunat',
+            'icon'        => '<i class="fa-solid fa-bullhorn text-teal"></i>',
+            'badge_color' => 'bg-teal-lt text-teal',
+            'default_module' => 'mailing-list',
+            'modules'     => [
+                'mailing-list' => [
+                    'slug'  => 'mailing-list',
+                    'title' => 'Mailing List & Diffusion',
+                    'icon'  => '<i class="fa-solid fa-bullhorn text-teal me-1"></i>',
+                    'file'  => 'community-manager/mailing-list.php'
+                ]
+            ]
+        ],
+        'qa-tester' => [
+            'slug'        => 'qa-tester',
+            'role_id'     => 'qa_tester',
+            'perm'        => 'bugs.manage',
+            'title'       => 'QA Tester',
+            'honor_title' => 'L\'Inquisiteur des Failles',
+            'icon'        => '<i class="fa-solid fa-clipboard-check text-danger"></i>',
+            'badge_color' => 'bg-danger-lt text-danger',
+            'default_module' => 'qa-validation',
+            'modules'     => [
+                'qa-validation' => [
+                    'slug'  => 'qa-validation',
+                    'title' => 'QA & Recette',
+                    'icon'  => '<i class="fa-solid fa-clipboard-check text-danger me-1"></i>',
+                    'file'  => 'qa-tester/qa-validation.php'
+                ],
+                'sandbox' => [
+                    'slug'  => 'sandbox',
+                    'title' => 'Atelier QA & Sandbox',
+                    'icon'  => '<i class="fa-solid fa-flask text-warning me-1"></i>',
+                    'file'  => 'qa-tester/sandbox.php'
+                ]
+            ]
+        ],
+        'backend-dev' => [
+            'slug'        => 'backend-dev',
+            'role_id'     => 'backend_dev',
+            'perm'        => 'system.monitoring',
+            'title'       => 'Développeur Backend',
+            'honor_title' => 'Le Maître des Engrenages',
+            'icon'        => '<i class="fa-solid fa-gears text-indigo"></i>',
+            'badge_color' => 'bg-indigo-lt text-indigo',
+            'default_module' => 'system-monitoring',
+            'modules'     => [
+                'system-monitoring' => [
+                    'slug'  => 'system-monitoring',
+                    'title' => 'Live Ops & Serveur',
+                    'icon'  => '<i class="fa-solid fa-gears text-cyan me-1"></i>',
+                    'file'  => 'backend-dev/system-monitoring.php'
+                ]
+            ]
+        ],
+        'narrative-designer' => [
+            'slug'        => 'narrative-designer',
+            'role_id'     => 'narrative_designer',
+            'perm'        => 'lore.publish',
+            'title'       => 'Narrative Designer',
+            'honor_title' => 'Le Grand Chroniqueur',
+            'icon'        => '<i class="fa-solid fa-scroll text-purple"></i>',
+            'badge_color' => 'bg-purple-lt text-purple',
+            'default_module' => 'lore',
+            'modules'     => [
+                'lore' => [
+                    'slug'  => 'lore',
+                    'title' => 'Univers & Lore',
+                    'icon'  => '<i class="fa-solid fa-scroll text-yellow me-1"></i>',
+                    'file'  => 'narrative-designer/lore.php'
+                ]
+            ]
         ]
     ];
 
@@ -604,10 +751,10 @@ class DevTeamEngine {
         $userRoles = $this->getUserRoles($userId);
         $userRoleIds = array_column($userRoles, 'id');
 
-        // 2. Règle stricte pour les 3 modules Game Elevate Designer :
+        // 2. Règle stricte pour les modules Game Elevate Designer :
         // Ces modules sont EXCLUSIVEMENT réservés aux détenteurs du métier "Game Elevate Designer" (game_designer).
         // L'administrateur NE LES VOIT PAS s'il ne possède pas lui-même ce métier assigné.
-        if (in_array($tab, ['game_speeds', 'world_expansion', 'oases_ecosystem'], true)) {
+        if (in_array($tab, ['game_speeds', 'world_expansion', 'oases_ecosystem', 'combat_simulator'], true)) {
             return in_array('game_designer', $userRoleIds, true);
         }
 
@@ -634,6 +781,80 @@ class DevTeamEngine {
         }
 
         return false;
+    }
+
+    /**
+     * Vérifie si un utilisateur a le droit d'accéder à un onglet Métier de Studio Dev
+     */
+    public function canAccessMetier(int $userId, string $metierSlug, bool $isAdmin = false): bool {
+        if (!isset(self::STUDIO_METIERS[$metierSlug])) {
+            return false;
+        }
+
+        if (!$this->isDevTeamMember($userId) && !$isAdmin) {
+            return false;
+        }
+
+        // L'onglet Studio & Roster est toujours garanti à l'administrateur et aux membres Dev Team
+        if ($metierSlug === 'roster') {
+            return true;
+        }
+
+        $userRoles = $this->getUserRoles($userId);
+        $userRoleIds = array_column($userRoles, 'id');
+
+        // Règle stricte pour Game Elevate Designer :
+        // Réservé exclusivement à ceux ayant le métier game_designer assigné
+        if ($metierSlug === 'game-elevate-designer') {
+            return in_array('game_designer', $userRoleIds, true);
+        }
+
+        $cfg = self::STUDIO_METIERS[$metierSlug];
+
+        // Vérification du rôle requis
+        if (!empty($cfg['role_id']) && in_array($cfg['role_id'], $userRoleIds, true)) {
+            return true;
+        }
+
+        // Vérification de permission associée
+        if (!empty($cfg['perm']) && $this->hasPermission($userId, $cfg['perm'])) {
+            return true;
+        }
+
+        // Passe-droit admin pour les autres métiers (sauf game-elevate-designer)
+        if ($isAdmin) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Retourne la liste des slugs de métiers autorisés pour un utilisateur
+     * @return array<string>
+     */
+    public function getAllowedMetiers(int $userId, bool $isAdmin = false): array {
+        $allowed = [];
+        foreach (self::STUDIO_METIERS as $slug => $cfg) {
+            if ($this->canAccessMetier($userId, $slug, $isAdmin)) {
+                $allowed[] = $slug;
+            }
+        }
+        return $allowed;
+    }
+
+    /**
+     * Vérifie l'accès à un sous-module spécifique d'un métier
+     */
+    public function canAccessModule(int $userId, string $metierSlug, string $moduleSlug, bool $isAdmin = false): bool {
+        if (!$this->canAccessMetier($userId, $metierSlug, $isAdmin)) {
+            return false;
+        }
+        $cfg = self::STUDIO_METIERS[$metierSlug] ?? null;
+        if (!$cfg || !isset($cfg['modules'][$moduleSlug])) {
+            return false;
+        }
+        return true;
     }
 
     /**

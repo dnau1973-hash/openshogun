@@ -164,18 +164,28 @@ if ($page === 'dev_team') {
         exit;
     }
 
-    // Contrôle d'accès strict côté serveur sur l'onglet demandé (?tab=...)
-    $allowedDevTabs = $devEngine->getAllowedTabs($currentDevUserId, $isDevAdmin);
-    if (empty($allowedDevTabs)) {
+    // Contrôle d'accès strict côté serveur sur le métier ou l'onglet demandé
+    $allowedDevMetiers = $devEngine->getAllowedMetiers($currentDevUserId, $isDevAdmin);
+    if (empty($allowedDevMetiers)) {
         http_response_code(403);
-        die("Accès interdit : aucun onglet autorisé pour votre profil de développement.");
+        die("Accès interdit : aucun métier autorisé pour votre profil de développement.");
     }
 
+    if (isset($_GET['metier']) && trim((string)$_GET['metier']) !== '') {
+        $requestedMetier = trim((string)$_GET['metier']);
+        if (!in_array($requestedMetier, $allowedDevMetiers, true)) {
+            $fallbackMetier = $allowedDevMetiers[0];
+            header('Location: /?page=dev_team&metier=' . urlencode($fallbackMetier) . '&forbidden=1');
+            exit;
+        }
+    }
+
+    $allowedDevTabs = $devEngine->getAllowedTabs($currentDevUserId, $isDevAdmin);
     if (isset($_GET['tab']) && trim((string)$_GET['tab']) !== '') {
         $requestedTab = trim((string)$_GET['tab']);
         if (!in_array($requestedTab, $allowedDevTabs, true)) {
-            $fallbackTab = $allowedDevTabs[0];
-            header('Location: /?page=dev_team&tab=' . urlencode($fallbackTab) . '&forbidden=1');
+            $fallbackMetier = $allowedDevMetiers[0];
+            header('Location: /?page=dev_team&metier=' . urlencode($fallbackMetier) . '&forbidden=1');
             exit;
         }
     }

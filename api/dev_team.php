@@ -535,6 +535,30 @@ try {
             echo json_encode($res);
             break;
 
+        // 19. Enregistrement d'un test de simulation de combat (Game Elevate Designer)
+        case 'save_combat_test':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            if (!$devEngine->hasRole($currentUserId, 'game_designer')) {
+                http_response_code(403);
+                throw new Exception("Accès interdit : le simulateur de combat est strictement réservé au métier Game Elevate Designer.");
+            }
+
+            $testDataRaw = $_POST['test_data'] ?? '';
+            $testData = json_decode($testDataRaw, true);
+            if (!$testData || !isset($testData['outcomeTitle'])) {
+                throw new Exception("Données de simulation de combat invalides.");
+            }
+
+            $summary = "Simulation : " . ($testData['outcomeTitle'] ?? 'Combat') . " (Muraille Niv " . ($testData['initialWallLvl'] ?? 0) . " ➔ Niv " . ($testData['currentWallLvl'] ?? 0) . ")";
+            $devEngine->addForgeXp($currentUserId, 15, 'combat_simulation', $summary);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Rapport de simulation de combat enregistré au registre avec succès.',
+                'xp_awarded' => 15
+            ]);
+            break;
+
         default:
             throw new Exception("Action Dev Team non reconnue.");
     }

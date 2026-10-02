@@ -37,6 +37,16 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 02/10/2026 (Partie 12) — Simulateur Tactique de Combat Féodal (Rôle de la Muraille) & Découpage Modulaire par Métiers
+- **Concept exploré :** Conception d'un simulateur de combat instantané en split-screen (Attaquant vs Défenseur), modélisation mathématique du rôle défensif des murailles (points de vie de structure, absorption, bonus multiplicateur de faction, riposte de meurtrières, dégradation par engins de siège), et refactorisation architecturale d'un studio de développement en sous-dossiers modulaires isolés par métier.
+- **Notions pour l'atelier :**
+  - **Mathématiques du Combat & Rôle des Fortifications (Game Design) :** Comment modéliser l'impact d'une muraille dans un jeu de stratégie ? Une fortification n'est pas qu'un simple boost statistique : elle possède des Points de Vie (PV) structurels (ex. 250 PV par niveau) qui absorbent les tirs, un coefficient multiplicateur de défense pour la garnison (+4% Oda, +3.5% Takeda, +5% Tokugawa) et des tirs de riposte automatiques (meurtrières). Les engins de siège (béliers et catapultes) attaquent en priorité la muraille au premier tour pour créer une brèche avant la mêlée générale.
+  - **Simulation Déterministe vs Multi-Rounds :** Comment calculer l'issue d'une bataille complexe sans latence ? En divisant l'affrontement en 3 phases tactiques (phase de siège préliminaire, phase d'échanges à distance/archerie, phase de mêlée générale au corps-à-corps) et en calculant les pertes relatives au prorata des puissances effectives restantes.
+  - **Architecture Modulaire par Métier en PHP :** Pourquoi éviter un fichier monolithique de 2000 lignes ? En découpant les vues en sous-répertoires dédiés (`views/studio/<slug_metier>/<module>.php`), chaque métier dispose de son propre atelier isolé. Le contrôleur central (`views/dev_team.php`) se contente d'inclure dynamiquement le module requis via une matrice de configuration sécurisée, évitant les collisions de code et facilitant la maintenance en équipe.
+- **Activité pratique suggérée :** Ouvrir le « Simulateur de Combat » dans Studio Dev, charger le préréglage « Assaut d'un bourg fortifié », faire varier le slider de muraille du niveau 0 au niveau 15, lancer la simulation et observer comment la muraille absorbe les pertes de la garnison et inflige des dégâts aux troupes attaquantes.
+
+---
+
 ### Session du 01/10/2026 (Partie 11) — Ergonomie de Navigation, Sous-barres Contextuelles & Tiroir Offcanvas d'Insertion WYSIWYG
 - **Concept exploré :** Décharge cognitive de la barre de navigation principale (séparation en deux niveaux hiérarchiques), conception de micro-badges à icône seule assistés de tooltips interactifs (Bootstrap/Tabler), et création d'un tiroir latéral coulissant (*Offcanvas*) pour la recherche, la sélection multiple et l'injection dynamique de contenu riche dans un éditeur WYSIWYG.
 - **Notions pour l'atelier :**

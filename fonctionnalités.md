@@ -3,6 +3,58 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - studio/architecture & studio/game-elevate-designer : Restructuration Métiers de Studio Dev & Simulateur de Combat avec Muraille
+- **Module :** `studio/architecture & studio/game-elevate-designer`
+- **Statut :** `À tester`
+- **Description :** 
+  1. **Refactorisation de l'Architecture de Studio Dev (`views/dev_team.php`, `views/studio/`, `core/DevTeamEngine.php`, `index.php`) :**
+     - Réorganisation complète de la navigation avec **UN ONGLET PRINCIPAL PAR MÉTIER** (`STUDIO_METIERS`) : « Game Elevate Designer » (réservé exclusivement au rôle `game_designer`), « Community Manager », « QA / Recetteur », « Développeur Backend », « Narrative Designer », complétés par « Studio & Roster » (gestion des membres) et « Journal de Forge ».
+     - Règle de visibilité et sécurité stricte : aucun onglet métier n'est affiché dans le DOM si l'utilisateur ne possède pas le métier requis (l'administrateur conserve l'accès à son onglet de gestion Roster & Métiers, et doit s'assigner le rôle pour voir les modules métier).
+     - Sous-navigation par module : sous chaque onglet métier, des pilules de sous-navigation (`nav-pills` Tabler.io) permettent de basculer de manière fluide entre les sous-modules.
+     - Modularisation physique des fichiers dans l'arborescence dédiée `views/studio/<slug_metier>/<module>.php` :
+       * `views/studio/game-elevate-designer/combat-simulator.php`
+       * `views/studio/game-elevate-designer/speed-balancing.php`
+       * `views/studio/game-elevate-designer/shogunat-survey.php`
+       * `views/studio/game-elevate-designer/oasis-ecosystem.php`
+       * `views/studio/community-manager/mailing-list.php`
+       * `views/studio/qa-tester/qa-validation.php`
+       * `views/studio/qa-tester/sandbox.php`
+       * `views/studio/backend-dev/system-monitoring.php`
+       * `views/studio/narrative-designer/lore.php`
+       * `views/studio/roster/members.php`
+       * `views/studio/forge/forge-journal.php`
+     - Contrôle d'accès et routage au niveau serveur (`index.php`) : redirection automatique avec toast d'alerte si tentative de forçage d'URL (`?page=dev_team&metier=...` ou `?page=dev_team&tab=...`).
+  2. **Simulateur de Combat Tactique pour le Game Elevate Designer (`views/studio/game-elevate-designer/combat-simulator.php`, `api/dev_team.php`) :**
+     - Ergonomie en 2 colonnes comparatives (Split-screen) :
+       * **Colonne Attaquant :** sélection de clan, saisie numérique fluide des troupes (infanterie, cavalerie, archers, armes de siège bélier/catapulte), sélection du Daimyō/Général et doctrine martiale avec bonus offensifs dynamiques.
+       * **Colonne Défenseur (Village attaqué) :** sélection du clan défenseur, composition de la garnison, ⭐ **Paramètre critique « Muraille du village »** avec sélecteur de niveau de 0 à 20 (curseur/slider réactif avec badges dynamiques), calcul en temps réel du bonus défensif (+4% Oda, +3.5% Takeda, +5% Tokugawa +15% bouclier passif), PV structurels de la muraille (250 PV/niveau) et tirs de meurtrières (15 pts/niveau).
+     - Préréglages rapides en 1 clic : « Raid sur village ouvert (Mur 0) », « Assaut d'un bourg fortifié (Mur 8) », « Grand siège de forteresse (Mur 20) ».
+     - Moteur de simulation martiale multi-rounds :
+       * Dégradation et brèche de la muraille par les engins de siège avant absorption résiduelle.
+       * Calcul des pertes d'effectifs, puissance brute vs effective, et tirs défensifs des meurtrières.
+       * Issue de la bataille : Victoire totale attaquant, Victoire à la Pyrrhus, Repli / Échec du siège, ou Triomphe défensif.
+     - Rapport d'analyse instantané :
+       * Bandeau de statut et jauges d'attrition Tabler.io colorées pour chaque armée.
+       * Bilan comparatif régiment par régiment (engagés, pertes, survivants).
+       * Journal de combat détaillé tour par tour (Combat Log dans un accordéon Tabler dépliable).
+       * Bouton d'exportation instantanée du rapport en Markdown.
+       * Bouton d'enregistrement du test de combat dans l'historique d'équilibrage avec attribution de +15 XP Forge (`api/dev_team.php`).
+- **Fichiers modifiés :** `views/dev_team.php`, `views/studio/*` (11 fichiers modulaires), `core/DevTeamEngine.php`, `index.php`, `api/dev_team.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter avec un compte Administrateur : se rendre sur Studio Dev (`/?page=dev_team`). Vérifier que seul l'onglet « Studio & Roster » est visible par défaut si aucun rôle métier n'est assigné.
+  2. S'attribuer le métier « Game Elevate Designer » : vérifier l'apparition immédiate de l'onglet « Game Elevate Designer ».
+  3. Cliquer sur l'onglet « Game Elevate Designer » : vérifier les 4 sous-modules (Simulateur de Combat, Équilibrage Vitesses, Arpentage des Terres, Écosystème Oasis).
+  4. Sélectionner « Simulateur de Combat » :
+     - Tester les 3 boutons de préréglages rapides (« Raid sur village ouvert », « Assaut d'un bourg fortifié », « Grand siège de forteresse ») : vérifier le remplissage instantané des effectifs et du niveau de muraille.
+     - Manipuler le curseur du niveau de muraille (de 0 à 20) : vérifier la mise à jour réactive des badges d'information (bonus %, PV muraille, tirs meurtrières).
+     - Cliquer sur « Lancer la Simulation Tactique » : observer l'apparition immédiate du rapport de combat sans rechargement de page.
+     - Vérifier les jauges d'attrition, le tableau détaillé des troupes engagées/perdues, et déplier le « Journal de Combat Détaillé (Combat Log) ».
+     - Cliquer sur « Copier le Rapport Markdown » : coller dans un éditeur et vérifier le formatage.
+     - Cliquer sur « Sauvegarder ce Test d'Équilibrage » : vérifier la requête AJAX vers l'API, l'apparition du toast de succès et le gain d'XP Forge.
+  5. Tenter d'accéder directement par l'URL avec un profil sans le rôle `game_designer` (`/?page=dev_team&metier=game-elevate-designer`) : vérifier le blocage de sécurité et la redirection propre.
+
+---
+
 ### [2026-10-01] - profile/poster : Upload d'Avatar Joueur & Sécurisation des Clés de Protection
 - **Module :** `profile/poster`
 - **Statut :** `À tester`

@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.16.0</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.17.0</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,6 +123,96 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.17.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #b91c1c; box-shadow: 0 0 0 2px #b91c1c;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.17.0</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-danger-lt fw-bold">Simulateur de Combat</span>
+                                <span class="badge bg-purple-lt fw-bold">Studio Dev par Métiers</span>
+                                <span class="badge bg-warning-lt fw-bold">Calcul de Muraille</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 2 Octobre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-danger-emphasis d-flex align-items-center gap-2 mb-3">
+                                <span>⚔️</span> Simulateur Tactique de Combat (Murailles &amp; Sièges) &amp; Restructuration Modulaire de Studio Dev
+                            </h4>
+                            <div class="row g-3">
+                                <!-- 🚀 Nouvelles fonctionnalités (Added) -->
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-danger text-white">🚀 Ajouté</span>
+                                            <span>Simulateur de Combat Tactique &amp; Muraille</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Nouvel atelier martial en <strong>Split-screen</strong> pour le Game Elevate Designer : armée attaquante vs village défendu. <strong>Prise en compte critique du niveau de muraille (0 à 20)</strong> avec curseur réactif, calcul du bonus défensif (+4% Oda, +3.5% Takeda, +5% Tokugawa +15% bouclier), PV de structure des remparts (250 PV/niv) et tirs de meurtrières. Pilonnage préliminaire par engins de siège (béliers, catapultes), jauges d'attrition Tabler, journal tour par tour (Combat Log), export Markdown et +15 XP Forge.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-purple text-white">🚀 Ajouté</span>
+                                            <span>Architecture Modulaire des Vues (`views/studio/`)</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Restructuration complète de l'arborescence physique en 11 sous-vues modulaires autonomes dans <code>views/studio/&lt;metier&gt;/&lt;module&gt;.php</code> : <code>game-elevate-designer/</code> (simulateur, vitesses, arpentage, oasis), <code>community-manager/</code> (mailing), <code>qa-tester/</code> (recette, sandbox), <code>backend-dev/</code> (live ops), <code>narrative-designer/</code> (lore), <code>roster/</code> et <code>forge/</code>.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- 🎨 Améliorations & Ergonomie (Changed) -->
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-warning text-dark">🎨 Modifié</span>
+                                            <span>Navigation par Métier &amp; Sous-onglets Modulaires</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Réorganisation ergonomique de Studio Dev avec <strong>un onglet principal par métier</strong> au lieu d'une liste éclatée d'applications. Chaque métier propose désormais des pilules de sous-navigation (<code>nav-pills</code> Tabler.io) pour commuter instantanément entre ses outils spécialisés sans rechargement lourd.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-teal text-white">🎨 Modifié</span>
+                                            <span>Doctrines Féodales, Grimoire (83) &amp; Avatar</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Illustrations HD des 3 doctrines martiales féodales (Oda, Takeda, Tokugawa) sur Mon Affiche avec bannière et transparence IA. Extension du Grimoire des Prompts à 83 entrées, et intégration du téléversement d'avatar joueur avec prévisualisation instantanée <code>FileReader</code> et upload sécurisé.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- 🐛 Correctifs & Sécurité (Fixed) -->
+                                <div class="col-12">
+                                    <div class="p-3 bg-light rounded border">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-success text-white">🐛 Sécurité &amp; Correctifs</span>
+                                            <span>Contrôles d'Accès Stricts par Métier, Routage Serveur &amp; Split-Screen</span>
+                                        </div>
+                                        <ul class="text-secondary small m-0 ps-3" style="line-height: 1.6;">
+                                            <li><strong>Contrôles RBAC stricts :</strong> Zéro fuite DOM pour les onglets non habilités, interception HTTP dans <code>index.php</code> des requêtes <code>?metier=...</code> et <code>?tab=...</code> avec redirection sécurisée, et blocage HTTP 403 API.</li>
+                                            <li><strong>Correctif layout missive :</strong> Correction d'une balise orpheline et attribution des classes <code>col-12 col-lg-6 col-xl-6</code> pour maintenir l'éditeur et l'aperçu côte à côte sur écran desktop.</li>
+                                            <li><strong>Iframe sandbox e-mail :</strong> Ajout des permissions <code>sandbox="allow-same-origin allow-scripts"</code> et nettoyage regex automatique du HTML injecté.</li>
+                                            <li><strong>Warning PHP poster.php :</strong> Sécurisation de l'évaluation de <code>is_protected</code> via coalescence nulle.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
                     <!-- VERSION 1.16.0 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
@@ -130,7 +220,6 @@
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.16.0</span>
-                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
                                 <span class="badge bg-warning-lt fw-bold">Game Elevate Designer</span>
                                 <span class="badge bg-danger-lt fw-bold">Vitesses &amp; Famine</span>
                                 <span class="badge bg-teal-lt fw-bold">Oasis &amp; Arpentage</span>
