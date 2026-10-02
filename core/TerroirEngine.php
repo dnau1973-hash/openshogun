@@ -104,11 +104,11 @@ class TerroirEngine {
                 5 => ['name' => 'Four Noborigama à Tuiles de Toit', 'desc' => 'Four à chambres ascendantes pour cuire les solides tuiles Kawara.']
             ],
             'spatial_coords' => [
-                1 => ['top' => 28.0, 'left' => 22.0],
-                2 => ['top' => 45.0, 'left' => 52.0],
-                3 => ['top' => 32.0, 'left' => 78.0],
-                4 => ['top' => 68.0, 'left' => 28.0],
-                5 => ['top' => 66.0, 'left' => 74.0]
+                1 => ['top' => 18.0, 'left' => 58.0],
+                2 => ['top' => 32.0, 'left' => 72.0],
+                3 => ['top' => 55.0, 'left' => 60.0],
+                4 => ['top' => 60.0, 'left' => 44.0],
+                5 => ['top' => 74.0, 'left' => 82.0]
             ]
         ],
         'rice' => [
