@@ -5,6 +5,11 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Grille des 40 Parcelles du Domaine Rural & Simplification des Habitations (`views/resources.php`, `core/TerroirEngine.php`) :**
+  * Restructuration ergonomique complète de la vue des ressources : transition vers une grille de 40 parcelles ordonnées en 8 catégories thématiques de 5 slots chacune (Bois, Pierre, Argile, Riz, Thé, Soja, Sérénité/Sanctuaires, Habitations).
+  * Simplification du système de logement : suppression des sous-types complexes et déploiement d'un modèle unique « Habitation » (Niveaux 1 à N) avec capacité totale calculée dynamiquement selon la formule $\text{Capacité Totale} = 75 \text{ (base)} + (\sum_{i=1}^5 \text{Niveau}(H_i) \times 5)$.
+  * Filtre interactif de catégories en tête de grille (badges pills) pour un ciblage instantané des parcelles en JavaScript Vanilla.
+  * En-tête enrichi à 10 indicateurs clés : 6 compteurs de ressources (stock et cadence horaire) et 4 jauges de pilotage (Sérénité shinto, Population globale, Affectation de la main-d'œuvre, Contentement avec bonus net asymétrique de saké).
 - **Grimoire des Prompts, Traçabilité IA & Harmonisation des Modales (`views/partials/grimoire_prompts_data.php`, `core/AiPromptHelper.php`, `views/partials/ai_prompt_modal.php`, `public/js/ai_prompt_modal.js`, `public/css/ai_prompt_modal.css`) :**
   * Intégration de 11 nouvelles fiches descriptives au Grimoire des Prompts (totalisant désormais 91 prompts référencés) couvrant les décors ruraux (Forêt, Montagne, Argile, Rizières, Thé, Soja, Village) et les bannières historiques de clans.
   * Modernisation du badge de transparence IA avec l'icône Font Awesome `fa-wand-magic-sparkles`, infobulles Tabler.io natives et variante capsule/pill (`ai-prompt-badge-pill`).

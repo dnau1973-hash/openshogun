@@ -3,6 +3,46 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - rural-terroir-40-grid : Grille des 40 Parcelles & Simplification des Habitations
+- **Module :** `rural-terroir-40-grid`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Restructuration de la Grille : Passage à 40 Parcelles (8 Catégories × 5 Parcelles) :**
+     - Remplacement de la navigation par carte interactive panoramique par une vue complète en grille de tuiles et parcelles (CSS Grid / Flexbox Tabler.io).
+     - Intégration stricte de 5 parcelles/slots dédiés pour chacune des 8 composantes féodales :
+       * 🌲 **Bois** (5 parcelles de sylviculture)
+       * ⛰️ **Pierre** (5 carrières d'extraction de granit)
+       * 🏺 **Argile** (5 gisements alluviaux et poteries)
+       * 🌾 **Riz** (5 terrasses inondées de riz Koku)
+       * 🍵 **Thé** (5 plantations de thé vert & matcha)
+       * 🫘 **Soja** (5 champs de soja pour tofu & farine)
+       * ⛩️ **Sérénité / Spiritualité** (5 sanctuaires shinto)
+       * 🛖 **Village / Habitations** (5 parcelles d'habitations civiles)
+     - Barre de filtrage interactif par catégorie en haut de grille (`Tout afficher (40)`, `Bois`, `Pierre`, `Argile`, `Riz`, `Thé`, `Soja`, `Sérénité`, `Habitations`) pour isoler instantanément un groupe de parcelles sans rechargement.
+     - Chaque tuile affiche : illustration thématique en filigrane, pastille de niveau, type de bâtiment, ouvriers requis, métrique de production/capacité (+XX / h, +XX Sérénité, ou +XX hab.), tags de coût multi-ressources, durée et bouton d'action/amélioration rapide 1-clic branché sur `api/terroir.php`.
+  2. **Simplification Drastique du Système d'Habitation :**
+     - Abandon des sous-types complexes (Minka, Nagaya, etc.) au profit d'un modèle unique et prévisible : « Habitation » (Niveaux 1 à N).
+     - Formule de capacité synchronisée : $\text{Capacité Totale} = 75 \text{ (base villageoise)} + (\sum_{i=1}^5 \text{Niveau}(H_i) \times 5 \text{ villageois})$.
+     - Évolution dynamique : chaque niveau d'habitation supplémentaire augmente directement la capacité d'accueil de +5 villageois dans la base de données.
+     - 5 habitations de niveau 1 de départ procurent exactement $75 + (5 \times 5) = 100$ places, s'alignant sur la population initiale de 100 habitants.
+  3. **Tableau de Bord Supérieur Enrichi (Header de la Vue `views/resources.php`) :**
+     - 6 cartes de ressources complètes avec stocks résiduels et cadences horaires dynamiques : Bois, Pierre, Argile, Riz, Thé, Soja.
+     - 4 cartes d'indicateurs majeurs :
+       * ⛩️ **Sérénité Shinto** : jauge et balance énergétique spirituelle issue des 5 sanctuaires.
+       * 👥 **Population Globale** : habitants actuels / capacité totale d'accueil issue des 5 habitations.
+       * ⛏️ **Main-d'œuvre** : ouvriers en poste vs requis vs inactifs disponibles.
+       * 😊 **Contentement du Peuple** : jauge de satisfaction (0-100%) intégrant vivres, spiritualité et le bonus net de +15% apporté par le Saké.
+- **Fichiers modifiés :** `core/TerroirEngine.php`, `views/resources.php`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Se rendre sur la page des ressources du domaine rural (`/?page=resources`).
+  2. Contrôler les 10 cartes d'indicateurs dans l'en-tête (6 ressources + Sérénité, Population, Main-d'œuvre, Contentement).
+  3. Vérifier que la grille présente 8 sections bien ordonnées pour un total de 40 tuiles de parcelles (5 slots par catégorie).
+  4. Tester les filtres de catégories (`🌲 Bois`, `🛖 Habitations`, etc.) : vérifier que les tuiles se masquent et s'affichent instantanément sans erreur JS.
+  5. Vérifier la capacité des habitations : au niveau 1 pour les 5 habitations, la capacité totale affichée est de 100 (75 + 25).
+  6. Déclencher l'amélioration d'une parcelle (champ de ressource, sanctuaire ou habitation) : vérifier la déduction des ressources et le rafraîchissement des valeurs.
+
+---
+
 ### [2026-10-02] - grimoire-prompts-traceability : Grimoire des Prompts, Traçabilité IA & Harmonisation des Modales
 - **Module :** `grimoire-prompts-traceability`
 - **Statut :** `À tester`

@@ -16,7 +16,7 @@ class TerroirEngine {
     private PlanetEngine $planetEngine;
     private BuildingEngine $buildingEngine;
 
-    // Définition maîtresse des 7 zones du Terroir Féodal
+    // Définition maîtresse des 8 composantes du Terroir Féodal (8 catégories × 5 parcelles = 40 parcelles)
     public const ZONES = [
         'wood' => [
             'type'        => 'wood',
@@ -29,6 +29,7 @@ class TerroirEngine {
             'badge_text'  => 'Sylviculture',
             'desc'        => 'Abattage et façonnage des nobles cèdres pour les charpentes de donjons, palissades et armes.',
             'bg_image'    => '/public/assets/resources/terroir_wood.jpg',
+            'tile_img'    => '/public/assets/tiles/tile_bucheron.png',
             'map_coords'  => ['left' => 21.0, 'top' => 38.0],
             'field_type'  => 'metal_mine',
             'db_slots'    => [1, 2, 3, 4, 5],
@@ -40,13 +41,6 @@ class TerroirEngine {
                 3 => ['name' => 'Défrichage du Vallon Sombre', 'desc' => 'Coupe de bois dur et conifères résistants pour les palissades.'],
                 4 => ['name' => 'Sylve Royale des Pins Noirs', 'desc' => 'Réserves sylvicoles réservées aux poutres maîtresses des Tenshu.'],
                 5 => ['name' => 'Scierie Fluviale & Flottage', 'desc' => 'Débitage de troncs et transport hydraulique le long du ruisseau.']
-            ],
-            'spatial_coords' => [
-                1 => ['top' => 25.0, 'left' => 16.0],
-                2 => ['top' => 28.0, 'left' => 74.0],
-                3 => ['top' => 54.0, 'left' => 48.0],
-                4 => ['top' => 74.0, 'left' => 26.0],
-                5 => ['top' => 78.0, 'left' => 76.0]
             ]
         ],
         'stone' => [
@@ -60,6 +54,7 @@ class TerroirEngine {
             'badge_text'  => 'Extraction Minérale',
             'desc'        => 'Extraction et taille des blocs cyclopéens de granit volcanique pour murailles et remparts.',
             'bg_image'    => '/public/assets/resources/terroir_stone.jpg',
+            'tile_img'    => '/public/assets/tiles/tile_carriere.png',
             'map_coords'  => ['left' => 58.0, 'top' => 25.0],
             'field_type'  => 'crystal_mine',
             'db_slots'    => [6, 7, 8, 9, 10],
@@ -71,44 +66,31 @@ class TerroirEngine {
                 3 => ['name' => 'Gisement de Granit Oriental', 'desc' => 'Veine de roche dense et polie idéale pour les tours d\'angle.'],
                 4 => ['name' => 'Fosse des Maçons Bâtisseurs', 'desc' => 'Façonnage d\'arêtes vives et pierres de taille millimétrées.'],
                 5 => ['name' => 'Atelier de Concassage & Pavage', 'desc' => 'Préparation de ballast pour les chemins de ronde et fortifications.']
-            ],
-            'spatial_coords' => [
-                1 => ['top' => 45.0, 'left' => 28.0],
-                2 => ['top' => 22.0, 'left' => 52.0],
-                3 => ['top' => 32.0, 'left' => 72.0],
-                4 => ['top' => 64.0, 'left' => 84.0],
-                5 => ['top' => 74.0, 'left' => 24.0]
             ]
         ],
         'clay' => [
             'type'        => 'clay',
             'name'        => 'Gisement Alluvial d\'Argile & Poterie',
             'jp_name'     => '粘土鉱床 (Nendo Kōshō)',
-            'res_name'    => 'Argile Fine & Tuiles Kawara',
+            'res_name'    => 'Argile Fine & Céramique',
             'icon'        => 'fa-solid fa-jar',
             'color'       => '#f59e0b',
             'color_class' => 'warning',
             'badge_text'  => 'Artisanat Céramique',
             'desc'        => 'Excavation à ciel ouvert d\'argile pure, modelage et cuisson des tuiles incombustibles et récipients.',
             'bg_image'    => '/public/assets/resources/terroir_clay.jpg',
+            'tile_img'    => '/public/assets/tiles/tile_stonemason.png',
             'map_coords'  => ['left' => 81.0, 'top' => 51.0],
             'field_type'  => null,
             'db_slots'    => [],
             'worker_name' => 'Potier & Extracteur',
             'workers_per_lvl' => 2,
             'slot_names'  => [
-                1 => ['name' => 'Fosse d\'Extraction Alluviale (Grue)', 'desc' => 'Excavation de sédiments plastiques à l\'aide de grues de bois.'],
-                2 => ['name' => 'Puits de Glaise Profonde', 'desc' => 'Couches d\'argile pure sans gravier idéales pour la vaisselle impériale.'],
-                3 => ['name' => 'Voie Ferrée & Berlines de Minerai', 'desc' => 'Chariots sur rails pour acheminer la motte vers les aires de malaxage.'],
-                4 => ['name' => 'Bassins de Décantation & Lavage', 'desc' => 'Clarification de la barbotine par sédimentation continue à l\'eau.'],
-                5 => ['name' => 'Four Noborigama à Tuiles de Toit', 'desc' => 'Four à chambres ascendantes pour cuire les solides tuiles Kawara.']
-            ],
-            'spatial_coords' => [
-                1 => ['top' => 18.0, 'left' => 58.0],
-                2 => ['top' => 32.0, 'left' => 72.0],
-                3 => ['top' => 55.0, 'left' => 60.0],
-                4 => ['top' => 60.0, 'left' => 44.0],
-                5 => ['top' => 74.0, 'left' => 82.0]
+                1 => ['name' => 'Fosse d\'Extraction Alluviale', 'desc' => 'Excavation de sédiments plastiques à l\'aide de grues de bois.'],
+                2 => ['name' => 'Puits de Glaise Profonde', 'desc' => 'Couches d\'argile pure sans gravier pour tuiles et jarres.'],
+                3 => ['name' => 'Voie Ferrée & Berlines de Minerai', 'desc' => 'Chariots sur rails pour acheminer la motte vers le malaxage.'],
+                4 => ['name' => 'Bassins de Décantation & Lavage', 'desc' => 'Clarification de la barbotine par sédimentation continue.'],
+                5 => ['name' => 'Four Noborigama à Tuiles Kawara', 'desc' => 'Four à chambres ascendantes pour cuire les solides tuiles.' ]
             ]
         ],
         'rice' => [
@@ -122,6 +104,7 @@ class TerroirEngine {
             'badge_text'  => 'Alimentation Vitale',
             'desc'        => 'Bassins inondés étagés le long du méandre fluvial. Le Koku de riz est l\'énergie motrice du fief.',
             'bg_image'    => '/public/assets/resources/terroir_rice.jpg',
+            'tile_img'    => '/public/assets/tiles/tile_riziere.png',
             'map_coords'  => ['left' => 52.0, 'top' => 62.0],
             'field_type'  => 'deuterium_synth',
             'db_slots'    => [11, 12, 13, 14, 19],
@@ -133,26 +116,20 @@ class TerroirEngine {
                 3 => ['name' => 'Canaux d\'Irrigation Centraux', 'desc' => 'Vannes de bois redistribuant l\'eau vivifiante aux jeunes plants.'],
                 4 => ['name' => 'Paddies Inondés du Delta', 'desc' => 'Rizières alluviales profondes travaillées avec buffles et charrues.'],
                 5 => ['name' => 'Terrasses Fertiles du Méandre', 'desc' => 'Riches terres bordières garantissant d\'abondantes récoltes annuelles.']
-            ],
-            'spatial_coords' => [
-                1 => ['top' => 22.0, 'left' => 52.0],
-                2 => ['top' => 28.0, 'left' => 18.0],
-                3 => ['top' => 52.0, 'left' => 44.0],
-                4 => ['top' => 76.0, 'left' => 54.0],
-                5 => ['top' => 38.0, 'left' => 85.0]
             ]
         ],
         'tea' => [
             'type'        => 'tea',
-            'name'        => 'Coteaux de Thé & Pavillons de Séchage',
+            'name'        => 'Coteaux de Thé & Pavillons',
             'jp_name'     => '茶畑 (Chabatake)',
             'res_name'    => 'Feuilles de Thé & Matcha',
             'icon'        => 'fa-solid fa-leaf',
             'color'       => '#14b8a6',
             'color_class' => 'teal',
-            'badge_text'  => 'Sérénité & Confort',
+            'badge_text'  => 'Confort & Sérénité',
             'desc'        => 'Buissons de thé taillés en vagues géométriques. Fournit le thé de cérémonie qui calme les esprits.',
             'bg_image'    => '/public/assets/resources/terroir_tea.jpg',
+            'tile_img'    => '/public/assets/tiles/tile_teahouse.png',
             'map_coords'  => ['left' => 20.0, 'top' => 54.0],
             'field_type'  => null,
             'db_slots'    => [],
@@ -164,26 +141,20 @@ class TerroirEngine {
                 3 => ['name' => 'Hangar de Séchage & Aération', 'desc' => 'Bâtisse ventilée où les feuilles fraîchement cueillies perdent leur humidité.'],
                 4 => ['name' => 'Pavillon de Torréfaction', 'desc' => 'Poêles en fonte chauffés au charbon de bois pour stopper l\'oxydation.'],
                 5 => ['name' => 'Meule de Granit à Poudre Matcha', 'desc' => 'Broyage lent sous pierre meulière pour une poudre verte d\'une finesse impériale.']
-            ],
-            'spatial_coords' => [
-                1 => ['top' => 62.0, 'left' => 16.0],
-                2 => ['top' => 46.0, 'left' => 78.0],
-                3 => ['top' => 46.0, 'left' => 48.0],
-                4 => ['top' => 18.0, 'left' => 44.0],
-                5 => ['top' => 78.0, 'left' => 84.0]
             ]
         ],
         'soybean' => [
             'type'        => 'soybean',
-            'name'        => 'Champs de Soja & Ateliers de Tofu',
+            'name'        => 'Champs de Soja & Ateliers',
             'jp_name'     => '大豆畑 (Daizu-batake)',
-            'res_name'    => 'Soja, Farine & Pâte Miso',
+            'res_name'    => 'Soja, Farine & Miso',
             'icon'        => 'fa-solid fa-seedling',
             'color'       => '#d97706',
-            'color_class' => 'warning',
+            'color_class' => 'orange',
             'badge_text'  => 'Protéines & Nutrition',
             'desc'        => 'Champs de légumineuses fortifiant la terre et pourvoyant paysans et troupes en tofu et miso fermenté.',
             'bg_image'    => '/public/assets/resources/terroir_soybean.jpg',
+            'tile_img'    => '/public/assets/tiles/tile_grain_mill.png',
             'map_coords'  => ['left' => 19.0, 'top' => 72.0],
             'field_type'  => null,
             'db_slots'    => [],
@@ -195,44 +166,56 @@ class TerroirEngine {
                 3 => ['name' => 'Atelier de Broyage & Meule à Farine', 'desc' => 'Extraction de farine végétale et de lait de soja nourrissant.'],
                 4 => ['name' => 'Presse Artisanale de Tofu', 'desc' => 'Moulage sous poids de granit pour presser de fermes blocs de tofu.'],
                 5 => ['name' => 'Cave de Fermentation du Miso', 'desc' => 'Fûts de cèdre où le soja vieillit avec le sel pour développer son umami.']
-            ],
-            'spatial_coords' => [
-                1 => ['top' => 78.0, 'left' => 14.0],
-                2 => ['top' => 35.0, 'left' => 42.0],
-                3 => ['top' => 46.0, 'left' => 64.0],
-                4 => ['top' => 78.0, 'left' => 88.0],
-                5 => ['top' => 28.0, 'left' => 85.0]
             ]
         ],
-        'village' => [
-            'type'        => 'village',
-            'name'        => 'Village Central, Démographie & Vie Rurale',
-            'jp_name'     => '農村集落 (Nōson Shūraku)',
-            'res_name'    => 'Population, Contentement & Sérénité',
-            'icon'        => 'fa-solid fa-people-roof',
-            'color'       => '#ef4444',
-            'color_class' => 'danger',
-            'badge_text'  => 'Cœur Démographique',
-            'desc'        => 'Agglomération rurale où résident les familles de villageois. Regroupe logements, moulins et sanctuaires.',
+        'shrine' => [
+            'type'        => 'shrine',
+            'name'        => 'Sérénité & Sanctuaires Shintō',
+            'jp_name'     => '神社 (Jinja)',
+            'res_name'    => 'Ferveur & Sérénité Spirituelle',
+            'icon'        => 'fa-solid fa-torii-gate',
+            'color'       => '#ec4899',
+            'color_class' => 'pink',
+            'badge_text'  => 'Spiritualité & Sérénité',
+            'desc'        => 'Sanctuaires ancestraux et torii sacrés honourant les Kami. Maintiennent la sérénité et le rendement de l\'ensemble du domaine.',
+            'bg_image'    => '/public/assets/resources/ressource_ferveur_shinto.jpg',
+            'tile_img'    => '/public/assets/tiles/tile_sanctuaire.png',
+            'map_coords'  => ['left' => 88.0, 'top' => 31.0],
+            'field_type'  => 'solar_plant',
+            'db_slots'    => [15, 16, 17, 18, 20],
+            'worker_name' => 'Gardien Shintō',
+            'workers_per_lvl' => 1,
+            'slot_names'  => [
+                1 => ['name' => 'Sanctuaire Ancestral d\'Inari', 'desc' => 'Dédié au renard céleste pour la bénédiction des récoltes féodales.'],
+                2 => ['name' => 'Torii des Mille Cerisiers', 'desc' => 'Portique sacré canalisant les souffles spirituels protecteurs.'],
+                3 => ['name' => 'Autel des Eaux Claires', 'desc' => 'Bassin de purification rituelle au pied des sources vives.'],
+                4 => ['name' => 'Pavillon de Prière de la Forêt', 'desc' => 'Espace de contemplation et d\'offrandes sous les cèdres millénaires.'],
+                5 => ['name' => 'Grand Sanctuaire du Soleil Levant', 'desc' => 'Haut lieu de culte irradiant une paix spirituelle inaltérable.']
+            ]
+        ],
+        'housing' => [
+            'type'        => 'housing',
+            'name'        => 'Habitations & Village Démographique',
+            'jp_name'     => '集落住居 (Shūraku Jūkyo)',
+            'res_name'    => 'Capacité d\'Accueil (+5 hab./niv.)',
+            'icon'        => 'fa-solid fa-house-chimney',
+            'color'       => '#6366f1',
+            'color_class' => 'indigo',
+            'badge_text'  => 'Démographie & Logement',
+            'desc'        => 'Modèle unique d\'habitation paysanne et artisanale. Chaque niveau supplémentaire augmente directement le plafond d\'accueil de +5 villageois.',
             'bg_image'    => '/public/assets/resources/terroir_village.jpg',
+            'tile_img'    => '/public/assets/tiles/tile_storage.png',
             'map_coords'  => ['left' => 53.0, 'top' => 90.0],
             'field_type'  => null,
             'db_slots'    => [],
-            'worker_name' => 'Intendant de village',
-            'workers_per_lvl' => 1,
+            'worker_name' => 'Villageois résident',
+            'workers_per_lvl' => 0,
             'slot_names'  => [
-                1 => ['name' => 'Logements Traditionnels (Minka - 民家)', 'desc' => 'Chaumières aux toits de chaume abritant les familles paysannes.'],
-                2 => ['name' => 'Maisons Communes d\'Artisans (Nagaya - 長屋)', 'desc' => 'Habitations en enfilade favorisant l\'accueil d\'artisans et marchands.'],
-                3 => ['name' => 'Sanctuaire Shintō & Torii Sacré (神社)', 'desc' => 'Lieu de dévotion dédié à Inari apportant paix spirituelle et sérénité.'],
-                4 => ['name' => 'Moulin à Eau Fluvial (Suisha - 水車小屋)', 'desc' => 'Roue à aubes entraînant les meules pour moudre riz et céréales en farine.'],
-                5 => ['name' => 'Brasserie de Riz & Sakagura (酒蔵)', 'desc' => 'Atelier de fermentation distillant le précieux Saké de réjouissance.']
-            ],
-            'spatial_coords' => [
-                1 => ['top' => 55.0, 'left' => 36.0],
-                2 => ['top' => 52.0, 'left' => 62.0],
-                3 => ['top' => 24.0, 'left' => 51.0],
-                4 => ['top' => 80.0, 'left' => 28.0],
-                5 => ['top' => 78.0, 'left' => 86.0]
+                1 => ['name' => 'Habitation de la Vallée', 'desc' => 'Demeure paysanne traditionnelle adossée aux parcelles fertiles.'],
+                2 => ['name' => 'Habitation des Coteaux', 'desc' => 'Maisons familiales établies sur les versants ensoleillés.'],
+                3 => ['name' => 'Habitation du Ruisseau', 'desc' => 'Chaumières rurales bordant les cours d\'eau et moulins.'],
+                4 => ['name' => 'Habitation des Artisans', 'desc' => 'Quartier d\'habitations pour maîtres maçons et charpentiers.'],
+                5 => ['name' => 'Habitation de la Haute-Terre', 'desc' => 'Résidences spacieuses pour accueillir les familles de pionniers.']
             ]
         ]
     ];
@@ -273,14 +256,14 @@ class TerroirEngine {
     }
 
     /**
-     * Récupère la liste des zones avec données enrichies pour la carte principale
+     * Récupère la liste des 8 zones avec données enrichies
      */
     public function getMapZones(int $planetId, array $planet): array {
         $fields = $this->planetEngine->getFields($planetId);
         $prodRates = $planet['prod_rates'] ?? [];
         $zones = self::ZONES;
+        $housingCap = $this->getHousingCapacity($planetId);
 
-        // Enrichir chaque zone avec sa cadence et son état réel
         foreach ($zones as $key => &$z) {
             switch ($key) {
                 case 'wood':
@@ -313,11 +296,17 @@ class TerroirEngine {
                     $z['status_sub'] = 'Nutrition équilibrée';
                     $z['level_avg'] = $this->calculateAvgLevelForTerroir($planetId, 'soybean');
                     break;
+                case 'shrine':
+                    $z['rate_label'] = '+' . ($planet['energy_max'] ?? 50) . ' Sérénité';
+                    $z['status_sub'] = 'Ferveur spirituelle Shintō';
+                    $z['level_avg'] = $this->calculateAvgLevelForFields($fields, 'solar_plant');
+                    break;
+                case 'housing':
                 case 'village':
                     $pop = $planet['population'] ?? 100;
-                    $z['rate_label'] = number_format($pop) . ' habitants';
-                    $z['status_sub'] = 'Démographie & Contentement';
-                    $z['level_avg'] = $this->calculateAvgLevelForTerroir($planetId, 'village');
+                    $z['rate_label'] = number_format($pop) . ' / ' . number_format($housingCap['total_capacity']) . ' hab.';
+                    $z['status_sub'] = 'Capacité : 5 hab. par niveau';
+                    $z['level_avg'] = round($housingCap['total_levels'] / 5, 1);
                     break;
             }
         }
@@ -327,9 +316,77 @@ class TerroirEngine {
     }
 
     /**
+     * Récupère les niveaux des 5 parcelles d'habitation du village
+     */
+    public function getHousingLevels(int $planetId): array {
+        $levels = [1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1];
+        if (!$this->db) return $levels;
+        try {
+            $stmt = $this->db->prepare("SELECT slot_index, level FROM planet_terroir_slots WHERE planet_id = ? AND (resource_type = 'housing' OR resource_type = 'village')");
+            $stmt->execute([$planetId]);
+            while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $idx = (int)$r['slot_index'];
+                if ($idx >= 1 && $idx <= 5) {
+                    $levels[$idx] = max($levels[$idx], (int)$r['level']);
+                }
+            }
+        } catch (Exception $e) {}
+        return $levels;
+    }
+
+    /**
+     * Formule simplifiée de calcul de la capacité totale d'accueil du village :
+     * Capacité Totale = 75 (Base villageoise) + (Somme des niveaux des 5 habitations × 5 villageois)
+     */
+    public function getHousingCapacity(int $planetId): array {
+        $levels = $this->getHousingLevels($planetId);
+        $totalLevels = array_sum($levels);
+        $baseCap = 75;
+        $bonus = $totalLevels * 5;
+        $totalCap = $baseCap + $bonus;
+
+        return [
+            'base_capacity'    => $baseCap,
+            'per_level_bonus'  => 5,
+            'total_levels'     => $totalLevels,
+            'housing_bonus'    => $bonus,
+            'total_capacity'   => $totalCap,
+            'housing_levels'   => $levels
+        ];
+    }
+
+    /**
+     * Récupère les 40 parcelles du domaine rural regroupées par les 8 catégories
+     */
+    public function getAll40Slots(int $planetId, array $planet): array {
+        $categories = ['wood', 'stone', 'clay', 'rice', 'tea', 'soybean', 'shrine', 'housing'];
+        $grouped = [];
+        $globalIdx = 1;
+
+        foreach ($categories as $catKey) {
+            $slots = $this->getZoneSlots($planetId, $catKey, $planet);
+            $grouped[$catKey] = [
+                'meta'  => self::ZONES[$catKey],
+                'slots' => []
+            ];
+            foreach ($slots as $slotIdx => $s) {
+                $s['global_index'] = $globalIdx++;
+                $s['category'] = $catKey;
+                $s['category_meta'] = self::ZONES[$catKey];
+                $grouped[$catKey]['slots'][$slotIdx] = $s;
+            }
+        }
+
+        return $grouped;
+    }
+
+    /**
      * Récupère les 5 slots détaillés pour une zone de ressource
      */
     public function getZoneSlots(int $planetId, string $resourceType, array $planet): array {
+        if ($resourceType === 'village') {
+            $resourceType = 'housing';
+        }
         if (!isset(self::ZONES[$resourceType])) {
             $resourceType = 'wood';
         }
@@ -351,18 +408,16 @@ class TerroirEngine {
         $buildings = $this->planetEngine->getBuildings($planetId);
         $hqLevel = $buildings['hq'] ?? 1;
 
-        // Si zone avec table secondaire (clay, tea, soybean, village)
+        // Slots en table secondaire (clay, tea, soybean, housing)
         $terroirRows = [];
         if ($this->db) {
             try {
-                $stmt = $this->db->prepare("SELECT * FROM planet_terroir_slots WHERE planet_id = ? AND resource_type = ?");
-                $stmt->execute([$planetId, $resourceType]);
+                $stmt = $this->db->prepare("SELECT * FROM planet_terroir_slots WHERE planet_id = ? AND (resource_type = ? OR (resource_type = 'village' AND ? = 'housing'))");
+                $stmt->execute([$planetId, $resourceType, $resourceType]);
                 while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     $terroirRows[(int)$r['slot_index']] = $r;
                 }
-            } catch (Exception $e) {
-                // Ignore fallback
-            }
+            } catch (Exception $e) {}
         }
 
         $slots = [];
@@ -370,17 +425,25 @@ class TerroirEngine {
             $sMeta = $zDef['slot_names'][$i] ?? ['name' => "Parcelle #{$i}", 'desc' => 'Emplacement de production'];
             $pos = $zDef['spatial_coords'][$i] ?? ['top' => 30.0 + ($i * 10), 'left' => 20.0 + ($i * 12)];
 
-            // Cas ressource standard rattachée aux 18 parcelles (wood, stone, rice)
-            if (!empty($zDef['db_slots']) && isset($zDef['db_slots'][$i - 1])) {
-                $fSlot = $zDef['db_slots'][$i - 1];
-                $fieldData = $fieldsBySlot[$fSlot] ?? ['level' => 1, 'type' => $zDef['field_type']];
+            // Cas ressource standard rattachée aux parcelles de planet_fields (wood, stone, rice, shrine)
+            $fSlot = (!empty($zDef['db_slots']) && isset($zDef['db_slots'][$i - 1])) ? $zDef['db_slots'][$i - 1] : null;
+
+            if ($fSlot !== null && isset($fieldsBySlot[$fSlot])) {
+                $fieldData = $fieldsBySlot[$fSlot];
                 $lvl = (int)($fieldData['level'] ?? 1);
                 $isUpgrading = isset($queueBySlot[$fSlot]);
                 $activeQueueItem = $isUpgrading ? $queueBySlot[$fSlot] : null;
 
                 $upDetails = $this->buildingEngine->getUpgradeDetails('field', $zDef['field_type'], $lvl, $hqLevel);
                 $workers = $lvl * ($zDef['workers_per_lvl'] ?? 2);
-                $prodHourly = round(($upDetails['next_prod'] ?? 30) * (defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
+                $speed = defined('SPEED_FACTOR') ? SPEED_FACTOR : 1;
+                $prodHourly = round(($upDetails['next_prod'] ?? 30) * $speed);
+
+                if ($resourceType === 'shrine') {
+                    $prodLabel = '+' . ($lvl * 25) . ' Sérénité';
+                } else {
+                    $prodLabel = '+' . number_format($prodHourly) . ' / h';
+                }
 
                 $slots[$i] = [
                     'slot_index'      => $i,
@@ -391,6 +454,7 @@ class TerroirEngine {
                     'workers'         => $workers,
                     'worker_role'     => $zDef['worker_name'],
                     'prod_hourly'     => $prodHourly,
+                    'prod_label'      => $prodLabel,
                     'cost'            => $upDetails['cost'],
                     'duration'        => $upDetails['duration'],
                     'can_afford'      => ($planet['metal'] >= $upDetails['cost']['metal'] &&
@@ -398,15 +462,24 @@ class TerroirEngine {
                                           $planet['deuterium'] >= $upDetails['cost']['deuterium']),
                     'is_upgrading'    => $isUpgrading,
                     'queue_item'      => $activeQueueItem,
-                    'spatial_pos'     => $pos
+                    'spatial_pos'     => $pos,
+                    'tile_img'        => $zDef['tile_img'] ?? '/public/assets/tiles/tile_bucheron.png'
                 ];
             } else {
-                // Zone terroir secondaire (clay, tea, soybean, village)
+                // Zone terroir secondaire (clay, tea, soybean, housing ou shrine hors champs)
                 $tRow = $terroirRows[$i] ?? null;
                 $lvl = $tRow ? (int)$tRow['level'] : 1;
                 $workers = $lvl * ($zDef['workers_per_lvl'] ?? 2);
                 $baseCost = $this->getBaseCostForTerroir($resourceType, $i, $lvl);
                 $prodHourly = $this->getHourlyProductionForTerroir($resourceType, $i, $lvl);
+
+                if ($resourceType === 'housing') {
+                    $prodLabel = '+' . ($lvl * 5) . ' hab. (Niv. ' . $lvl . ' × 5)';
+                } elseif ($resourceType === 'shrine') {
+                    $prodLabel = '+' . ($lvl * 25) . ' Sérénité';
+                } else {
+                    $prodLabel = '+' . number_format($prodHourly) . ' / h';
+                }
 
                 $slots[$i] = [
                     'slot_index'      => $i,
@@ -417,6 +490,7 @@ class TerroirEngine {
                     'workers'         => $workers,
                     'worker_role'     => $zDef['worker_name'],
                     'prod_hourly'     => $prodHourly,
+                    'prod_label'      => $prodLabel,
                     'cost'            => $baseCost['cost'],
                     'duration'        => $baseCost['duration'],
                     'can_afford'      => ($planet['metal'] >= $baseCost['cost']['metal'] &&
@@ -424,7 +498,8 @@ class TerroirEngine {
                                           $planet['deuterium'] >= $baseCost['cost']['deuterium']),
                     'is_upgrading'    => false,
                     'queue_item'      => null,
-                    'spatial_pos'     => $pos
+                    'spatial_pos'     => $pos,
+                    'tile_img'        => $zDef['tile_img'] ?? '/public/assets/tiles/tile_storage.png'
                 ];
             }
         }
@@ -436,6 +511,9 @@ class TerroirEngine {
      * Améliore un slot de terroir
      */
     public function upgradeSlot(int $planetId, string $resourceType, int $slotIndex): array {
+        if ($resourceType === 'village') {
+            $resourceType = 'housing';
+        }
         if (!isset(self::ZONES[$resourceType])) {
             return ['success' => false, 'error' => 'Type de ressource invalide.'];
         }
@@ -448,10 +526,20 @@ class TerroirEngine {
         // 1. Si rattaché à une parcelle standard de planet_fields
         if (!empty($zDef['db_slots']) && isset($zDef['db_slots'][$slotIndex - 1])) {
             $fSlot = $zDef['db_slots'][$slotIndex - 1];
-            return $this->buildingEngine->startUpgrade($planetId, 'field', (string)$fSlot, $fSlot, $zDef['field_type']);
+            $fields = $this->planetEngine->getFields($planetId);
+            $hasField = false;
+            foreach ($fields as $f) {
+                if ((int)$f['field_slot'] === $fSlot) {
+                    $hasField = true;
+                    break;
+                }
+            }
+            if ($hasField) {
+                return $this->buildingEngine->startUpgrade($planetId, 'field', (string)$fSlot, $fSlot, $zDef['field_type']);
+            }
         }
 
-        // 2. Si slot de terroir secondaire (clay, tea, soybean, village)
+        // 2. Si slot de terroir secondaire (clay, tea, soybean, housing)
         if (!$this->db) {
             return ['success' => false, 'error' => 'Base de données temporairement inaccessible.'];
         }
@@ -495,10 +583,9 @@ class TerroirEngine {
             $workers = $nextLvl * ($zDef['workers_per_lvl'] ?? 2);
             $stmtUpS->execute([$planetId, $resourceType, $slotIndex, $nextLvl, $workers]);
 
-            // Si amélioration de logements Minka/Nagaya, augmenter la capacité de population
-            if ($resourceType === 'village' && ($slotIndex === 1 || $slotIndex === 2)) {
-                $popBonus = ($slotIndex === 1) ? 15 : 10;
-                $this->db->prepare("UPDATE planets SET population = population + ? WHERE id = ?")->execute([$popBonus, $planetId]);
+            // Si amélioration d'habitation, accueillir directement +5 villageois
+            if ($resourceType === 'housing') {
+                $this->db->prepare("UPDATE planets SET population = LEAST(population + 5, 5000) WHERE id = ?")->execute([$planetId]);
             }
 
             $this->db->commit();
@@ -523,31 +610,24 @@ class TerroirEngine {
     public function getVillageSummary(int $planetId, array $planet): array {
         $buildings = $this->planetEngine->getBuildings($planetId);
         $fields = $this->planetEngine->getFields($planetId);
-        $maxPop = (int)($planet['metal_max'] ? 250 : 150);
 
-        // Intégrer les logements de village s'ils existent
-        if ($this->db) {
-            try {
-                $stmt = $this->db->prepare("SELECT slot_index, level FROM planet_terroir_slots WHERE planet_id = ? AND resource_type = 'village'");
-                $stmt->execute([$planetId]);
-                while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    if ((int)$r['slot_index'] === 1) $maxPop += (int)$r['level'] * 25; // Minka
-                    if ((int)$r['slot_index'] === 2) $maxPop += (int)$r['level'] * 20; // Nagaya
-                }
-            } catch (Exception $e) {}
-        }
+        // Formule simplifiée de calcul de la capacité totale d'accueil du village :
+        // Base de 75 villageois + (Somme des niveaux des 5 parcelles d'habitations × 5 villageois)
+        $housingCap = $this->getHousingCapacity($planetId);
+        $maxPop = $housingCap['total_capacity'];
 
         $workforce = PopulationEngine::calculateWorkforceSummary($planet, $buildings, $fields, $maxPop);
         $contentment = PopulationEngine::calculateContentment($planet);
 
         return [
-            'workforce'   => $workforce,
-            'contentment' => $contentment,
-            'population'  => (int)($planet['population'] ?? 100),
-            'max_pop'     => $maxPop,
-            'sake'        => (float)($planet['sake'] ?? 0),
-            'rice_flour'  => (float)($planet['rice_flour'] ?? 0),
-            'famine'      => !empty($planet['famine_active'])
+            'workforce'       => $workforce,
+            'contentment'     => $contentment,
+            'population'      => (int)($planet['population'] ?? 100),
+            'max_pop'         => $maxPop,
+            'housing_cap'     => $housingCap,
+            'sake'            => (float)($planet['sake'] ?? 0),
+            'rice_flour'      => (float)($planet['rice_flour'] ?? 0),
+            'famine'          => !empty($planet['famine_active'])
         ];
     }
 
@@ -596,12 +676,19 @@ class TerroirEngine {
                 $d = (int)round(30 * $mult);
                 $sec = (int)round(75 * $mult);
                 break;
+            case 'shrine':
+                $m = (int)round(75 * $mult);
+                $c = (int)round(30 * $mult);
+                $d = (int)round(10 * $mult);
+                $sec = (int)round(100 * $mult);
+                break;
+            case 'housing':
             case 'village':
             default:
-                $m = (int)round(85 * $mult);
-                $c = (int)round(60 * $mult);
-                $d = (int)round(45 * $mult);
-                $sec = (int)round(120 * $mult);
+                $m = (int)round(65 * $mult);
+                $c = (int)round(40 * $mult);
+                $d = (int)round(25 * $mult);
+                $sec = (int)round(90 * $mult);
                 break;
         }
         return [
@@ -619,10 +706,12 @@ class TerroirEngine {
                 return (int)round(($level * 8) * $speed);
             case 'soybean':
                 return (int)round(($level * 10) * $speed);
+            case 'shrine':
+                return (int)round(($level * 25) * $speed);
+            case 'housing':
             case 'village':
-                return (int)round(($level * 15) * $speed);
             default:
-                return (int)round(($level * 10) * $speed);
+                return $level * 5; // Capacité de population apportée
         }
     }
 }

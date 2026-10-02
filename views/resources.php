@@ -1,6 +1,8 @@
 <?php
 /**
- * Vue des Parcelles de Ressources & Carte Interactive du Terroir Rural
+ * Vue des 40 Parcelles de Ressources & Terroir Féodal (OpenShogun)
+ * Grille complète de 40 parcelles (8 catégories × 5 parcelles)
+ * Simplification du système de logement : Modèle unique « Habitation » (Capacité = 75 + Somme des niveaux × 5)
  */
 require_once __DIR__ . '/../core/BuildingEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
@@ -8,6 +10,7 @@ require_once __DIR__ . '/../core/VillageFieldGenerator.php';
 require_once __DIR__ . '/../core/OasisEngine.php';
 require_once __DIR__ . '/../core/SlotPositionEngine.php';
 require_once __DIR__ . '/../core/TerroirEngine.php';
+require_once __DIR__ . '/../core/PopulationEngine.php';
 require_once __DIR__ . '/../core/AiPromptHelper.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
@@ -16,462 +19,746 @@ $planetEngine = new PlanetEngine();
 $oasisEngine = new OasisEngine();
 $terroirEngine = new TerroirEngine();
 
-$fields = $planetEngine->getFields((int)$planet['id']);
+// Récupérer les 40 parcelles groupées par les 8 catégories thématiques
+$all40Slots = $terroirEngine->getAll40Slots((int)$planet['id'], $planet);
+
+// Bilan démographique avec la formule simplifiée d'habitation
+$villageSummary = $terroirEngine->getVillageSummary((int)$planet['id'], $planet);
+$workforce = $villageSummary['workforce'];
+$contentment = $villageSummary['contentment'];
+$housingCap = $villageSummary['housing_cap'];
+$maxPop = $housingCap['total_capacity'];
+
+// Oasis et files d'attente
+$annexedOases = $oasisEngine->getAnnexedOasesForPlanet((int)$planet['id']);
+$oasisBonuses = $oasisEngine->getTotalOasisBonusesForPlanet((int)$planet['id']);
+$queue = $buildingEngine->getQueue((int)$planet['id']);
+
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
 $hqLevel = $buildings['hq'] ?? 1;
 
-$annexedOases = $oasisEngine->getAnnexedOasesForPlanet((int)$planet['id']);
-$oasisBonuses = $oasisEngine->getTotalOasisBonusesForPlanet((int)$planet['id']);
-$mapZones = $terroirEngine->getMapZones((int)$planet['id'], $planet);
+// Calcul des cadences de production secondaire
+$clayProdHourly = 0;
+foreach ($all40Slots['clay']['slots'] as $cs) { $clayProdHourly += $cs['prod_hourly']; }
 
-$queue = $buildingEngine->getQueue((int)$planet['id']);
+$teaProdHourly = 0;
+foreach ($all40Slots['tea']['slots'] as $ts) { $teaProdHourly += $ts['prod_hourly']; }
 
-// Indexer les champs par slot et calculer les totaux par ressource
-$fieldsBySlot = [];
-$fieldCounts = [
-    'metal_mine' => 0,
-    'crystal_mine' => 0,
-    'deuterium_synth' => 0,
-    'solar_plant' => 0
-];
-foreach ($fields as $f) {
-    $sNum = (int)$f['field_slot'];
-    $fieldsBySlot[$sNum] = $f;
-    if (isset($fieldCounts[$f['type']])) {
-        $fieldCounts[$f['type']]++;
-    }
-}
+$soybeanProdHourly = 0;
+foreach ($all40Slots['soybean']['slots'] as $ss) { $soybeanProdHourly += $ss['prod_hourly']; }
+
+$shrineEnergyHourly = 0;
+foreach ($all40Slots['shrine']['slots'] as $shs) { $shrineEnergyHourly += $shs['prod_hourly']; }
 
 // Détection de l'archétype de terroir du village
+$fields = $planetEngine->getFields((int)$planet['id']);
 $terroir = VillageFieldGenerator::detectArchetype($fields);
 
-// Indexer la file active pour repérer les parcelles en cours d'amélioration
-$activeFieldQueue = [];
-$fieldsInQueue = 0;
-foreach ($queue as $q) {
-    if ($q['build_category'] === 'field') {
-        $activeFieldQueue[(int)$q['target_id']] = $q;
-        $fieldsInQueue++;
-    }
-}
-
 $isTerran = (($user['faction'] ?? 'terran') === 'terran');
-$canQueueNewField = $isTerran ? ($fieldsInQueue === 0) : (count($queue) === 0);
-
-$bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg')
-    ? filemtime(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jpg') : 1;
 ?>
 
 <style>
-/* Forcer la largeur maximale de la page pour profiter pleinement du terroir féodal */
+/* Disposition générale du Domaine Rural Féodal */
 .container {
     max-width: 1850px !important;
     width: 98% !important;
     margin: 1rem auto !important;
 }
 
-/* CARTE INTERACTIVE DU TERROIR RURAL (Panoramic Portrait / High-Angle Landscape) */
-.rural-terroir-map-viewport {
-    position: relative !important;
-    width: 100% !important;
-    max-width: 1050px !important;
-    margin: 0 auto !important;
-    aspect-ratio: 1696 / 2528 !important;
-    background-image: url('/public/assets/shogun_rural_terroir_bg.jpg?v=<?= $bgVersion ?>') !important;
-    background-size: 100% 100% !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    border-radius: 14px !important;
-    border: 2px solid rgba(255, 255, 255, 0.16) !important;
-    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.75), 0 12px 36px rgba(0, 0, 0, 0.45) !important;
-    overflow: hidden !important;
-    user-select: none !important;
+/* Grille principale : 40 parcelles à gauche, Sidebar chantiers/troupes à droite */
+.grid-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 1.5rem;
+    align-items: start;
 }
 
-/* Badges interactifs des zones du Terroir */
-.terroir-zone-badge {
-    position: absolute !important;
-    transform: translate(-50%, -50%) !important;
-    cursor: pointer !important;
-    z-index: 20 !important;
-    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease !important;
+@media (max-width: 1200px) {
+    .grid-main {
+        grid-template-columns: 1fr;
+    }
 }
 
-.terroir-zone-badge:hover {
-    transform: translate(-50%, -50%) scale(1.18) !important;
-    z-index: 50 !important;
+/* Header de la vue : Indicateurs de stocks et flux (KPI) */
+.kpi-resource-card {
+    background: var(--tblr-card-bg, #ffffff);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 0.65rem 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.zone-badge-pill {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.55rem !important;
-    padding: 0.38rem 0.85rem !important;
-    border-radius: 50px !important;
-    background: rgba(15, 23, 42, 0.88) !important;
-    backdrop-filter: blur(8px) !important;
-    border: 2px solid #eab308 !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.65), 0 0 15px rgba(234, 179, 8, 0.45) !important;
-    white-space: nowrap !important;
-    font-size: 0.82rem !important;
-    font-weight: 700 !important;
-    transition: all 0.22s ease !important;
+.kpi-resource-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.terroir-zone-badge:hover .zone-badge-pill {
-    background: rgba(15, 23, 42, 0.98) !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85), 0 0 25px rgba(234, 179, 8, 0.95) !important;
-    border-color: #ffffff !important;
+.kpi-resource-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
 }
 
-.zone-badge-icon {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 28px !important;
-    height: 28px !important;
-    border-radius: 50% !important;
-    font-size: 0.85rem !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5) !important;
+.kpi-resource-val {
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.1;
 }
 
-.zone-badge-rate {
-    font-size: 0.75rem !important;
-    opacity: 0.9 !important;
-    padding-left: 0.3rem !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.25) !important;
-    font-weight: 600 !important;
+.kpi-resource-rate {
+    font-size: 0.72rem;
+    font-weight: 700;
 }
 
-.zone-badge-beacon {
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    width: 100% !important;
-    height: 100% !important;
-    transform: translate(-50%, -50%) !important;
-    border-radius: 50px !important;
-    border: 1.5px solid #eab308 !important;
-    pointer-events: none !important;
-    animation: zone-beacon-pulse 2.2s infinite ease-out !important;
+/* Barre de filtrage rapide des 8 catégories */
+.filter-category-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    background: var(--tblr-card-bg, #ffffff);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 0.6rem 0.75rem;
 }
 
-@keyframes zone-beacon-pulse {
-    0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.95; }
-    100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
+.btn-filter-cat {
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.35rem 0.85rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
 }
 
-/* Hotspots pour la vue alternative des 18 parcelles */
-.fields-viewport.rts-surface {
-    position: relative !important;
-    width: 100% !important;
-    aspect-ratio: 16 / 9 !important;
-    background-image: url('/public/assets/shogun_rural_terroir_bg_legacy.jpg') !important;
-    background-size: cover !important;
-    background-position: center !important;
-    border-radius: 12px !important;
-    border: 2px solid var(--border-color) !important;
-    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+.btn-filter-cat.active {
+    box-shadow: 0 0 10px rgba(234, 179, 8, 0.35);
 }
 
-.rts-surface .rts-hotspot {
-    position: absolute !important;
-    cursor: pointer !important;
-    border-radius: 8px !important;
-    background: transparent !important;
-    border: 1.5px solid transparent !important;
+/* Sections des 8 Catégories Thématiques */
+.terroir-category-section {
+    background: var(--tblr-card-bg, #ffffff);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
-.rts-surface .rts-hotspot:hover {
-    background: rgba(234, 179, 8, 0.14) !important;
-    border: 1.5px solid rgba(234, 179, 8, 0.85) !important;
-    box-shadow: 0 0 18px rgba(234, 179, 8, 0.5) !important;
+
+.terroir-category-section:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.category-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.category-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.category-icon-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+
+/* Grille de 5 Parcelles par Catégorie */
+.terroir-category-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.9rem;
+}
+
+@media (max-width: 1400px) {
+    .terroir-category-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .terroir-category-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Tuile d'une Parcelle (Parcel Card) */
+.parcel-tile-card {
+    border-radius: 10px;
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    background: var(--tblr-bg-surface, #ffffff);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    position: relative;
+}
+
+.parcel-tile-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.parcel-tile-card.is-upgrading {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* En-tête de la tuile */
+.parcel-card-header {
+    padding: 0.5rem 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.parcel-slot-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    background: rgba(15, 23, 42, 0.1);
+    color: var(--tblr-body-color, #1e293b);
+}
+
+.parcel-name-text {
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+/* Vignette visuelle de la parcelle */
+.parcel-visual-box {
+    position: relative;
+    width: 100%;
+    height: 95px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0.45rem;
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.45);
+}
+
+.parcel-level-badge {
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(4px);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 900;
+    padding: 0.2rem 0.55rem;
+    border-radius: 20px;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.parcel-workers-pill {
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(4px);
+    color: #e2e8f0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.18rem 0.45rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Corps d'informations de la tuile */
+.parcel-card-body {
+    padding: 0.65rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-grow: 1;
+}
+
+.parcel-prod-metric {
+    font-size: 0.82rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 0.3rem 0.45rem;
+    border-radius: 6px;
+}
+
+/* Coûts et Durée */
+.parcel-cost-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+}
+
+.cost-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.04);
+    font-weight: 600;
+}
+
+.cost-chip.affordable {
+    color: var(--tblr-body-color, #1e293b);
+}
+
+.cost-chip.missing {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    font-weight: 800;
+}
+
+/* Boutons d'action */
+.btn-upgrade-parcel {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.38rem 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
 }
 </style>
-<?= SlotPositionEngine::renderCss('resources') ?>
 
 <div class="grid-main">
-    <!-- Vue Principale du Terroir -->
-    <div class="card shadow-sm">
-        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
-            <div>
-                <h2 class="card-title mb-1">
-                    <i class="fa-solid fa-map-location-dot text-warning me-2"></i>Carte Interactive du Terroir Rural &mdash; <?= htmlspecialchars($planet['name']) ?>
-                </h2>
-                <div style="font-size:0.8rem; color:var(--text-muted);">
-                    Terroir : <strong style="color:var(--border-highlight, #dc2626);"><?= $terroir['icon'] ?> <?= htmlspecialchars($terroir['name']) ?></strong>
-                    &bull; 7 Zones d'activités &bull; 5 Slots de développement par zone
+    <!-- COLONNE PRINCIPALE : VUE DES 40 PARCELLES -->
+    <div>
+        <!-- 1. En-tête principal de la vue -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
+                <div>
+                    <h2 class="card-title mb-1 fs-2">
+                        <i class="fa-solid fa-table-cells-large text-warning me-2"></i>Domaine Rural Féodal &mdash; <?= htmlspecialchars($planet['name']) ?>
+                    </h2>
+                    <div class="text-muted" style="font-size:0.82rem;">
+                        Terroir : <strong class="text-danger"><?= $terroir['icon'] ?> <?= htmlspecialchars($terroir['name']) ?></strong>
+                        &bull; <strong>40 Parcelles de Production &amp; d'Accueil</strong> (8 Catégories &times; 5 Parcelles)
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <a href="?page=city" class="btn btn-sm btn-primary">
+                        <i class="fa-solid fa-chess-rook me-1"></i> Cité Castrale &rarr;
+                    </a>
                 </div>
             </div>
-            
-            <div class="d-flex align-items-center gap-2">
-                <!-- Bascule entre vue interactive et vue 18 parcelles -->
-                <button type="button" class="btn btn-sm btn-outline-warning" id="btn-toggle-view" onclick="toggleTerroirView()">
-                    <i class="fa-solid fa-table-cells-large me-1"></i> <span id="label-toggle-view">Vue 18 Parcelles</span>
-                </button>
-                <a href="?page=city" class="btn btn-sm btn-secondary">Cité Castrale &rarr;</a>
-            </div>
-        </div>
 
-        <div class="card-body">
-            <!-- Barre de sélection rapide des 7 Zones Thématiques -->
-            <div class="d-flex flex-wrap gap-2 mb-3 pb-2 border-bottom">
-                <a href="?page=view_resource&type=wood" class="btn btn-sm btn-outline-success">
-                    <i class="fa-solid fa-tree me-1"></i> Forêt &amp; Bois
-                </a>
-                <a href="?page=view_resource&type=stone" class="btn btn-sm btn-outline-secondary">
-                    <i class="fa-solid fa-mountain me-1"></i> Montagne &amp; Pierre
-                </a>
-                <a href="?page=view_resource&type=clay" class="btn btn-sm btn-outline-warning">
-                    <i class="fa-solid fa-jar me-1"></i> Argile &amp; Poterie
-                </a>
-                <a href="?page=view_resource&type=rice" class="btn btn-sm btn-outline-warning">
-                    <i class="fa-solid fa-wheat-awn me-1"></i> Rizières (Koku)
-                </a>
-                <a href="?page=view_resource&type=tea" class="btn btn-sm btn-outline-teal">
-                    <i class="fa-solid fa-leaf me-1"></i> Champs de Thé
-                </a>
-                <a href="?page=view_resource&type=soybean" class="btn btn-sm btn-outline-warning">
-                    <i class="fa-solid fa-seedling me-1"></i> Champs de Soja
-                </a>
-                <a href="?page=view_resource&type=village" class="btn btn-sm btn-outline-danger">
-                    <i class="fa-solid fa-people-roof me-1"></i> Village &amp; Moulins
-                </a>
-            </div>
-
-            <!-- 1. VUE PRINCIPALE : CARTE INTERACTIVE DU TERROIR RURAL (7 ZONES) -->
-            <div id="container-interactive-map">
-                <div class="rural-terroir-map-viewport">
-                    <!-- Badge Transparence IA (Haut Droite) -->
-                    <div style="position:absolute; top:12px; right:12px; z-index:25;">
-                        <?= class_exists('AiPromptHelper') ? AiPromptHelper::renderBadge('shogun_rural_terroir_bg.jpg', 'Carte Interactive du Terroir Rural Féodal', '/public/assets/shogun_rural_terroir_bg.jpg', 'ai-prompt-badge-pill', true) : '' ?>
-                    </div>
-
-                    <!-- 1. ⛰️ Montagne : Extraction de pierre -->
-                    <div class="terroir-zone-badge"
-                         style="top: 25.0%; left: 58.0%;"
-                         data-bs-toggle="tooltip"
-                         data-bs-html="true"
-                         data-bs-placement="top"
-                         title="<strong>⛰️ Montagne &amp; Carrières</strong><br>Extraction de Granit &amp; Pierre de Taille<br><span class='text-info fw-bold'>Cadence : <?= $mapZones['stone']['rate_label'] ?></span><br><small class='text-warning'>Cliquer pour ouvrir les 5 slots &rarr;</small>"
-                         onclick="window.location.href='?page=view_resource&type=stone'">
-                        <div class="zone-badge-beacon" style="border-color:#94a3b8;"></div>
-                        <div class="zone-badge-pill" style="border-color:#94a3b8;">
-                            <span class="zone-badge-icon" style="background:#475569;">
-                                <i class="fa-solid fa-mountain"></i>
-                            </span>
-                            <span>Montagne</span>
-                            <span class="zone-badge-rate text-info"><?= $mapZones['stone']['rate_label'] ?></span>
+            <!-- 2. Indicateurs supérieurs (Header de la vue) : Stocks, Flux, Sérénité, Population, Main-d'œuvre & Contentement -->
+            <div class="card-body p-3 border-bottom bg-surface-secondary">
+                
+                <!-- Rangée 1 : Compteurs de ressources (Stocks & Flux horaires des 6 matières) -->
+                <div class="row row-cards g-2 mb-3">
+                    <!-- Bois de Cèdre -->
+                    <div class="col-6 col-sm-4 col-md-2">
+                        <div class="kpi-resource-card border-start border-3 border-success">
+                            <div>
+                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Bois de Cèdre</div>
+                                <div class="kpi-resource-val text-success"><?= number_format($planet['metal']) ?></div>
+                                <div class="kpi-resource-rate text-success">+<?= number_format($planet['prod_rates']['metal']) ?>/h</div>
+                            </div>
+                            <span class="kpi-resource-icon bg-success-lt text-success"><i class="fa-solid fa-tree"></i></span>
                         </div>
                     </div>
 
-                    <!-- 2. 🌲 Forêt : Bois / Bûcheronnage -->
-                    <div class="terroir-zone-badge"
-                         style="top: 38.0%; left: 21.0%;"
-                         data-bs-toggle="tooltip"
-                         data-bs-html="true"
-                         data-bs-placement="top"
-                         title="<strong>🌲 Forêt &amp; Bûcherons</strong><br>Exploitation des Nobles Cèdres (Charpentes &amp; Armes)<br><span class='text-success fw-bold'>Cadence : <?= $mapZones['wood']['rate_label'] ?></span><br><small class='text-warning'>Cliquer pour ouvrir les 5 slots &rarr;</small>"
-                         onclick="window.location.href='?page=view_resource&type=wood'">
-                        <div class="zone-badge-beacon" style="border-color:#22c55e;"></div>
-                        <div class="zone-badge-pill" style="border-color:#22c55e;">
-                            <span class="zone-badge-icon" style="background:#16a34a;">
-                                <i class="fa-solid fa-tree"></i>
-                            </span>
-                            <span>Forêt</span>
-                            <span class="zone-badge-rate text-success"><?= $mapZones['wood']['rate_label'] ?></span>
+                    <!-- Pierre de Taille -->
+                    <div class="col-6 col-sm-4 col-md-2">
+                        <div class="kpi-resource-card border-start border-3 border-secondary">
+                            <div>
+                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Pierre de Taille</div>
+                                <div class="kpi-resource-val text-secondary"><?= number_format($planet['crystal']) ?></div>
+                                <div class="kpi-resource-rate text-secondary">+<?= number_format($planet['prod_rates']['crystal']) ?>/h</div>
+                            </div>
+                            <span class="kpi-resource-icon bg-secondary-lt text-secondary"><i class="fa-solid fa-mountain"></i></span>
                         </div>
                     </div>
 
-                    <!-- 3. 🏺 Argile : Gisement alluvial et poterie -->
-                    <div class="terroir-zone-badge"
-                         style="top: 51.0%; left: 81.0%;"
-                         data-bs-toggle="tooltip"
-                         data-bs-html="true"
-                         data-bs-placement="top"
-                         title="<strong>🏺 Gisement d'Argile &amp; Fours</strong><br>Extraction alluviale &amp; Cuisson de Tuiles Kawara<br><span class='text-warning fw-bold'><?= $mapZones['clay']['rate_label'] ?></span><br><small class='text-warning'>Cliquer pour ouvrir les 5 slots &rarr;</small>"
-                         onclick="window.location.href='?page=view_resource&type=clay'">
-                        <div class="zone-badge-beacon" style="border-color:#f59e0b;"></div>
-                        <div class="zone-badge-pill" style="border-color:#f59e0b;">
-                            <span class="zone-badge-icon" style="background:#d97706;">
-                                <i class="fa-solid fa-jar"></i>
-                            </span>
-                            <span>Argile</span>
-                            <span class="zone-badge-rate text-warning"><?= $mapZones['clay']['rate_label'] ?></span>
+                    <!-- Argile & Céramique -->
+                    <div class="col-6 col-sm-4 col-md-2">
+                        <div class="kpi-resource-card border-start border-3 border-warning">
+                            <div>
+                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Argile &amp; Céramique</div>
+                                <div class="kpi-resource-val text-warning"><?= number_format($clayProdHourly * 4) ?></div>
+                                <div class="kpi-resource-rate text-warning">+<?= number_format($clayProdHourly) ?>/h</div>
+                            </div>
+                            <span class="kpi-resource-icon bg-warning-lt text-warning"><i class="fa-solid fa-jar"></i></span>
                         </div>
                     </div>
 
-                    <!-- 4. 🌾 Rizières : Culture du riz (nourriture vitale) -->
-                    <div class="terroir-zone-badge"
-                         style="top: 62.0%; left: 52.0%;"
-                         data-bs-toggle="tooltip"
-                         data-bs-html="true"
-                         data-bs-placement="top"
-                         title="<strong>🌾 Terrasses Rizicoles Inondées</strong><br>Culture du Riz Impérial (Koku de subsistance)<br><span class='text-warning fw-bold'>Cadence : <?= $mapZones['rice']['rate_label'] ?></span><br><small class='text-warning'>Cliquer pour ouvrir les 5 slots &rarr;</small>"
-                         onclick="window.location.href='?page=view_resource&type=rice'">
-                        <div class="zone-badge-beacon" style="border-color:#eab308;"></div>
-                        <div class="zone-badge-pill" style="border-color:#eab308;">
-                            <span class="zone-badge-icon" style="background:#ca8a04;">
-                                <i class="fa-solid fa-wheat-awn"></i>
-                            </span>
-                            <span>Rizières</span>
-                            <span class="zone-badge-rate text-warning"><?= $mapZones['rice']['rate_label'] ?></span>
+                    <!-- Riz Impérial (Koku) -->
+                    <div class="col-6 col-sm-4 col-md-2">
+                        <div class="kpi-resource-card border-start border-3 border-warning">
+                            <div>
+                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Riz Impérial (Koku)</div>
+                                <div class="kpi-resource-val text-warning"><?= number_format($planet['deuterium']) ?></div>
+                                <div class="kpi-resource-rate text-warning">+<?= number_format($planet['prod_rates']['deuterium']) ?>/h</div>
+                            </div>
+                            <span class="kpi-resource-icon bg-warning-lt text-warning"><i class="fa-solid fa-wheat-awn"></i></span>
                         </div>
                     </div>
 
-                    <!-- 5. 🍵 Thé : Champs de thé -->
-                    <div class="terroir-zone-badge"
-                         style="top: 54.0%; left: 20.0%;"
-                         data-bs-toggle="tooltip"
-                         data-bs-html="true"
-                         data-bs-placement="top"
-                         title="<strong>🍵 Champs de Thé &amp; Séchage</strong><br>Coteaux étagés de thé vert &amp; Matcha d'harmonie<br><span class='text-teal fw-bold'><?= $mapZones['tea']['rate_label'] ?></span><br><small class='text-warning'>Cliquer pour ouvrir les 5 slots &rarr;</small>"
-                         onclick="window.location.href='?page=view_resource&type=tea'">
-                        <div class="zone-badge-beacon" style="border-color:#14b8a6;"></div>
-                        <div class="zone-badge-pill" style="border-color:#14b8a6;">
-                            <span class="zone-badge-icon" style="background:#0d9488;">
-                                <i class="fa-solid fa-leaf"></i>
-                            </span>
-                            <span>Thé</span>
-                            <span class="zone-badge-rate text-teal"><?= $mapZones['tea']['rate_label'] ?></span>
+                    <!-- Feuilles de Thé -->
+                    <div class="col-6 col-sm-4 col-md-2">
+                        <div class="kpi-resource-card border-start border-3 border-teal">
+                            <div>
+                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Feuilles de Thé</div>
+                                <div class="kpi-resource-val text-teal"><?= number_format($teaProdHourly * 3) ?></div>
+                                <div class="kpi-resource-rate text-teal">+<?= number_format($teaProdHourly) ?>/h</div>
+                            </div>
+                            <span class="kpi-resource-icon bg-teal-lt text-teal"><i class="fa-solid fa-leaf"></i></span>
                         </div>
                     </div>
 
-                    <!-- 6. 🫘 Soja : Champs de soja (farine, tofu) -->
-                    <div class="terroir-zone-badge"
-                         style="top: 72.0%; left: 19.0%;"
-                         data-bs-toggle="tooltip"
-                         data-bs-html="true"
-                         data-bs-placement="top"
-                         title="<strong>🫘 Champs de Soja &amp; Tofu</strong><br>Cultures légumineuses, farine végétale &amp; Miso<br><span class='text-warning fw-bold'><?= $mapZones['soybean']['rate_label'] ?></span><br><small class='text-warning'>Cliquer pour ouvrir les 5 slots &rarr;</small>"
-                         onclick="window.location.href='?page=view_resource&type=soybean'">
-                        <div class="zone-badge-beacon" style="border-color:#d97706;"></div>
-                        <div class="zone-badge-pill" style="border-color:#d97706;">
-                            <span class="zone-badge-icon" style="background:#b45309;">
-                                <i class="fa-solid fa-seedling"></i>
-                            </span>
-                            <span>Soja</span>
-                            <span class="zone-badge-rate text-warning"><?= $mapZones['soybean']['rate_label'] ?></span>
-                        </div>
-                    </div>
-
-                    <!-- 7. ⛩️ Village central : Logements, Sanctuaires shinto, Moulins -->
-                    <div class="terroir-zone-badge"
-                         style="top: 90.0%; left: 53.0%;"
-                         data-bs-toggle="tooltip"
-                         data-bs-html="true"
-                         data-bs-placement="top"
-                         title="<strong>⛩️ Village Central &amp; Démographie</strong><br>Logements Minka, Sanctuaires &amp; Meuneries<br><span class='text-danger fw-bold'><?= $mapZones['village']['rate_label'] ?></span><br><small class='text-warning'>Cliquer pour ouvrir les 5 constructions &rarr;</small>"
-                         onclick="window.location.href='?page=view_resource&type=village'">
-                        <div class="zone-badge-beacon" style="border-color:#ef4444;"></div>
-                        <div class="zone-badge-pill" style="border-color:#ef4444;">
-                            <span class="zone-badge-icon" style="background:#dc2626;">
-                                <i class="fa-solid fa-people-roof"></i>
-                            </span>
-                            <span>Village</span>
-                            <span class="zone-badge-rate text-danger"><?= $mapZones['village']['rate_label'] ?></span>
-                        </div>
-                    </div>
-
-                    <!-- Repère bonus : Tenshu & Donjon Central -->
-                    <div class="terroir-zone-badge"
-                         style="top: 34.0%; left: 50.0%;"
-                         data-bs-toggle="tooltip"
-                         data-bs-html="true"
-                         data-bs-placement="top"
-                         title="<strong>🏯 Tenshu &amp; Cité Castrale</strong><br>Donjon et forteresse du Daimyō (Niveau <?= $hqLevel ?>)<br><small class='text-danger'>Visiter la Cité &rarr;</small>"
-                         onclick="window.location.href='?page=city'">
-                        <div class="zone-badge-beacon" style="border-color:#dc2626;"></div>
-                        <div class="zone-badge-pill" style="border-color:#dc2626;">
-                            <span class="zone-badge-icon" style="background:#b91c1c;">
-                                <i class="fa-solid fa-chess-rook"></i>
-                            </span>
-                            <span>Tenshu</span>
-                            <span class="zone-badge-rate text-danger">Niv. <?= $hqLevel ?></span>
-                        </div>
-                    </div>
-
-                    <!-- Repère bonus : Sanctuaire Shintō & Cerisiers -->
-                    <div class="terroir-zone-badge"
-                         style="top: 31.0%; left: 88.0%;"
-                         data-bs-toggle="tooltip"
-                         data-bs-html="true"
-                         data-bs-placement="top"
-                         title="<strong>⛩️ Sanctuaire Shinto d'Inari</strong><br>Cerisiers sacrés &amp; Ferveur passive<br><small class='text-danger'>Gérer les Sanctuaires &rarr;</small>"
-                         onclick="window.location.href='?page=view_resource&type=village'">
-                        <div class="zone-badge-pill" style="border-color:#f43f5e; padding: 0.35rem 0.65rem;">
-                            <span class="zone-badge-icon" style="background:#e11d48; width:24px; height:24px;">
-                                <i class="fa-solid fa-torii-gate"></i>
-                            </span>
-                            <span style="font-size:0.75rem;">Sanctuaire</span>
+                    <!-- Champs de Soja -->
+                    <div class="col-6 col-sm-4 col-md-2">
+                        <div class="kpi-resource-card border-start border-3 border-orange">
+                            <div>
+                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Soja &amp; Tofu</div>
+                                <div class="kpi-resource-val text-orange"><?= number_format($soybeanProdHourly * 3) ?></div>
+                                <div class="kpi-resource-rate text-orange">+<?= number_format($soybeanProdHourly) ?>/h</div>
+                            </div>
+                            <span class="kpi-resource-icon bg-orange-lt text-orange"><i class="fa-solid fa-seedling"></i></span>
                         </div>
                     </div>
                 </div>
 
-                <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted); text-align:center;">
-                    <i class="fa-solid fa-circle-info text-warning me-1"></i>
-                    <strong>Exploration du Terroir :</strong> Cliquez sur une zone d'activité (Montagne, Forêt, Argile, Rizières, Thé, Soja, Village) pour gérer ses 5 parcelles de développement.
-                </p>
-            </div>
-
-            <!-- 2. VUE SECONDAIRE : GRILLE DES 18 PARCELLES TRAVIAN (Masquée par défaut) -->
-            <div id="container-travian-grid" style="display:none;">
-                <div class="rts-sector-bar mb-2">
-                    <button class="sector-btn active" id="btn-sec-all" onclick="filterSector('all')"><i class="fa-solid fa-globe me-1"></i> Vue Globale</button>
-                    <button class="sector-btn filter-metal" id="btn-sec-metal_mine" onclick="filterSector('metal_mine')"><i class="fa-solid fa-tree text-success me-1"></i> Bûcherons (<?= $fieldCounts['metal_mine'] ?>)</button>
-                    <button class="sector-btn filter-crystal" id="btn-sec-crystal_mine" onclick="filterSector('crystal_mine')"><i class="fa-solid fa-mountain text-secondary me-1"></i> Carrières (<?= $fieldCounts['crystal_mine'] ?>)</button>
-                    <button class="sector-btn filter-deut" id="btn-sec-deuterium_synth" onclick="filterSector('deuterium_synth')"><i class="fa-solid fa-wheat-awn text-warning me-1"></i> Rizières (<?= $fieldCounts['deuterium_synth'] ?>)</button>
-                    <button class="sector-btn filter-energy" id="btn-sec-solar_plant" onclick="filterSector('solar_plant')"><i class="fa-solid fa-torii-gate text-danger me-1"></i> Sanctuaires (<?= $fieldCounts['solar_plant'] ?>)</button>
-                    <button class="sector-btn filter-hq" id="btn-sec-hq" onclick="filterSector('hq')"><i class="fa-solid fa-chess-rook text-danger me-1"></i> Tenshu Donjon (Centre)</button>
-                </div>
-
-                <div class="fields-viewport rts-surface">
-                    <div class="rts-hotspot sector-hq hotspot-bunker-hq" data-sector="hq" onclick="window.location.href='?page=city'">
-                        <div class="rts-level-bubble rts-tenshu-bubble"><?= $hqLevel ?></div>
-                    </div>
-                    <?php foreach ($fields as $f): ?>
-                        <?php
-                            $slot = (int)$f['field_slot'];
-                            $type = $f['type'];
-                            $lvl = (int)$f['level'];
-                            $info = FIELD_TYPES[$type] ?? FIELD_TYPES['metal_mine'];
-                            $isUpgrading = isset($activeFieldQueue[$slot]);
-                            $isDemolishing = ($isUpgrading && (int)($activeFieldQueue[$slot]['target_level'] ?? -1) === 0);
-                        ?>
-                        <div class="rts-hotspot sector-<?= $type ?> hotspot-slot-<?= $slot ?> <?= $isUpgrading ? 'is-upgrading' : '' ?> <?= $isDemolishing ? 'is-demolishing' : '' ?>"
-                             data-sector="<?= $type ?>"
-                             data-slot="<?= $slot ?>"
-                             onclick="window.location.href='/?page=field&slot=<?= $slot ?>'">
-                            <div class="rts-level-bubble <?= $isDemolishing ? 'demolishing' : ($isUpgrading ? 'upgrading' : ($lvl === 0 ? 'level-zero' : '')) ?>">
-                                <?= $isDemolishing ? '<i class="fa-solid fa-trash-can"></i>' : ($isUpgrading ? '<i class="fa-solid fa-hourglass-half"></i>' : ($lvl === 0 ? '+' : $lvl)) ?>
+                <!-- Rangée 2 : 4 Indicateurs Clés (Sérénité, Population Globale, Main-d'œuvre, Contentement) -->
+                <div class="row row-cards g-2">
+                    
+                    <!-- 1. Jauge de Sérénité (alimentée par les 5 sanctuaires) -->
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-sm shadow-sm h-100 border-start border-3 border-pink">
+                            <div class="card-body p-2">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span class="text-muted text-uppercase fw-bold" style="font-size:0.7rem;">
+                                        <i class="fa-solid fa-torii-gate text-pink me-1"></i>Sérénité Shintō
+                                    </span>
+                                    <span class="badge bg-pink-lt fw-bold" style="font-size:0.7rem;">5 Sanctuaires</span>
+                                </div>
+                                <div class="h2 fw-bold mb-1 text-pink">
+                                    <?= (int)$planet['energy_used'] ?> <small class="fs-4 text-muted">/ <?= (int)$planet['energy_max'] ?> ferveur</small>
+                                </div>
+                                <?php
+                                    $energyPct = ($planet['energy_max'] > 0) ? min(100, round(($planet['energy_used'] / $planet['energy_max']) * 100)) : 100;
+                                    $energyColor = ($planet['energy_used'] <= $planet['energy_max']) ? 'pink' : 'danger';
+                                ?>
+                                <div class="progress progress-sm mb-1">
+                                    <div class="progress-bar bg-<?= $energyColor ?>" style="width: <?= $energyPct ?>%"></div>
+                                </div>
+                                <div class="text-muted" style="font-size:0.7rem;">
+                                    <?php if ($planet['energy_used'] <= $planet['energy_max']): ?>
+                                        <span class="text-success"><i class="fa-solid fa-check me-1"></i>Harmonie spirituelle préservée</span>
+                                    <?php else: ?>
+                                        <span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i>Tension / Ferveur insuffisante</span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
+                    </div>
+
+                    <!-- 2. Compteur de Population Globale (fournie par les 5 habitations) -->
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-sm shadow-sm h-100 border-start border-3 border-primary">
+                            <div class="card-body p-2">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span class="text-muted text-uppercase fw-bold" style="font-size:0.7rem;">
+                                        <i class="fa-solid fa-people-roof text-primary me-1"></i>Population Globale
+                                    </span>
+                                    <span class="badge bg-primary-lt fw-bold" style="font-size:0.7rem;">5 Habitations</span>
+                                </div>
+                                <div class="h2 fw-bold mb-1 text-primary">
+                                    <?= number_format($villageSummary['population']) ?> <small class="fs-4 text-muted">/ <?= number_format($maxPop) ?> hab.</small>
+                                </div>
+                                <?php
+                                    $popPct = ($maxPop > 0) ? min(100, round(($villageSummary['population'] / $maxPop) * 100)) : 100;
+                                ?>
+                                <div class="progress progress-sm mb-1">
+                                    <div class="progress-bar bg-primary" style="width: <?= $popPct ?>%"></div>
+                                </div>
+                                <div class="text-muted" style="font-size:0.7rem;">
+                                    Capacité : <strong>75</strong> (base) + <strong><?= $housingCap['housing_bonus'] ?></strong> (<?= $housingCap['total_levels'] ?> niv. &times; 5 hab.)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Répartition de la Main-d'œuvre (Ouvriers en poste vs Inactifs) -->
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-sm shadow-sm h-100 border-start border-3 border-warning">
+                            <div class="card-body p-2">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span class="text-muted text-uppercase fw-bold" style="font-size:0.7rem;">
+                                        <i class="fa-solid fa-person-digging text-warning me-1"></i>Main-d'Œuvre
+                                    </span>
+                                    <?php if ($workforce['is_understaffed']): ?>
+                                        <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;">Sous-effectif -<?= $workforce['understaffed_malus_pct'] ?>%</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-success-lt fw-bold" style="font-size:0.7rem;">Effectif complet</span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="h2 fw-bold mb-1 text-warning">
+                                    <?= number_format($workforce['assigned_workers']) ?> <small class="fs-4 text-muted">/ <?= number_format($workforce['required_workers']) ?> postes</small>
+                                </div>
+                                <div class="progress progress-sm mb-1">
+                                    <div class="progress-bar bg-warning" style="width: <?= min(100, round($workforce['workforce_ratio'] * 100)) ?>%"></div>
+                                </div>
+                                <div class="text-muted" style="font-size:0.7rem;">
+                                    Villageois disponibles non assignés : <strong><?= number_format($workforce['idle_workers']) ?></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Jauge de Contentement Féodale -->
+                    <div class="col-sm-6 col-lg-3">
+                        <?php
+                            $ctScore = $contentment['score'];
+                            $ctColor = $contentment['badge_color'];
+                        ?>
+                        <div class="card card-sm shadow-sm h-100 border-start border-3 border-<?= $ctColor ?>">
+                            <div class="card-body p-2">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span class="text-muted text-uppercase fw-bold" style="font-size:0.7rem;">
+                                        <i class="fa-solid <?= $contentment['icon'] ?> text-<?= $ctColor ?> me-1"></i>Contentement
+                                    </span>
+                                    <span class="badge bg-<?= $ctColor ?>-lt fw-bold" style="font-size:0.7rem;"><?= $contentment['status_label'] ?></span>
+                                </div>
+                                <div class="h2 fw-bold mb-1 text-<?= $ctColor ?>">
+                                    <?= $ctScore ?>% <small class="fs-4 text-muted">satisfaction</small>
+                                </div>
+                                <div class="progress progress-sm mb-1">
+                                    <div class="progress-bar bg-<?= $ctColor ?>" style="width: <?= $ctScore ?>%"></div>
+                                </div>
+                                <div class="text-muted" style="font-size:0.7rem;">
+                                    Saké : <strong><?= ($contentment['sake_bonus_active']) ? '<span class="text-success">+15% (Bonus actif)</span>' : '<span class="text-muted">Neutre (0%)</span>' ?></strong> &bull; Farine : <?= number_format($planet['rice_flour']) ?> kg
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- 3. Barre de filtrage rapide des 8 Catégories Thématiques -->
+            <div class="card-footer py-2 px-3">
+                <div class="filter-category-bar">
+                    <span class="text-muted fw-bold me-2 align-self-center" style="font-size:0.75rem;">Filtrer :</span>
+                    <button type="button" class="btn-filter-cat btn-dark active" onclick="filterCategory('all', this)">
+                        <i class="fa-solid fa-globe me-1"></i> Tout afficher (40)
+                    </button>
+                    <button type="button" class="btn-filter-cat btn-outline-success" onclick="filterCategory('wood', this)">
+                        <i class="fa-solid fa-tree me-1"></i> Bois (5)
+                    </button>
+                    <button type="button" class="btn-filter-cat btn-outline-secondary" onclick="filterCategory('stone', this)">
+                        <i class="fa-solid fa-mountain me-1"></i> Pierre (5)
+                    </button>
+                    <button type="button" class="btn-filter-cat btn-outline-warning" onclick="filterCategory('clay', this)">
+                        <i class="fa-solid fa-jar me-1"></i> Argile (5)
+                    </button>
+                    <button type="button" class="btn-filter-cat btn-outline-warning" onclick="filterCategory('rice', this)">
+                        <i class="fa-solid fa-wheat-awn me-1"></i> Riz (5)
+                    </button>
+                    <button type="button" class="btn-filter-cat btn-outline-teal" onclick="filterCategory('tea', this)">
+                        <i class="fa-solid fa-leaf me-1"></i> Thé (5)
+                    </button>
+                    <button type="button" class="btn-filter-cat btn-outline-orange" onclick="filterCategory('soybean', this)">
+                        <i class="fa-solid fa-seedling me-1"></i> Soja (5)
+                    </button>
+                    <button type="button" class="btn-filter-cat btn-outline-pink" onclick="filterCategory('shrine', this)">
+                        <i class="fa-solid fa-torii-gate me-1"></i> Sérénité (5)
+                    </button>
+                    <button type="button" class="btn-filter-cat btn-outline-primary" onclick="filterCategory('housing', this)">
+                        <i class="fa-solid fa-house-chimney me-1"></i> Habitations (5)
+                    </button>
                 </div>
             </div>
         </div>
+
+        <!-- 4. GRILLE DES 40 PARCELLES (8 Catégories × 5 Parcelles) -->
+        <div id="terroir-40-container">
+            <?php foreach ($all40Slots as $catKey => $catGroup): ?>
+                <?php
+                    $cMeta = $catGroup['meta'];
+                    $cSlots = $catGroup['slots'];
+                ?>
+                <div class="terroir-category-section" id="cat-section-<?= $catKey ?>" data-cat="<?= $catKey ?>">
+                    
+                    <!-- En-tête de la catégorie -->
+                    <div class="category-section-header">
+                        <div class="category-title-group">
+                            <span class="category-icon-avatar bg-<?= $cMeta['color_class'] ?>-lt text-<?= $cMeta['color_class'] ?>">
+                                <i class="<?= $cMeta['icon'] ?>"></i>
+                            </span>
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h3 class="mb-0 fw-bold fs-3"><?= htmlspecialchars($cMeta['name']) ?></h3>
+                                    <span class="badge bg-<?= $cMeta['color_class'] ?>-lt fw-bold"><?= $cMeta['badge_text'] ?></span>
+                                    <span class="text-muted font-monospace" style="font-size:0.75rem;"><?= $cMeta['jp_name'] ?></span>
+                                </div>
+                                <div class="text-muted" style="font-size:0.78rem;">
+                                    <?= htmlspecialchars($cMeta['desc']) ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="badge bg-dark-lt text-white px-3 py-2 fw-bold" style="font-size:0.8rem;">
+                                5 Parcelles aménageables &bull; Bénéfice : <strong class="text-<?= $cMeta['color_class'] ?>"><?= $cMeta['res_name'] ?></strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Grille des 5 Tuiles / Parcelles -->
+                    <div class="terroir-category-grid">
+                        <?php foreach ($cSlots as $slotIdx => $s): ?>
+                            <?php
+                                $isUp = !empty($s['is_upgrading']);
+                                $canAfford = !empty($s['can_afford']);
+                                $cost = $s['cost'];
+                            ?>
+                            <div class="parcel-tile-card <?= $isUp ? 'is-upgrading' : '' ?>" id="card-parcel-<?= $catKey ?>-<?= $slotIdx ?>">
+                                
+                                <!-- Haut de tuile : Nom et Repère -->
+                                <div class="parcel-card-header">
+                                    <span class="parcel-slot-badge">#<?= $s['global_index'] ?></span>
+                                    <span class="parcel-name-text" title="<?= htmlspecialchars($s['name']) ?>"><?= htmlspecialchars($s['name']) ?></span>
+                                    <span class="badge bg-<?= $cMeta['color_class'] ?>-lt text-<?= $cMeta['color_class'] ?>" style="font-size:0.65rem;">Slot <?= $slotIdx ?></span>
+                                </div>
+
+                                <!-- Vignette Graphique avec Niveau & Ouvriers -->
+                                <div class="parcel-visual-box" style="background-image: linear-gradient(to top, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.2) 60%), url('<?= $cMeta['bg_image'] ?>');">
+                                    <span class="parcel-level-badge <?= $isUp ? 'border-warning text-warning' : '' ?>">
+                                        <?= $isUp ? '<i class="fa-solid fa-hourglass-half fa-spin me-1"></i>Niv. ' . ($s['level'] + 1) : 'Niveau ' . $s['level'] ?>
+                                    </span>
+                                    
+                                    <?php if ($catKey !== 'housing'): ?>
+                                        <span class="parcel-workers-pill">
+                                            <i class="fa-solid fa-person-digging text-warning"></i> <?= $s['workers'] ?> ouv.
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="parcel-workers-pill text-indigo">
+                                            <i class="fa-solid fa-people-roof"></i> Foyer #<?= $slotIdx ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Corps d'informations de la tuile -->
+                                <div class="parcel-card-body">
+                                    
+                                    <!-- Métrique de rendement / apport -->
+                                    <div class="parcel-prod-metric text-<?= $cMeta['color_class'] ?>">
+                                        <span><i class="<?= $cMeta['icon'] ?> me-1"></i>Apport :</span>
+                                        <strong><?= $s['prod_label'] ?></strong>
+                                    </div>
+
+                                    <!-- Coûts d'élévation -->
+                                    <div class="parcel-cost-row">
+                                        <span class="cost-chip <?= ($planet['metal'] >= $cost['metal']) ? 'affordable' : 'missing' ?>" title="Bois de Cèdre">
+                                            <i class="fa-solid fa-tree text-success"></i> <?= number_format($cost['metal']) ?>
+                                        </span>
+                                        <span class="cost-chip <?= ($planet['crystal'] >= $cost['crystal']) ? 'affordable' : 'missing' ?>" title="Pierre de Taille">
+                                            <i class="fa-solid fa-mountain text-secondary"></i> <?= number_format($cost['crystal']) ?>
+                                        </span>
+                                        <span class="cost-chip <?= ($planet['deuterium'] >= $cost['deuterium']) ? 'affordable' : 'missing' ?>" title="Riz Impérial">
+                                            <i class="fa-solid fa-wheat-awn text-warning"></i> <?= number_format($cost['deuterium']) ?>
+                                        </span>
+                                    </div>
+
+                                    <!-- Durée & Bouton d'action -->
+                                    <div class="mt-auto pt-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1 text-muted" style="font-size:0.7rem;">
+                                            <span><i class="fa-regular fa-clock me-1"></i>Durée :</span>
+                                            <span class="font-monospace fw-bold"><?= gmdate('i:s', $s['duration']) ?></span>
+                                        </div>
+
+                                        <?php if ($isUp): ?>
+                                            <button type="button" class="btn btn-sm btn-warning w-100 disabled" style="font-size:0.75rem;">
+                                                <i class="fa-solid fa-hourglass-half fa-spin me-1"></i> En chantier...
+                                            </button>
+                                        <?php elseif ($canAfford): ?>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-<?= $cMeta['color_class'] ?> w-100 btn-upgrade-parcel"
+                                                    onclick="upgradeTerroirSlot('<?= $catKey ?>', <?= $slotIdx ?>, this)">
+                                                <i class="fa-solid fa-arrow-up me-1"></i> Élever Niv. <?= $s['level'] + 1 ?>
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary w-100 disabled" style="font-size:0.75rem;" title="Ressources insuffisantes pour cette élévation">
+                                                <i class="fa-solid fa-lock me-1"></i> Ressources requises
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                </div>
+            <?php endforeach; ?>
+        </div>
+
     </div>
 
-    <!-- Sidebar : Files et Productions -->
+    <!-- COLONNE LATÉRALE : CHANTIERS, DIDACTICIEL, OASIS & TROUPES -->
     <div class="d-flex flex-column gap-3">
         <!-- Didacticiel Féodal & Quêtes du Daimyō -->
         <?php require __DIR__ . '/partials/quest_banner.php'; ?>
 
-        <!-- File de Construction Active -->
+        <!-- File de Construction Active du Domaine -->
         <div class="card shadow-sm">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fa-solid fa-trowel-bricks me-2 text-warning"></i>Chantiers du Domaine</h3>
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0 fs-3">
+                    <i class="fa-solid fa-trowel-bricks me-2 text-warning"></i>Chantiers Actifs
+                </h3>
+                <span class="badge bg-warning-lt fw-bold"><?= count($queue) ?> en cours</span>
             </div>
-            <div class="card-body">
+            <div class="card-body p-2">
                 <?php if (empty($queue)): ?>
-                    <p style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:1rem 0;">Aucun chantier en cours.</p>
+                    <div class="text-muted text-center py-3" style="font-size:0.85rem;">
+                        <i class="fa-solid fa-hammer text-secondary d-block mb-1 fs-2"></i>
+                        Aucun chantier en cours sur le fief.
+                    </div>
                 <?php else: ?>
                     <?php foreach ($queue as $q): ?>
                         <?php
+                            $name = $q['target_id'];
                             if ($q['build_category'] === 'field') {
                                 $tSlot = (int)$q['target_id'];
-                                $tType = $fieldsBySlot[$tSlot]['type'] ?? FIELD_LAYOUT[$tSlot] ?? 'metal_mine';
+                                $tType = FIELD_LAYOUT[$tSlot] ?? 'metal_mine';
                                 $name = (FIELD_TYPES[$tType]['name'] ?? 'Parcelle') . " #{$tSlot}";
                             } else {
                                 $name = BUILDINGS[$q['target_id']]['name'] ?? $q['target_id'];
@@ -482,36 +769,20 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                             $qTotal = max(1, $qEnd - $qStart);
                             $qElapsed = max(0, $qNow - $qStart);
                             $qPct = min(100, max(0, (int)round(($qElapsed / $qTotal) * 100)));
-                            $isDemolish = ((int)$q['target_level'] === 0);
                         ?>
-                        <div class="queue-item" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem; padding: 0.75rem;">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="queue-info">
-                                    <h4 class="mb-0 fw-bold" style="font-size:0.9rem;"><?= htmlspecialchars($name) ?></h4>
-                                    <?php if ($isDemolish): ?>
-                                        <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;"><i class="fa-solid fa-trash-can me-1"></i>Démantèlement</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary-lt" style="font-size:0.7rem;">Niveau <?= $q['target_level'] ?></span>
-                                    <?php endif; ?>
-                                </div>
-                                <button class="btn-cancel" onclick="cancelBuild(<?= $q['id'] ?>)">Annuler</button>
+                        <div class="p-2 mb-2 rounded bg-surface-secondary border" style="font-size:0.85rem;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-truncate"><?= htmlspecialchars($name) ?></strong>
+                                <span class="badge bg-primary-lt">Niveau <?= $q['target_level'] ?></span>
                             </div>
-
-                            <div class="queue-progress-box mt-1">
-                                <div class="progress" style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-<?= $isDemolish ? 'danger' : 'warning' ?> building-progress-bar"
-                                         role="progressbar"
-                                         style="width: <?= $qPct ?>%;"
-                                         aria-valuenow="<?= $qPct ?>"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100"
-                                         data-started="<?= $qStart ?>"
-                                         data-finishes="<?= $qEnd ?>"></div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
-                                    <span class="text-secondary fw-semibold">Avancement : <strong class="text-dark building-progress-pct"><?= $qPct ?>%</strong></span>
-                                    <span class="queue-timer font-monospace fw-bold text-danger building-time-remaining" data-countdown="<?= $qEnd ?>">Calcul...</span>
-                                </div>
+                            <div class="progress progress-sm mb-1">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning building-progress-bar"
+                                     style="width: <?= $qPct ?>%;"
+                                     data-countdown="<?= $qEnd ?>"></div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center" style="font-size:0.75rem;">
+                                <span class="text-muted font-monospace building-time-remaining" data-countdown="<?= $qEnd ?>">Calcul...</span>
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="cancelBuild(<?= $q['id'] ?>)">Annuler</button>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -519,116 +790,139 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
             </div>
         </div>
 
-        <!-- Récapitulatif de la Production -->
+        <!-- Bilan des Récoltes & Oasis Annexées -->
         <div class="card shadow-sm">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fa-solid fa-chart-column me-2 text-primary"></i>Récoltes &amp; Sérénité</h3>
+            <div class="card-header py-2">
+                <h3 class="card-title mb-0 fs-3">
+                    <i class="fa-solid fa-chart-line me-2 text-success"></i>Récoltes &amp; Oasis
+                </h3>
             </div>
-            <div class="card-body" style="font-size:0.9rem;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
-                    <span>
-                        <i class="fa-solid fa-tree text-success me-1"></i> Bois de Cèdre :
-                        <?php if (!empty($oasisBonuses['wood'])): ?>
-                            <small style="color:#4ade80; font-size:0.75rem;">(+<?= $oasisBonuses['wood'] ?>% Oasis)</small>
-                        <?php endif; ?>
-                    </span>
-                    <strong style="color:var(--res-metal);">+<?= number_format($planet['prod_rates']['metal']) ?> / h</strong>
+            <div class="card-body p-3" style="font-size:0.85rem;">
+                <div class="d-flex justify-content-between mb-2">
+                    <span><i class="fa-solid fa-tree text-success me-1"></i> Bois de Cèdre :</span>
+                    <strong class="text-success">+<?= number_format($planet['prod_rates']['metal']) ?> / h</strong>
                 </div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
-                    <span>
-                        <i class="fa-solid fa-mountain text-secondary me-1"></i> Pierre de Taille :
-                        <?php if (!empty($oasisBonuses['stone'])): ?>
-                            <small style="color:#60a5fa; font-size:0.75rem;">(+<?= $oasisBonuses['stone'] ?>% Oasis)</small>
-                        <?php endif; ?>
-                    </span>
-                    <strong style="color:var(--res-crystal);">+<?= number_format($planet['prod_rates']['crystal']) ?> / h</strong>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><i class="fa-solid fa-mountain text-secondary me-1"></i> Pierre de Taille :</span>
+                    <strong class="text-secondary">+<?= number_format($planet['prod_rates']['crystal']) ?> / h</strong>
                 </div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem;">
-                    <span>
-                        <i class="fa-solid fa-wheat-awn text-warning me-1"></i> Riz Impérial :
-                        <?php if (!empty($oasisBonuses['rice'])): ?>
-                            <small style="color:#fde047; font-size:0.75rem;">(+<?= $oasisBonuses['rice'] ?>% Oasis)</small>
-                        <?php endif; ?>
-                    </span>
-                    <strong style="color:var(--res-deut);">+<?= number_format($planet['prod_rates']['deuterium']) ?> / h</strong>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i> Riz Impérial :</span>
+                    <strong class="text-warning">+<?= number_format($planet['prod_rates']['deuterium']) ?> / h</strong>
                 </div>
-                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:0.75rem 0;">
-                <div style="display:flex; justify-content:space-between;">
-                    <span><i class="fa-solid fa-torii-gate text-danger me-1"></i> Ferveur &amp; Sérénité :</span>
-                    <strong><?= $planet['energy_used'] ?> / <?= $planet['energy_max'] ?></strong>
-                </div>
-                <?php if ($planet['prod_rates']['energy_ratio'] < 1.0): ?>
-                    <p style="color:#ef4444; font-size:0.75rem; margin-top:0.4rem; font-weight:700;">
-                        <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i> Sérénité insuffisante : Les récoltes du domaine ne fonctionnent qu'à 10%.
-                    </p>
-                <?php endif; ?>
-                <?php if (!empty($planet['prod_rates']['workforce']) && !empty($planet['prod_rates']['workforce']['is_understaffed'])): ?>
-                    <p style="color:#f59e0b; font-size:0.75rem; margin-top:0.4rem; font-weight:700;">
-                        <i class="fa-solid fa-people-carry-box text-warning me-1"></i> Sous-effectif : Manque d'ouvriers (-<?= $planet['prod_rates']['workforce']['understaffed_malus_pct'] ?>% sur le rendement).
-                    </p>
-                <?php endif; ?>
 
                 <?php if (!empty($annexedOases)): ?>
-                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:0.75rem 0;">
-                    <div style="font-size:0.8rem; color:#86efac; font-weight:700; margin-bottom:0.4rem; display:flex; justify-content:space-between; align-items:center;">
-                        <span><i class="fa-solid fa-seedling text-success me-1"></i> Oasis Annexées (<?= count($annexedOases) ?> / 3)</span>
-                        <a href="?page=map" style="color:var(--accent-color); text-decoration:none; font-size:0.75rem;">Carte Provinciale &rarr;</a>
+                    <hr class="my-2">
+                    <div class="fw-bold text-success mb-2" style="font-size:0.78rem;">
+                        <i class="fa-solid fa-seedling me-1"></i> Oasis Annexées (<?= count($annexedOases) ?> / 3) :
                     </div>
-                    <?php foreach ($annexedOases as $ao):
-                        $bLabel = '';
-                        if ($ao['bonus_rice'] > 0) $bLabel .= "+{$ao['bonus_rice']}% <i class=\"fa-solid fa-wheat-awn text-warning\"></i> ";
-                        if ($ao['bonus_wood'] > 0) $bLabel .= "+{$ao['bonus_wood']}% <i class=\"fa-solid fa-tree text-success\"></i> ";
-                        if ($ao['bonus_stone'] > 0) $bLabel .= "+{$ao['bonus_stone']}% <i class=\"fa-solid fa-mountain text-secondary\"></i> ";
-                    ?>
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border:1px solid rgba(34,197,94,0.2); padding:0.4rem 0.6rem; border-radius:6px; margin-bottom:0.4rem; font-size:0.8rem;">
-                            <span><i class="fa-solid fa-seedling text-success me-1"></i> <?= htmlspecialchars($ao['name']) ?> [<?= $ao['coord_x'] ?> : <?= $ao['coord_y'] ?>]</span>
-                            <strong style="color:#fde047;"><?= trim($bLabel) ?></strong>
+                    <?php foreach ($annexedOases as $ao): ?>
+                        <div class="d-flex justify-content-between align-items-center p-1 rounded bg-surface-secondary mb-1" style="font-size:0.75rem;">
+                            <span><?= htmlspecialchars($ao['name']) ?> [<?= $ao['coord_x'] ?>:<?= $ao['coord_y'] ?>]</span>
+                            <span class="badge bg-success-lt">+<?= $ao['bonus_rice'] ?? 25 ?>%</span>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
         </div>
 
-        <!-- Panel des Soldats (Style Travian) -->
+        <!-- Panel des Troupes & Garnisons (Style Travian) -->
         <?php require __DIR__ . '/partials/troops_panel.php'; ?>
     </div>
 </div>
 
 <script>
-let currentTerroirView = 'interactive';
+// Filtrage dynamique des 8 Catégories Thématiques de Parcelles
+function filterCategory(catKey, btn) {
+    document.querySelectorAll('.btn-filter-cat').forEach(b => {
+        b.classList.remove('active', 'btn-dark');
+        if (!b.classList.contains('btn-outline-success') && 
+            !b.classList.contains('btn-outline-secondary') && 
+            !b.classList.contains('btn-outline-warning') && 
+            !b.classList.contains('btn-outline-teal') && 
+            !b.classList.contains('btn-outline-orange') && 
+            !b.classList.contains('btn-outline-pink') && 
+            !b.classList.contains('btn-outline-primary')) {
+            b.classList.add('btn-outline-dark');
+        }
+    });
 
-function toggleTerroirView() {
-    const mapContainer = document.getElementById('container-interactive-map');
-    const travianContainer = document.getElementById('container-travian-grid');
-    const label = document.getElementById('label-toggle-view');
+    if (btn) {
+        btn.classList.add('active');
+    }
 
-    if (currentTerroirView === 'interactive') {
-        mapContainer.style.display = 'none';
-        travianContainer.style.display = 'block';
-        label.textContent = 'Carte Interactive';
-        currentTerroirView = 'travian';
-    } else {
-        travianContainer.style.display = 'none';
-        mapContainer.style.display = 'block';
-        label.textContent = 'Vue 18 Parcelles';
-        currentTerroirView = 'interactive';
+    const sections = document.querySelectorAll('.terroir-category-section');
+    sections.forEach(sec => {
+        if (catKey === 'all' || sec.dataset.cat === catKey) {
+            sec.style.display = 'block';
+            sec.style.opacity = '1';
+        } else {
+            sec.style.display = 'none';
+        }
+    });
+}
+
+// Action asynchrone AJAX pour élever une parcelle du domaine
+async function upgradeTerroirSlot(resourceType, slotIdx, btn) {
+    try {
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Chantiers...';
+        }
+
+        const formData = new FormData();
+        formData.append('action', 'upgrade');
+        formData.append('resource_type', resourceType);
+        formData.append('slot_index', slotIdx);
+
+        const res = await fetch('/api/terroir.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.error || 'Impossible de lancer l\'amélioration de la parcelle.');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up me-1"></i> Réessayer';
+            }
+        }
+    } catch (err) {
+        alert('Erreur réseau lors de l\'amélioration de la parcelle.');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-arrow-up me-1"></i> Réessayer';
+        }
     }
 }
 
-function filterSector(sector) {
-    document.querySelectorAll('.sector-btn').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(`btn-sec-${sector}`);
-    if (activeBtn) activeBtn.classList.add('active');
+// Annulation d'un chantier en cours
+async function cancelBuild(queueId) {
+    if (!confirm('Voulez-vous vraiment annuler ce chantier ? (80% des ressources seront remboursées)')) {
+        return;
+    }
 
-    const hotspots = document.querySelectorAll('.rts-hotspot');
-    hotspots.forEach(hs => {
-        if (sector === 'all' || hs.dataset.sector === sector) {
-            hs.style.opacity = '1';
-            hs.classList.toggle('highlighted', sector !== 'all');
+    try {
+        const formData = new FormData();
+        formData.append('action', 'cancel');
+        formData.append('queue_id', queueId);
+
+        const res = await fetch('/api/build.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            window.location.reload();
         } else {
-            hs.style.opacity = '0.25';
-            hs.classList.remove('highlighted');
+            alert(data.error || 'Impossible d\'annuler ce chantier.');
         }
-    });
+    } catch (err) {
+        alert('Erreur réseau lors de l\'annulation.');
+    }
 }
 </script>
