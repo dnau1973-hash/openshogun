@@ -98,8 +98,22 @@ try {
                 throw new Exception("Échec de l'enregistrement de l'avatar sur le serveur.");
             }
 
-            $webUrl = '/assets/uploads/avatars/' . $uniqueName;
+            $webUrl = '/public/assets/uploads/avatars/' . $uniqueName;
             $success = $honorEngine->updateAvatar($currentUserId, $webUrl);
+
+            // Mettre à jour immédiatement la variable de session pour éviter toute perte au rechargement
+            Auth::initSession();
+            if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
+                $_SESSION['user'] = [];
+            }
+            $_SESSION['user']['avatar'] = $webUrl;
+            $_SESSION['avatar'] = $webUrl;
+
+            // Commit explicite de transaction si existante
+            $db = Database::getConnection();
+            if ($db->inTransaction()) {
+                $db->commit();
+            }
 
             echo json_encode([
                 'success' => $success,

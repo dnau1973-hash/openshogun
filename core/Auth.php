@@ -255,7 +255,7 @@ class Auth {
     public static function getCurrentUser(): ?array {
         if (!self::check()) return null;
         $db = Database::getConnection();
-        $stmt = $db->prepare("SELECT id, username, email, faction, alliance_id, points, is_admin, is_moderator, is_bot, created_at, protection_until FROM users WHERE id = ?");
+        $stmt = $db->prepare("SELECT id, username, email, faction, alliance_id, points, avatar, bio, is_admin, is_moderator, is_bot, created_at, protection_until FROM users WHERE id = ?");
         $stmt->execute([self::id()]);
         return $stmt->fetch() ?: null;
     }

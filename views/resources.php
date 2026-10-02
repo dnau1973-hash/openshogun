@@ -352,6 +352,11 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
                         <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i> Sérénité insuffisante : Les récoltes du domaine ne fonctionnent qu'à 10%.
                     </p>
                 <?php endif; ?>
+                <?php if (!empty($planet['prod_rates']['workforce']) && !empty($planet['prod_rates']['workforce']['is_understaffed'])): ?>
+                    <p style="color:#f59e0b; font-size:0.75rem; margin-top:0.4rem; font-weight:700;">
+                        <i class="fa-solid fa-people-carry-box text-warning me-1"></i> Sous-effectif : Manque d'ouvriers (-<?= $planet['prod_rates']['workforce']['understaffed_malus_pct'] ?>% sur le rendement des récoltes).
+                    </p>
+                <?php endif; ?>
 
                 <?php if (!empty($annexedOases)): ?>
                     <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:0.75rem 0;">

@@ -502,7 +502,17 @@ $navItems = [
         </div>
 
         <?php if ($planet): ?>
-        <!-- ── 6 CARRÉS DE RESSOURCES CENTRÉS (Ultra-compacts, largeur frame centrale container-xl) ── -->
+        <style>
+        @keyframes pulseExodus {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.02); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .blinking-exodus {
+            animation: pulseExodus 1.2s infinite ease-in-out;
+        }
+        </style>
+        <!-- ── 8 CARRÉS DE RESSOURCES & DÉMOGRAPHIE (Ultra-compacts) ── -->
         <div class="container-fluid d-print-none mt-2 mb-2 px-3 px-lg-4">
             <div class="row g-2 justify-content-center">
                 <?php
@@ -525,6 +535,53 @@ $navItems = [
                 $eBalance = $planet['energy_max'] - $planet['energy_used'];
                 $eOk = ($eBalance >= 0);
                 $pctEnergy = ($planet['energy_max'] > 0) ? min(100, ($planet['energy_used'] / $planet['energy_max']) * 100) : 0;
+
+                // 8. Démographie & Satisfaction Féodale
+                $workforce = $planet['workforce'] ?? null;
+                $contentmentDetails = $planet['contentment_details'] ?? null;
+                if (!$workforce || !$contentmentDetails) {
+                    require_once __DIR__ . '/../../core/PopulationEngine.php';
+                    $planetEngineHeader = new PlanetEngine();
+                    $bH = $planetEngineHeader->getBuildings((int)$planet['id']);
+                    $fH = $planetEngineHeader->getFields((int)$planet['id']);
+                    $maxPopH = $planetEngineHeader->calculateMaxPopulation($bH, $fH);
+                    $feastH = $planetEngineHeader->getActiveFeast((int)$planet['id']);
+                    $workforce = PopulationEngine::calculateWorkforceSummary($planet, $bH, $fH, $maxPopH);
+                    $contentmentDetails = PopulationEngine::calculateContentment($planet, $feastH);
+                }
+
+                $curPop = (int)($workforce['total_population'] ?? 100);
+                $maxPop = (int)($workforce['max_population'] ?? 100);
+                $reqWorkers = (int)($workforce['required_workers'] ?? 0);
+                $assignedWorkers = (int)($workforce['assigned_workers'] ?? $curPop);
+                $idleWorkers = (int)($workforce['idle_workers'] ?? 0);
+                $isUnderstaffed = !empty($workforce['is_understaffed']);
+                $malusPct = (float)($workforce['understaffed_malus_pct'] ?? 0);
+
+                $contentmentScore = (int)($contentmentDetails['score'] ?? 85);
+                $badgeColor = $contentmentDetails['badge_color'] ?? 'success';
+                $statusLabel = $contentmentDetails['status_label'] ?? 'Paisible & Satisfait';
+                $sakeBonusActive = !empty($contentmentDetails['sake_bonus_active']);
+                $isExodus = !empty($contentmentDetails['is_exodus']);
+
+                $popoverTitle = "Démographie & Satisfaction (" . $contentmentScore . "%)";
+                $popoverHtml = "<div style='min-width:230px; font-size:0.8rem;'>"
+                    . "<div class='mb-1'><strong>Population :</strong> " . number_format($curPop) . " / " . number_format($maxPop) . " logements</div>"
+                    . "<div class='mb-1'><strong>Ouvriers requis :</strong> " . number_format($reqWorkers) . " &bull; <strong>Assignés :</strong> " . number_format($assignedWorkers) . "</div>"
+                    . "<div class='mb-1'><strong>Ouvriers disponibles :</strong> " . number_format($idleWorkers) . " libres</div>"
+                    . "<div class='mb-1'><strong>Statut moral :</strong> <span class='badge bg-" . $badgeColor . "-lt text-" . $badgeColor . " fw-bold'>" . htmlspecialchars($statusLabel) . "</span></div>"
+                    . "<hr class='my-1'>"
+                    . "<div class='mb-1'>🍚 <strong>Besoins Vitaux :</strong> " . ($contentmentDetails['has_food'] ? "<span class='text-success'>Assurés (+15%)</span>" : "<span class='text-danger fw-bold'>Disette (-55%)</span>") . "</div>"
+                    . "<div class='mb-1'>⛩️ <strong>Sérénité Shinto :</strong> " . ($contentmentDetails['has_energy'] ? "<span class='text-success'>Harmonieux (0)</span>" : "<span class='text-danger fw-bold'>Déficit (-20%)</span>") . "</div>"
+                    . "<div class='mb-1'>🍶 <strong>Luxe Saké :</strong> " . ($sakeBonusActive ? "<span class='text-purple fw-bold'>Bonus Actif (+15%)</span>" : "<span class='text-muted'>Neutre (0 malus)</span>") . "</div>"
+                    . "<hr class='my-1'>"
+                    . ($isUnderstaffed 
+                        ? "<div class='text-warning fw-bold mb-1'><i class='fa-solid fa-triangle-exclamation'></i> Sous-effectif : -" . $malusPct . "% sur la production</div>"
+                        : "<div class='text-success small mb-1'><i class='fa-solid fa-check'></i> Tous les chantiers sont pourvus (100%)</div>")
+                    . ($isExodus 
+                        ? "<div class='text-danger fw-bold mt-1'><i class='fa-solid fa-skull'></i> Exode de villageois en cours (&lt; 25%) !</div>"
+                        : "")
+                    . "</div>";
                 ?>
 
                 <!-- 1. Bois de Cèdre -->
@@ -710,6 +767,49 @@ $navItems = [
                             </div>
                             <div class="progress progress-xs mt-1">
                                 <div class="progress-bar <?= $eOk ? 'bg-teal' : 'bg-danger' ?>" style="width:<?= $pctEnergy ?>%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Population & Contentement Féodal -->
+                <div class="col-6 col-sm-4 col-md-3 col-xl">
+                    <div class="card card-sm shadow-sm border-start border-1 border-<?= $badgeColor ?> <?= $isExodus ? 'blinking-exodus border-danger bg-danger-lt' : '' ?>"
+                         data-bs-toggle="popover"
+                         data-bs-trigger="hover focus"
+                         data-bs-html="true"
+                         data-bs-placement="bottom"
+                         title="<?= htmlspecialchars($popoverTitle) ?>"
+                         data-bs-content="<?= htmlspecialchars($popoverHtml) ?>">
+                        <div class="card-body p-2" style="cursor:help;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-1 text-truncate">
+                                    <i class="fa-solid fa-users text-<?= $badgeColor ?>" style="font-size:0.95rem;"></i>
+                                    <strong class="text-<?= $badgeColor ?>" style="font-size:0.80rem;">Peuple</strong>
+                                    <?php if ($sakeBonusActive): ?>
+                                        <i class="fa-solid fa-wine-bottle text-purple" style="font-size:0.75rem;" title="Bonus Saké +15% actif"></i>
+                                    <?php endif; ?>
+                                    <?php if ($isExodus): ?>
+                                        <i class="fa-solid fa-triangle-exclamation text-danger" style="font-size:0.75rem;" title="Exode Imminent !"></i>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="text-end" style="font-variant-numeric:tabular-nums; white-space:nowrap;">
+                                    <span class="fw-bold <?= $isExodus ? 'text-danger' : '' ?>" style="font-size:0.82rem;">
+                                        <?= number_format($curPop) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.62rem;">/ <?= number_format($maxPop) ?></span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-1" style="font-size:0.65rem;">
+                                <span class="text-muted text-truncate" style="max-width:68px;">
+                                    <?= $idleWorkers > 0 ? "+{$idleWorkers} libres" : ($isUnderstaffed ? "-{$malusPct}%" : "100%") ?>
+                                </span>
+                                <span class="fw-bold text-<?= $badgeColor ?>">
+                                    <?= $contentmentScore ?>% <i class="fa-solid <?= $contentmentDetails['icon'] ?? 'fa-face-smile' ?> ms-0"></i>
+                                </span>
+                            </div>
+                            <div class="progress progress-xs mt-1">
+                                <div class="progress-bar bg-<?= $badgeColor ?> <?= $isExodus ? 'progress-bar-striped progress-bar-animated' : '' ?>" style="width:<?= $contentmentScore ?>%;"></div>
                             </div>
                         </div>
                     </div>

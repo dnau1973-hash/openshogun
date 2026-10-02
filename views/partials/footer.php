@@ -870,12 +870,18 @@ function updateHudResources(planet) {
 <!-- Tabler JS -->
 <script src="/public/js/tabler/tabler.min.js"></script>
 <script>
-// Initialisation universelle des infobulles Tabler / Bootstrap
+// Initialisation universelle des infobulles & popovers Tabler / Bootstrap
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.forEach(function (tooltipTriggerEl) {
             new bootstrap.Tooltip(tooltipTriggerEl, { boundary: document.body });
+        });
+    }
+    if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        popoverTriggerList.forEach(function (popoverTriggerEl) {
+            new bootstrap.Popover(popoverTriggerEl, { boundary: document.body });
         });
     }
 });

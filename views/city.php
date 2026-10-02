@@ -166,6 +166,9 @@ foreach (BUILDINGS as $code => $bInfo) {
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
                     Forteresse Principale : <strong style="color:var(--border-highlight, #c2252b);">Tenshu Niveau <?= $hqLevel ?></strong>
                     <span style="opacity:0.85;">&bull; <i class="fa-solid fa-users text-primary me-1"></i><strong><?= number_format($pop) ?></strong>/<?= number_format($popMax) ?> Habitants (<span class="text-success">+<?= $popBonus ?>% vitesse chantiers</span>)</span>
+                    <?php if (!empty($planet['workforce']) && !empty($planet['workforce']['is_understaffed'])): ?>
+                        <span class="badge bg-warning-lt text-warning ms-1" title="Main-d'œuvre insuffisante pour tous les postes"><i class="fa-solid fa-triangle-exclamation me-1"></i>Sous-effectif : -<?= $planet['workforce']['understaffed_malus_pct'] ?>%</span>
+                    <?php endif; ?>
                 </div>
             </div>
             <div style="display:flex; gap:0.5rem; align-items:center;">

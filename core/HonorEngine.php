@@ -441,6 +441,10 @@ class HonorEngine {
     public function updateAvatar(int $userId, string $avatarUrl): bool {
         $avatarUrl = trim($avatarUrl);
         $stmt = $this->db->prepare("UPDATE users SET avatar = ? WHERE id = ?");
-        return $stmt->execute([$avatarUrl, $userId]);
+        $res = $stmt->execute([$avatarUrl, $userId]);
+        if ($this->db->inTransaction()) {
+            $this->db->commit();
+        }
+        return $res;
     }
 }

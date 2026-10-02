@@ -619,6 +619,28 @@ if (!$isEmptyPlot) {
                             <div class="text-muted" style="font-size:0.8rem;">Emplacement #<?= $slot ?> &bull; Niveau actuel : <strong><?= $lvl ?></strong></div>
                         </div>
                     </div>
+                    <?php
+                    require_once __DIR__ . '/../core/PopulationEngine.php';
+                    $bWorkersReq = PopulationEngine::getBuildingWorkersRequired($code, $lvl);
+                    $bWorkersNext = PopulationEngine::getBuildingWorkersRequired($code, $targetLevel);
+                    $bWorkforce = $planet['workforce'] ?? null;
+                    $bUnderstaffed = !empty($bWorkforce['is_understaffed']);
+                    $bMalusPct = (float)($bWorkforce['understaffed_malus_pct'] ?? 0);
+                    ?>
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="badge bg-azure-lt d-inline-flex align-items-center gap-1" title="Main-d'œuvre nécessaire au fonctionnement">
+                            <i class="fa-solid fa-users text-azure"></i> <?= $bWorkersReq ?> ouvriers requis <?= ($targetLevel > $lvl) ? "(Niv.{$targetLevel} : {$bWorkersNext})" : '' ?>
+                        </span>
+                        <?php if ($bUnderstaffed): ?>
+                            <span class="badge bg-warning-lt text-warning d-inline-flex align-items-center gap-1" title="Le fief souffre d'un manque d'ouvriers">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Sous-effectif (-<?= $bMalusPct ?>%)
+                            </span>
+                        <?php else: ?>
+                            <span class="badge bg-success-lt text-success d-inline-flex align-items-center gap-1" title="Postes 100% pourvus">
+                                <i class="fa-solid fa-circle-check"></i> Effectif Complet
+                            </span>
+                        <?php endif; ?>
+                    </div>
                     <p class="text-muted mb-3" style="font-size:0.875rem;"><?= htmlspecialchars($bInfo['description']) ?></p>
 
                     <!-- Raccourcis opérationnels directs -->
@@ -751,20 +773,25 @@ if (!$isEmptyPlot) {
                 </div>
                 <div class="card-body py-3">
                     <div class="row align-items-center g-3 mb-2">
-                        <div class="col-sm-4 text-center border-end">
+                        <div class="col-sm-3 text-center border-end">
                             <div class="text-secondary small">Habitants Actuels</div>
                             <div class="fs-3 fw-bold text-primary"><?= number_format($pop) ?></div>
                             <div class="text-muted small">/ <?= number_format($popMax) ?> logements</div>
                         </div>
-                        <div class="col-sm-4 text-center border-end">
+                        <div class="col-sm-3 text-center border-end">
+                            <div class="text-secondary small">Main-d'Œuvre</div>
+                            <div class="fs-3 fw-bold text-dark"><?= number_format($bWorkforce['assigned_workers'] ?? $pop) ?></div>
+                            <div class="text-muted small">/ <?= number_format($bWorkforce['required_workers'] ?? 0) ?> requis (<?= number_format($bWorkforce['idle_workers'] ?? 0) ?> libres)</div>
+                        </div>
+                        <div class="col-sm-3 text-center border-end">
+                            <div class="text-secondary small">Satisfaction</div>
+                            <div class="fs-3 fw-bold text-<?= $planet['contentment_details']['badge_color'] ?? 'success' ?>"><?= (int)($planet['contentment'] ?? 85) ?>%</div>
+                            <div class="text-muted small"><?= htmlspecialchars($planet['contentment_details']['status_label'] ?? 'Paisible') ?></div>
+                        </div>
+                        <div class="col-sm-3 text-center">
                             <div class="text-secondary small"><i class="fa-solid fa-bolt text-warning me-1"></i>Bonus Bâtisseurs</div>
                             <div class="fs-3 fw-bold text-success">+<?= $popBonus ?>%</div>
                             <div class="text-muted small">vitesse de construction</div>
-                        </div>
-                        <div class="col-sm-4 text-center">
-                            <div class="text-secondary small"><i class="fa-solid fa-bowl-rice text-warning me-1"></i>Rations de Farine</div>
-                            <div class="fs-3 fw-bold text-dark"><?= number_format((int)($planet['rice_flour'] ?? 0)) ?></div>
-                            <div class="text-muted small">subsistance assurée</div>
                         </div>
                     </div>
                     <div class="progress progress-sm">

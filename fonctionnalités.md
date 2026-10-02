@@ -469,3 +469,53 @@
   2. Cliquer sur le badge « ? » en haut à droite de l'illustration : vérifier l'ouverture de la modale de transparence IA affichant le prompt anglais complet, la traduction française et les détails de l'image.
   3. Se rendre sur la page Pédagogie / Grimoire des Prompts (`/?page=pedagogy`) : constater la présence du compteur à 83 prompts et du filtre « 📜 Chroniques des Clans ». Cliquer sur ce filtre et vérifier l'affichage des 3 nouvelles cartes avec copie en un clic du prompt et vue grand format.
 
+---
+
+### [2026-10-02] - forum-wysiwyg : Éditeur WYSIWYG Moderne (Quill.js) & Neutralisation Stricte XSS Backend
+- **Module :** `forum`
+- **Statut :** `À tester`
+- **Description :** Modernisation de l'espace d'expression du Forum féodal en remplaçant les `<textarea>` bruts par un éditeur WYSIWYG moderne et fluide basé sur Quill.js (thème Snow) pour la création de sujets, la rédaction de réponses et l'édition de messages existants. Barre d'outils complète intégrée : enrichissements typographiques (gras, italique, souligné, barré), listes à puces et ordonnées, blocs de citation stylisés, liens hypertextes et insertion d'images. Côté backend, sécurisation absolue via une méthode d'assainissement HTML stricte (`ForumEngine::sanitizeHtml()`) : filtrage par liste blanche de balises et attributs autorisés, neutralisation préventive des balises exécutables (`<script>`, `<iframe>`, `<object>`, `<embed>`), stripping des attributs d'écouteurs d'événements JavaScript inline (`onclick`, `onerror`, `onload`, etc.) et validation rigoureuse des protocoles d'URL (`http`, `https`, `mailto`, liens relatifs).
+- **Fichiers modifiés :** `views/forum.php`, `core/ForumEngine.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Accéder au forum (`/?page=forum`) et ouvrir la création d'un nouveau sujet : vérifier la présence de l'éditeur Quill avec barre d'outils complète.
+  2. Rédiger un message formaté avec styles (gras, italique), listes et citation, puis publier : constater le respect des styles typographiques dans l'affichage du sujet.
+  3. Tester la réponse rapide et l'édition de message : vérifier que le contenu existant est correctement pré-chargé dans l'éditeur Quill et sauvegardé fidèlement.
+  4. Tester la sécurité XSS en injectant du code malveillant (ex. `<script>alert(1)</script>`, `<img src=x onerror=alert(1)>`, lien `javascript:void(0)`) : vérifier que le script est systématiquement neutralisé et n'est jamais exécuté par le navigateur.
+
+---
+
+### [2026-10-02] - avatar-persistence : Persistance Immédiate de l'Avatar Féodal & Cache-Busting
+- **Module :** `poster / profile`
+- **Statut :** `À tester`
+- **Description :** Résolution du dysfonctionnement de persistance de l'avatar téléversé sur la page d'affiche féodale (`/?page=poster`). Les causes racines ont été traitées : correction du chemin d'écriture des fichiers (`/public/assets/uploads/avatars/`), sécurisation des commits de transactions PDO dans `core/HonorEngine.php`, synchronisation immédiate des variables de session actives (`$_SESSION['user']['avatar']` et `$_SESSION['avatar']`) dès l'upload sans exiger de déconnexion/reconnexion, sélection explicite du champ avatar dans `core/Auth.php`, et ajout de suffixes de cache-busting dynamiques (`?v=...`) sur toutes les balises `<img>` et requêtes d'actualisation DOM JavaScript.
+- **Fichiers modifiés :** `api/profile.php`, `core/Auth.php`, `core/HonorEngine.php`, `views/poster.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se rendre sur la page « Mon Affiche Féodale » (`/?page=poster`).
+  2. Téléverser un nouvel avatar personnalisé (JPEG ou PNG) : constater la mise à jour immédiate de la photo dans l'interface sans rechargement.
+  3. Recharger complètement la page (F5 ou Ctrl+F5) : vérifier que le nouvel avatar reste affiché et ne revient pas à l'icône par défaut.
+  4. Naviguer vers d'autres pages (classement, forum, header) : vérifier que l'avatar est conservé dans l'ensemble de l'application.
+
+---
+
+### [2026-10-02] - population-contentment : Système de Population, Main-d'Œuvre, Règle Asymétrique du Saké & Mécanique d'Exode
+- **Module :** `economy / population`
+- **Statut :** `À tester`
+- **Description :** Implémentation du système de démographie, répartition du travail et satisfaction des villageois (`core/PopulationEngine.php`) intégré au moteur de calcul planétaire (`core/PlanetEngine.php`) :
+  - **Quotas de main-d'œuvre par bâtiment :** Définition stricte des besoins en ouvriers par niveau pour les 4 parcelles rurales (Bûcherons : 2, Carrières : 2, Rizières : 2, Shinto : 1) et les 16 structures urbaines (Scierie : 3, Briqueterie : 3, Meunerie : 3, Forge : 4, Caserne : 2, Écuries : 3, Académie : 2, Tenshu : 2, Marché : 1, Tour de Guet : 1, Remparts : 1, Grenier : 1, Silo : 1, Pavillon de Thé : 1, Place d'Exercices : 1, Ambassade : 1). En cas de sous-effectif global (population < ouvriers requis), un malus proportionnel est automatiquement appliqué au rendement horaire des récoltes ruraux.
+  - **Besoins vitaux vs Biens de confort (Règle asymétrique du Saké) :** 
+    * *Besoins vitaux :* La nourriture (farine de riz / riz impérial) et la sérénité spirituelle shinto sont indispensables. Une pénurie de nourriture dégrade violemment le moral féodal (-55%), tandis qu'un déficit de sérénité cause un malus de -20%.
+    * *Règle asymétrique du Saké :* La présence de saké dans les cuves octroie un bonus net de contentement (+15%). En cas d'épuisement ou absence de saké, AUCUN MALUS n'est appliqué (impact 0 neutre). Le saké étant un luxe réjouissant, son absence ne rend pas le peuple malheureux si les besoins vitaux sont garantis.
+  - **Jauge de contentement (0-100%) & Exode :** Si le contentement chute en dessous de 25% (famine prolongée, déficit cumulé), une mécanique de crise d'exode se déclenche avec la fuite progressive de 6% des villageois par heure (avec plancher de sécurité à 20 habitants). À l'inverse, si le contentement est supérieur ou égal à 50% avec vivres suffisants, une croissance démographique naturelle s'opère jusqu'à la capacité d'accueil des logements.
+  - **Interface Tabler.io :**
+    * 8e carte dédiée « Peuple & Satisfaction » dans la bannière supérieure des ressources : affichage des habitants / logements, ouvriers requis vs libres, jauge de satisfaction dynamique avec code couleur (vert euphorique, sarcelle paisible, jaune/orange inquiet, rouge clignotant pulsant avec barre striée animée en cas d'exode imminent `< 25%`).
+    * Icône saké violette animée sur la carte lors de l'activation du bonus +15%.
+    * Popover Bootstrap/Tabler interactif au survol détaillant le statut vital, le bonus saké asymétrique, le malus de sous-effectif et les prévisions démographiques.
+    * Badges d'ouvriers requis vs disponibles et alertes de sous-effectif sur les cartes d'exploitation rurale (`views/field.php`), d'édifices urbains (`views/building.php`), de la cité castrale (`views/city.php`) et du terroir (`views/resources.php`).
+- **Fichiers modifiés :** `core/PopulationEngine.php`, `core/PlanetEngine.php`, `views/partials/header.php`, `views/partials/footer.php`, `views/building.php`, `views/field.php`, `views/city.php`, `views/resources.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Consulter le bandeau des ressources en haut de page : vérifier la présence de la 8e carte « Peuple » avec la jauge de satisfaction et le nombre d'habitants.
+  2. Survoler la carte : vérifier l'ouverture du popover complet détaillant les besoins vitaux, le bonus de saké et la main-d'œuvre.
+  3. Vérifier la règle asymétrique du saké : avec du saké en stock, constater le bonus de +15% avec icône saké violette. Vider le saké tout en maintenant la farine : constater que le score revient à 90% sans AUCUN malus pénalisant.
+  4. Vider les réserves de farine et de riz : constater la chute du contentement en dessous de 25%, l'apparition du statut « Exode Imminent ! », le clignotement pulsant rouge du cadre et le début de perte d'habitants par cycle.
+  5. Consulter une fiche de bâtiment (`/?page=building&slot=...`) ou de parcelle (`/?page=field&slot=...`) : vérifier l'affichage du badge d'ouvriers requis et de l'indicateur d'effectif complet ou sous-effectif.
+

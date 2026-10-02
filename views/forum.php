@@ -33,6 +33,43 @@ if ($action === 'new_topic' && $catId) {
 $categories = $forumEngine->getCategories();
 ?>
 
+<!-- Feuille de styles Quill WYSIWYG pour le Forum Féodal -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
+<style>
+.ql-toolbar.ql-snow {
+    border-color: #cbd5e1 !important;
+    background: #f8fafc;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+.ql-container.ql-snow {
+    border-color: #cbd5e1 !important;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+.ql-editor {
+    min-height: 120px;
+    line-height: 1.7;
+}
+.post-content blockquote {
+    border-left: 4px solid #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+    padding: 0.6rem 1rem;
+    margin: 0.75rem 0;
+    border-radius: 0 6px 6px 0;
+    color: #475569;
+}
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 0.5rem 0;
+}
+</style>
+
 <div class="page-header d-print-none mb-3">
     <div class="row align-items-center">
         <div class="col">
@@ -502,7 +539,7 @@ $categories = $forumEngine->getCategories();
                                 </div>
                             </div>
 
-                            <div class="post-content" id="post-content-<?= $post['id'] ?>" style="line-height: 1.7; font-size: 0.95rem; white-space: pre-wrap;"><?= htmlspecialchars($post['content']) ?></div>
+                            <div class="post-content" id="post-content-<?= $post['id'] ?>" style="line-height: 1.7; font-size: 0.95rem;"><?= $post['content'] ?></div>
                         </div>
 
                         <!-- Barre d'action du message -->
@@ -542,7 +579,8 @@ $categories = $forumEngine->getCategories();
             <div class="card-body">
                 <form id="formReply" onsubmit="submitReply(event)">
                     <div class="mb-3">
-                        <textarea id="replyContent" class="form-control" rows="5" placeholder="Formulez vos arguments avec honneur et clarté..." required></textarea>
+                        <div id="replyQuillEditor" style="min-height: 160px; background: #ffffff;"></div>
+                        <input type="hidden" id="replyContent">
                     </div>
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary" id="btnSubmitReply">
@@ -584,7 +622,8 @@ $categories = $forumEngine->getCategories();
                 </div>
                 <div class="mb-3">
                     <label class="form-label required">Message d'Ouverture</label>
-                    <textarea id="topicContent" class="form-control" rows="8" placeholder="Exposez le fond de votre pensée, décrets ou interrogations..." minlength="3" required></textarea>
+                    <div id="topicQuillEditor" style="min-height: 250px; background: #ffffff;"></div>
+                    <input type="hidden" id="topicContent">
                 </div>
                 <div class="d-flex justify-content-between">
                     <a href="/?page=forum&cat=<?= $cat['id'] ?>" class="btn btn-secondary">
@@ -602,7 +641,7 @@ $categories = $forumEngine->getCategories();
 
 <!-- Modale d'Édition de Message -->
 <div class="modal modal-blur fade" id="modalEditPost" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title"><i class="fa-solid fa-pen text-primary me-1"></i>Édition du Message</h5>
@@ -610,7 +649,8 @@ $categories = $forumEngine->getCategories();
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editPostId" value="">
-                <textarea id="editPostContent" class="form-control" rows="6"></textarea>
+                <div id="editPostQuillEditor" style="min-height: 200px; background: #ffffff;"></div>
+                <input type="hidden" id="editPostContent">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -715,8 +755,58 @@ $categories = $forumEngine->getCategories();
 </div>
 <?php endif; ?>
 
+<!-- Script Quill WYSIWYG CDN -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+
 <!-- JavaScript d'interaction AJAX du Forum -->
 <script>
+const quillToolbarOptions = [
+    [{ 'header': [2, 3, 4, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['blockquote', 'code-block'],
+    ['link', 'image'],
+    ['clean']
+];
+
+let topicQuill = null;
+let replyQuill = null;
+let editPostQuill = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const topicContainer = document.getElementById('topicQuillEditor');
+    if (topicContainer) {
+        topicQuill = new Quill('#topicQuillEditor', {
+            theme: 'snow',
+            placeholder: 'Exposez le fond de votre pensée, décrets ou interrogations...',
+            modules: { toolbar: quillToolbarOptions }
+        });
+    }
+
+    const replyContainer = document.getElementById('replyQuillEditor');
+    if (replyContainer) {
+        replyQuill = new Quill('#replyQuillEditor', {
+            theme: 'snow',
+            placeholder: 'Formulez vos arguments avec honneur et clarté...',
+            modules: { toolbar: quillToolbarOptions }
+        });
+    }
+
+    const editContainer = document.getElementById('editPostQuillEditor');
+    if (editContainer) {
+        editPostQuill = new Quill('#editPostQuillEditor', {
+            theme: 'snow',
+            placeholder: 'Modifiez votre message...',
+            modules: { toolbar: quillToolbarOptions }
+        });
+    }
+});
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function showForumAlert(message, type = 'success') {
     const box = document.getElementById('forumAlertBox');
     if (!box) return;
@@ -734,11 +824,15 @@ async function submitNewTopic(e) {
     e.preventDefault();
     const btn = document.getElementById('btnSubmitTopic');
     const title = document.getElementById('topicTitle').value.trim();
-    const content = document.getElementById('topicContent').value.trim();
+    let content = topicQuill ? topicQuill.root.innerHTML : document.getElementById('topicContent').value.trim();
+    const plain = topicQuill ? topicQuill.getText().trim() : content;
 
-    if (!title || !content) return;
+    if (!title || (!plain && !content.includes('<img'))) {
+        showForumAlert("Veuillez renseigner un titre et un message d'ouverture.", 'warning');
+        return;
+    }
     btn.disabled = true;
-    btn.innerText = "Proclamation en cours...";
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Proclamation en cours...';
 
     try {
         const formData = new FormData();
@@ -757,12 +851,12 @@ async function submitNewTopic(e) {
         } else {
             showForumAlert(data.error || "Erreur lors de la création.", 'danger');
             btn.disabled = false;
-            btn.innerText = "<i class="fa-solid fa-bullhorn me-1"></i>Proclamer le Sujet sur le Forum";
+            btn.innerHTML = '<i class="fa-solid fa-bullhorn me-1"></i>Proclamer le Sujet sur le Forum';
         }
     } catch (err) {
-        showForumAlert("Erreur réseau.", 'danger');
+        showForumAlert("Erreur réseau lors de la proclamation.", 'danger');
         btn.disabled = false;
-        btn.innerText = "<i class="fa-solid fa-bullhorn me-1"></i>Proclamer le Sujet sur le Forum";
+        btn.innerHTML = '<i class="fa-solid fa-bullhorn me-1"></i>Proclamer le Sujet sur le Forum';
     }
 }
 
@@ -770,11 +864,15 @@ async function submitNewTopic(e) {
 async function submitReply(e) {
     e.preventDefault();
     const btn = document.getElementById('btnSubmitReply');
-    const content = document.getElementById('replyContent').value.trim();
+    let content = replyQuill ? replyQuill.root.innerHTML : document.getElementById('replyContent').value.trim();
+    const plain = replyQuill ? replyQuill.getText().trim() : content;
 
-    if (!content) return;
+    if (!plain && !content.includes('<img')) {
+        showForumAlert("Veuillez formuler votre réponse avant de publier.", 'warning');
+        return;
+    }
     btn.disabled = true;
-    btn.innerText = "Publication...";
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Scellage en cours...';
 
     try {
         const formData = new FormData();
@@ -792,25 +890,35 @@ async function submitReply(e) {
         } else {
             showForumAlert(data.error || "Erreur de réponse.", 'danger');
             btn.disabled = false;
-            btn.innerText = "<i class="fa-solid fa-scroll me-1"></i>Sceller &amp; Publier la Réponse";
+            btn.innerHTML = '<i class="fa-solid fa-scroll me-1"></i>Sceller &amp; Publier la Réponse';
         }
     } catch (err) {
-        showForumAlert("Erreur réseau.", 'danger');
+        showForumAlert("Erreur réseau lors de la publication.", 'danger');
         btn.disabled = false;
-        btn.innerText = "<i class="fa-solid fa-scroll me-1"></i>Sceller &amp; Publier la Réponse";
+        btn.innerHTML = '<i class="fa-solid fa-scroll me-1"></i>Sceller &amp; Publier la Réponse';
     }
 }
 
 // 3. Citer un message
 function quotePost(username, postId) {
     const contentElem = document.getElementById(`post-content-${postId}`);
-    const replyInput = document.getElementById('replyContent');
-    if (!contentElem || !replyInput) return;
+    if (!contentElem) return;
 
-    const quoteText = contentElem.innerText.trim();
-    replyInput.value += `[citation de ${username}]\n> ${quoteText.replace(/\n/g, '\n> ')}\n[/citation]\n\n`;
-    document.getElementById('replyFormContainer').scrollIntoView({ behavior: 'smooth' });
-    replyInput.focus();
+    const rawHtml = contentElem.innerHTML.trim();
+    if (replyQuill) {
+        const quoteHtml = `<blockquote><p><strong>${escapeHtml(username)} a proclamé :</strong></p>${rawHtml}</blockquote><p><br></p>`;
+        const range = replyQuill.getSelection() || { index: replyQuill.getLength(), length: 0 };
+        replyQuill.clipboard.dangerouslyPasteHTML(range.index, quoteHtml);
+        document.getElementById('replyFormContainer').scrollIntoView({ behavior: 'smooth' });
+        replyQuill.focus();
+    } else {
+        const replyInput = document.getElementById('replyContent');
+        if (replyInput) {
+            replyInput.value += `[citation de ${username}]\n> ${contentElem.innerText.trim().replace(/\n/g, '\n> ')}\n[/citation]\n\n`;
+            document.getElementById('replyFormContainer').scrollIntoView({ behavior: 'smooth' });
+            replyInput.focus();
+        }
+    }
 }
 
 // 4. Édition de message
@@ -819,7 +927,13 @@ function openEditModal(postId) {
     if (!contentElem) return;
 
     document.getElementById('editPostId').value = postId;
-    document.getElementById('editPostContent').value = contentElem.innerText;
+    const currentHtml = contentElem.innerHTML.trim();
+
+    if (editPostQuill) {
+        editPostQuill.root.innerHTML = currentHtml;
+    } else {
+        document.getElementById('editPostContent').value = currentHtml;
+    }
 
     const modal = new bootstrap.Modal(document.getElementById('modalEditPost'));
     modal.show();
@@ -827,7 +941,13 @@ function openEditModal(postId) {
 
 async function submitEditPost() {
     const postId = document.getElementById('editPostId').value;
-    const content = document.getElementById('editPostContent').value.trim();
+    const content = editPostQuill ? editPostQuill.root.innerHTML : document.getElementById('editPostContent').value.trim();
+    const plain = editPostQuill ? editPostQuill.getText().trim() : content;
+
+    if (!plain && !content.includes('<img')) {
+        alert("Le message ne peut pas être vide.");
+        return;
+    }
 
     try {
         const formData = new FormData();
@@ -846,7 +966,7 @@ async function submitEditPost() {
             alert(data.error || "Erreur d'édition.");
         }
     } catch (err) {
-        alert("Erreur réseau.");
+        alert("Erreur réseau lors de la modification.");
     }
 }
 

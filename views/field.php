@@ -293,6 +293,28 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                         <div class="text-muted" style="font-size:0.8rem;">Parcelle #<?= $slot ?> sur 20 · Niveau actuel : <strong><?= $lvl ?></strong></div>
                     </div>
                 </div>
+                <?php
+                require_once __DIR__ . '/../core/PopulationEngine.php';
+                $fWorkersReq = PopulationEngine::getFieldWorkersRequired($type, $lvl);
+                $fWorkersNext = PopulationEngine::getFieldWorkersRequired($type, $targetLevel);
+                $fWorkforce = $planet['workforce'] ?? null;
+                $fUnderstaffed = !empty($fWorkforce['is_understaffed']);
+                $fMalusPct = (float)($fWorkforce['understaffed_malus_pct'] ?? 0);
+                ?>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="badge bg-azure-lt d-inline-flex align-items-center gap-1" title="Ouvriers ruraux nécessaires à l'exploitation">
+                        <i class="fa-solid fa-users text-azure"></i> <?= $fWorkersReq ?> ouvriers requis <?= ($targetLevel > $lvl) ? "(Niv.{$targetLevel} : {$fWorkersNext})" : '' ?>
+                    </span>
+                    <?php if ($fUnderstaffed): ?>
+                        <span class="badge bg-warning-lt text-warning d-inline-flex align-items-center gap-1" title="Sous-effectif : rendement amputé">
+                            <i class="fa-solid fa-triangle-exclamation"></i> -<?= $fMalusPct ?>% rendement
+                        </span>
+                    <?php else: ?>
+                        <span class="badge bg-success-lt text-success d-inline-flex align-items-center gap-1" title="Exploitation 100% pourvue">
+                            <i class="fa-solid fa-circle-check"></i> Plein rendement
+                        </span>
+                    <?php endif; ?>
+                </div>
                 <p class="text-muted mb-3" style="font-size:0.875rem;"><?= htmlspecialchars($info['description']) ?></p>
 
                 <?php if ($lvl > 0 && !$activeJob): ?>

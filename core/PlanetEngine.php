@@ -4,6 +4,7 @@
  */
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/GameConfig.php';
+require_once __DIR__ . '/PopulationEngine.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 class PlanetEngine {
@@ -72,38 +73,33 @@ class PlanetEngine {
 
         // 6. Calcul démographique (capacité d'habitants et croissance)
         $maxPopulation = $this->calculateMaxPopulation($buildings, $fields);
-        $curPop = (int)($planet['population'] ?? 100);
-        $curFlour = (float)($planet['rice_flour'] ?? 0);
+        $activeFeast = $this->getActiveFeast($planetId);
 
         $now = time();
         $lastUpdate = $planet['last_resource_update'] ?: $now;
         $elapsed = max(0, $now - $lastUpdate);
 
+        $famineResult = ['famine' => false, 'casualties' => 0];
+
         if ($elapsed > 0) {
             // Facteur horaire
             $hours = $elapsed / 3600.0;
+
+            // Traitement du cycle de population : vivres, saké (règle asymétrique), contentement & exode
+            PopulationEngine::processTick($planetId, $hours, $planet, $maxPopulation, $activeFeast);
 
             $newMetal = min($metalMax, $planet['metal'] + ($prodRates['metal'] * $hours));
             $newCrystal = min($crystalMax, $planet['crystal'] + ($prodRates['crystal'] * $hours));
             $newDeut = min($deutMax, $planet['deuterium'] + ($prodRates['deuterium'] * $hours));
 
-            // Croissance démographique soutenue par la farine de riz
-            if ($curPop < $maxPopulation && $curFlour > 0) {
-                $growthCap = (int)ceil(25 * $hours);
-                $growth = min($maxPopulation - $curPop, $growthCap);
-                $flourNeeded = max(0, min($curFlour, ceil($growth * 0.05)));
-                $curPop += $growth;
-                $curFlour = max(0, $curFlour - $flourNeeded);
-            }
-
             // Entretien des troupes d'élite & Famine féodale (si activée)
-            $famineResult = $this->processFamine($planetId, $hours, $curFlour);
+            $famineResult = $this->processFamine($planetId, $hours, $planet['rice_flour']);
 
             try {
                 $stmtUpdate = $this->db->prepare("
                     UPDATE planets
                     SET metal = ?, crystal = ?, deuterium = ?,
-                        rice_flour = ?, population = ?,
+                        rice_flour = ?, sake = ?, population = ?, contentment = ?,
                         energy_used = ?, energy_max = ?,
                         metal_max = ?, crystal_max = ?, deuterium_max = ?,
                         sake_max = ?, rice_flour_max = ?,
@@ -114,8 +110,10 @@ class PlanetEngine {
                     $newMetal,
                     $newCrystal,
                     $newDeut,
-                    $curFlour,
-                    $curPop,
+                    $planet['rice_flour'],
+                    $planet['sake'],
+                    $planet['population'],
+                    $planet['contentment'],
                     $prodRates['energy_used'],
                     $prodRates['energy_max'],
                     $metalMax,
@@ -128,10 +126,11 @@ class PlanetEngine {
                 ]);
             } catch (Exception $e) {
                 try {
-                    // Fallback si la colonne population n'existe pas encore
+                    // Fallback sans colonne contentment si ancienne version de table
                     $stmtUpdate = $this->db->prepare("
                         UPDATE planets
                         SET metal = ?, crystal = ?, deuterium = ?,
+                            rice_flour = ?, population = ?,
                             energy_used = ?, energy_max = ?,
                             metal_max = ?, crystal_max = ?, deuterium_max = ?,
                             sake_max = ?, rice_flour_max = ?,
@@ -142,6 +141,8 @@ class PlanetEngine {
                         $newMetal,
                         $newCrystal,
                         $newDeut,
+                        $planet['rice_flour'],
+                        $planet['population'],
                         $prodRates['energy_used'],
                         $prodRates['energy_max'],
                         $metalMax,
@@ -188,15 +189,22 @@ class PlanetEngine {
             $planet['last_resource_update'] = $now;
         }
 
-        // Valeurs garanties pour les ressources raffinées et la démographie
+        // Bilan démographique et jauge de contentement féodale
+        $contentmentDetails = PopulationEngine::calculateContentment($planet, $activeFeast);
+        $workforceSummary = PopulationEngine::calculateWorkforceSummary($planet, $buildings, $fields, $maxPopulation);
+
+        // Valeurs garanties pour les ressources raffinées, démographie et satisfaction
         $planet['sake'] = (float)($planet['sake'] ?? 0);
-        $planet['rice_flour'] = (float)$curFlour;
+        $planet['rice_flour'] = (float)($planet['rice_flour'] ?? 0);
         $planet['sake_max'] = (int)($planet['sake_max'] ?? $sakeMax);
         $planet['rice_flour_max'] = (int)($planet['rice_flour_max'] ?? $flourMax);
         $planet['wooden_beams'] = (float)($planet['wooden_beams'] ?? 0);
         $planet['wooden_beams_max'] = (int)($planet['wooden_beams_max'] ?? $beamsMax);
-        $planet['population'] = (int)$curPop;
+        $planet['population'] = (int)($planet['population'] ?? 100);
         $planet['population_max'] = (int)$maxPopulation;
+        $planet['contentment'] = (int)($planet['contentment'] ?? $contentmentDetails['score']);
+        $planet['contentment_details'] = $contentmentDetails;
+        $planet['workforce'] = $workforceSummary;
         $planet['famine_active'] = !empty($famineResult['famine']) || (!empty($planet['famine_active']));
         $planet['last_famine_losses'] = (int)($famineResult['casualties'] ?? ($planet['last_famine_losses'] ?? 0));
         $planet['famine_enabled'] = (bool)GameConfig::get('famine_enabled', false);
@@ -803,6 +811,9 @@ class PlanetEngine {
         $stonemasonMult = 1.0;
         $grainMillMult = 1.0;
         $teahouseLvl = 0;
+        $workforceRatio = 1.0;
+        $workforceSummary = null;
+
         if ($planetId !== null && $planetId > 0) {
             try {
                 $buildings = $this->getBuildings($planetId);
@@ -815,6 +826,16 @@ class PlanetEngine {
                 if ($stonemasonLvl > 0) $stonemasonMult += ($stonemasonLvl * 0.05);
                 if ($grainMillLvl > 0) $grainMillMult += ($grainMillLvl * 0.05);
                 if ($teahouseLvl > 0) $energyMax = (int)($energyMax * (1.0 + ($teahouseLvl * 0.05)));
+
+                // Calcul du quota de main-d'œuvre et malus en cas de sous-effectif
+                $stmtPop = $this->db->prepare("SELECT population, rice_flour, deuterium, sake, energy_used, energy_max FROM planets WHERE id = ?");
+                $stmtPop->execute([$planetId]);
+                $pRow = $stmtPop->fetch(PDO::FETCH_ASSOC);
+                if ($pRow) {
+                    $maxPop = $this->calculateMaxPopulation($buildings, $fields);
+                    $workforceSummary = PopulationEngine::calculateWorkforceSummary($pRow, $buildings, $fields, $maxPop);
+                    $workforceRatio = $workforceSummary['workforce_ratio'];
+                }
             } catch (Exception $e) {
                 // Fallback silencieux
             }
@@ -874,12 +895,14 @@ class PlanetEngine {
         }
 
         return [
-            'metal' => (int)((($metalBase + ($metalMineProd * $speed)) * $energyRatio * $oasisBonusMult['wood'] * $sawmillMult) * $matsuriBonusMult) + $heroProdBonus['metal'],
-            'crystal' => (int)((($crystalBase + ($crystalMineProd * $speed)) * $energyRatio * $oasisBonusMult['stone'] * $stonemasonMult) * $matsuriBonusMult) + $heroProdBonus['crystal'],
-            'deuterium' => (int)((($deutBase + ($deutSynthProd * $speed)) * $energyRatio * $oasisBonusMult['rice'] * $grainMillMult) * $matsuriBonusMult) + $heroProdBonus['deuterium'],
+            'metal' => (int)((($metalBase + ($metalMineProd * $speed)) * $energyRatio * $workforceRatio * $oasisBonusMult['wood'] * $sawmillMult) * $matsuriBonusMult) + $heroProdBonus['metal'],
+            'crystal' => (int)((($crystalBase + ($crystalMineProd * $speed)) * $energyRatio * $workforceRatio * $oasisBonusMult['stone'] * $stonemasonMult) * $matsuriBonusMult) + $heroProdBonus['crystal'],
+            'deuterium' => (int)((($deutBase + ($deutSynthProd * $speed)) * $energyRatio * $workforceRatio * $oasisBonusMult['rice'] * $grainMillMult) * $matsuriBonusMult) + $heroProdBonus['deuterium'],
             'energy_max' => $energyMax,
             'energy_used' => $energyUsed,
             'energy_ratio' => $energyRatio,
+            'workforce_ratio' => $workforceRatio,
+            'workforce' => $workforceSummary,
             'oasis_bonuses' => $oasisBonuses,
             'hero_bonuses' => $heroProdBonus,
             'matsuri_bonus' => $matsuriBonusPct,
@@ -926,7 +949,8 @@ class PlanetEngine {
                     ADD COLUMN `rice_flour_max` INT UNSIGNED NOT NULL DEFAULT 10000,
                     ADD COLUMN `wooden_beams` DOUBLE NOT NULL DEFAULT 0,
                     ADD COLUMN `wooden_beams_max` INT UNSIGNED NOT NULL DEFAULT 10000,
-                    ADD COLUMN `population` INT UNSIGNED NOT NULL DEFAULT 100
+                    ADD COLUMN `population` INT UNSIGNED NOT NULL DEFAULT 100,
+                    ADD COLUMN `contentment` TINYINT UNSIGNED NOT NULL DEFAULT 85
                 ");
             } else {
                 $stmtFlour = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'rice_flour'");
@@ -940,6 +964,10 @@ class PlanetEngine {
                 $stmtPop = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'population'");
                 if ($stmtPop && $stmtPop->rowCount() === 0) {
                     $this->db->exec("ALTER TABLE `planets` ADD COLUMN `population` INT UNSIGNED NOT NULL DEFAULT 100");
+                }
+                $stmtCont = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'contentment'");
+                if ($stmtCont && $stmtCont->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets` ADD COLUMN `contentment` TINYINT UNSIGNED NOT NULL DEFAULT 85");
                 }
             }
 

@@ -210,11 +210,17 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                 <div class="col-auto text-center mb-3 mb-md-0">
                     <div class="position-relative d-inline-block">
                         <?php 
-                        $avatarPath = !empty($profile['avatar']) ? $profile['avatar'] : '/public/assets/hero_samurai.jpg';
+                        $rawAvatar = !empty($profile['avatar']) ? $profile['avatar'] : (!empty($_SESSION['user']['avatar']) ? $_SESSION['user']['avatar'] : '');
+                        if (empty($rawAvatar)) {
+                            $avatarPath = '/public/assets/hero_samurai.jpg';
+                        } else {
+                            $avatarPath = str_starts_with($rawAvatar, '/assets/') ? '/public' . $rawAvatar : $rawAvatar;
+                        }
+                        $avatarDisplayUrl = $avatarPath . (str_contains($avatarPath, '?') ? '&' : '?') . 'v=' . time();
                         ?>
                         <!-- Médaillon Avatar Circulaire avec bordure dorée/clan -->
                         <div id="daimyo-avatar-container" 
-                             style="width: 120px; height: 120px; border-radius: 50%; background-image: url('<?= htmlspecialchars($avatarPath) ?>'); background-size: cover; background-position: center; border: 3px solid rgba(255, 255, 255, 0.6); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); margin: 0 auto; position: relative;"
+                             style="width: 120px; height: 120px; border-radius: 50%; background-image: url('<?= htmlspecialchars($avatarDisplayUrl) ?>'); background-size: cover; background-position: center; border: 3px solid rgba(255, 255, 255, 0.6); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); margin: 0 auto; position: relative;"
                              title="Avatar officiel de <?= htmlspecialchars($profile['username']) ?>">
                             
                             <!-- Médaillon Mon du Clan incrusté en bas à droite -->
@@ -862,7 +868,8 @@ function handleAvatarUpload(input) {
     .then(data => {
         if (data.success) {
             if (avatarContainer) {
-                avatarContainer.style.backgroundImage = `url('${data.avatar_url}')`;
+                const bustUrl = data.avatar_url + (data.avatar_url.includes('?') ? '&' : '?') + 'v=' + Date.now();
+                avatarContainer.style.backgroundImage = `url('${bustUrl}')`;
             }
             if (statusEl) {
                 statusEl.innerHTML = '<span class="text-warning fw-bold" style="font-size:0.72rem;"><i class="fa-solid fa-check me-1"></i>Avatar établi !</span>';

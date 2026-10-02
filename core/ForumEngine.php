@@ -256,16 +256,63 @@ class ForumEngine {
     }
 
     /**
+     * Assainissement strict du code HTML issu de l'éditeur WYSIWYG
+     * Neutralise les scripts, gestionnaires d'événements et vecteurs XSS
+     */
+    public static function sanitizeHtml(string $html): string {
+        $html = trim($html);
+        if ($html === '') return '';
+
+        // Balises autorisées pour la mise en page riche du forum
+        $allowedTags = '<p><br><strong><b><em><i><u><s><strike><blockquote><pre><code><ul><ol><li><h1><h2><h3><h4><h5><h6><span><a><img><hr>';
+        $clean = strip_tags($html, $allowedTags);
+
+        // 1. Neutraliser les attributs d'événements (on* : onclick, onload, onerror, etc.)
+        $clean = preg_replace('/\s*on[a-zA-Z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $clean);
+
+        // 2. Sécuriser les liens <a> : autoriser uniquement http, https, mailto, ancre (#) ou chemin local (/)
+        $clean = preg_replace_callback('/<a\s+([^>]*?)>/i', function($matches) {
+            $attrs = $matches[1];
+            if (preg_match('/href\s*=\s*("([^"]*)"|\'([^\']*)\'|([^\s>]+))/i', $attrs, $hrefMatch)) {
+                $url = $hrefMatch[2] ?? $hrefMatch[3] ?? $hrefMatch[4] ?? '';
+                $url = trim($url, "\"' \t\n\r");
+                if (preg_match('/^(https?:\/\/|\/|#|mailto:)/i', $url)) {
+                    $safeHref = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+                    return '<a href="' . $safeHref . '" target="_blank" rel="noopener noreferrer">';
+                }
+            }
+            return '<span>';
+        }, $clean);
+
+        // 3. Sécuriser les images <img> : autoriser uniquement https, http, /public/, ou data:image/ valide
+        $clean = preg_replace_callback('/<img\s+([^>]*?)>/i', function($matches) {
+            $attrs = $matches[1];
+            if (preg_match('/src\s*=\s*("([^"]*)"|\'([^\']*)\'|([^\s>]+))/i', $attrs, $srcMatch)) {
+                $url = $srcMatch[2] ?? $srcMatch[3] ?? $srcMatch[4] ?? '';
+                $url = trim($url, "\"' \t\n\r");
+                if (preg_match('/^(https?:\/\/|\/|data:image\/(png|jpeg|jpg|webp|gif);base64,)/i', $url)) {
+                    $safeSrc = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+                    return '<img src="' . $safeSrc . '" class="img-fluid rounded my-2" style="max-height:450px; max-width:100%; object-fit:contain;" alt="Illustration">';
+                }
+            }
+            return '';
+        }, $clean);
+
+        return $clean;
+    }
+
+    /**
      * Création d'un nouveau sujet et de son premier message
      */
     public function createTopic(int $categoryId, int $userId, string $title, string $content): array {
         $title = trim($title);
-        $content = trim($content);
+        $content = self::sanitizeHtml($content);
+        $plainText = trim(strip_tags($content));
 
         if (mb_strlen($title) < 3 || mb_strlen($title) > 150) {
             return ['success' => false, 'error' => 'Le titre du sujet doit comporter entre 3 et 150 caractères.'];
         }
-        if (mb_strlen($content) < 3) {
+        if (mb_strlen($plainText) < 2 && !str_contains($content, '<img')) {
             return ['success' => false, 'error' => 'Le message est trop court pour proclamer un décret ou ouvrir un débat.'];
         }
 
@@ -413,8 +460,9 @@ class ForumEngine {
      * Répondre à un sujet
      */
     public function createPost(int $topicId, int $userId, string $content): array {
-        $content = trim($content);
-        if (mb_strlen($content) < 2) {
+        $content = self::sanitizeHtml($content);
+        $plainText = trim(strip_tags($content));
+        if (mb_strlen($plainText) < 2 && !str_contains($content, '<img')) {
             return ['success' => false, 'error' => 'Votre réponse doit contenir au moins 2 caractères.'];
         }
 
@@ -452,8 +500,9 @@ class ForumEngine {
      * Éditer un message (Auteur ou Modérateur / Admin)
      */
     public function updatePost(int $postId, int $userId, string $content): array {
-        $content = trim($content);
-        if (mb_strlen($content) < 2) {
+        $content = self::sanitizeHtml($content);
+        $plainText = trim(strip_tags($content));
+        if (mb_strlen($plainText) < 2 && !str_contains($content, '<img')) {
             return ['success' => false, 'error' => 'Le message ne peut pas être vide.'];
         }
 

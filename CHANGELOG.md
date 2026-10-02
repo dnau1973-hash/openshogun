@@ -5,6 +5,22 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Système de Population, Main-d'Œuvre, Règle Asymétrique du Saké & Mécanique d'Exode (`core/PopulationEngine.php`, `core/PlanetEngine.php`, `views/partials/header.php`, `views/building.php`, `views/field.php`, `views/city.php`, `views/resources.php`) :**
+  * Quotas d'ouvriers requis par niveau pour les 4 parcelles rurales et 16 structures urbaines.
+  * Malus proportionnel automatique sur le rendement horaire des récoltes en cas de sous-effectif global.
+  * Distinction vitale vs confort : la nourriture et la sérénité shinto dégradent le contentement en cas de pénurie (-55% / -20%).
+  * Règle asymétrique stricte du Saké : la présence de saké octroie un bonus net (+15%), son absence n'inflige strictement AUCUN malus (0 neutre).
+  * Jauge de satisfaction (0-100%) et crise d'exode : fuite de 6% d'habitants par heure si le contentement chute sous 25% (plancher de sécurité de 20 villageois).
+  * 8e carte « Peuple & Satisfaction » dans le bandeau supérieur avec code couleur réactif, animation clignotante en cas d'exode, icône de saké et popover Tabler.io explicatif.
+  * Badges d'ouvriers requis et indicateurs de sous-effectif sur l'ensemble des fiches d'édifices et de parcelles.
+- **Module Forum : Éditeur WYSIWYG Moderne & Neutralisation XSS Backend (`views/forum.php`, `core/ForumEngine.php`) :**
+  * Intégration de l'éditeur Quill.js (Thème Snow) pour la création de sujets, réponses rapides et édition de messages.
+  * Outils typographiques : enrichissements de texte, listes, citations, liens et images.
+  * Sécurisation backend robuste via `ForumEngine::sanitizeHtml()` éliminant les balises script/iframe, écouteurs `on*` inline et protocoles non sécurisés.
+- **Persistance Immédiate de l'Avatar Féodal & Cache-Busting (`api/profile.php`, `core/Auth.php`, `core/HonorEngine.php`, `views/poster.php`) :**
+  * Correction du chemin d'écriture `/public/assets/uploads/avatars/` et validation des commits PDO.
+  * Mise à jour instantanée des variables de session actives sans exiger de reconnexion.
+  * Cache-busting dynamique `?v=` côté serveur et JavaScript pour un rafraîchissement immédiat de l'image.
 - **Architecture de Télémétrie & Logs d'Activité (`core/ActivityTracker.php`, `database/migrate_activity_logs.sql`) :**
   * Structure de données optimisée `activity_logs` enregistrant `created_at`, `user_id`, `page_slug`, `tab_slug`, `action`, `device_type` et l'adresse IP anonymisée par salage et hachage SHA-256 (conformité RGPD).
   * Helper universel non bloquant `ActivityTracker::logView()` interceptant les navigations des visiteurs publics et des seigneurs authentifiés sans ralentir le cycle de vie de l'application.
