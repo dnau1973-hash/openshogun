@@ -538,7 +538,7 @@ try {
         // 19. Enregistrement d'un test de simulation de combat (Game Elevate Designer)
         case 'save_combat_test':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
-            if (!$devEngine->hasRole($currentUserId, 'game_designer')) {
+            if (!$devEngine->hasRole($currentUserId, 'game_designer') && !$auth->isAdmin()) {
                 http_response_code(403);
                 throw new Exception("Accès interdit : le simulateur de combat est strictement réservé au métier Game Elevate Designer.");
             }

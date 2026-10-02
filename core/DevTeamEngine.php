@@ -751,11 +751,10 @@ class DevTeamEngine {
         $userRoles = $this->getUserRoles($userId);
         $userRoleIds = array_column($userRoles, 'id');
 
-        // 2. Règle stricte pour les modules Game Elevate Designer :
-        // Ces modules sont EXCLUSIVEMENT réservés aux détenteurs du métier "Game Elevate Designer" (game_designer).
-        // L'administrateur NE LES VOIT PAS s'il ne possède pas lui-même ce métier assigné.
+        // 2. Règle pour les modules Game Elevate Designer :
+        // Réservés aux détenteurs du métier "Game Elevate Designer" (game_designer) ou à l'administrateur.
         if (in_array($tab, ['game_speeds', 'world_expansion', 'oases_ecosystem', 'combat_simulator'], true)) {
-            return in_array('game_designer', $userRoleIds, true);
+            return in_array('game_designer', $userRoleIds, true) || $isAdmin;
         }
 
         $tabConfig = self::STUDIO_TABS[$tab];
@@ -795,7 +794,12 @@ class DevTeamEngine {
             return false;
         }
 
-        // L'onglet Studio & Roster est toujours garanti à l'administrateur et aux membres Dev Team
+        // L'administrateur suprême a accès à tous les métiers et outils du Studio Dev
+        if ($isAdmin) {
+            return true;
+        }
+
+        // L'onglet Studio & Roster est toujours garanti aux membres Dev Team
         if ($metierSlug === 'roster') {
             return true;
         }
@@ -803,8 +807,8 @@ class DevTeamEngine {
         $userRoles = $this->getUserRoles($userId);
         $userRoleIds = array_column($userRoles, 'id');
 
-        // Règle stricte pour Game Elevate Designer :
-        // Réservé exclusivement à ceux ayant le métier game_designer assigné
+        // Règle pour Game Elevate Designer :
+        // Réservé aux détenteurs du rôle game_designer
         if ($metierSlug === 'game-elevate-designer') {
             return in_array('game_designer', $userRoleIds, true);
         }
@@ -818,11 +822,6 @@ class DevTeamEngine {
 
         // Vérification de permission associée
         if (!empty($cfg['perm']) && $this->hasPermission($userId, $cfg['perm'])) {
-            return true;
-        }
-
-        // Passe-droit admin pour les autres métiers (sauf game-elevate-designer)
-        if ($isAdmin) {
             return true;
         }
 

@@ -3,6 +3,24 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - studio/game-elevate-designer : Correctif d'Affichage du Simulateur de Combat & Déverrouillage d'Accès Admin
+- **Module :** `studio/game-elevate-designer`
+- **Statut :** `À tester`
+- **Description :** 
+  1. **Restauration Intégrale de la Vue Simulateur (`views/studio/game-elevate-designer/combat-simulator.php`) :** Remplacement du fichier vide par l'atelier martial complet en 2 colonnes comparatives (Attaquant vs Défenseur avec curseur de muraille de 0 à 20, calcul en temps réel des bonus défensifs et PV de structure, préréglages 1 clic, moteur d'affrontement multi-rounds, combat log dépliable et export Markdown).
+  2. **Déverrouillage d'Accès Administrateur (`core/DevTeamEngine.php`, `api/dev_team.php`) :** Autorisation des profils administrateurs dans `canAccessMetier()` et `canAccessTab()` pour leur permettre d'accéder au module du Game Elevate Designer et d'enregistrer des simulations (`save_combat_test`) sans blocage de sécurité ou redirection intempestive.
+  3. **Initialisation JavaScript Fiable :** Exécution réactive de `updateWallMetrics()` contrôlant l'état du DOM (`document.readyState === 'complete'`) pour assurer un calcul immédiat des jauges même lors des navigations asynchrones.
+- **Fichiers modifiés :** `views/studio/game-elevate-designer/combat-simulator.php`, `core/DevTeamEngine.php`, `api/dev_team.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter avec un compte Administrateur ou détenteur du rôle Game Elevate Designer et ouvrir `/?page=dev_team&metier=game-elevate-designer&module=combat-simulator` (ou `/?page=dev_team&tab=combat_simulator`).
+  2. Vérifier que la page se charge immédiatement avec les deux colonnes (Attaquant à gauche, Village défendu à droite avec le slider de muraille) et le grand bouton rouge d'action.
+  3. Tester le slider de muraille (0 à 20) : vérifier la mise à jour instantanée des badges de bonus (+% et PV).
+  4. Cliquer sur les 3 préréglages (« Raid Village Ouvert », « Bourg Fortifié », « Forteresse Impériale ») et vérifier la réactivité des jauges.
+  5. Cliquer sur « Lancer la Simulation Tactique Instantanée » : vérifier l'apparition du rapport complet, des jauges d'attrition, du bilan régimentaire et du journal déroulant.
+  6. Cliquer sur « Sauvegarder ce Test (+15 XP Forge) » et « Copier le Rapport Markdown » : vérifier l'absence d'erreur 403 et le message de succès.
+
+---
+
 ### [2026-10-02] - studio/architecture & studio/game-elevate-designer : Restructuration Métiers de Studio Dev & Simulateur de Combat avec Muraille
 - **Module :** `studio/architecture & studio/game-elevate-designer`
 - **Statut :** `À tester`
