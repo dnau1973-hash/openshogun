@@ -42,11 +42,11 @@ class TerroirEngine {
                 5 => ['name' => 'Scierie Fluviale & Flottage', 'desc' => 'Débitage de troncs et transport hydraulique le long du ruisseau.']
             ],
             'spatial_coords' => [
-                1 => ['top' => 26.0, 'left' => 20.0],
-                2 => ['top' => 36.0, 'left' => 50.0],
-                3 => ['top' => 28.0, 'left' => 76.0],
-                4 => ['top' => 65.0, 'left' => 25.0],
-                5 => ['top' => 68.0, 'left' => 68.0]
+                1 => ['top' => 25.0, 'left' => 16.0],
+                2 => ['top' => 28.0, 'left' => 74.0],
+                3 => ['top' => 54.0, 'left' => 48.0],
+                4 => ['top' => 74.0, 'left' => 26.0],
+                5 => ['top' => 78.0, 'left' => 76.0]
             ]
         ],
         'stone' => [
