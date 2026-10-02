@@ -228,11 +228,11 @@ class TerroirEngine {
                 5 => ['name' => 'Brasserie de Riz & Sakagura (酒蔵)', 'desc' => 'Atelier de fermentation distillant le précieux Saké de réjouissance.']
             ],
             'spatial_coords' => [
-                1 => ['top' => 35.0, 'left' => 22.0],
-                2 => ['top' => 30.0, 'left' => 74.0],
-                3 => ['top' => 50.0, 'left' => 50.0],
-                4 => ['top' => 72.0, 'left' => 28.0],
-                5 => ['top' => 72.0, 'left' => 72.0]
+                1 => ['top' => 55.0, 'left' => 36.0],
+                2 => ['top' => 52.0, 'left' => 62.0],
+                3 => ['top' => 24.0, 'left' => 51.0],
+                4 => ['top' => 80.0, 'left' => 28.0],
+                5 => ['top' => 78.0, 'left' => 86.0]
             ]
         ]
     ];
