@@ -5,6 +5,19 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Architecture de Télémétrie & Logs d'Activité (`core/ActivityTracker.php`, `database/migrate_activity_logs.sql`) :**
+  * Structure de données optimisée `activity_logs` enregistrant `created_at`, `user_id`, `page_slug`, `tab_slug`, `action`, `device_type` et l'adresse IP anonymisée par salage et hachage SHA-256 (conformité RGPD).
+  * Helper universel non bloquant `ActivityTracker::logView()` interceptant les navigations des visiteurs publics et des seigneurs authentifiés sans ralentir le cycle de vie de l'application.
+- **Suite Analytique Avancée & Tableaux de Bord Interactifs (`views/admin.php`) :**
+  * Intégration de 4 KPI Cards avec calcul dynamique des variations en pourcentage (%) : Total Pages Vues, Daimyōs Actifs Uniques (DAU/MAU), Taux Humains vs Bots/Crawlers, Durée Moyenne par Session.
+  * Graphique 1 (Spline Area Chart ApexCharts) : Évolution multi-séries croisant Pages Vues, Daimyōs Actifs et Inscriptions sur 1, 7, 30 ou 60 jours.
+  * Graphique 2 (Horizontal Bar Chart ApexCharts) : Palmarès Top 8 des modules et pages consultées.
+  * Graphique 3 (Column Bar Chart ApexCharts) : Répartition de l'affluence par tranches horaires (0h à 23h).
+  * Tableau dynamique des Daimyōs les plus actifs avec filtre de recherche textuel instantané en JavaScript Vanilla.
+  * Filtrage temporel réactif avec boutons d'accès rapide (Aujourd'hui, 7 Jours, 30 Jours, Tout).
+- **Bouton Statistiques & Métriques dans la Sous-Barre Header (`views/partials/header.php`) :**
+  * Ajout d'un bouton d'action compact vers le tableau de bord administratif (`?page=admin&tab=dashboard`), placé immédiatement avant le bouton d'administration générale.
+  * Format visuel épuré : icône seule Font Awesome (`fa-solid fa-chart-line fs-3`), badge Tabler sarcelle (`bg-teal-lt text-teal`), infobulle native Bootstrap/Tabler et restriction d'accès aux administrateurs.
 - **École du Backend & 3 Cours Illustrés pour Débutants (`views/atelier-pedagogique/backend/`) :**
   * Conception d'un module d'apprentissage vulgarisé pour les 12 ans et débutants avec métaphores du Japon féodal, encadrés « Le savais-tu ? » et typographie Dela Gothic One.
   * **Cours 01 (`php-poo-singleton.php`) :** POO expliquée via l'atelier de forge (Classe = plan, Objet = sabre forgé), le patron de conception Singleton via le Facteur Impérial Unique (`MailService`), et la persistance utilisateur via le Sceau de Cire des Sessions (`$_SESSION`).
@@ -25,6 +38,10 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * Export Markdown enrichi incluant la matrice d'attrition des infrastructures.
 
 ### Corrigé & Sécurité (Fixed)
+- **Débogage du Graphique d'Activité Dashboard (`views/admin.php`) :**
+  * Correction du non-affichage du graphique causé par un canvas initialisé avec une largeur nulle (`rect.width <= 0`) lors du masquage/affichage d'onglets.
+  * Remplacement de la requête SQL incomplète par une génération de série temporelle continue (`ActivityTracker::getTimelineTrend`) comblant automatiquement les dates sans activité pour éliminer les ruptures de courbe.
+  * Migration vers ApexCharts avec redimensionnement automatique responsive et maintien d'un canvas de repli non bloquant.
 - **Débogage du Bouton « Mise à Jour » dans l'Administration (`views/partials/admin_updates.php`, `views/admin.php`) :**
   * Éradication des erreurs JavaScript `TypeError: Cannot read properties of undefined` sur `data.local.short_sha` et `target_branch` lors du contrôle GitHub.
   * Vérifications défensives systématiques sur l'ensemble des éléments DOM (`bannerBox`, `bannerTitle`, `bannerDesc`, `bannerIcon`, `navBadge`).

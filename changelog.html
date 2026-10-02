@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.18.0</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.19.0</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,14 +123,85 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.19.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #206bc4; box-shadow: 0 0 0 2px #206bc4;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.19.0</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-primary-lt fw-bold">Télémétrie &amp; Analytics</span>
+                                <span class="badge bg-teal-lt fw-bold">Débogage Graphique Dashboard</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 2 Octobre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary-emphasis d-flex align-items-center gap-2 mb-3">
+                                <span>📊</span> Suite Analytique &amp; Télémétrie Avancée &bull; Débogage du Graphique d'Activité
+                            </h4>
+                            <div class="row g-3">
+                                <!-- 🚀 Nouvelles fonctionnalités : Télémétrie -->
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-primary text-white">🚀 Ajouté</span>
+                                            <span>Moteur de Télémétrie &amp; Logs d'Activité (`ActivityTracker.php`)</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Structure légère et performante <code>activity_logs</code> indexée sur les dates, utilisateurs et modules. Salage mensuel et hachage SHA-256 des adresses IP garantissant l'anonymisation stricte (RGPD). Helper universel non bloquant <code>ActivityTracker::logView()</code> instrumenté sur l'ensemble des routes publiques et privées du jeu.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-teal text-white">🚀 Ajouté</span>
+                                            <span>Visualisations Interactives ApexCharts &amp; Filtres Rapides</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Déploiement de 4 KPI Cards réactives (% vs période précédente), d'un Spline Area Chart croisant consultations, daimyōs uniques et inscriptions, d'un Bar Chart horizontal du Top 8 des pages et d'un graphique de répartition par tranches horaires (0h à 23h). Boutons de filtre temporel instantané (Aujourd'hui, 7j, 30j, Tout).
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-yellow text-dark">🚀 Ajouté</span>
+                                            <span>Classement Dynamique des Daimyōs les Plus Actifs</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Tableau interactif récapitulant les joueurs les plus engagés (volume de logs, clans, progression militaire et dernier module visité) avec champ de filtrage textuel instantané en JavaScript Vanilla sans rechargement de page.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-success text-white">🐛 Corrigé</span>
+                                            <span>Débogage du Graphique d'Activité Dashboard</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Correction du bug d'initialisation du canvas lié au dimensionnement asynchrone lors du basculement d'onglets. Correction de la requête SQL d'agrégation 30 jours via une série continue sans saut pour les jours sans activité, et intégration transparente d'ApexCharts avec solution de repli canvas.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
                     <!-- VERSION 1.18.0 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
-                        <div class="timeline-badge-dot" style="background: #b91c1c; box-shadow: 0 0 0 2px #b91c1c;"></div>
+                        <div class="timeline-badge-dot" style="background: #64748b; box-shadow: 0 0 0 2px #64748b;"></div>
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.18.0</span>
-                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-secondary-lt fw-bold">Version précédente</span>
                                 <span class="badge bg-danger-lt fw-bold">Dégâts de Siège &amp; Bâtiments</span>
                                 <span class="badge bg-teal-lt fw-bold">Débogage Mises à Jour</span>
                             </div>

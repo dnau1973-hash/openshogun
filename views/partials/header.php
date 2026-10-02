@@ -470,9 +470,17 @@ $navItems = [
                 <?php endif; ?>
 
                 <?php if ($auth->isAdmin()): ?>
-                    <!-- 4. Panneau d'Administration (Icône seule) -->
+                    <!-- 4. Statistiques & Métriques (Icône seule) -->
+                    <a href="?page=admin&tab=dashboard" 
+                       class="badge bg-teal-lt text-teal p-2 d-inline-flex align-items-center justify-content-center text-decoration-none shadow-none rounded <?= ($page === 'admin' && ($_GET['tab'] ?? '') === 'dashboard') ? 'border border-teal' : '' ?>"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom"
+                       title="Statistiques d'utilisation &amp; Métriques du Shōgunat">
+                        <i class="fa-solid fa-chart-line fs-3"></i>
+                    </a>
+
+                    <!-- 5. Panneau d'Administration (Icône seule) -->
                     <a href="?page=admin" 
-                       class="badge bg-blue-lt text-primary p-2 d-inline-flex align-items-center justify-content-center text-decoration-none shadow-none rounded <?= $page === 'admin' ? 'border border-primary' : '' ?>"
+                       class="badge bg-blue-lt text-primary p-2 d-inline-flex align-items-center justify-content-center text-decoration-none shadow-none rounded <?= ($page === 'admin' && ($_GET['tab'] ?? '') !== 'dashboard') ? 'border border-primary' : '' ?>"
                        data-bs-toggle="tooltip" data-bs-placement="bottom"
                        title="Panneau d'Administration Générale">
                         <i class="fa-solid fa-gear fs-3"></i>

@@ -25,7 +25,23 @@ require_once __DIR__ . '/../core/UpdateEngine.php';
 require_once __DIR__ . '/../core/HeroEngine.php';
 require_once __DIR__ . '/../core/ImperialSealEngine.php';
 require_once __DIR__ . '/../core/MailService.php';
+require_once __DIR__ . '/../core/ActivityTracker.php';
 
+ActivityTracker::ensureTable();
+
+// Filtrage & Métriques Télémétriques
+$analyticsPeriod = in_array($_GET['period'] ?? '', ['today', '7d', '30d', 'all'], true) ? (string)$_GET['period'] : '30d';
+$trendDays = match($analyticsPeriod) {
+    'today' => 1,
+    '7d'    => 7,
+    'all'   => 60,
+    default => 30
+};
+$kpiMetrics = ActivityTracker::getKpiSummary($analyticsPeriod);
+$timelineTrend = ActivityTracker::getTimelineTrend($trendDays);
+$topPages = ActivityTracker::getTopPages(8, $analyticsPeriod);
+$hourlyActivity = ActivityTracker::getHourlyDistribution($analyticsPeriod);
+$topActiveUsers = ActivityTracker::getTopActiveUsers(8, $analyticsPeriod);
 
 $botEngine = new BotEngine();
 $castleEngine = new CastleEngine();
@@ -307,20 +323,14 @@ $avgSessionTime = "24m 30s";
 $avgSessionsPerDay = "3.2";
 
 
-// Évolution 30 jours (inscriptions et activité)
+// Évolution 30 jours (série continue alimentée par ActivityTracker)
 $stats30Days = [];
-$nowTs = time();
-for ($i = 29; $i >= 0; $i--) {
-    $dKey = date('Y-m-d', $nowTs - ($i * 86400));
-    $stats30Days[$dKey] = ['day' => date('d/m', $nowTs - ($i * 86400)), 'users' => 0, 'sessions' => 0];
-}
-$stmtReg30 = $db->query("SELECT DATE(created_at) as d, COUNT(*) as c FROM users WHERE is_bot = 0 AND created_at >= NOW() - INTERVAL 30 DAY GROUP BY DATE(created_at)");
-while ($r = $stmtReg30->fetch(PDO::FETCH_ASSOC)) {
-    if (isset($stats30Days[$r['d']])) $stats30Days[$r['d']]['users'] = (int)$r['c'];
-}
-$stmtAct30 = $db->query("SELECT DATE(FROM_UNIXTIME(departure_time)) as d, COUNT(*) as c FROM fleet_missions WHERE departure_time >= UNIX_TIMESTAMP(NOW() - INTERVAL 30 DAY) GROUP BY DATE(FROM_UNIXTIME(departure_time))");
-while ($r = $stmtAct30->fetch(PDO::FETCH_ASSOC)) {
-    if (isset($stats30Days[$r['d']])) $stats30Days[$r['d']]['sessions'] = (int)$r['c'];
+foreach ($timelineTrend as $point) {
+    $stats30Days[$point['date']] = [
+        'day' => $point['label'],
+        'users' => $point['registrations'],
+        'sessions' => $point['views'] > 0 ? $point['views'] : $point['missions'],
+    ];
 }
 
 // Strates de score
@@ -670,9 +680,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <span>Système Opérationnel</span>
             </span>
             <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-outline-secondary" onclick="alert('Filtrage: Aujourd\'hui')">Aujourd'hui</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="alert('Filtrage: 7 derniers jours')">7 jours</button>
-                <button type="button" class="btn btn-outline-secondary active" onclick="alert('Filtrage: 30 derniers jours')">30 jours</button>
+                <a href="?page=admin&tab=dashboard&period=today" class="btn btn-outline-secondary <?= $analyticsPeriod === 'today' ? 'active fw-bold' : '' ?>">Aujourd'hui</a>
+                <a href="?page=admin&tab=dashboard&period=7d" class="btn btn-outline-secondary <?= $analyticsPeriod === '7d' ? 'active fw-bold' : '' ?>">7 jours</a>
+                <a href="?page=admin&tab=dashboard&period=30d" class="btn btn-outline-secondary <?= $analyticsPeriod === '30d' ? 'active fw-bold' : '' ?>">30 jours</a>
+                <a href="?page=admin&tab=dashboard&period=all" class="btn btn-outline-secondary <?= $analyticsPeriod === 'all' ? 'active fw-bold' : '' ?>">Tout</a>
             </div>
             <button type="button" onclick="location.reload()" class="btn btn-sm btn-outline-primary" title="Actualiser les métriques">
                 <i class="fa-solid fa-arrows-rotate me-1"></i>Actualiser
@@ -680,69 +691,91 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         </div>
     </div>
 
-    <!-- ── 3 CARTES KPIS EN HAUT ── -->
+    <!-- ── 4 CARTES KPIS TÉLÉMÉTRIE & PERFORMANCE ── -->
     <div class="row row-cards mb-4">
-        <!-- 1. Joueurs Actifs -->
-        <div class="col-sm-6 col-xl-4">
-            <div class="card card-sm border-start border-1 border-primary shadow-sm h-100">
+        <!-- 1. Total Pages Vues -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card card-sm border-start border-2 border-primary shadow-sm h-100">
                 <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <span class="avatar avatar-md rounded bg-primary-lt text-primary me-3 fs-2"><i class="fa-solid fa-users"></i></span>
-                        <div>
-                            <div class="text-muted small fw-bold text-uppercase">Joueurs Actifs</div>
-                            <div class="h2 m-0 font-weight-bold text-dark">
-                                <?= $activeUsersRealtime ?> <span class="fs-4 text-muted fw-normal">/ <?= $activeUsers24h ?></span>
-                            </div>
-                        </div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="text-muted small fw-bold text-uppercase">Total Pages Vues</div>
+                        <span class="avatar avatar-sm rounded bg-primary-lt text-primary fs-3"><i class="fa-solid fa-eye"></i></span>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top small text-muted">
-                        <span>Temps réel (&lt;15m) &bull; 24h</span>
-                        <span class="text-primary fw-bold"><?= $totalUsers ?> Inscrits</span>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <div class="h1 m-0 font-weight-bold text-dark"><?= number_format($kpiMetrics['total_views']) ?></div>
+                        <?php if ($kpiMetrics['views_delta'] >= 0): ?>
+                            <span class="badge bg-success-lt text-success small fw-bold"><i class="fa-solid fa-arrow-trend-up me-1"></i>+<?= $kpiMetrics['views_delta'] ?>%</span>
+                        <?php else: ?>
+                            <span class="badge bg-danger-lt text-danger small fw-bold"><i class="fa-solid fa-arrow-trend-down me-1"></i><?= $kpiMetrics['views_delta'] ?>%</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="text-secondary small mt-2 pt-2 border-top">
+                        <i class="fa-solid fa-users-viewfinder text-primary me-1"></i><strong><?= number_format($kpiMetrics['unique_visitors']) ?></strong> visiteurs uniques
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 2. Taux d'Achèvement (Quêtes & Didacticiel) -->
-        <div class="col-sm-6 col-xl-4">
-            <div class="card card-sm border-start border-1 border-success shadow-sm h-100">
+        <!-- 2. Joueurs Actifs Uniques (DAU / MAU) -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card card-sm border-start border-2 border-teal shadow-sm h-100">
                 <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <span class="avatar avatar-md rounded bg-success-lt text-success me-3 fs-2"><i class="fa-solid fa-bullseye"></i></span>
-                        <div>
-                            <div class="text-muted small fw-bold text-uppercase">Progression & Quêtes</div>
-                            <div class="h2 m-0 font-weight-bold text-success">
-                                <?= $completionRate ?>%
-                            </div>
-                        </div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="text-muted small fw-bold text-uppercase">Daimyōs Actifs (<?= strtoupper($analyticsPeriod) ?>)</div>
+                        <span class="avatar avatar-sm rounded bg-teal-lt text-teal fs-3"><i class="fa-solid fa-users"></i></span>
                     </div>
-                    <div class="progress progress-xs mt-3 mb-1">
-                        <div class="progress-bar bg-success" style="width: <?= $completionRate ?>%"></div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <div class="h1 m-0 font-weight-bold text-teal"><?= number_format($kpiMetrics['unique_users']) ?></div>
+                        <?php if ($kpiMetrics['users_delta'] >= 0): ?>
+                            <span class="badge bg-success-lt text-success small fw-bold"><i class="fa-solid fa-arrow-trend-up me-1"></i>+<?= $kpiMetrics['users_delta'] ?>%</span>
+                        <?php else: ?>
+                            <span class="badge bg-danger-lt text-danger small fw-bold"><i class="fa-solid fa-arrow-trend-down me-1"></i><?= $kpiMetrics['users_delta'] ?>%</span>
+                        <?php endif; ?>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between small text-muted">
-                        <span><?= $totalQuestsClaimed ?> quêtes accomplies</span>
-                        <span class="fw-bold">Moy. <?= number_format($avgPoints) ?> pts</span>
+                    <div class="text-secondary small mt-2 pt-2 border-top">
+                        <i class="fa-solid fa-clock text-teal me-1"></i>Temps réel : <strong><?= $activeUsersRealtime ?></strong> (24h : <strong><?= $activeUsers24h ?></strong>)
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 3. Temps Moyen / Session -->
-        <div class="col-sm-6 col-xl-4">
-            <div class="card card-sm border-start border-1 border-warning shadow-sm h-100">
+        <!-- 3. Taux Humains vs Bots / Crawlers -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card card-sm border-start border-2 border-success shadow-sm h-100">
                 <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <span class="avatar avatar-md rounded bg-warning-lt text-warning me-3 fs-2"><i class="fa-solid fa-stopwatch"></i></span>
-                        <div>
-                            <div class="text-muted small fw-bold text-uppercase">Temps Moyen / Session</div>
-                            <div class="h2 m-0 font-weight-bold text-warning-emphasis">
-                                <?= $avgSessionTime ?>
-                            </div>
-                        </div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="text-muted small fw-bold text-uppercase">Taux Humains vs Bots</div>
+                        <span class="avatar avatar-sm rounded bg-success-lt text-success fs-3"><i class="fa-solid fa-shield-halved"></i></span>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top small text-muted">
-                        <span>Fréquence quotidienne</span>
-                        <span class="text-warning fw-bold"><?= $avgSessionsPerDay ?> sessions/j</span>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <div class="h1 m-0 font-weight-bold text-success"><?= $kpiMetrics['human_ratio'] ?>%</div>
+                        <span class="badge bg-success-lt text-success small fw-bold">Humains</span>
+                    </div>
+                    <div class="progress progress-xs mt-2 mb-1">
+                        <div class="progress-bar bg-success" style="width: <?= $kpiMetrics['human_ratio'] ?>%"></div>
+                        <div class="progress-bar bg-secondary opacity-50" style="width: <?= $kpiMetrics['bot_ratio'] ?>%"></div>
+                    </div>
+                    <div class="text-secondary small mt-2 border-top pt-1">
+                        Bots / Crawlers filtrés : <strong><?= $kpiMetrics['bot_ratio'] ?>%</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Durée Moyenne / Session -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card card-sm border-start border-2 border-warning shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="text-muted small fw-bold text-uppercase">Temps Moyen / Session</div>
+                        <span class="avatar avatar-sm rounded bg-warning-lt text-warning fs-3"><i class="fa-solid fa-stopwatch"></i></span>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <div class="h1 m-0 font-weight-bold text-warning-emphasis"><?= $kpiMetrics['avg_session'] ?></div>
+                        <span class="badge bg-warning-lt text-warning-emphasis small fw-bold">Engagement</span>
+                    </div>
+                    <div class="text-secondary small mt-2 pt-2 border-top">
+                        <i class="fa-solid fa-repeat text-warning me-1"></i>Fréquence : <strong><?= $avgSessionsPerDay ?> sessions/j</strong>
                     </div>
                 </div>
             </div>
@@ -951,27 +984,31 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
     <!-- ── ZONE VISUALISATION DES DONNÉES (2 COLONNES) ── -->
     <div class="row row-cards mb-4">
-        <!-- Graphique 30 jours : Inscriptions & Missions/Sessions -->
+        <!-- Graphique 1 : Évolution Vues de Pages, Daimyōs Uniques & Inscriptions -->
         <div class="col-lg-8">
             <div class="card h-100 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title m-0 d-flex align-items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-success me-1"></i>Évolution des Inscriptions &amp; Activités (30 Jours)
+                        <i class="fa-solid fa-chart-line text-primary me-1"></i>Évolution Télémétrique &amp; Activités (<?= $trendDays ?> Jours)
                     </h4>
-                    <span class="badge bg-primary-lt">Moyenne quotidienne</span>
+                    <span class="badge bg-primary-lt">Période : <?= strtoupper($analyticsPeriod) ?></span>
                 </div>
-                <div class="card-body">
-                    <!-- Graphique Canvas stylisé natif responsive -->
-                    <div style="position: relative; height: 260px; width: 100%;">
+                <div class="card-body p-2 p-md-3">
+                    <!-- ApexCharts Spline Area Chart avec canvas fallback -->
+                    <div id="adminApexTrendChart" style="min-height: 270px; width: 100%;"></div>
+                    <div id="adminTrendChartFallback" style="display: none; position: relative; height: 260px; width: 100%;">
                         <canvas id="adminTrendChart" style="width: 100%; height: 100%;"></canvas>
                     </div>
                 </div>
-                <div class="card-footer d-flex justify-content-around text-center py-2 bg-light small">
+                <div class="card-footer d-flex justify-content-around text-center py-2 bg-light small flex-wrap gap-2">
                     <div>
-                        <span class="badge badge-dot bg-primary me-1"></span> Inscriptions : <strong><?= array_sum(array_column($stats30Days, 'users')) ?> nouveaux daimyōs</strong>
+                        <span class="badge badge-dot bg-primary me-1"></span> Pages Vues : <strong><?= number_format(array_sum(array_column($timelineTrend, 'views'))) ?></strong>
                     </div>
                     <div>
-                        <span class="badge badge-dot bg-success me-1"></span> Expéditions : <strong><?= array_sum(array_column($stats30Days, 'sessions')) ?> missions</strong>
+                        <span class="badge badge-dot bg-success me-1"></span> Daimyōs Actifs : <strong><?= number_format(max(array_column($timelineTrend, 'unique_users') ?: [0])) ?> pic/j</strong>
+                    </div>
+                    <div>
+                        <span class="badge badge-dot bg-warning me-1"></span> Inscriptions : <strong><?= number_format(array_sum(array_column($timelineTrend, 'registrations'))) ?> daimyōs</strong>
                     </div>
                 </div>
             </div>
@@ -1035,6 +1072,119 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ── MODULE ANALYTICS 2 : TOP PAGES & DISTRIBUTION HORAIRE ── -->
+    <div class="row row-cards mb-4">
+        <!-- Graphique 2 : Top Modules & Pages Consultées -->
+        <div class="col-lg-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title m-0 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-info me-1"></i>Top 8 Modules &amp; Pages Consultées
+                    </h4>
+                    <span class="badge bg-info-lt">Pages Vues</span>
+                </div>
+                <div class="card-body p-2 p-md-3">
+                    <div id="adminApexTopPagesChart" style="min-height: 280px; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphique 3 : Heures de Pointe (0h - 23h) -->
+        <div class="col-lg-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title m-0 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-warning me-1"></i>Heures de Pointe (0h &mdash; 23h)
+                    </h4>
+                    <span class="badge bg-warning-lt">Affluence Globale</span>
+                </div>
+                <div class="card-body p-2 p-md-3">
+                    <div id="adminApexHourlyChart" style="min-height: 280px; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── TABLEAU DYNAMIQUE : CLASSEMENT DES DAIMYŌS LES PLUS ACTIFS ── -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h4 class="card-title m-0 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-trophy text-warning me-1"></i>Classement Télémétrique des Daimyōs les Plus Actifs
+                </h4>
+                <div class="text-secondary small">Volume d'interactions et dernières actions enregistrées</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="input-icon">
+                    <span class="input-icon-addon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" id="activeUsersSearchInput" class="form-control form-control-sm" placeholder="Filtrer par daimyō ou clan...">
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-vcenter card-table table-hover" id="activeUsersTable">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Daimyō</th>
+                        <th>Clan &amp; Puissance</th>
+                        <th>Interactions Télémétriques</th>
+                        <th>Dernier Module Consulté</th>
+                        <th class="text-end">Dernier Signal</th>
+                    </tr>
+                </thead>
+                <tbody id="activeUsersTableBody">
+                    <?php if (empty($topActiveUsers)): ?>
+                        <tr><td colspan="6" class="text-center text-muted p-3">Aucune donnée télémétrique disponible sur cette période.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($topActiveUsers as $idx => $user): 
+                            $fInfo = FACTIONS[$user['faction'] ?? ''] ?? FACTIONS['terran'];
+                            $rankBadge = match($idx) {
+                                0 => '<span class="badge bg-warning text-dark"><i class="fa-solid fa-crown me-1"></i>1</span>',
+                                1 => '<span class="badge bg-secondary text-white">2</span>',
+                                2 => '<span class="badge bg-orange text-white">3</span>',
+                                default => '<span class="badge bg-light text-muted">#' . ($idx + 1) . '</span>'
+                            };
+                            $timeAgo = !empty($user['last_action_at']) ? date('d/m H:i', strtotime($user['last_action_at'])) : 'Récemment';
+                        ?>
+                            <tr class="active-user-row" data-search="<?= strtolower(htmlspecialchars($user['username'] . ' ' . $fInfo['name'])) ?>">
+                                <td><?= $rankBadge ?></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="avatar avatar-xs rounded-circle bg-primary-lt font-weight-bold text-uppercase">
+                                            <?= strtoupper(substr($user['username'], 0, 2)) ?>
+                                        </span>
+                                        <div class="fw-bold text-dark"><?= htmlspecialchars($user['username']) ?></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-lt me-1"><?= $fInfo['icon'] ?> <?= htmlspecialchars($fInfo['name']) ?></span>
+                                    <span class="text-muted small"><?= number_format((int)($user['points'] ?? 0)) ?> pts</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress progress-xs w-50">
+                                            <div class="progress-bar bg-primary" style="width: <?= min(100, max(10, (int)$user['action_count'])) ?>%"></div>
+                                        </div>
+                                        <strong class="text-primary small"><?= number_format((int)$user['action_count']) ?> logs</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-azure-lt">
+                                        <i class="fa-solid fa-compass me-1"></i><?= htmlspecialchars($user['last_page_label'] ?? $user['last_page'] ?? 'Fief') ?>
+                                    </span>
+                                </td>
+                                <td class="text-end text-muted small">
+                                    <i class="fa-regular fa-clock me-1"></i><?= $timeAgo ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -2543,6 +2693,9 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
 
 
 
+<!-- Script CDN ApexCharts pour les visualisations interactives du Shogunat -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
 <script>
 // --- GESTION DU SYSTÈME D'ONGLETS DU SHOGUNAT ---
 function switchWorldSubSection(subKey, event) {
@@ -2556,7 +2709,202 @@ function switchWorldSubSection(subKey, event) {
     if (activeBtn) activeBtn.classList.add('active');
 }
 
-// --- GRAPHIQUE DES TENDANCES (30 JOURS) DU DASHBOARD ---
+// --- ANALYTICS & TÉLÉMÉTRIE DU DASHBOARD (APEXCHARTS + FALLBACK CANVAS) ---
+let trendApexChart = null;
+let topPagesApexChart = null;
+let hourlyApexChart = null;
+
+const telemetryData = {
+    timeline: <?= json_encode($timelineTrend, JSON_UNESCAPED_UNICODE) ?>,
+    topPages: <?= json_encode($topPages, JSON_UNESCAPED_UNICODE) ?>,
+    hourly: <?= json_encode(array_values($hourlyActivity), JSON_UNESCAPED_UNICODE) ?>
+};
+
+function renderAnalyticsCharts() {
+    const trendContainer = document.getElementById('adminApexTrendChart');
+    const fallbackContainer = document.getElementById('adminTrendChartFallback');
+
+    if (!trendContainer) return;
+
+    if (typeof ApexCharts === 'undefined') {
+        if (fallbackContainer) fallbackContainer.style.display = 'block';
+        trendContainer.style.display = 'none';
+        renderAdminTrendChart();
+        return;
+    }
+
+    // Graphique 1 : Spline Area Chart (Pages Vues / Daimyōs Uniques / Inscriptions)
+    const trendCategories = telemetryData.timeline.map(item => item.label);
+    const viewsSeries = telemetryData.timeline.map(item => item.views);
+    const usersSeries = telemetryData.timeline.map(item => item.unique_users);
+    const regSeries = telemetryData.timeline.map(item => item.registrations);
+
+    const trendOptions = {
+        series: [
+            { name: 'Pages Vues', data: viewsSeries },
+            { name: 'Daimyōs Actifs', data: usersSeries },
+            { name: 'Inscriptions', data: regSeries }
+        ],
+        chart: {
+            type: 'area',
+            height: 270,
+            toolbar: { show: false },
+            fontFamily: 'inherit',
+            animations: { enabled: true, easing: 'easeinout', speed: 600 }
+        },
+        colors: ['#206bc4', '#2fb344', '#f59f00'],
+        stroke: { curve: 'smooth', width: [2.5, 2.5, 2] },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.45,
+                opacityTo: 0.05,
+                stops: [0, 90, 100]
+            }
+        },
+        dataLabels: { enabled: false },
+        grid: {
+            borderColor: 'rgba(148, 163, 184, 0.15)',
+            strokeDashArray: 4,
+            padding: { top: 0, right: 15, bottom: 0, left: 10 }
+        },
+        xaxis: {
+            categories: trendCategories,
+            labels: { style: { colors: '#64748b', fontSize: '11px' } },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+        },
+        yaxis: {
+            min: 0,
+            labels: {
+                style: { colors: '#64748b', fontSize: '11px' },
+                formatter: (val) => Math.round(val)
+            }
+        },
+        tooltip: {
+            shared: true,
+            intersect: false,
+            theme: 'light'
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'right',
+            labels: { colors: '#475569' }
+        }
+    };
+
+    if (trendApexChart) {
+        trendApexChart.updateOptions(trendOptions);
+    } else {
+        trendApexChart = new ApexCharts(trendContainer, trendOptions);
+        trendApexChart.render();
+    }
+
+    // Graphique 2 : Horizontal Bar Chart (Top 8 Pages / Modules)
+    const topPagesContainer = document.getElementById('adminApexTopPagesChart');
+    if (topPagesContainer && telemetryData.topPages.length > 0) {
+        const pageLabels = telemetryData.topPages.map(p => p.label);
+        const pageHits = telemetryData.topPages.map(p => p.hit_count);
+
+        const topPagesOptions = {
+            series: [{ name: 'Consultations', data: pageHits }],
+            chart: {
+                type: 'bar',
+                height: 280,
+                toolbar: { show: false },
+                fontFamily: 'inherit'
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 4,
+                    barHeight: '55%',
+                    distributed: false
+                }
+            },
+            colors: ['#4299e1'],
+            dataLabels: {
+                enabled: true,
+                formatter: (val) => val + ' vues',
+                style: { fontSize: '11px', colors: ['#ffffff'] }
+            },
+            xaxis: {
+                categories: pageLabels,
+                labels: { style: { colors: '#64748b', fontSize: '11px' } }
+            },
+            yaxis: {
+                labels: { style: { colors: '#475569', fontSize: '12px', fontWeight: 600 } }
+            },
+            grid: {
+                borderColor: 'rgba(148, 163, 184, 0.15)',
+                strokeDashArray: 4
+            },
+            tooltip: {
+                theme: 'light',
+                y: { formatter: (val) => val + ' vues enregistrées' }
+            }
+        };
+
+        if (topPagesApexChart) {
+            topPagesApexChart.updateOptions(topPagesOptions);
+        } else {
+            topPagesApexChart = new ApexCharts(topPagesContainer, topPagesOptions);
+            topPagesApexChart.render();
+        }
+    }
+
+    // Graphique 3 : Bar Chart Affluence Horaire (0h à 23h)
+    const hourlyContainer = document.getElementById('adminApexHourlyChart');
+    if (hourlyContainer) {
+        const hourCategories = ['0h','1h','2h','3h','4h','5h','6h','7h','8h','9h','10h','11h','12h','13h','14h','15h','16h','17h','18h','19h','20h','21h','22h','23h'];
+        const hourlyOptions = {
+            series: [{ name: 'Interactions', data: telemetryData.hourly }],
+            chart: {
+                type: 'bar',
+                height: 280,
+                toolbar: { show: false },
+                fontFamily: 'inherit'
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 3,
+                    columnWidth: '65%'
+                }
+            },
+            colors: ['#f59f00'],
+            dataLabels: { enabled: false },
+            xaxis: {
+                categories: hourCategories,
+                labels: { style: { colors: '#64748b', fontSize: '10px' } }
+            },
+            yaxis: {
+                min: 0,
+                labels: {
+                    style: { colors: '#64748b', fontSize: '11px' },
+                    formatter: (val) => Math.round(val)
+                }
+            },
+            grid: {
+                borderColor: 'rgba(148, 163, 184, 0.15)',
+                strokeDashArray: 4
+            },
+            tooltip: {
+                theme: 'light',
+                y: { formatter: (val) => val + ' requêtes / actions' }
+            }
+        };
+
+        if (hourlyApexChart) {
+            hourlyApexChart.updateOptions(hourlyOptions);
+        } else {
+            hourlyApexChart = new ApexCharts(hourlyContainer, hourlyOptions);
+            hourlyApexChart.render();
+        }
+    }
+}
+
+// Fallback natif Canvas stylisé si ApexCharts n'est pas chargé
 function renderAdminTrendChart() {
     const canvas = document.getElementById('adminTrendChart');
     if (!canvas) return;
@@ -2582,10 +2930,8 @@ function renderAdminTrendChart() {
     const maxSessions = Math.max(5, ...data.map(d => d.sessions));
     const maxVal = Math.max(maxUsers, maxSessions, 5) * 1.15;
 
-    // Effacer le canvas
     ctx.clearRect(0, 0, w, h);
 
-    // Lignes de quadrillage horizontales
     ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
     ctx.lineWidth = 1;
     ctx.fillStyle = '#94a3b8';
@@ -2613,7 +2959,6 @@ function renderAdminTrendChart() {
             points.push({x, y});
         });
 
-        // Surface remplie
         ctx.fillStyle = fillCol;
         ctx.beginPath();
         ctx.moveTo(points[0].x, padTop + chartH);
@@ -2622,7 +2967,6 @@ function renderAdminTrendChart() {
         ctx.closePath();
         ctx.fill();
 
-        // Ligne
         ctx.strokeStyle = strokeCol;
         ctx.lineWidth = 2.5;
         ctx.beginPath();
@@ -2632,7 +2976,6 @@ function renderAdminTrendChart() {
         });
         ctx.stroke();
 
-        // Points
         ctx.fillStyle = strokeCol;
         points.forEach((p, idx) => {
             if (idx % 4 === 0 || idx === points.length - 1) {
@@ -2646,7 +2989,6 @@ function renderAdminTrendChart() {
     drawLineSeries('sessions', '#2fb344', 'rgba(47, 179, 68, 0.08)');
     drawLineSeries('users', '#206bc4', 'rgba(32, 107, 196, 0.12)');
 
-    // Graduations Axe X
     ctx.fillStyle = '#64748b';
     data.forEach((d, idx) => {
         if (idx % 5 === 0 || idx === data.length - 1) {
@@ -2656,7 +2998,9 @@ function renderAdminTrendChart() {
     });
 }
 window.addEventListener('resize', () => {
-    if (typeof renderAdminTrendChart === 'function') {
+    if (typeof renderAnalyticsCharts === 'function') {
+        renderAnalyticsCharts();
+    } else if (typeof renderAdminTrendChart === 'function') {
         renderAdminTrendChart();
     }
 });
@@ -2765,7 +3109,9 @@ function switchAdminTab(tabKey) {
     }
 
     if (tabKey === 'dashboard' || tabKey === 'all') {
-        if (typeof renderAdminTrendChart === 'function') {
+        if (typeof renderAnalyticsCharts === 'function') {
+            setTimeout(renderAnalyticsCharts, 60);
+        } else if (typeof renderAdminTrendChart === 'function') {
             setTimeout(renderAdminTrendChart, 60);
         }
     }
@@ -2912,7 +3258,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initSupportPagination === 'function') initSupportPagination();
     if (typeof initBotsPagination === 'function') initBotsPagination();
 
-    if (typeof renderAdminTrendChart === 'function') {
+    const activeUsersSearch = document.getElementById('activeUsersSearchInput');
+    if (activeUsersSearch) {
+        activeUsersSearch.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#activeUsersTableBody .active-user-row');
+            rows.forEach(row => {
+                const searchTxt = row.getAttribute('data-search') || '';
+                row.style.display = searchTxt.includes(query) ? '' : 'none';
+            });
+        });
+    }
+
+    if (typeof renderAnalyticsCharts === 'function') {
+        setTimeout(renderAnalyticsCharts, 80);
+    } else if (typeof renderAdminTrendChart === 'function') {
         setTimeout(renderAdminTrendChart, 80);
     }
 });

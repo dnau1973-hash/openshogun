@@ -37,6 +37,26 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 02/10/2026 (Partie 16) — Télémétrie, Respect de la Vie Privée (RGPD) & Visualisation de Données (ApexCharts)
+- **Concept exploré :** Architecture d'un système de télémétrie et d'analyse d'audience pour un jeu en ligne, anonymisation des données personnelles (RGPD), génération de séries temporelles continues en SQL/PHP pour éviter les ruptures de courbes, et intégration d'une bibliothèque graphique réactive moderne (ApexCharts).
+- **Notions pour l'atelier :**
+  - **Qu'est-ce que la Télémétrie ? (Le Registre des Pèlerins de Kyoto) :** Pour savoir si un jeu plaît et quelles fonctionnalités sont réellement utilisées (les casernes, l'atelier de forge, la carte ou les simulateurs), les créateurs de jeux placent des « balises discrètes » qui notent les visites. C'est l'équivalent du garde à la porte du temple qui compte le nombre de pèlerins sans leur demander leur nom intime ni violer leur secret.
+  - **L'Anonymisation & Le Respect de la Vie Privée (Le Masque de Cire Haché) :** Une adresse IP est une donnée personnelle protégée par la loi (RGPD). Pour protéger les joueurs, on ne stocke jamais leur véritable adresse IP en clair. On utilise une fonction de hachage cryptographique (`hash('sha256', ...)`) combinée à un « sel » secret qui change chaque mois. Cela transforme l'IP en une chaîne de caractères indéchiffrable unique : on peut savoir si le même visiteur revient plusieurs fois dans la journée, mais personne (même pas l'administrateur de la base de données) ne peut retrouver l'identité réelle ou la localisation du joueur !
+  - **Pourquoi une Courbe Graphique se « casse » ? (Le Piège des Jours Vides en SQL) :** Si une requête SQL fait un `GROUP BY DATE(created_at)`, elle ne renvoie que les jours où il y a eu au moins 1 visite. S'il n'y a eu aucune inscription le mardi, le mardi disparaît complètement du résultat ! Pour tracer une belle courbe continue sans trous ni sauts temporels, le serveur génère d'abord une « ligne du temps continue » de 30 jours remplie de 0, puis vient y insérer les vraies données.
+  - **Le Bug du Canvas à Largeur Nulle (`rect.width = 0`) :** Lorsqu'un graphique en HTML5 Canvas est initialisé dans un onglet masqué (`display: none`), le navigateur ne peut pas calculer sa largeur car l'élément n'a aucune dimension physique à l'écran. Lors de l'ouverture de l'onglet, le canvas reste bloqué à 0 pixel ! Avec une bibliothèque moderne comme ApexCharts (ou en écoutant l'événement de bascule d'onglet avec un léger délai d'attente), le graphique redessine automatiquement ses proportions à la perfection.
+- **Activité pratique suggérée :** Ouvrir le panneau d'administration sur le Dashboard, observer les 4 KPI cards et les 3 graphiques interactifs. Survoler les courbes du graphique principal pour voir la bulle d'information s'afficher avec les 3 métriques (Vues, Actifs, Inscriptions), puis tester les boutons de filtrage temporel (Aujourd'hui, 7 jours, 30 jours, Tout) et le champ de recherche instantané du tableau des Daimyōs les plus actifs.
+
+---
+
+### Session du 02/10/2026 (Partie 15) — Ergonomie des Micro-Interactions & Barre d'Actions Rapides
+- **Concept exploré :** Conception d'actions d'accès rapide dans une barre secondaire (sous-barre compacte alignée à droite), épuration visuelle par l'usage exclusif d'icônes vectorielles avec infobulles contextuelles Bootstrap/Tabler (`Tooltip API`), et gestion des permissions d'affichage côté serveur.
+- **Notions pour l'atelier :**
+  - **Sobriété de l'Interface & Ratio Signal/Bruit :** Pourquoi ne pas écrire du texte sur tous les boutons d'une sous-barre ? Dans un tableau de bord de jeu de stratégie, la surcharge d'informations fatigue l'œil. L'usage d'une icône explicite (`fa-chart-line` pour les métriques, `fa-gear` pour l'administration) combinée à un badge compact coloré offre un repère visuel immédiat sans encombrer la largeur de l'écran.
+  - **Accessibilité & Infobulles Asynchrones (`bootstrap.Tooltip`) :** L'icône seule ne doit jamais laisser l'utilisateur dans l'ignorance. L'attribut `data-bs-toggle="tooltip"` couplé à un `title` descriptif permet au moteur Tabler d'afficher une infobulle flottante élégante dès le survol, garantissant un apprentissage sans effort pour les nouveaux joueurs et jeunes concepteurs.
+- **Activité pratique suggérée :** Se connecter avec le compte administrateur, observer l'alignement des icônes dans la sous-barre supérieure, survoler le nouveau badge sarcelle pour vérifier l'apparition de l'infobulle « Statistiques d'utilisation & Métriques du Shōgunat », puis cliquer pour vérifier la bascule instantanée sur l'onglet dashboard d'administration.
+
+---
+
 ### Session du 02/10/2026 (Partie 14) — Vulgarisation Pédagogique Backend (POO, Singleton, Injections SQL & Routage)
 - **Concept exploré :** Conception d'un module d'apprentissage interactif complet (« L'École du Backend ») dans l'Atelier Pédagogique, dédié aux jeunes débutants (dès 12 ans), avec vulgarisation par métaphores concrètes du quotidien et du Japon féodal, encarts culturels « Le savais-tu ? » et mini-quiz interactifs client-side.
 - **Notions pour l'atelier :**

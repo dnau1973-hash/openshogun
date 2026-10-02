@@ -3,6 +3,53 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - telemetry/analytics-suite : Suite Télémétrique & Débogage du Graphique d'Activité
+- **Module :** `telemetry/analytics-suite`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Débogage du Graphique d'Activité Dashboard (`views/admin.php`) :**
+     - Résolution de l'incident de canvas vierge (`rect.width <= 0`) causé par le rendu asynchrone lors du masquage/affichage d'onglets.
+     - Correction de la requête SQL d'agrégation chronologique sur 30 jours via une série continue sans saut (`ActivityTracker::getTimelineTrend`), alimentant les jours à 0 inscription ou activité pour préserver la courbe.
+     - Implémentation d'ApexCharts via CDN avec `ResizeObserver` natif et mécanisme de repli transparent sur un canvas 2D stylisé si la bibliothèque externe est indisponible.
+  2. **Moteur Télémétrique & Journal d'Activité (`core/ActivityTracker.php`, `database/migrate_activity_logs.sql`) :**
+     - Table `activity_logs` indexée (`created_at`, `user_id`, `page_slug`, `ip_hash`) avec horodatage, typage d'appareil (ordinateur, mobile, tablette, bot) et anonymisation RGPD par hachage SHA-256 avec salage mensuel.
+     - Helper non-bloquant `ActivityTracker::logView()` branché dans `index.php` pour tracer les visiteurs publics (Atelier pédagogique, Changelog, Authentification) et les joueurs authentifiés avant le rendu de chaque vue.
+  3. **Module de Statistiques Avancées du Shōgunat (`views/admin.php`) :**
+     - 4 KPI Cards réactives avec calcul de variation % par rapport à la période précédente : Total Pages Vues, Daimyōs Actifs Uniques (DAU/MAU), Taux Humains vs Bots, Durée moyenne de session.
+     - Graphique 1 (Spline Area Chart ApexCharts) : Évolution croisée Vues de Pages vs Daimyōs Actifs vs Inscriptions sur 1, 7, 30 ou 60 jours.
+     - Graphique 2 (Horizontal Bar Chart ApexCharts) : Top 8 des modules et pages les plus consultés avec volume de vues.
+     - Graphique 3 (Bar Chart ApexCharts) : Distribution et heures d'affluence de 0h à 23h.
+     - Tableau interactif dynamique : Classement des utilisateurs les plus actifs avec filtre de recherche instantané en JavaScript Vanilla (`#activeUsersSearchInput`).
+     - Boutons de filtrage temporel rapide : Aujourd'hui (`today`), 7 Jours (`7d`), 30 Jours (`30d`), Tout (`all`).
+- **Fichiers modifiés :** `core/ActivityTracker.php`, `database/migrate_activity_logs.sql`, `database/migrate_activity_logs.php`, `index.php`, `views/admin.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Accéder au Dashboard Administrateur (`/?page=admin&tab=dashboard`) : vérifier que le graphique d'activité principal s'affiche immédiatement sans page blanche ni erreur console JS.
+  2. Vérifier la présence et les valeurs des 4 KPI Cards (Pages Vues, Daimyōs Actifs, Taux Humains/Bots, Durée de session).
+  3. Tester les filtres temporels (Aujourd'hui, 7 jours, 30 jours, Tout) : vérifier la mise à jour des métriques selon la période choisie.
+  4. Vérifier l'affichage du Graphique 2 (Top 8 Modules) et du Graphique 3 (Heures de pointe).
+  5. Saisir un nom de joueur ou un clan dans le champ de recherche du tableau des Daimyōs les plus actifs : vérifier le filtrage instantané sans rechargement de page.
+  6. Naviguer vers un autre onglet puis revenir sur « Dashboard » : vérifier que les graphiques se redimensionnent correctement sans distorsion.
+
+---
+
+### [2026-10-02] - navigation/sub-navbar : Bouton Statistiques & Métriques dans la Sous-Barre Header
+- **Module :** `navigation/sub-navbar`
+- **Statut :** `À tester`
+- **Description :** 
+  - Ajout d'un bouton d'action compact « Statistiques d'utilisation & Métriques du Shōgunat » (`?page=admin&tab=dashboard`) dans la deuxième barre de navigation (sous-barre d'outils rapides alignée à droite dans `views/partials/header.php`).
+  - Positionnement : inséré immédiatement avant le bouton d'Administration Générale (`views/partials/header.php`).
+  - Format visuel strict : icône seule Font Awesome `<i class="fa-solid fa-chart-line fs-3"></i>` sans texte visible, format compact badge Tabler `bg-teal-lt text-teal`.
+  - Infobulle native Tabler / Bootstrap : attributs `data-bs-toggle="tooltip"`, `data-bs-placement="bottom"` et `title="Statistiques d'utilisation &amp; Métriques du Shōgunat"`, pris en charge par l'initialisation automatique dans `views/partials/footer.php`.
+  - Condition d'affichage : restreint aux profils administrateurs (`$auth->isAdmin()`).
+- **Fichiers modifiés :** `views/partials/header.php`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter avec un compte non-administrateur : vérifier que le bouton Statistiques (`fa-chart-line`) n'est pas affiché dans la sous-barre.
+  2. Se connecter avec un compte Administrateur : vérifier l'apparition du badge vert/bleu sarcelle `bg-teal-lt` immédiatement à gauche du bouton d'engrenage (Administration).
+  3. Survoler le bouton avec la souris : vérifier l'affichage de l'infobulle Tabler « Statistiques d'utilisation & Métriques du Shōgunat ».
+  4. Cliquer sur le bouton : vérifier la redirection fluide vers `?page=admin&tab=dashboard` et la mise en surbrillance de l'état actif (bordure sarcelle).
+
+---
+
 ### [2026-10-02] - pedagogy/backend-school : École du Backend & 3 Cours Illustrés (POO/Singleton, PDO/SQLi, Routage GET/POST)
 - **Module :** `pedagogy/backend-school`
 - **Statut :** `À tester`

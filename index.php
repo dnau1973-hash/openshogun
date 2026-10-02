@@ -99,6 +99,8 @@ if (preg_match('#^/admin(?:/([a-zA-Z0-9_-]+))?/?$#', $requestUriPath, $adminMatc
     }
 }
 
+require_once __DIR__ . '/core/ActivityTracker.php';
+
 // Détecter si la page demandée est publique (ex: Atelier Pédagogique ou Changelog accessible à tous)
 $reqPage = $_GET['page'] ?? 'resources';
 if (in_array($reqPage, ['php-poo-singleton', 'pdo-sql-injection', 'routing-get-post'], true)) {
@@ -110,12 +112,14 @@ if (in_array($reqPage, ['php-poo-singleton', 'pdo-sql-injection', 'routing-get-p
 if ($reqPage === 'pedagogy' || $reqPage === 'atelier' || $reqPage === 'atelier-pedagogique') {
     $page = 'pedagogy';
     if (!Auth::check()) {
+        ActivityTracker::logView(null, 'pedagogy', $_GET['lesson'] ?? null);
         require __DIR__ . '/views/pedagogy.php';
         exit;
     }
 } elseif ($reqPage === 'changelog') {
     $page = 'changelog';
     if (!Auth::check()) {
+        ActivityTracker::logView(null, 'changelog');
         require __DIR__ . '/views/changelog.php';
         exit;
     }
@@ -123,6 +127,7 @@ if ($reqPage === 'pedagogy' || $reqPage === 'atelier' || $reqPage === 'atelier-p
 
 // Si non connecté, afficher le portail d'authentification
 if (!Auth::check()) {
+    ActivityTracker::logView(null, 'auth');
     require __DIR__ . '/views/auth.php';
     exit;
 }
@@ -205,6 +210,11 @@ if ($page === 'dev_team') {
         }
     }
 }
+
+// Enregistrement de la télémétrie non-bloquante
+$trackingUserId = Auth::check() ? (int)Auth::id() : null;
+$trackingTab = $_GET['tab'] ?? $_GET['lesson'] ?? $_GET['module'] ?? $_GET['metier'] ?? null;
+ActivityTracker::logView($trackingUserId, $page, is_string($trackingTab) ? $trackingTab : null);
 
 // Rendu de la vue avec le Layout HUD
 require __DIR__ . '/views/partials/header.php';
