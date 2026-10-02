@@ -24,20 +24,20 @@
     transform: scale(1.02);
 }
 
-/* Badge circulaire « ? » flottant en haut à droite */
+/* Badge de transparence IA flottant */
 .ai-prompt-badge {
     position: absolute;
     top: 10px;
     right: 10px;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(15, 23, 42, 0.88);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    border: 1.5px solid rgba(6, 182, 212, 0.7);
+    border: 1.5px solid rgba(6, 182, 212, 0.75);
     color: #67e8f9;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
@@ -49,11 +49,12 @@
 }
 
 .ai-prompt-badge .ai-badge-icon {
-    font-size: 14px;
-    font-weight: 800;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
     line-height: 1;
-    transform: translateY(-0.5px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
 }
 
 /* Interaction au survol (Hover) et focus */
@@ -61,24 +62,58 @@
     background: #0891b2;
     color: #ffffff;
     border-color: #67e8f9;
-    transform: scale(1.15) rotate(6deg);
+    transform: scale(1.12) rotate(4deg);
     box-shadow: 0 0 16px rgba(6, 182, 212, 0.75);
+}
+
+.ai-prompt-badge:hover .ai-badge-icon {
+    transform: rotate(15deg) scale(1.1);
 }
 
 .ai-prompt-badge:active {
     transform: scale(0.95);
 }
 
+/* Version Pill / Étiquette élégante avec texte (ex: Panoramas & Terroirs) */
+.ai-prompt-badge-pill {
+    width: auto !important;
+    height: auto !important;
+    border-radius: 50px !important;
+    padding: 0.38rem 0.85rem !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    gap: 0.45rem !important;
+    letter-spacing: 0.3px !important;
+    background: rgba(15, 23, 42, 0.92) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1.5px solid rgba(234, 179, 8, 0.8) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65), 0 0 12px rgba(234, 179, 8, 0.35) !important;
+}
+
+.ai-prompt-badge-pill .ai-badge-label {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.ai-prompt-badge-pill:hover {
+    background: rgba(15, 23, 42, 0.98) !important;
+    border-color: #facc15 !important;
+    color: #ffffff !important;
+    transform: scale(1.06) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.8), 0 0 20px rgba(234, 179, 8, 0.75) !important;
+}
+
 /* Version miniature pour les vignettes compactes (ex: listes de troupes) */
 .ai-prompt-badge-sm {
     top: 4px;
     right: 4px;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-width: 1px;
 }
 .ai-prompt-badge-sm .ai-badge-icon {
-    font-size: 11px;
+    font-size: 10px;
 }
 
 /* ==========================================================================
@@ -156,6 +191,13 @@
     font-weight: 700;
     color: #f8fafc;
     letter-spacing: 0.3px;
+    line-height: 1.3;
+}
+
+.ai-modal-subtitle {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 2px;
 }
 
 .ai-modal-close-btn {
@@ -206,7 +248,80 @@
     border-radius: 8px;
 }
 
-/* 2 & 3. Blocs Prompts Anglais & Traduction Française */
+.ai-modal-zoom-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.3rem 0.65rem;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.ai-modal-zoom-btn:hover {
+    background: #0891b2;
+    color: #ffffff;
+    border-color: #06b6d4;
+    transform: translateY(-2px);
+}
+
+/* 2. Barre des métadonnées IA (Modèle, Date, Résolution) */
+.ai-modal-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.ai-meta-item {
+    background: rgba(2, 6, 23, 0.6);
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.ai-meta-icon {
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ai-meta-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+}
+
+.ai-meta-val {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-top: 2px;
+}
+
+@media (max-width: 640px) {
+    .ai-modal-meta-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+}
+
+/* 3 & 4. Blocs Prompts Anglais & Traduction Française */
 .ai-prompt-block {
     background: rgba(2, 6, 23, 0.7);
     border: 1px solid rgba(51, 65, 85, 0.6);

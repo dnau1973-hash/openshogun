@@ -5,6 +5,11 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Grimoire des Prompts, Traçabilité IA & Harmonisation des Modales (`views/partials/grimoire_prompts_data.php`, `core/AiPromptHelper.php`, `views/partials/ai_prompt_modal.php`, `public/js/ai_prompt_modal.js`, `public/css/ai_prompt_modal.css`) :**
+  * Intégration de 11 nouvelles fiches descriptives au Grimoire des Prompts (totalisant désormais 91 prompts référencés) couvrant les décors ruraux (Forêt, Montagne, Argile, Rizières, Thé, Soja, Village) et les bannières historiques de clans.
+  * Modernisation du badge de transparence IA avec l'icône Font Awesome `fa-wand-magic-sparkles`, infobulles Tabler.io natives et variante capsule/pill (`ai-prompt-badge-pill`).
+  * Nouvelle modale d'affichage universelle intégrant l'aperçu HD plein écran, une barre de métadonnées à 3 indicateurs (Modèle IA Google Gemini Imagen 3, Date de génération, Résolution), le prompt source anglais avec copie en 1 clic et la traduction française.
+  * Déploiement des badges IA sur la Carte Interactive du Terroir Rural (`views/resources.php`) et sur l'ensemble des scènes des 7 zones féodales (`views/view_resource.php`).
 - **Carte Interactive du Terroir Rural & Vues Dédiées 5 Slots par Ressource (`views/resources.php`, `views/view_resource.php`, `views/view_village.php`, `core/TerroirEngine.php`, `api/terroir.php`) :**
   * Nouvelle carte panoramique du terroir féodal (`1696x2528 px`) avec 7 badges interactifs positionnés en pourcentages CSS sur les repères du décor (Montagne, Forêt, Argile, Rizières, Thé, Soja, Village).
   * Effets de survol enrichis : zoom contextuel, halo lumineux pulsant (`zone-badge-beacon`), tooltips Tabler.io avec cadences horaires et redirection directe.

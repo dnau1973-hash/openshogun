@@ -8,6 +8,7 @@ require_once __DIR__ . '/../core/VillageFieldGenerator.php';
 require_once __DIR__ . '/../core/OasisEngine.php';
 require_once __DIR__ . '/../core/SlotPositionEngine.php';
 require_once __DIR__ . '/../core/TerroirEngine.php';
+require_once __DIR__ . '/../core/AiPromptHelper.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $buildingEngine = new BuildingEngine();
@@ -242,6 +243,11 @@ $bgVersion = file_exists(__DIR__ . '/../public/assets/shogun_rural_terroir_bg.jp
             <!-- 1. VUE PRINCIPALE : CARTE INTERACTIVE DU TERROIR RURAL (7 ZONES) -->
             <div id="container-interactive-map">
                 <div class="rural-terroir-map-viewport">
+                    <!-- Badge Transparence IA (Haut Droite) -->
+                    <div style="position:absolute; top:12px; right:12px; z-index:25;">
+                        <?= class_exists('AiPromptHelper') ? AiPromptHelper::renderBadge('shogun_rural_terroir_bg.jpg', 'Carte Interactive du Terroir Rural Féodal', '/public/assets/shogun_rural_terroir_bg.jpg', 'ai-prompt-badge-pill', true) : '' ?>
+                    </div>
+
                     <!-- 1. ⛰️ Montagne : Extraction de pierre -->
                     <div class="terroir-zone-badge"
                          style="top: 25.0%; left: 58.0%;"

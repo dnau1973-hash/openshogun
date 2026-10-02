@@ -3,6 +3,37 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - grimoire-prompts-traceability : Grimoire des Prompts, Traçabilité IA & Harmonisation des Modales
+- **Module :** `grimoire-prompts-traceability`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Enrichissement du Grimoire des Prompts (`views/partials/grimoire_prompts_data.php`) :**
+     - Intégration complète de 11 nouvelles fiches descriptives détaillées (portant le grimoire à 91 prompts référencés) :
+       * Décors thématiques de terroirs ruraux : `shogun_rural_terroir_bg.jpg` (Panorama interactif d'ensemble), `terroir_wood.jpg` (Forêt & Bûcheronnage), `terroir_stone.jpg` (Montagne & Granit), `terroir_clay.jpg` (Argile alluviale & Fours Noborigama), `terroir_rice.jpg` (Terrasses rizicoles inondées), `terroir_tea.jpg` (Coteaux de thé & Matcha), `terroir_soybean.jpg` (Champs de soja & Tofu), `terroir_village.jpg` (Village central, Minka & Sakagura).
+       * Bannières de clans féodaux : `clan_oda_war_council.jpg`, `clan_takeda_cavalry_charge.jpg`, `clan_tokugawa_covert_scout.jpg`.
+     - Respect strict de la structure documentaire : titre, sous-titre, catégorie, fichier d'asset, format, résolution (1920×1080), modèle IA (`Google Gemini Imagen 3`), date (`Octobre 2026`), prompt source anglais et traduction française avec notes d'ambiance.
+  2. **Refonte & Harmonisation du Badge de Traçabilité IA (`core/AiPromptHelper.php`, `public/css/ai_prompt_modal.css`) :**
+     - Remplacement de l'icône « ? » par l'icône Font Awesome `fa-wand-magic-sparkles` avec infobulle Tabler.io native (`title="Généré par IA • Google Gemini Imagen 3 • Cliquer pour voir le prompt source"`).
+     - Support du mode capsule/pill (`ai-prompt-badge-pill`) avec libellé textuel « Généré par IA », lueur ambrée et effet d'échelle au survol.
+     - Injection universelle des métadonnées `data-ai-model`, `data-ai-date`, `data-ai-resolution`, `data-ai-category`, `data-ai-title`, `data-ai-img`, `data-ai-prompt` et `data-ai-translation`.
+     - Intégration directe du badge sur la carte interactive du terroir rural (`views/resources.php`) et sur les scènes des 7 zones de ressources (`views/view_resource.php`).
+  3. **Modale Universelle Haute Définition & Métadonnées (`views/partials/ai_prompt_modal.php`, `public/js/ai_prompt_modal.js`) :**
+     - Affichage de l'image haute définition en grand format avec bouton d'ouverture plein écran (`#aiModalFullImgBtn`).
+     - Grille 3 colonnes de métadonnées visuelles : Modèle IA (`Google Gemini Imagen 3`), Date de génération (`Octobre 2026`) et Résolution/Format (`1920×1080 HD 16:9`).
+     - Blocs de code pour le prompt source en anglais avec bouton de copie en 1 clic dans le presse-papiers et traduction française commentée.
+     - Prise en charge du clic sur l'image elle-même (`.ai-image-clickable` ou dans `.ai-image-container`) pour déclencher la modale.
+     - Fermeture fluide via bouton, overlay assombri et touche Échap avec gestion des tooltips Tabler.
+- **Fichiers modifiés :** `views/partials/grimoire_prompts_data.php`, `core/AiPromptHelper.php`, `views/partials/ai_prompt_modal.php`, `public/js/ai_prompt_modal.js`, `public/css/ai_prompt_modal.css`, `views/resources.php`, `views/view_resource.php`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Se rendre sur la carte interactive du Terroir Rural (`/?page=resources`) : observer le badge capsule « Généré par IA » en haut à droite du décor panoramique.
+  2. Survoler le badge : vérifier l'infobulle Tooltip indiquant « Généré par IA • Google Gemini Imagen 3 • Cliquer pour voir le prompt source ».
+  3. Cliquer sur le badge : vérifier l'ouverture instantanée de la modale avec l'image HD, la barre de 3 métadonnées (Modèle, Date, Résolution), le prompt anglais et la traduction française.
+  4. Tester le bouton « Copier » du prompt anglais : vérifier le feedback visuel « Copié ! » et le collage effectif dans le presse-papiers.
+  5. Naviguer vers une vue de ressource dédiée (ex. `/?page=view_resource&type=wood` ou `type=village`) : vérifier la présence du badge IA sur la scène thématique et son bon fonctionnement au clic.
+  6. Vérifier la page de l'affiche féodale (`/?page=poster`) et les fiches de bâtiments/champs (`/?page=building`, `/?page=field`) : s'assurer que les badges de transparence existants affichent désormais l'icône `fa-wand-magic-sparkles` et ouvrent la modale enrichie.
+
+---
+
 ### [2026-10-02] - rural-terroir-interactive : Carte Interactive du Terroir Rural & Vues Dédiées 5 Slots
 - **Module :** `rural-terroir-interactive`
 - **Statut :** `À tester`
