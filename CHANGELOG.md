@@ -4,6 +4,13 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
+### Corrigé (Fixed)
+- **Résolution de la Fuite de Script JS & Clamping Pan/Zoom Strict sur le Domaine Rural (`views/resources.php`, `public/js/terroir_map.js`) :**
+  * Correction de la fuite de texte JavaScript causée par des guillemets orphelins dans les attributs `title` des 40 parcelles (échappement complet `htmlspecialchars` avec `ENT_QUOTES`).
+  * Découplage et externalisation de plus de 450 lignes de code JavaScript dans le nouvel asset dédié `/public/js/terroir_map.js` avec chargement propre et sécurisé.
+  * Verrouillage strict de l'échelle minimale (`minZoom`) : calcul automatique $minScale = \max(containerWidth / stageWidth, containerHeight / stageHeight)$ pour garantir 100% de couverture écran sans fond noir.
+  * Verrouillage des bords au glissement (Bounding Box Clamping) : limitation absolue des coordonnées de translation dans $[containerWidth - scaledWidth, 0]$ et $[containerHeight - scaledHeight, 0]$ interdisant toute exposition des marges vides au drag souris ou tactile.
+
 ### Ajouté (Added)
 - **Carte Illustrée des 40 Parcelles Féodales — Panorama 16:9 Ukiyo-e & Viewport Grab-and-Pan (`views/resources.php`, `core/TerroirEngine.php`, `public/assets/terroir_panoramic_16_9.jpg`, `views/partials/grimoire_prompts_data.php`) :**
   * Nouvelle création picturale originale haute définition au format widescreen 16:9 (`1376×768 px`), inspirée des estampes ukiyo-e et de la peinture numérique semi-réaliste féodale (encrage fin, textures d'aquarelle, lumière dorée d'aurore et brume matinale).

@@ -3,6 +3,32 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-02] - rural-terroir-viewport-clamping-fix : Verrouillage Pan/Zoom Clamping (minZoom & Bounding Box) & Résolution Fuite JS
+- **Module :** `rural-terroir-viewport-clamping-fix`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Résolution de la Fuite de Code JavaScript au-dessus de l'Image :**
+     - Correction des guillemets orphelins dans les attributs des 40 pins interactifs : échappement strict `htmlspecialchars($tooltipTitle, ENT_QUOTES, 'UTF-8')` sur `title` et `data-bs-title`. Les classes CSS internes (`text-warning`, `text-muted`) ne provoquent plus de fermeture prématurée de l'attribut HTML.
+     - Découplage et externalisation de l'intégralité de la logique front-end dans un asset dédié `/public/js/terroir_map.js` (validé sans erreur via `node --check`).
+     - Injection propre et sécurisée des stocks du joueur via `window.TERROIR_CONFIG` sans script inline orphelin.
+  2. **Verrouillage du Zoom & Déplacement (Pan/Zoom Clamping Strict) :**
+     - **Contrainte 1 — Limite minimale de dézoom (`minZoom` / Fit-to-screen) :** Calcul dynamique systématique `minScale = Math.max(containerWidth / stageWidth, containerHeight / stageHeight)`. L'illustration 16:9 recouvre toujours 100% de la zone visible du viewport, interdisant toute bordure vide ou fond noir.
+     - **Contrainte 2 — Verrouillage des bords au glissement (Clamp Pan / Bounding Box) :** Bornage strict des coordonnées de translation :
+       * `minX = containerWidth - (stageWidth * currentZoom)`, `maxX = 0`
+       * `minY = containerHeight - (stageHeight * currentZoom)`, `maxY = 0`
+       * `x = Math.min(Math.max(x, minX), maxX)` et `y = Math.min(Math.max(y, minY), maxY)`
+     - Interdiction formelle de tout déplacement hors de la boîte englobante lors du glissement à la souris et au tactile.
+     - Préservation du point d'ancrage sous le curseur lors du zoom molette / boutons (`zoomAtCursor`), recalcul dynamique sur `resize` et transitions plein écran (`fullscreenchange`).
+- **Fichiers modifiés :** `public/js/terroir_map.js`, `views/resources.php`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Charger la page `/?page=resources` : vérifier l'absence totale de code JavaScript en texte brut au-dessus de l'image de fond ou dans les en-têtes.
+  2. Survoler les pins des 40 parcelles : vérifier que les infobulles s'affichent correctement et qu'aucun attribut HTML (`onclick`, `data-`) ne déborde en texte sur l'écran.
+  3. Dézoomer au maximum (molette arrière ou bouton `-`) : vérifier que le zoom se bloque dès que l'image atteint les bords du conteneur (aucun fond noir visible).
+  4. Faire glisser la carte dans les 4 directions (haut, bas, gauche, droite) : vérifier le blocage net aux 4 bordures sans aucun interstice ni fond noir exposé.
+  5. Tester en redimensionnant la fenêtre et en mode Plein Écran (⛶) : vérifier que le clamping s'ajuste immédiatement.
+
+---
+
 ### [2026-10-02] - rural-terroir-40-illustrated-map : Carte Illustrée des 40 Parcelles Féodales (Panorama 16:9 Ukiyo-e & Viewport Grab-and-Pan)
 - **Module :** `rural-terroir-40-illustrated-map`
 - **Statut :** `À tester`
