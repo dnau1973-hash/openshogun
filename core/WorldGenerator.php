@@ -11,8 +11,8 @@ require_once __DIR__ . '/../config/game_constants.php';
 class WorldGenerator {
     private PDO $db;
 
-    public function __construct() {
-        $this->db = Database::getConnection();
+    public function __construct(?PDO $db = null) {
+        $this->db = $db ?? Database::getConnection();
     }
 
     /**

@@ -199,26 +199,43 @@ class InstallEngine {
         $sql = file_get_contents($filePath);
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 0;");
 
+        // Nettoyer les commentaires multilignes /* ... */
+        $sqlClean = preg_replace('!/\*.*?\*/!s', '', $sql);
+
         // Découpage et exécution bloc par bloc
-        $lines = explode("\n", $sql);
+        $lines = explode("\n", $sqlClean);
         $query = '';
         foreach ($lines as $line) {
             $lineTrim = trim($line);
-            if (empty($lineTrim) || str_starts_with($lineTrim, '--') || str_starts_with($lineTrim, '/*')) {
+            if (empty($lineTrim) || str_starts_with($lineTrim, '--') || str_starts_with($lineTrim, '#')) {
                 continue;
             }
             $query .= $line . "\n";
             if (str_ends_with($lineTrim, ';')) {
-                try {
-                    $pdo->exec($query);
-                } catch (PDOException $e) {
-                    // Ignorer les avertissements non critiques
+                $trimmedQuery = trim($query);
+                if (!empty($trimmedQuery)) {
+                    try {
+                        $pdo->exec($trimmedQuery);
+                    } catch (PDOException $e) {
+                        // Si une création de table échoue, c'est une anomalie bloquante
+                        if (stripos($trimmedQuery, 'CREATE TABLE') !== false) {
+                            throw new Exception("Erreur lors de la création d'une table SQL : " . $e->getMessage() . " (Requête : " . substr($trimmedQuery, 0, 120) . "...)");
+                        }
+                        // Ignorer les avertissements non critiques pour les autres requêtes (ex: DROP IF EXISTS)
+                    }
                 }
                 $query = '';
             }
         }
-        if (!empty(trim($query))) {
-            $pdo->exec($query);
+        $remaining = trim($query);
+        if (!empty($remaining)) {
+            try {
+                $pdo->exec($remaining);
+            } catch (PDOException $e) {
+                if (stripos($remaining, 'CREATE TABLE') !== false) {
+                    throw new Exception("Erreur lors de la création d'une table SQL : " . $e->getMessage());
+                }
+            }
         }
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 1;");
     }
@@ -269,6 +286,10 @@ class InstallEngine {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
 
+        // Synchroniser le singleton Database avec la connexion active
+        require_once __DIR__ . '/Database.php';
+        Database::setConnection($pdo);
+
         // 4. Importer le schéma complet consolidé (30 tables)
         self::executeSqlFile($pdo, self::SCHEMA_FILE);
 
@@ -278,6 +299,18 @@ class InstallEngine {
         }
 
         // 6. Configurer le titre du jeu et la vitesse dans game_settings
+        // Filet de sécurité résilient : garantir que la table game_settings existe quoi qu'il arrive
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `game_settings` (
+              `setting_key` varchar(50) NOT NULL,
+              `setting_value` text NOT NULL,
+              `setting_type` enum('int','float','string','boolean') NOT NULL DEFAULT 'string',
+              `description` varchar(255) DEFAULT NULL,
+              `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`setting_key`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
         $stmtSet = $pdo->prepare("
             INSERT INTO game_settings (setting_key, setting_value, setting_type, updated_at)
             VALUES (?, ?, 'string', NOW())
@@ -295,7 +328,7 @@ class InstallEngine {
 
         // 7. Initialiser l'Univers Féodal via WorldGenerator
         require_once __DIR__ . '/WorldGenerator.php';
-        $worldGen = new WorldGenerator();
+        $worldGen = new WorldGenerator($pdo);
         $worldGen->resetUniverse($adminPass, 12, true);
 
         // Mettre à jour le compte administrateur avec les identifiants saisis

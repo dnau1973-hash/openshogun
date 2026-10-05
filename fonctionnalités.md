@@ -3,6 +3,29 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-05] - fix-installer-game-settings-resilience : Résolution de l'erreur SQLSTATE[42S02] table 'game_settings' inexistante lors de l'installation
+- **Module :** `fix-installer-game-settings-resilience`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Résolution du blocage d'installation sur `game_settings` :**
+     - Ajout de la définition complète de la table `game_settings` dans le schéma de référence `database/schema.sql` (avec clause `DROP TABLE IF EXISTS` et DDL `CREATE TABLE IF NOT EXISTS`).
+     - Normalisation de `current_timestamp()` vers `CURRENT_TIMESTAMP` dans l'ensemble des 25 occurrences de `database/schema_complete.sql` pour assurer une compatibilité SQL stricte universelle (MySQL 5.7, 8.0, 8.4, MariaDB 10.x/11.x).
+     - Filet de sécurité résilient dans l'Étape 6 de `InstallEngine::runInstallation` : exécution explicite et inconditionnelle d'un `CREATE TABLE IF NOT EXISTS game_settings` immédiatement avant l'insertion des clés de configuration, rendant tout échec d'insertion par table absente impossible.
+  2. **Fiabilisation de l'analyseur SQL (`InstallEngine::executeSqlFile`) :**
+     - Prise en charge et filtrage rigoureux des blocs de commentaires multilignes (`/* ... */`) et des commentaires `#` / `--`.
+     - Levée d'exception descriptive explicite si une requête `CREATE TABLE` échoue, interdisant le masquage silencieux d'erreurs DDL critiques.
+  3. **Injection de dépendance PDO & Synchronisation Singleton :**
+     - Ajout de `Database::setConnection(?PDO $pdo)` pour réassigner dynamiquement la connexion active du singleton lors de l'installation.
+     - Refactorisation du constructeur `WorldGenerator::__construct(?PDO $db = null)` acceptant l'injection de l'instance PDO courante afin d'éviter tout conflit de connexion non synchronisée avec le fichier `config/database.php`.
+- **Fichiers modifiés :** `core/InstallEngine.php`, `core/WorldGenerator.php`, `core/Database.php`, `database/schema.sql`, `database/schema_complete.sql`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Lancer l'assistant d'installation web `install.php` sur une base vierge ou réinitialisée.
+  2. Vérifier que les 7 étapes d'installation se déroulent avec succès sans déclencher d'exception PDO ni d'erreur de table manquante.
+  3. Vérifier que la table `game_settings` est créée et contient l'intégralité des 12 paramètres requis (`game_title`, `game_speed`, `bots_enabled`, `oasis_density_percent`, etc.).
+  4. Vérifier la génération du château de départ et du compte administrateur.
+
+---
+
 ### [2026-10-02] - rural-terroir-viewport-clamping-fix : Verrouillage Pan/Zoom Clamping (minZoom & Bounding Box) & Résolution Fuite JS
 - **Module :** `rural-terroir-viewport-clamping-fix`
 - **Statut :** `À tester`

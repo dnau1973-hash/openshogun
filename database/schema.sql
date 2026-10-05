@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS `planet_fields`;
 DROP TABLE IF EXISTS `planets`;
 DROP TABLE IF EXISTS `alliances`;
 DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `game_settings`;
 
 -- Utilisateurs
 CREATE TABLE `users` (
@@ -381,6 +382,15 @@ CREATE TABLE `craft_queue` (
   KEY `idx_cq_planet` (`planet_id`),
   KEY `idx_cq_finishes` (`finishes_at`),
   CONSTRAINT `fk_cq_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Paramètres du Monde & Configuration Dynamique
+CREATE TABLE IF NOT EXISTS `game_settings` (
+  `setting_key` VARCHAR(50) NOT NULL PRIMARY KEY,
+  `setting_value` TEXT NOT NULL,
+  `setting_type` ENUM('int','float','string','boolean') NOT NULL DEFAULT 'string',
+  `description` VARCHAR(255) NULL DEFAULT NULL,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

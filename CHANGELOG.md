@@ -5,6 +5,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Corrigé (Fixed)
+- **Résilience de l'Assistant d'Installation & Création de la table `game_settings` (`core/InstallEngine.php`, `core/WorldGenerator.php`, `core/Database.php`, `database/schema.sql`, `database/schema_complete.sql`) :**
+  * Élimination de l'erreur `SQLSTATE[42S02]: Base table or view not found: 1146 Table 'game_settings' doesn't exist` lors du déploiement via `install.php`.
+  * Ajout du DDL de `game_settings` dans `database/schema.sql` et exécution préventive `CREATE TABLE IF NOT EXISTS` dans l'étape 6 de `InstallEngine::runInstallation`.
+  * Remplacement des 25 occurrences de `current_timestamp()` par `CURRENT_TIMESTAMP` dans `database/schema_complete.sql` garantissant la compatibilité multi-moteurs MySQL 5.7+, 8.0+, 8.4+ et MariaDB 10.x/11.x.
+  * Amélioration du parseur `InstallEngine::executeSqlFile` : filtrage des commentaires multilignes (`/* ... */`) et détection explicite sans masquage des erreurs d'exécution DDL (`CREATE TABLE`).
+  * Support de l'injection d'instance PDO active dans `WorldGenerator` et méthode `Database::setConnection(?PDO $pdo)` évitant toute incohérence de session durant l'installation.
 - **Résolution de la Fuite de Script JS & Clamping Pan/Zoom Strict sur le Domaine Rural (`views/resources.php`, `public/js/terroir_map.js`) :**
   * Correction de la fuite de texte JavaScript causée par des guillemets orphelins dans les attributs `title` des 40 parcelles (échappement complet `htmlspecialchars` avec `ENT_QUOTES`).
   * Découplage et externalisation de plus de 450 lignes de code JavaScript dans le nouvel asset dédié `/public/js/terroir_map.js` avec chargement propre et sécurisé.
