@@ -610,6 +610,7 @@ CREATE TABLE `users` (
   `faction` enum('terran','vorash','aethelis') NOT NULL DEFAULT 'terran',
   `alliance_id` int(10) unsigned DEFAULT NULL,
   `bio` text DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
   `is_admin` tinyint(1) NOT NULL DEFAULT 0,
   `is_moderator` tinyint(1) NOT NULL DEFAULT 0,
   `is_bot` tinyint(1) NOT NULL DEFAULT 0,

@@ -255,9 +255,25 @@ class Auth {
     public static function getCurrentUser(): ?array {
         if (!self::check()) return null;
         $db = Database::getConnection();
-        $stmt = $db->prepare("SELECT id, username, email, faction, alliance_id, points, avatar, bio, is_admin, is_moderator, is_bot, created_at, protection_until FROM users WHERE id = ?");
-        $stmt->execute([self::id()]);
-        return $stmt->fetch() ?: null;
+        try {
+            $stmt = $db->prepare("SELECT id, username, email, faction, alliance_id, points, avatar, bio, is_admin, is_moderator, is_bot, created_at, protection_until FROM users WHERE id = ?");
+            $stmt->execute([self::id()]);
+            return $stmt->fetch() ?: null;
+        } catch (PDOException $e) {
+            // Fallback résilient si les colonnes avatar ou bio n'ont pas encore été migrées
+            try {
+                $stmt = $db->prepare("SELECT id, username, email, faction, alliance_id, points, is_admin, is_moderator, is_bot, created_at, protection_until FROM users WHERE id = ?");
+                $stmt->execute([self::id()]);
+                $u = $stmt->fetch();
+                if ($u) {
+                    $u['avatar'] = null;
+                    $u['bio'] = null;
+                }
+                return $u ?: null;
+            } catch (Exception $fallbackEx) {
+                return null;
+            }
+        }
     }
 
     public function isAdmin(): bool {

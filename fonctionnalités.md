@@ -3,6 +3,22 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-05] - fix-auth-missing-avatar-column : Résolution de l'erreur SQLSTATE[42S22] colonne 'avatar' inconnue dans Auth::getCurrentUser
+- **Module :** `fix-auth-missing-avatar-column`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Résolution du crash au chargement de l'en-tête (`Auth::getCurrentUser()`) :**
+     - Ajout de la colonne `avatar VARCHAR(255) NULL AFTER bio` dans les schémas DDL de création de la table `users` (`database/schema_complete.sql` et `database/schema.sql`).
+     - Sécurisation résiliente de `Auth::getCurrentUser()` dans `core/Auth.php` : mise en place d'un bloc `try / catch (PDOException)` avec requête de secours sans les colonnes `avatar` / `bio` (assignées à `null` par défaut), garantissant le fonctionnement continu de l'interface même sur une base n'ayant pas encore exécuté la migration.
+     - Automatisation de la migration des colonnes `bio` et `avatar` directement dans l'étape d'installation de `core/InstallEngine.php`.
+- **Fichiers modifiés :** `core/Auth.php`, `core/InstallEngine.php`, `database/schema.sql`, `database/schema_complete.sql`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Se connecter avec un compte utilisateur et charger `index.php` : vérifier que la page d'accueil s'affiche sans erreur PDO.
+  2. Vérifier que la table `users` dispose des colonnes `bio` et `avatar`.
+  3. Vérifier que le profil utilisateur et l'avatar personnalisé fonctionnent sans régression.
+
+---
+
 ### [2026-10-05] - fix-installer-game-settings-resilience : Résolution de l'erreur SQLSTATE[42S02] table 'game_settings' inexistante lors de l'installation
 - **Module :** `fix-installer-game-settings-resilience`
 - **Statut :** `À tester`

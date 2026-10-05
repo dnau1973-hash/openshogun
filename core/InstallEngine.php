@@ -298,6 +298,19 @@ class InstallEngine {
             self::executeSqlFile($pdo, self::SEED_FILE);
         }
 
+        // Garantir la présence des colonnes bio et avatar dans users
+        try {
+            $userCols = $pdo->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('bio', $userCols)) {
+                $pdo->exec("ALTER TABLE users ADD COLUMN bio TEXT NULL AFTER alliance_id");
+            }
+            if (!in_array('avatar', $userCols)) {
+                $pdo->exec("ALTER TABLE users ADD COLUMN avatar VARCHAR(255) NULL AFTER bio");
+            }
+        } catch (Exception $e) {
+            // Ignorer si la table n'existe pas encore ou déjà présente
+        }
+
         // 6. Configurer le titre du jeu et la vitesse dans game_settings
         // Filet de sécurité résilient : garantir que la table game_settings existe quoi qu'il arrive
         $pdo->exec("

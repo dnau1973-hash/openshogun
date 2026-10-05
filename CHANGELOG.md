@@ -5,6 +5,11 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Corrigé (Fixed)
+- **Résolution de la colonne manquante `avatar` dans `Auth::getCurrentUser()` (`core/Auth.php`, `core/InstallEngine.php`, `database/schema.sql`, `database/schema_complete.sql`) :**
+  * Correction du crash `SQLSTATE[42S22]: Column not found: 1054 Unknown column 'avatar'` survenant au chargement de `index.php` après une nouvelle installation.
+  * Ajout de la colonne `avatar VARCHAR(255) NULL AFTER bio` dans les DDL de la table `users` des schémas SQL.
+  * Implémentation d'une requête de secours résiliente (`try/catch PDOException`) dans `Auth::getCurrentUser()` afin de parer immédiatement à toute absence de colonne dans des bases existantes non migrées.
+  * Automatisation de la vérification et migration des colonnes `bio` et `avatar` dans l'assistant `InstallEngine`.
 - **Résilience de l'Assistant d'Installation & Création de la table `game_settings` (`core/InstallEngine.php`, `core/WorldGenerator.php`, `core/Database.php`, `database/schema.sql`, `database/schema_complete.sql`) :**
   * Élimination de l'erreur `SQLSTATE[42S02]: Base table or view not found: 1146 Table 'game_settings' doesn't exist` lors du déploiement via `install.php`.
   * Ajout du DDL de `game_settings` dans `database/schema.sql` et exécution préventive `CREATE TABLE IF NOT EXISTS` dans l'étape 6 de `InstallEngine::runInstallation`.

@@ -33,6 +33,8 @@ CREATE TABLE `users` (
   `password_hash` VARCHAR(255) NOT NULL,
   `faction` ENUM('terran', 'vorash', 'aethelis') NOT NULL DEFAULT 'terran',
   `alliance_id` INT UNSIGNED NULL DEFAULT NULL,
+  `bio` TEXT NULL DEFAULT NULL,
+  `avatar` VARCHAR(255) NULL DEFAULT NULL,
   `points` INT UNSIGNED NOT NULL DEFAULT 0,
   `is_admin` TINYINT(1) NOT NULL DEFAULT 0,
   `is_moderator` TINYINT(1) NOT NULL DEFAULT 0,
