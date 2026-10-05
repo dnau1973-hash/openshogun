@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------------
+  # Base de données MariaDB 10.11 (LTS)
+  # ----------------------------------------------------------------------------
+  db:
+    image: mariadb:10.11
+    container_name: openshogun_db
+    restart: unless-stopped
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-file-per-table=1
+      --innodb-redo-log-capacity=67108864
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Gabriel125#}
+      MYSQL_DATABASE: ${DB_NAME:-openshogun}
+      MYSQL_USER: ${DB_USER:-shogun_user}
+      MYSQL_PASSWORD: ${DB_PASS:-ShogunPass2026!}
+    volumes:
+      - db_data:/var/lib/mysql
+      # Initialisation automatique au premier démarrage (baseline DDL + seeds)
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ----------------------------------------------------------------------------
+  # Serveur Web & Application PHP 8.2 Apache
+  # ----------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: openshogun_web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-openshogun}
+      DB_USER: root
+      DB_PASS: ${MYSQL_ROOT_PASSWORD:-Gabriel125#}
+      DB_CHARSET: utf8mb4
+      SITE_URL: ${SITE_URL:-http://localhost:8080}
+      SPEED_FACTOR: ${SPEED_FACTOR:-5}
+    volumes:
+      - ./:/var/www/html
+
+volumes:
+  db_data:
+    name: openshogun_db_data

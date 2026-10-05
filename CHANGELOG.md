@@ -23,6 +23,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * Verrouillage des bords au glissement (Bounding Box Clamping) : limitation absolue des coordonnées de translation dans $[containerWidth - scaledWidth, 0]$ et $[containerHeight - scaledHeight, 0]$ interdisant toute exposition des marges vides au drag souris ou tactile.
 
 ### Ajouté (Added)
+- **Refonte DevOps & Consolidation Idempotente de la Base de Données (`database/migrations/`, `core/MigrationEngine.php`, `scripts/migrate.php`, `Dockerfile`, `docker-compose.yml`, `.env.example`) :**
+  * Unification intégrale des 42 tables du jeu dans un schéma de référence unique `001_baseline_schema.sql` éliminant toute fragmentation DDL.
+  * Découplage des graines statiques de référence (unités, recherches, vaisseaux, châteaux, catégories forum, settings) dans `002_seed_game_data.sql` avec clauses idempotentes `INSERT ... ON DUPLICATE KEY UPDATE`.
+  * Nouveau moteur de migration `core/MigrationEngine.php` avec table d'historique `schema_migrations`, calcul d'empreinte SHA-256 et runner CLI `scripts/migrate.php` (`--status`, exécution automatique).
+  * Intégration du moteur de migration dans l'assistant web `InstallEngine`.
+  * Support 12-factor des variables d'environnement (`.env.example`, `core/Database.php`) et conteneurisation complète avec `Dockerfile` et `docker-compose.yml` (MariaDB 10.11, healthchecks, volumes persistants, initialisation automatique `/docker-entrypoint-initdb.d/`).
 - **Carte Illustrée des 40 Parcelles Féodales — Panorama 16:9 Ukiyo-e & Viewport Grab-and-Pan (`views/resources.php`, `core/TerroirEngine.php`, `public/assets/terroir_panoramic_16_9.jpg`, `views/partials/grimoire_prompts_data.php`) :**
   * Nouvelle création picturale originale haute définition au format widescreen 16:9 (`1376×768 px`), inspirée des estampes ukiyo-e et de la peinture numérique semi-réaliste féodale (encrage fin, textures d'aquarelle, lumière dorée d'aurore et brume matinale).
   * Composition spatiale isométrique distribuant 40 clairières et plateformes d'exploitation réparties sur 8 biomes stratégiques interconnectés (Carrières de pierre au nord, Forêt de cèdres au nord-est, Berges d'argile à l'est, Rizières en terrasses au centre-sud, Collines de thé au sud-est, Champs de soja au sud-ouest, Sanctuaires shintō à l'ouest, Cœur du village au centre).

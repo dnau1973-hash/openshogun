@@ -34,34 +34,48 @@ Jeu de stratégie multijoueur en temps réel sur navigateur (style **Travian**),
 
 ---
 
-## 🛠️ Prérequis & Installation
+## 🛠️ Déploiement & Installation Standardisée
 
-### Prérequis
-- **PHP** : 8.1 ou supérieur (avec extensions `pdo`, `pdo_mysql`, `mbstring`)
-- **Base de données** : MariaDB 10.5+ ou MySQL 8.0+
-- **Serveur Web** : Apache (avec `mod_rewrite`) ou Nginx
+### Méthode 1 — Déploiement Docker (Recommandé, Clé en main)
 
-### Installation Rapide
-1. Cloner le dépôt :
+OpenShogun intègre un environnement conteneurisé complet (PHP 8.2 Apache + MariaDB 10.11 avec initialisation automatique).
+
+1. **Cloner le dépôt et entrer dans le dossier :**
    ```bash
-   git clone git@github.com:dnau1973-hash/openshogun.git
+   git clone https://github.com/dnau1973-hash/openshogun.git
    cd openshogun
    ```
-2. Importer la base de données :
+2. **Configurer l'environnement :**
    ```bash
-   mysql -u root -p opengalaxy < database/schema.sql
+   cp .env.example .env
    ```
-3. Configurer la connexion dans `config/database.php` :
-   ```php
-   define('DB_HOST', '127.0.0.1');
-   define('DB_PORT', '3306');
-   define('DB_NAME', 'opengalaxy');
-   define('DB_USER', 'votre_utilisateur');
-   define('DB_PASS', 'votre_mot_de_passe');
-   ```
-4. Lancer les tests de vérification :
+3. **Lancer les conteneurs :**
    ```bash
-   php tests/test_village_generation.php
+   docker compose up -d
+   ```
+4. **Appliquer les migrations idempotentes :**
+   ```bash
+   docker compose exec web php scripts/migrate.php
+   ```
+5. **Ouvrir le jeu :** Accédez à `http://localhost:8080/` (ou complétez l'assistant sur `http://localhost:8080/install.php`).
+
+---
+
+### Méthode 2 — Déploiement Traditionnel (Bare-Metal / Serveur dédié)
+
+1. **Prérequis :** PHP >= 8.1 (`pdo_mysql`, `mbstring`, `gd`, `json`), MariaDB >= 10.5 ou MySQL >= 8.0, Apache/Nginx.
+2. **Configuration :**
+   ```bash
+   cp .env.example .env
+   # Renseignez vos accès MySQL dans .env ou dans config/database.php
+   ```
+3. **Exécuter les migrations idempotentes :**
+   ```bash
+   php scripts/migrate.php
+   ```
+4. **Vérifier l'intégrité de l'environnement :**
+   ```bash
+   php scripts/check_syntax.php
    ```
 
 ---

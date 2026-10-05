@@ -1,37 +1,15 @@
-/*M!999999\- enable the sandbox mode */
+-- ============================================================================
+-- OpenShogun — Migration 001 : Schéma Baseline Consolidé Unifié
+-- Version : 1.0.0 (Consolidation des 42 tables du Japon Féodal)
+-- ============================================================================
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-DROP TABLE IF EXISTS `alliances`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `alliances` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) NOT NULL,
-  `tag` varchar(8) NOT NULL,
-  `leader_id` int(10) unsigned NOT NULL,
-  `description` text DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `tag` (`tag`),
-  KEY `fk_alliance_leader` (`leader_id`),
-  CONSTRAINT `fk_alliance_leader` FOREIGN KEY (`leader_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET NAMES utf8mb4;
 
-DROP TABLE IF EXISTS `alliance_invitations`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `alliance_invitations` (
+-- Table : alliance_invitations
+CREATE TABLE IF NOT EXISTS `alliance_invitations` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `alliance_id` int(10) unsigned NOT NULL,
   `user_id` int(10) unsigned NOT NULL,
@@ -48,11 +26,9 @@ CREATE TABLE `alliance_invitations` (
   CONSTRAINT `fk_inv_alliance` FOREIGN KEY (`alliance_id`) REFERENCES `alliances` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_inv_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `authentic_castles`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `authentic_castles` (
+
+-- Table : authentic_castles
+CREATE TABLE IF NOT EXISTS `authentic_castles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code` varchar(50) NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -83,12 +59,10 @@ CREATE TABLE `authentic_castles` (
   UNIQUE KEY `code` (`code`),
   KEY `idx_coords` (`coord_x`,`coord_y`),
   KEY `idx_spawned` (`is_spawned`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `barracks_queue`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `barracks_queue` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : barracks_queue
+CREATE TABLE IF NOT EXISTS `barracks_queue` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `planet_id` int(10) unsigned NOT NULL,
   `unit_code` varchar(60) NOT NULL,
@@ -100,12 +74,29 @@ CREATE TABLE `barracks_queue` (
   PRIMARY KEY (`id`),
   KEY `idx_barracks_planet` (`planet_id`),
   CONSTRAINT `fk_barracks_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `combat_reports`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `combat_reports` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : chat_messages
+CREATE TABLE IF NOT EXISTS `chat_messages` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `channel_type` enum('global','alliance','whisper') NOT NULL DEFAULT 'global',
+  `channel_target_id` int(10) unsigned DEFAULT NULL,
+  `sender_id` int(10) unsigned NOT NULL,
+  `recipient_id` int(10) unsigned DEFAULT NULL,
+  `message` varchar(1000) NOT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `deleted_by` int(10) unsigned DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_chat_global` (`channel_type`,`id`),
+  KEY `idx_chat_alliance` (`channel_type`,`channel_target_id`,`id`),
+  KEY `idx_chat_whisper` (`sender_id`,`recipient_id`,`id`),
+  KEY `idx_chat_recipient` (`recipient_id`,`id`),
+  CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : combat_reports
+CREATE TABLE IF NOT EXISTS `combat_reports` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `attacker_id` int(10) unsigned NOT NULL,
   `defender_id` int(10) unsigned NOT NULL,
@@ -121,12 +112,10 @@ CREATE TABLE `combat_reports` (
   PRIMARY KEY (`id`),
   KEY `idx_cr_attacker` (`attacker_id`),
   KEY `idx_cr_defender` (`defender_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `construction_queue`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `construction_queue` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : construction_queue
+CREATE TABLE IF NOT EXISTS `construction_queue` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `planet_id` int(10) unsigned NOT NULL,
   `build_category` enum('field','building') NOT NULL,
@@ -137,12 +126,56 @@ CREATE TABLE `construction_queue` (
   PRIMARY KEY (`id`),
   KEY `idx_planet_queue` (`planet_id`),
   CONSTRAINT `fk_queue_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=167 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `fleet_missions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `fleet_missions` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : craft_queue
+CREATE TABLE IF NOT EXISTS `craft_queue` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `planet_id` int(10) unsigned NOT NULL,
+  `product` varchar(30) NOT NULL,
+  `rice_amount` double NOT NULL,
+  `produced_amount` int(10) unsigned NOT NULL,
+  `started_at` int(10) unsigned NOT NULL,
+  `finishes_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_cq_planet` (`planet_id`),
+  KEY `idx_cq_finishes` (`finishes_at`),
+  CONSTRAINT `fk_cq_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : farm_list_entries
+CREATE TABLE IF NOT EXISTS `farm_list_entries` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `farm_list_id` int(10) unsigned NOT NULL,
+  `target_type` enum('planet','oasis') NOT NULL DEFAULT 'planet',
+  `target_id` int(10) unsigned NOT NULL,
+  `target_name` varchar(100) NOT NULL,
+  `coord_x` int(11) NOT NULL,
+  `coord_y` int(11) NOT NULL,
+  `fleet_data` text NOT NULL,
+  `last_raid_at` datetime DEFAULT NULL,
+  `last_loot` text DEFAULT NULL,
+  `last_status` varchar(50) DEFAULT NULL,
+  `distance` double DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_fle_list` (`farm_list_id`),
+  CONSTRAINT `fk_fle_list` FOREIGN KEY (`farm_list_id`) REFERENCES `farm_lists` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table : farm_lists
+CREATE TABLE IF NOT EXISTS `farm_lists` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `source_planet_id` int(10) unsigned NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_fl_user` (`user_id`),
+  KEY `idx_fl_source` (`source_planet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table : fleet_missions
+CREATE TABLE IF NOT EXISTS `fleet_missions` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `source_planet_id` int(10) unsigned NOT NULL,
@@ -170,12 +203,57 @@ CREATE TABLE `fleet_missions` (
   CONSTRAINT `fk_fleet_target` FOREIGN KEY (`target_planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_fleet_target_oasis` FOREIGN KEY (`target_oasis_id`) REFERENCES `oases` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_fleet_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=143 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `game_settings`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `game_settings` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : forum_categories
+CREATE TABLE IF NOT EXISTS `forum_categories` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `icon` varchar(20) NOT NULL DEFAULT '?',
+  `display_order` int(11) NOT NULL DEFAULT 0,
+  `is_locked` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : forum_posts
+CREATE TABLE IF NOT EXISTS `forum_posts` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `topic_id` int(10) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
+  `content` text NOT NULL,
+  `is_first_post` tinyint(1) NOT NULL DEFAULT 0,
+  `edited_at` datetime DEFAULT NULL,
+  `edited_by_user_id` int(10) unsigned DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_post_topic` (`topic_id`,`created_at`),
+  KEY `idx_post_user` (`user_id`),
+  CONSTRAINT `fk_post_topic` FOREIGN KEY (`topic_id`) REFERENCES `forum_topics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : forum_topics
+CREATE TABLE IF NOT EXISTS `forum_topics` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `category_id` int(10) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
+  `title` varchar(150) NOT NULL,
+  `is_pinned` tinyint(1) NOT NULL DEFAULT 0,
+  `is_locked` tinyint(1) NOT NULL DEFAULT 0,
+  `views_count` int(10) unsigned NOT NULL DEFAULT 0,
+  `last_post_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_topic_cat` (`category_id`,`is_pinned`,`last_post_at`),
+  KEY `idx_topic_user` (`user_id`),
+  CONSTRAINT `fk_topic_category` FOREIGN KEY (`category_id`) REFERENCES `forum_categories` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_topic_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : game_settings
+CREATE TABLE IF NOT EXISTS `game_settings` (
   `setting_key` varchar(50) NOT NULL,
   `setting_value` text NOT NULL,
   `setting_type` enum('int','float','string','boolean') NOT NULL DEFAULT 'string',
@@ -183,11 +261,9 @@ CREATE TABLE `game_settings` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`setting_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `hero_adventures`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `hero_adventures` (
+
+-- Table : hero_adventures
+CREATE TABLE IF NOT EXISTS `hero_adventures` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `coord_x` int(11) NOT NULL,
@@ -201,12 +277,10 @@ CREATE TABLE `hero_adventures` (
   KEY `idx_ha_user` (`user_id`),
   KEY `idx_ha_status` (`status`),
   CONSTRAINT `fk_ha_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `hero_inventory`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `hero_inventory` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : hero_inventory
+CREATE TABLE IF NOT EXISTS `hero_inventory` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `item_code` varchar(50) NOT NULL,
@@ -220,11 +294,9 @@ CREATE TABLE `hero_inventory` (
   KEY `idx_hi_user` (`user_id`),
   CONSTRAINT `fk_hi_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `heroes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `heroes` (
+
+-- Table : heroes
+CREATE TABLE IF NOT EXISTS `heroes` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `current_planet_id` int(10) unsigned NOT NULL,
@@ -253,12 +325,26 @@ CREATE TABLE `heroes` (
   KEY `fk_heroes_planet` (`current_planet_id`),
   CONSTRAINT `fk_heroes_planet` FOREIGN KEY (`current_planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_heroes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `messages`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `messages` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : mailing_campaigns
+CREATE TABLE IF NOT EXISTS `mailing_campaigns` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sender_id` int(10) unsigned NOT NULL,
+  `sender_name` varchar(100) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `target_group` varchar(50) NOT NULL,
+  `recipient_count` int(10) unsigned NOT NULL DEFAULT 0,
+  `body_html` mediumtext NOT NULL,
+  `status` enum('draft','sent','failed') NOT NULL DEFAULT 'sent',
+  `sent_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_mc_sender` (`sender_id`),
+  KEY `idx_mc_sent_at` (`sent_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : messages
+CREATE TABLE IF NOT EXISTS `messages` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sender_id` int(10) unsigned DEFAULT NULL,
   `receiver_id` int(10) unsigned NOT NULL,
@@ -271,12 +357,10 @@ CREATE TABLE `messages` (
   PRIMARY KEY (`id`),
   KEY `idx_msg_receiver` (`receiver_id`),
   CONSTRAINT `fk_msg_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `oases`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oases` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : oases
+CREATE TABLE IF NOT EXISTS `oases` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `coord_x` int(11) NOT NULL,
   `coord_y` int(11) NOT NULL,
@@ -296,12 +380,10 @@ CREATE TABLE `oases` (
   UNIQUE KEY `idx_oasis_coords` (`coord_x`,`coord_y`),
   KEY `idx_oasis_owner` (`owner_planet_id`),
   CONSTRAINT `fk_oasis_owner_planet` FOREIGN KEY (`owner_planet_id`) REFERENCES `planets` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `oasis_units`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oasis_units` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : oasis_units
+CREATE TABLE IF NOT EXISTS `oasis_units` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `oasis_id` int(10) unsigned NOT NULL,
   `unit_code` varchar(60) NOT NULL,
@@ -310,12 +392,10 @@ CREATE TABLE `oasis_units` (
   PRIMARY KEY (`id`),
   KEY `idx_oasis_unit` (`oasis_id`,`unit_code`),
   CONSTRAINT `fk_oasis_units_oasis` FOREIGN KEY (`oasis_id`) REFERENCES `oases` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=148 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `planet_buildings`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `planet_buildings` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : planet_buildings
+CREATE TABLE IF NOT EXISTS `planet_buildings` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `planet_id` int(10) unsigned NOT NULL,
   `slot` tinyint(3) unsigned DEFAULT NULL,
@@ -325,12 +405,24 @@ CREATE TABLE `planet_buildings` (
   UNIQUE KEY `uniq_planet_building` (`planet_id`,`building_type`),
   UNIQUE KEY `uniq_planet_slot` (`planet_id`,`slot`),
   CONSTRAINT `fk_buildings_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=515 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `planet_fields`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `planet_fields` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : planet_feasts
+CREATE TABLE IF NOT EXISTS `planet_feasts` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `planet_id` int(10) unsigned NOT NULL,
+  `feast_type` varchar(40) NOT NULL,
+  `tenshu_level` int(10) unsigned NOT NULL DEFAULT 1,
+  `started_at` int(10) unsigned NOT NULL,
+  `finishes_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_pf_planet` (`planet_id`),
+  KEY `idx_pf_finishes` (`finishes_at`),
+  CONSTRAINT `fk_pf_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : planet_fields
+CREATE TABLE IF NOT EXISTS `planet_fields` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `planet_id` int(10) unsigned NOT NULL,
   `field_slot` tinyint(3) unsigned NOT NULL,
@@ -339,12 +431,10 @@ CREATE TABLE `planet_fields` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_planet_slot` (`planet_id`,`field_slot`),
   CONSTRAINT `fk_fields_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=987 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `planet_ships`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `planet_ships` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : planet_ships
+CREATE TABLE IF NOT EXISTS `planet_ships` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `planet_id` int(10) unsigned NOT NULL,
   `ship_code` varchar(30) NOT NULL,
@@ -354,12 +444,10 @@ CREATE TABLE `planet_ships` (
   KEY `fk_ships_code` (`ship_code`),
   CONSTRAINT `fk_ships_code` FOREIGN KEY (`ship_code`) REFERENCES `ships` (`code`) ON DELETE CASCADE,
   CONSTRAINT `fk_ships_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=145 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `planet_units`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `planet_units` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : planet_units
+CREATE TABLE IF NOT EXISTS `planet_units` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `planet_id` int(10) unsigned NOT NULL,
   `unit_code` varchar(60) NOT NULL,
@@ -369,12 +457,10 @@ CREATE TABLE `planet_units` (
   KEY `fk_units_code` (`unit_code`),
   CONSTRAINT `fk_units_code` FOREIGN KEY (`unit_code`) REFERENCES `units` (`code`) ON DELETE CASCADE,
   CONSTRAINT `fk_units_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=659 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `planets`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `planets` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : planets
+CREATE TABLE IF NOT EXISTS `planets` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned DEFAULT NULL,
   `name` varchar(60) NOT NULL,
@@ -398,19 +484,20 @@ CREATE TABLE `planets` (
   `last_famine_losses` int(10) unsigned NOT NULL DEFAULT 0,
   `last_resource_update` int(10) unsigned NOT NULL DEFAULT 0,
   `is_capital` tinyint(1) NOT NULL DEFAULT 1,
+  `tactical_evasion` tinyint(1) NOT NULL DEFAULT 0,
   `founder_planet_id` int(10) unsigned DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `wooden_beams` double NOT NULL DEFAULT 0,
+  `wooden_beams_max` int(10) unsigned NOT NULL DEFAULT 10000,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_coordinates` (`coord_x`,`coord_y`),
   KEY `idx_user_planet` (`user_id`),
   KEY `idx_founder_planet` (`founder_planet_id`),
   CONSTRAINT `fk_planets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `research_queue`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `research_queue` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : research_queue
+CREATE TABLE IF NOT EXISTS `research_queue` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `planet_id` int(10) unsigned NOT NULL,
@@ -421,12 +508,10 @@ CREATE TABLE `research_queue` (
   PRIMARY KEY (`id`),
   KEY `idx_research_user` (`user_id`),
   CONSTRAINT `fk_rqueue_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `researches`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `researches` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : researches
+CREATE TABLE IF NOT EXISTS `researches` (
   `code` varchar(30) NOT NULL,
   `name` varchar(60) NOT NULL,
   `metal_cost` int(10) unsigned NOT NULL,
@@ -436,11 +521,9 @@ CREATE TABLE `researches` (
   `description` varchar(255) NOT NULL,
   PRIMARY KEY (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `ships`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `ships` (
+
+-- Table : ships
+CREATE TABLE IF NOT EXISTS `ships` (
   `code` varchar(30) NOT NULL,
   `name` varchar(60) NOT NULL,
   `faction` enum('all','terran','vorash','aethelis') NOT NULL DEFAULT 'all',
@@ -457,11 +540,9 @@ CREATE TABLE `ships` (
   `description` varchar(255) NOT NULL,
   PRIMARY KEY (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `shipyard_queue`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `shipyard_queue` (
+
+-- Table : shipyard_queue
+CREATE TABLE IF NOT EXISTS `shipyard_queue` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `planet_id` int(10) unsigned NOT NULL,
   `ship_code` varchar(30) NOT NULL,
@@ -473,12 +554,10 @@ CREATE TABLE `shipyard_queue` (
   PRIMARY KEY (`id`),
   KEY `idx_shipyard_planet` (`planet_id`),
   CONSTRAINT `fk_shipyard_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `support_tickets`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `support_tickets` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : support_tickets
+CREATE TABLE IF NOT EXISTS `support_tickets` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `type` enum('bug','suggestion') NOT NULL DEFAULT 'bug',
@@ -499,11 +578,33 @@ CREATE TABLE `support_tickets` (
   KEY `idx_support_type` (`type`),
   CONSTRAINT `fk_support_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `units`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `units` (
+
+-- Table : trade_routes
+CREATE TABLE IF NOT EXISTS `trade_routes` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `source_planet_id` int(10) unsigned NOT NULL,
+  `target_planet_id` int(10) unsigned NOT NULL,
+  `wood` int(10) unsigned NOT NULL DEFAULT 0,
+  `stone` int(10) unsigned NOT NULL DEFAULT 0,
+  `rice` int(10) unsigned NOT NULL DEFAULT 0,
+  `interval_hours` int(10) unsigned NOT NULL DEFAULT 4,
+  `transporter_pref` varchar(30) NOT NULL DEFAULT 'auto',
+  `deliveries_count` int(10) unsigned NOT NULL DEFAULT 0,
+  `last_run_at` datetime DEFAULT NULL,
+  `next_run_at` datetime NOT NULL,
+  `last_status` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_tr_user` (`user_id`),
+  KEY `idx_tr_source` (`source_planet_id`),
+  KEY `idx_tr_target` (`target_planet_id`),
+  KEY `idx_tr_next` (`is_active`,`next_run_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table : units
+CREATE TABLE IF NOT EXISTS `units` (
   `code` varchar(60) NOT NULL,
   `name` varchar(60) NOT NULL,
   `faction` enum('all','terran','vorash','aethelis') NOT NULL DEFAULT 'all',
@@ -523,11 +624,9 @@ CREATE TABLE `units` (
   `description` varchar(255) NOT NULL,
   PRIMARY KEY (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `user_announcement_reads`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_announcement_reads` (
+
+-- Table : user_announcement_reads
+CREATE TABLE IF NOT EXISTS `user_announcement_reads` (
   `user_id` int(10) unsigned NOT NULL,
   `announcement_id` varchar(64) NOT NULL,
   `read_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -535,11 +634,9 @@ CREATE TABLE `user_announcement_reads` (
   KEY `idx_announcement_id` (`announcement_id`),
   CONSTRAINT `fk_announcement_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `user_medals`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_medals` (
+
+-- Table : user_medals
+CREATE TABLE IF NOT EXISTS `user_medals` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `category` enum('progression','attack','defense','raid') NOT NULL,
@@ -550,12 +647,10 @@ CREATE TABLE `user_medals` (
   PRIMARY KEY (`id`),
   KEY `idx_um_user` (`user_id`),
   CONSTRAINT `fk_um_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=165 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `user_quests`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_quests` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : user_quests
+CREATE TABLE IF NOT EXISTS `user_quests` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `quest_key` varchar(50) NOT NULL,
@@ -568,12 +663,10 @@ CREATE TABLE `user_quests` (
   KEY `idx_uq_user` (`user_id`),
   KEY `idx_uq_status` (`status`),
   CONSTRAINT `fk_uq_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `user_researches`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_researches` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table : user_researches
+CREATE TABLE IF NOT EXISTS `user_researches` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `research_code` varchar(30) NOT NULL,
@@ -584,11 +677,9 @@ CREATE TABLE `user_researches` (
   CONSTRAINT `fk_research_code` FOREIGN KEY (`research_code`) REFERENCES `researches` (`code`) ON DELETE CASCADE,
   CONSTRAINT `fk_research_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `user_weekly_stats`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_weekly_stats` (
+
+-- Table : user_weekly_stats
+CREATE TABLE IF NOT EXISTS `user_weekly_stats` (
   `user_id` int(10) unsigned NOT NULL,
   `attack_points` int(10) unsigned NOT NULL DEFAULT 0,
   `defense_points` int(10) unsigned NOT NULL DEFAULT 0,
@@ -598,26 +689,20 @@ CREATE TABLE `user_weekly_stats` (
   PRIMARY KEY (`user_id`),
   CONSTRAINT `fk_uws_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `users` (
+
+-- Table : users
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
+  `gold_coins` int(10) unsigned NOT NULL DEFAULT 100,
+  `imperial_seal_until` datetime DEFAULT NULL,
+  `last_daily_gold` date DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `email_verified_at` datetime DEFAULT NULL,
-  `activation_token` varchar(128) DEFAULT NULL,
-  `activation_token_expires_at` datetime DEFAULT NULL,
   `faction` enum('terran','vorash','aethelis') NOT NULL DEFAULT 'terran',
   `alliance_id` int(10) unsigned DEFAULT NULL,
   `bio` text DEFAULT NULL,
   `avatar` varchar(255) DEFAULT NULL,
-  `gold_coins` int(10) unsigned NOT NULL DEFAULT 100,
-  `imperial_seal_until` datetime DEFAULT NULL,
-  `last_daily_gold` date DEFAULT NULL,
   `is_admin` tinyint(1) NOT NULL DEFAULT 0,
   `is_moderator` tinyint(1) NOT NULL DEFAULT 0,
   `is_bot` tinyint(1) NOT NULL DEFAULT 0,
@@ -625,155 +710,45 @@ CREATE TABLE `users` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_active` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `protection_until` datetime DEFAULT NULL,
-  `newsletter_optin` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`),
   KEY `idx_users_protection` (`protection_until`),
-  KEY `idx_users_moderator` (`is_moderator`),
-  KEY `idx_users_newsletter` (`newsletter_optin`),
-  KEY `idx_users_active` (`is_active`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-DROP TABLE IF EXISTS `forum_categories`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `forum_categories` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
-  `icon` varchar(20) NOT NULL DEFAULT '💬',
-  `display_order` int(11) NOT NULL DEFAULT 0,
-  `is_locked` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  KEY `idx_users_moderator` (`is_moderator`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS `forum_topics`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `forum_topics` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `category_id` int(10) unsigned NOT NULL,
-  `user_id` int(10) unsigned NOT NULL,
-  `title` varchar(150) NOT NULL,
-  `is_pinned` tinyint(1) NOT NULL DEFAULT 0,
-  `is_locked` tinyint(1) NOT NULL DEFAULT 0,
-  `views_count` int(10) unsigned NOT NULL DEFAULT 0,
-  `last_post_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_topic_cat` (`category_id`,`is_pinned`,`last_post_at`),
-  KEY `idx_topic_user` (`user_id`),
-  CONSTRAINT `fk_topic_category` FOREIGN KEY (`category_id`) REFERENCES `forum_categories` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_topic_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+-- Table : activity_logs (Télémétrie et monitoring de navigation)
+CREATE TABLE IF NOT EXISTS `activity_logs` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT UNSIGNED NULL,
+    `page_slug` VARCHAR(64) NOT NULL,
+    `tab_slug` VARCHAR(64) NULL,
+    `action` VARCHAR(32) NOT NULL DEFAULT 'view',
+    `ip_hash` VARCHAR(64) NOT NULL,
+    `user_agent` VARCHAR(255) NULL,
+    `device_type` ENUM('desktop', 'mobile', 'tablet', 'bot', 'other') DEFAULT 'desktop',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_created_at` (`created_at`),
+    INDEX `idx_user_action` (`user_id`, `action`),
+    INDEX `idx_page_slug` (`page_slug`, `created_at`),
+    INDEX `idx_ip_hash` (`ip_hash`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS `forum_posts`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `forum_posts` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `topic_id` int(10) unsigned NOT NULL,
-  `user_id` int(10) unsigned NOT NULL,
-  `content` text NOT NULL,
-  `is_first_post` tinyint(1) NOT NULL DEFAULT 0,
-  `edited_at` datetime DEFAULT NULL,
-  `edited_by_user_id` int(10) unsigned DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_post_topic` (`topic_id`,`created_at`),
-  KEY `idx_post_user` (`user_id`),
-  CONSTRAINT `fk_post_topic` FOREIGN KEY (`topic_id`) REFERENCES `forum_topics` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+-- Table : planet_terroir_slots (5 emplacements de terroir par ressource)
+CREATE TABLE IF NOT EXISTS `planet_terroir_slots` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `planet_id` INT UNSIGNED NOT NULL,
+    `resource_type` VARCHAR(32) NOT NULL,
+    `slot_index` TINYINT UNSIGNED NOT NULL,
+    `level` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    `workers_assigned` INT UNSIGNED NOT NULL DEFAULT 2,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uniq_planet_res_slot` (`planet_id`, `resource_type`, `slot_index`),
+    KEY `idx_planet_res` (`planet_id`, `resource_type`),
+    CONSTRAINT `fk_terroir_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS `chat_messages`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `chat_messages` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `channel_type` enum('global','alliance','whisper') NOT NULL DEFAULT 'global',
-  `channel_target_id` int(10) unsigned DEFAULT NULL,
-  `sender_id` int(10) unsigned NOT NULL,
-  `recipient_id` int(10) unsigned DEFAULT NULL,
-  `message` varchar(1000) NOT NULL,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
-  `deleted_by` int(10) unsigned DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_chat_global` (`channel_type`,`id`),
-  KEY `idx_chat_alliance` (`channel_type`,`channel_target_id`,`id`),
-  KEY `idx_chat_whisper` (`sender_id`,`recipient_id`,`id`),
-  KEY `idx_chat_recipient` (`recipient_id`,`id`),
-  CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-DROP TABLE IF EXISTS `planet_feasts`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `planet_feasts` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `planet_id` int(10) unsigned NOT NULL,
-  `feast_type` varchar(40) NOT NULL,
-  `tenshu_level` int(10) unsigned NOT NULL DEFAULT 1,
-  `started_at` int(10) unsigned NOT NULL,
-  `finishes_at` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_pf_planet` (`planet_id`),
-  KEY `idx_pf_finishes` (`finishes_at`),
-  CONSTRAINT `fk_pf_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-DROP TABLE IF EXISTS `craft_queue`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `craft_queue` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `planet_id` int(10) unsigned NOT NULL,
-  `product` varchar(30) NOT NULL,
-  `rice_amount` double NOT NULL,
-  `produced_amount` int(10) unsigned NOT NULL,
-  `started_at` int(10) unsigned NOT NULL,
-  `finishes_at` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_cq_planet` (`planet_id`),
-  KEY `idx_cq_finishes` (`finishes_at`),
-  CONSTRAINT `fk_cq_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-DROP TABLE IF EXISTS `mailing_campaigns`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `mailing_campaigns` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `sender_id` int(10) unsigned NOT NULL,
-  `sender_name` varchar(100) NOT NULL,
-  `subject` varchar(255) NOT NULL,
-  `target_group` varchar(50) NOT NULL,
-  `recipient_count` int(10) unsigned NOT NULL DEFAULT 0,
-  `body_html` mediumtext NOT NULL,
-  `status` enum('draft','sent','failed') NOT NULL DEFAULT 'sent',
-  `sent_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_mc_sender` (`sender_id`),
-  KEY `idx_mc_sent_at` (`sent_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

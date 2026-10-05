@@ -3,6 +3,31 @@
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
 > Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
 
+### [2026-10-05] - refactor-devops-database-consolidation : Refonte DevOps & Consolidation Idempotente de la Base de Données
+- **Module :** `refactor-devops-database-consolidation`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Consolidation de la Baseline DDL & Seeds (`database/migrations/`) :**
+     - Fusion et unification intégrale des 42 tables du jeu dans un schéma de référence unique `database/migrations/001_baseline_schema.sql` (encadrement strict de désactivation des foreign keys pendant l'import, standardisation `CURRENT_TIMESTAMP`, UTF-8 mb4, suppression des numérotations statiques `AUTO_INCREMENT`).
+     - Création du fichier de graines de référence immuables `database/migrations/002_seed_game_data.sql` (unités, technologies, engins de siège, châteaux authentiques du Japon, catégories de forum et paramètres par défaut avec clauses idempotentes `INSERT ... ON DUPLICATE KEY UPDATE`).
+     - Synchronisation des schémas historiques `database/schema.sql` et `database/schema_complete.sql` sur la baseline consolidée.
+  2. **Moteur Idempotent de Migrations (`core/MigrationEngine.php` & `scripts/migrate.php`) :**
+     - Mise en place de la table de suivi `schema_migrations` (`version`, `applied_at`, `execution_time_ms`, `checksum` SHA-256).
+     - Script CLI `php scripts/migrate.php` supportant les modes exécution automatique et statut (`--status`).
+     - Intégration transparente dans l'assistant web `core/InstallEngine.php` pour un déploiement 100% automatisé sans patchs manuels.
+  3. **Architecture Docker & 12-Factor App :**
+     - Création du modèle d'environnement `.env.example` et support natif des variables d'environnement dans `core/Database.php` (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS`, `DB_CHARSET`).
+     - Création de `Dockerfile` (PHP 8.2 Apache + extensions requises) et `docker-compose.yml` (MariaDB 10.11 avec healthcheck, initialisation automatique `/docker-entrypoint-initdb.d/` et volumes persistants).
+     - Documentation standardisée complète dans `README.md`.
+- **Fichiers modifiés :** `database/migrations/001_baseline_schema.sql`, `database/migrations/002_seed_game_data.sql`, `core/MigrationEngine.php`, `scripts/migrate.php`, `core/Database.php`, `core/InstallEngine.php`, `Dockerfile`, `docker-compose.yml`, `.env.example`, `database/schema.sql`, `database/schema_complete.sql`, `README.md`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Lancer `php scripts/migrate.php --status` : vérifier que le statut de chaque migration est tracé avec succès.
+  2. Lancer `php scripts/migrate.php` plusieurs fois de suite : vérifier la parfaite idempotence (0 erreur, message d'état à jour).
+  3. Tester `php scripts/check_syntax.php` : valider le feu vert technique (100% de fichiers valides).
+  4. Tester un déploiement Docker `docker compose up -d` depuis une arborescence vierge.
+
+---
+
 ### [2026-10-05] - fix-auth-missing-avatar-column : Résolution de l'erreur SQLSTATE[42S22] colonne 'avatar' inconnue dans Auth::getCurrentUser
 - **Module :** `fix-auth-missing-avatar-column`
 - **Statut :** `À tester`

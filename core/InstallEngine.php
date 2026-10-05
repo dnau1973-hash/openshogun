@@ -290,26 +290,9 @@ class InstallEngine {
         require_once __DIR__ . '/Database.php';
         Database::setConnection($pdo);
 
-        // 4. Importer le schéma complet consolidé (30 tables)
-        self::executeSqlFile($pdo, self::SCHEMA_FILE);
-
-        // 5. Importer les graines de référence (unités, recherches, vaisseaux)
-        if (file_exists(self::SEED_FILE)) {
-            self::executeSqlFile($pdo, self::SEED_FILE);
-        }
-
-        // Garantir la présence des colonnes bio et avatar dans users
-        try {
-            $userCols = $pdo->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
-            if (!in_array('bio', $userCols)) {
-                $pdo->exec("ALTER TABLE users ADD COLUMN bio TEXT NULL AFTER alliance_id");
-            }
-            if (!in_array('avatar', $userCols)) {
-                $pdo->exec("ALTER TABLE users ADD COLUMN avatar VARCHAR(255) NULL AFTER bio");
-            }
-        } catch (Exception $e) {
-            // Ignorer si la table n'existe pas encore ou déjà présente
-        }
+        // 4. Appliquer la baseline et les migrations via le MigrationEngine
+        require_once __DIR__ . '/MigrationEngine.php';
+        MigrationEngine::run($pdo);
 
         // 6. Configurer le titre du jeu et la vitesse dans game_settings
         // Filet de sécurité résilient : garantir que la table game_settings existe quoi qu'il arrive
