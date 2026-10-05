@@ -31,10 +31,17 @@ CREATE TABLE `users` (
   `username` VARCHAR(50) NOT NULL UNIQUE,
   `email` VARCHAR(100) NOT NULL UNIQUE,
   `password_hash` VARCHAR(255) NOT NULL,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  `email_verified_at` DATETIME NULL DEFAULT NULL,
+  `activation_token` VARCHAR(128) NULL DEFAULT NULL,
+  `activation_token_expires_at` DATETIME NULL DEFAULT NULL,
   `faction` ENUM('terran', 'vorash', 'aethelis') NOT NULL DEFAULT 'terran',
   `alliance_id` INT UNSIGNED NULL DEFAULT NULL,
   `bio` TEXT NULL DEFAULT NULL,
   `avatar` VARCHAR(255) NULL DEFAULT NULL,
+  `gold_coins` INT UNSIGNED NOT NULL DEFAULT 100,
+  `imperial_seal_until` DATETIME NULL DEFAULT NULL,
+  `last_daily_gold` DATE NULL DEFAULT NULL,
   `points` INT UNSIGNED NOT NULL DEFAULT 0,
   `is_admin` TINYINT(1) NOT NULL DEFAULT 0,
   `is_moderator` TINYINT(1) NOT NULL DEFAULT 0,
@@ -43,7 +50,8 @@ CREATE TABLE `users` (
   `last_active` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `protection_until` DATETIME NULL DEFAULT NULL,
   KEY `idx_users_protection` (`protection_until`),
-  KEY `idx_users_role` (`is_admin`, `is_moderator`)
+  KEY `idx_users_role` (`is_admin`, `is_moderator`),
+  KEY `idx_users_active` (`is_active`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Alliances

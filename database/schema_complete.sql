@@ -607,10 +607,17 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `email_verified_at` datetime DEFAULT NULL,
+  `activation_token` varchar(128) DEFAULT NULL,
+  `activation_token_expires_at` datetime DEFAULT NULL,
   `faction` enum('terran','vorash','aethelis') NOT NULL DEFAULT 'terran',
   `alliance_id` int(10) unsigned DEFAULT NULL,
   `bio` text DEFAULT NULL,
   `avatar` varchar(255) DEFAULT NULL,
+  `gold_coins` int(10) unsigned NOT NULL DEFAULT 100,
+  `imperial_seal_until` datetime DEFAULT NULL,
+  `last_daily_gold` date DEFAULT NULL,
   `is_admin` tinyint(1) NOT NULL DEFAULT 0,
   `is_moderator` tinyint(1) NOT NULL DEFAULT 0,
   `is_bot` tinyint(1) NOT NULL DEFAULT 0,
@@ -624,7 +631,8 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`),
   KEY `idx_users_protection` (`protection_until`),
   KEY `idx_users_moderator` (`is_moderator`),
-  KEY `idx_users_newsletter` (`newsletter_optin`)
+  KEY `idx_users_newsletter` (`newsletter_optin`),
+  KEY `idx_users_active` (`is_active`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
