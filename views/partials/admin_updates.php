@@ -46,6 +46,23 @@ $localInfo = $updateEngine->getLocalInfo();
             </div>
         </div>
 
+        <!-- ALERTE PERMISSIONS LINUX SI .git N'EST PAS ACCESSIBLE EN ÉCRITURE -->
+        <?php if (isset($localInfo['is_git_writable']) && !$localInfo['is_git_writable']): ?>
+            <div class="alert alert-danger d-flex align-items-start gap-3 mb-4 shadow-sm" role="alert">
+                <i class="fa-solid fa-triangle-exclamation fs-1 text-danger mt-1"></i>
+                <div class="flex-grow-1">
+                    <h4 class="alert-title mb-1 text-danger fw-bold">Droits d'écriture insuffisants sur le dossier Git (.git)</h4>
+                    <p class="mb-2 text-secondary small">
+                        L'utilisateur web du serveur (<code><?= htmlspecialchars($localInfo['web_user'] ?? 'www-data') ?></code>) n'a pas les droits d'écriture sur <code>.git/FETCH_HEAD</code>. La mise à jour automatique via <code>git pull</code> est bloquée par le système de fichiers Linux.
+                    </p>
+                    <div class="p-2 bg-dark rounded">
+                        <span class="text-white-50 small d-block mb-1">📋 Commande SSH à copier-coller sur votre serveur pour débloquer :</span>
+                        <code class="text-warning font-monospace user-select-all"><?= htmlspecialchars($localInfo['permission_fix_cmd'] ?? 'sudo chown -R www-data:www-data /var/www/html') ?></code>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- GRILLE COMPARATIVE LOCAL VS GITHUB -->
         <div class="row row-cards mb-4">
             <!-- FIEF LOCAL -->
@@ -455,6 +472,9 @@ async function executeInstallGitHubUpdate() {
         }
 
         if (!data || !data.success) {
+            if (data && data.fix_cmd) {
+                logToConsole(`👉 Commande SSH pour corriger : ${data.fix_cmd}`, 'warning');
+            }
             throw new Error((data && data.message) ? data.message : "Échec de l'installation.");
         }
 

@@ -9,12 +9,12 @@ echo " TEST : MOTEUR DE MISES À JOUR GITHUB & TOKEN SECURITY   \n";
 echo "========================================================\n\n";
 
 // 1. Initialiser le moteur
-$engine = new UpdateEngine();
+$dummySecret = "ghp_EXAMPLE_TEST_TOKEN_1234567890abcdef";
+$engine = new UpdateEngine($dummySecret);
 assert($engine instanceof UpdateEngine, "Erreur d'instanciation de UpdateEngine");
 echo "[PASS] UpdateEngine instancié avec succès.\n";
 
 // 2. Tester le masquage de token (Sécurité)
-$dummySecret = "ghp_EXAMPLE_TEST_TOKEN_1234567890abcdef";
 $masked = $engine->maskToken("git pull https://{$dummySecret}@github.com/test.git main");
 assert(strpos($masked, $dummySecret) === false, "Échec de sécurité : Le token en clair ne doit JAMAIS apparaître !");
 assert(strpos($masked, 'ghp_••••••••') !== false, "Le token doit être masqué.");

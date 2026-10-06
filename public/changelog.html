@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.19.1</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.19.2</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,14 +123,62 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
-                    <!-- VERSION 1.19.1 -->
+                    <!-- VERSION 1.19.2 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
                         <div class="timeline-badge-dot" style="background: #206bc4; box-shadow: 0 0 0 2px #206bc4;"></div>
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.19.1</span>
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.19.2</span>
                                 <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-warning-lt fw-bold">Déploiement &amp; Git</span>
+                                <span class="badge bg-danger-lt fw-bold">Gestion Permissions Linux</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 6 Octobre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary-emphasis d-flex align-items-center gap-2 mb-3">
+                                <span>🛠️</span> Diagnostic &amp; Résolution des Permissions Git (.git) pour les Mises à Jour
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-warning-lt">Sécurité &amp; Permissions</span>
+                                            <span>Diagnostic Automatique .git/FETCH_HEAD</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Vérification proactive des droits d'écriture sur le répertoire <code>.git/</code> et ses descripteurs d'extraction. En cas de refus d'accès Linux pour l'utilisateur du serveur web (<code>www-data</code>), le moteur fournit la commande SSH exacte à exécuter (<code>sudo chown -R www-data:www-data ...</code>).
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-azure-lt">Console Admin &amp; Mises à Jour</span>
+                                            <span>Bannière Préventive &amp; Masquage Token</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Ajout d'une alerte préventive dans la console de mise à jour si les droits sont insuffisants, et renforcement du masquage des clés et jetons d'accès personnels GitHub (PAT/ghp) dans tous les journaux d'exécution.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.19.1 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #64748b; box-shadow: 0 0 0 2px #64748b;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.19.1</span>
+                                <span class="badge bg-secondary-lt fw-bold">Version précédente</span>
                                 <span class="badge bg-primary-lt fw-bold">Interface &amp; Terroir</span>
                                 <span class="badge bg-azure-lt fw-bold">Optimisation Ressources</span>
                             </div>

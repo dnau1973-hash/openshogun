@@ -46,7 +46,40 @@ class UpdateEngine {
         if (!empty($this->token)) {
             $text = str_replace($this->token, 'ghp_••••••••' . substr($this->token, -4), $text);
         }
-        return preg_replace('/ghp_[a-zA-Z0-9]{15,}/', 'ghp_••••••••••••', $text);
+        return preg_replace('/(ghp_|github_pat_)[a-zA-Z0-9_]{15,}/', 'ghp_••••••••••••', $text);
+    }
+
+    /**
+     * Tente de rendre accessibles en écriture les répertoires et fichiers Git critiques
+     */
+    public function ensureGitPermissions(): bool {
+        $gitDir = $this->basePath . '/.git';
+        if (!is_dir($gitDir)) {
+            return false;
+        }
+        @chmod($gitDir, 0775);
+        $criticalFiles = [
+            $gitDir . '/FETCH_HEAD',
+            $gitDir . '/ORIG_HEAD',
+            $gitDir . '/index',
+            $gitDir . '/COMMIT_EDITMSG',
+            $gitDir . '/config',
+            $gitDir . '/refs',
+            $gitDir . '/refs/heads',
+            $gitDir . '/logs',
+            $gitDir . '/logs/refs',
+            $gitDir . '/logs/refs/heads'
+        ];
+        foreach ($criticalFiles as $file) {
+            if (file_exists($file)) {
+                if (is_dir($file)) {
+                    @chmod($file, 0775);
+                } else {
+                    @chmod($file, 0664);
+                }
+            }
+        }
+        return is_writable($gitDir);
     }
 
     /**
@@ -73,6 +106,16 @@ class UpdateEngine {
             }
         }
 
+        $gitDir = $this->basePath . '/.git';
+        $webUser = function_exists('posix_getpwuid') && function_exists('posix_geteuid')
+            ? (posix_getpwuid(posix_geteuid())['name'] ?? get_current_user())
+            : get_current_user();
+        $isGitWritable = is_dir($gitDir) && is_writable($gitDir);
+        if ($isGitWritable && file_exists($gitDir . '/FETCH_HEAD')) {
+            $isGitWritable = is_writable($gitDir . '/FETCH_HEAD');
+        }
+        $fixCmd = "sudo chown -R {$webUser}:{$webUser} " . $this->basePath;
+
         return [
             'branch' => $branch,
             'commit_sha' => $commitSha,
@@ -86,7 +129,10 @@ class UpdateEngine {
             'repo_owner' => $this->owner,
             'repo_name' => $this->repo,
             'target_branch' => $this->branch,
-            'masked_token' => !empty($this->token) ? 'ghp_••••••••' . substr($this->token, -4) : 'Non configuré'
+            'masked_token' => !empty($this->token) ? 'ghp_••••••••' . substr($this->token, -4) : 'Non configuré',
+            'is_git_writable' => $isGitWritable,
+            'web_user' => $webUser,
+            'permission_fix_cmd' => $fixCmd
         ];
     }
 
@@ -259,6 +305,9 @@ class UpdateEngine {
             }
         }
 
+        // Tentative de sécurisation des permissions d'écriture Git avant le pull
+        $this->ensureGitPermissions();
+
         // Commande Git Pull avec Token sécurisé
         $logs[] = "📥 [2/4] Récupération et fusion des modifications (git pull)...";
         $pullUrl = "https://{$this->token}@github.com/{$this->owner}/{$this->repo}.git";
@@ -308,6 +357,25 @@ class UpdateEngine {
         }
 
         if ($pullRet !== 0) {
+            $webUser = function_exists('posix_getpwuid') && function_exists('posix_geteuid')
+                ? (posix_getpwuid(posix_geteuid())['name'] ?? get_current_user())
+                : get_current_user();
+            $fixCmd = "sudo chown -R {$webUser}:{$webUser} " . $this->basePath;
+
+            if (stripos($maskedPullLog, 'permission denied') !== false || stripos($maskedPullLog, 'fetch_head') !== false || stripos($maskedPullLog, 'index.lock') !== false) {
+                $logs[] = "❌ Échec de la commande git pull (Permissions Linux d'écriture insuffisantes).";
+                $logs[] = "🛑 Cause : L'utilisateur web ({$webUser}) n'a pas les droits d'écriture sur .git/FETCH_HEAD.";
+                $logs[] = "👉 Solution : Connectez-vous en SSH sur votre serveur et exécutez la commande :";
+                $logs[] = "   {$fixCmd}";
+                return [
+                    'success' => false,
+                    'message' => "Erreur de permissions : le serveur web ({$webUser}) ne peut pas écrire dans .git. Exécutez en SSH : {$fixCmd}",
+                    'error_code' => $pullRet,
+                    'fix_cmd' => $fixCmd,
+                    'logs' => $logs
+                ];
+            }
+
             $logs[] = "❌ Échec de la commande git pull (Code retour: {$pullRet}).";
             return [
                 'success' => false,
