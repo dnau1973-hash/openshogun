@@ -8,6 +8,20 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET NAMES utf8mb4;
 
+-- Table : alliances
+CREATE TABLE IF NOT EXISTS `alliances` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `tag` varchar(8) NOT NULL,
+  `leader_id` int(10) unsigned NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `tag` (`tag`),
+  KEY `idx_alliance_leader` (`leader_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Table : alliance_invitations
 CREATE TABLE IF NOT EXISTS `alliance_invitations` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,

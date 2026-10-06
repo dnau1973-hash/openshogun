@@ -180,7 +180,11 @@ class WorldGenerator {
         ];
 
         foreach ($dynamicTables as $tbl) {
-            $this->db->exec("TRUNCATE TABLE `{$tbl}`");
+            try {
+                $this->db->exec("TRUNCATE TABLE `{$tbl}`");
+            } catch (PDOException $e) {
+                error_log("WorldGenerator::resetUniverse - TRUNCATE TABLE `{$tbl}` notice: " . $e->getMessage());
+            }
         }
 
         // 2. Initialiser / Vérifier les constantes de jeu

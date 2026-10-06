@@ -5,6 +5,11 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Corrigé (Fixed)
+- **Intégration de la table `alliances` dans le schéma baseline et sécurisation de `WorldGenerator::resetUniverse` (`database/migrations/001_baseline_schema.sql`, `database/schema.sql`, `database/schema_complete.sql`, `core/WorldGenerator.php`) :**
+  * Correction du blocage d'installation `SQLSTATE[42S02]: Base table or view not found: 1146 Table 'openshogun.alliances' doesn't exist` lors de la réinitialisation de l'univers féodal (Étape 7).
+  * Ajout du DDL complet de la table `alliances` (`id`, `name`, `tag`, `leader_id`, `description`, `created_at` avec contraintes uniques et index) dans `001_baseline_schema.sql`, `database/schema.sql` et `database/schema_complete.sql` (schéma consolidé à 43 tables).
+  * Résolution de la dépendance de clé étrangère requise par `alliance_invitations` (`fk_inv_alliance`).
+  * Sécurisation défensive de `WorldGenerator::resetUniverse()` avec gestion d'exception `try / catch (PDOException $e)` sur les opérations `TRUNCATE TABLE`, évitant tout crash bloquant si une table dynamique est absente ou différée.
 - **Résolution de la colonne manquante `avatar` dans `Auth::getCurrentUser()` (`core/Auth.php`, `core/InstallEngine.php`, `database/schema.sql`, `database/schema_complete.sql`) :**
   * Correction du crash `SQLSTATE[42S22]: Column not found: 1054 Unknown column 'avatar'` survenant au chargement de `index.php` après une nouvelle installation.
   * Ajout de la colonne `avatar VARCHAR(255) NULL AFTER bio` dans les DDL de la table `users` des schémas SQL.

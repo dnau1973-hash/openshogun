@@ -1,7 +1,23 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
 > Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
-> Chaque nouvelle entrée démarre avec le statut initial `À tester` et doit être éprouvée et validée par le profil QA / Testeur.
+### [2026-10-06] - fix-installer-missing-alliances-table : Correction de l'erreur SQLSTATE[42S02] table 'alliances' inexistante lors de l'installation
+- **Module :** `fix-installer-missing-alliances-table`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Intégration de la table `alliances` dans les schémas de référence consolidés :**
+     - Ajout de la définition DDL de la table `alliances` (`id`, `name`, `tag`, `leader_id`, `description`, `created_at` avec clés uniques et index) dans la migration de base `database/migrations/001_baseline_schema.sql`, ainsi que dans `database/schema.sql` et `database/schema_complete.sql`.
+     - Résolution de la dépendance de clé étrangère requise par `alliance_invitations` (`fk_inv_alliance`).
+     - Porte le schéma consolidé à 43 tables complètes du jeu.
+  2. **Sécurisation défensive de `WorldGenerator::resetUniverse` (`core/WorldGenerator.php`) :**
+     - Encadrement des requêtes `TRUNCATE TABLE` dans un bloc `try / catch (PDOException $e)` avec journalisation d'avertissement, garantissant que l'absence ou la suppression future d'une table dynamique ne bloque pas la réinitialisation de l'univers ni le processus d'installation.
+- **Fichiers modifiés :** `database/migrations/001_baseline_schema.sql`, `database/schema.sql`, `database/schema_complete.sql`, `core/WorldGenerator.php`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Lancer l'installation complète via `install.php` (ou CLI `scripts/migrate.php`) sur une base vierge : vérifier qu'aucune exception SQLSTATE[42S02] relative à `alliances` n'est levée.
+  2. Vérifier que la table `alliances` est bien créée dans la base avec ses index et clés uniques (`SHOW CREATE TABLE alliances;`).
+  3. Vérifier que l'Étape 7 (`WorldGenerator::resetUniverse`) s'exécute avec succès et initialise le compte administrateur et les fiefs initiaux.
+
+---
 
 ### [2026-10-05] - refactor-devops-database-consolidation : Refonte DevOps & Consolidation Idempotente de la Base de Données
 - **Module :** `refactor-devops-database-consolidation`
