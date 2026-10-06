@@ -46,6 +46,9 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                     <span class="badge bg-purple-lt text-purple">
                         <i class="fa-solid fa-wine-bottle me-1"></i>Règle Asymétrique du Saké
                     </span>
+                    <span class="badge bg-danger-lt text-danger">
+                        <i class="fa-solid fa-shield-halved me-1"></i>Chômage &amp; Délinquance Féodale
+                    </span>
                     <span class="badge bg-warning-lt text-dark fw-bold">
                         ⚡ Horloge Accélérée x1 à x100
                     </span>
@@ -54,7 +57,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                     <span>Simulateur de Vie dans un Village &amp; Équilibrage des Flux</span>
                 </h2>
                 <div class="text-secondary small mt-1">
-                    Ajustez en temps réel les flux entrants de vivres, de saké et de sérénité. Observez dynamiquement l'évolution du contentement, l'occupation des ateliers, la croissance démographique et le seuil critique d'exode féodal.
+                    Ajustez en temps réel les flux entrants de vivres, de saké et de sérénité. Observez dynamiquement l'évolution du contentement, l'oisiveté et la délinquance, l'occupation des ateliers, la croissance démographique et le seuil critique d'exode féodal.
                 </div>
             </div>
 
@@ -69,6 +72,9 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-warning" onclick="applyVillagePreset('overcrowded')" title="Surpopulation avec déficit de postes de travail">
                     <i class="fa-solid fa-users-slash me-1"></i>Surpopulation Sans Emplois
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="applyVillagePreset('delinquency_crisis')" title="Explosion du chômage et criminalité sans garnison">
+                    <i class="fa-solid fa-mask me-1"></i>Crise de Délinquance
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-success" onclick="applyVillagePreset('perfect_balance')" title="Harmonie idéale production, consommation et expansion">
                     <i class="fa-solid fa-scale-balanced me-1"></i>Équilibre Parfait
@@ -120,6 +126,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
 .live-log-item.event-jobs {
     border-left-color: #f59e0b;
     background: #fffbeb;
+}
+.live-log-item.event-delinquency {
+    border-left-color: #e11d48;
+    background: #fff1f2;
 }
 .live-log-item.event-info {
     border-left-color: #0ea5e9;
@@ -225,14 +235,26 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 </div>
 
                 <!-- 3. Postes de Travail Ouverts -->
-                <div>
+                <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label small fw-bold m-0" for="inp-open-jobs">
+                        <label class="form-label small fw-bold m-0" for="range-open-jobs">
                             <i class="fa-solid fa-briefcase text-warning me-1"></i>Postes de Travail Ouverts (Ateliers &amp; Parcelles) :
                         </label>
                         <span class="badge bg-warning text-dark font-monospace" id="val-open-jobs">85 postes</span>
                     </div>
                     <input type="range" class="form-range" id="range-open-jobs" min="10" max="600" step="5" value="85" oninput="syncInput('open-jobs', this.value)">
+                </div>
+
+                <!-- 4. Maintien de l'Ordre Féodal (Tenshu, Muraille, Dojo, Vigie) -->
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold m-0" for="range-security">
+                            <i class="fa-solid fa-shield-halved text-danger me-1"></i>Maintien de l'Ordre Féodal (Garnison &amp; Sécurité) :
+                        </label>
+                        <span class="badge bg-danger font-monospace" id="val-security">+10% d'ordre</span>
+                    </div>
+                    <input type="range" class="form-range" id="range-security" min="0" max="50" step="1" value="10" oninput="syncInput('security', this.value)">
+                    <div class="text-secondary small">Présence armée (Tenshu +3%, Muraille +2%, Dojo +2%, Vigie +1%/lvl). Réprime la criminalité liée au chômage.</div>
                 </div>
             </div>
         </div>
@@ -316,10 +338,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
     <!-- ── COLONNE DROITE (7/12) : MONITEUR TEMPS RÉEL & VISUALISATION ── -->
     <div class="col-12 col-xl-7">
 
-        <!-- 1. 4 Jauges KPI Temps Réel -->
+        <!-- 1. 5 Jauges KPI Temps Réel -->
         <div class="row g-2 mb-3">
             <!-- KPI 1 : Contentement Global -->
-            <div class="col-6 col-sm-3">
+            <div class="col-6 col-sm-4 col-xl">
                 <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3" id="card-kpi-contentment" style="border-left-color: #22c55e !important;">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
@@ -338,7 +360,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             </div>
 
             <!-- KPI 2 : Population Vivante -->
-            <div class="col-6 col-sm-3">
+            <div class="col-6 col-sm-4 col-xl">
                 <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-primary">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
@@ -358,7 +380,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             </div>
 
             <!-- KPI 3 : Main-d'Œuvre & Emplois -->
-            <div class="col-6 col-sm-3">
+            <div class="col-6 col-sm-4 col-xl">
                 <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-warning">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
@@ -377,8 +399,29 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 </div>
             </div>
 
-            <!-- KPI 4 : Stocks en Grenier (Vivres & Saké) -->
-            <div class="col-6 col-sm-3">
+            <!-- KPI 4 : Délinquance & Sécurité Féodale -->
+            <div class="col-6 col-sm-4 col-xl">
+                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3" id="card-kpi-delinquency" style="border-left-color: #22c55e !important;">
+                    <div class="card-body p-2">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="text-secondary small fw-bold">Délinquance</span>
+                            <span id="kpi-delinquency-badge" class="badge bg-success-lt text-success py-0 px-1" title="Maintien de l'Ordre Féodal">
+                                <i class="fa-solid fa-shield-halved me-1"></i>Ordre
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-1">
+                            <span class="fs-1 fw-bold text-success font-monospace" id="kpi-delinquency-val">0%</span>
+                        </div>
+                        <div class="text-muted small text-truncate" id="kpi-delinquency-status">Ordre Parfait</div>
+                        <div class="progress progress-xs mt-2">
+                            <div class="progress-bar bg-success" id="kpi-delinquency-bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 5 : Stocks en Grenier (Vivres & Saké) -->
+            <div class="col-6 col-sm-4 col-xl">
                 <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-teal">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
@@ -463,6 +506,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         pop: 100,
         housingCap: 200,
         openJobs: 85,
+        securityBonus: 10,
         prodRice: 60,
         prodFlour: 25,
         prodSake: 12,
@@ -480,6 +524,13 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         assignedJobs: 85,
         idleWorkers: 15,
         workforceRatio: 1.0,
+        unemploymentRate: 0.15,
+        unemploymentPct: 15,
+        baseDelinquency: 0,
+        netDelinquency: 0,
+        delinquencyPenalty: 0,
+        delinquencyStatusLabel: 'Ordre Parfait',
+        delinquencyBadgeColor: 'success',
         sakeBonusActive: true,
         isExodus: false,
 
@@ -490,6 +541,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             rice: [],
             flour: [],
             sake: [],
+            delinquency: [],
             contentment: []
         },
         maxHistoryPoints: 40
@@ -503,6 +555,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             pop: 150,
             housingCap: 200,
             openJobs: 110,
+            security: 5,
             prodRice: 0,
             prodFlour: 0,
             prodSake: 0,
@@ -515,6 +568,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             pop: 110,
             housingCap: 250,
             openJobs: 95,
+            security: 25,
             prodRice: 80,
             prodFlour: 35,
             prodSake: 25,
@@ -527,6 +581,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             pop: 280,
             housingCap: 250,
             openJobs: 60,
+            security: 5,
             prodRice: 60,
             prodFlour: 20,
             prodSake: 5,
@@ -535,10 +590,24 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             stockFlour: 40,
             stockSake: 10
         },
+        delinquency_crisis: {
+            pop: 250,
+            housingCap: 300,
+            openJobs: 40,
+            security: 0,
+            prodRice: 60,
+            prodFlour: 25,
+            prodSake: 0,
+            serenity: 40,
+            stockRice: 150,
+            stockFlour: 40,
+            stockSake: 0
+        },
         perfect_balance: {
             pop: 120,
             housingCap: 200,
             openJobs: 110,
+            security: 15,
             prodRice: 70,
             prodFlour: 30,
             prodSake: 12,
@@ -567,6 +636,11 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 state.openJobs = val;
                 document.getElementById('val-open-jobs').innerText = val + ' postes';
                 document.getElementById('range-open-jobs').value = val;
+                break;
+            case 'security':
+                state.securityBonus = val;
+                document.getElementById('val-security').innerText = '+' + val + "% d'ordre";
+                document.getElementById('range-security').value = val;
                 break;
             case 'prod-rice':
                 state.prodRice = val;
@@ -601,6 +675,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         window.syncInput('initial-pop', p.pop);
         window.syncInput('housing-cap', p.housingCap);
         window.syncInput('open-jobs', p.openJobs);
+        window.syncInput('security', (p.security !== undefined) ? p.security : 10);
         window.syncInput('prod-rice', p.prodRice);
         window.syncInput('prod-flour', p.prodFlour);
         window.syncInput('prod-sake', p.prodSake);
@@ -751,7 +826,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         const serenityDelta = (state.serenity >= 50) ? 0 : -20;
         const sakePoints = state.sakeBonusActive ? +15 : 0; // Strictement >= 0 (asymétrique)
 
-        // Impact du ratio d'emploi
+        // Impact du ratio d'emploi (sous-effectif sur parcelles)
         const requiredWorkers = state.openJobs;
         const assigned = Math.min(pop, requiredWorkers);
         const jobRatio = (requiredWorkers > 0) ? Math.min(1.0, pop / requiredWorkers) : 1.0;
@@ -766,7 +841,18 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             overcrowdingMalus = -Math.min(30, Math.round(((pop - state.housingCap) / state.housingCap) * 50));
         }
 
-        let totalScore = Math.max(0, Math.min(100, baseScore + foodDelta + serenityDelta + sakePoints + jobMalus + overcrowdingMalus));
+        // Délinquance féodale (manque de travail / chômage)
+        const idleWorkers = Math.max(0, pop - requiredWorkers);
+        const unempRate = (pop > 20) ? Math.min(1.0, Math.max(0, idleWorkers / Math.max(1, pop))) : 0;
+        const baseDlq = (unempRate > 0.15) ? Math.min(100, Math.round(((unempRate - 0.15) / 0.85) * 100)) : 0;
+        const netDlq = Math.max(0, Math.round(baseDlq - state.securityBonus));
+        const delinquencyPenalty = Math.round((netDlq / 100) * 25);
+        const delinquencyMalus = -delinquencyPenalty;
+
+        state.netDelinquency = netDlq;
+        state.delinquencyPenalty = delinquencyPenalty;
+
+        let totalScore = Math.max(0, Math.min(100, baseScore + foodDelta + serenityDelta + sakePoints + jobMalus + overcrowdingMalus + delinquencyMalus));
         state.contentment = totalScore;
         state.isExodus = (totalScore < 25);
 
@@ -801,6 +887,11 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         if (state.sakeBonusActive && state.cyclesCount % 6 === 0) {
             addLogEntry('Festivités de saké : Régal des villageois (+15% de satisfaction active).', 'event-sake', 'fa-wine-bottle');
         }
+        if (netDlq >= 40 && state.cyclesCount % 5 === 0) {
+            addLogEntry(`Criminalité & Chômage (${netDlq}%) : L'oisiveté et le manque de postes sèment le chaos (-${delinquencyPenalty}% moral) !`, 'event-delinquency', 'fa-skull-crossbones');
+        } else if (netDlq > 15 && netDlq < 40 && state.cyclesCount % 6 === 0) {
+            addLogEntry(`Insécurité & Vols (${netDlq}%) : ${idleWorkers} villageois oisifs dégradent l'harmonie (-${delinquencyPenalty}% moral).`, 'event-delinquency', 'fa-mask');
+        }
     }
 
     // Recalcul des métriques UI dérivées
@@ -810,6 +901,42 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         state.assignedJobs = Math.min(pop, jobs);
         state.idleWorkers = Math.max(0, pop - jobs);
         state.workforceRatio = (jobs > 0) ? Math.min(1.0, pop / jobs) : 1.0;
+
+        // Délinquance et sécurité
+        if (pop <= 20) {
+            state.unemploymentRate = 0;
+            state.unemploymentPct = 0;
+            state.baseDelinquency = 0;
+            state.netDelinquency = 0;
+            state.delinquencyPenalty = 0;
+            state.delinquencyStatusLabel = 'Ordre Parfait';
+            state.delinquencyBadgeColor = 'success';
+        } else {
+            state.unemploymentRate = Math.min(1.0, Math.max(0, state.idleWorkers / Math.max(1, pop)));
+            state.unemploymentPct = Math.round(state.unemploymentRate * 100);
+            state.baseDelinquency = (state.unemploymentRate > 0.15) 
+                ? Math.min(100, Math.round(((state.unemploymentRate - 0.15) / 0.85) * 100)) 
+                : 0;
+            state.netDelinquency = Math.max(0, Math.round(state.baseDelinquency - state.securityBonus));
+            state.delinquencyPenalty = Math.round((state.netDelinquency / 100) * 25);
+
+            if (state.netDelinquency <= 0) {
+                state.delinquencyStatusLabel = 'Ordre Parfait';
+                state.delinquencyBadgeColor = 'success';
+            } else if (state.netDelinquency <= 15) {
+                state.delinquencyStatusLabel = 'Tension Faible';
+                state.delinquencyBadgeColor = 'info';
+            } else if (state.netDelinquency <= 35) {
+                state.delinquencyStatusLabel = 'Vols & Mécontentement';
+                state.delinquencyBadgeColor = 'warning';
+            } else if (state.netDelinquency <= 60) {
+                state.delinquencyStatusLabel = 'Troubles & Brigandage';
+                state.delinquencyBadgeColor = 'danger';
+            } else {
+                state.delinquencyStatusLabel = 'Criminalité Sévère';
+                state.delinquencyBadgeColor = 'danger';
+            }
+        }
 
         const score = state.contentment;
         if (score >= 80) {
@@ -874,11 +1001,33 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         if (state.workforceRatio < 1.0) {
             const malus = Math.round((1.0 - state.workforceRatio) * 100);
             document.getElementById('kpi-workforce-status').innerText = `Sous-effectif (-${malus}%)`;
+        } else if (state.idleWorkers > 0) {
+            document.getElementById('kpi-workforce-status').innerText = `${state.idleWorkers} inactifs (${state.unemploymentPct}% sans poste)`;
         } else {
-            document.getElementById('kpi-workforce-status').innerText = `100% Pourvu (+${state.idleWorkers} libres)`;
+            document.getElementById('kpi-workforce-status').innerText = `Plein emploi garanti`;
         }
 
-        // KPI 4 : Stocks
+        // KPI 4 : Délinquance & Sécurité
+        const valDelinquency = document.getElementById('kpi-delinquency-val');
+        if (valDelinquency) {
+            valDelinquency.innerText = state.netDelinquency + '%';
+            valDelinquency.className = `fs-1 fw-bold font-monospace text-${state.delinquencyBadgeColor}`;
+            document.getElementById('kpi-delinquency-status').innerText = `${state.delinquencyStatusLabel} (-${state.delinquencyPenalty}%)`;
+            const barDelinquency = document.getElementById('kpi-delinquency-bar');
+            barDelinquency.style.width = Math.min(100, state.netDelinquency) + '%';
+            barDelinquency.className = `progress-bar bg-${state.delinquencyBadgeColor}`;
+            const cardDelinquency = document.getElementById('card-kpi-delinquency');
+            if (cardDelinquency) {
+                cardDelinquency.style.setProperty('border-left-color', `var(--tblr-${state.delinquencyBadgeColor})`, 'important');
+            }
+            const badgeDelinquency = document.getElementById('kpi-delinquency-badge');
+            if (badgeDelinquency) {
+                badgeDelinquency.className = `badge bg-${state.delinquencyBadgeColor}-lt text-${state.delinquencyBadgeColor} py-0 px-1`;
+                badgeDelinquency.innerHTML = `<i class="fa-solid ${state.netDelinquency > 15 ? 'fa-mask' : 'fa-shield-halved'} me-1"></i>${state.delinquencyStatusLabel}`;
+            }
+        }
+
+        // KPI 5 : Stocks
         document.getElementById('kpi-stock-rice').innerText = Math.round(state.stockRice);
         document.getElementById('kpi-stock-flour').innerText = Math.round(state.stockFlour);
         document.getElementById('kpi-stock-sake').innerText = Math.round(state.stockSake);
@@ -961,12 +1110,13 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                     { name: '🌾 Riz (koku)', data: [] },
                     { name: '🍚 Farine (sacs)', data: [] },
                     { name: '🍶 Saké (tonnelets)', data: [] },
+                    { name: '🗡️ Délinquance (%)', data: [] },
                     { name: '❤️ Satisfaction (%)', data: [] }
                 ],
-                colors: ['#0284c7', '#eab308', '#64748b', '#a855f7', '#22c55e'],
+                colors: ['#0284c7', '#eab308', '#64748b', '#a855f7', '#e11d48', '#22c55e'],
                 stroke: {
                     curve: 'smooth',
-                    width: [3, 2, 2, 2, 3]
+                    width: [3, 2, 2, 2, 2, 3]
                 },
                 fill: {
                     type: 'gradient',
@@ -1019,6 +1169,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         h.rice.push(Math.round(state.stockRice));
         h.flour.push(Math.round(state.stockFlour));
         h.sake.push(Math.round(state.stockSake));
+        h.delinquency.push(state.netDelinquency);
         h.contentment.push(state.contentment);
 
         // Tronquer au nombre maximum de points
@@ -1028,6 +1179,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             h.rice.shift();
             h.flour.shift();
             h.sake.shift();
+            h.delinquency.shift();
             h.contentment.shift();
         }
 
@@ -1043,6 +1195,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 { name: '🌾 Riz (koku)', data: h.rice },
                 { name: '🍚 Farine (sacs)', data: h.flour },
                 { name: '🍶 Saké (tonnelets)', data: h.sake },
+                { name: '🗡️ Délinquance (%)', data: h.delinquency },
                 { name: '❤️ Satisfaction (%)', data: h.contentment }
             ], true);
         } else {
@@ -1057,6 +1210,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             rice: [],
             flour: [],
             sake: [],
+            delinquency: [],
             contentment: []
         };
         if (apexChartInstance) {
@@ -1065,6 +1219,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 { name: '🌾 Riz (koku)', data: [] },
                 { name: '🍚 Farine (sacs)', data: [] },
                 { name: '🍶 Saké (tonnelets)', data: [] },
+                { name: '🗡️ Délinquance (%)', data: [] },
                 { name: '❤️ Satisfaction (%)', data: [] }
             ]);
         }
@@ -1118,6 +1273,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 initial_population: state.pop,
                 housing_capacity: state.housingCap,
                 open_jobs: state.openJobs,
+                security_bonus: state.securityBonus,
                 hourly_production: {
                     rice: state.prodRice,
                     flour: state.prodFlour,
@@ -1130,6 +1286,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 contentment: state.contentment,
                 status_label: state.statusLabel,
                 workforce_ratio: Math.round(state.workforceRatio * 100) / 100,
+                idle_workers: state.idleWorkers,
+                unemployment_pct: state.unemploymentPct,
+                net_delinquency: state.netDelinquency,
+                delinquency_penalty: state.delinquencyPenalty,
                 is_exodus: state.isExodus,
                 sake_bonus_active: state.sakeBonusActive,
                 residual_stocks: {
@@ -1141,6 +1301,8 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             history_data: state.history,
             game_balancing_insights: [
                 "La règle asymétrique du saké permet un levier moral dynamique sans pénaliser les villages en paix.",
+                "Le manque de travail (> 15% d'inactifs) engendre de la délinquance féodale et pénalise le moral jusqu'à -25%.",
+                "Le maintien de l'ordre (Tenshu, Muraille, Dojo, Vigie) permet de réprimer et d'endiguer la criminalité urbaine.",
                 "Le point de bascule de l'exode féodal à 25% nécessite un approvisionnement continu en farine ou riz.",
                 "Le ratio d'emploi doit être maintenu au-dessus de 0.85 pour éviter le malus de productivité rurale."
             ]
