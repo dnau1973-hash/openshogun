@@ -15,7 +15,6 @@ require_once __DIR__ . '/../core/PopulationEngine.php';
 require_once __DIR__ . '/../core/AiPromptHelper.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
-$buildingEngine = new BuildingEngine();
 $planetEngine = new PlanetEngine();
 $oasisEngine = new OasisEngine();
 $terroirEngine = new TerroirEngine();
@@ -30,10 +29,9 @@ $contentment = $villageSummary['contentment'];
 $housingCap = $villageSummary['housing_cap'];
 $maxPop = $housingCap['total_capacity'];
 
-// Oasis et files d'attente
+// Oasis
 $annexedOases = $oasisEngine->getAnnexedOasesForPlanet((int)$planet['id']);
 $oasisBonuses = $oasisEngine->getTotalOasisBonusesForPlanet((int)$planet['id']);
-$queue = $buildingEngine->getQueue((int)$planet['id']);
 
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
 $hqLevel = $buildings['hq'] ?? 1;
@@ -865,62 +863,10 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 
     </div>
 
-    <!-- COLONNE LATÉRALE : CHANTIERS, DIDACTICIEL, OASIS & TROUPES -->
+    <!-- COLONNE LATÉRALE : DIDACTICIEL, OASIS & TROUPES -->
     <div class="d-flex flex-column gap-3">
         <!-- Didacticiel Féodal & Quêtes du Daimyō -->
         <?php require __DIR__ . '/partials/quest_banner.php'; ?>
-
-        <!-- File de Construction Active du Domaine -->
-        <div class="card shadow-sm">
-            <div class="card-header py-2 d-flex justify-content-between align-items-center">
-                <h3 class="card-title mb-0 fs-3">
-                    <i class="fa-solid fa-trowel-bricks me-2 text-warning"></i>Chantiers Actifs
-                </h3>
-                <span class="badge bg-warning-lt fw-bold"><?= count($queue) ?> en cours</span>
-            </div>
-            <div class="card-body p-2">
-                <?php if (empty($queue)): ?>
-                    <div class="text-muted text-center py-3" style="font-size:0.85rem;">
-                        <i class="fa-solid fa-hammer text-secondary d-block mb-1 fs-2"></i>
-                        Aucun chantier en cours sur le fief.
-                    </div>
-                <?php else: ?>
-                    <?php foreach ($queue as $q): ?>
-                        <?php
-                            $name = $q['target_id'];
-                            if ($q['build_category'] === 'field') {
-                                $tSlot = (int)$q['target_id'];
-                                $tType = FIELD_LAYOUT[$tSlot] ?? 'metal_mine';
-                                $name = (FIELD_TYPES[$tType]['name'] ?? 'Parcelle') . " #{$tSlot}";
-                            } else {
-                                $name = BUILDINGS[$q['target_id']]['name'] ?? $q['target_id'];
-                            }
-                            $qNow = time();
-                            $qStart = (int)($q['started_at'] ?? $qNow);
-                            $qEnd = (int)($q['finishes_at'] ?? $qNow);
-                            $qTotal = max(1, $qEnd - $qStart);
-                            $qElapsed = max(0, $qNow - $qStart);
-                            $qPct = min(100, max(0, (int)round(($qElapsed / $qTotal) * 100)));
-                        ?>
-                        <div class="p-2 mb-2 rounded bg-surface-secondary border" style="font-size:0.85rem;">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <strong class="text-truncate"><?= htmlspecialchars($name) ?></strong>
-                                <span class="badge bg-primary-lt">Niveau <?= $q['target_level'] ?></span>
-                            </div>
-                            <div class="progress progress-sm mb-1">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning building-progress-bar"
-                                     style="width: <?= $qPct ?>%;"
-                                     data-countdown="<?= $qEnd ?>"></div>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center" style="font-size:0.75rem;">
-                                <span class="text-muted font-monospace building-time-remaining" data-countdown="<?= $qEnd ?>">Calcul...</span>
-                                <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="cancelBuild(<?= $q['id'] ?>)">Annuler</button>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
 
         <!-- Bilan des Récoltes & Oasis Annexées -->
         <div class="card shadow-sm">

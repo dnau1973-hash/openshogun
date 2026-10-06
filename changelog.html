@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.19.0</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.19.1</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,14 +123,62 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
-                    <!-- VERSION 1.19.0 -->
+                    <!-- VERSION 1.19.1 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
                         <div class="timeline-badge-dot" style="background: #206bc4; box-shadow: 0 0 0 2px #206bc4;"></div>
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.19.0</span>
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.19.1</span>
                                 <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-primary-lt fw-bold">Interface &amp; Terroir</span>
+                                <span class="badge bg-azure-lt fw-bold">Optimisation Ressources</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 6 Octobre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary-emphasis d-flex align-items-center gap-2 mb-3">
+                                <span>🌾</span> Épuration de la Vue Terroir &bull; Allègement de la Barre Latérale des Ressources
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-azure-lt">Interface &amp; Ergonomie</span>
+                                            <span>Suppression du Bloc Redondant des Chantiers</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Retrait du panneau « Chantiers Actifs » dans la colonne latérale de la page des Terroirs &amp; Ressources (<code>views/resources.php</code>). Le suivi détaillé de la file de construction urbaine et rurale reste pleinement accessible depuis la vue de la Cité Castrale (<code>views/city.php</code>).
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-success-lt">Performance SQL</span>
+                                            <span>Allègement du Chargement du Fief</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Suppression de l'instanciation de <code>BuildingEngine</code> et de la requête de file d'attente lors du chargement de la carte des 40 parcelles, accélérant le rendu global de la vue agricole et artisanale.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.19.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #64748b; box-shadow: 0 0 0 2px #64748b;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.19.0</span>
+                                <span class="badge bg-secondary-lt fw-bold">Version précédente</span>
                                 <span class="badge bg-primary-lt fw-bold">Télémétrie &amp; Analytics</span>
                                 <span class="badge bg-teal-lt fw-bold">Débogage Graphique Dashboard</span>
                             </div>
