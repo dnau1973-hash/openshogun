@@ -87,6 +87,7 @@ class PopulationEngine {
         $idleWorkers = max(0, $totalPop - $requiredWorkers);
         $ratio = ($requiredWorkers > 0) ? min(1.0, $totalPop / $requiredWorkers) : 1.0;
         $malusPercent = round((1.0 - $ratio) * 100, 1);
+        $unemploymentRate = $totalPop > 0 ? min(1.0, max(0.0, $idleWorkers / $totalPop)) : 0.0;
 
         return [
             'total_population'         => $totalPop,
@@ -95,19 +96,125 @@ class PopulationEngine {
             'assigned_workers'         => $assignedWorkers,
             'idle_workers'             => $idleWorkers,
             'workforce_ratio'          => $ratio,
+            'unemployment_rate'        => $unemploymentRate,
+            'unemployment_pct'         => round($unemploymentRate * 100, 1),
             'is_understaffed'          => ($ratio < 1.0),
             'understaffed_malus_pct'   => $malusPercent
         ];
     }
 
     /**
+     * Calcule la délinquance et le maintien de l'ordre dans le fief.
+     * Le manque de travail (chômage/inactifs) engendre de l'oisiveté et de la criminalité,
+     * tempérée par les infrastructures d'autorité et de sécurité (Tenshu, Muraille, Dojo, Vigie).
+     */
+    public static function calculateDelinquency(array $planet, array $buildings = [], ?array $workforce = null): array {
+        $totalPop = (int)($planet['population'] ?? 100);
+        $idleWorkers = (int)($workforce['idle_workers'] ?? 0);
+
+        // Seuil d'exonération démographique pour les très petits villages naissants (<= 20 villageois)
+        if ($totalPop <= 20) {
+            return [
+                'unemployment_rate' => 0.0,
+                'unemployment_pct'  => 0.0,
+                'idle_workers'      => $idleWorkers,
+                'base_delinquency'  => 0.0,
+                'security_bonus'    => 0,
+                'net_delinquency'   => 0.0,
+                'moral_penalty'     => 0,
+                'level_label'       => 'Ordre Parfait',
+                'badge_color'       => 'success',
+                'icon'              => 'fa-shield-halved',
+                'desc'              => 'Petite communauté soudée, absence de criminalité.'
+            ];
+        }
+
+        // Taux de chômage / inactivité (de 0.0 à 1.0)
+        $unemploymentRate = min(1.0, max(0.0, $idleWorkers / max(1, $totalPop)));
+        $unemploymentPct = round($unemploymentRate * 100, 1);
+
+        // Seuil de tolérance : jusqu'à 15% d'inactifs, c'est considéré comme une réserve normale de main-d'œuvre.
+        // Au-delà de 15%, l'oisiveté génère de la délinquance croissante (jusqu'à 100% à plein chômage).
+        $baseDelinquency = 0.0;
+        if ($unemploymentRate > 0.15) {
+            $baseDelinquency = min(100.0, round((($unemploymentRate - 0.15) / 0.85) * 100.0, 1));
+        }
+
+        // Maintien de l'ordre féodal assuré par les édifices d'autorité et militaires :
+        // - Tenshu (hq) : +3% d'ordre par niveau (magistrats et officiers seigneuriaux)
+        // - Remparts (wall) : +2% d'ordre par niveau (contrôle des accès et patrouilles)
+        // - Dojo Militaire (barracks) : +2% d'ordre par niveau (rondes de samouraïs et bushi)
+        // - Poste de Vigie (radar) : +1% d'ordre par niveau (guetteurs et surveillance)
+        $hqLvl = (int)($buildings['hq'] ?? 0);
+        $wallLvl = (int)($buildings['wall'] ?? 0);
+        $barracksLvl = (int)($buildings['barracks'] ?? 0);
+        $radarLvl = (int)($buildings['radar'] ?? 0);
+
+        $securityBonus = ($hqLvl * 3) + ($wallLvl * 2) + ($barracksLvl * 2) + ($radarLvl * 1);
+
+        // Délinquance nette résiduelle
+        $netDelinquency = max(0.0, round($baseDelinquency - $securityBonus, 1));
+
+        // Impact sur le moral / contentement (pénalité de 0 à -25%)
+        $moralPenalty = (int)round(($netDelinquency / 100.0) * 25);
+
+        // Qualification de l'ordre public
+        if ($netDelinquency <= 0.0) {
+            $levelLabel = 'Ordre Parfait';
+            $badgeColor = 'success';
+            $icon = 'fa-shield-halved';
+            $desc = 'Garnison vigilante et sérénité dans les ruelles du village.';
+        } elseif ($netDelinquency <= 15.0) {
+            $levelLabel = 'Tension Faible';
+            $badgeColor = 'info';
+            $icon = 'fa-user-secret';
+            $desc = 'Petits larcins isolés et oisiveté modérée.';
+        } elseif ($netDelinquency <= 35.0) {
+            $levelLabel = 'Vols & Mécontentement';
+            $badgeColor = 'warning';
+            $icon = 'fa-mask';
+            $desc = 'Vols récurrents et grogne grandissante parmi les sans-emploi.';
+        } elseif ($netDelinquency <= 60.0) {
+            $levelLabel = 'Troubles & Brigandage';
+            $badgeColor = 'warning';
+            $icon = 'fa-skull-crossbones';
+            $desc = 'Bandes de pillards, rixes et insécurité marquée.';
+        } else {
+            $levelLabel = 'Criminalité Sévère';
+            $badgeColor = 'danger';
+            $icon = 'fa-fire';
+            $desc = 'Loi du plus fort, désordre total dans le fief.';
+        }
+
+        return [
+            'unemployment_rate' => $unemploymentRate,
+            'unemployment_pct'  => $unemploymentPct,
+            'idle_workers'      => $idleWorkers,
+            'base_delinquency'  => $baseDelinquency,
+            'security_bonus'    => $securityBonus,
+            'net_delinquency'   => $netDelinquency,
+            'moral_penalty'     => $moralPenalty,
+            'level_label'       => $levelLabel,
+            'badge_color'       => $badgeColor,
+            'icon'              => $icon,
+            'desc'              => $desc
+        ];
+    }
+
+    /**
      * Calcul de la jauge de contentement féodale (0% à 100%)
-     * Règle stricte :
+     * Règles :
      * - Besoins vitaux (Nourriture / Farine de riz / Sérénité) : Dégradent le contentement si absents.
      * - Saké (Bien de confort / Luxe) : Confère un BONUS positif net (+15%) si présent.
      *   En cas de pénurie de saké : NE DÉGRADE PAS le contentement (aucun malus, valeur neutre).
+     * - Délinquance : Dégrade le moral en cas de manque d'emplois / chômage (pénalité jusqu'à -25%).
      */
-    public static function calculateContentment(array $planet, ?array $activeFeast = null): array {
+    public static function calculateContentment(
+        array $planet,
+        ?array $activeFeast = null,
+        ?array $workforce = null,
+        array $buildings = []
+    ): array {
         $flour = (float)($planet['rice_flour'] ?? 0);
         $rice = (float)($planet['deuterium'] ?? 0);
         $sake = (float)($planet['sake'] ?? 0);
@@ -142,8 +249,14 @@ class PopulationEngine {
         // 5. Célébration au Tenshu active (Bonus Matsuri)
         $feastPoints = ($activeFeast !== null) ? 10 : 0;
 
+        // 6. Impact de la délinquance féodale (Manque de travail / Inactifs)
+        $wf = $workforce ?? ($planet['workforce'] ?? null);
+        $bld = !empty($buildings) ? $buildings : ($planet['buildings'] ?? []);
+        $delinquency = self::calculateDelinquency($planet, $bld, $wf);
+        $delinquencyDelta = -$delinquency['moral_penalty'];
+
         // Calcul final borné de 0 à 100%
-        $totalScore = max(0, min(100, $baseScore + $foodDelta + $energyDelta + $sakePoints + $feastPoints));
+        $totalScore = max(0, min(100, $baseScore + $foodDelta + $energyDelta + $sakePoints + $feastPoints + $delinquencyDelta));
 
         // Détermination du statut et du style Tabler
         $isExodus = ($totalScore < 25);
@@ -177,6 +290,8 @@ class PopulationEngine {
             'sake_bonus_active' => $sakeBonusActive,
             'sake_points'       => $sakePoints, // Strictement >= 0 (asymétrique)
             'feast_points'      => $feastPoints,
+            'delinquency'       => $delinquency,
+            'delinquency_delta' => $delinquencyDelta,
             'is_exodus'         => $isExodus
         ];
     }
@@ -190,10 +305,16 @@ class PopulationEngine {
         float $hours,
         array &$planet,
         int $maxPopulation,
-        ?array $activeFeast = null
+        ?array $activeFeast = null,
+        array $buildings = [],
+        array $fields = []
     ): array {
+        $workforce = (!empty($buildings) || !empty($fields))
+            ? self::calculateWorkforceSummary($planet, $buildings, $fields, $maxPopulation)
+            : ($planet['workforce'] ?? null);
+
         if ($hours <= 0) {
-            return self::calculateContentment($planet, $activeFeast);
+            return self::calculateContentment($planet, $activeFeast, $workforce, $buildings);
         }
 
         $pop = (int)($planet['population'] ?? 100);
@@ -237,7 +358,7 @@ class PopulationEngine {
         $planet['sake'] = $sake;
 
         // 3. Calcul du contentement
-        $contentment = self::calculateContentment($planet, $activeFeast);
+        $contentment = self::calculateContentment($planet, $activeFeast, $workforce, $buildings);
         $score = $contentment['score'];
 
         // 4. Exode ou Croissance démographique
@@ -261,6 +382,10 @@ class PopulationEngine {
 
         $planet['population'] = $pop;
         $planet['contentment'] = $score;
+        $planet['contentment_details'] = $contentment;
+        if ($workforce !== null) {
+            $planet['workforce'] = $workforce;
+        }
 
         return [
             'contentment'       => $contentment,

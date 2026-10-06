@@ -213,17 +213,19 @@ $bgVersion = file_exists($bgFile) ? filemtime($bgFile) : 1;
         </div>
     </div>
 
-    <!-- Widgets Spécifiques au Village Central (Démographie, Sérénité, Travailleurs) -->
+    <!-- Widgets Spécifiques au Village Central (Démographie, Sérénité, Travailleurs, Ordre & Délinquance) -->
     <?php if ($resourceType === 'village' && $villageData): ?>
         <?php
             $wf = $villageData['workforce'];
             $ct = $villageData['contentment'];
+            $dlq = $villageData['delinquency'] ?? ($ct['delinquency'] ?? PopulationEngine::calculateDelinquency($planet, $buildings ?? [], $wf));
             $score = $ct['score'] ?? 80;
             $ctColor = ($score >= 75) ? 'success' : (($score >= 40) ? 'warning' : 'danger');
+            $dlqColor = $dlq['badge_color'] ?? 'success';
         ?>
         <div class="row row-cards mb-3">
             <!-- Widget 1: Démographie & Logements -->
-            <div class="col-sm-6 col-lg-4">
+            <div class="col-sm-6 col-lg-3">
                 <div class="card card-sm shadow-sm border-start border-3 border-primary h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -244,7 +246,7 @@ $bgVersion = file_exists($bgFile) ? filemtime($bgFile) : 1;
             </div>
 
             <!-- Widget 2: Affectation des Travailleurs -->
-            <div class="col-sm-6 col-lg-4">
+            <div class="col-sm-6 col-lg-3">
                 <div class="card card-sm shadow-sm border-start border-3 border-warning h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -253,8 +255,10 @@ $bgVersion = file_exists($bgFile) ? filemtime($bgFile) : 1;
                             </span>
                             <?php if ($wf['is_understaffed']): ?>
                                 <span class="badge bg-danger-lt fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i>Sous-effectif (-<?= $wf['understaffed_malus_pct'] ?>%)</span>
+                            <?php elseif (($wf['unemployment_pct'] ?? 0) > 15): ?>
+                                <span class="badge bg-warning-lt fw-bold"><i class="fa-solid fa-person-shelter me-1"></i>Chômage : <?= $wf['unemployment_pct'] ?? 0 ?>%</span>
                             <?php else: ?>
-                                <span class="badge bg-success-lt fw-bold"><i class="fa-solid fa-check me-1"></i>Effectif complet</span>
+                                <span class="badge bg-success-lt fw-bold"><i class="fa-solid fa-check me-1"></i>Plein emploi</span>
                             <?php endif; ?>
                         </div>
                         <div class="h1 fw-bold mb-1"><?= number_format($wf['assigned_workers']) ?> <small class="fs-4 text-muted">/ <?= number_format($wf['required_workers']) ?> postes</small></div>
@@ -262,14 +266,35 @@ $bgVersion = file_exists($bgFile) ? filemtime($bgFile) : 1;
                             <div class="progress-bar bg-warning" style="width: <?= min(100, round($wf['workforce_ratio'] * 100)) ?>%"></div>
                         </div>
                         <div class="text-muted" style="font-size:0.75rem;">
-                            <?= number_format($wf['idle_workers']) ?> villageois inactifs disponibles pour les nouvelles extensions
+                            <?= number_format($wf['idle_workers']) ?> villageois inactifs (<?= $wf['unemployment_pct'] ?? 0 ?>% sans poste)
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Widget 3: Jauge de Contentement Féodale -->
-            <div class="col-sm-6 col-lg-4">
+            <!-- Widget 3: Délinquance & Sécurité Féodale -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm shadow-sm border-start border-3 border-<?= $dlqColor ?> h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="avatar rounded bg-<?= $dlqColor ?>-lt text-<?= $dlqColor ?> fs-3">
+                                <i class="fa-solid <?= $dlq['icon'] ?? 'fa-shield-halved' ?>"></i>
+                            </span>
+                            <span class="badge bg-<?= $dlqColor ?>-lt fw-bold"><?= htmlspecialchars($dlq['level_label']) ?></span>
+                        </div>
+                        <div class="h1 fw-bold text-<?= $dlqColor ?> mb-1"><?= $dlq['net_delinquency'] ?>% <small class="fs-4 text-muted">délinquance</small></div>
+                        <div class="progress progress-sm mb-1">
+                            <div class="progress-bar bg-<?= $dlqColor ?>" style="width: <?= min(100, (float)$dlq['net_delinquency']) ?>%"></div>
+                        </div>
+                        <div class="text-muted" style="font-size:0.75rem;">
+                            Garnison : <span class="text-success">+<?= $dlq['security_bonus'] ?>% ordre</span> &bull; Impact : <?= $dlq['moral_penalty'] > 0 ? '<span class="text-danger fw-bold">-' . $dlq['moral_penalty'] . '% moral</span>' : '<span class="text-success">0 malus</span>' ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Widget 4: Jauge de Contentement Féodale -->
+            <div class="col-sm-6 col-lg-3">
                 <div class="card card-sm shadow-sm border-start border-3 border-<?= $ctColor ?> h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -283,7 +308,7 @@ $bgVersion = file_exists($bgFile) ? filemtime($bgFile) : 1;
                             <div class="progress-bar bg-<?= $ctColor ?>" style="width: <?= $score ?>%"></div>
                         </div>
                         <div class="text-muted" style="font-size:0.75rem;">
-                            Saké : <strong><?= ($villageData['sake'] > 0) ? '<span class="text-success">+15% (Bonus actif)</span>' : '<span class="text-secondary">Neutre (0%)</span>' ?></strong> &bull; Farine : <?= number_format($villageData['rice_flour']) ?> kg
+                            Saké : <strong><?= ($villageData['sake'] > 0) ? '<span class="text-success">+15%</span>' : '<span class="text-secondary">Neutre</span>' ?></strong> &bull; Farine : <?= number_format($villageData['rice_flour']) ?> kg
                         </div>
                     </div>
                 </div>

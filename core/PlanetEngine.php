@@ -85,8 +85,8 @@ class PlanetEngine {
             // Facteur horaire
             $hours = $elapsed / 3600.0;
 
-            // Traitement du cycle de population : vivres, saké (règle asymétrique), contentement & exode
-            PopulationEngine::processTick($planetId, $hours, $planet, $maxPopulation, $activeFeast);
+            // Traitement du cycle de population : vivres, saké (règle asymétrique), contentement, délinquance & exode
+            PopulationEngine::processTick($planetId, $hours, $planet, $maxPopulation, $activeFeast, $buildings, $fields);
 
             $newMetal = min($metalMax, $planet['metal'] + ($prodRates['metal'] * $hours));
             $newCrystal = min($crystalMax, $planet['crystal'] + ($prodRates['crystal'] * $hours));
@@ -190,8 +190,8 @@ class PlanetEngine {
         }
 
         // Bilan démographique et jauge de contentement féodale
-        $contentmentDetails = PopulationEngine::calculateContentment($planet, $activeFeast);
         $workforceSummary = PopulationEngine::calculateWorkforceSummary($planet, $buildings, $fields, $maxPopulation);
+        $contentmentDetails = PopulationEngine::calculateContentment($planet, $activeFeast, $workforceSummary, $buildings);
 
         // Valeurs garanties pour les ressources raffinées, démographie et satisfaction
         $planet['sake'] = (float)($planet['sake'] ?? 0);
@@ -205,6 +205,7 @@ class PlanetEngine {
         $planet['contentment'] = (int)($planet['contentment'] ?? $contentmentDetails['score']);
         $planet['contentment_details'] = $contentmentDetails;
         $planet['workforce'] = $workforceSummary;
+        $planet['delinquency'] = $contentmentDetails['delinquency'] ?? null;
         $planet['famine_active'] = !empty($famineResult['famine']) || (!empty($planet['famine_active']));
         $planet['last_famine_losses'] = (int)($famineResult['casualties'] ?? ($planet['last_famine_losses'] ?? 0));
         $planet['famine_enabled'] = (bool)GameConfig::get('famine_enabled', false);

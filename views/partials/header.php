@@ -539,6 +539,7 @@ $navItems = [
                 // 8. Démographie & Satisfaction Féodale
                 $workforce = $planet['workforce'] ?? null;
                 $contentmentDetails = $planet['contentment_details'] ?? null;
+                $bH = $planet['buildings'] ?? [];
                 if (!$workforce || !$contentmentDetails) {
                     require_once __DIR__ . '/../../core/PopulationEngine.php';
                     $planetEngineHeader = new PlanetEngine();
@@ -547,7 +548,7 @@ $navItems = [
                     $maxPopH = $planetEngineHeader->calculateMaxPopulation($bH, $fH);
                     $feastH = $planetEngineHeader->getActiveFeast((int)$planet['id']);
                     $workforce = PopulationEngine::calculateWorkforceSummary($planet, $bH, $fH, $maxPopH);
-                    $contentmentDetails = PopulationEngine::calculateContentment($planet, $feastH);
+                    $contentmentDetails = PopulationEngine::calculateContentment($planet, $feastH, $workforce, $bH);
                 }
 
                 $curPop = (int)($workforce['total_population'] ?? 100);
@@ -557,6 +558,7 @@ $navItems = [
                 $idleWorkers = (int)($workforce['idle_workers'] ?? 0);
                 $isUnderstaffed = !empty($workforce['is_understaffed']);
                 $malusPct = (float)($workforce['understaffed_malus_pct'] ?? 0);
+                $delinquency = $contentmentDetails['delinquency'] ?? PopulationEngine::calculateDelinquency($planet, $bH, $workforce);
 
                 $contentmentScore = (int)($contentmentDetails['score'] ?? 85);
                 $badgeColor = $contentmentDetails['badge_color'] ?? 'success';
@@ -565,19 +567,23 @@ $navItems = [
                 $isExodus = !empty($contentmentDetails['is_exodus']);
 
                 $popoverTitle = "Démographie & Satisfaction (" . $contentmentScore . "%)";
-                $popoverHtml = "<div style='min-width:230px; font-size:0.8rem;'>"
+                $popoverHtml = "<div style='min-width:240px; font-size:0.8rem;'>"
                     . "<div class='mb-1'><strong>Population :</strong> " . number_format($curPop) . " / " . number_format($maxPop) . " logements</div>"
                     . "<div class='mb-1'><strong>Ouvriers requis :</strong> " . number_format($reqWorkers) . " &bull; <strong>Assignés :</strong> " . number_format($assignedWorkers) . "</div>"
-                    . "<div class='mb-1'><strong>Ouvriers disponibles :</strong> " . number_format($idleWorkers) . " libres</div>"
+                    . "<div class='mb-1'><strong>Sans affectation :</strong> " . number_format($idleWorkers) . " libres (" . ($delinquency['unemployment_pct'] ?? 0) . "% inactifs)</div>"
                     . "<div class='mb-1'><strong>Statut moral :</strong> <span class='badge bg-" . $badgeColor . "-lt text-" . $badgeColor . " fw-bold'>" . htmlspecialchars($statusLabel) . "</span></div>"
                     . "<hr class='my-1'>"
                     . "<div class='mb-1'>🍚 <strong>Besoins Vitaux :</strong> " . ($contentmentDetails['has_food'] ? "<span class='text-success'>Assurés (+15%)</span>" : "<span class='text-danger fw-bold'>Disette (-55%)</span>") . "</div>"
                     . "<div class='mb-1'>⛩️ <strong>Sérénité Shinto :</strong> " . ($contentmentDetails['has_energy'] ? "<span class='text-success'>Harmonieux (0)</span>" : "<span class='text-danger fw-bold'>Déficit (-20%)</span>") . "</div>"
                     . "<div class='mb-1'>🍶 <strong>Luxe Saké :</strong> " . ($sakeBonusActive ? "<span class='text-purple fw-bold'>Bonus Actif (+15%)</span>" : "<span class='text-muted'>Neutre (0 malus)</span>") . "</div>"
+                    . "<div class='mb-1'>🗡️ <strong>Ordre Public :</strong> " . ($delinquency['moral_penalty'] > 0 ? "<span class='text-danger fw-bold'>" . htmlspecialchars($delinquency['level_label']) . " (-" . $delinquency['moral_penalty'] . "%)</span>" : "<span class='text-success'>" . htmlspecialchars($delinquency['level_label']) . " (0 malus)</span>") . "</div>"
                     . "<hr class='my-1'>"
                     . ($isUnderstaffed 
                         ? "<div class='text-warning fw-bold mb-1'><i class='fa-solid fa-triangle-exclamation'></i> Sous-effectif : -" . $malusPct . "% sur la production</div>"
                         : "<div class='text-success small mb-1'><i class='fa-solid fa-check'></i> Tous les chantiers sont pourvus (100%)</div>")
+                    . (($delinquency['net_delinquency'] > 0)
+                        ? "<div class='text-danger small mb-1'><i class='fa-solid fa-shield-halved'></i> Délinquance : " . $delinquency['net_delinquency'] . "% (chômage " . $delinquency['unemployment_pct'] . "%, ordre +" . $delinquency['security_bonus'] . "%)</div>"
+                        : "<div class='text-success small mb-1'><i class='fa-solid fa-shield-halved'></i> Maintien de l'ordre parfait (+" . $delinquency['security_bonus'] . "% sécurité)</div>")
                     . ($isExodus 
                         ? "<div class='text-danger fw-bold mt-1'><i class='fa-solid fa-skull'></i> Exode de villageois en cours (&lt; 25%) !</div>"
                         : "")
@@ -746,7 +752,7 @@ $navItems = [
                         <!-- 8. Population & Logement -->
                         <div class="d-flex align-items-center gap-1.5 cursor-pointer"
                              data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                             title="<strong>Démographie &amp; Main-d'œuvre</strong><br>Population : <?= number_format($curPop) ?> / <?= number_format($maxPop) ?> logements<br>Ouvriers affectés : <?= number_format($assignedWorkers) ?> &bull; Libres : <?= number_format($idleWorkers) ?><br><span class='<?= $isUnderstaffed ? 'text-danger fw-bold' : 'text-success' ?>'><?= $isUnderstaffed ? 'Sous-effectif (-' . $malusPct . '%)' : 'Plein emploi garanti' ?></span>">
+                             title="<strong>Démographie &amp; Main-d'œuvre</strong><br>Population : <?= number_format($curPop) ?> / <?= number_format($maxPop) ?> logements<br>Ouvriers affectés : <?= number_format($assignedWorkers) ?> &bull; Libres : <?= number_format($idleWorkers) ?> (<?= $delinquency['unemployment_pct'] ?? 0 ?>% inactifs)<br>Délinquance : <?= $delinquency['net_delinquency'] ?? 0 ?>% &bull; <?= htmlspecialchars($delinquency['level_label'] ?? 'Ordre Parfait') ?><br><span class='<?= $isUnderstaffed ? 'text-danger fw-bold' : 'text-success' ?>'><?= $isUnderstaffed ? 'Sous-effectif (-' . $malusPct . '%)' : 'Plein emploi garanti' ?></span>">
                             <span class="avatar avatar-xs rounded-circle bg-blue-lt text-blue" style="width:26px; height:26px;">
                                 <i class="fa-solid fa-users" style="font-size:0.75rem;"></i>
                             </span>

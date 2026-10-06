@@ -686,12 +686,15 @@ class TerroirEngine {
         $housingCap = $this->getHousingCapacity($planetId);
         $maxPop = $housingCap['total_capacity'];
 
+        $activeFeast = $this->planetEngine->getActiveFeast($planetId);
         $workforce = PopulationEngine::calculateWorkforceSummary($planet, $buildings, $fields, $maxPop);
-        $contentment = PopulationEngine::calculateContentment($planet);
+        $contentment = PopulationEngine::calculateContentment($planet, $activeFeast, $workforce, $buildings);
+        $delinquency = $contentment['delinquency'] ?? PopulationEngine::calculateDelinquency($planet, $buildings, $workforce);
 
         return [
             'workforce'       => $workforce,
             'contentment'     => $contentment,
+            'delinquency'     => $delinquency,
             'population'      => (int)($planet['population'] ?? 100),
             'max_pop'         => $maxPop,
             'housing_cap'     => $housingCap,
