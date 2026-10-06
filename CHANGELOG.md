@@ -4,6 +4,13 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
+### Modifié (Changed)
+- **Refonte du HUD de ressources et statistiques de population en un ruban horizontal unifié compact (< 44px) aux couleurs du site (`views/partials/header.php`, `views/resources.php`) :**
+  * Élimination des doublons : fusion de la Sérénité Shintō, de la Population et du Contentement au sein d'une seule et même barre d'en-tête horizontale compacte (`card-sm`, hauteur contenue < 44px), supprimant le bloc redondant de 4 cartes dans `views/resources.php` et libérant plus de 150px verticaux au-dessus du Terroir.
+  * Respect absolu de la charte graphique et des teintes du site : surface blanche épurée (`bg-white`), bordures délicates (`border-secondary-subtle`), typographie sombre contrastée et accents de couleurs féodales d'origine (Bois, Pierre, Riz, Farine, Saké, Poutres).
+  * Micro-jauges fines (3px) discrètes sous chaque ressource et conservation stricte de tous les hooks JavaScript (`res-val-*`, `bar-*`, `data-current`, `data-max`, `data-prod`) pour les animations et rafraîchissements temps réel sans régression.
+  * Infobulles et popovers enrichis (production/heure, seuils de stockage, facteurs de sérénité et de contentement) au survol et au clic.
+
 ### Corrigé (Fixed)
 - **Résolution de la colonne manquante `newsletter_optin` et fiabilisation de `users` (`database/migrations/001_baseline_schema.sql`, `database/schema.sql`, `database/schema_complete.sql`, `core/InstallEngine.php`) :**
   * Correction du blocage d'installation `SQLSTATE[42S22]: Column not found: 1054 Unknown column 'newsletter_optin' in 'SET'` lors de la mise à jour du compte administrateur à l'Étape 8 de `install.php`.

@@ -1,5 +1,34 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-06] - refactor-compact-hud-unified-header : Refonte du HUD horizontal unifié compact (< 44px) aux couleurs du site et élimination des doublons
+- **Module :** `refactor-compact-hud-unified-header`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Unification et compacité de l'en-tête de jeu (`views/partials/header.php`) :**
+     - Remplacement des 8 grands blocs de cartes par un ruban horizontal unifié extra-compact (hauteur globale contenue < 44px, `card card-sm shadow-sm py-1`).
+     - Intégration harmonieuse des 6 ressources matérielles féodales (Bois, Pierre, Riz, Farine de Riz, Saké Impérial, Poutres Maîtresses) et des statistiques démographiques / spirituelles (Sérénité Shintō, Population, Contentement populaire).
+     - Micro-jauges minimalistes (3px de hauteur) discrètement placées sous chaque valeur pour matérialiser les niveaux de stockage sans alourdir l'interface.
+  2. **Respect rigoureux de la direction artistique et des teintes du site :**
+     - Conformité avec le thème Tabler clair d'OpenShogun : carte blanche (`bg-white`), bordures douces (`border-secondary-subtle`), typographie sombre et contrastée (`text-dark font-monospace`).
+     - Préservation des codes couleurs féodaux identitaires du jeu : Bois (`text-success`), Pierre (`text-primary`), Riz (`text-warning`), Farine (`text-secondary`), Saké (`text-purple`), Poutres (`text-orange`), Sérénité (`text-teal`), Population (`text-dark`).
+     - Badge de Contentement adaptatif (`badge bg-*-lt border-0`).
+  3. **Élimination complète des doublons (`views/resources.php`) :**
+     - Suppression du bloc intermédiaire de 4 cartes (Sérénité, Population, Main-d'œuvre, Contentement) dans la vue Terroir, évitant tout affichage en double avec le header.
+     - Gain d'espace vertical immédiat (> 150px) permettant à la carte interactive des 40 parcelles d'être visible sans défilement excessif.
+  4. **Compatibilité JS temps réel et infobulles :**
+     - Conservation de l'ensemble des IDs DOM (`res-val-metal`, `bar-metal`, `res-val-crystal`, etc.) et attributs `data-current`, `data-max`, `data-prod` exploités par `public/js/app.js` et le rafraîchissement périodique.
+     - Infobulles natives Bootstrap (`data-bs-toggle="tooltip"`) et popover de décomposition détaillée (`data-bs-toggle="popover"`).
+- **Fichiers modifiés :** `views/partials/header.php`, `views/resources.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter et naviguer sur n'importe quelle page du jeu (ex: `?page=overview`, `?page=resources`, `?page=buildings`).
+  2. Vérifier que la barre de ressources du header s'affiche sous forme d'un ruban horizontal compact d'une hauteur inférieure à 44px avec fond blanc et bordure discrète.
+  3. Vérifier que les ressources (Bois, Pierre, Riz, Farine, Saké, Poutres) s'incrémentent correctement en direct sans erreur dans la console JavaScript.
+  4. Vérifier que la Sérénité et la Population apparaissent dans le HUD du header avec leurs micro-jauges et pourcentages.
+  5. Se rendre sur la page Terroir (`?page=resources`) et vérifier que les 4 cartes en doublon n'apparaissent plus : la carte 40 parcelles et la grille tactique débutent directement sous la barre d'outils.
+  6. Survoler et cliquer sur le badge de Contentement dans le header pour vérifier l'affichage du popover explicatif.
+
+---
+
 ### [2026-10-06] - refactor-terroir-remove-redundant-resource-row : Allègement de l'en-tête du Terroir Féodal et suppression de la première rangée de ressources redondante
 - **Module :** `refactor-terroir-remove-redundant-resource-row`
 - **Statut :** `À tester`
