@@ -327,16 +327,44 @@ class InstallEngine {
         $worldGen = new WorldGenerator($pdo);
         $worldGen->resetUniverse($adminPass, 12, true);
 
+        // Garantir l'existence des colonnes de profil et newsletter dans users
+        try {
+            $cols = $pdo->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('newsletter_optin', $cols, true)) {
+                $pdo->exec("ALTER TABLE users ADD COLUMN newsletter_optin TINYINT(1) NOT NULL DEFAULT 0 AFTER protection_until");
+                try {
+                    $pdo->exec("ALTER TABLE users ADD INDEX idx_users_newsletter (newsletter_optin)");
+                } catch (Exception $e) {}
+            }
+            if (!in_array('avatar', $cols, true)) {
+                $pdo->exec("ALTER TABLE users ADD COLUMN avatar VARCHAR(255) NULL AFTER bio");
+            }
+            if (!in_array('bio', $cols, true)) {
+                $pdo->exec("ALTER TABLE users ADD COLUMN bio TEXT NULL AFTER alliance_id");
+            }
+        } catch (Exception $e) {}
+
         // Mettre à jour le compte administrateur avec les identifiants saisis
         $adminNewsletterOptin = !empty($params['admin_newsletter_optin']) ? 1 : 0;
         $adminHash = password_hash($adminPass, PASSWORD_BCRYPT);
-        $stmtUpAdmin = $pdo->prepare("
-            UPDATE users 
-            SET username = ?, email = ?, password_hash = ?, faction = ?, newsletter_optin = ? 
-            WHERE is_admin = 1 
-            ORDER BY id ASC LIMIT 1
-        ");
-        $stmtUpAdmin->execute([$adminUser, $adminEmail, $adminHash, $adminFaction, $adminNewsletterOptin]);
+        try {
+            $stmtUpAdmin = $pdo->prepare("
+                UPDATE users 
+                SET username = ?, email = ?, password_hash = ?, faction = ?, newsletter_optin = ? 
+                WHERE is_admin = 1 
+                ORDER BY id ASC LIMIT 1
+            ");
+            $stmtUpAdmin->execute([$adminUser, $adminEmail, $adminHash, $adminFaction, $adminNewsletterOptin]);
+        } catch (PDOException $e) {
+            // Repli résilient sans newsletter_optin en cas de schéma legacy
+            $stmtUpAdmin = $pdo->prepare("
+                UPDATE users 
+                SET username = ?, email = ?, password_hash = ?, faction = ? 
+                WHERE is_admin = 1 
+                ORDER BY id ASC LIMIT 1
+            ");
+            $stmtUpAdmin->execute([$adminUser, $adminEmail, $adminHash, $adminFaction]);
+        }
 
         // Mettre à jour le nom du château capital
         $stmtUpCap = $pdo->prepare("

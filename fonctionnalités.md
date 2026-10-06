@@ -1,6 +1,22 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
-> Ce document consigne l'ensemble des fonctionnalités et composants implémentés dans le projet.
+### [2026-10-06] - fix-installer-missing-newsletter-optin-column : Correction de l'erreur SQLSTATE[42S22] colonne 'newsletter_optin' inconnue lors de l'installation
+- **Module :** `fix-installer-missing-newsletter-optin-column`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Intégration des colonnes complètes de `users` dans les schémas de référence :**
+     - Ajout des colonnes `is_active`, `email_verified_at`, `activation_token`, `activation_token_expires_at` et `newsletter_optin` (avec leurs index respectifs) dans le DDL de la table `users` des fichiers `database/migrations/001_baseline_schema.sql`, `database/schema.sql` et `database/schema_complete.sql`.
+  2. **Auto-guérison et repli résilient dans l'assistant d'installation (`core/InstallEngine.php`) :**
+     - Vérification dynamique et création automatique (`ALTER TABLE`) des colonnes `newsletter_optin`, `avatar` et `bio` avant la mise à jour de l'administrateur.
+     - Requête `UPDATE` de secours sans `newsletter_optin` en cas d'exception sur les structures de données historiques.
+- **Fichiers modifiés :** `database/migrations/001_baseline_schema.sql`, `database/schema.sql`, `database/schema_complete.sql`, `core/InstallEngine.php`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Lancer l'installation via `install.php` jusqu'à son terme : vérifier que l'Étape 8 (création / mise à jour du Shogun Administrateur) passe avec succès.
+  2. Vérifier que la table `users` possède bien la colonne `newsletter_optin` et que le choix fait sur l'installateur y est correctement persisté.
+  3. Vérifier que la connexion à l'espace de jeu avec le compte administrateur fonctionne immédiatement sans erreur SQL.
+
+---
+
 ### [2026-10-06] - fix-installer-missing-alliances-table : Correction de l'erreur SQLSTATE[42S02] table 'alliances' inexistante lors de l'installation
 - **Module :** `fix-installer-missing-alliances-table`
 - **Statut :** `À tester`

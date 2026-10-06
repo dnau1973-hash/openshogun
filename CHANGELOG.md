@@ -5,6 +5,10 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Corrigé (Fixed)
+- **Résolution de la colonne manquante `newsletter_optin` et fiabilisation de `users` (`database/migrations/001_baseline_schema.sql`, `database/schema.sql`, `database/schema_complete.sql`, `core/InstallEngine.php`) :**
+  * Correction du blocage d'installation `SQLSTATE[42S22]: Column not found: 1054 Unknown column 'newsletter_optin' in 'SET'` lors de la mise à jour du compte administrateur à l'Étape 8 de `install.php`.
+  * Intégration des colonnes `is_active`, `email_verified_at`, `activation_token`, `activation_token_expires_at` et `newsletter_optin` (avec leurs index respectifs) dans le DDL de la table `users` de tous les schémas de référence (`001_baseline_schema.sql`, `database/schema.sql`, `database/schema_complete.sql`).
+  * Mise en place d'une auto-guérison préventive des colonnes de `users` et d'une requête de repli résiliente dans `InstallEngine::runInstallation()` prévenant tout échec sur d'anciennes bases ou installations partielles.
 - **Intégration de la table `alliances` dans le schéma baseline et sécurisation de `WorldGenerator::resetUniverse` (`database/migrations/001_baseline_schema.sql`, `database/schema.sql`, `database/schema_complete.sql`, `core/WorldGenerator.php`) :**
   * Correction du blocage d'installation `SQLSTATE[42S02]: Base table or view not found: 1146 Table 'openshogun.alliances' doesn't exist` lors de la réinitialisation de l'univers féodal (Étape 7).
   * Ajout du DDL complet de la table `alliances` (`id`, `name`, `tag`, `leader_id`, `description`, `created_at` avec contraintes uniques et index) dans `001_baseline_schema.sql`, `database/schema.sql` et `database/schema_complete.sql` (schéma consolidé à 43 tables).

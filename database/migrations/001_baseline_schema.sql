@@ -713,6 +713,10 @@ CREATE TABLE IF NOT EXISTS `users` (
   `imperial_seal_until` datetime DEFAULT NULL,
   `last_daily_gold` date DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `email_verified_at` datetime DEFAULT NULL,
+  `activation_token` varchar(128) DEFAULT NULL,
+  `activation_token_expires_at` datetime DEFAULT NULL,
   `faction` enum('terran','vorash','aethelis') NOT NULL DEFAULT 'terran',
   `alliance_id` int(10) unsigned DEFAULT NULL,
   `bio` text DEFAULT NULL,
@@ -724,11 +728,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_active` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `protection_until` datetime DEFAULT NULL,
+  `newsletter_optin` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`),
+  KEY `idx_users_active` (`is_active`),
+  KEY `idx_users_act_token` (`activation_token`),
   KEY `idx_users_protection` (`protection_until`),
-  KEY `idx_users_moderator` (`is_moderator`)
+  KEY `idx_users_moderator` (`is_moderator`),
+  KEY `idx_users_newsletter` (`newsletter_optin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table : activity_logs (Télémétrie et monitoring de navigation)
