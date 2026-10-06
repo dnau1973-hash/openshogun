@@ -1,5 +1,22 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-06] - refactor-terroir-remove-redundant-resource-row : Allègement de l'en-tête du Terroir Féodal et suppression de la première rangée de ressources redondante
+- **Module :** `refactor-terroir-remove-redundant-resource-row`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Suppression de la première rangée de compteurs de ressources (`views/resources.php`) :**
+     - Retrait de la Rangée 1 contenant les 6 cartes de stocks et productions horaires (Bois, Pierre, Argile, Riz, Thé, Soja), devenue inutile et redondante avec la barre de ressources globale du header et l'affichage individuel des 40 parcelles.
+     - Conservation exclusive de la barre des 4 indicateurs clés essentiels (Sérénité Shintō, Population globale, Mobilisation de la main-d'œuvre, Contentement féodal) pour un en-tête aéré et centré sur la gestion stratégique.
+     - Nettoyage des styles CSS `.kpi-resource-*` devenus obsolètes.
+- **Fichiers modifiés :** `views/resources.php`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Se rendre sur la page du Terroir Féodal (`?page=resources`).
+  2. Vérifier que la rangée des 6 cartes de ressources (Bois, Pierre, Argile, Riz, Thé, Soja) n'apparaît plus au-dessus des indicateurs clés.
+  3. Vérifier que les 4 cartes d'indicateurs de pilotage (Sérénité, Population, Main-d'œuvre, Contentement) s'affichent proprement et conservent toute leur interactivité (popover sur le contentement).
+  4. Vérifier que la carte illustrée des 40 parcelles et la grille tactique fonctionnent parfaitement sans perturbation de layout.
+
+---
+
 ### [2026-10-06] - fix-installer-missing-newsletter-optin-column : Correction de l'erreur SQLSTATE[42S22] colonne 'newsletter_optin' inconnue lors de l'installation
 - **Module :** `fix-installer-missing-newsletter-optin-column`
 - **Statut :** `À tester`

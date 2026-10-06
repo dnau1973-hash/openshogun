@@ -80,45 +80,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     }
 }
 
-/* Header de la vue : Indicateurs de stocks et flux (KPI) */
-.kpi-resource-card {
-    background: var(--tblr-card-bg, #ffffff);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    padding: 0.65rem 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.kpi-resource-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.kpi-resource-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.15rem;
-    flex-shrink: 0;
-}
-
-.kpi-resource-val {
-    font-size: 1.15rem;
-    font-weight: 800;
-    line-height: 1.1;
-}
-
-.kpi-resource-rate {
-    font-size: 0.72rem;
-    font-weight: 700;
-}
 
 /* Barre de filtrage rapide des 8 catégories */
 .filter-category-bar {
@@ -610,85 +571,10 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                 </div>
             </div>
 
-            <!-- 2. Indicateurs supérieurs (Header de la vue) : Stocks, Flux, Sérénité, Population, Main-d'œuvre & Contentement -->
+            <!-- 2. Indicateurs supérieurs (Header de la vue) : Sérénité, Population, Main-d'œuvre & Contentement -->
             <div class="card-body p-3 border-bottom bg-surface-secondary">
                 
-                <!-- Rangée 1 : Compteurs de ressources (Stocks & Flux horaires des 6 matières) -->
-                <div class="row row-cards g-2 mb-3">
-                    <!-- Bois de Cèdre -->
-                    <div class="col-6 col-sm-4 col-md-2">
-                        <div class="kpi-resource-card border-start border-3 border-success">
-                            <div>
-                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Bois de Cèdre</div>
-                                <div class="kpi-resource-val text-success"><?= number_format($planet['metal']) ?></div>
-                                <div class="kpi-resource-rate text-success">+<?= number_format($planet['prod_rates']['metal']) ?>/h</div>
-                            </div>
-                            <span class="kpi-resource-icon bg-success-lt text-success"><i class="fa-solid fa-tree"></i></span>
-                        </div>
-                    </div>
-
-                    <!-- Pierre de Taille -->
-                    <div class="col-6 col-sm-4 col-md-2">
-                        <div class="kpi-resource-card border-start border-3 border-secondary">
-                            <div>
-                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Pierre de Taille</div>
-                                <div class="kpi-resource-val text-secondary"><?= number_format($planet['crystal']) ?></div>
-                                <div class="kpi-resource-rate text-secondary">+<?= number_format($planet['prod_rates']['crystal']) ?>/h</div>
-                            </div>
-                            <span class="kpi-resource-icon bg-secondary-lt text-secondary"><i class="fa-solid fa-mountain"></i></span>
-                        </div>
-                    </div>
-
-                    <!-- Argile & Céramique -->
-                    <div class="col-6 col-sm-4 col-md-2">
-                        <div class="kpi-resource-card border-start border-3 border-warning">
-                            <div>
-                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Argile &amp; Céramique</div>
-                                <div class="kpi-resource-val text-warning"><?= number_format($clayProdHourly * 4) ?></div>
-                                <div class="kpi-resource-rate text-warning">+<?= number_format($clayProdHourly) ?>/h</div>
-                            </div>
-                            <span class="kpi-resource-icon bg-warning-lt text-warning"><i class="fa-solid fa-jar"></i></span>
-                        </div>
-                    </div>
-
-                    <!-- Riz Impérial (Koku) -->
-                    <div class="col-6 col-sm-4 col-md-2">
-                        <div class="kpi-resource-card border-start border-3 border-warning">
-                            <div>
-                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Riz Impérial (Koku)</div>
-                                <div class="kpi-resource-val text-warning"><?= number_format($planet['deuterium']) ?></div>
-                                <div class="kpi-resource-rate text-warning">+<?= number_format($planet['prod_rates']['deuterium']) ?>/h</div>
-                            </div>
-                            <span class="kpi-resource-icon bg-warning-lt text-warning"><i class="fa-solid fa-wheat-awn"></i></span>
-                        </div>
-                    </div>
-
-                    <!-- Feuilles de Thé -->
-                    <div class="col-6 col-sm-4 col-md-2">
-                        <div class="kpi-resource-card border-start border-3 border-teal">
-                            <div>
-                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Feuilles de Thé</div>
-                                <div class="kpi-resource-val text-teal"><?= number_format($teaProdHourly * 3) ?></div>
-                                <div class="kpi-resource-rate text-teal">+<?= number_format($teaProdHourly) ?>/h</div>
-                            </div>
-                            <span class="kpi-resource-icon bg-teal-lt text-teal"><i class="fa-solid fa-leaf"></i></span>
-                        </div>
-                    </div>
-
-                    <!-- Champs de Soja -->
-                    <div class="col-6 col-sm-4 col-md-2">
-                        <div class="kpi-resource-card border-start border-3 border-orange">
-                            <div>
-                                <div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;">Soja &amp; Tofu</div>
-                                <div class="kpi-resource-val text-orange"><?= number_format($soybeanProdHourly * 3) ?></div>
-                                <div class="kpi-resource-rate text-orange">+<?= number_format($soybeanProdHourly) ?>/h</div>
-                            </div>
-                            <span class="kpi-resource-icon bg-orange-lt text-orange"><i class="fa-solid fa-seedling"></i></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Rangée 2 : 4 Indicateurs Clés (Sérénité, Population Globale, Main-d'œuvre, Contentement) -->
+                <!-- 4 Indicateurs Clés (Sérénité, Population Globale, Main-d'œuvre, Contentement) -->
                 <div class="row row-cards g-2">
                     
                     <!-- 1. Jauge de Sérénité (alimentée par les 5 sanctuaires) -->

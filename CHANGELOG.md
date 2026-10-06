@@ -31,6 +31,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * Verrouillage strict de l'échelle minimale (`minZoom`) : calcul automatique $minScale = \max(containerWidth / stageWidth, containerHeight / stageHeight)$ pour garantir 100% de couverture écran sans fond noir.
   * Verrouillage des bords au glissement (Bounding Box Clamping) : limitation absolue des coordonnées de translation dans $[containerWidth - scaledWidth, 0]$ et $[containerHeight - scaledHeight, 0]$ interdisant toute exposition des marges vides au drag souris ou tactile.
 
+### Supprimé (Removed)
+- **Suppression de la première rangée de compteurs de ressources dans la vue Terroir (`views/resources.php`) :**
+  * Retrait de la Rangée 1 (les 6 cartes de stocks et productions horaires : Bois, Pierre, Argile, Riz, Thé, Soja), devenue redondante avec la barre de ressources globale du header et les 40 parcelles illustrées/tactiques.
+  * Conservation exclusive des 4 indicateurs stratégiques de pilotage (Sérénité Shintō, Population globale, Mobilisation de la main-d'œuvre, Contentement féodal) au-dessus de la carte et de la grille des 40 parcelles.
+  * Épuration des règles CSS associées `.kpi-resource-*`.
+
 ### Ajouté (Added)
 - **Refonte DevOps & Consolidation Idempotente de la Base de Données (`database/migrations/`, `core/MigrationEngine.php`, `scripts/migrate.php`, `Dockerfile`, `docker-compose.yml`, `.env.example`) :**
   * Unification intégrale des 42 tables du jeu dans un schéma de référence unique `001_baseline_schema.sql` éliminant toute fragmentation DDL.
