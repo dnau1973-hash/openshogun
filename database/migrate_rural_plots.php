@@ -42,3 +42,4 @@ try {
 } catch (Exception $e) {
     echo "[INFO] Migration hors ligne / exception : " . $e->getMessage() . "\n";
 }
+

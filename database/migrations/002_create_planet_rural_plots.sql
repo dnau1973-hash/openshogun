@@ -19,3 +19,4 @@ CREATE TABLE IF NOT EXISTS `planet_rural_plots` (
     KEY `idx_planet_id` (`planet_id`),
     CONSTRAINT `fk_rural_plots_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

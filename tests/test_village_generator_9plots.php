@@ -118,3 +118,4 @@ if ($planetMaxPop === 125) {
 }
 
 echo "\n[TOUS LES TESTS DU DOMAINE RURAL A 9 PARCELLES SONT VALIDES]\n";
+
