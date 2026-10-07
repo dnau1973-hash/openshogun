@@ -231,7 +231,37 @@ class PlanetEngine {
             $cat = $item['build_category'];
             $targetLevel = (int)$item['target_level'];
 
-            if ($cat === 'field') {
+            if ($cat === 'rural_plot') {
+                $structureType = $item['target_id'];
+                require_once __DIR__ . '/RuralPlotEngine.php';
+                require_once __DIR__ . '/VillageGeneratorService.php';
+
+                $newWorkers = max(2, (int)round(2 + ($targetLevel * 1.5)));
+                $newProd = VillageGeneratorService::calculateHourlyProduction($structureType, $targetLevel);
+
+                $up = $this->db->prepare("
+                    UPDATE planet_rural_plots
+                    SET level = ?,
+                        workers_assigned = ?,
+                        prod_hourly = ?
+                    WHERE planet_id = ? AND structure_type = ?
+                ");
+                $up->execute([$targetLevel, $newWorkers, $newProd, $planetId, $structureType]);
+
+                // Effets spécifiques
+                if ($structureType === 'village') {
+                    $newCapacity = 75 + ($targetLevel * 25);
+                    $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
+                    $minSql = ($driver === 'sqlite') ? "MIN(population + 5, ?)" : "LEAST(population + 5, ?)";
+                    $this->db->prepare("UPDATE planets SET population = {$minSql} WHERE id = ?")
+                        ->execute([$newCapacity, $planetId]);
+                } elseif ($structureType === 'tenshu') {
+                    try {
+                        $this->db->prepare("UPDATE planet_buildings SET level = ? WHERE planet_id = ? AND building_type = 'hq'")
+                            ->execute([$targetLevel, $planetId]);
+                    } catch (Exception $e) {}
+                }
+            } elseif ($cat === 'field') {
                 $slot = (int)$item['target_id'];
                 if ($targetLevel === 0) {
                     // Démolition de parcelle terminée : récupérer le type et niveau pour remboursement 30%

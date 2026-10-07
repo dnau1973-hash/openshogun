@@ -34,6 +34,17 @@ try {
     $db->exec($sql);
     echo "[OK] Table `planet_rural_plots` créée ou déjà existante.\n";
 
+    // Élargir la colonne build_category de construction_queue si nécessaire
+    try {
+        $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver !== 'sqlite') {
+            $db->exec("ALTER TABLE `construction_queue` MODIFY COLUMN `build_category` VARCHAR(32) NOT NULL");
+            echo "[OK] `construction_queue.build_category` mis à jour pour supporter 'rural_plot'.\n";
+        }
+    } catch (Exception $eCol) {
+        // Déjà converti ou non nécessaire
+    }
+
     // Initialisation procédurale de tous les villages existants
     $generator = new VillageGeneratorService($db);
     $count = $generator->ensureAllPlanetsInitialized();

@@ -1,6 +1,39 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
-### [2026-10-06] - refactor-compact-hud-unified-header : Refonte du HUD horizontal unifié compact (< 44px) aux couleurs du site et élimination des doublons
+### [2026-10-07] - refactor-rural-9plots-async-queue-fixed-panorama : Refonte globale du domaine rural (9 parcelles procédurales 20-100, panorama fixe 16:9 sans pan/zoom, file de construction asynchrone non-instantanée)
+- **Module :** `refactor-rural-9plots-async-queue-fixed-panorama`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Suppression définitive des contrôles de Zoom et Déplacement (Pan/Zoom/Drag) :**
+     - Retrait total des gestionnaires d'événements de drag-to-scroll, grab-and-pan, molette de zoom et boutons de contrôle (+, -, reset 100%, recentrage, plein écran).
+     - Nettoyage des styles de curseurs (`grab`, `grabbing`).
+     - Remplacement du viewport mobile par un conteneur responsive fixe verrouillé au ratio 16:9 (`aspect-ratio: 16 / 9; background-size: cover`), centré et stable sur tous les écrans.
+     - Positionnement direct en coordonnées relatives fixes (`% left / top`) des 9 badges interactifs sans matrice de transformation variable (`transform: translate/scale`).
+  2. **Modèle de données & 9 parcelles procédurales uniques :**
+     - Structure de données des 9 types par fief : `tenshu`, `foret`, `carriere`, `fosse_argile`, `riziere`, `champ_soja`, `culture_the`, `sanctuaire_shinto`, `village`.
+     - Potentiels verticaux procéduraux tirés entre le niveau 20 et 100 via `VillageGeneratorService`.
+  3. **File de construction & Durées réelles non-instantanées (Niveaux 1 à 100) :**
+     - Règle stricte d'élévation non-instantanée : enregistrement persistant dans `construction_queue` (`started_at`, `finishes_at`, `target_level`).
+     - Déduction immédiate des ressources au lancement du chantier.
+     - Verrouillage du niveau : le niveau en base de données reste inchangé pendant les travaux et n'est incrémenté côté serveur que lors de l'expiration de `finishes_at` via `PlanetEngine::processConstructionQueue`.
+     - Échelonnage progressif des durées : de quelques minutes sur les paliers bas, plusieurs heures sur les paliers intermédiaires, jusqu'à plusieurs jours sur les très hauts niveaux (jusqu'à 100).
+     - Support de l'annulation avec remboursement de 80% des ressources via `BuildingEngine::cancelUpgrade`.
+  4. **Interface utilisateur dynamique (Tabler.io + Vanilla JS) :**
+     - État visuel « En travaux » sur le badge de la parcelle ciblée : icône de marteau animée, halo doré pulsant, compte à rebours dynamique en temps réel (`JJ:HH:MM:SS` ou `HH:MM:SS`) et barre de progression fluide.
+     - Verrouillage de la modale d'amélioration pendant la durée du chantier (affichage du compte à rebours et possibilité d'annuler le chantier).
+     - Intégration des parcelles rurales dans le panneau « Chantiers en Cours » de la colonne latérale avec bouton d'annulation rapide.
+- **Fichiers modifiés :** `views/resources.php`, `public/js/rural_domain_map.js`, `core/RuralPlotEngine.php`, `core/PlanetEngine.php`, `core/BuildingEngine.php`, `core/ImperialSealEngine.php`, `api/rural_plot.php`, `database/migrations/003_support_rural_plots_in_queue.sql`, `database/migrate_rural_plots.php`, `tests/test_village_generator_9plots.php`, `fonctionnalités.md`, `public/changelog.html`
+- **Vérification QA :**
+  1. Se rendre sur la page Ressources (`?page=resources`).
+  2. Vérifier que la carte s'affiche dans un cadre 16:9 net et fixe, sans curseur grab, sans boutons de zoom et sans possibilité de glisser ou déplacer l'image à la souris.
+  3. Vérifier les 9 badges des structures féodales avec leurs niveaux et potentiels (ex: Niv. 1 / 45).
+  4. Cliquer sur une parcelle (ex. Forêt) : la modale s'ouvre affichant les coûts et la durée estimée.
+  5. Cliquer sur « Lancer le chantier » : les ressources sont déduites, la page se recharge avec l'état « TRAVAUX » sur le badge de la forêt, le compte à rebours dynamique s'égrène seconde par seconde et la barre de progression avance.
+  6. Vérifier dans la colonne de droite « Chantiers en Cours » que le chantier apparaît avec son compte à rebours et sa croix d'annulation.
+  7. Cliquer à nouveau sur le badge en travaux : la modale affiche l'état en cours et le bouton « Annuler le chantier (Remboursement 80%) ».
+  8. Cliquer sur « Annuler » : vérifier que 80% des ressources investies sont bien restituées et que la parcelle redevient disponible.
+
+---
 - **Module :** `refactor-compact-hud-unified-header`
 - **Statut :** `À tester`
 - **Description :**

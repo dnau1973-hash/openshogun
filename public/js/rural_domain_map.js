@@ -1,136 +1,28 @@
 /**
- * OpenShogun - Moteur Cartographique Interactif du Domaine Rural Féodal (9 Parcelles Uniques)
- * Viewport Grab-and-Pan, Pan/Zoom Clamping (16:9), Modale d'amélioration et intégration AJAX Tabler.
+ * OpenShogun - Gestion Interactive du Domaine Rural Féodal (9 Parcelles Uniques)
+ * Affichage panoramique 16:9 fixe (sans Pan/Zoom ni curseurs de déplacement),
+ * File de construction asynchrone, compte à rebours dynamique JJ:HH:MM:SS et modale Tabler.
  */
 (function(window, document) {
     'use strict';
 
-    const mapState = {
-        stageWidth: 1920,
-        stageHeight: 1080,
-        scale: 1.0,
-        minScale: 0.5,
-        maxScale: 2.2,
-        x: 0,
-        y: 0,
-        isDragging: false,
-        dragStartX: 0,
-        dragStartY: 0,
-        hasMoved: false
-    };
-
-    let viewportEl = null;
-    let stageEl = null;
-    let zoomIndicator = null;
-    let modalEl = null;
+    let currentOpenPin = null;
 
     /**
-     * Calcul du scale minimum pour couvrir 100% du conteneur sans bordure noire
+     * Formate un temps en secondes en JJ:HH:MM:SS ou HH:MM:SS
      */
-    function calculateMinScale(containerWidth, containerHeight) {
-        if (!containerWidth || !containerHeight) return 0.5;
-        return Math.max(
-            containerWidth / mapState.stageWidth,
-            containerHeight / mapState.stageHeight
-        );
-    }
+    function formatDuration(seconds) {
+        if (seconds <= 0) return '00:00:00';
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
 
-    /**
-     * Clamping strict du déplacement et du zoom
-     */
-    function clampMapCoordinates() {
-        if (!viewportEl) return;
-        const containerWidth = viewportEl.clientWidth;
-        const containerHeight = viewportEl.clientHeight;
-        if (containerWidth <= 0 || containerHeight <= 0) return;
-
-        const minScale = calculateMinScale(containerWidth, containerHeight);
-        mapState.minScale = minScale;
-        if (mapState.scale < minScale) {
-            mapState.scale = minScale;
+        const pad = n => n.toString().padStart(2, '0');
+        if (days > 0) {
+            return `${days}j ${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
         }
-
-        const currentZoom = mapState.scale;
-        const minX = containerWidth - (mapState.stageWidth * currentZoom);
-        const maxX = 0;
-        const minY = containerHeight - (mapState.stageHeight * currentZoom);
-        const maxY = 0;
-
-        mapState.x = Math.min(Math.max(mapState.x, minX), maxX);
-        mapState.y = Math.min(Math.max(mapState.y, minY), maxY);
-    }
-
-    /**
-     * Application de la transformation CSS
-     */
-    function renderTransform() {
-        if (!stageEl) return;
-        stageEl.style.transform = `translate(${mapState.x}px, ${mapState.y}px) scale(${mapState.scale})`;
-        if (zoomIndicator) {
-            zoomIndicator.textContent = Math.round(mapState.scale * 100) + '%';
-        }
-    }
-
-    /**
-     * Zoom centré sur la vue ou le curseur
-     */
-    function zoomMap(delta, clientX, clientY) {
-        if (!viewportEl || !stageEl) return;
-        const rect = viewportEl.getBoundingClientRect();
-        const cursorX = (clientX !== undefined) ? (clientX - rect.left) : (viewportEl.clientWidth / 2);
-        const cursorY = (clientY !== undefined) ? (clientY - rect.top) : (viewportEl.clientHeight / 2);
-
-        const oldScale = mapState.scale;
-        let newScale = oldScale + delta;
-        newScale = Math.max(mapState.minScale, Math.min(mapState.maxScale, newScale));
-
-        if (newScale === oldScale) return;
-
-        // Conservation du point focal
-        const contentX = (cursorX - mapState.x) / oldScale;
-        const contentY = (cursorY - mapState.y) / oldScale;
-
-        mapState.scale = newScale;
-        mapState.x = cursorX - (contentX * newScale);
-        mapState.y = cursorY - (contentY * newScale);
-
-        clampMapCoordinates();
-        renderTransform();
-    }
-
-    function resetZoom() {
-        if (!viewportEl) return;
-        mapState.scale = calculateMinScale(viewportEl.clientWidth, viewportEl.clientHeight);
-        centerMap();
-    }
-
-    function centerMap() {
-        if (!viewportEl) return;
-        const containerW = viewportEl.clientWidth;
-        const containerH = viewportEl.clientHeight;
-        const scaledW = mapState.stageWidth * mapState.scale;
-        const scaledH = mapState.stageHeight * mapState.scale;
-
-        mapState.x = (containerW - scaledW) / 2;
-        mapState.y = (containerH - scaledH) / 2;
-
-        clampMapCoordinates();
-        if (stageEl) {
-            stageEl.classList.add('is-animating');
-            renderTransform();
-            setTimeout(() => stageEl && stageEl.classList.remove('is-animating'), 400);
-        } else {
-            renderTransform();
-        }
-    }
-
-    function toggleFullscreen() {
-        if (!viewportEl) return;
-        if (!document.fullscreenElement) {
-            viewportEl.requestFullscreen().catch(err => console.error(err));
-        } else {
-            document.exitFullscreen().catch(err => console.error(err));
-        }
+        return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
     }
 
     /**
@@ -141,17 +33,16 @@
             e.preventDefault();
             e.stopPropagation();
         }
-        if (mapState.hasMoved) return;
-
+        currentOpenPin = el;
         openPlotUpgradeModal(el);
     };
 
     /**
-     * Remplissage et ouverture de la modale d'amélioration
+     * Remplissage et affichage de la modale d'amélioration
      */
     function openPlotUpgradeModal(pinEl) {
         if (!pinEl) return;
-        modalEl = document.getElementById('plotUpgradeModal');
+        const modalEl = document.getElementById('plotUpgradeModal');
         if (!modalEl) return;
 
         const d = pinEl.dataset;
@@ -176,7 +67,7 @@
         const workersCountEl = document.getElementById('modalPlotWorkersCount');
         if (workersCountEl) workersCountEl.textContent = d.workers || '2';
 
-        // Miniature
+        // Miniature visuelle
         const thumbEl = document.getElementById('modalPlotVisualThumb');
         if (thumbEl) {
             const bg = d.bgImg || d.tileImg || '';
@@ -204,67 +95,110 @@
         if (progBar) progBar.style.width = pct + '%';
         if (progText) progText.textContent = `${pct}% du potentiel féodal atteint`;
 
-        // Tags de coût
-        const costContainer = document.getElementById('modalPlotCostTags');
-        const isMax = d.isMax === '1';
+        // Bloc travaux en cours vs bloc élévation
+        const workBox = document.getElementById('modalPlotActiveWorkBox');
+        const normalBox = document.getElementById('modalPlotNormalUpgradeBox');
+        const actionContainer = document.getElementById('modalPlotActionContainer');
 
-        if (costContainer) {
-            costContainer.innerHTML = '';
-            if (isMax) {
-                costContainer.innerHTML = '<span class="badge bg-success-lt fs-4 p-2"><i class="fa-solid fa-crown me-1 text-warning"></i>Potentiel Maximum Atteint (Niveau ' + d.maxLevel + ')</span>';
-            } else {
-                const costMetal = parseInt(d.costMetal, 10) || 0;
-                const costCrystal = parseInt(d.costCrystal, 10) || 0;
-                const costDeut = parseInt(d.costDeuterium, 10) || 0;
-                const costClay = parseInt(d.costClay, 10) || 0;
+        const isUpgrading = (d.isUpgrading === '1');
+        const isMax = (d.isMax === '1');
+        const queueId = parseInt(d.queueId, 10) || 0;
+        const targetLevel = d.targetLevel || d.nextLevel;
 
-                const addTag = (icon, name, costVal, playerStock) => {
-                    if (costVal <= 0) return;
-                    const ok = playerStock >= costVal;
-                    const tag = document.createElement('span');
-                    tag.className = 'cost-chip ' + (ok ? 'affordable' : 'missing');
-                    tag.innerHTML = `<i class="${icon}"></i> ${name} : <strong>${costVal.toLocaleString()}</strong>`;
-                    costContainer.appendChild(tag);
-                };
+        if (isUpgrading) {
+            // Afficher le bloc de chantier actif
+            if (workBox) workBox.classList.remove('d-none');
+            if (normalBox) normalBox.classList.add('d-none');
 
-                addTag('fa-solid fa-tree text-success', 'Bois', costMetal, stocks.metal);
-                addTag('fa-solid fa-mountain text-secondary', 'Pierre', costCrystal, stocks.crystal);
-                addTag('fa-solid fa-wheat-awn text-warning', 'Riz', costDeut, stocks.deuterium);
-                if (costClay > 0) {
-                    addTag('fa-solid fa-cubes-stacked text-orange', 'Argile', costClay, stocks.clay || 99999);
+            const now = Math.floor(Date.now() / 1000);
+            const finishesAt = parseInt(d.finishesAt, 10) || now;
+            const startedAt = parseInt(d.startedAt, 10) || now;
+            const remaining = Math.max(0, finishesAt - now);
+            const total = Math.max(1, finishesAt - startedAt);
+            const elapsed = Math.max(0, now - startedAt);
+            const progress = Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)));
+
+            const cdEl = document.getElementById('modalPlotWorkCountdown');
+            if (cdEl) cdEl.textContent = formatDuration(remaining);
+
+            const pBar = document.getElementById('modalPlotWorkProgressBar');
+            if (pBar) pBar.style.width = progress + '%';
+
+            const finishLabel = document.getElementById('modalPlotWorkFinishLabel');
+            if (finishLabel) {
+                const dateObj = new Date(finishesAt * 1000);
+                finishLabel.textContent = `Élévation au Niveau ${targetLevel} en cours. Fin estimée : ${dateObj.toLocaleTimeString()}`;
+            }
+
+            if (actionContainer) {
+                actionContainer.innerHTML = `
+                    <button type="button" class="btn btn-secondary w-100 disabled py-2 mb-2">
+                        <i class="fa-solid fa-clock me-1"></i> Chantier en cours (Élévation active)
+                    </button>
+                    <button type="button" class="btn btn-outline-danger w-100 py-1" onclick="cancelRuralUpgrade(${queueId}, this)">
+                        <i class="fa-solid fa-ban me-1"></i> Annuler le chantier (Remboursement 80%)
+                    </button>`;
+            }
+        } else {
+            // Afficher les coûts d'élévation
+            if (workBox) workBox.classList.add('d-none');
+            if (normalBox) normalBox.classList.remove('d-none');
+
+            const costContainer = document.getElementById('modalPlotCostTags');
+            if (costContainer) {
+                costContainer.innerHTML = '';
+                if (isMax) {
+                    costContainer.innerHTML = '<span class="badge bg-success-lt fs-4 p-2"><i class="fa-solid fa-crown me-1 text-warning"></i>Potentiel Maximum Atteint (Niveau ' + d.maxLevel + ')</span>';
+                } else {
+                    const costMetal = parseInt(d.costMetal, 10) || 0;
+                    const costCrystal = parseInt(d.costCrystal, 10) || 0;
+                    const costDeut = parseInt(d.costDeuterium, 10) || 0;
+                    const costClay = parseInt(d.costClay, 10) || 0;
+
+                    const addTag = (icon, name, costVal, playerStock) => {
+                        if (costVal <= 0) return;
+                        const ok = playerStock >= costVal;
+                        const tag = document.createElement('span');
+                        tag.className = 'cost-chip ' + (ok ? 'affordable' : 'missing');
+                        tag.innerHTML = `<i class="${icon}"></i> ${name} : <strong>${costVal.toLocaleString()}</strong>`;
+                        costContainer.appendChild(tag);
+                    };
+
+                    addTag('fa-solid fa-tree text-success', 'Bois', costMetal, stocks.metal);
+                    addTag('fa-solid fa-mountain text-secondary', 'Pierre', costCrystal, stocks.crystal);
+                    addTag('fa-solid fa-wheat-awn text-warning', 'Riz', costDeut, stocks.deuterium);
+                    if (costClay > 0) {
+                        addTag('fa-solid fa-cubes-stacked text-orange', 'Argile', costClay, stocks.clay || 99999);
+                    }
                 }
             }
-        }
 
-        // Durée estimée
-        const durSec = parseInt(d.duration, 10) || 30;
-        const mins = Math.floor(durSec / 60);
-        const secs = durSec % 60;
-        const durEl = document.getElementById('modalPlotDuration');
-        if (durEl) {
-            durEl.textContent = isMax ? 'Terminé' : `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
+            // Durée estimée du chantier
+            const durSec = parseInt(d.duration, 10) || 60;
+            const durEl = document.getElementById('modalPlotDuration');
+            if (durEl) {
+                durEl.textContent = isMax ? 'Apogée' : formatDuration(durSec);
+            }
 
-        // Bouton d'élévation
-        const actionContainer = document.getElementById('modalPlotActionContainer');
-        const canAfford = d.canAfford === '1';
-
-        if (actionContainer) {
-            if (isMax) {
-                actionContainer.innerHTML = `
-                    <button type="button" class="btn btn-secondary w-100 disabled" style="font-size:0.9rem;">
-                        <i class="fa-solid fa-check me-1"></i> Apogée de la structure atteinte
-                    </button>`;
-            } else if (canAfford) {
-                actionContainer.innerHTML = `
-                    <button type="button" class="btn btn-${d.colorClass || 'primary'} w-100 fw-bold py-2 fs-3" onclick="upgradeRuralPlot('${d.type}', this)">
-                        <i class="fa-solid fa-arrow-up me-1"></i> Élever au Niveau ${d.nextLevel} / ${d.maxLevel}
-                    </button>`;
-            } else {
-                actionContainer.innerHTML = `
-                    <button type="button" class="btn btn-outline-secondary w-100 disabled py-2" style="font-size:0.85rem;">
-                        <i class="fa-solid fa-lock me-1"></i> Ressources insuffisantes pour cette élévation
-                    </button>`;
+            // Bouton d'élévation
+            const canAfford = (d.canAfford === '1');
+            if (actionContainer) {
+                if (isMax) {
+                    actionContainer.innerHTML = `
+                        <button type="button" class="btn btn-secondary w-100 disabled" style="font-size:0.9rem;">
+                            <i class="fa-solid fa-check me-1"></i> Apogée de la structure atteinte
+                        </button>`;
+                } else if (canAfford) {
+                    actionContainer.innerHTML = `
+                        <button type="button" class="btn btn-${d.colorClass || 'primary'} w-100 fw-bold py-2 fs-3" onclick="upgradeRuralPlot('${d.type}', this)">
+                            <i class="fa-solid fa-arrow-up me-1"></i> Lancer le chantier (Niveau ${d.nextLevel} / ${d.maxLevel})
+                        </button>`;
+                } else {
+                    actionContainer.innerHTML = `
+                        <button type="button" class="btn btn-outline-secondary w-100 disabled py-2" style="font-size:0.85rem;">
+                            <i class="fa-solid fa-lock me-1"></i> Ressources insuffisantes pour lancer ce chantier
+                        </button>`;
+                }
             }
         }
 
@@ -275,13 +209,13 @@
     }
 
     /**
-     * Action AJAX d'élévation
+     * Action AJAX d'élévation (non-instantanée)
      */
     window.upgradeRuralPlot = async function(structureType, btn) {
         try {
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Bénédiction & Chantier en cours...';
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Ordre de chantier en cours d\'envoi...';
             }
 
             const formData = new FormData();
@@ -297,14 +231,14 @@
             if (data.success) {
                 window.location.reload();
             } else {
-                alert(data.error || 'Impossible d\'élever cette structure.');
+                alert(data.error || 'Impossible de lancer ce chantier.');
                 if (btn) {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-arrow-up me-1"></i> Réessayer';
                 }
             }
         } catch (err) {
-            alert('Erreur réseau lors de l\'élévation de la structure.');
+            alert('Erreur réseau lors du lancement du chantier.');
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-arrow-up me-1"></i> Réessayer';
@@ -313,113 +247,126 @@
     };
 
     /**
-     * Initialisation globale des événements de la carte
+     * Action AJAX d'annulation d'un chantier
      */
-    function initMap() {
-        viewportEl = document.getElementById('ruralViewport');
-        stageEl = document.getElementById('ruralStage');
-        zoomIndicator = document.getElementById('ruralZoomIndicator');
+    window.cancelRuralUpgrade = async function(queueId, btn) {
+        if (!confirm('Voulez-vous vraiment annuler ce chantier ?\n80% des ressources investies vous seront restituées.')) {
+            return;
+        }
 
-        if (!viewportEl || !stageEl) return;
-
-        // Grab and Pan (Souris & Touch)
-        viewportEl.addEventListener('mousedown', e => {
-            if (e.button !== 0) return;
-            mapState.isDragging = true;
-            mapState.hasMoved = false;
-            mapState.dragStartX = e.clientX - mapState.x;
-            mapState.dragStartY = e.clientY - mapState.y;
-            viewportEl.classList.add('is-dragging');
-        });
-
-        window.addEventListener('mousemove', e => {
-            if (!mapState.isDragging) return;
-            const newX = e.clientX - mapState.dragStartX;
-            const newY = e.clientY - mapState.dragStartY;
-            if (Math.abs(newX - mapState.x) > 3 || Math.abs(newY - mapState.y) > 3) {
-                mapState.hasMoved = true;
+        try {
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Annulation...';
             }
-            mapState.x = newX;
-            mapState.y = newY;
-            clampMapCoordinates();
-            renderTransform();
-        });
 
-        window.addEventListener('mouseup', () => {
-            if (mapState.isDragging) {
-                mapState.isDragging = false;
-                viewportEl && viewportEl.classList.remove('is-dragging');
+            const formData = new FormData();
+            formData.append('action', 'cancel');
+            formData.append('queue_id', queueId);
+
+            const res = await fetch('/api/rural_plot.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.error || 'Impossible d\'annuler ce chantier.');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-ban me-1"></i> Annuler le chantier';
+                }
             }
-        });
-
-        // Touch support
-        let touchStartDist = 0;
-        viewportEl.addEventListener('touchstart', e => {
-            if (e.touches.length === 1) {
-                mapState.isDragging = true;
-                mapState.hasMoved = false;
-                mapState.dragStartX = e.touches[0].clientX - mapState.x;
-                mapState.dragStartY = e.touches[0].clientY - mapState.y;
-            } else if (e.touches.length === 2) {
-                touchStartDist = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
+        } catch (err) {
+            alert('Erreur réseau lors de l\'annulation du chantier.');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-ban me-1"></i> Annuler le chantier';
             }
-        }, { passive: true });
+        }
+    };
 
-        viewportEl.addEventListener('touchmove', e => {
-            if (e.touches.length === 1 && mapState.isDragging) {
-                mapState.x = e.touches[0].clientX - mapState.dragStartX;
-                mapState.y = e.touches[0].clientY - mapState.dragStartY;
-                mapState.hasMoved = true;
-                clampMapCoordinates();
-                renderTransform();
-            } else if (e.touches.length === 2 && touchStartDist > 0) {
-                const dist = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
-                const delta = (dist - touchStartDist) * 0.005;
-                zoomMap(delta);
-                touchStartDist = dist;
+    /**
+     * Horloge dynamique de compte à rebours par seconde
+     */
+    function initDynamicCountdowns() {
+        setInterval(() => {
+            const now = Math.floor(Date.now() / 1000);
+            let shouldReload = false;
+
+            // 1. Mise à jour des badges sur la carte
+            document.querySelectorAll('[data-rural-countdown]').forEach(el => {
+                const finishesAt = parseInt(el.dataset.ruralCountdown, 10);
+                const startedAt = parseInt(el.dataset.ruralStarted, 10);
+                if (!finishesAt) return;
+
+                const remaining = Math.max(0, finishesAt - now);
+                el.textContent = formatDuration(remaining);
+
+                if (startedAt && finishesAt > startedAt) {
+                    const total = finishesAt - startedAt;
+                    const elapsed = Math.max(0, now - startedAt);
+                    const pct = Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)));
+                    const bar = el.closest('.rural-plot-badge')?.querySelector('.rural-badge-progress-bar');
+                    if (bar) bar.style.width = pct + '%';
+                }
+
+                if (remaining <= 0 && !el.dataset.expired) {
+                    el.dataset.expired = '1';
+                    shouldReload = true;
+                }
+            });
+
+            // 2. Mise à jour des chantiers dans la colonne latérale
+            document.querySelectorAll('.building-time-remaining[data-countdown]').forEach(el => {
+                const finishesAt = parseInt(el.dataset.countdown, 10);
+                if (!finishesAt) return;
+
+                const remaining = Math.max(0, finishesAt - now);
+                el.textContent = formatDuration(remaining);
+
+                if (remaining <= 0 && !el.dataset.expired) {
+                    el.dataset.expired = '1';
+                    shouldReload = true;
+                }
+            });
+
+            // 3. Mise à jour de la modale si ouverte sur un chantier en cours
+            if (currentOpenPin && currentOpenPin.dataset.isUpgrading === '1') {
+                const modalWorkBox = document.getElementById('modalPlotActiveWorkBox');
+                if (modalWorkBox && !modalWorkBox.classList.contains('d-none')) {
+                    const finishesAt = parseInt(currentOpenPin.dataset.finishesAt, 10) || now;
+                    const startedAt = parseInt(currentOpenPin.dataset.startedAt, 10) || now;
+                    const remaining = Math.max(0, finishesAt - now);
+                    const total = Math.max(1, finishesAt - startedAt);
+                    const elapsed = Math.max(0, now - startedAt);
+                    const pct = Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)));
+
+                    const cdEl = document.getElementById('modalPlotWorkCountdown');
+                    if (cdEl) cdEl.textContent = formatDuration(remaining);
+
+                    const pBar = document.getElementById('modalPlotWorkProgressBar');
+                    if (pBar) pBar.style.width = pct + '%';
+
+                    if (remaining <= 0 && !currentOpenPin.dataset.expired) {
+                        currentOpenPin.dataset.expired = '1';
+                        shouldReload = true;
+                    }
+                }
             }
-        }, { passive: true });
 
-        viewportEl.addEventListener('touchend', () => {
-            mapState.isDragging = false;
-            touchStartDist = 0;
-        });
-
-        // Molette souris
-        viewportEl.addEventListener('wheel', e => {
-            e.preventDefault();
-            const delta = (e.deltaY < 0) ? 0.15 : -0.15;
-            zoomMap(delta, e.clientX, e.clientY);
-        }, { passive: false });
-
-        // Ajuster au démarrage
-        resetZoom();
-
-        // Réajustement lors du redimensionnement de la fenêtre
-        window.addEventListener('resize', () => {
-            clampMapCoordinates();
-            renderTransform();
-        });
+            if (shouldReload) {
+                setTimeout(() => window.location.reload(), 1200);
+            }
+        }, 1000);
     }
 
-    // Export fonctions globales
-    window.zoomRuralMap = delta => zoomMap(delta);
-    window.resetRuralMapZoom = resetZoom;
-    window.centerRuralMap = centerMap;
-    window.toggleRuralFullscreen = toggleFullscreen;
-
-    // Démarrage
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initMap);
+        document.addEventListener('DOMContentLoaded', initDynamicCountdowns);
     } else {
-        initMap();
+        initDynamicCountdowns();
     }
 
 })(window, document);
-

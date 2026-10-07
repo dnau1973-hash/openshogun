@@ -1,8 +1,8 @@
 <?php
 /**
  * Vue du Domaine Rural Féodal & 9 Parcelles Stratégiques (OpenShogun - Dorf 1)
- * Refonte majeure : Abandon de la grille de 40 parcelles au profit de 9 structures profondes uniques
- * Niveaux 20 à 100 avec potentiels procéduraux, carte panoramique 16:9 Grab-and-Pan et modale d'élévation Tabler.
+ * Refonte majeure : Carte panoramique 16:9 fixe (sans pan/zoom), 9 structures uniques,
+ * Progression verticale 20 à 100, chantiers avec durées réelles non-instantanées.
  */
 require_once __DIR__ . '/../core/BuildingEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
@@ -51,7 +51,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 
 .grid-main {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-columns: minmax(0, 1fr) 370px;
     gap: 1.5rem;
     align-items: start;
 }
@@ -63,83 +63,32 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 }
 
 /* ========================================================
-   CARTE ILLUSTRÉE PANORAMIQUE & VIEWPORT DRAG-TO-PAN 16:9
+   CARTE ILLUSTRÉE PANORAMIQUE FIXE 16:9 (SANS DRAG/ZOOM)
    ======================================================== */
-.rural-viewport-wrapper {
-    position: relative;
-    width: 100%;
-    height: 720px;
-    background: #0f172a;
+.rural-map-card {
     border-radius: 12px;
     overflow: hidden;
-    user-select: none;
-    cursor: grab;
     border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.7), 0 10px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    background: #0f172a;
 }
 
-.rural-viewport-wrapper.is-dragging {
-    cursor: grabbing !important;
-}
-
-.rural-viewport-wrapper:fullscreen {
-    height: 100vh !important;
-    border-radius: 0 !important;
-    border: none !important;
-}
-
-/* Scène panoramique 16:9 (1920×1080) */
-.rural-stage {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 1920px;
-    height: 1080px;
+.rural-map-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
     background-image: url('/public/assets/shogun_rural_terroir_9plots.jpg');
-    background-size: 100% 100%;
+    background-size: cover;
+    background-position: center;
     background-repeat: no-repeat;
-    transform-origin: 0 0;
-    will-change: transform;
+    user-select: none;
+    overflow: hidden;
 }
 
-.rural-stage.is-animating {
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.25, 1) !important;
-}
-
-/* Barre d'outils flottante du viewport */
-.rural-map-toolbar {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    right: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    z-index: 50;
-    pointer-events: none;
-}
-
-.rural-map-toolbar > * {
-    pointer-events: auto;
-}
-
-.rural-controls-cluster {
-    background: rgba(15, 23, 42, 0.88);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    padding: 0.25rem;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.rural-controls-cluster .btn {
-    padding: 0.35rem 0.65rem;
-    font-size: 0.78rem;
-    font-weight: 700;
+@media (max-width: 768px) {
+    .rural-map-container {
+        min-height: 480px;
+    }
 }
 
 /* ========================================================
@@ -150,12 +99,12 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     transform: translate(-50%, -50%);
     cursor: pointer;
     z-index: 25;
-    transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
     user-select: none;
 }
 
 .rural-plot-badge:hover {
-    transform: translate(-50%, -50%) scale(1.12);
+    transform: translate(-50%, -50%) scale(1.08);
     z-index: 45;
 }
 
@@ -170,7 +119,23 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     padding: 0.38rem 0.9rem 0.38rem 0.45rem;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.75), 0 0 16px var(--badge-glow, rgba(255, 255, 255, 0.3));
     color: #ffffff;
-    min-width: 165px;
+    min-width: 175px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.rural-badge-inner.is-upgrading {
+    border-color: #f59e0b !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.8), 0 0 20px rgba(245, 158, 11, 0.6) !important;
+    animation: pulse-worker 2.5s infinite ease-in-out;
+}
+
+@keyframes pulse-worker {
+    0%, 100% {
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.8), 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 22px rgba(0, 0, 0, 0.9), 0 0 24px rgba(245, 158, 11, 0.85);
+    }
 }
 
 .rural-badge-avatar {
@@ -186,6 +151,11 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     font-weight: bold;
     flex-shrink: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.rural-badge-inner.is-upgrading .rural-badge-avatar {
+    background: #f59e0b !important;
+    color: #0f172a !important;
 }
 
 .rural-badge-body {
@@ -222,6 +192,17 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     font-weight: 700;
     color: #cbd5e1;
     background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    padding: 0.05rem 0.35rem;
+    white-space: nowrap;
+}
+
+.rural-badge-timer {
+    font-size: 0.70rem;
+    font-weight: 800;
+    font-family: monospace;
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid rgba(245, 158, 11, 0.4);
     border-radius: 4px;
     padding: 0.05rem 0.35rem;
     white-space: nowrap;
@@ -276,10 +257,13 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                 <h2 class="mb-0 fs-2 fw-bold d-flex align-items-center gap-2">
                     <span>🌾</span> Domaine Rural &amp; Terroirs du Fief
                     <span class="badge bg-green-lt fw-bold font-monospace" style="font-size: 0.72rem;">
-                        <i class="fa-solid fa-map-location-dot me-1"></i>9 Domaines Uniques
+                        <i class="fa-solid fa-map-location-dot me-1"></i>9 Domaines Stratégiques
                     </span>
                     <span class="badge bg-primary-lt fw-bold" style="font-size: 0.72rem;">
                         Progression Niveaux 20 à 100
+                    </span>
+                    <span class="badge bg-warning-lt fw-bold" style="font-size: 0.72rem;">
+                        <i class="fa-solid fa-clock me-1"></i>Chantiers Asynchrones
                     </span>
                 </h2>
                 <div class="text-secondary small mt-1">
@@ -329,50 +313,44 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     <div class="grid-main">
 
         <!-- ========================================================
-             COLONNE GAUCHE : CARTE ILLUSTRÉE PANORAMIQUE 16:9
+             COLONNE GAUCHE : CARTE ILLUSTRÉE PANORAMIQUE 16:9 FIXE
              ======================================================== -->
         <div>
-            <div class="rural-viewport-wrapper" id="ruralViewport">
-
-                <!-- Barre d'outils flottante du viewport -->
-                <div class="rural-map-toolbar">
+            <div class="rural-map-card">
+                <!-- En-tête de la carte -->
+                <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center bg-dark text-white">
                     <div class="d-flex align-items-center gap-2">
-                        <?= AiPromptHelper::renderBadge('shogun_rural_terroir_9plots.jpg', 'Panorama Stratégique des 9 Parcelles Féodales', '/public/assets/shogun_rural_terroir_9plots.jpg', '', true) ?>
-                        <span class="badge bg-dark-lt text-white d-none d-lg-inline-block shadow-sm">
-                            <i class="fa-solid fa-arrows-up-down-left-right me-1 text-warning"></i> Glisser pour explorer &bull; Molette pour zoomer
+                        <i class="fa-solid fa-map text-warning"></i>
+                        <span class="fw-bold">Panorama Féodal du Terroir</span>
+                        <span class="badge bg-dark-lt text-white-50 border border-secondary" style="font-size:0.7rem;">
+                            16:9 Haute Définition
                         </span>
                     </div>
-
-                    <div class="rural-controls-cluster">
-                        <button type="button" class="btn btn-dark text-white" onclick="zoomRuralMap(0.18)" title="Zoomer avant (+)">
-                            <i class="fa-solid fa-magnifying-glass-plus"></i>
-                        </button>
-                        <button type="button" class="btn btn-dark text-white font-monospace" onclick="resetRuralMapZoom()" title="Ajuster la vue">
-                            <span id="ruralZoomIndicator">100%</span>
-                        </button>
-                        <button type="button" class="btn btn-dark text-white" onclick="zoomRuralMap(-0.18)" title="Zoomer arrière (-)">
-                            <i class="fa-solid fa-magnifying-glass-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-dark text-white" onclick="centerRuralMap()" title="Recentrer le fief">
-                            <i class="fa-solid fa-crosshairs"></i>
-                        </button>
-                        <button type="button" class="btn btn-dark text-white" onclick="toggleRuralFullscreen()" title="Plein écran (⛶)">
-                            <i class="fa-solid fa-expand"></i>
-                        </button>
+                    <div class="d-flex align-items-center gap-2">
+                        <?= AiPromptHelper::renderBadge('shogun_rural_terroir_9plots.jpg', 'Panorama Stratégique des 9 Parcelles Féodales', '/public/assets/shogun_rural_terroir_9plots.jpg', '', true) ?>
                     </div>
                 </div>
 
-                <!-- Scène interactive 16:9 contenant l'illustration HD et les 9 badges -->
-                <div class="rural-stage" id="ruralStage">
+                <!-- Conteneur Panoramique 16:9 Fixe (sans pan/zoom) -->
+                <div class="rural-map-container" id="ruralMapContainer">
 
                     <?php foreach ($plots as $type => $p): ?>
                         <?php
                             $isMax = !empty($p['is_max']);
+                            $isUpgrading = !empty($p['is_upgrading']);
                             $canAfford = !empty($p['can_afford']);
                             $cost = $p['cost'];
-                            $tooltip = '<strong>' . htmlspecialchars($p['name']) . '</strong> (Niv. ' . $p['level'] . ' / ' . $p['max_level'] . ')<br>' .
-                                       '<span class="text-warning">' . htmlspecialchars($p['prod_label']) . '</span><br>' .
-                                       '<small class="text-muted">' . htmlspecialchars($p['worker_role']) . ' : ' . $p['workers_assigned'] . ' ouvriers<br><em>Cliquer pour gérer &amp; élever</em></small>';
+                            $targetLevel = $p['target_level'] ?? $p['next_level'];
+
+                            if ($isUpgrading) {
+                                $tooltip = '<strong>' . htmlspecialchars($p['name']) . '</strong><br>' .
+                                           '<span class="text-warning"><i class="fa-solid fa-hammer fa-spin me-1"></i>En travaux vers Niv. ' . $targetLevel . '</span><br>' .
+                                           '<small class="text-muted">Cliquer pour voir l\'état du chantier</small>';
+                            } else {
+                                $tooltip = '<strong>' . htmlspecialchars($p['name']) . '</strong> (Niv. ' . $p['level'] . ' / ' . $p['max_level'] . ')<br>' .
+                                           '<span class="text-warning">' . htmlspecialchars($p['prod_label']) . '</span><br>' .
+                                           '<small class="text-muted">' . htmlspecialchars($p['worker_role']) . ' : ' . $p['workers_assigned'] . ' ouvriers<br><em>Cliquer pour gérer &amp; élever</em></small>';
+                            }
                         ?>
                         <div class="rural-plot-badge"
                              id="rural-badge-<?= $type ?>"
@@ -384,7 +362,12 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                              data-level="<?= $p['level'] ?>"
                              data-max-level="<?= $p['max_level'] ?>"
                              data-next-level="<?= $p['next_level'] ?>"
+                             data-target-level="<?= $targetLevel ?>"
                              data-is-max="<?= $isMax ? '1' : '0' ?>"
+                             data-is-upgrading="<?= $isUpgrading ? '1' : '0' ?>"
+                             data-queue-id="<?= (int)($p['queue_id'] ?? 0) ?>"
+                             data-finishes-at="<?= (int)($p['finishes_at'] ?? 0) ?>"
+                             data-started-at="<?= (int)($p['started_at'] ?? 0) ?>"
                              data-workers="<?= $p['workers_assigned'] ?>"
                              data-worker-role="<?= htmlspecialchars($p['worker_role']) ?>"
                              data-prod-label="<?= htmlspecialchars($p['prod_label']) ?>"
@@ -407,19 +390,42 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                              title="<?= htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8') ?>"
                              onclick="handleRuralPinClick(this, event)">
 
-                            <div class="rural-badge-inner">
+                            <div class="rural-badge-inner <?= $isUpgrading ? 'is-upgrading' : '' ?>">
                                 <div class="rural-badge-avatar">
-                                    <i class="<?= $p['icon'] ?>"></i>
+                                    <?php if ($isUpgrading): ?>
+                                        <i class="fa-solid fa-hammer fa-bounce text-warning"></i>
+                                    <?php else: ?>
+                                        <i class="<?= $p['icon'] ?>"></i>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="rural-badge-body">
-                                    <div class="rural-badge-name"><?= htmlspecialchars($p['name']) ?></div>
-                                    <div class="rural-badge-level-row">
-                                        <span class="rural-badge-level-pill">Niv. <?= $p['level'] ?> / <?= $p['max_level'] ?></span>
-                                        <span class="rural-badge-prod-pill"><?= htmlspecialchars($p['prod_label']) ?></span>
+                                    <div class="rural-badge-name d-flex align-items-center justify-content-between gap-1">
+                                        <span><?= htmlspecialchars($p['name']) ?></span>
+                                        <?php if ($isUpgrading): ?>
+                                            <span class="badge bg-warning text-dark px-1 py-0 fw-bold" style="font-size:0.6rem;">TRAVAUX</span>
+                                        <?php endif; ?>
                                     </div>
-                                    <div class="rural-badge-progress">
-                                        <div class="rural-badge-progress-bar" style="width: <?= $p['progress_pct'] ?>%;"></div>
-                                    </div>
+
+                                    <?php if ($isUpgrading): ?>
+                                        <div class="rural-badge-level-row">
+                                            <span class="rural-badge-level-pill text-warning">Niv. <?= $p['level'] ?> &rarr; <?= $targetLevel ?></span>
+                                            <span class="rural-badge-timer text-warning"
+                                                  data-rural-countdown="<?= (int)$p['finishes_at'] ?>"
+                                                  data-rural-started="<?= (int)$p['started_at'] ?>">--:--:--</span>
+                                        </div>
+                                        <div class="rural-badge-progress">
+                                            <div class="rural-badge-progress-bar progress-bar-striped progress-bar-animated bg-warning"
+                                                 style="width: <?= (int)$p['queue_progress_pct'] ?>%;"></div>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="rural-badge-level-row">
+                                            <span class="rural-badge-level-pill">Niv. <?= $p['level'] ?> / <?= $p['max_level'] ?></span>
+                                            <span class="rural-badge-prod-pill"><?= htmlspecialchars($p['prod_label']) ?></span>
+                                        </div>
+                                        <div class="rural-badge-progress">
+                                            <div class="rural-badge-progress-bar" style="width: <?= $p['progress_pct'] ?>%;"></div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -436,30 +442,41 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             <!-- Didacticiel Féodal & Quêtes du Daimyō -->
             <?php require __DIR__ . '/partials/quest_banner.php'; ?>
 
-            <!-- File Urbaine : Chantiers en cours -->
+            <!-- File de Construction : Chantiers en cours du Fief -->
             <div class="card shadow-sm">
                 <div class="card-header py-2 d-flex justify-content-between align-items-center">
                     <h3 class="card-title mb-0 fs-3">
-                        <i class="fa-solid fa-helmet-safety me-2 text-warning"></i>Chantiers Urbains
+                        <i class="fa-solid fa-helmet-safety me-2 text-warning"></i>Chantiers en Cours
                     </h3>
-                    <span class="badge bg-warning-lt fw-bold"><?= count($queue) ?> en cours</span>
+                    <span class="badge bg-warning-lt fw-bold"><?= count($queue) ?> actif(s)</span>
                 </div>
                 <div class="card-body p-2">
                     <?php if (empty($queue)): ?>
                         <p style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:1rem 0; margin-bottom:0;">
                             <i class="fa-solid fa-helmet-safety text-secondary d-block mb-1 fs-2"></i>
-                            Aucune construction urbaine en cours.
+                            Aucun chantier en cours sur le fief.
                         </p>
                     <?php else: ?>
                         <?php foreach ($queue as $q): ?>
                             <?php
-                                if ($q['build_category'] === 'field') {
+                                $isRural = ($q['build_category'] === 'rural_plot');
+                                $isField = ($q['build_category'] === 'field');
+
+                                if ($isRural) {
+                                    $rType = $q['target_id'];
+                                    $rMeta = RuralPlotEngine::STRUCTURES[$rType] ?? null;
+                                    $name = $rMeta ? $rMeta['name'] : ucfirst($rType);
+                                    $icon = $rMeta['icon'] ?? 'fa-solid fa-seedling';
+                                } elseif ($isField) {
                                     $tSlot = (int)$q['target_id'];
                                     $tType = FIELD_LAYOUT[$tSlot] ?? 'metal_mine';
                                     $name = (FIELD_TYPES[$tType]['name'] ?? 'Parcelle') . " #{$tSlot}";
+                                    $icon = 'fa-solid fa-wheat-awn';
                                 } else {
                                     $name = BUILDINGS[$q['target_id']]['name'] ?? $q['target_id'];
+                                    $icon = BUILDINGS[$q['target_id']]['icon'] ?? 'fa-solid fa-landmark';
                                 }
+
                                 $qNow = time();
                                 $qStart = (int)($q['started_at'] ?? $qNow);
                                 $qEnd = (int)($q['finishes_at'] ?? $qNow);
@@ -471,13 +488,26 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                             <div class="queue-item p-2 mb-2 rounded bg-surface-secondary border" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem; padding: 0.75rem;">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="queue-info">
-                                        <h4 class="mb-0 fw-bold" style="font-size:0.9rem;"><?= htmlspecialchars($name) ?></h4>
-                                        <?php if ($isDemolish): ?>
-                                            <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;"><i class="fa-solid fa-trash-can me-1"></i>Démolition</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-secondary-lt" style="font-size:0.7rem;">Niveau <?= $q['target_level'] ?></span>
-                                        <?php endif; ?>
+                                        <h4 class="mb-0 fw-bold d-flex align-items-center gap-2" style="font-size:0.9rem;">
+                                            <i class="<?= $icon ?> text-warning"></i>
+                                            <span><?= htmlspecialchars($name) ?></span>
+                                        </h4>
+                                        <div class="mt-1 d-flex align-items-center gap-1">
+                                            <?php if ($isDemolish): ?>
+                                                <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;"><i class="fa-solid fa-trash-can me-1"></i>Démolition</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary-lt" style="font-size:0.7rem;">Élévation Niveau <?= $q['target_level'] ?></span>
+                                            <?php endif; ?>
+                                            <?php if ($isRural): ?>
+                                                <span class="badge bg-green-lt" style="font-size:0.65rem;">Domaine Rural</span>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
+                                    <?php if ($isRural): ?>
+                                        <button type="button" class="btn btn-sm btn-ghost-danger p-1" title="Annuler le chantier (Remboursement 80%)" onclick="cancelRuralUpgrade(<?= (int)$q['id'] ?>, this)">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
 
                                 <div class="queue-progress-box mt-1">
@@ -598,16 +628,29 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                     </div>
                 </div>
 
-                <!-- Coûts requis pour l'élévation -->
-                <div class="mb-3">
-                    <label class="form-label mb-2 fw-bold text-muted" style="font-size:0.75rem;">COÛTS REQUIS POUR L'ÉLÉVATION :</label>
-                    <div class="d-flex flex-wrap gap-2" id="modalPlotCostTags"></div>
+                <!-- Statut Chantier en cours (si actif) -->
+                <div id="modalPlotActiveWorkBox" class="d-none alert alert-warning p-2 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold fs-4 text-dark"><i class="fa-solid fa-hammer fa-bounce me-1"></i> Chantier en cours</span>
+                        <span class="font-monospace fw-bold text-dark fs-3" id="modalPlotWorkCountdown">--:--:--</span>
+                    </div>
+                    <div class="progress mb-1" style="height: 6px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" id="modalPlotWorkProgressBar" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                    <div class="small text-muted" id="modalPlotWorkFinishLabel"></div>
                 </div>
 
-                <!-- Durée estimée du chantier -->
-                <div class="d-flex justify-content-between align-items-center text-muted mb-3" style="font-size:0.8rem;">
-                    <span><i class="fa-regular fa-clock me-1"></i> Durée estimée du chantier :</span>
-                    <strong class="font-monospace text-body" id="modalPlotDuration">00:01:30</strong>
+                <!-- Coûts requis & Durée (si pas de chantier en cours) -->
+                <div id="modalPlotNormalUpgradeBox">
+                    <div class="mb-3">
+                        <label class="form-label mb-2 fw-bold text-muted" style="font-size:0.75rem;">COÛTS REQUIS POUR L'ÉLÉVATION :</label>
+                        <div class="d-flex flex-wrap gap-2" id="modalPlotCostTags"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center text-muted mb-3" style="font-size:0.8rem;">
+                        <span><i class="fa-regular fa-clock me-1"></i> Durée estimée du chantier :</span>
+                        <strong class="font-monospace text-body" id="modalPlotDuration">00:01:30</strong>
+                    </div>
                 </div>
 
                 <!-- Bouton d'action -->

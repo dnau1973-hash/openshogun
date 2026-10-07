@@ -122,11 +122,16 @@ class ImperialSealEngine {
      * Vérifie si le joueur possède le Sceau Impérial actif
      */
     public function isSealActive(int $userId): bool {
-        $st = $this->db->prepare("SELECT imperial_seal_until FROM users WHERE id = ?");
-        $st->execute([$userId]);
-        $val = $st->fetchColumn();
-        if (!$val) return false;
-        return (strtotime($val) > time());
+        if ($userId <= 0) return false;
+        try {
+            $st = $this->db->prepare("SELECT imperial_seal_until FROM users WHERE id = ?");
+            $st->execute([$userId]);
+            $val = $st->fetchColumn();
+            if (!$val) return false;
+            return (strtotime($val) > time());
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     /**

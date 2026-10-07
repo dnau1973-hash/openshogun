@@ -152,6 +152,22 @@ class RuralPlotEngine {
     public function __construct(?PDO $db = null) {
         $this->db = $db ?? Database::getConnection();
         $this->generator = new VillageGeneratorService($this->db);
+        $this->ensureQueueSupportsRuralPlots();
+    }
+
+    /**
+     * S'assure que construction_queue supporte la catégorie 'rural_plot' (MySQL)
+     */
+    public function ensureQueueSupportsRuralPlots(): void {
+        if (!$this->db) return;
+        try {
+            $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
+            if ($driver !== 'sqlite') {
+                $this->db->exec("ALTER TABLE `construction_queue` MODIFY COLUMN `build_category` VARCHAR(32) NOT NULL");
+            }
+        } catch (Exception $e) {
+            // Silencieux si déjà migré ou droits restreints
+        }
     }
 
     /**
@@ -177,21 +193,45 @@ class RuralPlotEngine {
 
     /**
      * Formule de durée de chantier (en secondes)
+     * Échelonnage progressif :
+     * - Paliers bas (1 à 10) : ~3 min à ~20 min
+     * - Paliers intermédiaires (15 à 40) : ~45 min à ~13 heures
+     * - Hauts paliers (50 à 100) : ~1.5 jours à plus de 15 jours
      */
     public static function calculateUpgradeDuration(int $currentLevel, int $hqLevel = 1): int {
         $lvl = max(1, $currentLevel);
-        $baseSeconds = 25.0 * pow(1.06, min($lvl - 1, 50)) * sqrt($lvl);
-        $hqDiscount = 1.0 + (max(1, $hqLevel) * 0.05);
+        $base = 180.0 * (1.0 + 0.16 * pow($lvl - 1, 1.35)) * pow(1.065, min($lvl - 1, 55)) * pow(1.025, max(0, $lvl - 56));
+        $hqFactor = 1.0 + (max(1, $hqLevel) * 0.05);
         $speed = defined('SPEED_FACTOR') ? SPEED_FACTOR : 1;
 
-        return max(15, (int)round(($baseSeconds / $hqDiscount) / max(1, $speed)));
+        return max(60, (int)round(($base / $hqFactor) / max(1, $speed)));
     }
 
     /**
      * Récupère les 9 parcelles enrichies avec leurs calculs pour l'affichage de la carte
      */
     public function getEnrichedPlots(int $planetId, array $planet, int $hqLevel = 1): array {
+        // 1. Résolution des chantiers arrivés à échéance
+        require_once __DIR__ . '/PlanetEngine.php';
+        $pe = new PlanetEngine($this->db);
+        $pe->processConstructionQueue($planetId);
+
         $rawPlots = $this->generator->getPlanetPlots($planetId);
+
+        // 2. Récupérer les chantiers ruraux actifs dans la file
+        $stmtQueue = $this->db->prepare("
+            SELECT * FROM construction_queue 
+            WHERE planet_id = ? AND build_category = 'rural_plot'
+            ORDER BY finishes_at ASC
+        ");
+        $stmtQueue->execute([$planetId]);
+        $queueRows = $stmtQueue->fetchAll(PDO::FETCH_ASSOC);
+        $queueMap = [];
+        $now = time();
+        foreach ($queueRows as $q) {
+            $queueMap[$q['target_id']] = $q;
+        }
+
         $enriched = [];
 
         foreach ($rawPlots as $p) {
@@ -210,6 +250,17 @@ class RuralPlotEngine {
                 ($planet['crystal'] ?? 0) >= $cost['crystal'] &&
                 ($planet['deuterium'] ?? 0) >= $cost['deuterium']
             );
+
+            // État de chantier en cours
+            $qItem = $queueMap[$type] ?? null;
+            $isUpgrading = ($qItem !== null);
+            $targetLevel = $isUpgrading ? (int)$qItem['target_level'] : $nextLvl;
+            $startedAt = $isUpgrading ? (int)$qItem['started_at'] : null;
+            $finishesAt = $isUpgrading ? (int)$qItem['finishes_at'] : null;
+            $timeRemaining = $isUpgrading ? max(0, $finishesAt - $now) : 0;
+            $totalDuration = $isUpgrading ? max(1, $finishesAt - $startedAt) : $duration;
+            $elapsed = $isUpgrading ? max(0, $now - $startedAt) : 0;
+            $queueProgressPct = $isUpgrading ? min(100, max(0, (int)round(($elapsed / $totalDuration) * 100))) : 0;
 
             // Rendements actuels et futurs
             $currentProd = (float)$p['prod_hourly'];
@@ -232,24 +283,32 @@ class RuralPlotEngine {
             $progressPct = ($maxLvl > 0) ? min(100, (int)round(($lvl / $maxLvl) * 100)) : 100;
 
             $enriched[$type] = array_merge($p, [
-                'meta'            => $meta,
-                'name'            => $meta['name'],
-                'jp_name'         => $meta['jp_name'],
-                'desc'            => $meta['desc'],
-                'icon'            => $meta['icon'],
-                'color'           => $meta['color'],
-                'color_class'     => $meta['color_class'],
-                'tile_img'        => $meta['tile_img'],
-                'bg_image'        => $meta['bg_image'],
-                'worker_role'     => $meta['worker_role'],
-                'is_max'          => $isMax,
-                'next_level'      => $nextLvl,
-                'cost'            => $cost,
-                'duration'        => $duration,
-                'can_afford'      => $canAfford,
-                'prod_label'      => $prodLabel,
-                'next_prod_label' => $nextProdLabel,
-                'progress_pct'    => $progressPct,
+                'meta'               => $meta,
+                'name'               => $meta['name'],
+                'jp_name'            => $meta['jp_name'],
+                'desc'               => $meta['desc'],
+                'icon'               => $meta['icon'],
+                'color'              => $meta['color'],
+                'color_class'        => $meta['color_class'],
+                'tile_img'           => $meta['tile_img'],
+                'bg_image'           => $meta['bg_image'],
+                'worker_role'        => $meta['worker_role'],
+                'is_max'             => $isMax,
+                'next_level'         => $nextLvl,
+                'cost'               => $cost,
+                'duration'           => $duration,
+                'can_afford'         => $canAfford,
+                'prod_label'         => $prodLabel,
+                'next_prod_label'    => $nextProdLabel,
+                'progress_pct'       => $progressPct,
+                // Gestion du chantier actif
+                'is_upgrading'       => $isUpgrading,
+                'queue_id'           => $isUpgrading ? (int)$qItem['id'] : null,
+                'target_level'       => $targetLevel,
+                'started_at'         => $startedAt,
+                'finishes_at'        => $finishesAt,
+                'time_remaining'     => $timeRemaining,
+                'queue_progress_pct' => $queueProgressPct,
             ]);
         }
 
@@ -257,7 +316,7 @@ class RuralPlotEngine {
     }
 
     /**
-     * Améliore une parcelle rurale (transaction SQL avec contrôle des stocks et du plafond)
+     * Lance le chantier d'élévation d'une parcelle rurale (File non-instantanée, avec persistance dans construction_queue)
      */
     public function upgradePlot(int $planetId, string $structureType): array {
         if (!$this->db) {
@@ -291,11 +350,24 @@ class RuralPlotEngine {
                 return ['success' => false, 'error' => "Cette structure a atteint son potentiel maximum (Niveau {$maxLevel})."];
             }
 
-            $nextLevel = $currentLevel + 1;
-            $cost = self::calculateUpgradeCost($structureType, $currentLevel);
+            // 2. Contrôle de la file de construction : interdire si la parcelle est déjà en travaux
+            $stmtQCheck = $this->db->prepare("
+                SELECT * FROM construction_queue 
+                WHERE planet_id = ? AND build_category = 'rural_plot'
+                ORDER BY finishes_at ASC
+            ");
+            $stmtQCheck->execute([$planetId]);
+            $existingQueue = $stmtQCheck->fetchAll(PDO::FETCH_ASSOC);
 
-            // 2. Verrouiller la planète pour contrôler les ressources
-            $stmtPlanet = $this->db->prepare("SELECT metal, crystal, deuterium, population FROM planets WHERE id = ?" . $lockSql);
+            foreach ($existingQueue as $qItem) {
+                if ($qItem['target_id'] === $structureType) {
+                    $this->db->rollBack();
+                    return ['success' => false, 'error' => "Un chantier est déjà en cours pour cette structure."];
+                }
+            }
+
+            // 3. Verrouiller la planète pour contrôler les ressources et le Sceau
+            $stmtPlanet = $this->db->prepare("SELECT user_id, metal, crystal, deuterium, population FROM planets WHERE id = ?" . $lockSql);
             $stmtPlanet->execute([$planetId]);
             $planet = $stmtPlanet->fetch(PDO::FETCH_ASSOC);
 
@@ -304,12 +376,29 @@ class RuralPlotEngine {
                 return ['success' => false, 'error' => 'Planète introuvable.'];
             }
 
+            // Limite de chantiers simultanés (1 sans sceau, 2 avec le Sceau Impérial)
+            require_once __DIR__ . '/ImperialSealEngine.php';
+            $sealEngine = new ImperialSealEngine($this->db);
+            $isSealActive = $sealEngine->isSealActive((int)($planet['user_id'] ?? 0));
+            $maxSimultaneous = $isSealActive ? 2 : 1;
+
+            if (count($existingQueue) >= $maxSimultaneous) {
+                $this->db->rollBack();
+                $msg = $isSealActive
+                    ? "Vos deux créneaux de chantiers ruraux sont déjà occupés (maximum 2 simultanés avec le Sceau Impérial)."
+                    : "Un chantier rural est déjà en cours. Décrétez le Sceau Impérial pour mener 2 chantiers de front !";
+                return ['success' => false, 'error' => $msg];
+            }
+
+            $nextLevel = $currentLevel + 1;
+            $cost = self::calculateUpgradeCost($structureType, $currentLevel);
+
             if ($planet['metal'] < $cost['metal'] || $planet['crystal'] < $cost['crystal'] || $planet['deuterium'] < $cost['deuterium']) {
                 $this->db->rollBack();
                 return ['success' => false, 'error' => 'Ressources insuffisantes pour cette élévation.'];
             }
 
-            // 3. Déduire les ressources
+            // 4. Déduire les ressources immédiatement
             $stmtDeduct = $this->db->prepare("
                 UPDATE planets
                 SET metal = metal - ?,
@@ -319,50 +408,52 @@ class RuralPlotEngine {
             ");
             $stmtDeduct->execute([$cost['metal'], $cost['crystal'], $cost['deuterium'], $planetId]);
 
-            // 4. Mettre à jour la parcelle
-            $newWorkers = max(2, (int)round(2 + ($nextLevel * 1.5)));
-            $newProd = VillageGeneratorService::calculateHourlyProduction($structureType, $nextLevel);
+            // 5. Calcul des durées et planification du chantier
+            require_once __DIR__ . '/PlanetEngine.php';
+            $pe = new PlanetEngine($this->db);
+            $buildings = $pe->getBuildings($planetId);
+            $hqLevel = (int)($buildings['hq'] ?? 1);
+            $duration = self::calculateUpgradeDuration($currentLevel, $hqLevel);
 
-            $stmtUpdatePlot = $this->db->prepare("
-                UPDATE planet_rural_plots
-                SET level = ?,
-                    workers_assigned = ?,
-                    prod_hourly = ?
-                WHERE planet_id = ? AND structure_type = ?
-            ");
-            $stmtUpdatePlot->execute([$nextLevel, $newWorkers, $newProd, $planetId, $structureType]);
-
-            // 5. Effet spécifique de la structure
-            if ($structureType === 'village') {
-                // Accueillir directement +5 villageois (plafonné à la nouvelle capacité)
-                $newCapacity = 75 + ($nextLevel * 25);
-                $minSql = ($driver === 'sqlite') ? "MIN(population + 5, ?)" : "LEAST(population + 5, ?)";
-                $this->db->prepare("UPDATE planets SET population = {$minSql} WHERE id = ?")
-                    ->execute([$newCapacity, $planetId]);
-            } elseif ($structureType === 'tenshu') {
-                // Synchroniser avec planet_buildings si hq présent
-                try {
-                    $this->db->prepare("UPDATE planet_buildings SET level = ? WHERE planet_id = ? AND building_type = 'hq'")
-                        ->execute([$nextLevel, $planetId]);
-                } catch (Exception $e) {}
+            $now = time();
+            if (empty($existingQueue)) {
+                $startTime = $now;
+            } else {
+                if (count($existingQueue) < $maxSimultaneous) {
+                    $startTime = $now;
+                } else {
+                    $maxFin = max(array_column($existingQueue, 'finishes_at'));
+                    $startTime = max($now, (int)$maxFin);
+                }
             }
+            $finishesAt = $startTime + $duration;
+
+            // 6. Insérer dans la file de construction (le niveau n'est pas incrémenté tout de suite !)
+            $stmtInsert = $this->db->prepare("
+                INSERT INTO construction_queue (planet_id, build_category, target_id, target_level, started_at, finishes_at)
+                VALUES (?, 'rural_plot', ?, ?, ?, ?)
+            ");
+            $stmtInsert->execute([$planetId, $structureType, $nextLevel, $startTime, $finishesAt]);
+            $queueId = (int)$this->db->lastInsertId();
 
             $this->db->commit();
 
             $meta = self::STRUCTURES[$structureType];
             return [
-                'success'     => true,
-                'message'     => "« {$meta['name']} » élevé avec succès au Niveau {$nextLevel} / {$maxLevel} !",
-                'new_level'   => $nextLevel,
-                'max_level'   => $maxLevel,
-                'new_prod'    => $newProd,
-                'new_workers' => $newWorkers
+                'success'      => true,
+                'message'      => "Chantier d'élévation lancé pour « {$meta['name']} » vers le Niveau {$nextLevel} !",
+                'queue_id'     => $queueId,
+                'target_level' => $nextLevel,
+                'max_level'    => $maxLevel,
+                'started_at'   => $startTime,
+                'finishes_at'  => $finishesAt,
+                'duration'     => $duration
             ];
         } catch (Exception $e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
-            return ['success' => false, 'error' => 'Erreur technique lors de l\'élévation : ' . $e->getMessage()];
+            return ['success' => false, 'error' => 'Erreur technique lors du lancement du chantier : ' . $e->getMessage()];
         }
     }
 

@@ -183,7 +183,7 @@ class BuildingEngine {
                 if ($qStart <= $now && $qFin > $now) {
                     $fieldsActive++;
                 }
-            } else {
+            } elseif ($q['build_category'] === 'building') {
                 $buildingsInQueue++;
                 if ($qFin > $maxFinishesAtBuilding) {
                     $maxFinishesAtBuilding = $qFin;
@@ -301,6 +301,28 @@ class BuildingEngine {
         // Si on annule une démolition (target_level = 0), retirer de la file sans impacter les ressources : la structure reste intacte
         if ((int)$item['target_level'] === 0) {
             $this->db->prepare("DELETE FROM construction_queue WHERE id = ?")->execute([$queueId]);
+            return true;
+        }
+
+        // Gestion des parcelles rurales (rural_plot)
+        if ($item['build_category'] === 'rural_plot') {
+            $structureType = $item['target_id'];
+            require_once __DIR__ . '/RuralPlotEngine.php';
+            $targetLvl = (int)$item['target_level'];
+            $cost = RuralPlotEngine::calculateUpgradeCost($structureType, max(1, $targetLvl - 1));
+            $refundMetal = (int)($cost['metal'] * 0.8);
+            $refundCrystal = (int)($cost['crystal'] * 0.8);
+            $refundDeut = (int)($cost['deuterium'] * 0.8);
+
+            $this->db->beginTransaction();
+            $this->db->prepare("
+                UPDATE planets 
+                SET metal = metal + ?, crystal = crystal + ?, deuterium = deuterium + ? 
+                WHERE id = ?
+            ")->execute([$refundMetal, $refundCrystal, $refundDeut, $planetId]);
+
+            $this->db->prepare("DELETE FROM construction_queue WHERE id = ?")->execute([$queueId]);
+            $this->db->commit();
             return true;
         }
 

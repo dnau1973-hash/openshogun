@@ -41,6 +41,19 @@ try {
 
         $res = $ruralPlotEngine->upgradePlot((int)$planet['id'], $structureType);
         echo json_encode($res);
+    } elseif ($action === 'cancel') {
+        require_once __DIR__ . '/../core/BuildingEngine.php';
+        $queueId = (int)($_POST['queue_id'] ?? 0);
+        if ($queueId <= 0) {
+            throw new Exception("Identifiant de chantier manquant.");
+        }
+        $buildingEngine = new BuildingEngine();
+        $ok = $buildingEngine->cancelUpgrade((int)$planet['id'], $queueId);
+        if ($ok) {
+            echo json_encode(['success' => true, 'message' => 'Chantier annulé avec succès. 80% des ressources restituées.']);
+        } else {
+            throw new Exception("Impossible d'annuler ce chantier.");
+        }
     } else {
         throw new Exception("Action non reconnue.");
     }
