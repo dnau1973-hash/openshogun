@@ -27,6 +27,12 @@ class ImperialSealEngine {
      * Migration automatique et vérification du schéma
      */
     public function ensureSchema(): void {
+        static $executed = false;
+        if ($executed) return;
+        if ($this->db->inTransaction()) {
+            return;
+        }
+        $executed = true;
         try {
             // 1. Colonnes dans users : imperial_seal_until et gold_coins
             $userCols = [];

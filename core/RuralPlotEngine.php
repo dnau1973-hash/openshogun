@@ -327,7 +327,15 @@ class RuralPlotEngine {
         }
 
         try {
-            $this->db->beginTransaction();
+            // Instancier les services annexes AVANT la transaction pour éviter tout DDL implicite
+            require_once __DIR__ . '/ImperialSealEngine.php';
+            require_once __DIR__ . '/PlanetEngine.php';
+            $sealEngine = new ImperialSealEngine($this->db);
+            $pe = new PlanetEngine($this->db);
+
+            if (!$this->db->inTransaction()) {
+                $this->db->beginTransaction();
+            }
 
             $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
             $lockSql = ($driver === 'sqlite') ? '' : ' FOR UPDATE';
@@ -338,7 +346,9 @@ class RuralPlotEngine {
             $plot = $stmtPlot->fetch(PDO::FETCH_ASSOC);
 
             if (!$plot) {
-                $this->db->rollBack();
+                if ($this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
                 return ['success' => false, 'error' => 'Parcelle introuvable pour ce fief.'];
             }
 
@@ -346,7 +356,9 @@ class RuralPlotEngine {
             $maxLevel = (int)$plot['max_level'];
 
             if ($currentLevel >= $maxLevel) {
-                $this->db->rollBack();
+                if ($this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
                 return ['success' => false, 'error' => "Cette structure a atteint son potentiel maximum (Niveau {$maxLevel})."];
             }
 
@@ -365,7 +377,9 @@ class RuralPlotEngine {
 
             foreach ($existingQueue as $qItem) {
                 if ($qItem['build_category'] === 'rural_plot' && $qItem['target_id'] === $structureType) {
-                    $this->db->rollBack();
+                    if ($this->db->inTransaction()) {
+                        $this->db->rollBack();
+                    }
                     return ['success' => false, 'error' => "Un chantier est déjà en cours pour cette structure."];
                 }
                 if (in_array($qItem['build_category'], ['rural_plot', 'field'])) {
@@ -397,22 +411,24 @@ class RuralPlotEngine {
             }
 
             if (!$planet) {
-                $this->db->rollBack();
+                if ($this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
                 return ['success' => false, 'error' => 'Planète introuvable.'];
             }
 
             $userFaction = $planet['faction'] ?? 'terran';
 
             // Contrôle de concurrence des chantiers selon la faction et le Sceau Impérial
-            require_once __DIR__ . '/ImperialSealEngine.php';
-            $sealEngine = new ImperialSealEngine($this->db);
             $isSealActive = $sealEngine->isSealActive((int)($planet['user_id'] ?? 0));
 
             if ($userFaction === 'terran') {
                 // Clan Oda : Double développement simultané (1 rural + 1 urbain de base, 2+2 avec Sceau Impérial)
                 $maxRuralAllowed = $isSealActive ? 2 : 1;
                 if ($ruralInQueue >= $maxRuralAllowed) {
-                    $this->db->rollBack();
+                    if ($this->db->inTransaction()) {
+                        $this->db->rollBack();
+                    }
                     $msg = $isSealActive
                         ? "Vos deux créneaux de chantiers ruraux sont déjà occupés (maximum 2 simultanés avec le Sceau Impérial)."
                         : "Un chantier rural est déjà en cours. Décrétez le Sceau Impérial pour mener 2 chantiers ruraux de front !";
@@ -422,7 +438,9 @@ class RuralPlotEngine {
                 // Autres clans (Takeda, Tokugawa) : 1 seul chantier total sur tout le domaine (sauf avec Sceau Impérial)
                 $maxTotalAllowed = $isSealActive ? 2 : 1;
                 if (count($existingQueue) >= $maxTotalAllowed) {
-                    $this->db->rollBack();
+                    if ($this->db->inTransaction()) {
+                        $this->db->rollBack();
+                    }
                     $msg = $isSealActive
                         ? "Vos deux créneaux de chantiers sont déjà occupés (maximum 2 simultanés avec le Sceau Impérial)."
                         : "Un chantier est déjà en cours sur votre fief. Seul le Clan Oda maîtrise le double développement rural et urbain simultané (ou décrétez le Sceau Impérial) !";
@@ -434,7 +452,9 @@ class RuralPlotEngine {
             $cost = self::calculateUpgradeCost($structureType, $currentLevel);
 
             if ($planet['metal'] < $cost['metal'] || $planet['crystal'] < $cost['crystal'] || $planet['deuterium'] < $cost['deuterium']) {
-                $this->db->rollBack();
+                if ($this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
                 return ['success' => false, 'error' => 'Ressources insuffisantes pour cette élévation.'];
             }
 
@@ -449,8 +469,6 @@ class RuralPlotEngine {
             $stmtDeduct->execute([$cost['metal'], $cost['crystal'], $cost['deuterium'], $planetId]);
 
             // 5. Calcul des durées et planification du chantier
-            require_once __DIR__ . '/PlanetEngine.php';
-            $pe = new PlanetEngine($this->db);
             $buildings = $pe->getBuildings($planetId);
             $hqLevel = (int)($buildings['hq'] ?? 1);
             $duration = self::calculateUpgradeDuration($currentLevel, $hqLevel);
@@ -480,7 +498,9 @@ class RuralPlotEngine {
             $stmtInsert->execute([$planetId, $structureType, $nextLevel, $startTime, $finishesAt]);
             $queueId = (int)$this->db->lastInsertId();
 
-            $this->db->commit();
+            if ($this->db->inTransaction()) {
+                $this->db->commit();
+            }
 
             $meta = self::STRUCTURES[$structureType];
             return [

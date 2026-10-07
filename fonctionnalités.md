@@ -19,7 +19,11 @@
      - Affichage d'un badge distinctif « Double Chantier (Clan Oda) » dans le panneau de carte et dans la colonne latérale des chantiers en cours sur la page Ressources lorsque le joueur appartient au Clan Oda.
   4. **Couverture de tests unitaires automatisés :**
      - Ajout de tests de concurrence dans `tests/test_village_generator_9plots.php` validant que le Clan Oda lance bien 1 urbain + 1 rural en simultané (Queue count = 2) et bloque le 2e rural sans Sceau, et que le Clan Takeda/Tokugawa se voit interdire le double développement sans Sceau.
-- **Fichiers modifiés :** `core/BuildingEngine.php`, `core/RuralPlotEngine.php`, `views/city.php`, `views/building.php`, `views/field.php`, `views/resources.php`, `tests/test_village_generator_9plots.php`, `pedagogie.md`, `fonctionnalités.md`, `public/changelog.html`
+  5. **Résolution du crash de transaction PDO (`There is no active transaction`) :**
+     - Instanciation des moteurs annexes (`ImperialSealEngine`, `PlanetEngine`) en amont de `beginTransaction()` dans `RuralPlotEngine::upgradePlot`.
+     - Garde-fou strict sur `ImperialSealEngine::ensureSchema()` et `PlanetEngine::ensureSchemaMigration()` évitant l'exécution de requêtes DDL (`CREATE TABLE`, `ALTER TABLE`) qui provoquent un commit implicite MySQL rompant la transaction.
+     - Sécurisation de l'ensemble des appels `$this->db->commit()` et `$this->db->rollBack()` sous condition `$this->db->inTransaction()`.
+- **Fichiers modifiés :** `core/BuildingEngine.php`, `core/RuralPlotEngine.php`, `core/ImperialSealEngine.php`, `core/PlanetEngine.php`, `views/city.php`, `views/building.php`, `views/field.php`, `views/resources.php`, `tests/test_village_generator_9plots.php`, `pedagogie.md`, `fonctionnalités.md`, `public/changelog.html`
 - **Vérification QA :**
   1. Avec un compte du Clan Oda (faction `terran`) :
      - Se rendre sur la page Cité (`?page=buildings`) et lancer l'amélioration d'un bâtiment urbain (ex: Tenshu ou Forge).

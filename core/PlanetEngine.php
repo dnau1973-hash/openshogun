@@ -967,6 +967,7 @@ class PlanetEngine {
     public function ensureSchemaMigration(): void {
         static $executed = false;
         if ($executed) return;
+        if ($this->db->inTransaction()) return;
         $executed = true;
 
         try {
