@@ -13,6 +13,10 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * **Tests automatisés :** Ajout d'une suite de tests de concurrence dans `tests/test_village_generator_9plots.php` validant l'étanchéité des files selon la faction.
 
 ### Modifié (Changed)
+- **Simplification épurée des badges du terroir (Logo + Niveaux) et liaison directe du Tenshu vers la cité (`views/resources.php`, `public/js/rural_domain_map.js`, `core/RuralPlotEngine.php`) :**
+  * Remplacement des anciens grands badges (> 175px) par des micro-pilules ultra-compactes n'obstruant plus la composition panoramique 16:9.
+  * Suppression de la barre de progression sur les tuiles de la carte : affichage strict du logo et de la jauge textuelle `Niv. [Actuel] / [Max]` avec indicateur de travail subtil.
+  * Déconnexion de l'évolution rurale du Donjon (Tenshu) : transformation en passerelle directe vers la cité castrale (`/?page=buildings`).
 - **Refonte du HUD de ressources et statistiques de population en un ruban horizontal unifié compact (< 44px) aux couleurs du site (`views/partials/header.php`, `views/resources.php`) :**
   * Élimination des doublons : fusion de la Sérénité Shintō, de la Population et du Contentement au sein d'une seule et même barre d'en-tête horizontale compacte (`card-sm`, hauteur contenue < 44px), supprimant le bloc redondant de 4 cartes dans `views/resources.php` et libérant plus de 150px verticaux au-dessus du Terroir.
   * Respect absolu de la charte graphique et des teintes du site : surface blanche épurée (`bg-white`), bordures délicates (`border-secondary-subtle`), typographie sombre contrastée et accents de couleurs féodales d'origine (Bois, Pierre, Riz, Farine, Saké, Poutres).

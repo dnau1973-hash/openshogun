@@ -92,7 +92,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 }
 
 /* ========================================================
-   BADGES & TUILES INTERACTIVES DES 9 STRUCTURES
+   BADGES MINIMALISTES & COMPACTS DES 9 STRUCTURES
    ======================================================== */
 .rural-plot-badge {
     position: absolute;
@@ -104,53 +104,53 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 }
 
 .rural-plot-badge:hover {
-    transform: translate(-50%, -50%) scale(1.08);
+    transform: translate(-50%, -50%) scale(1.12);
     z-index: 45;
 }
 
 .rural-badge-inner {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.65rem;
-    background: rgba(15, 23, 42, 0.94);
+    gap: 0.45rem;
+    background: rgba(15, 23, 42, 0.90);
     backdrop-filter: blur(8px);
-    border: 2px solid var(--badge-color, #ffffff);
-    border-radius: 50px;
-    padding: 0.38rem 0.9rem 0.38rem 0.45rem;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.75), 0 0 16px var(--badge-glow, rgba(255, 255, 255, 0.3));
+    border: 1.5px solid var(--badge-color, #ffffff);
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem 0.2rem 0.25rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.75), 0 0 10px var(--badge-glow, rgba(255, 255, 255, 0.25));
     color: #ffffff;
-    min-width: 175px;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    white-space: nowrap;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.rural-badge-inner:hover {
+    background: rgba(15, 23, 42, 0.98);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.85), 0 0 16px var(--badge-glow, rgba(255, 255, 255, 0.4));
 }
 
 .rural-badge-inner.is-upgrading {
     border-color: #f59e0b !important;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.8), 0 0 20px rgba(245, 158, 11, 0.6) !important;
-    animation: pulse-worker 2.5s infinite ease-in-out;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.75), 0 0 16px rgba(245, 158, 11, 0.65) !important;
 }
 
-@keyframes pulse-worker {
-    0%, 100% {
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.8), 0 0 12px rgba(245, 158, 11, 0.4);
-    }
-    50% {
-        box-shadow: 0 4px 22px rgba(0, 0, 0, 0.9), 0 0 24px rgba(245, 158, 11, 0.85);
-    }
+.rural-badge-inner.is-tenshu {
+    border-color: #ef4444;
+    background: rgba(30, 27, 75, 0.92);
 }
 
 .rural-badge-avatar {
-    width: 38px;
-    height: 38px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background: var(--badge-color, #ffffff);
     color: #0f172a;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.15rem;
+    font-size: 0.82rem;
     font-weight: bold;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .rural-badge-inner.is-upgrading .rural-badge-avatar {
@@ -158,68 +158,29 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     color: #0f172a !important;
 }
 
-.rural-badge-body {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    line-height: 1.15;
+.rural-badge-level-text {
+    font-size: 0.75rem;
+    font-weight: 800;
+    font-family: monospace;
+    letter-spacing: 0.02em;
+    color: #f8fafc;
+    display: inline-flex;
+    align-items: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
 }
 
-.rural-badge-name {
-    font-size: 0.82rem;
+.rural-badge-name-short {
+    font-size: 0.76rem;
     font-weight: 800;
     color: #ffffff;
-    white-space: nowrap;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
 }
 
-.rural-badge-level-row {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin-top: 0.2rem;
-}
-
-.rural-badge-level-pill {
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: var(--badge-color, #facc15);
-    font-family: monospace;
-}
-
-.rural-badge-prod-pill {
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: #cbd5e1;
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
-    padding: 0.05rem 0.35rem;
-    white-space: nowrap;
-}
-
-.rural-badge-timer {
-    font-size: 0.70rem;
-    font-weight: 800;
-    font-family: monospace;
-    background: rgba(245, 158, 11, 0.2);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    border-radius: 4px;
-    padding: 0.05rem 0.35rem;
-    white-space: nowrap;
-}
-
-.rural-badge-progress {
-    height: 4px;
-    background: rgba(255, 255, 255, 0.18);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-top: 0.25rem;
-}
-
-.rural-badge-progress-bar {
-    height: 100%;
-    background: var(--badge-color, #ffffff);
-    transition: width 0.3s ease;
+.rural-badge-action-hint {
+    font-size: 0.7rem;
+    color: #fca5a5;
+    margin-left: 0.2rem;
 }
 
 /* Chips de coût dans la modale */
@@ -347,7 +308,12 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                             $cost = $p['cost'];
                             $targetLevel = $p['target_level'] ?? $p['next_level'];
 
-                            if ($isUpgrading) {
+                            $isTenshu = ($type === 'tenshu');
+
+                            if ($isTenshu) {
+                                $tooltip = '<strong>Tenshu (Cité Castrale)</strong><br>' .
+                                           '<span class="text-warning"><i class="fa-solid fa-arrow-right me-1"></i>Entrer dans la Cité Castrale</span>';
+                            } elseif ($isUpgrading) {
                                 $tooltip = '<strong>' . htmlspecialchars($p['name']) . '</strong><br>' .
                                            '<span class="text-warning"><i class="fa-solid fa-hammer fa-spin me-1"></i>En travaux vers Niv. ' . $targetLevel . '</span><br>' .
                                            '<small class="text-muted">Cliquer pour voir l\'état du chantier</small>';
@@ -357,7 +323,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                                            '<small class="text-muted">' . htmlspecialchars($p['worker_role']) . ' : ' . $p['workers_assigned'] . ' ouvriers<br><em>Cliquer pour gérer &amp; élever</em></small>';
                             }
                         ?>
-                        <div class="rural-plot-badge"
+                        <div class="rural-plot-badge <?= $isTenshu ? 'tenshu-badge' : '' ?>"
                              id="rural-badge-<?= $type ?>"
                              style="left: <?= $p['pos_x'] ?>%; top: <?= $p['pos_y'] ?>%; --badge-color: <?= $p['color'] ?>; --badge-glow: <?= $p['color'] ?>80;"
                              data-type="<?= $type ?>"
@@ -393,46 +359,35 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                              data-bs-html="true"
                              data-bs-placement="top"
                              title="<?= htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8') ?>"
-                             onclick="handleRuralPinClick(this, event)">
+                             onclick="<?= $isTenshu ? "window.location.href='/?page=buildings'" : "handleRuralPinClick(this, event)" ?>">
 
-                            <div class="rural-badge-inner <?= $isUpgrading ? 'is-upgrading' : '' ?>">
-                                <div class="rural-badge-avatar">
-                                    <?php if ($isUpgrading): ?>
-                                        <i class="fa-solid fa-hammer fa-bounce text-warning"></i>
-                                    <?php else: ?>
-                                        <i class="<?= $p['icon'] ?>"></i>
-                                    <?php endif; ?>
+                            <?php if ($isTenshu): ?>
+                                <div class="rural-badge-inner is-tenshu">
+                                    <div class="rural-badge-avatar">
+                                        <i class="fa-solid fa-chess-rook"></i>
+                                    </div>
+                                    <div class="rural-badge-level-text">
+                                        <span class="rural-badge-name-short">Tenshu</span>
+                                        <span class="rural-badge-action-hint"><i class="fa-solid fa-arrow-right-to-bracket"></i></span>
+                                    </div>
                                 </div>
-                                <div class="rural-badge-body">
-                                    <div class="rural-badge-name d-flex align-items-center justify-content-between gap-1">
-                                        <span><?= htmlspecialchars($p['name']) ?></span>
+                            <?php else: ?>
+                                <div class="rural-badge-inner <?= $isUpgrading ? 'is-upgrading' : '' ?>">
+                                    <div class="rural-badge-avatar">
                                         <?php if ($isUpgrading): ?>
-                                            <span class="badge bg-warning text-dark px-1 py-0 fw-bold" style="font-size:0.6rem;">TRAVAUX</span>
+                                            <i class="fa-solid fa-hammer fa-spin text-warning"></i>
+                                        <?php else: ?>
+                                            <i class="<?= $p['icon'] ?>"></i>
                                         <?php endif; ?>
                                     </div>
-
-                                    <?php if ($isUpgrading): ?>
-                                        <div class="rural-badge-level-row">
-                                            <span class="rural-badge-level-pill text-warning">Niv. <?= $p['level'] ?> &rarr; <?= $targetLevel ?></span>
-                                            <span class="rural-badge-timer text-warning"
-                                                  data-rural-countdown="<?= (int)$p['finishes_at'] ?>"
-                                                  data-rural-started="<?= (int)$p['started_at'] ?>">--:--:--</span>
-                                        </div>
-                                        <div class="rural-badge-progress">
-                                            <div class="rural-badge-progress-bar progress-bar-striped progress-bar-animated bg-warning"
-                                                 style="width: <?= (int)$p['queue_progress_pct'] ?>%;"></div>
-                                        </div>
-                                    <?php else: ?>
-                                        <div class="rural-badge-level-row">
-                                            <span class="rural-badge-level-pill">Niv. <?= $p['level'] ?> / <?= $p['max_level'] ?></span>
-                                            <span class="rural-badge-prod-pill"><?= htmlspecialchars($p['prod_label']) ?></span>
-                                        </div>
-                                        <div class="rural-badge-progress">
-                                            <div class="rural-badge-progress-bar" style="width: <?= $p['progress_pct'] ?>%;"></div>
-                                        </div>
-                                    <?php endif; ?>
+                                    <div class="rural-badge-level-text">
+                                        <span>Niv. <?= $p['level'] ?> / <?= $p['max_level'] ?></span>
+                                        <?php if ($isUpgrading): ?>
+                                            <i class="fa-solid fa-hourglass-half text-warning ms-1" style="font-size:0.65rem;" title="En travaux"></i>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                            </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
 

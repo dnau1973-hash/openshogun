@@ -1,5 +1,29 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-07] - ui-simplify-rural-badges-tenshu-link : Simplification minimaliste des badges du terroir (Logo + Niveaux) et liaison directe du Tenshu vers la cité
+- **Module :** `ui-simplify-rural-badges-tenshu-link`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Simplification épurée des badges des parcelles rurales (`views/resources.php`) :**
+     - Remplacement des anciens grands badges encombrants (> 175px) par des micro-pilules ultra-compactes et élégantes n'obstruant plus l'illustration panoramique 16:9.
+     - Suppression de la barre de progression de chantier sur les tuiles, des cadences de production horaires et des timers encombrants.
+     - Affichage strict du format épuré demandé : **Logo / Avatar rond + Niveau actuel / Niveau maximal** (`Niv. X / Y`).
+     - Indicateur subtil de travaux en cours : animation de marteau ou sablier discret sans déformer la pilule.
+  2. **Liaison directe du Tenshu vers la cité castrale (`views/resources.php`, `public/js/rural_domain_map.js`, `core/RuralPlotEngine.php`) :**
+     - Le donjon seigneurial (Tenshu) sur la page ressources n'est plus une parcelle rurale évolutive : il fait désormais office de porte d'accès directe vers la cité castrale.
+     - Le clic sur le badge du Tenshu redirige immédiatement vers `/?page=buildings` (sans ouvrir de modale d'amélioration rurale).
+     - Badge spécifique Tenshu avec icône donjon, intitulé et flèche d'entrée (`Tenshu ->`).
+     - Sécurité côté serveur dans `RuralPlotEngine::upgradePlot` interdisant toute amélioration rurale du Tenshu.
+- **Fichiers modifiés :** `views/resources.php`, `public/js/rural_domain_map.js`, `core/RuralPlotEngine.php`, `fonctionnalités.md`, `pedagogie.md`, `CHANGELOG.md`, `public/changelog.html`
+- **Vérification QA :**
+  1. Se rendre sur la page Ressources (`?page=resources`).
+  2. Constater la nouvelle apparence des 9 badges : micro-pilules arrondies et compactes avec uniquement le logo de la ressource et `Niv. X / Y`.
+  3. Vérifier qu'aucune barre de progression ni texte de production ne pollue les badges de la carte.
+  4. Cliquer sur le badge du Tenshu (Donjon seigneurial en haut) : vérifier qu'il redirige instantanément vers la cité castrale (`?page=buildings`).
+  5. Cliquer sur les autres parcelles (ex. Forêt, Rizière) : la modale d'amélioration complète s'ouvre normalement.
+
+---
+
 ### [2026-10-07] - queue-concurrency-clan-perks : Réactivation de la construction simultanée selon le clan féodal (Oda vs Takeda/Tokugawa) & Sceau Impérial
 - **Module :** `queue-concurrency-clan-perks`
 - **Statut :** `À tester`

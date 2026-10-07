@@ -240,6 +240,16 @@
   3. Constater dans la colonne de droite que les deux comptes à rebours s'égrènent ensemble en temps réel !
   4. Réfléchir ensemble : en quoi cet avantage modifie-t-il la vitesse de développement économique au début d'une saison ? Pourquoi les autres clans reçoivent-ils en contrepartie des bonus de combat ou de défense pour équilibrer la balance ?
 
+### Session du 07/10/2026 (Partie 18) — Ergonomie Épurée (Minimalist UX), Réduction de la Surcharge Cognitive & Portails Inter-Mondes
+- **Concept exploré :** Épuration visuelle d'une interface de jeu (principe « *Less is More* »), hiérarchisation de l'information (badges discrets vs panneaux détaillés), et utilisation d'un bâtiment emblématique comme passerelle de navigation (*World Portal*).
+- **Notions pour l'atelier :**
+  - **Pourquoi trop d'informations tuent l'immersion ? (La Règle du Glancement) :** Quand une illustration panoramique de grande qualité est recouverte de gigantesques blocs de 175px avec des jauges, des chronomètres et des taux de production, le joueur ne voit plus le paysage du terroir ! En réduisant chaque tuile à un format micro-pilule épuré (**Logo + Niv. Actuel / Max**), la carte respire à nouveau. Si le joueur veut les détails (ouvriers, coûts, temps restant), il les obtient en survolant la tuile ou en ouvrant la modale. C'est la règle d'or du *Progressive Disclosure* (divulgation progressive de l'information).
+  - **Le Donjon comme Passerelle (Le Concept de « Porte entre Deux Mondes ») :** Dans la plupart des jeux de stratégie féodale (Travian, Ikariam), le monde rural (Dorf 1) et la cité fortifiée (Dorf 2) sont connectés. Plutôt que de traiter le Tenshu comme une simple ferme de ressources parmi les autres, le consacrer comme une porte directe vers la Cité Castrale (`/?page=buildings`) donne un repère géographique naturel au joueur : cliquer sur le grand château fort au sommet de la colline le téléporte immédiatement au cœur de sa ville !
+- **Activité pratique suggérée :**
+  1. Comparer visuellement la carte avant et après : apprécier comme le paysage féodal 16:9 est mis en valeur avec les micro-badges.
+  2. Cliquer sur le Tenshu : constater la transition directe vers la Cité castrale.
+  3. Cliquer sur une rizière ou une carrière : vérifier que la modale d'élévation continue de fournir toutes les données détaillées à la demande.
+
 ---
 
 ## 🛠️ Modèle d'Entrée pour les Prochaines Sessions (Template)

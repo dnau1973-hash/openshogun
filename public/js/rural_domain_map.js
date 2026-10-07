@@ -33,6 +33,10 @@
             e.preventDefault();
             e.stopPropagation();
         }
+        if (el && el.dataset && el.dataset.type === 'tenshu') {
+            window.location.href = '/?page=buildings';
+            return;
+        }
         currentOpenPin = el;
         openPlotUpgradeModal(el);
     };

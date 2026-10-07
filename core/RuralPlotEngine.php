@@ -325,6 +325,12 @@ class RuralPlotEngine {
         if (!isset(self::STRUCTURES[$structureType])) {
             return ['success' => false, 'error' => 'Type de structure inconnu.'];
         }
+        if ($structureType === 'tenshu') {
+            return [
+                'success' => false,
+                'error' => "Le Tenshu est le donjon de la cité castrale. Rendez-vous dans la Cité pour développer vos infrastructures."
+            ];
+        }
 
         try {
             // Instancier les services annexes AVANT la transaction pour éviter tout DDL implicite
