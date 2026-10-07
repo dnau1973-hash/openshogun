@@ -764,7 +764,7 @@ if (!$isEmptyPlot) {
                             <span><i class="fa-solid fa-users text-primary"></i></span> Démographie &amp; Ouvriers du Domaine Castral
                         </h3>
                         <div class="text-secondary small mt-1">
-                            La population d'artisans, bûcherons et fermiers est logée par vos édifices et soutenue par la farine de riz.
+                            La population d'artisans, bûcherons et fermiers est logée par vos parcelles d'habitation du village et soutenue par la farine de riz.
                         </div>
                     </div>
                     <span class="badge bg-blue-lt fw-bold">

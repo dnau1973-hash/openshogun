@@ -10,8 +10,8 @@ require_once __DIR__ . '/../config/game_constants.php';
 class PlanetEngine {
     private PDO $db;
 
-    public function __construct() {
-        $this->db = Database::getConnection();
+    public function __construct(?PDO $db = null) {
+        $this->db = $db ?? Database::getConnection();
     }
 
     /**
@@ -72,7 +72,7 @@ class PlanetEngine {
         $prodRates = $this->calculateProduction($fields, $planetId);
 
         // 6. Calcul démographique (capacité d'habitants et croissance)
-        $maxPopulation = $this->calculateMaxPopulation($buildings, $fields);
+        $maxPopulation = $this->calculateMaxPopulation($buildings, $fields, $planetId);
         $activeFeast = $this->getActiveFeast($planetId);
 
         $now = time();
@@ -833,7 +833,7 @@ class PlanetEngine {
                 $stmtPop->execute([$planetId]);
                 $pRow = $stmtPop->fetch(PDO::FETCH_ASSOC);
                 if ($pRow) {
-                    $maxPop = $this->calculateMaxPopulation($buildings, $fields);
+                    $maxPop = $this->calculateMaxPopulation($buildings, $fields, $planetId);
                     $workforceSummary = PopulationEngine::calculateWorkforceSummary($pRow, $buildings, $fields, $maxPop);
                     $workforceRatio = $workforceSummary['workforce_ratio'];
                 }
@@ -1577,31 +1577,36 @@ class PlanetEngine {
     }
 
     /**
-     * Calcule la capacité maximale de population (logements) selon les édifices et parcelles
+     * Calcule la capacité maximale de population (logements).
+     * Règle : Seule la construction d'habitations (parcelles villageoises de terroir) offre des logements aux villageois.
+     * Les bâtiments urbains et parcelles rurales ne fournissent plus de capacité d'habitation.
+     * Formule : 75 (base féodale) + (Somme des niveaux des 5 parcelles d'habitations × 5)
      */
-    public function calculateMaxPopulation(array $buildings, array $fields): int {
-        // Hameau de base
-        $capacity = 100;
-
-        // Tenshu (palais castral) : 50 habitants par niveau
-        $capacity += ((int)($buildings['hq'] ?? 1)) * 50;
-
-        // Bâtiments urbains : 20 habitants par niveau
-        $urbanKeys = [
-            'storage', 'tank', 'barracks', 'shipyard', 'market', 'research_lab',
-            'radar', 'quantum_vault', 'embassy', 'sawmill', 'stonemason',
-            'grain_mill', 'blacksmith', 'teahouse', 'tournament_square', 'wall'
-        ];
-        foreach ($urbanKeys as $k) {
-            $capacity += ((int)($buildings[$k] ?? 0)) * 20;
+    public function calculateMaxPopulation(array $buildings = [], array $fields = [], ?int $planetId = null): int {
+        if ($planetId !== null && $this->db) {
+            try {
+                $levels = [1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1];
+                $stmt = $this->db->prepare("
+                    SELECT slot_index, level 
+                    FROM planet_terroir_slots 
+                    WHERE planet_id = ? AND (resource_type = 'housing' OR resource_type = 'village')
+                ");
+                $stmt->execute([$planetId]);
+                while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $idx = (int)$r['slot_index'];
+                    if ($idx >= 1 && $idx <= 5) {
+                        $levels[$idx] = max($levels[$idx], (int)$r['level']);
+                    }
+                }
+                $totalLevels = array_sum($levels);
+                return 75 + ($totalLevels * 5);
+            } catch (Exception $e) {
+                // Fallback silencieux
+            }
         }
 
-        // Parcelles rurales du terroir : 10 habitants par niveau
-        foreach ($fields as $f) {
-            $capacity += ((int)($f['level'] ?? 0)) * 10;
-        }
-
-        return $capacity;
+        // Capacité de base par défaut : 100 logements (75 base + 5 parcelles de niveau 1 × 5)
+        return 100;
     }
 
     /**

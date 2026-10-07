@@ -227,7 +227,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label class="form-label small fw-bold m-0" for="inp-housing-cap">
-                            <i class="fa-solid fa-house-chimney text-success me-1"></i>Capacité des Logements (Plafond Tenshu) :
+                            <i class="fa-solid fa-house-chimney text-success me-1"></i>Capacité des Logements (Parcelles d'Habitation) :
                         </label>
                         <span class="badge bg-success font-monospace" id="val-housing-cap">200 places</span>
                     </div>

@@ -11,9 +11,9 @@ class BuildingEngine {
     private PDO $db;
     private PlanetEngine $planetEngine;
 
-    public function __construct() {
-        $this->db = Database::getConnection();
-        $this->planetEngine = new PlanetEngine();
+    public function __construct(?PDO $db = null) {
+        $this->db = $db ?? Database::getConnection();
+        $this->planetEngine = new PlanetEngine($this->db);
     }
 
     /**
