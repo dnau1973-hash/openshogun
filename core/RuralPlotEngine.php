@@ -295,7 +295,7 @@ class RuralPlotEngine {
             $cost = self::calculateUpgradeCost($structureType, $currentLevel);
 
             // 2. Verrouiller la planète pour contrôler les ressources
-            $stmtPlanet = $this->db->prepare("SELECT metal, crystal, deuterium, population, population_max FROM planets WHERE id = ?" . $lockSql);
+            $stmtPlanet = $this->db->prepare("SELECT metal, crystal, deuterium, population FROM planets WHERE id = ?" . $lockSql);
             $stmtPlanet->execute([$planetId]);
             $planet = $stmtPlanet->fetch(PDO::FETCH_ASSOC);
 
@@ -334,11 +334,11 @@ class RuralPlotEngine {
 
             // 5. Effet spécifique de la structure
             if ($structureType === 'village') {
-                // Mise à jour directe de la capacité d'accueil des villageois : 75 + (nextLevel * 25)
+                // Accueillir directement +5 villageois (plafonné à la nouvelle capacité)
                 $newCapacity = 75 + ($nextLevel * 25);
                 $minSql = ($driver === 'sqlite') ? "MIN(population + 5, ?)" : "LEAST(population + 5, ?)";
-                $this->db->prepare("UPDATE planets SET population_max = ?, population = {$minSql} WHERE id = ?")
-                    ->execute([$newCapacity, $newCapacity, $planetId]);
+                $this->db->prepare("UPDATE planets SET population = {$minSql} WHERE id = ?")
+                    ->execute([$newCapacity, $planetId]);
             } elseif ($structureType === 'tenshu') {
                 // Synchroniser avec planet_buildings si hq présent
                 try {

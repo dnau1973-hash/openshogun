@@ -19,11 +19,10 @@ $pdo->exec("
         metal REAL DEFAULT 100000,
         crystal REAL DEFAULT 100000,
         deuterium REAL DEFAULT 100000,
-        population INTEGER DEFAULT 100,
-        population_max INTEGER DEFAULT 100
+        population INTEGER DEFAULT 100
     );
 ");
-$pdo->exec("INSERT INTO planets (id, metal, crystal, deuterium, population, population_max) VALUES (1, 50000, 50000, 50000, 100, 100)");
+$pdo->exec("INSERT INTO planets (id, metal, crystal, deuterium, population) VALUES (1, 50000, 50000, 50000, 100)");
 
 $generator = new VillageGeneratorService($pdo);
 
@@ -86,20 +85,24 @@ if ($costsLvl1['metal'] > 0 && $costsLvl100['metal'] > $costsLvl20['metal'] && $
 
 // 6. Test d'élévation d'une parcelle via RuralPlotEngine
 $engine = new RuralPlotEngine($pdo);
+$initForetLvl = (int)$pdo->query("SELECT level FROM planet_rural_plots WHERE planet_id = 1 AND structure_type = 'foret'")->fetchColumn();
 $resUpgrade = $engine->upgradePlot(1, 'foret');
 echo "5. Élévation de la forêt : ";
-if (!empty($resUpgrade['success']) && $resUpgrade['new_level'] === 2) {
-    echo "[SUCCES] Niveau 1 -> Niveau 2 validé ({$resUpgrade['message']})\n";
+if (!empty($resUpgrade['success']) && $resUpgrade['new_level'] === $initForetLvl + 1) {
+    echo "[SUCCES] Niveau $initForetLvl -> Niveau {$resUpgrade['new_level']} validé ({$resUpgrade['message']})\n";
 } else {
     echo "[ECHEC] Erreur : " . ($resUpgrade['error'] ?? 'Inconnue') . "\n";
     exit(1);
 }
 
 // 7. Test de la capacité d'habitation du village (75 + L * 25)
+$initVillageLvl = (int)$pdo->query("SELECT level FROM planet_rural_plots WHERE planet_id = 1 AND structure_type = 'village'")->fetchColumn();
 $resVillageUp = $engine->upgradePlot(1, 'village');
+$newVillageLvl = $resVillageUp['new_level'];
+$expectedCap = 75 + ($newVillageLvl * 25);
 $housingCap = $engine->getVillageHousingCapacity(1);
-echo "6. Capacité d'habitation après élévation du Village au Niveau 2 : {$housingCap['total_capacity']} places (attendu: 75 + 2*25 = 125)\n";
-if ($housingCap['total_capacity'] === 125) {
+echo "6. Capacité d'habitation après élévation du Village au Niveau $newVillageLvl : {$housingCap['total_capacity']} places (attendu: 75 + {$newVillageLvl}*25 = $expectedCap)\n";
+if ($housingCap['total_capacity'] === $expectedCap) {
     echo "   -> [SUCCES] Formule d'habitation 75 + (L * 25) validée !\n";
 } else {
     echo "   -> [ECHEC] Incohérence capacité : {$housingCap['total_capacity']}\n";
@@ -109,8 +112,8 @@ if ($housingCap['total_capacity'] === 125) {
 // 8. Test de cohérence avec PlanetEngine
 $pe = new PlanetEngine($pdo);
 $planetMaxPop = $pe->calculateMaxPopulation([], [], 1);
-echo "7. Capacité calculée par PlanetEngine : $planetMaxPop (attendu: 125)\n";
-if ($planetMaxPop === 125) {
+echo "7. Capacité calculée par PlanetEngine : $planetMaxPop (attendu: $expectedCap)\n";
+if ($planetMaxPop === $expectedCap) {
     echo "   -> [SUCCES] Parfaite synchronisation PlanetEngine <=> RuralPlotEngine !\n";
 } else {
     echo "   -> [ECHEC] Désynchronisation : $planetMaxPop\n";
