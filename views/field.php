@@ -63,12 +63,12 @@ $fieldsInQueue = 0;
 $buildingsInQueue = 0;
 
 foreach ($queue as $q) {
-    if ($q['build_category'] === 'field') {
+    if (in_array($q['build_category'], ['field', 'rural_plot'])) {
         $fieldsInQueue++;
         if ((int)$q['target_id'] === $slot) {
             $activeJob = $q;
         }
-    } else {
+    } elseif ($q['build_category'] === 'building') {
         $buildingsInQueue++;
     }
 }
@@ -76,11 +76,11 @@ foreach ($queue as $q) {
 // Vérifier la disponibilité de la file selon la faction et le Sceau Impérial
 require_once __DIR__ . '/../core/ImperialSealEngine.php';
 $sealEngine = new ImperialSealEngine();
-$isSealActive = $sealEngine->isSealActive((int)$user['id']);
+$isSealActive = $sealEngine->isSealActive((int)($user['id'] ?? 0));
 
-$isTerran = ($user['faction'] === 'terran');
+$isTerran = (($user['faction'] ?? 'terran') === 'terran');
 $maxAllowedFields = $isSealActive ? 2 : 1;
-$maxAllowedTotal = $isSealActive ? 3 : 1;
+$maxAllowedTotal = $isSealActive ? 2 : 1;
 $canQueueNewField = $isTerran ? ($fieldsInQueue < $maxAllowedFields) : (count($queue) < $maxAllowedTotal);
 
 // Vérifier les ressources

@@ -62,14 +62,21 @@ $citySlots = $planetEngine->getCitySlotMap((int)$planet['id']);
 $fieldsInQueue = 0;
 $buildingsInQueue = 0;
 foreach ($queue as $q) {
-    if ($q['build_category'] === 'field') {
+    if (in_array($q['build_category'], ['field', 'rural_plot'])) {
         $fieldsInQueue++;
-    } else {
+    } elseif ($q['build_category'] === 'building') {
         $buildingsInQueue++;
     }
 }
-$isTerran = ($user['faction'] === 'terran');
-$canQueueNewBuilding = $isTerran ? ($buildingsInQueue < 1) : (count($queue) === 0);
+
+require_once __DIR__ . '/../core/ImperialSealEngine.php';
+$sealEngine = new ImperialSealEngine();
+$isSealActive = $sealEngine->isSealActive((int)($user['id'] ?? 0));
+
+$isTerran = (($user['faction'] ?? 'terran') === 'terran');
+$maxAllowedBuildings = $isSealActive ? 2 : 1;
+$maxAllowedTotal = $isSealActive ? 2 : 1;
+$canQueueNewBuilding = $isTerran ? ($buildingsInQueue < $maxAllowedBuildings) : (count($queue) < $maxAllowedTotal);
 
 // Bâtiments disponibles à la construction sur les slots libres
 $availableBuildingsToConstruct = [];
@@ -348,7 +355,11 @@ foreach (BUILDINGS as $code => $bInfo) {
                 <?php else: ?>
                     <?php foreach ($queue as $q): ?>
                         <?php
-                            if ($q['build_category'] === 'field') {
+                            if ($q['build_category'] === 'rural_plot') {
+                                require_once __DIR__ . '/../core/RuralPlotEngine.php';
+                                $rMeta = RuralPlotEngine::STRUCTURES[$q['target_id']] ?? null;
+                                $name = $rMeta ? $rMeta['name'] : ucfirst($q['target_id']);
+                            } elseif ($q['build_category'] === 'field') {
                                 $tSlot = (int)$q['target_id'];
                                 $tType = $fieldsBySlot[$tSlot]['type'] ?? FIELD_LAYOUT[$tSlot] ?? 'metal_mine';
                                 $name = (FIELD_TYPES[$tType]['name'] ?? 'Parcelle') . " #{$tSlot}";

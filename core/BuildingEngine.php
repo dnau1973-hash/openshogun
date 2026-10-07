@@ -174,7 +174,7 @@ class BuildingEngine {
                 $maxFinishesAtGlobal = $qFin;
             }
 
-            if ($q['build_category'] === 'field') {
+            if (in_array($q['build_category'], ['field', 'rural_plot'])) {
                 $fieldsInQueue++;
                 if ($qFin > $maxFinishesAtField) {
                     $maxFinishesAtField = $qFin;
@@ -199,37 +199,29 @@ class BuildingEngine {
             }
         }
 
-        // Limite simultanée par zone (field = Ressources, building = City)
-        // Sceau impérial : 2 simultanés par zone ; sans sceau : 1 par zone
-        $maxSimultPerZone = ($isSealActive || $faction === 'terran' && $isSealActive) ? 2 : 1;
-
+        // Limites simultanées par clan féodal et statut VIP
         if ($faction === 'terran') {
-            // Terran : limites par catégorie, simultanées avec Sceau
+            // Clan Oda : Double développement simultané (1 rural + 1 urbain de base, 2+2 avec Sceau Impérial)
             $maxPerCategory = $isSealActive ? 2 : 1;
-            if ($category === 'field' && $fieldsInQueue >= $maxPerCategory) {
+            if (in_array($category, ['field', 'rural_plot']) && $fieldsInQueue >= $maxPerCategory) {
                 $msg = $isSealActive
-                    ? "Vos deux emplacements de parcelles agricoles sont déjà actifs (maximum 2 simultanés)."
-                    : "Une parcelle rurale est déjà en cours d'amélioration. Décrétez le Sceau Impérial pour lancer 2 chantiers simultanément !";
+                    ? "Vos deux créneaux de parcelles rurales sont déjà actifs (maximum 2 simultanés)."
+                    : "Une parcelle rurale est déjà en cours d'amélioration. Décrétez le Sceau Impérial pour lancer 2 parcelles simultanément !";
                 throw new Exception($msg);
             }
             if ($category === 'building' && $buildingsInQueue >= $maxPerCategory) {
                 $msg = $isSealActive
-                    ? "Vos deux emplacements d'infrastructures urbaines sont déjà actifs (maximum 2 simultanés)."
+                    ? "Vos deux créneaux d'infrastructures urbaines sont déjà actifs (maximum 2 simultanés)."
                     : "Une infrastructure de la cité est déjà en cours de construction. Décrétez le Sceau Impérial pour construire 2 bâtisses simultanément !";
                 throw new Exception($msg);
             }
         } else {
-            // Autres factions : Sceau → max 2 par zone (field ET building indépendamment)
-            if ($category === 'field' && $fieldsInQueue >= $maxSimultPerZone) {
+            // Autres clans (Takeda, Tokugawa) : 1 seul chantier total sur tout le domaine (sauf avec Sceau Impérial)
+            $maxTotalAllowed = $isSealActive ? 2 : 1;
+            if (count($queue) >= $maxTotalAllowed) {
                 $msg = $isSealActive
-                    ? "Vos deux emplacements de parcelles sont déjà actifs (maximum 2 simultanés par zone)."
-                    : "Une parcelle rurale est déjà en cours d'amélioration. Décrétez le Sceau Impérial pour lancer 2 chantiers simultanément !";
-                throw new Exception($msg);
-            }
-            if ($category === 'building' && $buildingsInQueue >= $maxSimultPerZone) {
-                $msg = $isSealActive
-                    ? "Vos deux emplacements de bâtiments urbains sont déjà actifs (maximum 2 simultanés par zone)."
-                    : "Une construction est déjà en cours dans la cité. Décrétez le Sceau Impérial pour construire 2 bâtisses simultanément !";
+                    ? "Vos deux emplacements de chantiers sont déjà actifs (maximum 2 simultanés avec le Sceau Impérial)."
+                    : "Un chantier est déjà en cours sur votre fief. Seul le Clan Oda maîtrise le double développement rural et urbain simultané (ou décrétez le Sceau Impérial) !";
                 throw new Exception($msg);
             }
         }
@@ -259,6 +251,7 @@ class BuildingEngine {
         //   - Si le nombre de chantiers ACTIFS dans la zone < limite simultanée → démarrage MAINTENANT
         //   - Sinon → enchaînement séquentiel (started_at = fin du dernier chantier de la zone)
         //
+        $maxSimultPerZone = $isSealActive ? 2 : 1;
         $activeInZone = ($category === 'field') ? $fieldsActive : $buildingsActive;
         $maxFinishesAtZone = ($category === 'field') ? $maxFinishesAtField : $maxFinishesAtBuilding;
 

@@ -325,6 +325,11 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                         <span class="badge bg-dark-lt text-white-50 border border-secondary" style="font-size:0.7rem;">
                             16:9 Haute Définition
                         </span>
+                        <?php if ($isTerran): ?>
+                            <span class="badge bg-danger text-white fw-bold" style="font-size:0.7rem;" title="Privilège du Clan Oda : 1 chantier rural et 1 chantier urbain peuvent progresser simultanément">
+                                <i class="fa-solid fa-bolt me-1"></i>Double Chantier (Clan Oda)
+                            </span>
+                        <?php endif; ?>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <?= AiPromptHelper::renderBadge('shogun_rural_terroir_9plots.jpg', 'Panorama Stratégique des 9 Parcelles Féodales', '/public/assets/shogun_rural_terroir_9plots.jpg', '', true) ?>
@@ -448,7 +453,14 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                     <h3 class="card-title mb-0 fs-3">
                         <i class="fa-solid fa-helmet-safety me-2 text-warning"></i>Chantiers en Cours
                     </h3>
-                    <span class="badge bg-warning-lt fw-bold"><?= count($queue) ?> actif(s)</span>
+                    <div class="d-flex align-items-center gap-1">
+                        <?php if ($isTerran): ?>
+                            <span class="badge bg-danger-lt text-danger fw-bold" style="font-size:0.65rem;" title="Privilège Oda : Chantiers rural &amp; urbain simultanés autorisés">
+                                <i class="fa-solid fa-bolt"></i> Oda
+                            </span>
+                        <?php endif; ?>
+                        <span class="badge bg-warning-lt fw-bold"><?= count($queue) ?> actif(s)</span>
+                    </div>
                 </div>
                 <div class="card-body p-2">
                     <?php if (empty($queue)): ?>

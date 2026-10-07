@@ -227,6 +227,19 @@
   2. Prendre une règle virtuelle (ou afficher les repères avec l'inspecteur `F12`) et tracer une ligne verticale depuis la première colonne de ressources (Riz) jusqu'au bord gauche de la carte principale : observer l'alignement parfait des bordures !
   3. Ouvrir l'onglet « Écosystème des oasis » ou « Roster & Métiers » dans Studio Dev et apprécier le confort visuel d'un affichage qui respire et tire parti de toute la largeur de l'écran.
 
+### Session du 07/10/2026 (Partie 17) — Game Design Asymétrique, Concurrence de Files d'Attente & Capacités de Clans (Oda vs Takeda/Tokugawa)
+- **Concept exploré :** Conception de mécaniques de gameplay asymétriques selon la faction choisie, gestion fine de la concurrence dans une file d'attente partagée (`construction_queue`), et détection d'effets de bord lors de refontes majeures (régression de type de données).
+- **Notions pour l'atelier :**
+  - **Qu'est-ce que l'Asymétrie dans un Jeu de Stratégie ? (L'Esprit des Clans Sengoku) :** Si tous les clans fonctionnaient à l'identique, le jeu perdrait sa richesse tactique. Le Clan Oda, réputé pour sa modernisation et sa vitesse d'organisation, possède un privilège unique : le *Double Développement Simultané*. Un joueur Oda peut mener de front la construction d'un bâtiment urbain (Tenshu, Forge, Dojo) ET l'élévation d'une parcelle rurale (Rizière, Carrière, Forêt). Les autres clans (Takeda, Tokugawa) doivent se concentrer sur un seul chantier à la fois sur tout leur domaine, à moins de décréter le prestigieux Sceau Impérial.
+  - **Comment modéliser des Files d'Attente Indépendantes en Base de Données ? :** Dans une table unique `construction_queue`, chaque chantier porte un marqueur de catégorie (`build_category`). Pour le Clan Oda, le serveur ne compte pas le total des chantiers, mais partitionne la file : d'un côté les chantiers ruraux (`rural_plot` / `field`), de l'autre les infrastructures urbaines (`building`). Cela permet d'avoir deux chronomètres qui tournent en parallèle sans jamais se bloquer l'un l'autre !
+  - **Le Piège des Clauses `else` et des Migrations de Types (L'Effet Domino) :** Lors de la refonte des 9 parcelles, un nouveau type `build_category = 'rural_plot'` a été introduit. Mais dans les vues (`city.php`, `building.php`), le code testait `if ($q['build_category'] === 'field') ... else { $buildingsInQueue++; }`. Conséquence inattendue : les nouvelles parcelles rurales tombaient toutes dans le `else` et étaient comptées comme des bâtiments urbains ! La ville se retrouvait donc instantanément bloquée, croyant à tort qu'un bâtiment urbain était en cours. En programmation, il faut toujours être explicite (`in_array(..., ['field', 'rural_plot'])`) plutôt que de compter sur des `else` fourre-tout.
+  - **Tester les Cas Limites (Tests Unitaires de Concurrence) :** Comment s'assurer qu'un joueur ne triche pas ou qu'un bug ne permet pas de lancer 10 chantiers ? En écrivant des tests automatisés qui essaient délibérément de violer les règles du jeu : tenter de lancer un 2e chantier rural pour Oda sans Sceau, tenter de lancer un rural pour Takeda alors qu'un urbain tourne déjà, et vérifier que le moteur renvoie bien une erreur claire et protectrice.
+- **Activité pratique suggérée :**
+  1. Se connecter avec le compte Oda : lancer l'amélioration d'un bâtiment urbain dans la Cité castrale.
+  2. Passer immédiatement sur la page Ressources : observer le badge « Double Chantier (Clan Oda) » et lancer l'élévation d'une Forêt.
+  3. Constater dans la colonne de droite que les deux comptes à rebours s'égrènent ensemble en temps réel !
+  4. Réfléchir ensemble : en quoi cet avantage modifie-t-il la vitesse de développement économique au début d'une saison ? Pourquoi les autres clans reçoivent-ils en contrepartie des bonus de combat ou de défense pour équilibrer la balance ?
+
 ---
 
 ## 🛠️ Modèle d'Entrée pour les Prochaines Sessions (Template)

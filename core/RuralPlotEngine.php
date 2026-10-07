@@ -350,44 +350,84 @@ class RuralPlotEngine {
                 return ['success' => false, 'error' => "Cette structure a atteint son potentiel maximum (Niveau {$maxLevel})."];
             }
 
-            // 2. Contrôle de la file de construction : interdire si la parcelle est déjà en travaux
+            // 2. Contrôle de la file de construction : récupérer tous les chantiers du fief
             $stmtQCheck = $this->db->prepare("
                 SELECT * FROM construction_queue 
-                WHERE planet_id = ? AND build_category = 'rural_plot'
+                WHERE planet_id = ?
                 ORDER BY finishes_at ASC
             ");
             $stmtQCheck->execute([$planetId]);
             $existingQueue = $stmtQCheck->fetchAll(PDO::FETCH_ASSOC);
 
+            $ruralInQueue = 0;
+            $buildingsInQueue = 0;
+            $ruralFinishes = [];
+
             foreach ($existingQueue as $qItem) {
-                if ($qItem['target_id'] === $structureType) {
+                if ($qItem['build_category'] === 'rural_plot' && $qItem['target_id'] === $structureType) {
                     $this->db->rollBack();
                     return ['success' => false, 'error' => "Un chantier est déjà en cours pour cette structure."];
                 }
+                if (in_array($qItem['build_category'], ['rural_plot', 'field'])) {
+                    $ruralInQueue++;
+                    $ruralFinishes[] = (int)$qItem['finishes_at'];
+                } elseif ($qItem['build_category'] === 'building') {
+                    $buildingsInQueue++;
+                }
             }
 
-            // 3. Verrouiller la planète pour contrôler les ressources et le Sceau
-            $stmtPlanet = $this->db->prepare("SELECT user_id, metal, crystal, deuterium, population FROM planets WHERE id = ?" . $lockSql);
-            $stmtPlanet->execute([$planetId]);
-            $planet = $stmtPlanet->fetch(PDO::FETCH_ASSOC);
+            // 3. Verrouiller la planète pour contrôler les ressources, faction et Sceau
+            try {
+                $stmtPlanet = $this->db->prepare("
+                    SELECT p.user_id, p.metal, p.crystal, p.deuterium, p.population, u.faction 
+                    FROM planets p 
+                    LEFT JOIN users u ON p.user_id = u.id 
+                    WHERE p.id = ?" . $lockSql
+                );
+                $stmtPlanet->execute([$planetId]);
+                $planet = $stmtPlanet->fetch(PDO::FETCH_ASSOC);
+            } catch (Exception $e) {
+                // Secours si u.faction n'est pas accessible
+                $stmtPlanet = $this->db->prepare("SELECT user_id, metal, crystal, deuterium, population FROM planets WHERE id = ?" . $lockSql);
+                $stmtPlanet->execute([$planetId]);
+                $planet = $stmtPlanet->fetch(PDO::FETCH_ASSOC);
+                if ($planet) {
+                    $planet['faction'] = 'terran';
+                }
+            }
 
             if (!$planet) {
                 $this->db->rollBack();
                 return ['success' => false, 'error' => 'Planète introuvable.'];
             }
 
-            // Limite de chantiers simultanés (1 sans sceau, 2 avec le Sceau Impérial)
+            $userFaction = $planet['faction'] ?? 'terran';
+
+            // Contrôle de concurrence des chantiers selon la faction et le Sceau Impérial
             require_once __DIR__ . '/ImperialSealEngine.php';
             $sealEngine = new ImperialSealEngine($this->db);
             $isSealActive = $sealEngine->isSealActive((int)($planet['user_id'] ?? 0));
-            $maxSimultaneous = $isSealActive ? 2 : 1;
 
-            if (count($existingQueue) >= $maxSimultaneous) {
-                $this->db->rollBack();
-                $msg = $isSealActive
-                    ? "Vos deux créneaux de chantiers ruraux sont déjà occupés (maximum 2 simultanés avec le Sceau Impérial)."
-                    : "Un chantier rural est déjà en cours. Décrétez le Sceau Impérial pour mener 2 chantiers de front !";
-                return ['success' => false, 'error' => $msg];
+            if ($userFaction === 'terran') {
+                // Clan Oda : Double développement simultané (1 rural + 1 urbain de base, 2+2 avec Sceau Impérial)
+                $maxRuralAllowed = $isSealActive ? 2 : 1;
+                if ($ruralInQueue >= $maxRuralAllowed) {
+                    $this->db->rollBack();
+                    $msg = $isSealActive
+                        ? "Vos deux créneaux de chantiers ruraux sont déjà occupés (maximum 2 simultanés avec le Sceau Impérial)."
+                        : "Un chantier rural est déjà en cours. Décrétez le Sceau Impérial pour mener 2 chantiers ruraux de front !";
+                    return ['success' => false, 'error' => $msg];
+                }
+            } else {
+                // Autres clans (Takeda, Tokugawa) : 1 seul chantier total sur tout le domaine (sauf avec Sceau Impérial)
+                $maxTotalAllowed = $isSealActive ? 2 : 1;
+                if (count($existingQueue) >= $maxTotalAllowed) {
+                    $this->db->rollBack();
+                    $msg = $isSealActive
+                        ? "Vos deux créneaux de chantiers sont déjà occupés (maximum 2 simultanés avec le Sceau Impérial)."
+                        : "Un chantier est déjà en cours sur votre fief. Seul le Clan Oda maîtrise le double développement rural et urbain simultané (ou décrétez le Sceau Impérial) !";
+                    return ['success' => false, 'error' => $msg];
+                }
             }
 
             $nextLevel = $currentLevel + 1;
@@ -416,10 +456,14 @@ class RuralPlotEngine {
             $duration = self::calculateUpgradeDuration($currentLevel, $hqLevel);
 
             $now = time();
-            if (empty($existingQueue)) {
-                $startTime = $now;
+            if ($userFaction === 'terran') {
+                if ($ruralInQueue < $maxRuralAllowed) {
+                    $startTime = $now;
+                } else {
+                    $startTime = max($now, empty($ruralFinishes) ? $now : max($ruralFinishes));
+                }
             } else {
-                if (count($existingQueue) < $maxSimultaneous) {
+                if (count($existingQueue) < $maxTotalAllowed) {
                     $startTime = $now;
                 } else {
                     $maxFin = max(array_column($existingQueue, 'finishes_at'));

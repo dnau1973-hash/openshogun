@@ -4,6 +4,14 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
+### Ajouté (Added)
+- **Réactivation du double développement simultané selon le clan féodal (Oda vs Takeda/Tokugawa) & Sceau Impérial (`core/BuildingEngine.php`, `core/RuralPlotEngine.php`, `views/city.php`, `views/building.php`, `views/field.php`, `views/resources.php`) :**
+  * **Clan Oda (`terran`) :** Rétablissement de la capacité signature de double développement simultané permettant de mener en parallèle 1 chantier de parcelle rurale (Forêt, Carrière, Rizière, etc.) et 1 chantier d'infrastructure urbaine (Tenshu, Forge, etc.). Avec le Sceau Impérial décrété, 2 ruraux et 2 urbains progressent de front (jusqu'à 4 simultanés).
+  * **Clan Takeda (`vorash`) & Clan Tokugawa (`aethelis`) :** Limitation stricte à 1 chantier unique sur l'ensemble du domaine (rural ou urbain), extensible à 2 chantiers simultanés toutes catégories confondues sous le Sceau Impérial.
+  * **Correction de régression de file :** Résolution du bug où les parcelles rurales de la nouvelle refonte (`build_category = 'rural_plot'`) tombaient dans la clause `else { $buildingsInQueue++; }` des vues urbaines, bloquant à tort toute construction en ville.
+  * **Badges et indicateurs UI :** Affichage d'un badge « Double Chantier (Clan Oda) » dans le panorama du terroir et dans la colonne latérale des chantiers en cours sur la page Ressources.
+  * **Tests automatisés :** Ajout d'une suite de tests de concurrence dans `tests/test_village_generator_9plots.php` validant l'étanchéité des files selon la faction.
+
 ### Modifié (Changed)
 - **Refonte du HUD de ressources et statistiques de population en un ruban horizontal unifié compact (< 44px) aux couleurs du site (`views/partials/header.php`, `views/resources.php`) :**
   * Élimination des doublons : fusion de la Sérénité Shintō, de la Population et du Contentement au sein d'une seule et même barre d'en-tête horizontale compacte (`card-sm`, hauteur contenue < 44px), supprimant le bloc redondant de 4 cartes dans `views/resources.php` et libérant plus de 150px verticaux au-dessus du Terroir.

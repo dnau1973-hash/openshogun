@@ -82,9 +82,9 @@ $fieldsInQueue = 0;
 $buildingsInQueue = 0;
 
 foreach ($queue as $q) {
-    if ($q['build_category'] === 'field') {
+    if (in_array($q['build_category'], ['field', 'rural_plot'])) {
         $fieldsInQueue++;
-    } else {
+    } elseif ($q['build_category'] === 'building') {
         $buildingsInQueue++;
         if ($q['target_id'] === $code) {
             $activeJob = $q;
@@ -94,11 +94,11 @@ foreach ($queue as $q) {
 
 require_once __DIR__ . '/../core/ImperialSealEngine.php';
 $sealEngine = new ImperialSealEngine();
-$isSealActive = $sealEngine->isSealActive((int)$user['id']);
+$isSealActive = $sealEngine->isSealActive((int)($user['id'] ?? 0));
 
-$isTerran = ($user['faction'] === 'terran');
+$isTerran = (($user['faction'] ?? 'terran') === 'terran');
 $maxAllowedBuildings = $isSealActive ? 2 : 1;
-$maxAllowedTotal = $isSealActive ? 3 : 1;
+$maxAllowedTotal = $isSealActive ? 2 : 1;
 $canQueueNewBuilding = $isTerran ? ($buildingsInQueue < $maxAllowedBuildings) : (count($queue) < $maxAllowedTotal);
 
 $isBuildingInQueue = ($code !== 'free_plot' && $activeJob !== null);

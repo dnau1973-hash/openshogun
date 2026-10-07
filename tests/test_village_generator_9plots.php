@@ -14,15 +14,22 @@ echo "=== Test unitaire : 9 Parcelles Rurales Procédurales & File de Chantier 2
 // 1. Base SQLite en mémoire
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+Database::setConnection($pdo);
 
 $pdo->exec("
+    CREATE TABLE game_settings (
+        setting_key TEXT PRIMARY KEY,
+        setting_value TEXT,
+        setting_type TEXT
+    );
     CREATE TABLE planets (
         id INTEGER PRIMARY KEY,
         user_id INTEGER DEFAULT 1,
         metal REAL DEFAULT 100000,
         crystal REAL DEFAULT 100000,
         deuterium REAL DEFAULT 100000,
-        population INTEGER DEFAULT 100
+        population INTEGER DEFAULT 100,
+        last_resource_update INTEGER DEFAULT 0
     );
     CREATE TABLE construction_queue (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,6 +45,7 @@ $pdo->exec("
         username TEXT DEFAULT 'daimyo_test',
         email TEXT DEFAULT 'test@daimyo.jp',
         gold_coins INTEGER DEFAULT 100,
+        faction TEXT DEFAULT 'terran',
         imperial_seal_until TEXT DEFAULT NULL,
         last_daily_gold TEXT DEFAULT NULL
     );
@@ -53,9 +61,69 @@ $pdo->exec("
         user_id INTEGER NOT NULL,
         expires_at INTEGER NOT NULL
     );
+    CREATE TABLE shipyard_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        planet_id INTEGER NOT NULL,
+        ship_code TEXT NOT NULL,
+        count INTEGER NOT NULL,
+        unit_build_time INTEGER NOT NULL,
+        started_at INTEGER NOT NULL,
+        finishes_at INTEGER NOT NULL,
+        total_count INTEGER DEFAULT NULL
+    );
+    CREATE TABLE barracks_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        planet_id INTEGER NOT NULL,
+        troop_type TEXT NOT NULL,
+        count INTEGER NOT NULL,
+        unit_build_time INTEGER NOT NULL,
+        started_at INTEGER NOT NULL,
+        finishes_at INTEGER NOT NULL,
+        total_count INTEGER DEFAULT NULL
+    );
+    CREATE TABLE craft_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        planet_id INTEGER NOT NULL,
+        recipe_code TEXT NOT NULL,
+        count INTEGER NOT NULL,
+        started_at INTEGER NOT NULL,
+        finishes_at INTEGER NOT NULL
+    );
+    CREATE TABLE planet_ships (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        planet_id INTEGER NOT NULL,
+        ship_code TEXT NOT NULL,
+        count INTEGER NOT NULL
+    );
+    CREATE TABLE planet_troops (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        planet_id INTEGER NOT NULL,
+        troop_type TEXT NOT NULL,
+        count INTEGER NOT NULL
+    );
+    CREATE TABLE planet_fields (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        planet_id INTEGER NOT NULL,
+        field_slot INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        level INTEGER NOT NULL DEFAULT 0
+    );
+    CREATE TABLE planet_oases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        planet_id INTEGER NOT NULL,
+        oasis_id INTEGER NOT NULL
+    );
+    CREATE TABLE oases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL
+    );
 ");
 $pdo->exec("INSERT INTO users (id, username) VALUES (1, 'daimyo_test')");
 $pdo->exec("INSERT INTO planets (id, user_id, metal, crystal, deuterium, population) VALUES (1, 1, 50000, 50000, 50000, 100)");
+
+for ($i = 1; $i <= 20; $i++) {
+    $pdo->exec("INSERT INTO planet_fields (planet_id, field_slot, type, level) VALUES (1, $i, 'metal_mine', 1)");
+}
 
 $generator = new VillageGeneratorService($pdo);
 
@@ -195,6 +263,53 @@ if ($housingCap['total_capacity'] === $expectedCap && $planetMaxPop === $expecte
     echo "   -> [SUCCES] Parfaite synchronisation PlanetEngine <=> RuralPlotEngine !\n";
 } else {
     echo "   -> [ECHEC] Désynchronisation : Rural={$housingCap['total_capacity']} vs Planet=$planetMaxPop\n";
+    exit(1);
+}
+
+// 10. Test de concurrence : Clan Oda (terran) - Double développement simultané (1 rural + 1 urbain)
+$pdo->exec("UPDATE planets SET metal = 500000, crystal = 500000, deuterium = 500000 WHERE id = 1");
+$pdo->exec("UPDATE users SET faction = 'terran' WHERE id = 1");
+$pdo->exec("DELETE FROM construction_queue WHERE planet_id = 1");
+
+$resBuildUrbain = $be->startUpgrade(1, 'building', 'hq');
+$resBuildRural = $engine->upgradePlot(1, 'carriere');
+
+echo "9. Double développement simultané Clan Oda (Urbain + Rural) : ";
+if (!empty($resBuildUrbain['success']) && !empty($resBuildRural['success'])) {
+    $qCount = (int)$pdo->query("SELECT COUNT(*) FROM construction_queue WHERE planet_id = 1")->fetchColumn();
+    if ($qCount === 2) {
+        echo "[SUCCES] 1 bâtiment urbain et 1 parcelle rurale en chantier simultané validés (Queue count = 2) !\n";
+    } else {
+        echo "[ECHEC] Queue count = $qCount\n";
+        exit(1);
+    }
+} else {
+    echo "[ECHEC] Erreur : Urbain=" . json_encode($resBuildUrbain) . " | Rural=" . json_encode($resBuildRural) . "\n";
+    exit(1);
+}
+
+// Tenter un 2e rural pour Oda sans Sceau -> doit être refusé
+$resSecondRural = $engine->upgradePlot(1, 'riziere');
+if (!$resSecondRural['success']) {
+    echo "   -> [SUCCES] Blocage du 2e chantier rural sans Sceau respecté : {$resSecondRural['error']}\n";
+} else {
+    echo "   -> [ECHEC] Le 2e chantier rural a été autorisé sans Sceau !\n";
+    exit(1);
+}
+
+// 11. Test de concurrence : Autre clan (vorash / Takeda) sans Sceau Impérial
+// Doit refuser tout chantier simultané (1 seul au total)
+$pdo->exec("DELETE FROM construction_queue WHERE planet_id = 1");
+$pdo->exec("UPDATE users SET faction = 'vorash' WHERE id = 1");
+
+$resVorashUrbain = $be->startUpgrade(1, 'building', 'storage');
+$resVorashRural = $engine->upgradePlot(1, 'foret');
+
+echo "10. Monopole de chantier pour Clan non-Oda (Takeda/Tokugawa sans Sceau) : ";
+if (!empty($resVorashUrbain['success']) && empty($resVorashRural['success'])) {
+    echo "[SUCCES] 1er chantier autorisé, 2e chantier simultané bloqué avec succès : {$resVorashRural['error']}\n";
+} else {
+    echo "[ECHEC] Résultat inattendu : Urbain=" . json_encode($resVorashUrbain) . " | Rural=" . json_encode($resVorashRural) . "\n";
     exit(1);
 }
 

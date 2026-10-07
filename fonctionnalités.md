@@ -1,5 +1,38 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-07] - queue-concurrency-clan-perks : Réactivation de la construction simultanée selon le clan féodal (Oda vs Takeda/Tokugawa) & Sceau Impérial
+- **Module :** `queue-concurrency-clan-perks`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Réactivation du Double Développement Simultané (Clan Oda / `terran`) :**
+     - Rétablissement de la capacité signature du Clan Oda : possibilité d'élever simultanément une parcelle rurale (Forêt, Carrière, Rizière, etc.) ET de bâtir/améliorer une infrastructure urbaine de la cité castrale (Tenshu, Caserne, Forge, Silos, etc.).
+     - Un chantier urbain en cours ne bloque plus le lancement d'une amélioration rurale, et réciproquement un chantier rural n'occupe plus le créneau de construction urbain.
+     - Avec le Sceau Impérial décrété : 2 chantiers ruraux ET 2 chantiers urbains peuvent progresser de front (jusqu'à 4 chantiers simultanés au total).
+  2. **Contrôle de Concurrence Rigoureux pour les autres Clans (Clan Takeda / `vorash`, Clan Tokugawa / `aethelis`) :**
+     - Respect de la doctrine féodale standard : 1 seul chantier actif au total sur l'ensemble du fief (qu'il soit rural ou urbain).
+     - Si un chantier urbain est en cours, toute tentative de lancer un chantier rural est rejetée avec un message explicite rappelant le privilège unique du Clan Oda.
+     - Si un chantier rural est en cours, toute tentative de bâtir un bâtiment urbain est bloquée de la même manière.
+     - Avec le Sceau Impérial décrété : déblocage d'un second créneau de chantier (jusqu'à 2 chantiers simultanés toutes catégories confondues sur le domaine).
+  3. **Harmonisation globale des contrôleurs et des vues :**
+     - Classification stricte dans `BuildingEngine::startUpgrade` et `RuralPlotEngine::upgradePlot` des catégories de travaux (`rural_plot` groupé avec `field`, `building` isolé).
+     - Correction dans `views/city.php`, `views/building.php` et `views/field.php` où les parcelles rurales de la nouvelle refonte étaient auparavant assimilées à tort à des bâtiments urbains (`else { $buildingsInQueue++; }`), ce qui verrouillait la cité.
+     - Affichage d'un badge distinctif « Double Chantier (Clan Oda) » dans le panneau de carte et dans la colonne latérale des chantiers en cours sur la page Ressources lorsque le joueur appartient au Clan Oda.
+  4. **Couverture de tests unitaires automatisés :**
+     - Ajout de tests de concurrence dans `tests/test_village_generator_9plots.php` validant que le Clan Oda lance bien 1 urbain + 1 rural en simultané (Queue count = 2) et bloque le 2e rural sans Sceau, et que le Clan Takeda/Tokugawa se voit interdire le double développement sans Sceau.
+- **Fichiers modifiés :** `core/BuildingEngine.php`, `core/RuralPlotEngine.php`, `views/city.php`, `views/building.php`, `views/field.php`, `views/resources.php`, `tests/test_village_generator_9plots.php`, `pedagogie.md`, `fonctionnalités.md`, `public/changelog.html`
+- **Vérification QA :**
+  1. Avec un compte du Clan Oda (faction `terran`) :
+     - Se rendre sur la page Cité (`?page=buildings`) et lancer l'amélioration d'un bâtiment urbain (ex: Tenshu ou Forge).
+     - Se rendre sur la page Ressources (`?page=resources`) : constater que les badges ruraux restent disponibles à l'amélioration (pas de blocage).
+     - Lancer l'élévation d'une parcelle rurale (ex: Forêt) : le chantier démarre immédiatement avec succès.
+     - Constater dans la colonne latérale « Chantiers en Cours » que les deux chantiers (1 urbain + 1 rural) s'égrènent simultanément.
+     - Tenter de lancer une 2e parcelle rurale : vérifier que le jeu affiche le message de blocage invitant à activer le Sceau Impérial.
+  2. Avec un compte non-Oda (Clan Takeda ou Tokugawa) :
+     - Lancer un bâtiment urbain.
+     - Tenter de lancer une parcelle rurale : vérifier que le jeu refuse l'élévation en indiquant qu'un chantier est déjà actif sur le fief et que seul le Clan Oda dispose du double développement de base.
+
+---
+
 ### [2026-10-07] - refactor-rural-9plots-async-queue-fixed-panorama : Refonte globale du domaine rural (9 parcelles procédurales 20-100, panorama fixe 16:9 sans pan/zoom, file de construction asynchrone non-instantanée)
 - **Module :** `refactor-rural-9plots-async-queue-fixed-panorama`
 - **Statut :** `À tester`
