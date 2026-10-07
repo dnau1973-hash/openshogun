@@ -1585,6 +1585,20 @@ class PlanetEngine {
     public function calculateMaxPopulation(array $buildings = [], array $fields = [], ?int $planetId = null): int {
         if ($planetId !== null && $this->db) {
             try {
+                // 1. Nouvelle refonte à 9 parcelles : vérifier la structure 'village'
+                $stmtRural = $this->db->prepare("SELECT level FROM planet_rural_plots WHERE planet_id = ? AND structure_type = 'village'");
+                $stmtRural->execute([$planetId]);
+                $vRow = $stmtRural->fetch(PDO::FETCH_ASSOC);
+                if ($vRow && isset($vRow['level'])) {
+                    $vLvl = (int)$vRow['level'];
+                    return 75 + ($vLvl * 25);
+                }
+            } catch (Exception $eRural) {
+                // Table planet_rural_plots absente ou non migrée, passer au fallback
+            }
+
+            try {
+                // 2. Fallback rétro-compatible sur les parcelles de terroir
                 $levels = [1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1];
                 $stmt = $this->db->prepare("
                     SELECT slot_index, level 
@@ -1605,7 +1619,7 @@ class PlanetEngine {
             }
         }
 
-        // Capacité de base par défaut : 100 logements (75 base + 5 parcelles de niveau 1 × 5)
+        // Capacité de base par défaut : 100 logements (75 base + niveau 1 x 25 = 100 logements)
         return 100;
     }
 

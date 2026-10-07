@@ -839,6 +839,39 @@
 
 ---
 
+### [2026-10-07] - refonte-terroir-9-parcelles : Refonte Majeure du Domaine Rural & Dorf 1 vers 9 Parcelles Stratégiques Procédurales
+- **Module :** `views / resources (Dorf 1 - Domaine Rural Féodal)`
+- **Statut :** `Implémenté / Prêt pour QA`
+- **Description :** Refonte complète du domaine rural féodal abandonnant la grille héritée de 40 micro-emplacements pour un système resserré, immersif et profond de **9 parcelles uniques** par village, avec génération procédurale/aléatoire par village et progression verticale profonde (Niveaux 20 à 100) :
+  - **Modèle de données & Migration BDD :** Création de la table `planet_rural_plots` (`database/migrations/002_create_planet_rural_plots.sql` et `database/migrate_rural_plots.php`) stockant pour chaque parcelle : son type (`tenshu`, `foret`, `carriere`, `fosse_argile`, `riziere`, `champ_soja`, `culture_the`, `sanctuaire_shinto`, `village`), son niveau actuel (min 1), son niveau maximal (`max_level` tiré entre 20 et 100), ses coordonnées relatives `pos_x` et `pos_y` sur la scène 16:9, ses ouvriers affectés et sa cadence de production courante.
+  - **Moteur de génération aléatoire & Spawner (`core/VillageGeneratorService.php`) :**
+    * Attribution des 9 structures indispensables garantissant l'équilibre économique du joueur.
+    * Tirage procédural des positions sur les points d'ancrage topologiques de la carte 16:9 avec micro-variations naturelles (jitter $\pm 0.8\%$).
+    * Tirage pondéré du potentiel (`max_level`) entre 20 et 100 différenciant chaque fief (potentiel jackpot de 75 à 100 pour la spécialité majeure du fief, 50 à 75 pour la spécialité secondaire, et 25 à 50 pour les parcelles équilibrées).
+    * Auto-migration douce (`convertExistingPlanet`) convertissant les niveaux historiques de bâtiments et de champs sans perte de progression.
+  - **Moteur Métier & Formules de progression (`core/RuralPlotEngine.php`) :**
+    * Formule de coût exponentielle lissée : $\text{Base} \times (1 + 0.22 \times (L-1)^{1.45}) \times 1.12^{\min(L-1, 40)}$, assurant une montée viable et non buggée du palier 20 jusqu'au palier 100 sans débordement d'entier.
+    * Formule de production horaire : $35 \times L^{1.38} \times (1 + L \times 0.015)$.
+    * Formule de capacité d'habitation du village : $75 + (L \times 25)$ places, indexant la démographie sur la parcelle `village`.
+    * Synchronisation avec `PlanetEngine::calculateMaxPopulation()` et mise à jour dynamique de `population_max`.
+  - **Interface Utilisateur & Expérience 16:9 (`views/resources.php` & `public/js/rural_domain_map.js`) :**
+    * Affichage plein écran de la nouvelle illustration panoramique (`public/assets/shogun_rural_terroir_9plots.jpg`) en 1920×1080.
+    * Moteur de navigation Grab-and-Pan avec clamping strict des bordures (aucun fond noir) et zoom molette/boutons centré.
+    * 9 tuiles/badges interactifs modernes Tabler affichant l'icône, le nom, le badge `Niv. [Actuel] / [Max]`, la jauge de progression visuelle du potentiel et le rendement horaire.
+    * Modale Tabler d'élévation interactive avec vignette d'illustration, prévisualisation des gains de rendement, tags de coûts avec statut de solvabilité en temps réel et bouton d'action asynchrone AJAX vers `/api/rural_plot.php`.
+  - **Tests & Intégrité :** Suite de tests unitaires automatisés validée à 100% (`tests/test_village_generator_9plots.php`).
+- **Fichiers modifiés / créés :** `database/migrations/002_create_planet_rural_plots.sql`, `database/migrate_rural_plots.php`, `core/VillageGeneratorService.php`, `core/RuralPlotEngine.php`, `api/rural_plot.php`, `views/resources.php`, `public/js/rural_domain_map.js`, `core/PlanetEngine.php`, `views/partials/grimoire_prompts_data.php`, `tests/test_village_generator_9plots.php`, `fonctionnalités.md`.
+- **Vérification QA :**
+  1. Accéder à `/?page=resources` : vérifier le chargement de la nouvelle illustration 16:9 haute définition sans bordure noire.
+  2. Vérifier la présence des 9 badges interactifs positionnés sur leurs zones respectives (Tenshu, Forêt, Carrière, Fosse d'argile, Rizière, Soja, Thé, Sanctuaire, Village).
+  3. Vérifier le format d'affichage du niveau : `Niv. X / Y` avec la barre de progression relative au plafond maximal.
+  4. Tester le Grab-and-Pan (glisser à la souris ou au doigt) et le zoom : vérifier la fluidité et le verrouillage strict des bords.
+  5. Cliquer sur un badge : vérifier l'ouverture instantanée de la modale d'amélioration avec le calcul exact des coûts, rendements et durée.
+  6. Cliquer sur « Élever la structure » avec ressources suffisantes : constater l'élévation au niveau supérieur, la déduction des ressources et le rafraîchissement sans erreur.
+  7. Élever le village : vérifier que la capacité maximale de logements (`population_max`) augmente immédiatement de +25 villageois.
+
+---
+
 ### [2026-10-02] - village-life-simulator : Simulateur de Vie dans un Village & Bac à Sable Démographique (Studio Dev)
 - **Module :** `studio / game-elevate-designer`
 - **Statut :** `À tester`
