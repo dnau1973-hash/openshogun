@@ -111,10 +111,14 @@ class BotEngine {
                 INSERT INTO planet_ships (planet_id, ship_code, count) VALUES (?, 'spy_probe', 4)
             ")->execute([$planetId]);
 
-            $this->db->commit();
+            if ($this->db->inTransaction()) {
+                $this->db->commit();
+            }
             return ['success' => true, 'bot_id' => $botId, 'username' => $username, 'coords' => $coords];
         } catch (Exception $e) {
-            $this->db->rollBack();
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }
@@ -892,7 +896,9 @@ class BotEngine {
                 INSERT INTO planet_ships (planet_id, ship_code, count) VALUES (?, 'spy_probe', 4)
             ")->execute([$planetId]);
 
-            $this->db->commit();
+            if ($this->db->inTransaction()) {
+                $this->db->commit();
+            }
 
             // Mettre à jour l'horodatage de dernière éclosion
             $now = time();
@@ -918,7 +924,9 @@ class BotEngine {
             ];
 
         } catch (Exception $e) {
-            $this->db->rollBack();
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
             return ['success' => false, 'error' => "Erreur lors de l'éclosion spontanée : " . $e->getMessage()];
         }
     }

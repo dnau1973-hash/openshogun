@@ -37,6 +37,10 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * Infobulles et popovers enrichis (production/heure, seuils de stockage, facteurs de sérénité et de contentement) au survol et au clic.
 
 ### Corrigé (Fixed)
+- **Résolution du crash `PDOException: There is no active transaction` lors de la réinitialisation de l'univers (`core/VillageGeneratorService.php`, `core/BotEngine.php`) :**
+  * **Cause :** L'appel à `ensureTableExists()` dans le constructeur de `VillageGeneratorService` exécutait un `CREATE TABLE IF NOT EXISTS` en MySQL. En MySQL, tout ordre DDL provoque un `COMMIT` implicite immédiat, rompant silencieusement la transaction amorcée par `BotEngine::createBot()` (`$this->db->beginTransaction()`). Lors du `$this->db->commit()` ou `$this->db->rollBack()`, PDO levait l'exception fatale `There is no active transaction`.
+  * **Correctif :** `VillageGeneratorService::ensureTableExists()` vérifie désormais si une transaction est en cours via `$this->db->inTransaction()` avant d'émettre des requêtes DDL, et mémorise l'état via un drapeau statique `self::$tableChecked`.
+  * **Sécurisation défensive :** Ajout de gardes `$this->db->inTransaction()` avant chaque appel à `$this->db->commit()` et `$this->db->rollBack()` dans `BotEngine` pour garantir une résilience totale en cas de transaction préalablement clôturée.
 - **Résolution de la colonne manquante `newsletter_optin` et fiabilisation de `users` (`database/migrations/001_baseline_schema.sql`, `database/schema.sql`, `database/schema_complete.sql`, `core/InstallEngine.php`) :**
   * Correction du blocage d'installation `SQLSTATE[42S22]: Column not found: 1054 Unknown column 'newsletter_optin' in 'SET'` lors de la mise à jour du compte administrateur à l'Étape 8 de `install.php`.
   * Intégration des colonnes `is_active`, `email_verified_at`, `activation_token`, `activation_token_expires_at` et `newsletter_optin` (avec leurs index respectifs) dans le DDL de la table `users` de tous les schémas de référence (`001_baseline_schema.sql`, `database/schema.sql`, `database/schema_complete.sql`).

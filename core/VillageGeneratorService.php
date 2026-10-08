@@ -34,6 +34,8 @@ class VillageGeneratorService {
         9 => ['id' => 9, 'name' => 'Bosquet Sacré (Sud-Est)',             'x' => 85.0, 'y' => 78.0, 'affinity' => 'sanctuaire_shinto'],
     ];
 
+    private static bool $tableChecked = false;
+
     public function __construct(?PDO $db = null) {
         $this->db = $db ?? Database::getConnection();
         $this->ensureTableExists();
@@ -43,7 +45,12 @@ class VillageGeneratorService {
      * S'assure de l'existence de la table planet_rural_plots
      */
     public function ensureTableExists(): void {
-        if (!$this->db) return;
+        if (!$this->db || self::$tableChecked) return;
+        // En MySQL, les DDL (CREATE TABLE) provoquent un COMMIT implicite.
+        // Si nous sommes dans une transaction, ne pas exécuter de DDL pour ne pas briser la transaction.
+        if ($this->db->inTransaction()) {
+            return;
+        }
         try {
             $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
             if ($driver === 'sqlite') {
@@ -87,6 +94,7 @@ class VillageGeneratorService {
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
                 ");
             }
+            self::$tableChecked = true;
         } catch (Exception $e) {
             // Ignorer silencieusement si table déjà présente
         }
