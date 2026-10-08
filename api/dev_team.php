@@ -22,7 +22,8 @@ if (!Auth::check()) {
 }
 
 $currentUserId = (int)Auth::id();
-$devEngine = new DevTeamEngine();
+$db = Database::getConnection();
+$devEngine = new DevTeamEngine($db);
 
 // Vérifier que l'utilisateur est bien membre de la Dev Team
 if (!$devEngine->isDevTeamMember($currentUserId)) {

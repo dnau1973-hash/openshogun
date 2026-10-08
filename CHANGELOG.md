@@ -36,6 +36,15 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * **Protection des oasis sauvages :** Section dédiée aux protectorats d'oasis annexées (statut X/3, coordonnées précises et bonus de production en koku).
 
 ### Corrigé (Fixed)
+- **Attribution des Métiers de Développement — Correction de l'Erreur d'Assignation (`api/dev_team.php`, `core/DevTeamEngine.php`, `views/dev_team.php`) :**
+  * **Résolution de l'erreur réseau / SQL 500 :**
+    - Initialisation systématique de la variable de base de données `$db` en en-tête de `api/dev_team.php` pour éviter l'erreur `Fatal Error: Call to a member function prepare() on null` lors de la vérification des comptes bots.
+    - Élargissement de la colonne `icon` de la table `dev_roles` de `VARCHAR(16)` à `VARCHAR(255)` (avec migration automatique) pour accueillir sans troncature les icônes FontAwesome HTML (`<i class="fa-solid ..."></i>`).
+    - Exécution du remplissage de référence (`seedReferenceData`) garantissant la présence des 9 rôles métiers dans `dev_roles` et évitant la violation de clé étrangère `fk_udr_role` lors de l'insertion dans `user_dev_roles`.
+  * **Robustesse client Tabler.io :**
+    - Intégration des fonctions manquantes `openAssignRoleModal()` et `confirmRemoveDevRole()` dans `views/dev_team.php` pour fluidifier l'ouverture du modal et la révocation interactive de métiers.
+    - Gestion d'erreur améliorée dans `handleAssignRoleSubmit()` affichant le message d'erreur serveur précis plutôt qu'un message générique « Erreur réseau ».
+
 - **Déblocage du Didacticiel du Daimyō — Validation des Parcelles du Terroir (`core/QuestEngine.php`) :**
   * **Prise en charge du Terroir Féodal :** Résolution du blocage sur l'étape 1 « Ouvrir le Terroir / Premier Arpent de Cèdre » (et étapes 2 à 4) où le moteur de quêtes vérifiait uniquement l'ancienne table `planet_fields` (`metal_mine`, etc.).
   * **Mappage universel :** `QuestEngine::evaluateCondition()` contrôle désormais en priorité la table `planet_rural_plots` pour les 9 parcelles du terroir (`foret`, `carriere`, `riziere`, `sanctuaire_shinto`, `tenshu`), validant instantanément l'objectif dès que le joueur élève son camp de bûcherons ou ses structures rurales.

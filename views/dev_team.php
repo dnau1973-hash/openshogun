@@ -784,25 +784,92 @@ async function handleAssignRoleSubmit(event) {
             body: formData,
             headers: { 'Accept': 'application/json' }
         });
-        const data = await res.json();
-        if (data.success) {
+        const data = await res.json().catch(() => null);
+        if (data && data.success) {
             showDevAlert('success', `<strong>Attribution réussie :</strong> ${data.message}`);
             const modalEl = document.getElementById('modal-assign-role');
             if (modalEl) bootstrap.Modal.getInstance(modalEl)?.hide();
             setTimeout(() => location.reload(), 1200);
         } else {
-            alert('Erreur : ' + (data.error || 'Impossible d\'assigner les métiers.'));
+            const errMsg = (data && data.error) ? data.error : (res.status ? `Erreur HTTP ${res.status}` : 'Impossible d\'assigner les métiers.');
+            alert('Erreur : ' + errMsg);
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-solid fa-plus me-1"></i>Assigner les métiers';
             }
         }
     } catch (err) {
-        alert('Erreur réseau lors de l\'assignation.');
+        alert('Erreur réseau lors de l\'assignation : ' + err.message);
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fa-solid fa-plus me-1"></i>Assigner les métiers';
         }
+    }
+}
+
+function openAssignRoleModal(userId = null, username = null) {
+    const selectEl = document.getElementById('assign-role-user-id');
+    if (selectEl && userId) {
+        selectEl.value = userId;
+        onAssignUserChanged(userId);
+    } else if (selectEl) {
+        selectEl.value = '';
+        onAssignUserChanged('');
+    }
+
+    const modalEl = document.getElementById('modal-assign-role');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        new bootstrap.Modal(modalEl).show();
+    }
+}
+
+function confirmRemoveDevRole(userId, roleId, username, roleTitle) {
+    showConfirmModal(
+        'Révocation de Métier',
+        `Voulez-vous vraiment retirer le métier <strong>« ${roleTitle} »</strong> à <strong>${username}</strong> ?`,
+        () => executeRemoveDevRole(userId, roleId, username, roleTitle),
+        'btn-danger',
+        '<i class="fa-solid fa-trash-can"></i>'
+    );
+}
+
+async function executeRemoveDevRole(userId, roleId, username, roleTitle) {
+    const badgeEl = document.getElementById(`badge-role-${userId}-${roleId}`);
+    if (badgeEl) badgeEl.style.opacity = '0.5';
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'remove_role');
+        formData.append('user_id', userId);
+        formData.append('role_id', roleId);
+
+        const res = await fetch('/api/dev_team.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        });
+        const data = await res.json().catch(() => null);
+
+        if (data && data.success) {
+            showDevAlert('success', `<strong>Succès :</strong> Le métier « ${roleTitle} » a été retiré à ${username}.`);
+            if (badgeEl) {
+                badgeEl.remove();
+                const container = document.getElementById(`user-roles-${userId}`);
+                if (container && container.querySelectorAll('.dev-role-badge').length === 0) {
+                    container.innerHTML = '<span class="text-muted small fst-italic no-roles-placeholder">Aucun métier</span>';
+                }
+            }
+            if (MEMBERS_ROLES_MAP[userId]) {
+                MEMBERS_ROLES_MAP[userId] = MEMBERS_ROLES_MAP[userId].filter(r => r !== roleId);
+            }
+        } else {
+            if (badgeEl) badgeEl.style.opacity = '1';
+            const errMsg = (data && data.error) ? data.error : 'Impossible de révoquer ce métier.';
+            alert('Erreur : ' + errMsg);
+        }
+    } catch (err) {
+        if (badgeEl) badgeEl.style.opacity = '1';
+        alert('Erreur réseau lors de la révocation : ' + err.message);
     }
 }
 

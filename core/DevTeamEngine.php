@@ -422,12 +422,19 @@ class DevTeamEngine {
                   `id` VARCHAR(32) PRIMARY KEY,
                   `title` VARCHAR(64) NOT NULL,
                   `honor_title` VARCHAR(64) NOT NULL,
-                  `icon` VARCHAR(16) NOT NULL DEFAULT '🛠️',
+                  `icon` VARCHAR(255) NOT NULL DEFAULT '🛠️',
                   `category` VARCHAR(32) NOT NULL DEFAULT 'General',
                   `description` TEXT NULL,
                   `display_order` INT NOT NULL DEFAULT 0
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             ");
+            // Migration douce si la colonne icon était limitée à 16 caractères
+            try {
+                $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
+                if ($driver !== 'sqlite') {
+                    $this->db->exec("ALTER TABLE `dev_roles` MODIFY COLUMN `icon` VARCHAR(255) NOT NULL DEFAULT '🛠️'");
+                }
+            } catch (Exception $eCol) {}
 
             // 2. Table dev_permissions
             $this->db->exec("

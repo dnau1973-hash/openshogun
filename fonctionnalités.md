@@ -1,5 +1,27 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-08] - dev-team-roles-assignment-fix : Correction de l'Erreur d'Attribution des Métiers de Développement
+- **Module :** `dev-team-roles-assignment-fix`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Résolution de l'Erreur Réseau / Erreur 500 (`api/dev_team.php`) :**
+     - Initialisation de la variable `$db = Database::getConnection()` en en-tête de `api/dev_team.php`. Auparavant, la tentative de préparation de requête pour tester `$isBotTarget` (`$db->prepare(...)`) provoquait un arrêt fatal PHP non capturé, se traduisant côté navigateur par une erreur réseau `500 Internal Server Error`.
+  2. **Migration & Intégrité Référentielle des Métiers (`core/DevTeamEngine.php`, table `dev_roles`) :**
+     - Augmentation de la taille de la colonne `icon` de `VARCHAR(16)` à `VARCHAR(255)` dans la table MySQL `dev_roles` pour accueillir les icônes HTML FontAwesome sans provoquer d'erreur SQL 1406 (données tronquées).
+     - Remplissage automatique des 9 métiers dans `dev_roles` empêchant les violations de clé étrangère `fk_udr_role` lors de l'insertion dans `user_dev_roles`.
+  3. **Amélioration de l'Interface Tabler (`views/dev_team.php`) :**
+     - Réintégration des fonctions `openAssignRoleModal()` et `confirmRemoveDevRole()` pour une gestion fluide des rôles par les producteurs.
+     - Prise en charge des messages d'erreur détaillés en cas d'échec de la requête réseau.
+- **Fichiers modifiés / créés :** `api/dev_team.php`, `core/DevTeamEngine.php`, `views/dev_team.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter avec le compte administrateur/producteur sur `/?page=dev_team&metier=producer&module=members`.
+  2. Cliquer sur le bouton « Assigner un Métier » ou sur « + Métier » à côté d'un membre de l'équipe.
+  3. Dans la modale, sélectionner un collaborateur, cocher un ou plusieurs métiers disponibles (ex: *Game Elevate Designer*, *Développeur Backend*, etc.).
+  4. Cliquer sur « Assigner les métiers » : vérifier que l'assignation réussit immédiatement avec l'alerte verte « Attribution réussie », la fermeture de la modale et l'apparition du badge de métier sans aucune erreur réseau.
+  5. Tester également le retrait d'un métier via la petite croix sur le badge : confirmer que la suppression se fait sans encombre.
+
+---
+
 ### [2026-10-08] - building-derivation-resource-production : Production de Ressources & Calcul de Rentabilité ROI dans le Simulateur de Dérivation
 - **Module :** `building-derivation-resource-production`
 - **Statut :** `À tester`
