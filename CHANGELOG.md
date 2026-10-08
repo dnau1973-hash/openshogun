@@ -5,6 +5,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Simulateur d'Équilibrage Studio Dev — Production de Ressources & Calcul de Rentabilité ROI (`views/studio/game-elevate-designer/building-derivation.php`) :**
+  * **Intégration de la production de ressources au simulateur :** Prise en charge des rendements de l'ensemble des édifices et parcelles dans le module de dérivation mathématique des chantiers (`?page=dev_team&metier=game-elevate-designer&module=building-derivation`) :
+    - *Terroir Vivant (9 parcelles) :* Calcul en temps réel de la cadence horaire selon la formule canonique féodale pour la Forêt de Cèdres (Bois/h), la Carrière (Pierre/h), la Rizière (Riz/h), la Fosse d'Argile (Argile/h), le Champ de Soja (Soja/h), les Coteaux de Thé (Thé/h), le Sanctuaire Shintō (Sérénité/h) et le Village (Logements Minka).
+    - *Cité Castrale & Exploitations :* Prise en charge des parcelles classiques (Bois, Pierre, Riz) ainsi que des édifices à bonus d'ateliers (+5%/niv pour Scierie, Briqueterie, Moulin, Pavillon de thé) et de stockage de vivres (Entrepôt et Grenier Kura x1.5/niv).
+  * **Analyse de rentabilité & Amortissement (ROI / Payback Time) :**
+    - Calcul automatique du retour sur investissement niveau par niveau ($\text{ROI} = \frac{\Delta\text{Coût}}{\Delta\text{Production horaire}}$) en heures et en jours.
+    - Colonnes dédiées dans le tableau comparatif : *Production / h*, *Gain Net $\Delta$ Prod* et *Amortissement (ROI)*.
+    - Carte d'indicateur synthétique KPI affichant le rendement maximal atteint et le délai d'amortissement moyen.
+  * **Triple courbe interactive sur le graphique SVG :** Ajout d'une 3ème courbe vectorielle cyan/bleue dédiée au rendement et à la production, avec dégradé subtil, pointillés techniques et infobulles enrichies au survol (coût, durée, production et temps d'amortissement).
+
 - **Moteur Météo & Cycle Temporel Dynamique du Terroir Féodal (`views/partials/rural_atmosphere_overlay.php`, `views/resources.php`, `public/assets/shogun_rural_terroir_*.jpg`) :**
   * **Estampes d'ambiance peintes 16:9 générées & couplées :** Génération et intégration de deux véritables variantes d'art ukiyo-e/shin-hanga rigoureusement calées sur la composition des 9 parcelles :
     - *Nuit Féodale peinte (`shogun_rural_terroir_night.jpg`) :* Ciel indigo profond, croissant de lune, fenêtres et lanternes du village et du Tenshu allumées d'or, rizières miroitantes sous les étoiles.

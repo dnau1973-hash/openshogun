@@ -44,6 +44,31 @@ $catalog = [];
 
 // 1. Bâtiments urbains
 foreach (BUILDINGS as $bCode => $bDef) {
+    // Détermination de l'impact économique / production de chaque bâtiment urbain
+    $prodMeta = [
+        'has_prod'   => false,
+        'prod_type'  => 'none',
+        'unit'       => '',
+        'base_val'   => 0,
+        'desc_prod'  => 'Fonction utilitaire/infrastructure'
+    ];
+
+    if ($bCode === 'sawmill') {
+        $prodMeta = ['has_prod' => true, 'prod_type' => 'boost_wood', 'unit' => '% Prod Bois', 'base_val' => 5, 'desc_prod' => '+5% production Bois de Cèdre / niv'];
+    } elseif ($bCode === 'stonemason') {
+        $prodMeta = ['has_prod' => true, 'prod_type' => 'boost_stone', 'unit' => '% Prod Pierre', 'base_val' => 5, 'desc_prod' => '+5% production Pierre de Taille / niv'];
+    } elseif ($bCode === 'grain_mill') {
+        $prodMeta = ['has_prod' => true, 'prod_type' => 'boost_rice', 'unit' => '% Prod Riz', 'base_val' => 5, 'desc_prod' => '+5% production Riz / niv'];
+    } elseif ($bCode === 'teahouse') {
+        $prodMeta = ['has_prod' => true, 'prod_type' => 'boost_serenity', 'unit' => '% Sérénité', 'base_val' => 5, 'desc_prod' => '+5% Sérénité & Ferveur / niv'];
+    } elseif ($bCode === 'storage') {
+        $prodMeta = ['has_prod' => true, 'prod_type' => 'cap_materials', 'unit' => 'Capacité Mat.', 'base_val' => 15000, 'desc_prod' => 'Stock Bois & Pierre (x1.5 / niv)'];
+    } elseif ($bCode === 'tank') {
+        $prodMeta = ['has_prod' => true, 'prod_type' => 'cap_rice', 'unit' => 'Capacité Riz', 'base_val' => 15000, 'desc_prod' => 'Stock Riz Koku (x1.5 / niv)'];
+    } elseif ($bCode === 'hq') {
+        $prodMeta = ['has_prod' => true, 'prod_type' => 'speed_discount', 'unit' => '% Réduction Durée', 'base_val' => 3.6, 'desc_prod' => 'Accélération des chantiers (gouvernance)'];
+    }
+
     $catalog[$bCode] = [
         'category'        => 'building',
         'code'            => $bCode,
@@ -58,12 +83,29 @@ foreach (BUILDINGS as $bCode => $bDef) {
         'cost_multiplier' => (float)$bDef['cost_multiplier'],
         'base_time'       => (int)$bDef['base_time'],
         'max_level'       => (int)($bDef['max_level'] ?? 20),
-        'description'     => $bDef['description'] ?? ''
+        'description'     => $bDef['description'] ?? '',
+        'production'      => $prodMeta
     ];
 }
 
-// 2. Parcelles rurales
+// 2. Parcelles rurales (terroir féodal & mines)
 foreach (FIELD_TYPES as $fCode => $fDef) {
+    $prodUnit = 'unités/h';
+    $prodDesc = 'Ressources / heure';
+    if ($fCode === 'metal_mine') {
+        $prodUnit = 'Bois/h';
+        $prodDesc = 'Bois de Cèdre coupé par heure';
+    } elseif ($fCode === 'crystal_mine') {
+        $prodUnit = 'Pierre/h';
+        $prodDesc = 'Pierre de Taille extraite par heure';
+    } elseif ($fCode === 'deuterium_synth') {
+        $prodUnit = 'Riz/h';
+        $prodDesc = 'Koku de Riz récolté par heure';
+    } elseif ($fCode === 'solar_plant') {
+        $prodUnit = 'Sérénité/h';
+        $prodDesc = 'Ferveur & Sérénité générée par heure';
+    }
+
     $catalog[$fCode] = [
         'category'        => 'field',
         'code'            => $fCode,
@@ -78,7 +120,133 @@ foreach (FIELD_TYPES as $fCode => $fDef) {
         'cost_multiplier' => (float)$fDef['cost_multiplier'],
         'base_time'       => (int)$fDef['base_time'],
         'max_level'       => 20,
-        'description'     => $fDef['description'] ?? ''
+        'description'     => $fDef['description'] ?? '',
+        'production'      => [
+            'has_prod'   => true,
+            'prod_type'  => 'hourly_res',
+            'unit'       => $prodUnit,
+            'base_val'   => (float)($fDef['base_prod'] ?? 20),
+            'desc_prod'  => $prodDesc
+        ]
+    ];
+}
+
+// 3. Structures du Terroir Rural Vivant (Fosse argile, Soja, Thé, Habitations village)
+$ruralExtras = [
+    'foret' => [
+        'name' => 'Forêt de Cèdres (Parcelle)',
+        'icon' => '<i class="fa-solid fa-tree text-success"></i>',
+        'res_name' => 'Bois de Cèdre',
+        'unit' => 'Bois/h',
+        'base_val' => 35,
+        'desc' => 'Parcelle forestière du terroir - Bois de cèdre récolté par heure',
+        'base_cost' => ['metal' => 45, 'crystal' => 60, 'deuterium' => 20],
+        'mult' => 1.45,
+        'time' => 180,
+    ],
+    'carriere' => [
+        'name' => 'Carrière de Granit (Parcelle)',
+        'icon' => '<i class="fa-solid fa-mountain text-secondary"></i>',
+        'res_name' => 'Pierre de Taille',
+        'unit' => 'Pierre/h',
+        'base_val' => 35,
+        'desc' => 'Parcelle de falaise du terroir - Granit extrait par heure',
+        'base_cost' => ['metal' => 60, 'crystal' => 40, 'deuterium' => 20],
+        'mult' => 1.45,
+        'time' => 200,
+    ],
+    'riziere' => [
+        'name' => 'Rizière Inondée (Parcelle)',
+        'icon' => '<i class="fa-solid fa-wheat-awn text-warning"></i>',
+        'res_name' => 'Riz Impérial',
+        'unit' => 'Riz/h',
+        'base_val' => 35,
+        'desc' => 'Bassin alluviaux du terroir - Riz nourricier récolté par heure',
+        'base_cost' => ['metal' => 35, 'crystal' => 45, 'deuterium' => 60],
+        'mult' => 1.45,
+        'time' => 220,
+    ],
+    'fosse_argile' => [
+        'name' => 'Fosse d\'Argile & Céramique',
+        'icon' => '<i class="fa-solid fa-cubes-stacked text-orange"></i>',
+        'res_name' => 'Argile & Tuiles',
+        'unit' => 'Argile/h',
+        'base_val' => 35,
+        'desc' => 'Gisement fluvial alluviale et poterie - Argile & tuiles par heure',
+        'base_cost' => ['metal' => 45, 'crystal' => 50, 'deuterium' => 30],
+        'mult' => 1.45,
+        'time' => 190,
+    ],
+    'champ_soja' => [
+        'name' => 'Champ de Soja & Miso',
+        'icon' => '<i class="fa-solid fa-seedling text-lime"></i>',
+        'res_name' => 'Soja & Tofu',
+        'unit' => 'Soja/h',
+        'base_val' => 35,
+        'desc' => 'Culture vivrière de soja et miso - Soja par heure',
+        'base_cost' => ['metal' => 40, 'crystal' => 30, 'deuterium' => 40],
+        'mult' => 1.45,
+        'time' => 180,
+    ],
+    'culture_the' => [
+        'name' => 'Coteaux de Théiers (Matcha)',
+        'icon' => '<i class="fa-solid fa-leaf text-teal"></i>',
+        'res_name' => 'Feuilles de Thé',
+        'unit' => 'Thé/h',
+        'base_val' => 35,
+        'desc' => 'Terrasses étagées de théiers taillés - Feuilles de thé par heure',
+        'base_cost' => ['metal' => 50, 'crystal' => 35, 'deuterium' => 45],
+        'mult' => 1.45,
+        'time' => 200,
+    ],
+    'sanctuaire_shinto' => [
+        'name' => 'Bosquet & Sanctuaire Shintō',
+        'icon' => '<i class="fa-solid fa-torii-gate text-danger"></i>',
+        'res_name' => 'Sérénité & Ferveur',
+        'unit' => 'Sérénité/h',
+        'base_val' => 30,
+        'desc' => 'Bosquet sacré au torii rouge - Sérénité divine générée par heure',
+        'base_cost' => ['metal' => 80, 'crystal' => 70, 'deuterium' => 50],
+        'mult' => 1.45,
+        'time' => 240,
+    ],
+    'village' => [
+        'name' => 'Village & Habitations (Minka)',
+        'icon' => '<i class="fa-solid fa-people-roof text-indigo"></i>',
+        'res_name' => 'Logements Habitants',
+        'unit' => 'Logements',
+        'base_val' => 25,
+        'desc' => 'Hameau central - Capacité d\'accueil maximale de villageois',
+        'base_cost' => ['metal' => 70, 'crystal' => 50, 'deuterium' => 30],
+        'mult' => 1.45,
+        'time' => 210,
+    ]
+];
+
+foreach ($ruralExtras as $rCode => $rDef) {
+    $catalog['rural_' . $rCode] = [
+        'category'        => 'rural',
+        'code'            => 'rural_' . $rCode,
+        'raw_type'        => $rCode,
+        'name'            => $rDef['name'],
+        'icon'            => $rDef['icon'],
+        'category_label'  => 'Terroir Vivant (9 Parcelles)',
+        'base_cost'       => [
+            'metal'     => (int)$rDef['base_cost']['metal'],
+            'crystal'   => (int)$rDef['base_cost']['crystal'],
+            'deuterium' => (int)$rDef['base_cost']['deuterium']
+        ],
+        'cost_multiplier' => (float)$rDef['mult'],
+        'base_time'       => (int)$rDef['time'],
+        'max_level'       => 30,
+        'description'     => $rDef['desc'],
+        'production'      => [
+            'has_prod'   => true,
+            'prod_type'  => $rCode === 'village' ? 'cap_housing' : ($rCode === 'sanctuaire_shinto' ? 'hourly_serenity' : 'hourly_res'),
+            'unit'       => $rDef['unit'],
+            'base_val'   => (float)$rDef['base_val'],
+            'desc_prod'  => $rDef['desc']
+        ]
     ];
 }
 ?>
@@ -235,14 +403,21 @@ foreach (FIELD_TYPES as $fCode => $fDef) {
                         <i class="fa-solid fa-landmark me-1"></i>Bâtiment / Parcelle testé :
                     </label>
                     <select id="sim_building_select" class="form-select form-select-sm" onchange="runDerivationSimulation()">
-                        <optgroup label="🏯 Bâtiments Urbains">
+                        <optgroup label="🏯 Cité Castrale (Bâtiments Urbains)">
                             <?php foreach ($catalog as $code => $item): if ($item['category'] === 'building'): ?>
                                 <option value="<?= htmlspecialchars($code) ?>" <?= $code === 'hq' ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($item['name']) ?>
                                 </option>
                             <?php endif; endforeach; ?>
                         </optgroup>
-                        <optgroup label="🌾 Parcelles Rurales">
+                        <optgroup label="🏞️ Terroir Vivant (9 Parcelles Féodales)">
+                            <?php foreach ($catalog as $code => $item): if ($item['category'] === 'rural'): ?>
+                                <option value="<?= htmlspecialchars($code) ?>">
+                                    <?= htmlspecialchars($item['name']) ?>
+                                </option>
+                            <?php endif; endforeach; ?>
+                        </optgroup>
+                        <optgroup label="🌾 Parcelles & Exploitations Classiques">
                             <?php foreach ($catalog as $code => $item): if ($item['category'] === 'field'): ?>
                                 <option value="<?= htmlspecialchars($code) ?>">
                                     <?= htmlspecialchars($item['name']) ?>
@@ -303,17 +478,17 @@ foreach (FIELD_TYPES as $fCode => $fDef) {
     <!-- ── INDICATEURS SYNTHÉTIQUES (KPIS) ── -->
     <div class="card-body p-3 bg-white">
         <div class="row g-3">
-            <div class="col-6 col-md-3">
-                <div class="border rounded p-3 text-center bg-body-tertiary">
+            <div class="col-6 col-lg">
+                <div class="border rounded p-3 text-center bg-body-tertiary h-100">
                     <div class="text-secondary small fw-medium mb-1">
-                        <i class="fa-solid fa-hourglass-start me-1 text-primary"></i>Durée Niv 1 &rarr; Niv 20
+                        <i class="fa-solid fa-hourglass-start me-1 text-primary"></i>Durée Niv 1 &rarr; Max
                     </div>
                     <div class="fs-4 fw-bold font-monospace text-dark" id="kpi_duration_range">--</div>
                     <div class="small text-muted mt-1" id="kpi_duration_sub">--</div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="border rounded p-3 text-center bg-body-tertiary">
+            <div class="col-6 col-lg">
+                <div class="border rounded p-3 text-center bg-body-tertiary h-100">
                     <div class="text-secondary small fw-medium mb-1">
                         <i class="fa-solid fa-clock-rotate-left me-1 text-warning"></i>Temps Cumulé Total
                     </div>
@@ -321,22 +496,31 @@ foreach (FIELD_TYPES as $fCode => $fDef) {
                     <div class="small text-muted mt-1">Du niveau 1 au niveau max</div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="border rounded p-3 text-center bg-body-tertiary">
+            <div class="col-6 col-lg">
+                <div class="border rounded p-3 text-center bg-body-tertiary h-100">
                     <div class="text-secondary small fw-medium mb-1">
-                        <i class="fa-solid fa-boxes-stacked me-1 text-success"></i>Coût Niv 1 &rarr; Niv 20
+                        <i class="fa-solid fa-boxes-stacked me-1 text-success"></i>Coût Niv 1 &rarr; Max
                     </div>
                     <div class="fs-4 fw-bold font-monospace text-dark" id="kpi_cost_range">--</div>
                     <div class="small text-muted mt-1" id="kpi_cost_sub">--</div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="border rounded p-3 text-center bg-body-tertiary">
+            <div class="col-6 col-lg">
+                <div class="border rounded p-3 text-center bg-body-tertiary h-100">
                     <div class="text-secondary small fw-medium mb-1">
-                        <i class="fa-solid fa-vault me-1 text-purple"></i>Total Ressources Cumulées
+                        <i class="fa-solid fa-vault me-1 text-purple"></i>Total Cumulé Dépensé
                     </div>
                     <div class="fs-4 fw-bold font-monospace text-purple" id="kpi_total_cost">--</div>
                     <div class="small text-muted mt-1">Bois + Pierre + Riz combinés</div>
+                </div>
+            </div>
+            <div class="col-12 col-lg">
+                <div class="border rounded p-3 text-center bg-body-tertiary h-100" style="border-left: 3px solid #06b6d4 !important;">
+                    <div class="text-secondary small fw-medium mb-1">
+                        <i class="fa-solid fa-chart-pie me-1 text-info"></i>Rendement &amp; Production
+                    </div>
+                    <div class="fs-4 fw-bold font-monospace text-info" id="kpi_prod_range">--</div>
+                    <div class="small text-muted mt-1" id="kpi_prod_sub">Amortissement ROI moyen : --</div>
                 </div>
             </div>
         </div>
@@ -357,11 +541,15 @@ foreach (FIELD_TYPES as $fCode => $fDef) {
             <div class="d-flex align-items-center gap-3 small">
                 <span class="d-flex align-items-center gap-1">
                     <span style="display:inline-block; width:12px; height:12px; background:#f59e0b; border-radius:3px;"></span>
-                    <strong class="text-dark">Durée de chantier</strong>
+                    <strong class="text-dark">Durée chantier</strong>
                 </span>
                 <span class="d-flex align-items-center gap-1">
                     <span style="display:inline-block; width:12px; height:12px; background:#10b981; border-radius:3px;"></span>
-                    <strong class="text-dark">Coût en ressources</strong>
+                    <strong class="text-dark">Coût total</strong>
+                </span>
+                <span class="d-flex align-items-center gap-1">
+                    <span style="display:inline-block; width:12px; height:12px; background:#06b6d4; border-radius:3px;"></span>
+                    <strong class="text-dark">Production / Rendement</strong>
                 </span>
             </div>
         </div>
@@ -382,12 +570,13 @@ foreach (FIELD_TYPES as $fCode => $fDef) {
                         <th class="py-2 text-end"><i class="fa-solid fa-tree text-success me-1"></i>Bois</th>
                         <th class="py-2 text-end"><i class="fa-solid fa-mountain text-primary me-1"></i>Pierre</th>
                         <th class="py-2 text-end"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz</th>
-                        <th class="py-2 text-end fw-bold"><i class="fa-solid fa-coins text-secondary me-1"></i>Total Palier</th>
-                        <th class="py-2 text-end text-muted">Cumul Dépensé</th>
+                        <th class="py-2 text-end fw-bold"><i class="fa-solid fa-coins text-secondary me-1"></i>Coût Palier</th>
                         <th class="py-2 text-end fw-bold text-warning"><i class="fa-solid fa-stopwatch me-1"></i>Durée</th>
                         <th class="py-2 text-end text-muted">Durée Cumulée</th>
-                        <th class="py-2 text-center"><i class="fa-solid fa-chart-line text-info me-1"></i>$\Delta$ Coût</th>
-                        <th class="pe-3 py-2 text-center"><i class="fa-solid fa-arrow-trend-up text-danger me-1"></i>$\Delta$ Temps</th>
+                        <th class="py-2 text-end fw-bold text-info"><i class="fa-solid fa-industry me-1"></i>Production / h</th>
+                        <th class="py-2 text-center text-info"><i class="fa-solid fa-arrow-up-right-dots me-1"></i>$\Delta$ Prod Net</th>
+                        <th class="py-2 text-center"><i class="fa-solid fa-hourglass-end text-purple me-1"></i>Amortissement (ROI)</th>
+                        <th class="pe-3 py-2 text-center"><i class="fa-solid fa-chart-line text-secondary me-1"></i>$\Delta$ Coût</th>
                     </tr>
                 </thead>
                 <tbody id="derivationTableBody" class="font-monospace small">
@@ -505,25 +694,118 @@ function readFormAndSimulate() {
     runDerivationSimulation();
 }
 
-// Cœur mathématique de simulation identique à BuildingEngine.php
+// Cœur mathématique de simulation de production / rendement
+function computeStructureProduction(buildingDef, targetLevel) {
+    if (!buildingDef.production || !buildingDef.production.has_prod) {
+        return {
+            hasProd: false,
+            unit: '',
+            production: 0,
+            deltaProd: 0,
+            label: 'Infrastructure'
+        };
+    }
+
+    const p = buildingDef.production;
+    const baseVal = p.base_val;
+    let prod = 0;
+
+    switch (p.prod_type) {
+        case 'hourly_res':
+            // Formule standard des parcelles/mines : base_prod * lvl * 1.15^lvl (ou 1.38 power rural)
+            if (buildingDef.category === 'rural') {
+                // Formule canonique VillageGeneratorService : 35 * lvl^1.38 * (1 + lvl * 0.015)
+                prod = baseVal * Math.pow(targetLevel, 1.38) * (1.0 + (targetLevel * 0.015));
+            } else {
+                // Formule de mines classiques PlanetEngine
+                prod = baseVal * targetLevel * Math.pow(1.15, targetLevel);
+            }
+            break;
+
+        case 'hourly_serenity':
+            // Sanctuaire Shinto : lvl * 30 Sérénité/h
+            prod = targetLevel * baseVal;
+            break;
+
+        case 'cap_housing':
+            // Village Minka : 75 + lvl * 25
+            prod = 75 + (targetLevel * baseVal);
+            break;
+
+        case 'cap_materials':
+        case 'cap_rice':
+            // Entrepôts Kura & Matériaux : 15000 * 1.5^lvl
+            prod = baseVal * Math.pow(1.5, targetLevel);
+            break;
+
+        case 'boost_wood':
+        case 'boost_stone':
+        case 'boost_rice':
+        case 'boost_serenity':
+            // Ateliers de transformation spécialisés : +5% par niveau
+            prod = targetLevel * baseVal;
+            break;
+
+        case 'speed_discount':
+            // Tenshu : réduction de temps (1 - 0.964^(lvl-1))*100
+            prod = (1 - Math.pow(0.964, Math.max(0, targetLevel - 1))) * 100;
+            break;
+
+        default:
+            prod = targetLevel * baseVal;
+            break;
+    }
+
+    return {
+        hasProd: true,
+        unit: p.unit,
+        production: Math.round(prod * 10) / 10,
+        label: p.desc_prod
+    };
+}
+
+// Cœur mathématique de simulation identique à BuildingEngine.php & RuralPlotEngine.php
 function computeLevelUpgrade(buildingDef, targetLevel) {
     const curLevel = targetLevel - 1;
-    const baseMult = buildingDef.cost_multiplier;
-    const effectiveMult = Math.pow(baseMult * simState.costGrowth, curLevel);
+    let metal = 0, crystal = 0, deut = 0, duration = 0;
 
-    const metal = Math.max(0, Math.round(buildingDef.base_cost.metal * effectiveMult * simState.costCoeff));
-    const crystal = Math.max(0, Math.round(buildingDef.base_cost.crystal * effectiveMult * simState.costCoeff));
-    const deut = Math.max(0, Math.round(buildingDef.base_cost.deuterium * effectiveMult * simState.costCoeff));
+    if (buildingDef.category === 'rural') {
+        // Formule dédiée aux 9 parcelles du Terroir Vivant (RuralPlotEngine)
+        const polyFactor = 1.0 + (0.22 * Math.pow(Math.max(0, curLevel), 1.45));
+        const expFactor = Math.pow(1.12 * simState.costGrowth, Math.min(curLevel, 40));
+        const mult = polyFactor * expFactor * simState.costCoeff;
+
+        metal = Math.max(0, Math.round(buildingDef.base_cost.metal * mult));
+        crystal = Math.max(0, Math.round(buildingDef.base_cost.crystal * mult));
+        deut = Math.max(0, Math.round(buildingDef.base_cost.deuterium * mult));
+
+        const baseSec = 180.0 * (1.0 + 0.16 * Math.pow(curLevel, 1.35)) * Math.pow(1.065, Math.min(curLevel, 55)) * Math.pow(1.025, Math.max(0, curLevel - 55));
+        const hqFactor = 1.0 + (Math.max(1, simState.hqLevel) * 0.05);
+        const popBonus = Math.min(0.25, Math.max(0, simState.population / 100) * 0.01);
+        const popFactor = 1.0 / (1.0 + popBonus);
+
+        const rawDur = ((baseSec / hqFactor) * simState.timeCoeff * popFactor) / CURRENT_GAME_SPEED;
+        duration = Math.max(10, Math.round(rawDur));
+    } else {
+        // Formule standard des édifices urbains & parcelles classiques
+        const baseMult = buildingDef.cost_multiplier;
+        const effectiveMult = Math.pow(baseMult * simState.costGrowth, curLevel);
+
+        metal = Math.max(0, Math.round(buildingDef.base_cost.metal * effectiveMult * simState.costCoeff));
+        crystal = Math.max(0, Math.round(buildingDef.base_cost.crystal * effectiveMult * simState.costCoeff));
+        deut = Math.max(0, Math.round(buildingDef.base_cost.deuterium * effectiveMult * simState.costCoeff));
+
+        const hqFactor = Math.pow(0.964, Math.max(0, simState.hqLevel - 1));
+        const lvlFactor = Math.pow(simState.timeGrowth, curLevel) * Math.pow(targetLevel, 0.85);
+        const popBonus = Math.min(0.25, Math.max(0, simState.population / 100) * 0.01);
+        const popFactor = 1.0 / (1.0 + popBonus);
+
+        const rawDuration = (buildingDef.base_time * lvlFactor * hqFactor * popFactor * simState.timeCoeff) / CURRENT_GAME_SPEED;
+        duration = Math.max(5, Math.round(rawDuration));
+    }
+
     const totalCost = metal + crystal + deut;
-
-    // Facteurs de durée
-    const hqFactor = Math.pow(0.964, Math.max(0, simState.hqLevel - 1));
-    const lvlFactor = Math.pow(simState.timeGrowth, curLevel) * Math.pow(targetLevel, 0.85);
-    const popBonus = Math.min(0.25, Math.max(0, simState.population / 100) * 0.01);
-    const popFactor = 1.0 / (1.0 + popBonus);
-
-    const rawDuration = (buildingDef.base_time * lvlFactor * hqFactor * popFactor * simState.timeCoeff) / CURRENT_GAME_SPEED;
-    const duration = Math.max(5, Math.round(rawDuration));
+    const prodInfo = computeStructureProduction(buildingDef, targetLevel);
 
     return {
         level: targetLevel,
@@ -531,7 +813,8 @@ function computeLevelUpgrade(buildingDef, targetLevel) {
         crystal,
         deut,
         totalCost,
-        duration
+        duration,
+        ...prodInfo
     };
 }
 
@@ -550,10 +833,23 @@ function runDerivationSimulation() {
 
         let deltaCostPct = 0;
         let deltaTimePct = 0;
+        let deltaProd = item.production;
+        let paybackHours = null;
+
         if (rows.length > 0) {
             const prev = rows[rows.length - 1];
             deltaCostPct = prev.totalCost > 0 ? ((item.totalCost - prev.totalCost) / prev.totalCost) * 100 : 0;
             deltaTimePct = prev.duration > 0 ? ((item.duration - prev.duration) / prev.duration) * 100 : 0;
+            deltaProd = Math.max(0, item.production - prev.production);
+
+            // Temps de retour sur investissement (ROI) = Coût palier / Gain de production horaire
+            if (item.hasProd && deltaProd > 0) {
+                paybackHours = item.totalCost / deltaProd;
+            }
+        } else {
+            if (item.hasProd && item.production > 0) {
+                paybackHours = item.totalCost / item.production;
+            }
         }
 
         rows.push({
@@ -561,16 +857,18 @@ function runDerivationSimulation() {
             cumCost,
             cumDuration,
             deltaCostPct,
-            deltaTimePct
+            deltaTimePct,
+            deltaProd: Math.round(deltaProd * 10) / 10,
+            paybackHours
         });
     }
 
-    renderKPIs(rows);
-    renderTable(rows);
-    renderSvgChart(rows);
+    renderKPIs(rows, bDef);
+    renderTable(rows, bDef);
+    renderSvgChart(rows, bDef);
 }
 
-function renderKPIs(rows) {
+function renderKPIs(rows, bDef) {
     if (!rows.length) return;
     const first = rows[0];
     const last = rows[rows.length - 1];
@@ -584,9 +882,33 @@ function renderKPIs(rows) {
     document.getElementById('kpi_cost_sub').textContent = `Ratio d'inflation : x${(last.totalCost / Math.max(1, first.totalCost)).toFixed(1)}`;
 
     document.getElementById('kpi_total_cost').textContent = formatNumber(last.cumCost);
+
+    // KPI 5 : Rendement / Production
+    const kpiProdRange = document.getElementById('kpi_prod_range');
+    const kpiProdSub = document.getElementById('kpi_prod_sub');
+    if (last.hasProd) {
+        kpiProdRange.textContent = `${formatNumber(last.production)} ${last.unit}`;
+        
+        // Moyenne d'amortissement
+        const validPaybacks = rows.map(r => r.paybackHours).filter(p => p !== null && isFinite(p) && p > 0);
+        if (validPaybacks.length > 0) {
+            const avgPayback = validPaybacks.reduce((a, b) => a + b, 0) / validPaybacks.length;
+            const avgH = Math.round(avgPayback);
+            if (avgH < 24) {
+                kpiProdSub.textContent = `ROI moyen : ~${avgH}h (${(avgH / 24).toFixed(1)}j)`;
+            } else {
+                kpiProdSub.textContent = `ROI moyen : ~${Math.round(avgH / 24)} jours d'amortissement`;
+            }
+        } else {
+            kpiProdSub.textContent = `Plafond au Niv ${last.level}`;
+        }
+    } else {
+        kpiProdRange.textContent = 'Infrastructure';
+        kpiProdSub.textContent = 'Bâtiment militaire ou stratégique';
+    }
 }
 
-function renderTable(rows) {
+function renderTable(rows, bDef) {
     const tbody = document.getElementById('derivationTableBody');
     tbody.innerHTML = '';
 
@@ -595,9 +917,28 @@ function renderTable(rows) {
         const costDeltaBadge = r.level === 1 
             ? '<span class="text-muted">-</span>' 
             : `<span class="badge bg-secondary-lt text-secondary">+${Math.round(r.deltaCostPct)}%</span>`;
-        const timeDeltaBadge = r.level === 1 
-            ? '<span class="text-muted">-</span>' 
-            : `<span class="badge bg-warning-lt text-warning">+${Math.round(r.deltaTimePct)}%</span>`;
+
+        // Formatage production
+        let prodDisplay = '<span class="text-muted small">Infrastructure</span>';
+        let deltaProdDisplay = '<span class="text-muted">-</span>';
+        let roiDisplay = '<span class="text-muted">-</span>';
+
+        if (r.hasProd) {
+            prodDisplay = `<span class="fw-bold text-info">${formatNumber(r.production)}</span> <span class="text-muted" style="font-size:0.7rem;">${r.unit}</span>`;
+            deltaProdDisplay = `<span class="badge bg-info-lt text-info">+${formatNumber(r.deltaProd)}</span>`;
+
+            if (r.paybackHours !== null && isFinite(r.paybackHours) && r.paybackHours > 0) {
+                const hours = Math.round(r.paybackHours);
+                if (hours < 24) {
+                    roiDisplay = `<span class="badge bg-purple-lt text-purple fw-bold">${hours}h</span>`;
+                } else {
+                    const days = (hours / 24).toFixed(1);
+                    roiDisplay = `<span class="badge bg-purple-lt text-purple fw-bold">${days}j (${hours}h)</span>`;
+                }
+            } else {
+                roiDisplay = '<span class="text-muted">N/A</span>';
+            }
+        }
 
         tr.innerHTML = `
             <td class="ps-3 text-center fw-bold">
@@ -607,18 +948,19 @@ function renderTable(rows) {
             <td class="text-end text-primary">${formatNumber(r.crystal)}</td>
             <td class="text-end text-warning">${formatNumber(r.deut)}</td>
             <td class="text-end fw-bold text-dark">${formatNumber(r.totalCost)}</td>
-            <td class="text-end text-muted small">${formatNumber(r.cumCost)}</td>
             <td class="text-end fw-bold text-warning">${formatDuration(r.duration)}</td>
             <td class="text-end text-muted small">${formatDuration(r.cumDuration)}</td>
-            <td class="text-center">${costDeltaBadge}</td>
-            <td class="pe-3 text-center">${timeDeltaBadge}</td>
+            <td class="text-end">${prodDisplay}</td>
+            <td class="text-center">${deltaProdDisplay}</td>
+            <td class="text-center">${roiDisplay}</td>
+            <td class="pe-3 text-center">${costDeltaBadge}</td>
         `;
         tbody.appendChild(tr);
     });
 }
 
-// Rendu SVG interactif haute fidélité
-function renderSvgChart(rows) {
+// Rendu SVG interactif haute fidélité avec triple courbe (Durée, Coût, Production)
+function renderSvgChart(rows, bDef) {
     const svg = document.getElementById('derivationSvgChart');
     if (!svg || rows.length < 2) return;
 
@@ -631,6 +973,7 @@ function renderSvgChart(rows) {
 
     const maxCost = Math.max(...rows.map(r => r.totalCost));
     const maxDur = Math.max(...rows.map(r => r.duration));
+    const maxProd = Math.max(...rows.map(r => r.production || 0));
 
     const numPoints = rows.length;
     const stepX = plotW / (numPoints - 1);
@@ -650,6 +993,14 @@ function renderSvgChart(rows) {
         return { x, y, data: r };
     });
 
+    const hasProd = rows.some(r => r.hasProd && r.production > 0);
+    const prodPoints = hasProd ? rows.map((r, i) => {
+        const x = padX + i * stepX;
+        const norm = maxProd > 0 ? (r.production / maxProd) : 0;
+        const y = height - padY - (norm * plotH);
+        return { x, y, data: r };
+    }) : [];
+
     // Génération des chemins SVG (smooth line)
     function generatePath(pts) {
         return pts.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(' ');
@@ -657,6 +1008,7 @@ function renderSvgChart(rows) {
 
     const pathCost = generatePath(costPoints);
     const pathDur = generatePath(durPoints);
+    const pathProd = prodPoints.length > 0 ? generatePath(prodPoints) : '';
 
     // Grille de fond
     let gridLines = '';
@@ -669,21 +1021,31 @@ function renderSvgChart(rows) {
     svg.innerHTML = `
         <defs>
             <linearGradient id="gradCost" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.25"/>
                 <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
             </linearGradient>
             <linearGradient id="gradDur" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3"/>
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.25"/>
                 <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.0"/>
+            </linearGradient>
+            <linearGradient id="gradProd" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.0"/>
             </linearGradient>
         </defs>
         ${gridLines}
+
         <!-- Lignes et remplissages -->
         <path d="${pathCost} L ${padX + (numPoints - 1) * stepX} ${height - padY} L ${padX} ${height - padY} Z" fill="url(#gradCost)"/>
         <path d="${pathCost}" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
 
         <path d="${pathDur} L ${padX + (numPoints - 1) * stepX} ${height - padY} L ${padX} ${height - padY} Z" fill="url(#gradDur)"/>
         <path d="${pathDur}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+
+        ${hasProd ? `
+            <path d="${pathProd} L ${padX + (numPoints - 1) * stepX} ${height - padY} L ${padX} ${height - padY} Z" fill="url(#gradProd)"/>
+            <path d="${pathProd}" fill="none" stroke="#06b6d4" stroke-width="3" stroke-dasharray="4,2" stroke-linecap="round"/>
+        ` : ''}
         
         <!-- Points interactifs -->
         ${durPoints.map((p, i) => `
@@ -691,6 +1053,9 @@ function renderSvgChart(rows) {
         `).join('')}
         ${costPoints.map((p, i) => `
             <circle cx="${p.x}" cy="${p.y}" r="4" fill="#10b981" stroke="#ffffff" stroke-width="2" class="chart-point" data-type="cost" data-idx="${i}" style="cursor:pointer;" />
+        `).join('')}
+        ${prodPoints.map((p, i) => `
+            <circle cx="${p.x}" cy="${p.y}" r="4" fill="#06b6d4" stroke="#ffffff" stroke-width="2" class="chart-point" data-type="prod" data-idx="${i}" style="cursor:pointer;" />
         `).join('')}
 
         <!-- Axe X (Niveaux) -->
@@ -710,10 +1075,19 @@ function renderSvgChart(rows) {
             if (!row) return;
 
             pt.setAttribute('r', '7');
+            let prodLine = '';
+            if (row.hasProd) {
+                const roiText = (row.paybackHours !== null && isFinite(row.paybackHours)) 
+                    ? ` (ROI: ${Math.round(row.paybackHours)}h)` 
+                    : '';
+                prodLine = `<div><i class="fa-solid fa-industry me-1 text-info"></i>Production : <strong>${formatNumber(row.production)} ${row.unit}</strong>${roiText}</div>`;
+            }
+
             tooltip.innerHTML = `
                 <div class="fw-bold mb-1 text-warning">Palier Niveau ${row.level}</div>
                 <div><i class="fa-solid fa-stopwatch me-1 text-warning"></i>Durée : <strong>${formatDuration(row.duration)}</strong></div>
                 <div><i class="fa-solid fa-coins me-1 text-success"></i>Coût : <strong>${formatNumber(row.totalCost)}</strong> ressources</div>
+                ${prodLine}
                 <div class="text-white-50 mt-1" style="font-size:0.7rem;">🪵 ${formatNumber(row.metal)} | 🪨 ${formatNumber(row.crystal)} | 🌾 ${formatNumber(row.deut)}</div>
             `;
             tooltip.classList.remove('d-none');

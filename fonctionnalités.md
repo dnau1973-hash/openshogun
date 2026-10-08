@@ -1,5 +1,30 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-08] - building-derivation-resource-production : Production de Ressources & Calcul de Rentabilité ROI dans le Simulateur de Dérivation
+- **Module :** `building-derivation-resource-production`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Intégration de la Production de Ressources au Simulateur (`views/studio/game-elevate-designer/building-derivation.php`) :**
+     - Intégration du catalogue complet des 9 parcelles du Terroir Vivant (`foret`, `carriere`, `riziere`, `fosse_argile`, `champ_soja`, `culture_the`, `sanctuaire_shinto`, `village`) en plus des bâtiments urbains et parcelles classiques.
+     - Calcul en temps réel de la cadence horaire de production par niveau selon les équations du jeu : formule progressive féodale puissance 1.38 pour les ressources du terroir, capacité de logements pour le village, sérénité pour le sanctuaire et bonus percentiles (+5%/niv) pour les ateliers de spécialisation.
+  2. **Analyse de Rentabilité & Amortissement (ROI / Payback Time) :**
+     - Calcul automatique du temps d'amortissement niveau par niveau ($\text{ROI} = \frac{\Delta\text{Coût Total}}{\Delta\text{Production Horaire}}$) exprimé en heures ou en jours.
+     - Colonnes dédiées dans la table niveau par niveau : *Production / h*, *$\Delta$ Prod Net* et *Amortissement (ROI)*.
+     - Carte d'indicateur synthétique KPI de production maximale et de délai d'amortissement moyen.
+  3. **Triple Courbe Interactive sur le Graphique SVG :**
+     - Ajout d'une 3ème courbe vectorielle cyan avec dégradé et tirets pour visualiser l'ascension de la production par rapport à l'explosion des coûts et des durées de chantier.
+     - Infobulle interactive de survol actualisée avec les gains de ressources et le temps de retour sur investissement du palier.
+- **Fichiers modifiés / créés :** `views/studio/game-elevate-designer/building-derivation.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter avec un compte possédant le rôle Game Elevate Designer et se rendre sur `/?page=dev_team&metier=game-elevate-designer&module=building-derivation`.
+  2. Dans le menu déroulant « Bâtiment / Parcelle testé », vérifier la présence des 3 catégories (Cité Castrale, Terroir Vivant 9 parcelles, Parcelles classiques).
+  3. Sélectionner une parcelle de ressource (ex: « Forêt de Cèdres (Parcelle) » ou « Camp de Bûcherons ») : constater l'apparition de la 3ème courbe cyan de production sur le graphe SVG.
+  4. Inspecter les KPI en haut : constater la carte « Rendement & Production » avec la production maximale au niveau 20 et le ROI moyen.
+  5. Inspecter le tableau niveau par niveau : vérifier les colonnes « Production / h », « $\Delta$ Prod Net » et « Amortissement (ROI) ».
+  6. Déplacer les curseurs de dérivation (Coût, Inflation) : constater la mise à jour réactive immédiate de tous les calculs de rentabilité et du graphique.
+
+---
+
 ### [2026-10-08] - weather-day-night-cycle-engine : Moteur Météo & Cycle Temporel Dynamique du Terroir Féodal
 - **Module :** `weather-day-night-cycle-engine`
 - **Statut :** `À tester`
