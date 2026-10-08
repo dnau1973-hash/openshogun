@@ -37,6 +37,16 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 08/10/2026 (Partie 21) — Bénédiction de Récolte du Samouraï Héros & Chaîne de Production Féodale
+- **Concept exploré :** Comprendre comment plusieurs briques logicielles indépendantes (moteur de héros, moteur de domaine rural, tick de ressources et rendu visuel côté client) doivent s'articuler sans rupture logique. Découverte de la notion de « découplage » vs « synchronisation des flux ».
+- **Notions pour l'atelier :**
+  - **Pourquoi une valeur semble-t-elle disparaître ? (Le Mystère du Statut Temporaire) :** Dans un jeu vidéo, une entité (ici le Samouraï) change d'état : il est « au domaine » (`home`), « en aventure » (`adventure`), ou « en marche » (`mission`). Si une formule de calcul mathématique dit naïvement « *ajoute le bonus seulement si le héros est dans sa chambre (`status === 'home'`)* », alors dès qu'il part chasser 30 minutes, le village perd tout son bonus ! C'est ce qu'on appelle un effet de bord indésirable. En modifiant la règle pour « *le bonus est actif tant que le héros respire (`health > 0` et `status !== 'dead'`)* », le jeu respecte la logique du joueur sans mauvaise surprise.
+  - **La Clé Étrangère Orpheline (Le Gardien sans Fief) :** Si la base de données relie le héros à un domaine via `current_planet_id`, que se passe-t-il si cette valeur est vide ou pointe vers un ancien identifiant ? Le code ne trouvait personne ! Pour rendre un moteur robuste, on recherche toujours le propriétaire du domaine en premier, puis on recalibre automatiquement le lien du héros s'il était égaré.
+  - **La Transparence de l'UI (Le Principe du Ticket de Caisse) :** Si un joueur lit `+155 Bois/h`, il ne sait pas ce qui compose ce chiffre (base, forêt, héros, scierie ?). En affichant un badge explicite `+X Héros` et un récapitulatif détaillé, on applique le principe d'explicabilité : le joueur comprend instantanément le résultat de ses investissements.
+- **Activité pratique suggérée :** Attribuer des points dans la Bénédiction de Récolte du Samouraï, observer la mise à jour réactive du libellé, puis aller sur la page Ressources pour constater l'apparition du badge violet `+X Héros` sur le panneau latéral et dans les modales des parcelles. Lancer une aventure et vérifier que la production horaire ne s'effondre plus !
+
+---
+
 ### Session du 02/10/2026 (Partie 16) — Télémétrie, Respect de la Vie Privée (RGPD) & Visualisation de Données (ApexCharts)
 - **Concept exploré :** Architecture d'un système de télémétrie et d'analyse d'audience pour un jeu en ligne, anonymisation des données personnelles (RGPD), génération de séries temporelles continues en SQL/PHP pour éviter les ruptures de courbes, et intégration d'une bibliothèque graphique réactive moderne (ApexCharts).
 - **Notions pour l'atelier :**

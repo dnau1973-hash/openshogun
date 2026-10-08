@@ -87,7 +87,14 @@
 
         // Rendements
         const curProdEl = document.getElementById('modalPlotCurrentProd');
-        if (curProdEl) curProdEl.textContent = d.prodLabel || '-';
+        if (curProdEl) {
+            const hBonus = (window.RURAL_CONFIG && window.RURAL_CONFIG.heroBonus) ? (window.RURAL_CONFIG.heroBonus[d.type] || 0) : 0;
+            if (hBonus > 0) {
+                curProdEl.innerHTML = `${d.prodLabel || '-'} <span class="badge bg-primary-lt text-primary ms-1" style="font-size:0.75rem;" title="Bénédiction du Samouraï Héros active (+${hBonus}/h)"><i class="fa-solid fa-user-ninja me-1"></i>+${hBonus}/h Héros</span>`;
+            } else {
+                curProdEl.textContent = d.prodLabel || '-';
+            }
+        }
 
         const nextProdEl = document.getElementById('modalPlotNextProd');
         if (nextProdEl) nextProdEl.textContent = d.nextProdLabel || '-';

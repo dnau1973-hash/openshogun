@@ -522,6 +522,11 @@ window.RURAL_CONFIG = {
         metal: <?= (int)($planet['metal'] ?? 0) ?>,
         crystal: <?= (int)($planet['crystal'] ?? 0) ?>,
         deuterium: <?= (int)($planet['deuterium'] ?? 0) ?>
+    },
+    heroBonus: {
+        foret: <?= (int)($planet['prod_rates']['hero_bonuses']['metal'] ?? 0) ?>,
+        carriere: <?= (int)($planet['prod_rates']['hero_bonuses']['crystal'] ?? 0) ?>,
+        riziere: <?= (int)($planet['prod_rates']['hero_bonuses']['deuterium'] ?? 0) ?>
     }
 };
 </script>

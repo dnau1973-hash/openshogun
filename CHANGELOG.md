@@ -36,6 +36,18 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * **Protection des oasis sauvages :** Section dédiée aux protectorats d'oasis annexées (statut X/3, coordonnées précises et bonus de production en koku).
 
 ### Corrigé (Fixed)
+- **Synchronisation & Persistance de la Bénédiction de Récolte du Samouraï Héros (`core/HeroEngine.php`, `core/PlanetEngine.php`, `views/hero.php`, `views/partials/rural_harvest_resources_panel.php`, `views/resources.php`, `public/js/rural_domain_map.js`) :**
+  * **Persistance active pendant les aventures & marches :** Suppression de la condition restrictive `status === 'home'`. La bénédiction de récolte du Samouraï bénéficie en permanence à son fief d'attache tant qu'il est vivant (`status !== 'dead'` et `health > 0`), conformément aux règles de gameplay du genre (style Travian).
+  * **Résolution résiliente du fief d'attache (`HeroEngine::getHeroProductionBonus`) :** Détection automatique du propriétaire réel du fief et auto-rattachement du héros en cas de `current_planet_id` orphelin ou nul.
+  * **Prise en compte des 9 parcelles du Terroir Féodal (`PlanetEngine::calculateProduction`) :** Connexion directe des rendements horaires de la Forêt, Carrière, Rizière et Sanctuaire Shintō (`planet_rural_plots`) dans la formule de production horaire globale et accumulation des stocks.
+  * **Indicateurs explicites et badge dédié dans l'interface (`rural_harvest_resources_panel.php`) :**
+    - Affichage de tags explicites `+X Héros` sous les flux de Bois, Pierre et Riz.
+    - Bannière récapitulative « Bénédiction du Samouraï : +X Bois, +Y Pierre, +Z Riz / h » dans le panneau latéral.
+    - Prise en compte du bonus du Samouraï dans la modale d'inspection des parcelles rurales (`rural_domain_map.js`).
+  * **Réactivité temps réel sur la fiche du Héros (`views/hero.php`) :**
+    - Suppression de la valeur statique `+120 res/h` et calcul dynamique des apports indexés sur `resource_speed`.
+    - Prévisualisation instantanée en JavaScript (`updatePointsUI`) du gain de récolte lors de l'attribution des points `+` / `-`.
+
 - **Attribution des Métiers de Développement — Correction de l'Erreur d'Assignation (`api/dev_team.php`, `core/DevTeamEngine.php`, `views/dev_team.php`) :**
   * **Résolution de l'erreur réseau / SQL 500 :**
     - Initialisation systématique de la variable de base de données `$db` en en-tête de `api/dev_team.php` pour éviter l'erreur `Fatal Error: Call to a member function prepare() on null` lors de la vérification des comptes bots.

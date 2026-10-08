@@ -1,6 +1,36 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
-### [2026-10-08] - dev-team-roles-assignment-fix : Correction de l'Erreur d'Attribution des Métiers de Développement
+### [2026-10-08] - hero-harvest-bonus-fix : Correction et Synchronisation Complète de la Bénédiction de Récolte du Samouraï Héros
+- **Module :** `hero-harvest-bonus-fix`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Persistance de la Bénédiction de Récolte en Déplacement & Aventure (`core/HeroEngine.php`) :**
+     - Le bonus de récolte du Samouraï Héros était auparavant conditionné à un statut strict `status === 'home'`. Dès que le joueur envoyait son Samouraï en aventure provinciale ou en expédition militaire, le bonus retombait brutalement à 0, faisant croire à un dysfonctionnement.
+     - Conformément aux règles féodales et aux standards du genre (Travian), la bénédiction de récolte profite en continu au fief d'attache du héros tant qu'il est vivant (`status !== 'dead'` et `health > 0`), sans interruption lors des aventures.
+  2. **Résolution Robuste du Fief d'Attache (`core/HeroEngine.php::getHeroProductionBonus`) :**
+     - Recherche fiabilisée basée sur le propriétaire réel du fief (`planets.user_id`) avec rattachement automatique en cas d'identifiant de planète non renseigné ou orphelin (`current_planet_id`).
+  3. **Connexion Intégrale des 9 Parcelles Rurales à `PlanetEngine::calculateProduction` (`core/PlanetEngine.php`) :**
+     - Prise en compte directe des rendements horaires réels de la Forêt, Carrière, Rizière et Sanctuaire Shintō (`planet_rural_plots`) dans le calcul de production globale du fief et accumulation lors des ticks de ressources.
+  4. **Transparence et Affichage UI dans le Panneau des Récoltes & Carte (`views/partials/rural_harvest_resources_panel.php`, `views/resources.php`, `public/js/rural_domain_map.js`) :**
+     - Ajout d'indicateurs visuels explicites `+X Héros` sous le Bois, la Pierre et le Riz dans le panneau latéral droit.
+     - Encart récapitulatif dédié « Bénédiction du Samouraï » synthétisant les apports horaires du héros pour le domaine.
+     - Prise en compte du bonus du Samouraï dans la modale d'inspection de chaque parcelle du Terroir Féodal.
+  5. **Dynamisme & Prévisualisation en Temps Réel dans la Fiche du Héros (`views/hero.php`) :**
+     - Correction du texte statique erroné `(+120 res/h)` au profit des valeurs réelles indexées sur la vitesse du serveur (`resource_speed`).
+     - Mise à jour réactive instantanée en JavaScript (`updatePointsUI`) du texte de production bonus lors de l'incrémentation `+` / `-` des points de Bénédiction de Récolte.
+- **Fichiers modifiés :** `core/HeroEngine.php`, `core/PlanetEngine.php`, `views/hero.php`, `views/partials/rural_harvest_resources_panel.php`, `views/resources.php`, `public/js/rural_domain_map.js`, `tests/test_village_generator_9plots.php`, `tests/test_hero_prod_check.php`, `fonctionnalités.md`, `CHANGELOG.md`, `pedagogie.md`, `public/changelog.html`
+- **Vérification QA :**
+  1. Se rendre sur la page `/?page=hero&tab=attributes`.
+  2. Allouer des points dans « Bénédiction de Récolte » en cliquant sur le bouton `+` : vérifier que le libellé « Production bonus » se met à jour en temps réel selon le mode choisi (Équilibré ou Spécialisé Bois/Pierre/Riz).
+  3. Enregistrer les attributs du héros.
+  4. Se rendre sur la page `/?page=resources` :
+     - Vérifier que le panneau latéral droit « Récoltes, Stocks & Oasis » affiche distinctement le badge violet `+X Héros` à côté du taux horaire de la ressource concernée.
+     - Vérifier la présence de l'encart « Bénédiction du Samouraï : +X /h ».
+     - Cliquer sur la parcelle correspondante (Forêt, Carrière ou Rizière) : constater la mention du bonus héros actif dans la modale.
+  5. Lancer une aventure provinciale depuis la page du Héros : retourner sur la page `/?page=resources` et constater que le bonus de récolte du héros reste actif et continue d'enrichir le domaine même pendant son expédition.
+
+---
+
 - **Module :** `dev-team-roles-assignment-fix`
 - **Statut :** `À tester`
 - **Description :**

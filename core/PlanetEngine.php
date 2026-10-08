@@ -814,26 +814,58 @@ class PlanetEngine {
         $energyMax = 20; // Énergie passive de la planète
         $energyUsed = 0;
 
-        foreach ($fields as $f) {
-            $lvl = (int)$f['level'];
-            if ($lvl === 0) continue;
+        $hasRuralPlots = false;
+        if ($planetId !== null && $planetId > 0) {
+            try {
+                $stmtPlots = $this->db->prepare("SELECT structure_type, level, prod_hourly FROM planet_rural_plots WHERE planet_id = ?");
+                $stmtPlots->execute([$planetId]);
+                $rPlots = $stmtPlots->fetchAll(PDO::FETCH_ASSOC);
+                if (!empty($rPlots)) {
+                    $hasRuralPlots = true;
+                    foreach ($rPlots as $rp) {
+                        $sType = $rp['structure_type'];
+                        $sProd = (float)$rp['prod_hourly'];
+                        switch ($sType) {
+                            case 'foret':
+                                $metalMineProd += $sProd;
+                                break;
+                            case 'carriere':
+                                $crystalMineProd += $sProd;
+                                break;
+                            case 'riziere':
+                                $deutSynthProd += $sProd;
+                                break;
+                            case 'sanctuaire_shinto':
+                                $energyMax += (int)$sProd;
+                                break;
+                        }
+                    }
+                }
+            } catch (Exception $e) {}
+        }
 
-            switch ($f['type']) {
-                case 'solar_plant':
-                    $energyMax += (int)(FIELD_TYPES['solar_plant']['base_prod'] * $lvl * pow(1.12, $lvl));
-                    break;
-                case 'metal_mine':
-                    $metalMineProd += FIELD_TYPES['metal_mine']['base_prod'] * $lvl * pow(1.15, $lvl);
-                    $energyUsed += (int)(FIELD_TYPES['metal_mine']['base_energy_cons'] * $lvl * pow(1.1, $lvl));
-                    break;
-                case 'crystal_mine':
-                    $crystalMineProd += FIELD_TYPES['crystal_mine']['base_prod'] * $lvl * pow(1.15, $lvl);
-                    $energyUsed += (int)(FIELD_TYPES['crystal_mine']['base_energy_cons'] * $lvl * pow(1.1, $lvl));
-                    break;
-                case 'deuterium_synth':
-                    $deutSynthProd += FIELD_TYPES['deuterium_synth']['base_prod'] * $lvl * pow(1.15, $lvl);
-                    $energyUsed += (int)(FIELD_TYPES['deuterium_synth']['base_energy_cons'] * $lvl * pow(1.1, $lvl));
-                    break;
+        if (!$hasRuralPlots) {
+            foreach ($fields as $f) {
+                $lvl = (int)$f['level'];
+                if ($lvl === 0) continue;
+
+                switch ($f['type']) {
+                    case 'solar_plant':
+                        $energyMax += (int)(FIELD_TYPES['solar_plant']['base_prod'] * $lvl * pow(1.12, $lvl));
+                        break;
+                    case 'metal_mine':
+                        $metalMineProd += FIELD_TYPES['metal_mine']['base_prod'] * $lvl * pow(1.15, $lvl);
+                        $energyUsed += (int)(FIELD_TYPES['metal_mine']['base_energy_cons'] * $lvl * pow(1.1, $lvl));
+                        break;
+                    case 'crystal_mine':
+                        $crystalMineProd += FIELD_TYPES['crystal_mine']['base_prod'] * $lvl * pow(1.15, $lvl);
+                        $energyUsed += (int)(FIELD_TYPES['crystal_mine']['base_energy_cons'] * $lvl * pow(1.1, $lvl));
+                        break;
+                    case 'deuterium_synth':
+                        $deutSynthProd += FIELD_TYPES['deuterium_synth']['base_prod'] * $lvl * pow(1.15, $lvl);
+                        $energyUsed += (int)(FIELD_TYPES['deuterium_synth']['base_energy_cons'] * $lvl * pow(1.1, $lvl));
+                        break;
+                }
             }
         }
 
@@ -925,10 +957,14 @@ class PlanetEngine {
             }
         }
 
+        $effectiveMetalProd = $hasRuralPlots ? ($metalBase + $metalMineProd) : ($metalBase + ($metalMineProd * $speed));
+        $effectiveCrystalProd = $hasRuralPlots ? ($crystalBase + $crystalMineProd) : ($crystalBase + ($crystalMineProd * $speed));
+        $effectiveDeutProd = $hasRuralPlots ? ($deutBase + $deutSynthProd) : ($deutBase + ($deutSynthProd * $speed));
+
         return [
-            'metal' => (int)((($metalBase + ($metalMineProd * $speed)) * $energyRatio * $workforceRatio * $oasisBonusMult['wood'] * $sawmillMult) * $matsuriBonusMult) + $heroProdBonus['metal'],
-            'crystal' => (int)((($crystalBase + ($crystalMineProd * $speed)) * $energyRatio * $workforceRatio * $oasisBonusMult['stone'] * $stonemasonMult) * $matsuriBonusMult) + $heroProdBonus['crystal'],
-            'deuterium' => (int)((($deutBase + ($deutSynthProd * $speed)) * $energyRatio * $workforceRatio * $oasisBonusMult['rice'] * $grainMillMult) * $matsuriBonusMult) + $heroProdBonus['deuterium'],
+            'metal' => (int)((($effectiveMetalProd * $energyRatio * $workforceRatio * $oasisBonusMult['wood'] * $sawmillMult) * $matsuriBonusMult) + $heroProdBonus['metal']),
+            'crystal' => (int)((($effectiveCrystalProd * $energyRatio * $workforceRatio * $oasisBonusMult['stone'] * $stonemasonMult) * $matsuriBonusMult) + $heroProdBonus['crystal']),
+            'deuterium' => (int)((($effectiveDeutProd * $energyRatio * $workforceRatio * $oasisBonusMult['rice'] * $grainMillMult) * $matsuriBonusMult) + $heroProdBonus['deuterium']),
             'energy_max' => $energyMax,
             'energy_used' => $energyUsed,
             'energy_ratio' => $energyRatio,

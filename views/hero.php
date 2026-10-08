@@ -6,8 +6,10 @@
  */
 require_once __DIR__ . '/../core/HeroEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
+require_once __DIR__ . '/../core/GameConfig.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
+$resSpeed = max(1, (float)GameConfig::get('resource_speed', 5));
 $heroEngine = new HeroEngine();
 $planetEngine = new PlanetEngine();
 
@@ -441,10 +443,26 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                         <strong class="fs-5">Bénédiction de Récolte</strong>
                                     </div>
                                     <p class="text-secondary small mb-1">
-                                        Accroît la production horaire de ressources du fief où réside le héros (+120 res/h par point).
+                                        Accroît la production horaire de ressources du fief où réside le héros (+<?= (int)round(20 * $resSpeed) ?>/h en spécialisé ou +<?= (int)round(6 * $resSpeed) ?>/h de chaque en équilibré par point).
                                     </p>
                                     <div class="text-warning small font-weight-bold">
-                                        Production bonus : <span id="effectiveProd">+<?= number_format($hero['stat_production'] * 120) ?> res/h</span>
+                                        Production bonus : <span id="effectiveProd">
+                                            <?php
+                                            $prodType = $hero['production_type'] ?? 'balanced';
+                                            $hM = (int)($hero['effective']['hourly_production']['metal'] ?? 0);
+                                            $hC = (int)($hero['effective']['hourly_production']['crystal'] ?? 0);
+                                            $hD = (int)($hero['effective']['hourly_production']['deuterium'] ?? 0);
+                                            if ($prodType === 'balanced') {
+                                                echo "+{$hM} Bois, +{$hC} Pierre, +{$hD} Riz / h (Total +" . ($hM + $hC + $hD) . " / h)";
+                                            } elseif ($prodType === 'metal') {
+                                                echo "+{$hM} Bois de Cèdre / h";
+                                            } elseif ($prodType === 'crystal') {
+                                                echo "+{$hC} Pierre de Taille / h";
+                                            } else {
+                                                echo "+{$hD} Riz Impérial / h";
+                                            }
+                                            ?>
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
@@ -949,6 +967,30 @@ function updatePointsUI() {
     
     const effDef = document.getElementById('effectiveDefense');
     if (effDef) effDef.innerText = '+' + newDefPct + '%';
+
+    // Prévisualisation dynamique de la production
+    const baseProd = <?= (int)$hero['stat_production'] ?>;
+    const resSpeed = <?= (float)$resSpeed ?>;
+    const prodType = '<?= htmlspecialchars($hero['production_type'] ?? 'balanced') ?>';
+    const totalProdPts = baseProd + pointsToAdd.production;
+    
+    let prodLabel = '';
+    if (prodType === 'balanced') {
+        const perRes = Math.round(totalProdPts * 6 * resSpeed);
+        prodLabel = `+${perRes} Bois, +${perRes} Pierre, +${perRes} Riz / h (Total +${perRes * 3} / h)`;
+    } else if (prodType === 'metal') {
+        const val = Math.round(totalProdPts * 20 * resSpeed);
+        prodLabel = `+${val} Bois de Cèdre / h`;
+    } else if (prodType === 'crystal') {
+        const val = Math.round(totalProdPts * 20 * resSpeed);
+        prodLabel = `+${val} Pierre de Taille / h`;
+    } else if (prodType === 'deuterium') {
+        const val = Math.round(totalProdPts * 20 * resSpeed);
+        prodLabel = `+${val} Riz Impérial / h`;
+    }
+
+    const effProd = document.getElementById('effectiveProd');
+    if (effProd) effProd.innerText = prodLabel;
 }
 
 async function submitAttributes() {

@@ -61,6 +61,13 @@ $stockDeut = (float)($planet['deuterium'] ?? 0);
 $maxDeut = max(1, (float)($planet['deuterium_max'] ?? 15000));
 $pctDeut = min(100, round(($stockDeut / $maxDeut) * 100, 1));
 
+// Bonus de production du Samouraï Héros
+$heroBonuses = $prodRates['hero_bonuses'] ?? ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+$heroBonusMetal = (int)($heroBonuses['metal'] ?? 0);
+$heroBonusCrystal = (int)($heroBonuses['crystal'] ?? 0);
+$heroBonusDeut = (int)($heroBonuses['deuterium'] ?? 0);
+$hasHeroBonus = ($heroBonusMetal > 0 || $heroBonusCrystal > 0 || $heroBonusDeut > 0);
+
 // Populations & Habitations
 $curPop = (int)($planet['population'] ?? 0);
 $pctPop = ($maxPop > 0) ? min(100, round(($curPop / $maxPop) * 100, 1)) : 0;
@@ -120,9 +127,16 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
                             <span class="badge bg-danger text-white py-0 px-1" style="font-size:0.65rem;">Plein</span>
                         <?php endif; ?>
                     </div>
-                    <span class="badge bg-success-lt font-monospace fw-bold">
-                        +<?= number_format($prodRates['metal'] ?? 0) ?>/h
-                    </span>
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge bg-success-lt font-monospace fw-bold">
+                            +<?= number_format($prodRates['metal'] ?? 0) ?>/h
+                        </span>
+                        <?php if ($heroBonusMetal > 0): ?>
+                            <span class="badge bg-primary-lt text-primary font-monospace py-0 px-1" style="font-size:0.65rem;" title="Bénédiction du Samouraï Héros incluse (+<?= number_format($heroBonusMetal) ?>/h)">
+                                <i class="fa-solid fa-user-ninja me-0.5"></i>+<?= number_format($heroBonusMetal) ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-1 text-muted font-monospace" style="font-size:0.72rem;">
                     <span>Stock : <strong class="text-body"><?= number_format($stockMetal) ?></strong> / <?= number_format($maxMetal) ?></span>
@@ -143,9 +157,16 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
                             <span class="badge bg-danger text-white py-0 px-1" style="font-size:0.65rem;">Plein</span>
                         <?php endif; ?>
                     </div>
-                    <span class="badge bg-secondary-lt font-monospace fw-bold">
-                        +<?= number_format($prodRates['crystal'] ?? 0) ?>/h
-                    </span>
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge bg-secondary-lt font-monospace fw-bold">
+                            +<?= number_format($prodRates['crystal'] ?? 0) ?>/h
+                        </span>
+                        <?php if ($heroBonusCrystal > 0): ?>
+                            <span class="badge bg-primary-lt text-primary font-monospace py-0 px-1" style="font-size:0.65rem;" title="Bénédiction du Samouraï Héros incluse (+<?= number_format($heroBonusCrystal) ?>/h)">
+                                <i class="fa-solid fa-user-ninja me-0.5"></i>+<?= number_format($heroBonusCrystal) ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-1 text-muted font-monospace" style="font-size:0.72rem;">
                     <span>Stock : <strong class="text-body"><?= number_format($stockCrystal) ?></strong> / <?= number_format($maxCrystal) ?></span>
@@ -166,9 +187,16 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
                             <span class="badge bg-danger text-white py-0 px-1" style="font-size:0.65rem;">Plein</span>
                         <?php endif; ?>
                     </div>
-                    <span class="badge bg-warning-lt font-monospace fw-bold">
-                        +<?= number_format($prodRates['deuterium'] ?? 0) ?>/h
-                    </span>
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge bg-warning-lt font-monospace fw-bold">
+                            +<?= number_format($prodRates['deuterium'] ?? 0) ?>/h
+                        </span>
+                        <?php if ($heroBonusDeut > 0): ?>
+                            <span class="badge bg-primary-lt text-primary font-monospace py-0 px-1" style="font-size:0.65rem;" title="Bénédiction du Samouraï Héros incluse (+<?= number_format($heroBonusDeut) ?>/h)">
+                                <i class="fa-solid fa-user-ninja me-0.5"></i>+<?= number_format($heroBonusDeut) ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-1 text-muted font-monospace" style="font-size:0.72rem;">
                     <span>Grenier : <strong class="text-body"><?= number_format($stockDeut) ?></strong> / <?= number_format($maxDeut) ?></span>
@@ -178,6 +206,25 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
                     <div class="progress-bar <?= ($pctDeut >= 90) ? 'bg-danger' : 'bg-warning' ?>" role="progressbar" style="width: <?= $pctDeut ?>%;"></div>
                 </div>
             </div>
+
+            <?php if ($hasHeroBonus): ?>
+                <!-- Récapitulatif Bénédiction du Samouraï Héros -->
+                <div class="p-1.5 px-2 rounded bg-primary-lt border border-primary-subtle d-flex align-items-center justify-content-between flex-wrap gap-1" style="font-size:0.72rem;">
+                    <div class="d-flex align-items-center gap-1 text-primary">
+                        <i class="fa-solid fa-user-ninja"></i>
+                        <span class="fw-bold">Bénédiction du Samouraï :</span>
+                    </div>
+                    <div class="font-monospace text-primary fw-bold">
+                        <?php
+                            $bParts = [];
+                            if ($heroBonusMetal > 0) $bParts[] = '+' . number_format($heroBonusMetal) . ' Bois';
+                            if ($heroBonusCrystal > 0) $bParts[] = '+' . number_format($heroBonusCrystal) . ' Pierre';
+                            if ($heroBonusDeut > 0) $bParts[] = '+' . number_format($heroBonusDeut) . ' Riz';
+                            echo implode(' &bull; ', $bParts) . '/h';
+                        ?>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- ====================================================

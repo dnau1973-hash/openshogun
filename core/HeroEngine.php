@@ -27,6 +27,10 @@ class HeroEngine {
         if (self::$schemaChecked) return;
         self::$schemaChecked = true;
 
+        if ($this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            return;
+        }
+
         try {
             // 1. Table `heroes`
             $this->db->exec("
@@ -126,12 +130,22 @@ class HeroEngine {
      * Crée et initialise un Samouraï Héros pour un joueur ainsi que ses 3 premières aventures
      */
     public function createHeroForUser(int $userId, string $name, int $planetId, ?int $coordX = null, ?int $coordY = null): array {
-        $stmt = $this->db->prepare("
-            INSERT INTO heroes 
-            (user_id, current_planet_id, name, level, experience, health, status, last_health_update, unassigned_points) 
-            VALUES (?, ?, ?, 1, 0, 100.0, 'home', UNIX_TIMESTAMP(), 4)
-            ON DUPLICATE KEY UPDATE current_planet_id = VALUES(current_planet_id)
-        ");
+        $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
+            $stmt = $this->db->prepare("
+                INSERT INTO heroes 
+                (user_id, current_planet_id, name, level, experience, health, status, last_health_update, unassigned_points) 
+                VALUES (?, ?, ?, 1, 0, 100.0, 'home', strftime('%s','now'), 4)
+                ON CONFLICT(user_id) DO UPDATE SET current_planet_id = excluded.current_planet_id
+            ");
+        } else {
+            $stmt = $this->db->prepare("
+                INSERT INTO heroes 
+                (user_id, current_planet_id, name, level, experience, health, status, last_health_update, unassigned_points) 
+                VALUES (?, ?, ?, 1, 0, 100.0, 'home', UNIX_TIMESTAMP(), 4)
+                ON DUPLICATE KEY UPDATE current_planet_id = VALUES(current_planet_id)
+            ");
+        }
         $stmt->execute([$userId, $planetId, $name]);
 
         if ($coordX === null || $coordY === null) {
@@ -288,7 +302,9 @@ class HeroEngine {
         $prodType = $hero['production_type'];
 
         $hourlyProd = ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
-        if ($hero['status'] === 'home') {
+        // En accord avec les règles féodales (style Travian), la bénédiction de récolte du Samouraï
+        // bénéficie à son domaine d'attache tant qu'il est vivant (statut != dead), y compris en aventure ou déplacement.
+        if ($hero['status'] !== 'dead' && (float)($hero['health'] ?? 100.0) > 0) {
             if ($prodType === 'balanced') {
                 $val = (int)round($prodPoints * 6 * $resSpeed);
                 $hourlyProd = ['metal' => $val, 'crystal' => $val, 'deuterium' => $val];
@@ -425,16 +441,34 @@ class HeroEngine {
      * Retourne le bonus de production apporté par le héros sur une planète donnée
      */
     public function getHeroProductionBonus(int $planetId): array {
-        $stmt = $this->db->prepare("SELECT user_id FROM heroes WHERE current_planet_id = ? AND status = 'home'");
-        $stmt->execute([$planetId]);
-        $uId = $stmt->fetchColumn();
-        if (!$uId) {
+        // 1. Trouver le propriétaire de ce fief
+        $stmtPlanet = $this->db->prepare("SELECT user_id FROM planets WHERE id = ?");
+        $stmtPlanet->execute([$planetId]);
+        $ownerUserId = $stmtPlanet->fetchColumn();
+        if (!$ownerUserId) {
             return ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
         }
 
-        $hero = $this->getHeroByUserId((int)$uId);
-        if (!$hero || $hero['status'] !== 'home' || $hero['health'] <= 0) {
+        // 2. Récupérer le Samouraï Héros du propriétaire
+        $hero = $this->getHeroByUserId((int)$ownerUserId);
+        if (!$hero || $hero['status'] === 'dead' || (float)($hero['health'] ?? 100.0) <= 0) {
             return ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+        }
+
+        // 3. Vérifier le fief d'attache du héros
+        $heroPlanetId = (int)($hero['current_planet_id'] ?? 0);
+        if ($heroPlanetId !== $planetId) {
+            // Si le héros est explicitement stationné sur un autre fief existant de ce joueur
+            if ($heroPlanetId > 0) {
+                $stmtCheck = $this->db->prepare("SELECT COUNT(*) FROM planets WHERE id = ? AND user_id = ?");
+                $stmtCheck->execute([$heroPlanetId, $ownerUserId]);
+                if ((int)$stmtCheck->fetchColumn() > 0) {
+                    return ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+                }
+            }
+            // Sinon (current_planet_id invalide ou non renseigné), rattacher à ce fief actif
+            $this->db->prepare("UPDATE heroes SET current_planet_id = ? WHERE id = ?")->execute([$planetId, $hero['id']]);
+            $hero['current_planet_id'] = $planetId;
         }
 
         return $hero['effective']['hourly_production'] ?? ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];

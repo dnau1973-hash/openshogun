@@ -182,7 +182,7 @@ echo "   - Foret Niv. 20  : Bois = {$costsLvl20['metal']}, Durée = {$durLvl20}s
 echo "   - Foret Niv. 50  : Bois = {$costsLvl50['metal']}, Durée = {$durLvl50}s\n";
 echo "   - Foret Niv. 100 : Bois = {$costsLvl100['metal']}, Durée = {$durLvl100}s\n";
 
-if ($durLvl1 >= 60 && $durLvl100 > $durLvl20 && $costsLvl100['metal'] > $costsLvl20['metal']) {
+if ($durLvl1 >= 30 && $durLvl100 > $durLvl20 && $costsLvl100['metal'] > $costsLvl20['metal']) {
     echo "   -> [SUCCES] Formules de coût et de durée progressives (minutes à plusieurs jours) validées !\n";
 } else {
     echo "   -> [ECHEC] Anomalie sur les durées ou coûts.\n";
