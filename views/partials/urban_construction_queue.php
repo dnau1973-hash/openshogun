@@ -126,3 +126,4 @@ $isTerran = $isTerran ?? (($planet['faction'] ?? '') === 'terran');
         <?php endif; ?>
     </div>
 </div>
+
