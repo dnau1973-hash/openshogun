@@ -1,5 +1,31 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-08] - rural-animated-atmosphere : Ambiance Vivante du Terroir Féodal (Estampe Japonaise Animée en Arrière-Plan)
+- **Module :** `rural-animated-atmosphere`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Surcouche Animée Légère & Non-Destructive (`views/partials/rural_atmosphere_overlay.php`, `views/resources.php`) :**
+     - Animation féodale dynamique superposée à l'illustration 16:9 du domaine rural (`views/resources.php`).
+     - **Brume vaporeuse :** Deux couches de brume matinale à défilement parallaxe continu créant de la profondeur atmosphérique le long des collines.
+     - **Vol de hérons / grues :** Formation en vol traversant majestueusement le ciel à intervalles réguliers avec battement d'ailes SVG vectoriel fluide.
+     - **Paysans & travailleurs en mouvement :** Personnages miniatures animés circulant le long des chemins de terre (porteurs de gerbes de riz, porteurs de rondins de bois).
+     - **Charrette tirée par un bœuf :** Convoi paysan d'attelage avec pas cadencés et roue en rotation avançant lentement sur la route provinciale.
+     - **Volutes de fumée :** Émanations douces au sommet du donjon Tenshu, des toits de chaume du village central et de l'encens au sanctuaire Shintō.
+     - **Pétales de cerisier (Sakura) :** Pétales flottant délicatement en diagonale au gré du vent.
+  2. **Performance GPU 60 FPS & Poids Plume :**
+     - Réalisé 100% en SVG vectoriel inline et CSS3 matériel (`translate3d`, `opacity`, `transform`) sans vidéo ni ressource lourde (< 30 Ko).
+     - Totalement non-bloquant (`pointer-events: none; z-index: 10`) : préserve intacts les clics, survols et interactions des 9 parcelles et du HUD.
+  3. **Mode Ambiance Zen Personnalisable :**
+     - Bouton de bascule « Ambiance Vivante : On / Off » intégré dans l'en-tête de la carte avec sauvegarde de l'état dans le `localStorage` du navigateur.
+- **Fichiers modifiés / créés :** `views/partials/rural_atmosphere_overlay.php`, `views/resources.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Accéder à la page Terroir / Ressources (`/?page=resources`).
+  2. Constater l'animation fluide en arrière-plan : la brume qui dérive, les hérons dans le ciel, les paysans marchant sur les chemins, le bœuf tirant sa charrette, la fumée s'élevant des toits et les pétales de cerisiers.
+  3. Survoler et cliquer sur les parcelles (ex: Tenshu pour aller à la cité, rizière ou carrière pour ouvrir la modale d'élévation) : vérifier qu'aucun clic n'est intercepté ni gêné.
+  4. Cliquer sur le bouton « Ambiance : On » dans le bandeau supérieur de la carte : vérifier l'arrêt doux de toutes les animations et la persistance du réglage après rechargement de la page.
+
+---
+
 ### [2026-10-08] - admin-backup-integration-map-parcel-properties : Intégration de la Sauvegarde dans l'Interface d'Administration & Affichage de la Propriété des Parcelles sur la Carte
 - **Module :** `admin-backup-integration-map-parcel-properties`
 - **Statut :** `À tester`

@@ -5,6 +5,17 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Ambiance Vivante du Terroir — Estampe Japonaise Animée en Arrière-Plan (`views/partials/rural_atmosphere_overlay.php`, `views/resources.php`) :**
+  * **Vie rurale féodale en mouvement :** Ajout d'une surcouche visuelle légère (pur SVG vectoriel + animations GPU 60 FPS CSS3) donnant vie au panorama 16:9 du domaine rural :
+    - *Brume matinale en défilement parallaxe :* Nappes vaporeuses dérivant lentement au ras des montagnes et des vallées à double vitesse.
+    - *Vol de hérons / grues du Japon :* Escadron d'oiseaux migrateurs traversant l'horizon avec battement d'ailes articulé en SVG.
+    - *Travailleurs féodaux sur les chemins :* Paysans portant des récoltes de riz et des fagots de bois sur l'épaule cheminant le long des voies de terre.
+    - *Convoi traditionnel :* Paysan guidant une charrette à grains tirée par un bœuf de labour aux pas cadencés.
+    - *Volutes de fumée :* Cheminées fumantes sur le Tenshu castral, les chaumières du village et l'encens du sanctuaire Shintō.
+    - *Pétales de cerisier (Sakura) :* Pétales roses tournoyant délicatement au vent printanier.
+  * **Performance & Respect de l'ergonomie :** Surcouche non-intrusive (`pointer-events: none`), n'interceptant aucun clic sur les 9 parcelles, les modales ou les chantiers. Poids plume (< 30 Ko sans aucune vidéo).
+  * **Contrôle du joueur & Mode Zen :** Bouton à bascule « Ambiance Vivante : On/Off » dans l'en-tête de la carte avec persistance du choix du joueur dans `localStorage`.
+
 - **Intégration de la sauvegarde & restauration de la base dans l'Interface d'Administration (`views/admin.php`, `api/admin.php`) :**
   * **Onglet Maintenance unifié :** Ajout d'une section dédiée complète « Sauvegarde & Restauration de la Base de Données (Structure & Données Séparées) » au panneau d'administration.
   * **Déclenchement immédiat :** Bouton de création de sauvegarde instantanée (générant séparément les fichiers DDL et DML) avec détection en temps réel des clés USB / disques externes (`/media`, `/mnt`) ou point de montage personnalisé.

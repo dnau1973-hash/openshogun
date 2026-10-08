@@ -293,12 +293,18 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                         <?php endif; ?>
                     </div>
                     <div class="d-flex align-items-center gap-2">
+                        <button type="button" id="btnToggleAtmosphere" onclick="toggleRuralAtmosphere()" class="btn btn-sm btn-dark text-warning border-secondary" title="Activer / Désactiver les animations vivantes de l'estampe" style="font-size:0.75rem; padding: 2px 8px;">
+                            <i class="fa-solid fa-wind me-1 text-warning"></i><span id="txtAtmosphereStatus">Ambiance : On</span>
+                        </button>
                         <?= AiPromptHelper::renderBadge('shogun_rural_terroir_9plots.jpg', 'Panorama Stratégique des 9 Parcelles Féodales', '/public/assets/shogun_rural_terroir_9plots.jpg', '', true) ?>
                     </div>
                 </div>
 
                 <!-- Conteneur Panoramique 16:9 Fixe (sans pan/zoom) -->
                 <div class="rural-map-container" id="ruralMapContainer">
+
+                    <!-- Calque Vivant Estampe Animée (Brume, Hérons, Paysans, Charrette, Fumée, Sakura) -->
+                    <?php require __DIR__ . '/partials/rural_atmosphere_overlay.php'; ?>
 
                     <?php foreach ($plots as $type => $p): ?>
                         <?php
