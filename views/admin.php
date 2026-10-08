@@ -465,6 +465,12 @@ $tabAliases = [
     'emails' => 'mail',
     'smtp' => 'mail',
     'messagerie' => 'mail',
+    'backup' => 'maintenance',
+    'backups' => 'maintenance',
+    'sauvegarde' => 'maintenance',
+    'sauvegardes' => 'maintenance',
+    'bdd' => 'maintenance',
+    'database' => 'maintenance',
 ];
 $allowedTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'mail', 'maintenance', 'all'];
 $currentTab = $_GET['tab'] ?? 'dashboard';
@@ -547,11 +553,11 @@ $adminPages = [
         'desc' => 'Configuration du transporteur d\'e-mails (SMTP / mail local), chiffrement des accès et tests d\'envoi.',
     ],
     'maintenance' => [
-        'title' => 'Maintenance Système',
-        'short' => 'Maintenance',
-        'icon' => '<i class="fa-solid fa-screwdriver-wrench text-danger"></i>',
-        'pretitle' => 'Opérations Techniques',
-        'desc' => 'Sauvegardes de base de données, vidage des caches et réinitialisations sécurisées.',
+        'title' => 'Sauvegardes & Maintenance Système',
+        'short' => 'Sauvegardes & Maintenance',
+        'icon' => '<i class="fa-solid fa-database text-danger"></i>',
+        'pretitle' => 'Sécurité & Opérations Techniques',
+        'desc' => 'Sauvegardes autonomes (Structure & Données séparées, support USB), réintégration et réinitialisation de l\'univers.',
     ],
     'all' => [
         'title' => 'Console Globale (Tout Dérouler)',
@@ -643,6 +649,9 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             </div>
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list" id="adminPageActions">
+                    <a href="?page=admin&tab=maintenance" onclick="switchAdminTab('maintenance'); return false;" class="btn btn-outline-danger d-flex align-items-center gap-1 shadow-sm" title="Sauvegardes de la base de données &amp; Maintenance">
+                        <i class="fa-solid fa-database me-1"></i>Sauvegardes DB
+                    </a>
                     <a href="?page=admin&tab=updates" onclick="switchAdminTab('updates'); return false;" class="btn btn-outline-teal d-flex align-items-center gap-1 shadow-sm" title="Mises à jour GitHub &amp; Déploiement en 1 clic">
                         <i class="fa-solid fa-arrows-rotate me-1"></i>GitHub Sync
                         <span class="badge bg-teal text-white ms-1"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
@@ -699,9 +708,17 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </a>
                 </li>
 
-                <!-- 6. Menu Déroulant "Autres Modules" -->
+                <!-- 6. Sauvegardes & Maintenance (Directement visible) -->
+                <li class="nav-item admin-nav-item" role="presentation">
+                    <a href="?page=admin&tab=maintenance" class="nav-link admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" data-bs-target="#tab-maintenance" role="tab" onclick="switchAdminTab('maintenance'); return false;">
+                        <i class="fa-solid fa-database text-danger me-1"></i>Sauvegardes &amp; Maintenance
+                        <span class="badge bg-danger-lt ms-1"><?= count($backupSets) ?></span>
+                    </a>
+                </li>
+
+                <!-- 7. Menu Déroulant "Autres Modules" -->
                 <li class="nav-item dropdown admin-nav-item" role="presentation">
-                    <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'mail', 'maintenance']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                    <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'mail']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                         <i class="fa-solid fa-bolt text-warning me-1"></i>Autres modules
                         <?php if ($supportStats['count_pending'] > 0): ?>
                             <span class="badge bg-danger text-white ms-1">!</span>
@@ -733,7 +750,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                         </a>
                         <div class="dropdown-divider"></div>
                         <a href="?page=admin&tab=maintenance" class="dropdown-item admin-tab-btn <?= ($currentTab === 'maintenance') ? 'active' : '' ?>" data-tab="maintenance" data-bs-target="#tab-maintenance" onclick="switchAdminTab('maintenance'); return false;">
-                            <i class="fa-solid fa-screwdriver-wrench text-danger me-2"></i>Maintenance Système
+                            <i class="fa-solid fa-database text-danger me-2"></i>Sauvegardes &amp; Maintenance
                         </a>
                     </div>
                 </li>
@@ -2643,8 +2660,26 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     <!-- Section 11 : Décret Suprême - Réinitialisation Complète du Monde Féodal -->
     <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'maintenance' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-maintenance" data-tab="maintenance" role="tabpanel">
         
+        <!-- Bannière d'accès rapide Maintenance & Sauvegardes -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-danger text-white py-2 px-3 fw-bold" style="font-size:0.85rem;">
+                    <i class="fa-solid fa-screwdriver-wrench me-1"></i>MODULE MAINTENANCE &amp; SÉCURITÉ
+                </span>
+                <span class="text-secondary small">Opérations techniques du Shōgunat :</span>
+            </div>
+            <div class="btn-group btn-group-sm">
+                <a href="#section-db-backup" class="btn btn-primary fw-bold">
+                    <i class="fa-solid fa-database me-1"></i>Sauvegardes &amp; Restauration
+                </a>
+                <a href="#section-world-reset" class="btn btn-outline-danger">
+                    <i class="fa-solid fa-fire text-danger me-1"></i>Réinitialisation de l'Univers
+                </a>
+            </div>
+        </div>
+
         <!-- Section Sauvegarde & Restauration Séparées (Structure & Données + Support USB) -->
-        <div class="card mb-4 border-primary">
+        <div class="card mb-4 border-primary" id="section-db-backup">
             <div class="card-header bg-primary-lt d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <h3 class="card-title text-primary d-flex align-items-center gap-2 m-0">
@@ -2814,7 +2849,7 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             </div>
         </div>
 
-        <div class="card mb-4 border-danger">
+        <div class="card mb-4 border-danger" id="section-world-reset">
             <div class="card-header bg-danger-lt d-flex justify-content-between align-items-center">
                 <h3 class="card-title text-danger d-flex align-items-center gap-2 m-0">
                     <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Décret Suprême &mdash; Réinitialisation Complète du Monde Féodal (Reset)
@@ -3556,7 +3591,13 @@ function switchAdminTab(tabKey) {
         'email': 'mail',
         'emails': 'mail',
         'smtp': 'mail',
-        'messagerie': 'mail'
+        'messagerie': 'mail',
+        'backup': 'maintenance',
+        'backups': 'maintenance',
+        'sauvegarde': 'maintenance',
+        'sauvegardes': 'maintenance',
+        'bdd': 'maintenance',
+        'database': 'maintenance'
     };
     if (jsTabAliases[tabKey]) {
         tabKey = jsTabAliases[tabKey];
@@ -3576,7 +3617,7 @@ function switchAdminTab(tabKey) {
         const bc = document.getElementById('adminBreadcrumbCurrent');
         if (bc) bc.textContent = meta.short || meta.title;
         const icon = document.getElementById('adminPageTitleIcon');
-        if (icon) icon.textContent = meta.icon;
+        if (icon) icon.innerHTML = meta.icon;
         const title = document.getElementById('adminPageTitleText');
         if (title) title.textContent = meta.title;
         const pretitle = document.getElementById('adminPagePretitle');
