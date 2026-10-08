@@ -33,36 +33,42 @@ class BuildingEngine {
      * Calcule le coût et le temps pour améliorer une parcelle ou un bâtiment
      */
     public function getUpgradeDetails(string $category, string $targetId, int $currentLevel, int $hqLevel, int $population = 0): array {
+        // Récupération des coefficients dynamiques de dérivation configurés par le Game Elevate Designer
+        $timeCoeff  = max(0.05, min(10.0, (float)GameConfig::get('building_time_coeff', 1.0)));
+        $timeGrowth = max(1.05, min(2.5, (float)GameConfig::get('building_time_growth', 1.28)));
+        $costCoeff  = max(0.05, min(10.0, (float)GameConfig::get('building_cost_coeff', 1.0)));
+        $costGrowth = max(0.5, min(2.0, (float)GameConfig::get('building_cost_growth', 1.0)));
+
         if ($category === 'field') {
             $fieldConf = FIELD_TYPES[$targetId] ?? null;
             if (!$fieldConf) throw new Exception("Type de parcelle inconnu.");
             $targetLevel = $currentLevel + 1;
-            $mult = pow($fieldConf['cost_multiplier'], $currentLevel);
-            $metal = (int)($fieldConf['base_cost']['metal'] * $mult);
-            $crystal = (int)($fieldConf['base_cost']['crystal'] * $mult);
-            $deut = (int)($fieldConf['base_cost']['deuterium'] * $mult);
+            $mult = pow($fieldConf['cost_multiplier'] * $costGrowth, $currentLevel);
+            $metal = (int)round(($fieldConf['base_cost']['metal'] ?? 0) * $mult * $costCoeff);
+            $crystal = (int)round(($fieldConf['base_cost']['crystal'] ?? 0) * $mult * $costCoeff);
+            $deut = (int)round(($fieldConf['base_cost']['deuterium'] ?? 0) * $mult * $costCoeff);
             $baseTime = $fieldConf['base_time'];
         } else {
             $bConf = BUILDINGS[$targetId] ?? null;
             if (!$bConf) throw new Exception("Type de bâtiment inconnu.");
             $targetLevel = $currentLevel + 1;
-            $mult = pow($bConf['cost_multiplier'], $currentLevel);
-            $metal = (int)($bConf['base_cost']['metal'] * $mult);
-            $crystal = (int)($bConf['base_cost']['crystal'] * $mult);
-            $deut = (int)($bConf['base_cost']['deuterium'] * $mult);
+            $mult = pow($bConf['cost_multiplier'] * $costGrowth, $currentLevel);
+            $metal = (int)round(($bConf['base_cost']['metal'] ?? 0) * $mult * $costCoeff);
+            $crystal = (int)round(($bConf['base_cost']['crystal'] ?? 0) * $mult * $costCoeff);
+            $deut = (int)round(($bConf['base_cost']['deuterium'] ?? 0) * $mult * $costCoeff);
             $baseTime = $bConf['base_time'];
         }
 
         $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
         // Échelle de temps authentique Travian : réduction par le Tenshu (0.964^(hq-1)) et progression exponentielle
         $hqFactor = pow(0.964, max(0, $hqLevel - 1));
-        $lvlFactor = pow(1.28, $currentLevel) * pow($targetLevel, 0.85);
+        $lvlFactor = pow($timeGrowth, $currentLevel) * pow($targetLevel, 0.85);
 
         // Bonus démographique de main-d'œuvre : +1% de vitesse de construction tous les 100 habitants (plafonné à 25%)
         $popBonus = min(0.25, max(0, $population / 100) * 0.01);
         $popFactor = 1.0 / (1.0 + $popBonus);
 
-        $duration = max(15, (int)(($baseTime * $lvlFactor * $hqFactor * $popFactor) / $speed));
+        $duration = max(5, (int)round((($baseTime * $lvlFactor * $hqFactor * $popFactor * $timeCoeff) / $speed)));
 
         return [
             'target_level' => $targetLevel,

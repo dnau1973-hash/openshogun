@@ -489,6 +489,38 @@ try {
             ]);
             break;
 
+        // 16b. Enregistrement de la dérivation des bâtiments et coûts (Game Elevate Designer)
+        case 'save_building_derivation':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            if (!$devEngine->hasRole($currentUserId, 'game_designer') && !$auth->isAdmin()) {
+                http_response_code(403);
+                throw new Exception("Accès interdit : le réglage de dérivation des bâtiments est strictement réservé au métier Game Elevate Designer.");
+            }
+
+            $timeCoeff  = max(0.05, min(10.0, (float)($_POST['building_time_coeff'] ?? 1.0)));
+            $timeGrowth = max(1.05, min(2.5, (float)($_POST['building_time_growth'] ?? 1.28)));
+            $costCoeff  = max(0.05, min(10.0, (float)($_POST['building_cost_coeff'] ?? 1.0)));
+            $costGrowth = max(0.5, min(2.0, (float)($_POST['building_cost_growth'] ?? 1.0)));
+
+            GameConfig::set('building_time_coeff', $timeCoeff);
+            GameConfig::set('building_time_growth', $timeGrowth);
+            GameConfig::set('building_cost_coeff', $costCoeff);
+            GameConfig::set('building_cost_growth', $costGrowth);
+
+            $devEngine->addForgeXp($currentUserId, 35, 'game_balance', "Ajustement de la dérivation des bâtiments et des courbes de chantier (Game Elevate Designer)");
+
+            echo json_encode([
+                'success'  => true,
+                'message'  => "Courbes et coefficients de dérivation enregistrés avec succès ! Le jeu applique immédiatement ces paramètres (+35 XP Forge).",
+                'settings' => [
+                    'building_time_coeff'  => $timeCoeff,
+                    'building_time_growth' => $timeGrowth,
+                    'building_cost_coeff'  => $costCoeff,
+                    'building_cost_growth' => $costGrowth
+                ]
+            ]);
+            break;
+
         // 17. Expansion et arpentage des provinces (Game Elevate Designer)
         case 'generate_world':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");

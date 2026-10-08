@@ -1,5 +1,34 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-08] - game-elevate-designer-building-derivation : Simulateur de Dérivation des Bâtiments & Contrôle Global des Courbes de Construction
+- **Module :** `game-elevate-designer-building-derivation`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Nouveau Simulateur Studio Dev (`?page=dev_team&metier=game-elevate-designer&module=building-derivation`) :**
+     - Atelier dédié au Game Elevate Designer permettant de simuler et calibrer les chantiers et les coûts de construction du niveau 1 au niveau 20+.
+     - Calcul en direct des durées (en heures, minutes, secondes) et des ressources nécessaires (Bois, Pierre, Riz) pour chaque palier.
+     - Graphique interactif SVG affichant simultanément la courbe exponentielle de durée et la courbe de coût avec tooltips dynamiques au survol.
+     - Tableau analytique complet avec calculs de dérivation marginale ($\Delta$ coût en % et $\Delta$ durée en ratio de progression).
+     - Préréglages rapides d'équilibrage : Standard Sengoku, Chantiers Éclair, Long Terme, Abondance Économique, Chantiers Monumentaux.
+  2. **Coefficients d'Ajustement Dynamiques :**
+     - **Multiplicateur de durée (`building_time_coeff`) :** Rallonge ou accélère la durée globale de tous les chantiers (0.1x à 5.0x).
+     - **Pente temporelle ($g_t$, `building_time_growth`) :** Module l'exposant géométrique par niveau ($g_t^L$).
+     - **Multiplicateur de coût (`building_cost_coeff`) :** Accentue ou allège la quantité de ressources requise pour bâtir (0.1x à 5.0x).
+     - **Inflation des coûts ($g_c$, `building_cost_growth`) :** Module la croissance des coûts entre les niveaux inférieurs et supérieurs.
+  3. **Application Immédiate au Moteur de Jeu Réel :**
+     - `BuildingEngine::getUpgradeDetails` et `RuralPlotEngine::calculateUpgradeCost` / `calculateUpgradeDuration` intègrent directement ces paramètres depuis `game_settings`.
+     - Toute modification enregistrée dans le simulateur impacte instantanément les coûts affichés sur la page Bâtiments (`?page=buildings`), la Cité Castrale (`?page=city`), le Terroir Rural (`?page=resources`) et les files de chantiers actives.
+- **Fichiers modifiés :** `views/studio/game-elevate-designer/building-derivation.php`, `core/BuildingEngine.php`, `core/RuralPlotEngine.php`, `core/DevTeamEngine.php`, `core/GameConfig.php`, `api/dev_team.php`, `database/migrations/002_seed_game_data.sql`, `views/dev_team.php`, `fonctionnalités.md`, `CHANGELOG.md`
+- **Vérification QA :**
+  1. Se connecter avec un compte Game Elevate Designer (ou Administrateur) et accéder à `/?page=dev_team&metier=game-elevate-designer`.
+  2. Constater la présence du sous-module **« Dérivation des Bâtiments »** dans la barre de navigation des pills.
+  3. Cliquer dessus : vérifier le chargement fluide du simulateur, du graphique SVG et du tableau analytique niveau par niveau (1 à 20).
+  4. Modifier le curseur de durée ou de coût, ou cliquer sur un preset (ex. « Éclair » ou « Long Terme ») : constater la mise à jour immédiate à 60 fps des courbes, des KPIs et du tableau.
+  5. Cliquer sur « Appliquer au Jeu Réel » : vérifier la notification de confirmation et le gain d'XP Forge (+35 XP).
+  6. Naviguer vers `/?page=buildings` ou `/?page=city` et constater que les durées et coûts affichés pour les prochains niveaux reflètent fidèlement les nouveaux coefficients enregistrés.
+
+---
+
 ### [2026-10-07] - ui-simplify-rural-badges-tenshu-link : Simplification minimaliste des badges du terroir (Logo + Niveaux) et liaison directe du Tenshu vers la cité
 - **Module :** `ui-simplify-rural-badges-tenshu-link`
 - **Statut :** `À tester`

@@ -52,7 +52,11 @@ class GameConfig {
                     'famine_rate' => 3.0,
                     'famine_flour_consumption' => 1.0,
                     'hero_cage_drop_rate' => 25,
-                    'hero_xp_rate_percent' => 100
+                    'hero_xp_rate_percent' => 100,
+                    'building_time_coeff' => 1.0,
+                    'building_time_growth' => 1.28,
+                    'building_cost_coeff' => 1.0,
+                    'building_cost_growth' => 1.0
                 ];
             }
         }

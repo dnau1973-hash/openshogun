@@ -175,13 +175,17 @@ class RuralPlotEngine {
      * Formule : Base × (1 + 0.22 × (Niveau - 1)^1.45) × 1.12^min(Niveau - 1, 40)
      */
     public static function calculateUpgradeCost(string $structureType, int $currentLevel): array {
+        require_once __DIR__ . '/GameConfig.php';
+        $costCoeff = max(0.05, min(10.0, (float)GameConfig::get('building_cost_coeff', 1.0)));
+        $costGrowth = max(0.5, min(2.0, (float)GameConfig::get('building_cost_growth', 1.0)));
+
         $def = self::STRUCTURES[$structureType] ?? self::STRUCTURES['foret'];
         $base = $def['base_cost'];
 
         $lvl = max(1, $currentLevel);
         $polyFactor = 1.0 + (0.22 * pow($lvl - 1, 1.45));
-        $expFactor = pow(1.12, min($lvl - 1, 40));
-        $multiplier = $polyFactor * $expFactor;
+        $expFactor = pow(1.12 * $costGrowth, min($lvl - 1, 40));
+        $multiplier = $polyFactor * $expFactor * $costCoeff;
 
         return [
             'metal'     => (int)round($base['metal'] * $multiplier),
@@ -199,12 +203,15 @@ class RuralPlotEngine {
      * - Hauts paliers (50 à 100) : ~1.5 jours à plus de 15 jours
      */
     public static function calculateUpgradeDuration(int $currentLevel, int $hqLevel = 1): int {
+        require_once __DIR__ . '/GameConfig.php';
+        $timeCoeff = max(0.05, min(10.0, (float)GameConfig::get('building_time_coeff', 1.0)));
+
         $lvl = max(1, $currentLevel);
         $base = 180.0 * (1.0 + 0.16 * pow($lvl - 1, 1.35)) * pow(1.065, min($lvl - 1, 55)) * pow(1.025, max(0, $lvl - 56));
         $hqFactor = 1.0 + (max(1, $hqLevel) * 0.05);
-        $speed = defined('SPEED_FACTOR') ? SPEED_FACTOR : 1;
+        $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
 
-        return max(60, (int)round(($base / $hqFactor) / max(1, $speed)));
+        return max(30, (int)round((($base / $hqFactor) * $timeCoeff) / $speed));
     }
 
     /**

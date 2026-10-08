@@ -242,6 +242,13 @@ class DevTeamEngine {
             'icon'        => '🌾',
             'roles'       => ['game_designer'],
             'permissions' => ['formulas.tune', 'debug.sandbox']
+        ],
+        'building_derivation' => [
+            'id'          => 'building_derivation',
+            'title'       => 'Dérivation des Bâtiments',
+            'icon'        => '📈',
+            'roles'       => ['game_designer'],
+            'permissions' => ['formulas.tune', 'debug.sandbox']
         ]
     ];
 
@@ -308,6 +315,12 @@ class DevTeamEngine {
                     'title' => 'Écosystème des Oasis',
                     'icon'  => '<i class="fa-solid fa-seedling text-teal me-1"></i>',
                     'file'  => 'game-elevate-designer/oasis-ecosystem.php'
+                ],
+                'building-derivation' => [
+                    'slug'  => 'building-derivation',
+                    'title' => 'Dérivation des Bâtiments',
+                    'icon'  => '<i class="fa-solid fa-chart-line text-warning me-1"></i>',
+                    'file'  => 'game-elevate-designer/building-derivation.php'
                 ]
             ]
         ],
