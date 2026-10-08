@@ -27,13 +27,18 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * **Sélecteur d'Ambiance Météo (Menu Déroulant) :** Menu dropdown Tabler intégré dans l'en-tête du panorama permettant au joueur de choisir son climat préféré (Auto, Plein Jour, Crépuscule, Nuit aux Lanternes, Hiver Enneigé, Pluie & Momiji, ou Mode Zen désactivé) avec mémorisation dans `localStorage`.
 
 
-- **Panneau Mutualisé des Récoltes, Stocks & Oasis Féodales (`views/partials/rural_harvest_resources_panel.php`, `views/resources.php`, `views/city.php`) :**
-  * **Composant réutilisable & unifié :** Extraction et enrichissement du box de récoltes sous la forme d'un élément modulaire sur le même modèle que le suivi des chantiers en cours, intégré simultanément sur la vue Terroir (`?page=resources`) et sur la Cité Castrale (`?page=city`).
-  * **Ensemble des 8 indicateurs du fief :** Suivi complet des productions horaires, niveaux de développement et jauges de remplissage :
-    - *Matières premières & Entrepôts :* Bois de Cèdre (`metal`), Pierre de Taille (`crystal`), Riz Impérial (`deuterium`) avec stocks actuels, capacités maximales d'entrepôts/greniers, barres d'avancement colorées et badges d'alerte en cas de saturation (>90%).
-    - *Terroirs spécialisés :* Argile & Céramique (`fosse_argile`), Thé & Matcha (`culture_the`), Fèves de Soja & Miso (`champ_soja`) avec productions horaires et progression verticale des parcelles.
-    - *Harmonie & Démographie :* Sérénité globale du fief et apport du Sanctuaire Shintō, ainsi que l'occupation des logements traditionnels (population active / capacité d'accueil des minka).
-  * **Protection des oasis sauvages :** Section dédiée aux protectorats d'oasis annexées (statut X/3, coordonnées précises et bonus de production en koku).
+- **Intégration Complète de Tous les Éléments de Production dans le Panneau Latéral (`views/partials/rural_harvest_resources_panel.php`, `views/resources.php`, `views/city.php`) :**
+  * **Composant réutilisable & unifié :** Extraction et enrichissement du box de récoltes sous la forme d'un cockpit de gestion holistique intégré simultanément sur la vue Terroir (`?page=resources`) et sur la Cité Castrale (`?page=city`).
+  * **Intégration exhaustive des 7 composantes fondamentales de production :**
+    - *Matières premières & Entrepôts :* Bois de Cèdre (`metal`), Pierre de Taille (`crystal`), Riz Impérial (`deuterium`) avec stocks actuels, capacités maximales, barres d'avancement colorées, alertes de saturation (>90%) et **décomposition granulaire des facteurs de rendement** sous chaque jauge (Base naturelle, Parcelle rurale Niv.X, Atelier de spécialisation, Oasis annexée, Bénédiction du Samouraï Héros, Célébration Matsuri).
+    - *Terroirs spécialisés (1-100) :* Argile & Céramique (`fosse_argile`), Thé & Matcha (`culture_the`), Fèves de Soja & Miso (`champ_soja`) avec cadences horaires nettes, progression verticale des niveaux et effectifs d'ouvriers mobilisés.
+    - *Vivres raffinées & Réserves stratégiques :* Suivi des stocks de *Farine de Riz* (rations des troupes d'élite et prévention de la famine), de *Saké Féodal* (breuvage sacré des célébrations Matsuri) et de *Poutres de Charpente* (ouvrages et machines de siège).
+    - *Ferveur divine & Alimentation énergétique :* Suivi de la ferveur produite par le Sanctuaire Shintō et les Pavillons de thé, de la consommation des installations, calcul du solde net et alerte immédiate en cas de déficit (bridage de la production à 10%).
+    - *Main-d'œuvre & Climat social :* Logements Minka du Village, mobilisation des travailleurs (ouvriers en poste vs requis), ratio d'efficacité de production et niveau de contentement populaire (Prospère, Paisible ou Agité).
+    - *Matrice des modificateurs actifs :* Synthèse d'un coup d'œil de l'ensemble des multiplicateurs actifs (Samouraï Héros, Scierie, Briqueterie, Meunerie, Pavillon de thé, Matsuri, Oasis).
+    - *Oasis sauvages annexées :* Décompte (X / 3) et liste des oasis sous protectorat avec coordonnées précises et bonus cumulés.
+  * **Indicateur d'efficacité globale :** Badge synthétique en en-tête calculant le rendement global net (`Énergie % × Main-d'œuvre %`).
+  * **Performance & Chargement paresseux :** Initialisation paresseuse conditionnelle évitant toute requête base de données redondante.
 
 ### Corrigé (Fixed)
 - **Synchronisation & Persistance de la Bénédiction de Récolte du Samouraï Héros (`core/HeroEngine.php`, `core/PlanetEngine.php`, `views/hero.php`, `views/partials/rural_harvest_resources_panel.php`, `views/resources.php`, `public/js/rural_domain_map.js`) :**

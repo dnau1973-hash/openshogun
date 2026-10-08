@@ -1,5 +1,34 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-08] - harvest-panel-complete-production-integration : Intégration Complète de Tous les Éléments de Production dans le Widget Latéral
+- **Module :** `harvest-panel-complete-production-integration`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Intégration Exhaustive des 7 Piliers de Production (`views/partials/rural_harvest_resources_panel.php`) :**
+     - **Matières Premières de Base (Bois, Pierre, Riz) :** Cadences nettes horaires, jauges de capacité de stockage, alertes de débordement et décomposition détaillée de la production directement sous chaque jauge (Base naturelle + Apport de la parcelle rurale + Bonus atelier urbain + Bonus d'oasis + Bénédiction du Samouraï Héros + Fête Matsuri).
+     - **Terroirs Agricoles Spécialisés (Argile & Céramique, Thé & Matcha, Fèves de Soja) :** Cadences horaires de récolte, niveaux d'élévation (1 à 100), jauges de progression et effectifs d'ouvriers affectés.
+     - **Vivres Raffinées & Réserves Stratégiques :** Suivi des stocks et silos de *Farine de Riz* (rations des troupes d'élite et prévention de la famine féodale), de *Saké Féodal* (ressource sacrée des célébrations Matsuri) et de *Poutres de Charpente* (ouvrages et machines de siège).
+     - **Ferveur Divine & Alimentation Énergétique :** Suivi en temps réel de la ferveur produite par le Sanctuaire Shintō et les Pavillons de thé, consommation énergétique des chantiers et calcul du solde net avec alerte en cas de déficit (bridage de la production à 10%).
+     - **Main-d'œuvre & Climat Social :** Occupation des habitations Minka traditionnelles du Village, mobilisation ouvrière (ouvriers requis vs en poste), ratio d'efficacité de production et indice de contentement populaire (Prospère, Paisible ou Agité).
+     - **Matrice des Modificateurs Actifs :** Synthèse d'un coup d'œil de l'ensemble des bonus actifs (Samouraï Héros, Scierie, Briqueterie, Meunerie, Pavillon de thé, Célébration Matsuri, Oasis).
+     - **Oasis Sauvages Sous Tutelle :** Décompte (X / 3) et liste des oasis annexées avec nom, coordonnées et bonus cumulés.
+  2. **Indicateur de Rendement Global & Conception Résiliente :**
+     - Badge dynamique en en-tête synthétisant l'efficacité globale nette (`Énergie % × Main-d'œuvre %`).
+     - Initialisation paresseuse conditionnelle n'effectuant aucune requête base de données redondante lorsque les contextes parents (`resources.php`, `city.php`) ont déjà injecté les structures.
+- **Fichiers modifiés :** `views/partials/rural_harvest_resources_panel.php`, `tests/test_harvest_panel.php`, `fonctionnalités.md`, `pedagogie.md`, `CHANGELOG.md`, `public/changelog.html`
+- **Vérification QA :**
+  1. Se rendre sur la page du Domaine Rural (`/?page=resources`) ou de la Cité Castrale (`/?page=city`).
+  2. Observer le panneau latéral droit « Récoltes, Stocks & Oasis » :
+     - Vérifier la présence du badge d'en-tête « 100% Rendement » (ou ajusté si déficit d'ouvriers/ferveur).
+     - Vérifier sous chaque matière première (Bois, Pierre, Riz) la ligne de badges explicatifs détaillant la part de la base, de la parcelle, des ateliers, des oasis et du héros.
+     - Constater la présence du bloc « Terroirs Spécialisés » (Argile, Thé, Soja) avec leurs niveaux et ouvriers.
+     - Constater la présence du bloc « Vivres Raffinées » avec la Farine de Riz, le Saké Féodal et les Poutres de Charpente.
+     - Constater le bloc « Ferveur Spirituelle & Énergie » avec l'état d'alimentation et le solde net.
+     - Constater le bloc « Main-d'œuvre & Démographie » avec le taux d'ouvriers en poste et le contentement.
+     - Vérifier la matrice des bonus actifs et les oasis sous tutelle.
+
+---
+
 ### [2026-10-08] - hero-harvest-bonus-fix : Correction et Synchronisation Complète de la Bénédiction de Récolte du Samouraï Héros
 - **Module :** `hero-harvest-bonus-fix`
 - **Statut :** `À tester`

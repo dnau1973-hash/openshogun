@@ -37,6 +37,17 @@
 
 ## 📜 Historique des Évolutions Pédagogiques
 
+### Session du 08/10/2026 (Partie 22) — Vue Holistique de Production & Ergonomie d'un Tableau de Bord Stratégique
+- **Concept exploré :** Conception d'un widget de tableau de bord synthétique multi-dimensionnel (« cockpit de gestion »), agrégation de données complexes (flux bruts, vivres de transformation, énergie/ferveur motrice, quotas de main-d'œuvre et modificateurs croisés) et chargement paresseux d'objets métier (Lazy Initialization Pattern).
+- **Notions pour l'atelier :**
+  - **Le Cockpit Stratégique (Vue Holistique vs Vues Encastrées) :** Dans un jeu de stratégie complexe, les informations de production sont souvent éparpillées : un peu dans la forêt, un peu dans la meunerie, un peu dans le temple shinto, un peu chez le forgeron. Le rôle d'un bon designer d'interface est d'offrir un panneau latéral unifié capable de synthétiser **l'ensemble de la chaîne de valeur** en un coup d'œil, sans forcer le joueur à cliquer sur dix pages différentes pour savoir pourquoi son fief produit moins de riz.
+  - **La Décomposition Mathématique Visible (Le Ticket de Caisse Pédagogique) :** Plutôt que d'afficher uniquement le résultat final d'une formule (ex: `+265 Bois/h`), afficher des micro-puces listant les contributions (`Base +100`, `Forêt Niv.2 +45`, `Scierie +5%`, `Héros +120`). L'utilisateur comprend immédiatement quelle décision a augmenté sa production et où porter son prochain investissement.
+  - **Le Goulot d'Étranglement Énergétique et Humain :** Comprendre comment l'énergie (ferveur divine des Kamis) et la main-d'œuvre (villageois Minka) agissent comme des « fusibles ». Si l'énergie est déficitaire, le rendement chute brutalement à 10%. Le widget doit immédiatement avertir le joueur avec une couleur contrastée pour guider son action corrective (construire un sanctuaire).
+  - **L'Optimisation par Initialisation Paresseuse (Lazy Loading) :** Si la page appelante a déjà préparé les données (`$plots`, `$prodRates`), le composant partiel ne doit pas réinterroger la base de données ni recréer des moteurs lourds. En vérifiant `if (!isset(...))`, on économise des requêtes SQL et on accélère l'affichage à quelques millisecondes.
+- **Activité pratique suggérée :** Ouvrir le domaine rural (`/?page=resources`) et inspecter la colonne de droite. Observer la décomposition sous le Bois, la Pierre et le Riz. Consulter l'état des réserves de Farine et de Saké. Observer la jauge de Ferveur et de Main-d'œuvre, puis vérifier comment le taux de rendement global réagit lorsqu'un chantier urbain est lancé.
+
+---
+
 ### Session du 08/10/2026 (Partie 21) — Bénédiction de Récolte du Samouraï Héros & Chaîne de Production Féodale
 - **Concept exploré :** Comprendre comment plusieurs briques logicielles indépendantes (moteur de héros, moteur de domaine rural, tick de ressources et rendu visuel côté client) doivent s'articuler sans rupture logique. Découverte de la notion de « découplage » vs « synchronisation des flux ».
 - **Notions pour l'atelier :**
