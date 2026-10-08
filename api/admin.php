@@ -12,6 +12,7 @@ require_once __DIR__ . '/../core/WorldGenerator.php';
 require_once __DIR__ . '/../core/HonorEngine.php';
 require_once __DIR__ . '/../core/CastleEngine.php';
 require_once __DIR__ . '/../core/MailService.php';
+require_once __DIR__ . '/../core/DatabaseBackupService.php';
 
 $auth = new Auth();
 
@@ -587,6 +588,78 @@ try {
                 echo json_encode([
                     'success' => false,
                     'error'   => "Échec de l'envoi de test : " . ($result['error'] ?? 'erreur inconnue.')
+                ]);
+            }
+            break;
+
+        // Sauvegarde de la base de données (Structure & Données séparées + support USB)
+        case 'backup_database':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            $customUsb = !empty($_POST['custom_usb_path']) ? trim($_POST['custom_usb_path']) : null;
+            $backupService = new DatabaseBackupService();
+            $backupResult = $backupService->createBackup($customUsb);
+            if (!$backupResult['success']) {
+                echo json_encode(['success' => false, 'error' => $backupResult['error'] ?? 'Erreur lors de la sauvegarde.']);
+            } else {
+                echo json_encode([
+                    'success' => true,
+                    'message' => "Sauvegarde réussie de la structure et des données !",
+                    'result' => $backupResult
+                ]);
+            }
+            break;
+
+        // Liste des sauvegardes disponibles et détection des supports USB
+        case 'list_backups':
+            $backupService = new DatabaseBackupService();
+            $backups = $backupService->listLocalBackups();
+            $usbDrives = $backupService->detectUsbDrives();
+            echo json_encode([
+                'success' => true,
+                'backups' => $backups,
+                'usb_drives' => $usbDrives
+            ]);
+            break;
+
+        // Restauration de la base de données
+        case 'restore_backup':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            $backupDir = realpath(__DIR__ . '/../database') . '/backups';
+            $backupService = new DatabaseBackupService($backupDir);
+            $mode = $_POST['mode'] ?? 'complete'; // 'complete', 'structure', 'data'
+            $structureFile = basename(trim($_POST['structure_file'] ?? ''));
+            $dataFile = basename(trim($_POST['data_file'] ?? ''));
+
+            if ($mode === 'complete') {
+                if (empty($structureFile) || empty($dataFile)) {
+                    throw new Exception("Les fichiers de structure et de données doivent être spécifiés.");
+                }
+                $structPath = $backupDir . '/' . $structureFile;
+                $dataPath = $backupDir . '/' . $dataFile;
+                if (!file_exists($structPath)) throw new Exception("Fichier de structure introuvable.");
+                if (!file_exists($dataPath)) throw new Exception("Fichier de données introuvable.");
+
+                $res = $backupService->restoreComplete($structPath, $dataPath);
+            } elseif ($mode === 'structure') {
+                if (empty($structureFile)) throw new Exception("Fichier de structure non spécifié.");
+                $structPath = $backupDir . '/' . $structureFile;
+                if (!file_exists($structPath)) throw new Exception("Fichier de structure introuvable.");
+                $res = $backupService->restoreSqlFile($structPath);
+            } elseif ($mode === 'data') {
+                if (empty($dataFile)) throw new Exception("Fichier de données non spécifié.");
+                $dataPath = $backupDir . '/' . $dataFile;
+                if (!file_exists($dataPath)) throw new Exception("Fichier de données introuvable.");
+                $res = $backupService->restoreSqlFile($dataPath);
+            } else {
+                throw new Exception("Mode de restauration inconnu.");
+            }
+
+            if (!$res['success']) {
+                echo json_encode(['success' => false, 'error' => $res['error'] ?? 'Échec de la restauration.']);
+            } else {
+                echo json_encode([
+                    'success' => true,
+                    'message' => $res['message'] ?? 'Restauration effectuée avec succès !'
                 ]);
             }
             break;

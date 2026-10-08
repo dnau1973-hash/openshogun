@@ -67,6 +67,60 @@ class GalaxyEngine {
     }
 
     /**
+     * Calcule de manière déterministe les potentiels verticaux des 9 parcelles uniques
+     * pour n'importe quelle coordonnée géographique libre (X, Y)
+     */
+    public static function calculatePlotPotentialsForCoords(int $x, int $y): array {
+        $specialties = ['foret', 'carriere', 'fosse_argile', 'riziere', 'champ_soja', 'culture_the'];
+        $hash1 = abs((int)(($x * 374761393) ^ ($y * 668265263))) % 1000;
+        $hash2 = abs((int)(($x * 827361119) ^ ($y * 492876143))) % 1000;
+        
+        $specIdx1 = $hash1 % count($specialties);
+        $specIdx2 = ($hash2 % (count($specialties) - 1));
+        if ($specIdx2 >= $specIdx1) $specIdx2++;
+
+        $fiefSpecialty = $specialties[$specIdx1];
+        $secondarySpecialty = $specialties[$specIdx2];
+
+        $structures = [
+            'tenshu'            => ['name' => 'Tenshu Donjon',      'icon' => 'fa-chess-rook',    'color' => '#b45309'],
+            'foret'             => ['name' => 'Forêt de Cèdres',   'icon' => 'fa-tree',          'color' => '#15803d'],
+            'carriere'          => ['name' => 'Carrière de Granit','icon' => 'fa-mountain',      'color' => '#2563eb'],
+            'fosse_argile'      => ['name' => 'Fosse d\'Argile',    'icon' => 'fa-cubes-stacked', 'color' => '#ea580c'],
+            'riziere'           => ['name' => 'Rizière Alluviale',  'icon' => 'fa-wheat-awn',     'color' => '#ca8a04'],
+            'champ_soja'        => ['name' => 'Champs de Soja',     'icon' => 'fa-seedling',      'color' => '#16a34a'],
+            'culture_the'       => ['name' => 'Coteaux de Thé',     'icon' => 'fa-leaf',          'color' => '#059669'],
+            'sanctuaire_shinto' => ['name' => 'Sanctuaire Shintō', 'icon' => 'fa-torii-gate',    'color' => '#dc2626'],
+            'village'           => ['name' => 'Village & Habitats', 'icon' => 'fa-house-chimney', 'color' => '#475569']
+        ];
+
+        $plots = [];
+        $i = 0;
+        foreach ($structures as $stype => $meta) {
+            $slotSeed = abs((int)(($hash1 * ($i + 7)) ^ ($hash2 * ($i + 13)))) % 100;
+            if ($stype === 'tenshu') {
+                $maxLevel = 30 + ($slotSeed % 31); // 30-60
+            } elseif ($stype === 'village') {
+                $maxLevel = 40 + ($slotSeed % 41); // 40-80
+            } elseif ($stype === $fiefSpecialty) {
+                $maxLevel = 75 + ($slotSeed % 26); // 75-100 Jackpot
+            } elseif ($stype === $secondarySpecialty) {
+                $maxLevel = 50 + ($slotSeed % 26); // 50-75
+            } else {
+                $maxLevel = 25 + ($slotSeed % 21); // 25-45
+            }
+
+            $plots[$stype] = [
+                'level'     => 0,
+                'max_level' => $maxLevel
+            ];
+            $i++;
+        }
+
+        return $plots;
+    }
+
+    /**
      * Identifie le quadrant géographique (Nord-Ouest, Nord-Est, Sud-Ouest, Sud-Est)
      * selon les coordonnées (X, Y)
      */
@@ -193,12 +247,22 @@ class GalaxyEngine {
                     $pId = (int)($gItem['planet_id'] ?? 0);
                     if ($pId > 0 && isset($plotsByPlanet[$pId])) {
                         $gItem['rural_plots'] = $plotsByPlanet[$pId];
+                    } elseif (empty($gItem['user_id'])) {
+                        $gItem['rural_plots'] = self::calculatePlotPotentialsForCoords((int)$gItem['coord_x'], (int)$gItem['coord_y']);
                     }
                 }
                 unset($gItem);
             } catch (Exception $e) {
                 // Continuer si erreur
             }
+        } else {
+            // Si aucune planète inoccupée en base, mais des tuiles inoccupées dans gridMap
+            foreach ($gridMap as $k => &$gItem) {
+                if (empty($gItem['user_id']) && empty($gItem['is_authentic_castle']) && empty($gItem['is_oasis'])) {
+                    $gItem['rural_plots'] = self::calculatePlotPotentialsForCoords((int)$gItem['coord_x'], (int)$gItem['coord_y']);
+                }
+            }
+            unset($gItem);
         }
 
         // Récupérer les donjons authentiques déployés dans ce secteur
@@ -321,7 +385,9 @@ class GalaxyEngine {
             for ($x = $minX; $x <= $maxX; $x++) {
                 $k = $x . ':' . $y;
                 if (!isset($gridMap[$k])) {
-                    $terrains[$k] = self::getTerrainType($x, $y);
+                    $t = self::getTerrainType($x, $y);
+                    $t['rural_plots'] = self::calculatePlotPotentialsForCoords($x, $y);
+                    $terrains[$k] = $t;
                 } else {
                     $terrains[$k] = [
                         'type' => $gridMap[$k]['terrain_type'],

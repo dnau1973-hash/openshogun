@@ -1,5 +1,27 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-08] - admin-backup-integration-map-parcel-properties : Intégration de la Sauvegarde dans l'Interface d'Administration & Affichage de la Propriété des Parcelles sur la Carte
+- **Module :** `admin-backup-integration-map-parcel-properties`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Intégration de la Sauvegarde & Restauration dans l'Interface d'Administration (`views/admin.php`, `api/admin.php`) :**
+     - Section dédiée dans l'onglet Maintenance (`?page=admin` sous `tab-maintenance`).
+     - Bouton de création immédiate de sauvegarde générant séparément la Structure (DDL) et les Données (DML).
+     - Détection en temps réel des périphériques de stockage USB connectés au serveur (`/media`, `/mnt`) et option de chemin manuel.
+     - Tableau historique des jeux de sauvegardes avec taille, horodatage, état d'intégrité (Paire Complète, Données Seules, Structure Seule).
+     - Modale de restauration sécurisée avec mot-clé de confirmation `RESTORE`.
+  2. **Affichage du Statut de Propriété et des Particularités au Clic sur la Carte (`views/map.php`, `core/GalaxyEngine.php`) :**
+     - Le modal au clic d'une parcelle libre ou vierge affiche explicitement le statut de propriété (« Terre Libre & Domaine Non Réclamé », « Propriétaire Foncier : Aucun »).
+     - Grille des 9 parcelles de terroir avec niveaux actuels et plafonds d'évolution garantis (`max_level`) calculés de façon déterministe même en cas de tuile procédurale naturelle ou de cache.
+- **Fichiers modifiés :** `views/admin.php`, `api/admin.php`, `views/map.php`, `core/GalaxyEngine.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Accéder à l'interface d'administration (`?page=admin`), onglet **Maintenance** : constater la présence du panneau « Sauvegarde & Restauration de la Base de Données ».
+  2. Cliquer sur « Lancer une Sauvegarde Immédiate » : vérifier la génération des fichiers et l'actualisation de la liste des sauvegardes.
+  3. Tester la boîte de dialogue de restauration en sélectionnant un jeu et en saisissant `RESTORE`.
+  4. Ouvrir la carte spatiale/provinciale (`?page=map`) et cliquer sur une case libre ou vierge : constater l'affichage clair du statut de propriété et des 9 parcelles de terroir avec leurs niveaux max.
+
+---
+
 ### [2026-10-08] - map-smooth-parcel-modal-backup-service : Déplacement Fluide Carte 60fps, Modale des Parcelles Libres avec Niveaux Max, 1000 Ressources Initiales et Sauvegarde Autonome USB
 - **Module :** `map-smooth-parcel-modal-backup-service`
 - **Statut :** `À tester`

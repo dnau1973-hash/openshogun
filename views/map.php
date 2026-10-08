@@ -181,6 +181,86 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeMapModal();
 });
 
+// Fonctions utilitaires pour le calcul et rendu des propriétés de parcelles
+function getDeterministicPlotPotentials(x, y) {
+    const structures = [
+        'tenshu', 'foret', 'carriere', 'culture_the',
+        'village', 'fosse_argile', 'riziere', 'champ_soja', 'sanctuaire_shinto'
+    ];
+    let seed = 0;
+    const str = `shogun_plots_${x}_${y}`;
+    for (let i = 0; i < str.length; i++) {
+        seed = ((seed << 5) - seed) + str.charCodeAt(i);
+        seed |= 0;
+    }
+    seed = Math.abs(seed);
+    const plots = {};
+    structures.forEach((stype, idx) => {
+        const plotSeed = (seed + (idx * 7919)) % 10000;
+        let maxLevel = 25 + (plotSeed % 41);
+        if ((plotSeed % 11) === 0) {
+            maxLevel = Math.min(100, maxLevel + 25 + (plotSeed % 15));
+        }
+        plots[stype] = { level: 0, max_level: maxLevel };
+    });
+    return plots;
+}
+
+function renderRuralPlotsGrid(ruralPlots) {
+    const structureMeta = {
+        'tenshu':            { name: 'Tenshu Donjon',      icon: 'fa-chess-rook',    color: '#b45309' },
+        'foret':             { name: 'Forêt de Cèdres',   icon: 'fa-tree',          color: '#15803d' },
+        'carriere':          { name: 'Carrière de Granit',icon: 'fa-mountain',      color: '#2563eb' },
+        'fosse_argile':      { name: 'Fosse d\'Argile',    icon: 'fa-cubes-stacked', color: '#ea580c' },
+        'riziere':           { name: 'Rizière Alluviale',  icon: 'fa-wheat-awn',     color: '#ca8a04' },
+        'champ_soja':        { name: 'Champs de Soja',     icon: 'fa-seedling',      color: '#16a34a' },
+        'culture_the':       { name: 'Coteaux de Thé',     icon: 'fa-leaf',          color: '#059669' },
+        'sanctuaire_shinto': { name: 'Sanctuaire Shintō', icon: 'fa-torii-gate',    color: '#dc2626' },
+        'village':           { name: 'Village & Habitats', icon: 'fa-house-chimney', color: '#475569' }
+    };
+
+    let html = `
+        <div class="mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong class="text-uppercase small text-dark" style="letter-spacing:0.5px; font-size:0.78rem;">
+                    <i class="fa-solid fa-layer-group text-primary me-1"></i>Propriétés &amp; Potentiels Verticaux (Niveaux Max d'Évolution)
+                </strong>
+                <span class="badge bg-success text-white font-weight-bold" style="font-size:0.72rem;">9 Parcelles de Terroir</span>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:0.5rem;">
+    `;
+
+    for (const [stype, pInfo] of Object.entries(ruralPlots)) {
+        const meta = structureMeta[stype] || { name: stype, icon: 'fa-circle-dot', color: '#475569' };
+        const maxLvl = pInfo.max_level || 30;
+        const isJackpot = maxLvl >= 70;
+        const borderStyle = isJackpot 
+            ? 'border:1.5px solid #eab308; background:#fefce8; box-shadow:0 1px 3px rgba(234,179,8,0.2);' 
+            : 'border:1px solid #cbd5e1; background:#ffffff;';
+
+        html += `
+            <div style="${borderStyle} border-radius:8px; padding:0.5rem 0.65rem; display:flex; align-items:center; justify-content:space-between; gap:0.4rem;">
+                <div class="d-flex align-items-center gap-2 min-w-0">
+                    <span style="color:${meta.color}; font-size:1.1rem; width:20px; text-align:center;"><i class="fa-solid ${meta.icon}"></i></span>
+                    <div class="lh-1 text-truncate">
+                        <div style="font-size:0.8rem; font-weight:700; color:#1e293b;" class="text-truncate">${meta.name}</div>
+                        <div class="text-muted" style="font-size:0.68rem; margin-top:2px;">Actuel : Niv. ${pInfo.level || 0}</div>
+                    </div>
+                </div>
+                <div class="text-end flex-shrink-0">
+                    <span class="badge ${isJackpot ? 'bg-warning text-dark fw-bold' : 'bg-primary-lt text-dark fw-bold'}" style="font-size:0.75rem;">
+                        Max ${maxLvl}
+                    </span>
+                    ${isJackpot ? '<div style="font-size:0.6rem; color:#b45309; font-weight:700;">Spécialité ⭐</div>' : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    html += `</div></div>`;
+    return html;
+}
+
 // Fonction appelée lors du clic sur une tuile de la carte
 window.selectPlanetTile = function(data) {
     const title  = document.getElementById('mapModalTitle');
@@ -191,7 +271,12 @@ window.selectPlanetTile = function(data) {
 
     // ── Terres Vierges Naturelles (Plaines, Collines, etc.) ────────────────────
     if (data.empty) {
-        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.terrain_name || 'Terres Vierges'}</span> <span class="text-secondary small font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
+        if (!data.rural_plots || Object.keys(data.rural_plots).length === 0) {
+            data.rural_plots = getDeterministicPlotPotentials(data.coord_x, data.coord_y);
+        }
+        const ruralPlotsHtml = renderRuralPlotsGrid(data.rural_plots);
+
+        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.terrain_name || 'Terres Vierges'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
@@ -199,22 +284,36 @@ window.selectPlanetTile = function(data) {
                         ${data.terrain_img ? `<img src="${data.terrain_img}" alt="" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:2rem; display:flex; align-items:center; justify-content:center; height:100%;"><i class="fa-solid fa-wheat-awn text-warning"></i></span>'}
                     </div>
                     <div>
-                        <div style="font-weight:700; color:#1e293b; font-size:1.1rem;">
+                        <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
                             ${data.terrain_name || 'Terres Vierges Inoccupées'}
                         </div>
-                        <div class="small text-secondary mt-1">
+                        <div class="small text-secondary mt-0.5">
                             ${data.terrain_desc || 'Plaines fertiles et terroirs prospères du Japon féodal, prêts à être défrichés.'}
                         </div>
                     </div>
                 </div>
 
-                <div class="alert alert-success d-flex align-items-center gap-2 m-0 p-2" style="font-size:0.85rem; border-radius:6px;">
+                <!-- Statut de Propriété -->
+                <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded border">
+                    <div>
+                        <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
+                        <strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-secondary small d-block" style="font-size:0.75rem;">Propriétaire Foncier :</span>
+                        <span class="badge bg-secondary-lt text-dark">Aucun seigneur féodal</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
                     <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
                     <div>
                         <strong>Emplacement Disponible pour Nouveau Fief !</strong><br>
                         Vous pouvez y dépêcher une expédition avec un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour y fonder votre prochain domaine castral.
                     </div>
                 </div>
+
+                ${ruralPlotsHtml}
             </div>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -353,60 +452,16 @@ window.selectPlanetTile = function(data) {
 
     // ── Terres Neutres (planète sans joueur ou parcelle libre répertoriée) ─────
     if (!data.user_id) {
-        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.planet_name || 'Domaine Libre'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
-
-        // Métadonnées canoniques des parcelles féodales
-        const structureMeta = {
-            'tenshu':            { name: 'Tenshu Donjon',      icon: 'fa-chess-rook',    color: '#b45309' },
-            'foret':             { name: 'Forêt de Cèdres',   icon: 'fa-tree',          color: '#15803d' },
-            'carriere':          { name: 'Carrière de Granit',icon: 'fa-mountain',      color: '#2563eb' },
-            'fosse_argile':      { name: 'Fosse d\'Argile',    icon: 'fa-cubes-stacked', color: '#ea580c' },
-            'riziere':           { name: 'Rizière Alluviale',  icon: 'fa-wheat-awn',     color: '#ca8a04' },
-            'champ_soja':        { name: 'Champs de Soja',     icon: 'fa-seedling',      color: '#16a34a' },
-            'culture_the':       { name: 'Coteaux de Thé',     icon: 'fa-leaf',          color: '#059669' },
-            'sanctuaire_shinto': { name: 'Sanctuaire Shintō', icon: 'fa-torii-gate',    color: '#dc2626' },
-            'village':           { name: 'Village & Habitats', icon: 'fa-house-chimney', color: '#475569' }
-        };
-
-        let ruralPlotsHtml = '';
-        if (data.rural_plots && Object.keys(data.rural_plots).length > 0) {
-            ruralPlotsHtml = `
-                <div class="mt-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <strong class="text-uppercase small text-secondary" style="letter-spacing:0.5px; font-size:0.75rem;">
-                            <i class="fa-solid fa-layer-group me-1"></i>Particularités du Terroir &bull; Potentiels Verticaux (Niveaux Max)
-                        </strong>
-                        <span class="badge bg-success-lt font-weight-bold">9 Parcelles Uniques</span>
-                    </div>
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:0.5rem;">
-            `;
-            for (const [stype, pInfo] of Object.entries(data.rural_plots)) {
-                const meta = structureMeta[stype] || { name: stype, icon: 'fa-circle-dot', color: '#475569' };
-                const maxLvl = pInfo.max_level || 30;
-                const isJackpot = maxLvl >= 70;
-                const borderStyle = isJackpot ? 'border:1.5px solid #ca8a04; background:#fefce8;' : 'border:1px solid #e2e8f0; background:#ffffff;';
-
-                ruralPlotsHtml += `
-                    <div style="${borderStyle} border-radius:8px; padding:0.45rem 0.6rem; display:flex; align-items:center; justify-content:space-between; gap:0.4rem;">
-                        <div class="d-flex align-items-center gap-2 min-w-0">
-                            <span style="color:${meta.color}; font-size:1rem; width:18px; text-align:center;"><i class="fa-solid ${meta.icon}"></i></span>
-                            <div class="lh-1 text-truncate">
-                                <div style="font-size:0.78rem; font-weight:600; color:#1e293b;" class="text-truncate">${meta.name}</div>
-                                <div class="text-muted" style="font-size:0.65rem;">Actuel: Niv. ${pInfo.level || 0}</div>
-                            </div>
-                        </div>
-                        <span class="badge ${isJackpot ? 'bg-warning text-dark fw-bold' : 'bg-secondary-lt text-dark'}" style="font-size:0.72rem; flex-shrink:0;">
-                            Max ${maxLvl}
-                        </span>
-                    </div>
-                `;
-            }
-            ruralPlotsHtml += `</div></div>`;
+        if (!data.rural_plots || Object.keys(data.rural_plots).length === 0) {
+            data.rural_plots = getDeterministicPlotPotentials(data.coord_x, data.coord_y);
         }
+        const ruralPlotsHtml = renderRuralPlotsGrid(data.rural_plots);
+
+        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.planet_name || 'Domaine Libre'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
 
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
-                <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="d-flex align-items-center gap-3 mb-3">
                     <div style="width:58px; height:58px; border-radius:8px; overflow:hidden; border:2px solid #cbd5e1; flex-shrink:0; background:#f1f5f9;">
                         ${data.terrain_img ? `<img src="${data.terrain_img}" alt="" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:2rem; display:flex; align-items:center; justify-content:center; height:100%;"><i class="fa-solid fa-wheat-awn text-warning"></i></span>'}
                     </div>
@@ -417,6 +472,18 @@ window.selectPlanetTile = function(data) {
                         <div class="small text-secondary mt-0.5">
                             Type de terrain : <strong class="text-dark">${data.planet_type || 'terrestrial'}</strong> &bull; Emplacement stratégique pour un nouveau fief.
                         </div>
+                    </div>
+                </div>
+
+                <!-- Statut de Propriété -->
+                <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded border">
+                    <div>
+                        <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
+                        <strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-secondary small d-block" style="font-size:0.75rem;">Propriétaire Foncier :</span>
+                        <span class="badge bg-secondary-lt text-dark">Aucun seigneur féodal</span>
                     </div>
                 </div>
 

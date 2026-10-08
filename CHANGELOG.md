@@ -5,16 +5,21 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Intégration de la sauvegarde & restauration de la base dans l'Interface d'Administration (`views/admin.php`, `api/admin.php`) :**
+  * **Onglet Maintenance unifié :** Ajout d'une section dédiée complète « Sauvegarde & Restauration de la Base de Données (Structure & Données Séparées) » au panneau d'administration.
+  * **Déclenchement immédiat :** Bouton de création de sauvegarde instantanée (générant séparément les fichiers DDL et DML) avec détection en temps réel des clés USB / disques externes (`/media`, `/mnt`) ou point de montage personnalisé.
+  * **Historique & réintégration :** Tableau des jeux de sauvegarde horodatés avec statut d'intégrité (Paire Complète, Structure Seule, Données Seules) et modale sécurisée de restauration avec confirmation par mot-clé `RESTORE`.
+- **Affichage clair de la propriété et des particularités au clic des parcelles sur la Carte (`views/map.php`, `core/GalaxyEngine.php`) :**
+  * **Statut de propriété explicite :** Affichage systématique dans le modal de la carte du statut foncier (« Terre Libre & Domaine Non Réclamé », « Propriétaire Foncier : Aucun ») pour les parcelles inoccupées et les terres vierges.
+  * **Potentiels verticaux garantis :** Intégration d'un algorithme déterministe garantissant la présence et le rendu des 9 parcelles de terroir avec niveaux actuels et plafonds d'évolution (`max_level`, spécialités régionales dorées), que la tuile provienne de la table `planets` ou de la grille procédurale naturelle.
 - **Ressources de départ par défaut à 1000 & Calibrage Féodal (`core/WorldGenerator.php`, `core/BotEngine.php`, `core/Auth.php`) :**
   * **Ressources initiales :** Chaque joueur (administrateur, nouveau joueur inscrit, bot) démarre désormais par défaut avec 1000 unités de chaque ressource de base (1000 Bois de Cèdre, 1000 Pierre de Taille, 1000 Riz Impérial).
 - **Suppression des saccades de la carte & Déplacement ultra-fluide 60fps (`public/js/galaxy_map.js`) :**
   * **Optimisation du Drag & Drop :** Élimination du recadrage / rechargement AJAX répétitif pendant le mouvement du curseur. La translation est désormais assurée en pur GPU (`translate3d`), le calcul du décalage de coordonnées et le rafraîchissement des secteurs ne s'effectuant qu'au relâchement du pointeur.
-- **Affichage des particularités et potentiels verticaux (Niveaux Max) au clic des parcelles libres sur la Carte (`core/GalaxyEngine.php`, `views/map.php`) :**
-  * **Modal enrichi des parcelles inoccupées :** L'ouverture du modal sur un terrain libre ou un fief inoccupé affiche la grille des particularités géologiques du domaine avec les plafonds verticaux (`max_level`) de chacune des 9 parcelles uniques (Bois, Pierre, Argile, Riz, Soja, Thé, Sanctuaire Shinto, Village). Mise en exergue des filons jackpot (Niv. 75-100).
 - **Système autonome de sauvegarde et réintégration séparées (Structure & Données) avec support USB (`core/DatabaseBackupService.php`, `scripts/backup_database.php`) :**
   * **Exports séparés DDL / DML :** Génération distincte de la structure (`structure_openshogun_YYYYMMDD_HHMMSS.sql`) et des données (`data_openshogun_YYYYMMDD_HHMMSS.sql`) avec désactivation contrôlée des clés étrangères.
   * **Double destination :** Sauvegarde dans le dossier interne `database/backups/` et réplication automatique sur support USB / disque externe connecté (détection automatique dans `/media` et `/mnt` ou spécification via `--usb=`).
-  * **Outil autonome :** Accessible en ligne de commande indépendamment de l'interface d'administration (`php scripts/backup_database.php backup|list|restore`).
+  * **Outil autonome :** Accessible en ligne de commande (`php scripts/backup_database.php backup|list|restore`) et directement via l'interface d'administration.
 - **Mutualisation du bloc de file de chantiers urbains & correction du lien Donjon / Cité (`views/partials/urban_construction_queue.php`, `views/city.php`, `views/resources.php`, `public/js/rural_domain_map.js`) :**
   * **Composant réutilisable `urban_construction_queue.php` :** Extraction mutualisée du bloc de chantiers en cours dans `views/partials/` avec prise en charge unifiée des bâtiments urbains, des parcelles rurales (`rural_plot`) et des champs (`field`), décomptes interactifs temps réel, annulation de chantiers (`cancelBuild` / `cancelRuralUpgrade`) et badge de double file pour le Clan Oda.
   * **Intégration harmonieuse :** Intégration du partial à la fois sur la page Cité (`views/city.php`) et sur la page Ressources (`views/resources.php`).
