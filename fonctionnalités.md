@@ -4,15 +4,16 @@
 - **Module :** `weather-day-night-cycle-engine`
 - **Statut :** `À tester`
 - **Description :**
-  1. **Cycle Temporel Synchronisé & Ambiances Féodales (`views/partials/rural_atmosphere_overlay.php`, `views/resources.php`) :**
+  1. **Cycle Temporel Synchronisé & Estampes Peintes HD (`views/partials/rural_atmosphere_overlay.php`, `views/resources.php`, `public/assets/shogun_rural_terroir_*.jpg`) :**
      - Moteur atmosphérique en temps réel synchronisé sur l'horloge locale du joueur (Aube 6h-9h, Plein Jour 9h-17h, Crépuscule 17h-20h30, Nuit 20h30-6h).
-     - **Nuit Féodale Magique (Yoru) :** Allumage automatique des fenêtres du donjon Tenshu et des chaumières du village en or chaleureux, lanternes vermillon du sanctuaire rougeoyantes, ciel constellé d'étoiles scintillantes, croissant de lune et lucioles dorées (hotaru).
-     - **Hiver sous la Neige (Yuki) :** Teintes froides givrées, brume blanche et chute continue de 26 flocons de neige légers en pur CSS GPU.
-     - **Pluie & Feuilles Momiji (Ame & Kōyō) :** Rideaux de pluie obliques fins et feuilles d'érable rouges tourbillonnant au vent.
-     - **Printemps & Plein Jour (Haru) :** Lumière solaire naturelle et pétales de cerisier Sakura.
+     - **Estampes Peintes Dédiées 16:9 :**
+       * *Nuit Féodale (`shogun_rural_terroir_night.jpg`) :* Véritable peinture nocturne avec Tenshu et village illuminés d'or, rizières miroitantes sous la lune et torii Shintō éclairé.
+       * *Hiver sous la Neige (`shogun_rural_terroir_winter.jpg`) :* Véritable estampe hivernale avec manteau blanc étincelant sur les toits, cèdres enneigés et rizières glacées, respectant à 100% l'emplacement exact des 9 parcelles.
+     - **Particules Saisonnieres 60 FPS :** Flocons de neige tourbillonnants (Hiver), feuilles d'érable rouges Momiji et rideaux de pluie (Automne), pétales de cerisier Sakura (Printemps/Jour).
   2. **Sélecteur Dropdown d'Ambiance Déroulant :**
      - Menu déroulant élégant dans l'en-tête du panorama permettant de basculer instantanément entre tous les climats et saisons avec mémorisation dans le `localStorage`.
-- **Fichiers modifiés :** `views/partials/rural_atmosphere_overlay.php`, `views/resources.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Fichiers modifiés / créés :** `public/assets/shogun_rural_terroir_night.jpg`, `public/assets/shogun_rural_terroir_winter.jpg`, `views/partials/rural_atmosphere_overlay.php`, `views/resources.php`, `CHANGELOG.md`, `fonctionnalités.md`
+
 - **Vérification QA :**
   1. Accéder à la page Ressources (`/?page=resources`).
   2. Ouvrir le sélecteur « Météo » en haut à droite du panorama.

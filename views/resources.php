@@ -83,7 +83,17 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     background-repeat: no-repeat;
     user-select: none;
     overflow: hidden;
+    transition: background-image 0.6s ease;
 }
+
+.rural-map-container.bg-theme-night {
+    background-image: url('/public/assets/shogun_rural_terroir_night.jpg') !important;
+}
+
+.rural-map-container.bg-theme-snow {
+    background-image: url('/public/assets/shogun_rural_terroir_winter.jpg') !important;
+}
+
 
 @media (max-width: 768px) {
     .rural-map-container {

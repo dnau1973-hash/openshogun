@@ -874,13 +874,23 @@
         // Retirer toutes les classes de thème
         overlay.classList.remove('theme-day', 'theme-dawn', 'theme-dusk', 'theme-night', 'theme-snow', 'theme-rain', 'is-disabled');
 
+        const resolvedPhase = (themeKey === 'auto') ? calculateAutoPhase() : themeKey;
+
         if (themeKey === 'off') {
             overlay.classList.add('is-disabled');
-        } else if (themeKey === 'auto') {
-            const phase = calculateAutoPhase();
-            overlay.classList.add('theme-' + phase);
         } else {
-            overlay.classList.add('theme-' + themeKey);
+            overlay.classList.add('theme-' + resolvedPhase);
+        }
+
+        // Bascule dynamique de la véritable illustration peinte d'arrière-plan
+        const mapContainer = document.getElementById('ruralMapContainer');
+        if (mapContainer) {
+            mapContainer.classList.remove('bg-theme-night', 'bg-theme-snow');
+            if (resolvedPhase === 'night') {
+                mapContainer.classList.add('bg-theme-night');
+            } else if (resolvedPhase === 'snow') {
+                mapContainer.classList.add('bg-theme-snow');
+            }
         }
 
         // Mettre à jour l'intitulé du bouton et l'icône
