@@ -7,9 +7,9 @@
   1. **Surcouche Animée Légère & Non-Destructive (`views/partials/rural_atmosphere_overlay.php`, `views/resources.php`) :**
      - Animation féodale dynamique superposée à l'illustration 16:9 du domaine rural (`views/resources.php`).
      - **Brume vaporeuse :** Deux couches de brume matinale à défilement parallaxe continu créant de la profondeur atmosphérique le long des collines.
-     - **Vol de hérons / grues :** Formation en vol traversant majestueusement le ciel à intervalles réguliers avec battement d'ailes SVG vectoriel fluide.
-     - **Paysans & travailleurs en mouvement :** Personnages miniatures animés circulant le long des chemins de terre (porteurs de gerbes de riz, porteurs de rondins de bois).
-     - **Charrette tirée par un bœuf :** Convoi paysan d'attelage avec pas cadencés et roue en rotation avançant lentement sur la route provinciale.
+     - **Vol majestueux des grues du Japon :** Traversée intégrale d'est en ouest d'un bout à l'autre de l'horizon sans interruption ni blocage figé (cycle de 72s linéaire avec battement d'ailes ample à 1.6s).
+     - **Trajectoires fidèles sur les sentiers :** Villageois (porteur de riz, bûcheron) circulant précisément le long des voies de terre battue sans traverser les bâtiments ni les rizières, avec démarche posée (cycles 70-76s, balancement des pas à 0.95s).
+     - **Charrette tirée par un bœuf :** Convoi paysan d'attelage progressant à l'allure lente d'un bœuf de labour sur la grand-route dégagée (cycle de 105s, balancement des pas à 1.8s).
      - **Volutes de fumée :** Émanations douces au sommet du donjon Tenshu, des toits de chaume du village central et de l'encens au sanctuaire Shintō.
      - **Pétales de cerisier (Sakura) :** Pétales flottant délicatement en diagonale au gré du vent.
   2. **Performance GPU 60 FPS & Poids Plume :**
@@ -20,9 +20,10 @@
 - **Fichiers modifiés / créés :** `views/partials/rural_atmosphere_overlay.php`, `views/resources.php`, `CHANGELOG.md`, `fonctionnalités.md`
 - **Vérification QA :**
   1. Accéder à la page Terroir / Ressources (`/?page=resources`).
-  2. Constater l'animation fluide en arrière-plan : la brume qui dérive, les hérons dans le ciel, les paysans marchant sur les chemins, le bœuf tirant sa charrette, la fumée s'élevant des toits et les pétales de cerisiers.
-  3. Survoler et cliquer sur les parcelles (ex: Tenshu pour aller à la cité, rizière ou carrière pour ouvrir la modale d'élévation) : vérifier qu'aucun clic n'est intercepté ni gêné.
-  4. Cliquer sur le bouton « Ambiance : On » dans le bandeau supérieur de la carte : vérifier l'arrêt doux de toutes les animations et la persistance du réglage après rechargement de la page.
+  2. Observer le vol des oiseaux : constater la traversée complète d'un côté à l'autre de l'écran, fluide et sans arrêt en plein ciel.
+  3. Observer les villageois et la charrette : constater leur allure apaisée et le respect strict des sentiers de terre battue sans empiéter sur les bâtiments.
+  4. Constater la présence continue de la fumée sur le village, le château et le sanctuaire.
+  5. Vérifier la totale réactivité des clics sur les 9 parcelles et le fonctionnement du bouton « Ambiance Vivante : On / Off ».
 
 ---
 

@@ -250,12 +250,12 @@
    ──────────────────────────────────────────────────────────── */
 .atmosphere-cranes-flock {
     position: absolute;
-    top: 8%;
-    left: -12%;
+    top: 10%;
+    left: -18%;
     width: 120px;
     height: 60px;
-    will-change: transform;
-    animation: flyAcrossSky 38s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+    will-change: left, top, transform;
+    animation: flyAcrossSky 72s linear infinite;
 }
 
 .crane-bird {
@@ -290,41 +290,56 @@
 
 .crane-wing-left {
     transform-origin: 15px 10px;
-    animation: craneFlap 0.75s ease-in-out infinite alternate;
+    animation: craneFlap 1.6s ease-in-out infinite alternate;
 }
 
 .crane-wing-right {
     transform-origin: 14px 10px;
-    animation: craneFlap 0.75s ease-in-out infinite alternate-reverse;
+    animation: craneFlap 1.6s ease-in-out infinite alternate-reverse;
 }
 
 @keyframes craneFlap {
     0%   { transform: scaleY(1) rotate(0deg); }
-    50%  { transform: scaleY(0.2) rotate(-15deg); }
-    100% { transform: scaleY(-0.9) rotate(25deg); }
+    35%  { transform: scaleY(0.2) rotate(-8deg); }
+    70%  { transform: scaleY(-0.8) rotate(18deg); }
+    100% { transform: scaleY(-0.9) rotate(22deg); }
 }
 
 @keyframes flyAcrossSky {
     0% {
-        transform: translate3d(-10vw, 4vh, 0) scale(0.65);
+        left: -18%;
+        top: 12%;
         opacity: 0;
+        transform: scale(0.7);
     }
-    5% {
-        opacity: 1;
+    3% {
+        opacity: 0.95;
     }
     45% {
-        transform: translate3d(60vw, -1vh, 0) scale(0.9);
+        top: 7%;
         opacity: 1;
+        transform: scale(0.85);
     }
-    60% {
-        transform: translate3d(115vw, -6vh, 0) scale(1.1);
+    85% {
+        left: 104%;
+        top: 4%;
+        opacity: 0.95;
+        transform: scale(1.0);
+    }
+    90% {
+        left: 112%;
+        top: 3.5%;
         opacity: 0;
+        transform: scale(1.05);
     }
     100% {
-        transform: translate3d(115vw, -6vh, 0) scale(1.1);
+        left: 112%;
+        top: 3.5%;
         opacity: 0;
+        transform: scale(1.05);
     }
 }
+
 
 /* ────────────────────────────────────────────────────────────
    3. VOLUTES DE FUMÉE & ENCENS (SMOKE & INCENSE)
@@ -384,175 +399,247 @@
 }
 
 /* ────────────────────────────────────────────────────────────
-   4. PAYSANS ET CHARRETTES (RURAL LIFE ON PATHS)
+   4. PAYSANS ET CHARRETTES (RURAL LIFE ON CLEAR DIRT PATHS)
    ──────────────────────────────────────────────────────────── */
 .atmosphere-paths-life {
     position: absolute;
     inset: 0;
 }
 
-/* Paysan des rizières (Monte depuis la rizière sud-ouest vers le village) */
+/* Paysan des rizières (Marche paisiblement sur le sentier sud entre rizières et carrefour) */
 .peasant-rice {
     position: absolute;
-    left: 20%;
-    top: 79%;
+    left: 28%;
+    top: 73.5%;
     width: 16px;
     height: 20px;
-    animation: walkPathRice 32s ease-in-out infinite;
+    will-change: left, top, transform;
+    animation: walkPathRice 76s linear infinite;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
 }
 
 @keyframes walkPathRice {
     0% {
-        transform: translate3d(0, 0, 0) scale(1);
+        left: 28%;
+        top: 73.5%;
+        transform: scale(0.9);
         opacity: 0;
     }
-    5% { opacity: 1; }
-    45% {
-        transform: translate3d(14vw, -8vh, 0) scale(0.92);
+    3% {
+        opacity: 1;
+    }
+    40% {
+        left: 48%;
+        top: 72%;
+        transform: scale(0.92);
+        opacity: 1;
+    }
+    47% {
+        left: 48%;
+        top: 72%;
+        transform: scale(0.92);
         opacity: 1;
     }
     50% {
-        transform: translate3d(16vw, -9vh, 0) scale(0.9);
-        opacity: 0;
-    }
-    55% {
-        transform: translate3d(16vw, -9vh, 0) scale(-0.9, 0.9);
-        opacity: 0;
-    }
-    60% { opacity: 1; }
-    95% {
-        transform: translate3d(0, 0, 0) scale(-1, 1);
+        left: 48%;
+        top: 72%;
+        transform: scale(-0.92, 0.92);
         opacity: 1;
     }
+    87% {
+        left: 28%;
+        top: 73.5%;
+        transform: scale(-0.9, 0.9);
+        opacity: 1;
+    }
+    94% {
+        left: 28%;
+        top: 73.5%;
+        transform: scale(-0.9, 0.9);
+        opacity: 1;
+    }
+    97% {
+        opacity: 0;
+    }
     100% {
-        transform: translate3d(0, 0, 0) scale(1);
+        left: 28%;
+        top: 73.5%;
+        transform: scale(0.9);
         opacity: 0;
     }
 }
 
-/* Paysan du bois (Descend depuis la forêt nord-ouest vers le village) */
+/* Paysan du bois (Chemine sur le sentier de colline ouest, évitant théiers et habitations) */
 .peasant-wood {
     position: absolute;
-    left: 24%;
-    top: 36%;
+    left: 28%;
+    top: 41%;
     width: 15px;
     height: 19px;
-    animation: walkPathWood 28s ease-in-out infinite 6s;
+    will-change: left, top, transform;
+    animation: walkPathWood 70s linear infinite 5s;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
 }
 
 @keyframes walkPathWood {
     0% {
-        transform: translate3d(0, 0, 0) scale(0.85);
+        left: 28%;
+        top: 41%;
+        transform: scale(0.78);
         opacity: 0;
     }
-    5% { opacity: 1; }
-    45% {
-        transform: translate3d(11vw, 6vh, 0) scale(0.95);
+    4% {
+        opacity: 1;
+    }
+    40% {
+        left: 34%;
+        top: 59%;
+        transform: scale(0.9);
+        opacity: 1;
+    }
+    47% {
+        left: 34%;
+        top: 59%;
+        transform: scale(0.9);
         opacity: 1;
     }
     50% {
-        transform: translate3d(12vw, 7vh, 0) scale(1);
-        opacity: 0;
-    }
-    55% {
-        transform: translate3d(12vw, 7vh, 0) scale(-1, 1);
-        opacity: 0;
-    }
-    60% { opacity: 1; }
-    95% {
-        transform: translate3d(0, 0, 0) scale(-0.85, 0.85);
+        left: 34%;
+        top: 59%;
+        transform: scale(-0.9, 0.9);
         opacity: 1;
     }
+    87% {
+        left: 28%;
+        top: 41%;
+        transform: scale(-0.78, 0.78);
+        opacity: 1;
+    }
+    94% {
+        left: 28%;
+        top: 41%;
+        transform: scale(-0.78, 0.78);
+        opacity: 1;
+    }
+    97% {
+        opacity: 0;
+    }
     100% {
-        transform: translate3d(0, 0, 0) scale(0.85);
+        left: 28%;
+        top: 41%;
+        transform: scale(0.78);
         opacity: 0;
     }
 }
 
-/* Balancement de marche du paysan */
+/* Balancement doux de marche du paysan (rythme posé) */
 .peasant-bob {
-    animation: peasantBob 0.65s ease-in-out infinite alternate;
+    animation: peasantBob 0.95s ease-in-out infinite alternate;
 }
 
 @keyframes peasantBob {
-    0%   { transform: translateY(0) rotate(-2deg); }
-    100% { transform: translateY(-2px) rotate(2deg); }
+    0%   { transform: translateY(0) rotate(-1.5deg); }
+    100% { transform: translateY(-1.5px) rotate(1.5deg); }
 }
 
 .leg-left {
     transform-origin: 10px 19px;
-    animation: legSwing 0.65s ease-in-out infinite alternate;
+    animation: legSwing 0.95s ease-in-out infinite alternate;
 }
 
 .leg-right {
     transform-origin: 14px 19px;
-    animation: legSwing 0.65s ease-in-out infinite alternate-reverse;
+    animation: legSwing 0.95s ease-in-out infinite alternate-reverse;
 }
 
 @keyframes legSwing {
-    0%   { transform: rotate(-18deg); }
-    100% { transform: rotate(18deg); }
+    0%   { transform: rotate(-14deg); }
+    100% { transform: rotate(14deg); }
 }
 
-/* Chariot à Bœuf (Traverse doucement la route de plaine de droite à gauche) */
+/* Chariot à Bœuf (Avance très lentement sur la grand-route de terre dégagée) */
 .ox-cart-unit {
     position: absolute;
-    left: 62%;
-    top: 67%;
+    left: 77%;
+    top: 66%;
     width: 38px;
     height: 18px;
-    animation: moveOxCart 48s linear infinite;
+    will-change: left, top, transform;
+    animation: moveOxCart 105s linear infinite;
     filter: drop-shadow(0 3px 4px rgba(0,0,0,0.65));
 }
 
 .ox-cart-bob {
-    animation: oxBob 1.2s ease-in-out infinite alternate;
+    animation: oxBob 1.8s ease-in-out infinite alternate;
 }
 
 @keyframes oxBob {
     0%   { transform: translateY(0); }
-    100% { transform: translateY(-1.5px); }
+    100% { transform: translateY(-1.2px); }
 }
 
 .ox-leg-front {
     transform-origin: 48px 19px;
-    animation: oxLeg 1.2s ease-in-out infinite alternate;
+    animation: oxLeg 1.8s ease-in-out infinite alternate;
 }
 
 .ox-leg-back {
     transform-origin: 40px 19px;
-    animation: oxLeg 1.2s ease-in-out infinite alternate-reverse;
+    animation: oxLeg 1.8s ease-in-out infinite alternate-reverse;
 }
 
 @keyframes oxLeg {
-    0%   { transform: rotate(-12deg); }
-    100% { transform: rotate(12deg); }
+    0%   { transform: rotate(-10deg); }
+    100% { transform: rotate(10deg); }
 }
 
 @keyframes moveOxCart {
     0% {
-        transform: translate3d(12vw, 4vh, 0) scale(-0.85, 0.85);
+        left: 77%;
+        top: 66%;
+        transform: scale(-0.85, 0.85);
         opacity: 0;
     }
-    5% { opacity: 1; }
+    3% {
+        opacity: 1;
+    }
+    40% {
+        left: 53%;
+        top: 69%;
+        transform: scale(-0.88, 0.88);
+        opacity: 1;
+    }
+    47% {
+        left: 53%;
+        top: 69%;
+        transform: scale(-0.88, 0.88);
+        opacity: 1;
+    }
     50% {
-        transform: translate3d(-6vw, -3vh, 0) scale(-0.85, 0.85);
+        left: 53%;
+        top: 69%;
+        transform: scale(0.88, 0.88);
         opacity: 1;
     }
-    55% { opacity: 0; }
-    60% {
-        transform: translate3d(-6vw, -3vh, 0) scale(0.85, 0.85);
+    87% {
+        left: 77%;
+        top: 66%;
+        transform: scale(0.85, 0.85);
+        opacity: 1;
+    }
+    94% {
+        left: 77%;
+        top: 66%;
+        transform: scale(0.85, 0.85);
+        opacity: 1;
+    }
+    97% {
         opacity: 0;
-    }
-    65% { opacity: 1; }
-    95% {
-        transform: translate3d(12vw, 4vh, 0) scale(0.85, 0.85);
-        opacity: 1;
     }
     100% {
-        transform: translate3d(12vw, 4vh, 0) scale(0.85, 0.85);
+        left: 77%;
+        top: 66%;
+        transform: scale(-0.85, 0.85);
         opacity: 0;
     }
 }
@@ -639,3 +726,4 @@
     };
 })();
 </script>
+

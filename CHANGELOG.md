@@ -6,12 +6,11 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 ## [Unreleased]
 ### Ajouté (Added)
 - **Ambiance Vivante du Terroir — Estampe Japonaise Animée en Arrière-Plan (`views/partials/rural_atmosphere_overlay.php`, `views/resources.php`) :**
-  * **Vie rurale féodale en mouvement :** Ajout d'une surcouche visuelle légère (pur SVG vectoriel + animations GPU 60 FPS CSS3) donnant vie au panorama 16:9 du domaine rural :
-    - *Brume matinale en défilement parallaxe :* Nappes vaporeuses dérivant lentement au ras des montagnes et des vallées à double vitesse.
-    - *Vol de hérons / grues du Japon :* Escadron d'oiseaux migrateurs traversant l'horizon avec battement d'ailes articulé en SVG.
-    - *Travailleurs féodaux sur les chemins :* Paysans portant des récoltes de riz et des fagots de bois sur l'épaule cheminant le long des voies de terre.
-    - *Convoi traditionnel :* Paysan guidant une charrette à grains tirée par un bœuf de labour aux pas cadencés.
-    - *Volutes de fumée :* Cheminées fumantes sur le Tenshu castral, les chaumières du village et l'encens du sanctuaire Shintō.
+  * **Vie rurale féodale en mouvement & Rythme contemplatif :** Surcouche visuelle légère (pur SVG vectoriel + animations GPU 60 FPS CSS3) donnant vie au panorama 16:9 du domaine rural :
+    - *Vol majestueux des grues du Japon :* Traversée intégrale d'est en ouest sans à-coups ni arrêts figés sur tout l'horizon (durée ralentie à 72s linéaire avec battement d'ailes ample à 1.6s).
+    - *Circulation fidèle sur les chemins de terre :* Trajectoires des paysans et de la charrette calées précisément sur les sentiers dégagés en pourcentages du terroir 16:9, contournant soigneusement tous les bâtiments, rizières, chaumières et sanctuaires.
+    - *Allure posée & Convoi traditionnel :* Vitesse de marche des villageois apaisée (durées de trajet 70-76s, balancement des pas à 0.95s) et marche lente d'un bœuf de labour tractant sa charrette sur la grand-route (105s, balancement à 1.8s).
+    - *Volutes de fumée & Brume :* Émanations du donjon Tenshu, des chaumières du village central et de l'encens sacré du sanctuaire Shintō, complétées par les nappes de brume d'altitude.
     - *Pétales de cerisier (Sakura) :* Pétales roses tournoyant délicatement au vent printanier.
   * **Performance & Respect de l'ergonomie :** Surcouche non-intrusive (`pointer-events: none`), n'interceptant aucun clic sur les 9 parcelles, les modales ou les chantiers. Poids plume (< 30 Ko sans aucune vidéo).
   * **Contrôle du joueur & Mode Zen :** Bouton à bascule « Ambiance Vivante : On/Off » dans l'en-tête de la carte avec persistance du choix du joueur dans `localStorage`.
