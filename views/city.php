@@ -350,10 +350,17 @@ foreach (BUILDINGS as $code => $bInfo) {
             require __DIR__ . '/partials/urban_construction_queue.php'; 
         ?>
 
+        <!-- Bilan Mutualisé des Récoltes, Stocks & Oasis Annexées -->
+        <?php 
+            $panelTitle = 'Récoltes, Stocks & Oasis';
+            require __DIR__ . '/partials/rural_harvest_resources_panel.php'; 
+        ?>
+
         <!-- Panel des Soldats (Style Travian) -->
         <?php require __DIR__ . '/partials/troops_panel.php'; ?>
     </div>
 </div>
+
 
 <!-- Modale de Fondation sur Emplacement Libre (Style Travian) -->
 <div class="modal-overlay" id="freeSlotModal" style="display:none; position:fixed; inset:0; background:rgba(5,7,15,0.88); backdrop-filter:blur(10px); z-index:9999; align-items:center; justify-content:center; padding:1rem;">

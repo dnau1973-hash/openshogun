@@ -5,6 +5,19 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Panneau Mutualisé des Récoltes, Stocks & Oasis Féodales (`views/partials/rural_harvest_resources_panel.php`, `views/resources.php`, `views/city.php`) :**
+  * **Composant réutilisable & unifié :** Extraction et enrichissement du box de récoltes sous la forme d'un élément modulaire sur le même modèle que le suivi des chantiers en cours, intégré simultanément sur la vue Terroir (`?page=resources`) et sur la Cité Castrale (`?page=city`).
+  * **Ensemble des 8 indicateurs du fief :** Suivi complet des productions horaires, niveaux de développement et jauges de remplissage :
+    - *Matières premières & Entrepôts :* Bois de Cèdre (`metal`), Pierre de Taille (`crystal`), Riz Impérial (`deuterium`) avec stocks actuels, capacités maximales d'entrepôts/greniers, barres d'avancement colorées et badges d'alerte en cas de saturation (>90%).
+    - *Terroirs spécialisés :* Argile & Céramique (`fosse_argile`), Thé & Matcha (`culture_the`), Fèves de Soja & Miso (`champ_soja`) avec productions horaires et progression verticale des parcelles.
+    - *Harmonie & Démographie :* Sérénité globale du fief et apport du Sanctuaire Shintō, ainsi que l'occupation des logements traditionnels (population active / capacité d'accueil des minka).
+  * **Protection des oasis sauvages :** Section dédiée aux protectorats d'oasis annexées (statut X/3, coordonnées précises et bonus de production en koku).
+
+### Corrigé (Fixed)
+- **Déblocage du Didacticiel du Daimyō — Validation des Parcelles du Terroir (`core/QuestEngine.php`) :**
+  * **Prise en charge du Terroir Féodal :** Résolution du blocage sur l'étape 1 « Ouvrir le Terroir / Premier Arpent de Cèdre » (et étapes 2 à 4) où le moteur de quêtes vérifiait uniquement l'ancienne table `planet_fields` (`metal_mine`, etc.).
+  * **Mappage universel :** `QuestEngine::evaluateCondition()` contrôle désormais en priorité la table `planet_rural_plots` pour les 9 parcelles du terroir (`foret`, `carriere`, `riziere`, `sanctuaire_shinto`, `tenshu`), validant instantanément l'objectif dès que le joueur élève son camp de bûcherons ou ses structures rurales.
+
 - **Ambiance Vivante du Terroir — Estampe Japonaise Animée en Arrière-Plan (`views/partials/rural_atmosphere_overlay.php`, `views/resources.php`) :**
   * **Vie rurale féodale en mouvement & Rythme contemplatif :** Surcouche visuelle légère (pur SVG vectoriel + animations GPU 60 FPS CSS3) donnant vie au panorama 16:9 du domaine rural :
     - *Vol majestueux des grues du Japon :* Traversée intégrale d'est en ouest sans à-coups ni arrêts figés sur tout l'horizon (durée ralentie à 72s linéaire avec battement d'ailes ample à 1.6s).

@@ -1,5 +1,26 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-08] - rural-harvest-panel-quest-fix : Panneau Mutualisé Récoltes & Stocks et Déblocage du Didacticiel sur le Terroir Féodal
+- **Module :** `rural-harvest-panel-quest-fix`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Composant Partiel Mutualisé `views/partials/rural_harvest_resources_panel.php` :**
+     - Nouveau panneau unifié extrait et enrichi, intégré à la fois sur la page Terroir (`views/resources.php`) et sur la Cité Castrale (`views/city.php`).
+     - **Matières Premières :** Suivi en direct du Bois de Cèdre, de la Pierre de Taille et du Riz Impérial avec productions horaires (`+XXX/h`), stocks actuels, capacités maximales, barres de progression colorées et alertes visuelles de saturation.
+     - **Terroirs Spécialisés :** Argile & Céramique (`fosse_argile`), Thé & Matcha (`culture_the`), Fèves de Soja & Miso (`champ_soja`) avec productions horaires et progression verticale des parcelles.
+     - **Harmonie Féodale & Démographie :** Jauge de sérénité du fief et apport du Sanctuaire Shintō, ainsi que le taux d'occupation des habitations (population / capacité maximale des minka).
+     - **Oasis Sauvages :** Section dédiée aux protectorats d'oasis annexées (statut X/3, coordonnées et bonus de récoltes).
+  2. **Résolution du Blocage du Didacticiel Féodal (`core/QuestEngine.php`) :**
+     - Adaptation de la validation des quêtes 1 à 4 pour prendre en compte les 9 parcelles du nouveau Terroir (`planet_rural_plots`) en plus de l'ancienne table `planet_fields`.
+     - L'étape 1 « Premier Arpent de Cèdre » (Camp de Bûcherons / Forêt de Cèdres) se valide automatiquement et permet de réclamer la récompense dès que la parcelle est au niveau 1.
+- **Fichiers modifiés / créés :** `views/partials/rural_harvest_resources_panel.php`, `views/resources.php`, `views/city.php`, `core/QuestEngine.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Visiter la page Terroir (`/?page=resources`) : vérifier l'affichage du nouveau panneau « Récoltes, Stocks & Oasis » avec les 8 indicateurs et leurs jauges de remplissage.
+  2. Visiter la Cité Castrale (`/?page=city`) : vérifier la présence identique et fonctionnelle de ce même panneau dans la colonne de droite.
+  3. Dans le widget Didacticiel du Daimyō (à droite sur la cité ou sur les ressources) : constater que l'étape 1 n'est plus bloquée et affiche « Objectif atteint ! Réclamer ma Récompense » si le bois est niveau >= 1, ou se valide dès l'élévation au niveau 1.
+
+---
+
 ### [2026-10-08] - rural-animated-atmosphere : Ambiance Vivante du Terroir Féodal (Estampe Japonaise Animée en Arrière-Plan)
 - **Module :** `rural-animated-atmosphere`
 - **Statut :** `À tester`

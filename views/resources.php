@@ -414,41 +414,12 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                 require __DIR__ . '/partials/urban_construction_queue.php'; 
             ?>
 
-            <!-- Bilan des Récoltes & Oasis Annexées -->
-            <div class="card shadow-sm">
-                <div class="card-header py-2">
-                    <h3 class="card-title mb-0 fs-3">
-                        <i class="fa-solid fa-chart-line me-2 text-success"></i>Récoltes &amp; Oasis
-                    </h3>
-                </div>
-                <div class="card-body p-3" style="font-size:0.85rem;">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span><i class="fa-solid fa-tree text-success me-1"></i> Bois de Cèdre :</span>
-                        <strong class="text-success">+<?= number_format($planet['prod_rates']['metal']) ?> / h</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span><i class="fa-solid fa-mountain text-secondary me-1"></i> Pierre de Taille :</span>
-                        <strong class="text-secondary">+<?= number_format($planet['prod_rates']['crystal']) ?> / h</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i> Riz Impérial :</span>
-                        <strong class="text-warning">+<?= number_format($planet['prod_rates']['deuterium']) ?> / h</strong>
-                    </div>
+            <!-- Bilan Mutualisé des Récoltes, Stocks & Oasis Annexées -->
+            <?php 
+                $panelTitle = 'Récoltes, Stocks & Oasis';
+                require __DIR__ . '/partials/rural_harvest_resources_panel.php'; 
+            ?>
 
-                    <?php if (!empty($annexedOases)): ?>
-                        <hr class="my-2">
-                        <div class="fw-bold text-success mb-2" style="font-size:0.78rem;">
-                            <i class="fa-solid fa-seedling me-1"></i> Oasis Annexées (<?= count($annexedOases) ?> / 3) :
-                        </div>
-                        <?php foreach ($annexedOases as $ao): ?>
-                            <div class="d-flex justify-content-between align-items-center p-1 rounded bg-surface-secondary mb-1" style="font-size:0.75rem;">
-                                <span><?= htmlspecialchars($ao['name']) ?> [<?= $ao['coord_x'] ?>:<?= $ao['coord_y'] ?>]</span>
-                                <span class="badge bg-success-lt">+<?= $ao['bonus_rice'] ?? 25 ?>%</span>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
 
             <!-- Panel des Troupes & Garnisons -->
             <?php require __DIR__ . '/partials/troops_panel.php'; ?>

@@ -315,6 +315,16 @@ class QuestEngine {
         $fields = $this->planetEngine->getFields($planetId);
         $user = $this->getUserData($userId);
 
+        // Parcelles rurales du nouveau Terroir Féodal (planet_rural_plots)
+        $ruralPlots = [];
+        try {
+            $stmtPlots = $this->db->prepare("SELECT structure_type, level FROM planet_rural_plots WHERE planet_id = ?");
+            $stmtPlots->execute([$planetId]);
+            $ruralPlots = $stmtPlots->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        } catch (Exception $e) {
+            $ruralPlots = [];
+        }
+
         $questList = [];
         $activeQuest = null;
         $claimableCount = 0;
@@ -338,8 +348,8 @@ class QuestEngine {
                 continue;
             }
 
-            // Évaluation dynamique de la complétion
-            $isMet = $this->evaluateCondition($q['check'], $userId, $planetId, $buildings, $fields, $user);
+            // Évaluation dynamique de la complétion (supporte les nouveaux terroirs ruraux)
+            $isMet = $this->evaluateCondition($q['check'], $userId, $planetId, $buildings, $fields, $user, $ruralPlots);
 
             if ($isMet && $status !== 'completed') {
                 $status = 'completed';
@@ -524,13 +534,36 @@ class QuestEngine {
     /**
      * Évalue si les conditions d'une quête sont satisfaites
      */
-    private function evaluateCondition(array $check, int $userId, int $planetId, array $buildings, array $fields, array $user): bool {
+    private function evaluateCondition(array $check, int $userId, int $planetId, array $buildings, array $fields, array $user, array $ruralPlots = []): bool {
         $type = $check['type'] ?? '';
 
         switch ($type) {
             case 'field_level':
                 $targetType = $check['field_type'] ?? '';
                 $minLevel = (int)($check['min_level'] ?? 1);
+
+                // 1. Prise en charge des 9 parcelles du Terroir Féodal (planet_rural_plots)
+                $ruralPlotMapping = [
+                    'metal_mine'       => 'foret',            // Camp de Bûcherons / Forêt de Cèdres
+                    'crystal_mine'     => 'carriere',         // Carrière de Pierre / Falaise de Granit
+                    'deuterium_synth'  => 'riziere',          // Rizière Inondée
+                    'solar_plant'      => 'sanctuaire_shinto',// Sanctuaire Shintō
+                    'foret'            => 'foret',
+                    'carriere'         => 'carriere',
+                    'riziere'          => 'riziere',
+                    'sanctuaire_shinto'=> 'sanctuaire_shinto',
+                    'village'          => 'village',
+                    'fosse_argile'     => 'fosse_argile',
+                    'culture_the'      => 'culture_the',
+                    'champ_soja'       => 'champ_soja',
+                ];
+
+                $ruralType = $ruralPlotMapping[$targetType] ?? $targetType;
+                if (isset($ruralPlots[$ruralType]) && (int)$ruralPlots[$ruralType] >= $minLevel) {
+                    return true;
+                }
+
+                // 2. Rétro-compatibilité avec les anciens champs procéduraux (planet_fields)
                 foreach ($fields as $f) {
                     if ($f['type'] === $targetType && (int)$f['level'] >= $minLevel) {
                         return true;
@@ -541,6 +574,13 @@ class QuestEngine {
             case 'building_level':
                 $bName = $check['building'] ?? '';
                 $minLevel = (int)($check['min_level'] ?? 1);
+
+                // Si la quête cible le Tenshu (hq)
+                if ($bName === 'hq') {
+                    if (isset($ruralPlots['tenshu']) && (int)$ruralPlots['tenshu'] >= $minLevel) {
+                        return true;
+                    }
+                }
                 return isset($buildings[$bName]) && (int)$buildings[$bName] >= $minLevel;
 
             case 'building_or_level':
