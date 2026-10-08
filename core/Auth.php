@@ -478,12 +478,12 @@ class Auth {
             // 2. Trouver un emplacement de coordonnées (X, Y) libre dans le quadrant choisi
             $coords = $this->findFreeCoordinates($zone);
 
-            // 3. Créer le domaine castral principal
+            // 3. Créer le domaine castral principal (1000 Bois, Pierre, Riz)
             $planetName = "Château " . ucfirst($username);
             $stmtPlanet = $this->db->prepare("
                 INSERT INTO planets 
                 (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, last_resource_update, is_capital) 
-                VALUES (?, ?, ?, ?, 'terrestrial', 2000, 1500, 800, 0, 50, 15000, 15000, 15000, UNIX_TIMESTAMP(), 1)
+                VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 50, 15000, 15000, 15000, UNIX_TIMESTAMP(), 1)
             ");
             $stmtPlanet->execute([$userId, $planetName, $coords['x'], $coords['y']]);
             $planetId = (int)$this->db->lastInsertId();

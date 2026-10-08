@@ -139,10 +139,12 @@ class GalaxyEngine {
 
         // Indexer par "x:y"
         $gridMap = [];
+        $unoccupiedPlanetIds = [];
+
         foreach ($planets as $p) {
             $isVillage = !empty($p['user_id']);
             $p['terrain_type'] = $isVillage ? 'village' : 'unoccupied';
-            $p['terrain_name'] = $isVillage ? ('Fief de ' . ($p['username'] ?? 'Daimyō')) : 'Terres Libres';
+            $p['terrain_name'] = $isVillage ? ('Fief de ' . ($p['username'] ?? 'Daimyō')) : ($p['planet_name'] ?? 'Terres Libres');
             $p['terrain_img'] = $isVillage ? '/public/assets/map/tile_village.jpg?v=2' : '/public/assets/map/tile_plains.jpg?v=2';
             
             if ($isVillage) {
@@ -160,9 +162,43 @@ class GalaxyEngine {
                 $p['is_protected'] = 0;
                 $p['protection_until'] = null;
                 $p['protection_remaining'] = null;
+                $unoccupiedPlanetIds[] = (int)$p['planet_id'];
             }
 
             $gridMap[$p['coord_x'] . ':' . $p['coord_y']] = $p;
+        }
+
+        // Récupérer les particularités des parcelles rurales pour les fiefs libres (max_level)
+        if (!empty($unoccupiedPlanetIds)) {
+            try {
+                $inClause = implode(',', $unoccupiedPlanetIds);
+                $stmtPlots = $this->db->query("
+                    SELECT planet_id, structure_type, level, max_level
+                    FROM planet_rural_plots
+                    WHERE planet_id IN ({$inClause})
+                    ORDER BY slot_id ASC
+                ");
+                $plotsByPlanet = [];
+                while ($row = $stmtPlots->fetch(PDO::FETCH_ASSOC)) {
+                    $pid = (int)$row['planet_id'];
+                    if (!isset($plotsByPlanet[$pid])) {
+                        $plotsByPlanet[$pid] = [];
+                    }
+                    $plotsByPlanet[$pid][$row['structure_type']] = [
+                        'level'     => (int)$row['level'],
+                        'max_level' => (int)$row['max_level']
+                    ];
+                }
+                foreach ($gridMap as $k => &$gItem) {
+                    $pId = (int)($gItem['planet_id'] ?? 0);
+                    if ($pId > 0 && isset($plotsByPlanet[$pId])) {
+                        $gItem['rural_plots'] = $plotsByPlanet[$pId];
+                    }
+                }
+                unset($gItem);
+            } catch (Exception $e) {
+                // Continuer si erreur
+            }
         }
 
         // Récupérer les donjons authentiques déployés dans ce secteur

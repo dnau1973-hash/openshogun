@@ -1,5 +1,28 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-08] - map-smooth-parcel-modal-backup-service : Déplacement Fluide Carte 60fps, Modale des Parcelles Libres avec Niveaux Max, 1000 Ressources Initiales et Sauvegarde Autonome USB
+- **Module :** `map-smooth-parcel-modal-backup-service`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Ressources Initiales par Défaut à 1000 (`core/WorldGenerator.php`, `core/BotEngine.php`, `core/Auth.php`) :**
+     - Tout joueur (administrateur au reset, nouvel inscrit, bots) débute désormais avec 1000 unités de Bois de Cèdre, 1000 Pierre de Taille et 1000 Riz Impérial.
+  2. **Suppression des Saccades sur la Carte des Provinces (`public/js/galaxy_map.js`) :**
+     - Le Drag & Drop de la carte est désormais traité exclusivement en translation GPU matérielle (`translate3d`), sans requête ni ré-instanciation DOM intempestive en cours de geste. Le recadrage et la requête AJAX ne s'opèrent qu'au relâchement du pointeur.
+  3. **Affichage des Particularités du Terroir & Niveaux Max au Clic d'une Parcelle Libre (`core/GalaxyEngine.php`, `views/map.php`) :**
+     - Au clic sur un domaine inoccupé ou une parcelle libre, la modale affiche la liste des 9 parcelles uniques du fief avec leur niveau maximal (`max_level`) et met en valeur les filons d'or / jackpots régionaux (Niveau max 75 à 100).
+  4. **Système Autonome de Sauvegarde / Réintégration Base de Données Séparées & Support USB (`core/DatabaseBackupService.php`, `scripts/backup_database.php`) :**
+     - Export séparé de la Structure (DDL) et des Données (DML avec `SET FOREIGN_KEY_CHECKS=0`).
+     - Sauvegarde dans `database/backups/` et duplication automatique sur support USB / disque externe connecté (`/media` ou `/mnt`, ou via paramètre `--usb`).
+     - Script CLI dédié indépendant de l'administration (`php scripts/backup_database.php backup|list|restore`).
+- **Fichiers modifiés :** `core/WorldGenerator.php`, `core/BotEngine.php`, `core/Auth.php`, `core/GalaxyEngine.php`, `public/js/galaxy_map.js`, `views/map.php`, `core/DatabaseBackupService.php`, `scripts/backup_database.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Glisser la carte des provinces (`?page=map`) à la souris ou au doigt : vérifier le déplacement instantané et fluide sans aucune saccade.
+  2. Cliquer sur une parcelle libre ou neutre : constater la présence du tableau des potentiels verticaux des 9 parcelles uniques (niveaux max).
+  3. Exécuter `php scripts/backup_database.php backup` : constater la création des 2 fichiers distincts dans `database/backups/` (structure et données).
+  4. Exécuter `php scripts/backup_database.php list` : constater l'affichage des sauvegardes et le statut des clés USB.
+
+---
+
 ### [2026-10-08] - urban-queue-partial-tenshu-city-link-zero-reset : Mutualisation du Chantier Urbain en Partial, Redirection Cité du Tenshu et Réinitialisation du Monde à Zéro
 - **Module :** `urban-queue-partial-tenshu-city-link-zero-reset`
 - **Statut :** `À tester`

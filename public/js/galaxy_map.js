@@ -160,6 +160,7 @@ class GalaxyMapController {
         this.dragOffsetX = 0;
         this.dragOffsetY = 0;
         this.totalDistanceMoved = 0;
+        this.canvas.style.transition = 'none';
 
         this.viewport.classList.add('grabbing');
     }
@@ -173,22 +174,14 @@ class GalaxyMapController {
         this.dragOffsetY = dy;
         this.totalDistanceMoved += Math.hypot(e.movementX, e.movementY);
 
+        // Fluidité 60fps pure : translation GPU sans rechargement ni reconstruction du DOM pendant le geste
         this.canvas.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
 
-        const coordDeltaX = -Math.trunc(dx / this.stepSize);
-        const coordDeltaY = Math.trunc(dy / this.stepSize);
-
-        if (coordDeltaX !== 0 || coordDeltaY !== 0) {
-            this.centerX += coordDeltaX;
-            this.centerY += coordDeltaY;
-            this.dragStartX += (-coordDeltaX * this.stepSize);
-            this.dragStartY += (coordDeltaY * this.stepSize);
-            this.dragOffsetX = e.clientX - this.dragStartX;
-            this.dragOffsetY = e.clientY - this.dragStartY;
-            this.canvas.style.transform = `translate3d(${this.dragOffsetX}px, ${this.dragOffsetY}px, 0)`;
-
-            this.updateCoordsDisplay();
-            this.loadSector(this.centerX, this.centerY);
+        // Prévisualisation des coordonnées centrales dans le HUD
+        const coordDeltaX = -Math.round(dx / this.stepSize);
+        const coordDeltaY = Math.round(dy / this.stepSize);
+        if (this.coordsDisplay) {
+            this.coordsDisplay.innerText = `[${this.centerX + coordDeltaX} : ${this.centerY + coordDeltaY}]`;
         }
     }
 
@@ -197,12 +190,26 @@ class GalaxyMapController {
         this.isDragging = false;
         this.viewport.classList.remove('grabbing');
 
-        this.canvas.style.transition = 'transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1)';
+        // Calcul du nombre de tuiles déplacées
+        const coordDeltaX = -Math.round(this.dragOffsetX / this.stepSize);
+        const coordDeltaY = Math.round(this.dragOffsetY / this.stepSize);
+
+        if (coordDeltaX !== 0 || coordDeltaY !== 0) {
+            this.centerX += coordDeltaX;
+            this.centerY += coordDeltaY;
+            this.updateCoordsDisplay();
+        }
+
+        // Réinitialisation douce de la transformation
+        this.canvas.style.transition = 'transform 0.15s cubic-bezier(0.2, 0.9, 0.4, 1)';
         this.canvas.style.transform = 'translate3d(0, 0, 0)';
 
         setTimeout(() => {
             this.canvas.style.transition = 'none';
-        }, 220);
+            if (coordDeltaX !== 0 || coordDeltaY !== 0) {
+                this.loadSector(this.centerX, this.centerY);
+            }
+        }, 160);
     }
 
     moveTo(x, y) {

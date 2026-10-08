@@ -351,18 +351,93 @@ window.selectPlanetTile = function(data) {
         return;
     }
 
-    // ── Terres Neutres (planète sans joueur) ────────────────────
+    // ── Terres Neutres (planète sans joueur ou parcelle libre répertoriée) ─────
     if (!data.user_id) {
-        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-secondary me-1"></i> Terres Neutres`;
+        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.planet_name || 'Domaine Libre'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
+
+        // Métadonnées canoniques des parcelles féodales
+        const structureMeta = {
+            'tenshu':            { name: 'Tenshu Donjon',      icon: 'fa-chess-rook',    color: '#b45309' },
+            'foret':             { name: 'Forêt de Cèdres',   icon: 'fa-tree',          color: '#15803d' },
+            'carriere':          { name: 'Carrière de Granit',icon: 'fa-mountain',      color: '#2563eb' },
+            'fosse_argile':      { name: 'Fosse d\'Argile',    icon: 'fa-cubes-stacked', color: '#ea580c' },
+            'riziere':           { name: 'Rizière Alluviale',  icon: 'fa-wheat-awn',     color: '#ca8a04' },
+            'champ_soja':        { name: 'Champs de Soja',     icon: 'fa-seedling',      color: '#16a34a' },
+            'culture_the':       { name: 'Coteaux de Thé',     icon: 'fa-leaf',          color: '#059669' },
+            'sanctuaire_shinto': { name: 'Sanctuaire Shintō', icon: 'fa-torii-gate',    color: '#dc2626' },
+            'village':           { name: 'Village & Habitats', icon: 'fa-house-chimney', color: '#475569' }
+        };
+
+        let ruralPlotsHtml = '';
+        if (data.rural_plots && Object.keys(data.rural_plots).length > 0) {
+            ruralPlotsHtml = `
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="text-uppercase small text-secondary" style="letter-spacing:0.5px; font-size:0.75rem;">
+                            <i class="fa-solid fa-layer-group me-1"></i>Particularités du Terroir &bull; Potentiels Verticaux (Niveaux Max)
+                        </strong>
+                        <span class="badge bg-success-lt font-weight-bold">9 Parcelles Uniques</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:0.5rem;">
+            `;
+            for (const [stype, pInfo] of Object.entries(data.rural_plots)) {
+                const meta = structureMeta[stype] || { name: stype, icon: 'fa-circle-dot', color: '#475569' };
+                const maxLvl = pInfo.max_level || 30;
+                const isJackpot = maxLvl >= 70;
+                const borderStyle = isJackpot ? 'border:1.5px solid #ca8a04; background:#fefce8;' : 'border:1px solid #e2e8f0; background:#ffffff;';
+
+                ruralPlotsHtml += `
+                    <div style="${borderStyle} border-radius:8px; padding:0.45rem 0.6rem; display:flex; align-items:center; justify-content:space-between; gap:0.4rem;">
+                        <div class="d-flex align-items-center gap-2 min-w-0">
+                            <span style="color:${meta.color}; font-size:1rem; width:18px; text-align:center;"><i class="fa-solid ${meta.icon}"></i></span>
+                            <div class="lh-1 text-truncate">
+                                <div style="font-size:0.78rem; font-weight:600; color:#1e293b;" class="text-truncate">${meta.name}</div>
+                                <div class="text-muted" style="font-size:0.65rem;">Actuel: Niv. ${pInfo.level || 0}</div>
+                            </div>
+                        </div>
+                        <span class="badge ${isJackpot ? 'bg-warning text-dark fw-bold' : 'bg-secondary-lt text-dark'}" style="font-size:0.72rem; flex-shrink:0;">
+                            Max ${maxLvl}
+                        </span>
+                    </div>
+                `;
+            }
+            ruralPlotsHtml += `</div></div>`;
+        }
+
         body.innerHTML = `
-            <div class="border rounded p-3 bg-surface mb-3">
-                <h4 class="font-weight-bold mb-1" style="color:#1e293b;">${data.planet_name || 'Domaine inconnu'}</h4>
-                <p class="text-secondary mb-1">Terrain : <strong style="color:#1e293b;">${data.planet_type || '—'}</strong></p>
-                <p class="text-success font-weight-medium mb-0"><i class="fa-solid fa-sparkles me-1"></i>Terres fertiles libres pour un nouveau fief !</p>
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div style="width:58px; height:58px; border-radius:8px; overflow:hidden; border:2px solid #cbd5e1; flex-shrink:0; background:#f1f5f9;">
+                        ${data.terrain_img ? `<img src="${data.terrain_img}" alt="" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:2rem; display:flex; align-items:center; justify-content:center; height:100%;"><i class="fa-solid fa-wheat-awn text-warning"></i></span>'}
+                    </div>
+                    <div>
+                        <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
+                            ${data.planet_name || 'Domaine Féodal Libre'}
+                        </div>
+                        <div class="small text-secondary mt-0.5">
+                            Type de terrain : <strong class="text-dark">${data.planet_type || 'terrestrial'}</strong> &bull; Emplacement stratégique pour un nouveau fief.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
+                    <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
+                    <div>
+                        <strong>Emplacement Libre pour Colonisation !</strong><br>
+                        Vous pouvez y envoyer un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour annexer ce terroir et fonder une colonie.
+                    </div>
+                </div>
+
+                ${ruralPlotsHtml}
             </div>
-            <div class="d-flex justify-content-end gap-2 flex-wrap">
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=colonize" class="btn btn-primary"><i class="fa-solid fa-chess-rook me-1"></i>Établir un Fief</a>
-                <a href="?page=fleet&target_id=${data.planet_id}&mission=raid"     class="btn btn-outline-danger"><i class="fa-solid fa-khanda me-1"></i>Piller</a>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
+                <div class="d-flex gap-2">
+                    <a href="?page=fleet&target_id=${data.planet_id || ''}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
+                        <i class="fa-solid fa-chess-rook me-1"></i>Fonder un Fief ici avec un Pionnier &rarr;
+                    </a>
+                </div>
             </div>
         `;
         openMapModal();

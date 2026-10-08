@@ -237,7 +237,7 @@ class WorldGenerator {
         $stmtAdmin->execute([$adminUsername, $adminEmail, $adminHash, $adminFaction]);
         $adminId = (int)$this->db->lastInsertId();
 
-        // 4. Fonder le Domaine Castral Capitale de l'Admin en [1 : 1] avec ressources à 0
+        // 4. Fonder le Domaine Castral Capitale de l'Admin en [1 : 1] avec ressources par défaut (1000 Bois, Pierre, Riz)
         $capitalName = "Château Nezzar";
         $capitalX = 1;
         $capitalY = 1;
@@ -245,7 +245,7 @@ class WorldGenerator {
         $stmtCap = $this->db->prepare("
             INSERT INTO planets 
             (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
-            VALUES (?, ?, ?, ?, 'terrestrial', 0, 0, 0, 0, 120, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
+            VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 120, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
         ");
         $stmtCap->execute([$adminId, $capitalName, $capitalX, $capitalY]);
         $capitalPlanetId = (int)$this->db->lastInsertId();

@@ -5,6 +5,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Ressources de départ par défaut à 1000 & Calibrage Féodal (`core/WorldGenerator.php`, `core/BotEngine.php`, `core/Auth.php`) :**
+  * **Ressources initiales :** Chaque joueur (administrateur, nouveau joueur inscrit, bot) démarre désormais par défaut avec 1000 unités de chaque ressource de base (1000 Bois de Cèdre, 1000 Pierre de Taille, 1000 Riz Impérial).
+- **Suppression des saccades de la carte & Déplacement ultra-fluide 60fps (`public/js/galaxy_map.js`) :**
+  * **Optimisation du Drag & Drop :** Élimination du recadrage / rechargement AJAX répétitif pendant le mouvement du curseur. La translation est désormais assurée en pur GPU (`translate3d`), le calcul du décalage de coordonnées et le rafraîchissement des secteurs ne s'effectuant qu'au relâchement du pointeur.
+- **Affichage des particularités et potentiels verticaux (Niveaux Max) au clic des parcelles libres sur la Carte (`core/GalaxyEngine.php`, `views/map.php`) :**
+  * **Modal enrichi des parcelles inoccupées :** L'ouverture du modal sur un terrain libre ou un fief inoccupé affiche la grille des particularités géologiques du domaine avec les plafonds verticaux (`max_level`) de chacune des 9 parcelles uniques (Bois, Pierre, Argile, Riz, Soja, Thé, Sanctuaire Shinto, Village). Mise en exergue des filons jackpot (Niv. 75-100).
+- **Système autonome de sauvegarde et réintégration séparées (Structure & Données) avec support USB (`core/DatabaseBackupService.php`, `scripts/backup_database.php`) :**
+  * **Exports séparés DDL / DML :** Génération distincte de la structure (`structure_openshogun_YYYYMMDD_HHMMSS.sql`) et des données (`data_openshogun_YYYYMMDD_HHMMSS.sql`) avec désactivation contrôlée des clés étrangères.
+  * **Double destination :** Sauvegarde dans le dossier interne `database/backups/` et réplication automatique sur support USB / disque externe connecté (détection automatique dans `/media` et `/mnt` ou spécification via `--usb=`).
+  * **Outil autonome :** Accessible en ligne de commande indépendamment de l'interface d'administration (`php scripts/backup_database.php backup|list|restore`).
 - **Mutualisation du bloc de file de chantiers urbains & correction du lien Donjon / Cité (`views/partials/urban_construction_queue.php`, `views/city.php`, `views/resources.php`, `public/js/rural_domain_map.js`) :**
   * **Composant réutilisable `urban_construction_queue.php` :** Extraction mutualisée du bloc de chantiers en cours dans `views/partials/` avec prise en charge unifiée des bâtiments urbains, des parcelles rurales (`rural_plot`) et des champs (`field`), décomptes interactifs temps réel, annulation de chantiers (`cancelBuild` / `cancelRuralUpgrade`) et badge de double file pour le Clan Oda.
   * **Intégration harmonieuse :** Intégration du partial à la fois sur la page Cité (`views/city.php`) et sur la page Ressources (`views/resources.php`).
