@@ -1,5 +1,28 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-08] - weather-day-night-cycle-engine : Moteur Météo & Cycle Temporel Dynamique du Terroir Féodal
+- **Module :** `weather-day-night-cycle-engine`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Cycle Temporel Synchronisé & Ambiances Féodales (`views/partials/rural_atmosphere_overlay.php`, `views/resources.php`) :**
+     - Moteur atmosphérique en temps réel synchronisé sur l'horloge locale du joueur (Aube 6h-9h, Plein Jour 9h-17h, Crépuscule 17h-20h30, Nuit 20h30-6h).
+     - **Nuit Féodale Magique (Yoru) :** Allumage automatique des fenêtres du donjon Tenshu et des chaumières du village en or chaleureux, lanternes vermillon du sanctuaire rougeoyantes, ciel constellé d'étoiles scintillantes, croissant de lune et lucioles dorées (hotaru).
+     - **Hiver sous la Neige (Yuki) :** Teintes froides givrées, brume blanche et chute continue de 26 flocons de neige légers en pur CSS GPU.
+     - **Pluie & Feuilles Momiji (Ame & Kōyō) :** Rideaux de pluie obliques fins et feuilles d'érable rouges tourbillonnant au vent.
+     - **Printemps & Plein Jour (Haru) :** Lumière solaire naturelle et pétales de cerisier Sakura.
+  2. **Sélecteur Dropdown d'Ambiance Déroulant :**
+     - Menu déroulant élégant dans l'en-tête du panorama permettant de basculer instantanément entre tous les climats et saisons avec mémorisation dans le `localStorage`.
+- **Fichiers modifiés :** `views/partials/rural_atmosphere_overlay.php`, `views/resources.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Accéder à la page Ressources (`/?page=resources`).
+  2. Ouvrir le sélecteur « Météo » en haut à droite du panorama.
+  3. Sélectionner « Nuit & Lanternes Allumées (Yoru) » : vérifier le ciel étoilé, la lune et l'illumination dorée des fenêtres du village et du château, ainsi que les lanternes rouges du sanctuaire.
+  4. Sélectionner « Hiver sous la Neige (Yuki) » : vérifier la teinte givrée et la chute de flocons de neige.
+  5. Sélectionner « Pluie & Feuilles d'Érable (Ame) » : vérifier les rideaux de pluie et les feuilles d'érable Momiji.
+  6. Revenir sur « Cycle Réel (Heure locale) » : vérifier la synchronisation automatique avec l'horloge locale.
+
+---
+
 ### [2026-10-08] - rural-harvest-panel-quest-fix : Panneau Mutualisé Récoltes & Stocks et Déblocage du Didacticiel sur le Terroir Féodal
 - **Module :** `rural-harvest-panel-quest-fix`
 - **Statut :** `À tester`

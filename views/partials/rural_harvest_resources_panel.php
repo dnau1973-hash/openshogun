@@ -339,3 +339,4 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
 
     </div>
 </div>
+

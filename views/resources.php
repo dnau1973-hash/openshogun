@@ -293,9 +293,25 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                         <?php endif; ?>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <button type="button" id="btnToggleAtmosphere" onclick="toggleRuralAtmosphere()" class="btn btn-sm btn-dark text-warning border-secondary" title="Activer / Désactiver les animations vivantes de l'estampe" style="font-size:0.75rem; padding: 2px 8px;">
-                            <i class="fa-solid fa-wind me-1 text-warning"></i><span id="txtAtmosphereStatus">Ambiance : On</span>
-                        </button>
+                        <!-- Sélecteur Météo & Cycle Jour/Nuit/Saisons -->
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-sm btn-dark text-warning border-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="btnAtmosphereDropdown" style="font-size:0.75rem; padding: 2px 10px;" title="Changer le climat, la saison ou le cycle jour/nuit du Terroir">
+                                <i class="fa-solid fa-clock text-primary me-1" id="iconAtmosphere"></i><span id="txtAtmosphereLabel">Météo : Auto</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow border-secondary" style="font-size:0.8rem; min-width: 220px;">
+                                <li><h6 class="dropdown-header text-muted font-monospace"><i class="fa-solid fa-clock me-1"></i>HORLOGE RÉELLE</h6></li>
+                                <li><a class="dropdown-item weather-dropdown-item active" data-theme="auto" href="javascript:void(0)" onclick="setShogunWeather('auto')"><i class="fa-solid fa-clock me-2 text-primary"></i>Cycle Réel (Heure locale)</a></li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li><h6 class="dropdown-header text-muted font-monospace"><i class="fa-solid fa-cloud-sun me-1"></i>CLIMATS DU FIEF</h6></li>
+                                <li><a class="dropdown-item weather-dropdown-item" data-theme="day" href="javascript:void(0)" onclick="setShogunWeather('day')"><i class="fa-solid fa-sun me-2 text-warning"></i>Plein Jour (Estampe claire)</a></li>
+                                <li><a class="dropdown-item weather-dropdown-item" data-theme="dusk" href="javascript:void(0)" onclick="setShogunWeather('dusk')"><i class="fa-solid fa-cloud-sun me-2 text-orange"></i>Crépuscule d'Ambre (Yūgure)</a></li>
+                                <li><a class="dropdown-item weather-dropdown-item" data-theme="night" href="javascript:void(0)" onclick="setShogunWeather('night')"><i class="fa-solid fa-moon me-2 text-info"></i>Nuit &amp; Lanternes Allumées (Yoru)</a></li>
+                                <li><a class="dropdown-item weather-dropdown-item" data-theme="snow" href="javascript:void(0)" onclick="setShogunWeather('snow')"><i class="fa-solid fa-snowflake me-2 text-cyan"></i>Hiver sous la Neige (Yuki)</a></li>
+                                <li><a class="dropdown-item weather-dropdown-item" data-theme="rain" href="javascript:void(0)" onclick="setShogunWeather('rain')"><i class="fa-solid fa-cloud-rain me-2 text-teal"></i>Pluie &amp; Feuilles d'Érable (Ame)</a></li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li><a class="dropdown-item weather-dropdown-item text-muted" data-theme="off" href="javascript:void(0)" onclick="setShogunWeather('off')"><i class="fa-solid fa-pause me-2"></i>Désactiver animations (Mode Zen)</a></li>
+                            </ul>
+                        </div>
                         <?= AiPromptHelper::renderBadge('shogun_rural_terroir_9plots.jpg', 'Panorama Stratégique des 9 Parcelles Féodales', '/public/assets/shogun_rural_terroir_9plots.jpg', '', true) ?>
                     </div>
                 </div>

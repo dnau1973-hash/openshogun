@@ -5,6 +5,15 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Moteur Météo & Cycle Temporel Dynamique du Terroir Féodal (`views/partials/rural_atmosphere_overlay.php`, `views/resources.php`) :**
+  * **Cycle Jour / Nuit / Aube / Crépuscule synchronisé :** Moteur atmosphérique temps réel calé sur l'horloge locale du joueur (Aube dorée 6h-9h, Plein jour 9h-17h, Crépuscule flamboyant Yūgure 17h-20h30, Nuit d'encre Yoru 20h30-6h).
+  * **Illumination nocturne féodale magique :** En mode Nuit, allumage chaleureux des fenêtres du Tenshu et des chaumières minka du village, lanternes tōrō vermillon rougeoyantes au sanctuaire Shintō, croissant de lune, étoiles scintillantes et lucioles dorées (hotaru) flottant au-dessus des rizières.
+  * **Saisons immersives & Particules :**
+    - *Hiver sous la Neige (Yuki) :* Manteau atmosphérique glacial bleuté avec tourbillon de 26 flocons de neige légers en pur CSS GPU.
+    - *Pluie d'Automne (Ame & Kōyō) :* Rideaux de pluie obliques fins et feuilles d'érable japonaises Momiji rouges et pourpres voletant au vent.
+    - *Printemps ensoleillé :* Pétales de cerisier Sakura roses et lumière douce d'estampe.
+  * **Sélecteur d'Ambiance Météo (Menu Déroulant) :** Menu dropdown Tabler intégré dans l'en-tête du panorama permettant au joueur de choisir son climat préféré (Auto, Plein Jour, Crépuscule, Nuit aux Lanternes, Hiver Enneigé, Pluie & Momiji, ou Mode Zen désactivé) avec mémorisation dans `localStorage`.
+
 - **Panneau Mutualisé des Récoltes, Stocks & Oasis Féodales (`views/partials/rural_harvest_resources_panel.php`, `views/resources.php`, `views/city.php`) :**
   * **Composant réutilisable & unifié :** Extraction et enrichissement du box de récoltes sous la forme d'un élément modulaire sur le même modèle que le suivi des chantiers en cours, intégré simultanément sur la vue Terroir (`?page=resources`) et sur la Cité Castrale (`?page=city`).
   * **Ensemble des 8 indicateurs du fief :** Suivi complet des productions horaires, niveaux de développement et jauges de remplissage :
