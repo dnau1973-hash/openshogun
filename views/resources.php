@@ -359,7 +359,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                              data-bs-html="true"
                              data-bs-placement="top"
                              title="<?= htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8') ?>"
-                             onclick="<?= $isTenshu ? "window.location.href='/?page=buildings'" : "handleRuralPinClick(this, event)" ?>">
+                             onclick="<?= $isTenshu ? "window.location.href='/?page=city'" : "handleRuralPinClick(this, event)" ?>">
 
                             <?php if ($isTenshu): ?>
                                 <div class="rural-badge-inner is-tenshu">
@@ -402,100 +402,11 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             <!-- Didacticiel Féodal & Quêtes du Daimyō -->
             <?php require __DIR__ . '/partials/quest_banner.php'; ?>
 
-            <!-- File de Construction : Chantiers en cours du Fief -->
-            <div class="card shadow-sm">
-                <div class="card-header py-2 d-flex justify-content-between align-items-center">
-                    <h3 class="card-title mb-0 fs-3">
-                        <i class="fa-solid fa-helmet-safety me-2 text-warning"></i>Chantiers en Cours
-                    </h3>
-                    <div class="d-flex align-items-center gap-1">
-                        <?php if ($isTerran): ?>
-                            <span class="badge bg-danger-lt text-danger fw-bold" style="font-size:0.65rem;" title="Privilège Oda : Chantiers rural &amp; urbain simultanés autorisés">
-                                <i class="fa-solid fa-bolt"></i> Oda
-                            </span>
-                        <?php endif; ?>
-                        <span class="badge bg-warning-lt fw-bold"><?= count($queue) ?> actif(s)</span>
-                    </div>
-                </div>
-                <div class="card-body p-2">
-                    <?php if (empty($queue)): ?>
-                        <p style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:1rem 0; margin-bottom:0;">
-                            <i class="fa-solid fa-helmet-safety text-secondary d-block mb-1 fs-2"></i>
-                            Aucun chantier en cours sur le fief.
-                        </p>
-                    <?php else: ?>
-                        <?php foreach ($queue as $q): ?>
-                            <?php
-                                $isRural = ($q['build_category'] === 'rural_plot');
-                                $isField = ($q['build_category'] === 'field');
-
-                                if ($isRural) {
-                                    $rType = $q['target_id'];
-                                    $rMeta = RuralPlotEngine::STRUCTURES[$rType] ?? null;
-                                    $name = $rMeta ? $rMeta['name'] : ucfirst($rType);
-                                    $icon = $rMeta['icon'] ?? 'fa-solid fa-seedling';
-                                } elseif ($isField) {
-                                    $tSlot = (int)$q['target_id'];
-                                    $tType = FIELD_LAYOUT[$tSlot] ?? 'metal_mine';
-                                    $name = (FIELD_TYPES[$tType]['name'] ?? 'Parcelle') . " #{$tSlot}";
-                                    $icon = 'fa-solid fa-wheat-awn';
-                                } else {
-                                    $name = BUILDINGS[$q['target_id']]['name'] ?? $q['target_id'];
-                                    $icon = BUILDINGS[$q['target_id']]['icon'] ?? 'fa-solid fa-landmark';
-                                }
-
-                                $qNow = time();
-                                $qStart = (int)($q['started_at'] ?? $qNow);
-                                $qEnd = (int)($q['finishes_at'] ?? $qNow);
-                                $qTotal = max(1, $qEnd - $qStart);
-                                $qElapsed = max(0, $qNow - $qStart);
-                                $qPct = min(100, max(0, (int)round(($qElapsed / $qTotal) * 100)));
-                                $isDemolish = ((int)$q['target_level'] === 0);
-                            ?>
-                            <div class="queue-item p-2 mb-2 rounded bg-surface-secondary border" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem; padding: 0.75rem;">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="queue-info">
-                                        <h4 class="mb-0 fw-bold d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                                            <i class="<?= $icon ?> text-warning"></i>
-                                            <span><?= htmlspecialchars($name) ?></span>
-                                        </h4>
-                                        <div class="mt-1 d-flex align-items-center gap-1">
-                                            <?php if ($isDemolish): ?>
-                                                <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;"><i class="fa-solid fa-trash-can me-1"></i>Démolition</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-secondary-lt" style="font-size:0.7rem;">Élévation Niveau <?= $q['target_level'] ?></span>
-                                            <?php endif; ?>
-                                            <?php if ($isRural): ?>
-                                                <span class="badge bg-green-lt" style="font-size:0.65rem;">Domaine Rural</span>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                    <?php if ($isRural): ?>
-                                        <button type="button" class="btn btn-sm btn-ghost-danger p-1" title="Annuler le chantier (Remboursement 80%)" onclick="cancelRuralUpgrade(<?= (int)$q['id'] ?>, this)">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="queue-progress-box mt-1">
-                                    <div class="progress" style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-<?= $isDemolish ? 'danger' : 'warning' ?> building-progress-bar"
-                                             role="progressbar"
-                                             style="width: <?= $qPct ?>%;"
-                                             aria-valuenow="<?= $qPct ?>"
-                                             aria-valuemin="0"
-                                             aria-valuemax="100"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
-                                        <span class="text-secondary fw-semibold">Avancement : <strong class="text-dark building-progress-pct"><?= $qPct ?>%</strong></span>
-                                        <span class="queue-timer font-monospace fw-bold text-danger building-time-remaining" data-countdown="<?= $qEnd ?>">En cours</span>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
+            <!-- File de Construction Mutualisée : Chantiers en cours du Fief -->
+            <?php 
+                $queueTitle = 'Chantiers en Cours';
+                require __DIR__ . '/partials/urban_construction_queue.php'; 
+            ?>
 
             <!-- Bilan des Récoltes & Oasis Annexées -->
             <div class="card shadow-sm">

@@ -18,7 +18,7 @@ class WorldGenerator {
     /**
      * Génère des planètes neutres/inoccupées de manière procédurale
      */
-    public function generatePlanets(int $count = 12, int $radius = 10, array $allowedTypes = [], bool $clearExistingUninhabited = false): array {
+    public function generatePlanets(int $count = 12, int $radius = 10, array $allowedTypes = [], bool $clearExistingUninhabited = false, bool $startAtZero = false): array {
         if ($clearExistingUninhabited) {
             $this->db->exec("
                 DELETE FROM planets 
@@ -86,42 +86,48 @@ class WorldGenerator {
             $name = $prefix . " " . $suffix;
             $type = $types[array_rand($types)];
 
-            // Ressources initiales selon le type de planète
-            $baseMetal = 2000;
-            $baseCrystal = 1500;
-            $baseDeut = 1000;
+            // Ressources initiales selon le type de planète (ou 0 si startAtZero)
+            if ($startAtZero) {
+                $baseMetal = 0;
+                $baseCrystal = 0;
+                $baseDeut = 0;
+            } else {
+                $baseMetal = 2000;
+                $baseCrystal = 1500;
+                $baseDeut = 1000;
 
-            switch ($type) {
-                case 'volcanic':
-                    $baseMetal = rand(4000, 7000);
-                    $baseCrystal = rand(1000, 2500);
-                    $baseDeut = rand(500, 1500);
-                    break;
-                case 'arctic':
-                    $baseMetal = rand(1500, 3000);
-                    $baseCrystal = rand(3500, 6500);
-                    $baseDeut = rand(1000, 2500);
-                    break;
-                case 'gas':
-                    $baseMetal = rand(1000, 2000);
-                    $baseCrystal = rand(1500, 3000);
-                    $baseDeut = rand(4000, 8000);
-                    break;
-                case 'desert':
-                    $baseMetal = rand(3000, 5000);
-                    $baseCrystal = rand(2500, 4500);
-                    $baseDeut = rand(800, 2000);
-                    break;
-                case 'oceanic':
-                    $baseMetal = rand(2000, 4000);
-                    $baseCrystal = rand(2000, 4000);
-                    $baseDeut = rand(2500, 5000);
-                    break;
-                default: // terrestrial
-                    $baseMetal = rand(2500, 4500);
-                    $baseCrystal = rand(2000, 4000);
-                    $baseDeut = rand(1500, 3000);
-                    break;
+                switch ($type) {
+                    case 'volcanic':
+                        $baseMetal = rand(4000, 7000);
+                        $baseCrystal = rand(1000, 2500);
+                        $baseDeut = rand(500, 1500);
+                        break;
+                    case 'arctic':
+                        $baseMetal = rand(1500, 3000);
+                        $baseCrystal = rand(3500, 6500);
+                        $baseDeut = rand(1000, 2500);
+                        break;
+                    case 'gas':
+                        $baseMetal = rand(1000, 2000);
+                        $baseCrystal = rand(1500, 3000);
+                        $baseDeut = rand(4000, 8000);
+                        break;
+                    case 'desert':
+                        $baseMetal = rand(3000, 5000);
+                        $baseCrystal = rand(2500, 4500);
+                        $baseDeut = rand(800, 2000);
+                        break;
+                    case 'oceanic':
+                        $baseMetal = rand(2000, 4000);
+                        $baseCrystal = rand(2000, 4000);
+                        $baseDeut = rand(2500, 5000);
+                        break;
+                    default: // terrestrial
+                        $baseMetal = rand(2500, 4500);
+                        $baseCrystal = rand(2000, 4000);
+                        $baseDeut = rand(1500, 3000);
+                        break;
+                }
             }
 
             $insertStmt->execute([$name, $x, $y, $type, $baseMetal, $baseCrystal, $baseDeut]);
@@ -130,6 +136,15 @@ class WorldGenerator {
 
             // Initialiser les 19 parcelles selon un archétype procédural (Style Travian)
             $fieldInfo = VillageFieldGenerator::populatePlanetFields($this->db, $newPlanetId, null, 0, false);
+
+            // Initialiser le domaine rural (9 parcelles)
+            try {
+                require_once __DIR__ . '/VillageGeneratorService.php';
+                $villageService = new VillageGeneratorService($this->db);
+                $villageService->generateVillage($newPlanetId, false, true, $startAtZero);
+            } catch (Exception $e) {
+                // Continuer si erreur
+            }
 
             $createdPlanets[] = [
                 'name' => $name,
@@ -165,8 +180,10 @@ class WorldGenerator {
             'barracks_queue',
             'planet_units',
             'construction_queue',
+            'craft_queue',
             'planet_buildings',
             'planet_fields',
+            'planet_rural_plots',
             'user_quests',
             'hero_inventory',
             'hero_adventures',
@@ -220,7 +237,7 @@ class WorldGenerator {
         $stmtAdmin->execute([$adminUsername, $adminEmail, $adminHash, $adminFaction]);
         $adminId = (int)$this->db->lastInsertId();
 
-        // 4. Fonder le Domaine Castral Capitale de l'Admin en [1 : 1]
+        // 4. Fonder le Domaine Castral Capitale de l'Admin en [1 : 1] avec ressources à 0
         $capitalName = "Château Nezzar";
         $capitalX = 1;
         $capitalY = 1;
@@ -228,13 +245,22 @@ class WorldGenerator {
         $stmtCap = $this->db->prepare("
             INSERT INTO planets 
             (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
-            VALUES (?, ?, ?, ?, 'terrestrial', 8000, 6000, 3000, 0, 120, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
+            VALUES (?, ?, ?, ?, 'terrestrial', 0, 0, 0, 0, 120, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
         ");
         $stmtCap->execute([$adminId, $capitalName, $capitalX, $capitalY]);
         $capitalPlanetId = (int)$this->db->lastInsertId();
 
         // 5. Initialiser les 18 Parcelles de ressources vierges (Style Travian, niveau 0 = parcelles disponibles)
         VillageFieldGenerator::populatePlanetFields($this->db, $capitalPlanetId, 'balanced', 0, false);
+
+        // 5b. Initialiser le Domaine Rural (9 parcelles à niveau 0)
+        try {
+            require_once __DIR__ . '/VillageGeneratorService.php';
+            $villageService = new VillageGeneratorService($this->db);
+            $villageService->generateVillage($capitalPlanetId, false, true, true);
+        } catch (Exception $e) {
+            error_log("WorldGenerator::resetUniverse - generateVillage error: " . $e->getMessage());
+        }
 
         // 6. Aucun bâtiment initial dans les slots urbains (tous les slots 19 à 34 sont 100% libres pour le joueur)
 
@@ -252,8 +278,8 @@ class WorldGenerator {
         $stmtShip->execute([$capitalPlanetId, 'transporter_light', 3]);
         $stmtShip->execute([$capitalPlanetId, 'spy_probe', 5]);
 
-        // 9. Générer les planètes neutres
-        $worldGenRes = $this->generatePlanets($neutralPlanetsCount, 10, [], false);
+        // 9. Générer les planètes neutres (avec ressources et parcelles à 0)
+        $worldGenRes = $this->generatePlanets($neutralPlanetsCount, 10, [], false, true);
 
         // 10. Déployer les bots initiaux si demandé
         $botsResult = null;

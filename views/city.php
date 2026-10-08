@@ -344,71 +344,11 @@ foreach (BUILDINGS as $code => $bInfo) {
         <!-- Didacticiel Féodal & Quêtes du Daimyō -->
         <?php require __DIR__ . '/partials/quest_banner.php'; ?>
 
-        <!-- File Urbaine -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fa-solid fa-helmet-safety me-1"></i>Chantiers Urbains</h3>
-            </div>
-            <div class="card-body">
-                <?php if (empty($queue)): ?>
-                    <p style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:1rem 0;">Aucune construction urbaine en cours.</p>
-                <?php else: ?>
-                    <?php foreach ($queue as $q): ?>
-                        <?php
-                            if ($q['build_category'] === 'rural_plot') {
-                                require_once __DIR__ . '/../core/RuralPlotEngine.php';
-                                $rMeta = RuralPlotEngine::STRUCTURES[$q['target_id']] ?? null;
-                                $name = $rMeta ? $rMeta['name'] : ucfirst($q['target_id']);
-                            } elseif ($q['build_category'] === 'field') {
-                                $tSlot = (int)$q['target_id'];
-                                $tType = $fieldsBySlot[$tSlot]['type'] ?? FIELD_LAYOUT[$tSlot] ?? 'metal_mine';
-                                $name = (FIELD_TYPES[$tType]['name'] ?? 'Parcelle') . " #{$tSlot}";
-                            } else {
-                                $name = BUILDINGS[$q['target_id']]['name'] ?? $q['target_id'];
-                            }
-                            $qNow = time();
-                            $qStart = (int)($q['started_at'] ?? $qNow);
-                            $qEnd = (int)($q['finishes_at'] ?? $qNow);
-                            $qTotal = max(1, $qEnd - $qStart);
-                            $qElapsed = max(0, $qNow - $qStart);
-                            $qPct = min(100, max(0, (int)round(($qElapsed / $qTotal) * 100)));
-                            $isDemolish = ((int)$q['target_level'] === 0);
-                        ?>
-                        <div class="queue-item" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem; padding: 0.75rem;">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="queue-info">
-                                    <h4 class="mb-0 fw-bold" style="font-size:0.9rem;"><?= htmlspecialchars($name) ?></h4>
-                                    <?php if ($isDemolish): ?>
-                                        <span class="badge bg-danger-lt fw-bold" style="font-size:0.7rem;"><i class="fa-solid fa-trash-can me-1"></i>Démolition</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary-lt" style="font-size:0.7rem;">Niveau <?= $q['target_level'] ?></span>
-                                    <?php endif; ?>
-                                </div>
-                                <button class="btn-cancel" onclick="cancelBuild(<?= $q['id'] ?>)">Annuler</button>
-                            </div>
-
-                            <!-- Barre de progression -->
-                            <div class="queue-progress-box mt-1">
-                                <div class="progress" style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-<?= $isDemolish ? 'danger' : 'warning' ?> building-progress-bar"
-                                         role="progressbar"
-                                         style="width: <?= $qPct ?>%;"
-                                         aria-valuenow="<?= $qPct ?>"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100"
-                                         data-started="<?= $qStart ?>"
-                                         data-finishes="<?= $qEnd ?>"></div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
-                                    <span class="text-secondary fw-semibold">Avancement : <strong class="text-dark building-progress-pct"><?= $qPct ?>%</strong></span>
-                                    <span class="queue-timer font-monospace fw-bold text-danger building-time-remaining" data-countdown="<?= $qEnd ?>">Calcul...</span>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
+        <!-- File Urbaine Mutualisée -->
+        <?php 
+            $queueTitle = 'Chantiers Urbains';
+            require __DIR__ . '/partials/urban_construction_queue.php'; 
+        ?>
 
         <!-- Panel des Soldats (Style Travian) -->
         <?php require __DIR__ . '/partials/troops_panel.php'; ?>

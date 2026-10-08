@@ -98,9 +98,10 @@ class VillageGeneratorService {
      * @param int $planetId
      * @param bool $shufflePositions Mélanger ou conserver l'affinité topologique naturelle
      * @param bool $forceRecreate Écraser les parcelles existantes
+     * @param bool $startAtZero Forcer toutes les structures au niveau 0 (ex: réinitialisation du monde)
      * @return array Liste des 9 parcelles générées
      */
-    public function generateVillage(int $planetId, bool $shufflePositions = false, bool $forceRecreate = false): array {
+    public function generateVillage(int $planetId, bool $shufflePositions = false, bool $forceRecreate = false, bool $startAtZero = false): array {
         if (!$this->db) return [];
 
         // Vérifier si des parcelles existent déjà
@@ -162,26 +163,26 @@ class VillageGeneratorService {
             if ($structureType === 'tenshu') {
                 // Tenshu : progression solide de 30 à 60
                 $maxLevel = mt_rand(30, 60);
-                $initialLevel = 1;
+                $initialLevel = $startAtZero ? 0 : 1;
             } elseif ($structureType === 'village') {
                 // Village : 40 à 80 pour soutenir la population
                 $maxLevel = mt_rand(40, 80);
-                $initialLevel = 1;
+                $initialLevel = $startAtZero ? 0 : 1;
             } elseif ($structureType === $fiefSpecialty) {
                 // Jackpot / Filon d'or du fief : potentiel exceptionnel (Niv. 75 à 100)
                 $maxLevel = mt_rand(75, 100);
-                $initialLevel = mt_rand(1, 3);
+                $initialLevel = $startAtZero ? 0 : mt_rand(1, 3);
             } elseif ($structureType === $secondarySpecialty) {
                 // Spécialité secondaire : potentiel élevé (Niv. 50 à 75)
                 $maxLevel = mt_rand(50, 75);
-                $initialLevel = mt_rand(1, 2);
+                $initialLevel = $startAtZero ? 0 : mt_rand(1, 2);
             } else {
                 // Potentiel standard équilibré : 25 à 45
                 $maxLevel = mt_rand(25, 45);
-                $initialLevel = 1;
+                $initialLevel = $startAtZero ? 0 : 1;
             }
 
-            $workers = max(2, (int)round(2 + ($initialLevel * 1.5)));
+            $workers = ($initialLevel <= 0) ? 0 : max(2, (int)round(2 + ($initialLevel * 1.5)));
             $prodHourly = self::calculateHourlyProduction($structureType, $initialLevel);
 
             $generatedPlots[] = [
@@ -334,6 +335,9 @@ class VillageGeneratorService {
      * Calcul de la cadence de production horaire par structure et niveau
      */
     public static function calculateHourlyProduction(string $structureType, int $level): float {
+        if ($level <= 0) {
+            return 0.0;
+        }
         if ($structureType === 'tenshu') {
             return 0.0;
         }

@@ -1,5 +1,28 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-08] - urban-queue-partial-tenshu-city-link-zero-reset : Mutualisation du Chantier Urbain en Partial, Redirection Cité du Tenshu et Réinitialisation du Monde à Zéro
+- **Module :** `urban-queue-partial-tenshu-city-link-zero-reset`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Composant Partiel Mutualisé `views/partials/urban_construction_queue.php` :**
+     - Extraction du bloc de suivi des chantiers en cours hors de `views/city.php` vers un partial réutilisable.
+     - Prise en charge universelle des chantiers d'infrastructures urbaines, des parcelles rurales (`rural_plot`) et des champs traditionnels (`field`).
+     - Rendu unifié sur la vue Cité Castrale (`views/city.php`) et sur la vue Terroir Rural (`views/resources.php`).
+     - Décomptes en direct interactifs, boutons d'annulation avec confirmation et badge de double file pour le Clan Oda.
+  2. **Correction du Lien Tenshu / Donjon vers la Cité Castrale :**
+     - Remplacement de la redirection vers `/?page=buildings` par `/?page=city` lors du clic sur le Tenshu / Donjon dans la carte panoramique du domaine rural (`views/resources.php` et `public/js/rural_domain_map.js`).
+  3. **Réinitialisation Strictement à Zéro de l'Univers Féodal :**
+     - Mise à jour de `WorldGenerator::resetUniverse()` pour purger l'ensemble des tables dynamiques, y compris `planet_rural_plots` et `craft_queue`.
+     - Les ressources de départ de la capitale admin, des bots et des planètes neutres sont strictement initialisées à 0 (Bois = 0, Pierre = 0, Riz = 0).
+     - Tous les bâtiments urbains et toutes les parcelles rurales (les 9 parcelles du Terroir ainsi que les champs) sont réinitialisés et générés avec un niveau initial de 0, 0 ouvriers affectés et une production horaire nulle.
+- **Fichiers modifiés :** `views/partials/urban_construction_queue.php`, `views/city.php`, `views/resources.php`, `public/js/rural_domain_map.js`, `core/WorldGenerator.php`, `core/VillageGeneratorService.php`, `core/BotEngine.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Accéder à `/?page=city` et `/?page=resources` et lancer des chantiers : constater le rendu identique et temps réel du bloc de file de construction sur les deux pages.
+  2. Sur la page `/?page=resources`, cliquer sur l'épingle / badge du Tenshu (Donjon) : vérifier la redirection immédiate vers `/?page=city`.
+  3. Lancer une réinitialisation du monde via l'administration ou le script : vérifier que les ressources du joueur et des fiefs sont à 0 et que tous les bâtiments / parcelles débutent au niveau 0.
+
+---
+
 ### [2026-10-08] - game-elevate-designer-building-derivation : Simulateur de Dérivation des Bâtiments & Contrôle Global des Courbes de Construction
 - **Module :** `game-elevate-designer-building-derivation`
 - **Statut :** `À tester`

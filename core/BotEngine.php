@@ -68,18 +68,27 @@ class BotEngine {
             // 2. Trouver des coordonnées libres
             $coords = $this->findFreeCoordinates();
 
-            // 3. Fonder la capitale du domaine castral du bot
+            // 3. Fonder la capitale du domaine castral du bot (ressources à 0)
             $planetName = "Château " . ucfirst($username);
             $stmtPlanet = $this->db->prepare("
                 INSERT INTO planets 
                 (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, last_resource_update, is_capital) 
-                VALUES (?, ?, ?, ?, 'terrestrial', 3000, 2500, 1200, 0, 80, 25000, 25000, 25000, UNIX_TIMESTAMP(), 1)
+                VALUES (?, ?, ?, ?, 'terrestrial', 0, 0, 0, 0, 80, 25000, 25000, 25000, UNIX_TIMESTAMP(), 1)
             ");
             $stmtPlanet->execute([$botId, $planetName, $coords['x'], $coords['y']]);
             $planetId = (int)$this->db->lastInsertId();
 
             // 4. Initialiser les 18 parcelles de ressources de façon procédurale (Style Travian, niveau 0 = libre)
             VillageFieldGenerator::populatePlanetFields($this->db, $planetId, null, 0, false);
+
+            // 4b. Initialiser les 9 parcelles rurales au niveau 0
+            try {
+                require_once __DIR__ . '/VillageGeneratorService.php';
+                $villageService = new VillageGeneratorService($this->db);
+                $villageService->generateVillage($planetId, false, true, true);
+            } catch (Exception $e) {
+                // Continuer si erreur
+            }
 
             // 5. Aucun bâtiment initial pré-placé dans les slots (slots 100% libres)
 
