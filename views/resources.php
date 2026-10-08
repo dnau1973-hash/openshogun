@@ -249,36 +249,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                 </a>
             </div>
         </div>
-    </div>
-
-    <!-- Bannière de Synthèse des 9 Domaines Stratégiques -->
-    <div class="card mb-3 shadow-sm">
-        <div class="card-body py-2 px-3">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 text-center text-sm-start">
-                <?php
-                $topKpis = [
-                    ['icon' => 'fa-solid fa-tree text-success', 'name' => 'Bois', 'val' => '+' . number_format($planet['prod_rates']['metal']) . '/h'],
-                    ['icon' => 'fa-solid fa-mountain text-secondary', 'name' => 'Pierre', 'val' => '+' . number_format($planet['prod_rates']['crystal']) . '/h'],
-                    ['icon' => 'fa-solid fa-wheat-awn text-warning', 'name' => 'Riz', 'val' => '+' . number_format($planet['prod_rates']['deuterium']) . '/h'],
-                    ['icon' => 'fa-solid fa-cubes-stacked text-orange', 'name' => 'Argile', 'val' => '+' . number_format($plots['fosse_argile']['prod_hourly']) . '/h'],
-                    ['icon' => 'fa-solid fa-leaf text-teal', 'name' => 'Thé', 'val' => '+' . number_format($plots['culture_the']['prod_hourly']) . '/h'],
-                    ['icon' => 'fa-solid fa-seedling text-lime', 'name' => 'Soja', 'val' => '+' . number_format($plots['champ_soja']['prod_hourly']) . '/h'],
-                    ['icon' => 'fa-solid fa-torii-gate text-danger', 'name' => 'Sérénité', 'val' => '+' . number_format($plots['sanctuaire_shinto']['prod_hourly'])],
-                    ['icon' => 'fa-solid fa-people-roof text-indigo', 'name' => 'Logements', 'val' => number_format($maxPop) . ' places'],
-                ];
-                foreach ($topKpis as $kpi):
-                ?>
-                    <div class="p-1 px-2 rounded bg-surface-secondary border d-flex align-items-center gap-2" style="font-size:0.8rem;">
-                        <i class="<?= $kpi['icon'] ?> fs-3"></i>
-                        <div>
-                            <div class="text-secondary small fw-bold" style="font-size:0.7rem;"><?= $kpi['name'] ?></div>
-                            <strong class="text-dark"><?= $kpi['val'] ?></strong>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
+    </div>    
 
     <!-- Grille Principale (Scène Interactive à Gauche, Chantiers & Troupes à Droite) -->
     <div class="grid-main">
