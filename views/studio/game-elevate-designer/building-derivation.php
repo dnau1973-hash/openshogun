@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../core/AuthManager.php';
 require_once __DIR__ . '/../../../core/GameConfig.php';
 require_once __DIR__ . '/../../../config/game_constants.php';
 require_once __DIR__ . '/../../../core/BuildingEngine.php';
+require_once __DIR__ . '/../../../core/PopulationEngine.php';
 
 // Contrôle strict côté serveur du métier Game Elevate Designer
 if (!AuthManager::hasJob('game-elevate-designer')) {
@@ -84,7 +85,8 @@ foreach (BUILDINGS as $bCode => $bDef) {
         'base_time'       => (int)$bDef['base_time'],
         'max_level'       => (int)($bDef['max_level'] ?? 20),
         'description'     => $bDef['description'] ?? '',
-        'production'      => $prodMeta
+        'production'      => $prodMeta,
+        'workers_rate'    => PopulationEngine::BUILDING_WORKERS[$bCode] ?? 1
     ];
 }
 
@@ -127,7 +129,8 @@ foreach (FIELD_TYPES as $fCode => $fDef) {
             'unit'       => $prodUnit,
             'base_val'   => (float)($fDef['base_prod'] ?? 20),
             'desc_prod'  => $prodDesc
-        ]
+        ],
+        'workers_rate'    => PopulationEngine::FIELD_WORKERS[$fCode] ?? 2
     ];
 }
 
@@ -143,6 +146,7 @@ $ruralExtras = [
         'base_cost' => ['metal' => 45, 'crystal' => 60, 'deuterium' => 20],
         'mult' => 1.45,
         'time' => 180,
+        'workers' => 2,
     ],
     'carriere' => [
         'name' => 'Carrière de Granit (Parcelle)',
@@ -154,6 +158,7 @@ $ruralExtras = [
         'base_cost' => ['metal' => 60, 'crystal' => 40, 'deuterium' => 20],
         'mult' => 1.45,
         'time' => 200,
+        'workers' => 2,
     ],
     'riziere' => [
         'name' => 'Rizière Inondée (Parcelle)',
@@ -165,6 +170,7 @@ $ruralExtras = [
         'base_cost' => ['metal' => 35, 'crystal' => 45, 'deuterium' => 60],
         'mult' => 1.45,
         'time' => 220,
+        'workers' => 2,
     ],
     'fosse_argile' => [
         'name' => 'Fosse d\'Argile & Céramique',
@@ -176,6 +182,7 @@ $ruralExtras = [
         'base_cost' => ['metal' => 45, 'crystal' => 50, 'deuterium' => 30],
         'mult' => 1.45,
         'time' => 190,
+        'workers' => 2,
     ],
     'champ_soja' => [
         'name' => 'Champ de Soja & Miso',
@@ -187,6 +194,7 @@ $ruralExtras = [
         'base_cost' => ['metal' => 40, 'crystal' => 30, 'deuterium' => 40],
         'mult' => 1.45,
         'time' => 180,
+        'workers' => 2,
     ],
     'culture_the' => [
         'name' => 'Coteaux de Théiers (Matcha)',
@@ -198,6 +206,7 @@ $ruralExtras = [
         'base_cost' => ['metal' => 50, 'crystal' => 35, 'deuterium' => 45],
         'mult' => 1.45,
         'time' => 200,
+        'workers' => 1,
     ],
     'sanctuaire_shinto' => [
         'name' => 'Bosquet & Sanctuaire Shintō',
@@ -209,6 +218,7 @@ $ruralExtras = [
         'base_cost' => ['metal' => 80, 'crystal' => 70, 'deuterium' => 50],
         'mult' => 1.45,
         'time' => 240,
+        'workers' => 1,
     ],
     'village' => [
         'name' => 'Village & Habitations (Minka)',
@@ -220,6 +230,7 @@ $ruralExtras = [
         'base_cost' => ['metal' => 70, 'crystal' => 50, 'deuterium' => 30],
         'mult' => 1.45,
         'time' => 210,
+        'workers' => 0,
     ]
 ];
 
@@ -246,7 +257,8 @@ foreach ($ruralExtras as $rCode => $rDef) {
             'unit'       => $rDef['unit'],
             'base_val'   => (float)$rDef['base_val'],
             'desc_prod'  => $rDef['desc']
-        ]
+        ],
+        'workers_rate'    => $rDef['workers']
     ];
 }
 ?>
@@ -573,6 +585,7 @@ foreach ($ruralExtras as $rCode => $rDef) {
                         <th class="py-2 text-end fw-bold"><i class="fa-solid fa-coins text-secondary me-1"></i>Coût Palier</th>
                         <th class="py-2 text-end fw-bold text-warning"><i class="fa-solid fa-stopwatch me-1"></i>Durée</th>
                         <th class="py-2 text-end text-muted">Durée Cumulée</th>
+                        <th class="py-2 text-center"><i class="fa-solid fa-users text-indigo me-1"></i>Travailleurs</th>
                         <th class="py-2 text-end fw-bold text-info"><i class="fa-solid fa-industry me-1"></i>Production / h</th>
                         <th class="py-2 text-center text-info"><i class="fa-solid fa-arrow-up-right-dots me-1"></i>$\Delta$ Prod Net</th>
                         <th class="py-2 text-center"><i class="fa-solid fa-hourglass-end text-purple me-1"></i>Amortissement (ROI)</th>
@@ -806,6 +819,7 @@ function computeLevelUpgrade(buildingDef, targetLevel) {
 
     const totalCost = metal + crystal + deut;
     const prodInfo = computeStructureProduction(buildingDef, targetLevel);
+    const workers = targetLevel * (buildingDef.workers_rate || 0);
 
     return {
         level: targetLevel,
@@ -814,6 +828,7 @@ function computeLevelUpgrade(buildingDef, targetLevel) {
         deut,
         totalCost,
         duration,
+        workers,
         ...prodInfo
     };
 }
@@ -940,6 +955,8 @@ function renderTable(rows, bDef) {
             }
         }
 
+        let workersDisplay = r.workers > 0 ? `<span class="badge bg-indigo-lt text-indigo"><i class="fa-solid fa-user me-1"></i>${formatNumber(r.workers)}</span>` : `<span class="text-muted">-</span>`;
+
         tr.innerHTML = `
             <td class="ps-3 text-center fw-bold">
                 <span class="badge bg-dark-lt text-dark">Niv ${r.level}</span>
@@ -950,6 +967,7 @@ function renderTable(rows, bDef) {
             <td class="text-end fw-bold text-dark">${formatNumber(r.totalCost)}</td>
             <td class="text-end fw-bold text-warning">${formatDuration(r.duration)}</td>
             <td class="text-end text-muted small">${formatDuration(r.cumDuration)}</td>
+            <td class="text-center">${workersDisplay}</td>
             <td class="text-end">${prodDisplay}</td>
             <td class="text-center">${deltaProdDisplay}</td>
             <td class="text-center">${roiDisplay}</td>
@@ -1083,10 +1101,13 @@ function renderSvgChart(rows, bDef) {
                 prodLine = `<div><i class="fa-solid fa-industry me-1 text-info"></i>Production : <strong>${formatNumber(row.production)} ${row.unit}</strong>${roiText}</div>`;
             }
 
+            let workersLine = row.workers > 0 ? `<div><i class="fa-solid fa-users me-1 text-indigo"></i>Travailleurs : <strong>${formatNumber(row.workers)}</strong></div>` : '';
+
             tooltip.innerHTML = `
                 <div class="fw-bold mb-1 text-warning">Palier Niveau ${row.level}</div>
                 <div><i class="fa-solid fa-stopwatch me-1 text-warning"></i>Durée : <strong>${formatDuration(row.duration)}</strong></div>
                 <div><i class="fa-solid fa-coins me-1 text-success"></i>Coût : <strong>${formatNumber(row.totalCost)}</strong> ressources</div>
+                ${workersLine}
                 ${prodLine}
                 <div class="text-white-50 mt-1" style="font-size:0.7rem;">🪵 ${formatNumber(row.metal)} | 🪨 ${formatNumber(row.crystal)} | 🌾 ${formatNumber(row.deut)}</div>
             `;
