@@ -1,7 +1,8 @@
 <?php
 /**
  * Sandbox de Développement Isolée - Architecture Border Layout / Viewport (ExtJS Style)
- * Régions : North, Center, West, South
+ * Régions : North, West, Center, East, South
+ * Avec repli / dépli (collapse/expand) pour les régions West et East.
  * Ne touche à aucun fichier de production du jeu.
  * Accessible directement via http://votreserveur/sandbox.php
  */
@@ -51,7 +52,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[SANDBOX] Layout 4 Régions (North, West, Center, South) - OpenShogun</title>
+    <title>[SANDBOX] Layout 5 Régions (North, West, Center, East, South) - OpenShogun</title>
     <!-- Polices & Font Awesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,20 +94,20 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
 
-        /* 3. CONTENEUR CENTRAL (Wrapper West + Center) */
+        /* 3. CONTENEUR CENTRAL (Wrapper West + Center + East) */
         .viewport-middle-wrapper {
             flex-grow: 1;
             display: flex;
             flex-direction: row;
             overflow: hidden;
             min-height: 0; /* Essentiel pour empêcher le flex child de déborder */
+            position: relative;
         }
 
-        /* 4. RÉGION WEST (Panneau Latéral Gauche / Navigation & Gestion) */
+        /* 4. RÉGION WEST (Panneau Latéral Gauche / Chantiers & Navigation) */
         .region-west {
-            width: 380px;
-            min-width: 320px;
-            max-width: 440px;
+            width: 340px;
+            min-width: 340px;
             flex-shrink: 0;
             background: #ffffff;
             border-right: 2px solid #e2e8f0;
@@ -115,6 +116,13 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             overflow-y: auto;
             overflow-x: hidden;
             z-index: 100;
+            transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+        }
+
+        .region-west.is-collapsed {
+            margin-left: -340px;
+            opacity: 0;
+            pointer-events: none;
         }
 
         /* 5. RÉGION CENTER (Zone de Jeu Principale / Carte Panoramique) */
@@ -127,9 +135,68 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             position: relative;
             min-width: 0;
             padding: 1.25rem;
+            transition: all 0.25s ease;
         }
 
-        /* 6. RÉGION SOUTH (Barre de statut / Notifications / Footer technique) */
+        /* 6. RÉGION EAST (Panneau Latéral Droit / Statistiques & Oasis) */
+        .region-east {
+            width: 340px;
+            min-width: 340px;
+            flex-shrink: 0;
+            background: #ffffff;
+            border-left: 2px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 100;
+            transition: margin-right 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+        }
+
+        .region-east.is-collapsed {
+            margin-right: -340px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Boutons Flottants pour Déplier / Réduire (ExtJS Collapsible Handles) */
+        .collapse-btn-handle {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 500;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            color: #475569;
+            width: 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: background 0.15s, color 0.15s;
+        }
+        .collapse-btn-handle:hover {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+        .collapse-btn-handle-west {
+            left: 0;
+            border-left: none;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .collapse-btn-handle-east {
+            right: 0;
+            border-right: none;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        /* 7. RÉGION SOUTH (Barre de statut / Notifications / Footer technique) */
         .region-south {
             flex-shrink: 0;
             background: #1e293b;
@@ -193,21 +260,28 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     <header class="region-north p-2 px-3">
         <div class="d-flex justify-content-between align-items-center">
             <!-- Brand & Info sandbox -->
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
                 <a href="/?page=resources" class="text-decoration-none d-flex align-items-center gap-2">
                     <span class="fs-2 text-danger"><i class="fa-solid fa-torii-gate"></i></span>
                     <span class="fw-bold text-dark font-game">OpenShogun</span>
                 </a>
                 <span class="badge bg-purple-lt text-purple fw-bold px-2 py-1">
-                    <i class="fa-solid fa-flask me-1"></i>SANDBOX 4-RÉGIONS
+                    <i class="fa-solid fa-layer-group me-1"></i>5-RÉGIONS VIEWPORT
                 </span>
-                <span class="text-secondary small d-none d-md-inline">
-                    Fief : <strong><?= htmlspecialchars($planet['name']) ?></strong> [<?= (int)$planet['coord_x'] ?>:<?= (int)$planet['coord_y'] ?>]
-                </span>
+                
+                <!-- Toggles pour afficher/masquer West et East -->
+                <div class="btn-group btn-group-sm ms-2">
+                    <button type="button" class="btn btn-outline-secondary" id="toggleWestBtn" onclick="toggleRegion('west')" title="Replier/Déplier Région West">
+                        <i class="fa-solid fa-bars-staggered me-1"></i>West
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="toggleEastBtn" onclick="toggleRegion('east')" title="Replier/Déplier Région East">
+                        <i class="fa-solid fa-table-columns me-1"></i>East
+                    </button>
+                </div>
             </div>
 
             <!-- Mini HUD Ressources direct -->
-            <div class="d-flex align-items-center gap-3 font-monospace small">
+            <div class="d-flex align-items-center gap-2 font-monospace small">
                 <span class="badge bg-light text-dark border px-2 py-1" title="Bois">
                     <i class="fa-solid fa-tree text-success me-1"></i><?= number_format($planet['metal']) ?>
                 </span>
@@ -232,20 +306,22 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     </header>
 
     <!-- ========================================================
-         CONTENEUR CENTRAL (WEST + CENTER)
+         CONTENEUR CENTRAL (WEST + CENTER + EAST)
          ======================================================== -->
     <div class="viewport-middle-wrapper">
 
         <!-- ========================================================
-             2. RÉGION WEST (Colonne Gauche - Chantiers & Indicateurs)
+             2. RÉGION WEST (Colonne Gauche - Chantiers & Navigation)
              ======================================================== -->
-        <aside class="region-west p-3">
+        <aside class="region-west p-3" id="regionWest">
             <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
                 <h4 class="m-0 fw-bold d-flex align-items-center gap-2 text-dark">
                     <i class="fa-solid fa-compass text-primary"></i>
                     <span>Région WEST</span>
                 </h4>
-                <span class="badge bg-primary-lt">Sidebar</span>
+                <button type="button" class="btn btn-sm btn-light border-0 p-1" onclick="toggleRegion('west')" title="Réduire Région West">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
             </div>
 
             <!-- Chantiers en cours -->
@@ -281,7 +357,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             <!-- Bilan Démographique & Ouvriers -->
             <div class="card mb-3 shadow-none border">
                 <div class="card-header bg-light py-2">
-                    <span class="fw-bold small text-dark"><i class="fa-solid fa-users text-indigo me-1"></i>Démographie & Ouvriers</span>
+                    <span class="fw-bold small text-dark"><i class="fa-solid fa-users text-indigo me-1"></i>Démographie &amp; Ouvriers</span>
                 </div>
                 <div class="card-body p-2 small">
                     <div class="d-flex justify-content-between mb-1">
@@ -297,44 +373,30 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                         <strong class="text-success"><?= number_format($workforce['assigned_workers']) ?></strong>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <span class="text-secondary">Inactifs / Disponibles :</span>
+                        <span class="text-secondary">Inactifs / Libres :</span>
                         <strong class="text-muted"><?= number_format($workforce['idle_workers']) ?></strong>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rendements Horaires -->
-            <div class="card shadow-none border">
-                <div class="card-header bg-light py-2">
-                    <span class="fw-bold small text-dark"><i class="fa-solid fa-chart-line text-success me-1"></i>Productions Horaires</span>
-                </div>
-                <div class="card-body p-2 small font-monospace">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>🪵 Bois de Cèdre :</span>
-                        <strong class="text-success">+<?= number_format($prodRates['metal']) ?>/h</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>🪨 Pierre de Taille :</span>
-                        <strong class="text-primary">+<?= number_format($prodRates['crystal']) ?>/h</strong>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>🌾 Riz Koku :</span>
-                        <strong class="text-warning">+<?= number_format($prodRates['deuterium']) ?>/h</strong>
                     </div>
                 </div>
             </div>
         </aside>
 
+        <!-- Poignée de réouverture flottante West (quand replié) -->
+        <button type="button" class="collapse-btn-handle collapse-btn-handle-west d-none" id="handleOpenWest" onclick="toggleRegion('west')" title="Déplier Région West">
+            <i class="fa-solid fa-chevron-right fs-4"></i>
+        </button>
+
         <!-- ========================================================
              3. RÉGION CENTER (Zone Centrale - Carte & Jeu)
              ======================================================== -->
-        <main class="region-center">
+        <main class="region-center" id="regionCenter">
             <div class="d-flex justify-content-between align-items-center mb-2 px-2 text-white">
                 <div class="d-flex align-items-center gap-2">
                     <h3 class="m-0 fw-bold font-game"><i class="fa-solid fa-map me-2 text-warning"></i>Région CENTER</h3>
                     <span class="badge bg-dark border border-secondary text-white-50">Carte Panoramique 16:9</span>
                 </div>
-                <span class="text-white-50 small">Confinement strict sans défilement de page</span>
+                <div class="text-white-50 small d-flex align-items-center gap-3">
+                    <span><i class="fa-solid fa-compress me-1 text-info"></i>Flex Grow dynamique</span>
+                </div>
             </div>
 
             <!-- Conteneur Carte 16:9 avec les 9 parcelles -->
@@ -355,10 +417,80 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             </div>
         </main>
 
+        <!-- Poignée de réouverture flottante East (quand replié) -->
+        <button type="button" class="collapse-btn-handle collapse-btn-handle-east d-none" id="handleOpenEast" onclick="toggleRegion('east')" title="Déplier Région East">
+            <i class="fa-solid fa-chevron-left fs-4"></i>
+        </button>
+
+        <!-- ========================================================
+             4. RÉGION EAST (Colonne Droite - Économie & Oasis)
+             ======================================================== -->
+        <aside class="region-east p-3" id="regionEast">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                <button type="button" class="btn btn-sm btn-light border-0 p-1" onclick="toggleRegion('east')" title="Réduire Région East">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <h4 class="m-0 fw-bold d-flex align-items-center gap-2 text-dark">
+                    <span>Région EAST</span>
+                    <i class="fa-solid fa-chart-pie text-success"></i>
+                </h4>
+            </div>
+
+            <!-- Rendements Horaires -->
+            <div class="card mb-3 shadow-none border">
+                <div class="card-header bg-light py-2">
+                    <span class="fw-bold small text-dark"><i class="fa-solid fa-chart-line text-success me-1"></i>Productions Horaires</span>
+                </div>
+                <div class="card-body p-2 small font-monospace">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>🪵 Bois de Cèdre :</span>
+                        <strong class="text-success">+<?= number_format($prodRates['metal']) ?>/h</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>🪨 Pierre de Taille :</span>
+                        <strong class="text-primary">+<?= number_format($prodRates['crystal']) ?>/h</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>🌾 Riz Koku :</span>
+                        <strong class="text-warning">+<?= number_format($prodRates['deuterium']) ?>/h</strong>
+                    </div>
+                    <div class="d-flex justify-content-between pt-1 border-top">
+                        <span>⚡ Énergie Fief :</span>
+                        <strong class="<?= $energyNet >= 0 ? 'text-cyan' : 'text-danger' ?>"><?= $energyNet >= 0 ? '+' : '' ?><?= $energyNet ?></strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Oasis Annexées -->
+            <div class="card shadow-none border">
+                <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold small text-dark"><i class="fa-solid fa-leaf text-teal me-1"></i>Oasis Annexées</span>
+                    <span class="badge bg-teal-lt"><?= count($annexedOases) ?></span>
+                </div>
+                <div class="card-body p-2 small">
+                    <?php if (empty($annexedOases)): ?>
+                        <div class="text-center text-muted py-3">
+                            <i class="fa-solid fa-tree d-block fs-3 mb-1 opacity-50"></i>
+                            Aucune oasis annexée.
+                        </div>
+                    <?php else: ?>
+                        <ul class="list-group list-group-flush">
+                            <?php foreach ($annexedOases as $oa): ?>
+                                <li class="list-group-item px-1 py-1 d-flex justify-content-between align-items-center">
+                                    <span>[<?= (int)$oa['coord_x'] ?>:<?= (int)$oa['coord_y'] ?>] <?= htmlspecialchars($oa['name']) ?></span>
+                                    <span class="badge bg-teal-lt">+25%</span>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </aside>
+
     </div>
 
     <!-- ========================================================
-         4. RÉGION SOUTH (Barre de statut / Footer technique)
+         5. RÉGION SOUTH (Barre de statut / Footer technique)
          ======================================================== -->
     <footer class="region-south py-1 px-3">
         <div class="d-flex justify-content-between align-items-center flex-wrap">
@@ -366,7 +498,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                 <span class="badge bg-secondary-lt text-secondary">Région SOUTH</span>
                 <span><i class="fa-solid fa-shield-halved text-success me-1"></i>Environnement Isolé : <code>sandbox.php</code></span>
                 <span class="d-none d-md-inline text-muted">&bull;</span>
-                <span class="d-none d-md-inline text-muted">Layout Viewport 100vw / 100vh sans body scroll</span>
+                <span class="d-none d-md-inline text-muted">5 Régions (North, West, Center, East, South) avec repliage animé</span>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <span>Serveur Speed : <strong>x5</strong></span>
@@ -378,8 +510,48 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 
 </div>
 
-<!-- Scripts Tabler & Bootstrap -->
+<!-- Scripts Tabler & Logique de Collapse ExtJS Style -->
 <script src="/public/js/tabler/tabler.min.js"></script>
+<script>
+function toggleRegion(region) {
+    if (region === 'west') {
+        const west = document.getElementById('regionWest');
+        const handle = document.getElementById('handleOpenWest');
+        const btn = document.getElementById('toggleWestBtn');
+        const isCollapsed = west.classList.toggle('is-collapsed');
+        
+        if (handle) handle.classList.toggle('d-none', !isCollapsed);
+        if (btn) {
+            btn.classList.toggle('active', !isCollapsed);
+            btn.classList.toggle('btn-secondary', !isCollapsed);
+            btn.classList.toggle('btn-outline-secondary', isCollapsed);
+        }
+        localStorage.setItem('sandbox_region_west_collapsed', isCollapsed ? '1' : '0');
+    } else if (region === 'east') {
+        const east = document.getElementById('regionEast');
+        const handle = document.getElementById('handleOpenEast');
+        const btn = document.getElementById('toggleEastBtn');
+        const isCollapsed = east.classList.toggle('is-collapsed');
+        
+        if (handle) handle.classList.toggle('d-none', !isCollapsed);
+        if (btn) {
+            btn.classList.toggle('active', !isCollapsed);
+            btn.classList.toggle('btn-secondary', !isCollapsed);
+            btn.classList.toggle('btn-outline-secondary', isCollapsed);
+        }
+        localStorage.setItem('sandbox_region_east_collapsed', isCollapsed ? '1' : '0');
+    }
+}
+
+// Restauration de l'état mémorisé au chargement
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('sandbox_region_west_collapsed') === '1') {
+        toggleRegion('west');
+    }
+    if (localStorage.getItem('sandbox_region_east_collapsed') === '1') {
+        toggleRegion('east');
+    }
+});
+</script>
 </body>
 </html>
-
