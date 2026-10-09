@@ -2,8 +2,9 @@
 /**
  * Sandbox de Développement Isolée - Architecture Border Layout / Viewport (ExtJS Style)
  * Régions : North, West, Center, East, South
- * West : Accordion Inverted with plus icon (Didacticiel du Daimyō, Chantiers en Cours, Récoltes, Stocks & Oasis, Garnison du Domaine)
- * Avec repli / dépli (collapse/expand) pour les régions West et East.
+ * West : Accordion Inverted with plus icon officiel Tabler.io
+ * - L'accordéon s'étire sur toute la hauteur restante (height: 100%, flex: 1).
+ * - Le premier élément ou tout élément ouvert s'adapte, et si son contenu dépasse la place disponible, un scroll interne apparaît.
  * Ne touche à aucun fichier de production du jeu.
  * Accessible directement via http://votreserveur/sandbox.php
  */
@@ -53,7 +54,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[SANDBOX] Layout 5 Régions (North, West, Center, East, South) - OpenShogun</title>
+    <title>[SANDBOX] Layout 5 Régions (Accordion Tabler Inverted Plus) - OpenShogun</title>
     <!-- Polices & Font Awesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -101,29 +102,149 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             display: flex;
             flex-direction: row;
             overflow: hidden;
-            min-height: 0; /* Essentiel pour empêcher le flex child de déborder */
+            min-height: 0; /* Empêche le flex child de déborder */
             position: relative;
         }
 
-        /* 4. RÉGION WEST (Panneau Latéral Gauche / Accordion) */
+        /* 4. RÉGION WEST (Panneau Latéral Gauche / Accordion Pleine Hauteur) */
         .region-west {
-            width: 370px;
-            min-width: 370px;
+            width: 380px;
+            min-width: 380px;
             flex-shrink: 0;
             background: #ffffff;
             border-right: 2px solid #e2e8f0;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
-            overflow-x: hidden;
+            overflow: hidden; /* Défilement géré à l'intérieur de l'accordéon */
             z-index: 100;
             transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
         }
 
         .region-west.is-collapsed {
-            margin-left: -370px;
+            margin-left: -380px;
             opacity: 0;
             pointer-events: none;
+        }
+
+        /* En-tête de la région West */
+        .region-west-header {
+            flex-shrink: 0;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        /* Conteneur de l'accordéon occupant toute la hauteur restante */
+        .west-accordion-wrapper {
+            flex-grow: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 0.5rem;
+        }
+
+        /* ========================================================
+           TABLER.IO ACCORDION INVERTED WITH PLUS ICON OFFICIEL
+           ======================================================== */
+        .accordion-inverted .accordion-button::after {
+            display: none !important; /* Neutralise le chevron standard droit */
+        }
+
+        .accordion-button-toggle-plus {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            transition: transform 0.25s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .accordion-button-toggle-plus svg {
+            width: 14px;
+            height: 14px;
+            stroke-width: 2.2;
+            transition: transform 0.25s ease;
+        }
+
+        /* Rotation quart de tour (45°) au dépliage : le plus (+) devient une croix/fermeture */
+        .accordion-button:not(.collapsed) .accordion-button-toggle-plus {
+            transform: rotate(45deg);
+            background: #e2e8f0;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+
+        /* Accordéon Pleine Hauteur avec Scroll Automatique Interne */
+        #westAccordion {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 0;
+            gap: 0.4rem;
+        }
+
+        #westAccordion .accordion-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px !important;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: flex-grow 0.25s ease;
+        }
+
+        /* L'élément ouvert s'étire pour occuper tout l'espace restant */
+        #westAccordion .accordion-item:has(.accordion-collapse.show) {
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        #westAccordion .accordion-header {
+            flex-shrink: 0;
+        }
+
+        #westAccordion .accordion-button {
+            padding: 0.65rem 0.85rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            background: #ffffff;
+            box-shadow: none !important;
+            border: none;
+        }
+
+        #westAccordion .accordion-button:not(.collapsed) {
+            background-color: #f8fafc;
+            color: #0f172a;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* La zone de contenu de l'accordéon prend tout l'espace et dispose de son propre scroll si ça déborde */
+        #westAccordion .accordion-collapse {
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        #westAccordion .accordion-collapse.show {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        #westAccordion .accordion-body {
+            flex-grow: 1;
+            min-height: 0;
+            overflow-y: auto; /* SCROLL AUTOMATIQUE SI SUPÉRIEUR À LA PLACE DISPONIBLE */
+            overflow-x: hidden;
+            padding: 0.75rem 0.85rem;
+            background: #ffffff;
         }
 
         /* 5. RÉGION CENTER (Zone de Jeu Principale / Carte Panoramique) */
@@ -205,67 +326,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             border-top: 2px solid #334155;
             font-size: 0.8rem;
             z-index: 1000;
-        }
-
-        /* ========================================================
-           TABLER / BOOTSTRAP : ACCORDION INVERTED WITH PLUS ICON
-           ======================================================== */
-        /* Supprime l'icône chevron native par défaut */
-        .accordion-inverted-plus .accordion-button::after {
-            display: none !important;
-        }
-
-        /* Place l'icône plus/minus à gauche (inversée) */
-        .accordion-inverted-plus .accordion-button::before {
-            content: "\f068"; /* fa-minus */
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            font-size: 0.75rem;
-            width: 20px;
-            height: 20px;
-            line-height: 20px;
-            text-align: center;
-            background: #e2e8f0;
-            color: #334155;
-            border-radius: 4px;
-            margin-right: 0.65rem;
-            flex-shrink: 0;
-            transition: transform 0.2s ease, background 0.2s ease;
-        }
-
-        /* Quand replié : icône plus */
-        .accordion-inverted-plus .accordion-button.collapsed::before {
-            content: "\f067"; /* fa-plus */
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        .accordion-inverted-plus .accordion-button {
-            padding: 0.65rem 0.85rem;
-            font-size: 0.88rem;
-            font-weight: 600;
-            background-color: #ffffff;
-            box-shadow: none !important;
-            border: none;
-        }
-
-        .accordion-inverted-plus .accordion-button:not(.collapsed) {
-            background-color: #f8fafc;
-            color: #0f172a;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .accordion-inverted-plus .accordion-item {
-            border: 1px solid #e2e8f0;
-            border-radius: 6px !important;
-            margin-bottom: 0.6rem;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        }
-
-        .accordion-inverted-plus .accordion-body {
-            padding: 0.75rem 0.85rem;
-            background: #ffffff;
         }
 
         /* Carte 16:9 dans la zone Center */
@@ -375,160 +435,208 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
         <!-- ========================================================
              2. RÉGION WEST (Colonne Gauche - Accordion Inverted With Plus Icon)
              ======================================================== -->
-        <aside class="region-west p-3" id="regionWest">
-            <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+        <aside class="region-west" id="regionWest">
+            <div class="region-west-header d-flex align-items-center justify-content-between">
                 <h4 class="m-0 fw-bold d-flex align-items-center gap-2 text-dark fs-3">
                     <i class="fa-solid fa-compass text-primary"></i>
                     <span>Région WEST</span>
                 </h4>
                 <div class="d-flex align-items-center gap-1">
-                    <span class="badge bg-primary-lt">Accordion</span>
+                    <span class="badge bg-primary-lt">Tabler Inverted</span>
                     <button type="button" class="btn btn-sm btn-light border-0 p-1" onclick="toggleRegion('west')" title="Réduire Région West">
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- ACCORDION INVERTED WITH PLUS ICON -->
-            <div class="accordion accordion-inverted-plus" id="westAccordion">
+            <!-- WRAPPER PLEINE HAUTEUR DE L'ACCORDÉON -->
+            <div class="west-accordion-wrapper">
 
-                <!-- 1. Didacticiel du Daimyō -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingQuest">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuest" aria-expanded="true" aria-controls="collapseQuest">
-                            <i class="fa-solid fa-scroll text-warning me-2"></i>
-                            <span class="flex-grow-1">Didacticiel du Daimyō</span>
-                            <span class="badge bg-warning-lt text-warning ms-auto me-1">Étape 2/12</span>
-                        </button>
-                    </h2>
-                    <div id="collapseQuest" class="accordion-collapse collapse show" aria-labelledby="headingQuest" data-bs-parent="#westAccordion">
-                        <div class="accordion-body small">
-                            <div class="d-flex align-items-start gap-2 mb-2">
-                                <div class="avatar avatar-sm rounded-circle bg-warning-lt text-warning flex-shrink-0">
-                                    <i class="fa-solid fa-user-ninja"></i>
+                <!-- ACCORDION INVERTED TABLER.IO -->
+                <div class="accordion accordion-inverted" id="westAccordion">
+
+                    <!-- 1. Didacticiel du Daimyō -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingQuest">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuest" aria-expanded="true" aria-controls="collapseQuest">
+                                <span class="accordion-button-toggle-plus">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </span>
+                                <i class="fa-solid fa-scroll text-warning me-2"></i>
+                                <span class="flex-grow-1">Didacticiel du Daimyō</span>
+                                <span class="badge bg-warning-lt text-warning ms-auto">Étape 2/12</span>
+                            </button>
+                        </h2>
+                        <div id="collapseQuest" class="accordion-collapse collapse show" aria-labelledby="headingQuest" data-bs-parent="#westAccordion">
+                            <div class="accordion-body small">
+                                <div class="d-flex align-items-start gap-2 mb-2">
+                                    <div class="avatar avatar-sm rounded-circle bg-warning-lt text-warning flex-shrink-0">
+                                        <i class="fa-solid fa-user-ninja"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="text-dark d-block">Maître Katsumoto :</strong>
+                                        <span class="text-muted" style="font-size: 0.78rem;">« Seigneur, consolidez vos réserves en élevant votre Carrière de Granit au niveau 1. »</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <strong class="text-dark d-block">Maître Katsumoto :</strong>
-                                    <span class="text-muted" style="font-size: 0.78rem;">« Seigneur, consolidez vos réserves en élevant votre Carrière de Granit au niveau 1. »</span>
+                                <div class="progress progress-sm mb-2" style="height: 6px;">
+                                    <div class="progress-bar bg-warning" style="width: 50%;"></div>
                                 </div>
-                            </div>
-                            <div class="progress progress-sm mb-2" style="height: 6px;">
-                                <div class="progress-bar bg-warning" style="width: 50%;"></div>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 0.72rem;">
-                                <span>Progression : <strong>1 / 2</strong></span>
-                                <span class="badge bg-success-lt text-success">+150 Bois &bull; +150 Riz</span>
+                                <div class="d-flex justify-content-between align-items-center text-muted mb-3" style="font-size: 0.72rem;">
+                                    <span>Progression : <strong>1 / 2</strong></span>
+                                    <span class="badge bg-success-lt text-success">+150 Bois &bull; +150 Riz</span>
+                                </div>
+
+                                <!-- Contenu dense pour tester le comportement de scroll interne -->
+                                <div class="p-2 bg-light rounded border mb-2">
+                                    <strong class="d-block text-secondary text-uppercase" style="font-size:0.68rem;">Objectifs Féodaux Débloqués :</strong>
+                                    <ul class="list-unstyled m-0 text-muted" style="font-size:0.75rem;">
+                                        <li><i class="fa-solid fa-check text-success me-1"></i> 1. Fonder le premier arpent sylvicole</li>
+                                        <li><i class="fa-solid fa-circle-dot text-warning me-1"></i> 2. Extraire la pierre de granit</li>
+                                        <li><i class="fa-regular fa-circle text-muted me-1"></i> 3. Bâtir le pavillon de thé</li>
+                                        <li><i class="fa-regular fa-circle text-muted me-1"></i> 4. Recruter 10 fantassins Ashigaru</li>
+                                        <li><i class="fa-regular fa-circle text-muted me-1"></i> 5. Annexer une première oasis fluviale</li>
+                                    </ul>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-warning w-100 fw-bold">
+                                    <i class="fa-solid fa-gift me-1"></i>Réclamer les récompenses
+                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 2. Chantiers en Cours -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingQueue">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQueue" aria-expanded="true" aria-controls="collapseQueue">
-                            <i class="fa-solid fa-helmet-safety text-primary me-2"></i>
-                            <span class="flex-grow-1">Chantiers en Cours</span>
-                            <span class="badge bg-primary-lt text-primary ms-auto me-1"><?= count($queue) ?> actif(s)</span>
-                        </button>
-                    </h2>
-                    <div id="collapseQueue" class="accordion-collapse collapse show" aria-labelledby="headingQueue" data-bs-parent="#westAccordion">
-                        <div class="accordion-body p-2 small">
-                            <?php if (empty($queue)): ?>
-                                <div class="text-center text-muted py-2" style="font-size:0.8rem;">
-                                    <i class="fa-solid fa-hammer d-block fs-3 mb-1 opacity-50"></i>
-                                    Aucune construction active sur ce fief.
-                                </div>
-                            <?php else: ?>
-                                <ul class="list-group list-group-flush small">
-                                    <?php foreach ($queue as $q): ?>
-                                        <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <div class="fw-bold text-dark"><?= htmlspecialchars($q['target_id']) ?></div>
-                                                <div class="text-muted" style="font-size: 0.7rem;">Élévation Niveau <?= (int)$q['target_level'] ?></div>
-                                            </div>
-                                            <span class="badge bg-warning text-dark font-monospace">
-                                                <?= max(0, $q['finishes_at'] - time()) ?>s
-                                            </span>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Récoltes, Stocks & Oasis -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingHarvest">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHarvest" aria-expanded="false" aria-controls="collapseHarvest">
-                            <i class="fa-solid fa-wheat-awn text-success me-2"></i>
-                            <span class="flex-grow-1">Récoltes, Stocks &amp; Oasis</span>
-                            <span class="badge bg-success-lt text-success ms-auto me-1">+<?= number_format($prodRates['metal'] + $prodRates['crystal'] + $prodRates['deuterium']) ?>/h</span>
-                        </button>
-                    </h2>
-                    <div id="collapseHarvest" class="accordion-collapse collapse" aria-labelledby="headingHarvest" data-bs-parent="#westAccordion">
-                        <div class="accordion-body p-2 small font-monospace">
-                            <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
-                                <span class="text-secondary"><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre :</span>
-                                <strong class="text-success">+<?= number_format($prodRates['metal']) ?>/h</strong>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
-                                <span class="text-secondary"><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille :</span>
-                                <strong class="text-primary">+<?= number_format($prodRates['crystal']) ?>/h</strong>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
-                                <span class="text-secondary"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial :</span>
-                                <strong class="text-warning">+<?= number_format($prodRates['deuterium']) ?>/h</strong>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-secondary"><i class="fa-solid fa-leaf text-teal me-1"></i>Oasis Annexées :</span>
-                                <strong class="text-teal"><?= count($annexedOases) ?> oasis</strong>
+                    <!-- 2. Chantiers en Cours -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingQueue">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQueue" aria-expanded="false" aria-controls="collapseQueue">
+                                <span class="accordion-button-toggle-plus">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </span>
+                                <i class="fa-solid fa-helmet-safety text-primary me-2"></i>
+                                <span class="flex-grow-1">Chantiers en Cours</span>
+                                <span class="badge bg-primary-lt text-primary ms-auto"><?= count($queue) ?> actif(s)</span>
+                            </button>
+                        </h2>
+                        <div id="collapseQueue" class="accordion-collapse collapse" aria-labelledby="headingQueue" data-bs-parent="#westAccordion">
+                            <div class="accordion-body p-2 small">
+                                <?php if (empty($queue)): ?>
+                                    <div class="text-center text-muted py-3" style="font-size:0.8rem;">
+                                        <i class="fa-solid fa-hammer d-block fs-3 mb-1 opacity-50"></i>
+                                        Aucun chantier actif sur ce fief.
+                                    </div>
+                                <?php else: ?>
+                                    <ul class="list-group list-group-flush small">
+                                        <?php foreach ($queue as $q): ?>
+                                            <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="fw-bold text-dark"><?= htmlspecialchars($q['target_id']) ?></div>
+                                                    <div class="text-muted" style="font-size: 0.7rem;">Élévation Niveau <?= (int)$q['target_level'] ?></div>
+                                                </div>
+                                                <span class="badge bg-warning text-dark font-monospace">
+                                                    <?= max(0, $q['finishes_at'] - time()) ?>s
+                                                </span>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 4. Garnison du Domaine -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingGarrison">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGarrison" aria-expanded="false" aria-controls="collapseGarrison">
-                            <i class="fa-solid fa-shield-halved text-danger me-2"></i>
-                            <span class="flex-grow-1">Garnison du Domaine</span>
-                            <span class="badge bg-danger-lt text-danger ms-auto me-1">45 guerriers</span>
-                        </button>
-                    </h2>
-                    <div id="collapseGarrison" class="accordion-collapse collapse" aria-labelledby="headingGarrison" data-bs-parent="#westAccordion">
-                        <div class="accordion-body p-2 small">
-                            <div class="d-flex flex-column gap-1">
-                                <div class="d-flex justify-content-between align-items-center p-1 bg-light rounded">
-                                    <span class="d-flex align-items-center gap-1">
-                                        <i class="fa-solid fa-person-rifle text-danger"></i> Ashigaru Yari
-                                    </span>
-                                    <span class="badge bg-dark font-monospace">30</span>
+                    <!-- 3. Récoltes, Stocks & Oasis -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingHarvest">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHarvest" aria-expanded="false" aria-controls="collapseHarvest">
+                                <span class="accordion-button-toggle-plus">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </span>
+                                <i class="fa-solid fa-wheat-awn text-success me-2"></i>
+                                <span class="flex-grow-1">Récoltes, Stocks &amp; Oasis</span>
+                                <span class="badge bg-success-lt text-success ms-auto">+<?= number_format($prodRates['metal'] + $prodRates['crystal'] + $prodRates['deuterium']) ?>/h</span>
+                            </button>
+                        </h2>
+                        <div id="collapseHarvest" class="accordion-collapse collapse" aria-labelledby="headingHarvest" data-bs-parent="#westAccordion">
+                            <div class="accordion-body p-2 small font-monospace">
+                                <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
+                                    <span class="text-secondary"><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre :</span>
+                                    <strong class="text-success">+<?= number_format($prodRates['metal']) ?>/h</strong>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center p-1 bg-light rounded">
-                                    <span class="d-flex align-items-center gap-1">
-                                        <i class="fa-solid fa-bow-arrow text-warning"></i> Archers Yumi
-                                    </span>
-                                    <span class="badge bg-dark font-monospace">12</span>
+                                <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
+                                    <span class="text-secondary"><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille :</span>
+                                    <strong class="text-primary">+<?= number_format($prodRates['crystal']) ?>/h</strong>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center p-1 bg-light rounded">
-                                    <span class="d-flex align-items-center gap-1">
-                                        <i class="fa-solid fa-horse text-primary"></i> Cavalerie Samurai
-                                    </span>
-                                    <span class="badge bg-dark font-monospace">3</span>
+                                <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
+                                    <span class="text-secondary"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial :</span>
+                                    <strong class="text-warning">+<?= number_format($prodRates['deuterium']) ?>/h</strong>
                                 </div>
-                            </div>
-                            <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center text-muted" style="font-size:0.75rem;">
-                                <span>Défense fortifiée : <strong>1 450 pts</strong></span>
-                                <a href="/?page=barracks" class="text-primary text-decoration-none">Dojo &rarr;</a>
+                                <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
+                                    <span class="text-secondary"><i class="fa-solid fa-leaf text-teal me-1"></i>Oasis Annexées :</span>
+                                    <strong class="text-teal"><?= count($annexedOases) ?> oasis</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary"><i class="fa-solid fa-box text-purple me-1"></i>Magasins Kura :</span>
+                                    <strong class="text-purple"><?= number_format($planet['metal_max'] ?? 15000) ?> max</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-            </div>
+                    <!-- 4. Garnison du Domaine -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingGarrison">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGarrison" aria-expanded="false" aria-controls="collapseGarrison">
+                                <span class="accordion-button-toggle-plus">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </span>
+                                <i class="fa-solid fa-shield-halved text-danger me-2"></i>
+                                <span class="flex-grow-1">Garnison du Domaine</span>
+                                <span class="badge bg-danger-lt text-danger ms-auto">45 guerriers</span>
+                            </button>
+                        </h2>
+                        <div id="collapseGarrison" class="accordion-collapse collapse" aria-labelledby="headingGarrison" data-bs-parent="#westAccordion">
+                            <div class="accordion-body p-2 small">
+                                <div class="d-flex flex-column gap-1">
+                                    <div class="d-flex justify-content-between align-items-center p-1 bg-light rounded">
+                                        <span class="d-flex align-items-center gap-1">
+                                            <i class="fa-solid fa-person-rifle text-danger"></i> Ashigaru Yari
+                                        </span>
+                                        <span class="badge bg-dark font-monospace">30</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center p-1 bg-light rounded">
+                                        <span class="d-flex align-items-center gap-1">
+                                            <i class="fa-solid fa-bow-arrow text-warning"></i> Archers Yumi
+                                        </span>
+                                        <span class="badge bg-dark font-monospace">12</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center p-1 bg-light rounded">
+                                        <span class="d-flex align-items-center gap-1">
+                                            <i class="fa-solid fa-horse text-primary"></i> Cavalerie Samurai
+                                        </span>
+                                        <span class="badge bg-dark font-monospace">3</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center text-muted" style="font-size:0.75rem;">
+                                    <span>Défense fortifiée : <strong>1 450 pts</strong></span>
+                                    <a href="/?page=barracks" class="text-primary text-decoration-none">Dojo &rarr;</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /#westAccordion -->
+
+            </div><!-- /.west-accordion-wrapper -->
         </aside>
 
         <!-- Poignée de réouverture flottante West (quand replié) -->
@@ -674,7 +782,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                 <span class="badge bg-secondary-lt text-secondary">Région SOUTH</span>
                 <span><i class="fa-solid fa-shield-halved text-success me-1"></i>Environnement Isolé : <code>sandbox.php</code></span>
                 <span class="d-none d-md-inline text-muted">&bull;</span>
-                <span class="d-none d-md-inline text-muted">5 Régions avec Accordion Inverted (+/- icon)</span>
+                <span class="d-none d-md-inline text-muted">Tabler Inverted Accordion + Plus icon (100% height &amp; internal scroll)</span>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <span>Serveur Speed : <strong>x5</strong></span>
