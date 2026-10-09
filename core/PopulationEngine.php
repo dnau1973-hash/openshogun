@@ -39,6 +39,19 @@ class PopulationEngine {
         'quantum_vault'     => 0  // Cachette secrète : 0 (dissimulée et passive)
     ];
 
+    // Quotas d'ouvriers requis par niveau pour les 9 structures du Terroir Féodal (planet_rural_plots)
+    public const RURAL_PLOT_WORKERS = [
+        'tenshu'           => 2, // Donjon Tenshu : 2 gardes/officiers par niveau
+        'foret'            => 2, // Forêt de Cèdres : 2 bûcherons par niveau
+        'carriere'         => 2, // Carrière de Granit : 2 carriers par niveau
+        'riziere'          => 2, // Rizière Inondée : 2 riziculteurs par niveau
+        'fosse_argile'     => 2, // Fosse d'Argile : 2 potiers/extracteurs par niveau
+        'champ_soja'       => 2, // Champ de Soja : 2 agriculteurs par niveau
+        'culture_the'      => 1, // Coteaux de Théiers : 1 cueilleur par niveau
+        'sanctuaire_shinto'=> 1, // Sanctuaire Shintō : 1 gardien/prêtre par niveau
+        'village'          => 0  // Village & Habitations : 0 ouvrier (fournit des logements)
+    ];
+
     public function __construct(?PDO $db = null) {
         $this->db = $db ?? Database::getConnection();
     }
@@ -62,27 +75,72 @@ class PopulationEngine {
     }
 
     /**
-     * Calcule le total d'ouvriers requis sur tout le domaine (bâtiments + parcelles)
+     * Nombre d'ouvriers requis pour une parcelle du Terroir Féodal selon son niveau
      */
-    public static function calculateTotalWorkersRequired(array $buildings, array $fields): int {
+    public static function getRuralPlotWorkersRequired(string $type, int $level): int {
+        if ($level <= 0) return 0;
+        $rate = self::RURAL_PLOT_WORKERS[$type] ?? 2;
+        return $level * $rate;
+    }
+
+    /**
+     * Calcule le total d'ouvriers requis sur tout le domaine (bâtiments + parcelles classiques + 9 parcelles du terroir)
+     */
+    public static function calculateTotalWorkersRequired(array $buildings, array $fields, ?int $planetId = null, ?array $ruralPlots = null): int {
         $total = 0;
-        foreach ($fields as $f) {
-            $lvl = (int)($f['level'] ?? 0);
-            $type = (string)($f['type'] ?? '');
-            $total += self::getFieldWorkersRequired($type, $lvl);
+        
+        // 1. Prise en compte des 9 parcelles du Terroir Féodal (planet_rural_plots) si disponibles
+        $hasPlots = false;
+        if (is_array($ruralPlots) && !empty($ruralPlots)) {
+            $hasPlots = true;
+            foreach ($ruralPlots as $p) {
+                $lvl = (int)($p['level'] ?? 0);
+                $type = (string)($p['structure_type'] ?? ($p['type'] ?? ''));
+                $total += self::getRuralPlotWorkersRequired($type, $lvl);
+            }
+        } elseif ($planetId !== null && $planetId > 0) {
+            try {
+                $db = Database::getConnection();
+                $stmt = $db->prepare("SELECT structure_type, level FROM planet_rural_plots WHERE planet_id = ?");
+                $stmt->execute([$planetId]);
+                $plots = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (!empty($plots)) {
+                    $hasPlots = true;
+                    foreach ($plots as $p) {
+                        $lvl = (int)($p['level'] ?? 0);
+                        $type = (string)($p['structure_type'] ?? '');
+                        $total += self::getRuralPlotWorkersRequired($type, $lvl);
+                    }
+                }
+            } catch (Exception $e) {
+                // Fallback silencieux vers $fields
+            }
         }
+
+        // 2. Parcelles classiques (planet_fields) : seulement si aucune parcelle du terroir n'a été comptabilisée
+        if (!$hasPlots) {
+            foreach ($fields as $f) {
+                $lvl = (int)($f['level'] ?? 0);
+                $type = (string)($f['type'] ?? '');
+                $total += self::getFieldWorkersRequired($type, $lvl);
+            }
+        }
+
+        // 3. Bâtiments urbains de la cité castrale
         foreach ($buildings as $type => $lvl) {
             $total += self::getBuildingWorkersRequired((string)$type, (int)$lvl);
         }
+
         return $total;
     }
 
     /**
      * Calcule le bilan complet de main-d'œuvre du domaine
      */
-    public static function calculateWorkforceSummary(array $planet, array $buildings, array $fields, int $maxPopulation): array {
+    public static function calculateWorkforceSummary(array $planet, array $buildings, array $fields, int $maxPopulation, ?array $ruralPlots = null): array {
         $totalPop = (int)($planet['population'] ?? 100);
-        $requiredWorkers = self::calculateTotalWorkersRequired($buildings, $fields);
+        $planetId = isset($planet['id']) ? (int)$planet['id'] : null;
+        $requiredWorkers = self::calculateTotalWorkersRequired($buildings, $fields, $planetId, $ruralPlots);
         $assignedWorkers = min($totalPop, $requiredWorkers);
         $idleWorkers = max(0, $totalPop - $requiredWorkers);
         $ratio = ($requiredWorkers > 0) ? min(1.0, $totalPop / $requiredWorkers) : 1.0;
