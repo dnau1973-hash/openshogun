@@ -15,6 +15,7 @@ require_once __DIR__ . '/core/BuildingEngine.php';
 require_once __DIR__ . '/core/RuralPlotEngine.php';
 require_once __DIR__ . '/core/PopulationEngine.php';
 require_once __DIR__ . '/core/OasisEngine.php';
+require_once __DIR__ . '/core/SlotPositionEngine.php';
 require_once __DIR__ . '/config/game_constants.php';
 
 $auth = new Auth();
@@ -48,6 +49,29 @@ $energyNet = $energyMax - $energyUsed;
 $annexedOases = $oasisEngine->getAnnexedOasesForPlanet($planetId);
 $oasisBonuses = $oasisEngine->getTotalOasisBonusesForPlanet($planetId);
 $isTerran = (($user['faction'] ?? 'terran') === 'terran');
+
+// Cité Castrale (Slots 19 à 34)
+$citySlots = $planetEngine->getCitySlotMap($planetId);
+$buildingSectors = [
+    'hq' => 'hq',
+    'shipyard' => 'military',
+    'barracks' => 'military',
+    'radar' => 'military',
+    'wall' => 'military',
+    'research_lab' => 'science',
+    'embassy' => 'science',
+    'storage' => 'logistics',
+    'tank' => 'logistics',
+    'quantum_vault' => 'logistics',
+    'market' => 'logistics',
+    'sawmill' => 'logistics',
+    'stonemason' => 'logistics',
+    'grain_mill' => 'logistics',
+    'blacksmith' => 'military',
+    'teahouse' => 'science',
+    'tournament_square' => 'military',
+    'free_plot' => 'logistics',
+];
 ?>
 <!DOCTYPE html>
 <html lang="fr" data-bs-theme="light">
@@ -370,7 +394,61 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             backdrop-filter: blur(4px);
         }
+
+        /* Sélecteur de vues féodales */
+        .sandbox-nav-switcher .btn {
+            font-size: 0.82rem;
+            padding: 0.35rem 0.85rem;
+            transition: all 0.2s ease;
+        }
+        .sandbox-nav-switcher .btn.active {
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        /* Surface Cité Castrale 16:9 */
+        .sandbox-city-surface {
+            position: relative;
+            width: 100%;
+            max-width: 1400px;
+            margin: auto;
+            aspect-ratio: 16 / 9;
+            background-image: url('/public/assets/shogun_castle_city_bg.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.15);
+        }
+
+        .sandbox-city-surface .rts-hotspot {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: transform 0.15s ease, background 0.2s ease;
+        }
+        .sandbox-city-surface .rts-hotspot:hover {
+            transform: scale(1.06);
+            background: rgba(255, 255, 255, 0.15);
+            z-index: 99 !important;
+        }
+
+        .sandbox-city-surface .rts-hotspot .rts-level-bubble {
+            top: 6%;
+            right: 8%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        /* Modal Carte */
+        @keyframes mapModalIn {
+            from { opacity:0; transform: scale(0.96) translateY(6px); }
+            to   { opacity:1; transform: scale(1)   translateY(0); }
+        }
     </style>
+    <?= SlotPositionEngine::renderCss('city') ?>
 </head>
 <body>
 
@@ -380,7 +458,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
          1. RÉGION NORTH (En-tête & Menu)
          ======================================================== -->
     <header class="region-north p-2 px-3">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center gap-3">
             <!-- Brand & Info sandbox -->
             <div class="d-flex align-items-center gap-2">
                 <a href="/?page=resources" class="text-decoration-none d-flex align-items-center gap-2">
@@ -388,18 +466,34 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                     <span class="fw-bold text-dark font-game">OpenShogun</span>
                 </a>
                 <span class="badge bg-purple-lt text-purple fw-bold px-2 py-1">
-                    <i class="fa-solid fa-layer-group me-1"></i>5-RÉGIONS VIEWPORT
+                    <i class="fa-solid fa-layer-group me-1"></i>5-RÉGIONS
                 </span>
                 
                 <!-- Toggles pour afficher/masquer West et East -->
                 <div class="btn-group btn-group-sm ms-2">
                     <button type="button" class="btn btn-outline-secondary" id="toggleWestBtn" onclick="toggleRegion('west')" title="Replier/Déplier Région West">
-                        <i class="fa-solid fa-bars-staggered me-1"></i>West (Accordion)
+                        <i class="fa-solid fa-bars-staggered me-1"></i>West
                     </button>
                     <button type="button" class="btn btn-outline-secondary" id="toggleEastBtn" onclick="toggleRegion('east')" title="Replier/Déplier Région East">
                         <i class="fa-solid fa-table-columns me-1"></i>East
                     </button>
                 </div>
+            </div>
+
+            <!-- SÉLECTEUR DE VUES FÉODALES (Terroir Féodal, Cité Castrale, La Carte) -->
+            <div class="btn-group btn-group-sm sandbox-nav-switcher shadow-sm mx-auto" role="group" aria-label="Sélecteur de Vue Féodale">
+                <button type="button" class="btn btn-primary active" id="btnViewTerroir" onclick="switchSandboxView('terroir')" title="Passer au Terroir Féodal (9 Parcelles)">
+                    <i class="fa-solid fa-wheat-awn text-warning me-1"></i>
+                    <span class="fw-bold">Terroir Féodal</span>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnViewCity" onclick="switchSandboxView('city')" title="Passer à la Cité Castrale (16 Bâtiments &amp; Tenshu)">
+                    <i class="fa-solid fa-chess-rook text-primary me-1"></i>
+                    <span class="fw-bold">Cité Castrale</span>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnViewMap" onclick="switchSandboxView('map')" title="Passer à la Carte des Provinces &amp; Fiefs">
+                    <i class="fa-solid fa-map-location-dot text-info me-1"></i>
+                    <span class="fw-bold">La Carte</span>
+                </button>
             </div>
 
             <!-- Mini HUD Ressources direct -->
@@ -421,7 +515,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
             <!-- Actions de sortie Sandbox -->
             <div class="d-flex align-items-center gap-2">
                 <a href="/?page=resources" class="btn btn-sm btn-outline-secondary">
-                    <i class="fa-solid fa-arrow-left me-1"></i>Retour au Jeu
+                    <i class="fa-solid fa-arrow-left me-1"></i>Quitter
                 </a>
             </div>
         </div>
@@ -645,35 +739,124 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
         </button>
 
         <!-- ========================================================
-             3. RÉGION CENTER (Zone Centrale - Carte & Jeu)
+             3. RÉGION CENTER (Zone Centrale - Terroir / Cité / Carte)
              ======================================================== -->
         <main class="region-center" id="regionCenter">
-            <div class="d-flex justify-content-between align-items-center mb-2 px-2 text-white">
-                <div class="d-flex align-items-center gap-2">
-                    <h3 class="m-0 fw-bold font-game"><i class="fa-solid fa-map me-2 text-warning"></i>Région CENTER</h3>
-                    <span class="badge bg-dark border border-secondary text-white-50">Carte Panoramique 16:9</span>
+
+            <!-- ----------------------------------------------------
+                 VUE 1 : TERROIR FÉODAL (9 Parcelles Stratégiques)
+                 ---------------------------------------------------- -->
+            <div id="viewTerroir" class="sandbox-view w-100 d-flex flex-column my-auto">
+                <div class="d-flex justify-content-between align-items-center mb-2 px-2 text-white">
+                    <div class="d-flex align-items-center gap-2">
+                        <h3 class="m-0 fw-bold font-game"><i class="fa-solid fa-wheat-awn me-2 text-warning"></i>Terroir Féodal</h3>
+                        <span class="badge bg-dark border border-secondary text-white-50">Carte Panoramique 16:9</span>
+                        <span class="badge bg-warning-lt text-warning">9 Parcelles de Terroir</span>
+                    </div>
+                    <div class="text-white-50 small d-flex align-items-center gap-3">
+                        <span><i class="fa-solid fa-compress me-1 text-info"></i>Flex Grow dynamique</span>
+                    </div>
                 </div>
-                <div class="text-white-50 small d-flex align-items-center gap-3">
-                    <span><i class="fa-solid fa-compress me-1 text-info"></i>Flex Grow dynamique</span>
+
+                <!-- Conteneur Carte 16:9 avec les 9 parcelles -->
+                <div class="sandbox-map-container my-auto">
+                    <?php foreach ($plots as $type => $p): 
+                        $meta = RuralPlotEngine::STRUCTURES[$type] ?? null;
+                        if (!$meta) continue;
+                        $posX = $p['pos_x'];
+                        $posY = $p['pos_y'];
+                    ?>
+                        <div class="plot-pin" style="left: <?= $posX ?>%; top: <?= $posY ?>%;" title="<?= htmlspecialchars($meta['name']) ?> (Niveau <?= $p['level'] ?>)">
+                            <div class="plot-pin-inner">
+                                <i class="<?= $meta['icon'] ?> text-warning"></i>
+                                <span>Niv.<?= $p['level'] ?></span>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
-            <!-- Conteneur Carte 16:9 avec les 9 parcelles -->
-            <div class="sandbox-map-container my-auto">
-                <?php foreach ($plots as $type => $p): 
-                    $meta = RuralPlotEngine::STRUCTURES[$type] ?? null;
-                    if (!$meta) continue;
-                    $posX = $p['pos_x'];
-                    $posY = $p['pos_y'];
-                ?>
-                    <div class="plot-pin" style="left: <?= $posX ?>%; top: <?= $posY ?>%;" title="<?= htmlspecialchars($meta['name']) ?> (Niveau <?= $p['level'] ?>)">
-                        <div class="plot-pin-inner">
-                            <i class="<?= $meta['icon'] ?> text-warning"></i>
-                            <span>Niv.<?= $p['level'] ?></span>
-                        </div>
+            <!-- ----------------------------------------------------
+                 VUE 2 : CITÉ CASTRALE (16 Bâtiments & Tenshu)
+                 ---------------------------------------------------- -->
+            <div id="viewCity" class="sandbox-view w-100 d-none flex-column my-auto">
+                <div class="d-flex justify-content-between align-items-center mb-2 px-2 text-white">
+                    <div class="d-flex align-items-center gap-2">
+                        <h3 class="m-0 fw-bold font-game"><i class="fa-solid fa-chess-rook me-2 text-primary"></i>Cité Castrale &amp; Village Féodal</h3>
+                        <span class="badge bg-dark border border-secondary text-white-50">Secteurs Urbains 16:9</span>
+                        <span class="badge bg-primary-lt text-primary">16 Bâtiments Castraux &amp; Tenshu</span>
                     </div>
-                <?php endforeach; ?>
+                    <div class="text-white-50 small d-flex align-items-center gap-3">
+                        <span><i class="fa-solid fa-landmark me-1 text-warning"></i>Tenshu &amp; Dojos</span>
+                    </div>
+                </div>
+
+                <!-- Conteneur Cité Castrale 16:9 avec les 16 Bâtiments -->
+                <div class="sandbox-city-surface my-auto">
+                    <?php foreach ($citySlots as $slot => $slotData):
+                        $code = $slotData['code'];
+                        if ($code === 'free_plot' && isset(CITY_SLOT_LAYOUT[$slot])) {
+                            $code = CITY_SLOT_LAYOUT[$slot];
+                        }
+                        $lvl = (int)($slotData['level'] ?? 0);
+                        if ($lvl === 0 && isset($buildings[$code])) {
+                            $lvl = (int)$buildings[$code];
+                        }
+                        $bInfo = BUILDINGS[$code] ?? null;
+                        if (!$bInfo) continue;
+                        $sector = $buildingSectors[$code] ?? 'logistics';
+                    ?>
+                        <div class="rts-hotspot sector-<?= $sector ?> hotspot-city-slot-<?= $slot ?>"
+                             title="<?= htmlspecialchars($bInfo['name']) ?> (Niveau <?= $lvl ?>)"
+                             onclick="showCityBuildingToast('<?= htmlspecialchars(addslashes($bInfo['name'])) ?>', <?= $lvl ?>, '<?= htmlspecialchars(addslashes($bInfo['description'] ?? '')) ?>')">
+                            <div class="rts-level-bubble <?= ($code === 'hq') ? 'rts-tenshu-bubble' : '' ?> <?= $lvl === 0 ? 'level-zero' : '' ?>">
+                                <?= $lvl > 0 ? $lvl : '+' ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
             </div>
+
+            <!-- ----------------------------------------------------
+                 VUE 3 : LA CARTE DES PROVINCES (Navigation & Fiefs)
+                 ---------------------------------------------------- -->
+            <div id="viewMap" class="sandbox-view w-100 d-none flex-column h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2 px-2 text-white flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <h3 class="m-0 fw-bold font-game"><i class="fa-solid fa-map-location-dot me-2 text-info"></i>Carte des Provinces &amp; Fiefs</h3>
+                        <span class="badge bg-dark border border-secondary text-white-50 font-monospace">[<?= (int)$planet['coord_x'] ?> : <?= (int)$planet['coord_y'] ?>] Fief d'attache</span>
+                        <span class="badge bg-info-lt text-info d-none d-md-inline"><i class="fa-solid fa-hand me-1"></i>Glissez la carte (Drag &amp; Drop)</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-light py-1 px-2" onclick="if(galaxyMap) galaxyMap.moveTo(-16, 16)" title="Nord-Ouest [- / +]">N-O</button>
+                        <button type="button" class="btn btn-sm btn-outline-light py-1 px-2" onclick="if(galaxyMap) galaxyMap.moveTo(16, 16)" title="Nord-Est [+ / +]">N-E</button>
+                        <button type="button" class="btn btn-sm btn-outline-light py-1 px-2" onclick="if(galaxyMap) galaxyMap.moveTo(-16, -16)" title="Sud-Ouest [- / -]">S-O</button>
+                        <button type="button" class="btn btn-sm btn-outline-light py-1 px-2" onclick="if(galaxyMap) galaxyMap.moveTo(16, -16)" title="Sud-Est [+ / -]">S-E</button>
+                        <button type="button" class="btn btn-sm btn-outline-light py-1 px-2" onclick="if(galaxyMap) galaxyMap.moveTo(0, 0)" title="Centre Impérial [0 : 0]"><i class="fa-solid fa-torii-gate me-1"></i>Centre</button>
+                        <button type="button" class="btn btn-sm btn-primary py-1 px-2" onclick="if(galaxyMap) galaxyMap.moveTo(<?= (int)$planet['coord_x'] ?>, <?= (int)$planet['coord_y'] ?>)" title="Mon Fief"><i class="fa-solid fa-house-chimney me-1"></i>Mon Fief</button>
+                    </div>
+                </div>
+
+                <!-- Légende rapide des terrains -->
+                <div class="bg-dark bg-opacity-75 border border-secondary border-opacity-50 rounded px-2 py-1 mb-2 d-flex align-items-center justify-content-between text-white-50 small flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <span class="fw-bold text-white"><i class="fa-solid fa-map me-1"></i>Terroirs :</span>
+                        <span><img src="/public/assets/map/tile_plains.jpg?v=2" style="width:14px; height:14px; border-radius:2px;" alt=""> Plaines</span>
+                        <span><img src="/public/assets/map/tile_forest.jpg?v=2" style="width:14px; height:14px; border-radius:2px;" alt=""> Forêt de Cèdres</span>
+                        <span><img src="/public/assets/map/tile_mountain.jpg?v=2" style="width:14px; height:14px; border-radius:2px;" alt=""> Montagnes</span>
+                        <span><img src="/public/assets/map/tile_lake.jpg?v=2" style="width:14px; height:14px; border-radius:2px;" alt=""> Lacs</span>
+                        <span><img src="/public/assets/map/tile_village.jpg?v=2" style="width:14px; height:14px; border-radius:2px;" alt=""> Fief</span>
+                        <span><span class="badge bg-success-lt" style="font-size:0.65rem;">+25%</span> Oasis</span>
+                    </div>
+                    <div class="text-white-50 font-monospace small">
+                        Zoom : +/- &bull; Flèches clavier pour naviguer
+                    </div>
+                </div>
+
+                <!-- Conteneur Carte interactif -->
+                <div class="galaxy-map-wrapper map-fullwidth-wrapper flex-grow-1" id="galaxyMapContainer" style="width: 100%; height: 100%; min-height: 420px; border-radius: 8px; overflow: hidden; position: relative;"></div>
+            </div>
+
         </main>
 
         <!-- Poignée de réouverture flottante East (quand replié) -->
@@ -794,9 +977,160 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 
 </div>
 
-<!-- Scripts Tabler & Logique de Collapse ExtJS Style -->
+<!-- Modal d'informations pour la Carte -->
+<div id="mapTileModal" style="
+    display: none;
+    position: fixed; inset: 0; z-index: 9000;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+" onclick="if(event.target===this) closeMapModal();">
+    <div class="card shadow-lg" style="
+        background: #ffffff;
+        border: 1px solid var(--tblr-border-color, #e6e7e9);
+        border-radius: 12px;
+        width: 100%; max-width: 540px;
+        max-height: 85vh; overflow-y: auto;
+        position: relative;
+        animation: mapModalIn 0.2s ease;
+        color: #1e293b;
+    ">
+        <div class="card-header d-flex justify-content-between align-items-center py-2 px-3 border-bottom bg-white">
+            <div class="d-flex align-items-center gap-2">
+                <h4 id="mapModalTitle" class="card-title m-0 fw-bold">Informations</h4>
+                <span id="mapModalCoords" class="badge bg-secondary text-white font-monospace"></span>
+            </div>
+            <button type="button" class="btn-close ms-2" onclick="closeMapModal()" aria-label="Fermer"></button>
+        </div>
+        <div id="mapModalBody" class="card-body p-3"></div>
+    </div>
+</div>
+
+<!-- Scripts Tabler & Logique Sandbox -->
 <script src="/public/js/tabler/tabler.min.js"></script>
+<script src="/public/js/galaxy_map.js"></script>
 <script>
+let galaxyMap = null;
+
+// ========================================================
+// BASCULE DES VUES (Terroir Féodal, Cité Castrale, La Carte)
+// ========================================================
+function switchSandboxView(viewName) {
+    const views = {
+        'terroir': { btn: document.getElementById('btnViewTerroir'), el: document.getElementById('viewTerroir') },
+        'city':    { btn: document.getElementById('btnViewCity'),    el: document.getElementById('viewCity') },
+        'map':     { btn: document.getElementById('btnViewMap'),     el: document.getElementById('viewMap') }
+    };
+
+    if (!views[viewName]) return;
+
+    // Mise à jour de l'état des boutons
+    Object.keys(views).forEach(k => {
+        const item = views[k];
+        if (!item.btn || !item.el) return;
+        
+        if (k === viewName) {
+            item.btn.classList.add('btn-primary', 'active');
+            item.btn.classList.remove('btn-outline-secondary');
+            item.el.classList.remove('d-none');
+            item.el.classList.add('d-flex');
+        } else {
+            item.btn.classList.remove('btn-primary', 'active');
+            item.btn.classList.add('btn-outline-secondary');
+            item.el.classList.add('d-none');
+            item.el.classList.remove('d-flex');
+        }
+    });
+
+    // Initialisation ou redimensionnement dynamique de la Carte
+    if (viewName === 'map') {
+        setTimeout(() => {
+            if (!galaxyMap) {
+                galaxyMap = new GalaxyMapController('galaxyMapContainer', {
+                    initialX: <?= (int)$planet['coord_x'] ?>,
+                    initialY: <?= (int)$planet['coord_y'] ?>,
+                    playerX: <?= (int)$planet['coord_x'] ?>,
+                    playerY: <?= (int)$planet['coord_y'] ?>,
+                    userId: <?= (int)$user['id'] ?>
+                });
+            } else {
+                galaxyMap.renderGrid();
+            }
+        }, 50);
+    }
+
+    localStorage.setItem('sandbox_active_view', viewName);
+    history.replaceState(null, null, '#view=' + viewName);
+}
+
+// Clic interactif sur un bâtiment de la Cité Castrale
+function showCityBuildingToast(name, level, desc) {
+    alert(`🏯 ${name} (Niveau ${level})\n\n${desc || 'Bâtiment traditionnel du domaine castral.'}`);
+}
+
+// Modal Carte
+function openMapModal() {
+    const modal = document.getElementById('mapTileModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeMapModal() {
+    const modal = document.getElementById('mapTileModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeMapModal();
+});
+
+window.selectPlanetTile = function(planetData) {
+    const title = document.getElementById('mapModalTitle');
+    const coords = document.getElementById('mapModalCoords');
+    const body = document.getElementById('mapModalBody');
+    if (!title || !coords || !body) return;
+
+    coords.innerText = `[${planetData.coord_x} : ${planetData.coord_y}]`;
+
+    if (planetData.is_oasis) {
+        title.innerHTML = `<i class="fa-solid fa-leaf text-success me-1"></i> ${planetData.oasis_name || 'Oasis Naturelle'}`;
+        body.innerHTML = `
+            <div class="alert alert-success py-2 mb-2">
+                <i class="fa-solid fa-sparkles me-1"></i> Terres fertiles regorgeant de ressources.
+            </div>
+            <p class="small text-muted mb-0">Coordonnées : <strong>[${planetData.coord_x} : ${planetData.coord_y}]</strong></p>
+        `;
+    } else if (planetData.name) {
+        const isOwn = (parseInt(planetData.user_id, 10) === <?= (int)$user['id'] ?>);
+        title.innerHTML = `<i class="fa-solid fa-chess-rook text-primary me-1"></i> ${planetData.name}`;
+        body.innerHTML = `
+            <div class="card p-2 bg-light mb-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-secondary small">Daimyō Souverain :</span>
+                    <strong class="text-dark">${planetData.username || 'Inconnu'}</strong>
+                </div>
+            </div>
+            ${isOwn ? '<span class="badge bg-success-lt font-weight-bold py-2 px-3"><i class="fa-solid fa-check me-1"></i>Votre propre domaine</span>' : ''}
+        `;
+    } else {
+        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-secondary me-1"></i> Province Sauvage`;
+        body.innerHTML = `
+            <p class="small text-muted mb-0">Terre vierge inoccupée. Coordonnées : <strong>[${planetData.coord_x} : ${planetData.coord_y}]</strong></p>
+        `;
+    }
+    openMapModal();
+};
+
+// ========================================================
+// LOGIQUE DE COLLAPSE WEST / EAST
+// ========================================================
 function toggleRegion(region) {
     if (region === 'west') {
         const west = document.getElementById('regionWest');
@@ -829,12 +1163,23 @@ function toggleRegion(region) {
 
 // Restauration de l'état mémorisé au chargement
 document.addEventListener('DOMContentLoaded', () => {
+    // Restauration collapse
     if (localStorage.getItem('sandbox_region_west_collapsed') === '1') {
         toggleRegion('west');
     }
     if (localStorage.getItem('sandbox_region_east_collapsed') === '1') {
         toggleRegion('east');
     }
+
+    // Restauration de la vue active
+    const hash = window.location.hash;
+    let targetView = 'terroir';
+    if (hash.includes('city')) targetView = 'city';
+    else if (hash.includes('map')) targetView = 'map';
+    else if (localStorage.getItem('sandbox_active_view')) {
+        targetView = localStorage.getItem('sandbox_active_view');
+    }
+    switchSandboxView(targetView);
 });
 </script>
 </body>
