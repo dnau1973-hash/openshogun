@@ -492,14 +492,226 @@ $navItems = [
             </div>
         </div>
 
-        <!-- ── 2. LOGO FÉODAL CENTRAL DU JEU (Bannière pleine largeur fluide) ── -->
-        <div class="container-fluid text-center py-2 d-print-none">
-            <a href="?page=resources" class="brand-logo-link" title="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>">
-                <img src="/public/assets/logo_transparent.png?v=<?= file_exists(__DIR__ . '/../../public/assets/logo_transparent.png') ? filemtime(__DIR__ . '/../../public/assets/logo_transparent.png') : 1 ?>" 
-                     alt="<?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>" 
-                     style="height: 140px; max-height: 160px; width: auto; max-width: 92vw; object-fit: contain;">
-            </a>
+        <!-- ── 2. CARROUSEL AUTOMATIQUE DES BÂTIMENTS FÉODAUX (Bannière Cité Castrale) ── -->
+        <?php
+        $carouselBuildingsMeta = [
+            'building_tenshu.jpg' => [
+                'name' => 'Tenshu (Donjon Castral)',
+                'badge' => 'Siège du Commandement',
+                'desc' => 'Palais fortifié du Daimyō et réduction du temps de construction des édifices.',
+                'icon' => 'fa-solid fa-chess-rook text-danger'
+            ],
+            'building_barracks.jpg' => [
+                'name' => 'Dojo Militaire & Caserne',
+                'badge' => 'Infanterie Féodale',
+                'desc' => 'Enrôlement des Samouraïs d\'élite, archers Yumi et mousquetaires Tanegashima.',
+                'icon' => 'fa-solid fa-user-ninja text-primary'
+            ],
+            'building_shipyard.jpg' => [
+                'name' => 'Atelier de Siège & Écuries',
+                'badge' => 'Cavalerie & Génie Militaire',
+                'desc' => 'Élevage de coursiers de guerre, catapultes géantes et convois de ravitaillement.',
+                'icon' => 'fa-solid fa-horse text-warning'
+            ],
+            'building_wall.jpg' => [
+                'name' => 'Muraille & Remparts de Cité',
+                'badge' => 'Enceinte Fortifiée',
+                'desc' => 'Murailles en pierre cyclopéenne et douves protégeant le fief (+4% défense garnison/niv).',
+                'icon' => 'fa-solid fa-shield-halved text-success'
+            ],
+            'building_storage.jpg' => [
+                'name' => 'Hangar de Cèdre & Dépôt',
+                'badge' => 'Entrepôt de Bois',
+                'desc' => 'Réserves stratégiques de bois de cèdre et poutres de charpente.',
+                'icon' => 'fa-solid fa-tree text-success'
+            ],
+            'building_tank.jpg' => [
+                'name' => 'Grenier Kura & Réserve de Granit',
+                'badge' => 'Réserves Vivrières & Roches',
+                'desc' => 'Grands silos kura protégeant la pierre de taille et le riz impérial.',
+                'icon' => 'fa-solid fa-mountain text-secondary'
+            ],
+            'building_research_lab.jpg' => [
+                'name' => 'Académie des Savoirs & Forge',
+                'badge' => 'Recherche Stratégique',
+                'desc' => 'Perfectionnement du tamahagane, métallurgie et doctrines de guerre ancestrales.',
+                'icon' => 'fa-solid fa-scroll text-info'
+            ],
+            'building_market.jpg' => [
+                'name' => 'Marché Féodal & Caravanes',
+                'badge' => 'Commerce Provincial',
+                'desc' => 'Échanges de denrées et marchandises avec les marchands itinérants.',
+                'icon' => 'fa-solid fa-coins text-warning'
+            ],
+            'building_radar.jpg' => [
+                'name' => 'Tour de Guet Yagura',
+                'badge' => 'Vigie & Feux d\'Alarme',
+                'desc' => 'Surveillance provinciale et détection précoce des armées et espions ennemis.',
+                'icon' => 'fa-solid fa-eye text-danger'
+            ],
+            'building_quantum_vault.jpg' => [
+                'name' => 'Cachette Secrète Sous Terre',
+                'badge' => 'Caveau Anti-Pillage',
+                'desc' => 'Réserve inviolable dissimulée sous terre protégeant les stocks du pillage.',
+                'icon' => 'fa-solid fa-vault text-purple'
+            ],
+            'building_embassy.jpg' => [
+                'name' => 'Pavillon Diplomatique des Clans',
+                'badge' => 'Traités d\'Alliance',
+                'desc' => 'Pactes d\'alliance scellés sous les auspices des cérémonies du thé.',
+                'icon' => 'fa-solid fa-handshake text-primary'
+            ],
+            'building_sawmill.jpg' => [
+                'name' => 'Scierie Kizukuri',
+                'badge' => 'Atelier (+5% Bois)',
+                'desc' => 'Façonnage des poutres et débitage des troncs de cèdre.',
+                'icon' => 'fa-solid fa-hammer text-warning'
+            ],
+            'building_stonemason.jpg' => [
+                'name' => 'Tailleuse de Granit',
+                'badge' => 'Atelier (+5% Pierre)',
+                'desc' => 'Briqueterie et polissage des blocs de granit pour les forteresses.',
+                'icon' => 'fa-solid fa-trowel-bricks text-secondary'
+            ],
+            'building_grain_mill.jpg' => [
+                'name' => 'Meunerie de Riz Impérial',
+                'badge' => 'Atelier (+5% Riz)',
+                'desc' => 'Moulins à eau convertissant le riz koku en farine nourricière.',
+                'icon' => 'fa-solid fa-wheat-awn text-warning'
+            ],
+            'building_blacksmith.jpg' => [
+                'name' => 'Forge d\'Armes & d\'Armures',
+                'badge' => 'Armurerie Ancestrale',
+                'desc' => 'Fabrication des lames légendaires et des armures de samouraï.',
+                'icon' => 'fa-solid fa-fire-burner text-danger'
+            ],
+            'building_teahouse.jpg' => [
+                'name' => 'Pavillon de Thé Chashitsu',
+                'badge' => 'Sérénité Démographique',
+                'desc' => 'Cérémonie du thé favorisant le contentement et l\'attrait du fief.',
+                'icon' => 'fa-solid fa-leaf text-teal'
+            ],
+            'building_tournament_square.jpg' => [
+                'name' => 'Place d\'Armes & Tournoi',
+                'badge' => 'Joutes Féodales',
+                'desc' => 'Arène martiale et ralliement des troupes provinciales.',
+                'icon' => 'fa-solid fa-flag text-danger'
+            ]
+        ];
+
+        // Découverte dynamique de tous les fichiers présents dans assets/buildings
+        $buildingsAssetsDir = __DIR__ . '/../../public/assets/buildings';
+        $carouselSlides = [];
+        if (is_dir($buildingsAssetsDir)) {
+            $foundFiles = glob($buildingsAssetsDir . '/*.jpg');
+            if ($foundFiles) {
+                // Trier pour placer tenshu en premier
+                usort($foundFiles, function($a, $b) {
+                    $baseA = basename($a);
+                    $baseB = basename($b);
+                    if ($baseA === 'building_tenshu.jpg') return -1;
+                    if ($baseB === 'building_tenshu.jpg') return 1;
+                    return strcmp($baseA, $baseB);
+                });
+
+                foreach ($foundFiles as $filePath) {
+                    $bName = basename($filePath);
+                    $meta = $carouselBuildingsMeta[$bName] ?? [
+                        'name' => ucwords(str_replace(['building_', '_', '.jpg'], ['', ' ', ''], $bName)),
+                        'badge' => 'Édifice Castral',
+                        'desc' => 'Bâtiment traditionnel du domaine féodal.',
+                        'icon' => 'fa-solid fa-landmark text-warning'
+                    ];
+                    $carouselSlides[] = [
+                        'url' => '/public/assets/buildings/' . $bName,
+                        'name' => $meta['name'],
+                        'badge' => $meta['badge'],
+                        'desc' => $meta['desc'],
+                        'icon' => $meta['icon']
+                    ];
+                }
+            }
+        }
+        ?>
+
+        <div class="container-fluid px-3 px-lg-4 py-2 d-print-none">
+            <div id="headerBuildingsCarousel" 
+                 class="carousel slide carousel-fade shadow-sm rounded border overflow-hidden position-relative" 
+                 data-bs-ride="carousel" 
+                 data-bs-interval="3500" 
+                 data-bs-pause="hover"
+                 style="max-width: 1280px; margin: 0 auto; height: 140px; background: #0f172a;">
+                
+                <!-- Diapositives -->
+                <div class="carousel-inner h-100">
+                    <?php foreach ($carouselSlides as $idx => $slide): ?>
+                        <div class="carousel-item h-100 <?= $idx === 0 ? 'active' : '' ?>">
+                            <a href="?page=city" class="d-block w-100 h-100 position-relative text-decoration-none" title="<?= htmlspecialchars($slide['name']) ?> - Visiter la Cité Castrale">
+                                <img src="<?= htmlspecialchars($slide['url']) ?>" 
+                                     class="d-block w-100 h-100" 
+                                     alt="<?= htmlspecialchars($slide['name']) ?>"
+                                     style="object-fit: cover; object-position: center 30%; filter: brightness(0.92);">
+                                
+                                <!-- Voile dégradé cinéma -->
+                                <div class="position-absolute top-0 start-0 w-100 h-100" 
+                                     style="background: linear-gradient(180deg, rgba(15,23,42,0.25) 0%, rgba(15,23,42,0.4) 40%, rgba(15,23,42,0.85) 100%);"></div>
+
+                                <!-- Légende supérieure : Tag du Domaine -->
+                                <div class="position-absolute top-0 start-0 p-2 d-flex align-items-center gap-2">
+                                    <span class="badge bg-dark bg-opacity-75 text-warning font-monospace border border-secondary" style="backdrop-filter: blur(4px); font-size: 0.68rem;">
+                                        <i class="fa-solid fa-torii-gate me-1"></i><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>
+                                    </span>
+                                    <span class="badge bg-primary bg-opacity-75 text-white font-monospace border border-primary-subtle" style="backdrop-filter: blur(4px); font-size: 0.68rem;">
+                                        <?= htmlspecialchars($slide['badge']) ?>
+                                    </span>
+                                </div>
+
+                                <!-- Bouton raccourci Cité en haut à droite -->
+                                <div class="position-absolute top-0 end-0 p-2">
+                                    <span class="badge bg-danger bg-opacity-90 text-white font-monospace shadow-sm" style="backdrop-filter: blur(4px); font-size: 0.68rem;">
+                                        <i class="fa-solid fa-city me-1"></i>Cité Castrale
+                                    </span>
+                                </div>
+
+                                <!-- Légende inférieure : Titre et description du bâtiment -->
+                                <div class="position-absolute bottom-0 start-0 end-0 px-3 pb-2 text-start text-white">
+                                    <h3 class="mb-0 fw-bold d-flex align-items-center gap-2 text-white" style="font-size: 1.05rem; text-shadow: 0 2px 6px rgba(0,0,0,0.9);">
+                                        <i class="<?= htmlspecialchars($slide['icon']) ?>"></i>
+                                        <span><?= htmlspecialchars($slide['name']) ?></span>
+                                    </h3>
+                                    <p class="mb-0 text-white-50 text-truncate d-none d-sm-block" style="font-size: 0.78rem; text-shadow: 0 1px 4px rgba(0,0,0,0.9); max-width: 85%;">
+                                        <?= htmlspecialchars($slide['desc']) ?>
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Contrôles Précédent / Suivant -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#headerBuildingsCarousel" data-bs-slide="prev" style="width: 5%;">
+                    <span class="carousel-control-prev-icon p-2 rounded bg-dark bg-opacity-50" aria-hidden="true" style="width: 24px; height: 24px; background-size: 60%;"></span>
+                    <span class="visually-hidden">Précédent</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#headerBuildingsCarousel" data-bs-slide="next" style="width: 5%;">
+                    <span class="carousel-control-next-icon p-2 rounded bg-dark bg-opacity-50" aria-hidden="true" style="width: 24px; height: 24px; background-size: 60%;"></span>
+                    <span class="visually-hidden">Suivant</span>
+                </button>
+            </div>
         </div>
+
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var carEl = document.getElementById('headerBuildingsCarousel');
+            if (carEl && typeof bootstrap !== 'undefined' && bootstrap.Carousel) {
+                new bootstrap.Carousel(carEl, {
+                    interval: 3500,
+                    ride: 'carousel',
+                    pause: 'hover'
+                });
+            }
+        });
+        </script>
 
         <?php if ($planet): ?>
         <style>
