@@ -1,7 +1,7 @@
 <?php
 /**
  * Vue Partielle Mutualisée : Colonne Est en Accordéon (Page Ressources / Domaine Rural)
- * Contient les 4 blocs stratégiques : Didacticiel, Chantiers en cours, Récoltes & Stocks, Garnison.
+ * Contient les 5 blocs stratégiques : Didacticiel, Chantiers en cours, Récoltes & Stocks, Main-d'œuvre & Démographie, Garnison.
  * Tous les items ont une hauteur fixe identique avec barre de défilement (scroll) automatique.
  */
 
@@ -40,6 +40,13 @@ $totalTroopsCount = 0;
 foreach ($stationedTroops as $t) {
     $totalTroopsCount += (int)($t['stationed_count'] ?? 0);
 }
+
+// Données de la Main-d'œuvre & Démographie
+$curPop = (int)($planet['population'] ?? 0);
+$maxPop = (int)($planet['population_max'] ?? 100);
+$wfSummary = $planet['workforce'] ?? ($prodRates['workforce'] ?? null);
+$isUnderstaffed = !empty($wfSummary['is_understaffed']);
+$malusUnderstaffed = (float)($wfSummary['understaffed_malus_pct'] ?? 0);
 
 // Détermination de l'élément ouvert par défaut : Didacticiel si quête active, sinon Chantiers
 $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
@@ -301,7 +308,44 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
         </div>
     </div>
 
-    <!-- ── 4. GARNISON DU DOMAINE ── -->
+    <!-- ── 4. MAIN-D'ŒUVRE & DÉMOGRAPHIE ── -->
+    <div class="accordion-item bg-white">
+        <h3 class="accordion-header" id="heading-east-workforce">
+            <button class="accordion-button collapsed" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#east-item-workforce" 
+                    aria-expanded="false" 
+                    aria-controls="east-item-workforce">
+                <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate pe-2">
+                    <i class="fa-solid fa-users-gear text-indigo"></i>
+                    <span class="fw-bold">Main-d'œuvre &amp; Démographie</span>
+                    <?php if ($isUnderstaffed): ?>
+                        <span class="badge bg-warning-lt text-warning font-monospace ms-auto fw-bold" style="font-size:0.68rem;" title="Sous-effectif actif : productivité réduite">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>-<?= $malusUnderstaffed ?>%
+                        </span>
+                    <?php else: ?>
+                        <span class="badge bg-indigo-lt text-indigo font-monospace ms-auto" style="font-size:0.68rem;">
+                            <?= number_format($curPop) ?>/<?= number_format($maxPop) ?> Sujets
+                        </span>
+                    <?php endif; ?>
+                </div>
+                <span class="accordion-button-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon"><path d="M6 9l6 6l6 -6" /></svg>
+                </span>
+            </button>
+        </h3>
+        <div id="east-item-workforce" 
+             class="accordion-collapse collapse" 
+             aria-labelledby="heading-east-workforce" 
+             data-bs-parent="#resourcesEastAccordion">
+            <div class="accordion-body">
+                <?php require __DIR__ . '/workforce_demographics_panel.php'; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 5. GARNISON DU DOMAINE ── -->
     <div class="accordion-item bg-white">
         <h3 class="accordion-header" id="heading-east-troops">
             <button class="accordion-button collapsed" 

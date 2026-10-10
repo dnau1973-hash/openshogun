@@ -190,7 +190,8 @@ class VillageGeneratorService {
                 $initialLevel = $startAtZero ? 0 : 1;
             }
 
-            $workers = ($initialLevel <= 0) ? 0 : max(2, (int)round(2 + ($initialLevel * 1.5)));
+            require_once __DIR__ . '/PopulationEngine.php';
+            $workers = PopulationEngine::getRuralPlotWorkersRequired($structureType, $initialLevel);
             $prodHourly = self::calculateHourlyProduction($structureType, $initialLevel);
 
             $generatedPlots[] = [

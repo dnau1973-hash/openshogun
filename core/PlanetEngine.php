@@ -235,8 +235,9 @@ class PlanetEngine {
                 $structureType = $item['target_id'];
                 require_once __DIR__ . '/RuralPlotEngine.php';
                 require_once __DIR__ . '/VillageGeneratorService.php';
+                require_once __DIR__ . '/PopulationEngine.php';
 
-                $newWorkers = max(2, (int)round(2 + ($targetLevel * 1.5)));
+                $newWorkers = PopulationEngine::getRuralPlotWorkersRequired($structureType, $targetLevel);
                 $newProd = VillageGeneratorService::calculateHourlyProduction($structureType, $targetLevel);
 
                 $up = $this->db->prepare("
@@ -891,10 +892,11 @@ class PlanetEngine {
                 if ($teahouseLvl > 0) $energyMax = (int)($energyMax * (1.0 + ($teahouseLvl * 0.05)));
 
                 // Calcul du quota de main-d'œuvre et malus en cas de sous-effectif
-                $stmtPop = $this->db->prepare("SELECT population, rice_flour, deuterium, sake, energy_used, energy_max FROM planets WHERE id = ?");
+                $stmtPop = $this->db->prepare("SELECT id, population, rice_flour, deuterium, sake, energy_used, energy_max FROM planets WHERE id = ?");
                 $stmtPop->execute([$planetId]);
                 $pRow = $stmtPop->fetch(PDO::FETCH_ASSOC);
                 if ($pRow) {
+                    $pRow['id'] = (int)$planetId;
                     $maxPop = $this->calculateMaxPopulation($buildings, $fields, $planetId);
                     $workforceSummary = PopulationEngine::calculateWorkforceSummary($pRow, $buildings, $fields, $maxPop);
                     $workforceRatio = $workforceSummary['workforce_ratio'];

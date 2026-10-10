@@ -91,9 +91,9 @@ $annexedOases = [
 
 ob_start();
 include __DIR__ . '/../views/partials/rural_harvest_resources_panel.php';
-$output = ob_get_clean();
+$outputHarvest = ob_get_clean();
 
-$checks = [
+$checksHarvest = [
     'Bois de Cèdre' => 'Matières premières (Bois)',
     'Pierre de Taille' => 'Matières premières (Pierre)',
     'Riz Impérial (Koku)' => 'Matières premières (Riz)',
@@ -104,8 +104,6 @@ $checks = [
     'Saké Féodal' => 'Vivres transformées (Saké)',
     'Poutres de Charpente' => 'Matériaux transformés (Poutres)',
     'Ferveur Divine' => 'Facteur moteur (Énergie / Sérénité)',
-    'Mobilisation des Travailleurs' => 'Main-d\'œuvre & Quotas',
-    'Capacité d\'Habitations' => 'Logements & Démographie',
     'Modificateurs &amp; Bonus Actifs' => 'Matrice des modificateurs',
     'Héros :' => 'Bénédiction du Héros Samouraï',
     'Scierie +' => 'Bonus d\'atelier (Scierie)',
@@ -116,14 +114,34 @@ $checks = [
 
 echo "=== VÉRIFICATION DU WIDGET RÉCOLTES, STOCKS & OASIS ===\n";
 $allOk = true;
-foreach ($checks as $needle => $label) {
-    $found = (strpos($output, $needle) !== false);
+foreach ($checksHarvest as $needle => $label) {
+    $found = (strpos($outputHarvest, $needle) !== false);
+    echo ($found ? "[OK] " : "[ERREUR] ") . $label . " : " . ($found ? "Présent" : "MANQUANT") . "\n";
+    if (!$found) $allOk = false;
+}
+
+ob_start();
+include __DIR__ . '/../views/partials/workforce_demographics_panel.php';
+$outputWorkforce = ob_get_clean();
+
+$checksWorkforce = [
+    'Capacité d\'Habitations' => 'Logements villageois & Minka',
+    'Mobilisation Ouvrière' => 'Mobilisation & Quotas ouvriers',
+    'Décomposition des Postes Requis' => 'Section de contrôle des calculs',
+    'Terroir Rural (9 Parcelles)' => 'Sous-total secteur rural',
+    'Cité Castrale (Édifices Urbains)' => 'Sous-total secteur urbain',
+    'Total des Besoins en Main-d\'œuvre' => 'Formule totale consolidée'
+];
+
+echo "\n=== VÉRIFICATION DU WIDGET MAIN-D'ŒUVRE & DÉMOGRAPHIE ===\n";
+foreach ($checksWorkforce as $needle => $label) {
+    $found = (strpos($outputWorkforce, $needle) !== false);
     echo ($found ? "[OK] " : "[ERREUR] ") . $label . " : " . ($found ? "Présent" : "MANQUANT") . "\n";
     if (!$found) $allOk = false;
 }
 
 if ($allOk) {
-    echo "\n>>> SUCCÈS TOTAL : Tous les éléments de production sont parfaitement intégrés et rendus !\n";
+    echo "\n>>> SUCCÈS TOTAL : Tous les éléments de production et de main-d'œuvre sont parfaitement intégrés et vérifiés !\n";
 } else {
-    echo "\n>>> ÉCHEC : Des éléments de production sont manquants.\n";
+    echo "\n>>> ÉCHEC : Des éléments sont manquants.\n";
 }

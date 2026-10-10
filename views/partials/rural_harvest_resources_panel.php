@@ -136,11 +136,11 @@ $curPop = (int)($planet['population'] ?? 0);
 $pctPop = ($maxPop > 0) ? min(100, round(($curPop / $maxPop) * 100, 1)) : 0;
 $contentmentVal = (int)($planet['contentment'] ?? 100);
 
-$workforceSummary = $prodRates['workforce'] ?? null;
+$workforceSummary = $planet['workforce'] ?? ($prodRates['workforce'] ?? null);
 if (!$workforceSummary && class_exists('PopulationEngine')) {
     $fields = $fields ?? ($planetEngine ? $planetEngine->getFields($planetId) : []);
     $buildings = $buildings ?? ($planetEngine ? $planetEngine->getBuildings($planetId) : []);
-    $workforceSummary = PopulationEngine::calculateWorkforceSummary($planet, $buildings, $fields, $maxPop);
+    $workforceSummary = PopulationEngine::calculateWorkforceSummary($planet, $buildings, $fields, $maxPop, $plots);
 }
 $workforceRatio = (float)($prodRates['workforce_ratio'] ?? ($workforceSummary['workforce_ratio'] ?? 1.0));
 $assignedWorkers = (int)($workforceSummary['assigned_workers'] ?? $curPop);
@@ -665,94 +665,7 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
         </div>
 
         <!-- ====================================================
-             5. MAIN-D'ŒUVRE & CLIMAT DÉMOGRAPHIQUE
-             ==================================================== -->
-        <div class="d-flex justify-content-between align-items-center mb-2 px-1">
-            <div class="text-uppercase text-muted fw-bold font-monospace" style="font-size:0.68rem; letter-spacing:0.5px;">
-                <i class="fa-solid fa-users-gear me-1 text-indigo"></i>Main-d'œuvre &amp; Démographie
-            </div>
-            <span class="badge bg-<?= ($workforceRatio >= 1.0) ? 'indigo' : 'warning' ?>-lt font-monospace fw-bold" style="font-size:0.65rem;">
-                Effectif <?= round($workforceRatio * 100) ?>%
-            </span>
-        </div>
-
-        <div class="d-flex flex-column gap-1 mb-3">
-            <!-- Logements & Capacité d'accueil -->
-            <div class="harvest-item p-2 mb-1 rounded bg-surface-secondary border" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem;">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
-                    <div class="harvest-info">
-                        <h4 class="mb-0 fw-bold d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                            <i class="fa-solid fa-people-roof text-indigo"></i>
-                            <span>Capacité d'Habitations</span>
-                            <?php if ($pctPop >= 95): ?>
-                                <span class="badge bg-danger text-white py-0 px-1" style="font-size:0.65rem;">Saturé</span>
-                            <?php endif; ?>
-                        </h4>
-                        <div class="mt-1 d-flex align-items-center gap-1 flex-wrap">
-                            <span class="badge bg-secondary-lt fw-bold font-monospace" style="font-size:0.7rem;">
-                                Sujets : <strong class="text-dark"><?= number_format($curPop) ?></strong> / <?= number_format($maxPop) ?>
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="badge bg-indigo-lt font-monospace fw-bold" style="font-size:0.8rem;">
-                            <?= number_format($maxPop) ?> places
-                        </span>
-                    </div>
-                </div>
-                <div class="harvest-progress-box mt-1">
-                    <div class="progress" style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                        <div class="progress-bar bg-indigo" role="progressbar" style="width: <?= $pctPop ?>%;" aria-valuenow="<?= $pctPop ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
-                        <span class="text-secondary fw-semibold">Taux d'occupation : <strong class="<?= ($pctPop >= 90) ? 'text-danger' : 'text-dark' ?>"><?= $pctPop ?>%</strong></span>
-                        <span class="font-monospace text-secondary">Capacité : <?= number_format($maxPop) ?></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mobilisation Ouvrière & Contentement -->
-            <div class="harvest-item p-2 mb-1 rounded bg-surface-secondary border" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem;">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
-                    <div class="harvest-info">
-                        <h4 class="mb-0 fw-bold d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                            <i class="fa-solid fa-person-digging text-blue"></i>
-                            <span>Mobilisation des Travailleurs</span>
-                        </h4>
-                        <div class="mt-1 d-flex align-items-center gap-1 flex-wrap">
-                            <span class="badge bg-secondary-lt fw-bold font-monospace" style="font-size:0.7rem;">
-                                Ouvriers : <strong class="text-dark"><?= number_format($assignedWorkers) ?></strong> / <?= number_format($requiredWorkers) ?>
-                            </span>
-                            <span class="badge bg-light text-secondary border font-monospace" style="font-size:0.7rem;">
-                                Contentement : <?= $contentmentVal ?>% (<?= ($contentmentVal >= 75) ? 'Prospère' : (($contentmentVal >= 50) ? 'Paisible' : 'Agité') ?>)
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="badge bg-blue-lt font-monospace fw-bold" style="font-size:0.8rem;">
-                            Efficacité <?= round($workforceRatio * 100) ?>%
-                        </span>
-                    </div>
-                </div>
-                <div class="harvest-progress-box mt-1">
-                    <div class="progress" style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                        <div class="progress-bar bg-<?= ($workforceRatio >= 1.0) ? 'primary' : 'warning' ?>" role="progressbar" style="width: <?= min(100, round($workforceRatio * 100)) ?>%;" aria-valuenow="<?= min(100, round($workforceRatio * 100)) ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
-                        <span class="text-secondary fw-semibold">Mobilisation : <strong class="text-<?= ($workforceRatio >= 1.0) ? 'success' : 'warning' ?>"><?= min(100, round($workforceRatio * 100)) ?>%</strong></span>
-                        <span class="font-monospace text-secondary">Chômage : <?= round($prodRates['workforce']['unemployment_pct'] ?? 0) ?>%</span>
-                    </div>
-                </div>
-                <?php if ($workforceRatio < 1.0): ?>
-                    <div class="text-warning font-monospace mt-1" style="font-size:0.68rem;">
-                        <i class="fa-solid fa-triangle-exclamation me-1"></i>Sous-effectif : productivité globale réduite de <?= round((1.0 - $workforceRatio) * 100, 1) ?>%.
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- ====================================================
-             6. SYNTHÈSE DES MULTIPLICATEURS ACTIFS DU FIEF
+             5. SYNTHÈSE DES MULTIPLICATEURS ACTIFS DU FIEF
              ==================================================== -->
         <div class="d-flex justify-content-between align-items-center mb-2 px-1">
             <div class="text-uppercase text-muted fw-bold font-monospace" style="font-size:0.68rem; letter-spacing:0.5px;">
@@ -811,7 +724,7 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
         </div>
 
         <!-- ====================================================
-             7. OASIS ANNEXÉES (BONUS DE RÉCOLTE)
+             6. OASIS ANNEXÉES (BONUS DE RÉCOLTE)
              ==================================================== -->
         <div class="border-top pt-2">
             <div class="d-flex justify-content-between align-items-center mb-2 px-1">

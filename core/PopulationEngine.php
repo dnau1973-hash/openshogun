@@ -41,7 +41,7 @@ class PopulationEngine {
 
     // Quotas d'ouvriers requis par niveau pour les 9 structures du Terroir Féodal (planet_rural_plots)
     public const RURAL_PLOT_WORKERS = [
-        'tenshu'           => 2, // Donjon Tenshu : 2 gardes/officiers par niveau
+        'tenshu'           => 0, // Donjon Tenshu : 0 ouvrier rural (comptabilisé sous HQ urbain pour éviter le double comptage)
         'foret'            => 2, // Forêt de Cèdres : 2 bûcherons par niveau
         'carriere'         => 2, // Carrière de Granit : 2 carriers par niveau
         'riziere'          => 2, // Rizière Inondée : 2 riziculteurs par niveau
@@ -50,6 +50,38 @@ class PopulationEngine {
         'culture_the'      => 1, // Coteaux de Théiers : 1 cueilleur par niveau
         'sanctuaire_shinto'=> 1, // Sanctuaire Shintō : 1 gardien/prêtre par niveau
         'village'          => 0  // Village & Habitations : 0 ouvrier (fournit des logements)
+    ];
+
+    public const RURAL_PLOT_META = [
+        'foret'            => ['name' => 'Forêt de Cèdres',          'role' => 'Bûcherons sylvicoles',         'rate' => 2, 'icon' => 'fa-tree',          'color' => '#22c55e'],
+        'carriere'         => ['name' => 'Carrière de Granit',       'role' => 'Tailleurs de pierre & carriers','rate' => 2, 'icon' => 'fa-mountain',      'color' => '#94a3b8'],
+        'riziere'          => ['name' => 'Rizière Inondée',          'role' => 'Repiqueurs & Riziculteurs',    'rate' => 2, 'icon' => 'fa-wheat-awn',     'color' => '#eab308'],
+        'fosse_argile'     => ['name' => 'Fosse d\'Argile',          'role' => 'Potiers & Extracteurs',        'rate' => 2, 'icon' => 'fa-cubes-stacked', 'color' => '#d97706'],
+        'champ_soja'       => ['name' => 'Champ de Soja',            'role' => 'Agriculteurs maraîchers',      'rate' => 2, 'icon' => 'fa-seedling',      'color' => '#84cc16'],
+        'culture_the'      => ['name' => 'Coteaux de Théiers',       'role' => 'Cueilleurs de thé & matcha',   'rate' => 1, 'icon' => 'fa-leaf',          'color' => '#10b981'],
+        'sanctuaire_shinto'=> ['name' => 'Sanctuaire Shintō',        'role' => 'Gardiens & Prêtres Shintō',    'rate' => 1, 'icon' => 'fa-torii-gate',    'color' => '#ef4444'],
+        'village'          => ['name' => 'Village & Habitations',    'role' => 'Logements (0 ouvrier requis)', 'rate' => 0, 'icon' => 'fa-people-roof',   'color' => '#6366f1'],
+        'tenshu'           => ['name' => 'Donjon Tenshu',            'role' => 'Comptabilisé sous HQ urbain',  'rate' => 0, 'icon' => 'fa-chess-rook',    'color' => '#dc2626']
+    ];
+
+    public const BUILDING_META = [
+        'hq'                => ['name' => 'Tenshu (Donjon Castral)',     'role' => 'Officiers & Gardes d\'élite',  'rate' => 2, 'icon' => 'fa-chess-rook', 'color' => '#dc2626'],
+        'sawmill'           => ['name' => 'Charpenterie Kizukuri',       'role' => 'Charpentiers & Artisans',      'rate' => 3, 'icon' => 'fa-hammer',     'color' => '#22c55e'],
+        'stonemason'        => ['name' => 'Taille de Granit',            'role' => 'Maîtres tailleurs de pierre',  'rate' => 3, 'icon' => 'fa-gem',        'color' => '#94a3b8'],
+        'grain_mill'        => ['name' => 'Meunerie de Riz',             'role' => 'Meuniers & Raffineurs',        'rate' => 3, 'icon' => 'fa-industry',   'color' => '#eab308'],
+        'blacksmith'        => ['name' => 'Forge Tamahagane',            'role' => 'Forgerons d\'armes & armures',  'rate' => 4, 'icon' => 'fa-fire',       'color' => '#ea580c'],
+        'barracks'          => ['name' => 'Dojo Militaire',              'role' => 'Maîtres d\'armes & Recrues',   'rate' => 2, 'icon' => 'fa-person-military-rifle', 'color' => '#ef4444'],
+        'shipyard'          => ['name' => 'Écuries & Siège',             'role' => 'Palefreniers & Armuriers',    'rate' => 3, 'icon' => 'fa-horse',      'color' => '#8b5cf6'],
+        'research_lab'      => ['name' => 'Académie des Savoirs',        'role' => 'Érudits & Scribes',            'rate' => 2, 'icon' => 'fa-graduation-cap', 'color' => '#06b6d4'],
+        'market'            => ['name' => 'Marché Castral',              'role' => 'Intendants & Négociants',      'rate' => 1, 'icon' => 'fa-store',      'color' => '#14b8a6'],
+        'radar'             => ['name' => 'Poste de Vigie',              'role' => 'Guetteurs de ronde',          'rate' => 1, 'icon' => 'fa-eye',        'color' => '#64748b'],
+        'wall'              => ['name' => 'Muraille & Remparts',         'role' => 'Sentinelles de garde',         'rate' => 1, 'icon' => 'fa-shield-halved', 'color' => '#64748b'],
+        'storage'           => ['name' => 'Grenier à Riz',               'role' => 'Magasiniers des grains',       'rate' => 1, 'icon' => 'fa-warehouse',  'color' => '#f59e0b'],
+        'tank'              => ['name' => 'Silo de Réserve',             'role' => 'Magasiniers de réserve',       'rate' => 1, 'icon' => 'fa-box-archive', 'color' => '#f59e0b'],
+        'teahouse'          => ['name' => 'Pavillon de Thé',             'role' => 'Serviteurs & Maîtres de thé',   'rate' => 1, 'icon' => 'fa-mug-hot',    'color' => '#10b981'],
+        'tournament_square' => ['name' => 'Place d\'Exercices',          'role' => 'Sergents d\'armes',            'rate' => 1, 'icon' => 'fa-flag',       'color' => '#ec4899'],
+        'embassy'           => ['name' => 'Pavillon Diplomatique',       'role' => 'Hérauts & Émissaires',         'rate' => 1, 'icon' => 'fa-scroll',     'color' => '#3b82f6'],
+        'quantum_vault'     => ['name' => 'Cachette Secrète',            'role' => 'Passif dissimulé (0)',         'rate' => 0, 'icon' => 'fa-vault',      'color' => '#64748b']
     ];
 
     public function __construct(?PDO $db = null) {
@@ -84,54 +116,120 @@ class PopulationEngine {
     }
 
     /**
-     * Calcule le total d'ouvriers requis sur tout le domaine (bâtiments + parcelles classiques + 9 parcelles du terroir)
+     * Fournit la décomposition détaillée et transparente des postes de travail requis
+     * Séparation claire entre parcelles rurales du terroir et édifices urbains de la cité.
      */
-    public static function calculateTotalWorkersRequired(array $buildings, array $fields, ?int $planetId = null, ?array $ruralPlots = null): int {
-        $total = 0;
-        
-        // 1. Prise en compte des 9 parcelles du Terroir Féodal (planet_rural_plots) si disponibles
-        $hasPlots = false;
+    public static function getDetailedWorkforceBreakdown(array $buildings, array $fields, ?int $planetId = null, ?array $ruralPlots = null): array {
+        $ruralItems = [];
+        $urbanItems = [];
+        $totalRural = 0;
+        $totalUrban = 0;
+
+        // 1. Parcelles du Terroir Féodal
+        $plotsToProcess = [];
         if (is_array($ruralPlots) && !empty($ruralPlots)) {
-            $hasPlots = true;
-            foreach ($ruralPlots as $p) {
-                $lvl = (int)($p['level'] ?? 0);
-                $type = (string)($p['structure_type'] ?? ($p['type'] ?? ''));
-                $total += self::getRuralPlotWorkersRequired($type, $lvl);
-            }
+            $plotsToProcess = $ruralPlots;
         } elseif ($planetId !== null && $planetId > 0) {
             try {
                 $db = Database::getConnection();
-                $stmt = $db->prepare("SELECT structure_type, level FROM planet_rural_plots WHERE planet_id = ?");
+                $stmt = $db->prepare("SELECT slot_id, structure_type, level FROM planet_rural_plots WHERE planet_id = ? ORDER BY slot_id ASC");
                 $stmt->execute([$planetId]);
-                $plots = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                if (!empty($plots)) {
-                    $hasPlots = true;
-                    foreach ($plots as $p) {
-                        $lvl = (int)($p['level'] ?? 0);
-                        $type = (string)($p['structure_type'] ?? '');
-                        $total += self::getRuralPlotWorkersRequired($type, $lvl);
-                    }
-                }
-            } catch (Exception $e) {
-                // Fallback silencieux vers $fields
-            }
+                $plotsToProcess = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $e) {}
         }
 
-        // 2. Parcelles classiques (planet_fields) : seulement si aucune parcelle du terroir n'a été comptabilisée
-        if (!$hasPlots) {
+        if (!empty($plotsToProcess)) {
+            foreach ($plotsToProcess as $k => $p) {
+                $lvl = (int)($p['level'] ?? 0);
+                $type = (string)($p['structure_type'] ?? ($p['type'] ?? $k));
+                $rate = self::RURAL_PLOT_WORKERS[$type] ?? 2;
+                $req = $lvl * $rate;
+                $totalRural += $req;
+                
+                $meta = self::RURAL_PLOT_META[$type] ?? [
+                    'name'  => ucfirst($type),
+                    'role'  => 'Ouvriers ruraux',
+                    'rate'  => $rate,
+                    'icon'  => 'fa-tractor',
+                    'color' => '#64748b'
+                ];
+                
+                $ruralItems[$type] = [
+                    'type'     => $type,
+                    'name'     => $meta['name'],
+                    'role'     => $meta['role'],
+                    'icon'     => $meta['icon'],
+                    'color'    => $meta['color'] ?? '#64748b',
+                    'level'    => $lvl,
+                    'rate'     => $rate,
+                    'required' => $req
+                ];
+            }
+        } else {
+            // Fallback parcelles classiques si le terroir n'existe pas
             foreach ($fields as $f) {
                 $lvl = (int)($f['level'] ?? 0);
                 $type = (string)($f['type'] ?? '');
-                $total += self::getFieldWorkersRequired($type, $lvl);
+                $rate = self::FIELD_WORKERS[$type] ?? 2;
+                $req = $lvl * $rate;
+                $totalRural += $req;
+                $ruralItems[$type] = [
+                    'type'     => $type,
+                    'name'     => ucfirst(str_replace('_', ' ', $type)),
+                    'role'     => 'Exploitants de ressource',
+                    'icon'     => 'fa-wheat-awn',
+                    'color'    => '#64748b',
+                    'level'    => $lvl,
+                    'rate'     => $rate,
+                    'required' => $req
+                ];
             }
         }
 
-        // 3. Bâtiments urbains de la cité castrale
+        // 2. Bâtiments urbains de la cité castrale
         foreach ($buildings as $type => $lvl) {
-            $total += self::getBuildingWorkersRequired((string)$type, (int)$lvl);
+            $lvl = (int)$lvl;
+            if ($lvl <= 0) continue;
+            $typeStr = (string)$type;
+            $rate = self::BUILDING_WORKERS[$typeStr] ?? 1;
+            $req = $lvl * $rate;
+            $totalUrban += $req;
+
+            $meta = self::BUILDING_META[$typeStr] ?? [
+                'name'  => ucfirst(str_replace('_', ' ', $typeStr)),
+                'role'  => 'Artisans & Fonctionnaires',
+                'rate'  => $rate,
+                'icon'  => 'fa-building',
+                'color' => '#3b82f6'
+            ];
+
+            $urbanItems[$typeStr] = [
+                'type'     => $typeStr,
+                'name'     => $meta['name'],
+                'role'     => $meta['role'],
+                'icon'     => $meta['icon'],
+                'color'    => $meta['color'] ?? '#3b82f6',
+                'level'    => $lvl,
+                'rate'     => $rate,
+                'required' => $req
+            ];
         }
 
-        return $total;
+        return [
+            'rural_plots'         => $ruralItems,
+            'urban_buildings'     => $urbanItems,
+            'total_rural_workers' => $totalRural,
+            'total_urban_workers' => $totalUrban,
+            'total_required'      => $totalRural + $totalUrban
+        ];
+    }
+
+    /**
+     * Calcule le total d'ouvriers requis sur tout le domaine (bâtiments + parcelles classiques + 9 parcelles du terroir)
+     */
+    public static function calculateTotalWorkersRequired(array $buildings, array $fields, ?int $planetId = null, ?array $ruralPlots = null): int {
+        $breakdown = self::getDetailedWorkforceBreakdown($buildings, $fields, $planetId, $ruralPlots);
+        return $breakdown['total_required'];
     }
 
     /**
@@ -140,7 +238,8 @@ class PopulationEngine {
     public static function calculateWorkforceSummary(array $planet, array $buildings, array $fields, int $maxPopulation, ?array $ruralPlots = null): array {
         $totalPop = (int)($planet['population'] ?? 100);
         $planetId = isset($planet['id']) ? (int)$planet['id'] : null;
-        $requiredWorkers = self::calculateTotalWorkersRequired($buildings, $fields, $planetId, $ruralPlots);
+        $breakdown = self::getDetailedWorkforceBreakdown($buildings, $fields, $planetId, $ruralPlots);
+        $requiredWorkers = $breakdown['total_required'];
         $assignedWorkers = min($totalPop, $requiredWorkers);
         $idleWorkers = max(0, $totalPop - $requiredWorkers);
         $ratio = ($requiredWorkers > 0) ? min(1.0, $totalPop / $requiredWorkers) : 1.0;
@@ -157,7 +256,10 @@ class PopulationEngine {
             'unemployment_rate'        => $unemploymentRate,
             'unemployment_pct'         => round($unemploymentRate * 100, 1),
             'is_understaffed'          => ($ratio < 1.0),
-            'understaffed_malus_pct'   => $malusPercent
+            'understaffed_malus_pct'   => $malusPercent,
+            'total_rural_workers'      => $breakdown['total_rural_workers'],
+            'total_urban_workers'      => $breakdown['total_urban_workers'],
+            'breakdown'                => $breakdown
         ];
     }
 
