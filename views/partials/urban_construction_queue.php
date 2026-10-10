@@ -100,14 +100,14 @@ $isTerran = $isTerran ?? (($planet['faction'] ?? '') === 'terran');
                             </div>
                         </div>
 
-                        <!-- Bouton Annulation de Chantier (Remboursement partiel) -->
+                        <!-- Bouton Annulation de Chantier (Croix) -->
                         <div>
                             <button type="button" 
-                                    class="btn btn-sm btn-outline-danger py-0 px-2 font-monospace" 
-                                    style="font-size:0.75rem;" 
+                                    class="btn btn-sm btn-icon btn-outline-danger" 
                                     title="Annuler ce chantier (Remboursement de 80% des ressources)"
+                                    aria-label="Annuler ce chantier"
                                     onclick="<?= $isRural ? "typeof cancelRuralUpgrade === 'function' ? cancelRuralUpgrade({$q['id']}, this) : cancelBuild({$q['id']})" : "cancelBuild({$q['id']})" ?>">
-                                <i class="fa-solid fa-xmark me-1"></i>Annuler
+                                <i class="fa-solid fa-xmark"></i>
                             </button>
                         </div>
                     </div>
