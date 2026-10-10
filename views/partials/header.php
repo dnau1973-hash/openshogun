@@ -634,18 +634,30 @@ $navItems = [
         }
         ?>
 
-        <div class="container-fluid px-3 px-lg-4 py-2 d-print-none">
+        <style>
+        #headerBuildingsCarousel {
+            width: 100% !important;
+            height: 188px !important;
+            background: #0f172a;
+        }
+        @media (max-width: 768px) {
+            #headerBuildingsCarousel {
+                height: 150px !important;
+            }
+        }
+        </style>
+
+        <div class="w-100 p-0 m-0 d-print-none">
             <div id="headerBuildingsCarousel" 
-                 class="carousel slide carousel-fade shadow-sm rounded border overflow-hidden position-relative" 
+                 class="carousel slide carousel-fade border-top border-bottom border-dark border-opacity-25 overflow-hidden position-relative w-100" 
                  data-bs-ride="carousel" 
                  data-bs-interval="3500" 
-                 data-bs-pause="hover"
-                 style="max-width: 1280px; margin: 0 auto; height: 140px; background: #0f172a;">
+                 data-bs-pause="hover">
                 
                 <!-- Diapositives -->
-                <div class="carousel-inner h-100">
+                <div class="carousel-inner h-100 w-100">
                     <?php foreach ($carouselSlides as $idx => $slide): ?>
-                        <div class="carousel-item h-100 <?= $idx === 0 ? 'active' : '' ?>">
+                        <div class="carousel-item h-100 w-100 <?= $idx === 0 ? 'active' : '' ?>">
                             <a href="?page=city" class="d-block w-100 h-100 position-relative text-decoration-none" title="<?= htmlspecialchars($slide['name']) ?> - Visiter la Cité Castrale">
                                 <img src="<?= htmlspecialchars($slide['url']) ?>" 
                                      class="d-block w-100 h-100" 
@@ -654,32 +666,32 @@ $navItems = [
                                 
                                 <!-- Voile dégradé cinéma -->
                                 <div class="position-absolute top-0 start-0 w-100 h-100" 
-                                     style="background: linear-gradient(180deg, rgba(15,23,42,0.25) 0%, rgba(15,23,42,0.4) 40%, rgba(15,23,42,0.85) 100%);"></div>
+                                     style="background: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.35) 40%, rgba(15,23,42,0.85) 100%);"></div>
 
                                 <!-- Légende supérieure : Tag du Domaine -->
-                                <div class="position-absolute top-0 start-0 p-2 d-flex align-items-center gap-2">
-                                    <span class="badge bg-dark bg-opacity-75 text-warning font-monospace border border-secondary" style="backdrop-filter: blur(4px); font-size: 0.68rem;">
+                                <div class="position-absolute top-0 start-0 p-3 d-flex align-items-center gap-2">
+                                    <span class="badge bg-dark bg-opacity-75 text-warning font-monospace border border-secondary shadow-sm" style="backdrop-filter: blur(4px); font-size: 0.72rem;">
                                         <i class="fa-solid fa-torii-gate me-1"></i><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>
                                     </span>
-                                    <span class="badge bg-primary bg-opacity-75 text-white font-monospace border border-primary-subtle" style="backdrop-filter: blur(4px); font-size: 0.68rem;">
+                                    <span class="badge bg-primary bg-opacity-75 text-white font-monospace border border-primary-subtle shadow-sm" style="backdrop-filter: blur(4px); font-size: 0.72rem;">
                                         <?= htmlspecialchars($slide['badge']) ?>
                                     </span>
                                 </div>
 
                                 <!-- Bouton raccourci Cité en haut à droite -->
-                                <div class="position-absolute top-0 end-0 p-2">
-                                    <span class="badge bg-danger bg-opacity-90 text-white font-monospace shadow-sm" style="backdrop-filter: blur(4px); font-size: 0.68rem;">
+                                <div class="position-absolute top-0 end-0 p-3">
+                                    <span class="badge bg-danger bg-opacity-90 text-white font-monospace shadow-sm" style="backdrop-filter: blur(4px); font-size: 0.72rem;">
                                         <i class="fa-solid fa-city me-1"></i>Cité Castrale
                                     </span>
                                 </div>
 
                                 <!-- Légende inférieure : Titre et description du bâtiment -->
-                                <div class="position-absolute bottom-0 start-0 end-0 px-3 pb-2 text-start text-white">
-                                    <h3 class="mb-0 fw-bold d-flex align-items-center gap-2 text-white" style="font-size: 1.05rem; text-shadow: 0 2px 6px rgba(0,0,0,0.9);">
+                                <div class="position-absolute bottom-0 start-0 end-0 px-3 px-lg-4 pb-3 text-start text-white">
+                                    <h3 class="mb-1 fw-bold d-flex align-items-center gap-2 text-white" style="font-size: 1.15rem; text-shadow: 0 2px 6px rgba(0,0,0,0.9);">
                                         <i class="<?= htmlspecialchars($slide['icon']) ?>"></i>
                                         <span><?= htmlspecialchars($slide['name']) ?></span>
                                     </h3>
-                                    <p class="mb-0 text-white-50 text-truncate d-none d-sm-block" style="font-size: 0.78rem; text-shadow: 0 1px 4px rgba(0,0,0,0.9); max-width: 85%;">
+                                    <p class="mb-0 text-white-50 text-truncate d-none d-sm-block" style="font-size: 0.82rem; text-shadow: 0 1px 4px rgba(0,0,0,0.9); max-width: 80%;">
                                         <?= htmlspecialchars($slide['desc']) ?>
                                     </p>
                                 </div>
@@ -689,12 +701,12 @@ $navItems = [
                 </div>
 
                 <!-- Contrôles Précédent / Suivant -->
-                <button class="carousel-control-prev" type="button" data-bs-target="#headerBuildingsCarousel" data-bs-slide="prev" style="width: 5%;">
-                    <span class="carousel-control-prev-icon p-2 rounded bg-dark bg-opacity-50" aria-hidden="true" style="width: 24px; height: 24px; background-size: 60%;"></span>
+                <button class="carousel-control-prev" type="button" data-bs-target="#headerBuildingsCarousel" data-bs-slide="prev" style="width: 4%;">
+                    <span class="carousel-control-prev-icon p-2 rounded bg-dark bg-opacity-50" aria-hidden="true" style="width: 28px; height: 28px; background-size: 60%;"></span>
                     <span class="visually-hidden">Précédent</span>
                 </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#headerBuildingsCarousel" data-bs-slide="next" style="width: 5%;">
-                    <span class="carousel-control-next-icon p-2 rounded bg-dark bg-opacity-50" aria-hidden="true" style="width: 24px; height: 24px; background-size: 60%;"></span>
+                <button class="carousel-control-next" type="button" data-bs-target="#headerBuildingsCarousel" data-bs-slide="next" style="width: 4%;">
+                    <span class="carousel-control-next-icon p-2 rounded bg-dark bg-opacity-50" aria-hidden="true" style="width: 28px; height: 28px; background-size: 60%;"></span>
                     <span class="visually-hidden">Suivant</span>
                 </button>
             </div>
