@@ -49,18 +49,26 @@ $isTerran = $isTerran ?? (($planet['faction'] ?? '') === 'terran');
                         $rType = $q['target_id'];
                         $rMeta = RuralPlotEngine::STRUCTURES[$rType] ?? null;
                         $name = $rMeta ? $rMeta['name'] : ucfirst($rType);
-                        $icon = $rMeta['icon'] ?? 'fa-solid fa-seedling';
+                        $iconRaw = $rMeta['icon'] ?? 'fa-solid fa-seedling';
                         $catBadge = '<span class="badge bg-green-lt" style="font-size:0.65rem;">Domaine Rural</span>';
                     } elseif ($isField) {
                         $tSlot = (int)$q['target_id'];
                         $tType = isset($fieldsBySlot[$tSlot]['type']) ? $fieldsBySlot[$tSlot]['type'] : (FIELD_LAYOUT[$tSlot] ?? 'metal_mine');
                         $name = (FIELD_TYPES[$tType]['name'] ?? 'Parcelle') . " #{$tSlot}";
-                        $icon = 'fa-solid fa-wheat-awn';
+                        $iconRaw = FIELD_TYPES[$tType]['icon'] ?? 'fa-solid fa-wheat-awn';
                         $catBadge = '<span class="badge bg-success-lt" style="font-size:0.65rem;">Parcelle Rurale</span>';
                     } else {
                         $name = BUILDINGS[$q['target_id']]['name'] ?? $q['target_id'];
-                        $icon = BUILDINGS[$q['target_id']]['icon'] ?? 'fa-solid fa-landmark';
+                        $iconRaw = BUILDINGS[$q['target_id']]['icon'] ?? 'fa-solid fa-landmark';
                         $catBadge = '<span class="badge bg-primary-lt" style="font-size:0.65rem;">Cité Castrale</span>';
+                    }
+
+                    // Si l'icône est déjà une balise HTML complète (comme dans BUILDINGS ou FIELD_TYPES), on l'utilise directement
+                    // Sinon, on l'encapsule dans une balise <i> avec la classe correspondante
+                    if (strpos(trim($iconRaw), '<') === 0) {
+                        $iconHtml = $iconRaw;
+                    } else {
+                        $iconHtml = '<i class="' . htmlspecialchars($iconRaw) . ' text-warning"></i>';
                     }
 
                     $qNow = time();
@@ -75,7 +83,7 @@ $isTerran = $isTerran ?? (($planet['faction'] ?? '') === 'terran');
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
                         <div class="queue-info">
                             <h4 class="mb-0 fw-bold d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                                <i class="<?= $icon ?> text-warning"></i>
+                                <?= $iconHtml ?>
                                 <span><?= htmlspecialchars($name) ?></span>
                             </h4>
                             <div class="mt-1 d-flex align-items-center gap-1 flex-wrap">
