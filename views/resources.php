@@ -399,27 +399,10 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
         </div>
 
         <!-- ========================================================
-             COLONNE DROITE : CHANTIERS, RÉCOLTES & GARNISONS
+             COLONNE DROITE : ACCORDÉON MUTUALISÉ (EST)
              ======================================================== -->
-        <div class="d-flex flex-column gap-3">
-            <!-- Didacticiel Féodal & Quêtes du Daimyō -->
-            <?php require __DIR__ . '/partials/quest_banner.php'; ?>
-
-            <!-- File de Construction Mutualisée : Chantiers en cours du Fief -->
-            <?php 
-                $queueTitle = 'Chantiers en Cours';
-                require __DIR__ . '/partials/urban_construction_queue.php'; 
-            ?>
-
-            <!-- Bilan Mutualisé des Récoltes, Stocks & Oasis Annexées -->
-            <?php 
-                $panelTitle = 'Récoltes, Stocks & Oasis';
-                require __DIR__ . '/partials/rural_harvest_resources_panel.php'; 
-            ?>
-
-
-            <!-- Panel des Troupes & Garnisons -->
-            <?php require __DIR__ . '/partials/troops_panel.php'; ?>
+        <div>
+            <?php require __DIR__ . '/partials/resources_east_accordion.php'; ?>
         </div>
     </div>
 </div>
