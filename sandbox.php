@@ -625,10 +625,29 @@ $buildingSectors = [
                                     </div>
                                 <?php else: ?>
                                     <ul class="list-group list-group-flush small">
-                                        <?php foreach ($queue as $q): ?>
+                                        <?php foreach ($queue as $q): 
+                                            $isRural = ($q['build_category'] === 'rural_plot');
+                                            $isField = ($q['build_category'] === 'field');
+                                            if ($isRural) {
+                                                $rMeta = RuralPlotEngine::STRUCTURES[$q['target_id']] ?? null;
+                                                $qName = $rMeta ? $rMeta['name'] : ucfirst($q['target_id']);
+                                                $qIcon = '<i class="' . ($rMeta['icon'] ?? 'fa-solid fa-seedling') . ' text-success me-1"></i>';
+                                            } elseif ($isField) {
+                                                $qName = (FIELD_TYPES[$q['target_id']]['name'] ?? 'Parcelle Rurale') . ' #' . $q['target_id'];
+                                                $qIcon = '<i class="fa-solid fa-wheat-awn text-warning me-1"></i>';
+                                            } else {
+                                                $bInfo = BUILDINGS[$q['target_id']] ?? null;
+                                                $qName = $bInfo['name'] ?? ucfirst($q['target_id']);
+                                                $bIcon = $bInfo['icon'] ?? '<i class="fa-solid fa-landmark text-primary"></i>';
+                                                $qIcon = strpos(trim($bIcon), '<') === 0 ? $bIcon : '<i class="' . $bIcon . ' text-primary me-1"></i>';
+                                            }
+                                        ?>
                                             <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <div class="fw-bold text-dark"><?= htmlspecialchars($q['target_id']) ?></div>
+                                                    <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                        <?= $qIcon ?>
+                                                        <span><?= htmlspecialchars($qName) ?></span>
+                                                    </div>
                                                     <div class="text-muted" style="font-size: 0.7rem;">Élévation Niveau <?= (int)$q['target_level'] ?></div>
                                                 </div>
                                                 <span class="badge bg-warning text-dark font-monospace">
@@ -658,27 +677,88 @@ $buildingSectors = [
                             </button>
                         </h2>
                         <div id="collapseHarvest" class="accordion-collapse collapse" aria-labelledby="headingHarvest" data-bs-parent="#westAccordion">
-                            <div class="accordion-body p-2 small font-monospace">
-                                <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
-                                    <span class="text-secondary"><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre :</span>
-                                    <strong class="text-success">+<?= number_format($prodRates['metal']) ?>/h</strong>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
-                                    <span class="text-secondary"><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille :</span>
-                                    <strong class="text-primary">+<?= number_format($prodRates['crystal']) ?>/h</strong>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
-                                    <span class="text-secondary"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial :</span>
-                                    <strong class="text-warning">+<?= number_format($prodRates['deuterium']) ?>/h</strong>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1 pb-1 border-bottom">
-                                    <span class="text-secondary"><i class="fa-solid fa-leaf text-teal me-1"></i>Oasis Annexées :</span>
-                                    <strong class="text-teal"><?= count($annexedOases) ?> oasis</strong>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-secondary"><i class="fa-solid fa-box text-purple me-1"></i>Magasins Kura :</span>
-                                    <strong class="text-purple"><?= number_format($planet['metal_max'] ?? 15000) ?> max</strong>
-                                </div>
+                            <div class="accordion-body p-2 small">
+                                <ul class="list-group list-group-flush small">
+                                    <!-- 1. Bois de Cèdre -->
+                                    <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-tree text-success me-1"></i>
+                                                <span>Bois de Cèdre</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">
+                                                Stock : <strong class="text-dark font-monospace"><?= number_format($planet['metal']) ?></strong> / <?= number_format($planet['metal_max'] ?? 15000) ?>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-success-lt text-success font-monospace fw-bold">
+                                            +<?= number_format($prodRates['metal']) ?>/h
+                                        </span>
+                                    </li>
+
+                                    <!-- 2. Pierre de Taille -->
+                                    <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-mountain text-secondary me-1"></i>
+                                                <span>Pierre de Taille</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">
+                                                Stock : <strong class="text-dark font-monospace"><?= number_format($planet['crystal']) ?></strong> / <?= number_format($planet['crystal_max'] ?? 15000) ?>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-primary-lt text-primary font-monospace fw-bold">
+                                            +<?= number_format($prodRates['crystal']) ?>/h
+                                        </span>
+                                    </li>
+
+                                    <!-- 3. Riz Impérial -->
+                                    <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-wheat-awn text-warning me-1"></i>
+                                                <span>Riz Impérial (Koku)</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">
+                                                Stock : <strong class="text-dark font-monospace"><?= number_format($planet['deuterium']) ?></strong> / <?= number_format($planet['deuterium_max'] ?? 10000) ?>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-warning-lt text-warning font-monospace fw-bold">
+                                            +<?= number_format($prodRates['deuterium']) ?>/h
+                                        </span>
+                                    </li>
+
+                                    <!-- 4. Oasis Annexées -->
+                                    <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-leaf text-teal me-1"></i>
+                                                <span>Oasis Sauvages Annexées</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">
+                                                Bonus de récoltes : <strong class="text-teal font-monospace">+<?= (int)(($oasisBonuses['wood'] ?? 0) + ($oasisBonuses['stone'] ?? 0) + ($oasisBonuses['rice'] ?? 0)) ?>%</strong>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-teal-lt text-teal font-monospace fw-bold">
+                                            <?= count($annexedOases) ?> oasis
+                                        </span>
+                                    </li>
+
+                                    <!-- 5. Magasins & Greniers Kura -->
+                                    <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-warehouse text-purple me-1"></i>
+                                                <span>Magasins &amp; Greniers Kura</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">
+                                                Plafond de stockage du domaine
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-purple-lt text-purple font-monospace fw-bold">
+                                            <?= number_format($planet['metal_max'] ?? 15000) ?> max
+                                        </span>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -700,26 +780,38 @@ $buildingSectors = [
                         </h2>
                         <div id="collapseGarrison" class="accordion-collapse collapse" aria-labelledby="headingGarrison" data-bs-parent="#westAccordion">
                             <div class="accordion-body p-2 small">
-                                <div class="d-flex flex-column gap-1">
-                                    <div class="d-flex justify-content-between align-items-center p-1 bg-light rounded">
-                                        <span class="d-flex align-items-center gap-1">
-                                            <i class="fa-solid fa-person-rifle text-danger"></i> Ashigaru Yari
-                                        </span>
-                                        <span class="badge bg-dark font-monospace">30</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center p-1 bg-light rounded">
-                                        <span class="d-flex align-items-center gap-1">
-                                            <i class="fa-solid fa-bow-arrow text-warning"></i> Archers Yumi
-                                        </span>
-                                        <span class="badge bg-dark font-monospace">12</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center p-1 bg-light rounded">
-                                        <span class="d-flex align-items-center gap-1">
-                                            <i class="fa-solid fa-horse text-primary"></i> Cavalerie Samurai
-                                        </span>
-                                        <span class="badge bg-dark font-monospace">3</span>
-                                    </div>
-                                </div>
+                                <ul class="list-group list-group-flush small">
+                                    <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-person-rifle text-danger me-1"></i>
+                                                <span>Ashigaru Yari</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">Fantassins à piques légères</div>
+                                        </div>
+                                        <span class="badge bg-dark font-monospace fw-bold">30</span>
+                                    </li>
+                                    <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-bow-arrow text-warning me-1"></i>
+                                                <span>Archers Yumi</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">Tireurs d'élite à longue portée</div>
+                                        </div>
+                                        <span class="badge bg-dark font-monospace fw-bold">12</span>
+                                    </li>
+                                    <li class="list-group-item px-2 py-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-horse text-primary me-1"></i>
+                                                <span>Cavalerie Samurai</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">Cavaliers nobles cuirassés</div>
+                                        </div>
+                                        <span class="badge bg-dark font-monospace fw-bold">3</span>
+                                    </li>
+                                </ul>
                                 <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center text-muted" style="font-size:0.75rem;">
                                     <span>Défense fortifiée : <strong>1 450 pts</strong></span>
                                     <a href="/?page=barracks" class="text-primary text-decoration-none">Dojo &rarr;</a>
