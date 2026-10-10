@@ -53,7 +53,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     display: grid;
     grid-template-columns: minmax(0, 1fr) 370px;
     gap: 1.5rem;
-    align-items: start;
+    align-items: stretch;
 }
 
 @media (max-width: 1200px) {
@@ -62,17 +62,16 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     }
 }
 
+.east-sidebar-col {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 /* ========================================================
    CARTE ILLUSTRÉE PANORAMIQUE FIXE 16:9 (SANS DRAG/ZOOM)
    ======================================================== */
-.rural-map-card {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    background: #0f172a;
-}
-
 .rural-map-container {
     position: relative;
     width: 100%;
@@ -83,6 +82,9 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     background-repeat: no-repeat;
     user-select: none;
     overflow: hidden;
+    border-radius: 12px;
+    border: 2px solid var(--border-color, #e2e8f0);
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.3), 0 10px 25px rgba(60, 45, 30, 0.15);
     transition: background-image 0.6s ease;
 }
 
@@ -221,82 +223,69 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 
 <div class="container">
 
-    <!-- En-tête féodal & Bannière du Domaine Rural -->
-    <div class="card mb-3 shadow-sm" style="border-left: 4px solid #10b981;">
-        <div class="card-body py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div>
-                <h2 class="mb-0 fs-2 fw-bold d-flex align-items-center gap-2">
-                    <span>🌾</span> Domaine Rural &amp; Terroirs du Fief
-                    <span class="badge bg-green-lt fw-bold font-monospace" style="font-size: 0.72rem;">
-                        <i class="fa-solid fa-map-location-dot me-1"></i>9 Domaines Stratégiques
-                    </span>
-                    <span class="badge bg-primary-lt fw-bold" style="font-size: 0.72rem;">
-                        Progression Niveaux 20 à 100
-                    </span>
-                    <span class="badge bg-warning-lt fw-bold" style="font-size: 0.72rem;">
-                        <i class="fa-solid fa-clock me-1"></i>Chantiers Asynchrones
-                    </span>
-                </h2>
-                <div class="text-secondary small mt-1">
-                    Gouvernance de <strong><?= htmlspecialchars($planet['name']) ?></strong> [<?= (int)$planet['coord_x'] ?>:<?= (int)$planet['coord_y'] ?>] &bull;
-                    Capacité d'habitation : <strong class="text-primary"><?= number_format($maxPop) ?> villageois</strong> &bull;
-                    Main-d'œuvre active : <strong><?= number_format($workforce['assigned_workers']) ?></strong> / <?= number_format($workforce['required_workers']) ?> requis
-                </div>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <a href="?page=city" class="btn btn-outline-danger btn-sm">
-                    <i class="fa-solid fa-chess-rook me-1"></i> Cité Castrale (Dorf 2) &rarr;
-                </a>
-            </div>
-        </div>
-    </div>    
-
-    <!-- Grille Principale (Scène Interactive à Gauche, Chantiers & Troupes à Droite) -->
+    <!-- Grille Principale (Scène Interactive à Gauche, Accordéon Stratégique à Droite) -->
     <div class="grid-main">
 
         <!-- ========================================================
-             COLONNE GAUCHE : CARTE ILLUSTRÉE PANORAMIQUE 16:9 FIXE
+             COLONNE GAUCHE : CARTE ILLUSTRÉE PANORAMIQUE DU FIEF
              ======================================================== -->
-        <div>
-            <div class="rural-map-card">
-                <!-- En-tête de la carte -->
-                <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center bg-dark text-white">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fa-solid fa-map text-warning"></i>
-                        <span class="fw-bold">Panorama Féodal du Terroir</span>
-                        <span class="badge bg-dark-lt text-white-50 border border-secondary" style="font-size:0.7rem;">
-                            16:9 Haute Définition
+        <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                <div>
+                    <h2 class="card-title d-flex align-items-center gap-2">
+                        <span><i class="fa-solid fa-wheat-awn text-success me-1"></i> Domaine Rural &amp; Terroirs du Fief - <?= htmlspecialchars($planet['name']) ?></span>
+                        <?php if (!empty($planet['is_capital'])): ?>
+                            <span class="badge bg-warning text-dark fw-bold" style="font-size:0.72rem;"><i class="fa-solid fa-crown me-1"></i>Capitale</span>
+                        <?php endif; ?>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" title="Renommer ce fief" onclick="openCityRenamePrompt()" style="font-size:0.75rem;">
+                            <i class="fa-solid fa-pen me-1"></i>Renommer
+                        </button>
+                        <span class="badge bg-green-lt fw-bold font-monospace" style="font-size: 0.72rem;">
+                            <i class="fa-solid fa-map-location-dot me-1"></i>9 Terroirs
                         </span>
                         <?php if ($isTerran): ?>
-                            <span class="badge bg-danger text-white fw-bold" style="font-size:0.7rem;" title="Privilège du Clan Oda : 1 chantier rural et 1 chantier urbain peuvent progresser simultanément">
-                                <i class="fa-solid fa-bolt me-1"></i>Double Chantier (Clan Oda)
+                            <span class="badge bg-danger-lt text-danger fw-bold" style="font-size:0.72rem;" title="Privilège du Clan Oda : 1 chantier rural et 1 chantier urbain peuvent progresser simultanément">
+                                <i class="fa-solid fa-bolt me-1"></i>Clan Oda
                             </span>
                         <?php endif; ?>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <!-- Sélecteur Météo & Cycle Jour/Nuit/Saisons -->
-                        <div class="dropdown">
-                            <button type="button" class="btn btn-sm btn-dark text-warning border-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="btnAtmosphereDropdown" style="font-size:0.75rem; padding: 2px 10px;" title="Changer le climat, la saison ou le cycle jour/nuit du Terroir">
-                                <i class="fa-solid fa-clock text-primary me-1" id="iconAtmosphere"></i><span id="txtAtmosphereLabel">Météo : Auto</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow border-secondary" style="font-size:0.8rem; min-width: 220px;">
-                                <li><h6 class="dropdown-header text-muted font-monospace"><i class="fa-solid fa-clock me-1"></i>HORLOGE RÉELLE</h6></li>
-                                <li><a class="dropdown-item weather-dropdown-item active" data-theme="auto" href="javascript:void(0)" onclick="setShogunWeather('auto')"><i class="fa-solid fa-clock me-2 text-primary"></i>Cycle Réel (Heure locale)</a></li>
-                                <li><hr class="dropdown-divider my-1"></li>
-                                <li><h6 class="dropdown-header text-muted font-monospace"><i class="fa-solid fa-cloud-sun me-1"></i>CLIMATS DU FIEF</h6></li>
-                                <li><a class="dropdown-item weather-dropdown-item" data-theme="day" href="javascript:void(0)" onclick="setShogunWeather('day')"><i class="fa-solid fa-sun me-2 text-warning"></i>Plein Jour (Estampe claire)</a></li>
-                                <li><a class="dropdown-item weather-dropdown-item" data-theme="dusk" href="javascript:void(0)" onclick="setShogunWeather('dusk')"><i class="fa-solid fa-cloud-sun me-2 text-orange"></i>Crépuscule d'Ambre (Yūgure)</a></li>
-                                <li><a class="dropdown-item weather-dropdown-item" data-theme="night" href="javascript:void(0)" onclick="setShogunWeather('night')"><i class="fa-solid fa-moon me-2 text-info"></i>Nuit &amp; Lanternes Allumées (Yoru)</a></li>
-                                <li><a class="dropdown-item weather-dropdown-item" data-theme="snow" href="javascript:void(0)" onclick="setShogunWeather('snow')"><i class="fa-solid fa-snowflake me-2 text-cyan"></i>Hiver sous la Neige (Yuki)</a></li>
-                                <li><a class="dropdown-item weather-dropdown-item" data-theme="rain" href="javascript:void(0)" onclick="setShogunWeather('rain')"><i class="fa-solid fa-cloud-rain me-2 text-teal"></i>Pluie &amp; Feuilles d'Érable (Ame)</a></li>
-                                <li><hr class="dropdown-divider my-1"></li>
-                                <li><a class="dropdown-item weather-dropdown-item text-muted" data-theme="off" href="javascript:void(0)" onclick="setShogunWeather('off')"><i class="fa-solid fa-pause me-2"></i>Désactiver animations (Mode Zen)</a></li>
-                            </ul>
-                        </div>
-                        <?= AiPromptHelper::renderBadge('shogun_rural_terroir_9plots.jpg', 'Panorama Stratégique des 9 Parcelles Féodales', '/public/assets/shogun_rural_terroir_9plots.jpg', '', true) ?>
+                    </h2>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
+                        Gouvernance [<?= (int)$planet['coord_x'] ?>:<?= (int)$planet['coord_y'] ?>] &bull;
+                        Tenshu Donjon : <strong style="color:var(--border-highlight, #c2252b);">Niveau <?= $hqLevel ?></strong> &bull;
+                        Habitants : <strong class="text-primary"><?= number_format($maxPop) ?> villageois</strong> &bull;
+                        Main-d'œuvre active : <strong><?= number_format($workforce['assigned_workers']) ?></strong> / <?= number_format($workforce['required_workers']) ?> requis
+                        <?php if (!empty($planet['workforce']) && !empty($planet['workforce']['is_understaffed'])): ?>
+                            <span class="badge bg-warning-lt text-warning ms-1" title="Main-d'œuvre insuffisante pour tous les postes"><i class="fa-solid fa-triangle-exclamation me-1"></i>Sous-effectif : -<?= $planet['workforce']['understaffed_malus_pct'] ?>%</span>
+                        <?php endif; ?>
                     </div>
                 </div>
-
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <!-- Sélecteur Météo & Cycle Jour/Nuit/Saisons -->
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="btnAtmosphereDropdown" style="font-size:0.8rem; padding:0.35rem 0.75rem;" title="Changer le climat, la saison ou le cycle jour/nuit du Terroir">
+                            <i class="fa-solid fa-clock text-primary me-1" id="iconAtmosphere"></i><span id="txtAtmosphereLabel">Météo : Auto</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow border-secondary" style="font-size:0.8rem; min-width: 220px;">
+                            <li><h6 class="dropdown-header text-muted font-monospace"><i class="fa-solid fa-clock me-1"></i>HORLOGE RÉELLE</h6></li>
+                            <li><a class="dropdown-item weather-dropdown-item active" data-theme="auto" href="javascript:void(0)" onclick="setShogunWeather('auto')"><i class="fa-solid fa-clock me-2 text-primary"></i>Cycle Réel (Heure locale)</a></li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><h6 class="dropdown-header text-muted font-monospace"><i class="fa-solid fa-cloud-sun me-1"></i>CLIMATS DU FIEF</h6></li>
+                            <li><a class="dropdown-item weather-dropdown-item" data-theme="day" href="javascript:void(0)" onclick="setShogunWeather('day')"><i class="fa-solid fa-sun me-2 text-warning"></i>Plein Jour (Estampe claire)</a></li>
+                            <li><a class="dropdown-item weather-dropdown-item" data-theme="dusk" href="javascript:void(0)" onclick="setShogunWeather('dusk')"><i class="fa-solid fa-cloud-sun me-2 text-orange"></i>Crépuscule d'Ambre (Yūgure)</a></li>
+                            <li><a class="dropdown-item weather-dropdown-item" data-theme="night" href="javascript:void(0)" onclick="setShogunWeather('night')"><i class="fa-solid fa-moon me-2 text-info"></i>Nuit &amp; Lanternes Allumées (Yoru)</a></li>
+                            <li><a class="dropdown-item weather-dropdown-item" data-theme="snow" href="javascript:void(0)" onclick="setShogunWeather('snow')"><i class="fa-solid fa-snowflake me-2 text-cyan"></i>Hiver sous la Neige (Yuki)</a></li>
+                            <li><a class="dropdown-item weather-dropdown-item" data-theme="rain" href="javascript:void(0)" onclick="setShogunWeather('rain')"><i class="fa-solid fa-cloud-rain me-2 text-teal"></i>Pluie &amp; Feuilles d'Érable (Ame)</a></li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><a class="dropdown-item weather-dropdown-item text-muted" data-theme="off" href="javascript:void(0)" onclick="setShogunWeather('off')"><i class="fa-solid fa-pause me-2"></i>Désactiver animations (Mode Zen)</a></li>
+                        </ul>
+                    </div>
+                    <?= AiPromptHelper::renderBadge('shogun_rural_terroir_9plots.jpg', 'Panorama Stratégique des 9 Parcelles Féodales', '/public/assets/shogun_rural_terroir_9plots.jpg', '', true) ?>
+                    <a href="?page=city" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">
+                        <i class="fa-solid fa-chess-rook me-1"></i>Vers la Cité Castrale &rarr;
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
                 <!-- Conteneur Panoramique 16:9 Fixe (sans pan/zoom) -->
                 <div class="rural-map-container" id="ruralMapContainer">
 
@@ -401,7 +390,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
         <!-- ========================================================
              COLONNE DROITE : ACCORDÉON MUTUALISÉ (EST)
              ======================================================== -->
-        <div>
+        <div class="east-sidebar-col">
             <?php require __DIR__ . '/partials/resources_east_accordion.php'; ?>
         </div>
     </div>
@@ -512,5 +501,28 @@ window.RURAL_CONFIG = {
         riziere: <?= (int)($planet['prod_rates']['hero_bonuses']['deuterium'] ?? 0) ?>
     }
 };
+
+async function openCityRenamePrompt() {
+    const currentName = <?= json_encode($planet['name']) ?>;
+    const newName = prompt("Entrez le nouveau nom de ce village :", currentName);
+    if (!newName || newName.trim() === '' || newName.trim() === currentName) return;
+
+    const formData = new FormData();
+    formData.append('action', 'rename');
+    formData.append('name', newName.trim());
+
+    try {
+        const res = await fetch('/api/planet.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert(data.error || 'Erreur lors du renommage.');
+        }
+    } catch (e) {
+        alert('Erreur réseau avec le serveur.');
+    }
+}
 </script>
 <script src="/public/js/rural_domain_map.js?v=<?= file_exists(__DIR__ . '/../public/js/rural_domain_map.js') ? filemtime(__DIR__ . '/../public/js/rural_domain_map.js') : time() ?>"></script>

@@ -36,12 +36,21 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
 
 <style>
 /* ========================================================
-   ACCORDÉON DE LA COLONNE EST (PAGE RESSOURCES)
+   ACCORDÉON DE LA COLONNE EST (ALIGNÉ SUR LE CARD DU FIEF)
    ======================================================== */
+.east-sidebar-col {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 .resources-east-accordion {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    width: 100%;
+    height: 100%;
 }
 
 .resources-east-accordion .accordion-item {
@@ -50,10 +59,12 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
     overflow: hidden;
     background-color: #ffffff !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    flex: 0 0 auto;
 }
 
 .resources-east-accordion .accordion-header {
     margin: 0;
+    flex: 0 0 auto;
 }
 
 .resources-east-accordion .accordion-button {
@@ -89,14 +100,49 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
     color: #0f172a;
 }
 
-/* HAUTEUR STRICTEMENT IDENTIQUE POUR TOUS LES ITEMS AVEC SCROLL */
-.resources-east-accordion .accordion-body {
-    height: 480px;
-    max-height: 480px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 0.75rem;
-    background-color: #ffffff !important;
+/* HAUTEUR DYNAMIQUE SUR DESKTOP : ITEM ACTIF EXTENSIBLE À LA HAUTEUR DU CARD */
+@media (min-width: 961px) {
+    .resources-east-accordion .accordion-item.is-expanded,
+    .resources-east-accordion .accordion-item:has(> .accordion-collapse.show),
+    .resources-east-accordion .accordion-item:has(> .accordion-collapse.collapsing) {
+        flex: 1 1 0%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .resources-east-accordion .accordion-collapse.show,
+    .resources-east-accordion .accordion-collapse.collapsing {
+        flex: 1 1 0%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        height: auto !important;
+        transition: none !important;
+    }
+
+    .resources-east-accordion .accordion-body {
+        flex: 1 1 0%;
+        min-height: 0;
+        height: 100%;
+        max-height: none;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 0.75rem;
+        background-color: #ffffff !important;
+    }
+}
+
+/* TABLETTE / MOBILE : HAUTEUR DÉFINIE AVEC SCROLL */
+@media (max-width: 960px) {
+    .resources-east-accordion .accordion-body {
+        height: 480px;
+        max-height: 480px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 0.75rem;
+        background-color: #ffffff !important;
+    }
 }
 
 .resources-east-accordion .accordion-body::-webkit-scrollbar {
@@ -281,4 +327,75 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
     </div>
 
 </div>
+
+<script>
+(function() {
+    function syncAccordionWithCenterCard() {
+        const accordion = document.getElementById('resourcesEastAccordion');
+        if (!accordion) return;
+
+        // Sur mobile/tablette, laisser la hauteur fluide avec max-height
+        if (window.innerWidth <= 960) {
+            accordion.style.height = '';
+            return;
+        }
+
+        // Trouver la carte centrale dans le même .grid-main
+        const gridMain = accordion.closest('.grid-main');
+        const centerCard = gridMain ? gridMain.querySelector(':scope > .card') : null;
+        if (centerCard) {
+            const targetHeight = centerCard.offsetHeight;
+            if (targetHeight > 0) {
+                accordion.style.height = targetHeight + 'px';
+            }
+        }
+
+        // Marquer l'élément actuellement ouvert avec la classe is-expanded
+        accordion.querySelectorAll('.accordion-item').forEach(function(item) {
+            if (item.querySelector('.accordion-collapse.show')) {
+                item.classList.add('is-expanded');
+            } else {
+                item.classList.remove('is-expanded');
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const accordion = document.getElementById('resourcesEastAccordion');
+        if (!accordion) return;
+
+        syncAccordionWithCenterCard();
+
+        accordion.addEventListener('show.bs.collapse', function(e) {
+            accordion.querySelectorAll('.accordion-item').forEach(function(item) {
+                item.classList.remove('is-expanded');
+            });
+            const openItem = e.target.closest('.accordion-item');
+            if (openItem) openItem.classList.add('is-expanded');
+            setTimeout(syncAccordionWithCenterCard, 50);
+        });
+
+        accordion.addEventListener('hidden.bs.collapse', function(e) {
+            const item = e.target.closest('.accordion-item');
+            if (item && !item.querySelector('.accordion-collapse.show')) {
+                item.classList.remove('is-expanded');
+            }
+        });
+
+        window.addEventListener('resize', syncAccordionWithCenterCard);
+
+        if (window.ResizeObserver) {
+            const gridMain = accordion.closest('.grid-main');
+            const centerCard = gridMain ? gridMain.querySelector(':scope > .card') : null;
+            if (centerCard) {
+                new ResizeObserver(syncAccordionWithCenterCard).observe(centerCard);
+            }
+        }
+    });
+
+    if (document.readyState !== 'loading') {
+        syncAccordionWithCenterCard();
+    }
+})();
+</script>
 
