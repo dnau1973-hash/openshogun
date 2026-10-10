@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../config/game_constants.php';
 $queue = $queue ?? [];
 $isTerran = $isTerran ?? (($user['faction'] ?? 'terran') === 'terran');
 $annexedOases = $annexedOases ?? [];
+$queueTitle = $queueTitle ?? 'Chantiers en cours';
 
 // Données du Didacticiel
 $questEngine = new QuestEngine();
@@ -188,7 +189,7 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
                     aria-controls="east-item-queue">
                 <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate pe-2">
                     <i class="fa-solid fa-helmet-safety text-warning"></i>
-                    <span class="fw-bold">Chantiers en cours</span>
+                    <span class="fw-bold"><?= htmlspecialchars($queueTitle) ?></span>
                     <?php if ($isTerran): ?>
                         <span class="badge bg-danger-lt text-danger ms-auto fw-bold" style="font-size:0.65rem;" title="Privilège Oda : Chantiers simultanés">Oda</span>
                     <?php endif; ?>
@@ -205,7 +206,6 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
              data-bs-parent="#resourcesEastAccordion">
             <div class="accordion-body">
                 <?php 
-                    $queueTitle = 'Chantiers en Cours';
                     require __DIR__ . '/urban_construction_queue.php'; 
                 ?>
             </div>
@@ -281,3 +281,4 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
     </div>
 
 </div>
+

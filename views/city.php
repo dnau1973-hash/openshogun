@@ -339,25 +339,12 @@ foreach (BUILDINGS as $code => $bInfo) {
         </div>
     </div>
 
-    <!-- Sidebar : File de Construction Urbaine & Régiments -->
-    <div class="d-flex flex-column gap-3">
-        <!-- Didacticiel Féodal & Quêtes du Daimyō -->
-        <?php require __DIR__ . '/partials/quest_banner.php'; ?>
-
-        <!-- File Urbaine Mutualisée -->
+    <!-- Colonne Est : Accordéon Stratégique Mutualisé (Didacticiel, Chantiers, Récoltes, Garnison) -->
+    <div>
         <?php 
             $queueTitle = 'Chantiers Urbains';
-            require __DIR__ . '/partials/urban_construction_queue.php'; 
+            require __DIR__ . '/partials/resources_east_accordion.php'; 
         ?>
-
-        <!-- Bilan Mutualisé des Récoltes, Stocks & Oasis Annexées -->
-        <?php 
-            $panelTitle = 'Récoltes, Stocks & Oasis';
-            require __DIR__ . '/partials/rural_harvest_resources_panel.php'; 
-        ?>
-
-        <!-- Panel des Soldats (Style Travian) -->
-        <?php require __DIR__ . '/partials/troops_panel.php'; ?>
     </div>
 </div>
 
