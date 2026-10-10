@@ -767,6 +767,6 @@ $navItems = [
 
         <!-- CORPS DE PAGE (Pleine largeur alignée sur la barre de ressources) -->
         <div class="page-body">
-            <div class="<?= ($page === 'map' || $page === 'galaxy') ? 'container-fluid px-0' : 'container-fluid px-3 px-lg-4' ?>">
+            <div class="container-fluid px-3 px-lg-4">
 
 

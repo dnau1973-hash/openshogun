@@ -12,87 +12,110 @@ $questEngine = new QuestEngine();
 $questEngine->recordAction((int)$user['id'], 'visit_map');
 ?>
 
-<!-- Navigation breadcrumb Tabler -->
-<div class="page-header d-print-none mb-3">
-    <div class="row align-items-center">
-        <div class="col">
-            <div class="page-pretitle">Exploration panoramique & Provinces</div>
-            <h2 class="page-title">
-                <i class="fa-solid fa-map me-1"></i>Carte des Provinces &amp; Fiefs
-                <span class="badge bg-secondary text-white ms-2" style="font-size:0.65rem; vertical-align:middle; color:#fff !important;">[<?= (int)$planet['coord_x'] ?> : <?= (int)$planet['coord_y'] ?>]</span>
-            </h2>
-        </div>
-        <div class="col-auto ms-auto d-print-none">
-            <div class="btn-list">
-                <a href="/?page=resources" class="btn btn-secondary">
-                    <i class="fa-solid fa-wheat-awn me-1"></i>Terroir
-                </a>
-                <a href="/?page=station" class="btn btn-secondary">
-                    <i class="fa-solid fa-chess-rook me-1"></i>Cité Castrale
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+.container {
+    max-width: 1850px !important;
+    width: 98% !important;
+    margin: 1rem auto !important;
+}
 
-<div class="card card-map-fullwidth mb-3" style="width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 18px rgba(0,0,0,0.05);">
-    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
-        <div class="d-flex align-items-center gap-2">
-            <span style="font-size: 1.5rem;"><i class="fa-solid fa-map-location-dot text-danger"></i></span>
+.grid-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 370px;
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+@media (max-width: 1200px) {
+    .grid-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+.east-sidebar-col {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-map-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+</style>
+
+<div class="grid-main">
+    <!-- ========================================================
+         COLONNE GAUCHE : CARTE INTERACTIVE DES PROVINCES
+         ======================================================== -->
+    <div class="card card-map-wrapper shadow-sm" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
             <div>
-                <h3 class="card-title m-0 font-weight-bold" style="font-size: 1.15rem;">
-                    Provinces &amp; Fiefs du Japon Féodal
-                </h3>
-                <div class="text-secondary small">
-                    Fief d'attache : <strong><?= htmlspecialchars($planet['name']) ?></strong> <span class="badge bg-secondary-lt font-monospace">[<?= $planet['coord_x'] ?> : <?= $planet['coord_y'] ?>]</span> &bull; Exploration panoramique pleine largeur
+                <h2 class="card-title d-flex align-items-center gap-2">
+                    <span><i class="fa-solid fa-map-location-dot text-danger me-1"></i> Carte des Provinces &amp; Fiefs</span>
+                    <span class="badge bg-secondary-lt font-monospace" style="font-size:0.72rem;">[<?= (int)$planet['coord_x'] ?> : <?= (int)$planet['coord_y'] ?>]</span>
+                </h2>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
+                    Fief d'attache : <strong><?= htmlspecialchars($planet['name']) ?></strong> &bull; Exploration panoramique &amp; terroirs du Japon Féodal
                 </div>
             </div>
-        </div>
 
-        <!-- Barre de saut rapide et d'instructions -->
-        <div class="galaxy-nav-bar d-flex align-items-center gap-2 flex-wrap m-0">
-            <form id="jumpCoordsForm" onsubmit="event.preventDefault(); jumpToCoords();" class="d-flex align-items-center gap-1 bg-surface border rounded px-2 py-1">
-                <span class="text-secondary small font-weight-bold">Aller en :</span>
-                <span class="small font-weight-bold">X</span>
-                <input type="number" id="inputCoordX" value="<?= $centerX ?>" class="form-control form-control-sm text-center font-weight-bold" style="width: 60px;">
-                <span class="small font-weight-bold">Y</span>
-                <input type="number" id="inputCoordY" value="<?= $centerY ?>" class="form-control form-control-sm text-center font-weight-bold" style="width: 60px;">
-                <button type="submit" class="btn btn-sm btn-primary">Marcher</button>
-            </form>
-
-            <div class="badge bg-danger-lt border border-danger-subtle py-2 px-2 text-danger">
-                <i class="fa-solid fa-hand me-1"></i><em>Glissez la carte (Drag &amp; Drop) ou flèches clavier.</em>
+            <!-- Outils de coordonnées & boutons d'accès -->
+            <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                <form id="jumpCoordsForm" onsubmit="event.preventDefault(); jumpToCoords();" class="d-flex align-items-center gap-1 bg-surface border rounded px-2 py-1 m-0">
+                    <span class="text-secondary small font-weight-bold">Aller en :</span>
+                    <span class="small font-weight-bold">X</span>
+                    <input type="number" id="inputCoordX" value="<?= $centerX ?>" class="form-control form-control-sm text-center font-weight-bold" style="width: 55px; padding: 2px 4px;">
+                    <span class="small font-weight-bold">Y</span>
+                    <input type="number" id="inputCoordY" value="<?= $centerY ?>" class="form-control form-control-sm text-center font-weight-bold" style="width: 55px; padding: 2px 4px;">
+                    <button type="submit" class="btn btn-sm btn-primary py-0 px-2" style="font-size:0.75rem; height:24px;">Aller</button>
+                </form>
+                <a href="/?page=resources" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">
+                    <i class="fa-solid fa-wheat-awn me-1"></i>Terroir
+                </a>
+                <a href="/?page=city" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">
+                    <i class="fa-solid fa-chess-rook me-1"></i>Cité Castrale &rarr;
+                </a>
             </div>
         </div>
-    </div>
 
-    <!-- Légende des Terroirs & Saut de Quadrants (Style Travian) -->
-    <div class="card-body bg-surface-secondary border-bottom py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-            <span class="font-weight-bold text-secondary text-uppercase" style="letter-spacing: 0.5px;"><i class="fa-solid fa-map me-1"></i>Terroirs :</span>
-            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_plains.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Plaines</span>
-            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_forest.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Forêt de Cèdres</span>
-            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_mountain.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Montagnes</span>
-            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_lake.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Lacs &amp; Eaux</span>
-            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_hills.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Collines</span>
-            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_village.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Fief Castral</span>
-            <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_authentic_castle.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Donjon Sacré</span>
-            <span class="d-inline-flex align-items-center gap-1"><span class="badge bg-success-lt" style="font-size:0.68rem; padding:2px 4px;"><i class="fa-solid fa-wheat-awn me-1"></i>+25%</span> Oasis</span>
+        <!-- Légende des Terroirs & Saut de Quadrants (Style Travian) -->
+        <div class="card-body bg-surface-secondary border-bottom py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2 small flex-shrink-0">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <span class="font-weight-bold text-secondary text-uppercase" style="letter-spacing: 0.5px;"><i class="fa-solid fa-map me-1"></i>Terroirs :</span>
+                <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_plains.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Plaines</span>
+                <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_forest.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Forêt</span>
+                <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_mountain.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Montagnes</span>
+                <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_lake.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Eaux</span>
+                <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_hills.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Collines</span>
+                <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_village.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Fief</span>
+                <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_authentic_castle.jpg?v=2" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Donjon Sacré</span>
+                <span class="d-inline-flex align-items-center gap-1"><span class="badge bg-success-lt" style="font-size:0.68rem; padding:2px 4px;"><i class="fa-solid fa-wheat-awn me-1"></i>+25%</span> Oasis</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-1">
+                <span class="font-weight-bold text-secondary me-1">Quadrants :</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, 16)" title="Nord-Ouest [- / +]"><i class="fa-solid fa-arrow-trend-up me-1"></i>N-O</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, 16)" title="Nord-Est [+ / +]"><i class="fa-solid fa-arrow-trend-up me-1"></i>N-E</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, -16)" title="Sud-Ouest [- / -]"><i class="fa-solid fa-arrow-trend-down me-1"></i>S-O</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, -16)" title="Sud-Est [+ / -]"><i class="fa-solid fa-arrow-trend-down me-1"></i>S-E</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(0, 0)" title="Centre Impérial [0 : 0]"><i class="fa-solid fa-torii-gate me-1"></i>Centre</button>
+            </div>
         </div>
 
-        <div class="d-flex align-items-center gap-1">
-            <span class="font-weight-bold text-secondary me-1">Saut de Zone :</span>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, 16)" title="Nord-Ouest [- / +]"><i class="fa-solid fa-arrow-trend-up me-1"></i>N-O</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, 16)" title="Nord-Est [+ / +]"><i class="fa-solid fa-arrow-trend-up me-1"></i>N-E</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, -16)" title="Sud-Ouest [- / -]"><i class="fa-solid fa-arrow-trend-down me-1"></i>S-O</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, -16)" title="Sud-Est [+ / -]"><i class="fa-solid fa-arrow-trend-down me-1"></i>S-E</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(0, 0)" title="Centre Impérial [0 : 0]"><i class="fa-solid fa-torii-gate me-1"></i>Centre</button>
+        <!-- Conteneur Interactif Drag-and-Drop -->
+        <div class="galaxy-map-wrapper map-fullwidth-wrapper" id="galaxyMapContainer" style="width: 100%; border: none; border-radius: 0; flex: 1 1 auto; min-height: 560px;">
+            <!-- Rendu interactif via GalaxyMapController -->
         </div>
     </div>
 
-    <!-- Conteneur Interactif Drag-and-Drop Pleine Largeur -->
-    <div class="galaxy-map-wrapper map-fullwidth-wrapper" id="galaxyMapContainer" style="width: 100%; border: none; border-radius: 0;">
-        <!-- Rendu interactif via GalaxyMapController -->
+    <!-- ========================================================
+         COLONNE DROITE : ACCORDÉON MUTUALISÉ (EST)
+         ======================================================== -->
+    <div class="east-sidebar-col">
+        <?php require __DIR__ . '/partials/resources_east_accordion.php'; ?>
     </div>
 </div>
 

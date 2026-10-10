@@ -11,6 +11,17 @@ require_once __DIR__ . '/../../core/PlanetEngine.php';
 require_once __DIR__ . '/../../core/RuralPlotEngine.php';
 require_once __DIR__ . '/../../config/game_constants.php';
 
+if (!isset($queue) && !empty($planet['id'])) {
+    require_once __DIR__ . '/../../core/BuildingEngine.php';
+    $bEngine = new BuildingEngine();
+    $queue = $bEngine->getQueue((int)$planet['id']);
+}
+if (!isset($annexedOases) && !empty($planet['id'])) {
+    require_once __DIR__ . '/../../core/OasisEngine.php';
+    $oEngine = new OasisEngine();
+    $annexedOases = $oEngine->getAnnexedOasesForPlanet((int)$planet['id']);
+}
+
 $queue = $queue ?? [];
 $isTerran = $isTerran ?? (($user['faction'] ?? 'terran') === 'terran');
 $annexedOases = $annexedOases ?? [];
