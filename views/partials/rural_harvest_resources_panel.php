@@ -157,18 +157,27 @@ $clayLvl = (int)($plots['fosse_argile']['level'] ?? 0);
 $clayMaxLvl = (int)($plots['fosse_argile']['max_level'] ?? 30);
 $clayProgress = ($clayMaxLvl > 0) ? min(100, round(($clayLvl / $clayMaxLvl) * 100)) : 0;
 $clayWorkers = (int)($plots['fosse_argile']['workers_assigned'] ?? 0);
+$stockClay = (float)($planet['clay'] ?? 0);
+$maxClay = max(1, (float)($planet['clay_max'] ?? 10000));
+$pctClayStock = min(100, round(($stockClay / $maxClay) * 100, 1));
 
 $teaHourly = (float)($plots['culture_the']['prod_hourly'] ?? 0);
 $teaLvl = (int)($plots['culture_the']['level'] ?? 0);
 $teaMaxLvl = (int)($plots['culture_the']['max_level'] ?? 30);
 $teaProgress = ($teaMaxLvl > 0) ? min(100, round(($teaLvl / $teaMaxLvl) * 100)) : 0;
 $teaWorkers = (int)($plots['culture_the']['workers_assigned'] ?? 0);
+$stockTea = (float)($planet['tea'] ?? 0);
+$maxTea = max(1, (float)($planet['tea_max'] ?? 10000));
+$pctTeaStock = min(100, round(($stockTea / $maxTea) * 100, 1));
 
 $soyHourly = (float)($plots['champ_soja']['prod_hourly'] ?? 0);
 $soyLvl = (int)($plots['champ_soja']['level'] ?? 0);
 $soyMaxLvl = (int)($plots['champ_soja']['max_level'] ?? 30);
 $soyProgress = ($soyMaxLvl > 0) ? min(100, round(($soyLvl / $soyMaxLvl) * 100)) : 0;
 $soyWorkers = (int)($plots['champ_soja']['workers_assigned'] ?? 0);
+$stockSoy = (float)($planet['soybean'] ?? 0);
+$maxSoy = max(1, (float)($planet['soybean_max'] ?? 10000));
+$pctSoyStock = min(100, round(($stockSoy / $maxSoy) * 100, 1));
 
 $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
 ?>
@@ -410,6 +419,9 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
                             <span class="badge bg-light text-secondary border font-monospace" style="font-size:0.7rem;">
                                 <?= $clayWorkers ?> ouvriers
                             </span>
+                            <span class="badge bg-orange-lt text-orange fw-bold font-monospace" style="font-size:0.7rem;">
+                                Stock : <?= number_format((int)$stockClay) ?> / <?= number_format($maxClay) ?>
+                            </span>
                         </div>
                     </div>
                     <div>
@@ -447,6 +459,9 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
                             <span class="badge bg-light text-secondary border font-monospace" style="font-size:0.7rem;">
                                 <?= $teaWorkers ?> ouvriers
                             </span>
+                            <span class="badge bg-teal-lt text-teal fw-bold font-monospace" style="font-size:0.7rem;">
+                                Stock : <?= number_format((int)$stockTea) ?> / <?= number_format($maxTea) ?>
+                            </span>
                         </div>
                     </div>
                     <div>
@@ -480,6 +495,9 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
                             </span>
                             <span class="badge bg-light text-secondary border font-monospace" style="font-size:0.7rem;">
                                 <?= $soyWorkers ?> ouvriers
+                            </span>
+                            <span class="badge bg-lime-lt text-lime fw-bold font-monospace" style="font-size:0.7rem;">
+                                Stock : <?= number_format((int)$stockSoy) ?> / <?= number_format($maxSoy) ?>
                             </span>
                         </div>
                     </div>

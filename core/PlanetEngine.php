@@ -66,6 +66,9 @@ class PlanetEngine {
         $sakeMax = (int)(10000 * pow(1.4, $grainMillLvl));
         $flourMax = (int)(10000 * pow(1.4, $grainMillLvl));
         $beamsMax = (int)(10000 * pow(1.4, $sawmillLvl));
+        $clayMax = (int)(10000 * pow(1.4, $storageLvl));
+        $teaMax = (int)(10000 * pow(1.4, $grainMillLvl));
+        $soyMax = (int)(10000 * pow(1.4, $grainMillLvl));
 
         // 5. Calcul de l'énergie et des productions horaires (avec bonus d'oasis annexées)
         $fields = $this->getFields($planetId);
@@ -91,6 +94,9 @@ class PlanetEngine {
             $newMetal = min($metalMax, $planet['metal'] + ($prodRates['metal'] * $hours));
             $newCrystal = min($crystalMax, $planet['crystal'] + ($prodRates['crystal'] * $hours));
             $newDeut = min($deutMax, $planet['deuterium'] + ($prodRates['deuterium'] * $hours));
+            $newClay = min($clayMax, (float)($planet['clay'] ?? 0) + (($prodRates['clay'] ?? 0) * $hours));
+            $newTea = min($teaMax, (float)($planet['tea'] ?? 0) + (($prodRates['tea'] ?? 0) * $hours));
+            $newSoy = min($soyMax, (float)($planet['soybean'] ?? 0) + (($prodRates['soybean'] ?? 0) * $hours));
 
             // Entretien des troupes d'élite & Famine féodale (si activée)
             $famineResult = $this->processFamine($planetId, $hours, $planet['rice_flour']);
@@ -99,10 +105,11 @@ class PlanetEngine {
                 $stmtUpdate = $this->db->prepare("
                     UPDATE planets
                     SET metal = ?, crystal = ?, deuterium = ?,
-                        rice_flour = ?, sake = ?, population = ?, contentment = ?,
+                        rice_flour = ?, sake = ?, clay = ?, tea = ?, soybean = ?,
+                        population = ?, contentment = ?,
                         energy_used = ?, energy_max = ?,
                         metal_max = ?, crystal_max = ?, deuterium_max = ?,
-                        sake_max = ?, rice_flour_max = ?,
+                        sake_max = ?, rice_flour_max = ?, clay_max = ?, tea_max = ?, soybean_max = ?,
                         last_resource_update = ?
                     WHERE id = ?
                 ");
@@ -112,6 +119,9 @@ class PlanetEngine {
                     $newDeut,
                     $planet['rice_flour'],
                     $planet['sake'],
+                    $newClay,
+                    $newTea,
+                    $newSoy,
                     $planet['population'],
                     $planet['contentment'],
                     $prodRates['energy_used'],
@@ -121,16 +131,19 @@ class PlanetEngine {
                     $deutMax,
                     $sakeMax,
                     $flourMax,
+                    $clayMax,
+                    $teaMax,
+                    $soyMax,
                     $now,
                     $planetId
                 ]);
             } catch (Exception $e) {
                 try {
-                    // Fallback sans colonne contentment si ancienne version de table
+                    // Fallback sans colonnes terroirs si ancienne version de table
                     $stmtUpdate = $this->db->prepare("
                         UPDATE planets
                         SET metal = ?, crystal = ?, deuterium = ?,
-                            rice_flour = ?, population = ?,
+                            rice_flour = ?, sake = ?, population = ?, contentment = ?,
                             energy_used = ?, energy_max = ?,
                             metal_max = ?, crystal_max = ?, deuterium_max = ?,
                             sake_max = ?, rice_flour_max = ?,
@@ -142,7 +155,9 @@ class PlanetEngine {
                         $newCrystal,
                         $newDeut,
                         $planet['rice_flour'],
+                        $planet['sake'],
                         $planet['population'],
+                        $planet['contentment'],
                         $prodRates['energy_used'],
                         $prodRates['energy_max'],
                         $metalMax,
@@ -153,34 +168,70 @@ class PlanetEngine {
                         $now,
                         $planetId
                     ]);
-                } catch (Exception $e2) {
-                    // Fallback initial
-                    $stmtUpdate = $this->db->prepare("
-                        UPDATE planets
-                        SET metal = ?, crystal = ?, deuterium = ?,
-                            energy_used = ?, energy_max = ?,
-                            metal_max = ?, crystal_max = ?, deuterium_max = ?,
-                            last_resource_update = ?
-                        WHERE id = ?
-                    ");
-                    $stmtUpdate->execute([
-                        $newMetal,
-                        $newCrystal,
-                        $newDeut,
-                        $prodRates['energy_used'],
-                        $prodRates['energy_max'],
-                        $metalMax,
-                        $crystalMax,
-                        $deutMax,
-                        $now,
-                        $planetId
-                    ]);
+                } catch (Exception $e1) {
+                    try {
+                        // Fallback sans colonne contentment si ancienne version de table
+                        $stmtUpdate = $this->db->prepare("
+                            UPDATE planets
+                            SET metal = ?, crystal = ?, deuterium = ?,
+                                rice_flour = ?, population = ?,
+                                energy_used = ?, energy_max = ?,
+                                metal_max = ?, crystal_max = ?, deuterium_max = ?,
+                                sake_max = ?, rice_flour_max = ?,
+                                last_resource_update = ?
+                            WHERE id = ?
+                        ");
+                        $stmtUpdate->execute([
+                            $newMetal,
+                            $newCrystal,
+                            $newDeut,
+                            $planet['rice_flour'],
+                            $planet['population'],
+                            $prodRates['energy_used'],
+                            $prodRates['energy_max'],
+                            $metalMax,
+                            $crystalMax,
+                            $deutMax,
+                            $sakeMax,
+                            $flourMax,
+                            $now,
+                            $planetId
+                        ]);
+                    } catch (Exception $e2) {
+                        // Fallback initial
+                        $stmtUpdate = $this->db->prepare("
+                            UPDATE planets
+                            SET metal = ?, crystal = ?, deuterium = ?,
+                                energy_used = ?, energy_max = ?,
+                                metal_max = ?, crystal_max = ?, deuterium_max = ?,
+                                last_resource_update = ?
+                            WHERE id = ?
+                        ");
+                        $stmtUpdate->execute([
+                            $newMetal,
+                            $newCrystal,
+                            $newDeut,
+                            $prodRates['energy_used'],
+                            $prodRates['energy_max'],
+                            $metalMax,
+                            $crystalMax,
+                            $deutMax,
+                            $now,
+                            $planetId
+                        ]);
+                    }
                 }
             }
 
             $planet['metal'] = $newMetal;
             $planet['crystal'] = $newCrystal;
             $planet['deuterium'] = $newDeut;
+            $planet['clay'] = $newClay;
+            $planet['tea'] = $newTea;
+            $planet['soybean'] = $newSoy;
+            $planet['clay_max'] = $clayMax;
+            $planet['tea_max'] = $teaMax;
+            $planet['soybean_max'] = $soyMax;
             $planet['energy_used'] = $prodRates['energy_used'];
             $planet['energy_max'] = $prodRates['energy_max'];
             $planet['metal_max'] = $metalMax;
@@ -200,6 +251,12 @@ class PlanetEngine {
         $planet['rice_flour_max'] = (int)($planet['rice_flour_max'] ?? $flourMax);
         $planet['wooden_beams'] = (float)($planet['wooden_beams'] ?? 0);
         $planet['wooden_beams_max'] = (int)($planet['wooden_beams_max'] ?? $beamsMax);
+        $planet['clay'] = (float)($planet['clay'] ?? 0);
+        $planet['clay_max'] = (int)($planet['clay_max'] ?? $clayMax);
+        $planet['tea'] = (float)($planet['tea'] ?? 0);
+        $planet['tea_max'] = (int)($planet['tea_max'] ?? $teaMax);
+        $planet['soybean'] = (float)($planet['soybean'] ?? 0);
+        $planet['soybean_max'] = (int)($planet['soybean_max'] ?? $soyMax);
         $planet['population'] = (int)($planet['population'] ?? 100);
         $planet['population_max'] = (int)$maxPopulation;
         $planet['contentment'] = (int)($planet['contentment'] ?? $contentmentDetails['score']);
@@ -816,6 +873,9 @@ class PlanetEngine {
         $energyUsed = 0;
 
         $hasRuralPlots = false;
+        $clayHourlyProd = 0;
+        $teaHourlyProd = 0;
+        $soyHourlyProd = 0;
         if ($planetId !== null && $planetId > 0) {
             try {
                 $stmtPlots = $this->db->prepare("SELECT structure_type, level, prod_hourly FROM planet_rural_plots WHERE planet_id = ?");
@@ -838,6 +898,15 @@ class PlanetEngine {
                                 break;
                             case 'sanctuaire_shinto':
                                 $energyMax += (int)$sProd;
+                                break;
+                            case 'fosse_argile':
+                                $clayHourlyProd += $sProd;
+                                break;
+                            case 'culture_the':
+                                $teaHourlyProd += $sProd;
+                                break;
+                            case 'champ_soja':
+                                $soyHourlyProd += $sProd;
                                 break;
                         }
                     }
@@ -962,11 +1031,17 @@ class PlanetEngine {
         $effectiveMetalProd = $hasRuralPlots ? ($metalBase + $metalMineProd) : ($metalBase + ($metalMineProd * $speed));
         $effectiveCrystalProd = $hasRuralPlots ? ($crystalBase + $crystalMineProd) : ($crystalBase + ($crystalMineProd * $speed));
         $effectiveDeutProd = $hasRuralPlots ? ($deutBase + $deutSynthProd) : ($deutBase + ($deutSynthProd * $speed));
+        $effectiveClayProd = $clayHourlyProd * $energyRatio * $workforceRatio * $matsuriBonusMult;
+        $effectiveTeaProd = $teaHourlyProd * $energyRatio * $workforceRatio * $matsuriBonusMult;
+        $effectiveSoyProd = $soyHourlyProd * $energyRatio * $workforceRatio * $matsuriBonusMult;
 
         return [
             'metal' => (int)((($effectiveMetalProd * $energyRatio * $workforceRatio * $oasisBonusMult['wood'] * $sawmillMult) * $matsuriBonusMult) + $heroProdBonus['metal']),
             'crystal' => (int)((($effectiveCrystalProd * $energyRatio * $workforceRatio * $oasisBonusMult['stone'] * $stonemasonMult) * $matsuriBonusMult) + $heroProdBonus['crystal']),
             'deuterium' => (int)((($effectiveDeutProd * $energyRatio * $workforceRatio * $oasisBonusMult['rice'] * $grainMillMult) * $matsuriBonusMult) + $heroProdBonus['deuterium']),
+            'clay' => (int)$effectiveClayProd,
+            'tea' => (int)$effectiveTeaProd,
+            'soybean' => (int)$effectiveSoyProd,
             'energy_max' => $energyMax,
             'energy_used' => $energyUsed,
             'energy_ratio' => $energyRatio,
@@ -1009,7 +1084,7 @@ class PlanetEngine {
         $executed = true;
 
         try {
-            // 1. Colonne sake, rice_flour et wooden_beams sur planets
+            // 1. Colonne sake, rice_flour, wooden_beams, clay, tea, soybean sur planets
             $stmt = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'sake'");
             if ($stmt && $stmt->rowCount() === 0) {
                 $this->db->exec("ALTER TABLE `planets`
@@ -1019,6 +1094,12 @@ class PlanetEngine {
                     ADD COLUMN `rice_flour_max` INT UNSIGNED NOT NULL DEFAULT 10000,
                     ADD COLUMN `wooden_beams` DOUBLE NOT NULL DEFAULT 0,
                     ADD COLUMN `wooden_beams_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+                    ADD COLUMN `clay` DOUBLE NOT NULL DEFAULT 0,
+                    ADD COLUMN `clay_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+                    ADD COLUMN `tea` DOUBLE NOT NULL DEFAULT 0,
+                    ADD COLUMN `tea_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+                    ADD COLUMN `soybean` DOUBLE NOT NULL DEFAULT 0,
+                    ADD COLUMN `soybean_max` INT UNSIGNED NOT NULL DEFAULT 10000,
                     ADD COLUMN `population` INT UNSIGNED NOT NULL DEFAULT 100,
                     ADD COLUMN `contentment` TINYINT UNSIGNED NOT NULL DEFAULT 85
                 ");
@@ -1030,6 +1111,18 @@ class PlanetEngine {
                 $stmtBeams = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'wooden_beams'");
                 if ($stmtBeams && $stmtBeams->rowCount() === 0) {
                     $this->db->exec("ALTER TABLE `planets` ADD COLUMN `wooden_beams` DOUBLE NOT NULL DEFAULT 0, ADD COLUMN `wooden_beams_max` INT UNSIGNED NOT NULL DEFAULT 10000");
+                }
+                $stmtClay = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'clay'");
+                if ($stmtClay && $stmtClay->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets` ADD COLUMN `clay` DOUBLE NOT NULL DEFAULT 0, ADD COLUMN `clay_max` INT UNSIGNED NOT NULL DEFAULT 10000");
+                }
+                $stmtTea = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'tea'");
+                if ($stmtTea && $stmtTea->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets` ADD COLUMN `tea` DOUBLE NOT NULL DEFAULT 0, ADD COLUMN `tea_max` INT UNSIGNED NOT NULL DEFAULT 10000");
+                }
+                $stmtSoy = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'soybean'");
+                if ($stmtSoy && $stmtSoy->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets` ADD COLUMN `soybean` DOUBLE NOT NULL DEFAULT 0, ADD COLUMN `soybean_max` INT UNSIGNED NOT NULL DEFAULT 10000");
                 }
                 $stmtPop = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'population'");
                 if ($stmtPop && $stmtPop->rowCount() === 0) {

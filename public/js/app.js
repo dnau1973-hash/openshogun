@@ -26,34 +26,64 @@ function initResourceTickers() {
     const metalEl = document.getElementById('res-val-metal');
     const crystalEl = document.getElementById('res-val-crystal');
     const deutEl = document.getElementById('res-val-deut');
+    const clayEl = document.getElementById('res-val-clay');
+    const teaEl = document.getElementById('res-val-tea');
+    const soyEl = document.getElementById('res-val-soybean');
 
-    if (!metalEl || !crystalEl || !deutEl) return;
+    if (!metalEl && !clayEl) return;
 
-    let metal = parseFloat(metalEl.dataset.current || 0);
-    let crystal = parseFloat(crystalEl.dataset.current || 0);
-    let deut = parseFloat(deutEl.dataset.current || 0);
+    let metal = metalEl ? parseFloat(metalEl.dataset.current || 0) : 0;
+    let crystal = crystalEl ? parseFloat(crystalEl.dataset.current || 0) : 0;
+    let deut = deutEl ? parseFloat(deutEl.dataset.current || 0) : 0;
+    let clay = clayEl ? parseFloat(clayEl.dataset.current || 0) : 0;
+    let tea = teaEl ? parseFloat(teaEl.dataset.current || 0) : 0;
+    let soy = soyEl ? parseFloat(soyEl.dataset.current || 0) : 0;
 
-    const metalMax = parseFloat(metalEl.dataset.max || 15000);
-    const crystalMax = parseFloat(crystalEl.dataset.max || 15000);
-    const deutMax = parseFloat(deutEl.dataset.max || 15000);
+    const metalMax = metalEl ? parseFloat(metalEl.dataset.max || 15000) : 15000;
+    const crystalMax = crystalEl ? parseFloat(crystalEl.dataset.max || 15000) : 15000;
+    const deutMax = deutEl ? parseFloat(deutEl.dataset.max || 15000) : 15000;
+    const clayMax = clayEl ? parseFloat(clayEl.dataset.max || 10000) : 10000;
+    const teaMax = teaEl ? parseFloat(teaEl.dataset.max || 10000) : 10000;
+    const soyMax = soyEl ? parseFloat(soyEl.dataset.max || 10000) : 10000;
 
-    const prodMetalSec = parseFloat(metalEl.dataset.prod || 0) / 3600;
-    const prodCrystalSec = parseFloat(crystalEl.dataset.prod || 0) / 3600;
-    const prodDeutSec = parseFloat(deutEl.dataset.prod || 0) / 3600;
+    const prodMetalSec = metalEl ? (parseFloat(metalEl.dataset.prod || 0) / 3600) : 0;
+    const prodCrystalSec = crystalEl ? (parseFloat(crystalEl.dataset.prod || 0) / 3600) : 0;
+    const prodDeutSec = deutEl ? (parseFloat(deutEl.dataset.prod || 0) / 3600) : 0;
+    const prodClaySec = clayEl ? (parseFloat(clayEl.dataset.prod || 0) / 3600) : 0;
+    const prodTeaSec = teaEl ? (parseFloat(teaEl.dataset.prod || 0) / 3600) : 0;
+    const prodSoySec = soyEl ? (parseFloat(soyEl.dataset.prod || 0) / 3600) : 0;
 
     setInterval(() => {
-        metal = Math.min(metalMax, metal + prodMetalSec);
-        crystal = Math.min(crystalMax, crystal + prodCrystalSec);
-        deut = Math.min(deutMax, deut + prodDeutSec);
-
-        metalEl.innerText = Math.floor(metal).toLocaleString();
-        crystalEl.innerText = Math.floor(crystal).toLocaleString();
-        deutEl.innerText = Math.floor(deut).toLocaleString();
-
-        // Mettre à jour les jauges visuelles
-        updateBar('metal', metal, metalMax);
-        updateBar('crystal', crystal, crystalMax);
-        updateBar('deut', deut, deutMax);
+        if (metalEl) {
+            metal = Math.min(metalMax, metal + prodMetalSec);
+            metalEl.innerText = Math.floor(metal).toLocaleString();
+            updateBar('metal', metal, metalMax);
+        }
+        if (crystalEl) {
+            crystal = Math.min(crystalMax, crystal + prodCrystalSec);
+            crystalEl.innerText = Math.floor(crystal).toLocaleString();
+            updateBar('crystal', crystal, crystalMax);
+        }
+        if (deutEl) {
+            deut = Math.min(deutMax, deut + prodDeutSec);
+            deutEl.innerText = Math.floor(deut).toLocaleString();
+            updateBar('deut', deut, deutMax);
+        }
+        if (clayEl) {
+            clay = Math.min(clayMax, clay + prodClaySec);
+            clayEl.innerText = Math.floor(clay).toLocaleString();
+            updateBar('clay', clay, clayMax);
+        }
+        if (teaEl) {
+            tea = Math.min(teaMax, tea + prodTeaSec);
+            teaEl.innerText = Math.floor(tea).toLocaleString();
+            updateBar('tea', tea, teaMax);
+        }
+        if (soyEl) {
+            soy = Math.min(soyMax, soy + prodSoySec);
+            soyEl.innerText = Math.floor(soy).toLocaleString();
+            updateBar('soybean', soy, soyMax);
+        }
     }, 1000);
 }
 

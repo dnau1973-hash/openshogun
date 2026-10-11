@@ -864,6 +864,9 @@ function updateHudResources(planet) {
     if (planet.rice_flour !== undefined) updateEl('res-val-rice-flour', 'bar-rice-flour', planet.rice_flour, planet.rice_flour_max || 10000);
     if (planet.sake !== undefined) updateEl('res-val-sake', 'bar-sake', planet.sake, planet.sake_max || 10000);
     if (planet.wooden_beams !== undefined) updateEl('res-val-wooden-beams', 'bar-wooden-beams', planet.wooden_beams, planet.wooden_beams_max || 10000);
+    if (planet.clay !== undefined) updateEl('res-val-clay', 'bar-clay', planet.clay, planet.clay_max || 10000);
+    if (planet.tea !== undefined) updateEl('res-val-tea', 'bar-tea', planet.tea, planet.tea_max || 10000);
+    if (planet.soybean !== undefined) updateEl('res-val-soybean', 'bar-soybean', planet.soybean, planet.soybean_max || 10000);
 }
 </script>
 <script src="/public/js/audio_manager.js"></script>

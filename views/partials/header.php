@@ -874,20 +874,26 @@ $navItems = [
                 $ruralPlotsData = [];
             }
         }
-        $clayHourly = (float)($ruralPlotsData['fosse_argile']['prod_hourly'] ?? 0);
+        $clayHourly = (float)($planet['prod_rates']['clay'] ?? ($ruralPlotsData['fosse_argile']['prod_hourly'] ?? 0));
         $clayLvl = (int)($ruralPlotsData['fosse_argile']['level'] ?? 1);
         $clayMaxLvl = max(1, (int)($ruralPlotsData['fosse_argile']['max_level'] ?? 30));
-        $pctClay = min(100, max(0, round(($clayLvl / $clayMaxLvl) * 100)));
+        $clayStock = (float)($planet['clay'] ?? 0);
+        $clayMax = max(1, (int)($planet['clay_max'] ?? 10000));
+        $pctClayStock = min(100, max(0, ($clayStock / $clayMax) * 100));
 
-        $teaHourly = (float)($ruralPlotsData['culture_the']['prod_hourly'] ?? 0);
+        $teaHourly = (float)($planet['prod_rates']['tea'] ?? ($ruralPlotsData['culture_the']['prod_hourly'] ?? 0));
         $teaLvl = (int)($ruralPlotsData['culture_the']['level'] ?? 1);
         $teaMaxLvl = max(1, (int)($ruralPlotsData['culture_the']['max_level'] ?? 30));
-        $pctTea = min(100, max(0, round(($teaLvl / $teaMaxLvl) * 100)));
+        $teaStock = (float)($planet['tea'] ?? 0);
+        $teaMax = max(1, (int)($planet['tea_max'] ?? 10000));
+        $pctTeaStock = min(100, max(0, ($teaStock / $teaMax) * 100));
 
-        $soyHourly = (float)($ruralPlotsData['champ_soja']['prod_hourly'] ?? 0);
+        $soyHourly = (float)($planet['prod_rates']['soybean'] ?? ($ruralPlotsData['champ_soja']['prod_hourly'] ?? 0));
         $soyLvl = (int)($ruralPlotsData['champ_soja']['level'] ?? 1);
         $soyMaxLvl = max(1, (int)($ruralPlotsData['champ_soja']['max_level'] ?? 30));
-        $pctSoy = min(100, max(0, round(($soyLvl / $soyMaxLvl) * 100)));
+        $soyStock = (float)($planet['soybean'] ?? 0);
+        $soyMax = max(1, (int)($planet['soybean_max'] ?? 10000));
+        $pctSoyStock = min(100, max(0, ($soyStock / $soyMax) * 100));
 
         $flourStock = (float)($planet['rice_flour'] ?? 0);
         $flourMax = max(1, (int)($planet['rice_flour_max'] ?? 10000));
@@ -1043,17 +1049,21 @@ $navItems = [
                     <!-- 4. Argile & Céramique -->
                     <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Argile &amp; Tuiles (Fosse)</strong><br>Production : <strong class='text-orange'>+<?= number_format($clayHourly) ?>/heure</strong><br>Développement : Niv. <?= $clayLvl ?> / <?= $clayMaxLvl ?> (<?= $pctClay ?>%)">
+                       title="<strong>Argile &amp; Tuiles (Fosse)</strong><br>Stock disponible : <?= number_format((int)$clayStock) ?> / <?= number_format($clayMax) ?> (<?= round($pctClayStock) ?>%)<br><span class='text-orange'>+<?= number_format($clayHourly) ?>/heure</span>">
                         <i class="fa-solid fa-cubes-stacked text-orange fs-3"></i>
                         <div class="lh-1">
                             <div class="d-flex align-items-baseline gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;">
-                                    Niv. <?= $clayLvl ?>
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                      id="res-val-clay"
+                                      data-current="<?= $clayStock ?>"
+                                      data-max="<?= $clayMax ?>"
+                                      data-prod="<?= $clayHourly ?>">
+                                    <?= number_format((int)$clayStock) ?>
                                 </span>
                                 <span class="text-orange font-monospace" style="font-size:0.65rem;">+<?= number_format($clayHourly) ?>/h</span>
                             </div>
                             <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
-                                <div class="progress-bar bg-orange" style="width:<?= $pctClay ?>%;"></div>
+                                <div class="progress-bar bg-orange" id="bar-clay" style="width:<?= $pctClayStock ?>%;"></div>
                             </div>
                         </div>
                     </a>
@@ -1061,17 +1071,21 @@ $navItems = [
                     <!-- 5. Thé & Matcha -->
                     <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Feuilles de Thé &amp; Matcha (Coteaux)</strong><br>Production : <strong class='text-teal'>+<?= number_format($teaHourly) ?>/heure</strong><br>Développement : Niv. <?= $teaLvl ?> / <?= $teaMaxLvl ?> (<?= $pctTea ?>%)">
+                       title="<strong>Feuilles de Thé &amp; Matcha (Coteaux)</strong><br>Stock disponible : <?= number_format((int)$teaStock) ?> / <?= number_format($teaMax) ?> (<?= round($pctTeaStock) ?>%)<br><span class='text-teal'>+<?= number_format($teaHourly) ?>/heure</span>">
                         <i class="fa-solid fa-leaf text-teal fs-3"></i>
                         <div class="lh-1">
                             <div class="d-flex align-items-baseline gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;">
-                                    Niv. <?= $teaLvl ?>
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                      id="res-val-tea"
+                                      data-current="<?= $teaStock ?>"
+                                      data-max="<?= $teaMax ?>"
+                                      data-prod="<?= $teaHourly ?>">
+                                    <?= number_format((int)$teaStock) ?>
                                 </span>
                                 <span class="text-teal font-monospace" style="font-size:0.65rem;">+<?= number_format($teaHourly) ?>/h</span>
                             </div>
                             <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
-                                <div class="progress-bar bg-teal" style="width:<?= $pctTea ?>%;"></div>
+                                <div class="progress-bar bg-teal" id="bar-tea" style="width:<?= $pctTeaStock ?>%;"></div>
                             </div>
                         </div>
                     </a>
@@ -1079,17 +1093,21 @@ $navItems = [
                     <!-- 6. Soja & Miso -->
                     <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Gousses de Soja &amp; Miso (Champ)</strong><br>Production : <strong class='text-lime'>+<?= number_format($soyHourly) ?>/heure</strong><br>Développement : Niv. <?= $soyLvl ?> / <?= $soyMaxLvl ?> (<?= $pctSoy ?>%)">
+                       title="<strong>Gousses de Soja &amp; Miso (Champ)</strong><br>Stock disponible : <?= number_format((int)$soyStock) ?> / <?= number_format($soyMax) ?> (<?= round($pctSoyStock) ?>%)<br><span class='text-lime'>+<?= number_format($soyHourly) ?>/heure</span>">
                         <i class="fa-solid fa-seedling text-lime fs-3"></i>
                         <div class="lh-1">
                             <div class="d-flex align-items-baseline gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;">
-                                    Niv. <?= $soyLvl ?>
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                      id="res-val-soybean"
+                                      data-current="<?= $soyStock ?>"
+                                      data-max="<?= $soyMax ?>"
+                                      data-prod="<?= $soyHourly ?>">
+                                    <?= number_format((int)$soyStock) ?>
                                 </span>
                                 <span class="text-lime font-monospace" style="font-size:0.65rem;">+<?= number_format($soyHourly) ?>/h</span>
                             </div>
                             <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
-                                <div class="progress-bar bg-lime" style="width:<?= $pctSoy ?>%;"></div>
+                                <div class="progress-bar bg-lime" id="bar-soybean" style="width:<?= $pctSoyStock ?>%;"></div>
                             </div>
                         </div>
                     </a>
