@@ -59,6 +59,8 @@
 <?php require_once __DIR__ . '/announcement_modal.php'; ?>
 <!-- Modale du Sceau Impérial / Privilège du Shōgun -->
 <?php require_once __DIR__ . '/imperial_seal_modal.php'; ?>
+<!-- Modale des Chroniques Féodales du Sengoku (Événement Hebdomadaire) -->
+<?php require_once __DIR__ . '/weekly_event_modal.php'; ?>
 <!-- Modale de Transparence IA (Prompts & Traduction) -->
 <?php require_once __DIR__ . '/ai_prompt_modal.php'; ?>
 

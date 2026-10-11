@@ -48,6 +48,24 @@ $wfSummary = $planet['workforce'] ?? ($prodRates['workforce'] ?? null);
 $isUnderstaffed = !empty($wfSummary['is_understaffed']);
 $malusUnderstaffed = (float)($wfSummary['understaffed_malus_pct'] ?? 0);
 
+// Données de l'Événement Hebdomadaire (Chronique Féodale)
+require_once __DIR__ . '/../../core/WeeklyEventEngine.php';
+$weeklyEngine = new WeeklyEventEngine();
+$activeEvent = ($user && $planet) ? $weeklyEngine->getActiveEvent((int)$user['id'], (int)$planet['id']) : null;
+$eventPlayerStatus = $activeEvent['player_status'] ?? null;
+$hasClaimableEvent = false;
+if (!empty($eventPlayerStatus['tasks'])) {
+    foreach ($eventPlayerStatus['tasks'] as $t) {
+        if (!empty($t['is_completed']) && empty($t['is_claimed'])) {
+            $hasClaimableEvent = true;
+            break;
+        }
+    }
+}
+if (!empty($eventPlayerStatus['all_completed']) && empty($eventPlayerStatus['final_claimed'])) {
+    $hasClaimableEvent = true;
+}
+
 // Détermination de l'élément ouvert par défaut : Didacticiel si quête active, sinon Chantiers
 $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
 ?>
@@ -241,6 +259,63 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
             </div>
         </div>
     </div>
+
+    <!-- ── 1bis. CHRONIQUE FÉODALE DU SENGOKU (ÉVÉNEMENT HEBDOMADAIRE) ── -->
+    <?php if ($activeEvent): ?>
+    <div class="accordion-item bg-white border-warning-subtle">
+        <h3 class="accordion-header" id="heading-east-weekly-event">
+            <button class="accordion-button collapsed" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#east-item-weekly-event" 
+                    aria-expanded="false" 
+                    aria-controls="east-item-weekly-event">
+                <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate pe-2">
+                    <i class="fa-solid fa-hourglass-start text-warning"></i>
+                    <span class="fw-bold">Chronique Féodale</span>
+                    <?php if ($hasClaimableEvent): ?>
+                        <span class="badge bg-success text-white fw-bold ms-auto animate-pulse" style="font-size:0.68rem;">Récompense !</span>
+                    <?php else: ?>
+                        <span class="badge bg-warning-lt text-warning ms-auto font-monospace" style="font-size:0.68rem;"><?= (int)($eventPlayerStatus['completed_tasks'] ?? 0) ?>/<?= (int)($eventPlayerStatus['total_tasks'] ?? 0) ?> actes</span>
+                    <?php endif; ?>
+                </div>
+                <span class="accordion-button-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon"><path d="M6 9l6 6l6 -6" /></svg>
+                </span>
+            </button>
+        </h3>
+        <div id="east-item-weekly-event" 
+             class="accordion-collapse collapse" 
+             aria-labelledby="heading-east-weekly-event" 
+             data-bs-parent="#resourcesEastAccordion">
+            <div class="accordion-body p-2">
+                <div class="p-2 rounded mb-2 text-white shadow-sm" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(234, 179, 8, 0.3);">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="badge bg-warning text-dark fw-bold font-monospace" style="font-size:0.65rem;"><?= htmlspecialchars($activeEvent['era_year']) ?></span>
+                        <span class="font-monospace text-warning small"><i class="fa-regular fa-clock me-1"></i><?= gmdate('d\j H\h', max(0, $activeEvent['seconds_remaining'])) ?></span>
+                    </div>
+                    <div class="fw-bold text-white small mb-1"><?= htmlspecialchars($activeEvent['title']) ?></div>
+                    <div class="text-secondary" style="font-size:0.75rem; line-height: 1.35;"><?= htmlspecialchars(mb_strimwidth($activeEvent['description'], 0, 110, '...')) ?></div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between text-muted font-monospace mb-1" style="font-size:0.72rem;">
+                        <span>Progression des Actes</span>
+                        <strong class="text-warning"><?= (int)($eventPlayerStatus['progress_percent'] ?? 0) ?>%</strong>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: <?= (int)($eventPlayerStatus['progress_percent'] ?? 0) ?>%;"></div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold d-flex align-items-center justify-content-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#weeklyChronicleModal">
+                    <i class="fa-solid fa-scroll"></i>
+                    <span>Dérouler la Chronique &amp; Récompenses</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <!-- ── 2. CHANTIERS EN COURS DU FIEF ── -->
     <div class="accordion-item bg-white">

@@ -459,6 +459,14 @@ $navItems = [
                     <i class="fa-solid fa-crown fs-3"></i>
                 </a>
 
+                <!-- 2bis. Chroniques Féodales du Sengoku (Événement Hebdomadaire) -->
+                <button type="button" 
+                        class="badge bg-yellow-lt text-warning p-2 border-0 d-inline-flex align-items-center justify-content-center shadow-none rounded cursor-pointer" 
+                        data-bs-toggle="modal" data-bs-target="#weeklyChronicleModal"
+                        title="Chroniques Féodales du Sengoku (Événement Hebdomadaire)">
+                    <i class="fa-solid fa-scroll fs-3"></i>
+                </button>
+
                 <?php if ($isDevTeamMember): ?>
                     <!-- 3. Studio Dev Team (Icône seule) -->
                     <a href="?page=dev_team" 
