@@ -39,13 +39,23 @@ $allEvents = $adminEventEngine->getAllEvents();
                 </a>
             </div>
         <?php else: ?>
+            <div class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+                <div class="input-icon flex-grow-1" style="min-width: 250px;">
+                    <span class="input-icon-addon"><i class="fa-solid fa-magnifying-glass text-warning"></i></span>
+                    <input type="text" id="adminWeeklyEventFilter" class="form-control" placeholder="Rechercher par semaine, nom, slug ou période..." onkeyup="filterAdminWeeklyEvents()">
+                </div>
+                <span class="badge bg-dark font-monospace fs-4 text-nowrap py-2 px-3">
+                    <i class="fa-solid fa-scroll text-warning me-1"></i><?= count($allEvents) ?> Chroniques enregistrées
+                </span>
+            </div>
+
             <div class="row g-3">
                 <?php foreach ($allEvents as $ev): 
                     $evId = (int)$ev['id'];
                     $isActive = !empty($ev['is_active']);
                     $tasks = $adminEventEngine->getEventDetails($evId)['tasks'] ?? [];
                 ?>
-                    <div class="col-12 col-xl-6">
+                    <div class="col-12 col-xl-6 admin-weekly-event-col">
                         <div class="card h-100 border <?= $isActive ? 'border-warning shadow' : 'border-secondary-subtle' ?>" style="background: <?= $isActive ? 'rgba(234, 179, 8, 0.04)' : '#ffffff' ?>;">
                             <div class="card-header py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div class="d-flex align-items-center gap-2">
@@ -462,6 +472,15 @@ function deleteTask(taskId) {
     .then(data => {
         if (!data.success) alert(data.error || 'Erreur.');
         else window.location.reload();
+    });
+}
+
+function filterAdminWeeklyEvents() {
+    const input = document.getElementById('adminWeeklyEventFilter');
+    const q = (input ? input.value : '').toLowerCase().trim();
+    document.querySelectorAll('.admin-weekly-event-col').forEach(col => {
+        const text = col.innerText.toLowerCase();
+        col.style.display = (!q || text.includes(q)) ? '' : 'none';
     });
 }
 </script>

@@ -42,7 +42,16 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
 ?>
 
 <style>
-/* Style Parchemin Féodal & Chronique du Sengoku */
+/* Style Parchemin Féodal & Chronique du Sengoku - Pleine Hauteur avec Marges */
+.weekly-chronicle-modal .modal-dialog {
+    max-width: 960px;
+    width: 95%;
+    height: calc(100vh - 40px);
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+}
+
 .weekly-chronicle-modal .modal-content {
     background: #0f172a;
     color: #f8fafc;
@@ -50,11 +59,16 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(234, 179, 8, 0.15);
     border-radius: 12px;
     overflow: hidden;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .weekly-chronicle-hero {
     position: relative;
-    height: 190px;
+    height: 165px;
+    flex-shrink: 0;
     background-size: cover;
     background-position: center;
     border-bottom: 2px solid rgba(234, 179, 8, 0.4);
@@ -68,6 +82,35 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
     flex-direction: column;
     justify-content: flex-end;
     padding: 1.25rem 1.5rem;
+}
+
+.weekly-chronicle-modal .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1.25rem 1.5rem !important;
+}
+
+.weekly-chronicle-modal .modal-body::-webkit-scrollbar {
+    width: 7px;
+}
+.weekly-chronicle-modal .modal-body::-webkit-scrollbar-thumb {
+    background: rgba(234, 179, 8, 0.35);
+    border-radius: 4px;
+}
+.weekly-chronicle-modal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(234, 179, 8, 0.65);
+}
+.weekly-chronicle-modal .modal-body::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.6);
+}
+
+.weekly-chronicle-modal .modal-footer {
+    flex-shrink: 0;
+    background: rgba(15, 23, 42, 0.98);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.75rem 1.25rem;
 }
 
 .weekly-chronicle-story-box {
@@ -297,11 +340,68 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
                 </div>
 
             </div>
+
+            <!-- Pied de page : case à cocher 'Ne plus afficher' et fermeture -->
+            <div class="modal-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="form-check form-switch m-0">
+                    <input class="form-check-input cursor-pointer" type="checkbox" id="chkWeeklyNoAutoOpen" onchange="toggleWeeklyEventAutoOpen(<?= (int)$activeEvent['id'] ?>, this.checked)">
+                    <label class="form-check-label text-muted small cursor-pointer" for="chkWeeklyNoAutoOpen">
+                        Ne plus ouvrir automatiquement cette chronique à la connexion
+                    </label>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary font-monospace" onclick="window.closeWeeklyChronicleModal();">
+                    <i class="fa-solid fa-xmark me-1"></i>Fermer
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+// Auto-ouverture : 1 seule fois par session, et inhibée si l'utilisateur a coché la case
+(function() {
+    const eventId = <?= (int)($activeEvent['id'] ?? 0) ?>;
+    if (eventId <= 0) return;
+
+    const storageKeyDismissed = 'weekly_chronicle_dismissed_' + eventId;
+    const sessionKeySeen = 'weekly_chronicle_seen_session_' + eventId;
+
+    const isDismissed = (localStorage.getItem(storageKeyDismissed) === '1');
+    const isSeenThisSession = (sessionStorage.getItem(sessionKeySeen) === '1');
+
+    function syncCheckbox() {
+        const chk = document.getElementById('chkWeeklyNoAutoOpen');
+        if (chk) {
+            chk.checked = isDismissed;
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncCheckbox);
+    } else {
+        syncCheckbox();
+    }
+
+    // Auto-ouverture uniquement si jamais vue cette session ET non désactivée
+    if (!isDismissed && !isSeenThisSession) {
+        sessionStorage.setItem(sessionKeySeen, '1');
+        setTimeout(function() {
+            if (typeof window.openWeeklyChronicleModal === 'function') {
+                window.openWeeklyChronicleModal();
+            }
+        }, 800);
+    }
+})();
+
+window.toggleWeeklyEventAutoOpen = function(eventId, doDismiss) {
+    const key = 'weekly_chronicle_dismissed_' + eventId;
+    if (doDismiss) {
+        localStorage.setItem(key, '1');
+    } else {
+        localStorage.removeItem(key);
+    }
+};
+
 // Fonctions universelles d'ouverture et de fermeture de la modale des Chroniques
 window.openWeeklyChronicleModal = function() {
     const modalEl = document.getElementById('weeklyChronicleModal');
