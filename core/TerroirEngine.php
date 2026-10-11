@@ -771,7 +771,8 @@ class TerroirEngine {
     }
 
     private function getHourlyProductionForTerroir(string $type, int $slotIndex, int $level): int {
-        $speed = defined('SPEED_FACTOR') ? SPEED_FACTOR : 1;
+        require_once __DIR__ . '/GameConfig.php';
+        $speed = (float)GameConfig::get('resource_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5);
         switch ($type) {
             case 'clay':
                 return (int)round(($level * 12) * $speed);

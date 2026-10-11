@@ -152,7 +152,7 @@ $globalEfficiencyPct = (int)round($energyRatio * $workforceRatio * 100);
 // ====================================================
 // SPÉCIALITÉS DU TERROIR RURAL (ARGILE, THÉ, SOJA)
 // ====================================================
-$clayHourly = (float)($plots['fosse_argile']['prod_hourly'] ?? 0);
+$clayHourly = (float)($prodRates['clay'] ?? ($plots['fosse_argile']['prod_hourly'] ?? 0));
 $clayLvl = (int)($plots['fosse_argile']['level'] ?? 0);
 $clayMaxLvl = (int)($plots['fosse_argile']['max_level'] ?? 30);
 $clayProgress = ($clayMaxLvl > 0) ? min(100, round(($clayLvl / $clayMaxLvl) * 100)) : 0;
@@ -161,7 +161,7 @@ $stockClay = (float)($planet['clay'] ?? 0);
 $maxClay = max(1, (float)($planet['clay_max'] ?? 10000));
 $pctClayStock = min(100, round(($stockClay / $maxClay) * 100, 1));
 
-$teaHourly = (float)($plots['culture_the']['prod_hourly'] ?? 0);
+$teaHourly = (float)($prodRates['tea'] ?? ($plots['culture_the']['prod_hourly'] ?? 0));
 $teaLvl = (int)($plots['culture_the']['level'] ?? 0);
 $teaMaxLvl = (int)($plots['culture_the']['max_level'] ?? 30);
 $teaProgress = ($teaMaxLvl > 0) ? min(100, round(($teaLvl / $teaMaxLvl) * 100)) : 0;
@@ -170,7 +170,7 @@ $stockTea = (float)($planet['tea'] ?? 0);
 $maxTea = max(1, (float)($planet['tea_max'] ?? 10000));
 $pctTeaStock = min(100, round(($stockTea / $maxTea) * 100, 1));
 
-$soyHourly = (float)($plots['champ_soja']['prod_hourly'] ?? 0);
+$soyHourly = (float)($prodRates['soybean'] ?? ($plots['champ_soja']['prod_hourly'] ?? 0));
 $soyLvl = (int)($plots['champ_soja']['level'] ?? 0);
 $soyMaxLvl = (int)($plots['champ_soja']['max_level'] ?? 30);
 $soyProgress = ($soyMaxLvl > 0) ? min(100, round(($soyLvl / $soyMaxLvl) * 100)) : 0;

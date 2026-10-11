@@ -697,16 +697,21 @@ $navItems = [
         if (is_dir($carrouselAssetsDir)) {
             $foundCarrouselFiles = glob($carrouselAssetsDir . '/*.jpg');
             if (!empty($foundCarrouselFiles)) {
-                sort($foundCarrouselFiles);
+                sort($foundCarrouselFiles, SORT_NATURAL);
                 foreach ($foundCarrouselFiles as $filePath) {
                     $bName = basename($filePath);
-                    $meta = $carouselBuildingsMeta[$bName] ?? [
-                        'name' => ucwords(str_replace(['carrousel_', '_', '.jpg'], ['', ' ', ''], $bName)),
-                        'badge' => 'Domaine Féodal',
-                        'desc' => 'Panorama stratégique du Japon féodal.',
-                        'icon' => 'fa-solid fa-mountain-sun text-warning',
-                        'position' => 'center center'
-                    ];
+                    $meta = $carouselBuildingsMeta[$bName] ?? null;
+                    if (!$meta) {
+                        $cleanTitle = trim(str_replace(['carrousel_', '.jpg', '.jpeg', '.png'], '', strtolower($bName)));
+                        $slideName = is_numeric($cleanTitle) ? 'Domaine Féodal #' . (int)$cleanTitle : ucwords(str_replace('_', ' ', $cleanTitle));
+                        $meta = [
+                            'name' => $slideName,
+                            'badge' => 'Domaine Féodal',
+                            'desc' => 'Panorama stratégique du Japon féodal.',
+                            'icon' => 'fa-solid fa-mountain-sun text-warning',
+                            'position' => 'center center'
+                        ];
+                    }
                     $carouselSlides[] = [
                         'url' => '/public/assets/carrousel/' . $bName,
                         'name' => $meta['name'],

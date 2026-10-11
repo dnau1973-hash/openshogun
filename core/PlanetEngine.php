@@ -878,6 +878,7 @@ class PlanetEngine {
         $soyHourlyProd = 0;
         if ($planetId !== null && $planetId > 0) {
             try {
+                require_once __DIR__ . '/VillageGeneratorService.php';
                 $stmtPlots = $this->db->prepare("SELECT structure_type, level, prod_hourly FROM planet_rural_plots WHERE planet_id = ?");
                 $stmtPlots->execute([$planetId]);
                 $rPlots = $stmtPlots->fetchAll(PDO::FETCH_ASSOC);
@@ -885,7 +886,8 @@ class PlanetEngine {
                     $hasRuralPlots = true;
                     foreach ($rPlots as $rp) {
                         $sType = $rp['structure_type'];
-                        $sProd = (float)$rp['prod_hourly'];
+                        // Calcul dynamique de la cadence horaire indexée sur resource_speed
+                        $sProd = VillageGeneratorService::calculateHourlyProduction($sType, (int)$rp['level'], $speed);
                         switch ($sType) {
                             case 'foret':
                                 $metalMineProd += $sProd;
@@ -1242,6 +1244,26 @@ class PlanetEngine {
                 $this->db->exec("ALTER TABLE `shipyard_queue` ADD COLUMN `total_count` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `count`");
                 $this->db->exec("UPDATE `shipyard_queue` SET `total_count` = `count` WHERE `total_count` = 0");
             }
+
+            // 11. Synchronisation de la production horaire des parcelles rurales avec resource_speed
+            try {
+                $stmtCheck = $this->db->query("SELECT id, structure_type, level, prod_hourly FROM planet_rural_plots WHERE structure_type NOT IN ('tenshu', 'village', 'sanctuaire_shinto') LIMIT 1");
+                if ($stmtCheck && ($rowCheck = $stmtCheck->fetch(PDO::FETCH_ASSOC))) {
+                    $speed = (float)GameConfig::get('resource_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5);
+                    $expectedSample = round(35.0 * pow((int)$rowCheck['level'], 1.38) * (1.0 + ((int)$rowCheck['level'] * 0.015)) * $speed, 1);
+                    if (abs((float)$rowCheck['prod_hourly'] - $expectedSample) > 1.0) {
+                        require_once __DIR__ . '/VillageGeneratorService.php';
+                        $stmtAllPlots = $this->db->query("SELECT id, structure_type, level FROM planet_rural_plots");
+                        if ($stmtAllPlots) {
+                            $upPlots = $this->db->prepare("UPDATE planet_rural_plots SET prod_hourly = ? WHERE id = ?");
+                            while ($pr = $stmtAllPlots->fetch(PDO::FETCH_ASSOC)) {
+                                $newP = VillageGeneratorService::calculateHourlyProduction($pr['structure_type'], (int)$pr['level'], $speed);
+                                $upPlots->execute([$newP, $pr['id']]);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception $eSync) {}
         } catch (Exception $e) {
             // Ignorer silencieusement si déjà en cours ou permissions limitées
         }

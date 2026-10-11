@@ -341,9 +341,9 @@ class VillageGeneratorService {
     }
 
     /**
-     * Calcul de la cadence de production horaire par structure et niveau
+     * Calcul de la cadence de production horaire par structure et niveau indexée sur la vitesse de ressource
      */
-    public static function calculateHourlyProduction(string $structureType, int $level): float {
+    public static function calculateHourlyProduction(string $structureType, int $level, ?float $speed = null): float {
         if ($level <= 0) {
             return 0.0;
         }
@@ -351,17 +351,25 @@ class VillageGeneratorService {
             return 0.0;
         }
         if ($structureType === 'village') {
-            // Capacité de logements : 75 + level * 25
+            // Capacité de logements : 75 + level * 25 (non affecté par la vitesse de ressource)
             return (float)(75 + ($level * 25));
         }
         if ($structureType === 'sanctuaire_shinto') {
-            // Sérénité : level * 30
+            // Sérénité : level * 30 (non affecté par la vitesse de ressource)
             return (float)($level * 30);
         }
 
-        // Ressources primaires & secondaires : progression puissance 1.38
+        require_once __DIR__ . '/GameConfig.php';
+        if ($speed === null) {
+            $speed = (float)GameConfig::get('resource_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5);
+        }
+        if ($speed <= 0) {
+            $speed = 1.0;
+        }
+
+        // Ressources primaires & secondaires : progression puissance 1.38 indexée sur resource_speed
         $baseRate = 35.0;
-        $prod = $baseRate * pow($level, 1.38) * (1.0 + ($level * 0.015));
+        $prod = $baseRate * pow($level, 1.38) * (1.0 + ($level * 0.015)) * $speed;
         return round($prod, 1);
     }
 }

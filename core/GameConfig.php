@@ -77,13 +77,20 @@ class GameConfig {
     public static function set(string $key, mixed $value): bool {
         try {
             $db = Database::getConnection();
-            $stmt = $db->prepare("
-                INSERT INTO game_settings (setting_key, setting_value, updated_at) 
-                VALUES (?, ?, NOW()) 
-                ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = NOW()
-            ");
+            $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
             $strVal = is_bool($value) ? ($value ? '1' : '0') : (string)$value;
-            $res = $stmt->execute([$key, $strVal]);
+
+            if ($driver === 'sqlite') {
+                $stmt = $db->prepare("INSERT OR REPLACE INTO game_settings (setting_key, setting_value) VALUES (?, ?)");
+                $res = $stmt->execute([$key, $strVal]);
+            } else {
+                $stmt = $db->prepare("
+                    INSERT INTO game_settings (setting_key, setting_value, updated_at) 
+                    VALUES (?, ?, NOW()) 
+                    ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = NOW()
+                ");
+                $res = $stmt->execute([$key, $strVal]);
+            }
             
             // Invalider le cache
             self::$cache = null;

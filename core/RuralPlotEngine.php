@@ -268,9 +268,18 @@ class RuralPlotEngine {
             $elapsed = $isUpgrading ? max(0, $now - $startedAt) : 0;
             $queueProgressPct = $isUpgrading ? min(100, max(0, (int)round(($elapsed / $totalDuration) * 100))) : 0;
 
-            // Rendements actuels et futurs
-            $currentProd = (float)$p['prod_hourly'];
+            // Rendements actuels et futurs indexés sur resource_speed
+            $currentProd = VillageGeneratorService::calculateHourlyProduction($type, $lvl);
             $nextProd = VillageGeneratorService::calculateHourlyProduction($type, $nextLvl);
+
+            // Mettre à jour l'entrée mémoire et synchroniser la BDD si nécessaire
+            if (isset($p['id']) && abs((float)$p['prod_hourly'] - $currentProd) > 0.05) {
+                try {
+                    $this->db->prepare("UPDATE planet_rural_plots SET prod_hourly = ? WHERE id = ?")
+                        ->execute([$currentProd, $p['id']]);
+                } catch (Exception $e) {}
+            }
+            $p['prod_hourly'] = $currentProd;
 
             if ($type === 'village') {
                 $prodLabel = number_format($currentProd) . ' logements';
