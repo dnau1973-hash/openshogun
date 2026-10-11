@@ -4,6 +4,41 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
+
+## [1.22.0] - 2026-10-11
+### Ajouté (Added)
+- **Système Exhaustif des 52 Chroniques Féodales du Sengoku (`core/WeeklyEventsData.php`, `core/WeeklyEventEngine.php`, `database/migrate_weekly_events.php`) :**
+  * **52 Récits Historiques du Sengoku (1543-1615) :** Déploiement d'un calendrier complet d'événements hebdomadaires couvrant 52 semaines réparties sur 4 trimestres thématiques :
+    - *T1 (Semaines 01-13) :* L'Aube des Conquêtes & les Seigneurs de Guerre (Tanegashima, Okehazama, Kawanakajima, etc.).
+    - *T2 (Semaines 14-26) :* L'Ascension d'Oda Nobunaga & la Flamme de l'Unification (Château de Gifu, Nagashino, Azuchi, etc.).
+    - *T3 (Semaines 27-39) :* La Régence de Toyotomi Hideyoshi & l'Âge d'Or Momoyama (Honnō-ji, Shizugatake, Odawara, etc.).
+    - *T4 (Semaines 40-52) :* L'Hégémonie des Tokugawa & la Paix d'Edo (Sekigahara, Château d'Edo, Sièges d'Osaka, etc.).
+  * **156 Actes Narratifs Séquentiels :** Chaque chronique se compose de 3 actes historiques progressifs (tâches de récolte de ressources, mobilisation de troupes samouraïs, investissements culturels ou diplomatiques) avec lore immersif et récompenses intermédiaires.
+  * **Récompenses de Clôture Majeures :** Kobans d'or, Honneur de Daimyō, Sceaux Impériaux et 52 Titres Honorifiques uniques attribués au joueur à la complétion du 3ème acte.
+  * **Rotation Hebdomadaire Automatique :** Sélection automatique de la chronique active calée sur la semaine calendaire ISO courante `(int)date('W')`, avec possibilité d'activation/désactivation manuelle par les administrateurs.
+
+- **Banque d'Illustrations Artistiques 16:9 (`public/assets/events/event_week_01.jpg` à `event_week_52.jpg`) :**
+  * **52 Œuvres d'Art Ukiyo-e Digital :** Intégration d'un corpus visuel complet au format 16:9 haute résolution respectant la direction artistique feutrée et authentique du Japon féodal (style peinture numérique / estampe ukiyo-e inspiré de Travian / Grepolis).
+  * **Couverture Chronologique Exhaustive :** Chaque semaine dispose de son illustration sur mesure mettant en scène les batailles mythiques, forteresses emblématiques, cérémonies du thé et personnages historiques du Sengoku Jidai.
+
+- **Affichage & Ergonomie de la Modale Joueur (`views/partials/weekly_event_modal.php`) :**
+  * **Mise en Valeur Visuelle 16:9 :** Intégration de l'illustration de la chronique courante en bannière héroïque avec cadre doré traditionnel, sceau calligraphié et sous-titre kanji immersif.
+  * **Gabarit Pleine Hauteur avec Marges :** Refonte responsive du conteneur modal s'adaptant à la hauteur totale du viewport avec marges supérieure et inférieure calibrées et zone de défilement interne soignée (`overflow-y: auto`).
+  * **Ouverture Automatique Éco-Session :** Déclenchement automatique de la modale à la première visite d'une session de jeu (`sessionStorage`), avec case à cocher « Ne plus afficher automatiquement cette semaine » persistée dans `localStorage` pour préserver le confort du joueur.
+
+- **Administration & Édition Avancée des Chroniques (`views/partials/admin_weekly_events.php`, `api/weekly_events.php`) :**
+  * **Recherche Instantanée & Filtrage :** Barre de recherche dynamique par nom, description ou numéro de semaine pour naviguer instantanément parmi les 52 chroniques.
+  * **Édition Rapide en 1 Clic :** Bouton « Éditer » dédié sur chaque carte d'événement ouvrant la modale d'administration de la chronique sans interférence avec l'interface joueur.
+  * **Sélecteur d'Illustration avec Aperçu en Direct :** Menu déroulant listant les 52 illustrations d'événements avec prévisualisation immédiate en temps réel.
+  * **Gestion Granulaire des Tâches :** Boutons d'édition unitaire sur chaque acte narratif préremplissant automatiquement le formulaire (`modalAddTask`) pour ajuster le titre, la description, les conditions et les récompenses.
+
+### Corrigé (Fixed)
+- **Isolation des Événements & Modales Admin (`views/partials/admin_weekly_events.php`) :**
+  * Suppression du bouton d'édition redondant sous la miniature de la carte.
+  * Correction du conflit de propagation d'événements qui déclenchait la modale joueur lors du clic sur le bouton d'édition de l'administration.
+- **Accélérations & Multiplicateurs de Production :** Prise en compte rigoureuse des bonus d'ateliers et de technologie pour les nouvelles ressources de terroir (Argile, Thé, Soja).
+
+## [1.21.0] - 2026-10-11
 ### Ajouté (Added)
 - **Intégration de la Page Classement au Template Unique (`views/ranking.php`, `views/partials/game_screen_template.php`) :**
   * **Harmonisation complète du Palmarès :** Intégration de la vue du classement (Daimyōs, Alliances et Tableau d'Honneur) dans `game_screen_template.php`.
