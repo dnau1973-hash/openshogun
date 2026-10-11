@@ -55,6 +55,9 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * **Décomposition transparente des postes requis :** Contrôle granulaire séparant le secteur rural (9 parcelles du terroir) et le secteur urbain (bâtiments de la cité castrale) avec niveau, taux par niveau et total vérifiable.
 
 ### Corrigé (Fixed)
+- **Échappement de l'Infobulle de Main-d'œuvre dans le Header (`views/partials/header.php`) :**
+  * **Correction de la fermeture prématurée de balise HTML :** Résolution d'un défaut où les guillemets non échappés dans l'attribut `title` de la pastille des effectifs entraînaient une rupture de l'attribut `title="..."` et faisaient fuiter du texte brut et un caractère `">` visible à l'écran. Utilisation de `htmlspecialchars($workforceTooltip, ENT_QUOTES, 'UTF-8')`.
+
 - **Audit & Correction du Calcul des Quotas d'Ouvriers (`core/PlanetEngine.php`, `core/PopulationEngine.php`, `core/VillageGeneratorService.php`) :**
   * **Prise en compte des 9 parcelles dans la production :** Correction de la requête `SELECT` dans `PlanetEngine::calculateProduction` qui omettait `id`, restaurant la prise en compte des 9 parcelles du terroir dans les calculs de main-d'œuvre et de cadence de production.
   * **Suppression du double comptage du Donjon Tenshu :** Tenshu Donjon comptabilisé exclusivement comme quartier général castral urbain (`hq`, 2 ouvriers/niv) et passage de `RURAL_PLOT_WORKERS['tenshu']` à 0 pour éliminer la duplication de 2 ouvriers supplémentaires par niveau.

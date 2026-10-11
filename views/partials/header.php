@@ -803,6 +803,20 @@ $navItems = [
         $understaffedMalus = (float)($workforce['understaffed_malus_pct'] ?? 0);
         $idleWorkers = (int)($workforce['idle_workers'] ?? 0);
         $pctWorkforce = ($requiredWorkers > 0) ? min(100, max(0, round(($assignedWorkers / $requiredWorkers) * 100))) : 100;
+
+        $workforceTooltipParts = [
+            "<strong>Main-d'œuvre &amp; Postes de Travail</strong>",
+            "Pourvus : <strong class='" . ($isUnderstaffed ? 'text-warning' : 'text-success') . "'>" . number_format($assignedWorkers) . "</strong> / " . number_format($requiredWorkers) . " requis (" . $pctWorkforce . "%)"
+        ];
+        if ($isUnderstaffed) {
+            $workforceTooltipParts[] = "<span class='text-warning'><i class='fa-solid fa-triangle-exclamation me-1'></i>Sous-effectif : -" . $understaffedMalus . "% vitesse</span>";
+        } else {
+            $workforceTooltipParts[] = "<span class='text-success'><i class='fa-solid fa-check me-1'></i>Effectif complet (+0% malus)</span>";
+        }
+        if ($idleWorkers > 0) {
+            $workforceTooltipParts[] = "<span class='text-muted'><i class='fa-solid fa-user-clock me-1'></i>Sans affectation : " . number_format($idleWorkers) . "</span>";
+        }
+        $workforceTooltip = implode('<br>', $workforceTooltipParts);
         ?>
 
         <style>
@@ -1067,7 +1081,7 @@ $navItems = [
                     <!-- 9. Main-d'œuvre Féodale (Ouvriers pourvus vs requis) -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Main-d'œuvre &amp; Postes de Travail</strong><br>Pourvus : <strong class='<?= $isUnderstaffed ? 'text-warning' : 'text-success' ?>'><?= number_format($assignedWorkers) ?></strong> / <?= number_format($requiredWorkers) ?> requis (<?= $pctWorkforce ?>%)<?= $isUnderstaffed ? '<br><span class=\"text-warning\"><i class=\"fa-solid fa-triangle-exclamation me-1\"></i>Sous-effectif : -' . $understaffedMalus . '% vitesse</span>' : '<br><span class=\"text-success\"><i class=\"fa-solid fa-check me-1\"></i>Effectif complet (+0% malus)</span>' ?><?= ($idleWorkers > 0) ? '<br><span class=\"text-muted\"><i class=\"fa-solid fa-user-clock me-1\"></i>Sans affectation : ' . number_format($idleWorkers) . '</span>' : '' ?>">
+                       title="<?= htmlspecialchars($workforceTooltip, ENT_QUOTES, 'UTF-8') ?>">
                         <i class="fa-solid fa-person-digging <?= $isUnderstaffed ? 'text-warning' : 'text-success' ?> fs-3"></i>
                         <div class="lh-1">
                             <div class="d-flex align-items-baseline gap-1 font-monospace" style="font-size:0.82rem;">
