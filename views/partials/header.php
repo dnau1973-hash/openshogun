@@ -957,6 +957,44 @@ $navItems = [
             $workforceTooltipParts[] = "<span class='text-muted'><i class='fa-solid fa-user-clock me-1'></i>Sans affectation : " . number_format($idleWorkers) . "</span>";
         }
         $workforceTooltip = implode('<br>', $workforceTooltipParts);
+
+        // Moral & Contentement féodal des villageois (0 - 100%)
+        require_once __DIR__ . '/../../core/PopulationEngine.php';
+        $contentmentDetails = $planet['contentment_details'] ?? null;
+        if (!$contentmentDetails && !empty($planet['id'])) {
+            $pBld = $planetBuildings ?? ($planetEngine ? $planetEngine->getBuildings((int)$planet['id']) : []);
+            $activeFeast = $planetEngine ? $planetEngine->getActiveFeast((int)$planet['id']) : null;
+            $contentmentDetails = PopulationEngine::calculateContentment($planet, $activeFeast, $workforce, $pBld);
+        }
+        $contentmentScore = (int)($contentmentDetails['score'] ?? ($planet['contentment'] ?? 85));
+        $contentmentStatus = $contentmentDetails['status_label'] ?? (($contentmentScore >= 80) ? 'Euphorique & Prospère' : (($contentmentScore >= 50) ? 'Paisible & Satisfait' : (($contentmentScore >= 25) ? 'Inquiet & Tendu' : 'Exode Imminent !')));
+        $contentmentBadgeColor = $contentmentDetails['badge_color'] ?? (($contentmentScore >= 80) ? 'success' : (($contentmentScore >= 50) ? 'teal' : (($contentmentScore >= 25) ? 'warning' : 'danger')));
+        $contentmentIcon = $contentmentDetails['icon'] ?? (($contentmentScore >= 80) ? 'fa-face-laugh-beam' : (($contentmentScore >= 50) ? 'fa-face-smile' : (($contentmentScore >= 25) ? 'fa-face-meh' : 'fa-face-frown')));
+
+        $moraleTooltipParts = [
+            "<strong>Moral &amp; Contentement Féodal</strong>",
+            "Indice : <strong class='text-{$contentmentBadgeColor}'>{$contentmentScore}%</strong> &bull; <span class='text-muted'>{$contentmentStatus}</span>"
+        ];
+        if (!empty($contentmentDetails['has_food'])) {
+            $moraleTooltipParts[] = "<span class='text-success'><i class='fa-solid fa-bowl-rice me-1'></i>Vivres assurées (+15%)</span>";
+        } else {
+            $moraleTooltipParts[] = "<span class='text-danger'><i class='fa-solid fa-triangle-exclamation me-1'></i>Famine / Pénurie de riz (-55%)</span>";
+        }
+        if (!empty($contentmentDetails['has_energy'])) {
+            $moraleTooltipParts[] = "<span class='text-teal'><i class='fa-solid fa-torii-gate me-1'></i>Sérénité Shintō stable</span>";
+        } else {
+            $moraleTooltipParts[] = "<span class='text-danger'><i class='fa-solid fa-triangle-exclamation me-1'></i>Déficit spirituel (-20%)</span>";
+        }
+        if (!empty($contentmentDetails['sake_bonus_active'])) {
+            $moraleTooltipParts[] = "<span class='text-purple'><i class='fa-solid fa-wine-bottle me-1'></i>Saké Impérial en réserve (+15%)</span>";
+        }
+        if (!empty($contentmentDetails['feast_points'])) {
+            $moraleTooltipParts[] = "<span class='text-warning'><i class='fa-solid fa-drum me-1'></i>Célébration Matsuri (+10%)</span>";
+        }
+        if (!empty($contentmentDetails['delinquency_delta']) && $contentmentDetails['delinquency_delta'] < 0) {
+            $moraleTooltipParts[] = "<span class='text-warning'><i class='fa-solid fa-user-slash me-1'></i>Chômage / Inactifs (" . $contentmentDetails['delinquency_delta'] . "%)</span>";
+        }
+        $moraleTooltip = implode('<br>', $moraleTooltipParts);
         ?>
 
         <style>
@@ -1230,7 +1268,7 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 9. Main-d'œuvre Féodale (Ouvriers pourvus vs requis) -->
+                    <!-- 12. Main-d'œuvre Féodale (Ouvriers pourvus vs requis) -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<?= htmlspecialchars($workforceTooltip, ENT_QUOTES, 'UTF-8') ?>">
@@ -1246,7 +1284,23 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 9. Trésor Impérial (Kobans) -->
+                    <!-- 13. Moral des Villageois (Contentement féodal) -->
+                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<?= htmlspecialchars($moraleTooltip, ENT_QUOTES, 'UTF-8') ?>">
+                        <i class="fa-solid <?= $contentmentIcon ?> text-<?= $contentmentBadgeColor ?> fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-baseline gap-1 font-monospace" style="font-size:0.82rem;">
+                                <span class="fw-bold text-<?= $contentmentBadgeColor ?>" id="res-val-contentment"><?= $contentmentScore ?>%</span>
+                                <span class="text-muted" style="font-size:0.65rem;">moral</span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
+                                <div class="progress-bar bg-<?= $contentmentBadgeColor ?>" id="bar-contentment" style="width:<?= $contentmentScore ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 14. Trésor Impérial (Kobans) -->
                     <a href="?page=privilege" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Trésor Impérial</strong><br><?= number_format($userGoldCoins) ?> Kobans d'or">
