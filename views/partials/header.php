@@ -495,114 +495,232 @@ $navItems = [
         <!-- ── 2. CARROUSEL AUTOMATIQUE DES BÂTIMENTS FÉODAUX (Bannière Cité Castrale) ── -->
         <?php
         $carouselBuildingsMeta = [
+            // ── 10 PANORAMAS DU DOMAINE (Dossier assets/carrousel) ──
+            'carrousel_01_port_fluvial.jpg' => [
+                'name' => 'Port Fluvial & Jonques (Kawa-Minato)',
+                'badge' => 'Commerce Fluvial',
+                'desc' => 'Quais de déchargement des cargaisons de riz, bois de cèdre et barriques de saké.',
+                'icon' => 'fa-solid fa-ship text-info',
+                'position' => 'center center'
+            ],
+            'carrousel_02_porte_otemon.jpg' => [
+                'name' => 'Grande Porte Fortifiée (Ōtemon)',
+                'badge' => 'Défense de Cité',
+                'desc' => 'Entrée monumentale en chêne ferré et pont arqué sur les douves surveillées par la garnison.',
+                'icon' => 'fa-solid fa-archway text-warning',
+                'position' => 'center center'
+            ],
+            'carrousel_03_conseil_guerre.jpg' => [
+                'name' => 'Conseil de Guerre & Tactique (Gunbai-dō)',
+                'badge' => 'Stratégie Militaire',
+                'desc' => 'Pavillon seigneurial où sont arrêtés les plans de campagne et alliances provinciales.',
+                'icon' => 'fa-solid fa-chess-rook text-danger',
+                'position' => 'center center'
+            ],
+            'carrousel_04_sanctuaire_shinto.jpg' => [
+                'name' => 'Sanctuaire Sacré & Cerisiers (Jinja)',
+                'badge' => 'Sérénité Divine',
+                'desc' => 'Allée de toriis vermillon et prières aux esprits kami protecteurs du fief.',
+                'icon' => 'fa-solid fa-torii-gate text-danger',
+                'position' => 'center center'
+            ],
+            'carrousel_05_tir_archers.jpg' => [
+                'name' => 'Dojo des Maîtres Archers (Kyūdōjō)',
+                'badge' => 'Tir à l\'Arc Yumi',
+                'desc' => 'Entraînement de précision martiale et discipline des archers d\'élite du clan.',
+                'icon' => 'fa-solid fa-bullseye text-primary',
+                'position' => 'center center'
+            ],
+            'carrousel_06_atelier_potiers.jpg' => [
+                'name' => 'Atelier de Céramique & Four Noborigama',
+                'badge' => 'Artisanat de l\'Argile',
+                'desc' => 'Façonnage des jarres étanches et cuisson des tuiles incombustibles pour la forteresse.',
+                'icon' => 'fa-solid fa-cubes-stacked text-orange',
+                'position' => 'center center'
+            ],
+            'carrousel_07_jardin_zen.jpg' => [
+                'name' => 'Jardin Zen & Bassin de Koï (Chisen Teien)',
+                'badge' => 'Harmonie du Fief',
+                'desc' => 'Pont vermillon, carpes sacrées et quiétude inspirant la gouvernance du Daimyō.',
+                'icon' => 'fa-solid fa-leaf text-success',
+                'position' => 'center center'
+            ],
+            'carrousel_08_fonderie_canons.jpg' => [
+                'name' => 'Fonderie d\'Armes & Canons (Imoji-ya)',
+                'badge' => 'Génie & Métallurgie',
+                'desc' => 'Coulée de bronze et de fer pour les mortiers, cloches monumentales et défenses.',
+                'icon' => 'fa-solid fa-fire-burner text-danger',
+                'position' => 'center center'
+            ],
+            'carrousel_09_moulin_hydraulique.jpg' => [
+                'name' => 'Moulin Hydraulique & Moissons (Mizuguruma)',
+                'badge' => 'Terroirs d\'Abondance',
+                'desc' => 'Meunerie hydraulique au cœur des rizières impériales mûres prêtes pour la récolte.',
+                'icon' => 'fa-solid fa-wheat-awn text-warning',
+                'position' => 'center center'
+            ],
+            'carrousel_10_revue_troupes.jpg' => [
+                'name' => 'Grande Parade & Revue Martiale (Gunkō Emaki)',
+                'badge' => 'Ost Seigneurial',
+                'desc' => 'Ralliement solennel des samouraïs et tambours taiko géants sous le crépuscule.',
+                'icon' => 'fa-solid fa-flag text-danger',
+                'position' => 'center center'
+            ],
+
+            // ── BÂTIMENTS URBAINS (Dossier assets/buildings) ──
             'building_tenshu.jpg' => [
                 'name' => 'Tenshu (Donjon Castral)',
                 'badge' => 'Siège du Commandement',
                 'desc' => 'Palais fortifié du Daimyō et réduction du temps de construction des édifices.',
-                'icon' => 'fa-solid fa-chess-rook text-danger'
+                'icon' => 'fa-solid fa-chess-rook text-danger',
+                'position' => 'center center'
             ],
             'building_barracks.jpg' => [
                 'name' => 'Dojo Militaire & Caserne',
                 'badge' => 'Infanterie Féodale',
                 'desc' => 'Enrôlement des Samouraïs d\'élite, archers Yumi et mousquetaires Tanegashima.',
-                'icon' => 'fa-solid fa-user-ninja text-primary'
+                'icon' => 'fa-solid fa-user-ninja text-primary',
+                'position' => 'center center'
             ],
             'building_shipyard.jpg' => [
                 'name' => 'Atelier de Siège & Écuries',
                 'badge' => 'Cavalerie & Génie Militaire',
                 'desc' => 'Élevage de coursiers de guerre, catapultes géantes et convois de ravitaillement.',
-                'icon' => 'fa-solid fa-horse text-warning'
+                'icon' => 'fa-solid fa-horse text-warning',
+                'position' => 'center center'
             ],
             'building_wall.jpg' => [
                 'name' => 'Muraille & Remparts de Cité',
                 'badge' => 'Enceinte Fortifiée',
                 'desc' => 'Murailles en pierre cyclopéenne et douves protégeant le fief (+4% défense garnison/niv).',
-                'icon' => 'fa-solid fa-shield-halved text-success'
+                'icon' => 'fa-solid fa-shield-halved text-success',
+                'position' => 'center center'
             ],
             'building_storage.jpg' => [
                 'name' => 'Hangar de Cèdre & Dépôt',
                 'badge' => 'Entrepôt de Bois',
                 'desc' => 'Réserves stratégiques de bois de cèdre et poutres de charpente.',
-                'icon' => 'fa-solid fa-tree text-success'
+                'icon' => 'fa-solid fa-tree text-success',
+                'position' => 'center center'
             ],
             'building_tank.jpg' => [
                 'name' => 'Grenier Kura & Réserve de Granit',
                 'badge' => 'Réserves Vivrières & Roches',
                 'desc' => 'Grands silos kura protégeant la pierre de taille et le riz impérial.',
-                'icon' => 'fa-solid fa-mountain text-secondary'
+                'icon' => 'fa-solid fa-mountain text-secondary',
+                'position' => 'center center'
             ],
             'building_research_lab.jpg' => [
                 'name' => 'Académie des Savoirs & Forge',
                 'badge' => 'Recherche Stratégique',
                 'desc' => 'Perfectionnement du tamahagane, métallurgie et doctrines de guerre ancestrales.',
-                'icon' => 'fa-solid fa-scroll text-info'
+                'icon' => 'fa-solid fa-scroll text-info',
+                'position' => 'center center'
             ],
             'building_market.jpg' => [
                 'name' => 'Marché Féodal & Caravanes',
                 'badge' => 'Commerce Provincial',
                 'desc' => 'Échanges de denrées et marchandises avec les marchands itinérants.',
-                'icon' => 'fa-solid fa-coins text-warning'
+                'icon' => 'fa-solid fa-coins text-warning',
+                'position' => 'center center'
             ],
             'building_radar.jpg' => [
                 'name' => 'Tour de Guet Yagura',
                 'badge' => 'Vigie & Feux d\'Alarme',
                 'desc' => 'Surveillance provinciale et détection précoce des armées et espions ennemis.',
-                'icon' => 'fa-solid fa-eye text-danger'
+                'icon' => 'fa-solid fa-eye text-danger',
+                'position' => 'center center'
             ],
             'building_quantum_vault.jpg' => [
                 'name' => 'Cachette Secrète Sous Terre',
                 'badge' => 'Caveau Anti-Pillage',
                 'desc' => 'Réserve inviolable dissimulée sous terre protégeant les stocks du pillage.',
-                'icon' => 'fa-solid fa-vault text-purple'
+                'icon' => 'fa-solid fa-vault text-purple',
+                'position' => 'center center'
             ],
             'building_embassy.jpg' => [
                 'name' => 'Pavillon Diplomatique des Clans',
                 'badge' => 'Traités d\'Alliance',
                 'desc' => 'Pactes d\'alliance scellés sous les auspices des cérémonies du thé.',
-                'icon' => 'fa-solid fa-handshake text-primary'
+                'icon' => 'fa-solid fa-handshake text-primary',
+                'position' => 'center center'
             ],
             'building_sawmill.jpg' => [
                 'name' => 'Scierie Kizukuri',
                 'badge' => 'Atelier (+5% Bois)',
                 'desc' => 'Façonnage des poutres et débitage des troncs de cèdre.',
-                'icon' => 'fa-solid fa-hammer text-warning'
+                'icon' => 'fa-solid fa-hammer text-warning',
+                'position' => 'center center'
             ],
             'building_stonemason.jpg' => [
                 'name' => 'Tailleuse de Granit',
                 'badge' => 'Atelier (+5% Pierre)',
                 'desc' => 'Briqueterie et polissage des blocs de granit pour les forteresses.',
-                'icon' => 'fa-solid fa-trowel-bricks text-secondary'
+                'icon' => 'fa-solid fa-trowel-bricks text-secondary',
+                'position' => 'center center'
             ],
             'building_grain_mill.jpg' => [
                 'name' => 'Meunerie de Riz Impérial',
                 'badge' => 'Atelier (+5% Riz)',
                 'desc' => 'Moulins à eau convertissant le riz koku en farine nourricière.',
-                'icon' => 'fa-solid fa-wheat-awn text-warning'
+                'icon' => 'fa-solid fa-wheat-awn text-warning',
+                'position' => 'center center'
             ],
             'building_blacksmith.jpg' => [
                 'name' => 'Forge d\'Armes & d\'Armures',
                 'badge' => 'Armurerie Ancestrale',
                 'desc' => 'Fabrication des lames légendaires et des armures de samouraï.',
-                'icon' => 'fa-solid fa-fire-burner text-danger'
+                'icon' => 'fa-solid fa-fire-burner text-danger',
+                'position' => 'center center'
             ],
             'building_teahouse.jpg' => [
                 'name' => 'Pavillon de Thé Chashitsu',
                 'badge' => 'Sérénité Démographique',
                 'desc' => 'Cérémonie du thé favorisant le contentement et l\'attrait du fief.',
-                'icon' => 'fa-solid fa-leaf text-teal'
+                'icon' => 'fa-solid fa-leaf text-teal',
+                'position' => 'center center'
             ],
             'building_tournament_square.jpg' => [
                 'name' => 'Place d\'Armes & Tournoi',
                 'badge' => 'Joutes Féodales',
                 'desc' => 'Arène martiale et ralliement des troupes provinciales.',
-                'icon' => 'fa-solid fa-flag text-danger'
+                'icon' => 'fa-solid fa-flag text-danger',
+                'position' => 'center center'
             ]
         ];
 
-        // Découverte dynamique de tous les fichiers présents dans assets/buildings
+        // 1. Découverte prioritaire du dossier public/assets/carrousel
+        $carrouselAssetsDir = __DIR__ . '/../../public/assets/carrousel';
         $buildingsAssetsDir = __DIR__ . '/../../public/assets/buildings';
         $carouselSlides = [];
-        if (is_dir($buildingsAssetsDir)) {
+
+        if (is_dir($carrouselAssetsDir)) {
+            $foundCarrouselFiles = glob($carrouselAssetsDir . '/*.jpg');
+            if (!empty($foundCarrouselFiles)) {
+                sort($foundCarrouselFiles);
+                foreach ($foundCarrouselFiles as $filePath) {
+                    $bName = basename($filePath);
+                    $meta = $carouselBuildingsMeta[$bName] ?? [
+                        'name' => ucwords(str_replace(['carrousel_', '_', '.jpg'], ['', ' ', ''], $bName)),
+                        'badge' => 'Domaine Féodal',
+                        'desc' => 'Panorama stratégique du Japon féodal.',
+                        'icon' => 'fa-solid fa-mountain-sun text-warning',
+                        'position' => 'center center'
+                    ];
+                    $carouselSlides[] = [
+                        'url' => '/public/assets/carrousel/' . $bName,
+                        'name' => $meta['name'],
+                        'badge' => $meta['badge'],
+                        'desc' => $meta['desc'],
+                        'icon' => $meta['icon'],
+                        'position' => $meta['position'] ?? 'center center'
+                    ];
+                }
+            }
+        }
+
+        // 2. Fallback sur assets/buildings si le carrousel dédié est vide
+        if (empty($carouselSlides) && is_dir($buildingsAssetsDir)) {
             $foundFiles = glob($buildingsAssetsDir . '/*.jpg');
             if ($foundFiles) {
                 // Trier pour placer tenshu en premier
@@ -620,14 +738,16 @@ $navItems = [
                         'name' => ucwords(str_replace(['building_', '_', '.jpg'], ['', ' ', ''], $bName)),
                         'badge' => 'Édifice Castral',
                         'desc' => 'Bâtiment traditionnel du domaine féodal.',
-                        'icon' => 'fa-solid fa-landmark text-warning'
+                        'icon' => 'fa-solid fa-landmark text-warning',
+                        'position' => 'center center'
                     ];
                     $carouselSlides[] = [
                         'url' => '/public/assets/buildings/' . $bName,
                         'name' => $meta['name'],
                         'badge' => $meta['badge'],
                         'desc' => $meta['desc'],
-                        'icon' => $meta['icon']
+                        'icon' => $meta['icon'],
+                        'position' => $meta['position'] ?? 'center center'
                     ];
                 }
             }
@@ -662,7 +782,7 @@ $navItems = [
                                 <img src="<?= htmlspecialchars($slide['url']) ?>" 
                                      class="d-block w-100 h-100" 
                                      alt="<?= htmlspecialchars($slide['name']) ?>"
-                                     style="object-fit: cover; object-position: center 30%; filter: brightness(0.92);">
+                                     style="object-fit: cover; object-position: <?= htmlspecialchars($slide['position'] ?? 'center center') ?>; filter: brightness(0.92);">
                                 
                                 <!-- Voile dégradé cinéma -->
                                 <div class="position-absolute top-0 start-0 w-100 h-100" 
