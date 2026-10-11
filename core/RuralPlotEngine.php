@@ -25,7 +25,7 @@ class RuralPlotEngine {
             'desc'         => 'Donjon seigneurial fortifié dominant le domaine. Accélère l\'ensemble des chantiers et affirme l\'autorité féodale.',
             'tile_img'     => '/public/assets/tiles/tile_hq.png',
             'bg_image'     => '/public/assets/buildings/hq.jpg',
-            'base_cost'    => ['metal' => 120, 'crystal' => 90, 'deuterium' => 60, 'clay' => 80],
+            'base_cost'    => ['metal' => 120, 'crystal' => 90, 'deuterium' => 60],
         ],
         'foret' => [
             'type'         => 'foret',
@@ -40,7 +40,7 @@ class RuralPlotEngine {
             'desc'         => 'Exploitation forestière et camp de bûcheronnage abattant les nobles cèdres pour les charpentes et défenses.',
             'tile_img'     => '/public/assets/tiles/tile_bucheron.png',
             'bg_image'     => '/public/assets/resources/terroir_wood.jpg',
-            'base_cost'    => ['metal' => 45, 'crystal' => 60, 'deuterium' => 20, 'clay' => 30],
+            'base_cost'    => ['metal' => 45, 'crystal' => 60, 'deuterium' => 20],
         ],
         'carriere' => [
             'type'         => 'carriere',
@@ -55,7 +55,7 @@ class RuralPlotEngine {
             'desc'         => 'Extraction à flanc de falaise de blocs de granit pour fortifier les remparts et ériger les fondations cyclopéennes.',
             'tile_img'     => '/public/assets/tiles/tile_carriere.png',
             'bg_image'     => '/public/assets/resources/terroir_stone.jpg',
-            'base_cost'    => ['metal' => 60, 'crystal' => 40, 'deuterium' => 20, 'clay' => 40],
+            'base_cost'    => ['metal' => 60, 'crystal' => 40, 'deuterium' => 20],
         ],
         'culture_the' => [
             'type'         => 'culture_the',
@@ -70,7 +70,7 @@ class RuralPlotEngine {
             'desc'         => 'Terrasses étagées de théiers taillés alimentant la maison de thé, stimulant l\'énergie et la concentration du domaine.',
             'tile_img'     => '/public/assets/tiles/tile_ferme.png',
             'bg_image'     => '/public/assets/resources/terroir_tea.jpg',
-            'base_cost'    => ['metal' => 50, 'crystal' => 35, 'deuterium' => 45, 'clay' => 25],
+            'base_cost'    => ['metal' => 50, 'crystal' => 35, 'deuterium' => 45],
         ],
         'village' => [
             'type'         => 'village',
@@ -85,7 +85,7 @@ class RuralPlotEngine {
             'desc'         => 'Hameau central traditionnel composé de maisons minka aux toits de chaume. Détermine la capacité d\'accueil maximale de villageois.',
             'tile_img'     => '/public/assets/tiles/tile_storage.png',
             'bg_image'     => '/public/assets/resources/terroir_village.jpg',
-            'base_cost'    => ['metal' => 70, 'crystal' => 50, 'deuterium' => 30, 'clay' => 60],
+            'base_cost'    => ['metal' => 70, 'crystal' => 50, 'deuterium' => 30],
         ],
         'fosse_argile' => [
             'type'         => 'fosse_argile',
@@ -100,7 +100,7 @@ class RuralPlotEngine {
             'desc'         => 'Gisements alluviaux en bordure de rivière et fours noborigama pour modeler les tuiles étanches et la céramique.',
             'tile_img'     => '/public/assets/tiles/tile_argiliere.png',
             'bg_image'     => '/public/assets/resources/terroir_clay.jpg',
-            'base_cost'    => ['metal' => 45, 'crystal' => 50, 'deuterium' => 30, 'clay' => 20],
+            'base_cost'    => ['metal' => 45, 'crystal' => 50, 'deuterium' => 30],
         ],
         'riziere' => [
             'type'         => 'riziere',
@@ -115,7 +115,7 @@ class RuralPlotEngine {
             'desc'         => 'Bassins inondés miroitants produisant le riz nourricier, base des vivres, de la farine et du saké féodal.',
             'tile_img'     => '/public/assets/tiles/tile_riziere.png',
             'bg_image'     => '/public/assets/resources/terroir_rice.jpg',
-            'base_cost'    => ['metal' => 35, 'crystal' => 45, 'deuterium' => 60, 'clay' => 35],
+            'base_cost'    => ['metal' => 35, 'crystal' => 45, 'deuterium' => 60],
         ],
         'champ_soja' => [
             'type'         => 'champ_soja',
@@ -130,7 +130,7 @@ class RuralPlotEngine {
             'desc'         => 'Sillons agricoles rectangulaires fertiles fournissant le soja essentiel aux sauces, tofu et miso nutritif.',
             'tile_img'     => '/public/assets/tiles/tile_ferme.png',
             'bg_image'     => '/public/assets/resources/terroir_soybean.jpg',
-            'base_cost'    => ['metal' => 40, 'crystal' => 30, 'deuterium' => 40, 'clay' => 25],
+            'base_cost'    => ['metal' => 40, 'crystal' => 30, 'deuterium' => 40],
         ],
         'sanctuaire_shinto' => [
             'type'         => 'sanctuaire_shinto',
@@ -145,7 +145,7 @@ class RuralPlotEngine {
             'desc'         => 'Bosquet sacré orné de lanternes et d\'un grand torii vermillon. Rayonne la sérénité divine et soutient le moral des villageois.',
             'tile_img'     => '/public/assets/tiles/tile_temple.png',
             'bg_image'     => '/public/assets/resources/terroir_shrine.jpg',
-            'base_cost'    => ['metal' => 80, 'crystal' => 70, 'deuterium' => 50, 'clay' => 50],
+            'base_cost'    => ['metal' => 80, 'crystal' => 70, 'deuterium' => 50],
         ],
     ];
 
@@ -191,7 +191,6 @@ class RuralPlotEngine {
             'metal'     => (int)round($base['metal'] * $multiplier),
             'crystal'   => (int)round($base['crystal'] * $multiplier),
             'deuterium' => (int)round($base['deuterium'] * $multiplier),
-            'clay'      => (int)round(($base['clay'] ?? 30) * $multiplier),
         ];
     }
 

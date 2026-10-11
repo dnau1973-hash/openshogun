@@ -164,7 +164,6 @@
                     const costMetal = parseInt(d.costMetal, 10) || 0;
                     const costCrystal = parseInt(d.costCrystal, 10) || 0;
                     const costDeut = parseInt(d.costDeuterium, 10) || 0;
-                    const costClay = parseInt(d.costClay, 10) || 0;
 
                     const addTag = (icon, name, costVal, playerStock) => {
                         if (costVal <= 0) return;
@@ -178,9 +177,6 @@
                     addTag('fa-solid fa-tree text-success', 'Bois', costMetal, stocks.metal);
                     addTag('fa-solid fa-mountain text-secondary', 'Pierre', costCrystal, stocks.crystal);
                     addTag('fa-solid fa-wheat-awn text-warning', 'Riz', costDeut, stocks.deuterium);
-                    if (costClay > 0) {
-                        addTag('fa-solid fa-cubes-stacked text-orange', 'Argile', costClay, stocks.clay || 99999);
-                    }
                 }
             }
 

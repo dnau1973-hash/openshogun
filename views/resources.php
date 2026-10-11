@@ -307,7 +307,6 @@ ob_start();
                              data-bg-img="<?= htmlspecialchars($p['bg_image']) ?>"
                              data-cost-metal="<?= (int)$cost['metal'] ?>"
                              data-cost-crystal="<?= (int)$cost['crystal'] ?>"
-                             data-cost-clay="<?= (int)$cost['clay'] ?>"
                              data-cost-deuterium="<?= (int)$cost['deuterium'] ?>"
                              data-duration="<?= (int)$p['duration'] ?>"
                              data-can-afford="<?= $canAfford ? '1' : '0' ?>"
