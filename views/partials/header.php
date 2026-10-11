@@ -725,6 +725,259 @@ $navItems = [
         });
         </script>
 
+        <!-- ── BARRE COMPACTE D'AFFICHAGE DES RESSOURCES (Option A : Tabler Clair Épuré) ── -->
+        <?php if ($planet): ?>
+        <?php
+        $metalMax = max(1, (float)($planet['metal_max'] ?? 15000));
+        $pctMetal = min(100, max(0, ((float)($planet['metal'] ?? 0) / $metalMax) * 100));
+
+        $crystalMax = max(1, (float)($planet['crystal_max'] ?? 15000));
+        $pctCrystal = min(100, max(0, ((float)($planet['crystal'] ?? 0) / $crystalMax) * 100));
+
+        $deutMax = max(1, (float)($planet['deuterium_max'] ?? 15000));
+        $pctDeut = min(100, max(0, ((float)($planet['deuterium'] ?? 0) / $deutMax) * 100));
+
+        $prodMetal = (float)($planet['prod_rates']['metal'] ?? 0);
+        $prodCrystal = (float)($planet['prod_rates']['crystal'] ?? 0);
+        $prodDeut = (float)($planet['prod_rates']['deuterium'] ?? 0);
+
+        $flourStock = (float)($planet['rice_flour'] ?? 0);
+        $flourMax = max(1, (int)($planet['rice_flour_max'] ?? 10000));
+        $pctFlour = min(100, max(0, ($flourStock / $flourMax) * 100));
+
+        $sakeStock = (float)($planet['sake'] ?? 0);
+        $sakeMax = max(1, (int)($planet['sake_max'] ?? 10000));
+        $pctSake = min(100, max(0, ($sakeStock / $sakeMax) * 100));
+
+        $beamsStock = (float)($planet['wooden_beams'] ?? 0);
+        $beamsMax = max(1, (int)($planet['wooden_beams_max'] ?? 10000));
+        $pctBeams = min(100, max(0, ($beamsStock / $beamsMax) * 100));
+
+        $eBalance = (int)($planet['energy_max'] ?? 0) - (int)($planet['energy_used'] ?? 0);
+        $eOk = ($eBalance >= 0);
+        $pctEnergy = ($planet['energy_max'] > 0) ? min(100, max(0, ((int)($planet['energy_used'] ?? 0) / (int)$planet['energy_max']) * 100)) : 0;
+
+        $curPop = (int)($planet['population'] ?? 100);
+        $maxPop = max(1, (int)($planet['population_max'] ?? 100));
+        $pctPop = min(100, max(0, ($curPop / $maxPop) * 100));
+        ?>
+
+        <style>
+        .resource-strip-scroll {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .resource-strip-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .resource-item-pill {
+            transition: background-color 0.15s ease, transform 0.1s ease;
+            border-radius: 6px;
+            padding: 2px 6px;
+            white-space: nowrap;
+        }
+        .resource-item-pill:hover {
+            background-color: rgba(0, 0, 0, 0.04);
+        }
+        </style>
+
+        <div class="border-bottom bg-white py-1 px-3 px-lg-4 shadow-sm d-print-none position-relative" style="z-index: 5;">
+            <div class="container-fluid p-0 d-flex align-items-center justify-content-start justify-content-lg-center gap-2 gap-md-3 gap-lg-4 resource-strip-scroll flex-nowrap py-0.5">
+                
+                <!-- GROUPE 1 : MATIÈRES PREMIÈRES (Bois, Pierre, Riz) -->
+                <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
+                    
+                    <!-- 1. Bois de Cèdre -->
+                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Bois de Cèdre</strong><br>Stock : <?= number_format((int)$planet['metal']) ?> / <?= number_format($metalMax) ?> (<?= round($pctMetal) ?>%)<br><span class='text-success'>+<?= number_format($prodMetal) ?>/heure</span>">
+                        <i class="fa-solid fa-tree text-success fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-baseline gap-1">
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                      id="res-val-metal"
+                                      data-current="<?= (float)$planet['metal'] ?>"
+                                      data-max="<?= $metalMax ?>"
+                                      data-prod="<?= $prodMetal ?>">
+                                    <?= number_format((int)$planet['metal']) ?>
+                                </span>
+                                <span class="text-success font-monospace" style="font-size:0.65rem;">+<?= number_format($prodMetal) ?>/h</span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:52px;">
+                                <div class="progress-bar bg-success" id="bar-metal" style="width:<?= $pctMetal ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 2. Pierre de Granit -->
+                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Pierre de Granit</strong><br>Stock : <?= number_format((int)$planet['crystal']) ?> / <?= number_format($crystalMax) ?> (<?= round($pctCrystal) ?>%)<br><span class='text-primary'>+<?= number_format($prodCrystal) ?>/heure</span>">
+                        <i class="fa-solid fa-mountain text-primary fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-baseline gap-1">
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                      id="res-val-crystal"
+                                      data-current="<?= (float)$planet['crystal'] ?>"
+                                      data-max="<?= $crystalMax ?>"
+                                      data-prod="<?= $prodCrystal ?>">
+                                    <?= number_format((int)$planet['crystal']) ?>
+                                </span>
+                                <span class="text-primary font-monospace" style="font-size:0.65rem;">+<?= number_format($prodCrystal) ?>/h</span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:52px;">
+                                <div class="progress-bar bg-primary" id="bar-crystal" style="width:<?= $pctCrystal ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 3. Riz Koku -->
+                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Riz Koku (Vivres)</strong><br>Stock : <?= number_format((int)$planet['deuterium']) ?> / <?= number_format($deutMax) ?> (<?= round($pctDeut) ?>%)<br><span class='text-warning'>+<?= number_format($prodDeut) ?>/heure</span>">
+                        <i class="fa-solid fa-wheat-awn text-warning fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-baseline gap-1">
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                      id="res-val-deut"
+                                      data-current="<?= (float)$planet['deuterium'] ?>"
+                                      data-max="<?= $deutMax ?>"
+                                      data-prod="<?= $prodDeut ?>">
+                                    <?= number_format((int)$planet['deuterium']) ?>
+                                </span>
+                                <span class="text-warning font-monospace" style="font-size:0.65rem;">+<?= number_format($prodDeut) ?>/h</span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:52px;">
+                                <div class="progress-bar bg-warning" id="bar-deut" style="width:<?= $pctDeut ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                </div>
+
+                <!-- SÉPARATEUR VERTICAL 1 -->
+                <div class="vr opacity-25 my-auto flex-shrink-0" style="height: 20px;"></div>
+
+                <!-- GROUPE 2 : VIVRES RAFFINÉES & MATÉRIAUX -->
+                <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
+                    
+                    <!-- 4. Farine de Riz -->
+                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Farine de Riz (Komeko)</strong><br>Stock : <?= number_format((int)$flourStock) ?> / <?= number_format($flourMax) ?> (<?= round($pctFlour) ?>%)">
+                        <i class="fa-solid fa-bowl-rice text-secondary fs-3"></i>
+                        <div class="lh-1">
+                            <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                  id="res-val-rice-flour"
+                                  data-current="<?= $flourStock ?>"
+                                  data-max="<?= $flourMax ?>">
+                                <?= number_format((int)$flourStock) ?>
+                            </span>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
+                                <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 5. Saké Impérial -->
+                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Saké Impérial</strong><br>Stock : <?= number_format((int)$sakeStock) ?> / <?= number_format($sakeMax) ?> (<?= round($pctSake) ?>%)<br><span class='text-purple'>Bonus moral actif : +15% satisfaction</span>">
+                        <i class="fa-solid fa-wine-bottle text-purple fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                      id="res-val-sake"
+                                      data-current="<?= $sakeStock ?>"
+                                      data-max="<?= $sakeMax ?>">
+                                    <?= number_format((int)$sakeStock) ?>
+                                </span>
+                                <span class="badge bg-purple-lt text-purple font-monospace py-0 px-1" style="font-size:0.6rem;">+15%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
+                                <div class="progress-bar bg-purple" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 6. Poutres en bois -->
+                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Poutres en bois (Charpenterie)</strong><br>Stock : <?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?> (<?= round($pctBeams) ?>%)">
+                        <i class="fa-solid fa-hammer text-orange fs-3"></i>
+                        <div class="lh-1">
+                            <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                  id="res-val-wooden-beams"
+                                  data-current="<?= $beamsStock ?>"
+                                  data-max="<?= $beamsMax ?>">
+                                <?= number_format((int)$beamsStock) ?>
+                            </span>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
+                                <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                </div>
+
+                <!-- SÉPARATEUR VERTICAL 2 -->
+                <div class="vr opacity-25 my-auto flex-shrink-0" style="height: 20px;"></div>
+
+                <!-- GROUPE 3 : SÉRÉNITÉ, PEUPLE & KOBANS -->
+                <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
+                    
+                    <!-- 7. Sérénité Shinto -->
+                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Sérénité Shintō</strong><br>Solde net : <strong class='<?= $eOk ? 'text-teal' : 'text-danger' ?>'><?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?> ferveur</strong><br>Consommation : <?= number_format((int)($planet['energy_used'] ?? 0)) ?> / <?= number_format((int)($planet['energy_max'] ?? 0)) ?> ferveur">
+                        <i class="fa-solid fa-torii-gate <?= $eOk ? 'text-teal' : 'text-danger' ?> fs-3"></i>
+                        <div class="lh-1">
+                            <span class="fw-bold font-monospace <?= $eOk ? 'text-teal' : 'text-danger' ?>" style="font-size:0.82rem;">
+                                <?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?>
+                            </span>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
+                                <div class="progress-bar <?= $eOk ? 'bg-teal' : 'bg-danger' ?>" style="width:<?= $pctEnergy ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 8. Population & Logements -->
+                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Démographie &amp; Main-d'œuvre</strong><br>Population : <?= number_format($curPop) ?> / <?= number_format($maxPop) ?> logements">
+                        <i class="fa-solid fa-users text-blue fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-baseline gap-1 font-monospace" style="font-size:0.82rem;">
+                                <span class="fw-bold text-dark"><?= number_format($curPop) ?></span>
+                                <span class="text-muted" style="font-size:0.65rem;">/ <?= number_format($maxPop) ?></span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
+                                <div class="progress-bar bg-primary" style="width:<?= $pctPop ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 9. Trésor Impérial (Kobans) -->
+                    <a href="?page=privilege" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Trésor Impérial</strong><br><?= number_format($userGoldCoins) ?> Kobans d'or">
+                        <i class="fa-solid fa-coins text-warning fs-3"></i>
+                        <div class="lh-1">
+                            <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;">
+                                <?= number_format($userGoldCoins) ?>
+                            </span>
+                            <div class="text-warning font-monospace" style="font-size:0.60rem; line-height: 1;">Kobans</div>
+                        </div>
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+        <?php endif; ?>
+
 
 
         <!-- Bannière d'alerte Tour de Guet -->

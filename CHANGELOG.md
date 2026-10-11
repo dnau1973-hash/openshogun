@@ -5,6 +5,14 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Barre d'Affichage Compacte des Ressources sous le Slideshow (`views/partials/header.php`) :**
+  * **Intégration d'un bandeau Tabler blanc ultra-fin (~38px) :** Affichage panoramique sobre et épuré directement sous le carrousel des bâtiments féodaux (`#headerBuildingsCarousel`).
+  * **Inventaire complet des 9 ressources & piliers :**
+    - *Matières premières :* Bois de Cèdre, Pierre de Granit et Riz Koku avec taux horaire (+XX/h) et micro-jauges de saturation.
+    - *Vivres raffinées & matériaux :* Farine de Riz, Saké Impérial (+15% moral) et Poutres de charpente avec jauges de stock.
+    - *Société & Monnaie :* Sérénité Shintō (solde net), Démographie & Logements (habitants/max) et Trésor en Kobans.
+  * **Ergonomie & Dynamique :** Connexion directe aux tickers JavaScript temps réel (`res-val-*`, `bar-*`), infobulles détaillées au survol et défilement horizontal fluide tactile pour mobiles.
+
 - **Atelier Pédagogique — Masterclass IA Vidéo & Prompt Engineering de Trailer (`views/atelier-pedagogique/multimedia/ia-video-trailer.php`, `views/pedagogy.php`, `views/partials/admin_pedagogy.php`) :**
   * **Cours illustré interactif :** Conception d'un module d'apprentissage complet dédié à la création d'un trailer vidéo par intelligence artificielle générative (Text-to-Video & Image-to-Video).
   * **Anatomie d'un prompt vidéo & lexique cinématographique :** Formule maîtresse de prompt en 5 piliers (`[Style & Rendu] + [Sujet & Action] + [Mouvement Caméra & Cadrage] + [Éclairage & Atmosphère] + [Paramètres Temporels & Qualité]`), vocabulaire de prise de vue (*Slow Tilt-Up*, *Tracking*, *Aerial Isometric 45° Timelapse*, *Handheld*) et principes de cohérence temporelle.

@@ -279,7 +279,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
                             <li><a class="dropdown-item weather-dropdown-item text-muted" data-theme="off" href="javascript:void(0)" onclick="setShogunWeather('off')"><i class="fa-solid fa-pause me-2"></i>Désactiver animations (Mode Zen)</a></li>
                         </ul>
                     </div>
-                    <?= AiPromptHelper::renderBadge('shogun_rural_terroir_9plots.jpg', 'Panorama Stratégique des 9 Parcelles Féodales', '/public/assets/shogun_rural_terroir_9plots.jpg', '', true) ?>
+                    <?php /* = AiPromptHelper::renderBadge('shogun_rural_terroir_9plots.jpg', 'Panorama Stratégique des 9 Parcelles Féodales', '/public/assets/shogun_rural_terroir_9plots.jpg', '', true) */ ?>
                     <a href="?page=city" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">
                         <i class="fa-solid fa-chess-rook me-1"></i>Vers la Cité Castrale &rarr;
                     </a>
