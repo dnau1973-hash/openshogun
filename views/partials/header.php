@@ -741,6 +741,34 @@ $navItems = [
         $prodCrystal = (float)($planet['prod_rates']['crystal'] ?? 0);
         $prodDeut = (float)($planet['prod_rates']['deuterium'] ?? 0);
 
+        // Terroirs agricoles spécialisés (Argile, Thé, Soja)
+        $ruralPlotsData = [];
+        if (!empty($planet['id'])) {
+            try {
+                $stmtRural = $db->prepare("SELECT structure_type, level, max_level, prod_hourly FROM planet_rural_plots WHERE planet_id = ?");
+                $stmtRural->execute([(int)$planet['id']]);
+                while ($rRow = $stmtRural->fetch(PDO::FETCH_ASSOC)) {
+                    $ruralPlotsData[$rRow['structure_type']] = $rRow;
+                }
+            } catch (Throwable $e) {
+                $ruralPlotsData = [];
+            }
+        }
+        $clayHourly = (float)($ruralPlotsData['fosse_argile']['prod_hourly'] ?? 0);
+        $clayLvl = (int)($ruralPlotsData['fosse_argile']['level'] ?? 1);
+        $clayMaxLvl = max(1, (int)($ruralPlotsData['fosse_argile']['max_level'] ?? 30));
+        $pctClay = min(100, max(0, round(($clayLvl / $clayMaxLvl) * 100)));
+
+        $teaHourly = (float)($ruralPlotsData['culture_the']['prod_hourly'] ?? 0);
+        $teaLvl = (int)($ruralPlotsData['culture_the']['level'] ?? 1);
+        $teaMaxLvl = max(1, (int)($ruralPlotsData['culture_the']['max_level'] ?? 30));
+        $pctTea = min(100, max(0, round(($teaLvl / $teaMaxLvl) * 100)));
+
+        $soyHourly = (float)($ruralPlotsData['champ_soja']['prod_hourly'] ?? 0);
+        $soyLvl = (int)($ruralPlotsData['champ_soja']['level'] ?? 1);
+        $soyMaxLvl = max(1, (int)($ruralPlotsData['champ_soja']['max_level'] ?? 30));
+        $pctSoy = min(100, max(0, round(($soyLvl / $soyMaxLvl) * 100)));
+
         $flourStock = (float)($planet['rice_flour'] ?? 0);
         $flourMax = max(1, (int)($planet['rice_flour_max'] ?? 10000));
         $pctFlour = min(100, max(0, ($flourStock / $flourMax) * 100));
@@ -784,7 +812,7 @@ $navItems = [
         </style>
 
         <div class="border-bottom bg-white py-1 px-3 px-lg-4 shadow-sm d-print-none position-relative" style="z-index: 5;">
-            <div class="container-fluid p-0 d-flex align-items-center justify-content-start justify-content-lg-center gap-2 gap-md-3 gap-lg-4 resource-strip-scroll flex-nowrap py-0.5">
+            <div class="container-fluid p-0 d-flex align-items-center justify-content-start justify-content-lg-center gap-2 gap-md-3 gap-lg-3 resource-strip-scroll flex-nowrap py-0.5">
                 
                 <!-- GROUPE 1 : MATIÈRES PREMIÈRES (Bois, Pierre, Riz) -->
                 <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
@@ -860,10 +888,72 @@ $navItems = [
                 <!-- SÉPARATEUR VERTICAL 1 -->
                 <div class="vr opacity-25 my-auto flex-shrink-0" style="height: 20px;"></div>
 
-                <!-- GROUPE 2 : VIVRES RAFFINÉES & MATÉRIAUX -->
+                <!-- GROUPE 2 : TERROIRS SPÉCIALISÉS (Argile, Thé, Soja) -->
                 <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
                     
-                    <!-- 4. Farine de Riz -->
+                    <!-- 4. Argile & Céramique -->
+                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Argile &amp; Tuiles (Fosse)</strong><br>Production : <strong class='text-orange'>+<?= number_format($clayHourly) ?>/heure</strong><br>Développement : Niv. <?= $clayLvl ?> / <?= $clayMaxLvl ?> (<?= $pctClay ?>%)">
+                        <i class="fa-solid fa-cubes-stacked text-orange fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-baseline gap-1">
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;">
+                                    Niv. <?= $clayLvl ?>
+                                </span>
+                                <span class="text-orange font-monospace" style="font-size:0.65rem;">+<?= number_format($clayHourly) ?>/h</span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
+                                <div class="progress-bar bg-orange" style="width:<?= $pctClay ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 5. Thé & Matcha -->
+                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Feuilles de Thé &amp; Matcha (Coteaux)</strong><br>Production : <strong class='text-teal'>+<?= number_format($teaHourly) ?>/heure</strong><br>Développement : Niv. <?= $teaLvl ?> / <?= $teaMaxLvl ?> (<?= $pctTea ?>%)">
+                        <i class="fa-solid fa-leaf text-teal fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-baseline gap-1">
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;">
+                                    Niv. <?= $teaLvl ?>
+                                </span>
+                                <span class="text-teal font-monospace" style="font-size:0.65rem;">+<?= number_format($teaHourly) ?>/h</span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
+                                <div class="progress-bar bg-teal" style="width:<?= $pctTea ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 6. Soja & Miso -->
+                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Gousses de Soja &amp; Miso (Champ)</strong><br>Production : <strong class='text-lime'>+<?= number_format($soyHourly) ?>/heure</strong><br>Développement : Niv. <?= $soyLvl ?> / <?= $soyMaxLvl ?> (<?= $pctSoy ?>%)">
+                        <i class="fa-solid fa-seedling text-lime fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-baseline gap-1">
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;">
+                                    Niv. <?= $soyLvl ?>
+                                </span>
+                                <span class="text-lime font-monospace" style="font-size:0.65rem;">+<?= number_format($soyHourly) ?>/h</span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
+                                <div class="progress-bar bg-lime" style="width:<?= $pctSoy ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                </div>
+
+                <!-- SÉPARATEUR VERTICAL 2 -->
+                <div class="vr opacity-25 my-auto flex-shrink-0" style="height: 20px;"></div>
+
+                <!-- GROUPE 3 : VIVRES RAFFINÉES & MATÉRIAUX -->
+                <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
+                    
+                    <!-- 7. Farine de Riz -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Farine de Riz (Komeko)</strong><br>Stock : <?= number_format((int)$flourStock) ?> / <?= number_format($flourMax) ?> (<?= round($pctFlour) ?>%)">
@@ -881,7 +971,7 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 5. Saké Impérial -->
+                    <!-- 8. Saké Impérial -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Saké Impérial</strong><br>Stock : <?= number_format((int)$sakeStock) ?> / <?= number_format($sakeMax) ?> (<?= round($pctSake) ?>%)<br><span class='text-purple'>Bonus moral actif : +15% satisfaction</span>">
@@ -902,7 +992,7 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 6. Poutres en bois -->
+                    <!-- 9. Poutres en bois -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Poutres en bois (Charpenterie)</strong><br>Stock : <?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?> (<?= round($pctBeams) ?>%)">
@@ -922,13 +1012,13 @@ $navItems = [
 
                 </div>
 
-                <!-- SÉPARATEUR VERTICAL 2 -->
+                <!-- SÉPARATEUR VERTICAL 3 -->
                 <div class="vr opacity-25 my-auto flex-shrink-0" style="height: 20px;"></div>
 
-                <!-- GROUPE 3 : SÉRÉNITÉ, PEUPLE & KOBANS -->
+                <!-- GROUPE 4 : SÉRÉNITÉ, PEUPLE & KOBANS -->
                 <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
                     
-                    <!-- 7. Sérénité Shinto -->
+                    <!-- 10. Sérénité Shinto -->
                     <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Sérénité Shintō</strong><br>Solde net : <strong class='<?= $eOk ? 'text-teal' : 'text-danger' ?>'><?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?> ferveur</strong><br>Consommation : <?= number_format((int)($planet['energy_used'] ?? 0)) ?> / <?= number_format((int)($planet['energy_max'] ?? 0)) ?> ferveur">

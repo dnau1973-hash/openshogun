@@ -42,33 +42,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 ?>
 
 <style>
-/* Disposition générale du Domaine Rural */
-.container {
-    max-width: 1850px !important;
-    width: 98% !important;
-    margin: 1rem auto !important;
-}
-
-.grid-main {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 370px;
-    gap: 1.5rem;
-    align-items: stretch;
-}
-
-@media (max-width: 1200px) {
-    .grid-main {
-        grid-template-columns: 1fr;
-    }
-}
-
-.east-sidebar-col {
-    height: 100%;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-}
-
 /* ========================================================
    CARTE ILLUSTRÉE PANORAMIQUE FIXE 16:9 (SANS DRAG/ZOOM)
    ======================================================== */
@@ -221,15 +194,10 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 }
 </style>
 
-<div class="container">
-
-    <!-- Grille Principale (Scène Interactive à Gauche, Accordéon Stratégique à Droite) -->
-    <div class="grid-main">
-
-        <!-- ========================================================
-             COLONNE GAUCHE : CARTE ILLUSTRÉE PANORAMIQUE DU FIEF
-             ======================================================== -->
-        <div class="card">
+<?php
+$queueTitle = 'Chantiers Ruraux';
+ob_start();
+?>
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
                 <div>
                     <h2 class="card-title d-flex align-items-center gap-2">
@@ -385,16 +353,11 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 
                 </div>
             </div>
-        </div>
+<?php
+$centerCardContent = ob_get_clean();
 
-        <!-- ========================================================
-             COLONNE DROITE : ACCORDÉON MUTUALISÉ (EST)
-             ======================================================== -->
-        <div class="east-sidebar-col">
-            <?php require __DIR__ . '/partials/resources_east_accordion.php'; ?>
-        </div>
-    </div>
-</div>
+ob_start();
+?>
 
 <!-- ========================================================
      MODALE D'AMÉLIORATION INTERACTIVE D'UNE PARCELLE (TABLER)
@@ -526,3 +489,7 @@ async function openCityRenamePrompt() {
 }
 </script>
 <script src="/public/js/rural_domain_map.js?v=<?= file_exists(__DIR__ . '/../public/js/rural_domain_map.js') ? filemtime(__DIR__ . '/../public/js/rural_domain_map.js') : time() ?>"></script>
+<?php
+$extraHtml = ob_get_clean();
+require __DIR__ . '/partials/game_screen_template.php';
+?>

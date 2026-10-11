@@ -98,33 +98,6 @@ foreach (BUILDINGS as $code => $bInfo) {
 ?>
 
 <style>
-/* Forcer la largeur maximale de la page pour profiter pleinement de la cité castrale */
-.container {
-    max-width: 1850px !important;
-    width: 98% !important;
-    margin: 1rem auto !important;
-}
-
-.grid-main {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 370px;
-    gap: 1.5rem;
-    align-items: stretch;
-}
-
-@media (max-width: 1200px) {
-    .grid-main {
-        grid-template-columns: 1fr;
-    }
-}
-
-.east-sidebar-col {
-    height: 100%;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-}
-
 .fields-viewport.rts-city-surface {
     background-image: url('/public/assets/shogun_castle_city_bg.jpg?v=<?= $bgVersion ?>') !important;
 }
@@ -176,9 +149,10 @@ foreach (BUILDINGS as $code => $bInfo) {
 }
 </style>
 <?= SlotPositionEngine::renderCss('city') ?>
-
-<div class="grid-main">
-    <div class="card">
+<?php
+$queueTitle = 'Chantiers Urbains';
+ob_start();
+?>
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
             <div>
                 <h2 class="card-title d-flex align-items-center gap-2">
@@ -357,16 +331,11 @@ foreach (BUILDINGS as $code => $bInfo) {
                 <?php endforeach; ?>
             </div>
         </div>
-    </div>
+<?php
+$centerCardContent = ob_get_clean();
 
-    <!-- Colonne Est : Accordéon Stratégique Mutualisé (Didacticiel, Chantiers, Récoltes, Garnison) -->
-    <div class="east-sidebar-col">
-        <?php 
-            $queueTitle = 'Chantiers Urbains';
-            require __DIR__ . '/partials/resources_east_accordion.php'; 
-        ?>
-    </div>
-</div>
+ob_start();
+?>
 
 
 <!-- Modale de Fondation sur Emplacement Libre (Style Travian) -->
@@ -634,4 +603,8 @@ async function openCityRenamePrompt() {
     }
 }
 </script>
+<?php
+$extraHtml = ob_get_clean();
+require __DIR__ . '/partials/game_screen_template.php';
+?>
 

@@ -10,47 +10,10 @@ $centerY = isset($_GET['y']) ? (int)$_GET['y'] : (int)$planet['coord_y'];
 
 $questEngine = new QuestEngine();
 $questEngine->recordAction((int)$user['id'], 'visit_map');
+
+$queueTitle = 'Mouvements & Chantiers';
+ob_start();
 ?>
-
-<style>
-.container {
-    max-width: 1850px !important;
-    width: 98% !important;
-    margin: 1rem auto !important;
-}
-
-.grid-main {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 370px;
-    gap: 1.5rem;
-    align-items: stretch;
-}
-
-@media (max-width: 1200px) {
-    .grid-main {
-        grid-template-columns: 1fr;
-    }
-}
-
-.east-sidebar-col {
-    height: 100%;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.card-map-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-</style>
-
-<div class="grid-main">
-    <!-- ========================================================
-         COLONNE GAUCHE : CARTE INTERACTIVE DES PROVINCES
-         ======================================================== -->
-    <div class="card card-map-wrapper shadow-sm" style="border-radius: 12px; overflow: hidden;">
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
             <div>
                 <h2 class="card-title d-flex align-items-center gap-2">
@@ -109,15 +72,11 @@ $questEngine->recordAction((int)$user['id'], 'visit_map');
         <div class="galaxy-map-wrapper map-fullwidth-wrapper" id="galaxyMapContainer" style="width: 100%; border: none; border-radius: 0; flex: 1 1 auto; min-height: 560px;">
             <!-- Rendu interactif via GalaxyMapController -->
         </div>
-    </div>
+<?php
+$centerCardContent = ob_get_clean();
 
-    <!-- ========================================================
-         COLONNE DROITE : ACCORDÉON MUTUALISÉ (EST)
-         ======================================================== -->
-    <div class="east-sidebar-col">
-        <?php require __DIR__ . '/partials/resources_east_accordion.php'; ?>
-    </div>
-</div>
+ob_start();
+?>
 
 <!-- =====================================================
      MODAL CARTE — Informations de la Zone Sélectionnée (Modal Blanc Simple)
@@ -638,4 +597,8 @@ window.abandonOasisDirect = async function(oasisId) {
     }
 };
 </script>
+<?php
+$extraHtml = ob_get_clean();
+require __DIR__ . '/partials/game_screen_template.php';
+?>
 

@@ -5,10 +5,20 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
+- **Template de Grille & Présentation Harmonisée (`views/partials/game_screen_template.php`, `views/resources.php`, `views/city.php`, `views/map.php`) :**
+  * **Architecture à brique unique (`game_screen_template.php`) :** Conception d'un composant de mise en page réutilisable centralisant le conteneur plein écran (`.rts-screen-container`), la grille 2 colonnes responsive (`.grid-main`), la carte centrale interactive (`.rts-center-card`) et la colonne latérale Est (`.east-sidebar-col`).
+  * **Uniformisation visuelle (border-radius 8px) :** Résolution des disparités d'arrondi (notamment les 12px de la carte du monde) en standardisant les styles Tabler (rayon de courbure unifié à 8px, ombre douce `shadow-sm`, fond blanc, bordure nette).
+  * **Maintenance simplifiée :** Toute future modification d'enveloppe, d'espacement ou de comportement de la barre latérale s'effectue désormais en un seul point central.
+
+- **Complétion des Terroirs Spécialisés dans la Barre de Ressources (`views/partials/header.php`) :**
+  * **Ajout de l'Argile, du Thé et du Soja :** Intégration des 3 ressources issues des parcelles rurales spécialisées (`fosse_argile`, `culture_the`, `champ_soja`) dans le bandeau compact sous le slider.
+  * **Suivi complet :** Affichage de la production horaire (+XX/h), des jauges de capacité de stockage, des niveaux de parcelles et d'infobulles contextuelles pour l'ensemble des 12 ressources et piliers féodaux.
+
 - **Barre d'Affichage Compacte des Ressources sous le Slideshow (`views/partials/header.php`) :**
   * **Intégration d'un bandeau Tabler blanc ultra-fin (~38px) :** Affichage panoramique sobre et épuré directement sous le carrousel des bâtiments féodaux (`#headerBuildingsCarousel`).
-  * **Inventaire complet des 9 ressources & piliers :**
-    - *Matières premières :* Bois de Cèdre, Pierre de Granit et Riz Koku avec taux horaire (+XX/h) et micro-jauges de saturation.
+  * **Inventaire complet des 12 ressources & piliers :**
+    - *Matières premières de base :* Bois de Cèdre, Pierre de Granit et Riz Koku avec taux horaire (+XX/h) et micro-jauges de saturation.
+    - *Terroirs spécialisés :* Argile, Thé Vert et Soja avec niveaux et cadences horaires.
     - *Vivres raffinées & matériaux :* Farine de Riz, Saké Impérial (+15% moral) et Poutres de charpente avec jauges de stock.
     - *Société & Monnaie :* Sérénité Shintō (solde net), Démographie & Logements (habitants/max) et Trésor en Kobans.
   * **Ergonomie & Dynamique :** Connexion directe aux tickers JavaScript temps réel (`res-val-*`, `bar-*`), infobulles détaillées au survol et défilement horizontal fluide tactile pour mobiles.
