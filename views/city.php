@@ -129,18 +129,18 @@ foreach (BUILDINGS as $code => $bInfo) {
     background-image: url('/public/assets/shogun_castle_city_bg.jpg?v=<?= $bgVersion ?>') !important;
 }
 
-/* Hotspots interactifs de la Cité Castrale intégrée */
+/* Hotspots interactifs de la Cité Castrale intégrée (sans cadre jaune au survol) */
 .rts-city-surface .rts-hotspot {
     border-radius: 8px;
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
     background: transparent;
-    border: 1.5px solid transparent;
+    border: none;
+    transition: transform 0.15s ease;
 }
 
 .rts-city-surface .rts-hotspot:hover {
-    background: rgba(234, 179, 8, 0.14);
-    border: 1.5px solid rgba(234, 179, 8, 0.85);
-    box-shadow: 0 0 18px rgba(234, 179, 8, 0.5), inset 0 0 12px rgba(234, 179, 8, 0.2);
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .rts-city-surface .rts-hotspot.highlighted {
@@ -157,7 +157,7 @@ foreach (BUILDINGS as $code => $bInfo) {
 
 .rts-city-surface .rts-hotspot:hover .rts-level-bubble {
     transform: scale(1.15);
-    box-shadow: 0 0 12px rgba(234, 179, 8, 0.75);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
 }
 
 .rts-city-surface .rts-hotspot .rts-level-bubble.level-zero {

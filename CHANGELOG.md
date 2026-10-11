@@ -4,6 +4,28 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
+### Modifié (Changed)
+- **Interface Cité Castrale — Suppression de l'Effet « Cadre Jaune » au Survol (`views/city.php`) :**
+  * **Épuration visuelle des zones interactives :** Suppression des bordures (`1.5px solid rgba(234, 179, 8, 0.85)`), de la teinte d'arrière-plan et du halo jaune (`box-shadow`) au survol des bâtisses (`.rts-hotspot:hover`).
+  * **Immersion artistique renforcée :** L'illustration panoramique du château et des bâtiments reste limpide et visible sans cadre jaune intrusif, tandis que le badge de niveau conserve son interaction subtile (agrandissement et ombre portée douce).
+
+- **Harmonisation de la Colonne Est en Accordéon Tabler Blanc (`views/partials/resources_east_accordion.php`, `views/resources.php`, `views/city.php`, `views/map.php`) :**
+  * **Standardisation sur 3 vues clés :** Déploiement du composant d'accordéon Tabler blanc (`bg-white`, chevron rotatif) sur les pages *Terroirs Ruraux* (`resources.php`), *Cité Castrale* (`city.php`) et *Carte du Monde* (`map.php`).
+  * **Hauteur synchronisée :** Alignement dynamique de la hauteur de l'accordéon sur la carte centrale (`syncAccordionWithCenterCard`) avec barre de défilement interne automatique au-delà de la hauteur du card.
+  * **Suppression des 8 carrés de ressources du header :** Allègement de l'en-tête global pour centraliser la consultation des stocks et des récoltes dans la colonne latérale.
+
+### Ajouté (Added)
+- **Module Dédié Main-d'œuvre & Démographie dans l'Accordéon (`views/partials/workforce_demographics_panel.php`, `views/partials/resources_east_accordion.php`) :**
+  * **Nouvel item autonome (4ème volet) :** Création du panneau complet *Main-d'œuvre & Démographie* séparé du bilan des récoltes de matières premières.
+  * **Capacités & Mobilisation :** Suivi de la capacité d'accueil des maisons minka, du taux d'occupation, du contentement féodal, de la mobilisation des ouvriers et du taux de chômage.
+  * **Décomposition transparente des postes requis :** Contrôle granulaire séparant le secteur rural (9 parcelles du terroir) et le secteur urbain (bâtiments de la cité castrale) avec niveau, taux par niveau et total vérifiable.
+
+### Corrigé (Fixed)
+- **Audit & Correction du Calcul des Quotas d'Ouvriers (`core/PlanetEngine.php`, `core/PopulationEngine.php`, `core/VillageGeneratorService.php`) :**
+  * **Prise en compte des 9 parcelles dans la production :** Correction de la requête `SELECT` dans `PlanetEngine::calculateProduction` qui omettait `id`, restaurant la prise en compte des 9 parcelles du terroir dans les calculs de main-d'œuvre et de cadence de production.
+  * **Suppression du double comptage du Donjon Tenshu :** Tenshu Donjon comptabilisé exclusivement comme quartier général castral urbain (`hq`, 2 ouvriers/niv) et passage de `RURAL_PLOT_WORKERS['tenshu']` à 0 pour éliminer la duplication de 2 ouvriers supplémentaires par niveau.
+  * **Unification des formules de travailleurs :** Alignement de `VillageGeneratorService` et de `PlanetEngine` sur la méthode canonique `PopulationEngine::getRuralPlotWorkersRequired`.
+
 ### Ajouté (Added)
 - **Simulateur d'Équilibrage Studio Dev — Production de Ressources & Calcul de Rentabilité ROI (`views/studio/game-elevate-designer/building-derivation.php`) :**
   * **Intégration de la production de ressources au simulateur :** Prise en charge des rendements de l'ensemble des édifices et parcelles dans le module de dérivation mathématique des chantiers (`?page=dev_team&metier=game-elevate-designer&module=building-derivation`) :
