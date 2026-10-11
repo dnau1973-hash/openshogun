@@ -4,6 +4,14 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
+### Ajouté (Added)
+- **Atelier Pédagogique — Masterclass IA Vidéo & Prompt Engineering de Trailer (`views/atelier-pedagogique/multimedia/ia-video-trailer.php`, `views/pedagogy.php`, `views/partials/admin_pedagogy.php`) :**
+  * **Cours illustré interactif :** Conception d'un module d'apprentissage complet dédié à la création d'un trailer vidéo par intelligence artificielle générative (Text-to-Video & Image-to-Video).
+  * **Anatomie d'un prompt vidéo & lexique cinématographique :** Formule maîtresse de prompt en 5 piliers (`[Style & Rendu] + [Sujet & Action] + [Mouvement Caméra & Cadrage] + [Éclairage & Atmosphère] + [Paramètres Temporels & Qualité]`), vocabulaire de prise de vue (*Slow Tilt-Up*, *Tracking*, *Aerial Isometric 45° Timelapse*, *Handheld*) et principes de cohérence temporelle.
+  * **Script & Narration cinématique en 6 actes :** Réécriture de la narration originale de David & Gabriel en un découpage chronologique de ~70 secondes avec sound design traditionnel japonais (flûte Shakuhachi, luth Shamisen, tambours Taiko, chœurs martiaux et gong).
+  * **Prompts prêts à l'emploi & guide de montage pour Gabriel :** 6 prompts optimisés en anglais avec boutons de copie en un clic et feuille de route de montage pas-à-pas (génération des rushes, cut au beat musical sous CapCut / DaVinci, sound design SFX, titrage & call to action).
+  * **Intégration au Hub Pédagogique :** Ajout du raccourci Hero, de la bannière dans la section IA Visuelle et d'une 4ème carte dans le catalogue de l'École de Conception (grille 4 colonnes).
+
 ### Modifié (Changed)
 - **Interface Cité Castrale — Suppression de l'Effet « Cadre Jaune » au Survol (`views/city.php`) :**
   * **Épuration visuelle des zones interactives :** Suppression des bordures (`1.5px solid rgba(234, 179, 8, 0.85)`), de la teinte d'arrière-plan et du halo jaune (`box-shadow`) au survol des bâtisses (`.rts-hotspot:hover`).

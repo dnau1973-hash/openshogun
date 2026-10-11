@@ -43,7 +43,10 @@
                             <i class="fa-solid fa-book-open text-info me-1"></i>4. Le Grimoire des 80 Prompts
                         </a>
                         <a href="#section-cours-backend" class="btn btn-outline-success rounded-pill">
-                            <i class="fa-solid fa-graduation-cap text-success me-1"></i>5. École du Backend (3 Cours)
+                            <i class="fa-solid fa-graduation-cap text-success me-1"></i>5. École du Code (4 Cours)
+                        </a>
+                        <a href="/?page=pedagogy&lesson=ia-video-trailer" class="btn btn-warning text-dark fw-bold rounded-pill shadow-sm">
+                            <i class="fa-solid fa-clapperboard me-1"></i>Nouveau : Masterclass IA Vidéo &amp; Trailer
                         </a>
                     </div>
                 </div>
@@ -753,6 +756,27 @@ seuil_final   = seuil_de_base + bonus_pitié;
                     </div>
                 </div>
             </div>
+
+            <!-- NOUVELLE MASTERCLASS IA VIDÉO & TRAILER -->
+            <div class="card-footer bg-warning-subtle border-top p-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="avatar avatar-lg rounded-circle bg-warning text-dark fs-2 shadow-sm">
+                            <i class="fa-solid fa-film"></i>
+                        </span>
+                        <div>
+                            <span class="badge bg-dark text-warning fw-bold mb-1">Masterclass Vidéo Disponible</span>
+                            <h3 class="text-dark mb-1 fs-3">Comment créer le Trailer d'OpenShogun avec l'IA ?</h3>
+                            <p class="text-secondary small mb-0">
+                                Principes du prompting vidéo cinématique (Veo, Runway, Kling), narration en 6 actes de Gabriel et les 6 prompts officiels prêts à l'emploi.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="/?page=pedagogy&lesson=ia-video-trailer" class="btn btn-dark text-warning fw-bold px-3 py-2 shadow-sm">
+                        Découvrir la Masterclass Vidéo &rarr;
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -797,7 +821,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
                         <span class="badge bg-success-lt text-success fw-semibold">Spécial Débutants &bull; 12 ans &amp; +</span>
                     </div>
                     <h2 class="h1 fw-bold text-dark mb-0" style="font-family: 'Dela Gothic One', cursive, sans-serif; letter-spacing: 0.5px;">
-                        L'École du Backend : Les Cours Illustrés
+                        L'École de Conception : Cours &amp; Masterclasses
                     </h2>
                 </div>
             </div>
@@ -812,24 +836,24 @@ seuil_final   = seuil_de_base + bonus_pitié;
             <div class="card-body p-4">
                 <div class="row align-items-center g-3">
                     <div class="col-lg-8">
-                        <h3 class="fs-2 text-dark mb-2"><i class="fa-solid fa-book-open-reader text-success me-2"></i>La Programmation Serveur expliquée simplement</h3>
+                        <h3 class="fs-2 text-dark mb-2"><i class="fa-solid fa-book-open-reader text-success me-2"></i>La Programmation &amp; l'IA expliquées simplement</h3>
                         <p class="text-secondary mb-0" style="line-height: 1.6;">
-                            Dans un jeu multijoueur, le <strong>Backend</strong> est le grand cerveau invisible qui fait tourner le monde. Chaque cours ci-dessous est conçu comme une aventure guidée avec des métaphores amusantes, des exemples de code commentés et un <strong>mini-quiz interactif</strong> pour valider tes connaissances !
+                            Dans un jeu vidéo moderne, le <strong>Backend</strong> est le grand cerveau invisible et l'<strong>IA Multimédia</strong> donne vie à l'univers visuel et cinématique. Chaque cours ci-dessous est conçu comme une aventure guidée avec des métaphores amusantes, des exemples concrets et un <strong>mini-quiz interactif</strong> pour valider tes connaissances !
                         </p>
                     </div>
                     <div class="col-lg-4 text-lg-end">
                         <span class="badge bg-success-lt text-success p-2 fs-4">
-                            <i class="fa-solid fa-trophy text-warning me-1"></i> 3 Niveaux &bull; 6 Défis Quiz
+                            <i class="fa-solid fa-trophy text-warning me-1"></i> 4 Cours &bull; 8 Défis Quiz
                         </span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Grille des 3 Cartes de Cours -->
+        <!-- Grille des 4 Cartes de Cours -->
         <div class="row row-cards g-4">
             <!-- Cours 1 : POO & Singleton -->
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-3">
                 <div class="card h-100 bg-white border shadow-sm hover-shadow d-flex flex-column">
                     <div class="card-status-top bg-primary"></div>
                     <div class="card-body p-4 d-flex flex-column flex-grow-1">
@@ -856,7 +880,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
             </div>
 
             <!-- Cours 2 : PDO & Injections SQL -->
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-3">
                 <div class="card h-100 bg-white border shadow-sm hover-shadow d-flex flex-column">
                     <div class="card-status-top bg-danger"></div>
                     <div class="card-body p-4 d-flex flex-column flex-grow-1">
@@ -883,7 +907,7 @@ seuil_final   = seuil_de_base + bonus_pitié;
             </div>
 
             <!-- Cours 3 : Routage, $_GET & $_POST -->
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-3">
                 <div class="card h-100 bg-white border shadow-sm hover-shadow d-flex flex-column">
                     <div class="card-status-top bg-success"></div>
                     <div class="card-body p-4 d-flex flex-column flex-grow-1">
@@ -903,6 +927,33 @@ seuil_final   = seuil_de_base + bonus_pitié;
                         <div class="border-top pt-3 mt-auto">
                             <a href="/?page=pedagogy&lesson=routing-get-post" class="btn btn-success w-100 fw-bold">
                                 Suivre le Cours 03 &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cours 4 : IA Vidéo & Trailer -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 bg-white border shadow-sm hover-shadow d-flex flex-column">
+                    <div class="card-status-top bg-warning"></div>
+                    <div class="card-body p-4 d-flex flex-column flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge bg-warning-lt text-dark fw-bold">Niveau 04 &bull; IA &amp; Vidéo</span>
+                            <span class="text-muted small"><i class="fa-solid fa-clock me-1"></i>10 min</span>
+                        </div>
+                        <div class="avatar avatar-lg bg-warning-lt text-warning rounded-circle mb-3 fs-2">
+                            <i class="fa-solid fa-clapperboard"></i>
+                        </div>
+                        <h3 class="card-title fs-2 text-dark mb-2" style="font-family: 'Dela Gothic One', cursive, sans-serif; font-size: 1.05rem;">
+                            Cinématique IA : L'Art du Prompt Vidéo Shogun
+                        </h3>
+                        <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.6;">
+                            Comment concevoir un trailer cinématique complet : structure d'un prompt vidéo (mouvements caméra, éclairage, 24fps), narration en 6 actes et prompts prêts à l'emploi.
+                        </p>
+                        <div class="border-top pt-3 mt-auto">
+                            <a href="/?page=pedagogy&lesson=ia-video-trailer" class="btn btn-warning text-dark w-100 fw-bold">
+                                Suivre le Cours 04 &rarr;
                             </a>
                         </div>
                     </div>

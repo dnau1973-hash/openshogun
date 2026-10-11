@@ -36,6 +36,11 @@ $backendLessons = [
         'badge' => "Réseau &bull; Leçon 03",
         'file' => __DIR__ . '/atelier-pedagogique/backend/routing-get-post.php',
     ],
+    'ia-video-trailer' => [
+        'title' => "IA Vidéo & Prompting Cinématique : Créer le Trailer d'OpenShogun",
+        'badge' => "IA Vidéo &bull; Masterclass",
+        'file' => __DIR__ . '/atelier-pedagogique/multimedia/ia-video-trailer.php',
+    ],
 ];
 
 $requestedLesson = trim((string)($_GET['lesson'] ?? $_GET['course'] ?? ''));
