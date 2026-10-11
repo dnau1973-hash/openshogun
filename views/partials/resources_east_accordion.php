@@ -308,7 +308,7 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold d-flex align-items-center justify-content-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#weeklyChronicleModal">
+                <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold d-flex align-items-center justify-content-center gap-1.5 shadow-sm" onclick="if(window.openWeeklyChronicleModal){window.openWeeklyChronicleModal();} return false;" data-bs-toggle="modal" data-bs-target="#weeklyChronicleModal">
                     <i class="fa-solid fa-scroll"></i>
                     <span>Dérouler la Chronique &amp; Récompenses</span>
                 </button>

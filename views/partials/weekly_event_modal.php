@@ -9,8 +9,22 @@ require_once __DIR__ . '/../../core/WeeklyEventEngine.php';
 $weeklyEngine = $weeklyEngine ?? new WeeklyEventEngine();
 $activeEvent = $activeEvent ?? ($weeklyEngine->getActiveEvent((int)($user['id'] ?? 0), (int)($planet['id'] ?? 0)));
 
-if (!$activeEvent) {
-    return;
+$hasActiveEvent = !empty($activeEvent);
+if (!$hasActiveEvent) {
+    $activeEvent = [
+        'id' => 0,
+        'title' => "Chroniques Féodales du Sengoku",
+        'jp_title' => "戦国年代記",
+        'era_year' => "Époque Sengoku",
+        'description' => "Aucune chronique n'est active pour le moment. Les scribes et historiens du Shōgunat préparent la prochaine saga historique. Revenez très bientôt pour relever de nouveaux défis féodaux !",
+        'image_url' => "/public/assets/buildings/hq.jpg",
+        'seconds_remaining' => 0,
+        'tasks' => [],
+        'reward_final_gold' => 0,
+        'reward_final_honor' => 0,
+        'reward_final_seal_days' => 0,
+        'reward_final_title' => ''
+    ];
 }
 
 $pStatus = $activeEvent['player_status'] ?? [
@@ -23,7 +37,7 @@ $pStatus = $activeEvent['player_status'] ?? [
     'tasks'            => []
 ];
 
-$tasks = !empty($pStatus['tasks']) ? $pStatus['tasks'] : $activeEvent['tasks'];
+$tasks = !empty($pStatus['tasks']) ? $pStatus['tasks'] : ($activeEvent['tasks'] ?? []);
 $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
 ?>
 
@@ -111,12 +125,12 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
 </style>
 
 <!-- MODALE D'ÉVÉNEMENT HEBDOMADAIRE (TABLER) -->
-<div class="modal fade weekly-chronicle-modal" id="weeklyChronicleModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade weekly-chronicle-modal" id="weeklyChronicleModal" tabindex="-1" aria-hidden="true" onclick="if(event.target === this) window.closeWeeklyChronicleModal();">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <!-- En-tête visuelle de l'époque -->
             <div class="weekly-chronicle-hero" style="background-image: url('<?= htmlspecialchars($activeEvent['image_url']) ?>');">
-                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Fermer" style="z-index: 10;"></button>
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" onclick="window.closeWeeklyChronicleModal();" data-bs-dismiss="modal" aria-label="Fermer" style="z-index: 10;"></button>
                 <div class="weekly-chronicle-hero-overlay">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
                         <span class="badge bg-warning text-dark fw-bold font-monospace text-uppercase" style="letter-spacing: 0.5px;">
@@ -288,14 +302,67 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
 </div>
 
 <script>
+// Fonctions universelles d'ouverture et de fermeture de la modale des Chroniques
+window.openWeeklyChronicleModal = function() {
+    const modalEl = document.getElementById('weeklyChronicleModal');
+    if (!modalEl) {
+        console.warn("Élément #weeklyChronicleModal introuvable dans le DOM.");
+        return;
+    }
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const inst = bootstrap.Modal.getOrCreateInstance(modalEl);
+        inst.show();
+    } else {
+        modalEl.classList.add('show');
+        modalEl.style.display = 'block';
+        modalEl.removeAttribute('aria-hidden');
+        document.body.classList.add('modal-open');
+        let backdrop = document.getElementById('weekly-modal-backdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.id = 'weekly-modal-backdrop';
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.onclick = window.closeWeeklyChronicleModal;
+            document.body.appendChild(backdrop);
+        }
+    }
+};
+
+window.closeWeeklyChronicleModal = function() {
+    const modalEl = document.getElementById('weeklyChronicleModal');
+    if (!modalEl) return;
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const inst = bootstrap.Modal.getInstance(modalEl);
+        if (inst) inst.hide();
+    }
+    modalEl.classList.remove('show');
+    modalEl.style.display = 'none';
+    modalEl.setAttribute('aria-hidden', 'true');
+    const bd = document.getElementById('weekly-modal-backdrop');
+    if (bd) bd.remove();
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    document.body.classList.remove('modal-open');
+};
+
 (function() {
+    // Initialisation des écouteurs de clics pour tous les boutons ouvrant le rouleau
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[data-bs-target="#weeklyChronicleModal"], button[title*="Chronique"], button[title*="chronique"]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.openWeeklyChronicleModal();
+            });
+        });
+    });
+
     // Compte à rebours de l'événement hebdomadaire
     let cdEl = document.getElementById('weeklyEventCountdown');
     if (cdEl) {
         let sec = parseInt(cdEl.dataset.seconds || 0, 10);
         function tickWeekly() {
             if (sec <= 0) {
-                document.getElementById('weeklyEventCountdownText').textContent = "Terminé !";
+                const txtEl = document.getElementById('weeklyEventCountdownText');
+                if (txtEl) txtEl.textContent = "Terminé !";
                 return;
             }
             const d = Math.floor(sec / 86400);
@@ -303,7 +370,8 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
             const m = Math.floor((sec % 3600) / 60);
             const s = sec % 60;
             const pad = n => n.toString().padStart(2, '0');
-            document.getElementById('weeklyEventCountdownText').textContent = `${d}j ${pad(h)}:${pad(m)}:${pad(s)}`;
+            const txtEl = document.getElementById('weeklyEventCountdownText');
+            if (txtEl) txtEl.textContent = `${d}j ${pad(h)}:${pad(m)}:${pad(s)}`;
             sec--;
         }
         tickWeekly();

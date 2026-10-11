@@ -3622,7 +3622,10 @@ function switchAdminTab(tabKey) {
         'sauvegarde': 'maintenance',
         'sauvegardes': 'maintenance',
         'bdd': 'maintenance',
-        'database': 'maintenance'
+        'database': 'maintenance',
+        'chroniques': 'events',
+        'evenements': 'events',
+        'event': 'events'
     };
     if (jsTabAliases[tabKey]) {
         tabKey = jsTabAliases[tabKey];
@@ -3633,7 +3636,7 @@ function switchAdminTab(tabKey) {
         return;
     }
 
-    const validTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'mail', 'maintenance', 'all'];
+    const validTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'mail', 'maintenance', 'events', 'all'];
     if (!validTabs.includes(tabKey)) tabKey = 'dashboard';
 
     // Mettre à jour dynamiquement le fil d'Ariane et l'en-tête de page Tabler

@@ -462,6 +462,7 @@ $navItems = [
                 <!-- 2bis. Chroniques Féodales du Sengoku (Événement Hebdomadaire) -->
                 <button type="button" 
                         class="badge bg-yellow-lt text-warning p-2 border-0 d-inline-flex align-items-center justify-content-center shadow-none rounded cursor-pointer" 
+                        onclick="if(window.openWeeklyChronicleModal){window.openWeeklyChronicleModal();} return false;"
                         data-bs-toggle="modal" data-bs-target="#weeklyChronicleModal"
                         title="Chroniques Féodales du Sengoku (Événement Hebdomadaire)">
                     <i class="fa-solid fa-scroll fs-3"></i>

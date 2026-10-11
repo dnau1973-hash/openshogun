@@ -68,7 +68,7 @@ if (!empty($pStatus['all_completed']) && empty($pStatus['final_claimed'])) {
                     <span class="text-secondary">Progression : </span>
                     <strong class="text-warning"><?= (int)$pStatus['completed_tasks'] ?> / <?= (int)$pStatus['total_tasks'] ?> actes</strong>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-warning fw-bold font-monospace d-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#weeklyChronicleModal">
+                <button type="button" class="btn btn-sm btn-outline-warning fw-bold font-monospace d-flex align-items-center gap-1.5 shadow-sm" onclick="if(window.openWeeklyChronicleModal){window.openWeeklyChronicleModal();} return false;" data-bs-toggle="modal" data-bs-target="#weeklyChronicleModal">
                     <i class="fa-solid fa-feather-pointed"></i>
                     <span>Consulter la Chronique</span>
                 </button>

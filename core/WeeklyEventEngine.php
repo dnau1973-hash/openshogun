@@ -150,7 +150,244 @@ class WeeklyEventEngine {
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 ");
             }
+
+            // Amorçage automatique des 4 chroniques initiales si la table est vide
+            $stCnt = $this->db->query("SELECT COUNT(*) FROM weekly_events");
+            if ($stCnt && (int)$stCnt->fetchColumn() === 0) {
+                $this->seedInitialEvents();
+            }
         } catch (Exception $e) {}
+    }
+
+    /**
+     * Initialise automatiquement les 4 premières Chroniques Historiques Féodales du Sengoku
+     */
+    public function seedInitialEvents(): void {
+        if (!$this->db) return;
+        try {
+            $now = time();
+            $events = [
+                [
+                    'slug'                   => 'okehazama_1560',
+                    'title'                  => "L'Alerte d'Okehazama",
+                    'jp_title'               => "桶狭間の奇襲 (Okehazama no Kishū)",
+                    'era_year'               => "Juin 1560 — Ère Eiroku",
+                    'description'            => "L'armée d'invasion colossale du puissant seigneur Imagawa Yoshimoto pénètre en province d'Owari sous un orage dantesque. Le jeune Oda Nobunaga rassemble ses hommes au temple Zen Enshō-ji et prépare une contre-attaque fulgurante. Pour soutenir les forteresses assiégées et alimenter l'avant-garde, votre domaine doit d'urgence stocker du ravitaillement, consolider le Donjon Tenshu et lever une troupe de vaillants piquiers Ashigaru !",
+                    'image_url'              => "/public/assets/buildings/hq.jpg",
+                    'starts_at'              => date('Y-m-d 00:00:00', $now),
+                    'ends_at'                => date('Y-m-d 23:59:59', $now + (7 * 86400)),
+                    'is_active'              => 1,
+                    'reward_final_gold'      => 60,
+                    'reward_final_honor'     => 120,
+                    'reward_final_seal_days' => 1,
+                    'reward_final_title'     => "Héros d'Okehazama",
+                    'tasks'                  => [
+                        [
+                            'step_order'    => 1,
+                            'title'         => "Acte I : Ravitaillement d'Urgence",
+                            'description'   => "Amasser des vivres pour les messagers et garnisons en alerte. Posséder au moins 2 500 unités de Bois de Cèdre et 2 000 de Riz Impérial en réserve.",
+                            'task_type'     => "stock_resource",
+                            'target_key'    => "deuterium",
+                            'target_amount' => 2000,
+                            'reward_metal'  => 800,
+                            'reward_crystal'=> 600,
+                            'reward_gold'   => 5,
+                            'reward_honor'  => 25,
+                        ],
+                        [
+                            'step_order'    => 2,
+                            'title'         => "Acte II : La Vigie du Donjon",
+                            'description'   => "Inspecter les horizons depuis le sommet du Donjon seigneurial. Élever ou posséder le Donjon Tenshu au Niveau 2 ou supérieur.",
+                            'task_type'     => "upgrade_building",
+                            'target_key'    => "hq",
+                            'target_amount' => 2,
+                            'reward_metal'  => 1200,
+                            'reward_deuterium' => 800,
+                            'reward_gold'   => 10,
+                            'reward_honor'  => 35,
+                        ],
+                        [
+                            'step_order'    => 3,
+                            'title'         => "Acte III : Le Rempart de Piques",
+                            'description'   => "Former une solide compagnie de piquiers pour briser la cavalerie ennemie. Entraîner et maintenir au moins 25 Lanciers Yari Ashigaru.",
+                            'task_type'     => "train_troops",
+                            'target_key'    => "spearman",
+                            'target_amount' => 25,
+                            'reward_deuterium' => 1500,
+                            'reward_gold'   => 15,
+                            'reward_honor'  => 50,
+                            'reward_item'   => "rice_flour:40",
+                        ]
+                    ]
+                ],
+                [
+                    'slug'                   => 'sakai_tea_1569',
+                    'title'                  => "La Voie du Thé à Sakai",
+                    'jp_title'               => "堺の茶の湯 (Sakai no Cha-no-yu)",
+                    'era_year'               => "Automne 1569 — Ère Eiroku",
+                    'description'            => "Dans la florissante cité franche de Sakai, le grand maître Sen no Rikyū codifie l'art sobre et sacré du Wabi-cha pour apaiser les esprits des seigneurs de guerre. Les plus puissants daimyos recherchent des bols Chawan façonnés dans l'argile alluviale la plus pure ainsi que les meilleures feuilles de thé récoltées sur les coteaux brumeux.",
+                    'image_url'              => "/public/assets/resources/terroir_tea.jpg",
+                    'starts_at'              => date('Y-m-d 00:00:00', $now + (8 * 86400)),
+                    'ends_at'                => date('Y-m-d 23:59:59', $now + (14 * 86400)),
+                    'is_active'              => 0,
+                    'reward_final_gold'      => 75,
+                    'reward_final_honor'     => 150,
+                    'reward_final_seal_days' => 2,
+                    'reward_final_title'     => "Maître du Cha-no-yu",
+                    'tasks'                  => [
+                        [
+                            'step_order'    => 1,
+                            'title'         => "Acte I : L'Argile des Potiers",
+                            'description'   => "Extraire l'argile des berges pour façonner les bols Chawan et les tuiles des pavillons. Posséder au moins 1 500 unités d'Argile de Céramique.",
+                            'task_type'     => "stock_resource",
+                            'target_key'    => "clay",
+                            'target_amount' => 1500,
+                            'reward_metal'  => 900,
+                            'reward_crystal'=> 900,
+                            'reward_gold'   => 8,
+                            'reward_honor'  => 30,
+                        ],
+                        [
+                            'step_order'    => 2,
+                            'title'         => "Acte II : La Récolte de Jade",
+                            'description'   => "Étendre les coteaux de théiers pour sécher les meilleures feuilles de matcha. Amasser au moins 1 200 unités de Thé Vert.",
+                            'task_type'     => "stock_resource",
+                            'target_key'    => "tea",
+                            'target_amount' => 1200,
+                            'reward_crystal'=> 1000,
+                            'reward_gold'   => 12,
+                            'reward_honor'  => 40,
+                        ],
+                        [
+                            'step_order'    => 3,
+                            'title'         => "Acte III : Le Pavillon de Cérémonie",
+                            'description'   => "Offrir un saké d'exception aux hôtes illustres et daimyōs de passage. Stocker au moins 50 tonneaux de Saké Raffiné.",
+                            'task_type'     => "stock_resource",
+                            'target_key'    => "sake",
+                            'target_amount' => 50,
+                            'reward_metal'  => 1500,
+                            'reward_deuterium' => 1200,
+                            'reward_gold'   => 20,
+                            'reward_honor'  => 60,
+                        ]
+                    ]
+                ],
+                [
+                    'slug'                   => 'rakuichi_rakuza_1577',
+                    'title'                  => "L'Édit du Rakuichi Rakuza",
+                    'jp_title'               => "楽市楽座令 (Rakuichi Rakuza-rei)",
+                    'era_year'               => "1577 — Château d'Azuchi",
+                    'description'            => "Pour enrichir son domaine et attirer artisans et caravanes marchandes sans payer le tribut aux anciennes guildes féodales monopolistiques (Za), le Shōgunat décrète l'ouverture de marchés libres et exempts de taxes sous les remparts du donjon.",
+                    'image_url'              => "/public/assets/buildings/market.jpg",
+                    'starts_at'              => date('Y-m-d 00:00:00', $now + (15 * 86400)),
+                    'ends_at'                => date('Y-m-d 23:59:59', $now + (21 * 86400)),
+                    'is_active'              => 0,
+                    'reward_final_gold'      => 80,
+                    'reward_final_honor'     => 140,
+                    'reward_final_seal_days' => 2,
+                    'reward_final_title'     => "Bienfaiteur des Foires",
+                    'tasks'                  => [
+                        [
+                            'step_order'    => 1,
+                            'title'         => "Acte I : Les Greniers de Soja",
+                            'description'   => "Alimenter les auberges et foires franches en protéines de soja et miso. Posséder au moins 1 500 unités de Soja des Moissons.",
+                            'task_type'     => "stock_resource",
+                            'target_key'    => "soybean",
+                            'target_amount' => 1500,
+                            'reward_metal'  => 1000,
+                            'reward_deuterium' => 1000,
+                            'reward_gold'   => 10,
+                            'reward_honor'  => 30,
+                        ],
+                        [
+                            'step_order'    => 2,
+                            'title'         => "Acte II : La Fosse de Poterie",
+                            'description'   => "Développer la fosse d'extraction d'argile pour fournir tuiles et contenants aux marchands. Élever la Fosse d'Argile au Niveau 2 ou plus.",
+                            'task_type'     => "upgrade_rural",
+                            'target_key'    => "fosse_argile",
+                            'target_amount' => 2,
+                            'reward_crystal'=> 1200,
+                            'reward_gold'   => 15,
+                            'reward_honor'  => 45,
+                        ],
+                        [
+                            'step_order'    => 3,
+                            'title'         => "Acte III : Les Poutres de Chêne",
+                            'description'   => "Construire les étals et halles de marché en bois équarri. Réunir au moins 30 Poutres de Bois dans les réserves.",
+                            'task_type'     => "stock_resource",
+                            'target_key'    => "wooden_beams",
+                            'target_amount' => 30,
+                            'reward_metal'  => 1500,
+                            'reward_crystal'=> 1500,
+                            'reward_gold'   => 25,
+                            'reward_honor'  => 60,
+                        ]
+                    ]
+                ],
+                [
+                    'slug'                   => 'kawanakajima_1561',
+                    'title'                  => "Les Dragons de Kawanakajima",
+                    'jp_title'               => "川中島の激闘 (Kawanakajima no Gekitō)",
+                    'era_year'               => "Septembre 1561 — Ère Eiroku",
+                    'description'            => "Dans les plaines brumeuses de Kawanakajima au confluent des fleuves Sai et Chikuma, les deux plus grands stratèges de leur génération s'affrontent : Takeda Shingen, le Tigre de Kai, et Uesugi Kenshin, le Dragon d'Echigo. Pour triompher au milieu des charges furieuses de cavalerie et des tirs de yumi, chaque seigneur doit aiguiser le fer, galvaniser ses guerriers et mener son Samouraï Héros au zénith !",
+                    'image_url'              => "/public/assets/carrousel/carrousel_10_revue_troupes.jpg",
+                    'starts_at'              => date('Y-m-d 00:00:00', $now + (22 * 86400)),
+                    'ends_at'                => date('Y-m-d 23:59:59', $now + (28 * 86400)),
+                    'is_active'              => 0,
+                    'reward_final_gold'      => 100,
+                    'reward_final_honor'     => 200,
+                    'reward_final_seal_days' => 3,
+                    'reward_final_title'     => "Légende de Kawanakajima",
+                    'tasks'                  => [
+                        [
+                            'step_order'    => 1,
+                            'title'         => "Acte I : Le Fer des Forges",
+                            'description'   => "Fondre les lames d'acier et les fers de lance pour équiper le bataillon. Posséder au moins 4 000 unités de Métal (Bois/Fer).",
+                            'task_type'     => "stock_resource",
+                            'target_key'    => "metal",
+                            'target_amount' => 4000,
+                            'reward_crystal'=> 1500,
+                            'reward_deuterium' => 1500,
+                            'reward_gold'   => 15,
+                            'reward_honor'  => 40,
+                        ],
+                        [
+                            'step_order'    => 2,
+                            'title'         => "Acte II : La Force Martiale du Héros",
+                            'description'   => "Entraîner le Samouraï Héros pour atteindre au moins 250 de puissance martiale effective.",
+                            'task_type'     => "hero_stat",
+                            'target_key'    => "combat_strength",
+                            'target_amount' => 250,
+                            'reward_metal'  => 2000,
+                            'reward_gold'   => 20,
+                            'reward_honor'  => 60,
+                        ],
+                        [
+                            'step_order'    => 3,
+                            'title'         => "Acte III : L'Armée des Vents et Forêts",
+                            'description'   => "Mobiliser une armée combinée d'au moins 50 soldats sous vos bannières Sashimono.",
+                            'task_type'     => "train_troops",
+                            'target_key'    => "all",
+                            'target_amount' => 50,
+                            'reward_metal'  => 2500,
+                            'reward_deuterium' => 2500,
+                            'reward_gold'   => 35,
+                            'reward_honor'  => 80,
+                        ]
+                    ]
+                ]
+            ];
+
+            foreach ($events as $ev) {
+                $evTasks = $ev['tasks'];
+                unset($ev['tasks']);
+                $evId = $this->saveEvent($ev);
+                foreach ($evTasks as $t) {
+                    $t['event_id'] = $evId;
+                    $this->saveTask($t);
+                }
+            }
+        } catch (Throwable $e) {}
     }
 
     /**
