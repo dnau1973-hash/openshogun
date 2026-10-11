@@ -64,46 +64,58 @@ $allEvents = $adminEventEngine->getAllEvents();
                                     </span>
                                     <h4 class="card-title mb-0 fs-3 fw-bold"><?= htmlspecialchars($ev['title']) ?></h4>
                                 </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        Actions
+                                <div class="d-flex align-items-center gap-1">
+                                    <button type="button" class="btn btn-sm btn-warning font-monospace fw-bold shadow-sm" onclick="editEvent(<?= $evId ?>)" title="Modifier les textes, dates, image et récompenses de cette chronique">
+                                        <i class="fa-solid fa-pen-to-square me-1"></i>Éditer
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                                        <?php if (!$isActive): ?>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            Plus
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                                            <?php if (!$isActive): ?>
+                                                <li>
+                                                    <a class="dropdown-item text-success font-monospace" href="javascript:void(0)" onclick="setEventActive(<?= $evId ?>)">
+                                                        <i class="fa-solid fa-play me-2"></i>Activer maintenant
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
                                             <li>
-                                                <a class="dropdown-item text-success font-monospace" href="javascript:void(0)" onclick="setEventActive(<?= $evId ?>)">
-                                                    <i class="fa-solid fa-play me-2"></i>Activer maintenant
+                                                <a class="dropdown-item font-monospace" href="javascript:void(0)" onclick="editEvent(<?= $evId ?>)">
+                                                    <i class="fa-solid fa-pen-to-square me-2"></i>Modifier la chronique
                                                 </a>
                                             </li>
-                                        <?php endif; ?>
-                                        <li>
-                                            <a class="dropdown-item font-monospace" href="javascript:void(0)" onclick="editEvent(<?= $evId ?>)">
-                                                <i class="fa-solid fa-pen-to-square me-2"></i>Modifier le récit &amp; dates
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item font-monospace text-primary" href="javascript:void(0)" onclick="openAddTaskModal(<?= $evId ?>)">
-                                                <i class="fa-solid fa-plus me-2"></i>Ajouter un Acte narratif
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <a class="dropdown-item text-danger font-monospace" href="javascript:void(0)" onclick="deleteEvent(<?= $evId ?>, '<?= addslashes(htmlspecialchars($ev['title'])) ?>')">
-                                                <i class="fa-solid fa-trash me-2"></i>Supprimer la chronique
-                                            </a>
-                                        </li>
-                                    </ul>
+                                            <li>
+                                                <a class="dropdown-item font-monospace text-primary" href="javascript:void(0)" onclick="openAddTaskModal(<?= $evId ?>)">
+                                                    <i class="fa-solid fa-plus me-2"></i>Ajouter un Acte narratif
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger font-monospace" href="javascript:void(0)" onclick="deleteEvent(<?= $evId ?>, '<?= addslashes(htmlspecialchars($ev['title'])) ?>')">
+                                                    <i class="fa-solid fa-trash me-2"></i>Supprimer la chronique
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="card-body p-3">
                                 <div class="d-flex gap-3 mb-3">
-                                    <div class="rounded border shadow-sm flex-shrink-0" style="width: 100px; height: 80px; background-image: url('<?= htmlspecialchars($ev['image_url']) ?>'); background-size: cover; background-position: center;"></div>
+                                    <div class="rounded border shadow-sm flex-shrink-0 position-relative" style="width: 120px; height: 85px; background-image: url('<?= htmlspecialchars($ev['image_url']) ?>'); background-size: cover; background-position: center; cursor: pointer;" onclick="editEvent(<?= $evId ?>)" title="Cliquer pour éditer cette chronique">
+                                        <span class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-warning font-monospace text-center py-0.5" style="font-size: 0.65rem;">
+                                            <i class="fa-solid fa-pen me-0.5"></i>Éditer
+                                        </span>
+                                    </div>
                                     <div class="flex-grow-1">
-                                        <div class="d-flex align-items-center gap-2 font-monospace text-muted small mb-1">
+                                        <div class="d-flex align-items-center gap-2 font-monospace text-muted small mb-1 flex-wrap">
                                             <span class="text-primary fw-bold"><i class="fa-solid fa-calendar me-1"></i><?= htmlspecialchars($ev['era_year']) ?></span>
                                             <span>&bull;</span>
                                             <span>Du <?= date('d/m/Y', strtotime($ev['starts_at'])) ?> au <?= date('d/m/Y', strtotime($ev['ends_at'])) ?></span>
+                                            <?php if (!empty($ev['jp_title'])): ?>
+                                                <span class="badge bg-dark text-warning border border-warning-subtle font-monospace py-0 px-1"><?= htmlspecialchars($ev['jp_title']) ?></span>
+                                            <?php endif; ?>
                                         </div>
                                         <p class="text-secondary small mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                                             <?= htmlspecialchars($ev['description']) ?>
@@ -133,6 +145,9 @@ $allEvents = $adminEventEngine->getAllEvents();
                                                         <span class="text-muted font-monospace small ms-1">(<?= htmlspecialchars($t['task_type']) ?> : <?= htmlspecialchars($t['target_key']) ?> &ge; <?= number_format((int)$t['target_amount']) ?>)</span>
                                                     </div>
                                                     <div class="d-flex align-items-center gap-1">
+                                                        <button type="button" class="btn btn-sm btn-ghost-primary py-0 px-1" onclick='editTask(<?= json_encode($t, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP) ?>)' title="Modifier cet acte narratif">
+                                                            <i class="fa-solid fa-pen-to-square"></i>
+                                                        </button>
                                                         <button type="button" class="btn btn-sm btn-ghost-danger py-0 px-1" onclick="deleteTask(<?= (int)$t['id'] ?>)" title="Supprimer cet acte">
                                                             <i class="fa-solid fa-times"></i>
                                                         </button>
@@ -209,8 +224,23 @@ $allEvents = $adminEventEngine->getAllEvents();
                             <textarea name="description" id="edit_event_description" rows="4" class="form-control" required placeholder="Racontez le contexte de cette page d'Histoire réelle..."></textarea>
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label fw-bold small">Image d'illustration :</label>
-                            <input type="text" name="image_url" id="edit_event_image_url" class="form-control font-monospace" value="/public/assets/buildings/hq.jpg">
+                            <label class="form-label fw-bold small">Image d'illustration (Format 16:9 recommandé) :</label>
+                            <div class="d-flex gap-2 align-items-center mb-2 flex-wrap">
+                                <input type="text" name="image_url" id="edit_event_image_url" class="form-control font-monospace flex-grow-1" value="/public/assets/buildings/hq.jpg" oninput="updateEditImagePreview(this.value)">
+                                <select class="form-select font-monospace" style="max-width: 320px;" onchange="if(this.value){ document.getElementById('edit_event_image_url').value = this.value; updateEditImagePreview(this.value); }">
+                                    <option value="">-- Choisir une illustration (Semaines 01 à 52) --</option>
+                                    <?php for ($w = 1; $w <= 52; $w++): 
+                                        $wStr = sprintf('%02d', $w);
+                                        $imgPath = "/public/assets/events/event_week_{$wStr}.jpg";
+                                    ?>
+                                        <option value="<?= $imgPath ?>">Semaine <?= $wStr ?> (event_week_<?= $wStr ?>.jpg)</option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                            <div class="p-2 rounded bg-dark border text-center">
+                                <div class="text-muted small font-monospace mb-1"><i class="fa-solid fa-eye me-1"></i>Aperçu en direct de l'illustration :</div>
+                                <img id="edit_event_image_preview" src="/public/assets/buildings/hq.jpg" alt="Aperçu" style="max-height: 190px; width: auto; max-width: 100%; border-radius: 6px; object-fit: contain;" onerror="this.src='/public/assets/buildings/hq.jpg';">
+                            </div>
                         </div>
                     </div>
 
@@ -275,7 +305,7 @@ $allEvents = $adminEventEngine->getAllEvents();
                 <div class="modal-header bg-dark text-white py-2">
                     <h4 class="modal-title fs-3 d-flex align-items-center gap-2 mb-0">
                         <i class="fa-solid fa-list-check text-warning"></i>
-                        <span>Ajouter un Acte Narratif</span>
+                        <span id="modalTaskTitleLabel">Ajouter un Acte Narratif</span>
                     </h4>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -283,7 +313,7 @@ $allEvents = $adminEventEngine->getAllEvents();
                     <div class="row g-2 mb-2">
                         <div class="col-4">
                             <label class="form-label fw-bold small">Ordre :</label>
-                            <input type="number" name="step_order" id="task_step_order" class="form-control text-center" value="1" min="1" max="10">
+                            <input type="number" name="step_order" id="task_step_order" class="form-control text-center font-monospace" value="1" min="1" max="10">
                         </div>
                         <div class="col-8">
                             <label class="form-label fw-bold small">Titre de l'Acte :</label>
@@ -319,26 +349,35 @@ $allEvents = $adminEventEngine->getAllEvents();
                         <label class="form-label fw-bold small text-secondary mb-1">Gains de l'Acte :</label>
                         <div class="row g-1">
                             <div class="col-4">
-                                <input type="number" name="reward_metal" placeholder="Bois" class="form-control form-control-sm text-center" value="500">
+                                <label class="small text-muted" style="font-size: 0.7rem;">Bois :</label>
+                                <input type="number" name="reward_metal" id="task_reward_metal" placeholder="Bois" class="form-control form-control-sm text-center font-monospace" value="500">
                             </div>
                             <div class="col-4">
-                                <input type="number" name="reward_crystal" placeholder="Pierre" class="form-control form-control-sm text-center" value="500">
+                                <label class="small text-muted" style="font-size: 0.7rem;">Pierre :</label>
+                                <input type="number" name="reward_crystal" id="task_reward_crystal" placeholder="Pierre" class="form-control form-control-sm text-center font-monospace" value="500">
                             </div>
                             <div class="col-4">
-                                <input type="number" name="reward_deuterium" placeholder="Riz" class="form-control form-control-sm text-center" value="500">
+                                <label class="small text-muted" style="font-size: 0.7rem;">Riz :</label>
+                                <input type="number" name="reward_deuterium" id="task_reward_deuterium" placeholder="Riz" class="form-control form-control-sm text-center font-monospace" value="500">
                             </div>
-                            <div class="col-6 mt-1">
-                                <input type="number" name="reward_gold" placeholder="Or" class="form-control form-control-sm text-center" value="5">
+                            <div class="col-4 mt-1">
+                                <label class="small text-muted" style="font-size: 0.7rem;">Kobans (Or) :</label>
+                                <input type="number" name="reward_gold" id="task_reward_gold" placeholder="Or" class="form-control form-control-sm text-center font-monospace" value="5">
                             </div>
-                            <div class="col-6 mt-1">
-                                <input type="text" name="reward_item" placeholder="Item (ex: rice_flour:30)" class="form-control form-control-sm text-center font-monospace">
+                            <div class="col-4 mt-1">
+                                <label class="small text-muted" style="font-size: 0.7rem;">Honneur :</label>
+                                <input type="number" name="reward_honor" id="task_reward_honor" placeholder="Honneur" class="form-control form-control-sm text-center font-monospace" value="20">
+                            </div>
+                            <div class="col-4 mt-1">
+                                <label class="small text-muted" style="font-size: 0.7rem;">Objet/Item :</label>
+                                <input type="text" name="reward_item" id="task_reward_item" placeholder="ex: sake:30" class="form-control form-control-sm text-center font-monospace">
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer py-2">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary fw-bold font-monospace">Ajouter l'Acte</button>
+                    <button type="submit" class="btn btn-primary fw-bold font-monospace" id="modalTaskSubmitBtn">Enregistrer l'Acte</button>
                 </div>
             </form>
         </div>
@@ -346,6 +385,13 @@ $allEvents = $adminEventEngine->getAllEvents();
 </div>
 
 <script>
+function updateEditImagePreview(url) {
+    const img = document.getElementById('edit_event_image_preview');
+    if (img) {
+        img.src = url || '/public/assets/buildings/hq.jpg';
+    }
+}
+
 function openCreateEventModal() {
     document.getElementById('formWeeklyEvent').reset();
     document.getElementById('edit_event_id').value = '0';
@@ -354,6 +400,7 @@ function openCreateEventModal() {
     document.getElementById('edit_event_starts_at').value = now.toISOString().slice(0, 16);
     const end = new Date(now.getTime() + 7 * 86400000);
     document.getElementById('edit_event_ends_at').value = end.toISOString().slice(0, 16);
+    updateEditImagePreview('/public/assets/buildings/hq.jpg');
     new bootstrap.Modal(document.getElementById('modalEditWeeklyEvent')).show();
 }
 
@@ -362,28 +409,42 @@ function editEvent(eventId) {
         .then(r => r.json())
         .then(data => {
             if (!data.success) {
-                alert(data.error || 'Erreur lors du chargement.');
+                alert(data.error || 'Erreur lors du chargement de la chronique.');
                 return;
             }
             const ev = data.event;
             document.getElementById('edit_event_id').value = ev.id;
-            document.getElementById('edit_event_title').value = ev.title;
-            document.getElementById('edit_event_slug').value = ev.slug;
+            document.getElementById('edit_event_title').value = ev.title || '';
+            document.getElementById('edit_event_slug').value = ev.slug || '';
             document.getElementById('edit_event_jp_title').value = ev.jp_title || '';
             document.getElementById('edit_event_era_year').value = ev.era_year || '';
-            document.getElementById('edit_event_description').value = ev.description;
-            document.getElementById('edit_event_image_url').value = ev.image_url;
-            document.getElementById('edit_event_starts_at').value = ev.starts_at.replace(' ', 'T').slice(0, 16);
-            document.getElementById('edit_event_ends_at').value = ev.ends_at.replace(' ', 'T').slice(0, 16);
-            document.getElementById('edit_event_reward_gold').value = ev.reward_final_gold;
-            document.getElementById('edit_event_reward_honor').value = ev.reward_final_honor;
-            document.getElementById('edit_event_reward_seal').value = ev.reward_final_seal_days;
+            document.getElementById('edit_event_description').value = ev.description || '';
+            document.getElementById('edit_event_image_url').value = ev.image_url || '';
+            updateEditImagePreview(ev.image_url);
+
+            if (ev.starts_at) {
+                document.getElementById('edit_event_starts_at').value = ev.starts_at.replace(' ', 'T').slice(0, 16);
+            } else {
+                document.getElementById('edit_event_starts_at').value = '';
+            }
+            if (ev.ends_at) {
+                document.getElementById('edit_event_ends_at').value = ev.ends_at.replace(' ', 'T').slice(0, 16);
+            } else {
+                document.getElementById('edit_event_ends_at').value = '';
+            }
+
+            document.getElementById('edit_event_reward_gold').value = ev.reward_final_gold || 0;
+            document.getElementById('edit_event_reward_honor').value = ev.reward_final_honor || 0;
+            document.getElementById('edit_event_reward_seal').value = ev.reward_final_seal_days || 0;
             document.getElementById('edit_event_reward_title').value = ev.reward_final_title || '';
             document.getElementById('edit_event_is_active').checked = (parseInt(ev.is_active, 10) === 1);
-            document.getElementById('modalEventTitleLabel').textContent = 'Modifier la Chronique #' + ev.id;
+            document.getElementById('modalEventTitleLabel').textContent = 'Modifier la Chronique #' + ev.id + ' — ' + (ev.title || '');
             new bootstrap.Modal(document.getElementById('modalEditWeeklyEvent')).show();
         })
-        .catch(err => alert('Erreur réseau.'));
+        .catch(err => {
+            console.error(err);
+            alert('Erreur réseau lors de la récupération de la chronique.');
+        });
 }
 
 function saveEventSubmit(e) {
@@ -403,7 +464,7 @@ function saveEventSubmit(e) {
         alert(data.message || 'Chronique sauvegardée !');
         window.location.reload();
     })
-    .catch(err => alert('Erreur réseau.'));
+    .catch(err => alert('Erreur réseau lors de la sauvegarde.'));
 }
 
 function setEventActive(eventId) {
@@ -438,6 +499,29 @@ function openAddTaskModal(eventId) {
     document.getElementById('formWeeklyTask').reset();
     document.getElementById('task_event_id').value = eventId;
     document.getElementById('task_id').value = '0';
+    document.getElementById('modalTaskTitleLabel').textContent = 'Ajouter un Acte Narratif';
+    document.getElementById('modalTaskSubmitBtn').textContent = "Ajouter l'Acte";
+    new bootstrap.Modal(document.getElementById('modalAddTask')).show();
+}
+
+function editTask(t) {
+    document.getElementById('formWeeklyTask').reset();
+    document.getElementById('task_id').value = t.id;
+    document.getElementById('task_event_id').value = t.event_id;
+    document.getElementById('task_step_order').value = t.step_order;
+    document.getElementById('task_title').value = t.title || '';
+    document.getElementById('task_desc').value = t.description || '';
+    document.getElementById('task_type').value = t.task_type || 'stock_resource';
+    document.getElementById('task_target_key').value = t.target_key || '';
+    document.getElementById('task_target_amount').value = t.target_amount || 1;
+    document.getElementById('task_reward_metal').value = t.reward_metal || 0;
+    document.getElementById('task_reward_crystal').value = t.reward_crystal || 0;
+    document.getElementById('task_reward_deuterium').value = t.reward_deuterium || 0;
+    document.getElementById('task_reward_gold').value = t.reward_gold || 0;
+    document.getElementById('task_reward_honor').value = t.reward_honor || 0;
+    document.getElementById('task_reward_item').value = t.reward_item || '';
+    document.getElementById('modalTaskTitleLabel').textContent = "Modifier l'Acte #" + t.step_order + " — " + (t.title || '');
+    document.getElementById('modalTaskSubmitBtn').textContent = "Mettre à jour l'Acte";
     new bootstrap.Modal(document.getElementById('modalAddTask')).show();
 }
 
@@ -458,7 +542,7 @@ function saveTaskSubmit(e) {
         alert(data.message || 'Acte enregistré !');
         window.location.reload();
     })
-    .catch(err => alert('Erreur réseau.'));
+    .catch(err => alert('Erreur réseau lors de la sauvegarde de l\'acte.'));
 }
 
 function deleteTask(taskId) {

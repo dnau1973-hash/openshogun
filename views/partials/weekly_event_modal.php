@@ -171,13 +171,12 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
 <div class="modal fade weekly-chronicle-modal" id="weeklyChronicleModal" tabindex="-1" aria-hidden="true" onclick="if(event.target === this) window.closeWeeklyChronicleModal();">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-            <!-- En-tête visuelle de l'époque -->
-            <div class="weekly-chronicle-hero" style="background-image: url('<?= htmlspecialchars($activeEvent['image_url']) ?>');">
-                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" onclick="window.closeWeeklyChronicleModal();" data-bs-dismiss="modal" aria-label="Fermer" style="z-index: 10;"></button>
-                <div class="weekly-chronicle-hero-overlay">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+            <!-- En-tête de la Chronique Féodale -->
+            <div class="modal-header border-bottom border-warning-subtle py-3 px-4 bg-dark text-white d-flex justify-content-between align-items-center flex-shrink-0">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
                         <span class="badge bg-warning text-dark fw-bold font-monospace text-uppercase" style="letter-spacing: 0.5px;">
-                            <i class="fa-solid fa-scroll me-1"></i>Chronique Hebdomadaire
+                            <i class="fa-solid fa-scroll me-1"></i>Chronique Féodale Hebdomadaire
                         </span>
                         <div class="badge bg-dark border border-warning text-warning font-monospace py-1 px-2" id="weeklyEventCountdown" data-seconds="<?= $secRemaining ?>">
                             <i class="fa-regular fa-clock me-1"></i><span id="weeklyEventCountdownText">--:--:--</span>
@@ -193,9 +192,32 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
                         <i class="fa-solid fa-calendar-day me-1"></i><?= htmlspecialchars($activeEvent['era_year']) ?>
                     </div>
                 </div>
+                <button type="button" class="btn-close btn-close-white" onclick="window.closeWeeklyChronicleModal();" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
 
             <div class="modal-body p-3 p-md-4">
+                <!-- Illustration Historique Sengoku (Format 16:9) -->
+                <?php if (!empty($activeEvent['image_url'])): ?>
+                    <div class="weekly-chronicle-illustration-card mb-4 position-relative rounded overflow-hidden shadow-lg border border-warning" style="box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);">
+                        <img src="<?= htmlspecialchars($activeEvent['image_url']) ?>" 
+                             alt="<?= htmlspecialchars($activeEvent['title']) ?>" 
+                             class="w-100 object-fit-cover d-block" 
+                             style="max-height: 420px; width: 100%; aspect-ratio: 16/9; object-fit: cover; object-position: center; border-radius: 8px;"
+                             onerror="this.onerror=null; this.src='/public/assets/buildings/hq.jpg';">
+                        <div class="position-absolute bottom-0 start-0 end-0 p-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.92) 100%);">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-warning text-dark font-monospace fw-bold">
+                                    <i class="fa-solid fa-paintbrush me-1"></i>Illustration Historique
+                                </span>
+                                <span class="text-white-50 font-monospace small"><?= htmlspecialchars($activeEvent['era_year']) ?></span>
+                            </div>
+                            <?php if (!empty($activeEvent['jp_title'])): ?>
+                                <span class="badge bg-dark border border-warning text-warning font-monospace fs-4"><?= htmlspecialchars($activeEvent['jp_title']) ?></span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Récit Historique Immersif -->
                 <div class="weekly-chronicle-story-box mb-4 shadow-sm">
                     <div class="d-flex align-items-center gap-2 mb-1 text-warning fw-bold font-monospace" style="font-size: 0.78rem;">
