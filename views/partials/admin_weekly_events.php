@@ -65,7 +65,7 @@ $allEvents = $adminEventEngine->getAllEvents();
                                     <h4 class="card-title mb-0 fs-3 fw-bold"><?= htmlspecialchars($ev['title']) ?></h4>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
-                                    <button type="button" class="btn btn-sm btn-warning font-monospace fw-bold shadow-sm" onclick="editEvent(<?= $evId ?>)" title="Modifier les textes, dates, image et récompenses de cette chronique">
+                                    <button type="button" class="btn btn-sm btn-warning font-monospace fw-bold shadow-sm" onclick="event.stopPropagation(); editEvent(<?= $evId ?>);" title="Modifier cette chronique">
                                         <i class="fa-solid fa-pen-to-square me-1"></i>Éditer
                                     </button>
                                     <div class="dropdown">
@@ -103,11 +103,7 @@ $allEvents = $adminEventEngine->getAllEvents();
 
                             <div class="card-body p-3">
                                 <div class="d-flex gap-3 mb-3">
-                                    <div class="rounded border shadow-sm flex-shrink-0 position-relative" style="width: 120px; height: 85px; background-image: url('<?= htmlspecialchars($ev['image_url']) ?>'); background-size: cover; background-position: center; cursor: pointer;" onclick="editEvent(<?= $evId ?>)" title="Cliquer pour éditer cette chronique">
-                                        <span class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-warning font-monospace text-center py-0.5" style="font-size: 0.65rem;">
-                                            <i class="fa-solid fa-pen me-0.5"></i>Éditer
-                                        </span>
-                                    </div>
+                                    <div class="rounded border shadow-sm flex-shrink-0" style="width: 120px; height: 85px; background-image: url('<?= htmlspecialchars($ev['image_url']) ?>'); background-size: cover; background-position: center;"></div>
                                     <div class="flex-grow-1">
                                         <div class="d-flex align-items-center gap-2 font-monospace text-muted small mb-1 flex-wrap">
                                             <span class="text-primary fw-bold"><i class="fa-solid fa-calendar me-1"></i><?= htmlspecialchars($ev['era_year']) ?></span>

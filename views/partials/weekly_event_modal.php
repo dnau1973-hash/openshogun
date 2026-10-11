@@ -467,9 +467,9 @@ window.closeWeeklyChronicleModal = function() {
 };
 
 (function() {
-    // Initialisation des écouteurs de clics pour tous les boutons ouvrant le rouleau
+    // Initialisation des écouteurs de clics pour les boutons ouvrant la chronique joueur
     document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('[data-bs-target="#weeklyChronicleModal"], button[title*="Chronique"], button[title*="chronique"]').forEach(btn => {
+        document.querySelectorAll('[data-bs-target="#weeklyChronicleModal"]').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 window.openWeeklyChronicleModal();
