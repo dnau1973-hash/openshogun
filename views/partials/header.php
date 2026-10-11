@@ -788,6 +788,21 @@ $navItems = [
         $curPop = (int)($planet['population'] ?? 100);
         $maxPop = max(1, (int)($planet['population_max'] ?? 100));
         $pctPop = min(100, max(0, ($curPop / $maxPop) * 100));
+
+        // Main-d'œuvre du domaine (Ouvriers affectés / pourvus vs requis)
+        $workforce = $planet['workforce'] ?? null;
+        if (!$workforce && !empty($planet['id'])) {
+            require_once __DIR__ . '/../../core/PopulationEngine.php';
+            $pBld = $planetBuildings ?? $planetEngine->getBuildings((int)$planet['id']);
+            $pFld = $planetEngine->getFields((int)$planet['id']);
+            $workforce = PopulationEngine::calculateWorkforceSummary($planet, $pBld, $pFld, $maxPop);
+        }
+        $assignedWorkers = (int)($workforce['assigned_workers'] ?? 0);
+        $requiredWorkers = (int)($workforce['required_workers'] ?? 0);
+        $isUnderstaffed = !empty($workforce['is_understaffed']);
+        $understaffedMalus = (float)($workforce['understaffed_malus_pct'] ?? 0);
+        $idleWorkers = (int)($workforce['idle_workers'] ?? 0);
+        $pctWorkforce = ($requiredWorkers > 0) ? min(100, max(0, round(($assignedWorkers / $requiredWorkers) * 100))) : 100;
         ?>
 
         <style>
@@ -1036,7 +1051,7 @@ $navItems = [
                     <!-- 8. Population & Logements -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Démographie &amp; Main-d'œuvre</strong><br>Population : <?= number_format($curPop) ?> / <?= number_format($maxPop) ?> logements">
+                       title="<strong>Démographie &amp; Logements</strong><br>Population : <?= number_format($curPop) ?> / <?= number_format($maxPop) ?> places">
                         <i class="fa-solid fa-users text-blue fs-3"></i>
                         <div class="lh-1">
                             <div class="d-flex align-items-baseline gap-1 font-monospace" style="font-size:0.82rem;">
@@ -1045,6 +1060,22 @@ $navItems = [
                             </div>
                             <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
                                 <div class="progress-bar bg-primary" style="width:<?= $pctPop ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 9. Main-d'œuvre Féodale (Ouvriers pourvus vs requis) -->
+                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Main-d'œuvre &amp; Postes de Travail</strong><br>Pourvus : <strong class='<?= $isUnderstaffed ? 'text-warning' : 'text-success' ?>'><?= number_format($assignedWorkers) ?></strong> / <?= number_format($requiredWorkers) ?> requis (<?= $pctWorkforce ?>%)<?= $isUnderstaffed ? '<br><span class=\"text-warning\"><i class=\"fa-solid fa-triangle-exclamation me-1\"></i>Sous-effectif : -' . $understaffedMalus . '% vitesse</span>' : '<br><span class=\"text-success\"><i class=\"fa-solid fa-check me-1\"></i>Effectif complet (+0% malus)</span>' ?><?= ($idleWorkers > 0) ? '<br><span class=\"text-muted\"><i class=\"fa-solid fa-user-clock me-1\"></i>Sans affectation : ' . number_format($idleWorkers) . '</span>' : '' ?>">
+                        <i class="fa-solid fa-person-digging <?= $isUnderstaffed ? 'text-warning' : 'text-success' ?> fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-baseline gap-1 font-monospace" style="font-size:0.82rem;">
+                                <span class="fw-bold <?= $isUnderstaffed ? 'text-warning' : 'text-dark' ?>"><?= number_format($assignedWorkers) ?></span>
+                                <span class="text-muted" style="font-size:0.65rem;">/ <?= number_format($requiredWorkers) ?></span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
+                                <div class="progress-bar <?= $isUnderstaffed ? 'bg-warning' : 'bg-success' ?>" style="width:<?= $pctWorkforce ?>%;"></div>
                             </div>
                         </div>
                     </a>

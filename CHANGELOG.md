@@ -5,9 +5,17 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 ### Ajouté (Added)
-- **Template de Grille & Présentation Harmonisée (`views/partials/game_screen_template.php`, `views/resources.php`, `views/city.php`, `views/map.php`) :**
+- **Intégration de la Page Classement au Template Unique (`views/ranking.php`, `views/partials/game_screen_template.php`) :**
+  * **Harmonisation complète du Palmarès :** Intégration de la vue du classement (Daimyōs, Alliances et Tableau d'Honneur) dans `game_screen_template.php`.
+  * **Confort visuel et ergonomie 2 colonnes :** Présentation sous forme de carte unifiée (`.rts-center-card`), onglets intégrés en sous-en-tête fluide, et présence de la colonne Est mutualisée (`resources_east_accordion.php`) synchronisée en hauteur.
+
+- **Indicateur de Main-d'œuvre Féodale dans la Barre de Ressources (`views/partials/header.php`) :**
+  * **Ratio Ouvriers Requis vs Pourvus :** Ajout d'une pastille interactive dédiée affichant le nombre d'ouvriers mobilisés face aux postes requis (`assigned_workers` / `required_workers`), avec code couleur dynamique (vert si effectif complet, jaune/orange en cas de sous-effectif).
+  * **Jauge et infobulle détaillée :** Affichage de la micro-jauge de couverture, alerte de pénalité de vitesse de production en cas de sous-effectif, et comptage des villageois inactifs/sans affectation.
+
+- **Template de Grille & Présentation Harmonisée (`views/partials/game_screen_template.php`, `views/resources.php`, `views/city.php`, `views/map.php`, `views/ranking.php`) :**
   * **Architecture à brique unique (`game_screen_template.php`) :** Conception d'un composant de mise en page réutilisable centralisant le conteneur plein écran (`.rts-screen-container`), la grille 2 colonnes responsive (`.grid-main`), la carte centrale interactive (`.rts-center-card`) et la colonne latérale Est (`.east-sidebar-col`).
-  * **Uniformisation visuelle (border-radius 8px) :** Résolution des disparités d'arrondi (notamment les 12px de la carte du monde) en standardisant les styles Tabler (rayon de courbure unifié à 8px, ombre douce `shadow-sm`, fond blanc, bordure nette).
+  * **Uniformisation visuelle (border-radius 8px) :** Standardisation des styles Tabler (rayon de courbure unifié à 8px, ombre douce `shadow-sm`, fond blanc, bordure nette) sur l'ensemble des écrans du jeu.
   * **Maintenance simplifiée :** Toute future modification d'enveloppe, d'espacement ou de comportement de la barre latérale s'effectue désormais en un seul point central.
 
 - **Complétion des Terroirs Spécialisés dans la Barre de Ressources (`views/partials/header.php`) :**

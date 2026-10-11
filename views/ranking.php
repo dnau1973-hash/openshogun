@@ -206,72 +206,75 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
 }
 </style>
 
-<!-- EN-TÊTE DE PAGE TABLER -->
-<div class="page-header d-print-none mb-3">
-    <div class="container-fluid px-0">
-        <div class="row g-2 align-items-center">
-            <div class="col">
-                <div class="page-pretitle text-secondary">Honneur &amp; Renommée de l'Archipel</div>
-                <h2 class="page-title d-flex align-items-center gap-2 font-game">
-                    <i class="fa-solid fa-trophy text-warning"></i> Palmarès &amp; Gloire du Japon
-                </h2>
-            </div>
-            <div class="col-auto ms-auto d-print-none">
-                <div class="btn-list">
-                    <a href="?page=alliance" class="btn btn-outline-danger d-none d-sm-inline-flex align-items-center gap-1">
-                        <i class="fa-solid fa-flag text-danger me-1"></i> Pavillon des Alliances
-                    </a>
-                    <button type="button" onclick="window.location.reload()" class="btn btn-white d-inline-flex align-items-center gap-1 shadow-sm" title="Actualiser le classement">
-                        <i class="fa-solid fa-rotate me-1"></i> Actualiser
-                    </button>
-                </div>
+<?php
+$queueTitle = 'Chantiers Féodaux';
+ob_start();
+?>
+    <!-- EN-TÊTE DU CARD CENTRAL DU CLASSEMENT -->
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+        <div>
+            <h2 class="card-title d-flex align-items-center gap-2 m-0">
+                <span><i class="fa-solid fa-trophy text-warning me-1"></i> Palmarès &amp; Gloire du Japon</span>
+                <span class="badge bg-secondary-lt font-monospace" style="font-size:0.72rem;">Sengoku Jidai</span>
+            </h2>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
+                Honneur des Daimyōs, Ligues Féodales &amp; Tableau d'Honneur de l'Archipel
             </div>
         </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="?page=alliance" class="btn btn-outline-danger d-none d-sm-inline-flex align-items-center gap-1" style="font-size:0.8rem; padding:0.35rem 0.75rem;">
+                <i class="fa-solid fa-flag text-danger me-1"></i> Pavillon des Alliances
+            </a>
+            <button type="button" onclick="window.location.reload()" class="btn btn-secondary d-inline-flex align-items-center gap-1 shadow-sm" style="font-size:0.8rem; padding:0.35rem 0.75rem;" title="Actualiser le classement">
+                <i class="fa-solid fa-rotate me-1"></i> Actualiser
+            </button>
+        </div>
     </div>
-</div>
 
-<div class="container-fluid px-0">
-    <!-- BARRE DE NAVIGATION TABLER PAR ONGLETS SÉPARÉS -->
-    <div class="card mb-3 bg-white border shadow-sm ranking-navbar-card">
-        <div class="card-header border-bottom p-2 bg-white d-flex flex-wrap align-items-center justify-content-between gap-2">
-            <ul class="nav nav-pills flex-wrap gap-1 align-items-center m-0 p-0 border-0" id="rankingTabsNav" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <a href="?page=ranking&tab=general" 
-                       id="tab-btn-general"
-                       class="nav-link ranking-tab-btn <?= ($tab === 'general') ? 'active' : '' ?>" 
-                       data-tab="general"
-                       onclick="switchRankingTab('general'); return false;"
-                       role="tab" 
-                       aria-selected="<?= ($tab === 'general') ? 'true' : 'false' ?>">
-                        <i class="fa-solid fa-trophy text-warning me-1"></i> Classement Général
-                        <span class="badge bg-primary-lt ms-2"><?= number_format($totalPlayers) ?></span>
-                    </a>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a href="?page=ranking&tab=alliances" 
-                       id="tab-btn-alliances"
-                       class="nav-link ranking-tab-btn <?= ($tab === 'alliances') ? 'active' : '' ?>" 
-                       data-tab="alliances"
-                       onclick="switchRankingTab('alliances'); return false;"
-                       role="tab" 
-                       aria-selected="<?= ($tab === 'alliances') ? 'true' : 'false' ?>">
-                        <i class="fa-solid fa-flag text-danger me-1"></i> Alliances Féodales
-                        <span class="badge bg-danger-lt ms-2"><?= number_format($totalAlliances) ?></span>
-                    </a>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a href="?page=ranking&tab=honor" 
-                       id="tab-btn-honor"
-                       class="nav-link ranking-tab-btn <?= ($tab === 'honor') ? 'active' : '' ?>" 
-                       data-tab="honor"
-                       onclick="switchRankingTab('honor'); return false;"
-                       role="tab" 
-                       aria-selected="<?= ($tab === 'honor') ? 'true' : 'false' ?>">
-                        <i class="fa-solid fa-medal text-warning me-1"></i> Tableau d'Honneur
-                        <span class="badge bg-warning-lt ms-2">Semaine <?= $currentWeek ?></span>
-                    </a>
-                </li>
-            </ul>
+    <!-- NAVIGATION D'ONGLETS INTÉGRÉE DANS LE CARD -->
+    <div class="border-bottom px-3 py-2 bg-light-subtle d-flex flex-wrap align-items-center justify-content-between gap-2 flex-shrink-0">
+        <ul class="nav nav-pills flex-wrap gap-1 align-items-center m-0 p-0 border-0" id="rankingTabsNav" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a href="?page=ranking&tab=general" 
+                   id="tab-btn-general"
+                   class="nav-link ranking-tab-btn <?= ($tab === 'general') ? 'active' : '' ?>" 
+                   data-tab="general"
+                   onclick="switchRankingTab('general'); return false;"
+                   role="tab" 
+                   aria-selected="<?= ($tab === 'general') ? 'true' : 'false' ?>">
+                    <i class="fa-solid fa-trophy text-warning me-1"></i> Classement Général
+                    <span class="badge bg-primary-lt ms-2"><?= number_format($totalPlayers) ?></span>
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a href="?page=ranking&tab=alliances" 
+                   id="tab-btn-alliances"
+                   class="nav-link ranking-tab-btn <?= ($tab === 'alliances') ? 'active' : '' ?>" 
+                   data-tab="alliances"
+                   onclick="switchRankingTab('alliances'); return false;"
+                   role="tab" 
+                   aria-selected="<?= ($tab === 'alliances') ? 'true' : 'false' ?>">
+                    <i class="fa-solid fa-flag text-danger me-1"></i> Alliances Féodales
+                    <span class="badge bg-danger-lt ms-2"><?= number_format($totalAlliances) ?></span>
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a href="?page=ranking&tab=honor" 
+                   id="tab-btn-honor"
+                   class="nav-link ranking-tab-btn <?= ($tab === 'honor') ? 'active' : '' ?>" 
+                   data-tab="honor"
+                   onclick="switchRankingTab('honor'); return false;"
+                   role="tab" 
+                   aria-selected="<?= ($tab === 'honor') ? 'true' : 'false' ?>">
+                    <i class="fa-solid fa-medal text-warning me-1"></i> Tableau d'Honneur
+                    <span class="badge bg-warning-lt ms-2">Semaine <?= $currentWeek ?></span>
+                </a>
+            </li>
+        </ul>
+        <div class="text-secondary small d-none d-lg-flex align-items-center gap-1">
+            <span class="badge bg-success-lt d-inline-flex align-items-center gap-1">
+                <span class="badge-dot bg-success"></span> Temps réel
+            </span>
         </div>
     </div>
 
@@ -283,8 +286,8 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
          role="tabpanel" 
          style="display: <?= ($tab === 'general') ? 'block' : 'none' ?>;">
         
-        <div class="card shadow-sm mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center bg-light-subtle flex-wrap gap-2">
+        <div class="d-flex flex-column h-100">
+            <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center bg-light-subtle flex-wrap gap-2 border-bottom">
                 <div class="text-secondary small">
                     <span>Daimyōs les plus puissants du Japon • Page <?= $pageNum ?> sur <?= $totalPages ?> (25 par page)</span>
                 </div>
@@ -425,8 +428,8 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
          role="tabpanel" 
          style="display: <?= ($tab === 'alliances') ? 'block' : 'none' ?>;">
         
-        <div class="card shadow-sm mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center bg-light-subtle flex-wrap gap-2">
+        <div class="d-flex flex-column h-100">
+            <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center bg-light-subtle flex-wrap gap-2 border-bottom">
                 <div class="text-secondary small">
                     <span>Grand Livre des Alliances &amp; Ligues Féodales • Page <?= $allyPageNum ?> sur <?= $totalAllyPages ?> (20 par page)</span>
                 </div>
@@ -555,97 +558,103 @@ function renderTablerHonorColumn(array $list, string $unitLabel): void {
          role="tabpanel" 
          style="display: <?= ($tab === 'honor') ? 'block' : 'none' ?>;">
         
-        <!-- Bannière d'Honneur Shogunal -->
-        <div class="card bg-warning-lt border-warning-subtle shadow-sm mb-4">
-            <div class="card-body">
-                <div class="row align-items-center g-3">
-                    <div class="col">
-                        <h3 class="card-title text-warning fw-bold d-flex align-items-center gap-2 mb-1 fs-2">
-                            <i class="fa-solid fa-medal text-warning"></i> Tableau d'Honneur Féodal — Semaine <?= $currentWeek ?> / <?= $currentYear ?>
-                        </h3>
-                        <p class="text-secondary mb-0">
-                            Les 10 plus illustres daimyōs récompensés chaque semaine par décret impérial du Shogunat.<br>
-                            Médailles &amp; Dotations : <strong><i class="fa-solid fa-medal text-warning me-1"></i>Or (1er) +100 Koban</strong>, <strong><i class="fa-solid fa-medal text-secondary me-1"></i>Argent (2ème) +50 Koban</strong>, <strong><i class="fa-solid fa-medal text-amber me-1"></i>Bronze (3ème) +25 Koban</strong> et <strong><i class="fa-solid fa-award text-primary me-1"></i>Rubans Top 10</strong>.
-                            <span class="d-block mt-1 text-muted small"><span class="badge bg-secondary-lt"><i class="fa-solid fa-circle-info me-1"></i>Règle impériale</span> Seuls les commandants humains sont classés et peuvent recevoir des décorations impériales (les daimyōs IA en sont exclus).</span>
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <span class="badge bg-warning text-dark fw-bold px-3 py-2 fs-4 shadow-sm">
-                            <i class="fa-solid fa-trophy me-1"></i> DÉCRET DU SHOGUNAT
-                        </span>
+        <div class="p-3">
+            <!-- Bannière d'Honneur Shogunal -->
+            <div class="card bg-warning-lt border-warning-subtle shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="row align-items-center g-3">
+                        <div class="col">
+                            <h3 class="card-title text-warning fw-bold d-flex align-items-center gap-2 mb-1 fs-2">
+                                <i class="fa-solid fa-medal text-warning"></i> Tableau d'Honneur Féodal — Semaine <?= $currentWeek ?> / <?= $currentYear ?>
+                            </h3>
+                            <p class="text-secondary mb-0">
+                                Les 10 plus illustres daimyōs récompensés chaque semaine par décret impérial du Shogunat.<br>
+                                Médailles &amp; Dotations : <strong><i class="fa-solid fa-medal text-warning me-1"></i>Or (1er) +100 Koban</strong>, <strong><i class="fa-solid fa-medal text-secondary me-1"></i>Argent (2ème) +50 Koban</strong>, <strong><i class="fa-solid fa-medal text-amber me-1"></i>Bronze (3ème) +25 Koban</strong> et <strong><i class="fa-solid fa-award text-primary me-1"></i>Rubans Top 10</strong>.
+                                <span class="d-block mt-1 text-muted small"><span class="badge bg-secondary-lt"><i class="fa-solid fa-circle-info me-1"></i>Règle impériale</span> Seuls les commandants humains sont classés et peuvent recevoir des décorations impériales (les daimyōs IA en sont exclus).</span>
+                            </p>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge bg-warning text-dark fw-bold px-3 py-2 fs-4 shadow-sm">
+                                <i class="fa-solid fa-trophy me-1"></i> DÉCRET DU SHOGUNAT
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 4 Colonnes du Top 10 Travian-Style en cartes Tabler -->
-        <div class="row row-cards mb-4">
-            <!-- 1. Meilleure Progression -->
-            <div class="col-sm-6 col-xl-3">
-                <div class="card shadow-sm h-100">
-                    <div class="card-status-top bg-danger"></div>
-                    <div class="card-header border-bottom py-2">
-                        <div>
-                            <h4 class="card-title text-danger fw-bold mb-0 d-flex align-items-center gap-1">
-                                <i class="fa-solid fa-chart-line text-danger me-1"></i> Top Progression
-                            </h4>
-                            <div class="text-secondary small">Puissance acquise cette semaine</div>
+            <!-- 4 Colonnes du Top 10 Travian-Style en cartes Tabler -->
+            <div class="row row-cards mb-0">
+                <!-- 1. Meilleure Progression -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-status-top bg-danger"></div>
+                        <div class="card-header border-bottom py-2">
+                            <div>
+                                <h4 class="card-title text-danger fw-bold mb-0 d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-chart-line text-danger me-1"></i> Top Progression
+                                </h4>
+                                <div class="text-secondary small">Puissance acquise cette semaine</div>
+                            </div>
                         </div>
+                        <?php renderTablerHonorColumn($honorRoll['progression'], 'points'); ?>
                     </div>
-                    <?php renderTablerHonorColumn($honorRoll['progression'], 'points'); ?>
                 </div>
-            </div>
 
-            <!-- 2. Meilleurs Attaquants -->
-            <div class="col-sm-6 col-xl-3">
-                <div class="card shadow-sm h-100">
-                    <div class="card-status-top bg-red"></div>
-                    <div class="card-header border-bottom py-2">
-                        <div>
-                            <h4 class="card-title text-red fw-bold mb-0 d-flex align-items-center gap-1">
-                                <i class="fa-solid fa-khanda text-red me-1"></i> Top Conquérants
-                            </h4>
-                            <div class="text-secondary small">Sièges victorieux &amp; garnisons vaincues</div>
+                <!-- 2. Meilleurs Attaquants -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-status-top bg-red"></div>
+                        <div class="card-header border-bottom py-2">
+                            <div>
+                                <h4 class="card-title text-red fw-bold mb-0 d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-khanda text-red me-1"></i> Top Conquérants
+                                </h4>
+                                <div class="text-secondary small">Sièges victorieux &amp; garnisons vaincues</div>
+                            </div>
                         </div>
+                        <?php renderTablerHonorColumn($honorRoll['attack'], 'points'); ?>
                     </div>
-                    <?php renderTablerHonorColumn($honorRoll['attack'], 'points'); ?>
                 </div>
-            </div>
 
-            <!-- 3. Meilleurs Défenseurs -->
-            <div class="col-sm-6 col-xl-3">
-                <div class="card shadow-sm h-100">
-                    <div class="card-status-top bg-success"></div>
-                    <div class="card-header border-bottom py-2">
-                        <div>
-                            <h4 class="card-title text-success fw-bold mb-0 d-flex align-items-center gap-1">
-                                <i class="fa-solid fa-shield-halved text-success me-1"></i> Top Défenseurs
-                            </h4>
-                            <div class="text-secondary small">Assauts ennemis repoussés</div>
+                <!-- 3. Meilleurs Défenseurs -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-status-top bg-success"></div>
+                        <div class="card-header border-bottom py-2">
+                            <div>
+                                <h4 class="card-title text-success fw-bold mb-0 d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-shield-halved text-success me-1"></i> Top Défenseurs
+                                </h4>
+                                <div class="text-secondary small">Assauts ennemis repoussés</div>
+                            </div>
                         </div>
+                        <?php renderTablerHonorColumn($honorRoll['defense'], 'points'); ?>
                     </div>
-                    <?php renderTablerHonorColumn($honorRoll['defense'], 'points'); ?>
                 </div>
-            </div>
 
-            <!-- 4. Meilleurs Pillards -->
-            <div class="col-sm-6 col-xl-3">
-                <div class="card shadow-sm h-100">
-                    <div class="card-status-top bg-purple"></div>
-                    <div class="card-header border-bottom py-2">
-                        <div>
-                            <h4 class="card-title text-purple fw-bold mb-0 d-flex align-items-center gap-1">
-                                <i class="fa-solid fa-wheat-awn text-warning me-1"></i> Top Pillards de Riz
-                            </h4>
-                            <div class="text-secondary small">Récoltes et vivres saisis en raid</div>
+                <!-- 4. Meilleurs Pillards -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-status-top bg-purple"></div>
+                        <div class="card-header border-bottom py-2">
+                            <div>
+                                <h4 class="card-title text-purple fw-bold mb-0 d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-wheat-awn text-warning me-1"></i> Top Pillards de Riz
+                                </h4>
+                                <div class="text-secondary small">Récoltes et vivres saisis en raid</div>
+                            </div>
                         </div>
+                        <?php renderTablerHonorColumn($honorRoll['raid'], 'ressources'); ?>
                     </div>
-                    <?php renderTablerHonorColumn($honorRoll['raid'], 'ressources'); ?>
                 </div>
             </div>
         </div>
     </div>
-</div>
+<?php
+$centerCardContent = ob_get_clean();
+
+ob_start();
+?>
 
 <script>
 /**
@@ -695,3 +704,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
+<?php
+$extraHtml = ob_get_clean();
+require __DIR__ . '/partials/game_screen_template.php';
+?>
