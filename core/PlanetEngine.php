@@ -886,8 +886,13 @@ class PlanetEngine {
                     $hasRuralPlots = true;
                     foreach ($rPlots as $rp) {
                         $sType = $rp['structure_type'];
+                        $rLvl = (int)$rp['level'];
                         // Calcul dynamique de la cadence horaire indexée sur resource_speed
-                        $sProd = VillageGeneratorService::calculateHourlyProduction($sType, (int)$rp['level'], $speed);
+                        $sProd = VillageGeneratorService::calculateHourlyProduction($sType, $rLvl, $speed);
+                        
+                        // Consommation de ferveur spirituelle / énergie divine des parcelles en activité
+                        $energyUsed += VillageGeneratorService::calculateHourlyEnergyConsumption($sType, $rLvl);
+
                         switch ($sType) {
                             case 'foret':
                                 $metalMineProd += $sProd;

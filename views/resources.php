@@ -278,8 +278,12 @@ ob_start();
                                            '<span class="text-warning"><i class="fa-solid fa-hammer fa-spin me-1"></i>En travaux vers Niv. ' . $targetLevel . '</span><br>' .
                                            '<small class="text-muted">Cliquer pour voir l\'état du chantier</small>';
                             } else {
+                                $fervorInfo = (!empty($p['energy_cons']) && (int)$p['energy_cons'] > 0)
+                                    ? '<br><span class="text-info small"><i class="fa-solid fa-bolt me-1"></i>Ferveur : ' . (int)$p['energy_cons'] . '</span>'
+                                    : '';
                                 $tooltip = '<strong>' . htmlspecialchars($p['name']) . '</strong> (Niv. ' . $p['level'] . ' / ' . $p['max_level'] . ')<br>' .
-                                           '<span class="text-warning">' . htmlspecialchars($p['prod_label']) . '</span><br>' .
+                                           '<span class="text-warning">' . htmlspecialchars($p['prod_label']) . '</span>' .
+                                           $fervorInfo . '<br>' .
                                            '<small class="text-muted">' . htmlspecialchars($p['worker_role']) . ' : ' . $p['workers_assigned'] . ' ouvriers<br><em>Cliquer pour gérer &amp; élever</em></small>';
                             }
                         ?>
@@ -303,6 +307,8 @@ ob_start();
                              data-worker-role="<?= htmlspecialchars($p['worker_role']) ?>"
                              data-prod-label="<?= htmlspecialchars($p['prod_label']) ?>"
                              data-next-prod-label="<?= htmlspecialchars($p['next_prod_label']) ?>"
+                             data-energy-cons="<?= (int)($p['energy_cons'] ?? 0) ?>"
+                             data-next-energy-cons="<?= (int)($p['next_energy_cons'] ?? 0) ?>"
                              data-tile-img="<?= htmlspecialchars($p['tile_img']) ?>"
                              data-bg-img="<?= htmlspecialchars($p['bg_image']) ?>"
                              data-cost-metal="<?= (int)$cost['metal'] ?>"
@@ -384,9 +390,15 @@ ob_start();
                             <span class="badge bg-primary fw-bold" id="modalPlotLevelBadge">Niveau 1 / 30</span>
                         </div>
                         <p class="text-muted mb-2" style="font-size:0.82rem;" id="modalPlotDesc"></p>
-                        <div class="d-flex align-items-center gap-2 text-muted" style="font-size:0.78rem;">
-                            <i class="fa-solid fa-person-digging text-warning"></i>
-                            <span><strong id="modalPlotWorkerRole">Ouvriers</strong> : <strong class="text-body" id="modalPlotWorkersCount">2</strong> requis</span>
+                        <div class="d-flex align-items-center gap-2 text-muted flex-wrap" style="font-size:0.78rem;">
+                            <div class="d-flex align-items-center gap-1">
+                                <i class="fa-solid fa-person-digging text-warning"></i>
+                                <span><strong id="modalPlotWorkerRole">Ouvriers</strong> : <strong class="text-body" id="modalPlotWorkersCount">2</strong> requis</span>
+                            </div>
+                            <div id="modalPlotEnergyConsBox" class="d-none align-items-center gap-1 text-info">
+                                <i class="fa-solid fa-bolt text-info"></i>
+                                <span><strong>Ferveur</strong> : <strong class="text-body" id="modalPlotEnergyCons">0</strong> / h</span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -99,6 +99,21 @@
         const nextProdEl = document.getElementById('modalPlotNextProd');
         if (nextProdEl) nextProdEl.textContent = d.nextProdLabel || '-';
 
+        // Consommation de ferveur
+        const energyCons = parseInt(d.energyCons, 10) || 0;
+        const energyBox = document.getElementById('modalPlotEnergyConsBox');
+        const energyVal = document.getElementById('modalPlotEnergyCons');
+        if (energyBox && energyVal) {
+            if (energyCons > 0) {
+                energyVal.textContent = energyCons;
+                energyBox.classList.remove('d-none');
+                energyBox.classList.add('d-flex');
+            } else {
+                energyBox.classList.add('d-none');
+                energyBox.classList.remove('d-flex');
+            }
+        }
+
         // Barre de potentiel (20 à 100)
         const progBar = document.getElementById('modalPlotPotentialBar');
         const progText = document.getElementById('modalPlotPotentialText');

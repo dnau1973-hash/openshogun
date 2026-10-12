@@ -26,6 +26,7 @@ class RuralPlotEngine {
             'tile_img'     => '/public/assets/tiles/tile_hq.png',
             'bg_image'     => '/public/assets/buildings/hq.jpg',
             'base_cost'    => ['metal' => 120, 'crystal' => 90, 'deuterium' => 60],
+            'energy_cons_rate' => 0,
         ],
         'foret' => [
             'type'         => 'foret',
@@ -41,6 +42,7 @@ class RuralPlotEngine {
             'tile_img'     => '/public/assets/tiles/tile_bucheron.png',
             'bg_image'     => '/public/assets/resources/terroir_wood.jpg',
             'base_cost'    => ['metal' => 45, 'crystal' => 60, 'deuterium' => 20],
+            'energy_cons_rate' => 4,
         ],
         'carriere' => [
             'type'         => 'carriere',
@@ -56,6 +58,7 @@ class RuralPlotEngine {
             'tile_img'     => '/public/assets/tiles/tile_carriere.png',
             'bg_image'     => '/public/assets/resources/terroir_stone.jpg',
             'base_cost'    => ['metal' => 60, 'crystal' => 40, 'deuterium' => 20],
+            'energy_cons_rate' => 5,
         ],
         'culture_the' => [
             'type'         => 'culture_the',
@@ -71,6 +74,7 @@ class RuralPlotEngine {
             'tile_img'     => '/public/assets/tiles/tile_ferme.png',
             'bg_image'     => '/public/assets/resources/terroir_tea.jpg',
             'base_cost'    => ['metal' => 50, 'crystal' => 35, 'deuterium' => 45],
+            'energy_cons_rate' => 3,
         ],
         'village' => [
             'type'         => 'village',
@@ -86,6 +90,7 @@ class RuralPlotEngine {
             'tile_img'     => '/public/assets/tiles/tile_storage.png',
             'bg_image'     => '/public/assets/resources/terroir_village.jpg',
             'base_cost'    => ['metal' => 70, 'crystal' => 50, 'deuterium' => 30],
+            'energy_cons_rate' => 0,
         ],
         'fosse_argile' => [
             'type'         => 'fosse_argile',
@@ -101,6 +106,7 @@ class RuralPlotEngine {
             'tile_img'     => '/public/assets/tiles/tile_argiliere.png',
             'bg_image'     => '/public/assets/resources/terroir_clay.jpg',
             'base_cost'    => ['metal' => 45, 'crystal' => 50, 'deuterium' => 30],
+            'energy_cons_rate' => 4,
         ],
         'riziere' => [
             'type'         => 'riziere',
@@ -116,6 +122,7 @@ class RuralPlotEngine {
             'tile_img'     => '/public/assets/tiles/tile_riziere.png',
             'bg_image'     => '/public/assets/resources/terroir_rice.jpg',
             'base_cost'    => ['metal' => 35, 'crystal' => 45, 'deuterium' => 60],
+            'energy_cons_rate' => 6,
         ],
         'champ_soja' => [
             'type'         => 'champ_soja',
@@ -131,6 +138,7 @@ class RuralPlotEngine {
             'tile_img'     => '/public/assets/tiles/tile_ferme.png',
             'bg_image'     => '/public/assets/resources/terroir_soybean.jpg',
             'base_cost'    => ['metal' => 40, 'crystal' => 30, 'deuterium' => 40],
+            'energy_cons_rate' => 4,
         ],
         'sanctuaire_shinto' => [
             'type'         => 'sanctuaire_shinto',
@@ -146,6 +154,7 @@ class RuralPlotEngine {
             'tile_img'     => '/public/assets/tiles/tile_temple.png',
             'bg_image'     => '/public/assets/resources/terroir_shrine.jpg',
             'base_cost'    => ['metal' => 80, 'crystal' => 70, 'deuterium' => 50],
+            'energy_cons_rate' => 0,
         ],
     ];
 
@@ -272,6 +281,10 @@ class RuralPlotEngine {
             $currentProd = VillageGeneratorService::calculateHourlyProduction($type, $lvl);
             $nextProd = VillageGeneratorService::calculateHourlyProduction($type, $nextLvl);
 
+            // Consommation de ferveur spirituelle
+            $energyCons = VillageGeneratorService::calculateHourlyEnergyConsumption($type, $lvl);
+            $nextEnergyCons = VillageGeneratorService::calculateHourlyEnergyConsumption($type, $nextLvl);
+
             // Mettre à jour l'entrée mémoire et synchroniser la BDD si nécessaire
             if (isset($p['id']) && abs((float)$p['prod_hourly'] - $currentProd) > 0.05) {
                 try {
@@ -315,6 +328,9 @@ class RuralPlotEngine {
                 'can_afford'         => $canAfford,
                 'prod_label'         => $prodLabel,
                 'next_prod_label'    => $nextProdLabel,
+                'energy_cons'        => $energyCons,
+                'next_energy_cons'   => $nextEnergyCons,
+                'energy_cons_rate'   => (int)($meta['energy_cons_rate'] ?? 0),
                 'progress_pct'       => $progressPct,
                 // Gestion du chantier actif
                 'is_upgrading'       => $isUpgrading,

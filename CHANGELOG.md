@@ -26,6 +26,11 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 - **Correction du Crash JavaScript sur la Page Flotte (`views/fleet.php`) :**
   * Résolution des erreurs bloquantes `Uncaught SyntaxError: missing ) after argument list` et `Uncaught ReferenceError: submitFleet is not defined` causées par des guillemets doubles non échappés dans l'alerte modale lors du départ d'expéditions féodales.
 
+- **Consommation & Équilibrage de la Ferveur Divine (`core/VillageGeneratorService.php`, `core/PlanetEngine.php`, `core/RuralPlotEngine.php`, `views/resources.php`, `public/js/rural_domain_map.js`) :**
+  * **Résolution du blocage à 0 de la consommation :** Raccordement de la consommation de ferveur spirituelle pour les 6 parcelles de production du terroir rural (Rizière : 6/niv, Carrière : 5/niv, Forêt : 4/niv, Fosse d'argile : 4/niv, Soja : 4/niv, Thé : 3/niv).
+  * **Équilibrage Sanctuaire Shintō & Déficit :** Étalonnage face à la production du Sanctuaire Shintō (30/niv + 20 passif). En cas de déséquilibre (mines élevées sans sanctuaire), le déficit s'active correctement et bride la production à 10% jusqu'à l'élévation du sanctuaire.
+  * **Affichage In-Game & Modale :** Affichage de la consommation exacte dans la barre supérieure (`header.php`), l'accordéon latéral (`rural_harvest_resources_panel.php`), les infobulles du terroir et la modale d'élévation de structure.
+
 ## [1.22.0] - 2026-10-11
 ### Ajouté (Added)
 - **Système Exhaustif des 52 Chroniques Féodales du Sengoku (`core/WeeklyEventsData.php`, `core/WeeklyEventEngine.php`, `database/migrate_weekly_events.php`) :**

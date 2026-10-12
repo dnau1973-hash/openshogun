@@ -372,4 +372,39 @@ class VillageGeneratorService {
         $prod = $baseRate * pow($level, 1.38) * (1.0 + ($level * 0.015)) * $speed;
         return round($prod, 1);
     }
+
+    /**
+     * Calcul de la consommation horaire de ferveur/énergie divine par structure et niveau
+     * Les structures de production sollicitent la bénédiction et sérénité des Kamis (Sanctuaire Shintō).
+     */
+    public static function calculateHourlyEnergyConsumption(string $structureType, int $level): int {
+        if ($level <= 0) {
+            return 0;
+        }
+
+        // Taux de consommation unitaire en ferveur par niveau
+        // Les 6 parcelles de production consomment la ferveur spirituelle :
+        // - Rizière inondée : 6 / niv (besoin vital en irrigation et bénédiction céleste)
+        // - Carrière de granit : 5 / niv (extraction minérale lourde et taille de pierre)
+        // - Forêt de cèdres : 4 / niv (abattage, sylviculture et respect des esprits sylvestres)
+        // - Fosse d'argile : 4 / niv (fouille alluviale et cuisson céramique)
+        // - Champ de soja : 4 / niv (culture vivrière et maraîchage)
+        // - Coteaux de thé : 3 / niv (terrasses propices à la méditation et au recueillement)
+        // Total équilibré = 26 / niv (face au Sanctuaire qui produit 30 / niv + 20 passif)
+        static $energyRates = [
+            'riziere'          => 6,
+            'carriere'         => 5,
+            'foret'            => 4,
+            'fosse_argile'     => 4,
+            'champ_soja'       => 4,
+            'culture_the'      => 3,
+            'tenshu'           => 0,
+            'village'          => 0,
+            'sanctuaire_shinto'=> 0
+        ];
+
+        $rate = $energyRates[$structureType] ?? 0;
+        return (int)($rate * $level);
+    }
 }
+
