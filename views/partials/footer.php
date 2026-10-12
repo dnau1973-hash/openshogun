@@ -63,6 +63,8 @@
 <?php require_once __DIR__ . '/weekly_event_modal.php'; ?>
 <!-- Modale de Transparence IA (Prompts & Traduction) -->
 <?php require_once __DIR__ . '/ai_prompt_modal.php'; ?>
+<!-- Modale Universelle Tabler.io : Renommage de Fief Féodal -->
+<?php require_once __DIR__ . '/rename_village_modal.php'; ?>
 
 <!-- Modale Universelle de la Fiche Daimyō / Profil (Style Washi Féodal) -->
 <div class="modal-overlay" id="playerProfileModal">

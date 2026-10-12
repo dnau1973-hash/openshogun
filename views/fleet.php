@@ -1009,7 +1009,7 @@ async function submitFleet() {
         const colonizerCnt = parseInt(document.getElementById('ship-colonizer')?.value || '0', 10);
         const colonyShipCnt = parseInt(document.getElementById('ship-colony_ship')?.value || '0', 10);
         if (colonizerCnt <= 0 && colonyShipCnt <= 0) {
-            showModalAlert("Une expédition de colonisation nécessite d'inclure au moins 1 Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>). Si vous n'en avez pas encore en garnison, vous devez d'abord en former un au Donjon Tenshu (Niv. 10+) ou à l'Atelier de Siège.", "warning", "Pionnier Requis");
+            showModalAlert("Une expédition de colonisation nécessite d'inclure au moins 1 Pionnier Féodal (Colon <i class='fa-solid fa-torii-gate text-danger'></i>). Si vous n'en avez pas encore en garnison, vous devez d'abord en former un au Donjon Tenshu (Niv. 10+) ou à l'Atelier de Siège.", "warning", "Pionnier Requis");
             return;
         }
     }

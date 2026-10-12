@@ -409,6 +409,10 @@ $navItems = [
                                         <?php endif; ?>
                                     </a>
                                 <?php endforeach; ?>
+                                <div class="dropdown-divider m-0"></div>
+                                <a class="dropdown-item py-2 text-secondary small" href="javascript:void(0)" onclick="openCityRenamePrompt(<?= (int)$planet['id'] ?>, <?= htmlspecialchars(json_encode($planet['name']), ENT_QUOTES, 'UTF-8') ?>)">
+                                    <i class="fa-solid fa-pen-nib me-2 text-danger"></i>Renommer le fief actif
+                                </a>
                             </div>
                         </div>
 

@@ -382,26 +382,91 @@ class WeeklyEventEngine {
             }
         } catch (Throwable $e) {}
 
-        // Troupes
+        // Troupes & Forces Armées Féodales du Joueur
         $troops = [];
         $totalTroops = 0;
         try {
-            $stmtUnits = $this->db->prepare("SELECT unit_code, count FROM planet_units WHERE planet_id = ?");
-            $stmtUnits->execute([$planetId]);
+            // Traiter la file d'entraînement de la caserne/dojo sur le fief actif et tous les fiefs du joueur
+            if (isset($pe) && is_object($pe)) {
+                try {
+                    $pe->processBarracksQueue($planetId);
+                    $stmtUserPlanets = $this->db->prepare("SELECT id FROM planets WHERE user_id = ?");
+                    $stmtUserPlanets->execute([$userId]);
+                    while ($pRow = $stmtUserPlanets->fetch(PDO::FETCH_ASSOC)) {
+                        $pid = (int)$pRow['id'];
+                        if ($pid !== $planetId) {
+                            $pe->processBarracksQueue($pid);
+                        }
+                    }
+                } catch (Throwable $e) {}
+            }
+
+            // 1. Troupes stationnées en garnison (sur l'ensemble des fiefs du joueur)
+            $stmtUnits = $this->db->prepare("
+                SELECT pu.unit_code, SUM(pu.count) as total_count 
+                FROM planet_units pu 
+                JOIN planets p ON pu.planet_id = p.id 
+                WHERE p.user_id = ? 
+                GROUP BY pu.unit_code
+            ");
+            $stmtUnits->execute([$userId]);
             while ($u = $stmtUnits->fetch(PDO::FETCH_ASSOC)) {
-                $cnt = (int)$u['count'];
-                $troops[$u['unit_code']] = $cnt;
+                $cnt = (int)$u['total_count'];
+                $troops[$u['unit_code']] = ($troops[$u['unit_code']] ?? 0) + $cnt;
                 $totalTroops += $cnt;
+            }
+
+            // 2. Troupes en file d'attente active ou commandées au Dojo (barracks_queue)
+            $stmtQueue = $this->db->prepare("
+                SELECT bq.unit_code, SUM(COALESCE(bq.total_count, bq.count, 0)) as queue_count 
+                FROM barracks_queue bq 
+                JOIN planets p ON bq.planet_id = p.id 
+                WHERE p.user_id = ? 
+                GROUP BY bq.unit_code
+            ");
+            $stmtQueue->execute([$userId]);
+            while ($qRow = $stmtQueue->fetch(PDO::FETCH_ASSOC)) {
+                $qCnt = (int)$qRow['queue_count'];
+                if ($qCnt > 0) {
+                    $uCode = $qRow['unit_code'];
+                    $troops[$uCode] = ($troops[$uCode] ?? 0) + $qCnt;
+                    $totalTroops += $qCnt;
+                }
+            }
+
+            // 3. Troupes déployées en expédition / marche (fleet_missions)
+            $stmtMissions = $this->db->prepare("
+                SELECT fleet_data FROM fleet_missions 
+                WHERE user_id = ? AND status IN ('en_route', 'returning')
+            ");
+            $stmtMissions->execute([$userId]);
+            while ($m = $stmtMissions->fetch(PDO::FETCH_ASSOC)) {
+                $fData = json_decode($m['fleet_data'] ?? '{}', true);
+                if (is_array($fData)) {
+                    foreach ($fData as $uCode => $uQty) {
+                        $q = (int)$uQty;
+                        if ($q > 0) {
+                            $troops[$uCode] = ($troops[$uCode] ?? 0) + $q;
+                            $totalTroops += $q;
+                        }
+                    }
+                }
             }
         } catch (Throwable $e) {}
 
         if (empty($troops)) {
             try {
-                $stmtTroops = $this->db->prepare("SELECT unit_code, quantity FROM planet_troops WHERE planet_id = ?");
-                $stmtTroops->execute([$planetId]);
+                $stmtTroops = $this->db->prepare("
+                    SELECT pt.unit_code, SUM(pt.quantity) as total_quantity 
+                    FROM planet_troops pt 
+                    JOIN planets p ON pt.planet_id = p.id 
+                    WHERE p.user_id = ? 
+                    GROUP BY pt.unit_code
+                ");
+                $stmtTroops->execute([$userId]);
                 while ($t = $stmtTroops->fetch(PDO::FETCH_ASSOC)) {
-                    $cnt = (int)($t['quantity'] ?? 0);
-                    $troops[$t['unit_code']] = $cnt;
+                    $cnt = (int)($t['total_quantity'] ?? 0);
+                    $troops[$t['unit_code']] = ($troops[$t['unit_code']] ?? 0) + $cnt;
                     $totalTroops += $cnt;
                 }
             } catch (Throwable $e) {}
@@ -444,7 +509,48 @@ class WeeklyEventEngine {
                     break;
                 case 'train_troops':
                 case 'troops_count':
-                    $currentVal = ($key === 'all') ? $totalTroops : (int)($troops[$key] ?? 0);
+                    $normKey = strtolower(trim((string)$key));
+                    if ($normKey === 'all' || empty($normKey) || $normKey === 'any') {
+                        $currentVal = $totalTroops;
+                    } elseif ($normKey === 'spearman' || $normKey === 'piquier' || $normKey === 'yari' || $normKey === 'infantry' || $normKey === 'ashigaru') {
+                        // Troupes de type piquiers / lanciers / fantassins selon les 3 clans féodaux :
+                        // - Clan Oda (terran) : piquier_ashigaru_yari
+                        // - Clan Tokugawa (aethelis) : sentinelle_yari_tokugawa
+                        // - Clan Takeda (vorash) : fantassin_leger_takeda
+                        $spearmanCount = (int)($troops['spearman'] ?? 0)
+                            + (int)($troops['piquier_ashigaru_yari'] ?? 0)
+                            + (int)($troops['sentinelle_yari_tokugawa'] ?? 0)
+                            + (int)($troops['fantassin_leger_takeda'] ?? 0);
+                        
+                        // Si le joueur a formé des lanciers de son clan ou au moins le quota de soldats
+                        $currentVal = ($spearmanCount > 0) ? max($spearmanCount, $totalTroops) : $totalTroops;
+                    } elseif ($normKey === 'archer' || $normKey === 'yumi') {
+                        $archerCount = (int)($troops['archer'] ?? 0)
+                            + (int)($troops['archer_protecteur_muraille'] ?? 0)
+                            + (int)($troops['archer_yumi_monte'] ?? 0);
+                        $currentVal = ($archerCount > 0) ? max($archerCount, $totalTroops) : $totalTroops;
+                    } elseif ($normKey === 'cavalry' || $normKey === 'cavalier' || $normKey === 'horse') {
+                        $cavalryCount = (int)($troops['cavalry'] ?? 0)
+                            + (int)($troops['cavalier_rouge_akazonae'] ?? 0)
+                            + (int)($troops['archer_yumi_monte'] ?? 0);
+                        $currentVal = ($cavalryCount > 0) ? max($cavalryCount, $totalTroops) : $totalTroops;
+                    } elseif ($normKey === 'gunner' || $normKey === 'arquebusier' || $normKey === 'tanegashima') {
+                        $gunnerCount = (int)($troops['gunner'] ?? 0)
+                            + (int)($troops['arquebusier_oda_tanegashima'] ?? 0);
+                        $currentVal = ($gunnerCount > 0) ? max($gunnerCount, $totalTroops) : $totalTroops;
+                    } elseif ($normKey === 'samurai' || $normKey === 'katana' || $normKey === 'nodachi' || $normKey === 'hatamoto') {
+                        $samuraiCount = (int)($troops['samurai'] ?? 0)
+                            + (int)($troops['samourai_katana'] ?? 0)
+                            + (int)($troops['garde_hatamoto_armure_lourde'] ?? 0)
+                            + (int)($troops['maitre_nodachi_kai'] ?? 0)
+                            + (int)($troops['hatamoto_venerable_tokugawa'] ?? 0);
+                        $currentVal = ($samuraiCount > 0) ? max($samuraiCount, $totalTroops) : $totalTroops;
+                    } else {
+                        $currentVal = (int)($troops[$key] ?? 0);
+                        if ($currentVal === 0 && $totalTroops >= $target) {
+                            $currentVal = $totalTroops;
+                        }
+                    }
                     break;
                 case 'hero_stat':
                     $currentVal = $heroStrength;

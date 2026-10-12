@@ -5,6 +5,27 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 
+## [1.23.0] - 2026-10-12
+### Ajouté (Added)
+- **Modale Tabler.io Universelle pour le Renommage des Fiefs (`views/partials/rename_village_modal.php`, `views/city.php`, `views/resources.php`, `views/partials/header.php`, `views/partials/footer.php`) :**
+  * **Éradication des boîtes natives :** Remplacement intégral des invites JavaScript synchrones `prompt()` et `alert()` par une modale moderne Tabler.io (`modal-blur`).
+  * **Raccourci Rapide dans le Menu Daimyō :** Accès direct pour renommer le fief actif depuis le menu déroulant de la barre supérieure (`header.php`).
+  * **Interface Réactive & Ergonomie :** Saisie directe avec focus automatique, validation de formulaire AJAX fluide, bouton d'action avec indicateur de chargement (spinner) et notifications par toasts Tabler en cas de succès ou d'erreur.
+
+- **Indicateur de Moral & Contentement des Villageois (`views/partials/header.php`) :**
+  * **Jauge Interactive sous le Carrousel :** Intégration d'une pastille interactive affichant le niveau d'approbation et de moral de la population féodale du fief.
+  * **Statuts Dynamiques & Infobulles :** Calcul en temps réel de l'état d'esprit des paysans (Très mécontent, Morose, Satisfait, Enthousiaste) avec infobulle contextuelle explicitant l'influence des taxes, de la nourriture et du logement sur la productivité.
+
+### Corrigé (Fixed)
+- **Détection des Troupes dans les Chroniques Féodales Hebdomadaires (`core/WeeklyEventEngine.php`) :**
+  * **Résolution du blocage de l'Acte III d'Okehazama (et quêtes d'entraînement militaire) :** Résolution du problème où l'objectif `spearman` restait à 0. Mapping automatique des clés génériques (`spearman`, `archer`, `cavalry`, `gunner`, `samurai`) vers les identifiants techniques des 3 clans féodaux (Oda : `piquier_ashigaru_yari`, Tokugawa : `sentinelle_yari_tokugawa`, Takeda : `fantassin_leger_takeda`, etc.).
+  * **Périmètre Daimyō Étendu :** Agrégation des troupes sur l'ensemble des fiefs du joueur (`p.user_id = ?`) et non plus uniquement sur le fief actif.
+  * **Prise en Compte des Files d'Attente et Expéditions :** Actualisation automatique de la file du Dojo (`processBarracksQueue()`), détection des recrues en cours de formation (`barracks_queue`) et des régiments en marche lors d'expéditions (`fleet_missions`).
+  * **Fallback Quota Global :** Prise en compte du volume total de l'armée si le quota de recrues requis est atteint.
+
+- **Correction du Crash JavaScript sur la Page Flotte (`views/fleet.php`) :**
+  * Résolution des erreurs bloquantes `Uncaught SyntaxError: missing ) after argument list` et `Uncaught ReferenceError: submitFleet is not defined` causées par des guillemets doubles non échappés dans l'alerte modale lors du départ d'expéditions féodales.
+
 ## [1.22.0] - 2026-10-11
 ### Ajouté (Added)
 - **Système Exhaustif des 52 Chroniques Féodales du Sengoku (`core/WeeklyEventsData.php`, `core/WeeklyEventEngine.php`, `database/migrate_weekly_events.php`) :**

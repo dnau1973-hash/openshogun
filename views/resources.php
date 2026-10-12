@@ -205,7 +205,7 @@ ob_start();
                         <?php if (!empty($planet['is_capital'])): ?>
                             <span class="badge bg-warning text-dark fw-bold" style="font-size:0.72rem;"><i class="fa-solid fa-crown me-1"></i>Capitale</span>
                         <?php endif; ?>
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" title="Renommer ce fief" onclick="openCityRenamePrompt()" style="font-size:0.75rem;">
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" title="Renommer ce fief" onclick="openCityRenamePrompt(<?= (int)$planet['id'] ?>, <?= htmlspecialchars(json_encode($planet['name']), ENT_QUOTES, 'UTF-8') ?>)" style="font-size:0.75rem;">
                             <i class="fa-solid fa-pen me-1"></i>Renommer
                         </button>
                         <span class="badge bg-green-lt fw-bold font-monospace" style="font-size: 0.72rem;">
@@ -463,29 +463,6 @@ window.RURAL_CONFIG = {
         riziere: <?= (int)($planet['prod_rates']['hero_bonuses']['deuterium'] ?? 0) ?>
     }
 };
-
-async function openCityRenamePrompt() {
-    const currentName = <?= json_encode($planet['name']) ?>;
-    const newName = prompt("Entrez le nouveau nom de ce village :", currentName);
-    if (!newName || newName.trim() === '' || newName.trim() === currentName) return;
-
-    const formData = new FormData();
-    formData.append('action', 'rename');
-    formData.append('name', newName.trim());
-
-    try {
-        const res = await fetch('/api/planet.php', { method: 'POST', body: formData });
-        const data = await res.json();
-        if (data.success) {
-            alert(data.message);
-            window.location.reload();
-        } else {
-            alert(data.error || 'Erreur lors du renommage.');
-        }
-    } catch (e) {
-        alert('Erreur réseau avec le serveur.');
-    }
-}
 </script>
 <script src="/public/js/rural_domain_map.js?v=<?= file_exists(__DIR__ . '/../public/js/rural_domain_map.js') ? filemtime(__DIR__ . '/../public/js/rural_domain_map.js') : time() ?>"></script>
 <?php
