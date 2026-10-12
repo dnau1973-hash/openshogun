@@ -65,11 +65,37 @@ class WorldGenerator {
         $attempts = 0;
         $maxAttempts = $count * 50;
 
-        $insertStmt = $this->db->prepare("
-            INSERT INTO planets 
-            (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 50, 20000, 20000, 20000, 20000, 0, UNIX_TIMESTAMP())
-        ");
+        // Garantir la migration de schéma transparente
+        require_once __DIR__ . '/PlanetEngine.php';
+        $planetEngine = new PlanetEngine($this->db);
+        $planetEngine->ensureSchemaMigration();
+
+        $hasFishCol = false;
+        try {
+            $chk = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'fish'");
+            $hasFishCol = ($chk && $chk->rowCount() > 0);
+        } catch (Exception $e) {
+            try {
+                $this->db->query("SELECT fish FROM planets LIMIT 0");
+                $hasFishCol = true;
+            } catch (Exception $e2) {
+                $hasFishCol = false;
+            }
+        }
+
+        if ($hasFishCol) {
+            $insertStmt = $this->db->prepare("
+                INSERT INTO planets 
+                (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 50, 20000, 20000, 20000, 20000, 0, UNIX_TIMESTAMP())
+            ");
+        } else {
+            $insertStmt = $this->db->prepare("
+                INSERT INTO planets 
+                (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 50, 20000, 20000, 20000, 0, UNIX_TIMESTAMP())
+            ");
+        }
 
         while (count($createdPlanets) < $count && $attempts < $maxAttempts) {
             $attempts++;
@@ -168,6 +194,15 @@ class WorldGenerator {
     public function resetUniverse(string $adminPassword = 'Gabriel125#', int $neutralPlanetsCount = 12, bool $deployBots = true): array {
         $this->db->exec("SET FOREIGN_KEY_CHECKS = 0;");
 
+        // Garantir que les migrations de schéma sont appliquées avant le vidage et la reconstruction
+        try {
+            require_once __DIR__ . '/PlanetEngine.php';
+            $planetEngine = new PlanetEngine($this->db);
+            $planetEngine->ensureSchemaMigration(true);
+        } catch (Exception $eMig) {
+            error_log("WorldGenerator::resetUniverse - ensureSchemaMigration notice: " . $eMig->getMessage());
+        }
+
         // 1. Vidage de toutes les tables dynamiques
         $dynamicTables = [
             'combat_reports',
@@ -242,11 +277,32 @@ class WorldGenerator {
         $capitalX = 1;
         $capitalY = 1;
 
-        $stmtCap = $this->db->prepare("
-            INSERT INTO planets 
-            (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
-            VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 0, 120, 30000, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
-        ");
+        $hasFishCol = false;
+        try {
+            $chk = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'fish'");
+            $hasFishCol = ($chk && $chk->rowCount() > 0);
+        } catch (Exception $e) {
+            try {
+                $this->db->query("SELECT fish FROM planets LIMIT 0");
+                $hasFishCol = true;
+            } catch (Exception $e2) {
+                $hasFishCol = false;
+            }
+        }
+
+        if ($hasFishCol) {
+            $stmtCap = $this->db->prepare("
+                INSERT INTO planets 
+                (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
+                VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 0, 120, 30000, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
+            ");
+        } else {
+            $stmtCap = $this->db->prepare("
+                INSERT INTO planets 
+                (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
+                VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 120, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
+            ");
+        }
         $stmtCap->execute([$adminId, $capitalName, $capitalX, $capitalY]);
         $capitalPlanetId = (int)$this->db->lastInsertId();
 

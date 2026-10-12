@@ -1092,9 +1092,9 @@ class PlanetEngine {
      * Assure la présence des colonnes sake, rice_flour, population et des tables requises
      * Auto-migration transparente au runtime si les colonnes manquent dans la base MySQL
      */
-    public function ensureSchemaMigration(): void {
+    public function ensureSchemaMigration(bool $force = false): void {
         static $executed = false;
-        if ($executed) return;
+        if ($executed && !$force) return;
         if ($this->db->inTransaction()) return;
         $executed = true;
 
@@ -1277,6 +1277,51 @@ class PlanetEngine {
                     }
                 }
             } catch (Exception $eSync) {}
+
+            // 12. Colonnes fish et fish_max sur planets pour le système halieutique & lacs
+            try {
+                $stmtFish = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'fish'");
+                if ($stmtFish && $stmtFish->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets`
+                        ADD COLUMN `fish` DOUBLE NOT NULL DEFAULT 0,
+                        ADD COLUMN `fish_max` INT UNSIGNED NOT NULL DEFAULT 15000
+                    ");
+                } else {
+                    $stmtFishMax = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'fish_max'");
+                    if ($stmtFishMax && $stmtFishMax->rowCount() === 0) {
+                        $this->db->exec("ALTER TABLE `planets` ADD COLUMN `fish_max` INT UNSIGNED NOT NULL DEFAULT 15000");
+                    }
+                }
+            } catch (Exception $eFish) {}
+
+            // 13. Unité pecheur dans la table units
+            try {
+                $stmtPec = $this->db->query("SELECT code FROM `units` WHERE `code` = 'pecheur'");
+                if ($stmtPec && $stmtPec->rowCount() === 0) {
+                    $this->db->exec("INSERT INTO `units`
+                        (`code`, `name`, `faction`, `tier`, `icon`, `image`, `metal_cost`, `crystal_cost`, `deuterium_cost`, `rice_flour_cost`, `attack`, `def_infantry`, `def_mech`, `speed`, `cargo_capacity`, `base_train_time`, `description`)
+                        VALUES
+                        ('pecheur', 'Pêcheur Féodal (Ryōshi)', 'all', 1, '🐟', 'pecheur.jpg', 60, 40, 50, 0, 5, 10, 10, 14, 100, 45, 'Villageois spécialisé dans les sorties de pêche sur les lacs et eaux calmes pour ramener du poisson frais.')
+                    ");
+                }
+            } catch (Exception $ePec) {}
+
+            // 14. Technologie fishing_tech dans la table researches
+            try {
+                $stmtRes = $this->db->query("SELECT code FROM `researches` WHERE `code` = 'fishing_tech'");
+                if ($stmtRes && $stmtRes->rowCount() === 0) {
+                    $this->db->exec("INSERT INTO `researches`
+                        (`code`, `name`, `metal_cost`, `crystal_cost`, `deuterium_cost`, `base_time`, `description`)
+                        VALUES
+                        ('fishing_tech', 'Halieutique Féodale', 300, 250, 400, 120, 'Améliore les filets, nasses et techniques des pêcheurs villageois. Augmente de 25% la quantité de poisson frais pêchée par expédition.')
+                    ");
+                }
+            } catch (Exception $eRes) {}
+
+            // 15. Type de mission 'fishing' dans fleet_missions
+            try {
+                $this->db->exec("ALTER TABLE `fleet_missions` MODIFY COLUMN `mission_type` ENUM('attack','transport','occupy','colonize','spy','adventure','raid','fishing') NOT NULL");
+            } catch (Exception $eEnum) {}
         } catch (Exception $e) {
             // Ignorer silencieusement si déjà en cours ou permissions limitées
         }

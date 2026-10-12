@@ -318,6 +318,10 @@ try {
             $neutralCount = max(5, min(50, (int)($_POST['neutral_planets'] ?? 12)));
             $deployBots = !isset($_POST['deploy_bots']) || $_POST['deploy_bots'] === '1' || $_POST['deploy_bots'] === 'true';
 
+            require_once __DIR__ . '/../core/PlanetEngine.php';
+            $pe = new PlanetEngine();
+            $pe->ensureSchemaMigration(true);
+
             $worldGen = new WorldGenerator();
             $result = $worldGen->resetUniverse($adminPassword, $neutralCount, $deployBots);
             echo json_encode($result);
