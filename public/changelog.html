@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-primary font-monospace m-0">v1.22.0</div>
+                                    <div class="h2 text-primary font-monospace m-0">v1.23.0</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,14 +123,178 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
-                    <!-- VERSION 1.22.0 -->
+                    <!-- VERSION 1.24.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #0284c7; box-shadow: 0 0 0 2px #0284c7;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.24.0</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-azure-lt fw-bold">🐟 Eaux Libres &amp; Lacs</span>
+                                <span class="badge bg-info-lt fw-bold">Pêcheurs Féodaux</span>
+                                <span class="badge bg-purple-lt fw-bold">Académie &amp; Halieutique</span>
+                                <span class="badge bg-warning-lt fw-bold">Grenier Kura</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 12 Octobre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary-emphasis d-flex align-items-center gap-2 mb-3">
+                                <span>🐟</span> Système Halieutique, Pêcheurs Féodaux &amp; Parcelles de Lac Non-Annexables
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-azure-lt">Sanctuaire Aquatique</span>
+                                            <span>Parcelles de Lac Non-Annexables</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Les parcelles de lac (eaux calmes et oasis aquatiques) sont désormais des sanctuaires d'eaux communautaires inaliénables. Elles ne peuvent plus être annexées par un unique fief : l'action d'annexion est bloquée et remplacée par la faculté d'y dépêcher des expéditions de pêche.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-info-lt">Nouvelle Unité Dojo</span>
+                                            <span>Pêcheurs Féodaux (Ryōshi 🎣)</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Formation d'une nouvelle unité villageoise au Dojo (Tier 1) dotée d'une illustration ukiyo-e dédiée. Ces villageois sont indispensables pour armer les embarcations de pêche et transporter les prises de poisson frais.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-purple-lt">Académie</span>
+                                            <span>Technologie Halieutique Féodale</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Nouvelle recherche à l'Académie dans la catégorie « Subsistance &amp; Terroirs » (<code>fishing_tech</code>) augmentant le volume de prises des pêcheurs de +25% par niveau de recherche.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-warning-lt">Grenier à Riz Fortifié</span>
+                                            <span>Stockage du Poisson au Kura</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Le poisson rapporté lors des expéditions est entreposé dans le Grenier à Riz Fortifié (<code>b_tank</code>) alongside le riz, avec une capacité maximale qui s'accroît automatiquement avec le niveau du bâtiment.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-teal-lt">Expéditions</span>
+                                            <span>Temps de Pêche Fixe &amp; Interface Stratégique</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Les expéditions de pêche s'effectuent en aller-retour avec une durée de travail fixe d'exactement 1 heure sur le lac. Intégration sur la carte tactique avec badge distinctif, contrôle de flotte dans <code>fleet.php</code>, suivi dans la barre supérieure des ressources et rapport automatique remis au Daimyō.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.23.0 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
                         <div class="timeline-badge-dot" style="background: #b91c1c; box-shadow: 0 0 0 2px #b91c1c;"></div>
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.23.0</span>
+                                <span class="badge bg-danger-lt fw-bold">Quêtes &amp; Dojo</span>
+                                <span class="badge bg-azure-lt fw-bold">Modale Renommage</span>
+                                <span class="badge bg-teal-lt fw-bold">Moral Féodal</span>
+                                <span class="badge bg-purple-lt fw-bold">Ferveur Shintō</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 12 Octobre 2026
+                            </div>
+                        </div>
+
+                        <div class="release-card p-4 shadow-sm mb-3">
+                            <h4 class="card-title text-primary-emphasis d-flex align-items-center gap-2 mb-3">
+                                <span>⚔️</span> Évaluation des Armées, Modale de Renommage, Ferveur Divine &amp; Moral Féodal
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-danger-lt">Chroniques &amp; Armées</span>
+                                            <span>Détection Factions &amp; Files du Dojo</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Résolution du blocage des quêtes de troupes (Acte III d'Okehazama). Mapping automatique des unités génériques (piquiers, archers, cavaliers, arquebusiers, samouraïs) vers les identifiants techniques propres aux 3 clans (Oda, Tokugawa, Takeda). Prise en compte de tous les fiefs du Daimyō, des unités en cours de formation et des troupes en mission.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-azure-lt">Ergonomie &amp; UI</span>
+                                            <span>Modale Tabler pour Renommer les Fiefs</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Suppression complète des invites JavaScript natives (<code>prompt</code>/<code>alert</code>) au profit d'une modale Tabler.io fluide avec raccourci direct dans le menu de navigation supérieur, saisie sécurisée, retour d'état visuel et notifications toasts.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-teal-lt">Démographie</span>
+                                            <span>Indicateur de Moral des Villageois</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Ajout d'une jauge et pastille interactive dans le bandeau de statut sous le slider calculant en temps réel le contentement des villageois et détaillant l'impact sur la productivité générale du domaine.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-purple-lt">Spiritualité &amp; Ferveur</span>
+                                            <span>Consommation du Terroir &amp; Sanctuaires</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Résolution du blocage à 0 de la consommation d'énergie. Raccordement des 6 parcelles de récolte (rizière, carrière, forêt, argile, soja, thé) à la ferveur divine avec équilibrage face au Sanctuaire Shintō (+30/niv). Déclenchement rigoureux du déficit de ferveur bridant la production à 10% en cas d'infrastructure spirituelle négligée.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="p-3 bg-light rounded border h-100">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-warning-lt">Correctif Flotte</span>
+                                            <span>Fiabilisation des Expéditions Féodales</span>
+                                        </div>
+                                        <p class="text-secondary small m-0" style="line-height: 1.5;">
+                                            Correction d'un bogue de syntaxe JavaScript sur la page de gestion des flottes lors de l'envoi d'expéditions féodales (guillemets non échappés provoquant une interruption du script de soumission).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.22.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #206bc4; box-shadow: 0 0 0 2px #206bc4;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.22.0</span>
-                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
                                 <span class="badge bg-red-lt fw-bold">52 Chroniques Féodales</span>
                                 <span class="badge bg-yellow-lt fw-bold">Illustrations 16:9</span>
                                 <span class="badge bg-primary-lt fw-bold">Édition Admin</span>

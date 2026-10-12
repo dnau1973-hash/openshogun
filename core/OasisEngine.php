@@ -147,6 +147,13 @@ class OasisEngine {
             return ['success' => false, 'message' => 'Oasis introuvable.'];
         }
 
+        if (str_contains((string)$oasis['oasis_type'], 'lake')) {
+            return [
+                'success' => false,
+                'message' => 'Les parcelles de lac sont des sanctuaires d\'eaux libres communautaires. Elles ne peuvent pas être annexées par un fief, mais vous pouvez y envoyer des Pêcheurs formés au Dojo en expédition halieutique.'
+            ];
+        }
+
         if (!$this->isOasisPacified($oasisId)) {
             return ['success' => false, 'message' => 'L\'oasis est encore infestée d\'animaux sauvages féroces !'];
         }

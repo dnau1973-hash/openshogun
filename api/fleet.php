@@ -35,6 +35,19 @@ if (!$targetPlanetId && !$targetOasisId && isset($_POST['target_x'], $_POST['tar
         $stOasis = $db->prepare("SELECT id FROM oases WHERE coord_x = ? AND coord_y = ? LIMIT 1");
         $stOasis->execute([(int)$_POST['target_x'], (int)$_POST['target_y']]);
         $targetOasisId = $stOasis->fetchColumn() ?: null;
+
+        if (!$targetPlanetId && !$targetOasisId) {
+            require_once __DIR__ . '/../core/GalaxyEngine.php';
+            $terrain = GalaxyEngine::getTerrainType((int)$_POST['target_x'], (int)$_POST['target_y']);
+            if ($terrain['type'] === 'lake') {
+                $stCreateLake = $db->prepare("
+                    INSERT INTO planets (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
+                    VALUES (?, ?, ?, 'oceanic', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, UNIX_TIMESTAMP())
+                ");
+                $stCreateLake->execute([$terrain['name'] . ' d\'Eaux Vives', (int)$_POST['target_x'], (int)$_POST['target_y']]);
+                $targetPlanetId = (int)$db->lastInsertId();
+            }
+        }
     }
 }
 

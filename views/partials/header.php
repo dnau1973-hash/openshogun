@@ -875,6 +875,10 @@ $navItems = [
         $deutMax = max(1, (float)($planet['deuterium_max'] ?? 15000));
         $pctDeut = min(100, max(0, ((float)($planet['deuterium'] ?? 0) / $deutMax) * 100));
 
+        $fishStock = (float)($planet['fish'] ?? 0);
+        $fishMax = max(1, (float)($planet['fish_max'] ?? $deutMax));
+        $pctFish = min(100, max(0, ($fishStock / $fishMax) * 100));
+
         $prodMetal = (float)($planet['prod_rates']['metal'] ?? 0);
         $prodCrystal = (float)($planet['prod_rates']['crystal'] ?? 0);
         $prodDeut = (float)($planet['prod_rates']['deuterium'] ?? 0);
@@ -1072,10 +1076,10 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 3. Riz Koku -->
+                    <!-- 3. Riz Koku & Poisson (Grenier Fortifié) -->
                     <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Riz Koku (Vivres)</strong><br>Stock : <?= number_format((int)$planet['deuterium']) ?> / <?= number_format($deutMax) ?> (<?= round($pctDeut) ?>%)<br><span class='text-warning'>+<?= number_format($prodDeut) ?>/heure</span>">
+                       title="<strong>Grenier à Riz Fortifié (Kura)</strong><br>🌾 Riz : <?= number_format((int)$planet['deuterium']) ?> / <?= number_format($deutMax) ?> (<?= round($pctDeut) ?>%) <span class='text-warning'>+<?= number_format($prodDeut) ?>/h</span><br>🐟 Poisson : <?= number_format((int)$fishStock) ?> / <?= number_format($fishMax) ?> (<?= round($pctFish) ?>%)">
                         <i class="fa-solid fa-wheat-awn text-warning fs-3"></i>
                         <div class="lh-1">
                             <div class="d-flex align-items-baseline gap-1">
@@ -1086,7 +1090,11 @@ $navItems = [
                                       data-prod="<?= $prodDeut ?>">
                                     <?= number_format((int)$planet['deuterium']) ?>
                                 </span>
-                                <span class="text-warning font-monospace" style="font-size:0.65rem;">+<?= number_format($prodDeut) ?>/h</span>
+                                <?php if ($fishStock > 0): ?>
+                                    <span class="text-cyan font-monospace small" style="font-size:0.68rem;" title="<?= number_format((int)$fishStock) ?> poissons au grenier"><i class="fa-solid fa-fish"></i> <?= number_format((int)$fishStock) ?></span>
+                                <?php else: ?>
+                                    <span class="text-warning font-monospace" style="font-size:0.65rem;">+<?= number_format($prodDeut) ?>/h</span>
+                                <?php endif; ?>
                             </div>
                             <div class="progress progress-xs mt-1" style="height:2.5px; width:52px;">
                                 <div class="progress-bar bg-warning" id="bar-deut" style="width:<?= $pctDeut ?>%;"></div>

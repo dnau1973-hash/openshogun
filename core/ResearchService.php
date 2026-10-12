@@ -61,6 +61,11 @@ class ResearchService {
                 'category_label' => 'Doctrine Spirituelle',
                 'icon' => '🕯️',
             ],
+            'fishing_tech' => [
+                'category' => 'logistics',
+                'category_label' => 'Subsistance & Terroirs',
+                'icon' => '🐟',
+            ],
             default => [
                 'category' => 'general',
                 'category_label' => 'Savoir Général',

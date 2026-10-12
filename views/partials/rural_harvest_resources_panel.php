@@ -83,6 +83,10 @@ $stockDeut = (float)($planet['deuterium'] ?? 0);
 $maxDeut = max(1, (float)($planet['deuterium_max'] ?? 15000));
 $pctDeut = min(100, round(($stockDeut / $maxDeut) * 100, 1));
 
+$stockFish = (float)($planet['fish'] ?? 0);
+$maxFish = max(1, (float)($planet['fish_max'] ?? $maxDeut));
+$pctFish = min(100, round(($stockFish / $maxFish) * 100, 1));
+
 // 2. Vivres raffinées & matériaux de charpente
 $stockFlour = (float)($planet['rice_flour'] ?? 0);
 $maxFlour = max(1, (float)($planet['rice_flour_max'] ?? 10000));
@@ -388,6 +392,43 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
                     <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
                         <span class="text-secondary fw-semibold">Remplissage : <strong class="<?= ($pctDeut >= 90) ? 'text-danger' : 'text-dark' ?>"><?= $pctDeut ?>%</strong></span>
                         <span class="font-monospace text-secondary">Plafond : <?= number_format($maxDeut) ?></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Poisson Frais (Stocké dans le Grenier à Riz Fortifié) -->
+            <div class="harvest-item p-2 mb-1 rounded bg-surface-secondary border" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                    <div class="harvest-info">
+                        <h4 class="mb-0 fw-bold d-flex align-items-center gap-2" style="font-size:0.9rem;">
+                            <i class="fa-solid fa-fish text-cyan"></i>
+                            <span>Poisson Frais (Grenier Kura)</span>
+                            <?php if ($pctFish >= 95): ?>
+                                <span class="badge bg-danger text-white py-0 px-1" style="font-size:0.65rem;">Plein</span>
+                            <?php endif; ?>
+                        </h4>
+                        <div class="mt-1 d-flex align-items-center gap-1 flex-wrap">
+                            <span class="badge bg-secondary-lt fw-bold font-monospace" style="font-size:0.7rem;">
+                                Grenier : <strong class="text-dark"><?= number_format($stockFish) ?></strong> / <?= number_format($maxFish) ?>
+                            </span>
+                            <span class="badge bg-info-lt text-cyan font-monospace" style="font-size:0.7rem;" title="Rapporté par les expéditions de pêcheurs sur les lacs">
+                                <i class="fa-solid fa-ship me-1"></i>Expéditions Féodales
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="?page=map" class="badge bg-cyan-lt text-cyan font-monospace fw-bold text-decoration-none" style="font-size:0.75rem;" title="Déployer des pêcheurs sur un lac">
+                            <i class="fa-solid fa-water me-1"></i>Vers les Lacs &rarr;
+                        </a>
+                    </div>
+                </div>
+                <div class="harvest-progress-box mt-1">
+                    <div class="progress" style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                        <div class="progress-bar <?= ($pctFish >= 90) ? 'bg-danger' : 'bg-cyan' ?>" role="progressbar" style="width: <?= $pctFish ?>%;" aria-valuenow="<?= $pctFish ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
+                        <span class="text-secondary fw-semibold">Remplissage : <strong class="<?= ($pctFish >= 90) ? 'text-danger' : 'text-dark' ?>"><?= $pctFish ?>%</strong></span>
+                        <span class="font-monospace text-secondary">Plafond Grenier : <?= number_format($maxFish) ?></span>
                     </div>
                 </div>
             </div>

@@ -5,7 +5,20 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 
-## [1.23.0] - 2026-10-12
+## [1.24.0] - 2026-10-12
+### Ajouté (Added)
+- **Système Halieutique & Refonte des Parcelles de Lac (`core/FleetEngine.php`, `core/OasisEngine.php`, `core/PlanetEngine.php`, `core/ResearchService.php`, `views/map.php`, `views/fleet.php`, `views/partials/rural_harvest_resources_panel.php`, `views/partials/header.php`, `database/migrations/005_lake_fishing_system.sql`) :**
+  * **Parcelles de Lac Non-Annexables :** Les parcelles de lac (`tile_lake.jpg` et oasis aquatiques) deviennent des sanctuaires d'eaux libres communautaires non annexables par un fief unique. La tentative d'annexion est bloquée et remplacée par la possibilité d'y dépêcher des expéditions de pêche.
+  * **Nouvelle Unité au Dojo — Pêcheurs Féodaux (Ryōshi 🐟) :** Nouvelle unité villageoise recrutable au Dojo (Tier 1), dotée d'une illustration d'époque ukiyo-e dédiée (`public/assets/units/pecheur.jpg`) et d'une capacité de transport de vivres pour rapporter les prises.
+  * **Technologie Académique Halieutique (`fishing_tech`) :** Nouvelle recherche à l'Académie dans la catégorie « Subsistance & Terroirs » (icône 🐟), augmentant les prises de poisson de +25% par niveau.
+  * **Expéditions de Pêche à Durée Fixe (1 Heure) :** Les missions de pêche vers un lac effectuent un trajet aller-retour incluant un temps de pêche fixe d'exactement 1 heure (3600 secondes) sur le lac. La quantité de poisson ramenée est calculée selon le nombre de pêcheurs mobilisés, le niveau de la recherche académique, et plafonnée par la cargaison.
+  * **Stockage au Grenier à Riz Fortifié (Kura / `b_tank`) :** Le poisson frais débarqué est entreposé dans le Grenier à Riz Fortifié alongside le riz, avec un plafond de stockage indexé sur le niveau du bâtiment.
+  * **Affichage In-Game & Expérience Joueur :**
+    - Intégration sur la carte tactique (`map.php`) d'une pastille « Eaux Libres Non-Annexable » et d'un bouton direct « Dépêcher une Expédition de Pêche ».
+    - Formulaire d'envoi de flotte (`fleet.php`) enrichi avec l'option « Expédition de Pêche (1h sur le lac) » et contrôle de présence de pêcheurs.
+    - Suivi du stock de poisson frais dans la barre supérieure (`header.php`) et dans le panneau latéral des récoltes rurales (`rural_harvest_resources_panel.php`).
+    - Dépêche et rapport de mission transmis automatiquement dans la messagerie du Daimyō au retour de l'équipage.
+
 ### Ajouté (Added)
 - **Modale Tabler.io Universelle pour le Renommage des Fiefs (`views/partials/rename_village_modal.php`, `views/city.php`, `views/resources.php`, `views/partials/header.php`, `views/partials/footer.php`) :**
   * **Éradication des boîtes natives :** Remplacement intégral des invites JavaScript synchrones `prompt()` et `alert()` par une modale moderne Tabler.io (`modal-blur`).

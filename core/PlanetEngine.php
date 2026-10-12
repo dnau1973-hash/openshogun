@@ -63,6 +63,7 @@ class PlanetEngine {
         $metalMax = (int)(15000 * pow(1.5, $storageLvl));
         $crystalMax = (int)(15000 * pow(1.5, $storageLvl));
         $deutMax = (int)(15000 * pow(1.5, $tankLvl));
+        $fishMax = (int)(15000 * pow(1.5, $tankLvl));
         $sakeMax = (int)(10000 * pow(1.4, $grainMillLvl));
         $flourMax = (int)(10000 * pow(1.4, $grainMillLvl));
         $beamsMax = (int)(10000 * pow(1.4, $sawmillLvl));
@@ -108,7 +109,7 @@ class PlanetEngine {
                         rice_flour = ?, sake = ?, clay = ?, tea = ?, soybean = ?,
                         population = ?, contentment = ?,
                         energy_used = ?, energy_max = ?,
-                        metal_max = ?, crystal_max = ?, deuterium_max = ?,
+                        metal_max = ?, crystal_max = ?, deuterium_max = ?, fish_max = ?,
                         sake_max = ?, rice_flour_max = ?, clay_max = ?, tea_max = ?, soybean_max = ?,
                         last_resource_update = ?
                     WHERE id = ?
@@ -129,6 +130,7 @@ class PlanetEngine {
                     $metalMax,
                     $crystalMax,
                     $deutMax,
+                    $fishMax,
                     $sakeMax,
                     $flourMax,
                     $clayMax,
@@ -237,6 +239,7 @@ class PlanetEngine {
             $planet['metal_max'] = $metalMax;
             $planet['crystal_max'] = $crystalMax;
             $planet['deuterium_max'] = $deutMax;
+            $planet['fish_max'] = $fishMax;
             $planet['last_resource_update'] = $now;
         }
 
@@ -245,6 +248,11 @@ class PlanetEngine {
         $contentmentDetails = PopulationEngine::calculateContentment($planet, $activeFeast, $workforceSummary, $buildings);
 
         // Valeurs garanties pour les ressources raffinées, démographie et satisfaction
+        $planet['metal_max'] = (int)$metalMax;
+        $planet['crystal_max'] = (int)$crystalMax;
+        $planet['deuterium_max'] = (int)$deutMax;
+        $planet['fish'] = (float)($planet['fish'] ?? 0);
+        $planet['fish_max'] = (int)$fishMax;
         $planet['sake'] = (float)($planet['sake'] ?? 0);
         $planet['rice_flour'] = (float)($planet['rice_flour'] ?? 0);
         $planet['sake_max'] = (int)($planet['sake_max'] ?? $sakeMax);

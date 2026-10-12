@@ -89,6 +89,12 @@ class FleetEngine {
             return;
         }
 
+        // Cas d'une expédition de pêche féodale
+        if ($mission['mission_type'] === 'fishing') {
+            $this->resolveFishingArrival($mission);
+            return;
+        }
+
         // Cas d'une expédition vers une oasis naturelle ou sauvage
         if ($targetOasisId) {
             require_once __DIR__ . '/OasisEngine.php';
@@ -284,30 +290,65 @@ class FleetEngine {
             if ($count <= 0) continue;
             $stmtCheckUnit->execute([$code]);
             if ($stmtCheckUnit->fetch()) {
-                $this->db->prepare("
-                    INSERT INTO planet_units (planet_id, unit_code, count) 
-                    VALUES (?, ?, ?) 
-                    ON DUPLICATE KEY UPDATE count = count + ?
-                ")->execute([$sourcePlanetId, $code, $count, $count]);
+                try {
+                    $this->db->prepare("
+                        INSERT INTO planet_units (planet_id, unit_code, count) 
+                        VALUES (?, ?, ?) 
+                        ON DUPLICATE KEY UPDATE count = count + ?
+                    ")->execute([$sourcePlanetId, $code, $count, $count]);
+                } catch (Exception $e) {
+                    $stmtExist = $this->db->prepare("SELECT id FROM planet_units WHERE planet_id = ? AND unit_code = ?");
+                    $stmtExist->execute([$sourcePlanetId, $code]);
+                    $rowU = $stmtExist->fetch(PDO::FETCH_ASSOC);
+                    if ($rowU) {
+                        $this->db->prepare("UPDATE planet_units SET count = count + ? WHERE id = ?")->execute([$count, $rowU['id']]);
+                    } else {
+                        $this->db->prepare("INSERT INTO planet_units (planet_id, unit_code, count) VALUES (?, ?, ?)")->execute([$sourcePlanetId, $code, $count]);
+                    }
+                }
             } else {
-                $this->db->prepare("
-                    INSERT INTO planet_ships (planet_id, ship_code, count) 
-                    VALUES (?, ?, ?) 
-                    ON DUPLICATE KEY UPDATE count = count + ?
-                ")->execute([$sourcePlanetId, $code, $count, $count]);
+                try {
+                    $this->db->prepare("
+                        INSERT INTO planet_ships (planet_id, ship_code, count) 
+                        VALUES (?, ?, ?) 
+                        ON DUPLICATE KEY UPDATE count = count + ?
+                    ")->execute([$sourcePlanetId, $code, $count, $count]);
+                } catch (Exception $e) {
+                    $stmtExist = $this->db->prepare("SELECT id FROM planet_ships WHERE planet_id = ? AND ship_code = ?");
+                    $stmtExist->execute([$sourcePlanetId, $code]);
+                    $rowS = $stmtExist->fetch(PDO::FETCH_ASSOC);
+                    if ($rowS) {
+                        $this->db->prepare("UPDATE planet_ships SET count = count + ? WHERE id = ?")->execute([$count, $rowS['id']]);
+                    } else {
+                        $this->db->prepare("INSERT INTO planet_ships (planet_id, ship_code, count) VALUES (?, ?, ?)")->execute([$sourcePlanetId, $code, $count]);
+                    }
+                }
             }
         }
 
         // Décharger le butin / cargaison
-        $metal = $cargo['metal'] ?? 0;
-        $crystal = $cargo['crystal'] ?? 0;
-        $deut = $cargo['deuterium'] ?? 0;
+        $metal = (int)($cargo['metal'] ?? 0);
+        $crystal = (int)($cargo['crystal'] ?? 0);
+        $deut = (int)($cargo['deuterium'] ?? 0);
+        $fish = (int)($cargo['fish'] ?? 0);
         if ($metal > 0 || $crystal > 0 || $deut > 0) {
             $this->db->prepare("
                 UPDATE planets 
                 SET metal = metal + ?, crystal = crystal + ?, deuterium = deuterium + ? 
                 WHERE id = ?
             ")->execute([$metal, $crystal, $deut, $sourcePlanetId]);
+        }
+
+        if ($fish > 0) {
+            try {
+                $this->db->prepare("
+                    UPDATE planets 
+                    SET fish = LEAST(fish_max, fish + ?) 
+                    WHERE id = ?
+                ")->execute([$fish, $sourcePlanetId]);
+            } catch (Exception $e) {
+                // Silencieux si colonne absente
+            }
         }
 
         // Réintégrer le Samouraï Héros au domaine s'il a participé
@@ -319,10 +360,76 @@ class FleetEngine {
             ")->execute([$sourcePlanetId, $mission['user_id']]);
         }
 
+        // Notification féodale en cas de retour d'expédition de pêche
+        if ($mission['mission_type'] === 'fishing') {
+            try {
+                require_once __DIR__ . '/MessageEngine.php';
+                $msgEngine = new MessageEngine();
+                $msgEngine->sendSystemMessage(
+                    (int)$mission['user_id'],
+                    "Retour d'Expédition de Pêche Féodale",
+                    "Vos Pêcheurs sont revenus de leur expédition sur le lac avec une récolte de " . number_format($fish) . " poissons frais. Les vivres ont été entreposés dans le Grenier à Riz Fortifié de votre fief."
+                );
+            } catch (Exception $e) {
+                // Silencieux
+            }
+        }
+
         // Marquer la mission terminée
         $this->db->prepare("UPDATE fleet_missions SET status = 'completed' WHERE id = ?")->execute([$mission['id']]);
 
         $this->db->commit();
+    }
+
+    /**
+     * Résolution de l'arrivée et de la pêche sur une parcelle de lac
+     */
+    private function resolveFishingArrival(array $mission): void {
+        $missionId = (int)$mission['id'];
+        $userId = (int)$mission['user_id'];
+        $fleet = json_decode($mission['fleet_data'], true) ?: [];
+        $pecheurCount = (int)($fleet['pecheur'] ?? 0);
+
+        // Recherche halieutique à l'Académie des Savoirs
+        $stmtTech = $this->db->prepare("SELECT level FROM user_researches WHERE user_id = ? AND research_code = 'fishing_tech'");
+        $stmtTech->execute([$userId]);
+        $techLvl = (int)$stmtTech->fetchColumn() ?: 0;
+
+        // Rendement : 20 poissons par pêcheur, bonifié de +25% par niveau de recherche académique
+        $baseCatchPerPecheur = 20;
+        $mult = 1.0 + (0.25 * $techLvl);
+        $totalFish = (int)round($pecheurCount * $baseCatchPerPecheur * $mult);
+
+        // Calcul de la capacité de transport totale de l'expédition
+        $totalCapacity = 0;
+        $stmtUnits = $this->db->query("SELECT code, cargo_capacity FROM units");
+        $unitCapacities = $stmtUnits->fetchAll(PDO::FETCH_KEY_PAIR);
+        $stmtShips = $this->db->query("SELECT code, cargo_capacity FROM ships");
+        $shipCapacities = $stmtShips->fetchAll(PDO::FETCH_KEY_PAIR);
+        $allCapacities = array_merge($unitCapacities, $shipCapacities);
+
+        foreach ($fleet as $code => $count) {
+            $cap = (int)($allCapacities[$code] ?? 50);
+            $totalCapacity += ($cap * (int)$count);
+        }
+        if ($totalCapacity <= 0) {
+            $totalCapacity = max(100, $pecheurCount * 100);
+        }
+
+        $fishCaught = min($totalCapacity, $totalFish);
+
+        $cargo = json_decode($mission['cargo_data'], true) ?: [];
+        $cargo['fish'] = $fishCaught;
+
+        // La flottille engage le trajet de retour chargée de poisson frais
+        $this->db->prepare("
+            UPDATE fleet_missions 
+            SET status = 'returning', cargo_data = ? 
+            WHERE id = ?
+        ")->execute([
+            json_encode($cargo),
+            $missionId
+        ]);
     }
 
     /**
@@ -490,6 +597,25 @@ class FleetEngine {
             $destName = $targetPlanet['name'];
         }
 
+        // 2a. Contrôle spécifique pour les expéditions de pêche sur les lacs
+        if ($missionType === 'fishing') {
+            require_once __DIR__ . '/GalaxyEngine.php';
+            $isLake = false;
+            if ($targetOasis) {
+                if (str_contains((string)$targetOasis['oasis_type'], 'lake')) {
+                    $isLake = true;
+                }
+            } else {
+                $terrain = GalaxyEngine::getTerrainType($destX, $destY);
+                if ($terrain['type'] === 'lake') {
+                    $isLake = true;
+                }
+            }
+            if (!$isLake) {
+                throw new Exception("Une expédition de pêche ne peut être envoyée que sur une parcelle de lac ou d'eaux calmes.");
+            }
+        }
+
         // 2b. Vérification de l'Immunité des Nouveaux Joueurs (Protection Débutant)
         $hostileMissions = ['raid', 'attack', 'occupy', 'spy'];
         $protectionRevoked = false;
@@ -593,6 +719,13 @@ class FleetEngine {
             $heroIdToDeploy = (int)$hero['id'];
         }
 
+        // Règle spécifique à l'expédition de pêche halieutique
+        if ($missionType === 'fishing') {
+            if (empty($cleanFleet['pecheur']) || (int)$cleanFleet['pecheur'] <= 0) {
+                throw new Exception("Une expédition de pêche nécessite de mobiliser au moins 1 Pêcheur Féodal (Ryōshi).");
+            }
+        }
+
         if ($totalShips === 0 && !$hasHero) {
             throw new Exception("Veuillez sélectionner au moins un régiment, un engin de siège ou votre Samouraï Héros.");
         }
@@ -652,7 +785,14 @@ class FleetEngine {
 
         $now = time();
         $arrivalTime = $now + $duration;
-        $returnTime = $arrivalTime + $duration;
+        if ($missionType === 'fishing') {
+            $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
+            // Temps de pêche fixe sur le lac : 1 heure (3600 secondes)
+            $fishingDuration = max(60, (int)round(3600 / $speed));
+            $returnTime = $arrivalTime + $fishingDuration + $duration;
+        } else {
+            $returnTime = $arrivalTime + $duration;
+        }
 
         $stmtInsert = $this->db->prepare("
             INSERT INTO fleet_missions 

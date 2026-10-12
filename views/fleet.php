@@ -147,21 +147,36 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
             $preselectedTarget = (int)$foundOasisId;
             $preselectedMission = $_GET['mission'] ?? 'occupy';
         } else {
-            // Emplacement vierge : initialiser la terre libre à coloniser
+            // Emplacement vierge : vérifier le type de paysage
             require_once __DIR__ . '/../core/GalaxyEngine.php';
             $terrainData = GalaxyEngine::getTerrainType($targetX, $targetY);
-            $stmtCreateFree = $db->prepare("
-                INSERT INTO planets 
-                (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
-                VALUES (?, ?, ?, 'terrestrial', 2000, 1500, 1000, 0, 50, 20000, 20000, 20000, 0, UNIX_TIMESTAMP())
-            ");
-            $freeName = $terrainData['name'] . ' Vierges';
-            $stmtCreateFree->execute([$freeName, $targetX, $targetY]);
-            $createdPlanetId = (int)$db->lastInsertId();
+            if ($terrainData['type'] === 'lake') {
+                $stmtCreateFree = $db->prepare("
+                    INSERT INTO planets 
+                    (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
+                    VALUES (?, ?, ?, 'oceanic', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, UNIX_TIMESTAMP())
+                ");
+                $freeName = $terrainData['name'] . ' d\'Eaux Vives';
+                $stmtCreateFree->execute([$freeName, $targetX, $targetY]);
+                $createdPlanetId = (int)$db->lastInsertId();
 
-            $preselectedTargetType = 'planet';
-            $preselectedTarget = $createdPlanetId;
-            $preselectedMission = $_GET['mission'] ?? 'colonize';
+                $preselectedTargetType = 'planet';
+                $preselectedTarget = $createdPlanetId;
+                $preselectedMission = 'fishing';
+            } else {
+                $stmtCreateFree = $db->prepare("
+                    INSERT INTO planets 
+                    (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
+                    VALUES (?, ?, ?, 'terrestrial', 2000, 1500, 1000, 0, 50, 20000, 20000, 20000, 0, UNIX_TIMESTAMP())
+                ");
+                $freeName = $terrainData['name'] . ' Vierges';
+                $stmtCreateFree->execute([$freeName, $targetX, $targetY]);
+                $createdPlanetId = (int)$db->lastInsertId();
+
+                $preselectedTargetType = 'planet';
+                $preselectedTarget = $createdPlanetId;
+                $preselectedMission = $_GET['mission'] ?? 'colonize';
+            }
         }
     }
 }
@@ -533,6 +548,14 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                                 </span>
                                             </label>
                                         </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-selectgroup-item w-100">
+                                                <input type="radio" name="mission_type" value="fishing" class="form-selectgroup-input" <?= ($preselectedMission === 'fishing') ? 'checked' : '' ?>>
+                                                <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2">
+                                                    <span><i class="fa-solid fa-fish text-cyan"></i></span> Pêche Féodale
+                                                </span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -598,6 +621,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                             'spy' => '<i class="fa-solid fa-user-ninja text-secondary me-1"></i>SHINOBI',
                                             'transport' => '<i class="fa-solid fa-boxes-stacked text-warning me-1"></i>CONVOI',
                                             'colonize' => '<i class="fa-solid fa-chess-rook text-primary me-1"></i>EXPANSION',
+                                            'fishing' => '<i class="fa-solid fa-fish text-cyan me-1"></i>PÊCHE',
                                             default => strtoupper($m['mission_type'])
                                         };
                                     ?>
@@ -1010,6 +1034,15 @@ async function submitFleet() {
         const colonyShipCnt = parseInt(document.getElementById('ship-colony_ship')?.value || '0', 10);
         if (colonizerCnt <= 0 && colonyShipCnt <= 0) {
             showModalAlert("Une expédition de colonisation nécessite d'inclure au moins 1 Pionnier Féodal (Colon <i class='fa-solid fa-torii-gate text-danger'></i>). Si vous n'en avez pas encore en garnison, vous devez d'abord en former un au Donjon Tenshu (Niv. 10+) ou à l'Atelier de Siège.", "warning", "Pionnier Requis");
+            return;
+        }
+    }
+
+    // Contrôle d'éligibilité pour la pêche féodale sur les lacs
+    if (missionType === 'fishing') {
+        const pecheurCnt = parseInt(document.getElementById('ship-pecheur')?.value || '0', 10);
+        if (pecheurCnt <= 0) {
+            showModalAlert("Une expédition de pêche nécessite de mobiliser au moins 1 Pêcheur Féodal (Ryōshi). Si vous n'en possédez pas encore en garnison, formez-en au Dojo Militaire.", "warning", "Pêcheurs Requis");
             return;
         }
     }

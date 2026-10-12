@@ -279,7 +279,10 @@ window.selectPlanetTile = function(data) {
                 <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded border">
                     <div>
                         <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
-                        <strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>
+                        ${(data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac')))
+                            ? '<strong class="text-info"><i class="fa-solid fa-water me-1"></i>Eaux Libres &bull; Non Annexable</strong>'
+                            : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>'
+                        }
                     </div>
                     <div class="text-end">
                         <span class="text-secondary small d-block" style="font-size:0.75rem;">Propriétaire Foncier :</span>
@@ -287,22 +290,38 @@ window.selectPlanetTile = function(data) {
                     </div>
                 </div>
 
-                <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
-                    <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
-                    <div>
-                        <strong>Emplacement Disponible pour Nouveau Fief !</strong><br>
-                        Vous pouvez y dépêcher une expédition avec un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour y fonder votre prochain domaine castral.
+                ${(data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac'))) ? `
+                    <div class="alert alert-info d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px; background:#f0fdfa; border:1px solid #99f6e4;">
+                        <span style="font-size:1.4rem;"><i class="fa-solid fa-fish text-cyan"></i></span>
+                        <div style="color:#0f766e;">
+                            <strong>Étendue d'Eau Douce &amp; Sanctuaire Halieutique</strong><br>
+                            Cette parcelle de lac est un bien naturel commun. <strong>Elle ne peut pas être annexée ni colonisée.</strong><br>
+                            Vous pouvez y dépêcher vos <strong>Pêcheurs Féodaux (<i class="fa-solid fa-fish"></i>)</strong> créés au Dojo : plus ils sont nombreux et plus leur niveau de recherche à l'Académie est élevé, plus ils ramènent de poisson frais stocké dans votre Grenier à Riz Fortifié.
+                        </div>
                     </div>
-                </div>
-
-                ${ruralPlotsHtml}
+                ` : `
+                    <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
+                        <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
+                        <div>
+                            <strong>Emplacement Disponible pour Nouveau Fief !</strong><br>
+                            Vous pouvez y dépêcher une expédition avec un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour y fonder votre prochain domaine castral.
+                        </div>
+                    </div>
+                    ${ruralPlotsHtml}
+                `}
             </div>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
-                <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
-                    <i class="fa-solid fa-chess-rook me-1"></i>Fonder un Fief ici avec un Pionnier &rarr;
-                </a>
+                ${(data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac'))) ? `
+                    <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=fishing" class="btn btn-cyan text-white font-weight-bold">
+                        <i class="fa-solid fa-fish me-1"></i>Dépêcher une Expédition de Pêche &rarr;
+                    </a>
+                ` : `
+                    <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
+                        <i class="fa-solid fa-chess-rook me-1"></i>Fonder un Fief ici avec un Pionnier &rarr;
+                    </a>
+                `}
             </div>
         `;
         openMapModal();
@@ -348,13 +367,16 @@ window.selectPlanetTile = function(data) {
 
     // ── Oasis Naturelle ─────────────────────────────────────────
     if (data.is_oasis) {
+        const isLakeOasis  = (data.oasis_type && data.oasis_type.indexOf('lake') !== -1);
         const isOccupied   = (data.is_occupied == 1);
         const isOwn        = (data.owner_planet_id && parseInt(data.owner_planet_id, 10) === <?= (int)$planet['id'] ?>);
         const units        = data.units || [];
         const hasWildBeasts = units.some(u => u.is_wild == 1 && parseInt(u.count, 10) > 0);
 
         let statusBadge = '';
-        if (isOwn) {
+        if (isLakeOasis) {
+            statusBadge = '<span class="badge bg-cyan text-white font-weight-bold" style="font-size:0.75rem;"><i class="fa-solid fa-water me-1"></i>LAC NATUREL — EAUX LIBRES NON-ANNEXABLE</span>';
+        } else if (isOwn) {
             statusBadge = '<span class="badge bg-success text-white font-weight-bold" style="font-size:0.75rem;"><i class="fa-solid fa-seedling me-1"></i>VOTRE FIEF NATUREL ANNEXÉ</span>';
         } else if (isOccupied) {
             statusBadge = `<span class="badge bg-primary text-white font-weight-bold" style="font-size:0.75rem;"><i class="fa-solid fa-shield-halved me-1"></i>OCCUPÉE PAR ${data.username || 'UN DAIMYŌ'}</span>`;
@@ -388,16 +410,18 @@ window.selectPlanetTile = function(data) {
             unitsHtml = '<p class="text-success small my-2"><i class="fa-solid fa-dove me-1"></i>Aucun animal sauvage ni soldat en garnison. L\'oasis est entièrement pacifiée !</p>';
         }
 
-        title.innerHTML = `<i class="fa-solid fa-seedling text-success me-1"></i> <span style="color:#15803d;">${data.oasis_name}</span> <span class="text-secondary small">${data.bonus_label || ''}</span>`;
+        title.innerHTML = `<i class="fa-solid ${isLakeOasis ? 'fa-water text-cyan' : 'fa-seedling text-success'} me-1"></i> <span style="color:${isLakeOasis ? '#0891b2' : '#15803d'};">${data.oasis_name}</span> <span class="text-secondary small">${data.bonus_label || ''}</span>`;
         body.innerHTML = `
-            <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
+            <div style="background:${isLakeOasis ? '#f0fdfa' : '#f0fdf4'}; border:1px solid ${isLakeOasis ? '#99f6e4' : '#bbf7d0'}; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                     ${statusBadge}
                     <div class="d-flex gap-1 flex-wrap">${bonusBadgesHtml}</div>
                 </div>
-                <p style="color:#166534; font-size:0.9rem; margin:0.4rem 0 0.75rem 0; line-height:1.45;">
-                    Cette oasis naturelle regorge de terres fertiles et de ressources précieuses.
-                    <strong>Pillez les récoltes</strong> en terrassant la faune, ou <strong>occupez le territoire</strong> pour conférer des bonus permanents à votre fief.
+                <p style="color:${isLakeOasis ? '#0f766e' : '#166534'}; font-size:0.9rem; margin:0.4rem 0 0.75rem 0; line-height:1.45;">
+                    ${isLakeOasis 
+                        ? 'Ce lac naturel est un sanctuaire d\'eaux calmes et poissonneuses. <strong>Cette parcelle ne peut pas être annexée.</strong> Dépêchez vos Pêcheurs Féodaux formés au Dojo en expédition de pêche : les prises sont entreposées dans votre Grenier à Riz Fortifié.'
+                        : 'Cette oasis naturelle regorge de terres fertiles et de ressources précieuses. <strong>Pillez les récoltes</strong> en terrassant la faune, ou <strong>occupez le territoire</strong> pour conférer des bonus permanents à votre fief.'
+                    }
                 </p>
                 <div class="bg-white border rounded p-2 mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
                     <span class="text-secondary font-weight-medium">Récoltes accumulées :</span>
@@ -418,13 +442,15 @@ window.selectPlanetTile = function(data) {
                     <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=attack" class="btn btn-danger font-weight-bold"><i class="fa-solid fa-bomb me-1"></i>Nettoyer</a>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
-                    ${isOwn ? `
+                    ${isLakeOasis ? `
+                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=fishing" class="btn btn-cyan font-weight-bold text-white"><i class="fa-solid fa-fish me-1"></i>Dépêcher des Pêcheurs</a>
+                    ` : (isOwn ? `
                         <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-primary"><i class="fa-solid fa-shield-halved me-1"></i>Renforcer</a>
                         <button onclick="abandonOasisDirect(${data.oasis_id})" class="btn btn-outline-danger"><i class="fa-solid fa-flag text-danger me-1"></i>Abandonner</button>
                     ` : `
                         <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-success font-weight-bold"><i class="fa-solid fa-flag me-1"></i>Occuper</a>
                         ${!hasWildBeasts ? `<button onclick="annexOasisDirect(${data.oasis_id})" class="btn btn-primary font-weight-bold"><i class="fa-solid fa-sparkles me-1"></i>Annexion Directe</button>` : ''}
-                    `}
+                    `)}
                 </div>
             </div>
         `;

@@ -67,8 +67,8 @@ class WorldGenerator {
 
         $insertStmt = $this->db->prepare("
             INSERT INTO planets 
-            (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 0, 50, 20000, 20000, 20000, 0, UNIX_TIMESTAMP())
+            (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 50, 20000, 20000, 20000, 20000, 0, UNIX_TIMESTAMP())
         ");
 
         while (count($createdPlanets) < $count && $attempts < $maxAttempts) {
@@ -244,8 +244,8 @@ class WorldGenerator {
 
         $stmtCap = $this->db->prepare("
             INSERT INTO planets 
-            (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
-            VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 120, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
+            (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
+            VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 0, 120, 30000, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
         ");
         $stmtCap->execute([$adminId, $capitalName, $capitalX, $capitalY]);
         $capitalPlanetId = (int)$this->db->lastInsertId();
