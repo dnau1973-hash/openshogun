@@ -1015,6 +1015,16 @@ $navItems = [
         .resource-strip-scroll::-webkit-scrollbar {
             display: none;
         }
+        .resource-group-pill {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            transition: border-color 0.15s ease;
+        }
+        .resource-group-pill:hover {
+            border-color: rgba(0, 0, 0, 0.16) !important;
+        }
         .resource-item-pill {
             transition: background-color 0.15s ease, transform 0.1s ease;
             border-radius: 6px;
@@ -1026,12 +1036,16 @@ $navItems = [
         }
         </style>
 
-        <div class="border-bottom bg-white py-1 px-3 px-lg-4 shadow-sm d-print-none position-relative" style="z-index: 5;">
-            <div class="container-fluid p-0 d-flex align-items-center justify-content-start justify-content-lg-center gap-2 gap-md-3 gap-lg-3 resource-strip-scroll flex-nowrap py-0.5">
+        <div class="border-bottom bg-light py-1 px-2 px-lg-3 shadow-sm d-print-none position-relative" style="z-index: 5;">
+            <div class="container-fluid p-0 d-flex align-items-center justify-content-start justify-content-lg-center gap-2 gap-lg-3 resource-strip-scroll flex-nowrap py-0.5">
                 
-                <!-- GROUPE 1 : MATIÈRES PREMIÈRES (Bois, Pierre, Riz) -->
-                <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
-                    
+                <!-- GROUPE 1 : MATÉRIAUX DE CONSTRUCTION (Bois, Pierre, Argile, Poutres) -->
+                <div class="resource-group-pill d-flex align-items-center gap-2 gap-lg-3 px-2 py-1 flex-shrink-0">
+                    <span class="badge bg-secondary-lt text-secondary fw-bold px-2 py-1 text-uppercase font-monospace d-flex align-items-center gap-1" style="font-size:0.62rem; letter-spacing:0.5px;">
+                        <i class="fa-solid fa-hammer text-primary"></i>
+                        <span>Construction</span>
+                    </span>
+
                     <!-- 1. Bois de Cèdre -->
                     <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
@@ -1048,7 +1062,7 @@ $navItems = [
                                 </span>
                                 <span class="text-success font-monospace" style="font-size:0.65rem;">+<?= number_format($prodMetal) ?>/h</span>
                             </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:52px;">
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
                                 <div class="progress-bar bg-success" id="bar-metal" style="width:<?= $pctMetal ?>%;"></div>
                             </div>
                         </div>
@@ -1070,47 +1084,13 @@ $navItems = [
                                 </span>
                                 <span class="text-primary font-monospace" style="font-size:0.65rem;">+<?= number_format($prodCrystal) ?>/h</span>
                             </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:52px;">
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
                                 <div class="progress-bar bg-primary" id="bar-crystal" style="width:<?= $pctCrystal ?>%;"></div>
                             </div>
                         </div>
                     </a>
 
-                    <!-- 3. Riz Koku & Poisson (Grenier Fortifié) -->
-                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Grenier à Riz Fortifié (Kura)</strong><br>🌾 Riz : <?= number_format((int)$planet['deuterium']) ?> / <?= number_format($deutMax) ?> (<?= round($pctDeut) ?>%) <span class='text-warning'>+<?= number_format($prodDeut) ?>/h</span><br>🐟 Poisson : <?= number_format((int)$fishStock) ?> / <?= number_format($fishMax) ?> (<?= round($pctFish) ?>%)">
-                        <i class="fa-solid fa-wheat-awn text-warning fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-baseline gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                      id="res-val-deut"
-                                      data-current="<?= (float)$planet['deuterium'] ?>"
-                                      data-max="<?= $deutMax ?>"
-                                      data-prod="<?= $prodDeut ?>">
-                                    <?= number_format((int)$planet['deuterium']) ?>
-                                </span>
-                                <?php if ($fishStock > 0): ?>
-                                    <span class="text-cyan font-monospace small" style="font-size:0.68rem;" title="<?= number_format((int)$fishStock) ?> poissons au grenier"><i class="fa-solid fa-fish"></i> <?= number_format((int)$fishStock) ?></span>
-                                <?php else: ?>
-                                    <span class="text-warning font-monospace" style="font-size:0.65rem;">+<?= number_format($prodDeut) ?>/h</span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:52px;">
-                                <div class="progress-bar bg-warning" id="bar-deut" style="width:<?= $pctDeut ?>%;"></div>
-                            </div>
-                        </div>
-                    </a>
-
-                </div>
-
-                <!-- SÉPARATEUR VERTICAL 1 -->
-                <div class="vr opacity-25 my-auto flex-shrink-0" style="height: 20px;"></div>
-
-                <!-- GROUPE 2 : TERROIRS SPÉCIALISÉS (Argile, Thé, Soja) -->
-                <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
-                    
-                    <!-- 4. Argile & Céramique -->
+                    <!-- 3. Argile & Céramique -->
                     <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Argile &amp; Tuiles (Fosse)</strong><br>Stock disponible : <?= number_format((int)$clayStock) ?> / <?= number_format($clayMax) ?> (<?= round($pctClayStock) ?>%)<br><span class='text-orange'>+<?= number_format($clayHourly) ?>/heure</span>">
@@ -1132,7 +1112,73 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 5. Thé & Matcha -->
+                    <!-- 4. Poutres en bois -->
+                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Poutres en bois (Charpenterie)</strong><br>Stock : <?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?> (<?= round($pctBeams) ?>%)">
+                        <i class="fa-solid fa-hammer text-orange fs-3"></i>
+                        <div class="lh-1">
+                            <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                  id="res-val-wooden-beams"
+                                  data-current="<?= $beamsStock ?>"
+                                  data-max="<?= $beamsMax ?>">
+                                <?= number_format((int)$beamsStock) ?>
+                            </span>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
+                                <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- GROUPE 2 : RESSOURCES ALIMENTAIRES & VIVRES (Riz, Poisson, Thé, Soja, Farine, Saké) -->
+                <div class="resource-group-pill d-flex align-items-center gap-2 gap-lg-3 px-2 py-1 flex-shrink-0">
+                    <span class="badge bg-warning-lt text-warning fw-bold px-2 py-1 text-uppercase font-monospace d-flex align-items-center gap-1" style="font-size:0.62rem; letter-spacing:0.5px;">
+                        <i class="fa-solid fa-bowl-rice text-warning"></i>
+                        <span>Alimentaire</span>
+                    </span>
+
+                    <!-- 5. Riz Impérial -->
+                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Riz Impérial (Grenier Fortifié)</strong><br>Stock : <?= number_format((int)$planet['deuterium']) ?> / <?= number_format($deutMax) ?> (<?= round($pctDeut) ?>%)<br><span class='text-warning'>+<?= number_format($prodDeut) ?>/heure</span>">
+                        <i class="fa-solid fa-wheat-awn text-warning fs-3"></i>
+                        <div class="lh-1">
+                            <div class="d-flex align-items-baseline gap-1">
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                      id="res-val-deut"
+                                      data-current="<?= (float)$planet['deuterium'] ?>"
+                                      data-max="<?= $deutMax ?>"
+                                      data-prod="<?= $prodDeut ?>">
+                                    <?= number_format((int)$planet['deuterium']) ?>
+                                </span>
+                                <span class="text-warning font-monospace" style="font-size:0.65rem;">+<?= number_format($prodDeut) ?>/h</span>
+                            </div>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
+                                <div class="progress-bar bg-warning" id="bar-deut" style="width:<?= $pctDeut ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 6. Poisson Frais -->
+                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                       title="<strong>Poisson Frais (Pêche des Lacs)</strong><br>Stock au grenier : <?= number_format((int)$fishStock) ?> / <?= number_format($fishMax) ?> (<?= round($pctFish) ?>%)">
+                        <i class="fa-solid fa-fish text-cyan fs-3"></i>
+                        <div class="lh-1">
+                            <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
+                                  id="res-val-fish"
+                                  data-current="<?= $fishStock ?>"
+                                  data-max="<?= $fishMax ?>">
+                                <?= number_format((int)$fishStock) ?>
+                            </span>
+                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
+                                <div class="progress-bar bg-cyan" id="bar-fish" style="width:<?= $pctFish ?>%;"></div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 7. Thé & Matcha -->
                     <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Feuilles de Thé &amp; Matcha (Coteaux)</strong><br>Stock disponible : <?= number_format((int)$teaStock) ?> / <?= number_format($teaMax) ?> (<?= round($pctTeaStock) ?>%)<br><span class='text-teal'>+<?= number_format($teaHourly) ?>/heure</span>">
@@ -1154,7 +1200,7 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 6. Soja & Miso -->
+                    <!-- 8. Soja & Miso -->
                     <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Gousses de Soja &amp; Miso (Champ)</strong><br>Stock disponible : <?= number_format((int)$soyStock) ?> / <?= number_format($soyMax) ?> (<?= round($pctSoyStock) ?>%)<br><span class='text-lime'>+<?= number_format($soyHourly) ?>/heure</span>">
@@ -1176,15 +1222,7 @@ $navItems = [
                         </div>
                     </a>
 
-                </div>
-
-                <!-- SÉPARATEUR VERTICAL 2 -->
-                <div class="vr opacity-25 my-auto flex-shrink-0" style="height: 20px;"></div>
-
-                <!-- GROUPE 3 : VIVRES RAFFINÉES & MATÉRIAUX -->
-                <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
-                    
-                    <!-- 7. Farine de Riz -->
+                    <!-- 9. Farine de Riz -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Farine de Riz (Komeko)</strong><br>Stock : <?= number_format((int)$flourStock) ?> / <?= number_format($flourMax) ?> (<?= round($pctFlour) ?>%)">
@@ -1202,7 +1240,7 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 8. Saké Impérial -->
+                    <!-- 10. Saké Impérial -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Saké Impérial</strong><br>Stock : <?= number_format((int)$sakeStock) ?> / <?= number_format($sakeMax) ?> (<?= round($pctSake) ?>%)<br><span class='text-purple'>Bonus moral actif : +15% satisfaction</span>">
@@ -1222,34 +1260,16 @@ $navItems = [
                             </div>
                         </div>
                     </a>
-
-                    <!-- 9. Poutres en bois -->
-                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Poutres en bois (Charpenterie)</strong><br>Stock : <?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?> (<?= round($pctBeams) ?>%)">
-                        <i class="fa-solid fa-hammer text-orange fs-3"></i>
-                        <div class="lh-1">
-                            <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                  id="res-val-wooden-beams"
-                                  data-current="<?= $beamsStock ?>"
-                                  data-max="<?= $beamsMax ?>">
-                                <?= number_format((int)$beamsStock) ?>
-                            </span>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
-                                <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
-                            </div>
-                        </div>
-                    </a>
-
                 </div>
 
-                <!-- SÉPARATEUR VERTICAL 3 -->
-                <div class="vr opacity-25 my-auto flex-shrink-0" style="height: 20px;"></div>
+                <!-- GROUPE 3 : DOMAINE, PEUPLE & KOBANS -->
+                <div class="resource-group-pill d-flex align-items-center gap-2 gap-lg-3 px-2 py-1 flex-shrink-0">
+                    <span class="badge bg-azure-lt text-azure fw-bold px-2 py-1 text-uppercase font-monospace d-flex align-items-center gap-1" style="font-size:0.62rem; letter-spacing:0.5px;">
+                        <i class="fa-solid fa-landmark text-azure"></i>
+                        <span>Domaine</span>
+                    </span>
 
-                <!-- GROUPE 4 : SÉRÉNITÉ, PEUPLE & KOBANS -->
-                <div class="d-flex align-items-center gap-3 gap-lg-3 flex-shrink-0">
-                    
-                    <!-- 10. Sérénité Shinto -->
+                    <!-- 11. Sérénité Shinto -->
                     <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Sérénité Shintō</strong><br>Solde net : <strong class='<?= $eOk ? 'text-teal' : 'text-danger' ?>'><?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?> ferveur</strong><br>Consommation : <?= number_format((int)($planet['energy_used'] ?? 0)) ?> / <?= number_format((int)($planet['energy_max'] ?? 0)) ?> ferveur">
@@ -1264,7 +1284,7 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 8. Population & Logements -->
+                    <!-- 12. Population & Logements -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Démographie &amp; Logements</strong><br>Population : <?= number_format($curPop) ?> / <?= number_format($maxPop) ?> places">
@@ -1280,7 +1300,7 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 12. Main-d'œuvre Féodale (Ouvriers pourvus vs requis) -->
+                    <!-- 13. Main-d'œuvre Féodale (Ouvriers pourvus vs requis) -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<?= htmlspecialchars($workforceTooltip, ENT_QUOTES, 'UTF-8') ?>">
@@ -1296,7 +1316,7 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 13. Moral des Villageois (Contentement féodal) -->
+                    <!-- 14. Moral des Villageois (Contentement féodal) -->
                     <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<?= htmlspecialchars($moraleTooltip, ENT_QUOTES, 'UTF-8') ?>">
@@ -1312,7 +1332,7 @@ $navItems = [
                         </div>
                     </a>
 
-                    <!-- 14. Trésor Impérial (Kobans) -->
+                    <!-- 15. Trésor Impérial (Kobans) -->
                     <a href="?page=privilege" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
                        title="<strong>Trésor Impérial</strong><br><?= number_format($userGoldCoins) ?> Kobans d'or">
@@ -1324,7 +1344,6 @@ $navItems = [
                             <div class="text-warning font-monospace" style="font-size:0.60rem; line-height: 1;">Kobans</div>
                         </div>
                     </a>
-
                 </div>
 
             </div>

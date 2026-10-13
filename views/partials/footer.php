@@ -865,6 +865,7 @@ function updateHudResources(planet) {
     updateEl('res-val-metal', 'bar-metal', planet.metal, planet.metal_max);
     updateEl('res-val-crystal', 'bar-crystal', planet.crystal, planet.crystal_max);
     updateEl('res-val-deut', 'bar-deut', planet.deuterium, planet.deuterium_max);
+    if (planet.fish !== undefined) updateEl('res-val-fish', 'bar-fish', planet.fish, planet.fish_max || planet.deuterium_max || 15000);
     if (planet.rice_flour !== undefined) updateEl('res-val-rice-flour', 'bar-rice-flour', planet.rice_flour, planet.rice_flour_max || 10000);
     if (planet.sake !== undefined) updateEl('res-val-sake', 'bar-sake', planet.sake, planet.sake_max || 10000);
     if (planet.wooden_beams !== undefined) updateEl('res-val-wooden-beams', 'bar-wooden-beams', planet.wooden_beams, planet.wooden_beams_max || 10000);

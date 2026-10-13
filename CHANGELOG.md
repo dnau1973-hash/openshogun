@@ -5,6 +5,14 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 
+## [1.26.0] - 2026-10-13
+### Modifié (Changed)
+- **Regroupement Thématique des Ressources sous le Carrousel (`views/partials/header.php`, `views/partials/footer.php`) :**
+  * **Pôle Matériaux de Construction :** Rassemblement dans une capsule visuelle dédiée avec badge Tabler « Construction » des 4 ressources de bâtisseur : Bois de Cèdre 🪵 (`metal`), Pierre de Granit 🪨 (`crystal`), Argile Alluviale 🧱 (`clay`), Poutres de Charpente 🔨 (`wooden_beams`).
+  * **Pôle Vivres & Alimentation :** Regroupement complet dans une capsule dédiée avec badge « Alimentaire » des 6 ressources de subsistance et de terroir : Riz Impérial 🌾 (`deuterium`), Poisson Frais 🐟 (`fish`), Feuilles de Thé 🍵 (`tea`), Gousses de Soja 🫘 (`soybean`), Farine de Riz 🍚 (`rice_flour`), Saké Impérial 🍶 (`sake`).
+  * **Pôle Domaine, Démographie & Trésor :** Regroupement clair des indicateurs vitaux du domaine avec badge « Domaine » : Sérénité Shintō ⛩️ (`energy`), Démographie & Logements 👥 (`population`), Main-d'œuvre Féodale ⛏️ (`workforce`), Moral des Villageois 😊 (`contentment`), Kobans d'or 🪙 (`userGoldCoins`).
+  * **Ergonomie & Synchronisation Dynamique :** Structure simplifiée, pastilles délimitées (`resource-group-pill`), infobulles enrichies préservées, intégration du Poisson Frais dans le moteur de rafraîchissement temps réel (`updateHudResources()`), et défilement fluide optimisé sur mobile et écrans larges.
+
 ## [1.25.0] - 2026-10-13
 ### Ajouté (Added)
 - **Réserves Halieutiques Finies des Lacs & Préservation Permanente des Parcelles (`core/LakeEngine.php`, `core/WorldGenerator.php`, `core/GalaxyEngine.php`, `core/FleetEngine.php`, `views/map.php`, `views/fleet.php`, `database/migrations/006_lake_fish_stocks.sql`) :**
