@@ -7,11 +7,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [1.26.0] - 2026-10-13
 ### Modifié (Changed)
-- **Regroupement Thématique des Ressources sous le Carrousel (`views/partials/header.php`, `views/partials/footer.php`) :**
-  * **Pôle Matériaux de Construction :** Rassemblement dans une capsule visuelle dédiée avec badge Tabler « Construction » des 4 ressources de bâtisseur : Bois de Cèdre 🪵 (`metal`), Pierre de Granit 🪨 (`crystal`), Argile Alluviale 🧱 (`clay`), Poutres de Charpente 🔨 (`wooden_beams`).
-  * **Pôle Vivres & Alimentation :** Regroupement complet dans une capsule dédiée avec badge « Alimentaire » des 6 ressources de subsistance et de terroir : Riz Impérial 🌾 (`deuterium`), Poisson Frais 🐟 (`fish`), Feuilles de Thé 🍵 (`tea`), Gousses de Soja 🫘 (`soybean`), Farine de Riz 🍚 (`rice_flour`), Saké Impérial 🍶 (`sake`).
-  * **Pôle Domaine, Démographie & Trésor :** Regroupement clair des indicateurs vitaux du domaine avec badge « Domaine » : Sérénité Shintō ⛩️ (`energy`), Démographie & Logements 👥 (`population`), Main-d'œuvre Féodale ⛏️ (`workforce`), Moral des Villageois 😊 (`contentment`), Kobans d'or 🪙 (`userGoldCoins`).
-  * **Ergonomie & Synchronisation Dynamique :** Structure simplifiée, pastilles délimitées (`resource-group-pill`), infobulles enrichies préservées, intégration du Poisson Frais dans le moteur de rafraîchissement temps réel (`updateHudResources()`), et défilement fluide optimisé sur mobile et écrans larges.
+- **Menus Déroulants Interactifs & Gain d'Espace dans la Barre Supérieure (`views/partials/header.php`, `views/partials/footer.php`) :**
+  * **Barre Épurée à 3 Boutons Compacts :** Remplacement des jauges étalées par 3 boutons déclencheurs ergonomiques centrés sous le carrousel : **Construction 🔨**, **Alimentaire 🍚** et **Domaine ⛩️**, avec icônes, badges de comptage et sous-titres descriptifs.
+  * **Menu Déroulant Construction :** Au clic sur le bouton, ouverture d'un panneau Tabler élégant affichant en temps réel les 4 matériaux de bâtisseur (Bois de Cèdre 🪵, Pierre de Granit 🪨, Argile Alluviale 🧱, Poutres de Charpente 🔨) avec stocks, plafonds d'entrepôt, cadences horaires et jauges de progression.
+  * **Menu Déroulant Alimentaire :** Développement des 6 denrées de subsistance et de terroir (Riz Impérial 🌾, Poisson Frais 🐟, Feuilles de Thé 🍵, Gousses de Soja 🫘, Farine de Riz 🍚, Saké Impérial 🍶) avec détails de stockage au Grenier à Riz Fortifié (Kura).
+  * **Menu Déroulant Domaine :** Consultation instantanée des indices vitaux du fief (Sérénité Shintō ⛩️, Démographie & Logements Minka 👥, Main-d'œuvre & Quotas ouvriers ⛏️, Moral des Villageois 😊, Kobans d'or 🪙).
+  * **Gain d'Espace & Ergonomie Mobile :** Encombrement horizontal réduit de plus de 60%, affichage responsive impeccable sur mobile et desktop, et maintien de la synchronisation dynamique en temps réel via `updateHudResources()`.
 
 ## [1.25.0] - 2026-10-13
 ### Ajouté (Added)

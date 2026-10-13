@@ -1006,344 +1006,447 @@ $navItems = [
         ?>
 
         <style>
-        .resource-strip-scroll {
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            -webkit-overflow-scrolling: touch;
-        }
-        .resource-strip-scroll::-webkit-scrollbar {
-            display: none;
-        }
-        .resource-group-pill {
-            background: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
-            border-radius: 8px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-            transition: border-color 0.15s ease;
-        }
-        .resource-group-pill:hover {
-            border-color: rgba(0, 0, 0, 0.16) !important;
-        }
-        .resource-item-pill {
-            transition: background-color 0.15s ease, transform 0.1s ease;
+        .resource-dropdown-item {
+            transition: background-color 0.15s ease;
             border-radius: 6px;
-            padding: 2px 6px;
-            white-space: nowrap;
         }
-        .resource-item-pill:hover {
+        .resource-dropdown-item:hover {
             background-color: rgba(0, 0, 0, 0.04);
         }
         </style>
 
-        <div class="border-bottom bg-light py-1 px-2 px-lg-3 shadow-sm d-print-none position-relative" style="z-index: 5;">
-            <div class="container-fluid p-0 d-flex align-items-center justify-content-start justify-content-lg-center gap-2 gap-lg-3 resource-strip-scroll flex-nowrap py-0.5">
+        <div class="border-bottom bg-light-subtle py-1 px-2 px-lg-3 shadow-sm d-print-none position-relative" style="z-index: 5;">
+            <div class="container-fluid p-0 d-flex align-items-center justify-content-center gap-2 gap-md-3 flex-wrap flex-sm-nowrap py-0.5">
                 
-                <!-- GROUPE 1 : MATÉRIAUX DE CONSTRUCTION (Bois, Pierre, Argile, Poutres) -->
-                <div class="resource-group-pill d-flex align-items-center gap-2 gap-lg-3 px-2 py-1 flex-shrink-0">
-                    <span class="badge bg-secondary-lt text-secondary fw-bold px-2 py-1 text-uppercase font-monospace d-flex align-items-center gap-1" style="font-size:0.62rem; letter-spacing:0.5px;">
-                        <i class="fa-solid fa-hammer text-primary"></i>
-                        <span>Construction</span>
-                    </span>
-
-                    <!-- 1. Bois de Cèdre -->
-                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Bois de Cèdre</strong><br>Stock : <?= number_format((int)$planet['metal']) ?> / <?= number_format($metalMax) ?> (<?= round($pctMetal) ?>%)<br><span class='text-success'>+<?= number_format($prodMetal) ?>/heure</span>">
-                        <i class="fa-solid fa-tree text-success fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-baseline gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                      id="res-val-metal"
-                                      data-current="<?= (float)$planet['metal'] ?>"
-                                      data-max="<?= $metalMax ?>"
-                                      data-prod="<?= $prodMetal ?>">
-                                    <?= number_format((int)$planet['metal']) ?>
-                                </span>
-                                <span class="text-success font-monospace" style="font-size:0.65rem;">+<?= number_format($prodMetal) ?>/h</span>
-                            </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
-                                <div class="progress-bar bg-success" id="bar-metal" style="width:<?= $pctMetal ?>%;"></div>
-                            </div>
+                <!-- 1. BOUTON & MENU DÉROULANT : CONSTRUCTION -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary bg-white d-flex align-items-center gap-2 px-3 py-1 rounded-2 shadow-sm dropdown-toggle text-dark border"
+                            type="button" id="dropdownConstruction" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                            title="Cliquer pour afficher les matériaux de construction">
+                        <i class="fa-solid fa-hammer text-primary fs-3"></i>
+                        <div class="text-start lh-1">
+                            <span class="fw-bold" style="font-size:0.84rem;">Construction</span>
+                            <div class="text-muted d-none d-md-block font-monospace" style="font-size:0.65rem;">Bois &bull; Pierre &bull; Argile &bull; Poutres</div>
                         </div>
-                    </a>
-
-                    <!-- 2. Pierre de Granit -->
-                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Pierre de Granit</strong><br>Stock : <?= number_format((int)$planet['crystal']) ?> / <?= number_format($crystalMax) ?> (<?= round($pctCrystal) ?>%)<br><span class='text-primary'>+<?= number_format($prodCrystal) ?>/heure</span>">
-                        <i class="fa-solid fa-mountain text-primary fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-baseline gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                      id="res-val-crystal"
-                                      data-current="<?= (float)$planet['crystal'] ?>"
-                                      data-max="<?= $crystalMax ?>"
-                                      data-prod="<?= $prodCrystal ?>">
-                                    <?= number_format((int)$planet['crystal']) ?>
-                                </span>
-                                <span class="text-primary font-monospace" style="font-size:0.65rem;">+<?= number_format($prodCrystal) ?>/h</span>
+                        <span class="badge bg-secondary-lt text-secondary font-monospace ms-1" style="font-size:0.65rem;">4</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-start shadow-lg p-2 border" aria-labelledby="dropdownConstruction" style="min-width:320px; max-width:95vw; z-index:1060;">
+                        <div class="d-flex justify-content-between align-items-center px-2 py-1 mb-1 border-bottom">
+                            <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size:0.82rem;">
+                                <i class="fa-solid fa-hammer text-primary"></i> Matériaux de Construction
                             </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
-                                <div class="progress-bar bg-primary" id="bar-crystal" style="width:<?= $pctCrystal ?>%;"></div>
-                            </div>
+                            <a href="?page=resources" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size:0.68rem;">Gérer &rarr;</a>
                         </div>
-                    </a>
 
-                    <!-- 3. Argile & Céramique -->
-                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Argile &amp; Tuiles (Fosse)</strong><br>Stock disponible : <?= number_format((int)$clayStock) ?> / <?= number_format($clayMax) ?> (<?= round($pctClayStock) ?>%)<br><span class='text-orange'>+<?= number_format($clayHourly) ?>/heure</span>">
-                        <i class="fa-solid fa-cubes-stacked text-orange fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-baseline gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                      id="res-val-clay"
-                                      data-current="<?= $clayStock ?>"
-                                      data-max="<?= $clayMax ?>"
-                                      data-prod="<?= $clayHourly ?>">
-                                    <?= number_format((int)$clayStock) ?>
-                                </span>
-                                <span class="text-orange font-monospace" style="font-size:0.65rem;">+<?= number_format($clayHourly) ?>/h</span>
+                        <!-- 1. Bois de Cèdre -->
+                        <a href="?page=resources" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Bois de Cèdre : Stock <?= number_format((int)$planet['metal']) ?> / <?= number_format($metalMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-tree text-success fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Bois de Cèdre</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($metalMax) ?></div>
+                                </div>
                             </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
-                                <div class="progress-bar bg-orange" id="bar-clay" style="width:<?= $pctClayStock ?>%;"></div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-metal"
+                                          data-current="<?= (float)$planet['metal'] ?>"
+                                          data-max="<?= $metalMax ?>"
+                                          data-prod="<?= $prodMetal ?>">
+                                        <?= number_format((int)$planet['metal']) ?>
+                                    </span>
+                                    <span class="text-success" style="font-size:0.68rem;">+<?= number_format($prodMetal) ?>/h</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-success" id="bar-metal" style="width:<?= $pctMetal ?>%;"></div>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
 
-                    <!-- 4. Poutres en bois -->
-                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Poutres en bois (Charpenterie)</strong><br>Stock : <?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?> (<?= round($pctBeams) ?>%)">
-                        <i class="fa-solid fa-hammer text-orange fs-3"></i>
-                        <div class="lh-1">
-                            <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                  id="res-val-wooden-beams"
-                                  data-current="<?= $beamsStock ?>"
-                                  data-max="<?= $beamsMax ?>">
-                                <?= number_format((int)$beamsStock) ?>
-                            </span>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
-                                <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
+                        <!-- 2. Pierre de Granit -->
+                        <a href="?page=resources" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Pierre de Granit : Stock <?= number_format((int)$planet['crystal']) ?> / <?= number_format($crystalMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-mountain text-primary fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Pierre de Granit</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($crystalMax) ?></div>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-crystal"
+                                          data-current="<?= (float)$planet['crystal'] ?>"
+                                          data-max="<?= $crystalMax ?>"
+                                          data-prod="<?= $prodCrystal ?>">
+                                        <?= number_format((int)$planet['crystal']) ?>
+                                    </span>
+                                    <span class="text-primary" style="font-size:0.68rem;">+<?= number_format($prodCrystal) ?>/h</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-primary" id="bar-crystal" style="width:<?= $pctCrystal ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- 3. Argile Alluviale -->
+                        <a href="?page=resources" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Argile Alluviale : Stock <?= number_format((int)$clayStock) ?> / <?= number_format($clayMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-cubes-stacked text-orange fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Argile Alluviale</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($clayMax) ?></div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-clay"
+                                          data-current="<?= $clayStock ?>"
+                                          data-max="<?= $clayMax ?>"
+                                          data-prod="<?= $clayHourly ?>">
+                                        <?= number_format((int)$clayStock) ?>
+                                    </span>
+                                    <span class="text-orange" style="font-size:0.68rem;">+<?= number_format($clayHourly) ?>/h</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-orange" id="bar-clay" style="width:<?= $pctClayStock ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- 4. Poutres de Charpente -->
+                        <a href="?page=city" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Poutres de Charpente : Stock <?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-hammer text-orange fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Poutres de Charpente</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($beamsMax) ?></div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-wooden-beams"
+                                          data-current="<?= $beamsStock ?>"
+                                          data-max="<?= $beamsMax ?>">
+                                        <?= number_format((int)$beamsStock) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.68rem;">Urbain</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
 
-                <!-- GROUPE 2 : RESSOURCES ALIMENTAIRES & VIVRES (Riz, Poisson, Thé, Soja, Farine, Saké) -->
-                <div class="resource-group-pill d-flex align-items-center gap-2 gap-lg-3 px-2 py-1 flex-shrink-0">
-                    <span class="badge bg-warning-lt text-warning fw-bold px-2 py-1 text-uppercase font-monospace d-flex align-items-center gap-1" style="font-size:0.62rem; letter-spacing:0.5px;">
-                        <i class="fa-solid fa-bowl-rice text-warning"></i>
-                        <span>Alimentaire</span>
-                    </span>
-
-                    <!-- 5. Riz Impérial -->
-                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Riz Impérial (Grenier Fortifié)</strong><br>Stock : <?= number_format((int)$planet['deuterium']) ?> / <?= number_format($deutMax) ?> (<?= round($pctDeut) ?>%)<br><span class='text-warning'>+<?= number_format($prodDeut) ?>/heure</span>">
-                        <i class="fa-solid fa-wheat-awn text-warning fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-baseline gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                      id="res-val-deut"
-                                      data-current="<?= (float)$planet['deuterium'] ?>"
-                                      data-max="<?= $deutMax ?>"
-                                      data-prod="<?= $prodDeut ?>">
-                                    <?= number_format((int)$planet['deuterium']) ?>
-                                </span>
-                                <span class="text-warning font-monospace" style="font-size:0.65rem;">+<?= number_format($prodDeut) ?>/h</span>
-                            </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
-                                <div class="progress-bar bg-warning" id="bar-deut" style="width:<?= $pctDeut ?>%;"></div>
-                            </div>
+                <!-- 2. BOUTON & MENU DÉROULANT : ALIMENTAIRE -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-warning bg-white d-flex align-items-center gap-2 px-3 py-1 rounded-2 shadow-sm dropdown-toggle text-dark border"
+                            type="button" id="dropdownAlimentaire" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                            title="Cliquer pour afficher les vivres et denrées alimentaires">
+                        <i class="fa-solid fa-bowl-rice text-warning fs-3"></i>
+                        <div class="text-start lh-1">
+                            <span class="fw-bold" style="font-size:0.84rem;">Alimentaire</span>
+                            <div class="text-muted d-none d-md-block font-monospace" style="font-size:0.65rem;">Riz &bull; Poisson &bull; Thé &bull; Soja...</div>
                         </div>
-                    </a>
-
-                    <!-- 6. Poisson Frais -->
-                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Poisson Frais (Pêche des Lacs)</strong><br>Stock au grenier : <?= number_format((int)$fishStock) ?> / <?= number_format($fishMax) ?> (<?= round($pctFish) ?>%)">
-                        <i class="fa-solid fa-fish text-cyan fs-3"></i>
-                        <div class="lh-1">
-                            <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                  id="res-val-fish"
-                                  data-current="<?= $fishStock ?>"
-                                  data-max="<?= $fishMax ?>">
-                                <?= number_format((int)$fishStock) ?>
-                            </span>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
-                                <div class="progress-bar bg-cyan" id="bar-fish" style="width:<?= $pctFish ?>%;"></div>
+                        <span class="badge bg-warning-lt text-warning font-monospace ms-1" style="font-size:0.65rem;">6</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-start shadow-lg p-2 border" aria-labelledby="dropdownAlimentaire" style="min-width:330px; max-width:95vw; z-index:1060;">
+                        <div class="d-flex justify-content-between align-items-center px-2 py-1 mb-1 border-bottom">
+                            <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size:0.82rem;">
+                                <i class="fa-solid fa-bowl-rice text-warning"></i> Vivres &amp; Ressources Alimentaires
                             </div>
+                            <a href="?page=resources" class="btn btn-xs btn-outline-warning py-0 px-2" style="font-size:0.68rem;">Terroirs &rarr;</a>
                         </div>
-                    </a>
 
-                    <!-- 7. Thé & Matcha -->
-                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Feuilles de Thé &amp; Matcha (Coteaux)</strong><br>Stock disponible : <?= number_format((int)$teaStock) ?> / <?= number_format($teaMax) ?> (<?= round($pctTeaStock) ?>%)<br><span class='text-teal'>+<?= number_format($teaHourly) ?>/heure</span>">
-                        <i class="fa-solid fa-leaf text-teal fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-baseline gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                      id="res-val-tea"
-                                      data-current="<?= $teaStock ?>"
-                                      data-max="<?= $teaMax ?>"
-                                      data-prod="<?= $teaHourly ?>">
-                                    <?= number_format((int)$teaStock) ?>
-                                </span>
-                                <span class="text-teal font-monospace" style="font-size:0.65rem;">+<?= number_format($teaHourly) ?>/h</span>
+                        <!-- 1. Riz Impérial -->
+                        <a href="?page=resources" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Riz Impérial : Stock <?= number_format((int)$planet['deuterium']) ?> / <?= number_format($deutMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-wheat-awn text-warning fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Riz Impérial (Koku)</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Grenier Kura : <?= number_format($deutMax) ?></div>
+                                </div>
                             </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
-                                <div class="progress-bar bg-teal" id="bar-tea" style="width:<?= $pctTeaStock ?>%;"></div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-deut"
+                                          data-current="<?= (float)$planet['deuterium'] ?>"
+                                          data-max="<?= $deutMax ?>"
+                                          data-prod="<?= $prodDeut ?>">
+                                        <?= number_format((int)$planet['deuterium']) ?>
+                                    </span>
+                                    <span class="text-warning" style="font-size:0.68rem;">+<?= number_format($prodDeut) ?>/h</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-warning" id="bar-deut" style="width:<?= $pctDeut ?>%;"></div>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
 
-                    <!-- 8. Soja & Miso -->
-                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Gousses de Soja &amp; Miso (Champ)</strong><br>Stock disponible : <?= number_format((int)$soyStock) ?> / <?= number_format($soyMax) ?> (<?= round($pctSoyStock) ?>%)<br><span class='text-lime'>+<?= number_format($soyHourly) ?>/heure</span>">
-                        <i class="fa-solid fa-seedling text-lime fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-baseline gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                      id="res-val-soybean"
-                                      data-current="<?= $soyStock ?>"
-                                      data-max="<?= $soyMax ?>"
-                                      data-prod="<?= $soyHourly ?>">
-                                    <?= number_format((int)$soyStock) ?>
-                                </span>
-                                <span class="text-lime font-monospace" style="font-size:0.65rem;">+<?= number_format($soyHourly) ?>/h</span>
+                        <!-- 2. Poisson Frais -->
+                        <a href="?page=resources" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Poisson Frais : Stock <?= number_format((int)$fishStock) ?> / <?= number_format($fishMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-fish text-cyan fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Poisson Frais</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Grenier Kura : <?= number_format($fishMax) ?></div>
+                                </div>
                             </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:48px;">
-                                <div class="progress-bar bg-lime" id="bar-soybean" style="width:<?= $pctSoyStock ?>%;"></div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-fish"
+                                          data-current="<?= $fishStock ?>"
+                                          data-max="<?= $fishMax ?>">
+                                        <?= number_format((int)$fishStock) ?>
+                                    </span>
+                                    <span class="text-cyan" style="font-size:0.68rem;">Pêche</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-cyan" id="bar-fish" style="width:<?= $pctFish ?>%;"></div>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
 
-                    <!-- 9. Farine de Riz -->
-                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Farine de Riz (Komeko)</strong><br>Stock : <?= number_format((int)$flourStock) ?> / <?= number_format($flourMax) ?> (<?= round($pctFlour) ?>%)">
-                        <i class="fa-solid fa-bowl-rice text-secondary fs-3"></i>
-                        <div class="lh-1">
-                            <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                  id="res-val-rice-flour"
-                                  data-current="<?= $flourStock ?>"
-                                  data-max="<?= $flourMax ?>">
-                                <?= number_format((int)$flourStock) ?>
-                            </span>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
-                                <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
+                        <!-- 3. Feuilles de Thé -->
+                        <a href="?page=resources" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Feuilles de Thé : Stock <?= number_format((int)$teaStock) ?> / <?= number_format($teaMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-leaf text-teal fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Feuilles de Thé</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($teaMax) ?></div>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-tea"
+                                          data-current="<?= $teaStock ?>"
+                                          data-max="<?= $teaMax ?>"
+                                          data-prod="<?= $teaHourly ?>">
+                                        <?= number_format((int)$teaStock) ?>
+                                    </span>
+                                    <span class="text-teal" style="font-size:0.68rem;">+<?= number_format($teaHourly) ?>/h</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-teal" id="bar-tea" style="width:<?= $pctTeaStock ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
 
-                    <!-- 10. Saké Impérial -->
-                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Saké Impérial</strong><br>Stock : <?= number_format((int)$sakeStock) ?> / <?= number_format($sakeMax) ?> (<?= round($pctSake) ?>%)<br><span class='text-purple'>Bonus moral actif : +15% satisfaction</span>">
-                        <i class="fa-solid fa-wine-bottle text-purple fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-center gap-1">
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;"
-                                      id="res-val-sake"
-                                      data-current="<?= $sakeStock ?>"
-                                      data-max="<?= $sakeMax ?>">
-                                    <?= number_format((int)$sakeStock) ?>
-                                </span>
-                                <span class="badge bg-purple-lt text-purple font-monospace py-0 px-1" style="font-size:0.6rem;">+15%</span>
+                        <!-- 4. Gousses de Soja -->
+                        <a href="?page=resources" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Gousses de Soja : Stock <?= number_format((int)$soyStock) ?> / <?= number_format($soyMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-seedling text-lime fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Gousses de Soja</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($soyMax) ?></div>
+                                </div>
                             </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
-                                <div class="progress-bar bg-purple" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-soybean"
+                                          data-current="<?= $soyStock ?>"
+                                          data-max="<?= $soyMax ?>"
+                                          data-prod="<?= $soyHourly ?>">
+                                        <?= number_format((int)$soyStock) ?>
+                                    </span>
+                                    <span class="text-lime" style="font-size:0.68rem;">+<?= number_format($soyHourly) ?>/h</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-lime" id="bar-soybean" style="width:<?= $pctSoyStock ?>%;"></div>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+
+                        <!-- 5. Farine de Riz -->
+                        <a href="?page=city" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Farine de Riz : Stock <?= number_format((int)$flourStock) ?> / <?= number_format($flourMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-bowl-rice text-secondary fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Farine de Riz (Komeko)</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($flourMax) ?></div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-rice-flour"
+                                          data-current="<?= $flourStock ?>"
+                                          data-max="<?= $flourMax ?>">
+                                        <?= number_format((int)$flourStock) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.68rem;">Urbain</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- 6. Saké Impérial -->
+                        <a href="?page=city" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Saké Impérial : Stock <?= number_format((int)$sakeStock) ?> / <?= number_format($sakeMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-wine-bottle text-purple fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Saké Impérial</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($sakeMax) ?></div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-sake"
+                                          data-current="<?= $sakeStock ?>"
+                                          data-max="<?= $sakeMax ?>">
+                                        <?= number_format((int)$sakeStock) ?>
+                                    </span>
+                                    <span class="badge bg-purple-lt text-purple font-monospace py-0 px-1" style="font-size:0.6rem;">+15%</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-purple" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
 
-                <!-- GROUPE 3 : DOMAINE, PEUPLE & KOBANS -->
-                <div class="resource-group-pill d-flex align-items-center gap-2 gap-lg-3 px-2 py-1 flex-shrink-0">
-                    <span class="badge bg-azure-lt text-azure fw-bold px-2 py-1 text-uppercase font-monospace d-flex align-items-center gap-1" style="font-size:0.62rem; letter-spacing:0.5px;">
-                        <i class="fa-solid fa-landmark text-azure"></i>
-                        <span>Domaine</span>
-                    </span>
-
-                    <!-- 11. Sérénité Shinto -->
-                    <a href="?page=resources" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Sérénité Shintō</strong><br>Solde net : <strong class='<?= $eOk ? 'text-teal' : 'text-danger' ?>'><?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?> ferveur</strong><br>Consommation : <?= number_format((int)($planet['energy_used'] ?? 0)) ?> / <?= number_format((int)($planet['energy_max'] ?? 0)) ?> ferveur">
-                        <i class="fa-solid fa-torii-gate <?= $eOk ? 'text-teal' : 'text-danger' ?> fs-3"></i>
-                        <div class="lh-1">
-                            <span class="fw-bold font-monospace <?= $eOk ? 'text-teal' : 'text-danger' ?>" style="font-size:0.82rem;">
-                                <?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?>
-                            </span>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
-                                <div class="progress-bar <?= $eOk ? 'bg-teal' : 'bg-danger' ?>" style="width:<?= $pctEnergy ?>%;"></div>
-                            </div>
+                <!-- 3. BOUTON & MENU DÉROULANT : DOMAINE -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-info bg-white d-flex align-items-center gap-2 px-3 py-1 rounded-2 shadow-sm dropdown-toggle text-dark border"
+                            type="button" id="dropdownDomaine" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                            title="Cliquer pour afficher la vitalité du domaine et la démographie">
+                        <i class="fa-solid fa-landmark text-azure fs-3"></i>
+                        <div class="text-start lh-1">
+                            <span class="fw-bold" style="font-size:0.84rem;">Domaine</span>
+                            <div class="text-muted d-none d-md-block font-monospace" style="font-size:0.65rem;">Sérénité &bull; Peuple &bull; Kobans</div>
                         </div>
-                    </a>
-
-                    <!-- 12. Population & Logements -->
-                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Démographie &amp; Logements</strong><br>Population : <?= number_format($curPop) ?> / <?= number_format($maxPop) ?> places">
-                        <i class="fa-solid fa-users text-blue fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-baseline gap-1 font-monospace" style="font-size:0.82rem;">
-                                <span class="fw-bold text-dark"><?= number_format($curPop) ?></span>
-                                <span class="text-muted" style="font-size:0.65rem;">/ <?= number_format($maxPop) ?></span>
+                        <span class="badge bg-azure-lt text-azure font-monospace ms-1" style="font-size:0.65rem;">5</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end shadow-lg p-2 border" aria-labelledby="dropdownDomaine" style="min-width:330px; max-width:95vw; z-index:1060;">
+                        <div class="d-flex justify-content-between align-items-center px-2 py-1 mb-1 border-bottom">
+                            <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size:0.82rem;">
+                                <i class="fa-solid fa-landmark text-azure"></i> Domaine &amp; Démographie
                             </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
-                                <div class="progress-bar bg-primary" style="width:<?= $pctPop ?>%;"></div>
-                            </div>
+                            <a href="?page=city" class="btn btn-xs btn-outline-info py-0 px-2" style="font-size:0.68rem;">Cité &rarr;</a>
                         </div>
-                    </a>
 
-                    <!-- 13. Main-d'œuvre Féodale (Ouvriers pourvus vs requis) -->
-                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<?= htmlspecialchars($workforceTooltip, ENT_QUOTES, 'UTF-8') ?>">
-                        <i class="fa-solid fa-person-digging <?= $isUnderstaffed ? 'text-warning' : 'text-success' ?> fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-baseline gap-1 font-monospace" style="font-size:0.82rem;">
-                                <span class="fw-bold <?= $isUnderstaffed ? 'text-warning' : 'text-dark' ?>"><?= number_format($assignedWorkers) ?></span>
-                                <span class="text-muted" style="font-size:0.65rem;">/ <?= number_format($requiredWorkers) ?></span>
+                        <!-- 1. Sérénité Shinto -->
+                        <a href="?page=resources" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Sérénité Shintō : Solde <?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?> ferveur">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-torii-gate <?= $eOk ? 'text-teal' : 'text-danger' ?> fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Sérénité Shintō</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Conso : <?= number_format((int)($planet['energy_used'] ?? 0)) ?> / <?= number_format((int)($planet['energy_max'] ?? 0)) ?></div>
+                                </div>
                             </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
-                                <div class="progress-bar <?= $isUnderstaffed ? 'bg-warning' : 'bg-success' ?>" style="width:<?= $pctWorkforce ?>%;"></div>
+                            <div class="text-end lh-1">
+                                <div class="font-monospace fw-bold <?= $eOk ? 'text-teal' : 'text-danger' ?>" style="font-size:0.84rem;">
+                                    <?= ($eBalance >= 0 ? '+' : '') . number_format($eBalance) ?>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar <?= $eOk ? 'bg-teal' : 'bg-danger' ?>" style="width:<?= $pctEnergy ?>%;"></div>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
 
-                    <!-- 14. Moral des Villageois (Contentement féodal) -->
-                    <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<?= htmlspecialchars($moraleTooltip, ENT_QUOTES, 'UTF-8') ?>">
-                        <i class="fa-solid <?= $contentmentIcon ?> text-<?= $contentmentBadgeColor ?> fs-3"></i>
-                        <div class="lh-1">
-                            <div class="d-flex align-items-baseline gap-1 font-monospace" style="font-size:0.82rem;">
-                                <span class="fw-bold text-<?= $contentmentBadgeColor ?>" id="res-val-contentment"><?= $contentmentScore ?>%</span>
-                                <span class="text-muted" style="font-size:0.65rem;">moral</span>
+                        <!-- 2. Population & Logements -->
+                        <a href="?page=city" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Démographie : <?= number_format($curPop) ?> / <?= number_format($maxPop) ?> habitants">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-users text-blue fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Population (Minka)</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Capacité : <?= number_format($maxPop) ?></div>
+                                </div>
                             </div>
-                            <div class="progress progress-xs mt-1" style="height:2.5px; width:44px;">
-                                <div class="progress-bar bg-<?= $contentmentBadgeColor ?>" id="bar-contentment" style="width:<?= $contentmentScore ?>%;"></div>
+                            <div class="text-end lh-1">
+                                <div class="font-monospace fw-bold text-dark" style="font-size:0.84rem;">
+                                    <?= number_format($curPop) ?> <span class="text-muted" style="font-size:0.68rem;">/ <?= number_format($maxPop) ?></span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-primary" style="width:<?= $pctPop ?>%;"></div>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
 
-                    <!-- 15. Trésor Impérial (Kobans) -->
-                    <a href="?page=privilege" class="d-flex align-items-center gap-2 text-decoration-none text-reset resource-item-pill"
-                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                       title="<strong>Trésor Impérial</strong><br><?= number_format($userGoldCoins) ?> Kobans d'or">
-                        <i class="fa-solid fa-coins text-warning fs-3"></i>
-                        <div class="lh-1">
-                            <span class="fw-bold text-dark font-monospace" style="font-size:0.82rem;">
-                                <?= number_format($userGoldCoins) ?>
-                            </span>
-                            <div class="text-warning font-monospace" style="font-size:0.60rem; line-height: 1;">Kobans</div>
-                        </div>
-                    </a>
+                        <!-- 3. Main-d'œuvre Féodale -->
+                        <a href="?page=city" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Main-d'œuvre : <?= number_format($assignedWorkers) ?> / <?= number_format($requiredWorkers) ?> ouvriers requis">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-person-digging <?= $isUnderstaffed ? 'text-warning' : 'text-success' ?> fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Main-d'œuvre</div>
+                                    <div class="font-monospace <?= $isUnderstaffed ? 'text-warning' : 'text-success' ?>" style="font-size:0.68rem;">
+                                        <?= $isUnderstaffed ? 'Sous-effectif (-' . $understaffedMalus . '%)' : 'Effectif complet' ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="font-monospace fw-bold <?= $isUnderstaffed ? 'text-warning' : 'text-dark' ?>" style="font-size:0.84rem;">
+                                    <?= number_format($assignedWorkers) ?> <span class="text-muted" style="font-size:0.68rem;">/ <?= number_format($requiredWorkers) ?></span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar <?= $isUnderstaffed ? 'bg-warning' : 'bg-success' ?>" style="width:<?= $pctWorkforce ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- 4. Moral des Villageois -->
+                        <a href="?page=city" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Contentement : <?= $contentmentScore ?>% (<?= $contentmentStatus ?>)">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid <?= $contentmentIcon ?> text-<?= $contentmentBadgeColor ?> fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Moral des Villageois</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;"><?= $contentmentStatus ?></div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="font-monospace fw-bold text-<?= $contentmentBadgeColor ?>" style="font-size:0.84rem;">
+                                    <span id="res-val-contentment"><?= $contentmentScore ?>%</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-<?= $contentmentBadgeColor ?>" id="bar-contentment" style="width:<?= $contentmentScore ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- 5. Trésor Impérial -->
+                        <a href="?page=privilege" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Trésor Impérial : <?= number_format($userGoldCoins) ?> Kobans d'or">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-coins text-warning fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Trésor Impérial</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Trésor du clan</div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="font-monospace fw-bold text-dark" style="font-size:0.84rem;">
+                                    <?= number_format($userGoldCoins) ?> <span class="text-warning small" style="font-size:0.68rem;">Kobans</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
 
             </div>
