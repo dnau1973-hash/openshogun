@@ -242,6 +242,70 @@ function renderRuralPlotsGrid(ruralPlots) {
     html += `</div></div>`;
     return html;
 }
+ 
+// Rendu du compteur des ressources disponibles en poisson pour les parcelles de lac
+function renderLakeFishCounter(currentStock, initialStock, isDepleted) {
+    const cur = parseInt(currentStock, 10) || 0;
+    const init = parseInt(initialStock, 10) || (cur || 25000);
+    const depleted = !!isDepleted || (cur <= 0);
+    const pct = Math.max(depleted ? 0 : 2, Math.min(100, Math.round((cur / (init || 1)) * 100)));
+
+    return `
+        <div class="card mb-3 shadow-none border ${depleted ? 'border-secondary-subtle bg-secondary-lt' : 'border-info-subtle'}" style="border-radius:10px; ${depleted ? '' : 'background:#f0fdfa;'}">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="avatar avatar-md ${depleted ? 'bg-secondary text-white' : 'bg-cyan text-white'} rounded shadow-sm" style="font-size:1.35rem;">
+                            <i class="fa-solid fa-fish"></i>
+                        </span>
+                        <div>
+                            <div class="fw-bold text-dark" style="font-size:0.95rem;">
+                                Ressources Disponibles en Poisson
+                            </div>
+                            <div class="text-secondary small" style="font-size:0.75rem;">
+                                Sanctuaire halieutique naturel &bull; Vivres sauvages pêchables
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge ${depleted ? 'bg-secondary' : 'bg-cyan'} text-white font-monospace px-3 py-2 shadow-sm" style="font-size:1.1rem; letter-spacing:0.5px;">
+                            <i class="fa-solid fa-fish me-1"></i><strong>${cur.toLocaleString()}</strong> ${depleted ? 'poisson (Épuisé)' : 'poissons disponibles'}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Jauge de réserve halieutique -->
+                <div class="bg-white rounded p-2 border border-light-subtle mb-2">
+                    <div class="d-flex justify-content-between align-items-center small mb-1">
+                        <span class="text-secondary font-weight-medium">
+                            <i class="fa-solid fa-water text-cyan me-1"></i>Banc de poissons restant :
+                        </span>
+                        <span class="font-monospace fw-bold ${depleted ? 'text-secondary' : 'text-cyan'}">
+                            <strong>${cur.toLocaleString()}</strong> / ${init.toLocaleString()} vivres
+                            <span class="text-muted fw-normal ms-1">(${pct}%)</span>
+                        </span>
+                    </div>
+                    <div class="progress progress-sm" style="height:9px; border-radius:4px; background:#e2e8f0;">
+                        <div class="progress-bar ${depleted ? 'bg-secondary' : 'bg-cyan'}" style="width:${pct}%;"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 small" style="font-size:0.78rem;">
+                    <span class="text-secondary">
+                        <i class="fa-solid fa-circle-info ${depleted ? 'text-warning' : 'text-info'} me-1"></i>
+                        ${depleted 
+                            ? '<strong>Réserve épuisée.</strong> Ce lac demeure paisiblement sur la province mais ne peut plus être pêché.' 
+                            : 'Prélevé par vos <strong>Pêcheurs Féodaux (<i class="fa-solid fa-fish"></i>)</strong> créés au Dojo Militaire.'
+                        }
+                    </span>
+                    <span class="text-dark font-weight-medium">
+                        <i class="fa-solid fa-warehouse text-warning me-1"></i>Stocké au <strong>Grenier à Riz (Kura)</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+    `;
+}
 
 // Fonction appelée lors du clic sur une tuile de la carte
 window.selectPlanetTile = function(data) {
@@ -251,14 +315,22 @@ window.selectPlanetTile = function(data) {
 
     coords.innerText = `[${data.coord_x} : ${data.coord_y}]`;
 
-    // ── Terres Vierges Naturelles (Plaines, Collines, etc.) ────────────────────
+    // ── Terres Vierges Naturelles (Plaines, Collines, Lacs, etc.) ─────────────
     if (data.empty) {
+        const isLake = (data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac')));
+        const currentStock = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
+        const initialStock = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
+        const isDepleted = data.lake_depleted || (currentStock <= 0);
+
         if (!data.rural_plots || Object.keys(data.rural_plots).length === 0) {
             data.rural_plots = getDeterministicPlotPotentials(data.coord_x, data.coord_y);
         }
         const ruralPlotsHtml = renderRuralPlotsGrid(data.rural_plots);
 
-        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.terrain_name || 'Terres Vierges'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
+        title.innerHTML = isLake
+            ? `<i class="fa-solid fa-water text-cyan me-1"></i> <span style="color:#0891b2;">${data.terrain_name || 'Lac d\'Eaux Vives'}</span> <span class="badge bg-cyan-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`
+            : `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.terrain_name || 'Terres Vierges'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
+
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
@@ -267,10 +339,10 @@ window.selectPlanetTile = function(data) {
                     </div>
                     <div>
                         <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
-                            ${data.terrain_name || 'Terres Vierges Inoccupées'}
+                            ${data.terrain_name || (isLake ? 'Lac d\'Eaux Vives' : 'Terres Vierges Inoccupées')}
                         </div>
                         <div class="small text-secondary mt-0.5">
-                            ${data.terrain_desc || 'Plaines fertiles et terroirs prospères du Japon féodal, prêts à être défrichés.'}
+                            ${data.terrain_desc || (isLake ? 'Étendue d\'eau douce et sanctuaire naturel halieutique protégé.' : 'Plaines fertiles et terroirs prospères du Japon féodal, prêts à être défrichés.')}
                         </div>
                     </div>
                 </div>
@@ -279,8 +351,8 @@ window.selectPlanetTile = function(data) {
                 <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded border">
                     <div>
                         <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
-                        ${(data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac')))
-                            ? '<strong class="text-info"><i class="fa-solid fa-water me-1"></i>Eaux Libres &bull; Non Annexable</strong>'
+                        ${isLake
+                            ? '<strong class="text-cyan"><i class="fa-solid fa-water me-1"></i>Eaux Libres &bull; Non Annexable</strong>'
                             : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>'
                         }
                     </div>
@@ -290,40 +362,7 @@ window.selectPlanetTile = function(data) {
                     </div>
                 </div>
 
-                ${(data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac'))) ? `
-                    ${(data.lake_depleted || (data.fish_stock !== null && data.fish_stock !== undefined && parseInt(data.fish_stock, 10) <= 0)) ? `
-                        <div class="alert alert-secondary d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px; background:#f1f5f9; border:1px solid #cbd5e1;">
-                            <span style="font-size:1.4rem;"><i class="fa-solid fa-water text-secondary"></i></span>
-                            <div style="color:#475569;">
-                                <strong>Étendue d'Eau Calme &bull; Réserve Épuisée</strong><br>
-                                Tous les poissons de ce lac ont été pêchés (<strong>0 poisson restant</strong>).<br>
-                                Le lac demeure paisiblement sur la province, mais il n'est plus possible d'y prélever du poisson.
-                            </div>
-                        </div>
-                    ` : `
-                        <div class="alert alert-info d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px; background:#f0fdfa; border:1px solid #99f6e4;">
-                            <span style="font-size:1.4rem;"><i class="fa-solid fa-fish text-cyan"></i></span>
-                            <div style="color:#0f766e; width: 100%;">
-                                <strong>Étendue d'Eau Douce &amp; Sanctuaire Halieutique</strong><br>
-                                Cette parcelle de lac est un bien naturel commun. <strong>Elle ne peut pas être annexée ni colonisée.</strong>
-                                ${(data.fish_stock !== null && data.fish_stock !== undefined) ? `
-                                    <div class="mt-2 p-2 bg-white rounded border border-info-subtle">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <span class="small font-weight-bold text-dark"><i class="fa-solid fa-fish-fins text-cyan me-1"></i>Banc de poissons disponible :</span>
-                                            <span class="badge bg-cyan text-white font-monospace">${Number(data.fish_stock).toLocaleString()} / ${Number(data.fish_initial || 25000).toLocaleString()}</span>
-                                        </div>
-                                        <div class="progress progress-sm" style="height:6px;">
-                                            <div class="progress-bar bg-cyan" style="width: ${Math.max(3, Math.min(100, Math.round((parseInt(data.fish_stock, 10) / (parseInt(data.fish_initial, 10) || 1)) * 100)))}%"></div>
-                                        </div>
-                                    </div>
-                                ` : ''}
-                                <div class="mt-1 small">
-                                    Dépêchez vos <strong>Pêcheurs Féodaux (<i class="fa-solid fa-fish"></i>)</strong> créés au Dojo : plus ils sont nombreux et formés à l'Académie, plus ils ramènent de poisson frais stocké dans votre Grenier à Riz Fortifié.
-                                </div>
-                            </div>
-                        </div>
-                    `}
-                ` : `
+                ${isLake ? renderLakeFishCounter(currentStock, initialStock, isDepleted) : `
                     <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
                         <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
                         <div>
@@ -337,8 +376,8 @@ window.selectPlanetTile = function(data) {
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
-                ${(data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac'))) ? (
-                    (data.lake_depleted || (data.fish_stock !== null && data.fish_stock !== undefined && parseInt(data.fish_stock, 10) <= 0)) ? `
+                ${isLake ? (
+                    isDepleted ? `
                         <button type="button" class="btn btn-secondary font-weight-bold" disabled>
                             <i class="fa-solid fa-ban me-1"></i>Réserve de Poisson Épuisée
                         </button>
@@ -397,10 +436,13 @@ window.selectPlanetTile = function(data) {
 
     // ── Oasis Naturelle ─────────────────────────────────────────
     if (data.is_oasis) {
-        const isLakeOasis  = (data.oasis_type && data.oasis_type.indexOf('lake') !== -1);
-        const isOccupied   = (data.is_occupied == 1);
-        const isOwn        = (data.owner_planet_id && parseInt(data.owner_planet_id, 10) === <?= (int)$planet['id'] ?>);
-        const units        = data.units || [];
+        const isLakeOasis   = (data.oasis_type && data.oasis_type.indexOf('lake') !== -1);
+        const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
+        const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
+        const isLakeDepleted = data.lake_depleted || (currentStock <= 0);
+        const isOccupied    = (data.is_occupied == 1);
+        const isOwn         = (data.owner_planet_id && parseInt(data.owner_planet_id, 10) === <?= (int)$planet['id'] ?>);
+        const units         = data.units || [];
         const hasWildBeasts = units.some(u => u.is_wild == 1 && parseInt(u.count, 10) > 0);
 
         let statusBadge = '';
@@ -453,30 +495,11 @@ window.selectPlanetTile = function(data) {
                         : 'Cette oasis naturelle regorge de terres fertiles et de ressources précieuses. <strong>Pillez les récoltes</strong> en terrassant la faune, ou <strong>occupez le territoire</strong> pour conférer des bonus permanents à votre fief.'
                     }
                 </p>
-                ${isLakeOasis ? (
-                    (data.lake_depleted || (data.fish_stock !== null && data.fish_stock !== undefined && parseInt(data.fish_stock, 10) <= 0)) ? `
-                        <div class="alert alert-warning d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
-                            <span style="font-size:1.3rem;"><i class="fa-solid fa-triangle-exclamation text-warning"></i></span>
-                            <div>
-                                <strong>Banc de Poissons Épuisé !</strong><br>
-                                Toutes les réserves de poisson de ce lac ont été pêchées. Le lac demeure sur la carte provinciale, mais il n'est plus possible d'y prélever.
-                            </div>
-                        </div>
-                    ` : (data.fish_stock !== null && data.fish_stock !== undefined ? `
-                        <div class="mt-2 mb-2 p-2 bg-white rounded border border-info-subtle">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="small font-weight-bold text-dark"><i class="fa-solid fa-fish-fins text-cyan me-1"></i>Banc de poissons disponible :</span>
-                                <span class="badge bg-cyan text-white font-monospace">${Number(data.fish_stock).toLocaleString()} / ${Number(data.fish_initial || 25000).toLocaleString()}</span>
-                            </div>
-                            <div class="progress progress-sm" style="height:6px;">
-                                <div class="progress-bar bg-cyan" style="width: ${Math.max(3, Math.min(100, Math.round((parseInt(data.fish_stock, 10) / (parseInt(data.fish_initial, 10) || 1)) * 100)))}%"></div>
-                            </div>
-                        </div>
-                    ` : '')
-                ) : ''}
+                ${isLakeOasis ? renderLakeFishCounter(currentStock, initialStock, isLakeDepleted) : ''}
                 <div class="bg-white border rounded p-2 mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
-                    <span class="text-secondary font-weight-medium">Récoltes accumulées :</span>
-                    <div class="d-flex gap-3">
+                    <span class="text-secondary font-weight-medium">Ressources &amp; Récoltes :</span>
+                    <div class="d-flex gap-3 align-items-center flex-wrap">
+                        ${isLakeOasis ? `<span style="color:#0891b2;"><i class="fa-solid fa-fish text-cyan me-1"></i><strong>${currentStock.toLocaleString()}</strong> Poisson</span>` : ''}
                         <span style="color:#b45309;"><i class="fa-solid fa-tree text-success me-1"></i><strong>${(data.res_wood  || 0).toLocaleString()}</strong></span>
                         <span style="color:#2563eb;"><i class="fa-solid fa-mountain text-secondary me-1"></i><strong>${(data.res_stone || 0).toLocaleString()}</strong></span>
                         <span style="color:#15803d;"><i class="fa-solid fa-wheat-awn text-warning me-1"></i><strong>${(data.res_rice  || 0).toLocaleString()}</strong></span>
@@ -494,7 +517,7 @@ window.selectPlanetTile = function(data) {
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
                     ${isLakeOasis ? (
-                        (data.lake_depleted || (data.fish_stock !== null && data.fish_stock !== undefined && parseInt(data.fish_stock, 10) <= 0)) ? `
+                        isLakeDepleted ? `
                             <button type="button" class="btn btn-secondary font-weight-bold" disabled>
                                 <i class="fa-solid fa-ban me-1"></i>Réserve de Poisson Épuisée
                             </button>
@@ -517,12 +540,19 @@ window.selectPlanetTile = function(data) {
 
     // ── Terres Neutres (planète sans joueur ou parcelle libre répertoriée) ─────
     if (!data.user_id) {
+        const isLakePlanet  = (data.terrain_type === 'lake' || data.planet_type === 'oceanic' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac')) || data.is_lake);
+        const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
+        const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
+        const isDepleted    = data.lake_depleted || (currentStock <= 0);
+
         if (!data.rural_plots || Object.keys(data.rural_plots).length === 0) {
             data.rural_plots = getDeterministicPlotPotentials(data.coord_x, data.coord_y);
         }
         const ruralPlotsHtml = renderRuralPlotsGrid(data.rural_plots);
 
-        title.innerHTML = `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.planet_name || 'Domaine Libre'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
+        title.innerHTML = isLakePlanet
+            ? `<i class="fa-solid fa-water text-cyan me-1"></i> <span style="color:#0891b2;">${data.planet_name || data.terrain_name || 'Lac d\'Eaux Vives'}</span> <span class="badge bg-cyan-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`
+            : `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.planet_name || 'Domaine Libre'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
 
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
@@ -532,10 +562,10 @@ window.selectPlanetTile = function(data) {
                     </div>
                     <div>
                         <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
-                            ${data.planet_name || 'Domaine Féodal Libre'}
+                            ${data.planet_name || (isLakePlanet ? 'Lac d\'Eaux Vives' : 'Domaine Féodal Libre')}
                         </div>
                         <div class="small text-secondary mt-0.5">
-                            Type de terrain : <strong class="text-dark">${data.planet_type || 'terrestrial'}</strong> &bull; Emplacement stratégique pour un nouveau fief.
+                            Type de terrain : <strong class="text-dark">${data.planet_type || (isLakePlanet ? 'oceanic' : 'terrestrial')}</strong> &bull; ${isLakePlanet ? 'Sanctuaire d\'eau libre communautaire.' : 'Emplacement stratégique pour un nouveau fief.'}
                         </div>
                     </div>
                 </div>
@@ -544,7 +574,10 @@ window.selectPlanetTile = function(data) {
                 <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded border">
                     <div>
                         <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
-                        <strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>
+                        ${isLakePlanet
+                            ? '<strong class="text-cyan"><i class="fa-solid fa-water me-1"></i>Eaux Libres &bull; Non Annexable</strong>'
+                            : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>'
+                        }
                     </div>
                     <div class="text-end">
                         <span class="text-secondary small d-block" style="font-size:0.75rem;">Propriétaire Foncier :</span>
@@ -552,23 +585,36 @@ window.selectPlanetTile = function(data) {
                     </div>
                 </div>
 
-                <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
-                    <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
-                    <div>
-                        <strong>Emplacement Libre pour Colonisation !</strong><br>
-                        Vous pouvez y envoyer un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour annexer ce terroir et fonder une colonie.
+                ${isLakePlanet ? renderLakeFishCounter(currentStock, initialStock, isDepleted) : `
+                    <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
+                        <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
+                        <div>
+                            <strong>Emplacement Libre pour Colonisation !</strong><br>
+                            Vous pouvez y envoyer un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour annexer ce terroir et fonder une colonie.
+                        </div>
                     </div>
-                </div>
-
-                ${ruralPlotsHtml}
+                    ${ruralPlotsHtml}
+                `}
             </div>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
                 <div class="d-flex gap-2">
-                    <a href="?page=fleet&target_id=${data.planet_id || ''}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
-                        <i class="fa-solid fa-chess-rook me-1"></i>Fonder un Fief ici avec un Pionnier &rarr;
-                    </a>
+                    ${isLakePlanet ? (
+                        isDepleted ? `
+                            <button type="button" class="btn btn-secondary font-weight-bold" disabled>
+                                <i class="fa-solid fa-ban me-1"></i>Réserve de Poisson Épuisée
+                            </button>
+                        ` : `
+                            <a href="?page=fleet&target_id=${data.planet_id || ''}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=fishing" class="btn btn-cyan font-weight-bold text-white">
+                                <i class="fa-solid fa-fish me-1"></i>Dépêcher une Expédition de Pêche &rarr;
+                            </a>
+                        `
+                    ) : `
+                        <a href="?page=fleet&target_id=${data.planet_id || ''}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
+                            <i class="fa-solid fa-chess-rook me-1"></i>Fonder un Fief ici avec un Pionnier &rarr;
+                        </a>
+                    `}
                 </div>
             </div>
         `;

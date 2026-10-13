@@ -360,11 +360,20 @@ class GalaxyMapController {
                     }).replace(/"/g, '&quot;');
 
                 let tileTooltip = terrain.name;
+                if (terrain.type === 'lake') {
+                    if (terrain.lake_depleted) {
+                        tileTooltip += ' [Réserve Épuisée]';
+                    } else if (terrain.fish_stock !== null && terrain.fish_stock !== undefined) {
+                        tileTooltip += ` [${Number(terrain.fish_stock).toLocaleString()} poissons]`;
+                    }
+                }
                 if (planet) {
                     if (planet.is_authentic_castle) {
                         tileTooltip = planet.castle_name || planet.planet_name;
                     } else if (planet.is_oasis) {
-                        tileTooltip = `${planet.bonus_label || 'Oasis'} ${planet.is_occupied ? '(Occupée par ' + (planet.owner_planet_name || 'Fief') + ')' : '(Sauvage)'}`;
+                        const isLakeO = (planet.oasis_type && planet.oasis_type.indexOf('lake') !== -1);
+                        const fishInfo = isLakeO ? (planet.lake_depleted ? ' [Épuisé]' : (planet.fish_stock !== undefined ? ' [' + Number(planet.fish_stock).toLocaleString() + ' poissons]' : '')) : '';
+                        tileTooltip = `${planet.bonus_label || 'Oasis'} ${planet.is_occupied ? '(Occupée par ' + (planet.owner_planet_name || 'Fief') + ')' : '(Sauvage)'}${fishInfo}`;
                     } else {
                         tileTooltip = (planet.planet_name || 'Fief') + (planet.is_protected == 1 ? ' [Immunité active]' : '');
                     }

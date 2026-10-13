@@ -328,6 +328,22 @@ class GalaxyEngine {
                     'depleted'     => ((int)$ls['fish_stock'] <= 0)
                 ];
             }
+            foreach ($gridMap as $k => &$gItem) {
+                if (empty($gItem['user_id']) && empty($gItem['is_authentic_castle']) && empty($gItem['is_oasis'])) {
+                    $tt = self::getTerrainType((int)$gItem['coord_x'], (int)$gItem['coord_y']);
+                    if ($tt['type'] === 'lake' || ($gItem['planet_type'] ?? '') === 'oceanic') {
+                        $gItem['terrain_type'] = 'lake';
+                        $gItem['terrain_img'] = '/public/assets/map/tile_lake.jpg?v=2';
+                        $gItem['terrain_name'] = $tt['name'];
+                        $gItem['is_lake'] = 1;
+                        $ls = $lakeStocks[$k] ?? ($lakeEngine ? $lakeEngine->getStock((int)$gItem['coord_x'], (int)$gItem['coord_y']) : null);
+                        $gItem['fish_stock'] = $ls['fish_stock'] ?? 0;
+                        $gItem['fish_initial'] = $ls['fish_initial'] ?? 0;
+                        $gItem['lake_depleted'] = !empty($ls['depleted']);
+                    }
+                }
+            }
+            unset($gItem);
         } catch (Exception $e) {}
 
         try {
