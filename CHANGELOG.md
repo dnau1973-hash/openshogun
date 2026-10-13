@@ -5,6 +5,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 
+## [1.25.0] - 2026-10-13
+### Ajouté (Added)
+- **Réserves Halieutiques Finies des Lacs & Préservation Permanente des Parcelles (`core/LakeEngine.php`, `core/WorldGenerator.php`, `core/GalaxyEngine.php`, `core/FleetEngine.php`, `views/map.php`, `views/fleet.php`, `database/migrations/006_lake_fish_stocks.sql`) :**
+  * **Dépôt Aléatoire de 10 000 à 25 000 Poissons :** À la génération du monde et lors de la découverte de toute parcelle de lac (procédurale ou oasis lacustre), un banc de poissons fini est déposé aléatoirement entre 10 000 et 25 000 individus (`random_int(10000, 25000)`).
+  * **Prélèvement Atomique & Plafonnement des Prises :** Les expéditions de pêche déduisent leurs prises directement de la réserve du lac en base (`lake_fish_stocks`). Si la réserve est inférieure à la capacité de pêche de l'équipage, seule la quantité résiduelle est collectée et le lac passe au statut épuisé.
+  * **Pérennité Absolue des Parcelles de Lac :** Lorsqu'un lac est entièrement vidé de ses poissons, il ne disparaît jamais de la carte du monde. Il demeure visible sous forme de plan d'eau naturel pacifié, préservant la géographie et la topographie provinciale.
+  * **Interdiction Définitive de Prélèvement sur Lac Épuisé :** Une fois le stock tombé à zéro, il est impossible de lancer de nouvelles expéditions de pêche sur cette parcelle. Le bouton d'action est désactivé avec le statut « Réserve de Poisson Épuisée » et le moteur `FleetEngine` rejette toute tentative avec un message informatif explicite.
+  * **Jauge Visuelle des Réserves sur la Carte Tactique :** Intégration sur la modale de tuile d'une jauge de progression cyan affichant le stock actuel sur le stock initial (ex. `18 420 / 22 500`) et d'un bandeau d'alerte doré lorsque le sanctuaire est épuisé.
+  * **Pré-sélection Automatique au Formulaire d'Expédition (`views/fleet.php`) :** Lorsqu'un Daimyō prépare une expédition de pêche depuis un lac, les Pêcheurs Féodaux disponibles sont automatiquement pré-remplis au formulaire, avec contrôle immédiat de disponibilité.
+
 ## [1.24.0] - 2026-10-12
 ### Ajouté (Added)
 - **Système Halieutique & Refonte des Parcelles de Lac (`core/FleetEngine.php`, `core/OasisEngine.php`, `core/PlanetEngine.php`, `core/ResearchService.php`, `views/map.php`, `views/fleet.php`, `views/partials/rural_harvest_resources_panel.php`, `views/partials/header.php`, `database/migrations/005_lake_fishing_system.sql`) :**

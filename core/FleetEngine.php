@@ -365,10 +365,14 @@ class FleetEngine {
             try {
                 require_once __DIR__ . '/MessageEngine.php';
                 $msgEngine = new MessageEngine();
+                $body = "Vos Pêcheurs sont revenus de leur expédition sur le lac avec une récolte de " . number_format($fish) . " poissons frais. Les vivres ont été entreposés dans le Grenier à Riz Fortifié de votre fief.";
+                if (!empty($cargo['lake_depleted'])) {
+                    $body .= " ⚠️ Le lac a été entièrement vidé de ses poissons : il n'est désormais plus possible d'y pêcher.";
+                }
                 $msgEngine->sendSystemMessage(
                     (int)$mission['user_id'],
                     "Retour d'Expédition de Pêche Féodale",
-                    "Vos Pêcheurs sont revenus de leur expédition sur le lac avec une récolte de " . number_format($fish) . " poissons frais. Les vivres ont été entreposés dans le Grenier à Riz Fortifié de votre fief."
+                    $body
                 );
             } catch (Exception $e) {
                 // Silencieux
@@ -379,6 +383,27 @@ class FleetEngine {
         $this->db->prepare("UPDATE fleet_missions SET status = 'completed' WHERE id = ?")->execute([$mission['id']]);
 
         $this->db->commit();
+    }
+
+    /**
+     * Coordonnées [x, y] de la cible d'une mission (oasis ou fief/parcelle)
+     */
+    private function getMissionTargetCoords(array $mission): ?array {
+        try {
+            if (!empty($mission['target_oasis_id'])) {
+                $st = $this->db->prepare("SELECT coord_x, coord_y FROM oases WHERE id = ?");
+                $st->execute([(int)$mission['target_oasis_id']]);
+            } elseif (!empty($mission['target_planet_id'])) {
+                $st = $this->db->prepare("SELECT coord_x, coord_y FROM planets WHERE id = ?");
+                $st->execute([(int)$mission['target_planet_id']]);
+            } else {
+                return null;
+            }
+            $r = $st->fetch(PDO::FETCH_ASSOC);
+            return $r ? [(int)$r['coord_x'], (int)$r['coord_y']] : null;
+        } catch (Exception $e) {
+            return null;
+        }
     }
 
     /**
@@ -416,10 +441,21 @@ class FleetEngine {
             $totalCapacity = max(100, $pecheurCount * 100);
         }
 
-        $fishCaught = min($totalCapacity, $totalFish);
+        $fishWanted = min($totalCapacity, $totalFish);
+
+        // Prélèvement dans la réserve finie du lac ciblé
+        $fishCaught = $fishWanted;
+        $lakeCoords = $this->getMissionTargetCoords($mission);
+        if ($lakeCoords !== null) {
+            require_once __DIR__ . '/LakeEngine.php';
+            $fishCaught = (new LakeEngine($this->db))->harvest($lakeCoords[0], $lakeCoords[1], $fishWanted);
+        }
 
         $cargo = json_decode($mission['cargo_data'], true) ?: [];
         $cargo['fish'] = $fishCaught;
+        if ($fishCaught < $fishWanted) {
+            $cargo['lake_depleted'] = true;
+        }
 
         // La flottille engage le trajet de retour chargée de poisson frais
         $this->db->prepare("
@@ -613,6 +649,13 @@ class FleetEngine {
             }
             if (!$isLake) {
                 throw new Exception("Une expédition de pêche ne peut être envoyée que sur une parcelle de lac ou d'eaux calmes.");
+            }
+
+            // Réserve halieutique finie : un lac épuisé ne peut plus être pêché
+            require_once __DIR__ . '/LakeEngine.php';
+            $lakeStock = (new LakeEngine($this->db))->getStock($destX, $destY);
+            if ($lakeStock !== null && $lakeStock['depleted']) {
+                throw new Exception("Ce lac est épuisé : toutes ses réserves de poisson ont déjà été pêchées. Le lac demeure, mais il n'y a plus rien à prélever.");
             }
         }
 

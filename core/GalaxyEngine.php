@@ -314,6 +314,22 @@ class GalaxyEngine {
         }
 
         // Récupérer les oasis sauvages / occupées dans ce secteur
+        $lakeStocks = [];
+        $lakeEngine = null;
+        try {
+            require_once __DIR__ . '/LakeEngine.php';
+            $lakeEngine = new LakeEngine($this->db);
+            $stLake = $this->db->prepare("SELECT coord_x, coord_y, fish_stock, fish_initial FROM lake_fish_stocks WHERE coord_x BETWEEN ? AND ? AND coord_y BETWEEN ? AND ?");
+            $stLake->execute([$minX, $maxX, $minY, $maxY]);
+            while ($ls = $stLake->fetch(PDO::FETCH_ASSOC)) {
+                $lakeStocks[$ls['coord_x'] . ':' . $ls['coord_y']] = [
+                    'fish_stock'   => (int)$ls['fish_stock'],
+                    'fish_initial' => (int)$ls['fish_initial'],
+                    'depleted'     => ((int)$ls['fish_stock'] <= 0)
+                ];
+            }
+        } catch (Exception $e) {}
+
         try {
             require_once __DIR__ . '/OasisEngine.php';
             $oasisEngine = new OasisEngine();
@@ -321,6 +337,7 @@ class GalaxyEngine {
 
             foreach ($oases as $k => $o) {
                 $isOccupied = !empty($o['owner_planet_id']);
+                $isLakeOasis = (strpos($o['oasis_type'], 'lake') !== false);
                 
                 // Déterminer l'image de terrain de l'oasis selon son type
                 $oasisImg = '/public/assets/map/tile_lake.jpg?v=2';
@@ -358,6 +375,13 @@ class GalaxyEngine {
                     'terrain_img' => $oasisImg
                 ];
 
+                if ($isLakeOasis) {
+                    $ls = $lakeStocks[$k] ?? ($lakeEngine ? $lakeEngine->getStock((int)$o['coord_x'], (int)$o['coord_y']) : null);
+                    $oasisData['fish_stock'] = $ls['fish_stock'] ?? 0;
+                    $oasisData['fish_initial'] = $ls['fish_initial'] ?? 0;
+                    $oasisData['lake_depleted'] = !empty($ls['depleted']);
+                }
+
                 if (isset($gridMap[$k])) {
                     $gridMap[$k] = array_merge($gridMap[$k], $oasisData);
                 } else {
@@ -387,6 +411,12 @@ class GalaxyEngine {
                 if (!isset($gridMap[$k])) {
                     $t = self::getTerrainType($x, $y);
                     $t['rural_plots'] = self::calculatePlotPotentialsForCoords($x, $y);
+                    if ($t['type'] === 'lake') {
+                        $ls = $lakeStocks[$k] ?? ($lakeEngine ? $lakeEngine->getStock($x, $y) : null);
+                        $t['fish_stock'] = $ls['fish_stock'] ?? 0;
+                        $t['fish_initial'] = $ls['fish_initial'] ?? 0;
+                        $t['lake_depleted'] = !empty($ls['depleted']);
+                    }
                     $terrains[$k] = $t;
                 } else {
                     $terrains[$k] = [

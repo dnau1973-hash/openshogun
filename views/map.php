@@ -291,14 +291,38 @@ window.selectPlanetTile = function(data) {
                 </div>
 
                 ${(data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac'))) ? `
-                    <div class="alert alert-info d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px; background:#f0fdfa; border:1px solid #99f6e4;">
-                        <span style="font-size:1.4rem;"><i class="fa-solid fa-fish text-cyan"></i></span>
-                        <div style="color:#0f766e;">
-                            <strong>Étendue d'Eau Douce &amp; Sanctuaire Halieutique</strong><br>
-                            Cette parcelle de lac est un bien naturel commun. <strong>Elle ne peut pas être annexée ni colonisée.</strong><br>
-                            Vous pouvez y dépêcher vos <strong>Pêcheurs Féodaux (<i class="fa-solid fa-fish"></i>)</strong> créés au Dojo : plus ils sont nombreux et plus leur niveau de recherche à l'Académie est élevé, plus ils ramènent de poisson frais stocké dans votre Grenier à Riz Fortifié.
+                    ${(data.lake_depleted || (data.fish_stock !== null && data.fish_stock !== undefined && parseInt(data.fish_stock, 10) <= 0)) ? `
+                        <div class="alert alert-secondary d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px; background:#f1f5f9; border:1px solid #cbd5e1;">
+                            <span style="font-size:1.4rem;"><i class="fa-solid fa-water text-secondary"></i></span>
+                            <div style="color:#475569;">
+                                <strong>Étendue d'Eau Calme &bull; Réserve Épuisée</strong><br>
+                                Tous les poissons de ce lac ont été pêchés (<strong>0 poisson restant</strong>).<br>
+                                Le lac demeure paisiblement sur la province, mais il n'est plus possible d'y prélever du poisson.
+                            </div>
                         </div>
-                    </div>
+                    ` : `
+                        <div class="alert alert-info d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px; background:#f0fdfa; border:1px solid #99f6e4;">
+                            <span style="font-size:1.4rem;"><i class="fa-solid fa-fish text-cyan"></i></span>
+                            <div style="color:#0f766e; width: 100%;">
+                                <strong>Étendue d'Eau Douce &amp; Sanctuaire Halieutique</strong><br>
+                                Cette parcelle de lac est un bien naturel commun. <strong>Elle ne peut pas être annexée ni colonisée.</strong>
+                                ${(data.fish_stock !== null && data.fish_stock !== undefined) ? `
+                                    <div class="mt-2 p-2 bg-white rounded border border-info-subtle">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small font-weight-bold text-dark"><i class="fa-solid fa-fish-fins text-cyan me-1"></i>Banc de poissons disponible :</span>
+                                            <span class="badge bg-cyan text-white font-monospace">${Number(data.fish_stock).toLocaleString()} / ${Number(data.fish_initial || 25000).toLocaleString()}</span>
+                                        </div>
+                                        <div class="progress progress-sm" style="height:6px;">
+                                            <div class="progress-bar bg-cyan" style="width: ${Math.max(3, Math.min(100, Math.round((parseInt(data.fish_stock, 10) / (parseInt(data.fish_initial, 10) || 1)) * 100)))}%"></div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                <div class="mt-1 small">
+                                    Dépêchez vos <strong>Pêcheurs Féodaux (<i class="fa-solid fa-fish"></i>)</strong> créés au Dojo : plus ils sont nombreux et formés à l'Académie, plus ils ramènent de poisson frais stocké dans votre Grenier à Riz Fortifié.
+                                </div>
+                            </div>
+                        </div>
+                    `}
                 ` : `
                     <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
                         <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
@@ -313,11 +337,17 @@ window.selectPlanetTile = function(data) {
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
-                ${(data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac'))) ? `
-                    <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=fishing" class="btn btn-cyan text-white font-weight-bold">
-                        <i class="fa-solid fa-fish me-1"></i>Dépêcher une Expédition de Pêche &rarr;
-                    </a>
-                ` : `
+                ${(data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac'))) ? (
+                    (data.lake_depleted || (data.fish_stock !== null && data.fish_stock !== undefined && parseInt(data.fish_stock, 10) <= 0)) ? `
+                        <button type="button" class="btn btn-secondary font-weight-bold" disabled>
+                            <i class="fa-solid fa-ban me-1"></i>Réserve de Poisson Épuisée
+                        </button>
+                    ` : `
+                        <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=fishing" class="btn btn-cyan text-white font-weight-bold">
+                            <i class="fa-solid fa-fish me-1"></i>Dépêcher une Expédition de Pêche &rarr;
+                        </a>
+                    `
+                ) : `
                     <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
                         <i class="fa-solid fa-chess-rook me-1"></i>Fonder un Fief ici avec un Pionnier &rarr;
                     </a>
@@ -423,6 +453,27 @@ window.selectPlanetTile = function(data) {
                         : 'Cette oasis naturelle regorge de terres fertiles et de ressources précieuses. <strong>Pillez les récoltes</strong> en terrassant la faune, ou <strong>occupez le territoire</strong> pour conférer des bonus permanents à votre fief.'
                     }
                 </p>
+                ${isLakeOasis ? (
+                    (data.lake_depleted || (data.fish_stock !== null && data.fish_stock !== undefined && parseInt(data.fish_stock, 10) <= 0)) ? `
+                        <div class="alert alert-warning d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
+                            <span style="font-size:1.3rem;"><i class="fa-solid fa-triangle-exclamation text-warning"></i></span>
+                            <div>
+                                <strong>Banc de Poissons Épuisé !</strong><br>
+                                Toutes les réserves de poisson de ce lac ont été pêchées. Le lac demeure sur la carte provinciale, mais il n'est plus possible d'y prélever.
+                            </div>
+                        </div>
+                    ` : (data.fish_stock !== null && data.fish_stock !== undefined ? `
+                        <div class="mt-2 mb-2 p-2 bg-white rounded border border-info-subtle">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small font-weight-bold text-dark"><i class="fa-solid fa-fish-fins text-cyan me-1"></i>Banc de poissons disponible :</span>
+                                <span class="badge bg-cyan text-white font-monospace">${Number(data.fish_stock).toLocaleString()} / ${Number(data.fish_initial || 25000).toLocaleString()}</span>
+                            </div>
+                            <div class="progress progress-sm" style="height:6px;">
+                                <div class="progress-bar bg-cyan" style="width: ${Math.max(3, Math.min(100, Math.round((parseInt(data.fish_stock, 10) / (parseInt(data.fish_initial, 10) || 1)) * 100)))}%"></div>
+                            </div>
+                        </div>
+                    ` : '')
+                ) : ''}
                 <div class="bg-white border rounded p-2 mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
                     <span class="text-secondary font-weight-medium">Récoltes accumulées :</span>
                     <div class="d-flex gap-3">
@@ -442,9 +493,15 @@ window.selectPlanetTile = function(data) {
                     <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=attack" class="btn btn-danger font-weight-bold"><i class="fa-solid fa-bomb me-1"></i>Nettoyer</a>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
-                    ${isLakeOasis ? `
-                        <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=fishing" class="btn btn-cyan font-weight-bold text-white"><i class="fa-solid fa-fish me-1"></i>Dépêcher des Pêcheurs</a>
-                    ` : (isOwn ? `
+                    ${isLakeOasis ? (
+                        (data.lake_depleted || (data.fish_stock !== null && data.fish_stock !== undefined && parseInt(data.fish_stock, 10) <= 0)) ? `
+                            <button type="button" class="btn btn-secondary font-weight-bold" disabled>
+                                <i class="fa-solid fa-ban me-1"></i>Réserve de Poisson Épuisée
+                            </button>
+                        ` : `
+                            <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=fishing" class="btn btn-cyan font-weight-bold text-white"><i class="fa-solid fa-fish me-1"></i>Dépêcher des Pêcheurs</a>
+                        `
+                    ) : (isOwn ? `
                         <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-primary"><i class="fa-solid fa-shield-halved me-1"></i>Renforcer</a>
                         <button onclick="abandonOasisDirect(${data.oasis_id})" class="btn btn-outline-danger"><i class="fa-solid fa-flag text-danger me-1"></i>Abandonner</button>
                     ` : `

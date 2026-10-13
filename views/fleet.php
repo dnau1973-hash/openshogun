@@ -181,6 +181,41 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
     }
 }
 
+// Vérification si la cible sélectionnée est un lac et son stock de poisson
+$isTargetLake = false;
+$isTargetLakeDepleted = false;
+$targetLakeFishStock = null;
+$targetLakeFishInitial = null;
+
+$targetCoordsForLake = null;
+if (isset($targetX, $targetY)) {
+    $targetCoordsForLake = [$targetX, $targetY];
+} elseif ($preselectedTargetType === 'planet' && $preselectedTarget > 0) {
+    $stCoord = $db->prepare("SELECT coord_x, coord_y FROM planets WHERE id = ?");
+    $stCoord->execute([$preselectedTarget]);
+    $rowCoord = $stCoord->fetch();
+    if ($rowCoord) $targetCoordsForLake = [(int)$rowCoord['coord_x'], (int)$rowCoord['coord_y']];
+} elseif ($preselectedTargetType === 'oasis' && $preselectedTarget > 0) {
+    $stCoord = $db->prepare("SELECT coord_x, coord_y FROM oases WHERE id = ?");
+    $stCoord->execute([$preselectedTarget]);
+    $rowCoord = $stCoord->fetch();
+    if ($rowCoord) $targetCoordsForLake = [(int)$rowCoord['coord_x'], (int)$rowCoord['coord_y']];
+}
+
+if ($targetCoordsForLake) {
+    require_once __DIR__ . '/../core/LakeEngine.php';
+    $lakeEngine = new LakeEngine($db);
+    if ($lakeEngine->isLakeAt($targetCoordsForLake[0], $targetCoordsForLake[1])) {
+        $isTargetLake = true;
+        $lStock = $lakeEngine->getStock($targetCoordsForLake[0], $targetCoordsForLake[1]);
+        if ($lStock) {
+            $targetLakeFishStock = (int)$lStock['fish_stock'];
+            $targetLakeFishInitial = (int)$lStock['fish_initial'];
+            $isTargetLakeDepleted = !empty($lStock['depleted']) || ($targetLakeFishStock <= 0);
+        }
+    }
+}
+
 // Vérifier la présence d'un Pionnier Féodal (Colon) dans la garnison
 $hasColonistAvailable = false;
 $availableColonCount = 0;
@@ -194,6 +229,16 @@ foreach ($stationedShips as $s) {
     if ($s['ship_code'] === 'colony_ship' && (int)$s['count'] > 0) {
         $hasColonistAvailable = true;
         $availableColonCount += (int)$s['count'];
+    }
+}
+
+// Vérifier la présence de Pêcheurs Féodaux dans la garnison
+$hasFishermanAvailable = false;
+$availableFishermanCount = 0;
+foreach ($stationedUnits as $u) {
+    if ($u['unit_code'] === 'pecheur' && (int)$u['count'] > 0) {
+        $hasFishermanAvailable = true;
+        $availableFishermanCount += (int)$u['count'];
     }
 }
 
@@ -301,6 +346,31 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                             </div>
                         <?php else: ?>
                             <form id="fleetForm" onsubmit="event.preventDefault(); submitFleet();">
+                                <?php if ($isTargetLake && $isTargetLakeDepleted): ?>
+                                    <div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
+                                        <span class="fs-1 flex-shrink-0"><i class="fa-solid fa-ban text-warning"></i></span>
+                                        <div class="flex-fill">
+                                            <strong class="d-block mb-1">Réserve de Poisson Épuisée sur ce Lac !</strong>
+                                            <p class="mb-0 small">
+                                                Toutes les réserves de poisson de ce lac ont déjà été prélevées (0 / <?= number_format($targetLakeFishInitial ?? 25000) ?>). Le lac demeure sur les terres de la province, mais il n'est plus possible d'y envoyer de pêcheurs.
+                                            </p>
+                                        </div>
+                                    </div>
+                                <?php elseif ($preselectedMission === 'fishing' && !$hasFishermanAvailable): ?>
+                                    <div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
+                                        <span class="fs-1 flex-shrink-0"><i class="fa-solid fa-fish text-cyan"></i></span>
+                                        <div class="flex-fill">
+                                            <strong class="d-block mb-1">Aucun Pêcheur Féodal (Ryōshi) en garnison !</strong>
+                                            <p class="mb-2 small">
+                                                Pour envoyer une expédition de pêche sur un lac, vous devez former des <strong>Pêcheurs Féodaux</strong> au <strong>Dojo Militaire</strong>.
+                                            </p>
+                                            <a href="?page=barracks" class="btn btn-sm btn-cyan text-white fw-bold">
+                                                <i class="fa-solid fa-khanda me-1"></i>Former des Pêcheurs au Dojo &rarr;
+                                            </a>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
                                 <?php if ($preselectedMission === 'colonize' && !$hasColonistAvailable): ?>
                                     <div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
                                         <span class="fs-1 flex-shrink-0"><i class="fa-solid fa-torii-gate text-danger"></i></span>
@@ -369,7 +439,12 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                         <div class="list-group list-group-flush border rounded">
                                             <?php foreach ($stationedUnits as $u): ?>
                                                 <?php 
-                                                    $defaultUnitVal = ($preselectedMission === 'colonize' && $u['unit_code'] === 'colonizer' && (int)$u['count'] > 0) ? '1' : '0';
+                                                    $defaultUnitVal = '0';
+                                                    if ($preselectedMission === 'colonize' && $u['unit_code'] === 'colonizer' && (int)$u['count'] > 0) {
+                                                        $defaultUnitVal = '1';
+                                                    } elseif ($preselectedMission === 'fishing' && $u['unit_code'] === 'pecheur' && (int)$u['count'] > 0) {
+                                                        $defaultUnitVal = (string)$u['count'];
+                                                    }
                                                 ?>
                                                 <div class="list-group-item d-flex align-items-center justify-content-between p-2 border-start border-start-3 border-danger">
                                                     <div class="d-flex align-items-center gap-2">
@@ -584,9 +659,15 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
-                                    <span><i class="fa-solid fa-flag me-1"></i></span> Lancer l'Expédition Féodale
-                                </button>
+                                <?php if ($isTargetLake && $isTargetLakeDepleted && $preselectedMission === 'fishing'): ?>
+                                    <button type="button" class="btn btn-secondary btn-lg w-100 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" disabled>
+                                        <span><i class="fa-solid fa-ban me-1"></i></span> Réserve de Poisson Épuisée — Expédition Impossible
+                                    </button>
+                                <?php else: ?>
+                                    <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                                        <span><i class="fa-solid fa-flag me-1"></i></span> Lancer l'Expédition Féodale
+                                    </button>
+                                <?php endif; ?>
                             </form>
                         <?php endif; ?>
                     </div>

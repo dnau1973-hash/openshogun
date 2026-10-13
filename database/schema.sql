@@ -779,6 +779,16 @@ CREATE TABLE IF NOT EXISTS `planet_terroir_slots` (
     CONSTRAINT `fk_terroir_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Table : lake_fish_stocks (Réserves halieutiques des parcelles de lac)
+CREATE TABLE IF NOT EXISTS `lake_fish_stocks` (
+    `coord_x` INT NOT NULL,
+    `coord_y` INT NOT NULL,
+    `fish_stock` INT UNSIGNED NOT NULL DEFAULT 0,
+    `fish_initial` INT UNSIGNED NOT NULL DEFAULT 0,
+    `created_at` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`coord_x`, `coord_y`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

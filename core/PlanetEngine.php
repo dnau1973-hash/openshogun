@@ -1322,6 +1322,12 @@ class PlanetEngine {
             try {
                 $this->db->exec("ALTER TABLE `fleet_missions` MODIFY COLUMN `mission_type` ENUM('attack','transport','occupy','colonize','spy','adventure','raid','fishing') NOT NULL");
             } catch (Exception $eEnum) {}
+
+            // 16. Table lake_fish_stocks pour la gestion finie des réserves halieutiques
+            try {
+                require_once __DIR__ . '/LakeEngine.php';
+                (new LakeEngine($this->db))->ensureSchema();
+            } catch (Exception $eLake) {}
         } catch (Exception $e) {
             // Ignorer silencieusement si déjà en cours ou permissions limitées
         }

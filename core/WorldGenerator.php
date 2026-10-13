@@ -363,6 +363,15 @@ class WorldGenerator {
             // Ignorer silencieusement
         }
 
+        // 10d. Ensemencement aléatoire des réserves de poisson de chaque lac (10 000 à 25 000)
+        try {
+            require_once __DIR__ . '/LakeEngine.php';
+            $lakeEngine = new LakeEngine($this->db);
+            $lakeEngine->seedWorldLakes(40);
+        } catch (Exception $e) {
+            error_log("WorldGenerator::resetUniverse - seedWorldLakes notice: " . $e->getMessage());
+        }
+
         $this->db->exec("SET FOREIGN_KEY_CHECKS = 1;");
 
         // 11. Reconnecter directement la session active sous le compte nezzar

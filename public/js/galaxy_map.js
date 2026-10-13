@@ -353,7 +353,10 @@ class GalaxyMapController {
                         terrain_desc: terrain.desc, 
                         terrain_img: terrain.img, 
                         terrain_type: terrain.type,
-                        rural_plots: terrain.rural_plots || null
+                        rural_plots: terrain.rural_plots || null,
+                        fish_stock: (terrain.fish_stock !== undefined ? terrain.fish_stock : null),
+                        fish_initial: (terrain.fish_initial !== undefined ? terrain.fish_initial : null),
+                        lake_depleted: !!terrain.lake_depleted
                     }).replace(/"/g, '&quot;');
 
                 let tileTooltip = terrain.name;

@@ -431,6 +431,73 @@ $expectedTankMax = (int)(15000 * pow(1.5, 3));
 assert((int)$updatedPlanet['fish_max'] === $expectedTankMax, "La capacité maximale de poisson doit être alignée sur le niveau du Grenier à Riz Fortifié (Niv 3 = {$expectedTankMax})");
 echo "  ✓ Plafond de stockage poisson indexé sur le Grenier à Riz Fortifié (Niv. 3) : {$updatedPlanet['fish_max']} vivres\n";
 
+// =========================================================================
+// TEST 7 : Réserves Halieutiques Aléatoires (10 000 à 25 000 poissons par lac)
+// =========================================================================
+echo "\n7. Test de la génération aléatoire des bancs de poissons (10 000 à 25 000) :\n";
+require_once __DIR__ . '/../core/LakeEngine.php';
+$lakeEngine = new LakeEngine($sqlite);
+$lakeStockInfo = $lakeEngine->getStock(10, 10); // Coordonnées du lac testé (Oasis 42, où 750 poissons ont été pêchés au test 4)
+assert($lakeStockInfo !== null, "Le lac doit être identifié à (10, 10)");
+assert($lakeStockInfo['fish_initial'] >= 10000 && $lakeStockInfo['fish_initial'] <= 25000, "Le stock initial doit être entre 10 000 et 25 000 (initial : {$lakeStockInfo['fish_initial']})");
+assert($lakeStockInfo['fish_stock'] === ($lakeStockInfo['fish_initial'] - 750), "Le stock restant doit tenir compte des 750 poissons prélevés au test 4");
+assert($lakeStockInfo['depleted'] === false, "Le lac ne doit pas être épuisé après une seule pêche");
+echo "  ✓ Stock résiduel validé pour [10:10] : {$lakeStockInfo['fish_stock']} / {$lakeStockInfo['fish_initial']} poissons (750 prélevés)\n";
+
+// Test sur un nouveau lac vierge
+$sqlite->exec("INSERT INTO oases (id, coord_x, coord_y, oasis_type, name, bonus_rice) VALUES (44, 15, 15, 'lake_rice_25', 'Lac Paisible', 25)");
+$freshLake = $lakeEngine->getStock(15, 15);
+assert($freshLake['fish_initial'] >= 10000 && $freshLake['fish_initial'] <= 25000, "Le stock initial du lac vierge doit être entre 10 000 et 25 000");
+assert($freshLake['fish_stock'] === $freshLake['fish_initial'], "Pour un lac vierge, stock actuel == stock initial");
+assert($freshLake['depleted'] === false, "Un lac vierge n'est pas épuisé");
+echo "  ✓ Nouveau lac vierge généré avec stock aléatoire : {$freshLake['fish_stock']} poissons\n";
+
+// =========================================================================
+// TEST 8 : Prélèvement, Épuisement & Maintien Permanent du Lac sur la Carte
+// =========================================================================
+echo "\n8. Test d'épuisement des stocks, persistance du lac et interdiction de pêche :\n";
+// Prélèvement partiel
+$caught1 = $lakeEngine->harvest(10, 10, 5000);
+assert($caught1 === 5000, "Doit avoir prélevé 5000 poissons");
+$remaining = $lakeStockInfo['fish_stock'] - 5000;
+$stockAfterPart = $lakeEngine->getStock(10, 10);
+assert($stockAfterPart['fish_stock'] === $remaining, "Stock restant attendu : {$remaining}, obtenu : {$stockAfterPart['fish_stock']}");
+echo "  ✓ Prélèvement partiel validé : 5 000 prélevés, {$stockAfterPart['fish_stock']} restants\n";
+
+// Prélèvement du solde jusqu'à épuisement complet
+$caughtRemaining = $lakeEngine->harvest(10, 10, 999999);
+assert($caughtRemaining === $remaining, "Doit avoir prélevé exactement le solde disponible ({$remaining})");
+$stockDepleted = $lakeEngine->getStock(10, 10);
+assert($stockDepleted['fish_stock'] === 0, "Le stock de poisson doit être tombé à 0");
+assert($stockDepleted['depleted'] === true, "Le lac doit être marqué comme épuisé");
+echo "  ✓ Épuisement total validé : stock à 0, depleted = true\n";
+
+// Vérifier que le lac EXISTE TOUJOURS sur la carte (aucune suppression de l'oasis ou du terrain)
+$oasisStillExists = $sqlite->query("SELECT id FROM oases WHERE id = 42")->fetchColumn();
+assert($oasisStillExists !== false, "L'oasis de lac doit toujours exister en base de données");
+echo "  ✓ Le lac demeure présent sur la carte (les parcelles de lac ne disparaissent jamais)\n";
+
+// Vérifier le rejet d'une nouvelle expédition de pêche vers le lac épuisé
+$rejectedDepleted = false;
+try {
+    $fleetEngine->dispatchMission(
+        1,
+        1,
+        null,
+        'fishing',
+        ['pecheur' => 10],
+        [],
+        42,
+        false
+    );
+} catch (Exception $e) {
+    if (str_contains($e->getMessage(), 'épuisé')) {
+        $rejectedDepleted = true;
+    }
+}
+assert($rejectedDepleted, "Une expédition de pêche vers un lac épuisé doit être rejetée");
+echo "  ✓ Nouvelle expédition de pêche vers le lac épuisé rejetée avec succès : lac préservé mais non prélevable\n";
+
 echo "\n=================================================================\n";
-echo " ✅ TOUS LES TESTS HALIEUTIQUES (1 À 6) ONT RÉUSSI AVEC SUCCÈS !\n";
+echo " ✅ TOUS LES TESTS HALIEUTIQUES (1 À 8) ONT RÉUSSI AVEC SUCCÈS !\n";
 echo "=================================================================\n";
