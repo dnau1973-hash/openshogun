@@ -1460,9 +1460,18 @@ $navItems = [
                                     <span class="text-muted fw-bold font-monospace text-uppercase" style="font-size:0.65rem;">
                                         <i class="fa-solid fa-layer-group text-primary me-1"></i>Ordre Féodal (Shinōkōshō)
                                     </span>
-                                    <span class="badge bg-primary text-white font-monospace" style="font-size:0.62rem;">
-                                        <?= htmlspecialchars($civName) ?>
-                                    </span>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <button type="button" class="btn btn-xs btn-outline-warning py-0 px-1 d-inline-flex align-items-center gap-1" 
+                                                onclick="checkWisdomAdvice(true)" 
+                                                title="Consulter les conseils du Maître de la Sagesse pour faire évoluer votre société"
+                                                style="font-size: 0.62rem;">
+                                            <i class="fa-solid fa-scroll text-warning"></i>
+                                            <span>Sagesse</span>
+                                        </button>
+                                        <span class="badge bg-primary text-white font-monospace" style="font-size:0.62rem;">
+                                            <?= htmlspecialchars($civName) ?>
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div class="d-flex flex-column gap-1 px-1">

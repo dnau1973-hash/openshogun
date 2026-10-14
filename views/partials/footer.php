@@ -65,6 +65,8 @@
 <?php require_once __DIR__ . '/ai_prompt_modal.php'; ?>
 <!-- Modale Universelle Tabler.io : Renommage de Fief Féodal -->
 <?php require_once __DIR__ . '/rename_village_modal.php'; ?>
+<!-- Modale Interactive : Mode Apprentissage & Maître de la Sagesse (Shinōkōshō) -->
+<?php require_once __DIR__ . '/wisdom_learning_modal.php'; ?>
 
 <!-- Modale Universelle de la Fiche Daimyō / Profil (Style Washi Féodal) -->
 <div class="modal-overlay" id="playerProfileModal">

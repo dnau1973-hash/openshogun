@@ -268,6 +268,7 @@ class HonorEngine {
         // 1. Informations de base
         $stmtUser = $this->db->prepare("
             SELECT u.id, u.username, u.email, u.faction, u.points, u.bio, u.avatar, u.is_admin, u.is_moderator, u.is_bot, u.created_at, u.last_active, u.protection_until,
+                   COALESCE(u.learning_mode, 1) as learning_mode,
                    a.name as alliance_name, a.tag as alliance_tag
             FROM users u
             LEFT JOIN alliances a ON u.alliance_id = a.id
@@ -446,5 +447,14 @@ class HonorEngine {
             $this->db->commit();
         }
         return $res;
+    }
+
+    /**
+     * Met à jour le Mode Apprentissage (Maître de la Sagesse) pour un joueur
+     */
+    public function updateLearningMode(int $userId, bool $enabled): bool {
+        $val = $enabled ? 1 : 0;
+        $stmt = $this->db->prepare("UPDATE users SET learning_mode = ? WHERE id = ?");
+        return $stmt->execute([$val, $userId]);
     }
 }

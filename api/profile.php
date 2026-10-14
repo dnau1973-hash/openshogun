@@ -52,6 +52,24 @@ try {
             ]);
             break;
 
+        // Activer / Désactiver le Mode Apprentissage (Maître de la Sagesse)
+        case 'toggle_learning_mode':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Méthode de requête non autorisée.");
+            }
+            $currentUserId = (int)Auth::id();
+            $enabled = filter_var($_POST['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+            $success = $honorEngine->updateLearningMode($currentUserId, $enabled);
+            echo json_encode([
+                'success' => $success,
+                'learning_mode' => $enabled ? 1 : 0,
+                'message' => $enabled 
+                    ? "Le Maître de la Sagesse veillera sur l'évolution de votre société !" 
+                    : "Le Mode Apprentissage a été désactivé. Vous gouvernez en totale autonomie."
+            ]);
+            break;
+
         // Téléverser un avatar personnalisé pour le Daimyō
         case 'upload_avatar':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

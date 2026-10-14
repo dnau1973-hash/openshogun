@@ -67,6 +67,13 @@ class Auth {
                     $db->exec("ALTER TABLE users ADD INDEX idx_users_newsletter (newsletter_optin)");
                 } catch (Exception $e) {}
             }
+
+            if (!in_array('learning_mode', $cols, true)) {
+                $db->exec("ALTER TABLE users ADD COLUMN learning_mode TINYINT(1) NOT NULL DEFAULT 1 AFTER newsletter_optin");
+                try {
+                    $db->exec("ALTER TABLE users ADD INDEX idx_users_learning_mode (learning_mode)");
+                } catch (Exception $e) {}
+            }
         } catch (Exception $e) {
             // Ignorer silencieusement si la table n'est pas encore créée
         }
@@ -260,11 +267,11 @@ class Auth {
         if (!self::check()) return null;
         $db = Database::getConnection();
         try {
-            $stmt = $db->prepare("SELECT id, username, email, faction, alliance_id, points, avatar, bio, is_admin, is_moderator, is_bot, created_at, protection_until FROM users WHERE id = ?");
+            $stmt = $db->prepare("SELECT id, username, email, faction, alliance_id, points, avatar, bio, is_admin, is_moderator, is_bot, created_at, protection_until, COALESCE(learning_mode, 1) as learning_mode FROM users WHERE id = ?");
             $stmt->execute([self::id()]);
             return $stmt->fetch() ?: null;
         } catch (PDOException $e) {
-            // Fallback résilient si les colonnes avatar ou bio n'ont pas encore été migrées
+            // Fallback résilient si les colonnes avatar, bio ou learning_mode n'ont pas encore été migrées
             try {
                 $stmt = $db->prepare("SELECT id, username, email, faction, alliance_id, points, is_admin, is_moderator, is_bot, created_at, protection_until FROM users WHERE id = ?");
                 $stmt->execute([self::id()]);
@@ -272,6 +279,7 @@ class Auth {
                 if ($u) {
                     $u['avatar'] = null;
                     $u['bio'] = null;
+                    $u['learning_mode'] = 1;
                 }
                 return $u ?: null;
             } catch (Exception $fallbackEx) {

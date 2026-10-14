@@ -693,6 +693,51 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                 </div>
             </div>
 
+            <!-- PRÉFÉRENCES & MODE APPRENTISSAGE (MAÎTRE DE LA SAGESSE) -->
+            <?php if ($isSelf): ?>
+                <div class="card shadow-sm mb-4 border-warning">
+                    <div class="card-header bg-warning-subtle d-flex justify-content-between align-items-center">
+                        <h3 class="card-title text-dark fw-bold d-flex align-items-center gap-2 m-0 font-game">
+                            <i class="fa-solid fa-scroll text-warning"></i> Voie de l'Apprentissage &amp; Sagesse
+                        </h3>
+                        <span class="badge bg-warning text-dark font-monospace" style="font-size: 0.68rem;">Shinōkōshō</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="flex-shrink-0">
+                                <img src="/public/assets/maitre_sagesse.jpg" 
+                                     alt="Maître de la Sagesse" 
+                                     class="rounded-circle border border-2 border-warning object-fit-cover shadow-xs"
+                                     style="width: 54px; height: 54px; object-position: center top;"
+                                     onerror="this.src='/public/assets/hero_samurai.jpg'">
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div class="fw-bold text-dark font-game">Conseils du Maître de la Sagesse</div>
+                                    <div class="form-check form-switch m-0">
+                                        <input class="form-check-input cursor-pointer" 
+                                               type="checkbox" 
+                                               id="switchLearningMode" 
+                                               <?= ((int)($profile['learning_mode'] ?? 1) === 1) ? 'checked' : '' ?>
+                                               onchange="toggleLearningMode(this.checked)">
+                                    </div>
+                                </div>
+                                <p class="text-secondary small mb-2" id="learningModeDesc">
+                                    <?= ((int)($profile['learning_mode'] ?? 1) === 1) 
+                                        ? "<strong>Actif :</strong> Le sage vous guide aux moments clés (pénuries critiques, besoins comblés et passage des paliers de civilisation)." 
+                                        : "<strong>Désactivé :</strong> Vous dirigez votre domaine féodal en totale autonomie, sans interruptions du Maître." ?>
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary font-game py-1 px-2" onclick="checkWisdomAdvice(true)">
+                                        <i class="fa-solid fa-comments me-1"></i> Consulter le Maître maintenant
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <!-- REGISTRE DIPLOMATIQUE & RELATIONS -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light">
@@ -892,6 +937,45 @@ function handleAvatarUpload(input) {
     .finally(() => {
         input.value = '';
     });
+}
+
+/**
+ * Activer ou Désactiver le Mode Apprentissage (Maître de la Sagesse)
+ */
+async function toggleLearningMode(enabled) {
+    const descEl = document.getElementById('learningModeDesc');
+    const switchEl = document.getElementById('switchLearningMode');
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'toggle_learning_mode');
+        formData.append('enabled', enabled ? '1' : '0');
+
+        const resp = await fetch('/api/profile.php', {
+            method: 'POST',
+            body: formData
+        });
+        const res = await resp.json();
+
+        if (res.success) {
+            if (descEl) {
+                descEl.innerHTML = enabled
+                    ? "<strong>Actif :</strong> Le sage vous guide aux moments clés (pénuries critiques, besoins comblés et passage des paliers de civilisation)."
+                    : "<strong>Désactivé :</strong> Vous dirigez votre domaine féodal en totale autonomie, sans interruptions du Maître.";
+            }
+
+            if (typeof showTablerToast === 'function') {
+                showTablerToast(res.message, enabled ? "success" : "info");
+            } else if (typeof showModalAlert === 'function') {
+                showModalAlert("Mode Apprentissage", res.message, enabled ? "success" : "info");
+            }
+        } else {
+            throw new Error(res.error || "Impossible de mettre à jour le mode apprentissage.");
+        }
+    } catch (err) {
+        if (switchEl) switchEl.checked = !enabled;
+        alert("Erreur : " + err.message);
+    }
 }
 
 // Déclenchement automatique au chargement si ?edit=1
