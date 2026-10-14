@@ -516,12 +516,14 @@ function updateSimulation() {
 
         const durationSec = Math.max(15, Math.round((baseTime * lvlFactor * labFactor * eruditeFactor * timeCoeff) / speed));
         
-        const hours = Math.floor(durationSec / 3600);
+        const days = Math.floor(durationSec / 86400);
+        const hours = Math.floor((durationSec % 86400) / 3600);
         const minutes = Math.floor((durationSec % 3600) / 60);
         const seconds = durationSec % 60;
         let timeStr = '';
-        if (hours > 0) timeStr += hours + 'h ';
-        if (minutes > 0 || hours > 0) timeStr += minutes + 'm ';
+        if (days > 0) timeStr += days + 'j ';
+        if (hours > 0 || days > 0) timeStr += hours + 'h ';
+        if (minutes > 0 || hours > 0 || days > 0) timeStr += minutes + 'm ';
         timeStr += seconds + 's';
 
         const tr = document.createElement('tr');
