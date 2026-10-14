@@ -1042,7 +1042,7 @@ $navItems = [
         </style>
 
         <div class="border-bottom bg-light-subtle py-1 px-2 px-lg-3 shadow-sm d-print-none position-relative" style="z-index: 1050;">
-            <div class="container-fluid p-0 d-flex align-items-center justify-content-center gap-2 gap-md-3 flex-wrap flex-sm-nowrap py-0.5">
+            <div class="container-fluid px-3 px-lg-4 d-flex align-items-center justify-content-start gap-2 gap-md-3 flex-wrap flex-sm-nowrap py-0.5">
                 
                 <!-- 1. BOUTON & MENU DÉROULANT : CONSTRUCTION -->
                 <div class="dropdown">
