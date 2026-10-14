@@ -83,14 +83,14 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     position: absolute;
     transform: translate(-50%, -50%);
     cursor: pointer;
-    z-index: 25;
+    z-index: 5;
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
     user-select: none;
 }
 
 .rural-plot-badge:hover {
     transform: translate(-50%, -50%) scale(1.12);
-    z-index: 45;
+    z-index: 10;
 }
 
 .rural-badge-inner {

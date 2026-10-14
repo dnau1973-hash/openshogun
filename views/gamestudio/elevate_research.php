@@ -5,26 +5,6 @@
  * Interface de configuration et d'équilibrage des technologies et castes féodales
  */
 declare(strict_types=1);
-
-// Traitement du formulaire POST de mise à jour des coefficients si soumis
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    if ($_POST['action'] === 'save_global_coefficients') {
-        $elevateService->updateGlobalCoefficients(
-            (float)($_POST['research_time_coeff'] ?? 1.0),
-            (float)($_POST['research_time_growth'] ?? 1.35),
-            (float)($_POST['research_cost_coeff'] ?? 1.0),
-            (float)($_POST['research_cost_growth'] ?? 1.65)
-        );
-        $_SESSION['elevate_flash'] = ['type' => 'success', 'msg' => 'Coefficients exponentiels de recherche enregistrés avec succès !'];
-        header('Location: ?page=gamestudio&tab=elevate_research');
-        exit;
-    } elseif ($_POST['action'] === 'save_custom_research') {
-        $elevateService->saveResearch($_POST);
-        $_SESSION['elevate_flash'] = ['type' => 'success', 'msg' => 'Nouvelle technologie enregistrée dans l\'Académie des Savoirs !'];
-        header('Location: ?page=gamestudio&tab=elevate_research');
-        exit;
-    }
-}
 ?>
 
 <!-- EN-TÊTE DE SECTION -->
