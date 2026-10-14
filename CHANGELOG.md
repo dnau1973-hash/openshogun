@@ -17,6 +17,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * **Missions de Flotte « Expédition Minière » (`mission_type = 'mining'`) :** Déploiement d'expéditions vers les tuiles de montagne avec prélèvement atomique et sécurisé des minéraux, acheminement vers le fief émetteur et rapports féodaux détaillés.
   * **Affichage Télémétrique & Carte Tactique (`views/map.php`, `views/fleet.php`) :** Jauges interactives des gisements résiduels de montagne sur la modale de carte et pré-remplissage automatique des expéditions minières.
   * **Artisanat & Concassage Minéral au Tailleur de Pierre (`views/building.php`, `api/craft.php`, `core/PlanetEngine.php`) :** Possibilité de fabriquer du Soufre (à partir de Pierre de granit), du Nitrate (à partir d'Argile alluviale) et du Sable de fer (à partir de Pierre de granit) directement à l'Atelier du Tailleur de Pierre avec file d'attente, progression en direct et annulation avec remboursement de 80%.
+- **Conservation des Comptes Utilisateurs lors du Reset du Monde (`core/WorldGenerator.php`, `views/admin.php`) :**
+  * La procédure de réinitialisation (`resetUniverse`) ne supprime plus les comptes des joueurs (la table `users` n'est plus tronquée).
+  * Les identifiants, adresses email, mots de passe et préférences de profil sont intégralement préservés.
+  * Les points et appartenances aux clans (alliances) sont réinitialisés à 0 et l'immunité débutant est réactivée pour la nouvelle manche.
+  * Chaque joueur humain conservé reçoit automatiquement un nouveau domaine castral de départ procéduralement positionné, avec ses 18 parcelles de ressources, son terroir rural, sa garnison et son Héros Samouraï initial de niveau 1.
+  * Les bots résiduels (`is_bot = 1`) sont proprement purgés et régénérés à neuf selon la configuration choisie.
 
 ## [1.28.0] - 2026-10-14
 ### Ajouté (Added)

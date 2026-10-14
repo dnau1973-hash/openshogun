@@ -212,11 +212,16 @@ class VillageFieldGenerator {
 
         $distribution = self::generateSlotDistribution($archetypeKey);
 
-        $stmt = $db->prepare("
-            INSERT INTO planet_fields (planet_id, field_slot, type, level) 
-            VALUES (?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE type = VALUES(type), level = VALUES(level)
-        ");
+        $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $sql = ($driver === 'sqlite')
+            ? "INSERT INTO planet_fields (planet_id, field_slot, type, level) 
+               VALUES (?, ?, ?, ?)
+               ON CONFLICT(planet_id, field_slot) DO UPDATE SET type = excluded.type, level = excluded.level"
+            : "INSERT INTO planet_fields (planet_id, field_slot, type, level) 
+               VALUES (?, ?, ?, ?)
+               ON DUPLICATE KEY UPDATE type = VALUES(type), level = VALUES(level)";
+
+        $stmt = $db->prepare($sql);
 
         $boostedTypes = [];
 

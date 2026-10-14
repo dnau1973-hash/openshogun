@@ -2233,12 +2233,14 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
             </div>
             <div class="card-body">
                 <div class="alert alert-danger mb-3">
-                    <strong>Attention :</strong> Cette procédure purge l'ensemble des données du Japon féodal (clans, fiefs, rizières, armées en marche, dojos, messages et chroniques de combat).<br>
+                    <strong>Attention :</strong> Cette procédure purge l'ensemble des données du monde du Japon féodal (fiefs, alliances, rizières, armées en marche, dojos, messages et chroniques de combat).<br>
+                    <strong>Les comptes des joueurs (identifiants, mots de passe et emails) sont intégralement conservés</strong> : leurs points et classements sont remis à zéro et chaque joueur reçoit un nouveau domaine castral de départ ainsi qu'un Héros Samouraï pour la nouvelle saison.<br>
                     Le monde est alors recréé à neuf avec :
                 </div>
                 <ul class="text-secondary small mb-4">
-                    <li><i class="fa-solid fa-crown text-warning me-1"></i><strong>Shogun Administrateur par défaut</strong> : Identifiant <strong>nezzar</strong> / Mot de passe <strong>Gabriel125#</strong></li>
-                    <li><i class="fa-solid fa-chess-rook text-danger me-1"></i><strong>Château Capital</strong> : <code>Château Nezzar [1 : 1]</code> avec parcelles niveau 2, Tenshu, Dojo, Greniers et garnison de samouraïs.</li>
+                    <li><i class="fa-solid fa-crown text-warning me-1"></i><strong>Shogun Administrateur</strong> : Compte <strong>nezzar</strong> (privilèges administrateur garantis).</li>
+                    <li><i class="fa-solid fa-users text-primary me-1"></i><strong>Comptes Joueurs Préservés</strong> : Tous les comptes joueurs humains sont conservés avec nouveau fief et héros initial.</li>
+                    <li><i class="fa-solid fa-chess-rook text-danger me-1"></i><strong>Château Capital</strong> : <code>Château Nezzar [1 : 1]</code> avec parcelles de ressources, Tenshu, Dojo et garnison de samouraïs.</li>
                     <li><i class="fa-solid fa-wheat-awn text-warning me-1"></i><strong>12 terres et fiefs neutres</strong> générés procéduralement prêts pour l'expansion provinciale.</li>
                     <li><i class="fa-solid fa-robot text-indigo me-1"></i><strong>3 Daimyōs IA de départ</strong> (Clan Oda, Clan Takeda, Clan Tokugawa) pour un Japon vivant immédiatement.</li>
                 </ul>
@@ -2355,7 +2357,8 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                 <div class="d-flex">
                     <div><i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i></div>
                     <div class="ms-2">
-                        <strong>Attention irréversible !</strong> Toutes les parties, colonies, héros et données seront effacés. Le compte administrateur <strong>nezzar</strong> sera recréé avec son mot de passe initial.
+                        <strong>Attention !</strong> Toutes les parties, colonies, armées et données de jeu seront remises à zéro pour une nouvelle saison.<br>
+                        <strong>Les comptes des joueurs sont conservés</strong> et recevront un nouveau fief de départ. Le compte administrateur <strong>nezzar</strong> verra son mot de passe synchronisé avec celui spécifié.
                     </div>
                 </div>
             </div>
