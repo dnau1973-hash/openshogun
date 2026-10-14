@@ -567,6 +567,9 @@ $trendDays = $trendDays ?? 30;
     </div>
 </div>
 
+<!-- Script CDN ApexCharts pour les visualisations interactives du Dashboard -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
 <script>
 // =========================================================================
 // MOTEUR GRAPHIQUE APEXCHARTS & CANVAS (DASHBOARD GAME STUDIO)
@@ -804,15 +807,247 @@ function renderApexChartsSuite() {
 }
 
 function renderCanvasFallbackCharts() {
-    // Si ApexCharts échoue ou est absent, affiche le fallback Canvas HD
-    const cTrend = document.getElementById('adminApexTrendChart');
-    const fTrend = document.getElementById('adminTrendChartFallback');
-    if (cTrend) cTrend.style.display = 'none';
-    if (fTrend) fTrend.style.display = 'block';
+    renderCanvasTrend();
+    renderCanvasTopPages();
+    renderCanvasHourly();
 }
 
-// Initialisation au chargement du DOM
-document.addEventListener('DOMContentLoaded', () => {
+function renderCanvasTrend() {
+    const canvas = document.getElementById('adminTrendChart');
+    const container = document.getElementById('adminApexTrendChart');
+    const fallback = document.getElementById('adminTrendChartFallback');
+    if (!canvas) return;
+    if (fallback) fallback.style.display = 'block';
+    if (container) container.style.display = 'none';
+
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const parentW = canvas.parentElement ? canvas.parentElement.clientWidth : 600;
+    const w = Math.max(300, parentW || 600);
+    const h = 260;
+
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.scale(dpr, dpr);
+
+    const padLeft = 40;
+    const padRight = 20;
+    const padTop = 20;
+    const padBottom = 30;
+
+    const data = telemetryData.timeline;
+    if (!data || data.length === 0) return;
+
+    const maxVal = Math.max(10, ...data.map(d => Number(d.views) || 0), ...data.map(d => Number(d.unique_users) || 0), ...data.map(d => Number(d.registrations) || 0)) * 1.15;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Grille horizontale
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+    const steps = 4;
+    for (let i = 0; i <= steps; i++) {
+        const y = padTop + (h - padTop - padBottom) * (1 - i / steps);
+        ctx.beginPath();
+        ctx.moveTo(padLeft, y);
+        ctx.lineTo(w - padRight, y);
+        ctx.stroke();
+        ctx.fillText(Math.round((maxVal * i) / steps), 10, y + 3);
+    }
+
+    const chartW = w - padLeft - padRight;
+    const chartH = h - padTop - padBottom;
+    const stepX = chartW / Math.max(1, data.length - 1);
+
+    function drawLineSeries(key, strokeCol, fillCol) {
+        const points = [];
+        data.forEach((d, idx) => {
+            const x = padLeft + idx * stepX;
+            const y = padTop + chartH * (1 - ((Number(d[key]) || 0) / maxVal));
+            points.push({x, y});
+        });
+
+        ctx.fillStyle = fillCol;
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, padTop + chartH);
+        points.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.lineTo(points[points.length - 1].x, padTop + chartH);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = strokeCol;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        points.forEach((p, idx) => {
+            if (idx === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = strokeCol;
+        points.forEach((p, idx) => {
+            if (idx % 3 === 0 || idx === points.length - 1) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+    }
+
+    drawLineSeries('views', '#206bc4', 'rgba(32, 107, 196, 0.12)');
+    drawLineSeries('unique_users', '#2fb344', 'rgba(47, 179, 68, 0.08)');
+    drawLineSeries('registrations', '#f59f00', 'rgba(245, 159, 0, 0.08)');
+
+    ctx.fillStyle = '#64748b';
+    data.forEach((d, idx) => {
+        if (idx % Math.max(1, Math.ceil(data.length / 8)) === 0 || idx === data.length - 1) {
+            const x = padLeft + idx * stepX;
+            ctx.fillText(String(d.label || ''), x - 12, h - 8);
+        }
+    });
+}
+
+function renderCanvasTopPages() {
+    const canvas = document.getElementById('adminTopPagesChart');
+    const container = document.getElementById('adminApexTopPagesChart');
+    const fallback = document.getElementById('adminTopPagesFallback');
+    if (!canvas) return;
+    if (fallback) fallback.style.display = 'block';
+    if (container) container.style.display = 'none';
+
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const parentW = canvas.parentElement ? canvas.parentElement.clientWidth : 400;
+    const w = Math.max(300, parentW || 400);
+    const h = 260;
+
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.scale(dpr, dpr);
+
+    ctx.clearRect(0, 0, w, h);
+
+    const items = (telemetryData.topPages || []).slice(0, 8);
+    if (!items || items.length === 0) return;
+
+    const maxVal = Math.max(5, ...items.map(i => Number(i.hit_count) || 0)) * 1.15;
+    const labelW = 140;
+    const padRight = 50;
+    const padTop = 15;
+    const barAreaW = Math.max(50, w - labelW - padRight);
+    const barH = 20;
+    const gap = 10;
+
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+    items.forEach((item, idx) => {
+        const y = padTop + idx * (barH + gap);
+        const val = Number(item.hit_count) || 0;
+        const barW = Math.max(4, (val / maxVal) * barAreaW);
+
+        // Label
+        ctx.fillStyle = '#475569';
+        ctx.textAlign = 'right';
+        ctx.fillText(String(item.label || '').substring(0, 20), labelW - 10, y + 14);
+
+        // Background barre
+        ctx.fillStyle = 'rgba(66, 153, 225, 0.12)';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(labelW, y, barAreaW, barH, 4) : ctx.rect(labelW, y, barAreaW, barH);
+        ctx.fill();
+
+        // Barre active
+        ctx.fillStyle = '#4299e1';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(labelW, y, barW, barH, 4) : ctx.rect(labelW, y, barW, barH);
+        ctx.fill();
+
+        // Valeur
+        ctx.fillStyle = '#1e293b';
+        ctx.textAlign = 'left';
+        ctx.fillText(val + ' v.', labelW + barW + 8, y + 14);
+    });
+}
+
+function renderCanvasHourly() {
+    const canvas = document.getElementById('adminHourlyChart');
+    const container = document.getElementById('adminApexHourlyChart');
+    const fallback = document.getElementById('adminHourlyFallback');
+    if (!canvas) return;
+    if (fallback) fallback.style.display = 'block';
+    if (container) container.style.display = 'none';
+
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const parentW = canvas.parentElement ? canvas.parentElement.clientWidth : 400;
+    const w = Math.max(300, parentW || 400);
+    const h = 260;
+
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.scale(dpr, dpr);
+
+    ctx.clearRect(0, 0, w, h);
+
+    const data = telemetryData.hourly;
+    if (!data || data.length === 0) return;
+
+    const maxVal = Math.max(5, ...data.map(v => Number(v) || 0)) * 1.2;
+    const padLeft = 30;
+    const padRight = 15;
+    const padTop = 20;
+    const padBottom = 25;
+    const chartW = w - padLeft - padRight;
+    const chartH = h - padTop - padBottom;
+    const colW = (chartW / 24) * 0.7;
+    const stepX = chartW / 24;
+
+    ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+    // Grille 3 étapes
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)';
+    ctx.fillStyle = '#94a3b8';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 3; i++) {
+        const y = padTop + chartH * (1 - i / 3);
+        ctx.beginPath();
+        ctx.moveTo(padLeft, y);
+        ctx.lineTo(w - padRight, y);
+        ctx.stroke();
+        ctx.fillText(Math.round((maxVal * i) / 3), padLeft - 6, y + 3);
+    }
+
+    // Colonnes
+    data.forEach((val, hour) => {
+        const v = Number(val) || 0;
+        const barH = (v / maxVal) * chartH;
+        const x = padLeft + hour * stepX + (stepX - colW) / 2;
+        const y = padTop + chartH - barH;
+
+        ctx.fillStyle = '#f59f00';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(x, y, colW, barH, [3, 3, 0, 0]) : ctx.rect(x, y, colW, barH);
+        ctx.fill();
+
+        if (hour % 3 === 0) {
+            ctx.fillStyle = '#64748b';
+            ctx.textAlign = 'center';
+            ctx.fillText(hour + 'h', x + colW / 2, h - 8);
+        }
+    });
+}
+
+// Initialisation au chargement du DOM et vérification périodique d'ApexCharts
+function initDashboardCharts() {
     requestRenderAnalyticsCharts();
 
     // Filtre dynamique du tableau des daimyōs actifs
@@ -826,10 +1061,30 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-});
+}
 
-// Réactualisation automatique lors du redimensionnement de la fenêtre
-window.addEventListener('resize', () => {
-    requestRenderAnalyticsCharts();
-});
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboardCharts);
+} else {
+    initDashboardCharts();
+}
+
+window.addEventListener('load', requestRenderAnalyticsCharts);
+window.addEventListener('resize', requestRenderAnalyticsCharts);
+
+// Retenter si ApexCharts finit de se charger en asynchrone
+if (typeof ApexCharts === 'undefined') {
+    let checkApexAttempts = 0;
+    const checkApexInterval = setInterval(() => {
+        checkApexAttempts++;
+        if (typeof ApexCharts !== 'undefined') {
+            clearInterval(checkApexInterval);
+            requestRenderAnalyticsCharts();
+        } else if (checkApexAttempts >= 10) {
+            clearInterval(checkApexInterval);
+            renderCanvasFallbackCharts();
+        }
+    }, 200);
+}
 </script>
+

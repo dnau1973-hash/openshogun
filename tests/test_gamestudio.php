@@ -220,14 +220,31 @@ echo "OK - Rendu MVC Général validé (" . strlen($generalHtml) . " octets).\n"
 echo "[6] Test présence du raccourci Game Studio dans header.php...\n";
 $headerContent = file_get_contents(__DIR__ . '/../views/partials/header.php');
 assert(strpos($headerContent, 'href="?page=gamestudio"') !== false, "Le raccourci vers ?page=gamestudio doit être dans header.php");
+assert(strpos($headerContent, 'target="_blank"') !== false, "Le lien Game Studio doit s'ouvrir dans un nouvel onglet avec target='_blank'");
 assert(strpos($headerContent, 'fa-laptop-code') !== false, "L'icône Game Studio doit être présente");
 assert(strpos($headerContent, 'href="?page=admin"') !== false, "Le bouton Admin existant doit être conservé");
-echo "OK - Raccourci présent sans suppression d'icônes existantes.\n";
+echo "OK - Raccourci présent avec target='_blank' sans suppression d'icônes existantes.\n";
 
 // 8. Test de la suppression effective de sandbox.php
 echo "[7] Test suppression de sandbox.php...\n";
 assert(!file_exists(__DIR__ . '/../sandbox.php'), "sandbox.php doit être supprimé de la racine");
 echo "OK - sandbox.php n'existe plus.\n";
+
+// 9. Test de la page autonome gamestudio.php et du routage index.php
+echo "[8] Test environnement dédié gamestudio.php et scripts graphiques...\n";
+$studioContent = file_get_contents(__DIR__ . '/../views/gamestudio.php');
+assert(strpos($studioContent, '<!DOCTYPE html>') !== false, "gamestudio.php doit être une page HTML autonome");
+assert(strpos($studioContent, 'headerBuildingsCarousel') === false, "gamestudio.php ne doit PAS reprendre le carrousel du jeu");
+assert(strpos($studioContent, 'BARRE COMPACTE') === false, "gamestudio.php ne doit PAS reprendre la barre de ressources");
+
+assert(strpos($dashHtml, 'apexcharts') !== false, "ApexCharts CDN doit être chargé dans dashboard.php");
+assert(strpos($dashHtml, 'renderCanvasTrend') !== false, "renderCanvasTrend doit être présent");
+assert(strpos($dashHtml, 'renderCanvasTopPages') !== false, "renderCanvasTopPages doit être présent");
+assert(strpos($dashHtml, 'renderCanvasHourly') !== false, "renderCanvasHourly doit être présent");
+
+$indexContent = file_get_contents(__DIR__ . '/../index.php');
+assert(strpos($indexContent, "if (\$page === 'gamestudio')") !== false, "index.php doit router directement gamestudio sans header de jeu");
+echo "OK - Environnement Game Studio autonome et visualisations validés.\n";
 
 echo "\n========================================================\n";
 echo " TOUS LES TESTS GAME STUDIO (MVC) SONT PASSÉS AVEC SUCCÈS !\n";

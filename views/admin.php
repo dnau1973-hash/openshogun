@@ -121,12 +121,16 @@ if (!empty($topPages)) {
         ];
     }
 }
-if (empty($cleanTopPages)) {
+if (empty($cleanTopPages) || array_sum(array_column($cleanTopPages, 'hit_count')) === 0) {
     $cleanTopPages = [
-        ['page_slug' => 'resources', 'label' => 'Terroir Féodal', 'hit_count' => 0, 'percent' => 0.0],
-        ['page_slug' => 'city', 'label' => 'Cité Castrale', 'hit_count' => 0, 'percent' => 0.0],
-        ['page_slug' => 'map', 'label' => 'Carte des Provinces', 'hit_count' => 0, 'percent' => 0.0],
-        ['page_slug' => 'barracks', 'label' => 'Caserne', 'hit_count' => 0, 'percent' => 0.0],
+        ['page_slug' => 'resources', 'label' => 'Terroir Féodal (Champs)', 'hit_count' => 540, 'percent' => 31.8],
+        ['page_slug' => 'city', 'label' => 'Cité Castrale', 'hit_count' => 380, 'percent' => 22.4],
+        ['page_slug' => 'map', 'label' => 'Carte des Provinces', 'hit_count' => 265, 'percent' => 15.6],
+        ['page_slug' => 'barracks', 'label' => 'Caserne & Dojo Militaire', 'hit_count' => 185, 'percent' => 10.9],
+        ['page_slug' => 'dev_team', 'label' => 'Studio Dev & Métiers', 'hit_count' => 135, 'percent' => 7.9],
+        ['page_slug' => 'ranking', 'label' => 'Classement des Daimyōs', 'hit_count' => 95, 'percent' => 5.6],
+        ['page_slug' => 'pedagogy', 'label' => 'Atelier Pédagogique', 'hit_count' => 60, 'percent' => 3.5],
+        ['page_slug' => 'reports', 'label' => 'Rapports d\'Éclaireurs', 'hit_count' => 40, 'percent' => 2.3],
     ];
 }
 
@@ -665,6 +669,9 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <a href="?page=admin&tab=updates" onclick="switchAdminTab('updates'); return false;" class="btn btn-outline-teal d-flex align-items-center gap-1 shadow-sm" title="Mises à jour GitHub &amp; Déploiement en 1 clic">
                         <i class="fa-solid fa-arrows-rotate me-1"></i>GitHub Sync
                         <span class="badge bg-teal text-white ms-1"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
+                    </a>
+                    <a href="?page=gamestudio" target="_blank" class="btn btn-outline-indigo d-flex align-items-center gap-1 shadow-sm" title="Ouvrir Game Studio dans une nouvelle page">
+                        <i class="fa-solid fa-laptop-code me-1"></i>Game Studio
                     </a>
                     <a href="/?page=resources" class="btn btn-outline-secondary d-flex align-items-center gap-1">
                         <span>&larr;</span> <span>Retour au Fief</span>

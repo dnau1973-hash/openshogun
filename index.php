@@ -235,7 +235,12 @@ $trackingUserId = Auth::check() ? (int)Auth::id() : null;
 $trackingTab = $_GET['tab'] ?? $_GET['lesson'] ?? $_GET['module'] ?? $_GET['metier'] ?? null;
 ActivityTracker::logView($trackingUserId, $page, is_string($trackingTab) ? $trackingTab : null);
 
-// Rendu de la vue avec le Layout HUD
+// Rendu de la vue avec le Layout HUD (Game Studio s'ouvre sur une page dédiée sans le header de jeu)
+if ($page === 'gamestudio') {
+    require __DIR__ . '/views/gamestudio.php';
+    exit;
+}
+
 require __DIR__ . '/views/partials/header.php';
 require __DIR__ . '/views/' . $page . '.php';
 require __DIR__ . '/views/partials/footer.php';

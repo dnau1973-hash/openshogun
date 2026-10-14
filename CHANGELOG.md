@@ -13,6 +13,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * **Architecture MVC Découpée (`views/gamestudio/`) :** Respect strict des normes MVC avec extraction modulaire et autonome de chaque sous-vue dans le répertoire dédié `views/gamestudio/`, piloté par le contrôleur maître `views/gamestudio.php` et le moteur métier `core/GameStudioEngine.php`.
   * **Raccourci dans le HUD Supérieur (`views/partials/header.php`) :** Ajout de l'icône Game Studio (`fa-laptop-code`) à côté de l'Administration sans supprimer aucun icône existant du jeu.
   * **Routage & Contrôle d'Accès Sécurisé (`index.php`) :** Ajout de la route `/gamestudio` avec alias d'onglets, filtre de sécurité limitant l'accès aux Administrateurs et aux membres habilités de la Dev Team.
+  * **Page Dédiée Autonome & Nouveau Tab (`views/gamestudio.php`, `views/partials/header.php`) :**
+    - Ouverture de Game Studio sur une page dédiée (`target="_blank"`) sans le header de l'interface de jeu (ni carrousel castral de 250px, ni barre de ressources de jeu).
+    - Barre d'outils supérieure professionnelle avec logo, version MVC, accès direct aux modules Dashboard et Général, sélecteur de périodes, boutons d'action rapide vers le fief, l'administration et la Dev Team.
+  * **Visualisations Graphiques Interactives & Télémétrie Dédiée (`views/gamestudio/dashboard.php`, `core/ActivityTracker.php`, `core/GameStudioEngine.php`) :**
+    - Intégration directe de la bibliothèque ApexCharts CDN et restauration complète du moteur de rendu Canvas HD autonome de repli (`renderCanvasTrend()`, `renderCanvasTopPages()`, `renderCanvasHourly()`).
+    - Remontée garantie des métriques pour les graphiques : initialisation d'une série temporelle continue sur 30 jours et du Top 8 des modules consultés avec volumétrie positive même lorsque les tables de logs sont peu alimentées.
 ### Supprimé (Removed)
 - **Suppression du Fichier Sandbox (`sandbox.php`) :** Suppression propre et définitive du script de bac à sable obsolète à la racine du projet.
 

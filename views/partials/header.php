@@ -494,10 +494,10 @@ $navItems = [
 
                 <?php if ($auth->isAdmin() || $isDevTeamMember): ?>
                     <!-- Game Studio (Fusion Studio & Administration) -->
-                    <a href="?page=gamestudio" 
+                    <a href="?page=gamestudio" target="_blank"
                        class="badge bg-indigo-lt text-indigo p-2 d-inline-flex align-items-center justify-content-center text-decoration-none shadow-none rounded <?= $page === 'gamestudio' ? 'border border-indigo' : '' ?>"
                        data-bs-toggle="tooltip" data-bs-placement="bottom"
-                       title="Game Studio (Dashboard &amp; Général)">
+                       title="Game Studio (Ouvrir dans une nouvelle page)">
                         <i class="fa-solid fa-laptop-code fs-3"></i>
                     </a>
                 <?php endif; ?>
