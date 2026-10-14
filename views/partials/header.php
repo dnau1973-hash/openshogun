@@ -950,6 +950,19 @@ $navItems = [
         $maxPop = max(1, (int)($planet['population_max'] ?? 100));
         $pctPop = min(100, max(0, ($curPop / $maxPop) * 100));
 
+        // Répartition des villageois par Castes Féodales (Shinōkōshō)
+        require_once __DIR__ . '/../../core/SocialCasteEngine.php';
+        $socialCastesData = $planet['social_castes'] ?? null;
+        if (!$socialCastesData) {
+            $socialCastesData = SocialCasteEngine::processSocialTick($planet, 0.0);
+            $planet['social_castes'] = $socialCastesData;
+            $planet['civilization_level'] = $socialCastesData['civilization_level'];
+            $planet['civilization_name'] = $socialCastesData['civilization_name'];
+        }
+        $civLevel = (int)($socialCastesData['civilization_level'] ?? 1);
+        $civName = (string)($socialCastesData['civilization_name'] ?? 'Nōmin (Paysans & Ouvriers)');
+        $castesList = $socialCastesData['castes'] ?? [];
+
         // Main-d'œuvre du domaine (Ouvriers affectés / pourvus vs requis)
         $workforce = $planet['workforce'] ?? null;
         if (!$workforce && !empty($planet['id'])) {
@@ -1407,25 +1420,77 @@ $navItems = [
                             </div>
                         </a>
 
-                        <!-- 2. Population & Logements -->
-                        <a href="?page=city" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
-                           title="Démographie : <?= number_format($curPop) ?> / <?= number_format($maxPop) ?> habitants">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-users text-blue fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
-                                <div class="lh-1">
-                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Population (Minka)</div>
-                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Capacité : <?= number_format($maxPop) ?></div>
+                        <!-- 2. Population & Logements avec sous-menu de répartition par castes (Shinōkōshō) -->
+                        <div class="rounded border p-1 mb-1 bg-light-subtle">
+                            <div class="d-flex align-items-center justify-content-between p-1 rounded text-reset">
+                                <a href="?page=city" class="d-flex align-items-center gap-2 text-decoration-none text-reset flex-grow-1"
+                                   title="Démographie : <?= number_format($curPop) ?> / <?= number_format($maxPop) ?> habitants">
+                                    <i class="fa-solid fa-users text-blue fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-1" style="font-size:0.82rem;">
+                                            <span>Population (Minka)</span>
+                                            <span class="badge bg-indigo-lt text-indigo" style="font-size:0.6rem; padding:1px 4px;">Niv. <?= $civLevel ?></span>
+                                        </div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Capacité : <?= number_format($maxPop) ?></div>
+                                    </div>
+                                </a>
+                                <div class="text-end lh-1 me-2">
+                                    <div class="font-monospace fw-bold text-dark" style="font-size:0.84rem;">
+                                        <?= number_format($curPop) ?> <span class="text-muted" style="font-size:0.68rem;">/ <?= number_format($maxPop) ?></span>
+                                    </div>
+                                    <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:64px;">
+                                        <div class="progress-bar bg-primary" style="width:<?= $pctPop ?>%;"></div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-xs btn-outline-secondary py-0 px-2 d-flex align-items-center gap-1 flex-shrink-0" 
+                                        type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#collapseCastesBreakdown" 
+                                        aria-expanded="true" 
+                                        aria-controls="collapseCastesBreakdown"
+                                        title="Développer / Réduire la répartition des castes">
+                                    <span style="font-size:0.65rem;">Castes</span>
+                                    <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;"></i>
+                                </button>
+                            </div>
+
+                            <!-- Sous-menu : Répartition des villageois par castes féodales (Shinōkōshō) -->
+                            <div class="collapse show mt-1 pt-1 border-top" id="collapseCastesBreakdown">
+                                <div class="px-2 py-1 d-flex justify-content-between align-items-center bg-white rounded border-bottom mb-1">
+                                    <span class="text-muted fw-bold font-monospace text-uppercase" style="font-size:0.65rem;">
+                                        <i class="fa-solid fa-layer-group text-primary me-1"></i>Ordre Féodal (Shinōkōshō)
+                                    </span>
+                                    <span class="badge bg-primary text-white font-monospace" style="font-size:0.62rem;">
+                                        <?= htmlspecialchars($civName) ?>
+                                    </span>
+                                </div>
+
+                                <div class="d-flex flex-column gap-1 px-1">
+                                    <?php foreach ($castesList as $t => $cData): 
+                                        $cMeta = $cData['meta'] ?? [];
+                                        $cCount = (int)($cData['count'] ?? 0);
+                                        $cPct = (float)($cData['pct'] ?? 0.0);
+                                        $isUnlocked = ($civLevel >= $t);
+                                    ?>
+                                        <div class="d-flex align-items-center justify-content-between px-2 py-1 rounded <?= $isUnlocked ? 'bg-white' : 'bg-light text-muted' ?>" style="font-size:0.75rem; border-left: 3px solid <?= htmlspecialchars($cMeta['color'] ?? '#94a3b8') ?>;">
+                                            <div class="d-flex align-items-center gap-2 overflow-hidden me-1">
+                                                <i class="fa-solid <?= htmlspecialchars($cMeta['icon'] ?? 'fa-circle') ?> flex-shrink-0" style="color:<?= htmlspecialchars($cMeta['color'] ?? '#64748b') ?>; width:14px; text-align:center;"></i>
+                                                <span class="text-truncate fw-semibold" title="<?= htmlspecialchars($cMeta['name'] ?? '') ?>">
+                                                    <span class="font-monospace text-muted me-1" style="font-size:0.68rem;"><?= htmlspecialchars($cMeta['kanji'] ?? '') ?></span>
+                                                    <?= htmlspecialchars($cMeta['short_name'] ?? $cMeta['name'] ?? '') ?>
+                                                </span>
+                                            </div>
+                                            <div class="text-end font-monospace flex-shrink-0" style="min-width:70px;">
+                                                <span class="fw-bold <?= $isUnlocked ? 'text-dark' : 'text-muted' ?>">
+                                                    <?= number_format($cCount) ?>
+                                                </span>
+                                                <span class="text-muted" style="font-size:0.65rem;">(<?= number_format($cPct, 1) ?>%)</span>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
-                            <div class="text-end lh-1">
-                                <div class="font-monospace fw-bold text-dark" style="font-size:0.84rem;">
-                                    <?= number_format($curPop) ?> <span class="text-muted" style="font-size:0.68rem;">/ <?= number_format($maxPop) ?></span>
-                                </div>
-                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
-                                    <div class="progress-bar bg-primary" style="width:<?= $pctPop ?>%;"></div>
-                                </div>
-                            </div>
-                        </a>
+                        </div>
 
                         <!-- 3. Main-d'œuvre Féodale -->
                         <a href="?page=city" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
