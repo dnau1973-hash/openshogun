@@ -100,6 +100,10 @@ $stockBeams = (float)($planet['wooden_beams'] ?? 0);
 $maxBeams = max(1, (float)($planet['wooden_beams_max'] ?? 10000));
 $pctBeams = min(100, round(($stockBeams / $maxBeams) * 100, 1));
 
+$stockCharcoal = (float)($planet['charcoal'] ?? 0);
+$maxCharcoal = max(1, (float)($planet['charcoal_max'] ?? 10000));
+$pctCharcoal = min(100, round(($stockCharcoal / $maxCharcoal) * 100, 1));
+
 // ====================================================
 // BONUS & MULTIPLICATEURS DE RENDEMENT
 // ====================================================
@@ -667,6 +671,39 @@ $panelTitle = $panelTitle ?? 'Récoltes, Stocks & Oasis';
                         <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
                             <span class="text-secondary fw-semibold">Réserves : <strong class="text-dark"><?= $pctBeams ?>%</strong></span>
                             <span class="font-monospace text-secondary">Plafond : <?= number_format($maxBeams) ?></span>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($stockCharcoal > 0 || (!empty($buildings['sawmill']) && (int)$buildings['sawmill'] >= 15)): ?>
+                <!-- Charbon de bois (Sumi / Binchōtan) -->
+                <div class="harvest-item p-2 mb-1 rounded bg-surface-secondary border" style="display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem;">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                        <div class="harvest-info">
+                            <h4 class="mb-0 fw-bold d-flex align-items-center gap-2" style="font-size:0.9rem;">
+                                <i class="fa-solid fa-fire text-danger"></i>
+                                <span>Charbon de bois (Sumi)</span>
+                            </h4>
+                            <div class="mt-1 d-flex align-items-center gap-1 flex-wrap">
+                                <span class="badge bg-dark text-white font-monospace" style="font-size:0.7rem;">
+                                    <i class="fa-solid fa-industry me-1"></i>Combustible &amp; Pyrolyse
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge bg-dark font-monospace text-white fw-bold" style="font-size:0.8rem;">
+                                <?= number_format($stockCharcoal) ?> / <?= number_format($maxCharcoal) ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="harvest-progress-box mt-1">
+                        <div class="progress" style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                            <div class="progress-bar bg-dark" role="progressbar" style="width: <?= $pctCharcoal ?>%;" aria-valuenow="<?= $pctCharcoal ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
+                            <span class="text-secondary fw-semibold">Réserves : <strong class="text-dark"><?= $pctCharcoal ?>%</strong></span>
+                            <span class="font-monospace text-secondary">Plafond : <?= number_format($maxCharcoal) ?></span>
                         </div>
                     </div>
                 </div>

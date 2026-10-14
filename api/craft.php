@@ -27,9 +27,10 @@ $craftId = (int)($_POST['craft_id'] ?? 0);
 try {
     $planetEngine = new PlanetEngine();
 
-    if ($action === 'craft_wood' || $action === 'craft_beams' || ($action === 'start_craft' && $product === 'wooden_beams')) {
+    if ($action === 'craft_wood' || $action === 'craft_beams' || $action === 'craft_charcoal' || ($action === 'start_craft' && in_array($product, ['wooden_beams', 'charcoal']))) {
         $woodAmount = (float)($_POST['wood_amount'] ?? $_POST['amount'] ?? 0);
-        $result = $planetEngine->craftWoodProduct((int)$planet['id'], 'wooden_beams', $woodAmount);
+        $targetProduct = (!empty($product) && in_array($product, ['wooden_beams', 'charcoal'])) ? $product : ($action === 'craft_charcoal' ? 'charcoal' : 'wooden_beams');
+        $result = $planetEngine->craftWoodProduct((int)$planet['id'], $targetProduct, $woodAmount);
         echo json_encode($result);
     } elseif ($action === 'craft_rice' || $action === 'start_craft') {
         $result = $planetEngine->craftRiceProduct((int)$planet['id'], $product, $amount);

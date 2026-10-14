@@ -1275,11 +1275,20 @@ if (!$isEmptyPlot) {
                         </span>
                         <?php if ($lvl < 10): ?>
                             <span class="badge bg-secondary text-white fw-bold">
-                                <i class="fa-solid fa-lock text-muted me-1"></i>Poutres : Niveau 10 requis (<?= $lvl ?>/10)
+                                <i class="fa-solid fa-lock text-muted me-1"></i>Poutres : Niv. 10 (<?= $lvl ?>/10)
                             </span>
                         <?php else: ?>
                             <span class="badge bg-success-lt fw-bold">
-                                <i class="fa-solid fa-check text-success me-1"></i>Façonnage de Poutres Actif
+                                <i class="fa-solid fa-check text-success me-1"></i>Poutres Actives
+                            </span>
+                        <?php endif; ?>
+                        <?php if ($lvl < 15): ?>
+                            <span class="badge bg-secondary text-white fw-bold">
+                                <i class="fa-solid fa-lock text-muted me-1"></i>Charbon : Niv. 15 (<?= $lvl ?>/15)
+                            </span>
+                        <?php else: ?>
+                            <span class="badge bg-dark text-white fw-bold">
+                                <i class="fa-solid fa-fire text-warning me-1"></i>Charbon Actif
                             </span>
                         <?php endif; ?>
                         <?php if ($isSealActive): ?>
@@ -1302,19 +1311,25 @@ if (!$isEmptyPlot) {
                 <div class="card-body">
                     <!-- Lot 1 : En cours d'élaboration -->
                     <?php if ($activeWoodCraft): ?>
+                    <?php
+                    $isActiveCharcoal = ($activeWoodCraft['product'] === 'charcoal');
+                    $activeProdTitle = $isActiveCharcoal ? 'Production de Charbon de bois en cours...' : 'Façonnage de Poutres en bois en cours...';
+                    $activeProdIcon = $isActiveCharcoal ? '<i class="fa-solid fa-fire text-danger"></i>' : '<i class="fa-solid fa-tree text-success"></i>';
+                    $activeProdLabel = $isActiveCharcoal ? 'Charbon de bois 🪨' : 'Poutres en bois 🪵';
+                    ?>
                     <div class="alert alert-warning mb-3 p-3 border-warning shadow-sm" style="border-left: 5px solid #d97706; background: #fffbeb;">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
                             <div class="d-flex align-items-center gap-3">
-                                <span class="fs-1"><i class="fa-solid fa-tree text-success"></i></span>
+                                <span class="fs-1"><?= $activeProdIcon ?></span>
                                 <div>
                                     <div class="d-flex align-items-center gap-2">
                                         <h4 class="m-0 fw-bold text-dark">
-                                            Façonnage de Poutres en bois en cours...
+                                            <?= $activeProdTitle ?>
                                         </h4>
                                         <span class="badge bg-warning text-dark fw-bold">Lot Actif (#1)</span>
                                     </div>
                                     <div class="text-secondary small mt-1">
-                                        Production prévue : <strong class="text-warning-emphasis">+<?= number_format((int)$activeWoodCraft['produced_amount']) ?> Poutres en bois <i class="fa-solid fa-tree text-success"></i></strong>
+                                        Production prévue : <strong class="text-warning-emphasis">+<?= number_format((int)$activeWoodCraft['produced_amount']) ?> <?= $activeProdLabel ?></strong>
                                         &bull; Bois engagé : <strong><?= number_format((int)($activeWoodCraft['cost_amount'] ?: $activeWoodCraft['rice_amount'])) ?> <i class="fa-solid fa-tree text-success"></i></strong>
                                     </div>
                                 </div>
@@ -1352,16 +1367,22 @@ if (!$isEmptyPlot) {
                         </div>
                         <div class="list-group list-group-flush">
                             <?php foreach ($pendingWoodCrafts as $qIdx => $pCraft): ?>
+                            <?php
+                            $isPendingCharcoal = ($pCraft['product'] === 'charcoal');
+                            $pendingTitle = $isPendingCharcoal ? 'Production de Charbon de bois' : 'Façonnage de Poutres en bois';
+                            $pendingIcon = $isPendingCharcoal ? '<i class="fa-solid fa-fire text-danger"></i>' : '<i class="fa-solid fa-tree text-success"></i>';
+                            $pendingLabel = $isPendingCharcoal ? 'Charbon 🪨' : 'Poutres 🪵';
+                            ?>
                             <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
                                 <div class="d-flex align-items-center gap-3">
                                     <span class="badge bg-secondary-lt fw-bold">#<?= $qIdx + 2 ?></span>
-                                    <span class="fs-2"><i class="fa-solid fa-tree text-success"></i></span>
+                                    <span class="fs-2"><?= $pendingIcon ?></span>
                                     <div>
                                         <div class="fw-bold text-dark">
-                                            Façonnage de Poutres en bois
+                                            <?= $pendingTitle ?>
                                         </div>
                                         <div class="text-muted small">
-                                            Rendement : <strong class="text-success">+<?= number_format((int)$pCraft['produced_amount']) ?> <i class="fa-solid fa-tree text-success"></i></strong> &bull; Bois réservé : <strong><?= number_format((int)($pCraft['cost_amount'] ?: $pCraft['rice_amount'])) ?> <i class="fa-solid fa-tree text-success"></i></strong>
+                                            Rendement : <strong class="text-success">+<?= number_format((int)$pCraft['produced_amount']) ?> <?= $pendingLabel ?></strong> &bull; Bois réservé : <strong><?= number_format((int)($pCraft['cost_amount'] ?: $pCraft['rice_amount'])) ?> <i class="fa-solid fa-tree text-success"></i></strong>
                                         </div>
                                     </div>
                                 </div>
@@ -1384,101 +1405,189 @@ if (!$isEmptyPlot) {
 
                     <!-- Résumé des stocks actuels -->
                     <div class="row g-2 mb-3">
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="p-2 border rounded text-center bg-light">
-                                <div class="text-secondary small"><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre Brut Disponible</div>
+                                <div class="text-secondary small"><i class="fa-solid fa-tree text-success me-1"></i>Bois Brut Disponible</div>
                                 <div class="fs-4 fw-bold text-warning" id="craft_avail_metal"><?= number_format((int)$planet['metal']) ?></div>
                                 <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)$planet['metal_max']) ?> max</div>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="p-2 border rounded text-center bg-light">
-                                <div class="text-secondary small"><i class="fa-solid fa-tree text-success me-1"></i>Poutres en bois en Réserve</div>
+                                <div class="text-secondary small"><i class="fa-solid fa-cubes text-teal me-1"></i>Poutres en Réserve</div>
                                 <div class="fs-4 fw-bold text-dark" id="craft_avail_beams"><?= number_format((int)($planet['wooden_beams'] ?? 0)) ?></div>
                                 <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['wooden_beams_max'] ?? 10000)) ?> max</div>
                             </div>
                         </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-light">
+                                <div class="text-secondary small"><i class="fa-solid fa-fire text-danger me-1"></i>Charbon en Réserve</div>
+                                <div class="fs-4 fw-bold text-dark" id="craft_avail_charcoal"><?= number_format((int)($planet['charcoal'] ?? 0)) ?></div>
+                                <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['charcoal_max'] ?? 10000)) ?> max</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <?php if ($lvl < 10): ?>
-                    <!-- Atelier Verrouillé : Niveau 10 requis -->
-                    <div class="card card-sm border-dashed bg-light-lt p-4 mb-3">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="fs-1"><i class="fa-solid fa-lock text-muted"></i></span>
+                    <!-- Deux ateliers : Poutres (Niv 10) & Charbon de bois (Niv 15) -->
+                    <div class="row g-3">
+                        <!-- Atelier 1 : Façonnage de Poutres en bois (Niveau 10) -->
+                        <div class="col-md-6">
+                            <?php if ($lvl < 10): ?>
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
                                 <div>
-                                    <h4 class="m-0 fw-bold text-dark">
-                                        Façonnage de Poutres en bois Verrouillé
-                                    </h4>
-                                    <div class="text-secondary small mt-1">
-                                        L'équarrissage et le rabotage des troncs de cèdre en poutres maîtresses nécessitent un outillage et un savoir-faire avancé.
-                                        Améliorez votre <strong>Atelier de Charpenterie au Niveau 10</strong> pour débloquer la production de poutres.
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-muted">
+                                            <i class="fa-solid fa-lock me-1"></i>Poutres en bois
+                                        </h4>
+                                        <span class="badge bg-secondary-lt">Niv. 10 requis</span>
                                     </div>
+                                    <p class="text-secondary small mb-3">
+                                        L'équarrissage et le rabotage des troncs de cèdre en poutres massives nécessitent un outillage et un savoir-faire avancé.
+                                        Améliorez votre <strong>Atelier de Charpenterie au Niveau 10</strong> pour débloquer la production de poutres.
+                                    </p>
                                 </div>
-                            </div>
-                            <div class="ms-auto text-end">
-                                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 bg-white rounded border shadow-sm">
-                                    <span class="text-muted small">Niveau requis :</span>
-                                    <div class="progress" style="width: 140px; height: 8px;">
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                        <span>Progression de l'atelier</span>
+                                        <strong><?= $lvl ?> / 10</strong>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
                                         <div class="progress-bar bg-warning" style="width: <?= min(100, ($lvl / 10) * 100) ?>%;"></div>
                                     </div>
-                                    <span class="badge bg-warning-lt text-dark fw-bold"><?= $lvl ?> / 10</span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <?php else: ?>
-                    <!-- Atelier de Façonnage des Poutres (Débloqué Niveau 10) -->
-                    <div class="border rounded p-3" style="background:#fafaf9;">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
-                                <span><i class="fa-solid fa-hammer text-warning"></i></span> Façonnage de Poutres en bois
-                            </h4>
-                            <span class="badge bg-warning-lt text-warning">10 Bois de Cèdre &rarr; 1 Poutre</span>
-                        </div>
-                        <p class="text-secondary small mb-3">
-                            Équarrissage et rabotage des troncs de cèdre en poutres solides pour les édifices et structures défensives.
-                        </p>
+                            <?php else: ?>
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9;">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
+                                            <span><i class="fa-solid fa-hammer text-warning"></i></span> Poutres en bois
+                                        </h4>
+                                        <span class="badge bg-warning-lt text-warning">10 Bois &rarr; 1 Poutre</span>
+                                    </div>
+                                    <p class="text-secondary small mb-3">
+                                        Équarrissage et rabotage des troncs de cèdre en poutres solides pour les édifices et structures défensives.
+                                    </p>
 
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-7">
-                                <label class="form-label fw-bold text-dark small mb-1">Quantité de Bois de Cèdre à façonner :</label>
-                                <div class="input-group mb-2">
-                                    <input type="number" id="wood_amount_beams" min="10" step="10" value="100" class="form-control fw-bold text-center" oninput="calcBeamsPreview()" <?= !$canEnqueueWood ? 'disabled' : '' ?>>
-                                    <span class="input-group-text small">Bois <i class="fa-solid fa-tree text-success"></i></span>
-                                </div>
-                                <!-- Boutons raccourcis -->
-                                <div class="btn-group btn-group-sm w-100">
-                                    <button type="button" class="btn btn-outline-secondary" onclick="setWoodBeamsAmount(50)" <?= !$canEnqueueWood ? 'disabled' : '' ?>>50</button>
-                                    <button type="button" class="btn btn-outline-secondary" onclick="setWoodBeamsAmount(200)" <?= !$canEnqueueWood ? 'disabled' : '' ?>>200</button>
-                                    <button type="button" class="btn btn-outline-secondary" onclick="setWoodBeamsAmount(1000)" <?= !$canEnqueueWood ? 'disabled' : '' ?>>1 000</button>
-                                    <button type="button" class="btn btn-outline-secondary" onclick="setWoodBeamsAmount('max')" <?= !$canEnqueueWood ? 'disabled' : '' ?>>Max</button>
-                                </div>
-                            </div>
-                            <div class="col-md-5">
-                                <div class="alert alert-warning py-2 px-3 small mb-2">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span>Production estimée :</span>
-                                        <strong class="text-warning-emphasis fs-5" id="preview_beams_gain">+10 <i class="fa-solid fa-tree text-success"></i></strong>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.8rem;">
-                                        <span>Durée de façonnage :</span>
-                                        <span class="fw-bold font-monospace" id="preview_beams_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold text-dark small mb-1">Quantité de Bois de Cèdre à façonner :</label>
+                                        <div class="input-group mb-2">
+                                            <input type="number" id="wood_amount_beams" min="10" step="10" value="100" class="form-control fw-bold text-center" oninput="calcBeamsPreview()" <?= !$canEnqueueWood ? 'disabled' : '' ?>>
+                                            <span class="input-group-text small">Bois <i class="fa-solid fa-tree text-success"></i></span>
+                                        </div>
+                                        <div class="btn-group btn-group-sm w-100">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setWoodBeamsAmount(50)" <?= !$canEnqueueWood ? 'disabled' : '' ?>>50</button>
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setWoodBeamsAmount(200)" <?= !$canEnqueueWood ? 'disabled' : '' ?>>200</button>
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setWoodBeamsAmount(1000)" <?= !$canEnqueueWood ? 'disabled' : '' ?>>1 000</button>
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setWoodBeamsAmount('max')" <?= !$canEnqueueWood ? 'disabled' : '' ?>>Max</button>
+                                        </div>
                                     </div>
                                 </div>
-                                <?php if (!$canEnqueueWood): ?>
-                                <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
-                                    <i class="fa-solid fa-hourglass-half text-warning me-1"></i>File saturée (<?= count($woodCraftQueue) ?>/<?= $maxWoodCraftQueue ?> lots)
-                                </button>
-                                <?php else: ?>
-                                <button type="button" class="btn btn-warning w-100 fw-bold text-dark" onclick="submitWoodCraft('wooden_beams')">
-                                    <?= empty($woodCraftQueue) ? '<i class="fa-solid fa-hammer me-1"></i>Lancer le Façonnage de Poutres' : '<i class="fa-solid fa-plus me-1"></i>Ajouter à la File (#'.(count($woodCraftQueue)+1).'/'.$maxWoodCraftQueue.')' ?>
-                                </button>
-                                <?php endif; ?>
+
+                                <div class="mt-3">
+                                    <div class="alert alert-warning py-2 px-3 small mb-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span>Production estimée :</span>
+                                            <strong class="text-warning-emphasis fs-5" id="preview_beams_gain">+10 <i class="fa-solid fa-tree text-success"></i></strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.8rem;">
+                                            <span>Durée de façonnage :</span>
+                                            <span class="fw-bold font-monospace" id="preview_beams_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                        </div>
+                                    </div>
+                                    <?php if (!$canEnqueueWood): ?>
+                                    <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
+                                        <i class="fa-solid fa-hourglass-half text-warning me-1"></i>File saturée (<?= count($woodCraftQueue) ?>/<?= $maxWoodCraftQueue ?>)
+                                    </button>
+                                    <?php else: ?>
+                                    <button type="button" class="btn btn-warning w-100 fw-bold text-dark" onclick="submitWoodCraft('wooden_beams')">
+                                        <?= empty($woodCraftQueue) ? '<i class="fa-solid fa-hammer me-1"></i>Lancer le Façonnage' : '<i class="fa-solid fa-plus me-1"></i>Ajouter Poutres (#'.(count($woodCraftQueue)+1).'/'.$maxWoodCraftQueue.')' ?>
+                                    </button>
+                                    <?php endif; ?>
+                                </div>
                             </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Atelier 2 : Production de Charbon de bois (Niveau 15) -->
+                        <div class="col-md-6">
+                            <?php if ($lvl < 15): ?>
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-muted">
+                                            <i class="fa-solid fa-lock me-1"></i>Charbon de bois (Binchōtan)
+                                        </h4>
+                                        <span class="badge bg-secondary-lt">Niv. 15 requis</span>
+                                    </div>
+                                    <p class="text-secondary small mb-3">
+                                        La carbonisation en meules étanches et la pyrolyse du bois de cèdre exigent un atelier hautement perfectionné.
+                                        Améliorez votre <strong>Atelier de Charpenterie au Niveau 15</strong> pour débloquer la production de charbon.
+                                    </p>
+                                </div>
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                        <span>Progression de l'atelier</span>
+                                        <strong><?= $lvl ?> / 15</strong>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-dark" style="width: <?= min(100, ($lvl / 15) * 100) ?>%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php else: ?>
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9;">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
+                                            <span><i class="fa-solid fa-fire text-danger"></i></span> Charbon de bois (Sumi)
+                                        </h4>
+                                        <span class="badge bg-dark text-white">1 Bois &rarr; 1 Charbon</span>
+                                    </div>
+                                    <p class="text-secondary small mb-3">
+                                        Carbonisation à haute température du bois de cèdre pour produire un charbon épuré de qualité supérieure.
+                                    </p>
+
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold text-dark small mb-1">Quantité de Bois de Cèdre à carboniser :</label>
+                                        <div class="input-group mb-2">
+                                            <input type="number" id="wood_amount_charcoal" min="1" step="1" value="100" class="form-control fw-bold text-center" oninput="calcCharcoalPreview()" <?= !$canEnqueueWood ? 'disabled' : '' ?>>
+                                            <span class="input-group-text small">Bois <i class="fa-solid fa-tree text-success"></i></span>
+                                        </div>
+                                        <div class="btn-group btn-group-sm w-100">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setWoodCharcoalAmount(50)" <?= !$canEnqueueWood ? 'disabled' : '' ?>>50</button>
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setWoodCharcoalAmount(200)" <?= !$canEnqueueWood ? 'disabled' : '' ?>>200</button>
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setWoodCharcoalAmount(1000)" <?= !$canEnqueueWood ? 'disabled' : '' ?>>1 000</button>
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setWoodCharcoalAmount('max')" <?= !$canEnqueueWood ? 'disabled' : '' ?>>Max</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <div class="alert alert-dark py-2 px-3 small mb-2" style="background-color: #f1f5f9; border-color: #cbd5e1;">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="text-dark">Production estimée :</span>
+                                            <strong class="text-dark fs-5" id="preview_charcoal_gain">+100 🪨</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.8rem;">
+                                            <span>Durée de carbonisation :</span>
+                                            <span class="fw-bold font-monospace" id="preview_charcoal_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                        </div>
+                                    </div>
+                                    <?php if (!$canEnqueueWood): ?>
+                                    <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
+                                        <i class="fa-solid fa-hourglass-half text-warning me-1"></i>File saturée (<?= count($woodCraftQueue) ?>/<?= $maxWoodCraftQueue ?>)
+                                    </button>
+                                    <?php else: ?>
+                                    <button type="button" class="btn btn-dark w-100 fw-bold text-white" onclick="submitWoodCraft('charcoal')">
+                                        <?= empty($woodCraftQueue) ? '<i class="fa-solid fa-fire text-warning me-1"></i>Produire du Charbon' : '<i class="fa-solid fa-plus text-warning me-1"></i>Ajouter Charbon (#'.(count($woodCraftQueue)+1).'/'.$maxWoodCraftQueue.')' ?>
+                                    </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
-                    <?php endif; ?>
                 </div>
             </div>
             <?php endif; ?>
@@ -2524,7 +2633,7 @@ function calcBeamsPreview() {
 
     if (previewTime) {
         if (wood <= 0) {
-            previewTime.textContent = '<i class="fa-solid fa-stopwatch text-info me-1"></i>--';
+            previewTime.textContent = '--';
         } else {
             const duration = Math.max(10, Math.round((wood * 0.5) / (1 + (sawmillLevel * 0.15)) / (gameSpeed || 1)));
             previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
@@ -2543,18 +2652,58 @@ function setWoodBeamsAmount(val) {
     calcBeamsPreview();
 }
 
+function calcCharcoalPreview() {
+    const input = document.getElementById('wood_amount_charcoal');
+    const previewGain = document.getElementById('preview_charcoal_gain');
+    const previewTime = document.getElementById('preview_charcoal_time');
+    if (!input) return;
+    const wood = Math.max(0, parseFloat(input.value) || 0);
+    const efficiency = 1 + (sawmillLevel * 0.02);
+    const gain = Math.floor(wood * efficiency);
+    if (previewGain) previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' 🪨';
+
+    if (previewTime) {
+        if (wood <= 0) {
+            previewTime.textContent = '--';
+        } else {
+            const duration = Math.max(10, Math.round((wood * 0.35) / (1 + (sawmillLevel * 0.15)) / (gameSpeed || 1)));
+            previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
+        }
+    }
+}
+
+function setWoodCharcoalAmount(val) {
+    const input = document.getElementById('wood_amount_charcoal');
+    if (!input) return;
+    if (val === 'max') {
+        input.value = Math.floor(availableWoodStock);
+    } else {
+        input.value = val;
+    }
+    calcCharcoalPreview();
+}
+
 async function submitWoodCraft(product) {
-    if (sawmillLevel < 10) {
+    product = product || 'wooden_beams';
+    const isCharcoal = (product === 'charcoal');
+
+    if (isCharcoal && sawmillLevel < 15) {
+        showModalAlert("La production de charbon de bois n'est accessible qu'à partir du Niveau 15 de l'Atelier de Charpenterie.", 'warning');
+        return;
+    }
+    if (!isCharcoal && sawmillLevel < 10) {
         showModalAlert("Le façonnage de poutres en bois n'est accessible qu'à partir du Niveau 10 de l'Atelier de Charpenterie.", 'warning');
         return;
     }
-    const input = document.getElementById('wood_amount_beams');
+
+    const inputId = isCharcoal ? 'wood_amount_charcoal' : 'wood_amount_beams';
+    const input = document.getElementById(inputId);
     if (!input) return;
     const amount = parseFloat(input.value) || 0;
-    const minAmount = 10;
+    const minAmount = isCharcoal ? 1 : 10;
 
     if (amount < minAmount) {
-        showModalAlert(`La quantité minimale de bois requise est de ${minAmount} unités de Bois de Cèdre.`, 'warning');
+        showModalAlert(`La quantité minimale de bois requise est de ${minAmount} unité(s) de Bois de Cèdre.`, 'warning');
         return;
     }
 
@@ -2565,7 +2714,7 @@ async function submitWoodCraft(product) {
 
     const formData = new FormData();
     formData.append('action', 'craft_wood');
-    formData.append('product', product || 'wooden_beams');
+    formData.append('product', product);
     formData.append('wood_amount', amount);
     formData.append('amount', amount);
 
@@ -2579,7 +2728,7 @@ async function submitWoodCraft(product) {
             showModalAlert(data.message, 'success');
             setTimeout(() => window.location.reload(), 1200);
         } else {
-            showModalAlert(data.error || 'Erreur lors du façonnage.', 'error');
+            showModalAlert(data.error || 'Erreur lors de la commande de production.', 'error');
         }
     } catch (e) {
         showModalAlert('Erreur de transmission avec la charpenterie.', 'error');
@@ -2588,8 +2737,8 @@ async function submitWoodCraft(product) {
 
 async function cancelWoodCraft(craftId) {
     const confirmed = await showModalConfirm(
-        'Voulez-vous annuler ce façonnage de poutres en cours ? 80% du bois engagé sera restitué dans vos réserves.',
-        'Annulation du façonnage'
+        'Voulez-vous annuler cette tâche de charpenterie en cours ? 80% du bois engagé sera restitué dans vos réserves.',
+        'Annulation du lot'
     );
     if (!confirmed) return;
 
@@ -3090,6 +3239,8 @@ async function submitNpcExchange() {
 document.addEventListener('DOMContentLoaded', () => {
     calcFlourPreview();
     calcSakePreview();
+    calcBeamsPreview();
+    calcCharcoalPreview();
     updateMarketCalculations();
 });
 </script>

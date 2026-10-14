@@ -67,6 +67,7 @@ class PlanetEngine {
         $sakeMax = (int)(10000 * pow(1.4, $grainMillLvl));
         $flourMax = (int)(10000 * pow(1.4, $grainMillLvl));
         $beamsMax = (int)(10000 * pow(1.4, $sawmillLvl));
+        $charcoalMax = (int)(10000 * pow(1.4, $sawmillLvl));
         $clayMax = (int)(10000 * pow(1.4, $storageLvl));
         $teaMax = (int)(10000 * pow(1.4, $grainMillLvl));
         $soyMax = (int)(10000 * pow(1.4, $grainMillLvl));
@@ -259,6 +260,8 @@ class PlanetEngine {
         $planet['rice_flour_max'] = (int)($planet['rice_flour_max'] ?? $flourMax);
         $planet['wooden_beams'] = (float)($planet['wooden_beams'] ?? 0);
         $planet['wooden_beams_max'] = (int)($planet['wooden_beams_max'] ?? $beamsMax);
+        $planet['charcoal'] = (float)($planet['charcoal'] ?? 0);
+        $planet['charcoal_max'] = (int)($planet['charcoal_max'] ?? $charcoalMax);
         $planet['clay'] = (float)($planet['clay'] ?? 0);
         $planet['clay_max'] = (int)($planet['clay_max'] ?? $clayMax);
         $planet['tea'] = (float)($planet['tea'] ?? 0);
@@ -551,12 +554,12 @@ class PlanetEngine {
                 $product = $item['product'];
                 $amount = (float)$item['produced_amount'];
 
-                if ($product === 'wooden_beams') {
+                if ($product === 'wooden_beams' || $product === 'charcoal') {
                     $this->db->beginTransaction();
                     try {
                         $up = $this->db->prepare("
                             UPDATE planets
-                            SET wooden_beams = LEAST(wooden_beams_max, wooden_beams + ?)
+                            SET {$product} = LEAST({$product}_max, {$product} + ?)
                             WHERE id = ?
                         ");
                         $up->execute([$amount, $planetId]);
@@ -625,6 +628,9 @@ class PlanetEngine {
                 if ($item['product'] === 'wooden_beams') {
                     $item['product_name'] = 'Poutres en bois';
                     $item['product_icon'] = '🪵';
+                } elseif ($item['product'] === 'charcoal') {
+                    $item['product_name'] = 'Charbon de bois';
+                    $item['product_icon'] = '🪨';
                 } elseif ($item['product'] === 'sake') {
                     $item['product_name'] = 'Saké Impérial';
                     $item['product_icon'] = '🍶';
@@ -1127,6 +1133,10 @@ class PlanetEngine {
                 if ($stmtBeams && $stmtBeams->rowCount() === 0) {
                     $this->db->exec("ALTER TABLE `planets` ADD COLUMN `wooden_beams` DOUBLE NOT NULL DEFAULT 0, ADD COLUMN `wooden_beams_max` INT UNSIGNED NOT NULL DEFAULT 10000");
                 }
+                $stmtCharcoal = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'charcoal'");
+                if ($stmtCharcoal && $stmtCharcoal->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets` ADD COLUMN `charcoal` DOUBLE NOT NULL DEFAULT 0, ADD COLUMN `charcoal_max` INT UNSIGNED NOT NULL DEFAULT 10000");
+                }
                 $stmtClay = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'clay'");
                 if ($stmtClay && $stmtClay->rowCount() === 0) {
                     $this->db->exec("ALTER TABLE `planets` ADD COLUMN `clay` DOUBLE NOT NULL DEFAULT 0, ADD COLUMN `clay_max` INT UNSIGNED NOT NULL DEFAULT 10000");
@@ -1549,20 +1559,31 @@ class PlanetEngine {
     }
 
     /**
-     * Façonnage de Bois de Cèdre en Poutres en bois (Atelier de Charpenterie Kizukuri)
+     * Façonnage de Bois de Cèdre en Poutres en bois ou Charbon de bois (Atelier de Charpenterie Kizukuri)
      */
     public function calculateWoodCraftDetails(int $planetId, string $product, float $woodAmount): array {
         $buildings = $this->getBuildings($planetId);
         $sawmillLvl = (int)($buildings['sawmill'] ?? 1);
         $planet = $this->getPlanet($planetId);
 
+        $isCharcoal = ($product === 'charcoal');
         $efficiencyMultiplier = 1.0 + ($sawmillLvl * 0.02);
-        $baseCostPerUnit = 10; // 10 Bois de Cèdre pour 1 Poutre en bois
-        $rawProduced = floor(($woodAmount / $baseCostPerUnit) * $efficiencyMultiplier);
-        $productName = "Poutres en bois";
-        $productIcon = "🪵";
-        $currentStock = (float)($planet['wooden_beams'] ?? 0);
-        $maxStock = (int)($planet['wooden_beams_max'] ?? (10000 * pow(1.4, max(1, $sawmillLvl))));
+
+        if ($isCharcoal) {
+            $baseCostPerUnit = 1; // 1 Bois de Cèdre pour 1 Charbon de bois
+            $rawProduced = floor(($woodAmount / $baseCostPerUnit) * $efficiencyMultiplier);
+            $productName = "Charbon de bois";
+            $productIcon = "🪨";
+            $currentStock = (float)($planet['charcoal'] ?? 0);
+            $maxStock = (int)($planet['charcoal_max'] ?? (10000 * pow(1.4, max(1, $sawmillLvl))));
+        } else {
+            $baseCostPerUnit = 10; // 10 Bois de Cèdre pour 1 Poutre en bois
+            $rawProduced = floor(($woodAmount / $baseCostPerUnit) * $efficiencyMultiplier);
+            $productName = "Poutres en bois";
+            $productIcon = "🪵";
+            $currentStock = (float)($planet['wooden_beams'] ?? 0);
+            $maxStock = (int)($planet['wooden_beams_max'] ?? (10000 * pow(1.4, max(1, $sawmillLvl))));
+        }
 
         $availableSpace = max(0, $maxStock - $currentStock);
         $actualProduced = min($rawProduced, $availableSpace);
@@ -1577,7 +1598,8 @@ class PlanetEngine {
         if ($gameSpeed <= 0) $gameSpeed = 1;
 
         // Vitesse accélérée de 15% par niveau de charpenterie
-        $durationSeconds = max(10, (int)round(($actualWoodEngaged * 0.5) / (1 + ($sawmillLvl * 0.15)) / $gameSpeed));
+        $durationFactor = $isCharcoal ? 0.35 : 0.5;
+        $durationSeconds = max(10, (int)round(($actualWoodEngaged * $durationFactor) / (1 + ($sawmillLvl * 0.15)) / $gameSpeed));
 
         return [
             'product' => $product,
@@ -1597,12 +1619,12 @@ class PlanetEngine {
     }
 
     /**
-     * Lance le façonnage de Bois de Cèdre en Poutres en bois dans la Charpenterie
+     * Lance le façonnage de Bois de Cèdre (Poutres ou Charbon) dans la Charpenterie
      */
     public function craftWoodProduct(int $planetId, string $product, float $woodAmount): array {
         $this->ensureSchemaMigration();
-        if ($product !== 'wooden_beams') {
-            return ['success' => false, 'error' => "Produit de charpente invalide (Poutres en bois uniquement)."];
+        if (!in_array($product, ['wooden_beams', 'charcoal'])) {
+            return ['success' => false, 'error' => "Produit de charpente invalide (Poutres en bois ou Charbon de bois uniquement)."];
         }
 
         $woodAmount = floor($woodAmount);
@@ -1610,11 +1632,14 @@ class PlanetEngine {
             return ['success' => false, 'error' => "Veuillez indiquer une quantité de bois valide supérieure à zéro."];
         }
 
-        // 1. Vérifier le bâtiment Atelier de Charpenterie (Niveau 10 minimum pour les poutres)
+        // 1. Vérifier le bâtiment Atelier de Charpenterie (Niveau 10 minimum pour les poutres, Niveau 15 pour le charbon)
         $buildings = $this->getBuildings($planetId);
         $sawmillLvl = (int)($buildings['sawmill'] ?? 0);
-        if ($sawmillLvl < 10) {
+        if ($product === 'wooden_beams' && $sawmillLvl < 10) {
             return ['success' => false, 'error' => "L'Atelier de Charpenterie (Kizukuri) doit être érigé au Niveau 10 minimum pour façonner des poutres en bois (Niveau actuel : {$sawmillLvl}/10)."];
+        }
+        if ($product === 'charcoal' && $sawmillLvl < 15) {
+            return ['success' => false, 'error' => "L'Atelier de Charpenterie (Kizukuri) doit être érigé au Niveau 15 minimum pour produire du charbon de bois (Niveau actuel : {$sawmillLvl}/15)."];
         }
 
         // 2. Traiter les productions terminées et vérifier la limite de la file
@@ -1632,7 +1657,7 @@ class PlanetEngine {
                 $remaining = !empty($activeQueue[0]['time_remaining']) ? gmdate('i\m s\s', $activeQueue[0]['time_remaining']) : 'quelques instants';
                 return [
                     'success' => false,
-                    'error' => "Un façonnage de poutres est déjà en cours dans la Charpenterie (temps restant : {$remaining}). Décrétez le <strong>Sceau Impérial (Privilège du Shōgun)</strong> pour débloquer la file d'attente automatique jusqu'à 4 commandes consécutives !"
+                    'error' => "Une tâche de façonnage est déjà en cours dans la Charpenterie (temps restant : {$remaining}). Décrétez le <strong>Sceau Impérial (Privilège du Shōgun)</strong> pour débloquer la file d'attente automatique jusqu'à 4 commandes consécutives !"
                 ];
             } else {
                 return [
@@ -1648,14 +1673,14 @@ class PlanetEngine {
         if ($details['actual_produced'] < 1) {
             return [
                 'success' => false,
-                'error' => "Quantité de bois insuffisante pour produire au moins 1 Poutre en bois (minimum {$details['base_cost_per_unit']} Bois requis)."
+                'error' => "Quantité de bois insuffisante pour produire au moins 1 unité de {$details['product_name']} (minimum {$details['base_cost_per_unit']} Bois requis)."
             ];
         }
 
         if ($details['available_space'] <= 0) {
             return [
                 'success' => false,
-                'error' => "Vos réserves de Poutres en bois sont saturées (" . number_format($details['current_stock']) . "/" . number_format($details['max_stock']) . "). Augmentez le niveau de votre Atelier de Charpenterie."
+                'error' => "Vos réserves de {$details['product_name']} sont saturées (" . number_format($details['current_stock']) . "/" . number_format($details['max_stock']) . "). Augmentez le niveau de votre Atelier de Charpenterie."
             ];
         }
 
@@ -1722,9 +1747,10 @@ class PlanetEngine {
         $activeQueue = $this->getCraftQueue($planetId, 'sawmill');
 
         $durationFmt = gmdate('i\m s\s', $details['duration_seconds']);
+        $newStock = ($product === 'charcoal') ? ($updatedPlanet['charcoal'] ?? 0) : ($updatedPlanet['wooden_beams'] ?? 0);
         return [
             'success' => true,
-            'message' => "Le façonnage de <strong>+" . number_format($details['actual_produced']) . " Poutres en bois 🪵</strong> a débuté ! Durée estimée : <strong>{$durationFmt}</strong> (consommé : -{$engagedWood} Bois 🪵).",
+            'message' => "La production de <strong>+" . number_format($details['actual_produced']) . " {$details['product_name']} {$details['product_icon']}</strong> a débuté ! Durée estimée : <strong>{$durationFmt}</strong> (consommé : -{$engagedWood} Bois 🪵).",
             'product' => $product,
             'product_name' => $details['product_name'],
             'product_icon' => $details['product_icon'],
@@ -1733,7 +1759,7 @@ class PlanetEngine {
             'duration_seconds' => $details['duration_seconds'],
             'craft' => $activeQueue[0] ?? null,
             'new_metal' => $updatedPlanet['metal'],
-            'new_product_stock' => $updatedPlanet['wooden_beams'] ?? 0,
+            'new_product_stock' => $newStock,
             'planet' => $updatedPlanet
         ];
     }

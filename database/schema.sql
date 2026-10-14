@@ -505,6 +505,8 @@ CREATE TABLE IF NOT EXISTS `planets` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `wooden_beams` double NOT NULL DEFAULT 0,
   `wooden_beams_max` int(10) unsigned NOT NULL DEFAULT 10000,
+  `charcoal` double NOT NULL DEFAULT 0,
+  `charcoal_max` int(10) unsigned NOT NULL DEFAULT 10000,
   `clay` double NOT NULL DEFAULT 0,
   `clay_max` int(10) unsigned NOT NULL DEFAULT 10000,
   `tea` double NOT NULL DEFAULT 0,
