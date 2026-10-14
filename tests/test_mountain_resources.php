@@ -35,6 +35,10 @@ $sqlite->exec("CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     username TEXT,
     faction TEXT DEFAULT 'terran',
+    points INTEGER DEFAULT 0,
+    alliance_id INTEGER DEFAULT NULL,
+    is_bot INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     protection_until INTEGER DEFAULT NULL
 )");
 
@@ -220,6 +224,53 @@ $sqlite->exec("CREATE TABLE IF NOT EXISTS fleet_missions (
     status TEXT DEFAULT 'en_route'
 )");
 
+$sqlite->exec("CREATE TABLE IF NOT EXISTS alliances (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    tag TEXT
+)");
+
+$sqlite->exec("CREATE TABLE IF NOT EXISTS authentic_castles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT,
+    name TEXT,
+    japanese_name TEXT,
+    kanji TEXT,
+    province TEXT,
+    historical_builder TEXT,
+    classification TEXT,
+    icon TEXT,
+    short_desc TEXT,
+    coord_x INTEGER,
+    coord_y INTEGER,
+    is_spawned INTEGER DEFAULT 0,
+    planet_id INTEGER DEFAULT NULL
+)");
+
+$sqlite->exec("CREATE TABLE IF NOT EXISTS oases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    coord_x INTEGER,
+    coord_y INTEGER,
+    oasis_type TEXT,
+    name TEXT,
+    bonus_wood INTEGER DEFAULT 0,
+    bonus_stone INTEGER DEFAULT 0,
+    bonus_rice INTEGER DEFAULT 0,
+    res_wood INTEGER DEFAULT 0,
+    res_stone INTEGER DEFAULT 0,
+    res_rice INTEGER DEFAULT 0,
+    owner_planet_id INTEGER DEFAULT NULL
+)");
+
+$sqlite->exec("CREATE TABLE IF NOT EXISTS lake_fish_stocks (
+    coord_x INTEGER,
+    coord_y INTEGER,
+    fish_stock INTEGER,
+    fish_initial INTEGER,
+    created_at INTEGER,
+    PRIMARY KEY(coord_x, coord_y)
+)");
+
 // Insertion données initiales
 $sqlite->exec("INSERT INTO users (id, username, faction) VALUES (1, 'DaimyoTest', 'terran')");
 $sqlite->exec("INSERT INTO planets (id, user_id, name, coord_x, coord_y, last_resource_update) VALUES (1, 1, 'Fief de Départ', 10, 10, " . time() . ")");
@@ -347,6 +398,32 @@ $headerContent = file_get_contents(__DIR__ . '/../views/partials/header.php');
 assertTest(strpos($headerContent, '$charcoalStock') !== false, "Variable \$charcoalStock présente dans views/partials/header.php");
 assertTest(strpos($headerContent, 'res-val-charcoal') !== false, "Élément DOM #res-val-charcoal présent dans views/partials/header.php");
 assertTest(strpos($headerContent, 'bar-charcoal') !== false, "Barre de progression #bar-charcoal présente");
+
+// -------------------------------------------------------------
+// Test 7 : Vérification de la transmission des minerais par GalaxyEngine
+// -------------------------------------------------------------
+echo "\n7. Vérification de la transmission des minerais par GalaxyEngine::getSectorMap...\n";
+$galaxyEngine = new GalaxyEngine($sqlite);
+$sector = $galaxyEngine->getSectorMap($foundMountX, $foundMountY, 1);
+$mountKey = $foundMountX . ':' . $foundMountY;
+$mountTerrain = $sector['terrains'][$mountKey] ?? null;
+assertTest(
+    $mountTerrain !== null &&
+    isset($mountTerrain['sulfur_stock']) &&
+    $mountTerrain['sulfur_stock'] > 0 &&
+    isset($mountTerrain['nitrate_stock']) &&
+    $mountTerrain['nitrate_stock'] > 0 &&
+    isset($mountTerrain['iron_sand_stock']) &&
+    $mountTerrain['iron_sand_stock'] > 0,
+    "GalaxyEngine transmet bien les réserves minérales positives pour la tuile montagne [{$foundMountX}:{$foundMountY}]"
+);
+
+// -------------------------------------------------------------
+// Test 8 : Ensemencement mondial seedWorldMountains
+// -------------------------------------------------------------
+echo "\n8. Test de MountainEngine::seedWorldMountains...\n";
+$seededCount = $mountainEngine->seedWorldMountains(15);
+assertTest($seededCount > 0, "Ensemencement global de {$seededCount} parcelles de montagne avec gisements persistants");
 
 echo "\n=================================================================\n";
 echo " RÉSULTATS : {$passCount} passés, {$failCount} échoués\n";

@@ -439,6 +439,19 @@ class GalaxyEngine {
                     $oasisData['lake_depleted'] = !empty($ls['depleted']);
                 }
 
+                $isMountainOasis = (strpos($o['oasis_type'], 'mountain') !== false || strpos($o['oasis_type'], 'rock') !== false);
+                if ($isMountainOasis) {
+                    $ms = $mountainStocks[$k] ?? ($mountainEngine ? $mountainEngine->getStock((int)$o['coord_x'], (int)$o['coord_y']) : null);
+                    $oasisData['is_mountain'] = 1;
+                    $oasisData['sulfur_stock'] = $ms['sulfur_stock'] ?? 0;
+                    $oasisData['sulfur_initial'] = $ms['sulfur_initial'] ?? 0;
+                    $oasisData['nitrate_stock'] = $ms['nitrate_stock'] ?? 0;
+                    $oasisData['nitrate_initial'] = $ms['nitrate_initial'] ?? 0;
+                    $oasisData['iron_sand_stock'] = $ms['iron_sand_stock'] ?? 0;
+                    $oasisData['iron_sand_initial'] = $ms['iron_sand_initial'] ?? 0;
+                    $oasisData['mountain_depleted'] = !empty($ms['depleted']);
+                }
+
                 if (isset($gridMap[$k])) {
                     $gridMap[$k] = array_merge($gridMap[$k], $oasisData);
                 } else {
@@ -473,6 +486,15 @@ class GalaxyEngine {
                         $t['fish_stock'] = $ls['fish_stock'] ?? 0;
                         $t['fish_initial'] = $ls['fish_initial'] ?? 0;
                         $t['lake_depleted'] = !empty($ls['depleted']);
+                    } elseif ($t['type'] === 'mountain') {
+                        $ms = $mountainStocks[$k] ?? ($mountainEngine ? $mountainEngine->getStock($x, $y) : null);
+                        $t['sulfur_stock'] = $ms['sulfur_stock'] ?? 0;
+                        $t['sulfur_initial'] = $ms['sulfur_initial'] ?? 0;
+                        $t['nitrate_stock'] = $ms['nitrate_stock'] ?? 0;
+                        $t['nitrate_initial'] = $ms['nitrate_initial'] ?? 0;
+                        $t['iron_sand_stock'] = $ms['iron_sand_stock'] ?? 0;
+                        $t['iron_sand_initial'] = $ms['iron_sand_initial'] ?? 0;
+                        $t['mountain_depleted'] = !empty($ms['depleted']);
                     }
                     $terrains[$k] = $t;
                 } else {

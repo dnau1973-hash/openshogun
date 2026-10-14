@@ -497,6 +497,15 @@ class WorldGenerator {
             error_log("WorldGenerator::resetUniverse - seedWorldLakes notice: " . $e->getMessage());
         }
 
+        // 10e. Ensemencement aléatoire des gisements minéraux de chaque montagne (Soufre, Nitrate, Sable de fer)
+        try {
+            require_once __DIR__ . '/MountainEngine.php';
+            $mountainEngine = new MountainEngine($this->db);
+            $mountainEngine->seedWorldMountains(40);
+        } catch (Exception $e) {
+            error_log("WorldGenerator::resetUniverse - seedWorldMountains notice: " . $e->getMessage());
+        }
+
         if ($driverName !== 'sqlite') {
             $this->db->exec("SET FOREIGN_KEY_CHECKS = 1;");
         }

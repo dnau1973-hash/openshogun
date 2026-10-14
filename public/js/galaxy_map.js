@@ -356,7 +356,14 @@ class GalaxyMapController {
                         rural_plots: terrain.rural_plots || null,
                         fish_stock: (terrain.fish_stock !== undefined ? terrain.fish_stock : null),
                         fish_initial: (terrain.fish_initial !== undefined ? terrain.fish_initial : null),
-                        lake_depleted: !!terrain.lake_depleted
+                        lake_depleted: !!terrain.lake_depleted,
+                        sulfur_stock: (terrain.sulfur_stock !== undefined ? terrain.sulfur_stock : null),
+                        sulfur_initial: (terrain.sulfur_initial !== undefined ? terrain.sulfur_initial : null),
+                        nitrate_stock: (terrain.nitrate_stock !== undefined ? terrain.nitrate_stock : null),
+                        nitrate_initial: (terrain.nitrate_initial !== undefined ? terrain.nitrate_initial : null),
+                        iron_sand_stock: (terrain.iron_sand_stock !== undefined ? terrain.iron_sand_stock : null),
+                        iron_sand_initial: (terrain.iron_sand_initial !== undefined ? terrain.iron_sand_initial : null),
+                        mountain_depleted: !!terrain.mountain_depleted
                     }).replace(/"/g, '&quot;');
 
                 let tileTooltip = terrain.name;
@@ -366,14 +373,28 @@ class GalaxyMapController {
                     } else if (terrain.fish_stock !== null && terrain.fish_stock !== undefined) {
                         tileTooltip += ` [${Number(terrain.fish_stock).toLocaleString()} poissons]`;
                     }
+                } else if (terrain.type === 'mountain') {
+                    if (terrain.mountain_depleted) {
+                        tileTooltip += ' [Filon Épuisé]';
+                    } else if (terrain.sulfur_stock !== null && terrain.sulfur_stock !== undefined) {
+                        const totMin = (parseInt(terrain.sulfur_stock, 10) || 0) + (parseInt(terrain.nitrate_stock, 10) || 0) + (parseInt(terrain.iron_sand_stock, 10) || 0);
+                        tileTooltip += ` [${Number(totMin).toLocaleString()} minerais]`;
+                    }
                 }
                 if (planet) {
                     if (planet.is_authentic_castle) {
                         tileTooltip = planet.castle_name || planet.planet_name;
                     } else if (planet.is_oasis) {
                         const isLakeO = (planet.oasis_type && planet.oasis_type.indexOf('lake') !== -1);
-                        const fishInfo = isLakeO ? (planet.lake_depleted ? ' [Épuisé]' : (planet.fish_stock !== undefined ? ' [' + Number(planet.fish_stock).toLocaleString() + ' poissons]' : '')) : '';
-                        tileTooltip = `${planet.bonus_label || 'Oasis'} ${planet.is_occupied ? '(Occupée par ' + (planet.owner_planet_name || 'Fief') + ')' : '(Sauvage)'}${fishInfo}`;
+                        const isMountO = (planet.oasis_type && (planet.oasis_type.indexOf('mountain') !== -1 || planet.oasis_type.indexOf('rock') !== -1));
+                        let infoSuffix = '';
+                        if (isLakeO) {
+                            infoSuffix = planet.lake_depleted ? ' [Épuisé]' : (planet.fish_stock !== undefined ? ' [' + Number(planet.fish_stock).toLocaleString() + ' poissons]' : '');
+                        } else if (isMountO) {
+                            const totOasisMin = (parseInt(planet.sulfur_stock, 10) || 0) + (parseInt(planet.nitrate_stock, 10) || 0) + (parseInt(planet.iron_sand_stock, 10) || 0);
+                            infoSuffix = planet.mountain_depleted ? ' [Épuisé]' : ' [' + Number(totOasisMin).toLocaleString() + ' minerais]';
+                        }
+                        tileTooltip = `${planet.bonus_label || 'Oasis'} ${planet.is_occupied ? '(Occupée par ' + (planet.owner_planet_name || 'Fief') + ')' : '(Sauvage)'}${infoSuffix}`;
                     } else {
                         tileTooltip = (planet.planet_name || 'Fief') + (planet.is_protected == 1 ? ' [Immunité active]' : '');
                     }

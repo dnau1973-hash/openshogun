@@ -196,4 +196,46 @@ class MountainEngine {
             'depleted' => $remStock ? !empty($remStock['depleted']) : false
         ];
     }
+
+    /**
+     * Ensemencement préalable de toutes les réserves minérales de montagne du monde.
+     * Appelé lors du reset / génération de l'univers pour garantir la persistance immédiate.
+     *
+     * @param int $radius Rayon de la carte
+     * @return int Nombre de montagnes ensemencées
+     */
+    public function seedWorldMountains(int $radius = 40): int {
+        $this->db->exec("DELETE FROM mountain_mineral_stocks");
+
+        $coords = [];
+        // 1. Montagnes procédurales dans le rayon du monde
+        for ($y = -$radius; $y <= $radius; $y++) {
+            for ($x = -$radius; $x <= $radius; $x++) {
+                if (GalaxyEngine::getTerrainType($x, $y)['type'] === 'mountain') {
+                    $coords[$x . ':' . $y] = [$x, $y];
+                }
+            }
+        }
+
+        // 2. Oasis de montagne ou rocheuses
+        try {
+            $stmt = $this->db->query("SELECT coord_x, coord_y, oasis_type FROM oases");
+            while ($o = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $k = $o['coord_x'] . ':' . $o['coord_y'];
+                $oType = (string)$o['oasis_type'];
+                if (str_contains($oType, 'mountain') || str_contains($oType, 'rock')) {
+                    $coords[$k] = [(int)$o['coord_x'], (int)$o['coord_y']];
+                }
+            }
+        } catch (Exception $e) {}
+
+        foreach ($coords as [$x, $y]) {
+            $sInit = random_int(self::SULFUR_MIN, self::SULFUR_MAX);
+            $nInit = random_int(self::NITRATE_MIN, self::NITRATE_MAX);
+            $iInit = random_int(self::IRON_SAND_MIN, self::IRON_SAND_MAX);
+            $this->insertStock($x, $y, $sInit, $nInit, $iInit);
+        }
+
+        return count($coords);
+    }
 }
