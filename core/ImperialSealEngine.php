@@ -32,6 +32,9 @@ class ImperialSealEngine {
         if ($this->db->inTransaction()) {
             return;
         }
+        if ($this->db->getAttribute(PDO::ATTR_DRIVER_NAME) !== 'mysql') {
+            return;
+        }
         $executed = true;
         try {
             // 1. Colonnes dans users : imperial_seal_until et gold_coins
@@ -292,18 +295,143 @@ class ImperialSealEngine {
     }
 
     /**
-     * Intendant du Marché : Échangeur de ressources NPC 1:1:1
-     * Rééquilibre instantanément le bois, la pierre et le riz
+     * Structure de référence pour les ressources gérées par l'Intendant du Marché
      */
-    public function npcExchange(int $userId, int $planetId, int $wood, int $stone, int $rice): array {
-        if ($wood < 0 || $stone < 0 || $rice < 0) {
-            throw new Exception("Les quantités de ressources doivent être positives.");
+    public function getNpcResourceDefinitions(): array {
+        return [
+            // Côté Gauche : Vivres & Denrées Alimentaires (6)
+            'rice' => [
+                'col' => 'deuterium',
+                'max_col' => 'deuterium_max',
+                'label' => 'Riz Impérial (Koku)',
+                'category' => 'food',
+                'default_max' => 15000,
+                'icon' => 'fa-solid fa-wheat-awn text-warning'
+            ],
+            'fish' => [
+                'col' => 'fish',
+                'max_col' => 'fish_max',
+                'label' => 'Poisson Frais',
+                'category' => 'food',
+                'default_max' => 15000,
+                'icon' => 'fa-solid fa-fish text-info'
+            ],
+            'tea' => [
+                'col' => 'tea',
+                'max_col' => 'tea_max',
+                'label' => 'Feuilles de Thé',
+                'category' => 'food',
+                'default_max' => 10000,
+                'icon' => 'fa-solid fa-leaf text-success'
+            ],
+            'soybean' => [
+                'col' => 'soybean',
+                'max_col' => 'soybean_max',
+                'label' => 'Gousses de Soja',
+                'category' => 'food',
+                'default_max' => 10000,
+                'icon' => 'fa-solid fa-seedling text-warning'
+            ],
+            'rice_flour' => [
+                'col' => 'rice_flour',
+                'max_col' => 'rice_flour_max',
+                'label' => 'Farine de Riz (Komeko)',
+                'category' => 'food',
+                'default_max' => 10000,
+                'icon' => 'fa-solid fa-bowl-rice text-secondary'
+            ],
+            'sake' => [
+                'col' => 'sake',
+                'max_col' => 'sake_max',
+                'label' => 'Saké Impérial',
+                'category' => 'food',
+                'default_max' => 10000,
+                'icon' => 'fa-solid fa-wine-bottle text-danger'
+            ],
+
+            // Côté Droit : Matériaux de Construction (5)
+            'wood' => [
+                'col' => 'metal',
+                'max_col' => 'metal_max',
+                'label' => 'Bois de Cèdre',
+                'category' => 'construction',
+                'default_max' => 15000,
+                'icon' => 'fa-solid fa-tree text-success'
+            ],
+            'stone' => [
+                'col' => 'crystal',
+                'max_col' => 'crystal_max',
+                'label' => 'Pierre de Granit',
+                'category' => 'construction',
+                'default_max' => 15000,
+                'icon' => 'fa-solid fa-mountain text-secondary'
+            ],
+            'clay' => [
+                'col' => 'clay',
+                'max_col' => 'clay_max',
+                'label' => 'Argile Alluviale',
+                'category' => 'construction',
+                'default_max' => 10000,
+                'icon' => 'fa-solid fa-cubes-stacked text-danger'
+            ],
+            'wooden_beams' => [
+                'col' => 'wooden_beams',
+                'max_col' => 'wooden_beams_max',
+                'label' => 'Poutres de Charpente',
+                'category' => 'construction',
+                'default_max' => 10000,
+                'icon' => 'fa-solid fa-hammer text-warning'
+            ],
+            'charcoal' => [
+                'col' => 'charcoal',
+                'max_col' => 'charcoal_max',
+                'label' => 'Charbon de Bois',
+                'category' => 'construction',
+                'default_max' => 10000,
+                'icon' => 'fa-solid fa-fire text-dark'
+            ],
+        ];
+    }
+
+    /**
+     * Prépare les données de stocks et de plafonds d'une planète pour la modale NPC
+     */
+    public function getNpcPlanetResourceData(array $planet): array {
+        $defs = $this->getNpcResourceDefinitions();
+        $resources = [];
+        $maxes = [];
+
+        foreach ($defs as $key => $def) {
+            $resources[$key] = (int)floor((float)($planet[$def['col']] ?? 0));
+            $defaultMax = $def['default_max'];
+            if ($def['col'] === 'fish') {
+                $defaultMax = (int)($planet['deuterium_max'] ?? 15000);
+            }
+            $maxes[$key] = max(1, (int)($planet[$def['max_col']] ?? $defaultMax));
         }
 
-        $costGold = 3; // Coût symbolique de 3 Koban
+        return [
+            'resources' => $resources,
+            'maxes' => $maxes
+        ];
+    }
 
-        // Vérifier que la planète appartient à l'utilisateur
-        $st = $this->db->prepare("SELECT id, user_id, metal, crystal, deuterium, metal_max, crystal_max, deuterium_max FROM planets WHERE id = ?");
+    /**
+     * Intendant du Marché : Échangeur de ressources NPC 1:1
+     * Rééquilibre instantanément l'ensemble des vivres et matériaux de construction au ratio parfait 1:1
+     */
+    public function npcExchange(int $userId, int $planetId, $woodOrRes, int $stone = 0, int $rice = 0): array {
+        $defs = $this->getNpcResourceDefinitions();
+
+        // 1. Récupération des données du fief
+        $cols = ['id', 'user_id'];
+        foreach ($defs as $d) {
+            $cols[] = "`{$d['col']}`";
+            $cols[] = "`{$d['max_col']}`";
+        }
+        $colsStr = implode(', ', array_unique($cols));
+
+        $st = $this->db->prepare("SELECT {$colsStr} FROM planets WHERE id = ?");
         $st->execute([$planetId]);
         $planet = $st->fetch(PDO::FETCH_ASSOC);
 
@@ -311,49 +439,90 @@ class ImperialSealEngine {
             throw new Exception("Ce fief ne répond pas à votre commandement.");
         }
 
-        $currentTotal = (int)floor($planet['metal'] + $planet['crystal'] + $planet['deuterium']);
-        $targetTotal = (int)floor($wood + $stone + $rice);
+        // 2. Normalisation des nouvelles valeurs cibles
+        $targetValues = [];
+        if (is_array($woodOrRes)) {
+            foreach ($defs as $key => $def) {
+                if (isset($woodOrRes[$key])) {
+                    $targetValues[$key] = (int)$woodOrRes[$key];
+                } else {
+                    $targetValues[$key] = (int)floor((float)($planet[$def['col']] ?? 0));
+                }
+            }
+        } else {
+            // Compatibilité ancienne signature positionnelle ($wood, $stone, $rice)
+            $targetValues = [
+                'wood' => (int)$woodOrRes,
+                'stone' => (int)$stone,
+                'rice' => (int)$rice,
+            ];
+            foreach ($defs as $key => $def) {
+                if (!isset($targetValues[$key])) {
+                    $targetValues[$key] = (int)floor((float)($planet[$def['col']] ?? 0));
+                }
+            }
+        }
+
+        // 3. Validation des valeurs positives et des capacités de stockage
+        $currentTotal = 0;
+        $targetTotal = 0;
+
+        foreach ($defs as $key => $def) {
+            $curr = (int)floor((float)($planet[$def['col']] ?? 0));
+            $target = $targetValues[$key];
+
+            if ($target < 0) {
+                throw new Exception("La quantité de {$def['label']} doit être positive.");
+            }
+
+            $defaultMax = ($def['col'] === 'fish') ? (int)($planet['deuterium_max'] ?? 15000) : $def['default_max'];
+            $maxStore = max(1, (int)($planet[$def['max_col']] ?? $defaultMax));
+
+            if ($target > $maxStore) {
+                throw new Exception("La quantité de {$def['label']} ({$target}) dépasse la capacité de vos entrepôts (" . number_format($maxStore) . ").");
+            }
+
+            $currentTotal += $curr;
+            $targetTotal += $target;
+        }
 
         if ($currentTotal <= 0) {
             throw new Exception("Vos greniers sont déserts, impossible d'effectuer un troc.");
         }
 
         if ($targetTotal !== $currentTotal) {
-            throw new Exception("Le total rééquilibré ($targetTotal) doit être strictement égal au total actuel ($currentTotal).");
+            throw new Exception("Le total rééquilibré (" . number_format($targetTotal) . ") doit être strictement égal au total actuel (" . number_format($currentTotal) . ").");
         }
 
-        // Vérification des capacités de stockage
-        if ($wood > $planet['metal_max']) {
-            throw new Exception("La quantité de Bois dépasse la capacité de vos greniers (" . number_format($planet['metal_max']) . ").");
-        }
-        if ($stone > $planet['crystal_max']) {
-            throw new Exception("La quantité de Pierre dépasse la capacité de vos greniers (" . number_format($planet['crystal_max']) . ").");
-        }
-        if ($rice > $planet['deuterium_max']) {
-            throw new Exception("La quantité de Riz dépasse la capacité de votre silo (" . number_format($planet['deuterium_max']) . ").");
-        }
-
+        // 4. Vérification du solde de Koban (3 Koban)
+        $costGold = 3;
         $currentGold = $this->getGoldCoins($userId);
         if ($currentGold < $costGold) {
             throw new Exception("Il vous faut au moins {$costGold} Koban pour mandater l'Intendant du Marché.");
         }
 
+        // 5. Exécution de la transaction
         $this->db->beginTransaction();
         try {
             // Déduire l'or
             $upGold = $this->db->prepare("UPDATE users SET gold_coins = gold_coins - ? WHERE id = ? AND gold_coins >= ?");
             $upGold->execute([$costGold, $userId, $costGold]);
             if ($upGold->rowCount() === 0) {
-                throw new Exception("Or insuffisant.");
+                throw new Exception("Solde de Koban insuffisant lors du paiement.");
             }
 
-            // Rééquilibrer les ressources
-            $upPlanet = $this->db->prepare("
-                UPDATE planets 
-                SET metal = ?, crystal = ?, deuterium = ? 
-                WHERE id = ?
-            ");
-            $upPlanet->execute([$wood, $stone, $rice, $planetId]);
+            // Mettre à jour les ressources sur la planète
+            $setParts = [];
+            $bindParams = [];
+            foreach ($defs as $key => $def) {
+                $setParts[] = "`{$def['col']}` = ?";
+                $bindParams[] = $targetValues[$key];
+            }
+            $bindParams[] = $planetId;
+
+            $sqlSet = implode(', ', $setParts);
+            $upPlanet = $this->db->prepare("UPDATE planets SET {$sqlSet} WHERE id = ?");
+            $upPlanet->execute($bindParams);
 
             $this->db->commit();
         } catch (Exception $e) {
@@ -363,10 +532,11 @@ class ImperialSealEngine {
 
         return [
             'success' => true,
-            'message' => "L'Intendant a rééquilibré vos réserves : {$wood} Bois, {$stone} Pierre, {$rice} Riz.",
-            'wood' => $wood,
-            'stone' => $stone,
-            'rice' => $rice,
+            'message' => "L'Intendant du Marché a rééquilibré vos réserves avec succès au ratio 1:1.",
+            'resources' => $targetValues,
+            'wood' => $targetValues['wood'],
+            'stone' => $targetValues['stone'],
+            'rice' => $targetValues['rice'],
             'remaining_gold' => $currentGold - $costGold
         ];
     }

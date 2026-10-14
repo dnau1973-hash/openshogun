@@ -39,11 +39,15 @@ try {
 
         case 'npc_exchange':
             $targetPlanetId = !empty($_POST['planet_id']) ? (int)$_POST['planet_id'] : ($planet ? (int)$planet['id'] : 0);
-            $wood = (int)($_POST['wood'] ?? 0);
-            $stone = (int)($_POST['stone'] ?? 0);
-            $rice = (int)($_POST['rice'] ?? 0);
+            $resKeys = ['rice', 'fish', 'tea', 'soybean', 'rice_flour', 'sake', 'wood', 'stone', 'clay', 'wooden_beams', 'charcoal'];
+            $resources = [];
+            foreach ($resKeys as $k) {
+                if (isset($_POST[$k])) {
+                    $resources[$k] = (int)$_POST[$k];
+                }
+            }
 
-            $res = $sealEngine->npcExchange($userId, $targetPlanetId, $wood, $stone, $rice);
+            $res = $sealEngine->npcExchange($userId, $targetPlanetId, $resources);
             echo json_encode($res);
             break;
 

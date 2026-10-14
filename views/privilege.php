@@ -416,11 +416,12 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
                     </div>
                 </div>
                 <p class="text-secondary small mb-3" style="line-height:1.55;">
-                    Rééquilibrez immédiatement vos réserves excédentaires de Bois, Pierre et Riz sans perte au ratio 1:1:1 pour 3 Koban, et lancez vos chantiers cruciaux.
+                    Rééquilibrez immédiatement vos réserves de vivres et matériaux de construction sans perte au ratio 1:1 pour 3 Koban, et lancez vos chantiers cruciaux.
                 </p>
                 <div class="mt-auto">
+                    <?php $npcPrivData = $sealEngine->getNpcPlanetResourceData($planet); ?>
                     <button type="button" class="btn btn-sm btn-outline-purple w-100" 
-                            onclick="openNpcExchangeModal(<?= $planet['id'] ?>, '<?= htmlspecialchars(addslashes($planet['name'])) ?>', <?= (int)$planet['metal'] ?>, <?= (int)$planet['crystal'] ?>, <?= (int)$planet['deuterium'] ?>, <?= (int)$planet['metal_max'] ?>, <?= (int)$planet['crystal_max'] ?>, <?= (int)$planet['deuterium_max'] ?>)">
+                            onclick='openNpcExchangeModal(<?= (int)$planet['id'] ?>, <?= json_encode($planet['name']) ?>, <?= json_encode($npcPrivData['resources']) ?>, <?= json_encode($npcPrivData['maxes']) ?>)'>
                         <i class="fa-solid fa-scale-balanced text-warning me-1"></i>Troc Rapide &rarr;
                     </button>
                 </div>
@@ -713,79 +714,7 @@ $tradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
     </div>
 </div>
 
-<!-- ================= MODALE INTERACTIVE DU MARCHAND NPC ================= -->
-<div class="modal modal-blur fade" id="modalNpcExchange" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-warning-subtle">
-                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-scale-balanced text-warning me-1"></i>Intendant du Marché Castral
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="text-secondary small mb-3">
-                    L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au taux parfait de <strong>1:1:1</strong> pour un tribut de <strong>3 Koban <i class="fa-solid fa-coins text-warning"></i></strong>.
-                </div>
-
-                <div class="p-2 bg-light border rounded mb-3 text-center">
-                    <span class="text-muted small">Fief sélectionné : </span>
-                    <strong id="npc_planet_name" class="text-dark">Fief</strong>
-                    <div class="fs-4 fw-bold text-primary mt-1">
-                        Total à répartir : <span id="npc_total_amount">0</span>
-                    </div>
-                    <div class="small text-muted">La somme totale doit être conservée au grain près.</div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre :</span>
-                        <span id="npc_wood_val" class="font-monospace text-primary">0</span>
-                    </label>
-                    <input type="range" class="form-range" id="npc_range_wood" oninput="onNpcRangeChange('wood')">
-                    <input type="number" class="form-control form-control-sm mt-1" id="npc_input_wood" oninput="onNpcInputChange('wood')">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Taille :</span>
-                        <span id="npc_stone_val" class="font-monospace text-primary">0</span>
-                    </label>
-                    <input type="range" class="form-range" id="npc_range_stone" oninput="onNpcRangeChange('stone')">
-                    <input type="number" class="form-control form-control-sm mt-1" id="npc_input_stone" oninput="onNpcInputChange('stone')">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label d-flex justify-content-between small fw-bold">
-                        <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial :</span>
-                        <span id="npc_rice_val" class="font-monospace text-primary">0</span>
-                    </label>
-                    <input type="range" class="form-range" id="npc_range_rice" oninput="onNpcRangeChange('rice')">
-                    <input type="number" class="form-control form-control-sm mt-1" id="npc_input_rice" oninput="onNpcInputChange('rice')">
-                </div>
-
-                <div class="d-flex gap-2 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="distributeEvenly()">
-                        <i class="fa-solid fa-scale-balanced text-warning me-1"></i>Répartir Équitablement (1/3 chacun)
-                    </button>
-                </div>
-
-                <div id="npc_diff_alert" class="alert alert-danger p-2 small d-none">
-                    La somme répartie ne correspond pas au total disponible.
-                </div>
-            </div>
-            <div class="modal-footer d-flex justify-content-between">
-                <span class="small text-muted">Coût : <strong class="text-warning">3 Koban</strong> (Solde : <?= $goldCoins ?>)</span>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-warning fw-bold" id="btnSubmitNpcExchange" onclick="submitNpcExchange()">
-                        <i class="fa-solid fa-coins text-warning me-1"></i>Sceller le Troc (3 Koban)
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<?php require_once __DIR__ . '/partials/npc_exchange_modal.php'; ?>
 
 <script>
 async function activateSeal(days) {
@@ -833,112 +762,7 @@ async function claimDailyGold() {
     }
 }
 
-// Logique Intendant NPC
-let currentNpcPlanetId = 0;
-let currentNpcTotal = 0;
-let currentNpcMax = { wood: 0, stone: 0, rice: 0 };
 
-function openNpcExchangeModal(planetId, planetName, wood, stone, rice, maxW, maxS, maxR) {
-    currentNpcPlanetId = planetId;
-    currentNpcTotal = Math.floor(wood + stone + rice);
-    currentNpcMax = { wood: maxW, stone: maxS, rice: maxR };
-
-    document.getElementById('npc_planet_name').innerText = planetName;
-    document.getElementById('npc_total_amount').innerText = currentNpcTotal.toLocaleString('fr-FR');
-
-    ['wood', 'stone', 'rice'].forEach(res => {
-        const r = document.getElementById(`npc_range_${res}`);
-        const inp = document.getElementById(`npc_input_${res}`);
-        const val = (res === 'wood') ? wood : ((res === 'stone') ? stone : rice);
-
-        r.max = Math.min(currentNpcTotal, currentNpcMax[res]);
-        r.value = val;
-        inp.max = currentNpcMax[res];
-        inp.value = val;
-        document.getElementById(`npc_val_${res}`) && (document.getElementById(`npc_val_${res}`).innerText = val);
-    });
-
-    updateNpcDisplay();
-    const modal = new bootstrap.Modal(document.getElementById('modalNpcExchange'));
-    modal.show();
-}
-
-function distributeEvenly() {
-    const part = Math.floor(currentNpcTotal / 3);
-    const rest = currentNpcTotal - (part * 2);
-
-    document.getElementById('npc_input_wood').value = part;
-    document.getElementById('npc_input_stone').value = part;
-    document.getElementById('npc_input_rice').value = rest;
-
-    document.getElementById('npc_range_wood').value = part;
-    document.getElementById('npc_range_stone').value = part;
-    document.getElementById('npc_range_rice').value = rest;
-
-    updateNpcDisplay();
-}
-
-function onNpcRangeChange(type) {
-    const val = document.getElementById(`npc_range_${type}`).value;
-    document.getElementById(`npc_input_${type}`).value = val;
-    updateNpcDisplay();
-}
-
-function onNpcInputChange(type) {
-    const val = document.getElementById(`npc_input_${type}`).value;
-    document.getElementById(`npc_range_${type}`).value = val;
-    updateNpcDisplay();
-}
-
-function updateNpcDisplay() {
-    const w = parseInt(document.getElementById('npc_input_wood').value || 0, 10);
-    const s = parseInt(document.getElementById('npc_input_stone').value || 0, 10);
-    const r = parseInt(document.getElementById('npc_input_rice').value || 0, 10);
-
-    document.getElementById('npc_wood_val').innerText = w.toLocaleString('fr-FR');
-    document.getElementById('npc_stone_val').innerText = s.toLocaleString('fr-FR');
-    document.getElementById('npc_rice_val').innerText = r.toLocaleString('fr-FR');
-
-    const sum = w + s + r;
-    const diff = currentNpcTotal - sum;
-    const alertEl = document.getElementById('npc_diff_alert');
-    const submitBtn = document.getElementById('btnSubmitNpcExchange');
-
-    if (diff !== 0) {
-        alertEl.classList.remove('d-none');
-        alertEl.innerText = diff > 0 ? `Il reste ${diff.toLocaleString('fr-FR')} ressources à assigner.` : `Excédent de ${Math.abs(diff).toLocaleString('fr-FR')} ressources réparties en trop.`;
-        submitBtn.disabled = true;
-    } else {
-        alertEl.classList.add('d-none');
-        submitBtn.disabled = false;
-    }
-}
-
-async function submitNpcExchange() {
-    const w = parseInt(document.getElementById('npc_input_wood').value || 0, 10);
-    const s = parseInt(document.getElementById('npc_input_stone').value || 0, 10);
-    const r = parseInt(document.getElementById('npc_input_rice').value || 0, 10);
-
-    const fd = new FormData();
-    fd.append('action', 'npc_exchange');
-    fd.append('planet_id', currentNpcPlanetId);
-    fd.append('wood', w);
-    fd.append('stone', s);
-    fd.append('rice', r);
-
-    try {
-        const res = await fetch('/api/seal.php', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (data.success) {
-            showModalAlert(data.message, 'success');
-            setTimeout(() => window.location.reload(), 1200);
-        } else {
-            showModalAlert(data.error || 'Erreur lors du troc.', 'error');
-        }
-    } catch (e) {
-        showModalAlert('Erreur de communication.', 'error');
-    }
-}
 
 // ==========================================
 // GESTION DES ROUTES COMMERCIALES FÉODALES

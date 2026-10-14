@@ -17,6 +17,15 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
     - Fiche détaillée de parcelle de ressource (`views/field.php`) : Bouton doré au-dessus de l'option d'annulation.
     - Carte interactive du domaine rural (`rural_domain_map.js`) : Bouton doré d'achèvement immédiat dans la modale d'élévation de parcelle.
     - Modale de confirmation personnalisée Tabler demandant validation au joueur avant débit des 2 Kobans.
+- **Équilibrage Proportionnel 1:1 & Présentation en 2 Colonnes de l'Intendant du Marché (`views/partials/npc_exchange_modal.php`, `core/ImperialSealEngine.php`, `api/seal.php`, `views/building.php`, `views/empire.php`, `views/privilege.php`) :**
+  * **Présentation Structurée en Deux Colonnes (Modal-XL) :** Organisation ergonomique claire et spacieuse :
+    - **Colonne Gauche (Alimentaire — 6 vivres) :** Riz Impérial (Koku) 🌾, Poisson Frais 🐟, Feuilles de Thé 🍵, Gousses de Soja 🫘, Farine de Riz (Komeko) 🍚, Saké Impérial 🍶.
+    - **Colonne Droite (Matériaux de Construction — 5 ressources) :** Bois de Cèdre 🪵, Pierre de Granit 🪨, Argile Alluviale 🧱, Poutres de Charpente 🔨, Charbon de Bois 🪨/🔥.
+  * **Cases à Cocher par Ressource (Max 2 Sélectionnables) :** Intégration d'une case à cocher devant chacune des 11 ressources. Le joueur peut lier jusqu'à 2 ressources simultanément pour un équilibrage automatisé (inter-colonnes ou intra-colonnes). Dès que 2 cases sont cochées, les 9 autres ressources sont verrouillées pour préserver leur quota fixe et leurs cases sont temporairement désactivées.
+  * **Ajustement en Miroir Proportionnel (Troc Parfait 1:1) :** Augmenter le curseur ou la valeur numérique d'une ressource liée diminue automatiquement et proportionnellement l'autre ressource liée de la même quantité, conservant la somme totale du fief au grain près sans rupture d'équilibre.
+  * **Respect Strict des Plafonds & Planchers :** L'ajustement est borné dynamiquement par la capacité de stockage maximale de chaque ressource (scieries, carrières, fosses d'argile, greniers Kura, pavillons, meuneries, brasseries, etc.) et par le plancher de zéro, évitant tout dépassement d'entrepôt.
+  * **Gestion Backend & API Universelle (`ImperialSealEngine.php`, `api/seal.php`) :** Prise en charge complète de l'ensemble des 11 colonnes en base (`planets`), vérification transactionnelle du coût (3 Kobans), mise à jour atomique et rétrocompatibilité assurée.
+  * **Mutualisation Complète du Marché Castral :** Remplacement des implémentations dupliquées par la vue partielle mutualisée `views/partials/npc_exchange_modal.php` sur l'ensemble des pages (`building.php`, `empire.php`, `privilege.php`).
 ### Modifié (Changed)
 - **Rotation Aléatoire des Estampes du Carrousel (`views/partials/header.php`) :**
   * **Affichage Homogène des 50+ Panoramas :** Remplacement du tri alphabétique par nom de fichier par un brassage aléatoire (`shuffle`) à chaque rechargement de page. Toutes les estampes et œuvres d'art du carrousel bénéficient ainsi d'une visibilité équitable et variée à chaque navigation du Daimyō.
