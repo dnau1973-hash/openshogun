@@ -92,6 +92,11 @@ if (preg_match('#^/admin(?:/([a-zA-Z0-9_-]+))?/?$#', $requestUriPath, $adminMatc
     if (!empty($adminMatches[1])) {
         $_GET['tab'] = $adminMatches[1];
     }
+} elseif (preg_match('#^/gamestudio(?:/([a-zA-Z0-9_-]+))?/?$#', $requestUriPath, $gsMatches)) {
+    $_GET['page'] = 'gamestudio';
+    if (!empty($gsMatches[1])) {
+        $_GET['tab'] = $gsMatches[1];
+    }
 } elseif (preg_match('#^/atelier(?:-pedagogique)?(?:/backend/([a-zA-Z0-9_-]+))?/?$#', $requestUriPath, $atelierMatches)) {
     $_GET['page'] = 'pedagogy';
     if (!empty($atelierMatches[1])) {
@@ -152,7 +157,7 @@ if ($page === 'galaxy') {
     $page = 'view_resource';
 }
 
-$allowedPages = ['resources', 'view_resource', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team', 'poster', 'newsletter_compose'];
+$allowedPages = ['resources', 'view_resource', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'gamestudio', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team', 'poster', 'newsletter_compose'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';
@@ -162,6 +167,17 @@ if (!in_array($page, $allowedPages)) {
 if ($page === 'admin' && !$auth->isAdmin()) {
     header('Location: /?page=resources');
     exit;
+}
+
+// Vérifier les droits si la page demandée est Game Studio
+if ($page === 'gamestudio') {
+    require_once __DIR__ . '/core/GameStudioEngine.php';
+    $gsEngine = new GameStudioEngine();
+    $currentGsUserId = (int)Auth::id();
+    if (!$gsEngine->isAuthorized($currentGsUserId)) {
+        header('Location: /?page=resources');
+        exit;
+    }
 }
 
 // Vérifier les droits si la page demandée est la composition de missive impériale

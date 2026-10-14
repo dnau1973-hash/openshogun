@@ -3,7 +3,18 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
-## [Unreleased]
+## [1.28.0] - 2026-10-14
+### Ajouté (Added)
+- **Nouvelle Interface Unifiée Game Studio en Architecture MVC (`views/gamestudio.php`, `core/GameStudioEngine.php`) :**
+  * **Fusion Studio & Administration :** Plateforme centrale unifiant les outils du studio de développement (Dev Team) et le panneau d'administration générale du Shōgunat.
+  * **Barre d'Outils Supérieure (Toolbar) :** Intégration d'une barre de navigation supérieure avec onglets interactifs :
+    - **Dashboard (`views/gamestudio/dashboard.php`) :** Tableau de bord télémétrique avec cartes KPIs (Pages vues, daimyōs uniques, requêtes/minute, ratio bots/humains), graphiques d'activité interactifs ApexCharts avec fallback haute définition Canvas sans dépendance, top des modules consultés, répartition horaire des requêtes, table des daimyōs les plus actifs avec filtre de recherche dynamique, métriques serveur et santé du système.
+    - **Général (`views/gamestudio/general.php`) :** Vue synthétique sur la configuration globale, version du framework, spécifications d'environnement (PHP, OS, serveur web), compteurs globaux (comptes humains, clans IA, fiefs) et effectifs de l'équipe de développement avec rôles honorifiques.
+  * **Architecture MVC Découpée (`views/gamestudio/`) :** Respect strict des normes MVC avec extraction modulaire et autonome de chaque sous-vue dans le répertoire dédié `views/gamestudio/`, piloté par le contrôleur maître `views/gamestudio.php` et le moteur métier `core/GameStudioEngine.php`.
+  * **Raccourci dans le HUD Supérieur (`views/partials/header.php`) :** Ajout de l'icône Game Studio (`fa-laptop-code`) à côté de l'Administration sans supprimer aucun icône existant du jeu.
+  * **Routage & Contrôle d'Accès Sécurisé (`index.php`) :** Ajout de la route `/gamestudio` avec alias d'onglets, filtre de sécurité limitant l'accès aux Administrateurs et aux membres habilités de la Dev Team.
+### Supprimé (Removed)
+- **Suppression du Fichier Sandbox (`sandbox.php`) :** Suppression propre et définitive du script de bac à sable obsolète à la racine du projet.
 
 ## [1.27.0] - 2026-10-14
 ### Ajouté (Added)

@@ -492,6 +492,16 @@ $navItems = [
                     </a>
                 <?php endif; ?>
 
+                <?php if ($auth->isAdmin() || $isDevTeamMember): ?>
+                    <!-- Game Studio (Fusion Studio & Administration) -->
+                    <a href="?page=gamestudio" 
+                       class="badge bg-indigo-lt text-indigo p-2 d-inline-flex align-items-center justify-content-center text-decoration-none shadow-none rounded <?= $page === 'gamestudio' ? 'border border-indigo' : '' ?>"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom"
+                       title="Game Studio (Dashboard &amp; Général)">
+                        <i class="fa-solid fa-laptop-code fs-3"></i>
+                    </a>
+                <?php endif; ?>
+
                 <!-- 5. Ambiance Sonore (Icône seule Font Awesome) -->
                 <button type="button" 
                         class="badge bg-secondary-lt text-secondary p-2 border-0 d-inline-flex align-items-center justify-content-center shadow-none rounded cursor-pointer" 
