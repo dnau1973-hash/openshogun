@@ -134,6 +134,68 @@ class ResearchEngine {
     }
 
     /**
+     * Récupère la liste fusionnée de toutes les définitions de recherche (statiques + enregistrées en base)
+     */
+    public static function getAllDefinitions(?PDO $db = null): array {
+        $defs = self::RESEARCH_DEFINITIONS;
+
+        // Charger les surcharges ou nouvelles recherches configurées en base
+        try {
+            $conn = $db ?? Database::getConnection();
+            $customRows = $conn->query("SELECT * FROM researches")->fetchAll(PDO::FETCH_ASSOC);
+            $customMeta = json_decode((string)GameConfig::get('custom_research_metadata', '{}'), true) ?: [];
+
+            foreach ($customRows as $row) {
+                $code = (string)$row['code'];
+                $meta = $customMeta[$code] ?? [];
+
+                if (isset($defs[$code])) {
+                    // Mettre à jour les coûts/délais depuis la BD si modifiés par l'administrateur
+                    $defs[$code]['name'] = $row['name'] ?: $defs[$code]['name'];
+                    $defs[$code]['description'] = $row['description'] ?: $defs[$code]['description'];
+                    $defs[$code]['base_cost']['metal'] = (int)$row['metal_cost'];
+                    $defs[$code]['base_cost']['crystal'] = (int)$row['crystal_cost'];
+                    $defs[$code]['base_cost']['deuterium'] = (int)$row['deuterium_cost'];
+                    $defs[$code]['base_time'] = (int)$row['base_time'];
+                    if (isset($meta['civ_tier'])) $defs[$code]['civ_tier'] = (int)$meta['civ_tier'];
+                    if (isset($meta['cost_multiplier'])) $defs[$code]['cost_multiplier'] = (float)$meta['cost_multiplier'];
+                    if (isset($meta['category'])) $defs[$code]['category'] = (string)$meta['category'];
+                    if (isset($meta['icon'])) $defs[$code]['icon'] = (string)$meta['icon'];
+                } else {
+                    // Nouvelle recherche personnalisée injectée !
+                    $civTier = (int)($meta['civ_tier'] ?? 1);
+                    $defs[$code] = [
+                        'name' => (string)$row['name'],
+                        'civ_tier' => $civTier,
+                        'category' => (string)($meta['category'] ?? 'general'),
+                        'category_label' => (string)($meta['category_label'] ?? 'Traité Supérieur'),
+                        'icon' => (string)($meta['icon'] ?? '📜'),
+                        'base_cost' => [
+                            'metal' => (int)$row['metal_cost'],
+                            'crystal' => (int)$row['crystal_cost'],
+                            'deuterium' => (int)$row['deuterium_cost']
+                        ],
+                        'cost_multiplier' => (float)($meta['cost_multiplier'] ?? 1.65),
+                        'base_time' => (int)$row['base_time'],
+                        'description' => (string)$row['description'],
+                        'is_custom' => true
+                    ];
+                }
+            }
+        } catch (Throwable $e) {}
+
+        return $defs;
+    }
+
+    /**
+     * Récupère la définition d'une technologie par son code
+     */
+    public static function getDefinitionByCode(string $code, ?PDO $db = null): ?array {
+        $all = self::getAllDefinitions($db);
+        return $all[$code] ?? null;
+    }
+
+    /**
      * Calcule le coût et la durée d'une technologie calqués sur le modèle exponentiel de BuildingEngine
      */
     public function calculateTechUpgrade(array $res, int $currentLevel, int $labLevel, int $population = 0, float $eruditeRatio = 0.0): array {
@@ -211,11 +273,15 @@ class ResearchEngine {
             $researchesMap[$row['code']] = $row;
         }
 
-        // Intégrer également les recherches définies au code si absentes de la BD
+        // Intégrer toutes les recherches (définitions initiales + recherches injectées et surchargées en base)
+        $allDefinitions = self::getAllDefinitions($this->db);
         $researches = [];
-        foreach (self::RESEARCH_DEFINITIONS as $code => $def) {
+        foreach ($allDefinitions as $code => $def) {
             if (isset($researchesMap[$code])) {
                 $item = $researchesMap[$code];
+                // Préserver nom/description si non renseignés
+                $item['name'] = $item['name'] ?: $def['name'];
+                $item['description'] = $item['description'] ?: $def['description'];
             } else {
                 $item = [
                     'code' => $code,
@@ -264,7 +330,7 @@ class ResearchEngine {
             $stmt->execute([$userId]);
             $res = $stmt->fetch();
             if ($res && empty($res['research_name'])) {
-                $def = self::RESEARCH_DEFINITIONS[$res['research_code']] ?? null;
+                $def = self::getDefinitionByCode($res['research_code'], $this->db);
                 $res['research_name'] = $def['name'] ?? ucfirst($res['research_code']);
             }
             return $res ?: null;
@@ -288,7 +354,7 @@ class ResearchEngine {
             throw new Exception("Vous devez d'abord construire l'Académie des Savoirs & Forge.");
         }
 
-        $def = self::RESEARCH_DEFINITIONS[$researchCode] ?? null;
+        $def = self::getDefinitionByCode($researchCode, $this->db);
         if (!$def) {
             throw new Exception("Cette technologie féodale est inconnue du traité de guerre.");
         }

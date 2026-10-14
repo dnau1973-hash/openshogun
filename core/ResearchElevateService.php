@@ -29,8 +29,8 @@ class ResearchElevateService {
         $costGrowth  = (float)GameConfig::get('research_cost_growth', 1.65);
         $gameSpeed   = (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1);
 
-        // Liste des technologies existantes
-        $researches = ResearchEngine::RESEARCH_DEFINITIONS;
+        // Liste de toutes les technologies existantes et injectées
+        $researches = ResearchEngine::getAllDefinitions($this->db);
 
         // Castes de référence
         $castes = SocialCasteEngine::CASTES;
@@ -63,7 +63,7 @@ class ResearchElevateService {
     }
 
     /**
-     * Enregistre ou met à jour une recherche féodale dans la base de données
+     * Enregistre ou édite une recherche féodale (BD + métadonnées de caste et d'icône)
      */
     public function saveResearch(array $data): bool {
         $code = trim((string)($data['code'] ?? ''));
@@ -73,11 +73,17 @@ class ResearchElevateService {
         $crystal = max(0, (int)($data['crystal_cost'] ?? 500));
         $deut = max(0, (int)($data['deuterium_cost'] ?? 200));
         $time = max(10, (int)($data['base_time'] ?? 180));
+        $civTier = max(1, min(5, (int)($data['civ_tier'] ?? 1)));
+        $costMultiplier = max(1.1, min(3.0, (float)($data['cost_multiplier'] ?? 1.65)));
+        $category = trim((string)($data['category'] ?? 'military'));
+        $categoryLabel = trim((string)($data['category_label'] ?? 'Traité Supérieur'));
+        $icon = trim((string)($data['icon'] ?? '📜'));
 
         if (empty($code) || empty($name)) {
             throw new Exception("Le code technique et le nom du savoir sont obligatoires.");
         }
 
+        // 1. Sauvegarder dans la table `researches`
         try {
             $stmt = $this->db->prepare("
                 INSERT INTO researches (code, name, metal_cost, crystal_cost, deuterium_cost, base_time, description)
@@ -91,10 +97,22 @@ class ResearchElevateService {
                     description = VALUES(description)
             ");
             $stmt->execute([$code, $name, $metal, $crystal, $deut, $time, $desc]);
-            return true;
         } catch (Throwable $e) {
-            // Fallback silencieux si la base est verrouillée
-            return false;
+            // Ignorer l'erreur SQL si serveur indisponible
         }
+
+        // 2. Sauvegarder les métadonnées (Palier de Caste, Icône, Catégorie, Multiplicateur)
+        $customMeta = json_decode((string)GameConfig::get('custom_research_metadata', '{}'), true) ?: [];
+        $customMeta[$code] = [
+            'civ_tier' => $civTier,
+            'cost_multiplier' => $costMultiplier,
+            'category' => $category,
+            'category_label' => $categoryLabel ?: 'Traité Supérieur',
+            'icon' => $icon ?: '📜'
+        ];
+        GameConfig::set('custom_research_metadata', json_encode($customMeta, JSON_UNESCAPED_UNICODE));
+
+        return true;
     }
 }
+

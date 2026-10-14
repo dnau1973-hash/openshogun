@@ -245,8 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <th class="text-center">Palier Civilisation</th>
                     <th>Coûts de Base</th>
                     <th class="text-center">Temps de Base</th>
-                    <th class="text-center">Coeff Exponentiel</th>
-                    <th class="text-end">Statut</th>
+                    <th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -291,11 +290,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         <td class="text-center font-monospace small">
                             <i class="fa-solid fa-stopwatch text-info me-1"></i><?= $r['base_time'] ?>s (<?= intdiv($r['base_time'], 60) ?>m <?= $r['base_time'] % 60 ?>s)
                         </td>
-                        <td class="text-center font-monospace fw-bold text-indigo">
-                            &times;<?= number_format((float)($r['cost_multiplier'] ?? 1.6), 2) ?>
-                        </td>
                         <td class="text-end">
-                            <span class="badge bg-success-lt text-success fw-bold">Actif en Jeu</span>
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm"
+                                    onclick="openEditResearchModal(<?= htmlspecialchars(json_encode([
+                                        'code' => $code,
+                                        'name' => $r['name'],
+                                        'description' => $r['description'] ?? '',
+                                        'metal_cost' => (int)($r['base_cost']['metal'] ?? 1000),
+                                        'crystal_cost' => (int)($r['base_cost']['crystal'] ?? 800),
+                                        'deuterium_cost' => (int)($r['base_cost']['deuterium'] ?? 400),
+                                        'base_time' => (int)($r['base_time'] ?? 300),
+                                        'civ_tier' => $civTier,
+                                        'cost_multiplier' => (float)($r['cost_multiplier'] ?? 1.65),
+                                        'category' => $r['category'] ?? 'military',
+                                        'category_label' => $r['category_label'] ?? 'Armement & Forge',
+                                        'icon' => $r['icon'] ?? '📜'
+                                    ]), ENT_QUOTES, 'UTF-8') ?>)"
+                                    title="Éditer les paramètres, coûts et palier de ce savoir">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                <span>Éditer</span>
+                            </button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -313,15 +328,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <div class="modal-header">
                     <h5 class="modal-title d-flex align-items-center gap-2">
                         <i class="fa-solid fa-scroll text-primary"></i>
-                        <span>Ajouter une Technologie dans l'Académie des Savoirs</span>
+                        <span>Injecter une Nouvelle Technologie dans l'Académie des Savoirs</span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small">Code Technique (ex: kayaku_explosive_tech) *</label>
-                            <input type="text" name="code" class="form-control font-monospace" placeholder="code_en_snake_case" required>
+                            <label class="form-label fw-bold small">Code Technique (identifiant unique) *</label>
+                            <input type="text" name="code" class="form-control font-monospace" placeholder="ex: kayaku_explosive_tech" required>
+                            <div class="form-text small">Lettres minuscules et underscores uniquement.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold small">Nom Féodal de la Recherche *</label>
@@ -343,12 +359,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             <label class="form-label fw-bold small">Coût Riz de Base</label>
                             <input type="number" name="deuterium_cost" class="form-control font-monospace" value="1000" min="0" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label fw-bold small">Temps de Base (Secondes)</label>
                             <input type="number" name="base_time" class="form-control font-monospace" value="300" min="10" required>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small">Palier de Civilisation Requis (Shinōkōshō)</label>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Palier de Civilisation (Shinōkōshō)</label>
                             <select name="civ_tier" class="form-select">
                                 <option value="1">Palier 1 : Nōmin (Paysans &amp; Ouvriers)</option>
                                 <option value="2">Palier 2 : Kōgiyō (Artisans &amp; Bâtisseurs)</option>
@@ -357,12 +373,122 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                 <option value="5">Palier 5 : Daimyō &amp; Kuge (Haute Noblesse)</option>
                             </select>
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Multiplicateur Coût / Niv</label>
+                            <input type="number" step="0.05" name="cost_multiplier" class="form-control font-monospace" value="1.65" min="1.1" max="2.5" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Catégorie</label>
+                            <select name="category" class="form-select">
+                                <option value="military" selected>Armement &amp; Balistique</option>
+                                <option value="defense">Défense Castrale</option>
+                                <option value="logistics">Logistique &amp; Subsistance</option>
+                                <option value="strategy">Stratégie &amp; Renseignement</option>
+                                <option value="doctrine">Doctrine &amp; Spiritualité</option>
+                                <option value="general">Général</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold small">Libellé Catégorie</label>
+                            <input type="text" name="category_label" class="form-control" value="Armement &amp; Forge">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small">Icône / Émoji</label>
+                            <input type="text" name="icon" class="form-control text-center fs-3" value="⚔️">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-1 shadow-sm">
-                        <i class="fa-solid fa-plus me-1"></i> Créer la Technologie
+                        <i class="fa-solid fa-plus me-1"></i> Injecter la Technologie
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL D'ÉDITION D'UNE RECHERCHE EXISTANTE -->
+<div class="modal fade" id="modalEditResearch" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="?page=gamestudio&tab=elevate_research">
+                <input type="hidden" name="action" value="save_custom_research">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-primary"></i>
+                        <span>Éditer la Technologie Féodale</span>
+                        <span class="badge bg-indigo-lt font-monospace" id="edit_badge_code"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="code" id="edit_code">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold small">Nom Féodal de la Recherche *</label>
+                            <input type="text" name="name" id="edit_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Icône / Émoji</label>
+                            <input type="text" name="icon" id="edit_icon" class="form-control text-center fs-3">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Description &amp; Traité Militaire</label>
+                            <textarea name="description" id="edit_description" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Coût Bois de Base</label>
+                            <input type="number" name="metal_cost" id="edit_metal_cost" class="form-control font-monospace" min="0" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Coût Pierre de Base</label>
+                            <input type="number" name="crystal_cost" id="edit_crystal_cost" class="form-control font-monospace" min="0" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Coût Riz de Base</label>
+                            <input type="number" name="deuterium_cost" id="edit_deuterium_cost" class="form-control font-monospace" min="0" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Temps de Base (Secondes)</label>
+                            <input type="number" name="base_time" id="edit_base_time" class="form-control font-monospace" min="10" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Palier de Civilisation (Shinōkōshō)</label>
+                            <select name="civ_tier" id="edit_civ_tier" class="form-select">
+                                <option value="1">Palier 1 : Nōmin (Paysans &amp; Ouvriers)</option>
+                                <option value="2">Palier 2 : Kōgiyō (Artisans &amp; Bâtisseurs)</option>
+                                <option value="3">Palier 3 : Shōnin (Marchands &amp; Caravaniers)</option>
+                                <option value="4">Palier 4 : Gakusha &amp; Bushi (Érudits &amp; Samouraïs)</option>
+                                <option value="5">Palier 5 : Daimyō &amp; Kuge (Haute Noblesse)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Multiplicateur Coût / Niv</label>
+                            <input type="number" step="0.05" name="cost_multiplier" id="edit_cost_multiplier" class="form-control font-monospace" min="1.1" max="2.5" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Catégorie</label>
+                            <select name="category" id="edit_category" class="form-select">
+                                <option value="military">Armement &amp; Balistique</option>
+                                <option value="defense">Défense Castrale</option>
+                                <option value="logistics">Logistique &amp; Subsistance</option>
+                                <option value="strategy">Stratégie &amp; Renseignement</option>
+                                <option value="doctrine">Doctrine &amp; Spiritualité</option>
+                                <option value="general">Général</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Libellé Catégorie</label>
+                            <input type="text" name="category_label" id="edit_category_label" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer les Modifications
                     </button>
                 </div>
             </form>
@@ -433,4 +559,31 @@ function updateSimulation() {
 
 // Initialiser au chargement
 document.addEventListener('DOMContentLoaded', updateSimulation);
+
+/**
+ * Préremplit et ouvre le modal d'édition d'une technologie
+ */
+function openEditResearchModal(data) {
+    if (!data) return;
+    document.getElementById('edit_code').value = data.code || '';
+    document.getElementById('edit_badge_code').textContent = data.code || '';
+    document.getElementById('edit_name').value = data.name || '';
+    document.getElementById('edit_icon').value = data.icon || '📜';
+    document.getElementById('edit_description').value = data.description || '';
+    document.getElementById('edit_metal_cost').value = data.metal_cost || 1000;
+    document.getElementById('edit_crystal_cost').value = data.crystal_cost || 800;
+    document.getElementById('edit_deuterium_cost').value = data.deuterium_cost || 400;
+    document.getElementById('edit_base_time').value = data.base_time || 300;
+    document.getElementById('edit_civ_tier').value = data.civ_tier || 1;
+    document.getElementById('edit_cost_multiplier').value = data.cost_multiplier || 1.65;
+    document.getElementById('edit_category').value = data.category || 'military';
+    document.getElementById('edit_category_label').value = data.category_label || 'Armement & Forge';
+
+    const modalEl = document.getElementById('modalEditResearch');
+    if (modalEl) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+}
 </script>
+

@@ -76,11 +76,21 @@ class ResearchService {
                 'category_label' => 'Armement & Forge',
                 'icon' => '⚔️',
             ],
-            default => [
-                'category' => 'general',
-                'category_label' => 'Savoir Général',
-                'icon' => '📜',
-            ],
+            default => (function() use ($code) {
+                $def = ResearchEngine::getDefinitionByCode($code);
+                if ($def) {
+                    return [
+                        'category' => $def['category'] ?? 'general',
+                        'category_label' => $def['category_label'] ?? 'Traité Supérieur',
+                        'icon' => $def['icon'] ?? '📜',
+                    ];
+                }
+                return [
+                    'category' => 'general',
+                    'category_label' => 'Savoir Général',
+                    'icon' => '📜',
+                ];
+            })(),
         };
     }
 
