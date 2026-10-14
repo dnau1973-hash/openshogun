@@ -45,11 +45,11 @@ try {
         if ($queueId <= 0) {
             throw new Exception("Identifiant de chantier manquant.");
         }
-        $user = Auth::user();
-        if (!$user) {
+        $userId = (int)(Auth::id() ?? $planet['user_id'] ?? 0);
+        if ($userId <= 0) {
             throw new Exception("Utilisateur non identifié.");
         }
-        $result = $buildingEngine->instantFinish((int)$user['id'], (int)$planet['id'], $queueId);
+        $result = $buildingEngine->instantFinish($userId, (int)$planet['id'], $queueId);
         echo json_encode($result);
     } elseif ($action === 'demolish') {
         $category = $_POST['category'] ?? 'building';
@@ -63,7 +63,7 @@ try {
     } else {
         throw new Exception("Action non reconnue.");
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
 

@@ -696,13 +696,23 @@ async function instantFinishBuild(queueId) {
 
     try {
         const res = await fetch('/api/build.php', { method: 'POST', body: formData });
-        const data = await res.json();
+        const text = await res.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (parseErr) {
+            console.error('Réponse brute serveur non-JSON :', text);
+            showModalAlert("Erreur serveur : " + (text.replace(/<[^>]*>?/gm, '').trim().substring(0, 180) || 'Réponse inattendue.'), 'error');
+            return;
+        }
+
         if (data.success) {
             window.location.reload();
         } else {
             showModalAlert(data.error || 'Erreur lors de la finalisation du chantier.', 'error');
         }
     } catch (e) {
+        console.error('Erreur réseau / fetch :', e);
         showModalAlert('Erreur de connexion au serveur.', 'error');
     }
 }

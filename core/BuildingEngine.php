@@ -439,7 +439,7 @@ class BuildingEngine {
         // Mise à jour des calculs de production et capacités hors transaction
         try {
             $this->planetEngine->updatePlanet($planetId);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             // Tolérance si déjà rafraîchi
         }
 

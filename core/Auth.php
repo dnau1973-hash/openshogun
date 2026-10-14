@@ -252,6 +252,10 @@ class Auth {
         return $_SESSION['user_id'] ?? null;
     }
 
+    public static function user(): ?array {
+        return self::getCurrentUser();
+    }
+
     public static function getCurrentUser(): ?array {
         if (!self::check()) return null;
         $db = Database::getConnection();
