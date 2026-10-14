@@ -938,6 +938,10 @@ $navItems = [
         $beamsMax = max(1, (int)($planet['wooden_beams_max'] ?? 10000));
         $pctBeams = min(100, max(0, ($beamsStock / $beamsMax) * 100));
 
+        $charcoalStock = (float)($planet['charcoal'] ?? 0);
+        $charcoalMax = max(1, (int)($planet['charcoal_max'] ?? 10000));
+        $pctCharcoal = min(100, max(0, ($charcoalStock / $charcoalMax) * 100));
+
         $eBalance = (int)($planet['energy_max'] ?? 0) - (int)($planet['energy_used'] ?? 0);
         $eOk = ($eBalance >= 0);
         $pctEnergy = ($planet['energy_max'] > 0) ? min(100, max(0, ((int)($planet['energy_used'] ?? 0) / (int)$planet['energy_max']) * 100)) : 0;
@@ -1035,9 +1039,9 @@ $navItems = [
                         <i class="fa-solid fa-hammer text-primary fs-3"></i>
                         <div class="text-start lh-1">
                             <span class="fw-bold" style="font-size:0.84rem;">Construction</span>
-                            <div class="text-muted d-none d-md-block font-monospace" style="font-size:0.65rem;">Bois &bull; Pierre &bull; Argile &bull; Poutres</div>
+                            <div class="text-muted d-none d-md-block font-monospace" style="font-size:0.65rem;">Bois &bull; Pierre &bull; Argile &bull; Poutres &bull; Charbon</div>
                         </div>
-                        <span class="badge bg-secondary-lt text-secondary font-monospace ms-1" style="font-size:0.65rem;">4</span>
+                        <span class="badge bg-secondary-lt text-secondary font-monospace ms-1" style="font-size:0.65rem;">5</span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-start shadow-lg p-2 border" aria-labelledby="dropdownConstruction" style="min-width:320px; max-width:95vw; z-index:1060;">
                         <div class="d-flex justify-content-between align-items-center px-2 py-1 mb-1 border-bottom">
@@ -1150,6 +1154,32 @@ $navItems = [
                                 </div>
                                 <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
                                     <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- 5. Charbon de Bois -->
+                        <a href="?page=building&type=sawmill" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Charbon de Bois : Stock <?= number_format((int)$charcoalStock) ?> / <?= number_format($charcoalMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-fire text-dark fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Charbon de Bois</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($charcoalMax) ?></div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-charcoal"
+                                          data-current="<?= $charcoalStock ?>"
+                                          data-max="<?= $charcoalMax ?>">
+                                        <?= number_format((int)$charcoalStock) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.68rem;">Scierie</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-dark" id="bar-charcoal" style="width:<?= $pctCharcoal ?>%;"></div>
                                 </div>
                             </div>
                         </a>

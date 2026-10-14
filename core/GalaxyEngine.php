@@ -346,6 +346,47 @@ class GalaxyEngine {
             unset($gItem);
         } catch (Exception $e) {}
 
+        // Récupérer les réserves minérales des montagnes dans ce secteur
+        $mountainStocks = [];
+        $mountainEngine = null;
+        try {
+            require_once __DIR__ . '/MountainEngine.php';
+            $mountainEngine = new MountainEngine($this->db);
+            $stMount = $this->db->prepare("SELECT coord_x, coord_y, sulfur_stock, sulfur_initial, nitrate_stock, nitrate_initial, iron_sand_stock, iron_sand_initial FROM mountain_mineral_stocks WHERE coord_x BETWEEN ? AND ? AND coord_y BETWEEN ? AND ?");
+            $stMount->execute([$minX, $maxX, $minY, $maxY]);
+            while ($ms = $stMount->fetch(PDO::FETCH_ASSOC)) {
+                $mountainStocks[$ms['coord_x'] . ':' . $ms['coord_y']] = [
+                    'sulfur_stock'       => (int)$ms['sulfur_stock'],
+                    'sulfur_initial'     => (int)$ms['sulfur_initial'],
+                    'nitrate_stock'      => (int)$ms['nitrate_stock'],
+                    'nitrate_initial'    => (int)$ms['nitrate_initial'],
+                    'iron_sand_stock'    => (int)$ms['iron_sand_stock'],
+                    'iron_sand_initial'  => (int)$ms['iron_sand_initial'],
+                    'depleted'           => ((int)$ms['sulfur_stock'] <= 0 && (int)$ms['nitrate_stock'] <= 0 && (int)$ms['iron_sand_stock'] <= 0)
+                ];
+            }
+            foreach ($gridMap as $k => &$gItem) {
+                if (empty($gItem['user_id']) && empty($gItem['is_authentic_castle']) && empty($gItem['is_oasis'])) {
+                    $tt = self::getTerrainType((int)$gItem['coord_x'], (int)$gItem['coord_y']);
+                    if ($tt['type'] === 'mountain') {
+                        $gItem['terrain_type'] = 'mountain';
+                        $gItem['terrain_img'] = '/public/assets/map/tile_mountain.jpg?v=2';
+                        $gItem['terrain_name'] = $tt['name'];
+                        $gItem['is_mountain'] = 1;
+                        $ms = $mountainStocks[$k] ?? ($mountainEngine ? $mountainEngine->getStock((int)$gItem['coord_x'], (int)$gItem['coord_y']) : null);
+                        $gItem['sulfur_stock'] = $ms['sulfur_stock'] ?? 0;
+                        $gItem['sulfur_initial'] = $ms['sulfur_initial'] ?? 0;
+                        $gItem['nitrate_stock'] = $ms['nitrate_stock'] ?? 0;
+                        $gItem['nitrate_initial'] = $ms['nitrate_initial'] ?? 0;
+                        $gItem['iron_sand_stock'] = $ms['iron_sand_stock'] ?? 0;
+                        $gItem['iron_sand_initial'] = $ms['iron_sand_initial'] ?? 0;
+                        $gItem['mountain_depleted'] = !empty($ms['depleted']);
+                    }
+                }
+            }
+            unset($gItem);
+        } catch (Exception $e) {}
+
         try {
             require_once __DIR__ . '/OasisEngine.php';
             $oasisEngine = new OasisEngine();

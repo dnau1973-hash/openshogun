@@ -3,6 +3,21 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.29.0] - 2026-10-14
+### Ajouté (Added)
+- **Indicateur de Charbon de Bois dans le HUD Supérieur (`views/partials/header.php`) :**
+  * Intégration complète de la ressource Charbon de Bois (`charcoal`) dans la barre de ressources sous le carrousel castral.
+  * Mise à jour du menu déroulant Matériaux de Construction (badge `5`, sous-titre `Bois • Pierre • Argile • Poutres • Charbon`).
+  * Indicateur dynamique (`#res-val-charcoal`, barre `#bar-charcoal`, icône `fa-fire`) relié directement à la carbonisation de la Scierie (`?page=building&type=sawmill`).
+- **Nouveau Système Minier de Montagne & 3 Nouvelles Ressources (`core/MountainEngine.php`, `core/PlanetEngine.php`, `core/FleetEngine.php`, `core/GalaxyEngine.php`, `views/map.php`, `views/fleet.php`, `views/building.php`, `api/craft.php`) :**
+  * **3 Nouvelles Ressources Minérales :** Implantation du **Soufre** (`sulfur`, 🌋), du **Nitrate** (`nitrate`, 🧪) et du **Sable de fer** (*Satetsu* `iron_sand`, 💎) sur le modèle écologique des parcelles de lac.
+  * **Sanctuaires Minéraux Non-Annexables (`core/MountainEngine.php`) :** Les tuiles de montagne (`mountain`) sur la carte procédurale hébergent des gisements minéraux finis générés procéduralement (10 000 à 25 000 par composant). Les parcelles de montagne ne peuvent être annexées et restent des sanctuaires communautaires exploitables par expédition.
+  * **Nouvelle Unité Féodale — Mineur des Cimes (`mineur` / ⛏️ *Kōfu*) :** Formé au Dojo d'Infanterie (`barracks`), équipé pour l'extraction en haute altitude et doté d'une capacité de transport de 250 unités.
+  * **Nouvelle Recherche Académique — Métallurgie & Géologie Féodale (`mining_tech`) :** Confère +25% de rendement d'extraction minérale par niveau d'académie.
+  * **Missions de Flotte « Expédition Minière » (`mission_type = 'mining'`) :** Déploiement d'expéditions vers les tuiles de montagne avec prélèvement atomique et sécurisé des minéraux, acheminement vers le fief émetteur et rapports féodaux détaillés.
+  * **Affichage Télémétrique & Carte Tactique (`views/map.php`, `views/fleet.php`) :** Jauges interactives des gisements résiduels de montagne sur la modale de carte et pré-remplissage automatique des expéditions minières.
+  * **Artisanat & Concassage Minéral au Tailleur de Pierre (`views/building.php`, `api/craft.php`, `core/PlanetEngine.php`) :** Possibilité de fabriquer du Soufre (à partir de Pierre de granit), du Nitrate (à partir d'Argile alluviale) et du Sable de fer (à partir de Pierre de granit) directement à l'Atelier du Tailleur de Pierre avec file d'attente, progression en direct et annulation avec remboursement de 80%.
+
 ## [1.28.0] - 2026-10-14
 ### Ajouté (Added)
 - **Nouvelle Interface Unifiée Game Studio en Architecture MVC (`views/gamestudio.php`, `core/GameStudioEngine.php`) :**

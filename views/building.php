@@ -670,6 +670,10 @@ if (!$isEmptyPlot) {
                                 <a href="#craftSection" class="btn btn-warning text-dark fw-bold">
                                     <i class="fa-solid fa-hammer me-1"></i>Accéder au Façonnage de Poutres &darr;
                                 </a>
+                            <?php elseif ($code === 'stonemason' && $lvl > 0): ?>
+                                <a href="#craftSection" class="btn btn-secondary text-white fw-bold">
+                                    <i class="fa-solid fa-gem me-1"></i>Accéder à l'Atelier Minéralier &darr;
+                                </a>
                             <?php elseif ($code === 'hq'): ?>
                                 <a href="#feastSection" class="btn btn-warning text-dark fw-bold">
                                     <i class="fa-solid fa-wine-bottle me-1"></i>Salle des Banquets &amp; Célébrations &darr;
@@ -1592,6 +1596,224 @@ if (!$isEmptyPlot) {
             </div>
             <?php endif; ?>
 
+            <?php if ($code === 'stonemason' && $lvl > 0): ?>
+            <?php
+            $planetEngine->processCraftQueue((int)$planet['id']);
+            $mineralCraftQueue = $planetEngine->getCraftQueue((int)$planet['id'], 'stonemason');
+            $activeMineralCraft = !empty($mineralCraftQueue) ? $mineralCraftQueue[0] : null;
+            $pendingMineralCrafts = count($mineralCraftQueue) > 1 ? array_slice($mineralCraftQueue, 1) : [];
+
+            require_once __DIR__ . '/../core/ImperialSealEngine.php';
+            $sealEngine = new ImperialSealEngine();
+            $isSealActive = $sealEngine->isSealActive((int)$user['id']);
+            $maxMineralCraftQueue = $isSealActive ? 4 : 1;
+            $canEnqueueMineral = count($mineralCraftQueue) < $maxMineralCraftQueue;
+            ?>
+            <!-- ========================================================
+                 ATELIER DU TAILLEUR DE PIERRE : RAFFINAGE MINÉRALIER
+                 ======================================================== -->
+            <div class="card mb-3" id="craftSection" style="border-top: 3px solid #64748b;">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h3 class="card-title text-secondary-emphasis d-flex align-items-center gap-2 m-0">
+                            <span><i class="fa-solid fa-gem text-secondary"></i></span> Atelier Minéralier &amp; Concassage (Ishikiri)
+                        </h3>
+                        <div class="text-secondary small mt-1">
+                            Raffinez vos blocs de granit et poches d'argile en minerais précieux : <strong>Soufre Volcanique</strong>, <strong>Nitrate de Potasse</strong> et <strong>Sable de Fer (Satetsu 砂鉄)</strong> pour vos manufactures de poudre et forges impériales.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap ms-auto">
+                        <span class="badge bg-secondary text-white fw-bold shadow-sm">
+                            <i class="fa-solid fa-landmark me-1"></i>Niveau <?= $lvl ?>
+                        </span>
+                        <?php if ($isSealActive): ?>
+                            <span class="badge bg-warning text-dark fw-bold shadow-sm">
+                                <i class="fa-solid fa-crown text-warning me-1"></i>Sceau Impérial (<?= count($mineralCraftQueue) ?>/4)
+                            </span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary-lt fw-bold">
+                                File Simple : <?= count($mineralCraftQueue) ?>/1
+                            </span>
+                        <?php endif; ?>
+                        <span class="badge bg-warning-lt fw-bold">Rendement : +<?= (int)($lvl * 2) ?>%</span>
+                        <span class="badge bg-info-lt fw-bold">Vitesse : +<?= (int)($lvl * 15) ?>%</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Lot actif -->
+                    <?php if ($activeMineralCraft): ?>
+                    <?php
+                    $mProd = $activeMineralCraft['product'];
+                    $mIcon = match($mProd) {
+                        'sulfur' => '🌋',
+                        'nitrate' => '🧪',
+                        'iron_sand' => '💎',
+                        default => '⛏️'
+                    };
+                    $mTitle = match($mProd) {
+                        'sulfur' => 'Synthèse de Soufre Volcanique en cours...',
+                        'nitrate' => 'Cristallisation de Salpêtre (Nitrate) en cours...',
+                        'iron_sand' => 'Broyage & Lavage de Sable de Fer en cours...',
+                        default => 'Raffinage Minéralier en cours...'
+                    };
+                    ?>
+                    <div class="alert alert-secondary mb-3 p-3 border-secondary shadow-sm" style="border-left: 5px solid #64748b; background: #f8fafc;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="fs-1"><?= $mIcon ?></span>
+                                <div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h4 class="m-0 fw-bold text-dark"><?= $mTitle ?></h4>
+                                        <span class="badge bg-secondary text-white fw-bold">Lot Actif (#1)</span>
+                                    </div>
+                                    <div class="text-secondary small mt-1">
+                                        Lot : <strong>+<?= number_format((int)$activeMineralCraft['produced_amount']) ?></strong> minerais &bull;
+                                        Fin estimée : <strong><?= date('H:i:s', (int)$activeMineralCraft['finishes_at']) ?></strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="cancelMineralCraft(<?= (int)$activeMineralCraft['id'] ?>)">
+                                    <i class="fa-solid fa-xmark me-1"></i>Interrompre
+                                </button>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-secondary" id="mineralCraftProgressBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Résumé des stocks minéraux -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-light">
+                                <div class="text-secondary small"><i class="fa-solid fa-volcano text-warning me-1"></i>Soufre en Réserve</div>
+                                <div class="fs-4 fw-bold text-warning"><?= number_format((int)($planet['sulfur'] ?? 0)) ?></div>
+                                <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['sulfur_max'] ?? 10000)) ?> max</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-light">
+                                <div class="text-secondary small"><i class="fa-solid fa-flask-vial text-info me-1"></i>Nitrate en Réserve</div>
+                                <div class="fs-4 fw-bold text-info"><?= number_format((int)($planet['nitrate'] ?? 0)) ?></div>
+                                <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['nitrate_max'] ?? 10000)) ?> max</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-light">
+                                <div class="text-secondary small"><i class="fa-solid fa-gem text-secondary me-1"></i>Sable de Fer (Satetsu)</div>
+                                <div class="fs-4 fw-bold text-secondary"><?= number_format((int)($planet['iron_sand'] ?? 0)) ?></div>
+                                <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['iron_sand_max'] ?? 15000)) ?> max</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Recettes d'Atelier : Soufre, Nitrate, Sable de fer -->
+                    <div class="row g-3">
+                        <!-- Recette 1 : Soufre -->
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9;">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
+                                            <span>🌋</span> Soufre Volcanique
+                                        </h4>
+                                        <span class="badge bg-warning-lt">4 Granit &rarr; 1 Soufre</span>
+                                    </div>
+                                    <p class="text-secondary small mb-3">
+                                        Concassage fin de roches granitiques et pyrites pour en extraire le soufre.
+                                    </p>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-secondary mb-1">Granit à concasser :</label>
+                                        <div class="input-group">
+                                            <input type="number" id="stone_amount_sulfur" class="form-control font-monospace" min="4" step="4" value="40" oninput="calcSulfurPreview()">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setMineralAmount('sulfur', 'max')">Max</button>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-2 rounded border mb-3 small d-flex justify-content-between align-items-center">
+                                        <span>Rendement : <strong id="preview_sulfur_gain" class="text-warning">+10 🌋</strong></span>
+                                        <span id="preview_sulfur_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-warning text-dark w-100 fw-bold" onclick="submitMineralCraft('sulfur')" <?= !$canEnqueueMineral ? 'disabled' : '' ?>>
+                                        <i class="fa-solid fa-fire text-dark me-1"></i>Raffiner du Soufre
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recette 2 : Nitrate -->
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9;">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
+                                            <span>🧪</span> Nitrate (Salpêtre)
+                                        </h4>
+                                        <span class="badge bg-info-lt">3 Argile &rarr; 1 Nitrate</span>
+                                    </div>
+                                    <p class="text-secondary small mb-3">
+                                        Lixiviation et filtration d'argiles salpêtrées pour cristalliser le nitrate de potasse.
+                                    </p>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-secondary mb-1">Argile à lixivier :</label>
+                                        <div class="input-group">
+                                            <input type="number" id="clay_amount_nitrate" class="form-control font-monospace" min="3" step="3" value="30" oninput="calcNitratePreview()">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setMineralAmount('nitrate', 'max')">Max</button>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-2 rounded border mb-3 small d-flex justify-content-between align-items-center">
+                                        <span>Rendement : <strong id="preview_nitrate_gain" class="text-info">+10 🧪</strong></span>
+                                        <span id="preview_nitrate_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-info text-white w-100 fw-bold" onclick="submitMineralCraft('nitrate')" <?= !$canEnqueueMineral ? 'disabled' : '' ?>>
+                                        <i class="fa-solid fa-flask-vial me-1"></i>Raffiner du Nitrate
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recette 3 : Sable de Fer -->
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9;">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
+                                            <span>💎</span> Sable de Fer (Satetsu)
+                                        </h4>
+                                        <span class="badge bg-secondary-lt">5 Granit &rarr; 1 Satetsu</span>
+                                    </div>
+                                    <p class="text-secondary small mb-3">
+                                        Séparation par gravitation des sables noirs ferrugineux issus de roches magmatiques.
+                                    </p>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-secondary mb-1">Granit à broyer :</label>
+                                        <div class="input-group">
+                                            <input type="number" id="stone_amount_ironsand" class="form-control font-monospace" min="5" step="5" value="50" oninput="calcIronSandPreview()">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="setMineralAmount('iron_sand', 'max')">Max</button>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-2 rounded border mb-3 small d-flex justify-content-between align-items-center">
+                                        <span>Rendement : <strong id="preview_ironsand_gain" class="text-secondary">+10 💎</strong></span>
+                                        <span id="preview_ironsand_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-secondary text-white w-100 fw-bold" onclick="submitMineralCraft('iron_sand')" <?= !$canEnqueueMineral ? 'disabled' : '' ?>>
+                                        <i class="fa-solid fa-gem me-1"></i>Raffiner du Satetsu
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <?php if ($code === 'market' && $lvl > 0): ?>
             <?php
             // Données opérationnelles du Marché Féodal (Bazar Castral)
@@ -2444,8 +2666,11 @@ function closeArtworkModal(e) {
 // ==========================================
 const grainMillLevel = <?= ($code === 'grain_mill') ? (int)$lvl : (int)($buildings['grain_mill'] ?? 0) ?>;
 const sawmillLevel = <?= ($code === 'sawmill') ? (int)$lvl : (int)($buildings['sawmill'] ?? 0) ?>;
+const stonemasonLevel = <?= ($code === 'stonemason') ? (int)$lvl : (int)($buildings['stonemason'] ?? 0) ?>;
 const availableRiceStock = <?= (float)($planet['deuterium'] ?? 0) ?>;
 const availableWoodStock = <?= (float)($planet['metal'] ?? 0) ?>;
+const availableStoneStock = <?= (float)($planet['crystal'] ?? 0) ?>;
+const availableClayStock = <?= (float)($planet['clay'] ?? 0) ?>;
 const gameSpeed = <?= (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1) ?>;
 
 function formatCraftDuration(sec) {
@@ -2766,6 +2991,191 @@ async function cancelWoodCraft(craftId) {
         }
     } catch (e) {
         showModalAlert('Erreur de communication avec la charpenterie.', 'error');
+    }
+}
+
+// ==========================================
+// ATELIER MINÉRALIER : CONCASSAGE & SYNTHÈSE
+// ==========================================
+<?php if (!empty($activeMineralCraft)): ?>
+function updateMineralCraftProgressBar() {
+    const started = <?= (int)$activeMineralCraft['started_at'] ?>;
+    const finishes = <?= (int)$activeMineralCraft['finishes_at'] ?>;
+    const now = Math.floor(Date.now() / 1000);
+    const total = Math.max(1, finishes - started);
+    const elapsed = Math.max(0, now - started);
+    const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+    const pbar = document.getElementById('mineralCraftProgressBar');
+    if (pbar) {
+        pbar.style.width = pct.toFixed(1) + '%';
+        pbar.setAttribute('aria-valuenow', pct.toFixed(1));
+    }
+}
+setInterval(updateMineralCraftProgressBar, 1000);
+updateMineralCraftProgressBar();
+<?php endif; ?>
+
+function calcSulfurPreview() {
+    const input = document.getElementById('stone_amount_sulfur');
+    const previewGain = document.getElementById('preview_sulfur_gain');
+    const previewTime = document.getElementById('preview_sulfur_time');
+    if (!input) return;
+    const stone = Math.max(0, parseFloat(input.value) || 0);
+    const efficiency = 1 + (stonemasonLevel * 0.02);
+    const gain = Math.floor((stone / 4) * efficiency);
+    if (previewGain) previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' 🌋';
+
+    if (previewTime) {
+        if (stone <= 0) {
+            previewTime.textContent = '--';
+        } else {
+            const duration = Math.max(15, Math.round((stone * 0.5) / (1 + (stonemasonLevel * 0.15)) / (gameSpeed || 1)));
+            previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
+        }
+    }
+}
+
+function calcNitratePreview() {
+    const input = document.getElementById('clay_amount_nitrate');
+    const previewGain = document.getElementById('preview_nitrate_gain');
+    const previewTime = document.getElementById('preview_nitrate_time');
+    if (!input) return;
+    const clay = Math.max(0, parseFloat(input.value) || 0);
+    const efficiency = 1 + (stonemasonLevel * 0.02);
+    const gain = Math.floor((clay / 3) * efficiency);
+    if (previewGain) previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' 🧪';
+
+    if (previewTime) {
+        if (clay <= 0) {
+            previewTime.textContent = '--';
+        } else {
+            const duration = Math.max(15, Math.round((clay * 0.4) / (1 + (stonemasonLevel * 0.15)) / (gameSpeed || 1)));
+            previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
+        }
+    }
+}
+
+function calcIronSandPreview() {
+    const input = document.getElementById('stone_amount_ironsand');
+    const previewGain = document.getElementById('preview_ironsand_gain');
+    const previewTime = document.getElementById('preview_ironsand_time');
+    if (!input) return;
+    const stone = Math.max(0, parseFloat(input.value) || 0);
+    const efficiency = 1 + (stonemasonLevel * 0.02);
+    const gain = Math.floor((stone / 5) * efficiency);
+    if (previewGain) previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' 💎';
+
+    if (previewTime) {
+        if (stone <= 0) {
+            previewTime.textContent = '--';
+        } else {
+            const duration = Math.max(20, Math.round((stone * 0.6) / (1 + (stonemasonLevel * 0.15)) / (gameSpeed || 1)));
+            previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
+        }
+    }
+}
+
+function setMineralAmount(product, val) {
+    let inputId = 'stone_amount_sulfur';
+    let available = availableStoneStock;
+    if (product === 'nitrate') {
+        inputId = 'clay_amount_nitrate';
+        available = availableClayStock;
+    } else if (product === 'iron_sand') {
+        inputId = 'stone_amount_ironsand';
+        available = availableStoneStock;
+    }
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (val === 'max') {
+        input.value = Math.floor(available);
+    } else {
+        input.value = val;
+    }
+    if (product === 'sulfur') calcSulfurPreview();
+    else if (product === 'nitrate') calcNitratePreview();
+    else if (product === 'iron_sand') calcIronSandPreview();
+}
+
+async function submitMineralCraft(product) {
+    let inputId = 'stone_amount_sulfur';
+    let available = availableStoneStock;
+    let minCost = 4;
+    let matName = "Pierre de Granit";
+
+    if (product === 'nitrate') {
+        inputId = 'clay_amount_nitrate';
+        available = availableClayStock;
+        minCost = 3;
+        matName = "Argile Alluviale";
+    } else if (product === 'iron_sand') {
+        inputId = 'stone_amount_ironsand';
+        available = availableStoneStock;
+        minCost = 5;
+        matName = "Pierre de Granit";
+    }
+
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const amount = parseFloat(input.value) || 0;
+
+    if (amount < minCost) {
+        showModalAlert(`Veuillez engager au moins ${minCost} unités de ${matName}.`, 'warning');
+        return;
+    }
+
+    if (amount > available) {
+        showModalAlert(`Vos réserves ne disposent que de ${Math.floor(available).toLocaleString('fr-FR')} unités de ${matName}.`, 'warning');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'craft_mineral');
+    formData.append('product', product);
+    formData.append('amount', amount);
+
+    try {
+        const res = await fetch('/api/craft.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Erreur lors du raffinage.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de transmission avec l\'atelier minéralier.', 'error');
+    }
+}
+
+async function cancelMineralCraft(craftId) {
+    const confirmed = await showModalConfirm(
+        'Voulez-vous annuler cette commande de raffinage minéralier ? 80% des matières premières engagées seront restituées dans vos entrepôts.',
+        'Annulation du lot'
+    );
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'cancel_craft');
+    formData.append('craft_id', craftId);
+
+    try {
+        const res = await fetch('/api/craft.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showModalAlert(data.error || "Impossible d'annuler le lot.", 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication avec l\'atelier.', 'error');
     }
 }
 

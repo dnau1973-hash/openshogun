@@ -163,6 +163,19 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
                 $preselectedTargetType = 'planet';
                 $preselectedTarget = $createdPlanetId;
                 $preselectedMission = 'fishing';
+            } elseif ($terrainData['type'] === 'mountain') {
+                $stmtCreateFree = $db->prepare("
+                    INSERT INTO planets 
+                    (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
+                    VALUES (?, ?, ?, 'terrestrial', 0, 0, 0, 0, 0, 0, 0, 0, 0, UNIX_TIMESTAMP())
+                ");
+                $freeName = $terrainData['name'] . ' Sanctuarisés';
+                $stmtCreateFree->execute([$freeName, $targetX, $targetY]);
+                $createdPlanetId = (int)$db->lastInsertId();
+
+                $preselectedTargetType = 'planet';
+                $preselectedTarget = $createdPlanetId;
+                $preselectedMission = 'mining';
             } else {
                 $stmtCreateFree = $db->prepare("
                     INSERT INTO planets 
@@ -216,6 +229,22 @@ if ($targetCoordsForLake) {
     }
 }
 
+// Vérification si la cible sélectionnée est une montagne et ses filons minéraux
+$isTargetMountain = false;
+$isTargetMountainDepleted = false;
+$targetMountainStock = null;
+if ($targetCoordsForLake) {
+    require_once __DIR__ . '/../core/MountainEngine.php';
+    $mountainEngine = new MountainEngine($db);
+    if ($mountainEngine->isMountainAt($targetCoordsForLake[0], $targetCoordsForLake[1])) {
+        $isTargetMountain = true;
+        $targetMountainStock = $mountainEngine->getStock($targetCoordsForLake[0], $targetCoordsForLake[1]);
+        if ($targetMountainStock) {
+            $isTargetMountainDepleted = !empty($targetMountainStock['depleted']);
+        }
+    }
+}
+
 // Vérifier la présence d'un Pionnier Féodal (Colon) dans la garnison
 $hasColonistAvailable = false;
 $availableColonCount = 0;
@@ -239,6 +268,16 @@ foreach ($stationedUnits as $u) {
     if ($u['unit_code'] === 'pecheur' && (int)$u['count'] > 0) {
         $hasFishermanAvailable = true;
         $availableFishermanCount += (int)$u['count'];
+    }
+}
+
+// Vérifier la présence de Mineurs des Cimes dans la garnison
+$hasMinerAvailable = false;
+$availableMinerCount = 0;
+foreach ($stationedUnits as $u) {
+    if ($u['unit_code'] === 'mineur' && (int)$u['count'] > 0) {
+        $hasMinerAvailable = true;
+        $availableMinerCount += (int)$u['count'];
     }
 }
 
@@ -371,6 +410,31 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                     </div>
                                 <?php endif; ?>
 
+                                <?php if ($isTargetMountain && $isTargetMountainDepleted): ?>
+                                    <div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
+                                        <span class="fs-1 flex-shrink-0"><i class="fa-solid fa-ban text-warning"></i></span>
+                                        <div class="flex-fill">
+                                            <strong class="d-block mb-1">Filon Minéral Épuisé sur cette Montagne !</strong>
+                                            <p class="mb-0 small">
+                                                Tous les gisements de soufre, de nitrate et de sable de fer de ce mont ont déjà été extraits. La montagne demeure sur les terres de la province, mais il n'est plus possible d'y envoyer de mineurs.
+                                            </p>
+                                        </div>
+                                    </div>
+                                <?php elseif ($preselectedMission === 'mining' && !$hasMinerAvailable): ?>
+                                    <div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
+                                        <span class="fs-1 flex-shrink-0"><i class="fa-solid fa-pickaxe text-warning"></i></span>
+                                        <div class="flex-fill">
+                                            <strong class="d-block mb-1">Aucun Mineur des Cimes (Kōfu ⛏️) en garnison !</strong>
+                                            <p class="mb-2 small">
+                                                Pour dépêcher une expédition minière dans les crêtes montagneuses, vous devez mobiliser des <strong>Mineurs des Cimes</strong> formés au <strong>Dojo Militaire</strong>.
+                                            </p>
+                                            <a href="?page=barracks" class="btn btn-sm btn-warning text-dark fw-bold">
+                                                <i class="fa-solid fa-hammer me-1"></i>Former des Mineurs au Dojo &rarr;
+                                            </a>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
                                 <?php if ($preselectedMission === 'colonize' && !$hasColonistAvailable): ?>
                                     <div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
                                         <span class="fs-1 flex-shrink-0"><i class="fa-solid fa-torii-gate text-danger"></i></span>
@@ -443,6 +507,8 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                                     if ($preselectedMission === 'colonize' && $u['unit_code'] === 'colonizer' && (int)$u['count'] > 0) {
                                                         $defaultUnitVal = '1';
                                                     } elseif ($preselectedMission === 'fishing' && $u['unit_code'] === 'pecheur' && (int)$u['count'] > 0) {
+                                                        $defaultUnitVal = (string)$u['count'];
+                                                    } elseif ($preselectedMission === 'mining' && $u['unit_code'] === 'mineur' && (int)$u['count'] > 0) {
                                                         $defaultUnitVal = (string)$u['count'];
                                                     }
                                                 ?>
@@ -631,6 +697,14 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                                 </span>
                                             </label>
                                         </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-selectgroup-item w-100">
+                                                <input type="radio" name="mission_type" value="mining" class="form-selectgroup-input" <?= ($preselectedMission === 'mining') ? 'checked' : '' ?>>
+                                                <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2">
+                                                    <span><i class="fa-solid fa-pickaxe text-warning"></i></span> Expédition Minière
+                                                </span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -662,6 +736,10 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                 <?php if ($isTargetLake && $isTargetLakeDepleted && $preselectedMission === 'fishing'): ?>
                                     <button type="button" class="btn btn-secondary btn-lg w-100 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" disabled>
                                         <span><i class="fa-solid fa-ban me-1"></i></span> Réserve de Poisson Épuisée — Expédition Impossible
+                                    </button>
+                                <?php elseif ($isTargetMountain && $isTargetMountainDepleted && $preselectedMission === 'mining'): ?>
+                                    <button type="button" class="btn btn-secondary btn-lg w-100 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" disabled>
+                                        <span><i class="fa-solid fa-ban me-1"></i></span> Filon Minéral Épuisé — Expédition Impossible
                                     </button>
                                 <?php else: ?>
                                     <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
@@ -703,6 +781,7 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                             'transport' => '<i class="fa-solid fa-boxes-stacked text-warning me-1"></i>CONVOI',
                                             'colonize' => '<i class="fa-solid fa-chess-rook text-primary me-1"></i>EXPANSION',
                                             'fishing' => '<i class="fa-solid fa-fish text-cyan me-1"></i>PÊCHE',
+                                            'mining' => '<i class="fa-solid fa-pickaxe text-warning me-1"></i>MINE',
                                             default => strtoupper($m['mission_type'])
                                         };
                                     ?>
@@ -1124,6 +1203,15 @@ async function submitFleet() {
         const pecheurCnt = parseInt(document.getElementById('ship-pecheur')?.value || '0', 10);
         if (pecheurCnt <= 0) {
             showModalAlert("Une expédition de pêche nécessite de mobiliser au moins 1 Pêcheur Féodal (Ryōshi). Si vous n'en possédez pas encore en garnison, formez-en au Dojo Militaire.", "warning", "Pêcheurs Requis");
+            return;
+        }
+    }
+
+    // Contrôle d'éligibilité pour l'expédition minière dans les montagnes
+    if (missionType === 'mining') {
+        const mineurCnt = parseInt(document.getElementById('ship-mineur')?.value || '0', 10);
+        if (mineurCnt <= 0) {
+            showModalAlert("Une expédition minière nécessite de mobiliser au moins 1 Mineur des Cimes (Kōfu ⛏️). Si vous n'en possédez pas encore en garnison, formez-en au Dojo Militaire.", "warning", "Mineurs Requis");
             return;
         }
     }

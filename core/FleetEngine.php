@@ -95,6 +95,12 @@ class FleetEngine {
             return;
         }
 
+        // Cas d'une expédition minière féodale (montagnes)
+        if ($mission['mission_type'] === 'mining') {
+            $this->resolveMiningArrival($mission);
+            return;
+        }
+
         // Cas d'une expédition vers une oasis naturelle ou sauvage
         if ($targetOasisId) {
             require_once __DIR__ . '/OasisEngine.php';
@@ -351,6 +357,23 @@ class FleetEngine {
             }
         }
 
+        $sulfur = (float)($cargo['sulfur'] ?? 0);
+        $nitrate = (float)($cargo['nitrate'] ?? 0);
+        $ironSand = (float)($cargo['iron_sand'] ?? 0);
+        if ($sulfur > 0 || $nitrate > 0 || $ironSand > 0) {
+            try {
+                $this->db->prepare("
+                    UPDATE planets 
+                    SET sulfur = LEAST(sulfur_max, sulfur + ?),
+                        nitrate = LEAST(nitrate_max, nitrate + ?),
+                        iron_sand = LEAST(iron_sand_max, iron_sand + ?)
+                    WHERE id = ?
+                ")->execute([$sulfur, $nitrate, $ironSand, $sourcePlanetId]);
+            } catch (Exception $e) {
+                // Silencieux si colonnes absentes
+            }
+        }
+
         // Réintégrer le Samouraï Héros au domaine s'il a participé
         if (!empty($mission['has_hero'])) {
             $this->db->prepare("
@@ -372,6 +395,29 @@ class FleetEngine {
                 $msgEngine->sendSystemMessage(
                     (int)$mission['user_id'],
                     "Retour d'Expédition de Pêche Féodale",
+                    $body
+                );
+            } catch (Exception $e) {
+                // Silencieux
+            }
+        }
+
+        // Notification féodale en cas de retour d'expédition minière
+        if ($mission['mission_type'] === 'mining') {
+            try {
+                require_once __DIR__ . '/MessageEngine.php';
+                $msgEngine = new MessageEngine();
+                $body = "Vos Mineurs des Cimes sont revenus de leur expédition de montagne avec les minerais extraits :\n"
+                    . "• Soufre Volcanique : +" . number_format($sulfur) . "\n"
+                    . "• Nitrate (Salpêtre) : +" . number_format($nitrate) . "\n"
+                    . "• Sable de Fer (Satetsu) : +" . number_format($ironSand) . "\n\n"
+                    . "Les minerais bruts ont été déposés dans vos entrepôts de fief pour vos forges et manufactures.";
+                if (!empty($cargo['mountain_depleted'])) {
+                    $body .= "\n⚠️ Le filon minéral de cette montagne est désormais totalement épuisé.";
+                }
+                $msgEngine->sendSystemMessage(
+                    (int)$mission['user_id'],
+                    "Retour d'Expédition Minière Féodale",
                     $body
                 );
             } catch (Exception $e) {
@@ -458,6 +504,94 @@ class FleetEngine {
         }
 
         // La flottille engage le trajet de retour chargée de poisson frais
+        $this->db->prepare("
+            UPDATE fleet_missions 
+            SET status = 'returning', cargo_data = ? 
+            WHERE id = ?
+        ")->execute([
+            json_encode($cargo),
+            $missionId
+        ]);
+    }
+
+    /**
+     * Résolution de l'arrivée et de l'extraction minière sur une parcelle de montagne
+     */
+    private function resolveMiningArrival(array $mission): void {
+        $missionId = (int)$mission['id'];
+        $userId = (int)$mission['user_id'];
+        $fleet = json_decode($mission['fleet_data'], true) ?: [];
+        $mineurCount = (int)($fleet['mineur'] ?? 0);
+
+        // Recherche en métallurgie & géologie à l'Académie des Savoirs
+        $stmtTech = $this->db->prepare("SELECT level FROM user_researches WHERE user_id = ? AND research_code = 'mining_tech'");
+        $stmtTech->execute([$userId]);
+        $techLvl = (int)$stmtTech->fetchColumn() ?: 0;
+
+        // Rendement par mineur : 15 Soufre, 15 Nitrate, 25 Sable de Fer (Satetsu), bonifié de +25% par niveau de recherche
+        $mult = 1.0 + (0.25 * $techLvl);
+        $baseSulfurPerMineur = 15;
+        $baseNitratePerMineur = 15;
+        $baseIronSandPerMineur = 25;
+
+        $targetSulfur = (int)round($mineurCount * $baseSulfurPerMineur * $mult);
+        $targetNitrate = (int)round($mineurCount * $baseNitratePerMineur * $mult);
+        $targetIronSand = (int)round($mineurCount * $baseIronSandPerMineur * $mult);
+
+        // Calcul de la capacité de transport totale de l'expédition
+        $totalCapacity = 0;
+        $stmtUnits = $this->db->query("SELECT code, cargo_capacity FROM units");
+        $unitCapacities = $stmtUnits->fetchAll(PDO::FETCH_KEY_PAIR);
+        $stmtShips = $this->db->query("SELECT code, cargo_capacity FROM ships");
+        $shipCapacities = $stmtShips->fetchAll(PDO::FETCH_KEY_PAIR);
+        $allCapacities = array_merge($unitCapacities, $shipCapacities);
+
+        foreach ($fleet as $code => $count) {
+            $cap = (int)($allCapacities[$code] ?? 50);
+            $totalCapacity += ($cap * (int)$count);
+        }
+        if ($totalCapacity <= 0) {
+            $totalCapacity = max(100, $mineurCount * 120);
+        }
+
+        $totalDesired = $targetSulfur + $targetNitrate + $targetIronSand;
+        if ($totalDesired > $totalCapacity && $totalDesired > 0) {
+            $ratio = $totalCapacity / $totalDesired;
+            $targetSulfur = (int)floor($targetSulfur * $ratio);
+            $targetNitrate = (int)floor($targetNitrate * $ratio);
+            $targetIronSand = (int)floor($targetIronSand * $ratio);
+        }
+
+        // Prélèvement dans le gisement de la montagne ciblée
+        $harvested = [
+            'sulfur' => $targetSulfur,
+            'nitrate' => $targetNitrate,
+            'iron_sand' => $targetIronSand
+        ];
+        $isDepleted = false;
+
+        $mountainCoords = $this->getMissionTargetCoords($mission);
+        if ($mountainCoords !== null) {
+            require_once __DIR__ . '/MountainEngine.php';
+            $mountainEngine = new MountainEngine($this->db);
+            $harvestResult = $mountainEngine->harvest($mountainCoords[0], $mountainCoords[1], [
+                'sulfur' => $targetSulfur,
+                'nitrate' => $targetNitrate,
+                'iron_sand' => $targetIronSand
+            ]);
+            $harvested = $harvestResult['harvested'];
+            $isDepleted = !empty($harvestResult['depleted']);
+        }
+
+        $cargo = json_decode($mission['cargo_data'], true) ?: [];
+        $cargo['sulfur'] = (int)($harvested['sulfur'] ?? 0);
+        $cargo['nitrate'] = (int)($harvested['nitrate'] ?? 0);
+        $cargo['iron_sand'] = (int)($harvested['iron_sand'] ?? 0);
+        if ($isDepleted) {
+            $cargo['mountain_depleted'] = true;
+        }
+
+        // La flottille engage le trajet de retour chargée des minerais bruts
         $this->db->prepare("
             UPDATE fleet_missions 
             SET status = 'returning', cargo_data = ? 
@@ -659,6 +793,32 @@ class FleetEngine {
             }
         }
 
+        // 2a-bis. Contrôle spécifique pour les expéditions minières dans les montagnes
+        if ($missionType === 'mining') {
+            require_once __DIR__ . '/GalaxyEngine.php';
+            $isMountain = false;
+            if ($targetOasis) {
+                if (str_contains((string)$targetOasis['oasis_type'], 'mountain')) {
+                    $isMountain = true;
+                }
+            } else {
+                $terrain = GalaxyEngine::getTerrainType($destX, $destY);
+                if ($terrain['type'] === 'mountain') {
+                    $isMountain = true;
+                }
+            }
+            if (!$isMountain) {
+                throw new Exception("Une expédition minière ne peut être envoyée que sur une parcelle de montagne ou de crête rocheuse.");
+            }
+
+            // Gisement minéral fini : une montagne épuisée ne peut plus être forée
+            require_once __DIR__ . '/MountainEngine.php';
+            $mountainStock = (new MountainEngine($this->db))->getStock($destX, $destY);
+            if ($mountainStock !== null && $mountainStock['depleted']) {
+                throw new Exception("Ce filon de montagne est épuisé : toutes ses réserves de soufre, nitrate et sable de fer ont été extraites.");
+            }
+        }
+
         // 2b. Vérification de l'Immunité des Nouveaux Joueurs (Protection Débutant)
         $hostileMissions = ['raid', 'attack', 'occupy', 'spy'];
         $protectionRevoked = false;
@@ -769,6 +929,13 @@ class FleetEngine {
             }
         }
 
+        // Règle spécifique à l'expédition minière
+        if ($missionType === 'mining') {
+            if (empty($cleanFleet['mineur']) || (int)$cleanFleet['mineur'] <= 0) {
+                throw new Exception("Une expédition minière nécessite de mobiliser au moins 1 Mineur des Cimes (Kōfu ⛏️).");
+            }
+        }
+
         if ($totalShips === 0 && !$hasHero) {
             throw new Exception("Veuillez sélectionner au moins un régiment, un engin de siège ou votre Samouraï Héros.");
         }
@@ -828,11 +995,11 @@ class FleetEngine {
 
         $now = time();
         $arrivalTime = $now + $duration;
-        if ($missionType === 'fishing') {
+        if ($missionType === 'fishing' || $missionType === 'mining') {
             $speed = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1));
-            // Temps de pêche fixe sur le lac : 1 heure (3600 secondes)
-            $fishingDuration = max(60, (int)round(3600 / $speed));
-            $returnTime = $arrivalTime + $fishingDuration + $duration;
+            // Temps d'extraction fixe sur le site (pêche ou forage) : 1 heure (3600 secondes)
+            $siteDuration = max(60, (int)round(3600 / $speed));
+            $returnTime = $arrivalTime + $siteDuration + $duration;
         } else {
             $returnTime = $arrivalTime + $duration;
         }

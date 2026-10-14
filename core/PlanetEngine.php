@@ -71,6 +71,9 @@ class PlanetEngine {
         $clayMax = (int)(10000 * pow(1.4, $storageLvl));
         $teaMax = (int)(10000 * pow(1.4, $grainMillLvl));
         $soyMax = (int)(10000 * pow(1.4, $grainMillLvl));
+        $sulfurMax = (int)(10000 * pow(1.4, $storageLvl));
+        $nitrateMax = (int)(10000 * pow(1.4, $storageLvl));
+        $ironSandMax = (int)(15000 * pow(1.5, $storageLvl));
 
         // 5. Calcul de l'énergie et des productions horaires (avec bonus d'oasis annexées)
         $fields = $this->getFields($planetId);
@@ -112,6 +115,7 @@ class PlanetEngine {
                         energy_used = ?, energy_max = ?,
                         metal_max = ?, crystal_max = ?, deuterium_max = ?, fish_max = ?,
                         sake_max = ?, rice_flour_max = ?, clay_max = ?, tea_max = ?, soybean_max = ?,
+                        sulfur_max = ?, nitrate_max = ?, iron_sand_max = ?,
                         last_resource_update = ?
                     WHERE id = ?
                 ");
@@ -137,6 +141,9 @@ class PlanetEngine {
                     $clayMax,
                     $teaMax,
                     $soyMax,
+                    $sulfurMax,
+                    $nitrateMax,
+                    $ironSandMax,
                     $now,
                     $planetId
                 ]);
@@ -268,6 +275,12 @@ class PlanetEngine {
         $planet['tea_max'] = (int)($planet['tea_max'] ?? $teaMax);
         $planet['soybean'] = (float)($planet['soybean'] ?? 0);
         $planet['soybean_max'] = (int)($planet['soybean_max'] ?? $soyMax);
+        $planet['sulfur'] = (float)($planet['sulfur'] ?? 0);
+        $planet['sulfur_max'] = (int)($planet['sulfur_max'] ?? $sulfurMax);
+        $planet['nitrate'] = (float)($planet['nitrate'] ?? 0);
+        $planet['nitrate_max'] = (int)($planet['nitrate_max'] ?? $nitrateMax);
+        $planet['iron_sand'] = (float)($planet['iron_sand'] ?? 0);
+        $planet['iron_sand_max'] = (int)($planet['iron_sand_max'] ?? $ironSandMax);
         $planet['population'] = (int)($planet['population'] ?? 100);
         $planet['population_max'] = (int)$maxPopulation;
         $planet['contentment'] = (int)($planet['contentment'] ?? $contentmentDetails['score']);
@@ -581,7 +594,7 @@ class PlanetEngine {
                     } catch (Exception $e) {
                         $this->db->rollBack();
                     }
-                } elseif (in_array($product, ['sake', 'rice_flour'])) {
+                } elseif (in_array($product, ['sake', 'rice_flour', 'sulfur', 'nitrate', 'iron_sand'])) {
                     $this->db->beginTransaction();
                     try {
                         $up = $this->db->prepare("
@@ -1338,9 +1351,9 @@ class PlanetEngine {
                 }
             } catch (Exception $eRes) {}
 
-            // 15. Type de mission 'fishing' dans fleet_missions
+            // 15. Type de mission 'fishing' et 'mining' dans fleet_missions
             try {
-                $this->db->exec("ALTER TABLE `fleet_missions` MODIFY COLUMN `mission_type` ENUM('attack','transport','occupy','colonize','spy','adventure','raid','fishing') NOT NULL");
+                $this->db->exec("ALTER TABLE `fleet_missions` MODIFY COLUMN `mission_type` ENUM('attack','transport','occupy','colonize','spy','adventure','raid','fishing','mining') NOT NULL");
             } catch (Exception $eEnum) {}
 
             // 16. Table lake_fish_stocks pour la gestion finie des réserves halieutiques
@@ -1348,6 +1361,51 @@ class PlanetEngine {
                 require_once __DIR__ . '/LakeEngine.php';
                 (new LakeEngine($this->db))->ensureSchema();
             } catch (Exception $eLake) {}
+
+            // 17. Colonnes de minerais sulfur, nitrate, iron_sand sur planets
+            try {
+                $stmtSulfur = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'sulfur'");
+                if ($stmtSulfur && $stmtSulfur->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets`
+                        ADD COLUMN `sulfur` DOUBLE NOT NULL DEFAULT 0,
+                        ADD COLUMN `sulfur_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+                        ADD COLUMN `nitrate` DOUBLE NOT NULL DEFAULT 0,
+                        ADD COLUMN `nitrate_max` INT UNSIGNED NOT NULL DEFAULT 10000,
+                        ADD COLUMN `iron_sand` DOUBLE NOT NULL DEFAULT 0,
+                        ADD COLUMN `iron_sand_max` INT UNSIGNED NOT NULL DEFAULT 15000
+                    ");
+                }
+            } catch (Exception $eMinPlanets) {}
+
+            // 18. Unité mineur (Mineur des Cimes / Kōfu) dans la table units
+            try {
+                $stmtMineur = $this->db->query("SELECT code FROM `units` WHERE `code` = 'mineur'");
+                if ($stmtMineur && $stmtMineur->rowCount() === 0) {
+                    $this->db->exec("INSERT INTO `units`
+                        (`code`, `name`, `faction`, `tier`, `icon`, `image`, `metal_cost`, `crystal_cost`, `deuterium_cost`, `rice_flour_cost`, `attack`, `def_infantry`, `def_mech`, `speed`, `cargo_capacity`, `base_train_time`, `description`)
+                        VALUES
+                        ('mineur', 'Mineur des Cimes (Kōfu)', 'all', 1, '⛏️', 'mineur.jpg', 80, 50, 40, 0, 8, 12, 10, 12, 120, 50, 'Mineur aguerri aux parois rocheuses et crêtes volcaniques pour extraire le soufre, le nitrate et le sable de fer.')
+                    ");
+                }
+            } catch (Exception $eMineur) {}
+
+            // 19. Technologie mining_tech dans la table researches
+            try {
+                $stmtTechMine = $this->db->query("SELECT code FROM `researches` WHERE `code` = 'mining_tech'");
+                if ($stmtTechMine && $stmtTechMine->rowCount() === 0) {
+                    $this->db->exec("INSERT INTO `researches`
+                        (`code`, `name`, `metal_cost`, `crystal_cost`, `deuterium_cost`, `base_time`, `description`)
+                        VALUES
+                        ('mining_tech', 'Métallurgie & Géologie Féodale', 350, 300, 300, 150, 'Perfectionne le forage montagnard et l\'extraction minérale. Augmente de 25% les rendements de soufre, nitrate et sable de fer par expédition.')
+                    ");
+                }
+            } catch (Exception $eMTech) {}
+
+            // 20. Table mountain_mineral_stocks pour la gestion finie des gisements minéraux
+            try {
+                require_once __DIR__ . '/MountainEngine.php';
+                (new MountainEngine($this->db))->ensureSchema();
+            } catch (Exception $eMountain) {}
         } catch (Exception $e) {
             // Ignorer silencieusement si déjà en cours ou permissions limitées
         }
@@ -1775,6 +1833,201 @@ class PlanetEngine {
     }
 
     /**
+     * Calcule les détails de fabrication/raffinage d'un minerai (sulfur, nitrate, iron_sand)
+     */
+    public function calculateMineralCraftDetails(int $planetId, string $product, float $amount): array {
+        $planet = $this->getPlanet($planetId);
+        $buildings = $this->getBuildings($planetId);
+        $stoneLvl = (int)($buildings['stonemason'] ?? 1);
+
+        $recipes = [
+            'sulfur' => [
+                'name' => 'Soufre Volcanique',
+                'icon' => '🌋',
+                'cost_res' => 'crystal', // Pierre
+                'cost_name' => 'Pierre de Granit 🪨',
+                'ratio' => 4, // 4 Pierre -> 1 Soufre
+                'duration_factor' => 0.5,
+                'min_duration' => 15
+            ],
+            'nitrate' => [
+                'name' => 'Nitrate de Potasse (Salpêtre)',
+                'icon' => '🧪',
+                'cost_res' => 'clay', // Argile
+                'cost_name' => 'Argile Alluviale 🏺',
+                'ratio' => 3, // 3 Argile -> 1 Nitrate
+                'duration_factor' => 0.4,
+                'min_duration' => 15
+            ],
+            'iron_sand' => [
+                'name' => 'Sable de Fer (Satetsu 砂鉄)',
+                'icon' => '💎',
+                'cost_res' => 'crystal', // Pierre
+                'cost_name' => 'Pierre de Granit 🪨',
+                'ratio' => 5, // 5 Pierre -> 1 Sable de fer
+                'duration_factor' => 0.6,
+                'min_duration' => 20
+            ]
+        ];
+
+        $recipe = $recipes[$product] ?? $recipes['sulfur'];
+        $efficiencyMultiplier = 1.0 + ($stoneLvl * 0.02);
+        $baseCostPerUnit = $recipe['ratio'];
+
+        $rawProduced = floor(($amount / $baseCostPerUnit) * $efficiencyMultiplier);
+        $currentStock = (float)($planet[$product] ?? 0);
+        $maxStock = (int)($planet[$product . '_max'] ?? 10000);
+        $availableSpace = max(0, $maxStock - $currentStock);
+        $actualProduced = min($rawProduced, $availableSpace);
+
+        $actualEngaged = $amount;
+        if ($actualProduced < $rawProduced && $actualProduced > 0) {
+            $actualEngaged = ceil(($actualProduced / $efficiencyMultiplier) * $baseCostPerUnit);
+        }
+
+        $gameSpeed = (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1);
+        if ($gameSpeed <= 0) $gameSpeed = 1;
+
+        $durationSeconds = max($recipe['min_duration'], (int)round(($actualEngaged * $recipe['duration_factor']) / (1 + ($stoneLvl * 0.15)) / $gameSpeed));
+
+        return [
+            'product' => $product,
+            'product_name' => $recipe['name'],
+            'product_icon' => $recipe['icon'],
+            'cost_resource' => $recipe['cost_res'],
+            'cost_name' => $recipe['cost_name'],
+            'stone_level' => $stoneLvl,
+            'efficiency_multiplier' => $efficiencyMultiplier,
+            'base_cost_per_unit' => $baseCostPerUnit,
+            'raw_produced' => $rawProduced,
+            'actual_produced' => $actualProduced,
+            'current_stock' => $currentStock,
+            'max_stock' => $maxStock,
+            'available_space' => $availableSpace,
+            'actual_engaged' => $actualEngaged,
+            'duration_seconds' => $durationSeconds
+        ];
+    }
+
+    /**
+     * Lance le raffinage artisanal de minerais (sulfur, nitrate, iron_sand)
+     */
+    public function craftMineralProduct(int $planetId, string $product, float $amount): array {
+        $this->ensureSchemaMigration();
+        if (!in_array($product, ['sulfur', 'nitrate', 'iron_sand'])) {
+            return ['success' => false, 'error' => "Produit minéralier invalide (Soufre, Nitrate ou Sable de fer uniquement)."];
+        }
+
+        $amount = floor($amount);
+        if ($amount <= 0) {
+            return ['success' => false, 'error' => "Veuillez indiquer une quantité valide supérieure à zéro."];
+        }
+
+        $this->processCraftQueue($planetId);
+        $activeQueue = $this->getCraftQueue($planetId, 'stonemason');
+
+        $planet = $this->getPlanet($planetId);
+        require_once __DIR__ . '/ImperialSealEngine.php';
+        $sealEngine = new ImperialSealEngine($this->db);
+        $isSealActive = $sealEngine->isSealActive((int)$planet['user_id']);
+        $maxQueue = $isSealActive ? 4 : 1;
+
+        if (count($activeQueue) >= $maxQueue) {
+            $remaining = !empty($activeQueue[0]['time_remaining']) ? gmdate('i\m s\s', $activeQueue[0]['time_remaining']) : 'quelques instants';
+            return [
+                'success' => false,
+                'error' => "Une opération d'extraction/concassage est déjà en cours dans l'Atelier (temps restant : {$remaining})."
+            ];
+        }
+
+        $details = $this->calculateMineralCraftDetails($planetId, $product, $amount);
+        if ($details['actual_produced'] < 1) {
+            return [
+                'success' => false,
+                'error' => "Quantité de matière insuffisante pour produire au moins 1 unité de {$details['product_name']}."
+            ];
+        }
+
+        $costRes = $details['cost_resource'];
+        $engagedCost = $details['actual_engaged'];
+        $availableRes = (float)($planet[$costRes] ?? 0);
+
+        if ($availableRes < $engagedCost) {
+            return [
+                'success' => false,
+                'error' => "Stock insuffisant de {$details['cost_name']} (Requis : {$engagedCost}, Disponible : " . floor($availableRes) . ")."
+            ];
+        }
+
+        $now = time();
+        $startedAt = $now;
+        if (!empty($activeQueue)) {
+            $lastFinish = 0;
+            foreach ($activeQueue as $qItem) {
+                if ((int)$qItem['finishes_at'] > $lastFinish) {
+                    $lastFinish = (int)$qItem['finishes_at'];
+                }
+            }
+            $startedAt = max($now, $lastFinish);
+        }
+        $finishesAt = $startedAt + $details['duration_seconds'];
+
+        $this->db->beginTransaction();
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE planets
+                SET {$costRes} = GREATEST(0, {$costRes} - ?)
+                WHERE id = ? AND {$costRes} >= ?
+            ");
+            $stmt->execute([$engagedCost, $planetId, $engagedCost]);
+
+            if ($stmt->rowCount() === 0) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => "Échec de l'opération : stock de matière modifié entretemps."];
+            }
+
+            $stmtQueue = $this->db->prepare("
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                VALUES (?, 'stonemason', ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmtQueue->execute([
+                $planetId,
+                $product,
+                $costRes,
+                $engagedCost,
+                $engagedCost,
+                $details['actual_produced'],
+                $startedAt,
+                $finishesAt
+            ]);
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'error' => "Erreur lors du lancement du craft minéral : " . $e->getMessage()];
+        }
+
+        $updatedPlanet = $this->getPlanet($planetId);
+        $activeQueue = $this->getCraftQueue($planetId, 'stonemason');
+        $durationFmt = gmdate('i\m s\s', $details['duration_seconds']);
+
+        return [
+            'success' => true,
+            'message' => "La synthèse de <strong>+" . number_format($details['actual_produced']) . " {$details['product_name']} {$details['product_icon']}</strong> a débuté ! Durée : <strong>{$durationFmt}</strong>.",
+            'product' => $product,
+            'product_name' => $details['product_name'],
+            'product_icon' => $details['product_icon'],
+            'produced' => $details['actual_produced'],
+            'consumed_amount' => $engagedCost,
+            'consumed_resource' => $costRes,
+            'duration_seconds' => $details['duration_seconds'],
+            'craft' => $activeQueue[0] ?? null,
+            'new_product_stock' => $updatedPlanet[$product] ?? 0,
+            'planet' => $updatedPlanet
+        ];
+    }
+
+    /**
      * Annule un lot de raffinage ou charpente en cours et rembourse 80% des matières engagées
      */
     public function cancelCraft(int $planetId, int $craftId): array {
@@ -1787,10 +2040,15 @@ class PlanetEngine {
         }
 
         $bType = $craft['building_type'] ?? ($craft['product'] === 'wooden_beams' ? 'sawmill' : 'grain_mill');
-        $isWood = ($bType === 'sawmill' || $craft['product'] === 'wooden_beams' || ($craft['cost_resource'] ?? '') === 'metal');
+        $costRes = $craft['cost_resource'] ?? ($bType === 'sawmill' ? 'metal' : 'deuterium');
         $rawEngaged = !empty($craft['cost_amount']) ? (float)$craft['cost_amount'] : (float)$craft['rice_amount'];
         $refundAmount = (float)floor($rawEngaged * 0.8);
-        $refundResName = $isWood ? 'Bois de Cèdre 🪵' : 'Riz 🌾';
+        $refundResName = match($costRes) {
+            'metal' => 'Bois de Cèdre 🪵',
+            'crystal' => 'Pierre de Granit 🪨',
+            'clay' => 'Argile Alluviale 🏺',
+            default => 'Riz 🌾'
+        };
 
         $this->db->beginTransaction();
         try {
@@ -1798,11 +2056,8 @@ class PlanetEngine {
             $del->execute([$craftId]);
 
             if ($refundAmount > 0) {
-                if ($isWood) {
-                    $up = $this->db->prepare("UPDATE planets SET metal = metal + ? WHERE id = ?");
-                    $up->execute([$refundAmount, $planetId]);
-                } else {
-                    $up = $this->db->prepare("UPDATE planets SET deuterium = deuterium + ? WHERE id = ?");
+                if (in_array($costRes, ['metal', 'crystal', 'deuterium', 'clay'])) {
+                    $up = $this->db->prepare("UPDATE planets SET {$costRes} = {$costRes} + ? WHERE id = ?");
                     $up->execute([$refundAmount, $planetId]);
                 }
             }

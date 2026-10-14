@@ -242,7 +242,115 @@ function renderRuralPlotsGrid(ruralPlots) {
     html += `</div></div>`;
     return html;
 }
- 
+
+// Rendu du compteur des réserves minérales pour les parcelles de montagne
+function renderMountainMineralsCounter(sulfurStock, sulfurInit, nitrateStock, nitrateInit, ironSandStock, ironSandInit, isDepleted) {
+    const sCur = parseInt(sulfurStock, 10) || 0;
+    const sInit = parseInt(sulfurInit, 10) || (sCur || 10000);
+    const sPct = Math.max(sCur <= 0 ? 0 : 2, Math.min(100, Math.round((sCur / (sInit || 1)) * 100)));
+
+    const nCur = parseInt(nitrateStock, 10) || 0;
+    const nInit = parseInt(nitrateInit, 10) || (nCur || 10000);
+    const nPct = Math.max(nCur <= 0 ? 0 : 2, Math.min(100, Math.round((nCur / (nInit || 1)) * 100)));
+
+    const iCur = parseInt(ironSandStock, 10) || 0;
+    const iInit = parseInt(ironSandInit, 10) || (iCur || 15000);
+    const iPct = Math.max(iCur <= 0 ? 0 : 2, Math.min(100, Math.round((iCur / (iInit || 1)) * 100)));
+
+    const depleted = !!isDepleted || (sCur <= 0 && nCur <= 0 && iCur <= 0);
+
+    return `
+        <div class="card mb-3 shadow-none border ${depleted ? 'border-secondary-subtle bg-secondary-lt' : 'border-warning-subtle'}" style="border-radius:10px; ${depleted ? '' : 'background:#fffbeb;'}">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="avatar avatar-md ${depleted ? 'bg-secondary text-white' : 'bg-warning text-dark'} rounded shadow-sm" style="font-size:1.35rem;">
+                            <i class="fa-solid fa-mountain"></i>
+                        </span>
+                        <div>
+                            <div class="fw-bold text-dark" style="font-size:0.95rem;">
+                                Filons &amp; Gisements Minéraux des Cimes
+                            </div>
+                            <div class="text-secondary small" style="font-size:0.75rem;">
+                                Sanctuaire minéralier d'altitude &bull; Soufre, Salpêtre &amp; Sable de Fer
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge ${depleted ? 'bg-secondary' : 'bg-warning text-dark'} font-monospace px-3 py-2 shadow-sm" style="font-size:0.95rem; letter-spacing:0.5px;">
+                            <i class="fa-solid fa-pickaxe me-1"></i>${depleted ? 'Gisements Épuisés' : 'Gisements Actifs'}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 3 Jauges de minerais -->
+                <div class="d-flex flex-column gap-2 mb-3">
+                    <!-- 1. Soufre -->
+                    <div class="bg-white rounded p-2 border border-light-subtle">
+                        <div class="d-flex justify-content-between align-items-center small mb-1">
+                            <span class="text-dark fw-bold">
+                                <i class="fa-solid fa-volcano text-warning me-1"></i>Soufre Volcanique :
+                            </span>
+                            <span class="font-monospace fw-bold ${sCur <= 0 ? 'text-secondary' : 'text-warning'}">
+                                <strong>${sCur.toLocaleString()}</strong> / ${sInit.toLocaleString()}
+                                <span class="text-muted fw-normal ms-1">(${sPct}%)</span>
+                            </span>
+                        </div>
+                        <div class="progress progress-sm" style="height:7px; border-radius:4px; background:#e2e8f0;">
+                            <div class="progress-bar bg-warning" style="width:${sPct}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Nitrate -->
+                    <div class="bg-white rounded p-2 border border-light-subtle">
+                        <div class="d-flex justify-content-between align-items-center small mb-1">
+                            <span class="text-dark fw-bold">
+                                <i class="fa-solid fa-flask-vial text-info me-1"></i>Nitrate de Potasse (Salpêtre) :
+                            </span>
+                            <span class="font-monospace fw-bold ${nCur <= 0 ? 'text-secondary' : 'text-info'}">
+                                <strong>${nCur.toLocaleString()}</strong> / ${nInit.toLocaleString()}
+                                <span class="text-muted fw-normal ms-1">(${nPct}%)</span>
+                            </span>
+                        </div>
+                        <div class="progress progress-sm" style="height:7px; border-radius:4px; background:#e2e8f0;">
+                            <div class="progress-bar bg-info" style="width:${nPct}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Sable de Fer -->
+                    <div class="bg-white rounded p-2 border border-light-subtle">
+                        <div class="d-flex justify-content-between align-items-center small mb-1">
+                            <span class="text-dark fw-bold">
+                                <i class="fa-solid fa-gem text-secondary me-1"></i>Sable de Fer (Satetsu 砂鉄) :
+                            </span>
+                            <span class="font-monospace fw-bold ${iCur <= 0 ? 'text-secondary' : 'text-secondary'}">
+                                <strong>${iCur.toLocaleString()}</strong> / ${iInit.toLocaleString()}
+                                <span class="text-muted fw-normal ms-1">(${iPct}%)</span>
+                            </span>
+                        </div>
+                        <div class="progress progress-sm" style="height:7px; border-radius:4px; background:#e2e8f0;">
+                            <div class="progress-bar bg-secondary" style="width:${iPct}%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 small" style="font-size:0.78rem;">
+                    <span class="text-secondary">
+                        <i class="fa-solid fa-circle-info ${depleted ? 'text-warning' : 'text-info'} me-1"></i>
+                        ${depleted 
+                            ? '<strong>Gisements forés à sec.</strong> Cette montagne demeure sur la province mais ne peut plus être forée.' 
+                            : 'Foré par vos <strong>Mineurs des Cimes (<i class="fa-solid fa-pickaxe"></i>)</strong> créés au Dojo Militaire.'
+                        }
+                    </span>
+                    <span class="text-dark font-weight-medium">
+                        <i class="fa-solid fa-cubes text-secondary me-1"></i>Stocké dans les <strong>Entrepôts de Fief</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 // Rendu du compteur des ressources disponibles en poisson pour les parcelles de lac
 function renderLakeFishCounter(currentStock, initialStock, isDepleted) {
     const cur = parseInt(currentStock, 10) || 0;
@@ -318,9 +426,19 @@ window.selectPlanetTile = function(data) {
     // ── Terres Vierges Naturelles (Plaines, Collines, Lacs, etc.) ─────────────
     if (data.empty) {
         const isLake = (data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac')));
+        const isMountain = (data.terrain_type === 'mountain' || (data.terrain_name && data.terrain_name.toLowerCase().includes('montagne')));
+
         const currentStock = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
         const isDepleted = data.lake_depleted || (currentStock <= 0);
+
+        const sulfurStock = (data.sulfur_stock !== null && data.sulfur_stock !== undefined) ? parseInt(data.sulfur_stock, 10) : 0;
+        const sulfurInit = (data.sulfur_initial !== null && data.sulfur_initial !== undefined) ? parseInt(data.sulfur_initial, 10) : (sulfurStock || 10000);
+        const nitrateStock = (data.nitrate_stock !== null && data.nitrate_stock !== undefined) ? parseInt(data.nitrate_stock, 10) : 0;
+        const nitrateInit = (data.nitrate_initial !== null && data.nitrate_initial !== undefined) ? parseInt(data.nitrate_initial, 10) : (nitrateStock || 10000);
+        const ironSandStock = (data.iron_sand_stock !== null && data.iron_sand_stock !== undefined) ? parseInt(data.iron_sand_stock, 10) : 0;
+        const ironSandInit = (data.iron_sand_initial !== null && data.iron_sand_initial !== undefined) ? parseInt(data.iron_sand_initial, 10) : (ironSandStock || 15000);
+        const isMountainDepleted = !!data.mountain_depleted || (sulfurStock <= 0 && nitrateStock <= 0 && ironSandStock <= 0);
 
         if (!data.rural_plots || Object.keys(data.rural_plots).length === 0) {
             data.rural_plots = getDeterministicPlotPotentials(data.coord_x, data.coord_y);
@@ -329,7 +447,9 @@ window.selectPlanetTile = function(data) {
 
         title.innerHTML = isLake
             ? `<i class="fa-solid fa-water text-cyan me-1"></i> <span style="color:#0891b2;">${data.terrain_name || 'Lac d\'Eaux Vives'}</span> <span class="badge bg-cyan-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`
-            : `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.terrain_name || 'Terres Vierges'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
+            : (isMountain 
+                ? `<i class="fa-solid fa-mountain text-warning me-1"></i> <span style="color:#b45309;">${data.terrain_name || 'Pics Rocheux & Montagnes'}</span> <span class="badge bg-warning-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`
+                : `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.terrain_name || 'Terres Vierges'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`);
 
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
@@ -339,10 +459,10 @@ window.selectPlanetTile = function(data) {
                     </div>
                     <div>
                         <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
-                            ${data.terrain_name || (isLake ? 'Lac d\'Eaux Vives' : 'Terres Vierges Inoccupées')}
+                            ${data.terrain_name || (isLake ? 'Lac d\'Eaux Vives' : (isMountain ? 'Pics Rocheux des Cimes' : 'Terres Vierges Inoccupées'))}
                         </div>
                         <div class="small text-secondary mt-0.5">
-                            ${data.terrain_desc || (isLake ? 'Étendue d\'eau douce et sanctuaire naturel halieutique protégé.' : 'Plaines fertiles et terroirs prospères du Japon féodal, prêts à être défrichés.')}
+                            ${data.terrain_desc || (isLake ? 'Étendue d\'eau douce et sanctuaire naturel halieutique protégé.' : (isMountain ? 'Massif rocheux et crêtes volcaniques sanctuarisées riches en minerais féodaux.' : 'Plaines fertiles et terroirs prospères du Japon féodal, prêts à être défrichés.'))}
                         </div>
                     </div>
                 </div>
@@ -353,7 +473,9 @@ window.selectPlanetTile = function(data) {
                         <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
                         ${isLake
                             ? '<strong class="text-cyan"><i class="fa-solid fa-water me-1"></i>Eaux Libres &bull; Non Annexable</strong>'
-                            : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>'
+                            : (isMountain 
+                                ? '<strong class="text-warning"><i class="fa-solid fa-mountain me-1"></i>Sanctuaire Minéral &bull; Non Annexable</strong>'
+                                : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>')
                         }
                     </div>
                     <div class="text-end">
@@ -362,16 +484,21 @@ window.selectPlanetTile = function(data) {
                     </div>
                 </div>
 
-                ${isLake ? renderLakeFishCounter(currentStock, initialStock, isDepleted) : `
-                    <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
-                        <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
-                        <div>
-                            <strong>Emplacement Disponible pour Nouveau Fief !</strong><br>
-                            Vous pouvez y dépêcher une expédition avec un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour y fonder votre prochain domaine castral.
-                        </div>
-                    </div>
-                    ${ruralPlotsHtml}
-                `}
+                ${isLake 
+                    ? renderLakeFishCounter(currentStock, initialStock, isDepleted) 
+                    : (isMountain 
+                        ? renderMountainMineralsCounter(sulfurStock, sulfurInit, nitrateStock, nitrateInit, ironSandStock, ironSandInit, isMountainDepleted)
+                        : `
+                            <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
+                                <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
+                                <div>
+                                    <strong>Emplacement Disponible pour Nouveau Fief !</strong><br>
+                                    Vous pouvez y dépêcher une expédition avec un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour y fonder votre prochain domaine castral.
+                                </div>
+                            </div>
+                            ${ruralPlotsHtml}
+                        `)
+                }
             </div>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -386,11 +513,21 @@ window.selectPlanetTile = function(data) {
                             <i class="fa-solid fa-fish me-1"></i>Dépêcher une Expédition de Pêche &rarr;
                         </a>
                     `
+                ) : (isMountain ? (
+                    isMountainDepleted ? `
+                        <button type="button" class="btn btn-secondary font-weight-bold" disabled>
+                            <i class="fa-solid fa-ban me-1"></i>Filon Minéral Épuisé
+                        </button>
+                    ` : `
+                        <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=mining" class="btn btn-warning text-dark font-weight-bold">
+                            <i class="fa-solid fa-pickaxe me-1"></i>Dépêcher des Mineurs (Expédition Minière) &rarr;
+                        </a>
+                    `
                 ) : `
                     <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
                         <i class="fa-solid fa-chess-rook me-1"></i>Fonder un Fief ici avec un Pionnier &rarr;
                     </a>
-                `}
+                `)}
             </div>
         `;
         openMapModal();
@@ -540,10 +677,20 @@ window.selectPlanetTile = function(data) {
 
     // ── Terres Neutres (planète sans joueur ou parcelle libre répertoriée) ─────
     if (!data.user_id) {
-        const isLakePlanet  = (data.terrain_type === 'lake' || data.planet_type === 'oceanic' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac')) || data.is_lake);
+        const isLakePlanet      = (data.terrain_type === 'lake' || data.planet_type === 'oceanic' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac')) || data.is_lake);
+        const isMountainPlanet  = (data.terrain_type === 'mountain' || (data.terrain_name && data.terrain_name.toLowerCase().includes('montagne')) || data.is_mountain);
+
         const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
         const isDepleted    = data.lake_depleted || (currentStock <= 0);
+
+        const sulfurStock   = (data.sulfur_stock !== null && data.sulfur_stock !== undefined) ? parseInt(data.sulfur_stock, 10) : 0;
+        const sulfurInit    = (data.sulfur_initial !== null && data.sulfur_initial !== undefined) ? parseInt(data.sulfur_initial, 10) : (sulfurStock || 10000);
+        const nitrateStock  = (data.nitrate_stock !== null && data.nitrate_stock !== undefined) ? parseInt(data.nitrate_stock, 10) : 0;
+        const nitrateInit   = (data.nitrate_initial !== null && data.nitrate_initial !== undefined) ? parseInt(data.nitrate_initial, 10) : (nitrateStock || 10000);
+        const ironSandStock = (data.iron_sand_stock !== null && data.iron_sand_stock !== undefined) ? parseInt(data.iron_sand_stock, 10) : 0;
+        const ironSandInit  = (data.iron_sand_initial !== null && data.iron_sand_initial !== undefined) ? parseInt(data.iron_sand_initial, 10) : (ironSandStock || 15000);
+        const isMountainDepleted = !!data.mountain_depleted || (sulfurStock <= 0 && nitrateStock <= 0 && ironSandStock <= 0);
 
         if (!data.rural_plots || Object.keys(data.rural_plots).length === 0) {
             data.rural_plots = getDeterministicPlotPotentials(data.coord_x, data.coord_y);
@@ -552,7 +699,9 @@ window.selectPlanetTile = function(data) {
 
         title.innerHTML = isLakePlanet
             ? `<i class="fa-solid fa-water text-cyan me-1"></i> <span style="color:#0891b2;">${data.planet_name || data.terrain_name || 'Lac d\'Eaux Vives'}</span> <span class="badge bg-cyan-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`
-            : `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.planet_name || 'Domaine Libre'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`;
+            : (isMountainPlanet
+                ? `<i class="fa-solid fa-mountain text-warning me-1"></i> <span style="color:#b45309;">${data.planet_name || data.terrain_name || 'Pics Rocheux & Montagnes'}</span> <span class="badge bg-warning-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`
+                : `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.planet_name || 'Domaine Libre'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`);
 
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
@@ -562,10 +711,10 @@ window.selectPlanetTile = function(data) {
                     </div>
                     <div>
                         <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
-                            ${data.planet_name || (isLakePlanet ? 'Lac d\'Eaux Vives' : 'Domaine Féodal Libre')}
+                            ${data.planet_name || (isLakePlanet ? 'Lac d\'Eaux Vives' : (isMountainPlanet ? 'Pics Rocheux & Montagnes' : 'Domaine Féodal Libre'))}
                         </div>
                         <div class="small text-secondary mt-0.5">
-                            Type de terrain : <strong class="text-dark">${data.planet_type || (isLakePlanet ? 'oceanic' : 'terrestrial')}</strong> &bull; ${isLakePlanet ? 'Sanctuaire d\'eau libre communautaire.' : 'Emplacement stratégique pour un nouveau fief.'}
+                            Type de terrain : <strong class="text-dark">${data.planet_type || (isLakePlanet ? 'oceanic' : (isMountainPlanet ? 'mountain' : 'terrestrial'))}</strong> &bull; ${isLakePlanet ? 'Sanctuaire d\'eau libre communautaire.' : (isMountainPlanet ? 'Sanctuaire minéralier des cimes non-annexable.' : 'Emplacement stratégique pour un nouveau fief.')}
                         </div>
                     </div>
                 </div>
@@ -576,7 +725,9 @@ window.selectPlanetTile = function(data) {
                         <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
                         ${isLakePlanet
                             ? '<strong class="text-cyan"><i class="fa-solid fa-water me-1"></i>Eaux Libres &bull; Non Annexable</strong>'
-                            : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>'
+                            : (isMountainPlanet
+                                ? '<strong class="text-warning"><i class="fa-solid fa-mountain me-1"></i>Sanctuaire Minéral &bull; Non Annexable</strong>'
+                                : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>')
                         }
                     </div>
                     <div class="text-end">
@@ -585,16 +736,21 @@ window.selectPlanetTile = function(data) {
                     </div>
                 </div>
 
-                ${isLakePlanet ? renderLakeFishCounter(currentStock, initialStock, isDepleted) : `
-                    <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
-                        <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
-                        <div>
-                            <strong>Emplacement Libre pour Colonisation !</strong><br>
-                            Vous pouvez y envoyer un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour annexer ce terroir et fonder une colonie.
-                        </div>
-                    </div>
-                    ${ruralPlotsHtml}
-                `}
+                ${isLakePlanet 
+                    ? renderLakeFishCounter(currentStock, initialStock, isDepleted) 
+                    : (isMountainPlanet 
+                        ? renderMountainMineralsCounter(sulfurStock, sulfurInit, nitrateStock, nitrateInit, ironSandStock, ironSandInit, isMountainDepleted)
+                        : `
+                            <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
+                                <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
+                                <div>
+                                    <strong>Emplacement Libre pour Colonisation !</strong><br>
+                                    Vous pouvez y envoyer un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour annexer ce terroir et fonder une colonie.
+                                </div>
+                            </div>
+                            ${ruralPlotsHtml}
+                        `)
+                }
             </div>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -610,11 +766,21 @@ window.selectPlanetTile = function(data) {
                                 <i class="fa-solid fa-fish me-1"></i>Dépêcher une Expédition de Pêche &rarr;
                             </a>
                         `
+                    ) : (isMountainPlanet ? (
+                        isMountainDepleted ? `
+                            <button type="button" class="btn btn-secondary font-weight-bold" disabled>
+                                <i class="fa-solid fa-ban me-1"></i>Filon Minéral Épuisé
+                            </button>
+                        ` : `
+                            <a href="?page=fleet&target_id=${data.planet_id || ''}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=mining" class="btn btn-warning text-dark font-weight-bold">
+                                <i class="fa-solid fa-pickaxe me-1"></i>Dépêcher des Mineurs (Expédition Minière) &rarr;
+                            </a>
+                        `
                     ) : `
                         <a href="?page=fleet&target_id=${data.planet_id || ''}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
                             <i class="fa-solid fa-chess-rook me-1"></i>Fonder un Fief ici avec un Pionnier &rarr;
                         </a>
-                    `}
+                    `)}
                 </div>
             </div>
         `;
