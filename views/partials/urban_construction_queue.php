@@ -100,8 +100,17 @@ $isTerran = $isTerran ?? (($planet['faction'] ?? '') === 'terran');
                             </div>
                         </div>
 
-                        <!-- Bouton Annulation de Chantier (Croix) -->
-                        <div>
+                        <!-- Actions Chantier : Finir instantanément (2 Kobans) & Annulation -->
+                        <div class="d-flex align-items-center gap-1">
+                            <button type="button" 
+                                    class="btn btn-sm btn-warning text-dark fw-bold d-inline-flex align-items-center gap-1 px-2 py-1 shadow-sm" 
+                                    title="Terminer instantanément cette construction pour 2 Kobans"
+                                    aria-label="Terminer instantanément (2 Kobans)"
+                                    onclick="instantFinishBuild(<?= (int)$q['id'] ?>)">
+                                <i class="fa-solid fa-bolt text-danger"></i>
+                                <span>2</span>
+                                <i class="fa-solid fa-coins text-warning-fg"></i>
+                            </button>
                             <button type="button" 
                                     class="btn btn-sm btn-icon btn-outline-danger" 
                                     title="Annuler ce chantier (Remboursement de 80% des ressources)"

@@ -366,6 +366,92 @@ class BuildingEngine {
     }
 
     /**
+     * Termine instantanément une construction en cours pour 2 Kobans
+     *
+     * @param int $userId Identifiant de l'utilisateur
+     * @param int $planetId Identifiant de la planète / fief
+     * @param int $queueId Identifiant de la tâche dans construction_queue
+     * @return array Résultat de l'opération
+     * @throws Exception En cas d'erreur ou solde insuffisant
+     */
+    public function instantFinish(int $userId, int $planetId, int $queueId): array {
+        $stmt = $this->db->prepare("SELECT * FROM construction_queue WHERE id = ? AND planet_id = ?");
+        $stmt->execute([$queueId, $planetId]);
+        $item = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$item) {
+            throw new Exception("Ce chantier est introuvable ou est déjà achevé.");
+        }
+
+        $stUser = $this->db->prepare("SELECT gold_coins FROM users WHERE id = ?");
+        $stUser->execute([$userId]);
+        $currentGold = (int)$stUser->fetchColumn();
+        if ($currentGold < 2) {
+            throw new Exception("Trésor en Kobans insuffisant : 2 Kobans requis (solde actuel : {$currentGold} Kobans).");
+        }
+
+        $this->db->beginTransaction();
+        try {
+            // Déduction des 2 Kobans avec contrôle de solde suffisant
+            $upGold = $this->db->prepare("UPDATE users SET gold_coins = gold_coins - 2 WHERE id = ? AND gold_coins >= 2");
+            $upGold->execute([$userId]);
+            if ($upGold->rowCount() === 0) {
+                throw new Exception("Trésor en Kobans insuffisant : 2 Kobans requis.");
+            }
+
+            $now = time();
+            $originalFinishesAt = (int)$item['finishes_at'];
+            $timeSaved = max(0, $originalFinishesAt - $now);
+
+            // Mettre la date d'achèvement dans le passé immédiat
+            $upFinish = $this->db->prepare("UPDATE construction_queue SET finishes_at = ? WHERE id = ?");
+            $upFinish->execute([$now - 1, $queueId]);
+
+            // Si d'autres chantiers attendaient la fin séquentielle de celui-ci, les avancer
+            if ($timeSaved > 0) {
+                $stSub = $this->db->prepare("
+                    SELECT id, started_at, finishes_at FROM construction_queue
+                    WHERE planet_id = ? AND id != ? AND started_at >= ?
+                    ORDER BY started_at ASC
+                ");
+                $stSub->execute([$planetId, $queueId, $originalFinishesAt]);
+                $nextItems = $stSub->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($nextItems as $nextItem) {
+                    $nStart = max($now, (int)$nextItem['started_at'] - $timeSaved);
+                    $nDur = (int)$nextItem['finishes_at'] - (int)$nextItem['started_at'];
+                    $nFinish = $nStart + $nDur;
+                    $upNext = $this->db->prepare("UPDATE construction_queue SET started_at = ?, finishes_at = ? WHERE id = ?");
+                    $upNext->execute([$nStart, $nFinish, $nextItem['id']]);
+                }
+            }
+
+            // Exécution immédiate du chantier via le processeur de file
+            $this->planetEngine->processConstructionQueue($planetId);
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
+
+        // Mise à jour des calculs de production et capacités hors transaction
+        try {
+            $this->planetEngine->updatePlanet($planetId);
+        } catch (Exception $e) {
+            // Tolérance si déjà rafraîchi
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Construction terminée immédiatement pour 2 Kobans !',
+            'gold_spent' => 2,
+            'remaining_gold' => $currentGold - 2
+        ];
+    }
+
+    /**
      * Lance un ordre de démantèlement / démolition avec compte à rebours.
      * La structure reste en place pendant les travaux et n'est supprimée qu'à l'achèvement,
      * libérant ainsi le slot et créditant 30% de remboursement des matériaux.

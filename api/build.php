@@ -40,6 +40,17 @@ try {
             'message' => $ok ? 'Construction annulée, 80% remboursé.' : '',
             'error' => $ok ? null : 'Impossible d\'annuler ce chantier (introuvable ou déjà achevé).'
         ]);
+    } elseif ($action === 'instant_finish') {
+        $queueId = (int)($_POST['queue_id'] ?? 0);
+        if ($queueId <= 0) {
+            throw new Exception("Identifiant de chantier manquant.");
+        }
+        $user = Auth::user();
+        if (!$user) {
+            throw new Exception("Utilisateur non identifié.");
+        }
+        $result = $buildingEngine->instantFinish((int)$user['id'], (int)$planet['id'], $queueId);
+        echo json_encode($result);
     } elseif ($action === 'demolish') {
         $category = $_POST['category'] ?? 'building';
         $targetId = $_POST['target_id'] ?? '';

@@ -5,7 +5,18 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [Unreleased]
 
-## [1.26.0] - 2026-10-13
+## [1.27.0] - 2026-10-14
+### Ajouté (Added)
+- **Achèvement Instantané des Chantiers pour 2 Kobans (`core/BuildingEngine.php`, `core/PlanetEngine.php`, `api/build.php`, `api/rural_plot.php`, `public/js/app.js`, `views/partials/urban_construction_queue.php`, `views/building.php`, `views/field.php`, `public/js/rural_domain_map.js`) :**
+  * **Disponible pour Tous les Bâtiments & Toutes les Unités de Ressources :** Couvre l'intégralité des infrastructures urbaines de la cité castrale (`building`), toutes les parcelles de ressources élémentaires (`field` : scierie, carrière, mines, fermes) et l'ensemble des 9 parcelles du terroir rural (`rural_plot` : forêt de cèdres, rizière, carrière, fosse d'argile, thé, soja, village, sanctuaire shintō, tenshu).
+  * **Coût Fixe de 2 Kobans (`gold_coins`) :** Déduction transactionnelle rigoureusement sécurisée de 2 pièces d'or impériales par achèvement instantané. Contrôle strict du solde joueur avec rejet explicite et informatif si le Daimyō dispose de moins de 2 Kobans.
+  * **Résolution Immédiate & Avancement Automatique de la File :** Le chantier sélectionné s'achève sur-le-champ via `PlanetEngine::processConstructionQueue()`, appliquant les nouveaux niveaux, les quotas d'ouvriers et le recalcul instantané de la production horaire. Tout chantier ultérieur en attente séquentielle dans la file est automatiquement avancé dans le temps pour démarrer immédiatement.
+  * **Intégration Visuelle Complète & Ergonomie :**
+    - File des chantiers mutualisée (`urban_construction_queue.php`) : Ajout d'un bouton compact doré `2 🪙` à côté du bouton d'annulation sur chaque ligne de travaux.
+    - Fiche détaillée de bâtiment (`views/building.php`) : Bouton doré proéminent « Finir instantanément (2 Kobans) » dans la carte des travaux actifs.
+    - Fiche détaillée de parcelle de ressource (`views/field.php`) : Bouton doré au-dessus de l'option d'annulation.
+    - Carte interactive du domaine rural (`rural_domain_map.js`) : Bouton doré d'achèvement immédiat dans la modale d'élévation de parcelle.
+    - Modale de confirmation personnalisée Tabler demandant validation au joueur avant débit des 2 Kobans.
 ### Modifié (Changed)
 - **Rotation Aléatoire des Estampes du Carrousel (`views/partials/header.php`) :**
   * **Affichage Homogène des 50+ Panoramas :** Remplacement du tri alphabétique par nom de fichier par un brassage aléatoire (`shuffle`) à chaque rechargement de page. Toutes les estampes et œuvres d'art du carrousel bénéficient ainsi d'une visibilité équitable et variée à chaque navigation du Daimyō.

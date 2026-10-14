@@ -683,3 +683,29 @@ async function cancelBuild(queueId) {
     }
 }
 
+async function instantFinishBuild(queueId) {
+    const confirmed = await showModalConfirm(
+        'Voulez-vous achever immédiatement ces travaux pour 2 Kobans ?',
+        'Finir Immédiatement (2 Kobans)'
+    );
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'instant_finish');
+    formData.append('queue_id', queueId);
+
+    try {
+        const res = await fetch('/api/build.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            showModalAlert(data.error || 'Erreur lors de la finalisation du chantier.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de connexion au serveur.', 'error');
+    }
+}
+window.instantFinishBuild = instantFinishBuild;
+
+

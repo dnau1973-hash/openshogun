@@ -158,8 +158,10 @@
 
             if (actionContainer) {
                 actionContainer.innerHTML = `
-                    <button type="button" class="btn btn-secondary w-100 disabled py-2 mb-2">
-                        <i class="fa-solid fa-clock me-1"></i> Chantier en cours (Élévation active)
+                    <button type="button" class="btn btn-warning w-100 py-2 mb-2 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" onclick="instantFinishBuild(${queueId})">
+                        <i class="fa-solid fa-bolt text-danger"></i>
+                        <span>Finir instantanément (2 Kobans)</span>
+                        <i class="fa-solid fa-coins"></i>
                     </button>
                     <button type="button" class="btn btn-outline-danger w-100 py-1" onclick="cancelRuralUpgrade(${queueId}, this)">
                         <i class="fa-solid fa-ban me-1"></i> Annuler le chantier (Remboursement 80%)

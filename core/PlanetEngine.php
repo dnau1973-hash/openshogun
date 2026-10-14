@@ -393,12 +393,22 @@ class PlanetEngine {
                             ->execute([$rfM, $rfC, $rfD, $planetId]);
                     }
                 } else {
-                    $up = $this->db->prepare("
-                        INSERT INTO planet_buildings (planet_id, building_type, level)
-                        VALUES (?, ?, ?)
-                        ON DUPLICATE KEY UPDATE level = ?
-                    ");
-                    $up->execute([$planetId, $bType, $targetLevel, $targetLevel]);
+                    $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
+                    if ($driver === 'sqlite') {
+                        $up = $this->db->prepare("
+                            INSERT INTO planet_buildings (planet_id, building_type, level)
+                            VALUES (?, ?, ?)
+                            ON CONFLICT(planet_id, building_type) DO UPDATE SET level = excluded.level
+                        ");
+                        $up->execute([$planetId, $bType, $targetLevel]);
+                    } else {
+                        $up = $this->db->prepare("
+                            INSERT INTO planet_buildings (planet_id, building_type, level)
+                            VALUES (?, ?, ?)
+                            ON DUPLICATE KEY UPDATE level = ?
+                        ");
+                        $up->execute([$planetId, $bType, $targetLevel, $targetLevel]);
+                    }
                 }
             }
 

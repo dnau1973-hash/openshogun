@@ -2077,6 +2077,11 @@ if (!$isEmptyPlot) {
                                 </div>
                             </div>
                         </div>
+                        <button type="button" class="btn btn-warning w-100 mb-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="instantFinishBuild(<?= (int)$activeJob['id'] ?>)">
+                            <i class="fa-solid fa-bolt text-danger"></i>
+                            <span>Finir instantan&eacute;ment (2 Kobans)</span>
+                            <i class="fa-solid fa-coins"></i>
+                        </button>
                         <button type="button" class="btn btn-outline-danger w-100" onclick="cancelBuildingBuild(<?= (int)$activeJob['id'] ?>)">
                             <i class="fa-solid fa-ban text-danger me-1"></i><?= $isDemolishingJob ? 'Interrompre le démantèlement' : 'Interrompre les travaux (80% remboursé)' ?>
                         </button>

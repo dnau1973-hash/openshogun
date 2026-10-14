@@ -54,6 +54,19 @@ try {
         } else {
             throw new Exception("Impossible d'annuler ce chantier.");
         }
+    } elseif ($action === 'instant_finish') {
+        require_once __DIR__ . '/../core/BuildingEngine.php';
+        $queueId = (int)($_POST['queue_id'] ?? 0);
+        if ($queueId <= 0) {
+            throw new Exception("Identifiant de chantier manquant.");
+        }
+        $user = Auth::user();
+        if (!$user) {
+            throw new Exception("Utilisateur non identifié.");
+        }
+        $buildingEngine = new BuildingEngine();
+        $result = $buildingEngine->instantFinish((int)$user['id'], (int)$planet['id'], $queueId);
+        echo json_encode($result);
     } else {
         throw new Exception("Action non reconnue.");
     }
