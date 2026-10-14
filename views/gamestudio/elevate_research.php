@@ -113,9 +113,9 @@ declare(strict_types=1);
                         <label class="form-label small fw-bold">Facteur d'Accélération Temporelle par Niveau (research_time_growth)</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa-solid fa-arrow-trend-up text-warning"></i></span>
-                            <input type="number" step="0.01" min="1.05" max="2.5" class="form-control font-monospace" name="research_time_growth" value="<?= $timeGrowth ?>" required>
+                            <input type="number" step="0.01" min="1.01" max="100.0" class="form-control font-monospace" name="research_time_growth" value="<?= $timeGrowth ?>" required>
                         </div>
-                        <div class="form-text small">Croissance exponentielle de durée par niveau (calqué sur building_time_growth 1.28 - 1.35).</div>
+                        <div class="form-text small">Croissance exponentielle de durée par niveau (valeur entre 1.01 et 100.0).</div>
                     </div>
 
                     <div class="mb-3">

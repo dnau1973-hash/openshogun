@@ -203,7 +203,7 @@ class ResearchEngine {
 
         // Coefficients dynamiques du Game Elevate Designer
         $timeCoeff   = max(0.05, min(10.0, (float)GameConfig::get('research_time_coeff', 1.0)));
-        $timeGrowth  = max(1.05, min(2.5, (float)GameConfig::get('research_time_growth', 1.35)));
+        $timeGrowth  = max(1.01, min(100.0, (float)GameConfig::get('research_time_growth', 1.35)));
         $costCoeff   = max(0.05, min(10.0, (float)GameConfig::get('research_cost_coeff', 1.0)));
         $costGrowth  = max(0.5, min(2.5, (float)GameConfig::get('research_cost_growth', 1.65)));
 

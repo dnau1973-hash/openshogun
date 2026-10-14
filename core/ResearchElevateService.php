@@ -56,7 +56,7 @@ class ResearchElevateService {
      */
     public function updateGlobalCoefficients(float $timeCoeff, float $timeGrowth, float $costCoeff, float $costGrowth): bool {
         GameConfig::set('research_time_coeff', max(0.05, min(10.0, $timeCoeff)));
-        GameConfig::set('research_time_growth', max(1.05, min(2.5, $timeGrowth)));
+        GameConfig::set('research_time_growth', max(1.01, min(100.0, $timeGrowth)));
         GameConfig::set('research_cost_coeff', max(0.05, min(10.0, $costCoeff)));
         GameConfig::set('research_cost_growth', max(0.5, min(2.5, $costGrowth)));
         return true;
