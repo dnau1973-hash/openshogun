@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/SocialCasteEngine.php';
 
 class PopulationEngine {
     private PDO $db;
@@ -517,11 +518,18 @@ class PopulationEngine {
         $planet['deuterium'] = $rice;
         $planet['sake'] = $sake;
 
-        // 3. Calcul du contentement
+        // 3. Évolution de la société féodale par les besoins (Shinōkōshō)
+        // Consommation automatique des ressources supérieures (poisson, farine, thé, saké)
+        $socialData = SocialCasteEngine::processSocialTick($planet, $hours);
+        $planet['civilization_level'] = $socialData['civilization_level'];
+        $planet['civilization_name'] = $socialData['civilization_name'];
+        $planet['social_castes'] = $socialData;
+
+        // 4. Calcul du contentement
         $contentment = self::calculateContentment($planet, $activeFeast, $workforce, $buildings);
         $score = $contentment['score'];
 
-        // 4. Exode ou Croissance démographique
+        // 5. Exode ou Croissance démographique
         $exodusCasualties = 0;
         $popGrowth = 0;
 
@@ -549,6 +557,7 @@ class PopulationEngine {
 
         return [
             'contentment'       => $contentment,
+            'social_castes'     => $socialData,
             'flour_consumed'    => $flourConsumed,
             'rice_consumed'     => $riceConsumed,
             'sake_consumed'     => $sakeConsumed,

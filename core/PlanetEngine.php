@@ -291,6 +291,15 @@ class PlanetEngine {
         $planet['last_famine_losses'] = (int)($famineResult['casualties'] ?? ($planet['last_famine_losses'] ?? 0));
         $planet['famine_enabled'] = (bool)GameConfig::get('famine_enabled', false);
 
+        // Évolution de la société féodale par les besoins (Shinōkōshō)
+        if (!isset($planet['social_castes'])) {
+            require_once __DIR__ . '/SocialCasteEngine.php';
+            $socialData = SocialCasteEngine::processSocialTick($planet, 0.0);
+            $planet['civilization_level'] = $socialData['civilization_level'];
+            $planet['civilization_name'] = $socialData['civilization_name'];
+            $planet['social_castes'] = $socialData;
+        }
+
         $planet['prod_rates'] = $prodRates;
         return $planet;
     }

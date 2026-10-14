@@ -56,7 +56,11 @@ class GameConfig {
                     'building_time_coeff' => 1.0,
                     'building_time_growth' => 1.28,
                     'building_cost_coeff' => 1.0,
-                    'building_cost_growth' => 1.0
+                    'building_cost_growth' => 1.0,
+                    'research_time_coeff' => 1.0,
+                    'research_time_growth' => 1.35,
+                    'research_cost_coeff' => 1.0,
+                    'research_cost_growth' => 1.65
                 ];
             }
         }

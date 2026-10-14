@@ -138,6 +138,60 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
         </div>
     <?php else: ?>
 
+        <?php
+        $civLevel = (int)($planet['civilization_level'] ?? 1);
+        $civName = (string)($planet['civilization_name'] ?? 'Nōmin (Paysans & Ouvriers)');
+        $castesData = $planet['social_castes']['castes'] ?? [];
+        ?>
+        <!-- ========================================== -->
+        <!-- BANNIÈRE DE CIVILISATION FÉODALE (CASTES)  -->
+        <!-- ========================================== -->
+        <div class="card shadow-sm mb-3 border-0 bg-dark text-white overflow-hidden position-relative">
+            <div class="position-absolute end-0 top-0 bottom-0 opacity-10 d-none d-md-flex align-items-center pe-4" style="pointer-events:none;">
+                <i class="fa-solid fa-torii-gate" style="font-size: 8rem;"></i>
+            </div>
+            <div class="card-body p-3 p-md-4 position-relative">
+                <div class="row align-items-center g-3">
+                    <div class="col-auto">
+                        <div class="avatar avatar-lg rounded bg-warning text-dark fw-bold fs-2 shadow-sm">
+                            <?= $civLevel ?>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                            <span class="badge bg-warning text-dark fw-bold text-uppercase" style="letter-spacing: 0.05em;">Société Féodale &bull; Palier <?= $civLevel ?> / 5</span>
+                            <span class="text-white-50 small">Système Shinōkōshō (士農工商)</span>
+                        </div>
+                        <h3 class="mb-1 fw-bold text-white fs-2">
+                            Échelon Provincial : <?= htmlspecialchars($civName) ?>
+                        </h3>
+                        <p class="text-white-50 small mb-2" style="max-width: 720px;">
+                            Plus vous nourrissez et pourvoyez votre population en vivres et biens de confort (Farine de riz, Thé, Poisson, Saké), plus votre société s'élève en castes supérieures, débloquant les traités de l'Académie.
+                        </p>
+                        <!-- Paliers des 5 castes -->
+                        <div class="d-flex gap-2 flex-wrap">
+                            <?php foreach (SocialCasteEngine::CASTES as $cTier => $cMeta): 
+                                $isUnlocked = ($civLevel >= $cTier);
+                                $cPop = $castesData[$cTier]['count'] ?? 0;
+                                $cPct = $castesData[$cTier]['pct'] ?? 0;
+                            ?>
+                                <span class="badge <?= $isUnlocked ? 'bg-' . $cMeta['badge'] . '-lt text-white border border-' . $cMeta['badge'] : 'bg-dark text-secondary border border-secondary-subtle opacity-60' ?> px-2 py-1"
+                                      title="<?= htmlspecialchars($cMeta['name']) ?> : <?= $cPop ?> citoyens (<?= $cPct ?>%)">
+                                    <i class="fa-solid <?= $cMeta['icon'] ?> me-1"></i>
+                                    P<?= $cTier ?> <?= htmlspecialchars($cMeta['short_name']) ?>
+                                    <?php if ($isUnlocked): ?>
+                                        <span class="ms-1 font-monospace fw-bold">(<?= $cPop ?>)</span>
+                                    <?php else: ?>
+                                        <i class="fa-solid fa-lock ms-1"></i>
+                                    <?php endif; ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ========================================== -->
         <!-- RECHERCHE EN COURS (FILE ACTIVE)           -->
         <!-- ========================================== -->
@@ -292,10 +346,19 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                     </span>
                                 </div>
                                 <div class="card-body d-flex flex-column">
-                                    <div class="mb-2">
+                                    <div class="mb-2 d-flex align-items-center justify-content-between flex-wrap gap-1">
                                         <span class="badge bg-secondary-lt text-secondary" style="font-size: 0.7rem;">
                                             <?= htmlspecialchars($r->categoryLabel) ?>
                                         </span>
+                                        <?php if (!$r->civLevelMet): ?>
+                                            <span class="badge bg-danger-lt text-danger fw-bold" style="font-size: 0.68rem;" title="Requiert la caste : <?= htmlspecialchars($r->civLevelName) ?>">
+                                                <i class="fa-solid fa-lock me-1"></i>Requiert Palier <?= $r->civLevelRequired ?> (<?= htmlspecialchars($r->civLevelName) ?>)
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-success-lt text-success" style="font-size: 0.68rem;">
+                                                <i class="fa-solid fa-check me-1"></i>Palier <?= $r->civLevelRequired ?> Débloqué
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                     <p class="text-secondary small mb-3 flex-grow-1" style="min-height: 48px;">
                                         <?= htmlspecialchars($r->description) ?>
@@ -332,6 +395,10 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                         <?php if ($activeResearch): ?>
                                             <button type="button" class="btn btn-sm btn-secondary" disabled title="Une recherche est déjà en cours dans l'Académie">
                                                 File occupée
+                                            </button>
+                                        <?php elseif (!$r->civLevelMet): ?>
+                                            <button type="button" class="btn btn-sm btn-outline-warning" disabled title="Civilisation insuffisante : requiert <?= htmlspecialchars($r->civLevelName) ?>">
+                                                <i class="fa-solid fa-lock me-1"></i>Palier <?= $r->civLevelRequired ?> requis
                                             </button>
                                         <?php elseif (!$r->canAfford): ?>
                                             <button type="button" class="btn btn-sm btn-outline-danger" disabled title="Ressources insuffisantes pour lancer ce palier">
@@ -373,7 +440,14 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                             <div class="d-flex align-items-center gap-2">
                                                 <span class="fs-2 flex-shrink-0"><?= $r->icon ?></span>
                                                 <div>
-                                                    <div class="fw-bold text-dark"><?= htmlspecialchars($r->name) ?></div>
+                                                    <div class="fw-bold text-dark d-flex align-items-center gap-1">
+                                                        <span><?= htmlspecialchars($r->name) ?></span>
+                                                        <?php if (!$r->civLevelMet): ?>
+                                                            <span class="badge bg-danger-lt text-danger font-monospace" style="font-size:0.65rem;">
+                                                                <i class="fa-solid fa-lock me-1"></i>Palier <?= $r->civLevelRequired ?>
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    </div>
                                                     <div class="text-secondary small"><?= htmlspecialchars($r->description) ?></div>
                                                 </div>
                                             </div>
@@ -408,6 +482,10 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                             <?php if ($activeResearch): ?>
                                                 <button type="button" class="btn btn-sm btn-secondary" disabled>
                                                     File occupée
+                                                </button>
+                                            <?php elseif (!$r->civLevelMet): ?>
+                                                <button type="button" class="btn btn-sm btn-outline-warning" disabled title="Civilisation insuffisante : requiert <?= htmlspecialchars($r->civLevelName) ?>">
+                                                    <i class="fa-solid fa-lock me-1"></i>Palier <?= $r->civLevelRequired ?>
                                                 </button>
                                             <?php elseif (!$r->canAfford): ?>
                                                 <button type="button" class="btn btn-sm btn-outline-danger" disabled>

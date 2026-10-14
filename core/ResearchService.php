@@ -66,6 +66,16 @@ class ResearchService {
                 'category_label' => 'Subsistance & Terroirs',
                 'icon' => '🐟',
             ],
+            'gunpowder_tech' => [
+                'category' => 'military',
+                'category_label' => 'Artillerie & Poudre',
+                'icon' => '💥',
+            ],
+            'katana_prestige_tech' => [
+                'category' => 'military',
+                'category_label' => 'Armement & Forge',
+                'icon' => '⚔️',
+            ],
             default => [
                 'category' => 'general',
                 'category_label' => 'Savoir Général',
@@ -172,7 +182,10 @@ class ResearchService {
                 canAfford: $canAfford,
                 missingMetal: $missingMetal,
                 missingCrystal: $missingCrystal,
-                missingDeuterium: $missingDeut
+                missingDeuterium: $missingDeut,
+                civLevelRequired: (int)($r['civ_tier_required'] ?? 1),
+                civLevelMet: (bool)($r['civ_tier_met'] ?? true),
+                civLevelName: (string)($r['civ_tier_name'] ?? 'Nōmin (Paysans)')
             );
 
             $dtos[] = $dto;

@@ -49,7 +49,7 @@ if (!$gameStudioEngine->isAuthorized($userId)) {
 }
 
 // 1. Détection de l'onglet actif dans la barre d'outils
-$allowedTabs = ['dashboard', 'general'];
+$allowedTabs = ['dashboard', 'general', 'elevate_research'];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
 $analyticsPeriod = in_array($_GET['period'] ?? '', ['today', '7d', '30d', 'all'], true) ? (string)$_GET['period'] : '30d';
 
@@ -60,6 +60,11 @@ if ($currentTab === 'dashboard') {
 } elseif ($currentTab === 'general') {
     $generalData = $gameStudioEngine->getGeneralData();
     extract($generalData);
+} elseif ($currentTab === 'elevate_research') {
+    require_once __DIR__ . '/../core/ResearchElevateService.php';
+    $elevateService = new ResearchElevateService();
+    $elevateData = $elevateService->getViewData();
+    extract($elevateData);
 }
 
 // 3. Journalisation télémétrique non-bloquante
@@ -169,6 +174,30 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                 <i class="fa-solid fa-sliders"></i>
                 <span>Général</span>
             </a>
+
+            <!-- Dropdown Game Elevate Designer -->
+            <div class="dropdown">
+                <a href="#" 
+                   class="studio-nav-link dropdown-toggle <?= str_starts_with($currentTab, 'elevate_') ? 'active' : '' ?>"
+                   data-bs-toggle="dropdown" 
+                   aria-expanded="false"
+                   title="Concepteur de progression et équilibrage de jeu (Game Elevate Designer)">
+                    <i class="fa-solid fa-compass-drafting text-warning"></i>
+                    <span>Game Elevate Designer</span>
+                </a>
+                <div class="dropdown-menu shadow-sm">
+                    <div class="dropdown-header text-uppercase text-secondary small fw-bold">
+                        Équilibrage &amp; Systèmes de Jeu
+                    </div>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_research' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_research">
+                        <i class="fa-solid fa-scroll text-info"></i>
+                        <div>
+                            <div>Académie des Savoirs &amp; Forge</div>
+                            <div class="small text-secondary">Technologies, Castes féodales, Coûts &amp; Délais</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
         </nav>
 
         <!-- 3. Outils Rapides & Raccourcis Externes (Jeu, Admin, Profil) -->

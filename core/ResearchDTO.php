@@ -23,7 +23,10 @@ class ResearchDTO {
         public readonly bool $canAfford,
         public readonly int $missingMetal = 0,
         public readonly int $missingCrystal = 0,
-        public readonly int $missingDeuterium = 0
+        public readonly int $missingDeuterium = 0,
+        public readonly int $civLevelRequired = 1,
+        public readonly bool $civLevelMet = true,
+        public readonly string $civLevelName = 'Nōmin (Paysans)'
     ) {}
 
     /**
