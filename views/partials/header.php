@@ -710,7 +710,8 @@ $navItems = [
         if (is_dir($carrouselAssetsDir)) {
             $foundCarrouselFiles = glob($carrouselAssetsDir . '/*.jpg');
             if (!empty($foundCarrouselFiles)) {
-                sort($foundCarrouselFiles, SORT_NATURAL);
+                // Mélange aléatoire des estampes pour une rotation homogène à chaque rechargement
+                shuffle($foundCarrouselFiles);
                 foreach ($foundCarrouselFiles as $filePath) {
                     $bName = basename($filePath);
                     $meta = $carouselBuildingsMeta[$bName] ?? null;
@@ -741,14 +742,7 @@ $navItems = [
         if (empty($carouselSlides) && is_dir($buildingsAssetsDir)) {
             $foundFiles = glob($buildingsAssetsDir . '/*.jpg');
             if ($foundFiles) {
-                // Trier pour placer tenshu en premier
-                usort($foundFiles, function($a, $b) {
-                    $baseA = basename($a);
-                    $baseB = basename($b);
-                    if ($baseA === 'building_tenshu.jpg') return -1;
-                    if ($baseB === 'building_tenshu.jpg') return 1;
-                    return strcmp($baseA, $baseB);
-                });
+                shuffle($foundFiles);
 
                 foreach ($foundFiles as $filePath) {
                     $bName = basename($filePath);
@@ -769,6 +763,11 @@ $navItems = [
                     ];
                 }
             }
+        }
+
+        // 3. Brassage aléatoire final des diapositives pour garantir un affichage homogène et varié
+        if (!empty($carouselSlides)) {
+            shuffle($carouselSlides);
         }
         ?>
 

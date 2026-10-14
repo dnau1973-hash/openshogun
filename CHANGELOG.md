@@ -7,6 +7,8 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [1.26.0] - 2026-10-13
 ### Modifié (Changed)
+- **Rotation Aléatoire des Estampes du Carrousel (`views/partials/header.php`) :**
+  * **Affichage Homogène des 50+ Panoramas :** Remplacement du tri alphabétique par nom de fichier par un brassage aléatoire (`shuffle`) à chaque rechargement de page. Toutes les estampes et œuvres d'art du carrousel bénéficient ainsi d'une visibilité équitable et variée à chaque navigation du Daimyō.
 - **Menus Déroulants Interactifs & Gain d'Espace dans la Barre Supérieure (`views/partials/header.php`, `views/partials/footer.php`) :**
   * **Barre Épurée à 3 Boutons Compacts :** Remplacement des jauges étalées par 3 boutons déclencheurs ergonomiques centrés sous le carrousel : **Construction 🔨**, **Alimentaire 🍚** et **Domaine ⛩️**, avec icônes, badges de comptage et sous-titres descriptifs.
   * **Menu Déroulant Construction :** Au clic sur le bouton, ouverture d'un panneau Tabler élégant affichant en temps réel les 4 matériaux de bâtisseur (Bois de Cèdre 🪵, Pierre de Granit 🪨, Argile Alluviale 🧱, Poutres de Charpente 🔨) avec stocks, plafonds d'entrepôt, cadences horaires et jauges de progression.
