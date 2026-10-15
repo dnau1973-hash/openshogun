@@ -257,14 +257,14 @@ class ResearchEngine {
         $eruditeRatio = (float)($planet['social_castes']['erudite_ratio'] ?? 0.0);
 
         $rawRows = [];
+        $userLevels = [];
         try {
-            $stmt = $this->db->prepare("
-                SELECT r.*, COALESCE(ur.level, 0) as current_level 
-                FROM researches r 
-                LEFT JOIN user_researches ur ON ur.research_code = r.code AND ur.user_id = ? 
-                ORDER BY r.base_time ASC
-            ");
-            $stmt->execute([$userId]);
+            $stmtLvl = $this->db->prepare("SELECT research_code, level FROM user_researches WHERE user_id = ?");
+            $stmtLvl->execute([$userId]);
+            $userLevels = $stmtLvl->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            $stmt = $this->db->prepare("SELECT * FROM researches ORDER BY base_time ASC");
+            $stmt->execute();
             $rawRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $e) {}
 
@@ -277,6 +277,7 @@ class ResearchEngine {
         $allDefinitions = self::getAllDefinitions($this->db);
         $researches = [];
         foreach ($allDefinitions as $code => $def) {
+            $curLvl = (int)($userLevels[$code] ?? 0);
             if (isset($researchesMap[$code])) {
                 $item = $researchesMap[$code];
                 // Préserver nom/description si non renseignés
@@ -290,10 +291,10 @@ class ResearchEngine {
                     'crystal_cost' => $def['base_cost']['crystal'],
                     'deuterium_cost' => $def['base_cost']['deuterium'],
                     'base_time' => $def['base_time'],
-                    'description' => $def['description'],
-                    'current_level' => 0
+                    'description' => $def['description']
                 ];
             }
+            $item['current_level'] = $curLvl;
 
             $curLvl = (int)$item['current_level'];
             $upgradeDetails = $this->calculateTechUpgrade($item, $curLvl, $labLvl, $pop, $eruditeRatio);

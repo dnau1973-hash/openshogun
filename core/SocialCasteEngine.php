@@ -126,16 +126,21 @@ class SocialCasteEngine {
 
         // 1. Évaluation et consommation pour la Caste 5 (Daimyō)
         $actualPopCaste5 = 0;
-        if ($hours > 0 && $targetPopCaste5 > 0) {
-            $reqSake5 = $targetPopCaste5 * self::CASTES[5]['needs']['sake'] * $hours;
-            $reqFlour5 = $targetPopCaste5 * self::CASTES[5]['needs']['rice_flour'] * $hours;
+        if ($targetPopCaste5 > 0) {
             $ratio5 = 1.0;
-            if ($reqSake5 > 0) $ratio5 = min($ratio5, $stockSake / $reqSake5);
-            if ($reqFlour5 > 0) $ratio5 = min($ratio5, $stockFlour / $reqFlour5);
+            if ($hours > 0) {
+                $reqSake5 = $targetPopCaste5 * self::CASTES[5]['needs']['sake'] * $hours;
+                $reqFlour5 = $targetPopCaste5 * self::CASTES[5]['needs']['rice_flour'] * $hours;
+                if ($reqSake5 > 0) $ratio5 = min($ratio5, $stockSake / $reqSake5);
+                if ($reqFlour5 > 0) $ratio5 = min($ratio5, $stockFlour / $reqFlour5);
+            } else {
+                // Évaluation instantanée (stocks présents dans les greniers)
+                if ($stockSake <= 0 || $stockFlour <= 0) $ratio5 = 0.0;
+            }
             $ratio5 = min(1.0, max(0.0, $ratio5));
-
             $actualPopCaste5 = (int)floor($targetPopCaste5 * $ratio5);
-            if ($actualPopCaste5 > 0) {
+
+            if ($hours > 0 && $actualPopCaste5 > 0) {
                 $usedSake5 = $actualPopCaste5 * self::CASTES[5]['needs']['sake'] * $hours;
                 $usedFlour5 = $actualPopCaste5 * self::CASTES[5]['needs']['rice_flour'] * $hours;
                 $stockSake -= min($stockSake, $usedSake5);
@@ -145,16 +150,21 @@ class SocialCasteEngine {
 
         // 2. Évaluation et consommation pour la Caste 4 (Érudits & Samouraïs)
         $actualPopCaste4 = 0;
-        if ($hours > 0 && $targetPopCaste4 > 0) {
-            $reqSake4 = $targetPopCaste4 * self::CASTES[4]['needs']['sake'] * $hours;
-            $reqTea4 = $targetPopCaste4 * self::CASTES[4]['needs']['tea'] * $hours;
+        if ($targetPopCaste4 > 0) {
             $ratio4 = 1.0;
-            if ($reqSake4 > 0) $ratio4 = min($ratio4, $stockSake / $reqSake4);
-            if ($reqTea4 > 0) $ratio4 = min($ratio4, $stockTea / $reqTea4);
+            if ($hours > 0) {
+                $reqSake4 = $targetPopCaste4 * self::CASTES[4]['needs']['sake'] * $hours;
+                $reqTea4 = $targetPopCaste4 * self::CASTES[4]['needs']['tea'] * $hours;
+                if ($reqSake4 > 0) $ratio4 = min($ratio4, $stockSake / $reqSake4);
+                if ($reqTea4 > 0) $ratio4 = min($ratio4, $stockTea / $reqTea4);
+            } else {
+                // Évaluation instantanée (stocks présents dans les greniers)
+                if ($stockSake <= 0 || $stockTea <= 0) $ratio4 = 0.0;
+            }
             $ratio4 = min(1.0, max(0.0, $ratio4));
-
             $actualPopCaste4 = (int)floor($targetPopCaste4 * $ratio4);
-            if ($actualPopCaste4 > 0) {
+
+            if ($hours > 0 && $actualPopCaste4 > 0) {
                 $usedSake4 = $actualPopCaste4 * self::CASTES[4]['needs']['sake'] * $hours;
                 $usedTea4 = $actualPopCaste4 * self::CASTES[4]['needs']['tea'] * $hours;
                 $stockSake -= min($stockSake, $usedSake4);
@@ -164,16 +174,21 @@ class SocialCasteEngine {
 
         // 3. Évaluation et consommation pour la Caste 3 (Marchands)
         $actualPopCaste3 = 0;
-        if ($hours > 0 && $targetPopCaste3 > 0) {
-            $reqFlour3 = $targetPopCaste3 * self::CASTES[3]['needs']['rice_flour'] * $hours;
-            $reqTea3 = $targetPopCaste3 * self::CASTES[3]['needs']['tea'] * $hours;
+        if ($targetPopCaste3 > 0) {
             $ratio3 = 1.0;
-            if ($reqFlour3 > 0) $ratio3 = min($ratio3, $stockFlour / $reqFlour3);
-            if ($reqTea3 > 0) $ratio3 = min($ratio3, $stockTea / $reqTea3);
+            if ($hours > 0) {
+                $reqFlour3 = $targetPopCaste3 * self::CASTES[3]['needs']['rice_flour'] * $hours;
+                $reqTea3 = $targetPopCaste3 * self::CASTES[3]['needs']['tea'] * $hours;
+                if ($reqFlour3 > 0) $ratio3 = min($ratio3, $stockFlour / $reqFlour3);
+                if ($reqTea3 > 0) $ratio3 = min($ratio3, $stockTea / $reqTea3);
+            } else {
+                // Évaluation instantanée (stocks présents dans les greniers)
+                if ($stockFlour <= 0 || $stockTea <= 0) $ratio3 = 0.0;
+            }
             $ratio3 = min(1.0, max(0.0, $ratio3));
-
             $actualPopCaste3 = (int)floor($targetPopCaste3 * $ratio3);
-            if ($actualPopCaste3 > 0) {
+
+            if ($hours > 0 && $actualPopCaste3 > 0) {
                 $usedFlour3 = $actualPopCaste3 * self::CASTES[3]['needs']['rice_flour'] * $hours;
                 $usedTea3 = $actualPopCaste3 * self::CASTES[3]['needs']['tea'] * $hours;
                 $stockFlour -= min($stockFlour, $usedFlour3);
@@ -183,16 +198,21 @@ class SocialCasteEngine {
 
         // 4. Évaluation et consommation pour la Caste 2 (Artisans)
         $actualPopCaste2 = 0;
-        if ($hours > 0 && $targetPopCaste2 > 0) {
-            $reqFish2 = $targetPopCaste2 * self::CASTES[2]['needs']['fish'] * $hours;
-            $reqSoy2 = $targetPopCaste2 * self::CASTES[2]['needs']['soybean'] * $hours;
+        if ($targetPopCaste2 > 0) {
             $ratio2 = 1.0;
-            if ($reqFish2 > 0) $ratio2 = min($ratio2, $stockFish / $reqFish2);
-            if ($reqSoy2 > 0) $ratio2 = min($ratio2, $stockSoy / $reqSoy2);
+            if ($hours > 0) {
+                $reqFish2 = $targetPopCaste2 * self::CASTES[2]['needs']['fish'] * $hours;
+                $reqSoy2 = $targetPopCaste2 * self::CASTES[2]['needs']['soybean'] * $hours;
+                if ($reqFish2 > 0) $ratio2 = min($ratio2, $stockFish / $reqFish2);
+                if ($reqSoy2 > 0) $ratio2 = min($ratio2, $stockSoy / $reqSoy2);
+            } else {
+                // Évaluation instantanée (stocks présents dans les greniers)
+                if ($stockFish <= 0 || $stockSoy <= 0) $ratio2 = 0.0;
+            }
             $ratio2 = min(1.0, max(0.0, $ratio2));
-
             $actualPopCaste2 = (int)floor($targetPopCaste2 * $ratio2);
-            if ($actualPopCaste2 > 0) {
+
+            if ($hours > 0 && $actualPopCaste2 > 0) {
                 $usedFish2 = $actualPopCaste2 * self::CASTES[2]['needs']['fish'] * $hours;
                 $usedSoy2 = $actualPopCaste2 * self::CASTES[2]['needs']['soybean'] * $hours;
                 $stockFish -= min($stockFish, $usedFish2);
