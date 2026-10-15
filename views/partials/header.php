@@ -942,6 +942,18 @@ $navItems = [
         $charcoalMax = max(1, (int)($planet['charcoal_max'] ?? 10000));
         $pctCharcoal = min(100, max(0, ($charcoalStock / $charcoalMax) * 100));
 
+        $ironSandStock = (float)($planet['iron_sand'] ?? 0);
+        $ironSandMax = max(1, (int)($planet['iron_sand_max'] ?? 15000));
+        $pctIronSand = min(100, max(0, ($ironSandStock / $ironSandMax) * 100));
+
+        $sulfurStock = (float)($planet['sulfur'] ?? 0);
+        $sulfurMax = max(1, (int)($planet['sulfur_max'] ?? 10000));
+        $pctSulfur = min(100, max(0, ($sulfurStock / $sulfurMax) * 100));
+
+        $nitrateStock = (float)($planet['nitrate'] ?? 0);
+        $nitrateMax = max(1, (int)($planet['nitrate_max'] ?? 10000));
+        $pctNitrate = min(100, max(0, ($nitrateStock / $nitrateMax) * 100));
+
         $eBalance = (int)($planet['energy_max'] ?? 0) - (int)($planet['energy_used'] ?? 0);
         $eOk = ($eBalance >= 0);
         $pctEnergy = ($planet['energy_max'] > 0) ? min(100, max(0, ((int)($planet['energy_used'] ?? 0) / (int)$planet['energy_max']) * 100)) : 0;
@@ -1199,7 +1211,107 @@ $navItems = [
                     </div>
                 </div>
 
-                <!-- 2. BOUTON & MENU DÉROULANT : ALIMENTAIRE -->
+                <!-- 2. BOUTON & MENU DÉROULANT : MINERAIS -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-danger bg-white d-flex align-items-center gap-2 px-3 py-1 rounded-2 shadow-sm dropdown-toggle text-dark border"
+                            type="button" id="dropdownMinerais" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                            title="Cliquer pour afficher les minerais et ressources de montagne">
+                        <i class="fa-solid fa-gem text-danger fs-3"></i>
+                        <div class="text-start lh-1">
+                            <span class="fw-bold" style="font-size:0.84rem;">Minerais</span>
+                            <div class="text-muted d-none d-md-block font-monospace" style="font-size:0.65rem;">Sable &bull; Soufre &bull; Nitrate</div>
+                        </div>
+                        <span class="badge bg-danger-lt text-danger font-monospace ms-1" style="font-size:0.65rem;">3</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-start shadow-lg p-2 border" aria-labelledby="dropdownMinerais" style="min-width:320px; max-width:95vw; z-index:1060;">
+                        <div class="d-flex justify-content-between align-items-center px-2 py-1 mb-1 border-bottom">
+                            <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size:0.82rem;">
+                                <i class="fa-solid fa-gem text-danger"></i> Minerais &amp; Montagnes
+                            </div>
+                            <a href="?page=building&code=stonemason#craftSection" class="btn btn-xs btn-outline-danger py-0 px-2" style="font-size:0.68rem;">Raffiner &rarr;</a>
+                        </div>
+
+                        <!-- 1. Sable de Fer (Satetsu) -->
+                        <a href="?page=building&code=blacksmith#craftSection" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Sable de Fer (Satetsu) : Stock <?= number_format((int)$ironSandStock) ?> / <?= number_format($ironSandMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-gem text-secondary fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Sable de Fer (Satetsu)</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($ironSandMax) ?></div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-iron-sand"
+                                          data-current="<?= $ironSandStock ?>"
+                                          data-max="<?= $ironSandMax ?>">
+                                        <?= number_format((int)$ironSandStock) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.68rem;">Forge</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-secondary" id="bar-iron-sand" style="width:<?= $pctIronSand ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- 2. Soufre Volcanique -->
+                        <a href="?page=building&code=stonemason#craftSection" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Soufre Volcanique : Stock <?= number_format((int)$sulfurStock) ?> / <?= number_format($sulfurMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-volcano text-warning fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Soufre Volcanique</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($sulfurMax) ?></div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-sulfur"
+                                          data-current="<?= $sulfurStock ?>"
+                                          data-max="<?= $sulfurMax ?>">
+                                        <?= number_format((int)$sulfurStock) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.68rem;">Poudre</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-warning" id="bar-sulfur" style="width:<?= $pctSulfur ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- 3. Nitrate de Potasse -->
+                        <a href="?page=building&code=stonemason#craftSection" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between p-2 rounded text-reset text-decoration-none"
+                           title="Nitrate de Potasse (Salpêtre) : Stock <?= number_format((int)$nitrateStock) ?> / <?= number_format($nitrateMax) ?>">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-flask-vial text-info fs-2 flex-shrink-0" style="width:24px; text-align:center;"></i>
+                                <div class="lh-1">
+                                    <div class="fw-bold text-dark" style="font-size:0.82rem;">Nitrate de Potasse</div>
+                                    <div class="text-muted font-monospace" style="font-size:0.68rem;">Plafond : <?= number_format($nitrateMax) ?></div>
+                                </div>
+                            </div>
+                            <div class="text-end lh-1">
+                                <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
+                                    <span class="fw-bold text-dark" style="font-size:0.84rem;"
+                                          id="res-val-nitrate"
+                                          data-current="<?= $nitrateStock ?>"
+                                          data-max="<?= $nitrateMax ?>">
+                                        <?= number_format((int)$nitrateStock) ?>
+                                    </span>
+                                    <span class="text-muted" style="font-size:0.68rem;">Salpêtre</span>
+                                </div>
+                                <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:72px;">
+                                    <div class="progress-bar bg-info" id="bar-nitrate" style="width:<?= $pctNitrate ?>%;"></div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 3. BOUTON & MENU DÉROULANT : ALIMENTAIRE -->
                 <div class="dropdown">
                     <button class="btn btn-outline-warning bg-white d-flex align-items-center gap-2 px-3 py-1 rounded-2 shadow-sm dropdown-toggle text-dark border"
                             type="button" id="dropdownAlimentaire" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"

@@ -5,6 +5,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [1.30.0] - 2026-10-15
 ### Amélioré (Enhanced) & Ajouté (Added)
+- **Affichage des Nouvelles Ressources Minérales dans le HUD Supérieur (`views/partials/header.php`, `views/partials/footer.php`) :**
+  * **Nouveau Menu Déroulant « Minerais » sous le Carrousel Castral :** Intégration d'un bouton de catégorie dédié rouge rubis (`#dropdownMinerais`, icône `fa-gem`, badge `3`, sous-titre `Sable • Soufre • Nitrate`) entre Construction et Alimentaire.
+  * **3 Cartes de Ressources Minérales Interactives :**
+    - *Sable de Fer (Satetsu 砂鉄) :* Compteur dynamique (`#res-val-iron-sand`), jauge de stockage (`#bar-iron-sand`), plafond d'entrepôt et lien direct vers les fourneaux de la Grande Forge (`?page=building&code=blacksmith#craftSection`).
+    - *Soufre Volcanique (Iō 硫黄) :* Compteur dynamique (`#res-val-sulfur`), jauge de stockage (`#bar-sulfur`), plafond d'entrepôt et lien direct vers l'atelier minéralier du tailleur de pierre (`?page=building&code=stonemason#craftSection`).
+    - *Nitrate de Potasse (Shōseki 硝石) :* Compteur dynamique (`#res-val-nitrate`), jauge de stockage (`#bar-nitrate`), plafond d'entrepôt et lien direct vers l'atelier minéralier (`?page=building&code=stonemason#craftSection`).
+  * **Actualisation en Temps Réel (`views/partials/footer.php`) :** Prise en charge des trois minerais dans la fonction client de synchronisation des ressources (`updatePlanetResources`).
 - **Grande Forge du Tamahagane : Fonte de Métal (Niveau 15+) & Armes et Armées de Prestige (Niveau 20+) (`core/PlanetEngine.php`, `api/craft.php`, `views/building.php`, `views/city.php`) :**
   * **Fonte & Réduction de Métal (Niveau 15+) :**
     - *Fourneau Tatara des Maîtres (`product = 'metal'`) :* Réduction noble consommant 1 Sable de fer (*Satetsu* 💎) + 2 Charbon de bois (🪨) pour couler 40 Métal (⚔️) d'une pureté exceptionnelle, augmenté par le bonus d'efficacité de forge (+2%/niveau).

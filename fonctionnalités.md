@@ -1,5 +1,26 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-15] - mineral-resources-header-bar : Intégration des Ressources Minérales (Sable, Soufre, Nitrate) dans le HUD Supérieur
+- **Module :** `mineral-resources-header-bar`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Nouveau Menu Déroulant « Minerais » sous le Carrousel :**
+     - Ajout du bouton de catégorie `#dropdownMinerais` (rouge rubis, icône `fa-gem`, sous-titre `Sable • Soufre • Nitrate`, badge compteur `3`) disposé élégamment entre les boutons Construction et Alimentaire.
+  2. **Présentation Détaillée des 3 Ressources Minérales :**
+     - *Sable de Fer (Satetsu 砂鉄) :* Affiche le stock, le plafond d'entrepôt, la jauge animée et un lien vers la Grande Forge (`?page=building&code=blacksmith#craftSection`).
+     - *Soufre Volcanique (Iō 硫黄) :* Affiche le stock, le plafond d'entrepôt, la jauge animée et un lien vers l'atelier minéralier du tailleur de pierre (`?page=building&code=stonemason#craftSection`).
+     - *Nitrate de Potasse (Shōseki 硝石) :* Affiche le stock, le plafond d'entrepôt, la jauge animée et un lien vers l'atelier minéralier (`?page=building&code=stonemason#craftSection`).
+  3. **Synchronisation Client en Direct :**
+     - Prise en charge dans `views/partials/footer.php` de `res-val-iron-sand`, `res-val-sulfur`, `res-val-nitrate` et de leurs jauges associées.
+- **Fichiers modifiés :** `views/partials/header.php`, `views/partials/footer.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Charger n'importe quelle page du jeu affichant le carrousel castral (`/?page=city`, `/?page=overview`, etc.).
+  2. Observer la barre de ressources sous le carrousel : vérifier la présence du nouveau bouton « Minerais » (badge `3`).
+  3. Cliquer sur le menu déroulant « Minerais » et vérifier l'affichage des 3 lignes (Sable de fer, Soufre volcanique, Nitrate de potasse) avec leurs stocks actuels, plafonds et jauges de progression.
+  4. Cliquer sur chaque lien de raccourci pour vérifier la redirection vers la Grande Forge et l'Atelier Minéralier.
+
+---
+
 ### [2026-10-15] - blacksmith-metal-and-prestige : Grande Forge du Tamahagane (Fonte Niveau 15+ & Armées de Prestige Niveau 20+)
 - **Module :** `blacksmith-metal-and-prestige`
 - **Statut :** `À tester`

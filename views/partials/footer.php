@@ -874,6 +874,9 @@ function updateHudResources(planet) {
     if (planet.clay !== undefined) updateEl('res-val-clay', 'bar-clay', planet.clay, planet.clay_max || 10000);
     if (planet.tea !== undefined) updateEl('res-val-tea', 'bar-tea', planet.tea, planet.tea_max || 10000);
     if (planet.soybean !== undefined) updateEl('res-val-soybean', 'bar-soybean', planet.soybean, planet.soybean_max || 10000);
+    if (planet.iron_sand !== undefined) updateEl('res-val-iron-sand', 'bar-iron-sand', planet.iron_sand, planet.iron_sand_max || 15000);
+    if (planet.sulfur !== undefined) updateEl('res-val-sulfur', 'bar-sulfur', planet.sulfur, planet.sulfur_max || 10000);
+    if (planet.nitrate !== undefined) updateEl('res-val-nitrate', 'bar-nitrate', planet.nitrate, planet.nitrate_max || 10000);
 }
 </script>
 <script src="/public/js/audio_manager.js"></script>
