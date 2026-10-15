@@ -317,7 +317,7 @@ ob_start();
                                 <a href="?page=barracks" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-user-ninja me-1"></i>Entraîner Soldats (Dojo)</a>
                             <?php elseif ($code === 'research_lab' && $lvl > 0): ?>
                                 <a href="?page=research" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-scroll me-1"></i>Académie des Savoirs</a>
-                            <?php elseif ($code === 'grain_mill' && $lvl > 0): ?>
+                            <?php elseif ($code === 'grain_mill' && $lvl >= 10): ?>
                                 <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-wine-bottle me-1"></i>Raffiner Saké &amp; Farine</a>
                             <?php elseif ($code === 'sawmill' && $lvl >= 10): ?>
                                 <a href="/?page=building&code=sawmill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-hammer me-1"></i>Façonner Poutres</a>

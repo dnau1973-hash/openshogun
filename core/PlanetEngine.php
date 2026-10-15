@@ -1507,11 +1507,11 @@ class PlanetEngine {
             return ['success' => false, 'error' => "Veuillez indiquer une quantité de riz valide supérieure à zéro."];
         }
 
-        // 1. Vérifier le bâtiment Meunerie & Brasserie
+        // 1. Vérifier le bâtiment Meunerie & Brasserie (Niveau 10 minimum requis)
         $buildings = $this->getBuildings($planetId);
         $millLvl = (int)($buildings['grain_mill'] ?? 0);
-        if ($millLvl < 1) {
-            return ['success' => false, 'error' => "La Meunerie & Brasserie de riz (Sakagura) doit être érigée au Niveau 1 minimum pour raffiner le riz."];
+        if ($millLvl < 10) {
+            return ['success' => false, 'error' => "La Meunerie & Brasserie de riz (Sakagura) doit être érigée au Niveau 10 minimum pour raffiner le riz en farine ou saké (Niveau actuel : {$millLvl}/10)."];
         }
 
         // 2. Traiter les productions terminées et vérifier la limite de la file

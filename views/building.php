@@ -662,7 +662,7 @@ if (!$isEmptyPlot) {
                                 <a href="/?page=alliance" class="btn btn-primary">
                                     <i class="fa-solid fa-flag me-1"></i>Ouvrir le Pavillon des Alliances Féodales &rarr;
                                 </a>
-                            <?php elseif ($code === 'grain_mill'): ?>
+                            <?php elseif ($code === 'grain_mill' && $lvl >= 10): ?>
                                 <a href="#craftSection" class="btn btn-success text-white">
                                     <i class="fa-solid fa-wine-bottle me-1"></i>Accéder à la Minoterie &amp; Cuves de Saké &darr;
                                 </a>
@@ -981,6 +981,18 @@ if (!$isEmptyPlot) {
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge bg-success text-white fw-bold shadow-sm" title="Étage / Niveau actuel de la meunerie">
+                            <i class="fa-solid fa-landmark text-white me-1"></i>Niveau <?= $lvl ?>
+                        </span>
+                        <?php if ($lvl < 10): ?>
+                            <span class="badge bg-secondary text-white fw-bold">
+                                <i class="fa-solid fa-lock text-muted me-1"></i>Raffinage : Niv. 10 requis (<?= $lvl ?>/10)
+                            </span>
+                        <?php else: ?>
+                            <span class="badge bg-success-lt fw-bold">
+                                <i class="fa-solid fa-check text-success me-1"></i>Raffinage Débloqué
+                            </span>
+                        <?php endif; ?>
                         <?php if ($isSealActive): ?>
                             <span class="badge bg-warning text-dark fw-bold shadow-sm" title="File de tâches automatique active grâce au Sceau Impérial">
                                 <i class="fa-solid fa-crown text-warning me-1"></i>Sceau Impérial : File de raffinage (<?= count($craftQueue) ?>/4)
@@ -991,7 +1003,7 @@ if (!$isEmptyPlot) {
                             </a>
                         <?php endif; ?>
                         <span class="badge bg-success-lt fw-bold">
-                            Rendement : +<?= (int)($lvl * 2) ?>% (Niveau <?= $lvl ?>)
+                            Rendement : +<?= (int)($lvl * 2) ?>%
                         </span>
                         <span class="badge bg-info-lt fw-bold">
                             Vitesse : +<?= (int)($lvl * 15) ?>%
@@ -1133,10 +1145,35 @@ if (!$isEmptyPlot) {
                         </div>
                     </div>
 
-                    <!-- Deux colonnes d'ateliers : Farine & Saké -->
+                    <!-- Deux colonnes d'ateliers : Farine & Saké (Déblocage Niveau 10) -->
                     <div class="row g-3">
-                        <!-- Atelier 1 : Farine de Riz -->
+                        <!-- Atelier 1 : Farine de Riz (Niveau 10) -->
                         <div class="col-md-6">
+                            <?php if ($lvl < 10): ?>
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-muted">
+                                            <i class="fa-solid fa-lock me-1"></i>Mouture de Farine
+                                        </h4>
+                                        <span class="badge bg-secondary-lt">Niv. 10 requis</span>
+                                    </div>
+                                    <p class="text-secondary small mb-3">
+                                        L'installation des meules hydrauliques et le tamisage fin du grain de riz (Komeko) nécessitent une infrastructure avancée.
+                                        Améliorez votre <strong>Meunerie &amp; Brasserie au Niveau 10</strong> pour débloquer la production de farine.
+                                    </p>
+                                </div>
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                        <span>Progression de la Meunerie</span>
+                                        <strong><?= $lvl ?> / 10</strong>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: <?= min(100, ($lvl / 10) * 100) ?>%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php else: ?>
                             <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9;">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -1187,10 +1224,36 @@ if (!$isEmptyPlot) {
                                 </button>
                                 <?php endif; ?>
                             </div>
+                            <?php endif; ?>
                         </div>
 
-                        <!-- Atelier 2 : Saké Féodal -->
+                        <!-- Atelier 2 : Saké Féodal (Niveau 10) -->
                         <div class="col-md-6">
+                            <?php if ($lvl < 10): ?>
+                            <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-muted">
+                                            <i class="fa-solid fa-lock me-1"></i>Cuves de Saké (Sakagura)
+                                        </h4>
+                                        <span class="badge bg-secondary-lt">Niv. 10 requis</span>
+                                    </div>
+                                    <p class="text-secondary small mb-3">
+                                        La fermentation du koji et l'élevage du saké en grands fûts de cèdre exigent des cuves spécialisées et des maîtres brasseurs (Toji).
+                                        Améliorez votre <strong>Meunerie &amp; Brasserie au Niveau 10</strong> pour débloquer le brassage du saké.
+                                    </p>
+                                </div>
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                        <span>Progression de la Brasserie</span>
+                                        <strong><?= $lvl ?> / 10</strong>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-warning" style="width: <?= min(100, ($lvl / 10) * 100) ?>%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php else: ?>
                             <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9;">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -1241,6 +1304,7 @@ if (!$isEmptyPlot) {
                                 </button>
                                 <?php endif; ?>
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

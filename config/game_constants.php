@@ -266,7 +266,7 @@ const BUILDINGS = [
         'name' => 'Meunerie & Brasserie de Riz (Sakagura)',
         'icon' => '<i class="fa-solid fa-wine-bottle text-warning"></i>',
         'tile_img' => 'tile_grain_mill.png',
-        'description' => 'Brasserie et meunerie artisanale traitant les récoltes de riz. Augmente la production de Koku de Riz de +5% par niveau.',
+        'description' => 'Brasserie et meunerie artisanale traitant les récoltes de riz (+5% de Koku de riz par niveau). Débloque la mouture de farine de riz et le brassage du saké à partir du Niveau 10.',
         'base_cost' => ['metal' => 160, 'crystal' => 150, 'deuterium' => 100],
         'cost_multiplier' => 1.5,
         'base_time' => 660,
