@@ -791,6 +791,29 @@ CREATE TABLE IF NOT EXISTS `lake_fish_stocks` (
     PRIMARY KEY (`coord_x`, `coord_y`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Table : market_offers (Bourse de troc féodal P2P avec séquestre / escrow)
+CREATE TABLE IF NOT EXISTS `market_offers` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT UNSIGNED NOT NULL,
+    `planet_id` INT UNSIGNED NOT NULL,
+    `offer_res` VARCHAR(32) NOT NULL,
+    `offer_amount` INT UNSIGNED NOT NULL,
+    `demand_res` VARCHAR(32) NOT NULL,
+    `demand_amount` INT UNSIGNED NOT NULL,
+    `ratio` DECIMAL(8,4) NOT NULL,
+    `status` ENUM('active', 'completed', 'cancelled') NOT NULL DEFAULT 'active',
+    `buyer_user_id` INT UNSIGNED DEFAULT NULL,
+    `buyer_planet_id` INT UNSIGNED DEFAULT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `completed_at` DATETIME DEFAULT NULL,
+    `cancelled_at` DATETIME DEFAULT NULL,
+    INDEX `idx_mkt_status_res` (`status`, `offer_res`, `demand_res`),
+    INDEX `idx_mkt_user_status` (`user_id`, `status`),
+    INDEX `idx_mkt_planet` (`planet_id`),
+    CONSTRAINT `fk_mkt_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_mkt_planet` FOREIGN KEY (`planet_id`) REFERENCES `planets` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

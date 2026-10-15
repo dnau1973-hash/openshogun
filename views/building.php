@@ -2369,12 +2369,26 @@ if (!$isEmptyPlot) {
             $merchantsCount = (int)($lvl * 2);
 
             require_once __DIR__ . '/../core/ImperialSealEngine.php';
+            require_once __DIR__ . '/../core/MarketEngine.php';
             $sealEngine = new ImperialSealEngine();
+            $marketEngine = new MarketEngine();
             $isSealActive = $sealEngine->isSealActive((int)$user['id']);
             $allTradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
             $marketRoutes = array_filter($allTradeRoutes, function($tr) use ($planet) {
                 return (int)$tr['source_planet_id'] === (int)$planet['id'] || (int)$tr['target_planet_id'] === (int)$planet['id'];
             });
+
+            // Données de la Bourse P2P (Niveau 10)
+            $p2pMaxSlots = $marketEngine->getMaxOfferSlots($lvl);
+            $p2pTradables = MarketEngine::getTradableResources();
+            $p2pActiveOffers = ($lvl >= 10) ? $marketEngine->getActiveOffers() : [];
+            $p2pMyOffers = ($lvl >= 10) ? $marketEngine->getUserOffers((int)$user['id']) : [];
+            $p2pMyActiveOffersCount = 0;
+            foreach ($p2pMyOffers as $mo) {
+                if ($mo['status'] === 'active' && (int)$mo['planet_id'] === (int)$planet['id']) {
+                    $p2pMyActiveOffersCount++;
+                }
+            }
             ?>
             <!-- ========================================================
                  SECTION MARCHÉ FÉODAL : CONVOIS DE MARCHANDISES & TROC
@@ -2421,6 +2435,16 @@ if (!$isEmptyPlot) {
                         <li class="nav-item" role="presentation">
                             <a href="#tab-market-npc" class="nav-link fw-bold text-purple d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="false" role="tab">
                                 <span><i class="fa-solid fa-scale-balanced text-warning"></i></span> Intendant du Marché (Troc 1:1:1)
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-market-p2p" class="nav-link fw-bold text-success d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="false" role="tab">
+                                <span><i class="fa-solid fa-handshake text-success"></i></span> Bourse Féodale (Troc P2P)
+                                <?php if ($lvl >= 10): ?>
+                                    <span class="badge bg-success-lt ms-1"><?= count($p2pActiveOffers) ?></span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary-lt ms-1"><i class="fa-solid fa-lock me-1"></i>Niv. 10</span>
+                                <?php endif; ?>
                             </a>
                         </li>
                     </ul>
@@ -2721,6 +2745,9 @@ if (!$isEmptyPlot) {
                                 </div>
                             </div>
                         </div>
+
+                        <!-- ONGLET 4 : BOURSE FÉODALE (TROC P2P & ESCROW NIV 10) -->
+                        <?php require_once __DIR__ . '/partials/market_p2p_tab.php'; ?>
                     </div>
                 </div>
             </div>
@@ -4254,12 +4281,261 @@ async function submitMarketCargoDispatch() {
 
 
 
+// ========================================================
+// BOURSE FÉODALE (TROC P2P & SÉQUESTRE)
+// ========================================================
+const p2pPlanetStockMap = <?= json_encode([
+    'metal' => (float)$planet['metal'],
+    'crystal' => (float)$planet['crystal'],
+    'deuterium' => (float)$planet['deuterium'],
+    'clay' => (float)($planet['clay'] ?? 0),
+    'wooden_beams' => (float)($planet['wooden_beams'] ?? 0),
+    'charcoal' => (float)($planet['charcoal'] ?? 0),
+    'fish' => (float)($planet['fish'] ?? 0),
+    'tea' => (float)($planet['tea'] ?? 0),
+    'soybean' => (float)($planet['soybean'] ?? 0),
+    'rice_flour' => (float)($planet['rice_flour'] ?? 0),
+    'sake' => (float)($planet['sake'] ?? 0),
+    'sulfur' => (float)($planet['sulfur'] ?? 0),
+    'nitrate' => (float)($planet['nitrate'] ?? 0),
+    'iron_sand' => (float)($planet['iron_sand'] ?? 0),
+]) ?>;
+
+function onP2POfferResChange() {
+    const sel = document.getElementById('p2p_offer_res');
+    if (!sel) return;
+    const res = sel.value;
+    const stock = p2pPlanetStockMap[res] || 0;
+    const badge = document.getElementById('p2p_offer_stock_badge');
+    if (badge) {
+        badge.innerHTML = `Stock dispo : <strong class="text-success">${Math.floor(stock).toLocaleString('fr-FR')}</strong>`;
+    }
+    updateP2PRatioPreview();
+}
+
+function onP2PDemandResChange() {
+    updateP2PRatioPreview();
+}
+
+function setP2POfferQuick(pct) {
+    const sel = document.getElementById('p2p_offer_res');
+    if (!sel) return;
+    const stock = p2pPlanetStockMap[sel.value] || 0;
+    const val = Math.max(1, Math.floor(stock * pct));
+    const inp = document.getElementById('p2p_offer_amount');
+    if (inp) {
+        inp.value = val;
+        updateP2PRatioPreview();
+    }
+}
+
+function setP2PDemandRatio(targetRatio) {
+    const offInp = document.getElementById('p2p_offer_amount');
+    const demInp = document.getElementById('p2p_demand_amount');
+    if (!offInp || !demInp) return;
+    const offerVal = Math.max(1, parseInt(offInp.value || 1, 10));
+    demInp.value = Math.max(1, Math.round(offerVal * targetRatio));
+    updateP2PRatioPreview();
+}
+
+function updateP2PRatioPreview() {
+    const offInp = document.getElementById('p2p_offer_amount');
+    const demInp = document.getElementById('p2p_demand_amount');
+    const ratioDisp = document.getElementById('p2p_ratio_display');
+    const ratioHint = document.getElementById('p2p_ratio_hint');
+    if (!offInp || !demInp || !ratioDisp) return;
+
+    const offVal = Math.max(1, parseInt(offInp.value || 1, 10));
+    const demVal = Math.max(1, parseInt(demInp.value || 1, 10));
+    const r = (demVal / offVal).toFixed(2);
+
+    ratioDisp.textContent = `1 : ${r}`;
+    if (ratioHint) {
+        if (r < 0.8) {
+            ratioHint.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-gift me-1"></i>Très avantageuse</span>`;
+        } else if (r > 1.5) {
+            ratioHint.innerHTML = `<span class="text-warning-emphasis fw-bold"><i class="fa-solid fa-coins me-1"></i>Offre exigeante</span>`;
+        } else {
+            ratioHint.innerHTML = `<span class="text-muted"><i class="fa-solid fa-scale-balanced me-1"></i>Taux équilibré</span>`;
+        }
+    }
+}
+
+async function submitP2POffer() {
+    const offRes = document.getElementById('p2p_offer_res')?.value;
+    const offAmt = parseInt(document.getElementById('p2p_offer_amount')?.value || 0, 10);
+    const demRes = document.getElementById('p2p_demand_res')?.value;
+    const demAmt = parseInt(document.getElementById('p2p_demand_amount')?.value || 0, 10);
+
+    if (!offRes || offAmt <= 0) {
+        showModalAlert("Veuillez saisir une quantité valide de ressources à bloquer en offre.", "warning");
+        return;
+    }
+    if (!demRes || demAmt <= 0) {
+        showModalAlert("Veuillez saisir une quantité valide de ressources demandées.", "warning");
+        return;
+    }
+    if (offRes === demRes) {
+        showModalAlert("Vous ne pouvez pas échanger une ressource contre la même ressource.", "warning");
+        return;
+    }
+
+    const confirmed = await showModalConfirm(
+        `Confirmez-vous le dépôt de l'offre ? ${offAmt.toLocaleString('fr-FR')} unités seront immédiatement BLOQUÉES en séquestre jusqu'à l'échange ou l'annulation.`,
+        "Séquestre & Dépôt d'Offre de Troc"
+    );
+    if (!confirmed) return;
+
+    const btn = document.getElementById('btnSubmitP2POffer');
+    if (btn) btn.disabled = true;
+
+    try {
+        const fd = new FormData();
+        fd.append('offer_res', offRes);
+        fd.append('offer_amount', offAmt);
+        fd.append('demand_res', demRes);
+        fd.append('demand_amount', demAmt);
+
+        const res = await fetch('/api/market.php?action=create_offer', {
+            method: 'POST',
+            body: fd
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message || "Offre consignée avec succès dans les coffres du marché !", "success");
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || "Erreur lors du dépôt de l'offre.", "error");
+            if (btn) btn.disabled = false;
+        }
+    } catch (e) {
+        showModalAlert("Erreur de communication avec la bourse féodale.", "error");
+        if (btn) btn.disabled = false;
+    }
+}
+
+async function cancelP2POffer(offerId) {
+    const confirmed = await showModalConfirm(
+        `Voulez-vous annuler l'offre n°#${offerId} ? Vos ressources consignées seront immédiatement restituées à vos entrepôts.`,
+        "Annulation de l'Offre & Restitution"
+    );
+    if (!confirmed) return;
+
+    try {
+        const fd = new FormData();
+        fd.append('offer_id', offerId);
+        const res = await fetch('/api/market.php?action=cancel_offer', {
+            method: 'POST',
+            body: fd
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message || "Offre annulée et ressources restituées avec succès !", "success");
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || "Erreur lors de l'annulation de l'offre.", "error");
+        }
+    } catch (e) {
+        showModalAlert("Erreur de communication avec le marché.", "error");
+    }
+}
+
+async function acceptP2POffer(offerId, offName, offAmt, demName, demAmt) {
+    const confirmed = await showModalConfirm(
+        `Confirmez-vous l'échange féodal ? Vous allez donner ${demAmt.toLocaleString('fr-FR')} ${demName} pour recevoir ${offAmt.toLocaleString('fr-FR')} ${offName}.`,
+        "Conclure le Troc Féodal"
+    );
+    if (!confirmed) return;
+
+    try {
+        const fd = new FormData();
+        fd.append('offer_id', offerId);
+        const res = await fetch('/api/market.php?action=accept_offer', {
+            method: 'POST',
+            body: fd
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message || "Accord commercial accompli avec succès !", "success");
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || "Erreur lors de la conclusion de l'échange.", "error");
+        }
+    } catch (e) {
+        showModalAlert("Erreur de communication avec le marché.", "error");
+    }
+}
+
+async function refreshP2POffers() {
+    const filterOff = document.getElementById('p2p_filter_offer')?.value || '';
+    const filterDem = document.getElementById('p2p_filter_demand')?.value || '';
+    try {
+        const res = await fetch(`/api/market.php?action=list_offers&offer_res=${encodeURIComponent(filterOff)}&demand_res=${encodeURIComponent(filterDem)}`);
+        const data = await res.json();
+        if (data.success) {
+            const tbody = document.getElementById('p2p_active_offers_tbody');
+            if (!tbody) return;
+            if (data.offers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Aucune offre ne correspond à vos filtres.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.offers.map(o => {
+                const offDef = data.tradables[o.offer_res] || { name: o.offer_res, icon: 'fa-solid fa-box' };
+                const demDef = data.tradables[o.demand_res] || { name: o.demand_res, icon: 'fa-solid fa-box' };
+                const curStock = p2pPlanetStockMap[o.demand_res] || 0;
+                const canAccept = (curStock >= parseInt(o.demand_amount, 10));
+                return `
+                    <tr>
+                        <td class="font-monospace text-muted">#${o.id}</td>
+                        <td>
+                            <strong class="text-dark">${o.seller_name}</strong>
+                            <div class="text-muted small">${o.seller_planet_name} [${o.seller_x}|${o.seller_y}]</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-success text-white fs-6 py-1 px-2">
+                                +${parseInt(o.offer_amount).toLocaleString('fr-FR')} <i class="${offDef.icon} ms-1"></i>
+                            </span>
+                            <div class="text-muted small mt-1">${offDef.name}</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-danger-lt text-danger fs-6 py-1 px-2">
+                                -${parseInt(o.demand_amount).toLocaleString('fr-FR')} <i class="${demDef.icon} ms-1"></i>
+                            </span>
+                            <div class="text-muted small mt-1">${demDef.name}</div>
+                        </td>
+                        <td class="font-monospace"><strong>1 : ${parseFloat(o.ratio)}</strong></td>
+                        <td>
+                            <div class="small ${canAccept ? 'text-success fw-bold' : 'text-danger'}">
+                                ${Math.floor(curStock).toLocaleString('fr-FR')} en réserve
+                            </div>
+                        </td>
+                        <td class="text-end">
+                            ${canAccept ? `
+                                <button type="button" class="btn btn-sm btn-success fw-bold shadow-sm" onclick="acceptP2POffer(${o.id}, '${offDef.name.replace(/'/g, "\\'")}', ${o.offer_amount}, '${demDef.name.replace(/'/g, "\\'")}', ${o.demand_amount})">
+                                    <i class="fa-solid fa-handshake me-1"></i>Échanger
+                                </button>
+                            ` : `
+                                <button type="button" class="btn btn-sm btn-secondary disabled" title="Stock insuffisant">
+                                    <i class="fa-solid fa-ban me-1"></i>Insuffisant
+                                </button>
+                            `}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    } catch (e) {
+        console.error("Erreur actualisation offres:", e);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     calcFlourPreview();
     calcSakePreview();
     calcBeamsPreview();
     calcCharcoalPreview();
     updateMarketCalculations();
+    onP2POfferResChange();
 });
 </script>
 

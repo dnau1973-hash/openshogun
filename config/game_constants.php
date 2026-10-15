@@ -206,7 +206,7 @@ const BUILDINGS = [
         'name' => 'Marché Féodal & Caravanes',
         'icon' => '<i class="fa-solid fa-scale-balanced text-warning"></i>',
         'tile_img' => 'tile_market.png',
-        'description' => 'Permet d\'échanger des ressources avec les marchands itinérants et autres daimyōs provinciaux.',
+        'description' => 'Permet d\'échanger des ressources avec les marchands itinérants, d\'affréter des convois de fret et d\'accéder à la Bourse de Troc P2P dès le niveau 10 (offres à ratios personnalisés avec séquestre des ressources).',
         'base_cost' => ['metal' => 300, 'crystal' => 200, 'deuterium' => 150],
         'cost_multiplier' => 1.5,
         'base_time' => 450,
