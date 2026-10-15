@@ -187,10 +187,10 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
 <!-- BARRE D'OUTILS PRINCIPALE GAME STUDIO (STANDALONE NAVBAR)           -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 <header class="studio-navbar sticky-top py-2">
-    <div class="container-fluid px-3 px-lg-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <!-- 1. Logo & Identité Game Studio -->
-        <div class="d-flex align-items-center gap-3">
-            <a href="?page=gamestudio&tab=dashboard" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
+    <div class="container-fluid px-3 px-lg-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <!-- 1. Logo & Identité Game Studio + Menus de Navigation Alignés à Gauche -->
+        <div class="d-flex align-items-center flex-wrap gap-3 gap-lg-4">
+            <a href="?page=gamestudio&tab=dashboard" class="d-flex align-items-center gap-2 text-decoration-none text-dark me-2">
                 <span class="avatar avatar-md rounded bg-indigo-lt text-indigo shadow-sm" style="font-size: 1.4rem;">
                     <i class="fa-solid fa-laptop-code"></i>
                 </span>
@@ -204,195 +204,167 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                     </div>
                 </div>
             </a>
+
+            <!-- 2. Barre d'Outils (Menus alignés à gauche : Dashboard, Général, Game Elevate Designer, Narrative Designer) -->
+            <nav class="d-flex align-items-center flex-wrap gap-1">
+                <a href="?page=gamestudio&tab=dashboard" 
+                   class="studio-nav-link <?= $currentTab === 'dashboard' ? 'active' : '' ?>"
+                   title="Tableau de bord exécutif et télémétrie en temps réel">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <!-- Dropdown Onglet Général avec Sous-Menu -->
+                <div class="dropdown">
+                    <a href="#" 
+                       class="studio-nav-link dropdown-toggle <?= $currentTab === 'general' ? 'active' : '' ?>"
+                       data-bs-toggle="dropdown" 
+                       aria-expanded="false"
+                       title="Synthèse générale et outils système du Game Studio">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Général</span>
+                    </a>
+                    <div class="dropdown-menu shadow-sm">
+                        <div class="dropdown-header text-uppercase text-secondary small fw-bold">
+                            Administration &amp; Système
+                        </div>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'overview') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=overview">
+                            <i class="fa-solid fa-gauge text-indigo"></i>
+                            <div>
+                                <div>Synthèse &amp; Dev Team</div>
+                                <div class="small text-secondary">Environnement, KPIs &amp; Accréditations</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'backups') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=backups">
+                            <i class="fa-solid fa-database text-primary"></i>
+                            <div>
+                                <div>Gestion des Sauvegardes</div>
+                                <div class="small text-secondary">Sauvegardes DDL/DML, USB &amp; Restauration</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'updates') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=updates">
+                            <i class="fa-solid fa-arrows-rotate text-teal"></i>
+                            <div>
+                                <div>GitHub Sync &amp; Mises à Jour</div>
+                                <div class="small text-secondary">Déploiement continu, commits &amp; synchronisation</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Dropdown Game Elevate Designer -->
+                <div class="dropdown">
+                    <a href="#" 
+                       class="studio-nav-link dropdown-toggle <?= str_starts_with($currentTab, 'elevate_') ? 'active' : '' ?>"
+                       data-bs-toggle="dropdown" 
+                       aria-expanded="false"
+                       title="Concepteur de progression et équilibrage de jeu (Game Elevate Designer)">
+                        <i class="fa-solid fa-compass-drafting text-warning"></i>
+                        <span>Game Elevate Designer</span>
+                    </a>
+                    <div class="dropdown-menu shadow-sm">
+                        <div class="dropdown-header text-uppercase text-secondary small fw-bold">
+                            Équilibrage &amp; Systèmes de Jeu
+                        </div>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_research' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_research">
+                            <i class="fa-solid fa-scroll text-info"></i>
+                            <div>
+                                <div>Académie des Savoirs &amp; Forge</div>
+                                <div class="small text-secondary">Technologies, Castes féodales, Coûts &amp; Délais</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_bots' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_bots">
+                            <i class="fa-solid fa-robot text-indigo"></i>
+                            <div>
+                                <div>Clans IA &amp; Daimyōs Autonomes</div>
+                                <div class="small text-secondary">Supervision, Cycles de décision &amp; Éclosion PNJ</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_combat' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_combat">
+                            <i class="fa-solid fa-shield-halved text-danger"></i>
+                            <div>
+                                <div>Simulateur de Combat</div>
+                                <div class="small text-secondary">Split-screen tactique, Murailles &amp; Sièges</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_village' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_village">
+                            <i class="fa-solid fa-people-roof text-success"></i>
+                            <div>
+                                <div>Vie du Village</div>
+                                <div class="small text-secondary">Sandbox démographique, Contentement &amp; Saké</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_speed' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_speed">
+                            <i class="fa-solid fa-bolt text-warning"></i>
+                            <div>
+                                <div>Vitesse &amp; Équilibrage</div>
+                                <div class="small text-secondary">Constantes monde, Chantiers &amp; Famine</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_survey' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_survey">
+                            <i class="fa-solid fa-map-location-dot text-primary"></i>
+                            <div>
+                                <div>Arpentage &amp; Provinces</div>
+                                <div class="small text-secondary">Répartition procédurale des tuiles féodales</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_oases' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_oases">
+                            <i class="fa-solid fa-seedling text-teal"></i>
+                            <div>
+                                <div>Écosystèmes des Oasis</div>
+                                <div class="small text-secondary">Havres naturels, Faune &amp; Densité</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_buildings' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_buildings">
+                            <i class="fa-solid fa-chart-line text-info"></i>
+                            <div>
+                                <div>Dérivation des Bâtiments</div>
+                                <div class="small text-secondary">Courbes de progression, Coûts &amp; Délais chantiers</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Dropdown Narrative Designer -->
+                <div class="dropdown">
+                    <a href="#" 
+                       class="studio-nav-link dropdown-toggle <?= str_starts_with($currentTab, 'narrative_') ? 'active' : '' ?>"
+                       data-bs-toggle="dropdown" 
+                       aria-expanded="false"
+                       title="Scénarisation, storyboards vidéo et univers féodal (Narrative Designer)">
+                        <i class="fa-solid fa-feather-pointed text-purple"></i>
+                        <span>Narrative Designer</span>
+                    </a>
+                    <div class="dropdown-menu shadow-sm">
+                        <div class="dropdown-header text-uppercase text-secondary small fw-bold">
+                            Narration &amp; Univers
+                        </div>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'narrative_storyboard' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=narrative_storyboard">
+                            <i class="fa-solid fa-film text-purple"></i>
+                            <div>
+                                <div>Gestionnaire de Storyboard</div>
+                                <div class="small text-secondary">Timeline interactive, Drag &amp; Drop, Vidéos &amp; Événements</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'narrative_lore' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=narrative_lore">
+                            <i class="fa-solid fa-scroll text-warning"></i>
+                            <div>
+                                <div>Charte Narrative &amp; Lore Féodal</div>
+                                <div class="small text-secondary">Lexique d'époque, Factions &amp; Cohérence d'univers</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </nav>
         </div>
 
-        <!-- 2. Barre d'Outils (Toolbar Centrale : Dashboard, Général) -->
-        <nav class="d-flex align-items-center gap-1">
-            <a href="?page=gamestudio&tab=dashboard" 
-               class="studio-nav-link <?= $currentTab === 'dashboard' ? 'active' : '' ?>"
-               title="Tableau de bord exécutif et télémétrie en temps réel">
-                <i class="fa-solid fa-chart-line"></i>
-                <span>Dashboard</span>
-            </a>
-            <!-- Dropdown Onglet Général avec Sous-Menu -->
-            <div class="dropdown">
-                <a href="#" 
-                   class="studio-nav-link dropdown-toggle <?= $currentTab === 'general' ? 'active' : '' ?>"
-                   data-bs-toggle="dropdown" 
-                   aria-expanded="false"
-                   title="Synthèse générale et outils système du Game Studio">
-                    <i class="fa-solid fa-sliders"></i>
-                    <span>Général</span>
-                </a>
-                <div class="dropdown-menu shadow-sm">
-                    <div class="dropdown-header text-uppercase text-secondary small fw-bold">
-                        Administration &amp; Système
-                    </div>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'overview') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=overview">
-                        <i class="fa-solid fa-gauge text-indigo"></i>
-                        <div>
-                            <div>Synthèse &amp; Dev Team</div>
-                            <div class="small text-secondary">Environnement, KPIs &amp; Accréditations</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'backups') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=backups">
-                        <i class="fa-solid fa-database text-primary"></i>
-                        <div>
-                            <div>Gestion des Sauvegardes</div>
-                            <div class="small text-secondary">Sauvegardes DDL/DML, USB &amp; Restauration</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'updates') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=updates">
-                        <i class="fa-solid fa-arrows-rotate text-teal"></i>
-                        <div>
-                            <div>GitHub Sync &amp; Mises à Jour</div>
-                            <div class="small text-secondary">Déploiement continu, commits &amp; synchronisation</div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Dropdown Game Elevate Designer -->
-            <div class="dropdown">
-                <a href="#" 
-                   class="studio-nav-link dropdown-toggle <?= str_starts_with($currentTab, 'elevate_') ? 'active' : '' ?>"
-                   data-bs-toggle="dropdown" 
-                   aria-expanded="false"
-                   title="Concepteur de progression et équilibrage de jeu (Game Elevate Designer)">
-                    <i class="fa-solid fa-compass-drafting text-warning"></i>
-                    <span>Game Elevate Designer</span>
-                </a>
-                <div class="dropdown-menu shadow-sm">
-                    <div class="dropdown-header text-uppercase text-secondary small fw-bold">
-                        Équilibrage &amp; Systèmes de Jeu
-                    </div>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_research' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_research">
-                        <i class="fa-solid fa-scroll text-info"></i>
-                        <div>
-                            <div>Académie des Savoirs &amp; Forge</div>
-                            <div class="small text-secondary">Technologies, Castes féodales, Coûts &amp; Délais</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_bots' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_bots">
-                        <i class="fa-solid fa-robot text-indigo"></i>
-                        <div>
-                            <div>Clans IA &amp; Daimyōs Autonomes</div>
-                            <div class="small text-secondary">Supervision, Cycles de décision &amp; Éclosion PNJ</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_combat' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_combat">
-                        <i class="fa-solid fa-shield-halved text-danger"></i>
-                        <div>
-                            <div>Simulateur de Combat</div>
-                            <div class="small text-secondary">Split-screen tactique, Murailles &amp; Sièges</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_village' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_village">
-                        <i class="fa-solid fa-people-roof text-success"></i>
-                        <div>
-                            <div>Vie du Village</div>
-                            <div class="small text-secondary">Sandbox démographique, Contentement &amp; Saké</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_speed' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_speed">
-                        <i class="fa-solid fa-bolt text-warning"></i>
-                        <div>
-                            <div>Vitesse &amp; Équilibrage</div>
-                            <div class="small text-secondary">Constantes monde, Chantiers &amp; Famine</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_survey' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_survey">
-                        <i class="fa-solid fa-map-location-dot text-primary"></i>
-                        <div>
-                            <div>Arpentage &amp; Provinces</div>
-                            <div class="small text-secondary">Répartition procédurale des tuiles féodales</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_oases' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_oases">
-                        <i class="fa-solid fa-seedling text-teal"></i>
-                        <div>
-                            <div>Écosystèmes des Oasis</div>
-                            <div class="small text-secondary">Havres naturels, Faune &amp; Densité</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_buildings' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_buildings">
-                        <i class="fa-solid fa-chart-line text-info"></i>
-                        <div>
-                            <div>Dérivation des Bâtiments</div>
-                            <div class="small text-secondary">Courbes de progression, Coûts &amp; Délais chantiers</div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Dropdown Narrative Designer -->
-            <div class="dropdown">
-                <a href="#" 
-                   class="studio-nav-link dropdown-toggle <?= str_starts_with($currentTab, 'narrative_') ? 'active' : '' ?>"
-                   data-bs-toggle="dropdown" 
-                   aria-expanded="false"
-                   title="Scénarisation, storyboards vidéo et univers féodal (Narrative Designer)">
-                    <i class="fa-solid fa-feather-pointed text-purple"></i>
-                    <span>Narrative Designer</span>
-                </a>
-                <div class="dropdown-menu shadow-sm">
-                    <div class="dropdown-header text-uppercase text-secondary small fw-bold">
-                        Narration &amp; Univers
-                    </div>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'narrative_storyboard' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=narrative_storyboard">
-                        <i class="fa-solid fa-film text-purple"></i>
-                        <div>
-                            <div>Gestionnaire de Storyboard</div>
-                            <div class="small text-secondary">Timeline interactive, Drag &amp; Drop, Vidéos &amp; Événements</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'narrative_lore' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=narrative_lore">
-                        <i class="fa-solid fa-scroll text-warning"></i>
-                        <div>
-                            <div>Charte Narrative &amp; Lore Féodal</div>
-                            <div class="small text-secondary">Lexique d'époque, Factions &amp; Cohérence d'univers</div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </nav>
-
-        <!-- 3. Outils Rapides & Raccourcis Externes (Jeu, Admin, Profil) -->
+        <!-- 3. Profil Utilisateur (Aligné à droite) -->
         <div class="d-flex align-items-center gap-2">
-            <!-- Période d'analyse si sur le dashboard -->
-            <?php if ($currentTab === 'dashboard'): ?>
-                <div class="btn-group btn-group-sm d-none d-md-inline-flex" role="group">
-                    <a href="?page=gamestudio&tab=dashboard&period=today" class="btn btn-outline-secondary <?= $analyticsPeriod === 'today' ? 'active fw-bold' : '' ?>">Aujourd'hui</a>
-                    <a href="?page=gamestudio&tab=dashboard&period=7d" class="btn btn-outline-secondary <?= $analyticsPeriod === '7d' ? 'active fw-bold' : '' ?>">7 jours</a>
-                    <a href="?page=gamestudio&tab=dashboard&period=30d" class="btn btn-outline-secondary <?= $analyticsPeriod === '30d' ? 'active fw-bold' : '' ?>">30 jours</a>
-                    <a href="?page=gamestudio&tab=dashboard&period=all" class="btn btn-outline-secondary <?= $analyticsPeriod === 'all' ? 'active fw-bold' : '' ?>">Tout</a>
-                </div>
-            <?php endif; ?>
-
-            <!-- Raccourci vers le jeu en plein écran -->
-            <a href="/?page=resources" target="_blank" class="btn btn-sm btn-outline-success d-flex align-items-center gap-1 shadow-sm" title="Ouvrir le jeu OpenShogun dans un nouvel onglet">
-                <i class="fa-solid fa-torii-gate me-1"></i>
-                <span class="d-none d-sm-inline">Accéder au</span> Fief
-            </a>
-
-            <?php if ($auth->isAdmin()): ?>
-                <a href="/?page=admin" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 shadow-sm" title="Ouvrir l'Administration Générale">
-                    <i class="fa-solid fa-gear me-1"></i>
-                    <span class="d-none d-md-inline">Administration</span>
-                </a>
-            <?php endif; ?>
-
-            <a href="/?page=dev_team" target="_blank" class="btn btn-sm btn-outline-purple d-flex align-items-center gap-1 shadow-sm" title="Ouvrir les métiers du jeu vidéo">
-                <i class="fa-solid fa-hammer me-1"></i>
-                <span class="d-none d-md-inline">Dev Team</span>
-            </a>
-
             <!-- Badge Utilisateur -->
-            <div class="d-flex align-items-center gap-2 ps-2 border-start">
+            <div class="d-flex align-items-center gap-2">
                 <span class="avatar avatar-sm rounded-circle bg-indigo-lt text-indigo fw-bold">
                     <?= strtoupper(substr($currentUser['username'] ?? 'U', 0, 2)) ?>
                 </span>
-                <div class="d-none d-xl-block lh-1 text-start">
+                <div class="d-none d-sm-block lh-1 text-start">
                     <div class="fw-bold small"><?= htmlspecialchars($currentUser['username'] ?? 'Daimyō') ?></div>
                     <div class="text-secondary font-monospace" style="font-size:0.65rem;">
                         <?= $auth->isAdmin() ? 'Administrateur' : 'Dev Team' ?>

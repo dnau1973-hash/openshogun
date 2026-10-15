@@ -455,50 +455,6 @@ if (!$isEmptyPlot) {
                     </a>
                 </div>
             </div>
-
-            <!-- Mini-grille des emplacements de la cité -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fa-solid fa-map me-1"></i>Emplacements de la Cité</h3>
-                    <div class="card-options text-muted" style="font-size:0.78rem;">Slots #19 à #34</div>
-                </div>
-                <div class="card-body p-2">
-                    <div class="row g-1">
-                        <?php for ($s = 19; $s <= 34; $s++):
-                            $sData = $citySlots[$s] ?? ['slot' => $s, 'code' => 'free_plot', 'level' => 0];
-                            $sCode = $sData['code'];
-                            $sLvl  = (int)$sData['level'];
-                            $isCurrent = ($s === $slot);
-                            $sInfo = BUILDINGS[$sCode] ?? null;
-                            $sTile = $sInfo['tile_img'] ?? 'tile_tenshu.png';
-                            $sTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $sTile)
-                                ? '/public/assets/tiles/' . $sTile
-                                : '/public/assets/' . $sTile;
-                            $sName = $sInfo['name'] ?? ($sCode === 'free_plot' ? 'Terrain Libre' : $sCode);
-                        ?>
-                        <div class="col-auto">
-                            <a href="/?page=building&slot=<?= $s ?>"
-                               title="<?= htmlspecialchars($sName) ?> #<?= $s ?><?= ($sCode !== 'free_plot') ? ' (Niv.' . $sLvl . ')' : '' ?>"
-                               style="display:block; text-align:center; width:44px; text-decoration:none;">
-                                <div style="width:40px; height:40px; border-radius:6px; overflow:hidden; margin:0 auto;
-                                            border:2px solid <?= $isCurrent ? '#dc2626' : 'var(--tblr-border-color)' ?>;
-                                            box-shadow:<?= $isCurrent ? '0 0 0 2px rgba(220,38,38,0.3)' : 'none' ?>;
-                                            background:rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:center;">
-                                    <?php if ($sCode === 'free_plot'): ?>
-                                        <span style="font-size:1.1rem; opacity:0.6;"><i class="fa-solid fa-helmet-safety text-danger"></i></span>
-                                    <?php else: ?>
-                                        <img src="<?= $sTileUrl ?>" alt="" style="width:100%; height:100%; object-fit:cover; opacity:<?= $isCurrent ? '1' : '0.85' ?>;">
-                                    <?php endif; ?>
-                                </div>
-                                <div style="font-size:0.6rem; color:<?= $isCurrent ? '#dc2626' : 'var(--tblr-text-muted)' ?>; font-weight:<?= $isCurrent ? '800' : '400' ?>; line-height:1.4;">
-                                    #<?= $s ?> <?= ($sCode !== 'free_plot') ? 'N' . $sLvl : '—' ?>
-                                </div>
-                            </a>
-                        </div>
-                        <?php endfor; ?>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Colonne Droite : Catalogue des Bâtiments Constructibles -->
@@ -703,50 +659,6 @@ if (!$isEmptyPlot) {
                             <i class="fa-solid fa-trash-can me-1"></i>Démanteler le Bâtiment (récupère 30%)
                         </button>
                     <?php endif; ?>
-                </div>
-            </div>
-
-            <!-- Mini-grille des emplacements de la cité -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fa-solid fa-map me-1"></i>Emplacements de la Cité</h3>
-                    <div class="card-options text-muted" style="font-size:0.78rem;">Slots #19 à #34</div>
-                </div>
-                <div class="card-body p-2">
-                    <div class="row g-1">
-                        <?php for ($s = 19; $s <= 34; $s++):
-                            $sData = $citySlots[$s] ?? ['slot' => $s, 'code' => 'free_plot', 'level' => 0];
-                            $sCode = $sData['code'];
-                            $sLvl  = (int)$sData['level'];
-                            $isCurrent = ($s === $slot);
-                            $sInfo = BUILDINGS[$sCode] ?? null;
-                            $sTile = $sInfo['tile_img'] ?? 'tile_tenshu.png';
-                            $sTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $sTile)
-                                ? '/public/assets/tiles/' . $sTile
-                                : '/public/assets/' . $sTile;
-                            $sName = $sInfo['name'] ?? ($sCode === 'free_plot' ? 'Terrain Libre' : $sCode);
-                        ?>
-                        <div class="col-auto">
-                            <a href="/?page=building&slot=<?= $s ?>"
-                               title="<?= htmlspecialchars($sName) ?> #<?= $s ?><?= ($sCode !== 'free_plot') ? ' (Niv.' . $sLvl . ')' : '' ?>"
-                               style="display:block; text-align:center; width:44px; text-decoration:none;">
-                                <div style="width:40px; height:40px; border-radius:6px; overflow:hidden; margin:0 auto;
-                                            border:2px solid <?= $isCurrent ? '#dc2626' : 'var(--tblr-border-color)' ?>;
-                                            box-shadow:<?= $isCurrent ? '0 0 0 2px rgba(220,38,38,0.3)' : 'none' ?>;
-                                            background:rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:center;">
-                                    <?php if ($sCode === 'free_plot'): ?>
-                                        <span style="font-size:1.1rem; opacity:0.6;"><i class="fa-solid fa-helmet-safety text-danger"></i></span>
-                                    <?php else: ?>
-                                        <img src="<?= $sTileUrl ?>" alt="" style="width:100%; height:100%; object-fit:cover; opacity:<?= $isCurrent ? '1' : '0.85' ?>;">
-                                    <?php endif; ?>
-                                </div>
-                                <div style="font-size:0.6rem; color:<?= $isCurrent ? '#dc2626' : 'var(--tblr-text-muted)' ?>; font-weight:<?= $isCurrent ? '800' : '400' ?>; line-height:1.4;">
-                                    #<?= $s ?> <?= ($sCode !== 'free_plot') ? 'N' . $sLvl : '—' ?>
-                                </div>
-                            </a>
-                        </div>
-                        <?php endfor; ?>
-                    </div>
                 </div>
             </div>
         </div>
