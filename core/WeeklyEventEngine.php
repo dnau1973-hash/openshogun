@@ -364,10 +364,10 @@ class WeeklyEventEngine {
             } catch (Throwable $e2) {}
 
             try {
-                $stmtB = $this->db->prepare("SELECT building_code, level FROM planet_buildings WHERE planet_id = ?");
+                $stmtB = $this->db->prepare("SELECT building_type, level FROM planet_buildings WHERE planet_id = ?");
                 $stmtB->execute([$planetId]);
                 while ($b = $stmtB->fetch(PDO::FETCH_ASSOC)) {
-                    $buildings[$b['building_code']] = (int)$b['level'];
+                    $buildings[$b['building_type']] = (int)$b['level'];
                 }
             } catch (Throwable $e2) {}
         }

@@ -172,7 +172,7 @@ class MarketEngine {
     public function getMarketLevel(int $planetId): int {
         $st = $this->db->prepare("
             SELECT level FROM planet_buildings 
-            WHERE planet_id = ? AND building_code = 'market'
+            WHERE planet_id = ? AND building_type = 'market'
         ");
         $st->execute([$planetId]);
         return (int)$st->fetchColumn();
