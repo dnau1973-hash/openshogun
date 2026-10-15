@@ -535,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Si l'onglet actif est 'updates', on vérifie automatiquement
     try {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('tab') === 'updates') {
+        if (params.get('tab') === 'updates' || params.get('subtab') === 'updates') {
             checkGitHubUpdates(false);
         }
     } catch (e) {

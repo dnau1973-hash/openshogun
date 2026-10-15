@@ -5,7 +5,7 @@
  */
 
 $currentPageSlug = $page ?? 'gamestudio';
-$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups'], true) ? $_GET['subtab'] : 'overview';
+$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
 ?>
 
 <div class="gamestudio-general">
@@ -16,12 +16,12 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups'], true) 
                 <i class="fa-solid fa-sliders text-indigo me-1"></i>Configuration &amp; Administration Générale
             </h3>
             <div class="text-secondary small mt-1">
-                Aperçu de l'environnement serveur, accréditations de l'équipe et centre de gestion des sauvegardes de la base de données.
+                Aperçu de l'environnement serveur, accréditations de l'équipe, centre de sauvegardes et synchronisation GitHub.
             </div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-purple-lt py-2 px-3 fw-bold">
-                <i class="fa-solid fa-code-branch me-1"></i>Branche <?= htmlspecialchars($gitInfo['branch'] ?? 'main') ?> (<?= htmlspecialchars($gitInfo['short_sha'] ?? 'HEAD') ?>)
+            <span class="badge bg-teal-lt py-2 px-3 fw-bold font-monospace">
+                <i class="fa-solid fa-code-branch me-1"></i><?= htmlspecialchars($gitInfo['branch'] ?? 'main') ?> &bull; <?= htmlspecialchars($gitInfo['short_sha'] ?? 'HEAD') ?>
             </span>
         </div>
     </div>
@@ -42,6 +42,14 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups'], true) 
                     <i class="fa-solid fa-database text-primary"></i>
                     <span>Gestion des Sauvegardes DB</span>
                     <span class="badge bg-primary text-white ms-1"><?= count($backupSets ?? []) ?></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="?page=gamestudio&tab=general&subtab=updates" 
+                   class="nav-link py-2 px-3 d-flex align-items-center justify-content-center gap-2 <?= $currentSubTab === 'updates' ? 'active fw-bold text-teal border-bottom-0' : 'text-secondary' ?>">
+                    <i class="fa-solid fa-arrows-rotate text-teal"></i>
+                    <span>GitHub Sync &amp; Mises à Jour</span>
+                    <span class="badge bg-teal-lt ms-1 font-monospace"><?= htmlspecialchars($gitInfo['short_sha'] ?? 'HEAD') ?></span>
                 </a>
             </li>
         </ul>
@@ -736,5 +744,10 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups'], true) 
             }
         }
         </script>
+    <?php elseif ($currentSubTab === 'updates'): ?>
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- SOUS-ONGLET 3 : GITHUB SYNC & MISES À JOUR                         -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <?php require __DIR__ . '/../partials/admin_updates.php'; ?>
     <?php endif; ?>
 </div>

@@ -644,8 +644,8 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <a href="?page=admin&tab=maintenance" onclick="switchAdminTab('maintenance'); return false;" class="btn btn-outline-danger d-flex align-items-center gap-1 shadow-sm" title="Sauvegardes de la base de données &amp; Maintenance">
                         <i class="fa-solid fa-database me-1"></i>Sauvegardes DB
                     </a>
-                    <a href="?page=admin&tab=updates" onclick="switchAdminTab('updates'); return false;" class="btn btn-outline-teal d-flex align-items-center gap-1 shadow-sm" title="Mises à jour GitHub &amp; Déploiement en 1 clic">
-                        <i class="fa-solid fa-arrows-rotate me-1"></i>GitHub Sync
+                    <a href="?page=gamestudio&tab=general&subtab=updates" class="btn btn-outline-teal d-flex align-items-center gap-1 shadow-sm" title="Mises à jour GitHub &amp; Déploiement en 1 clic">
+                        <i class="fa-solid fa-arrows-rotate me-1"></i>GitHub Sync (Game Studio)
                         <span class="badge bg-teal text-white ms-1"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
                     </a>
                     <a href="?page=gamestudio" target="_blank" class="btn btn-outline-indigo d-flex align-items-center gap-1 shadow-sm" title="Ouvrir Game Studio dans une nouvelle page">
@@ -695,10 +695,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </a>
                 </li>
 
-                <!-- 5. GitHub Sync -->
+                <!-- 5. GitHub Sync (Game Studio) -->
                 <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=updates" class="nav-link admin-tab-btn <?= ($currentTab === 'updates') ? 'active' : '' ?>" data-tab="updates" data-bs-target="#tab-updates" role="tab" onclick="switchAdminTab('updates'); return false;">
-                        <i class="fa-solid fa-arrows-rotate text-teal me-1"></i>GitHub Sync
+                    <a href="?page=gamestudio&tab=general&subtab=updates" class="nav-link admin-tab-btn" title="Ouvrir dans Game Studio">
+                        <i class="fa-solid fa-arrows-rotate text-teal me-1"></i>GitHub Sync (Game Studio)
                         <span class="badge bg-teal-lt ms-1" id="admin-update-nav-badge"><?= htmlspecialchars($localGitInfo['short_sha']) ?></span>
                     </a>
                 </li>
@@ -1713,9 +1713,33 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     
 
     
-<!-- Section Mises à Jour & Déploiement GitHub -->
+<!-- Section Mises à Jour & Déploiement GitHub Déplacée dans Game Studio -->
     <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'updates' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-updates" data-tab="updates" role="tabpanel">
-        <?php require __DIR__ . '/partials/admin_updates.php'; ?>
+        <div class="card mb-4 border-teal">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg bg-teal-lt rounded-circle">
+                        <i class="fa-solid fa-arrows-rotate fs-2 text-teal"></i>
+                    </div>
+                    <div>
+                        <h4 class="m-0 fw-bold text-teal">Centre de Mises à Jour &amp; Déploiement GitHub</h4>
+                        <p class="text-secondary small mb-0 mt-1">
+                            L'outil de contrôle des versions, d'inspection des commits et de synchronisation GitHub en 1 clic a été déplacé dans le <strong>Game Studio</strong> sous l'onglet <strong>Général &gt; GitHub Sync &amp; Mises à Jour</strong>.
+                        </p>
+                        <div class="d-flex align-items-center gap-2 mt-2">
+                            <span class="badge bg-teal text-white">Commit Actif : <?= htmlspecialchars($localGitInfo['short_sha'] ?? 'HEAD') ?></span>
+                            <span class="badge bg-teal-lt text-teal">Branche <?= htmlspecialchars($localGitInfo['branch'] ?? 'main') ?></span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <a href="?page=gamestudio&tab=general&subtab=updates" class="btn btn-teal d-flex align-items-center gap-2">
+                        <span>Ouvrir dans Game Studio</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Section Service de Messagerie & Transporteur d'E-mails -->

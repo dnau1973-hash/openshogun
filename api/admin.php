@@ -25,7 +25,8 @@ $isStudioMember = Auth::check() && $gameStudioEngine->isAuthorized($userId);
 $studioAllowedActions = [
     'backup_database', 'list_backups', 'restore_backup',
     'save_settings', 'spawn_spontaneous_village', 'run_bot_cycle',
-    'generate_bots', 'delete_bot', 'get_bot_spawn_status', 'get_bots'
+    'generate_bots', 'delete_bot', 'get_bot_spawn_status', 'get_bots',
+    'check_github_updates', 'install_github_update', 'save_github_settings'
 ];
 
 // 1. Vérification stricte des droits Administrateur ou Studio Habilité

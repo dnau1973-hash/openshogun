@@ -51,7 +51,7 @@ if (!$gameStudioEngine->isAuthorized($userId)) {
 // 1. Détection de l'onglet actif dans la barre d'outils
 $allowedTabs = ['dashboard', 'general', 'elevate_research', 'elevate_bots'];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
-$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups'], true) ? $_GET['subtab'] : 'overview';
+$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
 $analyticsPeriod = in_array($_GET['period'] ?? '', ['today', '7d', '30d', 'all'], true) ? (string)$_GET['period'] : '30d';
 
 // 2. Préparation des données selon l'onglet
@@ -224,6 +224,13 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                         <div>
                             <div>Gestion des Sauvegardes</div>
                             <div class="small text-secondary">Sauvegardes DDL/DML, USB &amp; Restauration</div>
+                        </div>
+                    </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'updates') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=updates">
+                        <i class="fa-solid fa-arrows-rotate text-teal"></i>
+                        <div>
+                            <div>GitHub Sync &amp; Mises à Jour</div>
+                            <div class="small text-secondary">Déploiement continu, commits &amp; synchronisation</div>
                         </div>
                     </a>
                 </div>
