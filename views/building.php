@@ -2339,8 +2339,8 @@ if (!$isEmptyPlot) {
                     </div>
                 </div>
 
-                <div class="card-header p-0 border-bottom-0">
-                    <ul class="nav nav-tabs card-header-tabs px-3" data-bs-toggle="tabs" role="tablist">
+                <div class="card-header border-bottom">
+                    <ul class="nav nav-tabs card-header-tabs m-0" data-bs-toggle="tabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <a href="#tab-market-dispatch" class="nav-link active fw-bold text-dark d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="true" role="tab">
                                 <span><i class="fa-solid fa-boxes-stacked text-warning"></i></span> Expédier des Marchandises
@@ -2370,7 +2370,7 @@ if (!$isEmptyPlot) {
                     </ul>
                 </div>
 
-                <div class="card-body">
+                <div class="card-body pt-4">
                     <div class="tab-content">
                         <!-- ONGLET 1 : EXPÉDIER DES MARCHANDISES -->
                         <div class="tab-pane active show" id="tab-market-dispatch" role="tabpanel">
