@@ -421,9 +421,14 @@ class ImperialSealEngine {
      * Rééquilibre instantanément l'ensemble des vivres et matériaux de construction au ratio parfait 1:1
      */
     public function npcExchange(int $userId, int $planetId, $woodOrRes, int $stone = 0, int $rice = 0): array {
+        require_once __DIR__ . '/PlanetEngine.php';
+        $planetEngine = new PlanetEngine($this->db);
+        // Synchroniser les productions passives avant le troc
+        $planetEngine->updatePlanet($planetId);
+
         $defs = $this->getNpcResourceDefinitions();
 
-        // 1. Récupération des données du fief
+        // 1. Récupération des données du fief à jour
         $cols = ['id', 'user_id'];
         foreach ($defs as $d) {
             $cols[] = "`{$d['col']}`";
@@ -490,8 +495,18 @@ class ImperialSealEngine {
             throw new Exception("Vos greniers sont déserts, impossible d'effectuer un troc.");
         }
 
-        if ($targetTotal !== $currentTotal) {
-            throw new Exception("Le total rééquilibré (" . number_format($targetTotal) . ") doit être strictement égal au total actuel (" . number_format($currentTotal) . ").");
+        // Vérification de la conservation stricte des ressources
+        // Tolérance souple si la production passive continue de faire monter les stocks pendant que la modale est ouverte
+        $diff = $currentTotal - $targetTotal;
+        if ($diff < 0) {
+            // L'utilisateur essaie de créer des ressources à partir de rien (targetTotal > currentTotal)
+            throw new Exception("Le total rééquilibré (" . number_format($targetTotal) . ") dépasse le total de vos réserves actuelles (" . number_format($currentTotal) . ").");
+        } elseif ($diff > 0) {
+            // Des ressources ont été produites entre l'ouverture de la modale et la soumission
+            // On redistribue le delta produit naturellement sur la première ressource modifiée (ex: bois/riz) pour ne perdre aucune production
+            $firstKey = array_key_first($targetValues);
+            $targetValues[$firstKey] += $diff;
+            $targetTotal += $diff;
         }
 
         // 4. Vérification du solde de Koban (3 Koban)
@@ -511,13 +526,14 @@ class ImperialSealEngine {
                 throw new Exception("Solde de Koban insuffisant lors du paiement.");
             }
 
-            // Mettre à jour les ressources sur la planète
+            // Mettre à jour les ressources sur la planète et réinitialiser l'horodatage
             $setParts = [];
             $bindParams = [];
             foreach ($defs as $key => $def) {
                 $setParts[] = "`{$def['col']}` = ?";
                 $bindParams[] = $targetValues[$key];
             }
+            $setParts[] = "`last_resource_update` = UNIX_TIMESTAMP()";
             $bindParams[] = $planetId;
 
             $sqlSet = implode(', ', $setParts);
