@@ -25,3 +25,4 @@ if (file_exists($loreFile)) {
 } else {
     echo '<div class="alert alert-info">Le document de charte narrative est en cours d\'initialisation.</div>';
 }
+

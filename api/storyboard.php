@@ -157,6 +157,72 @@ try {
             ]);
             break;
 
+        // Téléversement d'une nouvelle illustration vers assets/bibliotheque/
+        case 'upload_illustration':
+            if (empty($_FILES['image']) || !isset($_FILES['image']['tmp_name']) || !is_uploaded_file($_FILES['image']['tmp_name'])) {
+                echo json_encode(['success' => false, 'error' => 'Aucun fichier image reçu ou erreur d\'envoi.']);
+                exit;
+            }
+
+            $file = $_FILES['image'];
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                echo json_encode(['success' => false, 'error' => 'Erreur de téléversement (code: ' . $file['error'] . ')']);
+                exit;
+            }
+
+            // Vérification de la taille (max 12 Mo)
+            if ($file['size'] > 12 * 1024 * 1024) {
+                echo json_encode(['success' => false, 'error' => 'Le fichier dépasse la taille maximale autorisée (12 Mo).']);
+                exit;
+            }
+
+            // Vérification du type MIME
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($file['tmp_name']);
+            $allowedMimes = [
+                'image/jpeg' => 'jpg',
+                'image/png'  => 'png',
+                'image/webp' => 'webp',
+            ];
+
+            if (!isset($allowedMimes[$mime])) {
+                echo json_encode(['success' => false, 'error' => 'Format non pris en charge. Formats acceptés : JPG, PNG, WEBP.']);
+                exit;
+            }
+
+            $ext = $allowedMimes[$mime];
+            $origName = pathinfo($file['name'], PATHINFO_FILENAME);
+            $cleanBaseName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $origName);
+            $cleanBaseName = substr(trim((string)$cleanBaseName, '_'), 0, 40) ?: 'illustration';
+            
+            $targetDir = __DIR__ . '/../public/assets/bibliotheque';
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0775, true);
+            }
+
+            $filename = 'biblio_' . $cleanBaseName . '_' . time() . '_' . bin2hex(random_bytes(3)) . '.' . $ext;
+            $destPath = $targetDir . '/' . $filename;
+
+            if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+                echo json_encode(['success' => false, 'error' => 'Impossible d\'enregistrer le fichier dans assets/bibliotheque/.']);
+                exit;
+            }
+
+            @chmod($destPath, 0664);
+            $webPath = '/public/assets/bibliotheque/' . $filename;
+            $title = ucwords(str_replace(['_', '-'], ' ', $cleanBaseName));
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Illustration téléversée avec succès dans la Bibliothèque !',
+                'url' => $webPath,
+                'filename' => $filename,
+                'title' => $title,
+                'category' => 'bibliotheque',
+                'category_label' => 'Bibliothèque d\'Images',
+            ]);
+            break;
+
         // Catalogue complet des illustrations du jeu pour le sélecteur modal
         case 'gallery_assets':
             $assets = $engine->getGalleryAssets();
@@ -179,3 +245,4 @@ try {
         'error' => 'Erreur interne du serveur : ' . $e->getMessage()
     ]);
 }
+

@@ -5,10 +5,21 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [1.32.0] - 2026-10-15
 ### Ajouté (Added)
-- **Game Studio &bull; Pôle Narrative Designer & Gestionnaire de Storyboard Multi-Projets (`views/gamestudio.php`, `core/StoryboardEngine.php`, `api/storyboard.php`, `views/studio/narrative-designer/storyboard-manager.php`) :**
+- **Game Studio &bull; Pôle Narrative Designer & Gestionnaire de Storyboard Multi-Projets (`views/gamestudio.php`, `core/StoryboardEngine.php`, `api/storyboard.php`, `views/studio/narrative-designer/storyboard-manager.php`, `public/assets/bibliotheque/`) :**
   * **Intégration du Nouveau Métier « Narrative Designer » dans Game Studio :**
     - Ajout du menu déroulant dédié *Narrative Designer* (icône `fa-feather-pointed` violette) dans la barre de navigation du Studio.
     - Deux modules accessibles : le *Gestionnaire de Storyboard* (`tab=narrative_storyboard`) et la *Charte Narrative & Lore Féodal* (`tab=narrative_lore`).
+  * **Banc de Montage Vidéo Linéaire (Timeline Horizontale Continue sans Retour Chariot) :**
+    - Refonte complète de la timeline en véritable piste de montage vidéo linéaire continue (`flex-wrap: nowrap; overflow-x: auto;`) inspirée des logiciels NLE professionnels (*Premiere Pro, DaVinci Resolve*).
+    - Aucun retour à la ligne : les clips de plans forment une séquence continue de gauche à droite sur des cartes calibrées de 340px.
+    - Connecteurs de transition visuels cliquables entre chaque plan (*Cut franc, Fondu croisé, Fondu au noir*).
+    - Barre de défilement horizontal sombre et fluide, boutons de contrôle rapide (*⏮ Début, ◀ Recul, Avance ▶, ⏭ Fin*) et prise en charge naturelle de la molette de souris (`wheel`) pour scroller horizontalement.
+  * **Téléversement d'Illustrations Personnalisées (`assets/bibliotheque/`) :**
+    - Création du répertoire de stockage officiel `public/assets/bibliotheque/` pour accueillir les créations visuelles de la Dev Team.
+    - Action API sécurisée `action=upload_illustration` dans `api/storyboard.php` (contrôle MIME `image/jpeg`, `image/png`, `image/webp`, limite 12 Mo, assainissement de nom et sécurisation des droits).
+    - Zone de glisser-déposer (Dropzone) intégrée dans la modale du sélecteur d'illustrations avec bouton de parcours de fichiers et jauge de progression.
+    - Support du glisser-déposer direct depuis l'ordinateur sur la vignette d'un clip pour uploader et assigner l'image en 1 étape.
+    - Indexation automatique de la catégorie *« Bibliothèque »* dans le sélecteur modal et dans la Galerie d'Art globale (`views/gallery.php`).
   * **Gestion Multi-Storyboards (Espace de Travail & Projets Parallèles) :**
     - Prise en charge de plusieurs storyboards en cours d'élaboration avec sélecteur de projet instantané.
     - Création de nouveaux projets de storyboards avec typologie (*Trailer officiel, Démo de gameplay, Teaser d'événement, Cinématique de quête, Clip réseaux*), ratio d'image (16:9, 9:16, 1:1, 4:3), durée cible et piste audio.

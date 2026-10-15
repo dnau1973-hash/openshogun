@@ -30,3 +30,4 @@ if (file_exists($managerFile)) {
 } else {
     echo '<div class="alert alert-warning">Le module Storyboard Manager est en cours de déploiement.</div>';
 }
+

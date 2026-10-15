@@ -92,6 +92,14 @@ $categoryConfig = [
         'color' => 'danger',
         'desc' => 'Samouraïs, archers, cavaliers d’élite, ninjas et le Mineur des Cimes (Kōfu).',
     ],
+    'bibliotheque' => [
+        'label' => 'Bibliothèque',
+        'full_label' => 'Bibliothèque & Imports Personnalisés',
+        'icon' => 'fa-folder-plus',
+        'badge' => 'bg-indigo text-white',
+        'color' => 'indigo',
+        'desc' => 'Illustrations et documents visuels téléversés depuis le Narrative Designer et le Game Studio.',
+    ],
 ];
 
 /**
@@ -199,10 +207,11 @@ $categoryCounts = [
     'resources' => 0,
     'tiles' => 0,
     'units' => 0,
+    'bibliotheque' => 0,
 ];
 $totalBytes = 0;
 
-$scannedDirs = ['buildings', 'carrousel', 'castles', 'clans', 'events', 'items', 'resources', 'tiles', 'units'];
+$scannedDirs = ['buildings', 'carrousel', 'castles', 'clans', 'events', 'items', 'resources', 'tiles', 'units', 'bibliotheque'];
 
 foreach ($scannedDirs as $catKey) {
     $dirPath = $baseDir . '/' . $catKey;

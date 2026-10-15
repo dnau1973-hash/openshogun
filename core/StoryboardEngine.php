@@ -795,6 +795,7 @@ class StoryboardEngine {
             'resources' => 'Ressources & Terroirs',
             'tiles' => 'Tuiles Isométriques',
             'units' => 'Armées & Unités',
+            'bibliotheque' => 'Bibliothèque & Imports',
         ];
 
         $assets = [];
