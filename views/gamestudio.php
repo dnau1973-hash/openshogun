@@ -48,6 +48,16 @@ if (!$gameStudioEngine->isAuthorized($userId)) {
     exit;
 }
 
+// Alias de redirection directe vers les sous-onglets de Général
+if (($_GET['tab'] ?? '') === 'updates') {
+    header('Location: ?page=gamestudio&tab=general&subtab=updates');
+    exit;
+}
+if (($_GET['tab'] ?? '') === 'backups') {
+    header('Location: ?page=gamestudio&tab=general&subtab=backups');
+    exit;
+}
+
 // 1. Détection de l'onglet actif dans la barre d'outils
 $allowedTabs = ['dashboard', 'general', 'elevate_research', 'elevate_bots'];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
