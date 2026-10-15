@@ -22,7 +22,11 @@ $userId = (int)Auth::id();
 
 $isAdmin = Auth::check() && $auth->isAdmin();
 $isStudioMember = Auth::check() && $gameStudioEngine->isAuthorized($userId);
-$studioAllowedActions = ['backup_database', 'list_backups', 'restore_backup'];
+$studioAllowedActions = [
+    'backup_database', 'list_backups', 'restore_backup',
+    'save_settings', 'spawn_spontaneous_village', 'run_bot_cycle',
+    'generate_bots', 'delete_bot', 'get_bot_spawn_status', 'get_bots'
+];
 
 // 1. Vérification stricte des droits Administrateur ou Studio Habilité
 if (!$isAdmin && !($isStudioMember && in_array($action, $studioAllowedActions, true))) {

@@ -679,10 +679,10 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </a>
                 </li>
 
-                <!-- 3. Clans IA -->
+                <!-- 3. Clans IA (Game Studio) -->
                 <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=bots" class="nav-link admin-tab-btn <?= ($currentTab === 'bots') ? 'active' : '' ?>" data-tab="bots" data-bs-target="#tab-bots" role="tab" onclick="switchAdminTab('bots'); return false;">
-                        <i class="fa-solid fa-robot text-indigo me-1"></i>Clans IA
+                    <a href="?page=gamestudio&tab=elevate_bots" class="nav-link admin-tab-btn">
+                        <i class="fa-solid fa-robot text-indigo me-1"></i>Clans IA (Game Studio)
                         <span class="badge bg-indigo-lt ms-1"><?= $totalBots ?></span>
                     </a>
                 </li>
@@ -1174,317 +1174,38 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
     </div>
 
     
-<!-- Section 3 : Système d'IA & Colonisation des Bots -->
+<!-- Section 3 : Clans IA & Daimyōs Autonomes Déplacés dans Game Studio -->
     <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'bots' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-bots" data-tab="bots" role="tabpanel">
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title text-indigo d-flex align-items-center gap-2 m-0">
-                    <i class="fa-solid fa-robot text-indigo me-1"></i>Paramétrage de l'IA &amp; Colonisation des Bots (PNJ)
-                </h3>
-                <span class="badge bg-indigo-lt">
-                    <?= count($botsList) ?> Bots Enregistrés
-                </span>
-            </div>
-            <div class="card-body">
-                <form id="botSettingsForm" onsubmit="saveBotSettings(event)">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6 col-lg-3">
-                            <label class="form-label fw-bold text-dark mb-1">
-                                Interrupteur Général de l'IA
-                            </label>
-                            <select name="bots_enabled" class="form-select" id="bots_enabled">
-                                <option value="1" <?= !empty($settings['bots_enabled']) ? 'selected' : '' ?>>IA Active (Cycles opérationnels)</option>
-                                <option value="0" <?= empty($settings['bots_enabled']) ? 'selected' : '' ?>>IA En Veille (Bots figés)</option>
-                            </select>
-                            <div class="form-hint">Permet aux bots d'évoluer, miner et produire des armées.</div>
-                        </div>
-
-                        <div class="col-md-6 col-lg-3">
-                            <label class="form-label fw-bold text-dark mb-1">
-                                <i class="fa-solid fa-chess-rook me-1"></i>Colonisation Automatique
-                            </label>
-                            <select name="bot_colonize_enabled" class="form-select" id="bot_colonize_enabled">
-                                <option value="1" <?= !empty($settings['bot_colonize_enabled']) ? 'selected' : '' ?>>Autorisée (Conquêtes de fiefs)</option>
-                                <option value="0" <?= empty($settings['bot_colonize_enabled']) ? 'selected' : '' ?>>Désactivée (Domaine initial)</option>
-                            </select>
-                            <div class="form-hint">Déclenche l'expansion territoriale vers de nouvelles coordonnées.</div>
-                        </div>
-
-                        <div class="col-md-6 col-lg-3">
-                            <label class="form-label fw-bold text-dark mb-1">
-                                Max Fiefs par Daimyō IA
-                            </label>
-                            <input type="number" name="bot_max_planets" id="bot_max_planets" min="1" max="10" 
-                                   value="<?= (int)($settings['bot_max_planets'] ?? 3) ?>" class="form-control text-center font-weight-bold">
-                            <div class="form-hint">Plafond d'expansion territoriale par Daimyō IA.</div>
-                        </div>
-
-                        <div class="col-md-6 col-lg-3">
-                            <label class="form-label fw-bold text-dark mb-1">
-                                Profil d'Agressivité
-                            </label>
-                            <select name="bot_aggressiveness" class="form-select" id="bot_aggressiveness">
-                                <option value="peaceful" <?= (($settings['bot_aggressiveness'] ?? '') === 'peaceful') ? 'selected' : '' ?>>Pacifique (Mines & Défense)</option>
-                                <option value="moderate" <?= (($settings['bot_aggressiveness'] ?? 'moderate') === 'moderate') ? 'selected' : '' ?>>Modéré (Équilibré)</option>
-                                <option value="aggressive" <?= (($settings['bot_aggressiveness'] ?? '') === 'aggressive') ? 'selected' : '' ?>>Belliqueux (Armées & Raids)</option>
-                            </select>
-                            <div class="form-hint">Influence le recrutement et l'armement des PNJ.</div>
-                        </div>
+        <div class="card mb-4 border-indigo">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg bg-indigo-lt rounded-circle">
+                        <i class="fa-solid fa-robot fs-2 text-indigo"></i>
                     </div>
-
-                    <!-- Paramètres d'Éclosion Spontanée Homogène de Villages PNJ -->
-                    <div class="card bg-surface-secondary border-primary-subtle mb-3">
-                        <div class="card-header bg-primary-lt py-2 d-flex justify-content-between align-items-center">
-                            <h4 class="card-title m-0 text-primary fw-bold d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-spa text-pink me-1"></i>Éclosion Spontanée de Villages PNJ (Apparition Homogène sur la Carte)
-                            </h4>
-                            <span class="badge bg-primary text-white">
-                                Toutes les <?= (int)($settings['bot_spawn_interval_min'] ?? 15) ?> min
-                            </span>
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold text-dark mb-1">
-                                        Mécanisme d'Éclosion Spontanée
-                                    </label>
-                                    <select name="bot_spawn_enabled" class="form-select" id="bot_spawn_enabled">
-                                        <option value="1" <?= !empty($settings['bot_spawn_enabled']) ? 'selected' : '' ?>>Éclosion Activée (Automatique)</option>
-                                        <option value="0" <?= empty($settings['bot_spawn_enabled']) ? 'selected' : '' ?>>Éclosion En Sommeil (Désactivée)</option>
-                                    </select>
-                                    <div class="form-hint">Fait naître de nouveaux villages PNJ à intervalle régulier.</div>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold text-dark mb-1">
-                                        <i class="fa-solid fa-stopwatch me-1"></i>Intervalle d'Apparition (Minutes)
-                                    </label>
-                                    <div class="input-group">
-                                        <input type="number" name="bot_spawn_interval_min" id="bot_spawn_interval_min" min="1" max="1440" 
-                                               value="<?= (int)($settings['bot_spawn_interval_min'] ?? 15) ?>" class="form-control text-center font-weight-bold">
-                                        <span class="input-group-text">min</span>
-                                    </div>
-                                    <div class="form-hint">Délai entre deux apparitions spontanées de fiefs.</div>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold text-dark mb-1">
-                                        <i class="fa-solid fa-chess-rook me-1"></i>Plafond Global de Villages PNJ
-                                    </label>
-                                    <input type="number" name="bot_spawn_max_villages" id="bot_spawn_max_villages" min="5" max="200" 
-                                           value="<?= (int)($settings['bot_spawn_max_villages'] ?? 50) ?>" class="form-control text-center font-weight-bold">
-                                    <div class="form-hint">Nombre maximum de villages PNJ sur l'ensemble de la carte.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary px-4 fw-bold">
-                            <i class="fa-solid fa-floppy-disk me-1"></i>Sauvegarder la Directive IA &amp; Éclosions
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Panneau de Monitoring en Temps Réel de l'Éclosion Spontanée -->
-                <div class="card mt-4 border shadow-sm">
-                    <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="font-size: 1.3rem;"><i class="fa-solid fa-map-location-dot text-primary"></i></span>
-                            <div>
-                                <h4 class="card-title m-0 fw-bold">Distribution Spatiale &amp; Prochaine Éclosion Homogène</h4>
-                                <div class="text-secondary small">
-                                    L'algorithme analyse en temps réel les 4 quadrants pour faire éclore chaque nouveau fief dans la province la moins occupée.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <button type="button" onclick="triggerSpontaneousSpawn()" class="btn btn-sm btn-success fw-bold">
-                                <i class="fa-solid fa-spa text-pink me-1"></i>Faire Éclore un Fief PNJ Maintenant
-                            </button>
-                            <button type="button" onclick="runBotCycle()" class="btn btn-sm btn-outline-primary">
-                                <i class="fa-solid fa-gear me-1"></i>Forcer un Cycle IA
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body p-3">
-                        <div class="row g-3 align-items-center">
-                            <!-- Compte à rebours & métriques globales -->
-                            <div class="col-md-4">
-                                <div class="p-3 border rounded bg-surface">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="text-secondary fw-bold small text-uppercase">Statut d'Éclosion :</span>
-                                        <?php if (!empty($botSpawnStatus['enabled'])): ?>
-                                            <span class="badge bg-success-lt fw-bold"><i class="fa-solid fa-circle-check text-success me-1"></i>Actif (Toutes les <?= $botSpawnStatus['interval_min'] ?> min)</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-secondary-lt fw-bold"><i class="fa-solid fa-moon text-secondary me-1"></i>En Sommeil</span>
-                                        <?php endif; ?>
-                                    </div>
-
-                                    <div class="text-center py-2">
-                                        <div class="text-secondary small">Prochaine Éclosion dans :</div>
-                                        <div class="display-6 fw-bold text-primary font-monospace" id="botSpawnCountdownText">
-                                            <?= $botSpawnStatus['enabled'] ? $botSpawnStatus['next_spawn_in_formatted'] : '--m --s' ?>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-2 pt-2 border-top small d-flex justify-content-between">
-                                        <span class="text-muted">Total Fiefs PNJ :</span>
-                                        <strong><?= $botSpawnStatus['current_villages'] ?> / <?= $botSpawnStatus['max_villages'] ?></strong>
-                                    </div>
-                                    <div class="mt-1 small d-flex justify-content-between">
-                                        <span class="text-muted">Dernière Apparition :</span>
-                                        <span class="text-dark fw-medium"><?= $botSpawnStatus['last_spawn_formatted'] ?></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Répartition par Quadrant (Homogénéité) -->
-                            <div class="col-md-8">
-                                <div class="p-3 border rounded bg-surface">
-                                    <div class="fw-bold mb-2 small text-uppercase text-secondary d-flex justify-content-between">
-                                        <span><i class="fa-solid fa-chart-pie me-1"></i>Répartition Actuelle des Fiefs PNJ par Quadrant :</span>
-                                        <span class="text-success small fw-medium">Couverture Homogène 360°</span>
-                                    </div>
-
-                                    <div class="row g-2 text-center">
-                                        <div class="col-6 col-md-3">
-                                            <div class="p-2 border rounded bg-light">
-                                                <div class="small fw-bold text-dark">↖️ Nord-Ouest</div>
-                                                <div class="h3 m-0 text-primary font-monospace"><?= $botSpawnStatus['quadrants']['NO'] ?? 0 ?></div>
-                                                <div class="text-muted small">fiefs PNJ</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-md-3">
-                                            <div class="p-2 border rounded bg-light">
-                                                <div class="small fw-bold text-dark">↗️ Nord-Est</div>
-                                                <div class="h3 m-0 text-primary font-monospace"><?= $botSpawnStatus['quadrants']['NE'] ?? 0 ?></div>
-                                                <div class="text-muted small">fiefs PNJ</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-md-3">
-                                            <div class="p-2 border rounded bg-light">
-                                                <div class="small fw-bold text-dark">↙️ Sud-Ouest</div>
-                                                <div class="h3 m-0 text-primary font-monospace"><?= $botSpawnStatus['quadrants']['SO'] ?? 0 ?></div>
-                                                <div class="text-muted small">fiefs PNJ</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-md-3">
-                                            <div class="p-2 border rounded bg-light">
-                                                <div class="small fw-bold text-dark">↘️ Sud-Est</div>
-                                                <div class="h3 m-0 text-primary font-monospace"><?= $botSpawnStatus['quadrants']['SE'] ?? 0 ?></div>
-                                                <div class="text-muted small">fiefs PNJ</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <?php if (!empty($botSpawnStatus['last_village'])): ?>
-                                        <?php $lv = $botSpawnStatus['last_village']; ?>
-                                        <div class="mt-3 p-2 bg-success-lt border border-success-subtle rounded small d-flex justify-content-between align-items-center flex-wrap gap-1">
-                                            <span>
-                                                <i class="fa-solid fa-spa text-pink me-1"></i><strong>Dernier Fief Éclos :</strong> 
-                                                <?= htmlspecialchars($lv['planet_name']) ?> (<?= htmlspecialchars($lv['username']) ?>) 
-                                                en <strong>[<?= $lv['x'] ?> : <?= $lv['y'] ?>]</strong> &bull; Quadrant <strong><?= $lv['quadrant'] ?></strong>
-                                            </span>
-                                            <a href="/?page=map&x=<?= $lv['x'] ?>&y=<?= $lv['y'] ?>" target="_blank" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:0.75rem;">
-                                                <i class="fa-solid fa-map-location-dot me-1"></i>Localiser
-                                            </a>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
+                    <div>
+                        <h4 class="m-0 fw-bold text-indigo">Clans IA &amp; Daimyōs Autonomes (PNJ)</h4>
+                        <p class="text-secondary small mb-0 mt-1">
+                            La gestion complète de l'intelligence artificielle (cycles de décision, colonisation, éclosion spatiale homogène et registre des clans) a été déplacée dans le <strong>Game Studio</strong> sous le menu <strong>Game Elevate Designer &gt; Clans IA &amp; Daimyōs Autonomes</strong>.
+                        </p>
+                        <div class="d-flex align-items-center gap-2 mt-2">
+                            <span class="badge bg-indigo text-white"><?= count($botsList) ?> Daimyō(s) IA Actif(s)</span>
+                            <?php if (!empty($settings['bots_enabled'])): ?>
+                                <span class="badge bg-success-lt text-success fw-bold"><i class="fa-solid fa-circle-check me-1"></i>Cycles IA Actifs</span>
+                            <?php else: ?>
+                                <span class="badge bg-secondary-lt text-secondary fw-bold"><i class="fa-solid fa-moon me-1"></i>IA En Veille</span>
+                            <?php endif; ?>
+                            <?php if (!empty($botSpawnStatus['enabled'])): ?>
+                                <span class="badge bg-pink-lt text-pink fw-bold"><i class="fa-solid fa-spa me-1"></i>Éclosion Active (<?= (int)($settings['bot_spawn_interval_min'] ?? 15) ?> min)</span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-
-                <hr class="my-4">
-
-                <!-- Tableau des Bots Actifs -->
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="m-0 font-weight-bold"><i class="fa-solid fa-clipboard-list me-1"></i>Registre des Daimyōs IA en Activité</h4>
-                    <button onclick="generatePresetBots()" class="btn btn-sm btn-outline-primary">
-                        <i class="fa-solid fa-plus me-1"></i>Ajouter 3 Daimyōs Multi-Clans
-                    </button>
+                <div>
+                    <a href="?page=gamestudio&tab=elevate_bots" class="btn btn-indigo d-flex align-items-center gap-2">
+                        <span>Ouvrir dans Game Studio</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
                 </div>
-
-                <?php if (empty($botsList)): ?>
-                    <div class="text-center p-4 text-secondary">
-                        Aucun Daimyō IA n'est actuellement déployé dans l'archipel. Cliquez sur le bouton ci-dessus pour peupler le royaume !
-                    </div>
-                <?php else: ?>
-                    <div class="card border mb-0">
-                        <div class="table-responsive">
-                            <table class="table table-vcenter table-nowrap card-table table-hover" id="tableBotsList">
-                                <thead>
-                                    <tr>
-                                        <th>Daimyō IA</th>
-                                        <th>Clan Féodal</th>
-                                        <th>Fief Capitale</th>
-                                        <th class="text-center">Fiefs Annexes</th>
-                                        <th class="text-end">Puissance Militaire</th>
-                                        <th class="text-end">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="botsTableBody">
-                                    <?php foreach ($botsList as $botIndex => $bot): ?>
-                                        <?php 
-                                            $fInfo = FACTIONS[$bot['faction']] ?? FACTIONS['terran']; 
-                                            $isInitialHidden = ($botIndex >= 10);
-                                        ?>
-                                        <tr class="bot-table-row" data-index="<?= $botIndex ?>" style="<?= $isInitialHidden ? 'display: none;' : '' ?>">
-                                            <td>
-                                                <div class="font-weight-medium">
-                                                    <i class="fa-solid fa-robot text-indigo me-1"></i><?= htmlspecialchars($bot['username']) ?>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-secondary-lt">
-                                                    <?= $fInfo['icon'] ?> <?= htmlspecialchars($fInfo['name']) ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-danger-lt font-monospace">
-                                                    [<?= $bot['capital_x'] ?> : <?= $bot['capital_y'] ?>]
-                                                </span>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge bg-success-lt font-weight-bold">
-                                                    <?= $bot['planet_count'] ?> fief(s)
-                                                </span>
-                                            </td>
-                                            <td class="text-end font-weight-bold text-warning">
-                                                <i class="fa-solid fa-trophy text-warning me-1"></i><?= number_format($bot['points']) ?>
-                                            </td>
-                                            <td class="text-end">
-                                                <button onclick="deleteBot(<?= $bot['id'] ?>, '<?= htmlspecialchars(addslashes($bot['username'])) ?>')" 
-                                                        class="btn btn-sm btn-outline-danger">
-                                                    <i class="fa-solid fa-trash me-1"></i>Purger
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- Pagination du Registre des Bots -->
-                        <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-2 py-2" id="botsPaginationContainer">
-                            <p class="m-0 text-secondary small" id="botsPaginationInfo">
-                                Affichage de <strong id="botsPaginationStart"><?= min(1, count($botsList)) ?></strong> à <strong id="botsPaginationEnd"><?= min(10, count($botsList)) ?></strong> sur <strong id="botsPaginationTotal"><?= count($botsList) ?></strong> daimyōs IA
-                            </p>
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="botsPerPageSelect" class="small text-muted mb-0 d-none d-sm-inline">Par page :</label>
-                                <select id="botsPerPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changeBotsPerPage(this.value)">
-                                    <option value="10" selected>10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                </select>
-                                <ul class="pagination pagination-sm m-0" id="botsPaginationList">
-                                    <!-- Généré dynamiquement en JS -->
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -2815,101 +2536,6 @@ async function saveSettings(event) {
     }
 }
 
-async function saveBotSettings(event) {
-    if (event) event.preventDefault();
-    saveSettings();
-}
-
-// Compte à rebours temps réel pour l'éclosion spontanée
-let botSpawnSecondsRemaining = <?= (int)($botSpawnStatus['next_spawn_in_seconds'] ?? 0) ?>;
-const isBotSpawnActive = <?= !empty($botSpawnStatus['enabled']) ? 'true' : 'false' ?>;
-
-if (isBotSpawnActive && botSpawnSecondsRemaining > 0) {
-    setInterval(() => {
-        if (botSpawnSecondsRemaining > 0) {
-            botSpawnSecondsRemaining--;
-            const mins = Math.floor(botSpawnSecondsRemaining / 60);
-            const secs = botSpawnSecondsRemaining % 60;
-            const el = document.getElementById('botSpawnCountdownText');
-            if (el) {
-                el.textContent = `${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
-            }
-        } else {
-            const el = document.getElementById('botSpawnCountdownText');
-            if (el) el.textContent = "Éclosion imminente...";
-        }
-    }, 1000);
-}
-
-async function triggerSpontaneousSpawn() {
-    showModalConfirm(
-        "Éclosion Spontanée Immédiate", 
-        "Voulez-vous déclencher l'apparition immédiate d'un nouveau village PNJ ? L'emplacement sera choisi de façon homogène sur la carte afin de combler le quadrant le moins occupé.", 
-        async () => {
-            try {
-                const formData = new FormData();
-                formData.append('action', 'spawn_spontaneous_village');
-                const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
-                const data = await res.json();
-
-                if (data.success) {
-                    const v = data.village;
-                    showModalAlert(
-                        "Nouveau Village PNJ Éclos", 
-                        `Un nouveau domaine a fait son apparition dans l'archipel !<br><br>
-                         <i class="fa-solid fa-chess-rook text-danger me-1"></i><strong>${v.planet_name}</strong><br>
-                         <i class="fa-solid fa-user me-1"></i>Seigneur : <strong>${v.username}</strong> (${v.faction})<br>
-                         <i class="fa-solid fa-location-dot me-1"></i>Coordonnées : <strong>[${v.x} : ${v.y}]</strong> &bull; Quadrant : <strong>${v.quadrant}</strong><br>
-                         ${v.is_new_daimyo ? '<i class="fa-solid fa-crown text-warning me-1"></i><em>Nouveau Daimyō fondateur</em>' : '<i class="fa-solid fa-chess-rook text-danger me-1"></i><em>Extension territoriale provinciale</em>'}<br><br>
-                         <a href="/?page=map&x=${v.x}&y=${v.y}" target="_blank" class="btn btn-sm btn-primary"><i class="fa-solid fa-map-location-dot me-1"></i>Explorer sur la Carte</a>`,
-                        "success"
-                    );
-                    setTimeout(() => location.reload(), 2500);
-                } else {
-                    showModalAlert("Éclosion Impossible", data.error || data.message, "warning");
-                }
-            } catch (e) {
-                showModalAlert("Erreur Réseau", "Une erreur est survenue lors de l'éclosion du village.", "danger");
-            }
-        }
-    );
-}
-
-async function runBotCycle() {
-    showModalConfirm("Déclencher un Cycle IA", "Voulez-vous forcer l'exécution immédiate d'un cycle de simulation pour tous les bots ? Ils amélioreront leurs mines, entraîneront des unités et coloniseront de nouveaux mondes.", async () => {
-        try {
-            const formData = new FormData();
-            formData.append('action', 'run_bot_cycle');
-            const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
-            const data = await res.json();
-
-            if (data.success) {
-                const rep = data.report;
-                let colonisationsTxt = "";
-                if (rep.colonies_founded && rep.colonies_founded.length > 0) {
-                    colonisationsTxt = "<br><br><i class=\"fa-solid fa-chess-rook text-danger me-1\"></i><strong>Nouvelles Colonies Fondées :</strong><br>" + 
-                        rep.colonies_founded.map(c => `• <strong>${c.bot}</strong> : ${c.colony_name} aux coordonnées ${c.coords}`).join('<br>');
-                }
-
-                showModalAlert(
-                    "Cycle IA Terminé", 
-                    `Simulation effectuée avec succès pour <strong>${rep.bots_processed}</strong> bot(s) :<br>
-                     • Mines améliorées : <strong>+${rep.mines_upgraded}</strong><br>
-                     • Bâtiments fortifiés : <strong>+${rep.buildings_upgraded}</strong><br>
-                     • Soldats enrôlés : <strong>+${rep.troops_trained}</strong>
-                     ${colonisationsTxt}`,
-                    "success"
-                );
-                setTimeout(() => location.reload(), 2500);
-            } else {
-                showModalAlert("Info IA", data.message || data.error, "warning");
-            }
-        } catch (e) {
-            showModalAlert("Erreur Réseau", "Impossible de déclencher le cycle IA.", "danger");
-        }
-    });
-}
-
 // --- MOTEUR GÉNÉRIQUE DE CONSTRUCTION D'INTERFACE DE PAGINATION TABLER ---
 function buildPaginationUI(containerEl, currentPage, totalPages, onPageClickFnName) {
     if (!containerEl) return;
@@ -2967,63 +2593,6 @@ function buildPaginationUI(containerEl, currentPage, totalPages, onPageClickFnNa
     nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="${onPageClickFnName}(${currentPage + 1})" aria-label="Suivant">&rsaquo;</a>`;
     containerEl.appendChild(nextLi);
 }
-
-// 1. PAGINATION DU REGISTRE DES DAIMYŌS IA (BOTS)
-let currentBotsPage = 1;
-let botsPerPage = 10;
-
-function initBotsPagination() {
-    const rows = document.querySelectorAll('.bot-table-row');
-    if (rows.length === 0) return;
-    const urlParams = new URLSearchParams(window.location.search);
-    const p = parseInt(urlParams.get('bot_page'), 10);
-    if (!isNaN(p) && p >= 1) currentBotsPage = p;
-    const select = document.getElementById('botsPerPageSelect');
-    if (select) botsPerPage = parseInt(select.value, 10) || 10;
-    renderBotsPage(currentBotsPage);
-}
-
-function changeBotsPerPage(newVal) {
-    botsPerPage = parseInt(newVal, 10) || 10;
-    currentBotsPage = 1;
-    renderBotsPage(currentBotsPage);
-}
-
-function renderBotsPage(page) {
-    const rows = Array.from(document.querySelectorAll('.bot-table-row'));
-    const totalBots = rows.length;
-    if (totalBots === 0) return;
-    const totalPages = Math.ceil(totalBots / botsPerPage) || 1;
-    if (page < 1) page = 1;
-    if (page > totalPages) page = totalPages;
-    currentBotsPage = page;
-
-    try {
-        const url = new URL(window.location.href);
-        if (url.searchParams.get('tab') === 'bots') {
-            url.searchParams.set('bot_page', page);
-            window.history.replaceState({}, '', url.toString());
-        }
-    } catch (e) {}
-
-    const startIndex = (page - 1) * botsPerPage;
-    const endIndex = Math.min(startIndex + botsPerPage, totalBots);
-
-    rows.forEach((row, idx) => {
-        row.style.display = (idx >= startIndex && idx < endIndex) ? '' : 'none';
-    });
-
-    const startEl = document.getElementById('botsPaginationStart');
-    const endEl = document.getElementById('botsPaginationEnd');
-    const totalEl = document.getElementById('botsPaginationTotal');
-    if (startEl) startEl.textContent = (totalBots > 0) ? (startIndex + 1) : 0;
-    if (endEl) endEl.textContent = endIndex;
-    if (totalEl) totalEl.textContent = totalBots;
-
-    const ul = document.getElementById('botsPaginationList');
-    buildPaginationUI(ul, page, totalPages, 'renderBotsPage');
-}
-
 
 // 3. PAGINATION DU REGISTRE DES DAIMYŌS JOUEURS (TAB=USERS)
 let currentUsersPage = 1;
@@ -3198,50 +2767,6 @@ function renderSupportPage(page) {
 
     const ul = document.getElementById('supportPaginationList');
     buildPaginationUI(ul, page, totalPages, 'renderSupportPage');
-}
-
-async function generatePresetBots() {
-    showModalConfirm("Génération de Daimyōs", "Créer automatiquement un groupe de 3 nouveaux Daimyōs IA (Clan Oda, Clan Takeda et Clan Tokugawa) avec leurs châteaux capitaux et garnisons ?", async () => {
-        try {
-            const formData = new FormData();
-            formData.append('action', 'generate_bots');
-            formData.append('count', 3);
-            const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
-            const data = await res.json();
-
-            if (data.success) {
-                const count = data.created_count;
-                const names = data.created_bots.join(', ');
-                showModalAlert("Daimyōs Déployés", `${count} nouveau(x) Daimyō(s) établi(s) dans le royaume : <strong>${names}</strong>.`, "success");
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                showModalAlert("Erreur", data.error, "danger");
-            }
-        } catch (e) {
-            showModalAlert("Erreur", "Une erreur est survenue.", "danger");
-        }
-    });
-}
-
-async function deleteBot(botId, botName) {
-    showModalConfirm("Purger le Fief du Bot", `Êtes-vous certain de vouloir purger le Daimyō <strong>${botName}</strong> ainsi que l'ensemble de ses fiefs et armées ?`, async () => {
-        try {
-            const formData = new FormData();
-            formData.append('action', 'delete_bot');
-            formData.append('bot_id', botId);
-            const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
-            const data = await res.json();
-
-            if (data.success) {
-                showModalAlert("Purge Effectuée", data.message, "success");
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                showModalAlert("Erreur", data.error, "danger");
-            }
-        } catch (e) {
-            showModalAlert("Erreur", "Une erreur est survenue.", "danger");
-        }
-    });
 }
 
 async function toggleAdmin(userId, username, currentStatus) {

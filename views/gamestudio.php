@@ -49,7 +49,7 @@ if (!$gameStudioEngine->isAuthorized($userId)) {
 }
 
 // 1. Détection de l'onglet actif dans la barre d'outils
-$allowedTabs = ['dashboard', 'general', 'elevate_research'];
+$allowedTabs = ['dashboard', 'general', 'elevate_research', 'elevate_bots'];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
 $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups'], true) ? $_GET['subtab'] : 'overview';
 $analyticsPeriod = in_array($_GET['period'] ?? '', ['today', '7d', '30d', 'all'], true) ? (string)$_GET['period'] : '30d';
@@ -87,6 +87,13 @@ if ($currentTab === 'dashboard') {
 
     $elevateData = $elevateService->getViewData();
     extract($elevateData);
+} elseif ($currentTab === 'elevate_bots') {
+    require_once __DIR__ . '/../core/BotEngine.php';
+    require_once __DIR__ . '/../core/GameConfig.php';
+    $botEngine = new BotEngine();
+    $settings = GameConfig::load();
+    $botsList = $botEngine->getBots();
+    $botSpawnStatus = $botEngine->getBotSpawnStatus();
 }
 
 // 3. Journalisation télémétrique non-bloquante
@@ -110,6 +117,7 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
 
     <!-- Tabler UI Framework -->
     <link rel="stylesheet" href="/public/css/tabler/tabler.min.css?v=1.0.0-beta21">
+    <link rel="stylesheet" href="/public/css/style.css">
 
     <!-- ApexCharts CDN -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -242,6 +250,13 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div class="small text-secondary">Technologies, Castes féodales, Coûts &amp; Délais</div>
                         </div>
                     </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_bots' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_bots">
+                        <i class="fa-solid fa-robot text-indigo"></i>
+                        <div>
+                            <div>Clans IA &amp; Daimyōs Autonomes</div>
+                            <div class="small text-secondary">Supervision, Cycles de décision &amp; Éclosion PNJ</div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </nav>
@@ -340,6 +355,28 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
         </div>
     </div>
 </footer>
+
+<!-- Modale Universelle pour Messages, Alertes & Confirmations Tabler -->
+<div class="modal-overlay" id="customAlertModal">
+    <div class="modal-card alert-modal-card" id="customAlertCard">
+        <div class="card-header bg-dark text-white py-2 d-flex justify-content-between align-items-center">
+            <h3 class="card-title text-white m-0" id="customAlertTitle">Décret du Shogunat</h3>
+            <button onclick="closeCustomAlert()" class="modal-close-btn text-white btn-close" aria-label="Fermer"></button>
+        </div>
+        <div class="card-body p-4">
+            <div class="alert-modal-content d-flex align-items-center gap-3">
+                <span class="alert-modal-icon fs-1" id="customAlertIcon"><i class="fa-solid fa-circle-info text-primary"></i></span>
+                <p class="alert-modal-text m-0 fs-3" id="customAlertText"></p>
+            </div>
+            <div class="alert-modal-actions d-flex justify-content-end gap-2 mt-4" id="customAlertActions">
+                <button class="btn btn-primary" id="customAlertBtnOk">Compris</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conteneur Universel de Toasts Tabler.io pour Confirmations d'Actions & Notifications -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="tablerToastContainer" style="z-index: 99999; max-width: 420px;"></div>
 
 <!-- Tabler Core JS & Bootstrap Bundle -->
 <script src="/public/css/tabler/tabler.min.js?v=1.0.0-beta21"></script>
