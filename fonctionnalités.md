@@ -1,5 +1,45 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-15] - village-life-simulator-upgrade : Modernisation du Simulateur de Vie de Village, Castes Féodales & Nouvelles Ressources
+- **Module :** `village-life-simulator-upgrade`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Uniformisation des KPI (Standard Tabler / Game Studio) :**
+     - Réorganisation en 7 cartes KPI au design harmonisé :
+       * *Satisfaction & Moral Global* (%, jauge, badge Saké +15% asymétrique, clignotement rouge en cas d'exode critique).
+       * *Démographie & Minka* (Population, places max, % d'occupation).
+       * *Pyramide des 4 Castes Féodales* (Effectifs, pourcentages et barre de progression quadri-couleur segmentée : Paysans `#16a34a`, Artisans `#0284c7`, Marchands `#d97706`, Noblesse `#7c3aed`).
+       * *Emplois & Activité* (Postes pourvus vs requis, indicateur de plein emploi ou sous-effectif).
+       * *Ordre & Sécurité Féodale* (Délinquance nette %, efficacité garnison/vigie, statut de paix civile ou brigandage).
+       * *Grenier Féodal (Vivres & Confort)* (Riz, Poisson, Soja, Farine, Thé, Saké avec alertes d'autonomie et statut de ravitaillement).
+       * *Entrepôt des Matériaux & Énergie* (Bois, Pierre, Argile, Poutres, Charbon, Sérénité Shintō).
+  2. **Intégration Complète des 4 Castes Féodales (*Shinōkōshō*) :**
+     - Modélisation de la dynamique de consommation et de subsistance inspirée de `SocialCasteEngine` :
+       * *Paysans (Nōmin)* : Consomment 0.04 sac de farine ou koku de riz / hab / h.
+       * *Artisans (Kōgiyō)* : Consomment 0.02 poisson frais + 0.02 soja / hab / h, mobilisent bois, pierre, argile, poutres et charbon pour l'entretien des chantiers.
+       * *Marchands (Shōnin)* : Consomment 0.02 farine de riz + 0.015 thé vert / hab / h.
+       * *Noblesse (Bushi & Daimyō)* : Consomment 0.02 saké impérial + 0.015 thé vert + 0.02 farine de riz / hab / h.
+     - Promotion et régression automatique des effectifs selon les disponibilités des denrées et calcul du palier de civilisation (Hameau Paysan, Cité Artisanale, Comptoir Marchand, Cour Aristocratique).
+  3. **Intégration des Nouvelles Ressources :**
+     - Sliders de contrôle des flux horaires (/h) pour toutes les ressources : Riz, Poisson, Soja, Farine, Thé, Saké, Bois, Pierre, Argile, Poutres, Charbon, Sérénité.
+     - Respect absolu de la règle asymétrique du saké (+15% si disponible > 0, aucun malus si 0).
+  4. **Scénarios & Graphique Multi-Séries :**
+     - ApexCharts interactif 8 séries (Pop, Paysans, Artisans, Marchands, Noblesse, Saké, Délinquance, Moral) avec fallback Canvas HD.
+     - 5 scénarios préconfigurés (*Équilibre Sengoku*, *Âge d'Or Artisanal*, *Prospérité & Cour*, *Crise de Délinquance*, *Pénurie & Exode*).
+     - Exportation JSON complète avec insights d'équilibrage de game design.
+- **Fichiers modifiés :** `views/studio/game-elevate-designer/village-life-simulator.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Accéder au simulateur via Game Studio > Game Elevate Designer > Vie du Village (`/?page=gamestudio&tab=elevate_village`).
+  2. Vérifier l'affichage des 7 cartes KPI uniformisées au standard Tabler.
+  3. Vérifier la présence des commandes d'horloge (+1h, +24h, x1 à x100) et des curseurs pour toutes les ressources de vivres et de matériaux.
+  4. Tester le preset « Équilibre Sengoku » : vérifier la répartition stable des 4 castes et l'indicateur moral au vert.
+  5. Tester le preset « Âge d'Or Artisanal » : vérifier la forte proportion d'artisans et la consommation de poisson, soja et matériaux.
+  6. Tester le preset « Prospérité & Cour » : vérifier l'activation du badge Saké +15% et la présence de la caste Noblesse.
+  7. Tester le preset « Pénurie & Exode » : vérifier le déclenchement de la famine, la régression des castes et l'alerte clignotante d'exode féodal.
+  8. Cliquer sur « Exporter Scénario JSON » et vérifier le téléchargement du fichier JSON complet.
+
+---
+
 ### [2026-10-15] - gamestudio-elevate-designer-migration : Relocalisation de la Suite Game Elevate Designer vers Game Studio
 - **Module :** `gamestudio-elevate-designer-migration`
 - **Statut :** `À tester`

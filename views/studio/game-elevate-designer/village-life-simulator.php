@@ -7,6 +7,7 @@
 
 require_once __DIR__ . '/../../../core/AuthManager.php';
 require_once __DIR__ . '/../../../core/PopulationEngine.php';
+require_once __DIR__ . '/../../../core/SocialCasteEngine.php';
 
 // Contrôle strict côté serveur du métier Game Elevate Designer
 if (!AuthManager::hasJob('game-elevate-designer')) {
@@ -31,53 +32,56 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
 }
 ?>
 
-<!-- ── EN-TÊTE DU MODULE : SIMULATEUR DE VIE DANS UN VILLAGE ── -->
+<!-- ── EN-TÊTE DU MODULE : SIMULATEUR DE VIE DANS UN VILLAGE & ÉQUILIBRAGE DES FLUX ── -->
 <div class="card mb-3 border-0 shadow-sm" style="border-left: 4px solid var(--tblr-success) !important;">
     <div class="card-body p-3">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                     <span class="badge bg-green-lt text-green font-game px-2 py-1">
                         <i class="fa-solid fa-compass-drafting me-1"></i>Game Elevate Designer
                     </span>
                     <span class="badge bg-primary-lt text-primary">
-                        <i class="fa-solid fa-people-roof me-1"></i>Bac à Sable Démographique
+                        <i class="fa-solid fa-people-roof me-1"></i>Bac à Sable Démographique v2.1
+                    </span>
+                    <span class="badge bg-info-lt text-info">
+                        <i class="fa-solid fa-layer-group me-1"></i>4 Castes Féodales
                     </span>
                     <span class="badge bg-purple-lt text-purple">
-                        <i class="fa-solid fa-wine-bottle me-1"></i>Règle Asymétrique du Saké
-                    </span>
-                    <span class="badge bg-danger-lt text-danger">
-                        <i class="fa-solid fa-shield-halved me-1"></i>Chômage &amp; Délinquance Féodale
+                        <i class="fa-solid fa-wine-bottle me-1"></i>Règle Asymétrique du Saké (+15%)
                     </span>
                     <span class="badge bg-warning-lt text-dark fw-bold">
-                        ⚡ Horloge Accélérée x1 à x100
+                        <i class="fa-solid fa-boxes-stacked me-1"></i>Flux Vivres &amp; Matériaux
+                    </span>
+                    <span class="badge bg-dark-lt text-dark font-monospace">
+                        ⚡ Horloge x1 à x100
                     </span>
                 </div>
                 <h2 class="h3 mb-0 text-dark fw-bold d-flex align-items-center gap-2">
                     <span>Simulateur de Vie dans un Village &amp; Équilibrage des Flux</span>
                 </h2>
                 <div class="text-secondary small mt-1">
-                    Ajustez en temps réel les flux entrants de vivres, de saké et de sérénité. Observez dynamiquement l'évolution du contentement, l'oisiveté et la délinquance, l'occupation des ateliers, la croissance démographique et le seuil critique d'exode féodal.
+                    Simulez l'écosystème d'un fief féodal : flux entrants de vivres (Riz, Poisson, Thé, Soja, Farine, Saké) et de matériaux (Bois, Pierre, Argile, Poutres, Charbon), répartition pyramidale des 4 strates sociales (Paysans, Artisans, Marchands, Noblesse), oisiveté et délinquance, seuils de famine et seuils d'exode rural.
                 </div>
             </div>
 
             <!-- Profils Prédéfinis (Presets Rapides) -->
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <span class="text-secondary small fw-bold d-none d-md-inline">Scénarios :</span>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="applyVillagePreset('famine')" title="Pénurie sévère de vivres et effondrement moral">
-                    <i class="fa-solid fa-skull me-1"></i>Pénurie Critique
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="applyVillagePreset('perfect_balance')" title="Harmonie idéale entre vivres, matériaux et castes féodales">
+                    <i class="fa-solid fa-scale-balanced me-1"></i>Équilibre Sengoku
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-purple text-purple" onclick="applyVillagePreset('sake_prosperity')" title="Abondance de saké et fête continue">
-                    <i class="fa-solid fa-wine-bottle me-1"></i>Prospérité sous Saké
+                <button type="button" class="btn btn-sm btn-outline-info" onclick="applyVillagePreset('artisanal_boom')" title="Boom de construction, ateliers florissants et forte classe d'artisans">
+                    <i class="fa-solid fa-hammer me-1"></i>Âge d'Or Artisanal
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-warning" onclick="applyVillagePreset('overcrowded')" title="Surpopulation avec déficit de postes de travail">
-                    <i class="fa-solid fa-users-slash me-1"></i>Surpopulation Sans Emplois
+                <button type="button" class="btn btn-sm btn-outline-purple text-purple" onclick="applyVillagePreset('sake_prosperity')" title="Abondance de saké, cérémonies du thé et apogée de la noblesse">
+                    <i class="fa-solid fa-wine-bottle me-1"></i>Prospérité &amp; Cour
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="applyVillagePreset('delinquency_crisis')" title="Explosion du chômage et criminalité sans garnison">
+                <button type="button" class="btn btn-sm btn-outline-warning" onclick="applyVillagePreset('delinquency_crisis')" title="Explosion du chômage et criminalité sans ordre féodal">
                     <i class="fa-solid fa-mask me-1"></i>Crise de Délinquance
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-success" onclick="applyVillagePreset('perfect_balance')" title="Harmonie idéale production, consommation et expansion">
-                    <i class="fa-solid fa-scale-balanced me-1"></i>Équilibre Parfait
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="applyVillagePreset('famine')" title="Pénurie sévère de vivres et effondrement moral">
+                    <i class="fa-solid fa-skull me-1"></i>Pénurie &amp; Exode
                 </button>
                 <button type="button" class="btn btn-sm btn-light text-muted" onclick="resetVillageSim()" title="Réinitialiser le simulateur">
                     <i class="fa-solid fa-rotate-left"></i>
@@ -88,7 +92,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
 </div>
 
 <style>
-/* Styles immersifs du simulateur de vie de village */
+/* Styles modernes et réactifs du simulateur de vie de village */
 .village-kpi-card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -119,6 +123,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
     border-left-color: #22c55e;
     background: #f0fdf4;
 }
+.live-log-item.event-caste {
+    border-left-color: #0284c7;
+    background: #f0f9ff;
+}
 .live-log-item.event-exodus {
     border-left-color: #dc2626;
     background: #fee2e2;
@@ -137,12 +145,22 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
 }
 @keyframes simPulseExodus {
     0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.02); }
+    50% { opacity: 0.7; transform: scale(1.01); }
     100% { opacity: 1; transform: scale(1); }
 }
 .sim-blinking-exodus {
     animation: simPulseExodus 1.2s infinite ease-in-out;
 }
+.caste-pill {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.73rem;
+    font-weight: 600;
+}
+.caste-nomin { background: #dcfce7; color: #15803d; }
+.caste-kogiyo { background: #e0f2fe; color: #0369a1; }
+.caste-shonin { background: #fef3c7; color: #b45309; }
+.caste-noblesse { background: #f3e8ff; color: #6b21a8; }
 </style>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
@@ -150,7 +168,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
      ═══════════════════════════════════════════════════════════════════════ -->
 <div class="row g-3 mb-3">
 
-    <!-- ── COLONNE GAUCHE (5/12) : CONTRÔLE DU TEMPS & PARAMÈTRES ── -->
+    <!-- ── COLONNE GAUCHE (5/12) : CONTRÔLE DU TEMPS & PARAMÈTRES D'ÉQUILIBRAGE ── -->
     <div class="col-12 col-xl-5">
 
         <!-- 1. Horloge Temporelle & Commandes de Simulation -->
@@ -202,32 +220,32 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             </div>
         </div>
 
-        <!-- 2. Paramètres Démographiques de Départ -->
+        <!-- 2. Paramètres Démographiques & Infrastructure -->
         <div class="card mb-3 shadow-sm border-0" style="border-top: 3px solid #10b981 !important;">
             <div class="card-header py-2 bg-light-subtle d-flex justify-content-between align-items-center">
                 <div class="fw-bold text-dark d-flex align-items-center gap-2">
                     <i class="fa-solid fa-users text-success"></i>
-                    <span>Démographie &amp; Infrastructure Initiale</span>
+                    <span>Démographie &amp; Infrastructure</span>
                 </div>
-                <span class="badge bg-secondary-lt font-monospace" id="demography-badge-total">Pop: 100</span>
+                <span class="badge bg-secondary-lt font-monospace" id="demography-badge-total">Pop: 120</span>
             </div>
             <div class="card-body p-3">
                 <!-- 1. Population Initiale -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label small fw-bold m-0" for="inp-initial-pop">
+                        <label class="form-label small fw-bold m-0" for="range-initial-pop">
                             <i class="fa-solid fa-person text-primary me-1"></i>Population Initiale :
                         </label>
-                        <span class="badge bg-primary font-monospace" id="val-initial-pop">100 habitants</span>
+                        <span class="badge bg-primary font-monospace" id="val-initial-pop">120 habitants</span>
                     </div>
-                    <input type="range" class="form-range" id="range-initial-pop" min="10" max="600" step="5" value="100" oninput="syncInput('initial-pop', this.value)">
+                    <input type="range" class="form-range" id="range-initial-pop" min="10" max="600" step="5" value="120" oninput="syncInput('initial-pop', this.value)">
                 </div>
 
-                <!-- 2. Capacité des Logements -->
+                <!-- 2. Capacité des Logements (Minka) -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label small fw-bold m-0" for="inp-housing-cap">
-                            <i class="fa-solid fa-house-chimney text-success me-1"></i>Capacité des Logements (Parcelles d'Habitation) :
+                        <label class="form-label small fw-bold m-0" for="range-housing-cap">
+                            <i class="fa-solid fa-house-chimney text-success me-1"></i>Capacité des Minka (Logements &amp; Parcelles) :
                         </label>
                         <span class="badge bg-success font-monospace" id="val-housing-cap">200 places</span>
                     </div>
@@ -238,94 +256,197 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label class="form-label small fw-bold m-0" for="range-open-jobs">
-                            <i class="fa-solid fa-briefcase text-warning me-1"></i>Postes de Travail Ouverts (Ateliers &amp; Parcelles) :
+                            <i class="fa-solid fa-briefcase text-warning me-1"></i>Postes de Travail Ouverts (Ateliers &amp; Exploitations) :
                         </label>
-                        <span class="badge bg-warning text-dark font-monospace" id="val-open-jobs">85 postes</span>
+                        <span class="badge bg-warning text-dark font-monospace" id="val-open-jobs">110 postes</span>
                     </div>
-                    <input type="range" class="form-range" id="range-open-jobs" min="10" max="600" step="5" value="85" oninput="syncInput('open-jobs', this.value)">
+                    <input type="range" class="form-range" id="range-open-jobs" min="10" max="600" step="5" value="110" oninput="syncInput('open-jobs', this.value)">
                 </div>
 
-                <!-- 4. Maintien de l'Ordre Féodal (Tenshu, Muraille, Dojo, Vigie) -->
+                <!-- 4. Maintien de l'Ordre Féodal (Garnison & Tenshu) -->
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label class="form-label small fw-bold m-0" for="range-security">
-                            <i class="fa-solid fa-shield-halved text-danger me-1"></i>Maintien de l'Ordre Féodal (Garnison &amp; Sécurité) :
+                            <i class="fa-solid fa-shield-halved text-danger me-1"></i>Maintien de l'Ordre Féodal (Garnison &amp; Vigie) :
                         </label>
-                        <span class="badge bg-danger font-monospace" id="val-security">+10% d'ordre</span>
+                        <span class="badge bg-danger font-monospace" id="val-security">+15% d'ordre</span>
                     </div>
-                    <input type="range" class="form-range" id="range-security" min="0" max="50" step="1" value="10" oninput="syncInput('security', this.value)">
-                    <div class="text-secondary small">Présence armée (Tenshu +3%, Muraille +2%, Dojo +2%, Vigie +1%/lvl). Réprime la criminalité liée au chômage.</div>
+                    <input type="range" class="form-range" id="range-security" min="0" max="50" step="1" value="15" oninput="syncInput('security', this.value)">
+                    <div class="text-secondary small">Présence militaire (Tenshu, Muraille, Dojo, Vigie). Réprime la criminalité liée au chômage et à l'oisiveté.</div>
                 </div>
             </div>
         </div>
 
-        <!-- 3. Flux Entrants de Ressources (Production Horaire /h) -->
+        <!-- 3. Flux Agricoles & Vivres (Entrées Nettes /h) -->
         <div class="card mb-3 shadow-sm border-0" style="border-top: 3px solid #f59e0b !important;">
             <div class="card-header py-2 bg-light-subtle d-flex justify-content-between align-items-center">
                 <div class="fw-bold text-dark d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-arrow-trend-up text-warning"></i>
-                    <span>Flux de Production Horaire (Entrées nettes /h)</span>
+                    <i class="fa-solid fa-wheat-awn text-warning"></i>
+                    <span>Flux Agricoles &amp; Vivres (Entrées /h)</span>
                 </div>
-                <span class="badge bg-warning-lt text-warning fw-bold">Alimentation &amp; Confort</span>
+                <span class="badge bg-warning-lt text-warning fw-bold">Alimentation des Castes</span>
             </div>
             <div class="card-body p-3">
-                <!-- 1. Production de Riz (Nourriture de base) -->
+                <!-- 1. Riz Impérial -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label small fw-bold m-0" for="inp-prod-rice">
-                            <i class="fa-solid fa-wheat-awn text-warning me-1"></i>Production de Riz Impérial :
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz Impérial (Base vitale Nōmin) :
                         </label>
-                        <span class="badge bg-warning text-dark font-monospace" id="val-prod-rice">+60 koku / h</span>
+                        <span class="badge bg-warning text-dark font-monospace" id="val-prod-rice">+70 koku / h</span>
                     </div>
-                    <input type="range" class="form-range" id="range-prod-rice" min="0" max="300" step="5" value="60" oninput="syncInput('prod-rice', this.value)">
-                    <div class="text-secondary small">Nourriture de base féodale. Consommée si la farine vient à manquer.</div>
+                    <input type="range" class="form-range" id="range-prod-rice" min="0" max="300" step="5" value="70" oninput="syncInput('prod-rice', this.value)">
+                    <div class="text-secondary small">0.04 koku/habitant paysan/heure. Aliment de subsistance vital prévenant la famine.</div>
                 </div>
 
-                <!-- 2. Production de Farine (Nourriture transformée en meunerie) -->
+                <!-- 2. Poisson Frais -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label small fw-bold m-0" for="inp-prod-flour">
-                            <i class="fa-solid fa-bowl-rice text-secondary me-1"></i>Production de Farine de Riz :
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-fish text-azure me-1"></i>Poisson Frais (Port &amp; Pêcherie) :
                         </label>
-                        <span class="badge bg-secondary font-monospace" id="val-prod-flour">+25 sacs / h</span>
+                        <span class="badge bg-azure font-monospace" id="val-prod-fish">+30 paniers / h</span>
                     </div>
-                    <input type="range" class="form-range" id="range-prod-flour" min="0" max="150" step="2" value="25" oninput="syncInput('prod-flour', this.value)">
-                    <div class="text-secondary small">Aliment vital de subsistance (0.04 sac/habitant/heure). Prévient la famine.</div>
+                    <input type="range" class="form-range" id="range-prod-fish" min="0" max="150" step="2" value="30" oninput="syncInput('prod-fish', this.value)">
+                    <div class="text-secondary small">Nécessaire à l'épanouissement de la caste des Artisans (0.02 panier/hab/h).</div>
                 </div>
 
-                <!-- 3. Production de Saké (Bien de confort réjouissant - Règle Asymétrique) -->
+                <!-- 3. Soja du Terroir -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label small fw-bold m-0" for="inp-prod-sake">
-                            <i class="fa-solid fa-wine-bottle text-purple me-1"></i>Production de Saké Impérial :
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-seedling text-success me-1"></i>Soja du Terroir (Champs &amp; Maraîchage) :
                         </label>
-                        <span class="badge bg-purple font-monospace" id="val-prod-sake">+12 tonnelets / h</span>
+                        <span class="badge bg-success font-monospace" id="val-prod-soy">+25 sacs / h</span>
                     </div>
-                    <input type="range" class="form-range" id="range-prod-sake" min="0" max="80" step="1" value="12" oninput="syncInput('prod-sake', this.value)">
-                    <div class="text-secondary small">
-                        <strong>Règle Asymétrique :</strong> Si présent &gt; 0, confère <strong>+15% de bonus net</strong>. Si épuisé, n'inflige <strong>aucun malus</strong>.
-                    </div>
+                    <input type="range" class="form-range" id="range-prod-soy" min="0" max="150" step="2" value="25" oninput="syncInput('prod-soy', this.value)">
+                    <div class="text-secondary small">Consommé par les Artisans &amp; Bâtisseurs (0.02 sac/hab/h) avec le poisson.</div>
                 </div>
 
-                <!-- 4. Sérénité Shinto Passive -->
+                <!-- 4. Farine de Riz -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-bowl-rice text-secondary me-1"></i>Farine de Riz (Meunerie &amp; Minoterie) :
+                        </label>
+                        <span class="badge bg-secondary font-monospace" id="val-prod-flour">+30 sacs / h</span>
+                    </div>
+                    <input type="range" class="form-range" id="range-prod-flour" min="0" max="150" step="2" value="30" oninput="syncInput('prod-flour', this.value)">
+                    <div class="text-secondary small">Consommée par les Marchands (0.02 sac/h) et la Noblesse (0.02 sac/h).</div>
+                </div>
+
+                <!-- 5. Thé Vert des Coteaux -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-mug-hot text-teal me-1"></i>Thé Vert (Plantations &amp; Pavillons) :
+                        </label>
+                        <span class="badge bg-teal font-monospace" id="val-prod-tea">+15 boîtes / h</span>
+                    </div>
+                    <input type="range" class="form-range" id="range-prod-tea" min="0" max="100" step="1" value="15" oninput="syncInput('prod-tea', this.value)">
+                    <div class="text-secondary small">Requis pour les Marchands (0.015 boîte/h) et la Noblesse/Bushi (0.015 boîte/h).</div>
+                </div>
+
+                <!-- 6. Saké Impérial (Règle Asymétrique) -->
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label small fw-bold m-0" for="inp-serenity">
-                            <i class="fa-solid fa-torii-gate text-teal me-1"></i>Sérénité Shinto &amp; Ferveur :
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-wine-bottle text-purple me-1"></i>Saké Impérial (Brasseries féodales) :
                         </label>
-                        <span class="badge bg-teal font-monospace" id="val-serenity">75 / 100</span>
+                        <span class="badge bg-purple font-monospace" id="val-prod-sake">+15 tonnelets / h</span>
                     </div>
-                    <input type="range" class="form-range" id="range-serenity" min="0" max="100" step="5" value="75" oninput="syncInput('serenity', this.value)">
-                    <div class="text-secondary small">Énergie et paix des kami. Si &lt; 50, induit une anxiété spirituelle (-20%).</div>
+                    <input type="range" class="form-range" id="range-prod-sake" min="0" max="80" step="1" value="15" oninput="syncInput('prod-sake', this.value)">
+                    <div class="text-secondary small">
+                        <strong>Règle Asymétrique :</strong> Si stock &gt; 0, confère <strong>+15% de satisfaction</strong>. Si épuisé, n'inflige <strong>aucun malus</strong>. Requis pour maintenir la haute Noblesse (0.02/h).
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 4. Export & Sauvegarde du Scénario -->
+        <!-- 4. Flux Matériaux & Énergie Féodale (Entrées Nettes /h) -->
+        <div class="card mb-3 shadow-sm border-0" style="border-top: 3px solid #6366f1 !important;">
+            <div class="card-header py-2 bg-light-subtle d-flex justify-content-between align-items-center">
+                <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-cubes-stacked text-indigo"></i>
+                    <span>Flux Matériaux &amp; Énergie (Entrées /h)</span>
+                </div>
+                <span class="badge bg-indigo-lt text-indigo fw-bold">Chantiers &amp; Ateliers</span>
+            </div>
+            <div class="card-body p-3">
+                <!-- 1. Bois de Cèdre -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-tree text-green me-1"></i>Bois de Cèdre (Scieries) :
+                        </label>
+                        <span class="badge bg-green font-monospace" id="val-prod-wood">+50 unités / h</span>
+                    </div>
+                    <input type="range" class="form-range" id="range-prod-wood" min="0" max="200" step="5" value="50" oninput="syncInput('prod-wood', this.value)">
+                </div>
+
+                <!-- 2. Pierre de Granit -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-gem text-secondary me-1"></i>Pierre de Granit (Carrières) :
+                        </label>
+                        <span class="badge bg-secondary font-monospace" id="val-prod-stone">+40 unités / h</span>
+                    </div>
+                    <input type="range" class="form-range" id="range-prod-stone" min="0" max="200" step="5" value="40" oninput="syncInput('prod-stone', this.value)">
+                </div>
+
+                <!-- 3. Argile & Terres Cuites -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-shapes text-orange me-1"></i>Argile &amp; Terres (Fosses &amp; Tuileries) :
+                        </label>
+                        <span class="badge bg-orange font-monospace" id="val-prod-clay">+30 unités / h</span>
+                    </div>
+                    <input type="range" class="form-range" id="range-prod-clay" min="0" max="150" step="2" value="30" oninput="syncInput('prod-clay', this.value)">
+                </div>
+
+                <!-- 4. Poutres de Charpente (Atelier de charpenterie) -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-trowel-bricks text-yellow me-1"></i>Poutres de Charpente (Menuiserie) :
+                        </label>
+                        <span class="badge bg-yellow text-dark font-monospace" id="val-prod-beams">+15 poutres / h</span>
+                    </div>
+                    <input type="range" class="form-range" id="range-prod-beams" min="0" max="100" step="1" value="15" oninput="syncInput('prod-beams', this.value)">
+                </div>
+
+                <!-- 5. Charbon de Bois (Fours & Meules) -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-fire-flame-curved text-dark me-1"></i>Charbon de Bois (Combustible des forges) :
+                        </label>
+                        <span class="badge bg-dark font-monospace" id="val-prod-charcoal">+20 sacs / h</span>
+                    </div>
+                    <input type="range" class="form-range" id="range-prod-charcoal" min="0" max="100" step="1" value="20" oninput="syncInput('prod-charcoal', this.value)">
+                </div>
+
+                <!-- 6. Sérénité Shinto & Ferveur -->
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold m-0">
+                            <i class="fa-solid fa-torii-gate text-teal me-1"></i>Sérénité Shinto &amp; Ferveur Kami :
+                        </label>
+                        <span class="badge bg-teal font-monospace" id="val-serenity">80 / 100</span>
+                    </div>
+                    <input type="range" class="form-range" id="range-serenity" min="0" max="100" step="5" value="80" oninput="syncInput('serenity', this.value)">
+                    <div class="text-secondary small">Énergie et paix spirituelle des sanctuaires. Si &lt; 50, induit une anxiété des villageois (-20%).</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Export & Sauvegarde du Scénario -->
         <div class="card shadow-sm border-0">
             <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="small text-secondary">
-                    <i class="fa-solid fa-file-code me-1 text-primary"></i>Exporter les paramètres et la série chronologique sous format standard JSON.
+                    <i class="fa-solid fa-file-code me-1 text-primary"></i>Exporter les paramètres, castes et séries au format standard JSON.
                 </div>
                 <button type="button" class="btn btn-outline-dark btn-sm fw-bold" onclick="exportVillageScenario()">
                     <i class="fa-solid fa-download me-1"></i>Exporter Scénario JSON
@@ -335,84 +456,114 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
 
     </div>
 
-    <!-- ── COLONNE DROITE (7/12) : MONITEUR TEMPS RÉEL & VISUALISATION ── -->
+    <!-- ── COLONNE DROITE (7/12) : MONITEUR TEMPS RÉEL, KPI & VISUALISATION ── -->
     <div class="col-12 col-xl-7">
 
-        <!-- 1. 5 Jauges KPI Temps Réel -->
-        <div class="row g-2 mb-3">
-            <!-- KPI 1 : Contentement Global -->
-            <div class="col-6 col-sm-4 col-xl">
+        <!-- ── RANGÉE 1 DES KPI : MORAL, DÉMOGRAPHIE, CASTES, EMPLOIS ── -->
+        <div class="row g-2 mb-2">
+            <!-- KPI 1 : Satisfaction & Moral Global -->
+            <div class="col-12 col-sm-6 col-xxl-3">
                 <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3" id="card-kpi-contentment" style="border-left-color: #22c55e !important;">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="text-secondary small fw-bold">Satisfaction</span>
+                            <span class="text-secondary small fw-bold">Satisfaction &amp; Moral</span>
                             <span id="kpi-sake-bonus-icon" class="badge bg-purple-lt text-purple py-0 px-1" title="Bonus Saké +15% Actif">🍶 +15%</span>
                         </div>
-                        <div class="d-flex align-items-baseline gap-2">
-                            <span class="fs-1 fw-bold text-success" id="kpi-contentment-val">85%</span>
+                        <div class="d-flex align-items-baseline gap-1">
+                            <span class="fs-1 fw-bold text-success font-monospace" id="kpi-contentment-val">88%</span>
                         </div>
                         <div class="text-muted small text-truncate" id="kpi-contentment-status">Euphorique &amp; Prospère</div>
                         <div class="progress progress-xs mt-2">
-                            <div class="progress-bar bg-success" id="kpi-contentment-bar" style="width: 85%;"></div>
+                            <div class="progress-bar bg-success" id="kpi-contentment-bar" style="width: 88%;"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- KPI 2 : Population Vivante -->
-            <div class="col-6 col-sm-4 col-xl">
+            <!-- KPI 2 : Démographie & Minka -->
+            <div class="col-12 col-sm-6 col-xxl-3">
                 <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-primary">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="text-secondary small fw-bold">Population</span>
+                            <span class="text-secondary small fw-bold">Démographie (Minka)</span>
                             <i class="fa-solid fa-users text-primary"></i>
                         </div>
                         <div class="d-flex align-items-baseline gap-1">
-                            <span class="fs-1 fw-bold text-primary font-monospace" id="kpi-pop-val">100</span>
+                            <span class="fs-1 fw-bold text-primary font-monospace" id="kpi-pop-val">120</span>
                             <span class="text-muted small">/ <span id="kpi-housing-max">200</span></span>
                         </div>
-                        <div class="text-muted small text-truncate" id="kpi-housing-rate">50% Logements</div>
+                        <div class="text-muted small text-truncate" id="kpi-housing-rate">60% d'occupation</div>
                         <div class="progress progress-xs mt-2">
-                            <div class="progress-bar bg-primary" id="kpi-pop-bar" style="width: 50%;"></div>
+                            <div class="progress-bar bg-primary" id="kpi-pop-bar" style="width: 60%;"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- KPI 3 : Main-d'Œuvre & Emplois -->
-            <div class="col-6 col-sm-4 col-xl">
+            <!-- KPI 3 : Pyramide des 4 Castes Féodales -->
+            <div class="col-12 col-sm-6 col-xxl-3">
+                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3" style="border-left-color: #8b5cf6 !important;">
+                    <div class="card-body p-2">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="text-secondary small fw-bold">4 Castes Sociales</span>
+                            <span class="badge bg-purple-lt text-purple py-0 px-1 font-monospace" id="kpi-caste-top-badge">Shinōkōshō</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1 mb-1 font-monospace" style="font-size: 0.72rem;">
+                            <span class="caste-pill caste-nomin" title="Paysans &amp; Ouvriers">🌾 <span id="caste-nomin-count">60</span></span>
+                            <span class="caste-pill caste-kogiyo" title="Artisans &amp; Bâtisseurs">🔨 <span id="caste-kogiyo-count">30</span></span>
+                            <span class="caste-pill caste-shonin" title="Marchands &amp; Caravaniers">⚖️ <span id="caste-shonin-count">18</span></span>
+                            <span class="caste-pill caste-noblesse" title="Noblesse &amp; Daimyō">👑 <span id="caste-noblesse-count">12</span></span>
+                        </div>
+                        <div class="text-muted small text-truncate" id="kpi-caste-level-desc">Palier : Cour Aristocratique</div>
+                        <!-- Barre segmentée quadri-colore -->
+                        <div class="progress progress-xs mt-2">
+                            <div class="progress-bar" id="bar-caste-nomin" style="width: 50%; background-color: #16a34a;" title="Paysans"></div>
+                            <div class="progress-bar" id="bar-caste-kogiyo" style="width: 25%; background-color: #0284c7;" title="Artisans"></div>
+                            <div class="progress-bar" id="bar-caste-shonin" style="width: 15%; background-color: #d97706;" title="Marchands"></div>
+                            <div class="progress-bar" id="bar-caste-noblesse" style="width: 10%; background-color: #7c3aed;" title="Noblesse"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 4 : Emplois & Main-d'œuvre -->
+            <div class="col-12 col-sm-6 col-xxl-3">
                 <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-warning">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="text-secondary small fw-bold">Main-d'Œuvre</span>
+                            <span class="text-secondary small fw-bold">Emplois &amp; Activité</span>
                             <i class="fa-solid fa-briefcase text-warning"></i>
                         </div>
                         <div class="d-flex align-items-baseline gap-1">
-                            <span class="fs-1 fw-bold text-warning font-monospace" id="kpi-workforce-val">85</span>
-                            <span class="text-muted small">/ <span id="kpi-workforce-req">85</span></span>
+                            <span class="fs-1 fw-bold text-warning font-monospace" id="kpi-workforce-val">110</span>
+                            <span class="text-muted small">/ <span id="kpi-workforce-req">110</span></span>
                         </div>
-                        <div class="text-muted small text-truncate" id="kpi-workforce-status">100% Pourvu</div>
+                        <div class="text-muted small text-truncate" id="kpi-workforce-status">Plein emploi garanti</div>
                         <div class="progress progress-xs mt-2">
                             <div class="progress-bar bg-warning" id="kpi-workforce-bar" style="width: 100%;"></div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- KPI 4 : Délinquance & Sécurité Féodale -->
-            <div class="col-6 col-sm-4 col-xl">
+        <!-- ── RANGÉE 2 DES KPI : SÉCURITÉ, GRENIER VIVRES, ENTREPÔT MATÉRIAUX ── -->
+        <div class="row g-2 mb-3">
+            <!-- KPI 5 : Ordre & Sécurité Féodale -->
+            <div class="col-12 col-md-4">
                 <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3" id="card-kpi-delinquency" style="border-left-color: #22c55e !important;">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="text-secondary small fw-bold">Délinquance</span>
-                            <span id="kpi-delinquency-badge" class="badge bg-success-lt text-success py-0 px-1" title="Maintien de l'Ordre Féodal">
-                                <i class="fa-solid fa-shield-halved me-1"></i>Ordre
+                            <span class="text-secondary small fw-bold">Ordre &amp; Sécurité</span>
+                            <span id="kpi-delinquency-badge" class="badge bg-success-lt text-success py-0 px-1">
+                                <i class="fa-solid fa-shield-halved me-1"></i>Ordre Féodal
                             </span>
                         </div>
                         <div class="d-flex align-items-baseline gap-1">
                             <span class="fs-1 fw-bold text-success font-monospace" id="kpi-delinquency-val">0%</span>
+                            <span class="text-secondary small">(Délinquance nette)</span>
                         </div>
-                        <div class="text-muted small text-truncate" id="kpi-delinquency-status">Ordre Parfait</div>
+                        <div class="text-muted small text-truncate" id="kpi-delinquency-status">Sérénité &amp; Paix Civile (0%)</div>
                         <div class="progress progress-xs mt-2">
                             <div class="progress-bar bg-success" id="kpi-delinquency-bar" style="width: 0%;"></div>
                         </div>
@@ -420,31 +571,67 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 </div>
             </div>
 
-            <!-- KPI 5 : Stocks en Grenier (Vivres & Saké) -->
-            <div class="col-6 col-sm-4 col-xl">
+            <!-- KPI 6 : Grenier Féodal (Vivres & Confort) -->
+            <div class="col-12 col-md-4">
                 <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-teal">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="text-secondary small fw-bold">Grenier Féodal</span>
-                            <i class="fa-solid fa-wheat-awn text-teal"></i>
+                            <span class="text-secondary small fw-bold">Grenier (Vivres)</span>
+                            <i class="fa-solid fa-bowl-rice text-teal"></i>
                         </div>
-                        <div class="small font-monospace" style="line-height: 1.35;">
-                            <div>🌾 Riz : <strong id="kpi-stock-rice">300</strong></div>
-                            <div>🍚 Farine : <strong id="kpi-stock-flour">120</strong></div>
-                            <div>🍶 Saké : <strong id="kpi-stock-sake">50</strong></div>
+                        <div class="small font-monospace" style="line-height: 1.35; font-size: 0.76rem;">
+                            <div class="d-flex justify-content-between">
+                                <span>🌾 Riz: <strong id="kpi-stock-rice">400</strong></span>
+                                <span>🐟 Poisson: <strong id="kpi-stock-fish">150</strong></span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>🌱 Soja: <strong id="kpi-stock-soy">120</strong></span>
+                                <span>🍵 Thé: <strong id="kpi-stock-tea">80</strong></span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>🍚 Farine: <strong id="kpi-stock-flour">160</strong></span>
+                                <span>🍶 Saké: <strong id="kpi-stock-sake">60</strong></span>
+                            </div>
                         </div>
-                        <div class="text-muted small mt-1" id="kpi-food-status" style="font-size:0.68rem;">Rations assurées</div>
+                        <div class="text-muted small mt-1" id="kpi-food-status" style="font-size:0.68rem;">Rations &amp; Fêtes assurées</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 7 : Entrepôt des Matériaux & Chantiers -->
+            <div class="col-12 col-md-4">
+                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-indigo">
+                    <div class="card-body p-2">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="text-secondary small fw-bold">Entrepôt Matériaux</span>
+                            <i class="fa-solid fa-boxes-stacked text-indigo"></i>
+                        </div>
+                        <div class="small font-monospace" style="line-height: 1.35; font-size: 0.76rem;">
+                            <div class="d-flex justify-content-between">
+                                <span>🪵 Bois: <strong id="kpi-stock-wood">250</strong></span>
+                                <span>🪨 Pierre: <strong id="kpi-stock-stone">180</strong></span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>🧱 Argile: <strong id="kpi-stock-clay">140</strong></span>
+                                <span>🏗️ Poutres: <strong id="kpi-stock-beams">75</strong></span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>🔥 Charbon: <strong id="kpi-stock-charcoal">90</strong></span>
+                                <span>⛩️ Sérénité: <strong id="kpi-stock-serenity">80</strong></span>
+                            </div>
+                        </div>
+                        <div class="text-muted small mt-1" id="kpi-materials-status" style="font-size:0.68rem;">Chantiers Kizukuri approvisionnés</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 2. Graphique Dynamique Multi-Séries (ApexCharts avec Fallback Canvas) -->
+        <!-- ── GRAPHIQUE DYNAMIQUE MULTI-SÉRIES (APEXCHARTS + FALLBACK CANVAS) ── -->
         <div class="card mb-3 shadow-sm border-0">
             <div class="card-header py-2 bg-light-subtle d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="fw-bold text-dark d-flex align-items-center gap-2">
                     <i class="fa-solid fa-chart-line text-primary"></i>
-                    <span>Évolution Temporelle Dynamique (Population, Vivres, Saké, Contentement)</span>
+                    <span>Dynamique Temporelle (Population, 4 Castes, Saké, Délinquance, Moral)</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-green-lt text-green font-monospace" id="sim-points-counter">0 cycles enregistrés</span>
@@ -455,12 +642,12 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             </div>
             <div class="card-body p-2">
                 <!-- Conteneur ApexCharts avec Canvas HD de secours -->
-                <div id="village-apex-chart" style="min-height: 320px; width: 100%;"></div>
-                <canvas id="village-canvas-chart" class="d-none" width="800" height="320" style="width: 100%; height: 320px;"></canvas>
+                <div id="village-apex-chart" style="min-height: 330px; width: 100%;"></div>
+                <canvas id="village-canvas-chart" class="d-none" width="800" height="330" style="width: 100%; height: 330px;"></canvas>
             </div>
         </div>
 
-        <!-- 3. Journal d'Événements du Village (Ticker / Log en Direct) -->
+        <!-- ── JOURNAL D'ÉVÉNEMENTS DU VILLAGE (TICKER / LOG EN DIRECT) ── -->
         <div class="card shadow-sm border-0">
             <div class="card-header py-2 bg-light-subtle d-flex justify-content-between align-items-center">
                 <div class="fw-bold text-dark d-flex align-items-center gap-2">
@@ -476,7 +663,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             </div>
             <div class="card-body p-0" style="max-height: 220px; overflow-y: auto;" id="village-live-log-container">
                 <div class="text-center text-muted p-4 small" id="village-empty-log-msg">
-                    <i class="fa-solid fa-hourglass-start me-1"></i>Lancez la simulation pour observer les chroniques du village...
+                    <i class="fa-solid fa-hourglass-start me-1"></i>Lancez la simulation pour observer les chroniques démographiques et sociales du village...
                 </div>
             </div>
         </div>
@@ -493,7 +680,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
      ═══════════════════════════════════════════════════════════════════════ -->
 <script>
 (function() {
-    // État interne de la simulation
+    // État interne complet de la simulation
     const state = {
         isRunning: false,
         timerId: null,
@@ -502,44 +689,76 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         hoursElapsed: 0,        // Total d'heures féodales simulées
         cyclesCount: 0,         // Nombre de ticks exécutés
 
-        // Paramètres actuels
-        pop: 100,
+        // Paramètres démographiques et d'infrastructure
+        pop: 120,
         housingCap: 200,
-        openJobs: 85,
-        securityBonus: 10,
-        prodRice: 60,
-        prodFlour: 25,
-        prodSake: 12,
-        serenity: 75,
+        openJobs: 110,
+        securityBonus: 15,
+        serenity: 80,
 
-        // Stocks en réserve
-        stockRice: 300,
-        stockFlour: 120,
-        stockSake: 50,
+        // Flux de production horaire Vivres
+        prodRice: 70,
+        prodFish: 30,
+        prodSoy: 25,
+        prodFlour: 30,
+        prodTea: 15,
+        prodSake: 15,
 
-        // Métriques calculées
-        contentment: 85,
+        // Flux de production horaire Matériaux
+        prodWood: 50,
+        prodStone: 40,
+        prodClay: 30,
+        prodBeams: 15,
+        prodCharcoal: 20,
+
+        // Stocks de vivres
+        stockRice: 400,
+        stockFish: 150,
+        stockSoy: 120,
+        stockFlour: 160,
+        stockTea: 80,
+        stockSake: 60,
+
+        // Stocks de matériaux
+        stockWood: 250,
+        stockStone: 180,
+        stockClay: 140,
+        stockBeams: 75,
+        stockCharcoal: 90,
+
+        // 4 Castes Féodales (Effectifs et Pourcentages)
+        castes: {
+            nomin: { count: 60, pct: 50.0 },     // Paysans & Ouvriers
+            kogiyo: { count: 30, pct: 25.0 },    // Artisans & Bâtisseurs
+            shonin: { count: 18, pct: 15.0 },    // Marchands & Caravaniers
+            noblesse: { count: 12, pct: 10.0 }   // Noblesse (Bushi & Daimyō)
+        },
+        civLevelName: 'Cour Aristocratique',
+
+        // Métriques calculées de moral et activité
+        contentment: 88,
         statusLabel: 'Euphorique & Prospère',
         badgeColor: 'success',
-        assignedJobs: 85,
-        idleWorkers: 15,
+        assignedJobs: 110,
+        idleWorkers: 10,
         workforceRatio: 1.0,
-        unemploymentRate: 0.15,
-        unemploymentPct: 15,
-        baseDelinquency: 0,
+        unemploymentPct: 8,
         netDelinquency: 0,
         delinquencyPenalty: 0,
-        delinquencyStatusLabel: 'Ordre Parfait',
+        delinquencyStatusLabel: 'Ordre Féodal',
         delinquencyBadgeColor: 'success',
         sakeBonusActive: true,
+        famineTriggered: false,
         isExodus: false,
 
-        // Historique des séries temporelles (max 60 points)
+        // Historique des séries temporelles (max 40 points)
         history: {
             labels: [],
             pop: [],
-            rice: [],
-            flour: [],
+            nomin: [],
+            kogiyo: [],
+            shonin: [],
+            noblesse: [],
             sake: [],
             delinquency: [],
             contentment: []
@@ -549,76 +768,156 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
 
     let apexChartInstance = null;
 
-    // Presets préconfigurés
+    // Presets préconfigurés enrichis
     const PRESETS = {
-        famine: {
-            pop: 150,
-            housingCap: 200,
-            openJobs: 110,
-            security: 5,
-            prodRice: 0,
-            prodFlour: 0,
-            prodSake: 0,
-            serenity: 35,
-            stockRice: 10,
-            stockFlour: 5,
-            stockSake: 0
-        },
-        sake_prosperity: {
-            pop: 110,
-            housingCap: 250,
-            openJobs: 95,
-            security: 25,
-            prodRice: 80,
-            prodFlour: 35,
-            prodSake: 25,
-            serenity: 90,
-            stockRice: 500,
-            stockFlour: 200,
-            stockSake: 150
-        },
-        overcrowded: {
-            pop: 280,
-            housingCap: 250,
-            openJobs: 60,
-            security: 5,
-            prodRice: 60,
-            prodFlour: 20,
-            prodSake: 5,
-            serenity: 45,
-            stockRice: 200,
-            stockFlour: 40,
-            stockSake: 10
-        },
-        delinquency_crisis: {
-            pop: 250,
-            housingCap: 300,
-            openJobs: 40,
-            security: 0,
-            prodRice: 60,
-            prodFlour: 25,
-            prodSake: 0,
-            serenity: 40,
-            stockRice: 150,
-            stockFlour: 40,
-            stockSake: 0
-        },
         perfect_balance: {
             pop: 120,
             housingCap: 200,
             openJobs: 110,
             security: 15,
-            prodRice: 70,
-            prodFlour: 30,
-            prodSake: 12,
             serenity: 80,
+            prodRice: 70,
+            prodFish: 30,
+            prodSoy: 25,
+            prodFlour: 30,
+            prodTea: 15,
+            prodSake: 15,
+            prodWood: 50,
+            prodStone: 40,
+            prodClay: 30,
+            prodBeams: 15,
+            prodCharcoal: 20,
             stockRice: 400,
+            stockFish: 150,
+            stockSoy: 120,
             stockFlour: 160,
-            stockSake: 60
+            stockTea: 80,
+            stockSake: 60,
+            stockWood: 250,
+            stockStone: 180,
+            stockClay: 140,
+            stockBeams: 75,
+            stockCharcoal: 90
+        },
+        artisanal_boom: {
+            pop: 140,
+            housingCap: 220,
+            openJobs: 135,
+            security: 20,
+            serenity: 85,
+            prodRice: 80,
+            prodFish: 50,
+            prodSoy: 45,
+            prodFlour: 35,
+            prodTea: 20,
+            prodSake: 12,
+            prodWood: 120,
+            prodStone: 90,
+            prodClay: 70,
+            prodBeams: 40,
+            prodCharcoal: 45,
+            stockRice: 450,
+            stockFish: 250,
+            stockSoy: 200,
+            stockFlour: 180,
+            stockTea: 90,
+            stockSake: 50,
+            stockWood: 500,
+            stockStone: 400,
+            stockClay: 300,
+            stockBeams: 160,
+            stockCharcoal: 180
+        },
+        sake_prosperity: {
+            pop: 130,
+            housingCap: 250,
+            openJobs: 115,
+            security: 25,
+            serenity: 95,
+            prodRice: 90,
+            prodFish: 35,
+            prodSoy: 30,
+            prodFlour: 45,
+            prodTea: 35,
+            prodSake: 35,
+            prodWood: 60,
+            prodStone: 50,
+            prodClay: 35,
+            prodBeams: 20,
+            prodCharcoal: 25,
+            stockRice: 600,
+            stockFish: 200,
+            stockSoy: 160,
+            stockFlour: 250,
+            stockTea: 150,
+            stockSake: 180,
+            stockWood: 300,
+            stockStone: 220,
+            stockClay: 160,
+            stockBeams: 90,
+            stockCharcoal: 110
+        },
+        delinquency_crisis: {
+            pop: 250,
+            housingCap: 300,
+            openJobs: 45,
+            security: 0,
+            serenity: 40,
+            prodRice: 50,
+            prodFish: 10,
+            prodSoy: 10,
+            prodFlour: 15,
+            prodTea: 5,
+            prodSake: 0,
+            prodWood: 20,
+            prodStone: 15,
+            prodClay: 10,
+            prodBeams: 5,
+            prodCharcoal: 5,
+            stockRice: 120,
+            stockFish: 20,
+            stockSoy: 15,
+            stockFlour: 30,
+            stockTea: 10,
+            stockSake: 0,
+            stockWood: 80,
+            stockStone: 60,
+            stockClay: 40,
+            stockBeams: 15,
+            stockCharcoal: 20
+        },
+        famine: {
+            pop: 160,
+            housingCap: 200,
+            openJobs: 110,
+            security: 5,
+            serenity: 30,
+            prodRice: 0,
+            prodFish: 0,
+            prodSoy: 0,
+            prodFlour: 0,
+            prodTea: 0,
+            prodSake: 0,
+            prodWood: 15,
+            prodStone: 10,
+            prodClay: 5,
+            prodBeams: 2,
+            prodCharcoal: 5,
+            stockRice: 15,
+            stockFish: 5,
+            stockSoy: 5,
+            stockFlour: 5,
+            stockTea: 0,
+            stockSake: 0,
+            stockWood: 60,
+            stockStone: 40,
+            stockClay: 25,
+            stockBeams: 10,
+            stockCharcoal: 15
         }
     };
 
-    // Synchronisation Curseur Slider -> Input & État
+    // Synchronisation Curseur Slider -> État & Affichage
     window.syncInput = function(key, val) {
         val = parseFloat(val);
         switch(key) {
@@ -642,25 +941,69 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 document.getElementById('val-security').innerText = '+' + val + "% d'ordre";
                 document.getElementById('range-security').value = val;
                 break;
+            case 'serenity':
+                state.serenity = val;
+                document.getElementById('val-serenity').innerText = val + ' / 100';
+                document.getElementById('range-serenity').value = val;
+                break;
+
+            // Vivres
             case 'prod-rice':
                 state.prodRice = val;
                 document.getElementById('val-prod-rice').innerText = '+' + val + ' koku / h';
                 document.getElementById('range-prod-rice').value = val;
+                break;
+            case 'prod-fish':
+                state.prodFish = val;
+                document.getElementById('val-prod-fish').innerText = '+' + val + ' paniers / h';
+                document.getElementById('range-prod-fish').value = val;
+                break;
+            case 'prod-soy':
+                state.prodSoy = val;
+                document.getElementById('val-prod-soy').innerText = '+' + val + ' sacs / h';
+                document.getElementById('range-prod-soy').value = val;
                 break;
             case 'prod-flour':
                 state.prodFlour = val;
                 document.getElementById('val-prod-flour').innerText = '+' + val + ' sacs / h';
                 document.getElementById('range-prod-flour').value = val;
                 break;
+            case 'prod-tea':
+                state.prodTea = val;
+                document.getElementById('val-prod-tea').innerText = '+' + val + ' boîtes / h';
+                document.getElementById('range-prod-tea').value = val;
+                break;
             case 'prod-sake':
                 state.prodSake = val;
                 document.getElementById('val-prod-sake').innerText = '+' + val + ' tonnelets / h';
                 document.getElementById('range-prod-sake').value = val;
                 break;
-            case 'serenity':
-                state.serenity = val;
-                document.getElementById('val-serenity').innerText = val + ' / 100';
-                document.getElementById('range-serenity').value = val;
+
+            // Matériaux
+            case 'prod-wood':
+                state.prodWood = val;
+                document.getElementById('val-prod-wood').innerText = '+' + val + ' unités / h';
+                document.getElementById('range-prod-wood').value = val;
+                break;
+            case 'prod-stone':
+                state.prodStone = val;
+                document.getElementById('val-prod-stone').innerText = '+' + val + ' unités / h';
+                document.getElementById('range-prod-stone').value = val;
+                break;
+            case 'prod-clay':
+                state.prodClay = val;
+                document.getElementById('val-prod-clay').innerText = '+' + val + ' unités / h';
+                document.getElementById('range-prod-clay').value = val;
+                break;
+            case 'prod-beams':
+                state.prodBeams = val;
+                document.getElementById('val-prod-beams').innerText = '+' + val + ' poutres / h';
+                document.getElementById('range-prod-beams').value = val;
+                break;
+            case 'prod-charcoal':
+                state.prodCharcoal = val;
+                document.getElementById('val-prod-charcoal').innerText = '+' + val + ' sacs / h';
+                document.getElementById('range-prod-charcoal').value = val;
                 break;
         }
         recalculateMetrics();
@@ -675,15 +1018,34 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         window.syncInput('initial-pop', p.pop);
         window.syncInput('housing-cap', p.housingCap);
         window.syncInput('open-jobs', p.openJobs);
-        window.syncInput('security', (p.security !== undefined) ? p.security : 10);
-        window.syncInput('prod-rice', p.prodRice);
-        window.syncInput('prod-flour', p.prodFlour);
-        window.syncInput('prod-sake', p.prodSake);
+        window.syncInput('security', (p.security !== undefined) ? p.security : 15);
         window.syncInput('serenity', p.serenity);
 
+        window.syncInput('prod-rice', p.prodRice);
+        window.syncInput('prod-fish', p.prodFish);
+        window.syncInput('prod-soy', p.prodSoy);
+        window.syncInput('prod-flour', p.prodFlour);
+        window.syncInput('prod-tea', p.prodTea);
+        window.syncInput('prod-sake', p.prodSake);
+
+        window.syncInput('prod-wood', p.prodWood);
+        window.syncInput('prod-stone', p.prodStone);
+        window.syncInput('prod-clay', p.prodClay);
+        window.syncInput('prod-beams', p.prodBeams);
+        window.syncInput('prod-charcoal', p.prodCharcoal);
+
         state.stockRice = p.stockRice;
+        state.stockFish = p.stockFish;
+        state.stockSoy = p.stockSoy;
         state.stockFlour = p.stockFlour;
+        state.stockTea = p.stockTea;
         state.stockSake = p.stockSake;
+
+        state.stockWood = p.stockWood;
+        state.stockStone = p.stockStone;
+        state.stockClay = p.stockClay;
+        state.stockBeams = p.stockBeams;
+        state.stockCharcoal = p.stockCharcoal;
 
         addLogEntry('Scénario appliqué : ' + presetKey.replace('_', ' ').toUpperCase(), 'event-info', 'fa-wand-magic-sparkles');
         recalculateMetrics();
@@ -707,7 +1069,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             10: 'Vitesse x10 (1h / 1 sec)',
             25: 'Vitesse x25 (2.5h / 1 sec)',
             50: 'Vitesse x50 (5h / 1 sec)',
-            100: 'Vitesse x100 (10h / 1 sec - Ultra-rapide)'
+            100: 'Vitesse x100 (10h / 1 sec - Accélération Max)'
         };
         document.getElementById('speed-indicator-label').innerText = labels[state.speed] || ('Vitesse x' + state.speed);
     };
@@ -741,7 +1103,6 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
 
     // Pas temporel manuel (+1h ou +24h)
     window.stepVillageSim = function(hours) {
-        const prevSpeed = state.speed;
         processDeltaHours(hours);
         recalculateMetrics();
         updateUI();
@@ -759,83 +1120,192 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         addLogEntry('Simulateur réinitialisé au Jour 1', 'event-info', 'fa-rotate-left');
     };
 
-    // Cœur de la boucle temporelle (Tick Step)
+    // Boucle temporelle (Tick Step)
     function tickStep() {
-        // Calcul du temps féodal écoulé lors de ce pas
-        // À x10 : 1 tick (500ms) = 0.5 heure féodale
         const deltaHours = (state.tickIntervalMs / 1000) * (state.speed / 10);
         processDeltaHours(deltaHours);
         recalculateMetrics();
         updateUI();
 
-        // Enregistrer une mesure graphique tous les 2 ticks pour ne pas surcharger
+        // Enregistrer une mesure graphique tous les 2 ticks pour une animation fluide
         if (state.cyclesCount % 2 === 0) {
             recordDataPoint();
         }
     }
 
-    // Traitement mathématique d'un delta d'heures
+    // Traitement mathématique d'un delta d'heures (Castes, Stocks, Contentement, Délinquance)
     function processDeltaHours(hours) {
         state.hoursElapsed += hours;
         state.cyclesCount++;
 
         const pop = state.pop;
 
-        // 1. Production horaire
+        // 1. Entrées de production des Vivres
         state.stockRice += state.prodRice * hours;
+        state.stockFish += state.prodFish * hours;
+        state.stockSoy += state.prodSoy * hours;
         state.stockFlour += state.prodFlour * hours;
+        state.stockTea += state.prodTea * hours;
         state.stockSake += state.prodSake * hours;
 
-        // 2. Consommation vitale de nourriture (0.04 sac farine par habitant par heure)
-        const flourNeeded = pop * 0.04 * hours;
-        let famineTriggered = false;
+        // 2. Entrées de production des Matériaux
+        state.stockWood += state.prodWood * hours;
+        state.stockStone += state.prodStone * hours;
+        state.stockClay += state.prodClay * hours;
+        state.stockBeams += state.prodBeams * hours;
+        state.stockCharcoal += state.prodCharcoal * hours;
 
-        if (state.stockFlour >= flourNeeded) {
-            state.stockFlour -= flourNeeded;
+        // 3. Calcul dynamique de la répartition des 4 Castes Sociales (Shinōkōshō)
+        // Selon SocialCasteEngine :
+        // Cible idéale : Noblesse 10%, Marchands 15%, Artisans 25%, Paysans 50%
+        const targetNoblesse = Math.max(0, Math.round(pop * 0.10));
+        const targetMarchands = Math.max(0, Math.round(pop * 0.15));
+        const targetArtisans = Math.max(0, Math.round(pop * 0.25));
+
+        // Strate 4 : Noblesse (Bushi & Daimyō)
+        // Besoins : Saké 0.02, Thé 0.015, Farine 0.02 /hab/h
+        let actualNoblesse = 0;
+        if (hours > 0 && targetNoblesse > 0) {
+            const reqSake = targetNoblesse * 0.02 * hours;
+            const reqTea = targetNoblesse * 0.015 * hours;
+            const reqFlour = targetNoblesse * 0.02 * hours;
+            let ratioN = 1.0;
+            if (reqSake > 0) ratioN = Math.min(ratioN, state.stockSake / reqSake);
+            if (reqTea > 0) ratioN = Math.min(ratioN, state.stockTea / reqTea);
+            if (reqFlour > 0) ratioN = Math.min(ratioN, state.stockFlour / reqFlour);
+            ratioN = Math.max(0, Math.min(1.0, ratioN));
+
+            actualNoblesse = Math.floor(targetNoblesse * ratioN);
+            if (actualNoblesse > 0) {
+                state.stockSake -= Math.min(state.stockSake, actualNoblesse * 0.02 * hours);
+                state.stockTea -= Math.min(state.stockTea, actualNoblesse * 0.015 * hours);
+                state.stockFlour -= Math.min(state.stockFlour, actualNoblesse * 0.02 * hours);
+            }
+        }
+
+        // Strate 3 : Marchands (Shōnin)
+        // Besoins : Farine 0.02, Thé 0.015 /hab/h
+        let actualMarchands = 0;
+        if (hours > 0 && targetMarchands > 0) {
+            const reqFlour = targetMarchands * 0.02 * hours;
+            const reqTea = targetMarchands * 0.015 * hours;
+            let ratioM = 1.0;
+            if (reqFlour > 0) ratioM = Math.min(ratioM, state.stockFlour / reqFlour);
+            if (reqTea > 0) ratioM = Math.min(ratioM, state.stockTea / reqTea);
+            ratioM = Math.max(0, Math.min(1.0, ratioM));
+
+            actualMarchands = Math.floor(targetMarchands * ratioM);
+            if (actualMarchands > 0) {
+                state.stockFlour -= Math.min(state.stockFlour, actualMarchands * 0.02 * hours);
+                state.stockTea -= Math.min(state.stockTea, actualMarchands * 0.015 * hours);
+            }
+        }
+
+        // Strate 2 : Artisans (Kōgiyō)
+        // Besoins : Poisson 0.02, Soja 0.02 /hab/h
+        let actualArtisans = 0;
+        if (hours > 0 && targetArtisans > 0) {
+            const reqFish = targetArtisans * 0.02 * hours;
+            const reqSoy = targetArtisans * 0.02 * hours;
+            let ratioA = 1.0;
+            if (reqFish > 0) ratioA = Math.min(ratioA, state.stockFish / reqFish);
+            if (reqSoy > 0) ratioA = Math.min(ratioA, state.stockSoy / reqSoy);
+            ratioA = Math.max(0, Math.min(1.0, ratioA));
+
+            actualArtisans = Math.floor(targetArtisans * ratioA);
+            if (actualArtisans > 0) {
+                state.stockFish -= Math.min(state.stockFish, actualArtisans * 0.02 * hours);
+                state.stockSoy -= Math.min(state.stockSoy, actualArtisans * 0.02 * hours);
+                // Consommation nominale d'entretien d'ateliers par les artisans
+                state.stockWood -= Math.min(state.stockWood, actualArtisans * 0.015 * hours);
+                state.stockStone -= Math.min(state.stockStone, actualArtisans * 0.01 * hours);
+                state.stockClay -= Math.min(state.stockClay, actualArtisans * 0.01 * hours);
+                state.stockBeams -= Math.min(state.stockBeams, actualArtisans * 0.005 * hours);
+                state.stockCharcoal -= Math.min(state.stockCharcoal, actualArtisans * 0.01 * hours);
+            }
+        }
+
+        // Strate 1 : Paysans & Ouvriers (Nōmin)
+        const actualPaysans = Math.max(0, Math.round(pop - (actualNoblesse + actualMarchands + actualArtisans)));
+
+        // Consommation vitale de subsistance paysanne (0.04 sac ou koku/hab/h)
+        const vitalFoodNeeded = actualPaysans * 0.04 * hours;
+        let famineOccurred = false;
+
+        if (state.stockFlour >= vitalFoodNeeded) {
+            state.stockFlour -= vitalFoodNeeded;
         } else {
-            const missingFlour = flourNeeded - state.stockFlour;
+            const missingFlour = vitalFoodNeeded - state.stockFlour;
             state.stockFlour = 0;
-            // Puiser dans le riz brut
             if (state.stockRice >= missingFlour) {
                 state.stockRice -= missingFlour;
             } else {
                 state.stockRice = 0;
-                famineTriggered = true;
+                famineOccurred = true;
             }
         }
+        state.famineTriggered = famineOccurred;
 
-        // 3. Consommation de Saké (0.01 tonnelet par habitant par heure si disponible)
-        // RÈGLE STRICTE ASYMÉTRIQUE : si vide, aucun malus, juste absence du bonus !
-        if (state.stockSake > 0) {
-            const sakeNeeded = pop * 0.01 * hours;
-            const consumed = Math.min(state.stockSake, sakeNeeded);
-            state.stockSake = Math.max(0, state.stockSake - consumed);
-            state.sakeBonusActive = (state.stockSake > 0);
+        // Enregistrement des castes dans le state
+        const totalP = Math.max(1, pop);
+        state.castes = {
+            nomin: { count: actualPaysans, pct: Math.round((actualPaysans / totalP) * 1000) / 10 },
+            kogiyo: { count: actualArtisans, pct: Math.round((actualArtisans / totalP) * 1000) / 10 },
+            shonin: { count: actualMarchands, pct: Math.round((actualMarchands / totalP) * 1000) / 10 },
+            noblesse: { count: actualNoblesse, pct: Math.round((actualNoblesse / totalP) * 1000) / 10 }
+        };
+
+        if (actualNoblesse >= 5) {
+            state.civLevelName = 'Cour Aristocratique & Shōgunat';
+        } else if (actualMarchands >= 5) {
+            state.civLevelName = 'Comptoir Marchand Prospère';
+        } else if (actualArtisans >= 5) {
+            state.civLevelName = 'Cité Artisanale Kizukuri';
         } else {
-            state.sakeBonusActive = false;
+            state.civLevelName = 'Hameau Rural Paysan';
         }
 
-        // 4. Plafond de stockage féodal (max 2000 unités par ressource)
-        state.stockRice = Math.min(2500, Math.max(0, state.stockRice));
-        state.stockFlour = Math.min(1500, Math.max(0, state.stockFlour));
-        state.stockSake = Math.min(1000, Math.max(0, state.stockSake));
+        // 4. Règle Asymétrique du Saké :
+        // Si présent > 0, procure +15% de satisfaction. Si épuisé, aucun malus !
+        state.sakeBonusActive = (state.stockSake > 1);
 
-        // 5. Calcul de Contentement selon PopulationEngine
-        let baseScore = 75;
-        const foodDelta = famineTriggered ? -55 : +15;
+        // 5. Plafonds de stockage féodaux
+        const capVivres = 3000;
+        state.stockRice = Math.min(capVivres, Math.max(0, state.stockRice));
+        state.stockFish = Math.min(capVivres, Math.max(0, state.stockFish));
+        state.stockSoy = Math.min(capVivres, Math.max(0, state.stockSoy));
+        state.stockFlour = Math.min(capVivres, Math.max(0, state.stockFlour));
+        state.stockTea = Math.min(capVivres, Math.max(0, state.stockTea));
+        state.stockSake = Math.min(capVivres, Math.max(0, state.stockSake));
+
+        const capMat = 2500;
+        state.stockWood = Math.min(capMat, Math.max(0, state.stockWood));
+        state.stockStone = Math.min(capMat, Math.max(0, state.stockStone));
+        state.stockClay = Math.min(capMat, Math.max(0, state.stockClay));
+        state.stockBeams = Math.min(capMat, Math.max(0, state.stockBeams));
+        state.stockCharcoal = Math.min(capMat, Math.max(0, state.stockCharcoal));
+
+        // 6. Formule de Contentement Global
+        let baseScore = 70;
+        const foodDelta = famineOccurred ? -55 : +15;
         const serenityDelta = (state.serenity >= 50) ? 0 : -20;
         const sakePoints = state.sakeBonusActive ? +15 : 0; // Strictement >= 0 (asymétrique)
 
-        // Impact du ratio d'emploi (sous-effectif sur parcelles)
+        // Bonus d'épanouissement des castes supérieures
+        let casteBonus = 0;
+        if (targetNoblesse > 0 && actualNoblesse >= targetNoblesse * 0.7) casteBonus += 5;
+        if (targetMarchands > 0 && actualMarchands >= targetMarchands * 0.7) casteBonus += 4;
+        if (targetArtisans > 0 && actualArtisans >= targetArtisans * 0.7) casteBonus += 4;
+
+        // Malus de sous-effectif sur les ateliers
         const requiredWorkers = state.openJobs;
-        const assigned = Math.min(pop, requiredWorkers);
         const jobRatio = (requiredWorkers > 0) ? Math.min(1.0, pop / requiredWorkers) : 1.0;
         let jobMalus = 0;
         if (jobRatio < 1.0) {
             jobMalus = -Math.round((1.0 - jobRatio) * 15);
         }
 
-        // Malus de surpopulation (si population > logements)
+        // Malus de surpopulation (si population > parcelles de logements)
         let overcrowdingMalus = 0;
         if (pop > state.housingCap) {
             overcrowdingMalus = -Math.min(30, Math.round(((pop - state.housingCap) / state.housingCap) * 50));
@@ -852,45 +1322,44 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         state.netDelinquency = netDlq;
         state.delinquencyPenalty = delinquencyPenalty;
 
-        let totalScore = Math.max(0, Math.min(100, baseScore + foodDelta + serenityDelta + sakePoints + jobMalus + overcrowdingMalus + delinquencyMalus));
+        const totalScore = Math.max(0, Math.min(100, baseScore + foodDelta + serenityDelta + sakePoints + casteBonus + jobMalus + overcrowdingMalus + delinquencyMalus));
         state.contentment = totalScore;
         state.isExodus = (totalScore < 25);
 
-        // 6. Démographie : Naissances ou Exode
+        // 7. Démographie : Naissances ou Fuite féodale
         if (state.isExodus) {
-            // Fuite de 6% par heure de crise (plancher à 10 habitants)
             const fleeing = Math.ceil(pop * 0.06 * hours);
             const actualFleeing = Math.min(pop - 10, fleeing);
             if (actualFleeing > 0) {
                 state.pop -= actualFleeing;
                 if (state.cyclesCount % 3 === 0) {
-                    addLogEntry(`Crise morale (${totalScore}%) : ${actualFleeing} villageois fuient le village !`, 'event-exodus', 'fa-skull');
+                    addLogEntry(`Effondrement moral (${totalScore}%) : ${actualFleeing} villageois fuient le fief !`, 'event-exodus', 'fa-skull');
                 }
             }
-        } else if (totalScore >= 75 && state.pop < state.housingCap && !famineTriggered) {
-            // Croissance naturelle
+        } else if (totalScore >= 75 && state.pop < state.housingCap && !famineOccurred) {
             const growthRate = 0.04 * (totalScore / 100);
             const births = Math.floor(pop * growthRate * hours);
             const actualBirths = Math.min(state.housingCap - state.pop, births);
             if (actualBirths > 0) {
                 state.pop += actualBirths;
                 if (state.cyclesCount % 5 === 0) {
-                    addLogEntry(`Félicité féodale (${totalScore}%) : Naissance et arrivée de ${actualBirths} nouveaux villageois.`, 'event-growth', 'fa-baby');
+                    addLogEntry(`Félicité féodale (${totalScore}%) : Arrivée et naissance de ${actualBirths} villageois.`, 'event-growth', 'fa-baby');
                 }
             }
         }
 
-        // Journalisation intelligente des événements de seuil
-        if (famineTriggered && state.cyclesCount % 4 === 0) {
-            addLogEntry('Rupture de vivres : La famine frappe le fief (-55% de moral) !', 'event-famine', 'fa-triangle-exclamation');
+        // Journalisation intelligente des événements notables
+        if (famineOccurred && state.cyclesCount % 4 === 0) {
+            addLogEntry('Rupture de vivres : La famine frappe le fief (-55% de satisfaction) !', 'event-famine', 'fa-triangle-exclamation');
         }
-        if (state.sakeBonusActive && state.cyclesCount % 6 === 0) {
-            addLogEntry('Festivités de saké : Régal des villageois (+15% de satisfaction active).', 'event-sake', 'fa-wine-bottle');
+        if (state.sakeBonusActive && state.cyclesCount % 8 === 0) {
+            addLogEntry('Festivités de saké : Régal des samouraïs et villageois (+15% de bonus actif).', 'event-sake', 'fa-wine-bottle');
         }
-        if (netDlq >= 40 && state.cyclesCount % 5 === 0) {
-            addLogEntry(`Criminalité & Chômage (${netDlq}%) : L'oisiveté et le manque de postes sèment le chaos (-${delinquencyPenalty}% moral) !`, 'event-delinquency', 'fa-skull-crossbones');
-        } else if (netDlq > 15 && netDlq < 40 && state.cyclesCount % 6 === 0) {
-            addLogEntry(`Insécurité & Vols (${netDlq}%) : ${idleWorkers} villageois oisifs dégradent l'harmonie (-${delinquencyPenalty}% moral).`, 'event-delinquency', 'fa-mask');
+        if (netDlq >= 35 && state.cyclesCount % 5 === 0) {
+            addLogEntry(`Chômage & Brigandage (${netDlq}%) : ${idleWorkers} oisifs perturbent la paix civile (-${delinquencyPenalty}% moral).`, 'event-delinquency', 'fa-mask');
+        }
+        if (actualNoblesse >= 8 && state.cyclesCount % 10 === 0) {
+            addLogEntry(`Prestige de la Cour : ${actualNoblesse} seigneurs et samouraïs honorent le château.`, 'event-caste', 'fa-crown');
         }
     }
 
@@ -902,38 +1371,30 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         state.idleWorkers = Math.max(0, pop - jobs);
         state.workforceRatio = (jobs > 0) ? Math.min(1.0, pop / jobs) : 1.0;
 
-        // Délinquance et sécurité
         if (pop <= 20) {
-            state.unemploymentRate = 0;
             state.unemploymentPct = 0;
-            state.baseDelinquency = 0;
             state.netDelinquency = 0;
             state.delinquencyPenalty = 0;
-            state.delinquencyStatusLabel = 'Ordre Parfait';
+            state.delinquencyStatusLabel = 'Ordre Féodal';
             state.delinquencyBadgeColor = 'success';
         } else {
-            state.unemploymentRate = Math.min(1.0, Math.max(0, state.idleWorkers / Math.max(1, pop)));
-            state.unemploymentPct = Math.round(state.unemploymentRate * 100);
-            state.baseDelinquency = (state.unemploymentRate > 0.15) 
-                ? Math.min(100, Math.round(((state.unemploymentRate - 0.15) / 0.85) * 100)) 
-                : 0;
-            state.netDelinquency = Math.max(0, Math.round(state.baseDelinquency - state.securityBonus));
+            const unempRate = Math.min(1.0, Math.max(0, state.idleWorkers / Math.max(1, pop)));
+            state.unemploymentPct = Math.round(unempRate * 100);
+            const baseDlq = (unempRate > 0.15) ? Math.min(100, Math.round(((unempRate - 0.15) / 0.85) * 100)) : 0;
+            state.netDelinquency = Math.max(0, Math.round(baseDlq - state.securityBonus));
             state.delinquencyPenalty = Math.round((state.netDelinquency / 100) * 25);
 
             if (state.netDelinquency <= 0) {
-                state.delinquencyStatusLabel = 'Ordre Parfait';
+                state.delinquencyStatusLabel = 'Ordre Féodal Parfait';
                 state.delinquencyBadgeColor = 'success';
             } else if (state.netDelinquency <= 15) {
-                state.delinquencyStatusLabel = 'Tension Faible';
+                state.delinquencyStatusLabel = 'Tension Légère';
                 state.delinquencyBadgeColor = 'info';
             } else if (state.netDelinquency <= 35) {
                 state.delinquencyStatusLabel = 'Vols & Mécontentement';
                 state.delinquencyBadgeColor = 'warning';
-            } else if (state.netDelinquency <= 60) {
-                state.delinquencyStatusLabel = 'Troubles & Brigandage';
-                state.delinquencyBadgeColor = 'danger';
             } else {
-                state.delinquencyStatusLabel = 'Criminalité Sévère';
+                state.delinquencyStatusLabel = 'Brigandage Sévère';
                 state.delinquencyBadgeColor = 'danger';
             }
         }
@@ -943,18 +1404,18 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             state.statusLabel = 'Euphorique & Prospère';
             state.badgeColor = 'success';
         } else if (score >= 50) {
-            state.statusLabel = 'Paisible & Satisfait';
+            state.statusLabel = 'Paisible & Harmonieux';
             state.badgeColor = 'teal';
         } else if (score >= 25) {
-            state.statusLabel = 'Inquiet & Tendu';
+            state.statusLabel = 'Inquiet & Agité';
             state.badgeColor = 'warning';
         } else {
-            state.statusLabel = 'Exode Imminent !';
+            state.statusLabel = 'Exode & Révolte !';
             state.badgeColor = 'danger';
         }
     }
 
-    // Mise à jour complète du DOM
+    // Mise à jour complète du DOM (Cartes KPI, Barres, Stocks, Castes)
     function updateUI() {
         // Horloge
         const day = Math.floor(state.hoursElapsed / 24) + 1;
@@ -962,10 +1423,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         const hourFormatted = (hour < 10 ? '0' : '') + hour + ':00';
         document.getElementById('sim-clock-display').innerText = `Jour ${day} • ${hourFormatted}`;
 
-        // KPI 1 : Contentement
+        // KPI 1 : Contentement & Moral
         const valContentment = document.getElementById('kpi-contentment-val');
         valContentment.innerText = state.contentment + '%';
-        valContentment.className = `fs-1 fw-bold text-${state.badgeColor}`;
+        valContentment.className = `fs-1 fw-bold font-monospace text-${state.badgeColor}`;
         document.getElementById('kpi-contentment-status').innerText = state.statusLabel;
         const barContentment = document.getElementById('kpi-contentment-bar');
         barContentment.style.width = state.contentment + '%';
@@ -985,15 +1446,28 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             sakeIconBadge.classList.add('d-none');
         }
 
-        // KPI 2 : Population
+        // KPI 2 : Population & Minka
         document.getElementById('kpi-pop-val').innerText = Math.round(state.pop);
         document.getElementById('kpi-housing-max').innerText = state.housingCap;
         const occRate = Math.round((state.pop / state.housingCap) * 100);
-        document.getElementById('kpi-housing-rate').innerText = occRate + '% Logements';
+        document.getElementById('kpi-housing-rate').innerText = occRate + "% d'occupation";
         document.getElementById('kpi-pop-bar').style.width = Math.min(100, occRate) + '%';
         document.getElementById('demography-badge-total').innerText = 'Pop: ' + Math.round(state.pop);
 
-        // KPI 3 : Main-d'œuvre
+        // KPI 3 : 4 Castes Féodales
+        document.getElementById('caste-nomin-count').innerText = state.castes.nomin.count;
+        document.getElementById('caste-kogiyo-count').innerText = state.castes.kogiyo.count;
+        document.getElementById('caste-shonin-count').innerText = state.castes.shonin.count;
+        document.getElementById('caste-noblesse-count').innerText = state.castes.noblesse.count;
+
+        document.getElementById('bar-caste-nomin').style.width = state.castes.nomin.pct + '%';
+        document.getElementById('bar-caste-kogiyo').style.width = state.castes.kogiyo.pct + '%';
+        document.getElementById('bar-caste-shonin').style.width = state.castes.shonin.pct + '%';
+        document.getElementById('bar-caste-noblesse').style.width = state.castes.noblesse.pct + '%';
+
+        document.getElementById('kpi-caste-level-desc').innerText = 'Palier : ' + state.civLevelName;
+
+        // KPI 4 : Emplois & Activité
         document.getElementById('kpi-workforce-val').innerText = state.assignedJobs;
         document.getElementById('kpi-workforce-req').innerText = state.openJobs;
         const wfRate = Math.round(state.workforceRatio * 100);
@@ -1007,7 +1481,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             document.getElementById('kpi-workforce-status').innerText = `Plein emploi garanti`;
         }
 
-        // KPI 4 : Délinquance & Sécurité
+        // KPI 5 : Ordre & Sécurité
         const valDelinquency = document.getElementById('kpi-delinquency-val');
         if (valDelinquency) {
             valDelinquency.innerText = state.netDelinquency + '%';
@@ -1027,21 +1501,41 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             }
         }
 
-        // KPI 5 : Stocks
+        // KPI 6 : Stocks du Grenier Féodal (Vivres)
         document.getElementById('kpi-stock-rice').innerText = Math.round(state.stockRice);
+        document.getElementById('kpi-stock-fish').innerText = Math.round(state.stockFish);
+        document.getElementById('kpi-stock-soy').innerText = Math.round(state.stockSoy);
+        document.getElementById('kpi-stock-tea').innerText = Math.round(state.stockTea);
         document.getElementById('kpi-stock-flour').innerText = Math.round(state.stockFlour);
         document.getElementById('kpi-stock-sake').innerText = Math.round(state.stockSake);
 
         const foodStatus = document.getElementById('kpi-food-status');
-        if (state.stockFlour <= 0 && state.stockRice <= 0) {
-            foodStatus.innerText = '⚠️ Famine Déclarée';
+        if (state.famineTriggered) {
+            foodStatus.innerText = '⚠️ Famine Déclarée (Rupture)';
             foodStatus.className = 'text-danger fw-bold mt-1';
-        } else if (state.stockFlour <= 15) {
-            foodStatus.innerText = 'Ravitaillement critique';
+        } else if (state.stockFlour <= 20 || state.stockRice <= 20) {
+            foodStatus.innerText = 'Ravitaillement en flux tendu';
             foodStatus.className = 'text-warning fw-bold mt-1';
         } else {
-            foodStatus.innerText = 'Rations assurées';
+            foodStatus.innerText = 'Rations & Fêtes assurées';
             foodStatus.className = 'text-muted small mt-1';
+        }
+
+        // KPI 7 : Stocks des Matériaux
+        document.getElementById('kpi-stock-wood').innerText = Math.round(state.stockWood);
+        document.getElementById('kpi-stock-stone').innerText = Math.round(state.stockStone);
+        document.getElementById('kpi-stock-clay').innerText = Math.round(state.stockClay);
+        document.getElementById('kpi-stock-beams').innerText = Math.round(state.stockBeams);
+        document.getElementById('kpi-stock-charcoal').innerText = Math.round(state.stockCharcoal);
+        document.getElementById('kpi-stock-serenity').innerText = Math.round(state.serenity);
+
+        const matStatus = document.getElementById('kpi-materials-status');
+        if (state.stockWood <= 10 || state.stockStone <= 10) {
+            matStatus.innerText = 'Chantiers ralentis (Manque de matériaux)';
+            matStatus.className = 'text-warning fw-bold mt-1';
+        } else {
+            matStatus.innerText = 'Chantiers Kizukuri approvisionnés';
+            matStatus.className = 'text-muted small mt-1';
         }
     }
 
@@ -1090,7 +1584,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             const options = {
                 chart: {
                     type: 'area',
-                    height: 320,
+                    height: 330,
                     animations: {
                         enabled: true,
                         easing: 'linear',
@@ -1107,21 +1601,23 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 },
                 series: [
                     { name: '👥 Population', data: [] },
-                    { name: '🌾 Riz (koku)', data: [] },
-                    { name: '🍚 Farine (sacs)', data: [] },
+                    { name: '🌾 Paysans', data: [] },
+                    { name: '🔨 Artisans', data: [] },
+                    { name: '⚖️ Marchands', data: [] },
+                    { name: '👑 Noblesse', data: [] },
                     { name: '🍶 Saké (tonnelets)', data: [] },
                     { name: '🗡️ Délinquance (%)', data: [] },
                     { name: '❤️ Satisfaction (%)', data: [] }
                 ],
-                colors: ['#0284c7', '#eab308', '#64748b', '#a855f7', '#e11d48', '#22c55e'],
+                colors: ['#0284c7', '#16a34a', '#0ea5e9', '#d97706', '#7c3aed', '#ec4899', '#e11d48', '#22c55e'],
                 stroke: {
                     curve: 'smooth',
-                    width: [3, 2, 2, 2, 2, 3]
+                    width: [3, 2, 2, 2, 2, 2, 2, 3]
                 },
                 fill: {
                     type: 'gradient',
                     gradient: {
-                        opacityFrom: 0.35,
+                        opacityFrom: 0.30,
                         opacityTo: 0.05
                     }
                 },
@@ -1151,7 +1647,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             apexChartInstance = new ApexCharts(chartEl, options);
             apexChartInstance.render();
         } else {
-            // Activer le fallback Canvas HD
+            // Fallback Canvas HD
             chartEl.classList.add('d-none');
             document.getElementById('village-canvas-chart').classList.remove('d-none');
         }
@@ -1166,8 +1662,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         const h = state.history;
         h.labels.push(label);
         h.pop.push(Math.round(state.pop));
-        h.rice.push(Math.round(state.stockRice));
-        h.flour.push(Math.round(state.stockFlour));
+        h.nomin.push(state.castes.nomin.count);
+        h.kogiyo.push(state.castes.kogiyo.count);
+        h.shonin.push(state.castes.shonin.count);
+        h.noblesse.push(state.castes.noblesse.count);
         h.sake.push(Math.round(state.stockSake));
         h.delinquency.push(state.netDelinquency);
         h.contentment.push(state.contentment);
@@ -1176,8 +1674,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         if (h.labels.length > state.maxHistoryPoints) {
             h.labels.shift();
             h.pop.shift();
-            h.rice.shift();
-            h.flour.shift();
+            h.nomin.shift();
+            h.kogiyo.shift();
+            h.shonin.shift();
+            h.noblesse.shift();
             h.sake.shift();
             h.delinquency.shift();
             h.contentment.shift();
@@ -1192,8 +1692,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
 
             apexChartInstance.updateSeries([
                 { name: '👥 Population', data: h.pop },
-                { name: '🌾 Riz (koku)', data: h.rice },
-                { name: '🍚 Farine (sacs)', data: h.flour },
+                { name: '🌾 Paysans', data: h.nomin },
+                { name: '🔨 Artisans', data: h.kogiyo },
+                { name: '⚖️ Marchands', data: h.shonin },
+                { name: '👑 Noblesse', data: h.noblesse },
                 { name: '🍶 Saké (tonnelets)', data: h.sake },
                 { name: '🗡️ Délinquance (%)', data: h.delinquency },
                 { name: '❤️ Satisfaction (%)', data: h.contentment }
@@ -1207,8 +1709,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         state.history = {
             labels: [],
             pop: [],
-            rice: [],
-            flour: [],
+            nomin: [],
+            kogiyo: [],
+            shonin: [],
+            noblesse: [],
             sake: [],
             delinquency: [],
             contentment: []
@@ -1216,8 +1720,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         if (apexChartInstance) {
             apexChartInstance.updateSeries([
                 { name: '👥 Population', data: [] },
-                { name: '🌾 Riz (koku)', data: [] },
-                { name: '🍚 Farine (sacs)', data: [] },
+                { name: '🌾 Paysans', data: [] },
+                { name: '🔨 Artisans', data: [] },
+                { name: '⚖️ Marchands', data: [] },
+                { name: '👑 Noblesse', data: [] },
                 { name: '🍶 Saké (tonnelets)', data: [] },
                 { name: '🗡️ Délinquance (%)', data: [] },
                 { name: '❤️ Satisfaction (%)', data: [] }
@@ -1241,7 +1747,6 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         const series = state.history.pop;
         if (series.length < 2) return;
 
-        // Tracé de la courbe population
         ctx.beginPath();
         ctx.strokeStyle = '#0284c7';
         ctx.lineWidth = 3;
@@ -1258,10 +1763,10 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         ctx.stroke();
     }
 
-    // Exportation du scénario d'équilibrage en JSON téléchargeable
+    // Exportation du scénario d'équilibrage complet en JSON
     window.exportVillageScenario = function() {
         const report = {
-            export_title: "OpenShogun - Bilan de Simulation de Vie de Village",
+            export_title: "OpenShogun - Bilan Équilibrage de Vie Féodale & Castes",
             exported_at: new Date().toISOString(),
             job: "Game Elevate Designer",
             simulated_time: {
@@ -1274,10 +1779,20 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 housing_capacity: state.housingCap,
                 open_jobs: state.openJobs,
                 security_bonus: state.securityBonus,
-                hourly_production: {
+                hourly_production_food: {
                     rice: state.prodRice,
+                    fish: state.prodFish,
+                    soybean: state.prodSoy,
                     flour: state.prodFlour,
-                    sake: state.prodSake,
+                    tea: state.prodTea,
+                    sake: state.prodSake
+                },
+                hourly_production_materials: {
+                    wood: state.prodWood,
+                    stone: state.prodStone,
+                    clay: state.prodClay,
+                    beams: state.prodBeams,
+                    charcoal: state.prodCharcoal,
                     serenity: state.serenity
                 }
             },
@@ -1292,31 +1807,47 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 delinquency_penalty: state.delinquencyPenalty,
                 is_exodus: state.isExodus,
                 sake_bonus_active: state.sakeBonusActive,
-                residual_stocks: {
+                famine_triggered: state.famineTriggered,
+                caste_distribution: state.castes,
+                civilization_palier: state.civLevelName,
+                residual_food_stocks: {
                     rice: Math.round(state.stockRice),
+                    fish: Math.round(state.stockFish),
+                    soybean: Math.round(state.stockSoy),
                     flour: Math.round(state.stockFlour),
+                    tea: Math.round(state.stockTea),
                     sake: Math.round(state.stockSake)
+                },
+                residual_material_stocks: {
+                    wood: Math.round(state.stockWood),
+                    stone: Math.round(state.stockStone),
+                    clay: Math.round(state.stockClay),
+                    beams: Math.round(state.stockBeams),
+                    charcoal: Math.round(state.stockCharcoal),
+                    serenity: Math.round(state.serenity)
                 }
             },
             history_data: state.history,
             game_balancing_insights: [
-                "La règle asymétrique du saké permet un levier moral dynamique sans pénaliser les villages en paix.",
-                "Le manque de travail (> 15% d'inactifs) engendre de la délinquance féodale et pénalise le moral jusqu'à -25%.",
-                "Le maintien de l'ordre (Tenshu, Muraille, Dojo, Vigie) permet de réprimer et d'endiguer la criminalité urbaine.",
-                "Le point de bascule de l'exode féodal à 25% nécessite un approvisionnement continu en farine ou riz.",
-                "Le ratio d'emploi doit être maintenu au-dessus de 0.85 pour éviter le malus de productivité rurale."
+                "La règle asymétrique du saké permet un levier moral (+15%) sans pénaliser les villages ordinaires lorsqu'il s'épuise.",
+                "Les 4 strates sociales (Paysans, Artisans, Marchands, Noblesse) requièrent une chaîne de production diversifiée.",
+                "Les Artisans consomment du poisson et du soja et mobilisent du bois, de la pierre, de l'argile et des poutres pour les chantiers.",
+                "Les Marchands requièrent de la farine de riz et du thé vert, apportant une prospérité commerciale.",
+                "La Noblesse consomme du saké, du thé et de la farine, conférant un bonus de moral supérieur à la province.",
+                "Le manque de travail (> 15% d'inactifs) engendre de la délinquance réprimée par la garnison et le Tenshu.",
+                "Le point de rupture de l'exode féodal fixé à 25% nécessite un grenier sécurisé sous peine de désertification."
             ]
         };
 
         const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(report, null, 2));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", jsonStr);
-        downloadAnchor.setAttribute("download", `village_simulation_${Date.now()}.json`);
+        downloadAnchor.setAttribute("download", `village_life_simulation_${Date.now()}.json`);
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
 
-        addLogEntry('Bilan JSON du scénario téléchargé avec succès.', 'event-info', 'fa-file-arrow-down');
+        addLogEntry('Bilan JSON complet du scénario téléchargé avec succès.', 'event-info', 'fa-file-arrow-down');
     };
 
     // Initialisation au chargement de la vue

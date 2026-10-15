@@ -4,6 +4,15 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [1.30.0] - 2026-10-15
+### Amélioré (Enhanced) & Ajouté (Added)
+- **Modernisation & Équilibrage du Simulateur de Vie dans un Village (`views/studio/game-elevate-designer/village-life-simulator.php`) :**
+  * **Uniformisation des KPI au Standard Tabler / Game Studio :** Réorganisation en grille harmonisée de 7 cartes KPI interactives (Satisfaction & Moral avec badge Saké +15%, Démographie & Minka, Pyramide des 4 Castes Sociales quadri-colore, Emplois & Activité, Ordre & Sécurité Féodale avec délinquance nette, Grenier Féodal des Vivres, et Entrepôt des Matériaux & Énergie).
+  * **Intégration Complète des 4 Castes Féodales (*Shinōkōshō*) :** Modélisation fidèle de la dynamique sociale féodale (*Paysans Nōmin*, *Artisans Kōgiyō*, *Marchands Shōnin*, *Noblesse Bushi & Daimyō*) avec besoins spécifiques de subsistance et de confort, promotion sociale automatique et régression en cas de pénurie.
+  * **Intégration des Nouvelles Ressources de Jeu :**
+    - *Vivres & Denrées :* Riz impérial, Poisson frais, Soja du terroir, Farine de riz, Thé vert, Saké impérial (respect strict de la règle asymétrique : +15% de bonus si présent, 0 malus si absent).
+    - *Matériaux & Énergie :* Bois de cèdre, Pierre de granit, Argile & terres cuites, Poutres de charpente, Charbon de bois, Sérénité Shintō des kami.
+  * **Graphiques & Scénarios Étendus :** ApexCharts multi-séries 8 courbes (Pop, Paysans, Artisans, Marchands, Noblesse, Saké, Délinquance, Moral), 5 scénarios préconfigurés (*Équilibre Sengoku*, *Âge d'Or Artisanal*, *Prospérité & Cour*, *Crise de Délinquance*, *Pénurie & Exode*) et export JSON enrichi avec insights de game design.
+
 ### Modifié (Changed) & Déplacé (Moved)
 - **Relocalisation Intégrale de la suite Game Elevate Designer vers Game Studio (`views/gamestudio.php`, `views/gamestudio/elevate_*.php`, `core/DevTeamEngine.php`, `views/dev_team.php`, `api/dev_team.php`, `core/AuthManager.php`) :**
   * **Intégration au Menu Game Elevate Designer du Game Studio :** Relocalisation des 6 modules de simulation et équilibrage féodal dans le Game Studio :

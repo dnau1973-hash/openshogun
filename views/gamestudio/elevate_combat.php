@@ -25,3 +25,4 @@ declare(strict_types=1);
 
 <?php
 require __DIR__ . '/../studio/game-elevate-designer/combat-simulator.php';
+
