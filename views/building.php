@@ -267,6 +267,12 @@ if (!$isEmptyPlot) {
             'next' => ($targetLevel * 2) . ' marchands',
             'gain' => '+2 caravanes marchandes'
         ],
+        'blacksmith' => [
+            'label' => 'Forge & Réduction de Tamahagane',
+            'cur' => ($lvl >= 20) ? 'Armes & Armées de Prestige (Niv. 20+)' : (($lvl >= 15) ? 'Fonte de Métal débloquée (Niv. 15+)' : 'Niv. ' . $lvl . ' / 15 (Fonte verrouillée)'),
+            'next' => ($targetLevel >= 20) ? 'Armes & Armées de Prestige débloquées' : (($targetLevel >= 15) ? 'Fonte de Métal débloquée' : 'Progression Fonte (Niv. ' . $targetLevel . '/15)'),
+            'gain' => ($targetLevel === 15) ? 'Déblocage de la fonte du Métal' : (($targetLevel === 20) ? 'Déblocage des Armes & Armées de Prestige' : '+15% vitesse de forge')
+        ],
         default => [
             'label' => 'Niveau d\'élévation',
             'cur' => 'Niveau ' . $lvl,
@@ -673,6 +679,10 @@ if (!$isEmptyPlot) {
                             <?php elseif ($code === 'stonemason' && $lvl > 0): ?>
                                 <a href="#craftSection" class="btn btn-secondary text-white fw-bold">
                                     <i class="fa-solid fa-gem me-1"></i>Accéder à l'Atelier Minéralier &darr;
+                                </a>
+                            <?php elseif ($code === 'blacksmith' && $lvl >= 15): ?>
+                                <a href="#craftSection" class="btn btn-danger text-white fw-bold">
+                                    <i class="fa-solid fa-fire-burner me-1"></i>Accéder aux Fourneaux Tatara &amp; Forge &darr;
                                 </a>
                             <?php elseif ($code === 'hq'): ?>
                                 <a href="#feastSection" class="btn btn-warning text-dark fw-bold">
@@ -1878,6 +1888,470 @@ if (!$isEmptyPlot) {
             </div>
             <?php endif; ?>
 
+            <?php if ($code === 'blacksmith' && $lvl > 0): ?>
+            <?php
+            $planetEngine->processCraftQueue((int)$planet['id']);
+            $forgeCraftQueue = $planetEngine->getCraftQueue((int)$planet['id'], 'blacksmith');
+            $activeForgeCraft = !empty($forgeCraftQueue) ? $forgeCraftQueue[0] : null;
+            $pendingForgeCrafts = count($forgeCraftQueue) > 1 ? array_slice($forgeCraftQueue, 1) : [];
+
+            require_once __DIR__ . '/../core/ImperialSealEngine.php';
+            $sealEngine = new ImperialSealEngine();
+            $isSealActive = $sealEngine->isSealActive((int)$user['id']);
+            $maxForgeCraftQueue = $isSealActive ? 4 : 1;
+            $canEnqueueForge = count($forgeCraftQueue) < $maxForgeCraftQueue;
+
+            $hasLevel15 = ($lvl >= 15);
+            $hasLevel20 = ($lvl >= 20);
+
+            $availableIronSand = (float)($planet['iron_sand'] ?? 0);
+            $availableCharcoal = (float)($planet['charcoal'] ?? 0);
+            $availableStone = (float)($planet['crystal'] ?? 0);
+            $availableMetal = (float)($planet['metal'] ?? 0);
+            $availableSake = (float)($planet['sake'] ?? 0);
+            $maxMetalStorage = (int)($planet['metal_max'] ?? (15000 * pow(1.5, (int)($buildings['storage'] ?? 0))));
+            ?>
+            <!-- ========================================================
+                 GRANDE FORGE DU TAMAHAGANE : FONTE & ARMÉES DE PRESTIGE
+                 ======================================================== -->
+            <div class="card mb-3" id="craftSection" style="border-top: 3px solid #b91c1c;">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h3 class="card-title text-danger-emphasis d-flex align-items-center gap-2 m-0">
+                            <span><i class="fa-solid fa-fire text-danger"></i></span> Grande Forge du Tamahagane (Kaji-ba)
+                        </h3>
+                        <div class="text-secondary small mt-1">
+                            Fourneaux de réduction Tatara, affinage de l'acier d'exception et confection des armements de prestige féodaux.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap ms-auto">
+                        <span class="badge bg-danger text-white fw-bold shadow-sm">
+                            <i class="fa-solid fa-landmark me-1"></i>Niveau <?= $lvl ?>
+                        </span>
+                        <?php if ($isSealActive): ?>
+                            <span class="badge bg-warning text-dark fw-bold shadow-sm">
+                                <i class="fa-solid fa-crown text-warning me-1"></i>Sceau Impérial (<?= count($forgeCraftQueue) ?>/4)
+                            </span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary text-white fw-bold">
+                                File Simple : <?= count($forgeCraftQueue) ?>/1
+                            </span>
+                        <?php endif; ?>
+                        <span class="badge bg-warning text-dark fw-bold">Rendement : +<?= (int)($lvl * 2) ?>%</span>
+                        <span class="badge bg-info text-white fw-bold">Vitesse : +<?= (int)($lvl * 15) ?>%</span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Si niveau < 15 : Encart de verrouillage avec jauge de progression -->
+                    <?php if (!$hasLevel15): ?>
+                        <div class="alert alert-secondary p-3 mb-0 border-danger shadow-sm" style="background:#fff7ed; border-left: 5px solid #ea580c;">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-1 text-danger"><i class="fa-solid fa-lock"></i></span>
+                                    <div>
+                                        <h4 class="m-0 fw-bold text-dark">Fourneaux Tatara Verrouillés</h4>
+                                        <div class="text-secondary small mt-1">
+                                            La réduction de l'acier et la fonte de Métal nécessitent une chaleur d'artisanat supérieur débloquée au <strong>Niveau 15</strong>.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge bg-danger text-white fw-bold px-3 py-2 fs-6">Niveau <?= $lvl ?> / 15</span>
+                                </div>
+                            </div>
+                            <div class="progress mb-3" style="height: 12px;">
+                                <div class="progress-bar bg-danger progress-bar-striped" style="width: <?= min(100, round(($lvl / 15) * 100)) ?>%;">
+                                    <?= round(($lvl / 15) * 100) ?>%
+                                </div>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <div class="p-2 border rounded bg-white small">
+                                        <div class="fw-bold text-dark"><i class="fa-solid fa-fire text-danger me-1"></i>Niveau 15 : Fonte de Métal</div>
+                                        <div class="text-muted mt-1">Débloque les 2 recettes de fonte (Tatara aux Sables de Fer &amp; Réduction Rustique) pour produire directement du Métal.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-2 border rounded bg-white small">
+                                        <div class="fw-bold text-dark"><i class="fa-solid fa-crown text-warning me-1"></i>Niveau 20 : Armes &amp; Armées de Prestige</div>
+                                        <div class="text-muted mt-1">Débloque la forge des Katanas de Maître (Honneur/Prestige + Katana Tamahagane) et la Garde d'Honneur Hatamoto.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+
+                        <!-- Résumé des stocks pertinents -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-sm-6 col-md">
+                                <div class="p-2 border rounded text-center bg-light">
+                                    <div class="text-secondary small"><i class="fa-solid fa-gem text-secondary me-1"></i>Sable de Fer (Satetsu)</div>
+                                    <div class="fs-4 fw-bold text-dark"><?= number_format($availableIronSand) ?></div>
+                                    <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['iron_sand_max'] ?? 15000)) ?> max</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md">
+                                <div class="p-2 border rounded text-center bg-light">
+                                    <div class="text-secondary small"><i class="fa-solid fa-cubes-stacked text-warning me-1"></i>Charbon de Bois</div>
+                                    <div class="fs-4 fw-bold text-dark"><?= number_format($availableCharcoal) ?></div>
+                                    <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['charcoal_max'] ?? 10000)) ?> max</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md">
+                                <div class="p-2 border rounded text-center bg-light">
+                                    <div class="text-secondary small"><i class="fa-solid fa-mountain text-primary me-1"></i>Pierre de Granit</div>
+                                    <div class="fs-4 fw-bold text-primary"><?= number_format($availableStone) ?></div>
+                                    <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['crystal_max'] ?? 15000)) ?> max</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md">
+                                <div class="p-2 border rounded text-center bg-light">
+                                    <div class="text-secondary small"><i class="fa-solid fa-wine-bottle text-success me-1"></i>Saké Impérial</div>
+                                    <div class="fs-4 fw-bold text-success"><?= number_format($availableSake) ?></div>
+                                    <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format((int)($planet['sake_max'] ?? 10000)) ?> max</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md">
+                                <div class="p-2 border rounded text-center bg-light border-danger">
+                                    <div class="text-danger small fw-bold"><i class="fa-solid fa-shield-halved text-danger me-1"></i>Métal en Réserve</div>
+                                    <div class="fs-4 fw-bold text-danger"><?= number_format($availableMetal) ?></div>
+                                    <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format($maxMetalStorage) ?> max</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lot actif de Forge -->
+                        <?php if ($activeForgeCraft): ?>
+                        <?php
+                        $fProd = $activeForgeCraft['product'];
+                        $fIcon = match($fProd) {
+                            'metal' => '⚔️',
+                            'metal_crude' => '🔥',
+                            'prestige_weapons' => '🗡️',
+                            'prestige_army' => '🎌',
+                            default => '⚙️'
+                        };
+                        $fTitle = match($fProd) {
+                            'metal' => 'Fonte de Métal au Fourneau Tatara en cours...',
+                            'metal_crude' => 'Réduction Rustique de Métal en cours...',
+                            'prestige_weapons' => 'Forge de Katanas de Maître &amp; Lames Sacrées en cours...',
+                            'prestige_army' => 'Mobilisation de la Garde d\'Honneur en cours...',
+                            default => 'Tâche de forge en cours...'
+                        };
+                        ?>
+                        <div class="alert alert-secondary mb-3 p-3 border-danger shadow-sm" style="border-left: 5px solid #dc2626; background: #fff5f5;">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="fs-1"><?= $fIcon ?></span>
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <h4 class="m-0 fw-bold text-dark"><?= $fTitle ?></h4>
+                                            <span class="badge bg-danger text-white fw-bold">Lot Actif (#1)</span>
+                                        </div>
+                                        <div class="text-secondary small mt-1">
+                                            Quantité prévue : <strong>+<?= number_format((int)$activeForgeCraft['produced_amount']) ?></strong> &bull;
+                                            Fin estimée : <strong><?= date('H:i:s', (int)$activeForgeCraft['finishes_at']) ?></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="cancelForgeCraft(<?= (int)$activeForgeCraft['id'] ?>)">
+                                        <i class="fa-solid fa-xmark me-1"></i>Interrompre
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" id="forgeCraftProgressBar" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- File d'attente secondaire (Sceau Impérial) -->
+                        <?php if (!empty($pendingForgeCrafts)): ?>
+                        <div class="card mb-3 border-warning bg-light-subtle">
+                            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-warning-emphasis small">
+                                    <i class="fa-solid fa-layer-group me-1"></i>File d'Attente de Forge (<?= count($pendingForgeCrafts) ?> en attente)
+                                </span>
+                                <span class="badge bg-warning text-dark fw-bold">Sceau Impérial Actif</span>
+                            </div>
+                            <div class="list-group list-group-flush small">
+                                <?php foreach ($pendingForgeCrafts as $qIdx => $qItem): ?>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-secondary text-white">#<?= $qIdx + 2 ?></span>
+                                            <span class="fs-5"><?= $qItem['product_icon'] ?? '⚙️' ?></span>
+                                            <div>
+                                                <strong><?= htmlspecialchars($qItem['product_name'] ?? 'Commande') ?></strong>
+                                                <span class="text-secondary ms-2">(+<?= number_format((int)$qItem['produced_amount']) ?>)</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="text-muted"><i class="fa-solid fa-clock me-1"></i>Début à <?= date('H:i:s', (int)$qItem['started_at']) ?></span>
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="cancelForgeCraft(<?= (int)$qItem['id'] ?>)">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- SECTION PALIER 1 : FONTE DE MÉTAL (NIVEAU 15+) -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                                <h4 class="m-0 fw-bold text-dark d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-fire-burner text-danger"></i>
+                                    Fonte &amp; Réduction de Métal (Niveau 15+)
+                                </h4>
+                                <span class="badge bg-success text-white fw-bold">Débloqué</span>
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Recette 1 : Fonte Tatara des Maîtres -->
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-white shadow-sm" style="border-top: 3px solid #dc2626 !important;">
+                                        <div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h5 class="fw-bold m-0 text-dark">
+                                                    <span class="fs-4 me-1">⚔️</span> Fourneau Tatara des Maîtres
+                                                </h5>
+                                                <span class="badge bg-danger text-white fw-bold">Recette Noble</span>
+                                            </div>
+                                            <p class="text-secondary small mb-3">
+                                                Réduction traditionnelle par flux incandescent. Consomme du <strong>Sable de Fer (Satetsu)</strong> et du <strong>Charbon de Bois</strong> pour couler un métal pur d'une densité inégalée.
+                                            </p>
+                                            <div class="alert alert-light p-2 border mb-3 small">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Coût / Fournée :</span>
+                                                    <strong>1 Sable 💎 + 2 Charbon 🪨</strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between text-success mt-1">
+                                                    <span>Rendement de base :</span>
+                                                    <strong>40 Métal ⚔️</strong>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-secondary d-flex justify-content-between">
+                                                    <span>Nombre de fournées (Sable engagé) :</span>
+                                                    <span class="text-muted">Stock : <?= number_format($availableIronSand) ?> 💎</span>
+                                                </label>
+                                                <div class="input-group">
+                                                    <input type="number" id="forge_batches_metal" class="form-control" min="1" max="1000" value="5" oninput="calcForgeMetalPreview()">
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="setForgeAmount('metal', 5)">+5</button>
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="setForgeAmount('metal', 10)">+10</button>
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="setForgeAmount('metal', 25)">+25</button>
+                                                    <button type="button" class="btn btn-outline-danger" onclick="setForgeAmount('metal', 'max')">Max</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex justify-content-between align-items-center mb-3 small p-2 bg-light rounded">
+                                                <span>Production estimée : <strong id="preview_forge_metal_gain" class="text-danger">+200 ⚔️</strong></span>
+                                                <span id="preview_forge_metal_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <button type="button" class="btn btn-danger text-white w-100 fw-bold" onclick="submitForgeCraft('metal')" <?= !$canEnqueueForge ? 'disabled' : '' ?>>
+                                                <i class="fa-solid fa-fire me-1"></i>Allumer le Fourneau Tatara
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recette 2 : Réduction Rustique aux Scories -->
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-white shadow-sm" style="border-top: 3px solid #f97316 !important;">
+                                        <div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h5 class="fw-bold m-0 text-dark">
+                                                    <span class="fs-4 me-1">🔥</span> Réduction Rustique aux Scories
+                                                </h5>
+                                                <span class="badge bg-warning text-dark fw-bold">Recette Rustique</span>
+                                            </div>
+                                            <p class="text-secondary small mb-3">
+                                                Extraction à haute température à partir de concassé de <strong>Pierre de Granit</strong> et de <strong>Charbon de Bois</strong>. Idéal lorsque le sable de fer vient à manquer.
+                                            </p>
+                                            <div class="alert alert-light p-2 border mb-3 small">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Coût / Fournée :</span>
+                                                    <strong>10 Pierre 🪨 + 5 Charbon 🪨</strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between text-success mt-1">
+                                                    <span>Rendement de base :</span>
+                                                    <strong>25 Métal ⚔️</strong>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-secondary d-flex justify-content-between">
+                                                    <span>Nombre de fournées :</span>
+                                                    <span class="text-muted">Stock : <?= number_format($availableStone) ?> 🪨</span>
+                                                </label>
+                                                <div class="input-group">
+                                                    <input type="number" id="forge_batches_crude" class="form-control" min="1" max="1000" value="5" oninput="calcForgeCrudePreview()">
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="setForgeAmount('metal_crude', 5)">+5</button>
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="setForgeAmount('metal_crude', 10)">+10</button>
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="setForgeAmount('metal_crude', 25)">+25</button>
+                                                    <button type="button" class="btn btn-outline-warning text-dark" onclick="setForgeAmount('metal_crude', 'max')">Max</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex justify-content-between align-items-center mb-3 small p-2 bg-light rounded">
+                                                <span>Production estimée : <strong id="preview_forge_crude_gain" class="text-warning-emphasis">+125 ⚔️</strong></span>
+                                                <span id="preview_forge_crude_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <button type="button" class="btn btn-warning text-dark w-100 fw-bold" onclick="submitForgeCraft('metal_crude')" <?= !$canEnqueueForge ? 'disabled' : '' ?>>
+                                                <i class="fa-solid fa-temperature-arrow-up me-1"></i>Lancer la Réduction Rustique
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION PALIER 2 : ARMES & ARMÉES DE PRESTIGE (NIVEAU 20+) -->
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                                <h4 class="m-0 fw-bold text-dark d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-crown text-warning"></i>
+                                    Armes &amp; Armées de Prestige (Niveau 20+)
+                                </h4>
+                                <?php if ($hasLevel20): ?>
+                                    <span class="badge bg-success text-white fw-bold">Débloqué</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary text-white fw-bold">Niveau <?= $lvl ?> / 20</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <?php if (!$hasLevel20): ?>
+                                <div class="alert alert-secondary p-3 mb-0 border-warning shadow-sm" style="background:#fffbeb; border-left: 5px solid #d97706;">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fs-1 text-warning"><i class="fa-solid fa-lock"></i></span>
+                                            <div>
+                                                <h4 class="m-0 fw-bold text-dark">Prestige Féodal Verrouillé</h4>
+                                                <div class="text-secondary small mt-1">
+                                                    La forge des <strong>Katanas de Maître</strong> et la mobilisation de la <strong>Garde d'Honneur au Tamahagane</strong> requièrent une Grande Forge élevée au <strong>Niveau 20</strong>.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-warning text-dark fw-bold px-3 py-2 fs-6">Niveau <?= $lvl ?> / 20</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar bg-warning progress-bar-striped" style="width: <?= min(100, round(($lvl / 20) * 100)) ?>%;">
+                                            <?= round(($lvl / 20) * 100) ?>%
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="row g-3">
+                                    <!-- Option A : Katanas de Maître & Lames Sacrées -->
+                                    <div class="col-md-6">
+                                        <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-white shadow-sm" style="border-top: 3px solid #7c3aed !important;">
+                                            <div>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <h5 class="fw-bold m-0 text-dark">
+                                                        <span class="fs-4 me-1">🗡️</span> Katanas de Maître &amp; Lames Sacrées
+                                                    </h5>
+                                                    <span class="badge bg-purple text-white fw-bold">Relique &amp; Honneur</span>
+                                                </div>
+                                                <p class="text-secondary small mb-3">
+                                                    Forge d'apparat en acier plié 100 fois par les plus grands maîtres. Octroie un immense honneur impérial et forge l'arme légendaire <strong>Katana Forgé en Tamahagane</strong> pour votre héros.
+                                                </p>
+                                                <div class="alert alert-light p-2 border mb-3 small">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span>Coût / Lot :</span>
+                                                        <strong>500 Métal, 10 Sable 💎, 20 Charbon 🪨, 10 Saké 🍶</strong>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between text-purple mt-1 fw-bold">
+                                                        <span>Récompense :</span>
+                                                        <span>+150 Honneur Féodal + Relique Katana Tamahagane</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-bold text-secondary">Nombre de commandes de prestige :</label>
+                                                    <div class="input-group">
+                                                        <input type="number" id="forge_batches_prestige" class="form-control" min="1" max="10" value="1" oninput="calcForgePrestigePreview()">
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('forge_batches_prestige').value=1; calcForgePrestigePreview();">1 Lot</button>
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('forge_batches_prestige').value=2; calcForgePrestigePreview();">2 Lots</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mb-3 small p-2 bg-light rounded">
+                                                    <span>Gain : <strong id="preview_forge_prestige_gain" class="text-purple">+150 Honneur Féodal 🌟</strong></span>
+                                                    <span id="preview_forge_prestige_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <button type="button" class="btn btn-primary w-100 fw-bold" style="background:#7c3aed; border-color:#7c3aed;" onclick="submitForgeCraft('prestige_weapons')" <?= !$canEnqueueForge ? 'disabled' : '' ?>>
+                                                    <i class="fa-solid fa-khanda me-1"></i>Forger les Lames de Prestige
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Option B : Garde d'Honneur au Tamahagane -->
+                                    <div class="col-md-6">
+                                        <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-white shadow-sm" style="border-top: 3px solid #b91c1c !important;">
+                                            <div>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <h5 class="fw-bold m-0 text-dark">
+                                                        <span class="fs-4 me-1">🎌</span> Garde d'Honneur au Tamahagane
+                                                    </h5>
+                                                    <span class="badge bg-danger text-white fw-bold">Régiment d'Élite</span>
+                                                </div>
+                                                <p class="text-secondary small mb-3">
+                                                    Mobilisation d'urgence d'une garde prétorienne lourdement cuirassée d'armures en tamahagane et lames trempées, rejoignant directement votre garnison sans saturer le Dojo.
+                                                </p>
+                                                <div class="alert alert-light p-2 border mb-3 small">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span>Coût / Mobilisation :</span>
+                                                        <strong>800 Métal, 400 Pierre 🪨, 15 Charbon 🪨, 15 Saké 🍶</strong>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between text-danger mt-1 fw-bold">
+                                                        <span>Troupes recrutées :</span>
+                                                        <span>10 Samouraïs Katana + 2 Gardes Hatamoto</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-bold text-secondary">Nombre de mobilisations :</label>
+                                                    <div class="input-group">
+                                                        <input type="number" id="forge_batches_army" class="form-control" min="1" max="10" value="1" oninput="calcForgeArmyPreview()">
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('forge_batches_army').value=1; calcForgeArmyPreview();">1 Compagnie</button>
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('forge_batches_army').value=2; calcForgeArmyPreview();">2 Compagnies</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mb-3 small p-2 bg-light rounded">
+                                                    <span>Renforts : <strong id="preview_forge_army_gain" class="text-danger">+10 Samouraïs &amp; +2 Hatamoto 🎌</strong></span>
+                                                    <span id="preview_forge_army_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <button type="button" class="btn btn-danger text-white w-100 fw-bold" onclick="submitForgeCraft('prestige_army')" <?= !$canEnqueueForge ? 'disabled' : '' ?>>
+                                                    <i class="fa-solid fa-shield me-1"></i>Mobiliser la Garde d'Honneur
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <?php if ($code === 'market' && $lvl > 0): ?>
             <?php
             // Données opérationnelles du Marché Féodal (Bazar Castral)
@@ -2731,10 +3205,14 @@ function closeArtworkModal(e) {
 const grainMillLevel = <?= ($code === 'grain_mill') ? (int)$lvl : (int)($buildings['grain_mill'] ?? 0) ?>;
 const sawmillLevel = <?= ($code === 'sawmill') ? (int)$lvl : (int)($buildings['sawmill'] ?? 0) ?>;
 const stonemasonLevel = <?= ($code === 'stonemason') ? (int)$lvl : (int)($buildings['stonemason'] ?? 0) ?>;
+const blacksmithLevel = <?= ($code === 'blacksmith') ? (int)$lvl : (int)($buildings['blacksmith'] ?? 0) ?>;
 const availableRiceStock = <?= (float)($planet['deuterium'] ?? 0) ?>;
 const availableWoodStock = <?= (float)($planet['metal'] ?? 0) ?>;
 const availableStoneStock = <?= (float)($planet['crystal'] ?? 0) ?>;
 const availableClayStock = <?= (float)($planet['clay'] ?? 0) ?>;
+const availableIronSandStock = <?= (float)($planet['iron_sand'] ?? 0) ?>;
+const availableCharcoalStock = <?= (float)($planet['charcoal'] ?? 0) ?>;
+const availableSakeStock = <?= (float)($planet['sake'] ?? 0) ?>;
 const gameSpeed = <?= (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1) ?>;
 
 function formatCraftDuration(sec) {
@@ -3242,6 +3720,193 @@ async function cancelMineralCraft(craftId) {
         showModalAlert('Erreur de communication avec l\'atelier.', 'error');
     }
 }
+
+// ==========================================
+// GRANDE FORGE DU TAMAHAGANE : FONTE & PRESTIGE
+// ==========================================
+<?php if (!empty($activeForgeCraft)): ?>
+function updateForgeCraftProgressBar() {
+    const started = <?= (int)$activeForgeCraft['started_at'] ?>;
+    const finishes = <?= (int)$activeForgeCraft['finishes_at'] ?>;
+    const now = Math.floor(Date.now() / 1000);
+    const total = Math.max(1, finishes - started);
+    const elapsed = Math.max(0, now - started);
+    const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+    const pbar = document.getElementById('forgeCraftProgressBar');
+    if (pbar) {
+        pbar.style.width = pct.toFixed(1) + '%';
+        pbar.setAttribute('aria-valuenow', pct.toFixed(1));
+    }
+}
+setInterval(updateForgeCraftProgressBar, 1000);
+updateForgeCraftProgressBar();
+<?php endif; ?>
+
+function calcForgeMetalPreview() {
+    const input = document.getElementById('forge_batches_metal');
+    const previewGain = document.getElementById('preview_forge_metal_gain');
+    const previewTime = document.getElementById('preview_forge_metal_time');
+    if (!input) return;
+    const batches = Math.max(0, parseFloat(input.value) || 0);
+    const efficiency = 1 + (blacksmithLevel * 0.02);
+    const gain = Math.floor(batches * 40 * efficiency);
+    if (previewGain) previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' ⚔️';
+
+    if (previewTime) {
+        if (batches <= 0) {
+            previewTime.textContent = '--';
+        } else {
+            const duration = Math.max(10, Math.round((batches * 25) / (1 + (blacksmithLevel * 0.15)) / (gameSpeed || 1)));
+            previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
+        }
+    }
+}
+
+function calcForgeCrudePreview() {
+    const input = document.getElementById('forge_batches_crude');
+    const previewGain = document.getElementById('preview_forge_crude_gain');
+    const previewTime = document.getElementById('preview_forge_crude_time');
+    if (!input) return;
+    const batches = Math.max(0, parseFloat(input.value) || 0);
+    const efficiency = 1 + (blacksmithLevel * 0.02);
+    const gain = Math.floor(batches * 25 * efficiency);
+    if (previewGain) previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' ⚔️';
+
+    if (previewTime) {
+        if (batches <= 0) {
+            previewTime.textContent = '--';
+        } else {
+            const duration = Math.max(10, Math.round((batches * 30) / (1 + (blacksmithLevel * 0.15)) / (gameSpeed || 1)));
+            previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
+        }
+    }
+}
+
+function calcForgePrestigePreview() {
+    const input = document.getElementById('forge_batches_prestige');
+    const previewGain = document.getElementById('preview_forge_prestige_gain');
+    const previewTime = document.getElementById('preview_forge_prestige_time');
+    if (!input) return;
+    const batches = Math.max(1, parseFloat(input.value) || 1);
+    const honor = batches * 150;
+    if (previewGain) previewGain.innerHTML = '+' + honor.toLocaleString('fr-FR') + ' Honneur Féodal 🌟';
+
+    if (previewTime) {
+        const duration = Math.max(30, Math.round((batches * 180) / (1 + (blacksmithLevel * 0.15)) / (gameSpeed || 1)));
+        previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
+    }
+}
+
+function calcForgeArmyPreview() {
+    const input = document.getElementById('forge_batches_army');
+    const previewGain = document.getElementById('preview_forge_army_gain');
+    const previewTime = document.getElementById('preview_forge_army_time');
+    if (!input) return;
+    const batches = Math.max(1, parseFloat(input.value) || 1);
+    const sam = batches * 10;
+    const hat = batches * 2;
+    if (previewGain) previewGain.innerHTML = '+' + sam + ' Samouraïs &amp; +' + hat + ' Hatamoto 🎌';
+
+    if (previewTime) {
+        const duration = Math.max(45, Math.round((batches * 240) / (1 + (blacksmithLevel * 0.15)) / (gameSpeed || 1)));
+        previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
+    }
+}
+
+function setForgeAmount(product, val) {
+    let inputId = 'forge_batches_metal';
+    let maxVal = 10;
+
+    if (product === 'metal') {
+        inputId = 'forge_batches_metal';
+        maxVal = Math.max(1, Math.floor(Math.min(availableIronSandStock, availableCharcoalStock / 2)));
+    } else if (product === 'metal_crude') {
+        inputId = 'forge_batches_crude';
+        maxVal = Math.max(1, Math.floor(Math.min(availableStoneStock / 10, availableCharcoalStock / 5)));
+    }
+
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (val === 'max') {
+        input.value = maxVal;
+    } else {
+        input.value = val;
+    }
+
+    if (product === 'metal') calcForgeMetalPreview();
+    else if (product === 'metal_crude') calcForgeCrudePreview();
+}
+
+async function submitForgeCraft(product) {
+    let inputId = 'forge_batches_metal';
+    if (product === 'metal_crude') inputId = 'forge_batches_crude';
+    else if (product === 'prestige_weapons') inputId = 'forge_batches_prestige';
+    else if (product === 'prestige_army') inputId = 'forge_batches_army';
+
+    const input = document.getElementById(inputId);
+    const amount = input ? (parseFloat(input.value) || 1) : 1;
+
+    if (amount <= 0) {
+        showModalAlert('Veuillez indiquer un nombre de fournées supérieur à 0.', 'warning');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'craft_forge');
+    formData.append('product', product);
+    formData.append('amount', amount);
+
+    try {
+        const res = await fetch('/api/craft.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Erreur lors de la commande de forge.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de transmission avec la Grande Forge.', 'error');
+    }
+}
+
+async function cancelForgeCraft(craftId) {
+    const confirmed = await showModalConfirm(
+        'Voulez-vous annuler cette commande de forge ? 80% des matières premières engagées seront restituées dans vos réserves.',
+        'Annulation du travail de forge'
+    );
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append('action', 'cancel_craft');
+    formData.append('craft_id', craftId);
+
+    try {
+        const res = await fetch('/api/craft.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showModalAlert(data.error || "Impossible d'annuler le lot.", 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de communication avec la Grande Forge.', 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    calcForgeMetalPreview();
+    calcForgeCrudePreview();
+    calcForgePrestigePreview();
+    calcForgeArmyPreview();
+});
 
 // ==========================================
 // CÉLÉBRATIONS DU TENSHU : BANQUETS DE SAKÉ

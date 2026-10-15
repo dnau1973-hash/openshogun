@@ -321,6 +321,10 @@ ob_start();
                                 <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-wine-bottle me-1"></i>Raffiner Saké &amp; Farine</a>
                             <?php elseif ($code === 'sawmill' && $lvl >= 10): ?>
                                 <a href="/?page=building&code=sawmill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-hammer me-1"></i>Façonner Poutres</a>
+                            <?php elseif ($code === 'stonemason' && $lvl > 0): ?>
+                                <a href="/?page=building&code=stonemason#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-gem me-1"></i>Raffiner Minerais</a>
+                            <?php elseif ($code === 'blacksmith' && $lvl >= 15): ?>
+                                <a href="/?page=building&code=blacksmith#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-fire-burner me-1"></i>Fourneaux &amp; Prestige</a>
                             <?php endif; ?>
 
                             <a href="/?page=building&code=<?= $code ?>" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">

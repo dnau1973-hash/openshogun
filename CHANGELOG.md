@@ -5,6 +5,21 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [1.30.0] - 2026-10-15
 ### Amélioré (Enhanced) & Ajouté (Added)
+- **Grande Forge du Tamahagane : Fonte de Métal (Niveau 15+) & Armes et Armées de Prestige (Niveau 20+) (`core/PlanetEngine.php`, `api/craft.php`, `views/building.php`, `views/city.php`) :**
+  * **Fonte & Réduction de Métal (Niveau 15+) :**
+    - *Fourneau Tatara des Maîtres (`product = 'metal'`) :* Réduction noble consommant 1 Sable de fer (*Satetsu* 💎) + 2 Charbon de bois (🪨) pour couler 40 Métal (⚔️) d'une pureté exceptionnelle, augmenté par le bonus d'efficacité de forge (+2%/niveau).
+    - *Réduction Rustique aux Scories (`product = 'metal_crude'`) :* Réduction de substitution consommant 10 Pierre de granit (🪨) + 5 Charbon de bois (🪨) pour produire 25 Métal (⚔️).
+    - Jauges de progression et verrouillage élégant (`X / 15`) si le niveau de forge est inférieur à 15.
+  * **Armes & Armées de Prestige Féodales (Niveau 20+) :**
+    - *Katanas de Maître & Lames Sacrées (`product = 'prestige_weapons'`) :* Forge d'apparat (500 Métal, 10 Sable de fer, 20 Charbon, 10 Saké) octroyant +150 Points d'Honneur/Prestige impérial et forgeant/débloquant la relique héroïque unique `katana_tamahagane` (*Katana Forgé en Tamahagane* : +320 Force, +1.5% Attaque) dans l'inventaire du héros (ou +250 XP bonus si déjà possédé).
+    - *Garde d'Honneur au Tamahagane (`product = 'prestige_army'`) :* Mobilisation féodale (800 Métal, 400 Pierre, 15 Charbon, 15 Saké) formant et envoyant instantanément 10 Samouraïs au Katana (`samourai_katana`) et 2 Gardes Hatamoto d'Armure Lourde (`garde_hatamoto_armure_lourde`) dans la garnison du fief (`planet_units`) sans saturer le Dojo d'Infanterie.
+    - Jauges de déblocage avec carte de progression verrouillée (`X / 20`) avant le niveau 20.
+  * **Pipeline Backend & File d'Attente Complète (`core/PlanetEngine.php`, `api/craft.php`) :**
+    - Implémentation de `calculateForgeCraftDetails()`, `craftForgeProduct()`, prise en charge de la forge dans `processCraftQueue()`, et remboursement sécurisé de 80% des matières engagées en cas d'annulation dans `cancelCraft()`.
+    - Compatibilité intégrale avec le Sceau Impérial (*Privilège du Shōgun* : jusqu'à 4 commandes séquentielles dans la file de forge).
+  * **Interface Interactive & Raccourcis Cité (`views/building.php`, `views/city.php`) :**
+    - Section `#craftSection` dédiée sur la tuile de la Grande Forge avec prévisualisation des rendements en temps réel, boutons de remplissage rapide (+5, +10, +25, Max), minuteur dynamique de lot actif et file d'attente.
+    - Bouton d'accès direct « Fourneaux & Prestige » sur la tuile de la Forge dans la vue Cité Castrale (`views/city.php`) dès le niveau 15.
 - **Modernisation & Équilibrage du Simulateur de Vie dans un Village (`views/studio/game-elevate-designer/village-life-simulator.php`) :**
   * **Uniformisation Complète des 7 Cartes KPI au Standard Tabler :** Harmonisation structurelle et visuelle intégrale (bordure gauche colorée, badge d'en-tête thématique, indicateur chiffré principal `fs-1 font-monospace`, sous-titre de statut contextuel et jauge de progression `progress-xs`) pour l'ensemble des métriques : *Satisfaction & Moral*, *Démographie & Minka*, *Pyramide des 4 Castes*, *Emplois & Activité*, *Ordre & Sécurité Féodale*, *Grenier des Vivres* (total en silos) et *Entrepôt des Matériaux* (total chantiers).
   * **Amélioration de la Lisibilité Graphique & Visuelle :**

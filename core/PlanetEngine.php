@@ -620,6 +620,74 @@ class PlanetEngine {
                     } catch (Exception $e) {
                         $this->db->rollBack();
                     }
+                } elseif ($product === 'metal' || $product === 'metal_crude') {
+                    $this->db->beginTransaction();
+                    try {
+                        $up = $this->db->prepare("
+                            UPDATE planets
+                            SET metal = LEAST(metal_max, metal + ?)
+                            WHERE id = ?
+                        ");
+                        $up->execute([$amount, $planetId]);
+
+                        $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
+                        $del->execute([$item['id']]);
+
+                        $this->db->commit();
+                    } catch (Exception $e) {
+                        $this->db->rollBack();
+                    }
+                } elseif ($product === 'prestige_weapons') {
+                    $this->db->beginTransaction();
+                    try {
+                        $planet = $this->getPlanet($planetId);
+                        $userId = (int)($planet['user_id'] ?? 0);
+                        $honorGain = 150 * max(1, (int)$amount);
+                        if ($userId > 0) {
+                            $this->db->prepare("UPDATE users SET points = points + ? WHERE id = ?")->execute([$honorGain, $userId]);
+
+                            $stmtHeroItem = $this->db->prepare("SELECT id FROM hero_inventory WHERE user_id = ? AND item_code = 'katana_tamahagane'");
+                            $stmtHeroItem->execute([$userId]);
+                            if (!$stmtHeroItem->fetch()) {
+                                $bonus = json_encode(['strength' => 320, 'offense_bonus' => 1.5]);
+                                $this->db->prepare("
+                                    INSERT INTO hero_inventory (user_id, item_code, item_type, name, description, bonus_data, is_equipped)
+                                    VALUES (?, 'katana_tamahagane', 'weapon', 'Katana Forgé en Tamahagane', 'Lame d\'exception forgée dans le meilleur acier plié selon les secrets des maîtres forgerons de Bizen.', ?, 0)
+                                ")->execute([$userId, $bonus]);
+                            } else {
+                                $this->db->prepare("UPDATE hero SET experience = experience + 250 WHERE user_id = ?")->execute([$userId]);
+                            }
+                        }
+
+                        $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
+                        $del->execute([$item['id']]);
+
+                        $this->db->commit();
+                    } catch (Exception $e) {
+                        $this->db->rollBack();
+                    }
+                } elseif ($product === 'prestige_army') {
+                    $this->db->beginTransaction();
+                    try {
+                        $batches = max(1, (int)round($amount / 10));
+                        $samourais = 10 * $batches;
+                        $hatamotos = 2 * $batches;
+
+                        $upUnit = $this->db->prepare("
+                            INSERT INTO planet_units (planet_id, unit_code, count)
+                            VALUES (?, ?, ?)
+                            ON DUPLICATE KEY UPDATE count = count + ?
+                        ");
+                        $upUnit->execute([$planetId, 'samourai_katana', $samourais, $samourais]);
+                        $upUnit->execute([$planetId, 'garde_hatamoto_armure_lourde', $hatamotos, $hatamotos]);
+
+                        $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
+                        $del->execute([$item['id']]);
+
+                        $this->db->commit();
+                    } catch (Exception $e) {
+                        $this->db->rollBack();
+                    }
                 } else {
                     $this->db->prepare("DELETE FROM craft_queue WHERE id = ?")->execute([$item['id']]);
                 }
@@ -666,6 +734,31 @@ class PlanetEngine {
                 } elseif ($item['product'] === 'sake') {
                     $item['product_name'] = 'Saké Impérial';
                     $item['product_icon'] = '🍶';
+                } elseif ($item['product'] === 'metal') {
+                    $item['product_name'] = 'Fonte de Tamahagane';
+                    $item['product_icon'] = '⚔️';
+                } elseif ($item['product'] === 'metal_crude') {
+                    $item['product_name'] = 'Réduction Rustique de Métal';
+                    $item['product_icon'] = '🔥';
+                } elseif ($item['product'] === 'prestige_weapons') {
+                    $item['product_name'] = 'Katanas de Maître & Lames Sacrées';
+                    $item['product_icon'] = '🗡️';
+                } elseif ($item['product'] === 'prestige_army') {
+                    $item['product_name'] = 'Garde d\'Honneur au Tamahagane';
+                    $item['product_icon'] = '🎌';
+                } elseif (in_array($item['product'], ['sulfur', 'nitrate', 'iron_sand'])) {
+                    $item['product_name'] = match($item['product']) {
+                        'sulfur' => 'Soufre Volcanique',
+                        'nitrate' => 'Nitrate de Potasse',
+                        'iron_sand' => 'Sable de Fer (Satetsu)',
+                        default => 'Minerai Raffiné'
+                    };
+                    $item['product_icon'] = match($item['product']) {
+                        'sulfur' => '🌋',
+                        'nitrate' => '🧪',
+                        'iron_sand' => '💎',
+                        default => '⛏️'
+                    };
                 } else {
                     $item['product_name'] = 'Farine de Riz';
                     $item['product_icon'] = '🍚';
@@ -2037,7 +2130,399 @@ class PlanetEngine {
     }
 
     /**
-     * Annule un lot de raffinage ou charpente en cours et rembourse 80% des matières engagées
+     * Calcule les détails de fabrication pour la Grande Forge du Tamahagane
+     * - Palier 15+ : Fonte de Métal (Fourneau Tatara des Maîtres & Réduction Rustique)
+     * - Palier 20+ : Armes de Prestige (Katanas de Maître) & Armées de Prestige (Garde d'Honneur au Tamahagane)
+     */
+    public function calculateForgeCraftDetails(int $planetId, string $product, float $amount): array {
+        $buildings = $this->getBuildings($planetId);
+        $blacksmithLvl = (int)($buildings['blacksmith'] ?? 0);
+        $planet = $this->getPlanet($planetId);
+
+        $efficiencyMultiplier = 1.0 + ($blacksmithLvl * 0.02);
+        $gameSpeed = (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1);
+        if ($gameSpeed <= 0) $gameSpeed = 1;
+
+        $currentMetal = (float)($planet['metal'] ?? 0);
+        $storageLvl = (int)($buildings['storage'] ?? 0);
+        $maxMetal = (int)($planet['metal_max'] ?? (15000 * pow(1.5, $storageLvl)));
+        $availableMetalSpace = max(0, $maxMetal - $currentMetal);
+
+        if ($product === 'metal') {
+            // Fonte Tatara : 1 Sable de fer (iron_sand) + 2 Charbon (charcoal) -> 40 Métal
+            $baseIronSand = 1;
+            $baseCharcoal = 2;
+            $yieldPerBatch = 40;
+
+            $batches = max(1, floor($amount));
+            $rawProduced = floor($batches * $yieldPerBatch * $efficiencyMultiplier);
+            $actualProduced = min($rawProduced, $availableMetalSpace);
+
+            $actualBatches = $batches;
+            if ($actualProduced < $rawProduced && $actualProduced > 0) {
+                $actualBatches = max(1, (int)ceil($actualProduced / ($yieldPerBatch * $efficiencyMultiplier)));
+            }
+            $engagedIronSand = $actualBatches * $baseIronSand;
+            $engagedCharcoal = $actualBatches * $baseCharcoal;
+
+            $durationSeconds = max(10, (int)round(($actualBatches * 25) / (1 + ($blacksmithLvl * 0.15)) / $gameSpeed));
+
+            return [
+                'product' => 'metal',
+                'product_name' => 'Fonte de Métal (Fourneau Tatara)',
+                'product_icon' => '⚔️',
+                'forge_level' => $blacksmithLvl,
+                'batches' => $actualBatches,
+                'actual_produced' => $actualProduced,
+                'raw_produced' => $rawProduced,
+                'current_stock' => $currentMetal,
+                'max_stock' => $maxMetal,
+                'available_space' => $availableMetalSpace,
+                'engaged_iron_sand' => $engagedIronSand,
+                'engaged_charcoal' => $engagedCharcoal,
+                'duration_seconds' => $durationSeconds
+            ];
+        } elseif ($product === 'metal_crude') {
+            // Réduction Rustique : 10 Pierre (crystal) + 5 Charbon (charcoal) -> 25 Métal
+            $baseCrystal = 10;
+            $baseCharcoal = 5;
+            $yieldPerBatch = 25;
+
+            $batches = max(1, floor($amount));
+            $rawProduced = floor($batches * $yieldPerBatch * $efficiencyMultiplier);
+            $actualProduced = min($rawProduced, $availableMetalSpace);
+
+            $actualBatches = $batches;
+            if ($actualProduced < $rawProduced && $actualProduced > 0) {
+                $actualBatches = max(1, (int)ceil($actualProduced / ($yieldPerBatch * $efficiencyMultiplier)));
+            }
+            $engagedCrystal = $actualBatches * $baseCrystal;
+            $engagedCharcoal = $actualBatches * $baseCharcoal;
+
+            $durationSeconds = max(10, (int)round(($actualBatches * 30) / (1 + ($blacksmithLvl * 0.15)) / $gameSpeed));
+
+            return [
+                'product' => 'metal_crude',
+                'product_name' => 'Réduction Rustique de Métal',
+                'product_icon' => '🔥',
+                'forge_level' => $blacksmithLvl,
+                'batches' => $actualBatches,
+                'actual_produced' => $actualProduced,
+                'raw_produced' => $rawProduced,
+                'current_stock' => $currentMetal,
+                'max_stock' => $maxMetal,
+                'available_space' => $availableMetalSpace,
+                'engaged_crystal' => $engagedCrystal,
+                'engaged_charcoal' => $engagedCharcoal,
+                'duration_seconds' => $durationSeconds
+            ];
+        } elseif ($product === 'prestige_weapons') {
+            // Armes de Prestige : 500 Métal + 10 Sable de fer + 20 Charbon + 10 Saké
+            $batches = max(1, floor($amount));
+            $engagedMetal = 500 * $batches;
+            $engagedIronSand = 10 * $batches;
+            $engagedCharcoal = 20 * $batches;
+            $engagedSake = 10 * $batches;
+
+            $durationSeconds = max(30, (int)round(($batches * 180) / (1 + ($blacksmithLvl * 0.15)) / $gameSpeed));
+
+            return [
+                'product' => 'prestige_weapons',
+                'product_name' => 'Katanas de Maître & Lames Sacrées',
+                'product_icon' => '🗡️',
+                'forge_level' => $blacksmithLvl,
+                'batches' => $batches,
+                'actual_produced' => $batches,
+                'engaged_metal' => $engagedMetal,
+                'engaged_iron_sand' => $engagedIronSand,
+                'engaged_charcoal' => $engagedCharcoal,
+                'engaged_sake' => $engagedSake,
+                'duration_seconds' => $durationSeconds
+            ];
+        } elseif ($product === 'prestige_army') {
+            // Armée de Prestige : 800 Métal + 400 Pierre + 15 Charbon + 15 Saké -> 10 Samouraïs Katana + 2 Gardes Hatamoto
+            $batches = max(1, floor($amount));
+            $engagedMetal = 800 * $batches;
+            $engagedCrystal = 400 * $batches;
+            $engagedCharcoal = 15 * $batches;
+            $engagedSake = 15 * $batches;
+
+            $durationSeconds = max(45, (int)round(($batches * 240) / (1 + ($blacksmithLvl * 0.15)) / $gameSpeed));
+
+            return [
+                'product' => 'prestige_army',
+                'product_name' => 'Garde d\'Honneur au Tamahagane',
+                'product_icon' => '🎌',
+                'forge_level' => $blacksmithLvl,
+                'batches' => $batches,
+                'actual_produced' => $batches * 10,
+                'engaged_metal' => $engagedMetal,
+                'engaged_crystal' => $engagedCrystal,
+                'engaged_charcoal' => $engagedCharcoal,
+                'engaged_sake' => $engagedSake,
+                'duration_seconds' => $durationSeconds
+            ];
+        }
+
+        throw new Exception("Recette de forge inconnue : {$product}");
+    }
+
+    /**
+     * Lance une tâche de fonte de métal ou de fabrication d'armes/armées de prestige à la Grande Forge
+     */
+    public function craftForgeProduct(int $planetId, string $product, float $amount): array {
+        $this->ensureSchemaMigration();
+        if (!in_array($product, ['metal', 'metal_crude', 'prestige_weapons', 'prestige_army'])) {
+            return ['success' => false, 'error' => "Produit de forge invalide."];
+        }
+
+        $amount = floor($amount);
+        if ($amount <= 0) {
+            return ['success' => false, 'error' => "Veuillez indiquer une quantité ou un nombre de lots valide supérieur à zéro."];
+        }
+
+        $buildings = $this->getBuildings($planetId);
+        $forgeLvl = (int)($buildings['blacksmith'] ?? 0);
+
+        // Vérification des prérequis de niveau de forge
+        if (in_array($product, ['metal', 'metal_crude']) && $forgeLvl < 15) {
+            return [
+                'success' => false,
+                'error' => "La Grande Forge du Tamahagane doit atteindre le <strong>Niveau 15</strong> minimum pour allumer les fourneaux de fonte de métal (Niveau actuel : {$forgeLvl}/15)."
+            ];
+        }
+
+        if (in_array($product, ['prestige_weapons', 'prestige_army']) && $forgeLvl < 20) {
+            return [
+                'success' => false,
+                'error' => "La Grande Forge du Tamahagane doit atteindre le <strong>Niveau 20</strong> minimum pour forger des armes d'exception et mobiliser des armées de prestige (Niveau actuel : {$forgeLvl}/20)."
+            ];
+        }
+
+        $this->processCraftQueue($planetId);
+        $activeQueue = $this->getCraftQueue($planetId, 'blacksmith');
+
+        $planet = $this->getPlanet($planetId);
+        require_once __DIR__ . '/ImperialSealEngine.php';
+        $sealEngine = new ImperialSealEngine($this->db);
+        $isSealActive = $sealEngine->isSealActive((int)$planet['user_id']);
+        $maxQueue = $isSealActive ? 4 : 1;
+
+        if (count($activeQueue) >= $maxQueue) {
+            $remaining = !empty($activeQueue[0]['time_remaining']) ? gmdate('i\m s\s', $activeQueue[0]['time_remaining']) : 'quelques instants';
+            if ($maxQueue === 1) {
+                return [
+                    'success' => false,
+                    'error' => "Un travail de forge ou de fonte est déjà en cours dans la Grande Forge (temps restant : {$remaining}). Décrétez le <strong>Sceau Impérial</strong> pour débloquer jusqu'à 4 commandes consécutives !"
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'error' => "La file de travail de la Grande Forge est déjà saturée (4/4 tâches programmées). Attendez la finalisation d'un lot."
+                ];
+            }
+        }
+
+        $details = $this->calculateForgeCraftDetails($planetId, $product, $amount);
+
+        // Si production de métal brut, vérifier la capacité de stockage
+        if (in_array($product, ['metal', 'metal_crude'])) {
+            if ($details['actual_produced'] < 1) {
+                if ($details['available_space'] <= 0) {
+                    return [
+                        'success' => false,
+                        'error' => "Vos entrepôts de Métal sont déjà saturés (" . number_format($details['current_stock']) . " / " . number_format($details['max_stock']) . "). Augmentez la capacité de vos entrepôts."
+                    ];
+                }
+                return [
+                    'success' => false,
+                    'error' => "Quantité insuffisante pour couler au moins 1 unité de Métal."
+                ];
+            }
+        }
+
+        // Vérification des stocks de matières premières
+        $planet = $this->updatePlanet($planetId);
+        if ($product === 'metal') {
+            $reqIron = $details['engaged_iron_sand'];
+            $reqChar = $details['engaged_charcoal'];
+            if ((float)($planet['iron_sand'] ?? 0) < $reqIron) {
+                return ['success' => false, 'error' => "Stock insuffisant de Sable de Fer 💎 (Requis : {$reqIron}, Disponible : " . floor($planet['iron_sand'] ?? 0) . ")."];
+            }
+            if ((float)($planet['charcoal'] ?? 0) < $reqChar) {
+                return ['success' => false, 'error' => "Stock insuffisant de Charbon de Bois 🪨 (Requis : {$reqChar}, Disponible : " . floor($planet['charcoal'] ?? 0) . ")."];
+            }
+        } elseif ($product === 'metal_crude') {
+            $reqCrystal = $details['engaged_crystal'];
+            $reqChar = $details['engaged_charcoal'];
+            if ((float)($planet['crystal'] ?? 0) < $reqCrystal) {
+                return ['success' => false, 'error' => "Stock insuffisant de Pierre de Granit 🪨 (Requis : {$reqCrystal}, Disponible : " . floor($planet['crystal'] ?? 0) . ")."];
+            }
+            if ((float)($planet['charcoal'] ?? 0) < $reqChar) {
+                return ['success' => false, 'error' => "Stock insuffisant de Charbon de Bois 🪨 (Requis : {$reqChar}, Disponible : " . floor($planet['charcoal'] ?? 0) . ")."];
+            }
+        } elseif ($product === 'prestige_weapons') {
+            $reqMet = $details['engaged_metal'];
+            $reqIron = $details['engaged_iron_sand'];
+            $reqChar = $details['engaged_charcoal'];
+            $reqSake = $details['engaged_sake'];
+            if ((float)($planet['metal'] ?? 0) < $reqMet) {
+                return ['success' => false, 'error' => "Stock insuffisant de Métal (Requis : {$reqMet}, Disponible : " . floor($planet['metal'] ?? 0) . ")."];
+            }
+            if ((float)($planet['iron_sand'] ?? 0) < $reqIron) {
+                return ['success' => false, 'error' => "Stock insuffisant de Sable de Fer 💎 (Requis : {$reqIron}, Disponible : " . floor($planet['iron_sand'] ?? 0) . ")."];
+            }
+            if ((float)($planet['charcoal'] ?? 0) < $reqChar) {
+                return ['success' => false, 'error' => "Stock insuffisant de Charbon de Bois 🪨 (Requis : {$reqChar}, Disponible : " . floor($planet['charcoal'] ?? 0) . ")."];
+            }
+            if ((float)($planet['sake'] ?? 0) < $reqSake) {
+                return ['success' => false, 'error' => "Stock insuffisant de Saké Féodal 🍶 (Requis : {$reqSake}, Disponible : " . floor($planet['sake'] ?? 0) . ")."];
+            }
+        } elseif ($product === 'prestige_army') {
+            $reqMet = $details['engaged_metal'];
+            $reqStone = $details['engaged_crystal'];
+            $reqChar = $details['engaged_charcoal'];
+            $reqSake = $details['engaged_sake'];
+            if ((float)($planet['metal'] ?? 0) < $reqMet) {
+                return ['success' => false, 'error' => "Stock insuffisant de Métal (Requis : {$reqMet}, Disponible : " . floor($planet['metal'] ?? 0) . ")."];
+            }
+            if ((float)($planet['crystal'] ?? 0) < $reqStone) {
+                return ['success' => false, 'error' => "Stock insuffisant de Pierre de Granit 🪨 (Requis : {$reqStone}, Disponible : " . floor($planet['crystal'] ?? 0) . ")."];
+            }
+            if ((float)($planet['charcoal'] ?? 0) < $reqChar) {
+                return ['success' => false, 'error' => "Stock insuffisant de Charbon de Bois 🪨 (Requis : {$reqChar}, Disponible : " . floor($planet['charcoal'] ?? 0) . ")."];
+            }
+            if ((float)($planet['sake'] ?? 0) < $reqSake) {
+                return ['success' => false, 'error' => "Stock insuffisant de Saké Féodal 🍶 (Requis : {$reqSake}, Disponible : " . floor($planet['sake'] ?? 0) . ")."];
+            }
+        }
+
+        $now = time();
+        $startedAt = $now;
+        if (!empty($activeQueue)) {
+            $lastFinish = 0;
+            foreach ($activeQueue as $qItem) {
+                if ((int)$qItem['finishes_at'] > $lastFinish) {
+                    $lastFinish = (int)$qItem['finishes_at'];
+                }
+            }
+            $startedAt = max($now, $lastFinish);
+        }
+        $finishesAt = $startedAt + $details['duration_seconds'];
+
+        $this->db->beginTransaction();
+        try {
+            if ($product === 'metal') {
+                $stmt = $this->db->prepare("
+                    UPDATE planets
+                    SET iron_sand = GREATEST(0, iron_sand - ?),
+                        charcoal = GREATEST(0, charcoal - ?)
+                    WHERE id = ? AND iron_sand >= ? AND charcoal >= ?
+                ");
+                $stmt->execute([$details['engaged_iron_sand'], $details['engaged_charcoal'], $planetId, $details['engaged_iron_sand'], $details['engaged_charcoal']]);
+                if ($stmt->rowCount() === 0) {
+                    $this->db->rollBack();
+                    return ['success' => false, 'error' => "Échec : stock modifié entretemps."];
+                }
+
+                $stmtQueue = $this->db->prepare("
+                    INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                    VALUES (?, 'blacksmith', 'metal', 'iron_sand', ?, 0, ?, ?, ?)
+                ");
+                $stmtQueue->execute([$planetId, $details['batches'], $details['actual_produced'], $startedAt, $finishesAt]);
+            } elseif ($product === 'metal_crude') {
+                $stmt = $this->db->prepare("
+                    UPDATE planets
+                    SET crystal = GREATEST(0, crystal - ?),
+                        charcoal = GREATEST(0, charcoal - ?)
+                    WHERE id = ? AND crystal >= ? AND charcoal >= ?
+                ");
+                $stmt->execute([$details['engaged_crystal'], $details['engaged_charcoal'], $planetId, $details['engaged_crystal'], $details['engaged_charcoal']]);
+                if ($stmt->rowCount() === 0) {
+                    $this->db->rollBack();
+                    return ['success' => false, 'error' => "Échec : stock modifié entretemps."];
+                }
+
+                $stmtQueue = $this->db->prepare("
+                    INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                    VALUES (?, 'blacksmith', 'metal_crude', 'crystal', ?, 0, ?, ?, ?)
+                ");
+                $stmtQueue->execute([$planetId, $details['batches'], $details['actual_produced'], $startedAt, $finishesAt]);
+            } elseif ($product === 'prestige_weapons') {
+                $stmt = $this->db->prepare("
+                    UPDATE planets
+                    SET metal = GREATEST(0, metal - ?),
+                        iron_sand = GREATEST(0, iron_sand - ?),
+                        charcoal = GREATEST(0, charcoal - ?),
+                        sake = GREATEST(0, sake - ?)
+                    WHERE id = ? AND metal >= ? AND iron_sand >= ? AND charcoal >= ? AND sake >= ?
+                ");
+                $stmt->execute([
+                    $details['engaged_metal'], $details['engaged_iron_sand'], $details['engaged_charcoal'], $details['engaged_sake'],
+                    $planetId,
+                    $details['engaged_metal'], $details['engaged_iron_sand'], $details['engaged_charcoal'], $details['engaged_sake']
+                ]);
+                if ($stmt->rowCount() === 0) {
+                    $this->db->rollBack();
+                    return ['success' => false, 'error' => "Échec : stock modifié entretemps."];
+                }
+
+                $stmtQueue = $this->db->prepare("
+                    INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                    VALUES (?, 'blacksmith', 'prestige_weapons', 'prestige_weapons', ?, 0, ?, ?, ?)
+                ");
+                $stmtQueue->execute([$planetId, $details['batches'], $details['actual_produced'], $startedAt, $finishesAt]);
+            } elseif ($product === 'prestige_army') {
+                $stmt = $this->db->prepare("
+                    UPDATE planets
+                    SET metal = GREATEST(0, metal - ?),
+                        crystal = GREATEST(0, crystal - ?),
+                        charcoal = GREATEST(0, charcoal - ?),
+                        sake = GREATEST(0, sake - ?)
+                    WHERE id = ? AND metal >= ? AND crystal >= ? AND charcoal >= ? AND sake >= ?
+                ");
+                $stmt->execute([
+                    $details['engaged_metal'], $details['engaged_crystal'], $details['engaged_charcoal'], $details['engaged_sake'],
+                    $planetId,
+                    $details['engaged_metal'], $details['engaged_crystal'], $details['engaged_charcoal'], $details['engaged_sake']
+                ]);
+                if ($stmt->rowCount() === 0) {
+                    $this->db->rollBack();
+                    return ['success' => false, 'error' => "Échec : stock modifié entretemps."];
+                }
+
+                $stmtQueue = $this->db->prepare("
+                    INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                    VALUES (?, 'blacksmith', 'prestige_army', 'prestige_army', ?, 0, ?, ?, ?)
+                ");
+                $stmtQueue->execute([$planetId, $details['batches'], $details['actual_produced'], $startedAt, $finishesAt]);
+            }
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'error' => "Erreur lors du lancement de la commande de forge : " . $e->getMessage()];
+        }
+
+        $updatedPlanet = $this->getPlanet($planetId);
+        $activeQueue = $this->getCraftQueue($planetId, 'blacksmith');
+        $durationFmt = gmdate('i\m s\s', $details['duration_seconds']);
+
+        return [
+            'success' => true,
+            'message' => "La forge de <strong>{$details['product_name']} {$details['product_icon']}</strong> a débuté ! Durée estimée : <strong>{$durationFmt}</strong>.",
+            'product' => $product,
+            'product_name' => $details['product_name'],
+            'product_icon' => $details['product_icon'],
+            'produced' => $details['actual_produced'],
+            'duration_seconds' => $details['duration_seconds'],
+            'craft' => $activeQueue[0] ?? null,
+            'planet' => $updatedPlanet
+        ];
+    }
+
+    /**
+     * Annule un lot de raffinage, charpente ou forge en cours et rembourse 80% des matières engagées
      */
     public function cancelCraft(int $planetId, int $craftId): array {
         $stmt = $this->db->prepare("SELECT * FROM craft_queue WHERE id = ? AND planet_id = ?");
@@ -2049,6 +2534,90 @@ class PlanetEngine {
         }
 
         $bType = $craft['building_type'] ?? ($craft['product'] === 'wooden_beams' ? 'sawmill' : 'grain_mill');
+
+        // Cas spécifique de la Grande Forge
+        if ($bType === 'blacksmith') {
+            $product = $craft['product'] ?? '';
+            $rawEngaged = !empty($craft['cost_amount']) ? (float)$craft['cost_amount'] : 1;
+
+            $this->db->beginTransaction();
+            try {
+                $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
+                $del->execute([$craftId]);
+
+                $refundMsg = "";
+                if ($product === 'metal') {
+                    $ironRefund = floor($rawEngaged * 0.8);
+                    $charcoalRefund = floor($rawEngaged * 2 * 0.8);
+                    $up = $this->db->prepare("UPDATE planets SET iron_sand = iron_sand + ?, charcoal = charcoal + ? WHERE id = ?");
+                    $up->execute([$ironRefund, $charcoalRefund, $planetId]);
+                    $refundMsg = "+{$ironRefund} Sable de fer 💎 et +{$charcoalRefund} Charbon 🪨";
+                } elseif ($product === 'metal_crude') {
+                    $crystalRefund = floor($rawEngaged * 0.8);
+                    $charcoalRefund = floor(($rawEngaged / 10) * 5 * 0.8);
+                    $up = $this->db->prepare("UPDATE planets SET crystal = crystal + ?, charcoal = charcoal + ? WHERE id = ?");
+                    $up->execute([$crystalRefund, $charcoalRefund, $planetId]);
+                    $refundMsg = "+{$crystalRefund} Pierre de granit 🪨 et +{$charcoalRefund} Charbon 🪨";
+                } elseif ($product === 'prestige_weapons') {
+                    $batches = max(1, (int)$rawEngaged);
+                    $mRef = floor(500 * $batches * 0.8);
+                    $isRef = floor(10 * $batches * 0.8);
+                    $cRef = floor(20 * $batches * 0.8);
+                    $sRef = floor(10 * $batches * 0.8);
+                    $up = $this->db->prepare("UPDATE planets SET metal = metal + ?, iron_sand = iron_sand + ?, charcoal = charcoal + ?, sake = sake + ? WHERE id = ?");
+                    $up->execute([$mRef, $isRef, $cRef, $sRef, $planetId]);
+                    $refundMsg = "+{$mRef} Métal ⚔️, +{$isRef} Sable 💎, +{$cRef} Charbon 🪨, +{$sRef} Saké 🍶";
+                } elseif ($product === 'prestige_army') {
+                    $batches = max(1, (int)$rawEngaged);
+                    $mRef = floor(800 * $batches * 0.8);
+                    $pRef = floor(400 * $batches * 0.8);
+                    $cRef = floor(15 * $batches * 0.8);
+                    $sRef = floor(15 * $batches * 0.8);
+                    $up = $this->db->prepare("UPDATE planets SET metal = metal + ?, crystal = crystal + ?, charcoal = charcoal + ?, sake = sake + ? WHERE id = ?");
+                    $up->execute([$mRef, $pRef, $cRef, $sRef, $planetId]);
+                    $refundMsg = "+{$mRef} Métal ⚔️, +{$pRef} Pierre 🪨, +{$cRef} Charbon 🪨, +{$sRef} Saké 🍶";
+                }
+
+                // Réaligner séquentiellement les créneaux restants pour la forge
+                $stmtRem = $this->db->prepare("SELECT id, started_at, finishes_at FROM craft_queue WHERE planet_id = ? AND building_type = 'blacksmith' ORDER BY started_at ASC, id ASC");
+                $stmtRem->execute([$planetId]);
+                $remainingQueue = $stmtRem->fetchAll(PDO::FETCH_ASSOC);
+
+                $now = time();
+                $timeCursor = $now;
+                foreach ($remainingQueue as $idx => $rItem) {
+                    $duration = max(1, (int)$rItem['finishes_at'] - (int)$rItem['started_at']);
+                    if ($idx === 0) {
+                        if ((int)$rItem['started_at'] <= $now && (int)$rItem['finishes_at'] > $now) {
+                            $timeCursor = (int)$rItem['finishes_at'];
+                        } else {
+                            $newStart = $now;
+                            $newFinish = $newStart + $duration;
+                            $this->db->prepare("UPDATE craft_queue SET started_at = ?, finishes_at = ? WHERE id = ?")->execute([$newStart, $newFinish, $rItem['id']]);
+                            $timeCursor = $newFinish;
+                        }
+                    } else {
+                        $newStart = max($now, $timeCursor);
+                        $newFinish = $newStart + $duration;
+                        $this->db->prepare("UPDATE craft_queue SET started_at = ?, finishes_at = ? WHERE id = ?")->execute([$newStart, $newFinish, $rItem['id']]);
+                        $timeCursor = $newFinish;
+                    }
+                }
+
+                $this->db->commit();
+            } catch (Exception $e) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => "Erreur lors de l'annulation : " . $e->getMessage()];
+            }
+
+            $updatedPlanet = $this->getPlanet($planetId);
+            return [
+                'success' => true,
+                'message' => "Commande de forge annulée. <strong>{$refundMsg}</strong> (80% des matières engagées) ont été restitués.",
+                'planet' => $updatedPlanet
+            ];
+        }
+
         $costRes = $craft['cost_resource'] ?? ($bType === 'sawmill' ? 'metal' : 'deuterium');
         $rawEngaged = !empty($craft['cost_amount']) ? (float)$craft['cost_amount'] : (float)$craft['rice_amount'];
         $refundAmount = (float)floor($rawEngaged * 0.8);
@@ -2058,6 +2627,8 @@ class PlanetEngine {
             'clay' => 'Argile Alluviale 🏺',
             default => 'Riz 🌾'
         };
+
+        $isWood = ($bType === 'sawmill');
 
         $this->db->beginTransaction();
         try {

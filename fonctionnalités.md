@@ -1,5 +1,35 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-15] - blacksmith-metal-and-prestige : Grande Forge du Tamahagane (Fonte Niveau 15+ & Armées de Prestige Niveau 20+)
+- **Module :** `blacksmith-metal-and-prestige`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Fonte & Réduction de Métal (Niveau 15+) :**
+     - *Fourneau Tatara des Maîtres (`product = 'metal'`) :* Consomme 1 Sable de fer (*Satetsu* 💎) + 2 Charbon de bois (🪨) par fournée et produit 40 Métal (⚔️) majoré par l'efficacité de la forge (+2%/niveau).
+     - *Réduction Rustique aux Scories (`product = 'metal_crude'`) :* Consomme 10 Pierre de granit (🪨) + 5 Charbon de bois (🪨) pour produire 25 Métal (⚔️).
+     - Verrouillage progressif avec carte d'information et jauge `X / 15` si la forge est de niveau inférieur à 15.
+  2. **Armes & Armées de Prestige (Niveau 20+) :**
+     - *Katanas de Maître & Lames Sacrées (`product = 'prestige_weapons'`) :* Coûte 500 Métal, 10 Sable de fer, 20 Charbon, 10 Saké. Confère +150 Points d'Honneur et débloque/attribue la relique unique `katana_tamahagane` (*Katana Forgé en Tamahagane*) dans l'inventaire du héros (ou +250 XP bonus).
+     - *Garde d'Honneur au Tamahagane (`product = 'prestige_army'`) :* Coûte 800 Métal, 400 Pierre, 15 Charbon, 15 Saké. Mobilise instantanément 10 Samouraïs au Katana (`samourai_katana`) et 2 Gardes Hatamoto d'Armure Lourde (`garde_hatamoto_armure_lourde`) directement dans la garnison du fief (`planet_units`).
+     - Carte de verrouillage progressif `X / 20` si la forge est de niveau inférieur à 20.
+  3. **File d'Attente, Vitesse et Annulation :**
+     - Vitesse proportionnelle au niveau de forge (+15%/niveau) et au multiplicateur de vitesse globale du serveur.
+     - Gestion d'un lot actif et jusqu'à 4 commandes séquentielles avec le Sceau Impérial (*Privilège du Shōgun*).
+     - Annulation sécurisée avec remboursement de 80% des matières engagées.
+  4. **Interface Bâtiment & Cité :**
+     - Section `#craftSection` avec prévisualisation des rendements en temps réel, boutons de remplissage rapide (+5, +10, +25, Max), minuteur de progression animé et raccourci dans la vue Cité Castrale (`views/city.php`).
+- **Fichiers modifiés :** `core/PlanetEngine.php`, `api/craft.php`, `views/building.php`, `views/city.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Accéder à la page de la Grande Forge du Tamahagane (`/?page=building&code=blacksmith`).
+  2. Vérifier que pour un niveau < 15, un encart de verrouillage indique la progression `X / 15` avec les récompenses à venir.
+  3. Pour une forge au niveau 15+, vérifier le déblocage des 2 recettes de fonte (Tatara & Réduction Rustique) avec les prévisualisations dynamiques et boutons de remplissage rapide.
+  4. Pour une forge au niveau 20+, vérifier le déblocage des 2 commandes de prestige : Katanas de Maître (+150 Honneur + relique héroïque) et Garde d'Honneur (+10 Samouraïs + 2 Hatamotos).
+  5. Lancer un lot de fonte de métal, vérifier la déduction des matières premières et le minuteur actif avec la barre de progression.
+  6. Tester l'annulation d'un lot en cours et vérifier la restitution de 80% des matières premières engagées.
+  7. Aller sur la vue Cité Castrale (`/?page=city`) et vérifier la présence du bouton rapide « Fourneaux & Prestige » sur la tuile de la forge (si niveau >= 15).
+
+---
+
 ### [2026-10-15] - village-life-simulator-upgrade : Modernisation du Simulateur de Vie de Village, Castes Féodales & Nouvelles Ressources
 - **Module :** `village-life-simulator-upgrade`
 - **Statut :** `À tester`

@@ -27,7 +27,11 @@ $craftId = (int)($_POST['craft_id'] ?? 0);
 try {
     $planetEngine = new PlanetEngine();
 
-    if ($action === 'craft_mineral' || ($action === 'start_craft' && in_array($product, ['sulfur', 'nitrate', 'iron_sand']))) {
+    if ($action === 'craft_forge' || ($action === 'start_craft' && in_array($product, ['metal', 'metal_crude', 'prestige_weapons', 'prestige_army']))) {
+        $forgeAmount = (float)($_POST['amount'] ?? $_POST['batches'] ?? 1);
+        $result = $planetEngine->craftForgeProduct((int)$planet['id'], $product, $forgeAmount);
+        echo json_encode($result);
+    } elseif ($action === 'craft_mineral' || ($action === 'start_craft' && in_array($product, ['sulfur', 'nitrate', 'iron_sand']))) {
         $mineralAmount = (float)($_POST['amount'] ?? $_POST['mineral_amount'] ?? 0);
         $result = $planetEngine->craftMineralProduct((int)$planet['id'], $product, $mineralAmount);
         echo json_encode($result);
