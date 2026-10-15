@@ -13,11 +13,19 @@ require_once __DIR__ . '/../core/HonorEngine.php';
 require_once __DIR__ . '/../core/CastleEngine.php';
 require_once __DIR__ . '/../core/MailService.php';
 require_once __DIR__ . '/../core/DatabaseBackupService.php';
+require_once __DIR__ . '/../core/GameStudioEngine.php';
 
 $auth = new Auth();
+$gameStudioEngine = new GameStudioEngine();
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+$userId = (int)Auth::id();
 
-// 1. Vérification stricte des droits Administrateur
-if (!Auth::check() || !$auth->isAdmin()) {
+$isAdmin = Auth::check() && $auth->isAdmin();
+$isStudioMember = Auth::check() && $gameStudioEngine->isAuthorized($userId);
+$studioAllowedActions = ['backup_database', 'list_backups', 'restore_backup'];
+
+// 1. Vérification stricte des droits Administrateur ou Studio Habilité
+if (!$isAdmin && !($isStudioMember && in_array($action, $studioAllowedActions, true))) {
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Accès restreint au Shogun et aux Administrateurs habilités.']);
     exit;
@@ -25,7 +33,6 @@ if (!Auth::check() || !$auth->isAdmin()) {
 
 $db = Database::getConnection();
 $botEngine = new BotEngine();
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 try {
     switch ($action) {

@@ -296,5 +296,34 @@ class DatabaseBackupService {
 
         return $backups;
     }
+
+    /**
+     * Regroupe les sauvegardes par paires (structure + données) horodatées
+     * @return array
+     */
+    public function getFormattedBackupSets(): array {
+        $localBackups = $this->listLocalBackups();
+        $backupSets = [];
+        if (!empty($localBackups['structure']) || !empty($localBackups['data'])) {
+            foreach ($localBackups['structure'] as $s) {
+                $ts = str_replace(['structure_', '.sql'], '', $s['filename']);
+                $backupSets[$ts]['timestamp'] = $ts;
+                $backupSets[$ts]['date'] = $s['date'];
+                $backupSets[$ts]['mtime'] = $s['mtime'];
+                $backupSets[$ts]['structure'] = $s;
+            }
+            foreach ($localBackups['data'] as $d) {
+                $ts = str_replace(['data_', '.sql'], '', $d['filename']);
+                if (!isset($backupSets[$ts])) {
+                    $backupSets[$ts]['timestamp'] = $ts;
+                    $backupSets[$ts]['date'] = $d['date'];
+                    $backupSets[$ts]['mtime'] = $d['mtime'];
+                }
+                $backupSets[$ts]['data'] = $d;
+            }
+            uasort($backupSets, fn($a, $b) => ($b['mtime'] ?? 0) <=> ($a['mtime'] ?? 0));
+        }
+        return $backupSets;
+    }
 }
 

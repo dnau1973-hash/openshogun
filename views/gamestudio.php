@@ -51,6 +51,7 @@ if (!$gameStudioEngine->isAuthorized($userId)) {
 // 1. Détection de l'onglet actif dans la barre d'outils
 $allowedTabs = ['dashboard', 'general', 'elevate_research'];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
+$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups'], true) ? $_GET['subtab'] : 'overview';
 $analyticsPeriod = in_array($_GET['period'] ?? '', ['today', '7d', '30d', 'all'], true) ? (string)$_GET['period'] : '30d';
 
 // 2. Préparation des données selon l'onglet
@@ -189,12 +190,36 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                 <i class="fa-solid fa-chart-line"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="?page=gamestudio&tab=general" 
-               class="studio-nav-link <?= $currentTab === 'general' ? 'active' : '' ?>"
-               title="Synthèse générale et configuration du Game Studio">
-                <i class="fa-solid fa-sliders"></i>
-                <span>Général</span>
-            </a>
+            <!-- Dropdown Onglet Général avec Sous-Menu -->
+            <div class="dropdown">
+                <a href="#" 
+                   class="studio-nav-link dropdown-toggle <?= $currentTab === 'general' ? 'active' : '' ?>"
+                   data-bs-toggle="dropdown" 
+                   aria-expanded="false"
+                   title="Synthèse générale et outils système du Game Studio">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Général</span>
+                </a>
+                <div class="dropdown-menu shadow-sm">
+                    <div class="dropdown-header text-uppercase text-secondary small fw-bold">
+                        Administration &amp; Système
+                    </div>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'overview') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=overview">
+                        <i class="fa-solid fa-gauge text-indigo"></i>
+                        <div>
+                            <div>Synthèse &amp; Dev Team</div>
+                            <div class="small text-secondary">Environnement, KPIs &amp; Accréditations</div>
+                        </div>
+                    </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'backups') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=backups">
+                        <i class="fa-solid fa-database text-primary"></i>
+                        <div>
+                            <div>Gestion des Sauvegardes</div>
+                            <div class="small text-secondary">Sauvegardes DDL/DML, USB &amp; Restauration</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
 
             <!-- Dropdown Game Elevate Designer -->
             <div class="dropdown">
@@ -319,6 +344,7 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
 <!-- Tabler Core JS & Bootstrap Bundle -->
 <script src="/public/css/tabler/tabler.min.js?v=1.0.0-beta21"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="/public/js/app.js"></script>
 
 </body>
 </html>

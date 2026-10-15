@@ -330,15 +330,26 @@ class GameStudioEngine {
             $devMembers = $this->devEngine->getAllDevTeamMembers();
         } catch (Throwable $e) {}
 
+        $backupSets = [];
+        $detectedUsbDrives = [];
+        try {
+            require_once __DIR__ . '/DatabaseBackupService.php';
+            $backupService = new DatabaseBackupService();
+            $backupSets = $backupService->getFormattedBackupSets();
+            $detectedUsbDrives = $backupService->detectUsbDrives();
+        } catch (Throwable $e) {}
+
         return [
-            'gitInfo'       => $gitInfo,
-            'totalUsers'    => $totalUsers,
-            'totalBots'     => $totalBots,
-            'totalPlanets'  => $totalPlanets,
-            'devMembers'    => $devMembers,
-            'phpVersion'    => PHP_VERSION,
-            'serverSoftware'=> $_SERVER['SERVER_SOFTWARE'] ?? 'Inconnu',
-            'gameVersion'   => defined('GAME_VERSION') ? GAME_VERSION : '1.27.0'
+            'gitInfo'          => $gitInfo,
+            'totalUsers'       => $totalUsers,
+            'totalBots'        => $totalBots,
+            'totalPlanets'     => $totalPlanets,
+            'devMembers'       => $devMembers,
+            'backupSets'       => $backupSets,
+            'detectedUsbDrives'=> $detectedUsbDrives,
+            'phpVersion'       => PHP_VERSION,
+            'serverSoftware'   => $_SERVER['SERVER_SOFTWARE'] ?? 'Inconnu',
+            'gameVersion'      => defined('GAME_VERSION') ? GAME_VERSION : '1.27.0'
         ];
     }
 }
