@@ -1,5 +1,39 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-15] - art-gallery-photogrid : Galerie d'Art Féodale & Photogrid Tabler.io
+- **Module :** `art-gallery-photogrid`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Galerie d'Art Photogrid Haute Définition (`views/gallery.php`) :**
+     - Présentation de l'ensemble des 238 illustrations réparties dans les 9 sous-dossiers d'actifs du jeu : `buildings` (17), `carrousel` (50), `castles` (12), `clans` (3), `events` (52), `items` (36), `resources` (11), `tiles` (21), `units` (36).
+     - Structure responsive en grille Tabler (`row g-2 g-md-3`, `col-6 col-sm-4 col-md-3 col-lg-2`) au format carré `ratio ratio-1x1`.
+     - Effets de survol élégants avec zoom d'image, assombrissement progressif, badge de catégorie, bouton loupe HD et nom de fichier.
+  2. **Système de Filtres, Recherche et Tri :**
+     - Onglets pills Tabler (`.nav-pills`) avec icône thématique et badge de comptage pour chaque domaine artistique.
+     - Recherche textuelle instantanée (nom, titre humanisé, catégorie, fichier) sans rechargement.
+     - Tri dynamique dans le DOM (par défaut, A-Z, Z-A, poids de fichier).
+     - État vide soigné Tabler (`.empty`) en cas de recherche infructueuse.
+  3. **Visionneuse Lightbox Modale HD :**
+     - Modale haute résolution avec centrage, dégradé sombre et affichage plein cadre de l'illustration.
+     - Navigation Précédent / Suivant à la souris et au clavier (`Flèche Gauche`, `Flèche Droite`, `Échap`).
+     - Métadonnées complètes affichées en pied de modale (titre, nom de fichier, extension, poids, chemin web).
+     - Boutons d'action : « Copier chemin » (presse-papier avec notification), « Plein écran » (nouvel onglet) et « Télécharger ».
+  4. **Lien de Navigation dans le Footer (`views/partials/footer.php`) :**
+     - Ajout du lien direct vers la page `?page=gallery` (« Galerie d'Art », icône `fa-palette` rouge) dans la barre de pied de page universelle.
+  5. **Routage Hybride Connecté & Public (`index.php`) :**
+     - Consultable librement par les visiteurs anonymes via un layout Tabler public avec navbar d'accueil, et directement dans le HUD des seigneurs féodaux connectés.
+- **Fichiers modifiés :** `views/gallery.php`, `views/partials/footer.php`, `index.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Descendre au bas de n'importe quelle page du jeu et vérifier la présence du lien « Galerie d'Art » dans le footer.
+  2. Cliquer sur le lien « Galerie d'Art » ou naviguer directement vers `/?page=gallery`.
+  3. Vérifier que la grille affiche les 238 illustrations avec leurs vignettes carrées et cartes Tabler.
+  4. Tester les filtres par catégorie en cliquant sur chaque onglet (*Bâtiments*, *Carrousel*, *Châteaux*, *Clans*, *Événements*, *Objets & Reliques*, *Ressources*, *Tuiles*, *Unités*).
+  5. Saisir du texte dans la barre de recherche (ex: `mineur`, `himeji`, `takeda`, `saké`) et constater le filtrage en temps réel.
+  6. Cliquer sur une carte pour ouvrir la visionneuse Lightbox : vérifier la clarté de l'image, les boutons de changement d'image, le raccourci clavier, et le bouton « Copier chemin ».
+  7. Tester l'affichage en mode déconnecté (visiteur public) : la page s'ouvre avec l'en-tête public et le thème propre Tabler.
+
+---
+
 ### [2026-10-15] - mineur-unit-artwork : Illustration Officielle du Mineur des Cimes (Kōfu)
 - **Module :** `mineur-unit-artwork`
 - **Statut :** `À tester`

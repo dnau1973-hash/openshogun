@@ -3,6 +3,36 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.31.0] - 2026-10-15
+### Ajouté (Added)
+- **Galerie d'Art Féodale & Photogrid Officiel (`views/gallery.php`, `index.php`, `views/partials/footer.php`) :**
+  * **Photogrid Haute Définition selon le Modèle Tabler.io :**
+    - Création d'une interface responsive (`col-6 col-sm-4 col-md-3 col-lg-2`) affichant l'intégralité des 238 illustrations du jeu réparties dans les 9 répertoires d'actifs (`assets/buildings`, `carrousel`, `castles`, `clans`, `events`, `items`, `resources`, `tiles`, `units`).
+    - Format carré parfait (`ratio ratio-1x1`) avec zoom progressif au survol, overlay translucide avec badge thématique, bouton loupe HD et nom de fichier.
+  * **9 Domaines Graphiques Balayés Dynamiquement :**
+    - *Bâtiments Castraux (`buildings`, 17 estampes) :* Casernes, forges, dojos, tenshu et édifices du fief.
+    - *Panoramas & Carrousel (`carrousel`, 50 estampes) :* Fresques panoramiques 16:9 et décors du Sengoku.
+    - *Châteaux & Forteresses (`castles`, 12 estampes) :* Himeji, Hikone, Inuyama, Bitchū Matsuyama et hauts lieux fortifiés.
+    - *Clans & Armoiries (`clans`, 3 estampes) :* Conseils de guerre et bannières des maisons Oda, Takeda et Tokugawa.
+    - *Événements Féodaux (`events`, 52 estampes) :* Chroniques saisonnières des 52 semaines de jeu.
+    - *Objets & Reliques (`items`, 36 estampes) :* Armures historiques, montures de guerre, armes et objets de prestige.
+    - *Ressources & Terroirs (`resources`, 11 estampes) :* Rizières, cèdre, pierre, ferveur shinto et gisements d'argile.
+    - *Tuiles de Terroir (`tiles`, 21 estampes) :* Composants isométriques de l'arpentage et parcelles de village.
+    - *Armées & Unités (`units`, 36 estampes) :* Samouraïs, archers, cavalerie, ninjas et le Mineur des Cimes (*Kōfu*).
+  * **Filtres Avancés & Moteur Client :**
+    - Barre d'onglets / pilules Tabler (`.nav-pills`) avec icônes distinctes, badges de comptage par catégorie et description contextuelle.
+    - Recherche textuelle en temps réel par mot-clé, nom de fichier ou catégorie sans rechargement de page.
+    - Sélecteur de tri dynamique (Nom A-Z, Nom Z-A, Poids croissant, Poids décroissant).
+    - Compteurs de métriques instantanés (illustrations recensées, dossiers thématiques, poids total, œuvres actuellement filtrées).
+  * **Lightbox Modale Plein Écran Interactive :**
+    - Affichage de l'estampe en haute définition avec flèches de navigation Précédent / Suivant et raccourcis clavier (`Flèche Gauche`, `Flèche Droite`, `Échap`).
+    - Métadonnées complètes : titre noble humanisé, catégorie, nom de fichier, extension, poids en Ko/Mo et chemin d'accès.
+    - Bouton interactif « Copier chemin » (copie dans le presse-papier avec confirmation visuelle), « Plein écran » et « Télécharger ».
+  * **Double Rendu Public & Joueur Connecté :**
+    - Accessible aussi bien aux visiteurs non connectés (enveloppe Tabler publique épurée avec liens de découverte) qu'aux daimyōs connectés (intégré au HUD de jeu).
+  * **Lien Rapide dans le Pied de Page (`views/partials/footer.php`) :**
+    - Ajout du lien direct « Galerie d'Art » avec icône `fa-palette` rouge carmin aux côtés des Règles du jeu, Support, Changelog et de l'Atelier Pédagogique.
+
 ## [1.30.0] - 2026-10-15
 ### Amélioré (Enhanced) & Ajouté (Added)
 - **Illustration Officielle du Mineur des Cimes (`public/assets/units/mineur.jpg`) :**

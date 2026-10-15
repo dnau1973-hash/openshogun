@@ -500,7 +500,11 @@
             <span class="text-muted opacity-50">&bull;</span>
             <a href="?page=pedagogy" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
                 <i class="fa-solid fa-graduation-cap me-1"></i> Atelier Pédagogique
-            </a>            
+            </a>
+            <span class="text-muted opacity-50">&bull;</span>
+            <a href="?page=gallery" class="text-decoration-none d-inline-flex align-items-center gap-1 text-secondary hover-primary">
+                <i class="fa-solid fa-palette me-1 text-danger"></i> Galerie d'Art
+            </a>
         </div>
         <p class="m-0"><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?> &copy; <?= date('Y') ?> &mdash; Jeu de stratégie féodale japonaise par navigateur inspiré de Travian.</p>
         <p style="margin-top:0.35rem; color:#64748b;" class="small">Moteur féodal Sengoku PHP 8 &bull; MariaDB &bull; JavaScript Vanilla &bull; Tabler.io</p>

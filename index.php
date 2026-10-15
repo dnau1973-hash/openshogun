@@ -128,6 +128,13 @@ if ($reqPage === 'pedagogy' || $reqPage === 'atelier' || $reqPage === 'atelier-p
         require __DIR__ . '/views/changelog.php';
         exit;
     }
+} elseif ($reqPage === 'gallery' || $reqPage === 'galerie') {
+    $page = 'gallery';
+    if (!Auth::check()) {
+        ActivityTracker::logView(null, 'gallery');
+        require __DIR__ . '/views/gallery.php';
+        exit;
+    }
 }
 
 // Si non connecté, afficher le portail d'authentification
@@ -143,6 +150,8 @@ if ($page === 'galaxy') {
     $page = 'map';
 } elseif ($page === 'plus') {
     $page = 'privilege';
+} elseif ($page === 'gallery' || $page === 'galerie') {
+    $page = 'gallery';
 } elseif ($page === 'atelier' || $page === 'atelier-pedagogique') {
     $page = 'pedagogy';
 } elseif (in_array($page, ['php-poo-singleton', 'pdo-sql-injection', 'routing-get-post'], true)) {
@@ -157,7 +166,7 @@ if ($page === 'galaxy') {
     $page = 'view_resource';
 }
 
-$allowedPages = ['resources', 'view_resource', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'gamestudio', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team', 'poster', 'newsletter_compose'];
+$allowedPages = ['resources', 'view_resource', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'gamestudio', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team', 'poster', 'newsletter_compose', 'gallery'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';
