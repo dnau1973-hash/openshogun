@@ -10,7 +10,7 @@ class MarketEngine {
     private PDO $db;
 
     public function __construct(?PDO $db = null) {
-        $this->db = $db ?? Database::getInstance();
+        $this->db = $db ?? Database::getConnection();
         $this->ensureSchema();
     }
 

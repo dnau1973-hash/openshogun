@@ -31,6 +31,10 @@ class Database {
         return self::$instance;
     }
 
+    public static function getInstance(): PDO {
+        return self::getConnection();
+    }
+
     public static function tryGetConnection(): ?PDO {
         if (self::$instance !== null) {
             return self::$instance;

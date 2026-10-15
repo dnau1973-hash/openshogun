@@ -2799,7 +2799,7 @@ if (!$isEmptyPlot) {
             </div>
 
             <!-- Décret de Construction -->
-            <div class="card mb-3">
+            <div class="card mb-3" id="buildActionBtn">
                 <div class="card-header">
                     <h3 class="card-title"><i class="fa-solid fa-hammer text-danger me-1"></i>Décret de Construction Castral</h3>
                     <?php if ($isTerran): ?>
