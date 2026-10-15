@@ -63,7 +63,8 @@ $allowedTabs = [
     'dashboard', 'general',
     'elevate_research', 'elevate_bots',
     'elevate_combat', 'elevate_village', 'elevate_speed',
-    'elevate_survey', 'elevate_oases', 'elevate_buildings'
+    'elevate_survey', 'elevate_oases', 'elevate_buildings',
+    'narrative_storyboard', 'narrative_lore'
 ];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
 $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
@@ -319,6 +320,37 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                         <div>
                             <div>Dérivation des Bâtiments</div>
                             <div class="small text-secondary">Courbes de progression, Coûts &amp; Délais chantiers</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Dropdown Narrative Designer -->
+            <div class="dropdown">
+                <a href="#" 
+                   class="studio-nav-link dropdown-toggle <?= str_starts_with($currentTab, 'narrative_') ? 'active' : '' ?>"
+                   data-bs-toggle="dropdown" 
+                   aria-expanded="false"
+                   title="Scénarisation, storyboards vidéo et univers féodal (Narrative Designer)">
+                    <i class="fa-solid fa-feather-pointed text-purple"></i>
+                    <span>Narrative Designer</span>
+                </a>
+                <div class="dropdown-menu shadow-sm">
+                    <div class="dropdown-header text-uppercase text-secondary small fw-bold">
+                        Narration &amp; Univers
+                    </div>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'narrative_storyboard' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=narrative_storyboard">
+                        <i class="fa-solid fa-film text-purple"></i>
+                        <div>
+                            <div>Gestionnaire de Storyboard</div>
+                            <div class="small text-secondary">Timeline interactive, Drag &amp; Drop, Vidéos &amp; Événements</div>
+                        </div>
+                    </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'narrative_lore' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=narrative_lore">
+                        <i class="fa-solid fa-scroll text-warning"></i>
+                        <div>
+                            <div>Charte Narrative &amp; Lore Féodal</div>
+                            <div class="small text-secondary">Lexique d'époque, Factions &amp; Cohérence d'univers</div>
                         </div>
                     </a>
                 </div>

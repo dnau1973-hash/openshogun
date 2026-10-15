@@ -3,6 +3,34 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.32.0] - 2026-10-15
+### Ajouté (Added)
+- **Game Studio &bull; Pôle Narrative Designer & Gestionnaire de Storyboard Multi-Projets (`views/gamestudio.php`, `core/StoryboardEngine.php`, `api/storyboard.php`, `views/studio/narrative-designer/storyboard-manager.php`) :**
+  * **Intégration du Nouveau Métier « Narrative Designer » dans Game Studio :**
+    - Ajout du menu déroulant dédié *Narrative Designer* (icône `fa-feather-pointed` violette) dans la barre de navigation du Studio.
+    - Deux modules accessibles : le *Gestionnaire de Storyboard* (`tab=narrative_storyboard`) et la *Charte Narrative & Lore Féodal* (`tab=narrative_lore`).
+  * **Gestion Multi-Storyboards (Espace de Travail & Projets Parallèles) :**
+    - Prise en charge de plusieurs storyboards en cours d'élaboration avec sélecteur de projet instantané.
+    - Création de nouveaux projets de storyboards avec typologie (*Trailer officiel, Démo de gameplay, Teaser d'événement, Cinématique de quête, Clip réseaux*), ratio d'image (16:9, 9:16, 1:1, 4:3), durée cible et piste audio.
+    - Duplication en 1 clic pour tester des variantes de montage sans écraser l'original, renommage et suppression sécurisée.
+    - Pré-chargement de 3 storyboards féodaux de référence : *Trailer Officiel du Marché de la Cité Castrale (17s)*, *Teaser Événement de la Grande Forge du Tamahagane (18s)*, et *Démo Gameplay de l'Arpentage (20s)*.
+  * **Timeline Interactive & Drag & Drop Natif des Plans :**
+    - Piste temporelle graphique avec repères et blocs proportionnels à la durée de chaque plan.
+    - Réorganisation instantanée de la séquence par glisser-déposer HTML5 natif ultra-fluide avec recalcul en direct des timecodes cumulés (`00:00.0 → 00:04.5`, etc.).
+    - Ajustement rapide de la durée de chaque plan par pas de `0.5s` ou saisie libre, impactant automatiquement l'ensemble de la timeline en aval.
+    - Notes de mise en scène, choix du mouvement de caméra (travelling, panoramique, gros plan, vue aérienne), effets sonores et type de transition (cut, fondu au noir, fondu enchaîné).
+  * **Sélecteur d'Illustrations Directement Connecté à la Galerie d'Art (238 Actifs) :**
+    - Modale de sélection visuelle d'images puisant directement dans les 9 répertoires du jeu (*bâtiments, carrousel, châteaux, clans, événements, objets, ressources, tuiles, unités*) avec moteur de recherche textuelle temps réel.
+  * **Storyboard Player & Preview Cinématique Plein Écran :**
+    - Simulateur vidéo en temps réel faisant défiler automatiquement les plans et les visuels selon la cadence programmée.
+    - Affichage des sous-titres de voix off et description visuelle avec barre de progression temporelle et commandes Play, Pause, Précédent, Suivant, Recommencer.
+  * **Générateur Automatique de Prompts IA Vidéo :**
+    - Production instantanée du Master Prompt global et des prompts découpés plan par plan rédigés en anglais cinématographique pour Runway Gen-3, Sora, Kling et Luma.
+  * **Analyseur de Rythme Narratif (KPIs en Direct) :**
+    - Indicateur de durée cumulée vs durée cible, cadence moyenne par plan et calcul du débit de parole de la voix off en Mots Par Minute (WPM).
+  * **Export de Script Markdown :**
+    - Génération et téléchargement en un clic de la fiche de tournage complète au format Markdown.
+
 ## [1.31.0] - 2026-10-15
 ### Ajouté (Added)
 - **Galerie d'Art Féodale & Photogrid Officiel (`views/gallery.php`, `index.php`, `views/partials/footer.php`) :**

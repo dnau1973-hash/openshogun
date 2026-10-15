@@ -1,5 +1,43 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-15] - narrative-designer-storyboard : Narrative Designer & Gestionnaire de Storyboards Multi-Projets
+- **Module :** `narrative-designer-storyboard`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Pôle Narrative Designer dans Game Studio (`views/gamestudio.php`) :**
+     - Nouveau menu déroulant *Narrative Designer* (icône `fa-feather-pointed` violette) intégrant le *Gestionnaire de Storyboard* (`tab=narrative_storyboard`) et la *Charte Narrative & Lore Féodal* (`tab=narrative_lore`).
+  2. **Gestion Multi-Storyboards en Parallèle :**
+     - Sélecteur de projet en temps réel permettant de basculer entre plusieurs storyboards en travaux.
+     - Modale de création avec définition de la durée cible (en secondes), ratio d'image (16:9, 9:16, etc.), typologie (trailer, démo, événement) et audio d'ambiance.
+     - Duplication instantanée pour décliner des variantes créatives, renommage et suppression.
+     - 3 projets démo de référence pré-embarqués : *Trailer Officiel du Marché Féodal (17s)*, *Teaser de la Grande Forge du Tamahagane (18s)*, *Démo de l'Arpentage (20s)*.
+  3. **Timeline Horizontale & Drag & Drop Natif des Plans :**
+     - Règle temporelle graphique graduée avec blocs de plans proportionnels cliquables.
+     - Réorganisation de l'ordre des plans par glisser-déposer HTML5 sans dépendance externe, avec mise à jour instantanée des timecodes cumulés (`00:00.0 → 00:04.5`).
+     - Ajustement de durée par pas de 0.5s ou champ numérique, choix du mouvement de caméra, des effets sonores et de la transition.
+  4. **Navigateur d'Illustrations Connecté à la Galerie d'Art (238 Actifs) :**
+     - Modale visuelle filtrable par catégorie (*Bâtiments, Panoramas, Châteaux, Clans, Événements, Objets, Ressources, Tuiles, Unités*) et recherche instantanée.
+  5. **Storyboard Player Cinématique & Simulateur Vidéo Plein Écran :**
+     - Défilement automatique plan par plan respectant les durées programmées, affichage des sous-titres de voix off et barre de temps avec contrôles Play, Pause, Recul, Avance, Recommencer.
+  6. **Générateur Automatique de Prompts IA Vidéo & Export Markdown :**
+     - Génération en 1 clic des prompts pour Runway Gen-3, Kling, Sora et Luma (Master prompt + prompts découpés).
+     - Exportation et téléchargement du script de tournage complet au format Markdown.
+  7. **Indicateurs de Rythme Narratif (KPIs) :**
+     - Durée totale vs cible, cadence moyenne par plan, calcul du débit de voix off en mots par minute (WPM).
+- **Fichiers modifiés :** `views/gamestudio.php`, `core/StoryboardEngine.php`, `api/storyboard.php`, `views/gamestudio/narrative_storyboard.php`, `views/gamestudio/narrative_lore.php`, `views/studio/narrative-designer/storyboard-manager.php`, `core/Database.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Accéder au Game Studio (`/?page=gamestudio`).
+  2. Vérifier la présence du nouveau menu « Narrative Designer » dans la navbar supérieure.
+  3. Cliquer sur « Gestionnaire de Storyboard » : vérifier le chargement de la timeline, des métriques et des 4 plans du *Trailer Officiel : Le Marché de la Cité Castrale*.
+  4. Glisser-déposer un plan (ex: déplacer le Plan 1 en 3ème position) : constater la réorganisation fluide et la recalcul instantané des timecodes.
+  5. Modifier la durée d'un plan avec les boutons `+` / `-` et observer la mise à jour des KPIs (durée totale, cadence moyenne, WPM).
+  6. Cliquer sur l'illustration d'un plan : la modale de la Galerie d'Art s'ouvre, tester la recherche (ex: `mineur`) et sélectionner une nouvelle estampe.
+  7. Cliquer sur « Lire Storyboard » : le player cinématique s'ouvre, vérifier la lecture automatique minutée et les sous-titres de voix off.
+  8. Cliquer sur « Projet > Générer Prompts IA Vidéo » : vérifier la génération des prompts en anglais cinématographique et tester le bouton copier.
+  9. Tester la création d'un nouveau projet via le bouton « Nouveau Storyboard » et basculer entre les projets avec le sélecteur.
+
+---
+
 ### [2026-10-15] - art-gallery-photogrid : Galerie d'Art Féodale & Photogrid Tabler.io
 - **Module :** `art-gallery-photogrid`
 - **Statut :** `À tester`

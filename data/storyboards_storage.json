@@ -1,0 +1,176 @@
+[
+    {
+        "title": "Trailer Officiel : Le Marché de la Cité Castrale",
+        "slug": "trailer-marche-cite-castrale",
+        "description": "Scène vivante de la vie quotidienne dans un bourg féodal Sengoku. Échoppes animées, passage gracieux des geishas, patrouille martiale de samouraïs et donjon Tenshu.",
+        "video_type": "trailer",
+        "target_duration": 17,
+        "audio_track_title": "Sengoku Market Murmur & Shakuhachi Dawn",
+        "aspect_ratio": "16:9",
+        "shots": [
+            {
+                "order_index": 0,
+                "title": "Plan 1 : Effervescence du Marché & Échoppes",
+                "image_url": "\/public\/assets\/carrousel\/carrousel_01.jpg",
+                "narrative_text": "Une ruelle animée bordée d'auvents en toile brute et de lanternes suspendues. Des paysans et marchands négocient des paniers de riz, des céramiques fumantes et du poisson frais.",
+                "voiceover_text": "Au cœur du fief, le bourg s'éveille. Les récoltes abondent et la prospérité du seigneur nourrit chaque foyer.",
+                "camera_movement": "Travelling avant fluide au ras du sol",
+                "sound_fx": "Murmures de foule d'époque, braises qui crépitent, tintement de pièces Mon",
+                "duration": 4.5,
+                "transition_type": "cut"
+            },
+            {
+                "order_index": 1,
+                "title": "Plan 2 : L'Élégance : Déambulation des Geishas",
+                "image_url": "\/public\/assets\/carrousel\/carrousel_08.jpg",
+                "narrative_text": "Deux élégantes geishas avancent gracieusement sur des sandales en bois geta. Leurs kimonos en soie brodée de vagues vermillon contrastent avec les tenues rustiques des artisans.",
+                "voiceover_text": "Sous les ombrelles de soie, les traditions ancestrales côtoient la rumeur des grands destins.",
+                "camera_movement": "Travelling latéral doux accompagnant leur pas",
+                "sound_fx": "Claquement sec des geta sur la pierre, bruissement de soie, note pincée de koto",
+                "duration": 4.5,
+                "transition_type": "crossfade"
+            },
+            {
+                "order_index": 2,
+                "title": "Plan 3 : L'Ordre & la Force : Patrouille des Samouraïs",
+                "image_url": "\/public\/assets\/clans\/clan_takeda_cavalry_charge.jpg",
+                "narrative_text": "Trois fiers samouraïs en armures laquées noires et rouge écarlate patrouillent calmement. La main posée sur la tsuba de leur katana, la foule s'écarte avec respect.",
+                "voiceover_text": "Mais la paix d'un domaine repose toujours sur le tranchant de ses lames.",
+                "camera_movement": "Plan moyen face aux guerriers en légère contre-plongée",
+                "sound_fx": "Bruit métallique des plaques d'armure, battement sourd et lointain d'un tambour taiko",
+                "duration": 5,
+                "transition_type": "cut"
+            },
+            {
+                "order_index": 3,
+                "title": "Plan 4 : Le Siège du Pouvoir : Tenshu & Logo OpenShogun",
+                "image_url": "\/public\/assets\/buildings\/building_tenshu.jpg",
+                "narrative_text": "La caméra s'élève au-dessus des toits du marché pour embrasser le donjon impérial Tenshu sur son promontoire de pierre. Logo OpenShogun avec sceau impérial.",
+                "voiceover_text": "OpenShogun. Bâtissez votre fief. Forgez votre légende.",
+                "camera_movement": "Élévation majestueuse en grue vers le ciel doré",
+                "sound_fx": "Crescendo martial de taiko, souffle de vent, résonance de gong shinto",
+                "duration": 3,
+                "transition_type": "fade_black"
+            }
+        ],
+        "id": 1,
+        "created_at": "2026-10-15 15:42:37",
+        "updated_at": "2026-10-15 15:42:37"
+    },
+    {
+        "title": "Teaser Événement : La Grande Forge du Tamahagane",
+        "slug": "teaser-forge-tamahagane",
+        "description": "Focus narratif sur le travail minier des cimes, le fourneau Tatara ancestral et la trempe des armes de prestige au niveau 15 et 20 de la forge.",
+        "video_type": "event_teaser",
+        "target_duration": 18,
+        "audio_track_title": "Honneur d'Acier & Enclume Sacrée",
+        "aspect_ratio": "16:9",
+        "shots": [
+            {
+                "order_index": 0,
+                "title": "Plan 1 : Le Mineur des Cimes (Kōfu)",
+                "image_url": "\/public\/assets\/units\/mineur.jpg",
+                "narrative_text": "Au sommet des crêtes volcaniques brumeuses, le mineur extrait le sable de fer satetsu et le soufre pur sous une lumière dorée.",
+                "voiceover_text": "Dans les hauteurs inhospitalières des cimes, nos mineurs arrachent la matière première des dieux.",
+                "camera_movement": "Plan large panoramique sur la montagne puis zoom lent sur le mineur",
+                "sound_fx": "Vent des cimes, coup sec de pioche sur la roche volcanique",
+                "duration": 4.5,
+                "transition_type": "cut"
+            },
+            {
+                "order_index": 1,
+                "title": "Plan 2 : Le Fourneau Tatara en Fusion",
+                "image_url": "\/public\/assets\/buildings\/building_blacksmith.jpg",
+                "narrative_text": "Les braises incandescentes du fourneau Tatara atteignent les mille degrés. Les maîtres forgerons battent le fer à cadence régulière.",
+                "voiceover_text": "Charbon de bois et sable noir fusionnent dans le creuset des maîtres du Tamahagane.",
+                "camera_movement": "Gros plan dynamique sur les gerbes d'étincelles et les marteaux",
+                "sound_fx": "Souffle puissant du soufflet de forge, marteaux lourds frappant en rythme",
+                "duration": 4.5,
+                "transition_type": "cut"
+            },
+            {
+                "order_index": 2,
+                "title": "Plan 3 : La Trempe de la Lame Sacrée",
+                "image_url": "\/public\/assets\/items\/armure_do_maru.jpeg",
+                "narrative_text": "La lame rougeoyante est plongée dans l'eau bénie par les prières shinto. Une vapeur blanche s'élève dans la pénombre.",
+                "voiceover_text": "Une lame digne d'un daimyō ne tolère aucune impureté.",
+                "camera_movement": "Travelling avant vers la vapeur d'eau qui s'évapore",
+                "sound_fx": "Sifflement intense de l'acier trempé dans l'eau froide, clochette shinto",
+                "duration": 4.5,
+                "transition_type": "crossfade"
+            },
+            {
+                "order_index": 3,
+                "title": "Plan 4 : La Garde d'Honneur en Armure Lourde",
+                "image_url": "\/public\/assets\/units\/archer_protecteur_muraille.jpg",
+                "narrative_text": "Les gardes d'élite équipés de leurs armures de prestige et de leurs katanas étincelants s'alignent sur les remparts.",
+                "voiceover_text": "Débloquez la Grande Forge Niveau 20 et menez vos légions à la victoire.",
+                "camera_movement": "Plan large en travelling arrière révélant l'armée prête au combat",
+                "sound_fx": "Taiko martial puissant, cri de guerre unanime des samouraïs",
+                "duration": 4.5,
+                "transition_type": "fade_black"
+            }
+        ],
+        "id": 2,
+        "created_at": "2026-10-15 15:42:37",
+        "updated_at": "2026-10-15 15:42:37"
+    },
+    {
+        "title": "Démo Gameplay : L'Arpentage & la Cité Fluviale",
+        "slug": "demo-arpentage-cite-fluviale",
+        "description": "Démonstration de l'expansion du fief, de l'arpentage des parcelles rurales et du développement castral.",
+        "video_type": "gameplay_demo",
+        "target_duration": 20,
+        "audio_track_title": "Harmonie du Terroir",
+        "aspect_ratio": "16:9",
+        "shots": [
+            {
+                "order_index": 0,
+                "title": "Plan 1 : Vue d'Ensemble du Terroir Provincial",
+                "image_url": "\/public\/assets\/resources\/terroir_clay.jpg",
+                "narrative_text": "Cartographie vue du ciel des 40 parcelles du domaine : rizières, forêts de cèdre et carrières de granit.",
+                "voiceover_text": "Chaque grande forteresse commence par le tracé rigoureux de ses parcelles.",
+                "camera_movement": "Descente fluide d'un plan satellite vers la surface",
+                "sound_fx": "Ruisseau qui coule, oiseaux de campagne",
+                "duration": 5,
+                "transition_type": "crossfade"
+            },
+            {
+                "order_index": 1,
+                "title": "Plan 2 : Le Chantier Naval & la Flotte Fluviale",
+                "image_url": "\/public\/assets\/buildings\/building_shipyard.jpg",
+                "narrative_text": "Les charpentiers assemblent les navires de guerre le long des quais fluviaux fortifiés.",
+                "voiceover_text": "Contrôlez les voies d'eau et approvisionnez vos garnisons sans délai.",
+                "camera_movement": "Travelling avant longeant la cale de halage",
+                "sound_fx": "Bruit de scies à bois, clapotis des vagues sur la coque",
+                "duration": 5,
+                "transition_type": "cut"
+            },
+            {
+                "order_index": 2,
+                "title": "Plan 3 : La Muraille & les Tours de Vigilance",
+                "image_url": "\/public\/assets\/buildings\/building_wall.jpg",
+                "narrative_text": "Les créneaux de pierre et les archers en vigie surveillent l'horizon brumeux des terres ennemies.",
+                "voiceover_text": "Une défense inexpugnable décourage les daimyōs rivaux.",
+                "camera_movement": "Panoramique latéral le long du chemin de ronde",
+                "sound_fx": "Vent dans les bannières, sifflement d'une flèche d'essai",
+                "duration": 5,
+                "transition_type": "cut"
+            },
+            {
+                "order_index": 3,
+                "title": "Plan 4 : La Cité Royale de Himeji",
+                "image_url": "\/public\/assets\/castles\/himeji.jpg",
+                "narrative_text": "La cité castrale achevée, majestueuse et impériale sous un coucher de soleil pourpre.",
+                "voiceover_text": "Rejoignez des milliers de daimyōs. Jouez gratuitement à OpenShogun.",
+                "camera_movement": "Plan large fixe contemplatif, brume matinale au pied des murs",
+                "sound_fx": "Cloche de temple bouddhiste au loin, fondu musical apaisant",
+                "duration": 5,
+                "transition_type": "fade_black"
+            }
+        ],
+        "id": 3,
+        "created_at": "2026-10-15 15:42:37",
+        "updated_at": "2026-10-15 15:42:37"
+    }
+]

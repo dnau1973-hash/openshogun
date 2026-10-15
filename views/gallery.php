@@ -1015,3 +1015,4 @@ $galleryJson = json_encode($galleryItems, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HE
 </body>
 </html>
 <?php endif; ?>
+
