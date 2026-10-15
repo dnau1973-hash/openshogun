@@ -5,6 +5,8 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [1.30.0] - 2026-10-15
 ### Amélioré (Enhanced) & Ajouté (Added)
+- **Illustration Officielle du Mineur des Cimes (`public/assets/units/mineur.jpg`) :**
+  * Création et intégration de l'illustration HD du Mineur des Cimes (*Kōfu* ⛏️) dans le style concept art féodal japonais d'OpenShogun : mineur aguerri en tenue de travail sashiko indigo, sandales waraji, pioche forgée en main et panier dorsal tressé garni de cristaux de soufre volcanique et de sable de fer (*satetsu*), surplombant une crête rocheuse volcanique escarpée baignée de fumerolles.
 - **Affichage des Nouvelles Ressources Minérales dans le HUD Supérieur (`views/partials/header.php`, `views/partials/footer.php`) :**
   * **Nouveau Menu Déroulant « Minerais » sous le Carrousel Castral :** Intégration d'un bouton de catégorie dédié rouge rubis (`#dropdownMinerais`, icône `fa-gem`, badge `3`, sous-titre `Sable • Soufre • Nitrate`) entre Construction et Alimentaire.
   * **3 Cartes de Ressources Minérales Interactives :**

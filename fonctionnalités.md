@@ -1,5 +1,21 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-15] - mineur-unit-artwork : Illustration Officielle du Mineur des Cimes (Kōfu)
+- **Module :** `mineur-unit-artwork`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Illustration HD du Mineur des Cimes (`public/assets/units/mineur.jpg`) :**
+     - Réalisation d'une illustration concept art peinte à la main dans le style ukiyo-e / Sengoku d'OpenShogun.
+     - Représentation fidèle de l'unité : mineur aguerri en tenue de travail indigo sashiko, sandales de paille waraji, tenant sa pioche de mineur (*tsuruhashi*) et portant une hotte tressée remplie de cristaux de soufre volcanique et de sable de fer étincelant (*satetsu*), au sommet d'un massif rocheux volcanique fumant.
+     - Affichage automatique dans la caserne (`?page=barracks`), le panneau de troupes (`troops_panel.php`), les rapports d'expédition minière et le livre des unités (`?page=docs`).
+- **Fichiers modifiés :** `public/assets/units/mineur.jpg`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se rendre au Dojo d'Infanterie / Caserne (`/?page=barracks`).
+  2. Vérifier la tuile du « Mineur des Cimes (Kōfu) » : la carte affiche désormais l'illustration HD complète `mineur.jpg`.
+  3. Vérifier la section Unités / Documentation (`/?page=docs`) et s'assurer que le portrait s'affiche correctement.
+
+---
+
 ### [2026-10-15] - mineral-resources-header-bar : Intégration des Ressources Minérales (Sable, Soufre, Nitrate) dans le HUD Supérieur
 - **Module :** `mineral-resources-header-bar`
 - **Statut :** `À tester`
