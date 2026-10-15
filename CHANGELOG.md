@@ -6,7 +6,10 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 ## [1.30.0] - 2026-10-15
 ### Amélioré (Enhanced) & Ajouté (Added)
 - **Modernisation & Équilibrage du Simulateur de Vie dans un Village (`views/studio/game-elevate-designer/village-life-simulator.php`) :**
-  * **Uniformisation des KPI au Standard Tabler / Game Studio :** Réorganisation en grille harmonisée de 7 cartes KPI interactives (Satisfaction & Moral avec badge Saké +15%, Démographie & Minka, Pyramide des 4 Castes Sociales quadri-colore, Emplois & Activité, Ordre & Sécurité Féodale avec délinquance nette, Grenier Féodal des Vivres, et Entrepôt des Matériaux & Énergie).
+  * **Uniformisation Complète des 7 Cartes KPI au Standard Tabler :** Harmonisation structurelle et visuelle intégrale (bordure gauche colorée, badge d'en-tête thématique, indicateur chiffré principal `fs-1 font-monospace`, sous-titre de statut contextuel et jauge de progression `progress-xs`) pour l'ensemble des métriques : *Satisfaction & Moral*, *Démographie & Minka*, *Pyramide des 4 Castes*, *Emplois & Activité*, *Ordre & Sécurité Féodale*, *Grenier des Vivres* (total en silos) et *Entrepôt des Matériaux* (total chantiers).
+  * **Amélioration de la Lisibilité Graphique & Visuelle :**
+    - Suppression des badges numériques couvrant les points du graphique Dynamique Temporelle (`dataLabels: { enabled: false }`, `markers: { size: 0 }`), rendant les 8 courbes parfaitement nettes et visibles.
+    - Révision du contraste des badges d'en-tête et de contrôle des flux (texte sombre haute lisibilité sur fond jaune pour les vivres, texte blanc sur fond indigo pour les matériaux, et labels explicites `text-white` / `text-dark`).
   * **Intégration Complète des 4 Castes Féodales (*Shinōkōshō*) :** Modélisation fidèle de la dynamique sociale féodale (*Paysans Nōmin*, *Artisans Kōgiyō*, *Marchands Shōnin*, *Noblesse Bushi & Daimyō*) avec besoins spécifiques de subsistance et de confort, promotion sociale automatique et régression en cas de pénurie.
   * **Intégration des Nouvelles Ressources de Jeu :**
     - *Vivres & Denrées :* Riz impérial, Poisson frais, Soja du terroir, Farine de riz, Thé vert, Saké impérial (respect strict de la règle asymétrique : +15% de bonus si présent, 0 malus si absent).

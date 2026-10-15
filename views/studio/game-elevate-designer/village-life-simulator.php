@@ -284,7 +284,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                     <i class="fa-solid fa-wheat-awn text-warning"></i>
                     <span>Flux Agricoles &amp; Vivres (Entrées /h)</span>
                 </div>
-                <span class="badge bg-warning-lt text-warning fw-bold">Alimentation des Castes</span>
+                <span class="badge bg-warning text-dark fw-bold">Alimentation des Castes</span>
             </div>
             <div class="card-body p-3">
                 <!-- 1. Riz Impérial -->
@@ -305,7 +305,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                         <label class="form-label small fw-bold m-0">
                             <i class="fa-solid fa-fish text-azure me-1"></i>Poisson Frais (Port &amp; Pêcherie) :
                         </label>
-                        <span class="badge bg-azure font-monospace" id="val-prod-fish">+30 paniers / h</span>
+                        <span class="badge bg-azure text-white font-monospace" id="val-prod-fish">+30 paniers / h</span>
                     </div>
                     <input type="range" class="form-range" id="range-prod-fish" min="0" max="150" step="2" value="30" oninput="syncInput('prod-fish', this.value)">
                     <div class="text-secondary small">Nécessaire à l'épanouissement de la caste des Artisans (0.02 panier/hab/h).</div>
@@ -317,7 +317,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                         <label class="form-label small fw-bold m-0">
                             <i class="fa-solid fa-seedling text-success me-1"></i>Soja du Terroir (Champs &amp; Maraîchage) :
                         </label>
-                        <span class="badge bg-success font-monospace" id="val-prod-soy">+25 sacs / h</span>
+                        <span class="badge bg-success text-white font-monospace" id="val-prod-soy">+25 sacs / h</span>
                     </div>
                     <input type="range" class="form-range" id="range-prod-soy" min="0" max="150" step="2" value="25" oninput="syncInput('prod-soy', this.value)">
                     <div class="text-secondary small">Consommé par les Artisans &amp; Bâtisseurs (0.02 sac/hab/h) avec le poisson.</div>
@@ -329,7 +329,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                         <label class="form-label small fw-bold m-0">
                             <i class="fa-solid fa-bowl-rice text-secondary me-1"></i>Farine de Riz (Meunerie &amp; Minoterie) :
                         </label>
-                        <span class="badge bg-secondary font-monospace" id="val-prod-flour">+30 sacs / h</span>
+                        <span class="badge bg-secondary text-white font-monospace" id="val-prod-flour">+30 sacs / h</span>
                     </div>
                     <input type="range" class="form-range" id="range-prod-flour" min="0" max="150" step="2" value="30" oninput="syncInput('prod-flour', this.value)">
                     <div class="text-secondary small">Consommée par les Marchands (0.02 sac/h) et la Noblesse (0.02 sac/h).</div>
@@ -341,7 +341,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                         <label class="form-label small fw-bold m-0">
                             <i class="fa-solid fa-mug-hot text-teal me-1"></i>Thé Vert (Plantations &amp; Pavillons) :
                         </label>
-                        <span class="badge bg-teal font-monospace" id="val-prod-tea">+15 boîtes / h</span>
+                        <span class="badge bg-teal text-white font-monospace" id="val-prod-tea">+15 boîtes / h</span>
                     </div>
                     <input type="range" class="form-range" id="range-prod-tea" min="0" max="100" step="1" value="15" oninput="syncInput('prod-tea', this.value)">
                     <div class="text-secondary small">Requis pour les Marchands (0.015 boîte/h) et la Noblesse/Bushi (0.015 boîte/h).</div>
@@ -353,7 +353,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                         <label class="form-label small fw-bold m-0">
                             <i class="fa-solid fa-wine-bottle text-purple me-1"></i>Saké Impérial (Brasseries féodales) :
                         </label>
-                        <span class="badge bg-purple font-monospace" id="val-prod-sake">+15 tonnelets / h</span>
+                        <span class="badge bg-purple text-white font-monospace" id="val-prod-sake">+15 tonnelets / h</span>
                     </div>
                     <input type="range" class="form-range" id="range-prod-sake" min="0" max="80" step="1" value="15" oninput="syncInput('prod-sake', this.value)">
                     <div class="text-secondary small">
@@ -370,7 +370,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                     <i class="fa-solid fa-cubes-stacked text-indigo"></i>
                     <span>Flux Matériaux &amp; Énergie (Entrées /h)</span>
                 </div>
-                <span class="badge bg-indigo-lt text-indigo fw-bold">Chantiers &amp; Ateliers</span>
+                <span class="badge bg-indigo text-white fw-bold">Chantiers &amp; Ateliers</span>
             </div>
             <div class="card-body p-3">
                 <!-- 1. Bois de Cèdre -->
@@ -379,7 +379,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                         <label class="form-label small fw-bold m-0">
                             <i class="fa-solid fa-tree text-green me-1"></i>Bois de Cèdre (Scieries) :
                         </label>
-                        <span class="badge bg-green font-monospace" id="val-prod-wood">+50 unités / h</span>
+                        <span class="badge bg-green text-white font-monospace" id="val-prod-wood">+50 unités / h</span>
                     </div>
                     <input type="range" class="form-range" id="range-prod-wood" min="0" max="200" step="5" value="50" oninput="syncInput('prod-wood', this.value)">
                 </div>
@@ -390,7 +390,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                         <label class="form-label small fw-bold m-0">
                             <i class="fa-solid fa-gem text-secondary me-1"></i>Pierre de Granit (Carrières) :
                         </label>
-                        <span class="badge bg-secondary font-monospace" id="val-prod-stone">+40 unités / h</span>
+                        <span class="badge bg-secondary text-white font-monospace" id="val-prod-stone">+40 unités / h</span>
                     </div>
                     <input type="range" class="form-range" id="range-prod-stone" min="0" max="200" step="5" value="40" oninput="syncInput('prod-stone', this.value)">
                 </div>
@@ -401,7 +401,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                         <label class="form-label small fw-bold m-0">
                             <i class="fa-solid fa-shapes text-orange me-1"></i>Argile &amp; Terres (Fosses &amp; Tuileries) :
                         </label>
-                        <span class="badge bg-orange font-monospace" id="val-prod-clay">+30 unités / h</span>
+                        <span class="badge bg-orange text-white font-monospace" id="val-prod-clay">+30 unités / h</span>
                     </div>
                     <input type="range" class="form-range" id="range-prod-clay" min="0" max="150" step="2" value="30" oninput="syncInput('prod-clay', this.value)">
                 </div>
@@ -410,9 +410,9 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label class="form-label small fw-bold m-0">
-                            <i class="fa-solid fa-trowel-bricks text-yellow me-1"></i>Poutres de Charpente (Menuiserie) :
+                            <i class="fa-solid fa-trowel-bricks text-warning me-1"></i>Poutres de Charpente (Menuiserie) :
                         </label>
-                        <span class="badge bg-yellow text-dark font-monospace" id="val-prod-beams">+15 poutres / h</span>
+                        <span class="badge bg-warning text-dark font-monospace" id="val-prod-beams">+15 poutres / h</span>
                     </div>
                     <input type="range" class="form-range" id="range-prod-beams" min="0" max="100" step="1" value="15" oninput="syncInput('prod-beams', this.value)">
                 </div>
@@ -423,7 +423,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                         <label class="form-label small fw-bold m-0">
                             <i class="fa-solid fa-fire-flame-curved text-dark me-1"></i>Charbon de Bois (Combustible des forges) :
                         </label>
-                        <span class="badge bg-dark font-monospace" id="val-prod-charcoal">+20 sacs / h</span>
+                        <span class="badge bg-dark text-white font-monospace" id="val-prod-charcoal">+20 sacs / h</span>
                     </div>
                     <input type="range" class="form-range" id="range-prod-charcoal" min="0" max="100" step="1" value="20" oninput="syncInput('prod-charcoal', this.value)">
                 </div>
@@ -434,7 +434,7 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                         <label class="form-label small fw-bold m-0">
                             <i class="fa-solid fa-torii-gate text-teal me-1"></i>Sérénité Shinto &amp; Ferveur Kami :
                         </label>
-                        <span class="badge bg-teal font-monospace" id="val-serenity">80 / 100</span>
+                        <span class="badge bg-teal text-white font-monospace" id="val-serenity">80 / 100</span>
                     </div>
                     <input type="range" class="form-range" id="range-serenity" min="0" max="100" step="5" value="80" oninput="syncInput('serenity', this.value)">
                     <div class="text-secondary small">Énergie et paix spirituelle des sanctuaires. Si &lt; 50, induit une anxiété des villageois (-20%).</div>
@@ -482,17 +482,19 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
 
             <!-- KPI 2 : Démographie & Minka -->
             <div class="col-12 col-sm-6 col-xxl-3">
-                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-primary">
+                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3" style="border-left-color: #0284c7 !important;">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
                             <span class="text-secondary small fw-bold">Démographie (Minka)</span>
-                            <i class="fa-solid fa-users text-primary"></i>
+                            <span id="kpi-housing-occ-badge" class="badge bg-primary-lt text-primary py-0 px-1 font-monospace">
+                                <i class="fa-solid fa-users me-1"></i>60% plein
+                            </span>
                         </div>
                         <div class="d-flex align-items-baseline gap-1">
                             <span class="fs-1 fw-bold text-primary font-monospace" id="kpi-pop-val">120</span>
                             <span class="text-muted small">/ <span id="kpi-housing-max">200</span></span>
                         </div>
-                        <div class="text-muted small text-truncate" id="kpi-housing-rate">60% d'occupation</div>
+                        <div class="text-muted small text-truncate" id="kpi-housing-rate">60% d'occupation des Minka</div>
                         <div class="progress progress-xs mt-2">
                             <div class="progress-bar bg-primary" id="kpi-pop-bar" style="width: 60%;"></div>
                         </div>
@@ -526,13 +528,15 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 </div>
             </div>
 
-            <!-- KPI 4 : Emplois & Main-d'œuvre -->
+            <!-- KPI 4 : Emplois & Activité -->
             <div class="col-12 col-sm-6 col-xxl-3">
-                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-warning">
+                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3" style="border-left-color: #f59e0b !important;">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
                             <span class="text-secondary small fw-bold">Emplois &amp; Activité</span>
-                            <i class="fa-solid fa-briefcase text-warning"></i>
+                            <span id="kpi-workforce-badge" class="badge bg-warning-lt text-warning py-0 px-1 font-monospace">
+                                <i class="fa-solid fa-briefcase me-1"></i>100% pourvu
+                            </span>
                         </div>
                         <div class="d-flex align-items-baseline gap-1">
                             <span class="fs-1 fw-bold text-warning font-monospace" id="kpi-workforce-val">110</span>
@@ -571,56 +575,46 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 </div>
             </div>
 
-            <!-- KPI 6 : Grenier Féodal (Vivres & Confort) -->
+            <!-- KPI 6 : Grenier Féodal (Vivres) -->
             <div class="col-12 col-md-4">
-                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-teal">
+                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3" style="border-left-color: #0d9488 !important;">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
                             <span class="text-secondary small fw-bold">Grenier (Vivres)</span>
-                            <i class="fa-solid fa-bowl-rice text-teal"></i>
+                            <span id="kpi-grain-badge" class="badge bg-teal-lt text-teal py-0 px-1 font-monospace">
+                                <i class="fa-solid fa-wheat-awn me-1"></i>Silos Pleins
+                            </span>
                         </div>
-                        <div class="small font-monospace" style="line-height: 1.35; font-size: 0.76rem;">
-                            <div class="d-flex justify-content-between">
-                                <span>🌾 Riz: <strong id="kpi-stock-rice">400</strong></span>
-                                <span>🐟 Poisson: <strong id="kpi-stock-fish">150</strong></span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>🌱 Soja: <strong id="kpi-stock-soy">120</strong></span>
-                                <span>🍵 Thé: <strong id="kpi-stock-tea">80</strong></span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>🍚 Farine: <strong id="kpi-stock-flour">160</strong></span>
-                                <span>🍶 Saké: <strong id="kpi-stock-sake">60</strong></span>
-                            </div>
+                        <div class="d-flex align-items-baseline gap-1">
+                            <span class="fs-1 fw-bold text-teal font-monospace" id="kpi-stock-food-total">970</span>
+                            <span class="text-secondary small">(Total en silos)</span>
                         </div>
-                        <div class="text-muted small mt-1" id="kpi-food-status" style="font-size:0.68rem;">Rations &amp; Fêtes assurées</div>
+                        <div class="text-muted small text-truncate" id="kpi-food-status">Rations &amp; Fêtes assurées</div>
+                        <div class="progress progress-xs mt-2">
+                            <div class="progress-bar bg-teal" id="kpi-food-bar" style="width: 65%;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- KPI 7 : Entrepôt des Matériaux & Chantiers -->
             <div class="col-12 col-md-4">
-                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3 border-indigo">
+                <div class="card card-sm shadow-sm h-100 village-kpi-card border-start border-3" style="border-left-color: #6366f1 !important;">
                     <div class="card-body p-2">
                         <div class="d-flex align-items-center justify-content-between mb-1">
                             <span class="text-secondary small fw-bold">Entrepôt Matériaux</span>
-                            <i class="fa-solid fa-boxes-stacked text-indigo"></i>
+                            <span id="kpi-materials-badge" class="badge bg-indigo-lt text-indigo py-0 px-1 font-monospace">
+                                <i class="fa-solid fa-boxes-stacked me-1"></i>Chantiers
+                            </span>
                         </div>
-                        <div class="small font-monospace" style="line-height: 1.35; font-size: 0.76rem;">
-                            <div class="d-flex justify-content-between">
-                                <span>🪵 Bois: <strong id="kpi-stock-wood">250</strong></span>
-                                <span>🪨 Pierre: <strong id="kpi-stock-stone">180</strong></span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>🧱 Argile: <strong id="kpi-stock-clay">140</strong></span>
-                                <span>🏗️ Poutres: <strong id="kpi-stock-beams">75</strong></span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>🔥 Charbon: <strong id="kpi-stock-charcoal">90</strong></span>
-                                <span>⛩️ Sérénité: <strong id="kpi-stock-serenity">80</strong></span>
-                            </div>
+                        <div class="d-flex align-items-baseline gap-1">
+                            <span class="fs-1 fw-bold text-indigo font-monospace" id="kpi-stock-mat-total">735</span>
+                            <span class="text-secondary small">(Unités chantiers)</span>
                         </div>
-                        <div class="text-muted small mt-1" id="kpi-materials-status" style="font-size:0.68rem;">Chantiers Kizukuri approvisionnés</div>
+                        <div class="text-muted small text-truncate" id="kpi-materials-status">Chantiers Kizukuri approvisionnés</div>
+                        <div class="progress progress-xs mt-2">
+                            <div class="progress-bar bg-indigo" id="kpi-materials-bar" style="width: 55%;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -634,7 +628,6 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                     <span>Dynamique Temporelle (Population, 4 Castes, Saké, Délinquance, Moral)</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-green-lt text-green font-monospace" id="sim-points-counter">0 cycles enregistrés</span>
                     <button type="button" class="btn btn-sm btn-ghost-secondary p-1" onclick="clearVillageChart()" title="Réinitialiser les courbes">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
@@ -1450,8 +1443,13 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         document.getElementById('kpi-pop-val').innerText = Math.round(state.pop);
         document.getElementById('kpi-housing-max').innerText = state.housingCap;
         const occRate = Math.round((state.pop / state.housingCap) * 100);
-        document.getElementById('kpi-housing-rate').innerText = occRate + "% d'occupation";
+        document.getElementById('kpi-housing-rate').innerText = occRate + "% d'occupation des Minka";
         document.getElementById('kpi-pop-bar').style.width = Math.min(100, occRate) + '%';
+        const demographyBadge = document.getElementById('kpi-housing-occ-badge');
+        if (demographyBadge) {
+            demographyBadge.innerHTML = `<i class="fa-solid fa-users me-1"></i>${occRate}% plein`;
+            demographyBadge.className = occRate > 100 ? 'badge bg-danger-lt text-danger py-0 px-1 font-monospace' : 'badge bg-primary-lt text-primary py-0 px-1 font-monospace';
+        }
         document.getElementById('demography-badge-total').innerText = 'Pop: ' + Math.round(state.pop);
 
         // KPI 3 : 4 Castes Féodales
@@ -1472,13 +1470,26 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         document.getElementById('kpi-workforce-req').innerText = state.openJobs;
         const wfRate = Math.round(state.workforceRatio * 100);
         document.getElementById('kpi-workforce-bar').style.width = wfRate + '%';
+        const workforceBadge = document.getElementById('kpi-workforce-badge');
         if (state.workforceRatio < 1.0) {
             const malus = Math.round((1.0 - state.workforceRatio) * 100);
             document.getElementById('kpi-workforce-status').innerText = `Sous-effectif (-${malus}%)`;
+            if (workforceBadge) {
+                workforceBadge.className = 'badge bg-danger-lt text-danger py-0 px-1 font-monospace';
+                workforceBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i>${wfRate}% pourvu`;
+            }
         } else if (state.idleWorkers > 0) {
             document.getElementById('kpi-workforce-status').innerText = `${state.idleWorkers} inactifs (${state.unemploymentPct}% sans poste)`;
+            if (workforceBadge) {
+                workforceBadge.className = 'badge bg-warning-lt text-warning py-0 px-1 font-monospace';
+                workforceBadge.innerHTML = `<i class="fa-solid fa-person-shelter me-1"></i>${state.idleWorkers} inactifs`;
+            }
         } else {
             document.getElementById('kpi-workforce-status').innerText = `Plein emploi garanti`;
+            if (workforceBadge) {
+                workforceBadge.className = 'badge bg-success-lt text-success py-0 px-1 font-monospace';
+                workforceBadge.innerHTML = `<i class="fa-solid fa-briefcase me-1"></i>100% pourvu`;
+            }
         }
 
         // KPI 5 : Ordre & Sécurité
@@ -1502,40 +1513,66 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
         }
 
         // KPI 6 : Stocks du Grenier Féodal (Vivres)
-        document.getElementById('kpi-stock-rice').innerText = Math.round(state.stockRice);
-        document.getElementById('kpi-stock-fish').innerText = Math.round(state.stockFish);
-        document.getElementById('kpi-stock-soy').innerText = Math.round(state.stockSoy);
-        document.getElementById('kpi-stock-tea').innerText = Math.round(state.stockTea);
-        document.getElementById('kpi-stock-flour').innerText = Math.round(state.stockFlour);
-        document.getElementById('kpi-stock-sake').innerText = Math.round(state.stockSake);
-
+        const totalFood = Math.round(state.stockRice + state.stockFish + state.stockSoy + state.stockTea + state.stockFlour + state.stockSake);
+        const foodTotalEl = document.getElementById('kpi-stock-food-total');
+        if (foodTotalEl) foodTotalEl.innerText = totalFood;
+        const foodBar = document.getElementById('kpi-food-bar');
+        if (foodBar) {
+            const foodFillPct = Math.min(100, Math.round((totalFood / 2000) * 100));
+            foodBar.style.width = foodFillPct + '%';
+            foodBar.className = state.famineTriggered ? 'progress-bar bg-danger' : (totalFood < 200 ? 'progress-bar bg-warning' : 'progress-bar bg-teal');
+        }
         const foodStatus = document.getElementById('kpi-food-status');
+        const grainBadge = document.getElementById('kpi-grain-badge');
         if (state.famineTriggered) {
             foodStatus.innerText = '⚠️ Famine Déclarée (Rupture)';
-            foodStatus.className = 'text-danger fw-bold mt-1';
+            foodStatus.className = 'text-danger fw-bold text-truncate';
+            if (grainBadge) {
+                grainBadge.className = 'badge bg-danger-lt text-danger py-0 px-1 font-monospace';
+                grainBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i>Famine';
+            }
         } else if (state.stockFlour <= 20 || state.stockRice <= 20) {
             foodStatus.innerText = 'Ravitaillement en flux tendu';
-            foodStatus.className = 'text-warning fw-bold mt-1';
+            foodStatus.className = 'text-warning fw-bold text-truncate';
+            if (grainBadge) {
+                grainBadge.className = 'badge bg-warning-lt text-warning py-0 px-1 font-monospace';
+                grainBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i>Tension';
+            }
         } else {
             foodStatus.innerText = 'Rations & Fêtes assurées';
-            foodStatus.className = 'text-muted small mt-1';
+            foodStatus.className = 'text-muted small text-truncate';
+            if (grainBadge) {
+                grainBadge.className = 'badge bg-teal-lt text-teal py-0 px-1 font-monospace';
+                grainBadge.innerHTML = '<i class="fa-solid fa-wheat-awn me-1"></i>Silos Pleins';
+            }
         }
 
         // KPI 7 : Stocks des Matériaux
-        document.getElementById('kpi-stock-wood').innerText = Math.round(state.stockWood);
-        document.getElementById('kpi-stock-stone').innerText = Math.round(state.stockStone);
-        document.getElementById('kpi-stock-clay').innerText = Math.round(state.stockClay);
-        document.getElementById('kpi-stock-beams').innerText = Math.round(state.stockBeams);
-        document.getElementById('kpi-stock-charcoal').innerText = Math.round(state.stockCharcoal);
-        document.getElementById('kpi-stock-serenity').innerText = Math.round(state.serenity);
-
+        const totalMat = Math.round(state.stockWood + state.stockStone + state.stockClay + state.stockBeams + state.stockCharcoal);
+        const matTotalEl = document.getElementById('kpi-stock-mat-total');
+        if (matTotalEl) matTotalEl.innerText = totalMat;
+        const matBar = document.getElementById('kpi-materials-bar');
+        if (matBar) {
+            const matFillPct = Math.min(100, Math.round((totalMat / 1500) * 100));
+            matBar.style.width = matFillPct + '%';
+            matBar.className = totalMat < 100 ? 'progress-bar bg-warning' : 'progress-bar bg-indigo';
+        }
         const matStatus = document.getElementById('kpi-materials-status');
+        const matBadge = document.getElementById('kpi-materials-badge');
         if (state.stockWood <= 10 || state.stockStone <= 10) {
             matStatus.innerText = 'Chantiers ralentis (Manque de matériaux)';
-            matStatus.className = 'text-warning fw-bold mt-1';
+            matStatus.className = 'text-warning fw-bold text-truncate';
+            if (matBadge) {
+                matBadge.className = 'badge bg-warning-lt text-warning py-0 px-1 font-monospace';
+                matBadge.innerHTML = '<i class="fa-solid fa-boxes-stacked me-1"></i>Ralentis';
+            }
         } else {
             matStatus.innerText = 'Chantiers Kizukuri approvisionnés';
-            matStatus.className = 'text-muted small mt-1';
+            matStatus.className = 'text-muted small text-truncate';
+            if (matBadge) {
+                matBadge.className = 'badge bg-indigo-lt text-indigo py-0 px-1 font-monospace';
+                matBadge.innerHTML = '<i class="fa-solid fa-boxes-stacked me-1"></i>Chantiers';
+            }
         }
     }
 
@@ -1598,6 +1635,12 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                     zoom: {
                         enabled: false
                     }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                markers: {
+                    size: 0
                 },
                 series: [
                     { name: '👥 Population', data: [] },
@@ -1683,7 +1726,8 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
             h.contentment.shift();
         }
 
-        document.getElementById('sim-points-counter').innerText = h.labels.length + ' points';
+        const counterEl = document.getElementById('sim-points-counter');
+        if (counterEl) counterEl.innerText = h.labels.length + ' points';
 
         if (apexChartInstance) {
             apexChartInstance.updateOptions({
@@ -1729,7 +1773,8 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 { name: '❤️ Satisfaction (%)', data: [] }
             ]);
         }
-        document.getElementById('sim-points-counter').innerText = '0 cycle';
+        const counterEl = document.getElementById('sim-points-counter');
+        if (counterEl) counterEl.innerText = '0 cycle';
     };
 
     // Fallback Canvas HD en l'absence d'ApexCharts

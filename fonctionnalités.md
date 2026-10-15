@@ -4,26 +4,29 @@
 - **Module :** `village-life-simulator-upgrade`
 - **Statut :** `À tester`
 - **Description :**
-  1. **Uniformisation des KPI (Standard Tabler / Game Studio) :**
-     - Réorganisation en 7 cartes KPI au design harmonisé :
+  1. **Uniformisation Complète des 7 Cartes KPI (Standard Tabler / Game Studio) :**
+     - Réorganisation en 7 cartes KPI au design parfaitement unifié (bordure gauche colorée, badge d'en-tête, valeur principale `fs-1 font-monospace`, sous-titre explicite et barre de progression à la base) :
        * *Satisfaction & Moral Global* (%, jauge, badge Saké +15% asymétrique, clignotement rouge en cas d'exode critique).
-       * *Démographie & Minka* (Population, places max, % d'occupation).
+       * *Démographie & Minka* (Population, places max, % d'occupation, badge dynamique de remplissage).
        * *Pyramide des 4 Castes Féodales* (Effectifs, pourcentages et barre de progression quadri-couleur segmentée : Paysans `#16a34a`, Artisans `#0284c7`, Marchands `#d97706`, Noblesse `#7c3aed`).
-       * *Emplois & Activité* (Postes pourvus vs requis, indicateur de plein emploi ou sous-effectif).
-       * *Ordre & Sécurité Féodale* (Délinquance nette %, efficacité garnison/vigie, statut de paix civile ou brigandage).
-       * *Grenier Féodal (Vivres & Confort)* (Riz, Poisson, Soja, Farine, Thé, Saké avec alertes d'autonomie et statut de ravitaillement).
-       * *Entrepôt des Matériaux & Énergie* (Bois, Pierre, Argile, Poutres, Charbon, Sérénité Shintō).
-  2. **Intégration Complète des 4 Castes Féodales (*Shinōkōshō*) :**
+       * *Emplois & Activité* (Postes pourvus vs requis, badge d'état pourvu/inactifs, jauge d'activité).
+       * *Ordre & Sécurité Féodale* (Délinquance nette %, badge et statut de paix civile ou brigandage).
+       * *Grenier Féodal (Vivres)* (Total en silos en valeur principale, répartition détaillée, statut et jauge de subsistance).
+       * *Entrepôt des Matériaux & Énergie* (Total des réserves chantiers en valeur principale, répartition détaillée, statut et jauge de réserve).
+  2. **Amélioration de la Lisibilité Graphique & Contrastes des Badges :**
+     - *Graphique Dynamique Temporelle :* Suppression des badges numériques qui masquaient les courbes (`dataLabels: { enabled: false }`, `markers: { size: 0 }`), rendant les 8 courbes parfaitement visibles et lisibles.
+     - *Badges de Flux :* Augmentation du contraste des badges d'en-tête et de contrôle des flux (texte sombre sur fond jaune pour les vivres, texte blanc sur fond indigo pour les matériaux, labels `text-white` et `text-dark`).
+  3. **Intégration Complète des 4 Castes Féodales (*Shinōkōshō*) :**
      - Modélisation de la dynamique de consommation et de subsistance inspirée de `SocialCasteEngine` :
        * *Paysans (Nōmin)* : Consomment 0.04 sac de farine ou koku de riz / hab / h.
        * *Artisans (Kōgiyō)* : Consomment 0.02 poisson frais + 0.02 soja / hab / h, mobilisent bois, pierre, argile, poutres et charbon pour l'entretien des chantiers.
        * *Marchands (Shōnin)* : Consomment 0.02 farine de riz + 0.015 thé vert / hab / h.
        * *Noblesse (Bushi & Daimyō)* : Consomment 0.02 saké impérial + 0.015 thé vert + 0.02 farine de riz / hab / h.
      - Promotion et régression automatique des effectifs selon les disponibilités des denrées et calcul du palier de civilisation (Hameau Paysan, Cité Artisanale, Comptoir Marchand, Cour Aristocratique).
-  3. **Intégration des Nouvelles Ressources :**
+  4. **Intégration des Nouvelles Ressources :**
      - Sliders de contrôle des flux horaires (/h) pour toutes les ressources : Riz, Poisson, Soja, Farine, Thé, Saké, Bois, Pierre, Argile, Poutres, Charbon, Sérénité.
      - Respect absolu de la règle asymétrique du saké (+15% si disponible > 0, aucun malus si 0).
-  4. **Scénarios & Graphique Multi-Séries :**
+  5. **Scénarios & Graphique Multi-Séries :**
      - ApexCharts interactif 8 séries (Pop, Paysans, Artisans, Marchands, Noblesse, Saké, Délinquance, Moral) avec fallback Canvas HD.
      - 5 scénarios préconfigurés (*Équilibre Sengoku*, *Âge d'Or Artisanal*, *Prospérité & Cour*, *Crise de Délinquance*, *Pénurie & Exode*).
      - Exportation JSON complète avec insights d'équilibrage de game design.
