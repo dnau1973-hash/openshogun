@@ -438,27 +438,28 @@ if (!$isEmptyPlot) {
         <!-- ==========================================
              CAS A : TERRAIN LIBRE / EMPLACEMENT VIERGE
              ========================================== -->
-        <!-- Colonne Gauche : Information Terrain & Mini-Grille -->
-        <div class="col-lg-4">
+        <div class="col-12">
             <div class="card mb-3">
                 <div style="height:140px; background:linear-gradient(135deg,rgba(71,85,105,0.15),rgba(30,41,59,0.08)); display:flex; align-items:center; justify-content:center; font-size:3.5rem;">
                     <i class="fa-solid fa-flag text-danger"></i>
                 </div>
                 <div class="card-body">
-                    <h3 class="card-title mb-1">Emplacement Castral #<?= $slot ?></h3>
-                    <div class="text-muted mb-3" style="font-size:0.8rem;">Cour intérieure &bull; Domaine de <?= htmlspecialchars($planet['name']) ?></div>
-                    <p class="text-muted" style="font-size:0.875rem;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h3 class="card-title mb-1">Emplacement Castral #<?= $slot ?></h3>
+                            <div class="text-muted" style="font-size:0.8rem;">Cour intérieure &bull; Domaine de <?= htmlspecialchars($planet['name']) ?></div>
+                        </div>
+                        <a href="/?page=city" class="btn btn-outline-secondary">
+                            ← Revenir à la Cité Castrale
+                        </a>
+                    </div>
+                    <p class="text-muted mt-2 mb-0" style="font-size:0.875rem;">
                         Cet emplacement est viabilisé au sein de l'enceinte de votre forteresse. Au fur et à mesure de l'élévation de votre Tenshu, de nouvelles structures féodales pourront y être fondées.
                     </p>
-                    <a href="/?page=city" class="btn btn-outline-secondary w-100 mt-2">
-                        ← Revenir à la Cité Castrale
-                    </a>
                 </div>
             </div>
-        </div>
 
-        <!-- Colonne Droite : Catalogue des Bâtiments Constructibles -->
-        <div class="col-lg-8">
+            <!-- Catalogue des Bâtiments Constructibles -->
             <div class="card">
                 <div class="card-header">
                     <div>
@@ -551,120 +552,127 @@ if (!$isEmptyPlot) {
         <!-- ==========================================
              CAS B : BÂTIMENT FÉODAL ACTIF
              ========================================== -->
-        <!-- Colonne Gauche : Identité Bâtiment & Mini-Grille -->
-        <div class="col-lg-5">
+        <div class="col-12">
 
-            <!-- Card identité du bâtiment -->
+            <!-- Card identité du bâtiment (Vue Pleine Largeur) -->
             <div class="card mb-3">
-                <?php if ($buildingIllustrationUrl): ?>
-                    <div class="card-img-top position-relative" style="position:relative; cursor:pointer; overflow:hidden; max-height:220px;" title="Agrandir l'estampe">
-                        <img src="<?= $buildingIllustrationUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:100%; height:220px; object-fit:cover; display:block;">                        
-                        <!-- Badge Transparence IA Prompts (« ? ») -->
-                        <?= AiPromptHelper::renderBadge($heroImgRel, $bInfo['name'], $buildingIllustrationUrl) ?>
-                    </div>
-                <?php else: ?>
-                    <div style="height:120px; background:linear-gradient(135deg,rgba(185,28,28,0.15),rgba(30,41,59,0.1)); display:flex; align-items:center; justify-content:center; font-size:3rem;">
-                        <?= $bInfo['icon'] ?? '<i class="fa-solid fa-chess-rook"></i>' ?>
-                    </div>
-                <?php endif; ?>
-
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="position-relative me-3" style="cursor:pointer; display:inline-block;" onclick="openArtworkModal('<?= $tileUrl ?>', '<?= htmlspecialchars(addslashes($bInfo['name'])) ?> &bull; Bâtiment')" title="Agrandir le bâtiment">
-                            <img src="<?= $tileUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:52px; height:52px; border-radius:8px; object-fit:cover; border:2px solid var(--tblr-border-color); display:block;">
-                            <span class="badge bg-dark text-white position-absolute" style="bottom:-4px; right:-4px; font-size:0.6rem; padding:2px 4px; border-radius:4px; box-shadow:0 2px 4px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.3); pointer-events:none;" title="Agrandir">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                            </span>
+                <div class="row g-0 align-items-stretch">
+                    <?php if ($buildingIllustrationUrl): ?>
+                        <div class="col-md-4 col-lg-3 position-relative" style="cursor:pointer; overflow:hidden; min-height:220px;" title="Agrandir l'estampe" onclick="openArtworkModal('<?= $buildingIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($bInfo['name'])) ?>')">
+                            <img src="<?= $buildingIllustrationUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:100%; height:100%; object-fit:cover; display:block;">                        
+                            <!-- Badge Transparence IA Prompts (« ? ») -->
+                            <?= AiPromptHelper::renderBadge($heroImgRel, $bInfo['name'], $buildingIllustrationUrl) ?>
                         </div>
-                        <div>
-                            <h3 class="card-title mb-0"><?= htmlspecialchars($bInfo['name']) ?></h3>
-                            <div class="text-muted" style="font-size:0.8rem;">Emplacement #<?= $slot ?> &bull; Niveau actuel : <strong><?= $lvl ?></strong></div>
+                    <?php else: ?>
+                        <div class="col-md-4 col-lg-3 d-flex align-items-center justify-content-center" style="min-height:160px; background:linear-gradient(135deg,rgba(185,28,28,0.15),rgba(30,41,59,0.1)); font-size:3.5rem;">
+                            <?= $bInfo['icon'] ?? '<i class="fa-solid fa-chess-rook"></i>' ?>
                         </div>
-                    </div>
-                    <?php
-                    require_once __DIR__ . '/../core/PopulationEngine.php';
-                    $bWorkersReq = PopulationEngine::getBuildingWorkersRequired($code, $lvl);
-                    $bWorkersNext = PopulationEngine::getBuildingWorkersRequired($code, $targetLevel);
-                    $bWorkforce = $planet['workforce'] ?? null;
-                    $bUnderstaffed = !empty($bWorkforce['is_understaffed']);
-                    $bMalusPct = (float)($bWorkforce['understaffed_malus_pct'] ?? 0);
-                    ?>
-                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                        <span class="badge bg-azure-lt d-inline-flex align-items-center gap-1" title="Main-d'œuvre nécessaire au fonctionnement">
-                            <i class="fa-solid fa-users text-azure"></i> <?= $bWorkersReq ?> ouvriers requis <?= ($targetLevel > $lvl) ? "(Niv.{$targetLevel} : {$bWorkersNext})" : '' ?>
-                        </span>
-                        <?php if ($bUnderstaffed): ?>
-                            <span class="badge bg-warning-lt text-warning d-inline-flex align-items-center gap-1" title="Le fief souffre d'un manque d'ouvriers">
-                                <i class="fa-solid fa-triangle-exclamation"></i> Sous-effectif (-<?= $bMalusPct ?>%)
-                            </span>
-                        <?php else: ?>
-                            <span class="badge bg-success-lt text-success d-inline-flex align-items-center gap-1" title="Postes 100% pourvus">
-                                <i class="fa-solid fa-circle-check"></i> Effectif Complet
-                            </span>
-                        <?php endif; ?>
-                    </div>
-                    <p class="text-muted mb-3" style="font-size:0.875rem;"><?= htmlspecialchars($bInfo['description']) ?></p>
+                    <?php endif; ?>
 
-                    <!-- Raccourcis opérationnels directs -->
-                    <?php if ($lvl > 0): ?>
-                        <div class="d-flex flex-column gap-2 mb-2">
-                            <?php if ($code === 'barracks'): ?>
-                                <a href="/?page=barracks" class="btn btn-primary">
-                                    <i class="fa-solid fa-user-ninja me-1"></i>Ouvrir le Dojo d'Entraînement des Troupes &rarr;
-                                </a>
-                            <?php elseif ($code === 'shipyard'): ?>
-                                <a href="/?page=shipyard" class="btn btn-primary">
-                                    <i class="fa-solid fa-horse me-1"></i>Accéder aux Écuries de Cavalerie & Machines &rarr;
-                                </a>
-                            <?php elseif ($code === 'research_lab'): ?>
-                                <a href="/?page=research" class="btn btn-primary">
-                                    <i class="fa-solid fa-scroll me-1"></i>Consulter l'Académie & Savoirs Féodaux &rarr;
-                                </a>
-                            <?php elseif ($code === 'embassy'): ?>
-                                <a href="/?page=alliance" class="btn btn-primary">
-                                    <i class="fa-solid fa-flag me-1"></i>Ouvrir le Pavillon des Alliances Féodales &rarr;
-                                </a>
-                            <?php elseif ($code === 'grain_mill' && $lvl >= 10): ?>
-                                <a href="#craftSection" class="btn btn-success text-white">
-                                    <i class="fa-solid fa-wine-bottle me-1"></i>Accéder à la Minoterie &amp; Cuves de Saké &darr;
-                                </a>
-                            <?php elseif ($code === 'sawmill' && $lvl >= 10): ?>
-                                <a href="#craftSection" class="btn btn-warning text-dark fw-bold">
-                                    <i class="fa-solid fa-hammer me-1"></i>Accéder au Façonnage de Poutres &darr;
-                                </a>
-                            <?php elseif ($code === 'stonemason' && $lvl > 0): ?>
-                                <a href="#craftSection" class="btn btn-secondary text-white fw-bold">
-                                    <i class="fa-solid fa-gem me-1"></i>Accéder à l'Atelier Minéralier &darr;
-                                </a>
-                            <?php elseif ($code === 'blacksmith' && $lvl >= 15): ?>
-                                <a href="#craftSection" class="btn btn-danger text-white fw-bold">
-                                    <i class="fa-solid fa-fire-burner me-1"></i>Accéder aux Fourneaux Tatara &amp; Forge &darr;
-                                </a>
-                            <?php elseif ($code === 'hq'): ?>
-                                <a href="#feastSection" class="btn btn-warning text-dark fw-bold">
-                                    <i class="fa-solid fa-wine-bottle me-1"></i>Salle des Banquets &amp; Célébrations &darr;
-                                </a>
-                            <?php elseif ($code === 'market'): ?>
-                                <a href="#marketSection" class="btn btn-warning text-dark fw-bold">
-                                    <i class="fa-solid fa-scale-balanced me-1"></i>Accéder au Marché &amp; Convois de Marchandises &darr;
-                                </a>
+                    <div class="col-md-8 col-lg-9">
+                        <div class="card-body d-flex flex-column justify-content-between h-100">
+                            <div>
+                                <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <div class="position-relative me-3" style="cursor:pointer; display:inline-block;" onclick="openArtworkModal('<?= $tileUrl ?>', '<?= htmlspecialchars(addslashes($bInfo['name'])) ?> &bull; Bâtiment')" title="Agrandir le bâtiment">
+                                            <img src="<?= $tileUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:52px; height:52px; border-radius:8px; object-fit:cover; border:2px solid var(--tblr-border-color); display:block;">
+                                            <span class="badge bg-dark text-white position-absolute" style="bottom:-4px; right:-4px; font-size:0.6rem; padding:2px 4px; border-radius:4px; box-shadow:0 2px 4px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.3); pointer-events:none;" title="Agrandir">
+                                                <i class="fa-solid fa-magnifying-glass"></i>
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h2 class="card-title mb-0 fs-2"><?= htmlspecialchars($bInfo['name']) ?></h2>
+                                            <div class="text-muted" style="font-size:0.85rem;">Emplacement Castral #<?= $slot ?> &bull; Niveau actuel : <strong class="badge bg-danger text-white fs-6 py-0 px-2"><?= $lvl ?></strong></div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <a href="/?page=city" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fa-solid fa-arrow-left me-1"></i>Retour Cité
+                                        </a>
+                                        <?php if ($code !== 'hq' && $lvl > 0 && !$activeJob): ?>
+                                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    onclick="confirmDemolishBuilding('<?= $code ?>', <?= $slot ?>, '<?= htmlspecialchars(addslashes($bInfo['name'] ?? $code)) ?>')">
+                                                <i class="fa-solid fa-trash-can me-1"></i>Démanteler
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <?php
+                                require_once __DIR__ . '/../core/PopulationEngine.php';
+                                $bWorkersReq = PopulationEngine::getBuildingWorkersRequired($code, $lvl);
+                                $bWorkersNext = PopulationEngine::getBuildingWorkersRequired($code, $targetLevel);
+                                $bWorkforce = $planet['workforce'] ?? null;
+                                $bUnderstaffed = !empty($bWorkforce['is_understaffed']);
+                                $bMalusPct = (float)($bWorkforce['understaffed_malus_pct'] ?? 0);
+                                ?>
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                    <span class="badge bg-azure-lt d-inline-flex align-items-center gap-1" title="Main-d'œuvre nécessaire au fonctionnement">
+                                        <i class="fa-solid fa-users text-azure"></i> <?= $bWorkersReq ?> ouvriers requis <?= ($targetLevel > $lvl) ? "(Niv.{$targetLevel} : {$bWorkersNext})" : '' ?>
+                                    </span>
+                                    <?php if ($bUnderstaffed): ?>
+                                        <span class="badge bg-warning-lt text-warning d-inline-flex align-items-center gap-1" title="Le fief souffre d'un manque d'ouvriers">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> Sous-effectif (-<?= $bMalusPct ?>%)
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-success-lt text-success d-inline-flex align-items-center gap-1" title="Postes 100% pourvus">
+                                            <i class="fa-solid fa-circle-check"></i> Effectif Complet
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                                <p class="text-muted mb-3" style="font-size:0.9rem;"><?= htmlspecialchars($bInfo['description']) ?></p>
+                            </div>
+
+                            <!-- Raccourcis opérationnels directs -->
+                            <?php if ($lvl > 0): ?>
+                                <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                                    <?php if ($code === 'barracks'): ?>
+                                        <a href="/?page=barracks" class="btn btn-primary">
+                                            <i class="fa-solid fa-user-ninja me-1"></i>Ouvrir le Dojo d'Entraînement des Troupes &rarr;
+                                        </a>
+                                    <?php elseif ($code === 'shipyard'): ?>
+                                        <a href="/?page=shipyard" class="btn btn-primary">
+                                            <i class="fa-solid fa-horse me-1"></i>Accéder aux Écuries de Cavalerie & Machines &rarr;
+                                        </a>
+                                    <?php elseif ($code === 'research_lab'): ?>
+                                        <a href="/?page=research" class="btn btn-primary">
+                                            <i class="fa-solid fa-scroll me-1"></i>Consulter l'Académie & Savoirs Féodaux &rarr;
+                                        </a>
+                                    <?php elseif ($code === 'embassy'): ?>
+                                        <a href="/?page=alliance" class="btn btn-primary">
+                                            <i class="fa-solid fa-flag me-1"></i>Ouvrir le Pavillon des Alliances Féodales &rarr;
+                                        </a>
+                                    <?php elseif ($code === 'grain_mill' && $lvl >= 10): ?>
+                                        <a href="#craftSection" class="btn btn-success text-white">
+                                            <i class="fa-solid fa-wine-bottle me-1"></i>Accéder à la Minoterie &amp; Cuves de Saké &darr;
+                                        </a>
+                                    <?php elseif ($code === 'sawmill' && $lvl >= 10): ?>
+                                        <a href="#craftSection" class="btn btn-warning text-dark fw-bold">
+                                            <i class="fa-solid fa-hammer me-1"></i>Accéder au Façonnage de Poutres &darr;
+                                        </a>
+                                    <?php elseif ($code === 'stonemason' && $lvl > 0): ?>
+                                        <a href="#craftSection" class="btn btn-secondary text-white fw-bold">
+                                            <i class="fa-solid fa-gem me-1"></i>Accéder à l'Atelier Minéralier &darr;
+                                        </a>
+                                    <?php elseif ($code === 'blacksmith' && $lvl >= 15): ?>
+                                        <a href="#craftSection" class="btn btn-danger text-white fw-bold">
+                                            <i class="fa-solid fa-fire-burner me-1"></i>Accéder aux Fourneaux Tatara &amp; Forge &darr;
+                                        </a>
+                                    <?php elseif ($code === 'hq'): ?>
+                                        <a href="#feastSection" class="btn btn-warning text-dark fw-bold">
+                                            <i class="fa-solid fa-wine-bottle me-1"></i>Salle des Banquets &amp; Célébrations &darr;
+                                        </a>
+                                    <?php elseif ($code === 'market'): ?>
+                                        <a href="#marketSection" class="btn btn-warning text-dark fw-bold">
+                                            <i class="fa-solid fa-scale-balanced me-1"></i>Accéder au Marché &amp; Convois de Marchandises &darr;
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
                             <?php endif; ?>
                         </div>
-                    <?php endif; ?>
-
-                    <!-- Bouton Raser (sauf Tenshu) -->
-                    <?php if ($code !== 'hq' && $lvl > 0 && !$activeJob): ?>
-                        <button type="button" class="btn btn-outline-danger btn-sm w-100"
-                                onclick="confirmDemolishBuilding('<?= $code ?>', <?= $slot ?>, '<?= htmlspecialchars(addslashes($bInfo['name'] ?? $code)) ?>')">
-                            <i class="fa-solid fa-trash-can me-1"></i>Démanteler le Bâtiment (récupère 30%)
-                        </button>
-                    <?php endif; ?>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Colonne Droite : Coûts, Chantier & Zone Tenshu -->
-        <div class="col-lg-7">
 
             <?php if ($code === 'hq'):
                 $activeFeast = $planetEngine->getActiveFeast((int)$planet['id']);
