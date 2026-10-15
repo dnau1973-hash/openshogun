@@ -20,8 +20,8 @@ if (!AuthManager::hasJob('game-elevate-designer')) {
                 Ce simulateur d'équilibrage démographique et de bac à sable est strictement réservé au métier <strong>Game Elevate Designer</strong>.
             </p>
             <div class="mt-4">
-                <a href="/?page=dev_team" class="btn btn-secondary">
-                    <i class="fa-solid fa-arrow-left me-1"></i>Retour au Studio Dev
+                <a href="/?page=gamestudio" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Retour au Game Studio
                 </a>
             </div>
         </div>

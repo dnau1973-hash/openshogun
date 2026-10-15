@@ -451,9 +451,9 @@ try {
         // 16. Enregistrement des constantes et équilibrage des vitesses (Game Elevate Designer)
         case 'save_game_settings':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
-            if (!$devEngine->hasRole($currentUserId, 'game_designer')) {
+            if (!$auth->isAdmin() && !$devEngine->isDevTeamMember($currentUserId)) {
                 http_response_code(403);
-                throw new Exception("Accès interdit : cette configuration est strictement réservée au métier Game Elevate Designer.");
+                throw new Exception("Accès interdit : cette configuration est réservée au Game Elevate Designer.");
             }
 
             $gameSpeed = max(1, min(100, (int)($_POST['game_speed'] ?? 5)));
@@ -493,9 +493,9 @@ try {
         // 16b. Enregistrement de la dérivation des bâtiments et coûts (Game Elevate Designer)
         case 'save_building_derivation':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
-            if (!$devEngine->hasRole($currentUserId, 'game_designer') && !$auth->isAdmin()) {
+            if (!$auth->isAdmin() && !$devEngine->isDevTeamMember($currentUserId)) {
                 http_response_code(403);
-                throw new Exception("Accès interdit : le réglage de dérivation des bâtiments est strictement réservé au métier Game Elevate Designer.");
+                throw new Exception("Accès interdit : le réglage de dérivation des bâtiments est réservé au Game Elevate Designer.");
             }
 
             $timeCoeff  = max(0.05, min(10.0, (float)($_POST['building_time_coeff'] ?? 1.0)));
@@ -525,9 +525,9 @@ try {
         // 17. Expansion et arpentage des provinces (Game Elevate Designer)
         case 'generate_world':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
-            if (!$devEngine->hasRole($currentUserId, 'game_designer')) {
+            if (!$auth->isAdmin() && !$devEngine->isDevTeamMember($currentUserId)) {
                 http_response_code(403);
-                throw new Exception("Accès interdit : l'arpentage et l'expansion des provinces sont strictement réservés au métier Game Elevate Designer.");
+                throw new Exception("Accès interdit : l'arpentage et l'expansion des provinces sont réservés au Game Elevate Designer.");
             }
 
             $count = max(1, min(100, (int)($_POST['planet_count'] ?? 12)));
@@ -548,9 +548,9 @@ try {
         // 18. Rééquilibrage et génération des oasis (Game Elevate Designer)
         case 'repopulate_oases':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
-            if (!$devEngine->hasRole($currentUserId, 'game_designer')) {
+            if (!$auth->isAdmin() && !$devEngine->isDevTeamMember($currentUserId)) {
                 http_response_code(403);
-                throw new Exception("Accès interdit : la gestion de l'écosystème des oasis est strictement réservée au métier Game Elevate Designer.");
+                throw new Exception("Accès interdit : la gestion de l'écosystème des oasis est réservée au Game Elevate Designer.");
             }
 
             $oasisEngine = new OasisEngine();
@@ -571,9 +571,9 @@ try {
         // 19. Enregistrement d'un test de simulation de combat (Game Elevate Designer)
         case 'save_combat_test':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
-            if (!$devEngine->hasRole($currentUserId, 'game_designer') && !$auth->isAdmin()) {
+            if (!$auth->isAdmin() && !$devEngine->isDevTeamMember($currentUserId)) {
                 http_response_code(403);
-                throw new Exception("Accès interdit : le simulateur de combat est strictement réservé au métier Game Elevate Designer.");
+                throw new Exception("Accès interdit : le simulateur de combat est réservé au Game Elevate Designer.");
             }
 
             $testDataRaw = $_POST['test_data'] ?? '';

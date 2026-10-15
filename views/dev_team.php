@@ -115,18 +115,40 @@ if (empty($allowedMetiers)) {
     return;
 }
 
+// ── Redirections des modules Game Elevate Designer vers Game Studio ────────
+$elevateRedirectTabs = [
+    'game_speeds'         => 'elevate_speed',
+    'world_expansion'     => 'elevate_survey',
+    'oases_ecosystem'     => 'elevate_oases',
+    'combat_simulator'    => 'elevate_combat',
+    'village_simulator'   => 'elevate_village',
+    'building_derivation' => 'elevate_buildings',
+];
+if (isset($_GET['tab']) && isset($elevateRedirectTabs[$_GET['tab']])) {
+    header('Location: ?page=gamestudio&tab=' . $elevateRedirectTabs[$_GET['tab']]);
+    exit;
+}
+if (($_GET['metier'] ?? '') === 'game-elevate-designer') {
+    $elevateModuleMap = [
+        'speed-balancing'        => 'elevate_speed',
+        'shogunat-survey'        => 'elevate_survey',
+        'oasis-ecosystem'        => 'elevate_oases',
+        'combat-simulator'       => 'elevate_combat',
+        'village-life-simulator' => 'elevate_village',
+        'building-derivation'    => 'elevate_buildings',
+    ];
+    $mod = $_GET['module'] ?? '';
+    $targetTab = $elevateModuleMap[$mod] ?? 'elevate_combat';
+    header('Location: ?page=gamestudio&tab=' . $targetTab);
+    exit;
+}
+
 // ── Résolution de l'Onglet Métier et du Sous-Module Actifs ───────────────────
 // Rétrocompatibilité avec les anciens paramètres ?tab=...
 $tabToMetierMap = [
     'roster'           => ['metier' => 'roster', 'module' => 'members'],
     'forge'            => ['metier' => 'roster', 'module' => 'forge-journal'],
-    'game_speeds'      => ['metier' => 'game-elevate-designer', 'module' => 'speed-balancing'],
-    'world_expansion'  => ['metier' => 'game-elevate-designer', 'module' => 'shogunat-survey'],
-    'oases_ecosystem'  => ['metier' => 'game-elevate-designer', 'module' => 'oasis-ecosystem'],
-    'combat_simulator'    => ['metier' => 'game-elevate-designer', 'module' => 'combat-simulator'],
-    'village_simulator'   => ['metier' => 'game-elevate-designer', 'module' => 'village-life-simulator'],
-    'building_derivation' => ['metier' => 'game-elevate-designer', 'module' => 'building-derivation'],
-    'mailing'             => ['metier' => 'community-manager', 'module' => 'mailing-list'],
+    'mailing'          => ['metier' => 'community-manager', 'module' => 'mailing-list'],
     'qa'               => ['metier' => 'qa-tester', 'module' => 'qa-validation'],
     'sandbox'          => ['metier' => 'qa-tester', 'module' => 'sandbox'],
     'system'           => ['metier' => 'backend-dev', 'module' => 'system-monitoring'],
@@ -156,200 +178,6 @@ if ($requestedModule !== '' && in_array($requestedModule, $availableModules, tru
     $activeModule = $requestedModule;
 } else {
     $activeModule = $activeMetierConfig['default_module'] ?? $availableModules[0];
-}
-
-// Données requises pour les modules du Game Elevate Designer
-$gameSettings = [];
-$mapTileStats = [];
-$mapTileCategories = [];
-$oasisStats = ['total_oases' => 0, 'captured_oases' => 0, 'wild_oases' => 0, 'total_wild_animals' => 0];
-$allOases = [];
-
-if ($activeMetier === 'game-elevate-designer') {
-    require_once __DIR__ . '/../core/GameConfig.php';
-    require_once __DIR__ . '/../core/WorldGenerator.php';
-    require_once __DIR__ . '/../core/OasisEngine.php';
-    $gameSettings = GameConfig::load();
-
-    if ($activeModule === 'shogunat-survey') {
-        $mapRadius = 12;
-        $totalTilesCount = ($mapRadius * 2 + 1) * ($mapRadius * 2 + 1);
-
-        $stmtCastles = $db->query("SELECT coord_x, coord_y FROM authentic_castles WHERE is_spawned = 1");
-        $spawnedCastleCoords = [];
-        while ($row = $stmtCastles->fetch(PDO::FETCH_ASSOC)) {
-            $spawnedCastleCoords[$row['coord_x'] . ':' . $row['coord_y']] = true;
-        }
-
-        $allPlanetsRows = $db->query("SELECT coord_x, coord_y, user_id FROM planets")->fetchAll(PDO::FETCH_ASSOC);
-        $villageCoords = [];
-        $freeLandCoords = [];
-        foreach ($allPlanetsRows as $p) {
-            $k = ((int)$p['coord_x']) . ':' . ((int)$p['coord_y']);
-            if (isset($spawnedCastleCoords[$k])) {
-                continue;
-            }
-            if (!empty($p['user_id'])) {
-                $villageCoords[$k] = true;
-            } else {
-                $freeLandCoords[$k] = true;
-            }
-        }
-
-        $stmtOasesCoords = $db->query("SELECT coord_x, coord_y FROM oases");
-        $oasisCoords = [];
-        while ($row = $stmtOasesCoords->fetch(PDO::FETCH_ASSOC)) {
-            $oasisCoords[((int)$row['coord_x']) . ':' . ((int)$row['coord_y'])] = true;
-        }
-
-        $mapTileStats = [
-            'radius' => $mapRadius,
-            'total_tiles' => $totalTilesCount,
-            'villages' => count($villageCoords),
-            'free_lands' => count($freeLandCoords),
-            'castles' => count($spawnedCastleCoords),
-            'oases' => count($oasisCoords),
-            'plains' => 0,
-            'forest' => 0,
-            'mountain' => 0,
-            'hills' => 0,
-            'lake' => 0,
-        ];
-
-        for ($y = -$mapRadius; $y <= $mapRadius; $y++) {
-            for ($x = -$mapRadius; $x <= $mapRadius; $x++) {
-                $k = $x . ':' . $y;
-                if (isset($villageCoords[$k]) || isset($freeLandCoords[$k]) || isset($spawnedCastleCoords[$k]) || isset($oasisCoords[$k])) {
-                    continue;
-                }
-                $seed = abs((int)(($x * 73856093) ^ ($y * 19349663))) % 1000;
-                if ($seed < 600) {
-                    $mapTileStats['plains']++;
-                } elseif ($seed < 750) {
-                    $mapTileStats['forest']++;
-                } elseif ($seed < 870) {
-                    $mapTileStats['mountain']++;
-                } elseif ($seed < 950) {
-                    $mapTileStats['hills']++;
-                } else {
-                    $mapTileStats['lake']++;
-                }
-            }
-        }
-
-        $mapTileCategories = [
-            'villages' => [
-                'name' => 'Fiefs Occupés',
-                'sub' => 'Daimyōs & PNJ',
-                'count' => $mapTileStats['villages'],
-                'icon' => '<i class="fa-solid fa-chess-rook me-1"></i>',
-                'badge_bg' => 'bg-purple-lt text-purple',
-                'bar_color' => 'bg-purple',
-                'img' => '/public/assets/map/tile_village.jpg?v=2',
-                'desc' => 'Capitales et fiefs colonisés par les joueurs et clans IA.'
-            ],
-            'free_lands' => [
-                'name' => 'Terres Libres',
-                'sub' => 'Emplacements arpentés',
-                'count' => $mapTileStats['free_lands'],
-                'icon' => '<i class="fa-solid fa-flag me-1"></i>',
-                'badge_bg' => 'bg-secondary-lt text-secondary',
-                'bar_color' => 'bg-secondary',
-                'img' => '/public/assets/map/tile_plains.jpg?v=2',
-                'desc' => 'Emplacements arpentés disponibles pour fondation de colonie.'
-            ],
-            'castles' => [
-                'name' => 'Donjons Sacrés',
-                'sub' => '現存十二天守',
-                'count' => $mapTileStats['castles'],
-                'icon' => '<i class="fa-solid fa-crown me-1"></i>',
-                'badge_bg' => 'bg-warning-lt text-warning',
-                'bar_color' => 'bg-warning',
-                'img' => '/public/assets/map/tile_authentic_castle.jpg?v=2',
-                'desc' => 'Les 12 forteresses impériales historiques du Japon féodal.'
-            ],
-            'oases' => [
-                'name' => 'Oasis Naturelles',
-                'sub' => 'Faune & Bonus',
-                'count' => $mapTileStats['oases'],
-                'icon' => '<i class="fa-solid fa-leaf me-1"></i>',
-                'badge_bg' => 'bg-teal-lt text-teal',
-                'bar_color' => 'bg-teal',
-                'img' => '/public/assets/map/tile_lake.jpg?v=2',
-                'desc' => 'Havres de faune sauvage procurant des bonus de production.'
-            ],
-            'plains' => [
-                'name' => 'Plaines Fertiles',
-                'sub' => 'Prairies & Terres',
-                'count' => $mapTileStats['plains'],
-                'icon' => '<i class="fa-solid fa-wheat-awn me-1"></i>',
-                'badge_bg' => 'bg-lime-lt text-lime',
-                'bar_color' => 'bg-lime',
-                'img' => '/public/assets/map/tile_plains.jpg?v=2',
-                'desc' => 'Terres arables verdoyantes et plaines propices à l\'agriculture.'
-            ],
-            'forest' => [
-                'name' => 'Forêts de Cèdres',
-                'sub' => 'Bois d\'Œuvre',
-                'count' => $mapTileStats['forest'],
-                'icon' => '<i class="fa-solid fa-tree me-1"></i>',
-                'badge_bg' => 'bg-green-lt text-green',
-                'bar_color' => 'bg-green',
-                'img' => '/public/assets/map/tile_forest.jpg?v=2',
-                'desc' => 'Massifs forestiers anciens riches en cèdres pour la charpente.'
-            ],
-            'mountain' => [
-                'name' => 'Monts & Granit',
-                'sub' => 'Gisements de Pierre',
-                'count' => $mapTileStats['mountain'],
-                'icon' => '<i class="fa-solid fa-mountain me-1"></i>',
-                'badge_bg' => 'bg-secondary-lt text-secondary',
-                'bar_color' => 'bg-secondary',
-                'img' => '/public/assets/map/tile_mountain.jpg?v=2',
-                'desc' => 'Coteaux rocheux renfermant les filons de granit et de minerai.'
-            ],
-            'hills' => [
-                'name' => 'Collines Sanctuaire',
-                'sub' => 'Sérénité & Esprits',
-                'count' => $mapTileStats['hills'],
-                'icon' => '<i class="fa-solid fa-torii-gate me-1"></i>',
-                'badge_bg' => 'bg-orange-lt text-orange',
-                'bar_color' => 'bg-orange',
-                'img' => '/public/assets/map/tile_hills.jpg?v=2',
-                'desc' => 'Hautes collines baignées de ferveur spirituelle pour les sanctuaires.'
-            ],
-            'lake' => [
-                'name' => 'Lacs & Rivières',
-                'sub' => 'Eaux Sacrées',
-                'count' => $mapTileStats['lake'],
-                'icon' => '<i class="fa-solid fa-water me-1"></i>',
-                'badge_bg' => 'bg-azure-lt text-azure',
-                'bar_color' => 'bg-azure',
-                'img' => '/public/assets/map/tile_lake.jpg?v=2',
-                'desc' => 'Plans d\'eau navigables et canaux essentiels à l\'irrigation.'
-            ]
-        ];
-    }
-
-    if ($activeModule === 'oasis-ecosystem') {
-        $oasisEngine = new OasisEngine();
-        $oasisStats = $oasisEngine->getOasisStatistics();
-
-        $allOases = $db->query("
-            SELECT o.*, 
-                   p.name as owner_planet_name, 
-                   u.username as owner_username 
-            FROM oases o 
-            LEFT JOIN planets p ON o.owner_planet_id = p.id 
-            LEFT JOIN users u ON p.user_id = u.id 
-            ORDER BY o.owner_planet_id DESC, o.id ASC
-        ")->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($allOases as &$oRow) {
-            $oRow['garrison'] = $oasisEngine->getOasisGarrison((int)$oRow['id']);
-        }
-        unset($oRow);
-    }
 }
 
 $isForbiddenRedirect = !empty($_GET['forbidden']);
@@ -872,224 +700,4 @@ async function executeRemoveDevRole(userId, roleId, username, roleTitle) {
         alert('Erreur réseau lors de la révocation : ' + err.message);
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ACTIONS GLOBALES GAME ELEVATE DESIGNER & CONSTANTES
-// ═══════════════════════════════════════════════════════════════════════════
-function applyDevSpeedPreset(gSpeed, rSpeed, fSpeed) {
-    const gInput = document.getElementById('dev_game_speed_input');
-    const gRange = document.getElementById('dev_game_speed_range');
-    const bG = document.getElementById('dev_badge_game_speed');
-    if (gInput && gRange) {
-        gInput.value = gSpeed;
-        gRange.value = gSpeed;
-        if (bG) bG.textContent = 'x' + gSpeed;
-    }
-
-    const rInput = document.getElementById('dev_resource_speed_input');
-    const rRange = document.getElementById('dev_resource_speed_range');
-    const bR = document.getElementById('dev_badge_resource_speed');
-    if (rInput && rRange) {
-        rInput.value = rSpeed;
-        rRange.value = rSpeed;
-        if (bR) bR.textContent = 'x' + rSpeed;
-    }
-
-    const fInput = document.getElementById('dev_fleet_speed_input');
-    const fRange = document.getElementById('dev_fleet_speed_range');
-    const bF = document.getElementById('dev_badge_fleet_speed');
-    if (fInput && fRange) {
-        fInput.value = fSpeed;
-        fRange.value = fSpeed;
-        if (bF) bF.textContent = 'x' + fSpeed;
-    }
-}
-
-async function saveDevGameSettings(event) {
-    if (event) event.preventDefault();
-    const gForm = document.getElementById('devGameSettingsForm');
-    const formData = gForm ? new FormData(gForm) : new FormData();
-    formData.append('action', 'save_game_settings');
-
-    const submitBtn = gForm ? gForm.querySelector('button[type="submit"]') : null;
-    const oldBtnText = submitBtn ? submitBtn.innerHTML : '';
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Enregistrement...';
-    }
-
-    try {
-        const res = await fetch('/api/dev_team.php', {
-            method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json' }
-        });
-        const data = await res.json();
-        if (data.success) {
-            showDevAlert('success', `<i class="fa-solid fa-floppy-disk text-success me-1"></i><strong>Succès :</strong> ${data.message} (+30 XP Forge accordés)`);
-        } else {
-            showDevAlert('danger', `<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || "Impossible d'enregistrer les paramètres."}`);
-        }
-    } catch (err) {
-        showDevAlert('danger', `<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${err.message}`);
-    } finally {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = oldBtnText;
-        }
-    }
-}
-
-async function generateDevWorld(event) {
-    if (event) event.preventDefault();
-    const count = document.getElementById('dev_planet_count_input')?.value || 12;
-    const radius = document.getElementById('dev_radius_range')?.value || 12;
-    const clearUninhabited = document.getElementById('dev_clear_uninhabited')?.checked ? '1' : '0';
-
-    showConfirmModal(
-        "Expansion Provinciale Féodale",
-        `Voulez-vous générer <strong>${count}</strong> nouveaux fiefs et terres procédurales dans un rayon de <strong>&plusmn;${radius}</strong> provinces ?`,
-        async () => {
-            const formData = new FormData();
-            formData.append('action', 'generate_world');
-            formData.append('planet_count', count);
-            formData.append('radius', radius);
-            formData.append('clear_uninhabited', clearUninhabited);
-
-            try {
-                const res = await fetch('/api/dev_team.php', {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Accept': 'application/json' }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showDevAlert('success', `<i class="fa-solid fa-map-location-dot text-primary me-1"></i><strong>Expansion Réussie :</strong> <strong>${data.generated_count}</strong> terres ont été déployées (+40 XP Forge accordés) !`);
-                    setTimeout(() => location.reload(), 2500);
-                } else {
-                    showDevAlert('danger', `<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || "Impossible d'arpenter les terres."}`);
-                }
-            } catch (e) {
-                showDevAlert('danger', `<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${e.message}`);
-            }
-        },
-        'btn-success',
-        '<i class="fa-solid fa-map-location-dot"></i>'
-    );
-}
-
-async function executeDevRepopulateOases() {
-    const density = parseFloat(document.getElementById('dev_repop_density')?.value) || 2.0;
-    const radius = parseInt(document.getElementById('dev_repop_radius')?.value, 10) || 28;
-    const clearUnoccupied = document.getElementById('dev_repop_clear_unoccupied')?.checked ? '1' : '0';
-
-    showConfirmModal(
-        "Génération des Oasis Naturelles",
-        `Confirmez-vous la génération et l'équilibrage des oasis avec une densité cible de <strong>${density}%</strong> sur un rayon de <strong>${radius}</strong> tuiles ?`,
-        async () => {
-            const formData = new FormData();
-            formData.append('action', 'repopulate_oases');
-            formData.append('density_percent', density);
-            formData.append('radius', radius);
-            formData.append('clear_unoccupied', clearUnoccupied);
-
-            try {
-                const res = await fetch('/api/dev_team.php', {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Accept': 'application/json' }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showDevAlert('success', `<i class="fa-solid fa-leaf text-success me-1"></i><strong>Succès :</strong> ${data.message} (+35 XP Forge accordés)`);
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    showDevAlert('danger', `<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur :</strong> ${data.error || "Impossible de générer les oasis."}`);
-                }
-            } catch (e) {
-                showDevAlert('danger', `<i class="fa-solid fa-circle-xmark text-danger me-1"></i><strong>Erreur réseau :</strong> ${e.message}`);
-            }
-        },
-        'btn-success',
-        '<i class="fa-solid fa-leaf"></i>'
-    );
-}
-
-// Pagination des oasis
-let devOasesPerPage = 15;
-let currentDevOasesPage = 1;
-
-function initDevOasesPagination() {
-    const rows = document.querySelectorAll('.dev-oasis-table-row');
-    if (rows.length === 0) return;
-    const select = document.getElementById('devOasesPerPageSelect');
-    if (select) devOasesPerPage = parseInt(select.value, 10) || 15;
-    renderDevOasesPage(currentDevOasesPage);
-}
-
-function changeDevOasesPerPage(newVal) {
-    devOasesPerPage = parseInt(newVal, 10) || 15;
-    currentDevOasesPage = 1;
-    renderDevOasesPage(currentDevOasesPage);
-}
-
-function renderDevOasesPage(page) {
-    const rows = Array.from(document.querySelectorAll('.dev-oasis-table-row'));
-    const totalOases = rows.length;
-    if (totalOases === 0) return;
-    const totalPages = Math.ceil(totalOases / devOasesPerPage) || 1;
-    if (page < 1) page = 1;
-    if (page > totalPages) page = totalPages;
-    currentDevOasesPage = page;
-
-    const startIdx = (page - 1) * devOasesPerPage;
-    const endIdx = Math.min(startIdx + devOasesPerPage, totalOases);
-
-    rows.forEach((row, i) => {
-        row.style.display = (i >= startIdx && i < endIdx) ? '' : 'none';
-    });
-
-    const startEl = document.getElementById('devOasesPaginationStart');
-    const endEl = document.getElementById('devOasesPaginationEnd');
-    const totalEl = document.getElementById('devOasesPaginationTotal');
-    if (startEl) startEl.textContent = (startIdx + 1);
-    if (endEl) endEl.textContent = endIdx;
-    if (totalEl) totalEl.textContent = totalOases;
-
-    const listEl = document.getElementById('devOasesPaginationList');
-    if (!listEl) return;
-
-    let html = '';
-    html += `<li class="page-item ${page === 1 ? 'disabled' : ''}">
-        <a class="page-link" href="#" onclick="renderDevOasesPage(${page - 1}); return false;">&laquo;</a>
-    </li>`;
-
-    let startPage = Math.max(1, page - 2);
-    let endPage = Math.min(totalPages, page + 2);
-    if (startPage > 1) {
-        html += `<li class="page-item"><a class="page-link" href="#" onclick="renderDevOasesPage(1); return false;">1</a></li>`;
-        if (startPage > 2) html += `<li class="page-item disabled"><span class="page-link">&hellip;</span></li>`;
-    }
-
-    for (let p = startPage; p <= endPage; p++) {
-        html += `<li class="page-item ${p === page ? 'active' : ''}">
-            <a class="page-link" href="#" onclick="renderDevOasesPage(${p}); return false;">${p}</a>
-        </li>`;
-    }
-
-    if (endPage < totalPages) {
-        if (endPage < totalPages - 1) html += `<li class="page-item disabled"><span class="page-link">&hellip;</span></li>`;
-        html += `<li class="page-item"><a class="page-link" href="#" onclick="renderDevOasesPage(${totalPages}); return false;">${totalPages}</a></li>`;
-    }
-
-    html += `<li class="page-item ${page === totalPages ? 'disabled' : ''}">
-        <a class="page-link" href="#" onclick="renderDevOasesPage(${page + 1}); return false;">&raquo;</a>
-    </li>`;
-
-    listEl.innerHTML = html;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    initDevOasesPagination();
-});
 </script>

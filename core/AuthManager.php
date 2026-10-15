@@ -25,6 +25,16 @@ class AuthManager {
         }
 
         $normalizedJob = str_replace('-', '_', strtolower(trim($jobSlug)));
+
+        // Game Elevate Designer est désormais un outil intégré au Game Studio
+        if ($normalizedJob === 'game_elevate_designer' || $normalizedJob === 'game_designer') {
+            require_once __DIR__ . '/GameStudioEngine.php';
+            $studioEngine = new GameStudioEngine();
+            if ($studioEngine->isAuthorized($uid)) {
+                return true;
+            }
+        }
+
         $jobMap = [
             'game_elevate_designer' => 'game_designer',
             'game_designer'         => 'game_designer',

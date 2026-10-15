@@ -277,53 +277,6 @@ class DevTeamEngine {
                 ]
             ]
         ],
-        'game-elevate-designer' => [
-            'slug'        => 'game-elevate-designer',
-            'role_id'     => 'game_designer', // Règle stricte : réservé aux détenteurs de ce métier
-            'title'       => 'Game Elevate Designer',
-            'honor_title' => 'L\'Architecte des Mondes',
-            'icon'        => '<i class="fa-solid fa-compass-drafting text-success"></i>',
-            'badge_color' => 'bg-green-lt text-green',
-            'default_module' => 'combat-simulator',
-            'modules'     => [
-                'combat-simulator' => [
-                    'slug'  => 'combat-simulator',
-                    'title' => 'Simulateur de Combat',
-                    'icon'  => '<i class="fa-solid fa-shield-halved text-danger me-1"></i>',
-                    'file'  => 'game-elevate-designer/combat-simulator.php'
-                ],
-                'village-life-simulator' => [
-                    'slug'  => 'village-life-simulator',
-                    'title' => 'Vie du Village (Sandbox)',
-                    'icon'  => '<i class="fa-solid fa-people-roof text-primary me-1"></i>',
-                    'file'  => 'game-elevate-designer/village-life-simulator.php'
-                ],
-                'speed-balancing' => [
-                    'slug'  => 'speed-balancing',
-                    'title' => 'Vitesses & Équilibrage',
-                    'icon'  => '<i class="fa-solid fa-bolt text-warning me-1"></i>',
-                    'file'  => 'game-elevate-designer/speed-balancing.php'
-                ],
-                'shogunat-survey' => [
-                    'slug'  => 'shogunat-survey',
-                    'title' => 'Arpentage & Provinces',
-                    'icon'  => '<i class="fa-solid fa-map-location-dot text-success me-1"></i>',
-                    'file'  => 'game-elevate-designer/shogunat-survey.php'
-                ],
-                'oasis-ecosystem' => [
-                    'slug'  => 'oasis-ecosystem',
-                    'title' => 'Écosystème des Oasis',
-                    'icon'  => '<i class="fa-solid fa-seedling text-teal me-1"></i>',
-                    'file'  => 'game-elevate-designer/oasis-ecosystem.php'
-                ],
-                'building-derivation' => [
-                    'slug'  => 'building-derivation',
-                    'title' => 'Dérivation des Bâtiments',
-                    'icon'  => '<i class="fa-solid fa-chart-line text-warning me-1"></i>',
-                    'file'  => 'game-elevate-designer/building-derivation.php'
-                ]
-            ]
-        ],
         'community-manager' => [
             'slug'        => 'community-manager',
             'role_id'     => 'community_manager',
@@ -840,10 +793,8 @@ class DevTeamEngine {
         $userRoles = $this->getUserRoles($userId);
         $userRoleIds = array_column($userRoles, 'id');
 
-        // Règle pour Game Elevate Designer :
-        // Réservé aux détenteurs du rôle game_designer
-        if ($metierSlug === 'game-elevate-designer') {
-            return in_array('game_designer', $userRoleIds, true);
+        if (!isset(self::STUDIO_METIERS[$metierSlug])) {
+            return false;
         }
 
         $cfg = self::STUDIO_METIERS[$metierSlug];

@@ -3,6 +3,19 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.30.0] - 2026-10-15
+### Modifié (Changed) & Déplacé (Moved)
+- **Relocalisation Intégrale de la suite Game Elevate Designer vers Game Studio (`views/gamestudio.php`, `views/gamestudio/elevate_*.php`, `core/DevTeamEngine.php`, `views/dev_team.php`, `api/dev_team.php`, `core/AuthManager.php`) :**
+  * **Intégration au Menu Game Elevate Designer du Game Studio :** Relocalisation des 6 modules de simulation et équilibrage féodal dans le Game Studio :
+    1. *Simulateur de Combat* (`?page=gamestudio&tab=elevate_combat`)
+    2. *Vie du Village* (`?page=gamestudio&tab=elevate_village`)
+    3. *Vitesses & Équilibrage* (`?page=gamestudio&tab=elevate_speed`)
+    4. *Arpentage & Provinces* (`?page=gamestudio&tab=elevate_survey`)
+    5. *Écosystèmes des Oasis* (`?page=gamestudio&tab=elevate_oases`)
+    6. *Dérivation des Bâtiments* (`?page=gamestudio&tab=elevate_buildings`)
+  * **Suppression de Game Elevate Designer du Studio Métiers (`views/dev_team.php`, `core/DevTeamEngine.php`) :** Retrait de la configuration métier `game-elevate-designer` de `STUDIO_METIERS`, nettoyage des scripts et contrôleurs associés dans `views/dev_team.php`, et mise en place de redirections HTTP automatiques transparentes vers le Game Studio pour toutes les anciennes URLs et paramètres `?tab=...` ou `?metier=game-elevate-designer`.
+  * **Harmonisation des Accréditations (`core/AuthManager.php`, `api/dev_team.php`) :** `AuthManager::hasJob('game-elevate-designer')` et les points d'accès API associés autorisent désormais de plein droit l'ensemble des administrateurs et membres accrédités du Game Studio.
+
 ## [1.29.0] - 2026-10-14
 ### Ajouté (Added)
 - **Indicateur de Charbon de Bois dans le HUD Supérieur (`views/partials/header.php`) :**

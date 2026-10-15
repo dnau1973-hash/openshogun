@@ -1,5 +1,36 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-15] - gamestudio-elevate-designer-migration : Relocalisation de la Suite Game Elevate Designer vers Game Studio
+- **Module :** `gamestudio-elevate-designer-migration`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Relocalisation des 6 Modules de Simulation Féodale dans Game Studio :**
+     - Intégration complète sous le menu déroulant « Game Elevate Designer » de la navbar unifiée du Game Studio (`views/gamestudio.php`) :
+       * *Simulateur de Combat* (`?page=gamestudio&tab=elevate_combat`)
+       * *Vie du Village* (`?page=gamestudio&tab=elevate_village`)
+       * *Vitesses & Équilibrage* (`?page=gamestudio&tab=elevate_speed`)
+       * *Arpentage & Provinces* (`?page=gamestudio&tab=elevate_survey`)
+       * *Écosystèmes des Oasis* (`?page=gamestudio&tab=elevate_oases`)
+       * *Dérivation des Bâtiments* (`?page=gamestudio&tab=elevate_buildings`)
+  2. **Suppression de Game Elevate Designer du Studio Métiers (`views/dev_team.php`, `core/DevTeamEngine.php`) :**
+     - Retrait du slug métier `game-elevate-designer` de `DevTeamEngine::STUDIO_METIERS`.
+     - Nettoyage des contrôleurs et fonctions JS associées dans `views/dev_team.php`.
+     - Mise en place de redirections transparentes vers les onglets Game Studio correspondants pour les anciens liens ou favoris.
+  3. **Harmonisation des Accréditations & API (`core/AuthManager.php`, `api/dev_team.php`) :**
+     - Le helper `AuthManager::hasJob('game-elevate-designer')` et les points d'accès de l'API Dev Team autorisent désormais les utilisateurs accrédités du Game Studio.
+- **Fichiers modifiés :** `views/gamestudio.php`, `views/gamestudio/elevate_*.php`, `core/DevTeamEngine.php`, `views/dev_team.php`, `api/dev_team.php`, `core/AuthManager.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Ouvrir le Game Studio (`/?page=gamestudio`).
+  2. Cliquer sur le menu déroulant « Game Elevate Designer » dans la navbar :
+     - Vérifier la présence des 8 items (Académie des Savoirs, Clans IA, Simulateur de Combat, Vie du Village, Vitesse & Équilibrage, Arpentage & Provinces, Écosystèmes des Oasis, Dérivation des Bâtiments).
+  3. Tester chaque module relocalisé et vérifier son chargement fluide sans erreur 403.
+  4. Ouvrir l'ancienne URL `/?page=dev_team&metier=game-elevate-designer` :
+     - Vérifier la redirection automatique vers `/?page=gamestudio&tab=elevate_combat`.
+  5. Ouvrir `/?page=dev_team` :
+     - Vérifier que « Game Elevate Designer » n'apparaît plus dans la liste des métiers.
+
+---
+
 ### [2026-10-08] - harvest-panel-complete-production-integration : Intégration Complète de Tous les Éléments de Production dans le Widget Latéral
 - **Module :** `harvest-panel-complete-production-integration`
 - **Statut :** `À tester`

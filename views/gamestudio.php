@@ -59,7 +59,12 @@ if (($_GET['tab'] ?? '') === 'backups') {
 }
 
 // 1. Détection de l'onglet actif dans la barre d'outils
-$allowedTabs = ['dashboard', 'general', 'elevate_research', 'elevate_bots'];
+$allowedTabs = [
+    'dashboard', 'general',
+    'elevate_research', 'elevate_bots',
+    'elevate_combat', 'elevate_village', 'elevate_speed',
+    'elevate_survey', 'elevate_oases', 'elevate_buildings'
+];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
 $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
 $analyticsPeriod = in_array($_GET['period'] ?? '', ['today', '7d', '30d', 'all'], true) ? (string)$_GET['period'] : '30d';
@@ -274,6 +279,48 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div class="small text-secondary">Supervision, Cycles de décision &amp; Éclosion PNJ</div>
                         </div>
                     </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_combat' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_combat">
+                        <i class="fa-solid fa-shield-halved text-danger"></i>
+                        <div>
+                            <div>Simulateur de Combat</div>
+                            <div class="small text-secondary">Split-screen tactique, Murailles &amp; Sièges</div>
+                        </div>
+                    </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_village' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_village">
+                        <i class="fa-solid fa-people-roof text-success"></i>
+                        <div>
+                            <div>Vie du Village</div>
+                            <div class="small text-secondary">Sandbox démographique, Contentement &amp; Saké</div>
+                        </div>
+                    </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_speed' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_speed">
+                        <i class="fa-solid fa-bolt text-warning"></i>
+                        <div>
+                            <div>Vitesse &amp; Équilibrage</div>
+                            <div class="small text-secondary">Constantes monde, Chantiers &amp; Famine</div>
+                        </div>
+                    </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_survey' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_survey">
+                        <i class="fa-solid fa-map-location-dot text-primary"></i>
+                        <div>
+                            <div>Arpentage &amp; Provinces</div>
+                            <div class="small text-secondary">Répartition procédurale des tuiles féodales</div>
+                        </div>
+                    </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_oases' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_oases">
+                        <i class="fa-solid fa-seedling text-teal"></i>
+                        <div>
+                            <div>Écosystèmes des Oasis</div>
+                            <div class="small text-secondary">Havres naturels, Faune &amp; Densité</div>
+                        </div>
+                    </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_buildings' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_buildings">
+                        <i class="fa-solid fa-chart-line text-info"></i>
+                        <div>
+                            <div>Dérivation des Bâtiments</div>
+                            <div class="small text-secondary">Courbes de progression, Coûts &amp; Délais chantiers</div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </nav>
@@ -395,10 +442,79 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
 <!-- Conteneur Universel de Toasts Tabler.io pour Confirmations d'Actions & Notifications -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" id="tablerToastContainer" style="z-index: 99999; max-width: 420px;"></div>
 
+<!-- Modal Universelle de Confirmation Dev & Studio -->
+<div class="modal fade" id="dev-universal-confirm-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-dark text-white py-2">
+                <h5 class="modal-title d-flex align-items-center gap-2 m-0" id="dev-confirm-title">
+                    Confirmation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fs-1 text-danger" id="dev-confirm-icon-box"></span>
+                    <div id="dev-confirm-message" class="fs-4 text-dark mb-0"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 d-flex justify-content-end gap-2 p-3">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" id="dev-confirm-btn-action">Confirmer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Tabler Core JS & Bootstrap Bundle -->
 <script src="/public/css/tabler/tabler.min.js?v=1.0.0-beta21"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="/public/js/app.js"></script>
+
+<script>
+function showDevAlert(type, message) {
+    const alertBox = document.getElementById('dev-alert');
+    const contentBox = document.getElementById('dev-alert-content');
+    if (alertBox && contentBox) {
+        alertBox.className = `alert alert-${type} alert-dismissible shadow-sm mb-3`;
+        contentBox.innerHTML = message;
+        alertBox.classList.remove('d-none');
+        window.scrollTo({ top: alertBox.offsetTop - 80, behavior: 'smooth' });
+    } else {
+        alert(message.replace(/<[^>]*>?/gm, ''));
+    }
+}
+
+function showConfirmModal(title, message, onConfirm, btnClass = 'btn-danger', iconHtml = '<i class="fa-solid fa-triangle-exclamation"></i>') {
+    const modalEl = document.getElementById('dev-universal-confirm-modal');
+    if (!modalEl) {
+        if (confirm(message.replace(/<[^>]*>?/gm, ''))) onConfirm();
+        return;
+    }
+    const titleEl = document.getElementById('dev-confirm-title');
+    const msgEl = document.getElementById('dev-confirm-message');
+    const iconEl = document.getElementById('dev-confirm-icon-box');
+    const actionBtn = document.getElementById('dev-confirm-btn-action');
+
+    if (titleEl) titleEl.innerHTML = title;
+    if (msgEl) msgEl.innerHTML = message;
+    if (iconEl) iconEl.innerHTML = iconHtml;
+
+    if (actionBtn) {
+        actionBtn.className = `btn ${btnClass} w-100`;
+        const newBtn = actionBtn.cloneNode(true);
+        actionBtn.parentNode.replaceChild(newBtn, actionBtn);
+        newBtn.addEventListener('click', () => {
+            const bsModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            if (bsModal) bsModal.hide();
+            onConfirm();
+        });
+    }
+
+    const bsModal = new bootstrap.Modal(modalEl);
+    bsModal.show();
+}
+</script>
 
 </body>
 </html>
