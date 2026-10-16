@@ -3,6 +3,20 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.33.2] - 2026-10-16
+### Corrigé (Fixed)
+- **Plafond Castral & Apogée des Bâtiments &bull; Blocage des Évolutions au Niveau Max (`core/BuildingEngine.php`, `views/building.php`, `views/city.php`) :**
+  * **Interdiction stricte des évolutions au-delà du niveau maximal :**
+    - Dans `core/BuildingEngine.php`, ajout d'un contrôle de validation dans `startUpgrade()` et `getUpgradeDetails()` empêchant toute tentative de passage au niveau supérieur lorsque le bâtiment a déjà atteint son apogée maximale (`max_level`, par exemple Niveau 20 pour le Tenshu et la Grande Forge du Tamahagane, ou Niveau 15 pour le Radar et la Cachette).
+    - Déclenchement d'une exception explicite côté backend, protégeant l'intégrité du jeu contre toute soumission non autorisée (y compris pour les administrateurs).
+  * **Affichage de l'Apogée Castrale dans la page Building (`views/building.php`) :**
+    - Lorsque le bâtiment est au niveau maximal, les cartes de statistiques en haut de page affichent désormais fièrement *« Apogée Maximale (Niveau 20 Atteint) »* et *« Structure Parachevée »* au lieu de suggérer un Niveau 21 inexistant.
+    - La carte des coûts de matériaux est remplacée par une bannière commémorative d'apogée impériale confirmant que la structure fonctionne à plein régime sans besoin de ressources supplémentaires.
+    - Le décret de construction affiche une alerte d'apogée castrale et un bouton verrouillé *« Niveau Maximum Atteint (20 / 20) »*, supprimant tout bouton d'élévation vers le niveau 21.
+    - La jauge de main-d'œuvre requise ne projette plus d'ouvriers pour un niveau supérieur une fois le comble atteint.
+  * **Indicateurs d'Apogée sur la Cité (`views/city.php`) :**
+    - Dans la grille des bâtiments urbains, les structures ayant atteint leur niveau max arborent un badge distinctif vert *« Niveau 20 (Max) »* et un bouton sobre *« Niveau Maximum »* redirigeant vers la gestion de l'édifice sans incitation à l'amélioration.
+
 ## [1.33.1] - 2026-10-16
 ### Corrigé (Fixed)
 - **Privilège Administrateur &bull; Construction et Amélioration Instantanées sans Coût (`core/BuildingEngine.php`, `core/RuralPlotEngine.php`, `core/PlanetEngine.php`, `core/BarracksEngine.php`, `core/ShipyardEngine.php`, `core/ResearchEngine.php`, `api/build.php`, `views/building.php`, `views/city.php`, `views/field.php`, `views/partials/urban_construction_queue.php`, `public/js/app.js`, `public/js/rural_domain_map.js`) :**

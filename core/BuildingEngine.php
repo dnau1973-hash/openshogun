@@ -60,7 +60,7 @@ class BuildingEngine {
     /**
      * Calcule le coût et le temps pour améliorer une parcelle ou un bâtiment
      */
-    public function getUpgradeDetails(string $category, string $targetId, int $currentLevel, int $hqLevel, int $population = 0): array {
+    public function getUpgradeDetails(string $category, string $targetId, int $currentLevel, int $hqLevel = 1, int $population = 0): array {
         // Récupération des coefficients dynamiques de dérivation configurés par le Game Elevate Designer
         $timeCoeff  = max(0.05, min(10.0, (float)GameConfig::get('building_time_coeff', 1.0)));
         $timeGrowth = max(1.05, min(2.5, (float)GameConfig::get('building_time_growth', 1.28)));
@@ -70,6 +70,8 @@ class BuildingEngine {
         if ($category === 'field') {
             $fieldConf = FIELD_TYPES[$targetId] ?? null;
             if (!$fieldConf) throw new Exception("Type de parcelle inconnu.");
+            $maxLevel = 20;
+            $isMaxLevel = ($currentLevel >= $maxLevel);
             $targetLevel = $currentLevel + 1;
             $mult = pow($fieldConf['cost_multiplier'] * $costGrowth, $currentLevel);
             $metal = (int)round(($fieldConf['base_cost']['metal'] ?? 0) * $mult * $costCoeff);
@@ -79,6 +81,8 @@ class BuildingEngine {
         } else {
             $bConf = BUILDINGS[$targetId] ?? null;
             if (!$bConf) throw new Exception("Type de bâtiment inconnu.");
+            $maxLevel = (int)($bConf['max_level'] ?? 20);
+            $isMaxLevel = ($currentLevel >= $maxLevel);
             $targetLevel = $currentLevel + 1;
             $mult = pow($bConf['cost_multiplier'] * $costGrowth, $currentLevel);
             $metal = (int)round(($bConf['base_cost']['metal'] ?? 0) * $mult * $costCoeff);
@@ -100,6 +104,9 @@ class BuildingEngine {
 
         return [
             'target_level' => $targetLevel,
+            'current_level' => $currentLevel,
+            'max_level' => $maxLevel,
+            'is_max_level' => $isMaxLevel,
             'cost' => [
                 'metal' => $metal,
                 'crystal' => $crystal,
@@ -144,9 +151,20 @@ class BuildingEngine {
                     $type = $field['type'];
                 }
             }
+
+            $maxLevel = 20;
+            if ($currentLevel >= $maxLevel) {
+                throw new Exception("Cette parcelle a déjà atteint son niveau maximal (Niveau {$maxLevel}).");
+            }
         } else {
             $type = $targetId;
             $currentLevel = (int)($buildings[$type] ?? 0);
+            $maxLevel = (int)(BUILDINGS[$type]['max_level'] ?? 20);
+
+            if ($currentLevel >= $maxLevel) {
+                $bName = BUILDINGS[$type]['name'] ?? $type;
+                throw new Exception("L'édifice « {$bName} » a déjà atteint son apogée maximale (Niveau {$maxLevel}).");
+            }
 
             // Vérification du bâtiment existant et de son slot
             $stmtExisting = $this->db->prepare("SELECT slot, level FROM planet_buildings WHERE planet_id = ? AND building_type = ?");

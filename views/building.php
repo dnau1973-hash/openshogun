@@ -155,6 +155,8 @@ $buildingHeroImages = [
 if (!$isEmptyPlot) {
     $bInfo = BUILDINGS[$code] ?? null;
     $lvl = (int)($buildings[$code] ?? 0);
+    $maxLevel = (int)($bInfo['max_level'] ?? 20);
+    $isMaxLevel = ($lvl >= $maxLevel);
     $upgradeDetails = $buildingEngine->getUpgradeDetails('building', $code, $lvl, $hqLevel);
     $targetLevel = $upgradeDetails['target_level'];
     $cost = $upgradeDetails['cost'];
@@ -394,11 +396,19 @@ if (!$isEmptyPlot) {
             <div class="card card-sm h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="row align-items-center w-100 g-2">
-                        <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;"><i class="fa-solid fa-chart-line text-success"></i></span></div>
-                        <div class="col">
-                            <div class="font-weight-medium">Niveau <?= $targetLevel ?> → Rendement</div>
-                            <div class="text-success"><?= $statData['next'] ?> <span class="text-muted" style="font-size:0.75rem;">(<?= $statData['gain'] ?>)</span></div>
-                        </div>
+                        <?php if ($isMaxLevel): ?>
+                            <div class="col-auto"><span class="avatar rounded bg-warning-lt" style="font-size:1.3rem;"><i class="fa-solid fa-crown text-warning"></i></span></div>
+                            <div class="col">
+                                <div class="font-weight-medium">Apogée Maximale</div>
+                                <div class="text-warning fw-bold"><i class="fa-solid fa-star me-1"></i>Niveau <?= $maxLevel ?> (Atteint)</div>
+                            </div>
+                        <?php else: ?>
+                            <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;"><i class="fa-solid fa-chart-line text-success"></i></span></div>
+                            <div class="col">
+                                <div class="font-weight-medium">Niveau <?= $targetLevel ?> → Rendement</div>
+                                <div class="text-success"><?= $statData['next'] ?> <span class="text-muted" style="font-size:0.75rem;">(<?= $statData['gain'] ?>)</span></div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -407,12 +417,21 @@ if (!$isEmptyPlot) {
             <div class="card card-sm h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="row align-items-center w-100 g-2">
-                        <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;"><i class="fa-solid fa-stopwatch text-info"></i></span></div>
-                        <div class="col">
-                            <div class="font-weight-medium">Temps de construction</div>
-                            <div class="text-info font-monospace"><?= gmdate('H:i:s', $duration) ?></div>
-                            <div class="text-muted" style="font-size:0.72rem;">Tenshu Niv.<?= $hqLevel ?> &bull; Bâtisseurs du clan</div>
-                        </div>
+                        <?php if ($isMaxLevel): ?>
+                            <div class="col-auto"><span class="avatar rounded bg-success-lt" style="font-size:1.3rem;"><i class="fa-solid fa-check-double text-success"></i></span></div>
+                            <div class="col">
+                                <div class="font-weight-medium">Structure Parachevée</div>
+                                <div class="text-success fw-bold">Édifice à son comble</div>
+                                <div class="text-muted" style="font-size:0.72rem;">Aucun agrandissement requis</div>
+                            </div>
+                        <?php else: ?>
+                            <div class="col-auto"><span class="avatar rounded bg-info-lt" style="font-size:1.3rem;"><i class="fa-solid fa-stopwatch text-info"></i></span></div>
+                            <div class="col">
+                                <div class="font-weight-medium">Temps de construction</div>
+                                <div class="text-info font-monospace"><?= gmdate('H:i:s', $duration) ?></div>
+                                <div class="text-muted" style="font-size:0.72rem;">Tenshu Niv.<?= $hqLevel ?> &bull; Bâtisseurs du clan</div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -609,7 +628,7 @@ if (!$isEmptyPlot) {
                                 ?>
                                 <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                                     <span class="badge bg-azure-lt d-inline-flex align-items-center gap-1" title="Main-d'œuvre nécessaire au fonctionnement">
-                                        <i class="fa-solid fa-users text-azure"></i> <?= $bWorkersReq ?> ouvriers requis <?= ($targetLevel > $lvl) ? "(Niv.{$targetLevel} : {$bWorkersNext})" : '' ?>
+                                        <i class="fa-solid fa-users text-azure"></i> <?= $bWorkersReq ?> ouvriers requis <?= (!$isMaxLevel && $targetLevel > $lvl) ? "(Niv.{$targetLevel} : {$bWorkersNext})" : '' ?>
                                     </span>
                                     <?php if ($bUnderstaffed): ?>
                                         <span class="badge bg-warning-lt text-warning d-inline-flex align-items-center gap-1" title="Le fief souffre d'un manque d'ouvriers">
@@ -2675,6 +2694,21 @@ if (!$isEmptyPlot) {
             <?php endif; ?>
 
             <!-- Coûts d'amélioration -->
+            <?php if ($isMaxLevel): ?>
+            <div class="card mb-3 border-success">
+                <div class="card-header bg-success-lt d-flex justify-content-between align-items-center">
+                    <h3 class="card-title text-success"><i class="fa-solid fa-crown text-warning me-1"></i>Édifice à son Apogée Impériale</h3>
+                    <span class="badge bg-success text-white">Niveau <?= $maxLevel ?> / <?= $maxLevel ?></span>
+                </div>
+                <div class="card-body py-4 text-center">
+                    <div class="mb-2"><i class="fa-solid fa-shield-halved text-success" style="font-size:2.5rem;"></i></div>
+                    <h4 class="text-dark fw-bold mb-1">Cet ouvrage architectural a atteint son niveau maximal</h4>
+                    <p class="text-secondary small mb-0" style="max-width:550px; margin:0 auto;">
+                        Toutes les élévations et agrandissements prévus par les traités de charpente et de fortification féodale ont été menés à leur terme. Les rendements, capacités et prérogatives de cette structure fonctionnent à plein régime.
+                    </p>
+                </div>
+            </div>
+            <?php else: ?>
             <div class="card mb-3">
                 <div class="card-header">
                     <h3 class="card-title"><i class="fa-solid fa-cubes text-secondary me-1"></i>Coûts d'Amélioration &bull; Niveau <?= $targetLevel ?></h3>
@@ -2718,6 +2752,7 @@ if (!$isEmptyPlot) {
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Décret de Construction -->
             <div class="card mb-3" id="buildActionBtn">
@@ -2793,6 +2828,18 @@ if (!$isEmptyPlot) {
                         </button>
                         <button type="button" class="btn btn-outline-danger w-100" onclick="cancelBuildingBuild(<?= (int)$activeJob['id'] ?>)">
                             <i class="fa-solid fa-ban text-danger me-1"></i><?= $isDemolishingJob ? 'Interrompre le démantèlement' : 'Interrompre les travaux (80% remboursé)' ?>
+                        </button>
+
+                    <?php elseif ($isMaxLevel): ?>
+                        <div class="alert alert-success mb-3 text-center">
+                            <div style="font-size:1.8rem; margin-bottom:0.5rem;"><i class="fa-solid fa-crown text-warning"></i></div>
+                            <h4 class="alert-title text-success fw-bold">Apogée Castrale Atteinte</h4>
+                            <p class="text-muted mb-0" style="font-size:0.85rem;">
+                                Cet édifice prestigieux a atteint son niveau maximal (<strong>Niveau <?= $maxLevel ?></strong>). Ses capacités et rendements sont à leur apogée impériale.
+                            </p>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-lg w-100 disabled" disabled style="opacity:0.65; cursor:not-allowed;">
+                            <i class="fa-solid fa-check-double me-1 text-success"></i> Niveau Maximum Atteint (<?= $maxLevel ?> / <?= $maxLevel ?>)
                         </button>
 
                     <?php elseif (!$canQueueNewBuilding): ?>

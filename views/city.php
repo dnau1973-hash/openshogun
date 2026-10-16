@@ -289,6 +289,8 @@ ob_start();
                 <?php foreach (BUILDINGS as $code => $bInfo): ?>
                     <?php
                         $lvl = $buildings[$code] ?? 0;
+                        $maxLevel = (int)($bInfo['max_level'] ?? 20);
+                        $isMaxLevel = ($lvl >= $maxLevel);
                         $details = $buildingEngine->getUpgradeDetails('building', $code, $lvl, $hqLevel);
                         $cost = $details['cost'];
                         $duration = $details['duration'];
@@ -306,7 +308,9 @@ ob_start();
                             <?php endif; ?>
                         </div>
                         <h3 class="building-title"><?= htmlspecialchars($bInfo['name']) ?></h3>
-                        <span class="building-lvl-badge"><?= ($lvl > 0) ? "Niveau $lvl" : "Non bâti" ?></span>
+                        <span class="building-lvl-badge <?= $isMaxLevel ? 'bg-success text-white' : '' ?>">
+                            <?= ($lvl > 0) ? ($isMaxLevel ? "Niveau $lvl (Max)" : "Niveau $lvl") : "Non bâti" ?>
+                        </span>
                         <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem; flex:1;">
                             <?= htmlspecialchars($bInfo['description']) ?>
                         </p>
@@ -328,9 +332,15 @@ ob_start();
                                 <a href="/?page=building&code=blacksmith#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-fire-burner me-1"></i>Fourneaux &amp; Prestige</a>
                             <?php endif; ?>
 
-                            <a href="/?page=building&code=<?= $code ?>" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">
-                                <?= ($lvl === 0) ? '<i class="fa-solid fa-hammer me-1"></i>Construire' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Améliorer le niveau' ?>
-                            </a>
+                            <?php if ($isMaxLevel): ?>
+                                <a href="/?page=building&code=<?= $code ?>" class="btn btn-outline-success" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">
+                                    <i class="fa-solid fa-crown text-warning me-1"></i>Niveau Maximum (<?= $lvl ?>)
+                                </a>
+                            <?php else: ?>
+                                <a href="/?page=building&code=<?= $code ?>" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">
+                                    <?= ($lvl === 0) ? '<i class="fa-solid fa-hammer me-1"></i>Construire' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Améliorer le niveau' ?>
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
