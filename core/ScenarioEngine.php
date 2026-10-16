@@ -464,10 +464,19 @@ class ScenarioEngine {
      */
     public function calculateTaskMetrics(array $tasks): array {
         $total = count($tasks);
+        $byRole = [];
+        foreach (self::ROLES as $rKey => $rDef) {
+            $byRole[$rKey] = [
+                'total' => 0, 'done' => 0, 'in_progress' => 0,
+                'todo' => 0, 'blocked' => 0, 'percent' => 0
+            ];
+        }
+
         if ($total === 0) {
             return [
                 'total' => 0, 'done' => 0, 'in_progress' => 0,
-                'todo' => 0, 'blocked' => 0, 'percent' => 0, 'is_complete' => false
+                'todo' => 0, 'blocked' => 0, 'percent' => 0, 'is_complete' => false,
+                'by_role' => $byRole
             ];
         }
 
@@ -478,15 +487,27 @@ class ScenarioEngine {
 
         foreach ($tasks as $t) {
             $st = $t['status'] ?? 'todo';
+            $rCode = $t['role_code'] ?? 'level_designer';
+            if (!isset($byRole[$rCode])) {
+                $byRole[$rCode] = ['total' => 0, 'done' => 0, 'in_progress' => 0, 'todo' => 0, 'blocked' => 0, 'percent' => 0];
+            }
+            $byRole[$rCode]['total']++;
+
             match($st) {
-                'done'        => $done++,
-                'in_progress' => $inProgress++,
-                'blocked'     => $blocked++,
-                default       => $todo++
+                'done'        => [$done++, $byRole[$rCode]['done']++],
+                'in_progress' => [$inProgress++, $byRole[$rCode]['in_progress']++],
+                'blocked'     => [$blocked++, $byRole[$rCode]['blocked']++],
+                default       => [$todo++, $byRole[$rCode]['todo']++]
             };
         }
 
         $percent = (int)round(($done / $total) * 100);
+
+        foreach ($byRole as $rCode => &$metricsRole) {
+            if ($metricsRole['total'] > 0) {
+                $metricsRole['percent'] = (int)round(($metricsRole['done'] / $metricsRole['total']) * 100);
+            }
+        }
 
         return [
             'total'       => $total,
@@ -495,8 +516,41 @@ class ScenarioEngine {
             'todo'        => $todo,
             'blocked'     => $blocked,
             'percent'     => $percent,
-            'is_complete' => ($done === $total)
+            'is_complete' => ($done === $total),
+            'by_role'     => $byRole
         ];
+    }
+
+    /**
+     * Regroupe les tâches par rôle métier pour affichage structuré en accordéon/sections
+     */
+    public function getTasksGroupedByRole(array $tasks): array {
+        $grouped = [];
+        foreach (self::ROLES as $roleCode => $roleDef) {
+            $grouped[$roleCode] = [
+                'role'  => $roleDef,
+                'tasks' => []
+            ];
+        }
+
+        foreach ($tasks as $t) {
+            $rCode = $t['role_code'] ?? 'level_designer';
+            if (!isset($grouped[$rCode])) {
+                $grouped[$rCode] = [
+                    'role'  => self::ROLES[$rCode] ?? [
+                        'code' => $rCode,
+                        'name' => $t['role_name'] ?? 'Autre Métier',
+                        'icon' => 'fa-gear',
+                        'color' => 'secondary',
+                        'domain' => 'Spécialité'
+                    ],
+                    'tasks' => []
+                ];
+            }
+            $grouped[$rCode]['tasks'][] = $t;
+        }
+
+        return $grouped;
     }
 
     /**
@@ -658,7 +712,7 @@ class ScenarioEngine {
         $md .= "**Identifiant** : `{$sc['slug']}`  \n";
         $md .= "**Période Historique** : {$sc['era']}  \n";
         $md .= "**Statut de Production** : " . strtoupper($sc['status']) . "  \n";
-        $md .= "**Avancement Global des 10 Tâches** : {$sc['metrics']['percent']}% ({$sc['metrics']['done']}/{$sc['metrics']['total']} terminées)  \n\n";
+        $md .= "**Avancement Global des Tâches Métiers** : {$sc['metrics']['percent']}% ({$sc['metrics']['done']}/{$sc['metrics']['total']} terminées)  \n\n";
 
         $md .= "## 1. Trame Narrative & Synopsis\n";
         $md .= "{$sc['synopsis']}\n\n";

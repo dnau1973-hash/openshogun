@@ -242,9 +242,9 @@ ob_start();
 include __DIR__ . '/../views/gamestudio/narrative_scenarios.php';
 $narrativeHtml = ob_get_clean();
 assert(strlen($narrativeHtml) > 500, "Le rendu HTML de narrative_scenarios doit être supérieur à 500 octets");
-assert(strpos($narrativeHtml, 'Scénarios de Jeu &amp; Matrice des 10 Tâches Métiers') !== false, "Le titre de narrative_scenarios doit être présent");
-assert(strpos($narrativeHtml, 'modalScenarioDetail') !== false, "La modale de scénario et tâches doit être présente");
-echo "OK - Rendu MVC Narrative Designer (Scénarios & 10 Tâches Métiers) validé (" . strlen($narrativeHtml) . " octets).\n";
+assert(strpos($narrativeHtml, 'Scénarios de Jeu &amp; Matrice des Tâches Métiers') !== false, "Le titre de narrative_scenarios doit être présent");
+assert(strpos($narrativeHtml, 'Full Page Studio') !== false, "L'indicateur Full Page Studio doit être présent");
+echo "OK - Rendu MVC Narrative Designer (Scénarios & Tâches Métiers Multiples) validé (" . strlen($narrativeHtml) . " octets).\n";
 
 // 7. Test de la présence du raccourci Game Studio dans header.php
 echo "[6] Test présence du raccourci Game Studio dans header.php...\n";

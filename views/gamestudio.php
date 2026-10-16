@@ -237,15 +237,25 @@ if ($currentTab === 'dashboard') {
                 $newId = $scenarioEngine->saveScenarioFull($_POST);
                 $_SESSION['scenario_flash'] = [
                     'type' => 'success',
-                    'msg'  => "Scénario créé avec succès (ID #$newId) avec sa matrice de 10 tâches métiers !"
+                    'msg'  => "Scénario créé avec succès (ID #$newId) avec ses tâches métiers !"
                 ];
+                $redirectUrl = (!empty($_POST['redirect_to']) && $_POST['redirect_to'] === 'catalog')
+                    ? '?page=gamestudio&tab=narrative_scenarios'
+                    : "?page=gamestudio&tab=narrative_scenarios&action=edit&id=$newId";
+                header('Location: ' . $redirectUrl);
+                exit;
             } elseif ($action === 'update_scenario') {
                 $scId = (int)($_POST['scenario_id'] ?? 0);
                 $updated = $scenarioEngine->updateScenario($scId, $_POST);
                 $_SESSION['scenario_flash'] = [
                     'type' => $updated ? 'success' : 'danger',
-                    'msg'  => $updated ? "Scénario #$scId et ses 10 tâches métiers mis à jour avec succès !" : "Erreur lors de la mise à jour du scénario #$scId."
+                    'msg'  => $updated ? "Scénario #$scId et ses tâches métiers enregistrés avec succès !" : "Erreur lors de la mise à jour du scénario #$scId."
                 ];
+                $redirectUrl = (!empty($_POST['redirect_to']) && $_POST['redirect_to'] === 'catalog')
+                    ? '?page=gamestudio&tab=narrative_scenarios'
+                    : "?page=gamestudio&tab=narrative_scenarios&action=edit&id=$scId";
+                header('Location: ' . $redirectUrl);
+                exit;
             } elseif ($action === 'update_task_status') {
                 $scId = (int)($_POST['scenario_id'] ?? 0);
                 $taskId = (int)($_POST['task_id'] ?? 0);
@@ -255,6 +265,12 @@ if ($currentTab === 'dashboard') {
                     'type' => $updated ? 'success' : 'warning',
                     'msg'  => $updated ? "Statut de la tâche #$taskId mis à jour vers « $taskStatus »." : "Impossible de modifier la tâche."
                 ];
+                $returnAction = !empty($_POST['return_action']) ? $_POST['return_action'] : 'catalog';
+                $redirectUrl = ($returnAction === 'edit' && $scId > 0)
+                    ? "?page=gamestudio&tab=narrative_scenarios&action=edit&id=$scId"
+                    : '?page=gamestudio&tab=narrative_scenarios';
+                header('Location: ' . $redirectUrl);
+                exit;
             } elseif ($action === 'duplicate_scenario') {
                 $scId = (int)($_POST['scenario_id'] ?? 0);
                 $clone = $scenarioEngine->duplicateScenario($scId, $userId);
@@ -262,6 +278,12 @@ if ($currentTab === 'dashboard') {
                     'type' => $clone ? 'success' : 'danger',
                     'msg'  => $clone ? "Scénario dupliqué avec succès (Nouveau ID #" . $clone['id'] . ") !" : "Échec de la duplication."
                 ];
+                $newId = $clone['id'] ?? 0;
+                $redirectUrl = ($newId > 0)
+                    ? "?page=gamestudio&tab=narrative_scenarios&action=edit&id=$newId"
+                    : '?page=gamestudio&tab=narrative_scenarios';
+                header('Location: ' . $redirectUrl);
+                exit;
             } elseif ($action === 'delete_scenario') {
                 $scId = (int)($_POST['scenario_id'] ?? 0);
                 $deleted = $scenarioEngine->deleteScenario($scId);
@@ -269,6 +291,8 @@ if ($currentTab === 'dashboard') {
                     'type' => $deleted ? 'success' : 'danger',
                     'msg'  => $deleted ? "Scénario #$scId supprimé définitivement." : "Échec de la suppression."
                 ];
+                header('Location: ?page=gamestudio&tab=narrative_scenarios');
+                exit;
             }
         } catch (Throwable $e) {
             $_SESSION['scenario_flash'] = ['type' => 'danger', 'msg' => 'Erreur : ' . $e->getMessage()];
