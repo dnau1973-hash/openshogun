@@ -1625,7 +1625,7 @@ class PlanetEngine {
         $buildings = $this->getBuildings($planetId);
         $millLvl = (int)($buildings['grain_mill'] ?? 0);
         $minLvlRequired = ($product === 'sake') ? 10 : 5;
-        if (!$isAdmin && $millLvl < $minLvlRequired) {
+        if ($millLvl < $minLvlRequired) {
             $productLabel = ($product === 'sake') ? "le saké féodal" : "la farine de riz";
             return [
                 'success' => false,

@@ -7,13 +7,12 @@
   1. **Déblocage Échelonné dans la Meunerie & Brasserie de Riz (`views/building.php`, `core/PlanetEngine.php`) :**
      - La mouture de Farine de Riz (`rice_flour`) est accessible dès le **Niveau 5** du bâtiment.
      - Le brassage du Saké Féodal (`sake`) demeure réservé au **Niveau 10**.
-  2. **Contrôles Backend Stricts (`core/PlanetEngine.php`) :**
-     - Vérification dynamique du niveau du bâtiment selon le produit demandé : retour d'une erreur explicite si tentative de production avant le palier requis (`Niveau 5` pour la farine, `Niveau 10` pour le saké).
-     - Contournement conservé pour les administrateurs (`$isAdmin`).
-  3. **Interface Utilisateur & Navigation :**
-     - Badges d'état dynamiques dans l'en-tête de la section raffinage.
-     - Jauges de progression individuelles pour chaque atelier (`X / 5` pour la farine, `X / 10` pour le saké).
-     - Bouton d'accès rapide en haut de page actif dès le niveau 5.
+  2. **Contrôles Backend Infranchissables & Suppression du Contournement Admin (`core/PlanetEngine.php`) :**
+     - Vérification stricte du niveau réel du bâtiment selon le produit : rejet systématique si niveau insuffisant (`Niveau actuel : X/5` pour la farine, `X/10` pour le saké).
+     - Suppression de l'exception `$isAdmin` sur les paliers de niveau : même un compte administrateur doit respecter les prérequis d'élévation du bâtiment (l'avantage admin de gratuité et d'instantanéité s'appliquant une fois le niveau atteint).
+  3. **Verrouillage de l'Interface au Niveau 0 (`views/building.php`) :**
+     - Si le bâtiment est au niveau 0 (terrain non bâti ou emplacement libre), masquage total de la section d'artisanat `#craftSection` et du bouton d'accès rapide.
+     - Affichage dynamique des verrous et jauges individuelles (`X / 5` pour la farine, `X / 10` pour le saké).
 - **Fichiers modifiés :** `core/PlanetEngine.php`, `views/building.php`, `views/docs.php`, `CHANGELOG.md`, `fonctionnalités.md`
 - **Vérification QA :**
   1. Consulter la Meunerie & Brasserie de Riz (`/?page=building&code=grain_mill`) avec un joueur non-admin :

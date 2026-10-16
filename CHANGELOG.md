@@ -3,6 +3,16 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.3] - 2026-10-16
+### Corrigé (Fixed)
+- **Verrouillage Strict des Paliers Meunerie &bull; Interdiction Totale de Production au Niveau 0 & Avant Paliers Requis (`core/PlanetEngine.php`, `views/building.php`) :**
+  * **Suppression du Contournement Admin sur les Prérequis de Niveau :**
+    - Résolution du bug où un compte administrateur pouvait lancer la production de farine ou de saké même lorsque la Meunerie & Brasserie était au niveau 0 ou non bâtie.
+    - Dans `core/PlanetEngine.php` (`craftRiceProduct`), suppression de l'exemption `$isAdmin` sur les paliers de niveau : le Niveau 5 pour la farine et le Niveau 10 pour le saké sont désormais obligatoires et infranchissables pour tous les comptes.
+  * **Verrouillage Strict de l'Interface (`views/building.php`) :**
+    - Au niveau 0 (`$lvl === 0`), masquage complet de la section d'artisanat et du bouton d'accès rapide.
+    - Affichage strict des cadenas et jauges de progression tant que le niveau 5 (Farine) ou 10 (Saké) n'est pas atteint, sans possibilité de déclencher de lot prématurément.
+
 ## [1.34.2] - 2026-10-16
 ### Modifié (Changed)
 - **Meunerie & Brasserie de Riz &bull; Paliers de Production Échelonnés (Farine au Niv. 5, Saké au Niv. 10) (`core/PlanetEngine.php`, `views/building.php`, `views/docs.php`) :**

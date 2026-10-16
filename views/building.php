@@ -668,7 +668,7 @@ if (!$isEmptyPlot) {
                                         <a href="/?page=alliance" class="btn btn-primary">
                                             <i class="fa-solid fa-flag me-1"></i>Ouvrir le Pavillon des Alliances Féodales &rarr;
                                         </a>
-                                    <?php elseif ($code === 'grain_mill' && ($lvl >= 5 || $isAdmin)): ?>
+                                    <?php elseif ($code === 'grain_mill' && $lvl >= 5): ?>
                                         <a href="#craftSection" class="btn btn-success text-white">
                                             <i class="fa-solid fa-bowl-rice me-1"></i>Accéder à la Meunerie &amp; Brasserie &darr;
                                         </a>
@@ -909,7 +909,7 @@ if (!$isEmptyPlot) {
             </div>
             <?php endif; ?>
 
-            <?php if ($code === 'grain_mill' && ($lvl > 0 || $isAdmin)): ?>
+            <?php if ($code === 'grain_mill' && $lvl > 0): ?>
             <?php
             $planetEngine->processCraftQueue((int)$planet['id']);
             $craftQueue = $planetEngine->getCraftQueue((int)$planet['id'], 'grain_mill');
@@ -940,11 +940,11 @@ if (!$isEmptyPlot) {
                         <span class="badge bg-success text-white fw-bold shadow-sm" title="Étage / Niveau actuel de la meunerie">
                             <i class="fa-solid fa-landmark text-white me-1"></i>Niveau <?= $lvl ?>
                         </span>
-                        <?php if ($lvl < 5 && !$isAdmin): ?>
+                        <?php if ($lvl < 5): ?>
                             <span class="badge bg-secondary text-white fw-bold">
                                 <i class="fa-solid fa-lock text-muted me-1"></i>Farine : Niv. 5 requis (<?= $lvl ?>/5)
                             </span>
-                        <?php elseif ($lvl < 10 && !$isAdmin): ?>
+                        <?php elseif ($lvl < 10): ?>
                             <span class="badge bg-success-lt fw-bold">
                                 <i class="fa-solid fa-check text-success me-1"></i>Farine Débloquée
                             </span>
@@ -1112,7 +1112,7 @@ if (!$isEmptyPlot) {
                     <div class="row g-3">
                         <!-- Atelier 1 : Farine de Riz (Niveau 5) -->
                         <div class="col-md-6">
-                            <?php if ($lvl < 5 && !$isAdmin): ?>
+                            <?php if ($lvl < 5): ?>
                             <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -1192,7 +1192,7 @@ if (!$isEmptyPlot) {
 
                         <!-- Atelier 2 : Saké Féodal (Niveau 10) -->
                         <div class="col-md-6">
-                            <?php if ($lvl < 10 && !$isAdmin): ?>
+                            <?php if ($lvl < 10): ?>
                             <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
