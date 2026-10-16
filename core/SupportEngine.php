@@ -125,7 +125,8 @@ class SupportEngine {
         ?string $status = null,
         ?string $search = null,
         int $limit = 100,
-        int $offset = 0
+        int $offset = 0,
+        ?string $severity = null
     ): array {
         $sql = "
             SELECT t.*, 
@@ -146,6 +147,11 @@ class SupportEngine {
         if (!empty($status) && in_array($status, self::VALID_STATUSES)) {
             $sql .= " AND t.status = ?";
             $params[] = $status;
+        }
+
+        if (!empty($severity) && in_array($severity, self::VALID_SEVERITIES)) {
+            $sql .= " AND t.severity = ?";
+            $params[] = $severity;
         }
 
         if (!empty($search)) {

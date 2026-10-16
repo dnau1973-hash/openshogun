@@ -66,7 +66,8 @@ $allowedTabs = [
     'elevate_survey', 'elevate_oases', 'elevate_buildings',
     'elevate_events', 'elevate_weekly_events',
     'narrative_storyboard', 'narrative_lore',
-    'liveops_events', 'liveops_features', 'liveops_broadcast', 'liveops_support'
+    'liveops_events', 'liveops_features', 'liveops_broadcast', 'liveops_support',
+    'dev_tickets'
 ];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
 $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
@@ -175,6 +176,45 @@ if ($currentTab === 'dashboard') {
             $_SESSION['liveops_flash'] = ['type' => 'danger', 'msg' => 'Erreur : ' . $e->getMessage()];
         }
         header('Location: ?page=gamestudio&tab=' . $currentTab);
+        exit;
+    }
+} elseif ($currentTab === 'dev_tickets') {
+    require_once __DIR__ . '/../core/SupportEngine.php';
+    $supportEngine = new SupportEngine();
+
+    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action'])) {
+        $action = $_POST['action'];
+        try {
+            if ($action === 'update_ticket_status') {
+                $ticketId = (int)($_POST['ticket_id'] ?? 0);
+                $newStatus = (string)($_POST['status'] ?? 'pending');
+                $adminResponse = (string)($_POST['admin_response'] ?? '');
+                $notifyUser = !empty($_POST['notify_user']);
+                $adminResponseSanitized = SupportEngine::sanitizeHtml($adminResponse);
+
+                $res = $supportEngine->updateTicketStatus(
+                    $ticketId,
+                    $newStatus,
+                    $adminResponseSanitized ?: null,
+                    $userId,
+                    $notifyUser
+                );
+                $_SESSION['dev_flash'] = [
+                    'type' => 'success',
+                    'msg' => "Ticket #$ticketId mis à jour avec succès (Nouveau statut : $newStatus) !"
+                ];
+            } elseif ($action === 'delete_ticket') {
+                $ticketId = (int)($_POST['ticket_id'] ?? 0);
+                $deleted = $supportEngine->deleteTicket($ticketId);
+                $_SESSION['dev_flash'] = [
+                    'type' => $deleted ? 'success' : 'danger',
+                    'msg' => $deleted ? "Ticket #$ticketId supprimé avec succès." : "Échec de la suppression du ticket #$ticketId."
+                ];
+            }
+        } catch (Throwable $e) {
+            $_SESSION['dev_flash'] = ['type' => 'danger', 'msg' => 'Erreur : ' . $e->getMessage()];
+        }
+        header('Location: ?page=gamestudio&tab=dev_tickets' . (!empty($_POST['filter_params']) ? '&' . ltrim($_POST['filter_params'], '&') : ''));
         exit;
     }
 }
@@ -469,6 +509,30 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div>
                                 <div>Support &amp; Compensations Daimyō</div>
                                 <div class="small text-secondary">Recherche de fief, Colis de dédommagement &amp; Audit logs</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Dropdown Développeur Back-end, Front-end & Réseau -->
+                <div class="dropdown">
+                    <a href="#" 
+                       class="studio-nav-link dropdown-toggle <?= str_starts_with($currentTab, 'dev_') ? 'active' : '' ?>"
+                       data-bs-toggle="dropdown" 
+                       aria-expanded="false"
+                       title="Ingénierie logicielle, back-end, front-end, réseau et résolution de bugs (Développeur)">
+                        <i class="fa-solid fa-code text-teal"></i>
+                        <span>Développeur (Back, Front &amp; Réseau)</span>
+                    </a>
+                    <div class="dropdown-menu shadow-sm">
+                        <div class="dropdown-header text-uppercase text-secondary small fw-bold">
+                            Ingénierie &amp; Résolution de Bugs
+                        </div>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'dev_tickets' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=dev_tickets">
+                            <i class="fa-solid fa-bug text-danger"></i>
+                            <div>
+                                <div>Traitement des Tickets Support &amp; Bugs</div>
+                                <div class="small text-secondary">Signalements joueurs, triage, diagnostic technique &amp; résolution</div>
                             </div>
                         </a>
                     </div>

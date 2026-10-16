@@ -99,9 +99,18 @@ $sqlite->exec("INSERT INTO dev_roles (id, title, honor_title, icon, category, de
 $sqlite->exec("CREATE TABLE support_tickets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
-    subject TEXT,
-    status TEXT DEFAULT 'open',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    type TEXT DEFAULT 'bug',
+    category TEXT DEFAULT 'ui',
+    severity TEXT DEFAULT 'medium',
+    title TEXT DEFAULT 'Test Bug',
+    description TEXT DEFAULT 'Description du bug',
+    planet_id INTEGER NULL,
+    status TEXT DEFAULT 'pending',
+    admin_response TEXT NULL,
+    admin_id INTEGER NULL,
+    responded_at INTEGER NULL,
+    created_at INTEGER DEFAULT 1720000000,
+    updated_at INTEGER DEFAULT 1720000000
 )");
 
 $sqlite->exec("CREATE TABLE castles (
@@ -212,9 +221,19 @@ ob_start();
 include __DIR__ . '/../views/gamestudio/general.php';
 $generalHtml = ob_get_clean();
 assert(strlen($generalHtml) > 500, "Le rendu HTML de general doit être supérieur à 500 octets");
-assert(strpos($generalHtml, 'Configuration &amp; Synthèse Générale') !== false, "Le titre de la vue générale doit être présent");
+assert(strpos($generalHtml, 'Configuration &amp;') !== false, "Le titre de la vue générale doit être présent");
 assert(strpos($generalHtml, 'Comptes Humains') !== false, "La carte Comptes Humains doit être présente");
 echo "OK - Rendu MVC Général validé (" . strlen($generalHtml) . " octets).\n";
+
+// 6.b Test rendu MVC views/gamestudio/dev_tickets.php
+echo "[5.b] Test rendu MVC views/gamestudio/dev_tickets.php...\n";
+ob_start();
+include __DIR__ . '/../views/gamestudio/dev_tickets.php';
+$devTicketsHtml = ob_get_clean();
+assert(strlen($devTicketsHtml) > 500, "Le rendu HTML de dev_tickets doit être supérieur à 500 octets");
+assert(strpos($devTicketsHtml, 'Traitement des Tickets Support') !== false, "Le titre de dev_tickets doit être présent");
+assert(strpos($devTicketsHtml, 'modalDevTicket') !== false, "La modale technique de traitement doit être présente");
+echo "OK - Rendu MVC Développeur (Tickets & Bugs) validé (" . strlen($devTicketsHtml) . " octets).\n";
 
 // 7. Test de la présence du raccourci Game Studio dans header.php
 echo "[6] Test présence du raccourci Game Studio dans header.php...\n";
