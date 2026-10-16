@@ -1621,11 +1621,16 @@ class PlanetEngine {
             return ['success' => false, 'error' => "Veuillez indiquer une quantité de riz valide supérieure à zéro."];
         }
 
-        // 1. Vérifier le bâtiment Meunerie & Brasserie (Niveau 10 minimum requis)
+        // 1. Vérifier le bâtiment Meunerie & Brasserie (Niveau 5 pour la farine, Niveau 10 pour le saké)
         $buildings = $this->getBuildings($planetId);
         $millLvl = (int)($buildings['grain_mill'] ?? 0);
-        if (!$isAdmin && $millLvl < 10) {
-            return ['success' => false, 'error' => "La Meunerie & Brasserie de riz (Sakagura) doit être érigée au Niveau 10 minimum pour raffiner le riz en farine ou saké (Niveau actuel : {$millLvl}/10)."];
+        $minLvlRequired = ($product === 'sake') ? 10 : 5;
+        if (!$isAdmin && $millLvl < $minLvlRequired) {
+            $productLabel = ($product === 'sake') ? "le saké féodal" : "la farine de riz";
+            return [
+                'success' => false,
+                'error' => "La Meunerie & Brasserie de riz (Sakagura) doit être érigée au Niveau {$minLvlRequired} minimum pour produire {$productLabel} (Niveau actuel : {$millLvl}/{$minLvlRequired})."
+            ];
         }
 
         // Mode Administrateur : Raffinage instantané sans coût et sans délai

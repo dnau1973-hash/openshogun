@@ -276,6 +276,12 @@ if (!$isEmptyPlot) {
             'next' => ($targetLevel >= 20) ? 'Armes & Armées de Prestige débloquées' : (($targetLevel >= 15) ? 'Fonte de Métal débloquée' : 'Progression Fonte (Niv. ' . $targetLevel . '/15)'),
             'gain' => ($targetLevel === 15) ? 'Déblocage de la fonte du Métal' : (($targetLevel === 20) ? 'Déblocage des Armes & Armées de Prestige' : '+15% vitesse de forge')
         ],
+        'grain_mill' => [
+            'label' => 'Meunerie & Brasserie (Raffinage)',
+            'cur' => ($lvl >= 10) ? 'Farine & Saké opérationnels (Niv. 10+)' : (($lvl >= 5) ? 'Farine de riz débloquée (Saké au Niv. 10)' : 'Niv. ' . $lvl . ' / 5 (Farine Niv. 5, Saké Niv. 10)'),
+            'next' => ($targetLevel >= 10) ? 'Déblocage des Cuves de Saké (Sakagura)' : (($targetLevel >= 5) ? 'Déblocage de la Farine de riz' : 'Progression Farine (Niv. ' . $targetLevel . '/5)'),
+            'gain' => ($targetLevel === 5) ? 'Déblocage de la Farine de riz' : (($targetLevel === 10) ? 'Déblocage du Saké Féodal' : '+5% récolte riz & +15% vitesse raffinage')
+        ],
         default => [
             'label' => 'Niveau d\'élévation',
             'cur' => 'Niveau ' . $lvl,
@@ -662,9 +668,9 @@ if (!$isEmptyPlot) {
                                         <a href="/?page=alliance" class="btn btn-primary">
                                             <i class="fa-solid fa-flag me-1"></i>Ouvrir le Pavillon des Alliances Féodales &rarr;
                                         </a>
-                                    <?php elseif ($code === 'grain_mill' && $lvl >= 10): ?>
+                                    <?php elseif ($code === 'grain_mill' && ($lvl >= 5 || $isAdmin)): ?>
                                         <a href="#craftSection" class="btn btn-success text-white">
-                                            <i class="fa-solid fa-wine-bottle me-1"></i>Accéder à la Minoterie &amp; Cuves de Saké &darr;
+                                            <i class="fa-solid fa-bowl-rice me-1"></i>Accéder à la Meunerie &amp; Brasserie &darr;
                                         </a>
                                     <?php elseif ($code === 'sawmill' && $lvl >= 10): ?>
                                         <a href="#craftSection" class="btn btn-warning text-dark fw-bold">
@@ -934,13 +940,20 @@ if (!$isEmptyPlot) {
                         <span class="badge bg-success text-white fw-bold shadow-sm" title="Étage / Niveau actuel de la meunerie">
                             <i class="fa-solid fa-landmark text-white me-1"></i>Niveau <?= $lvl ?>
                         </span>
-                        <?php if ($lvl < 10 && !$isAdmin): ?>
+                        <?php if ($lvl < 5 && !$isAdmin): ?>
                             <span class="badge bg-secondary text-white fw-bold">
-                                <i class="fa-solid fa-lock text-muted me-1"></i>Raffinage : Niv. 10 requis (<?= $lvl ?>/10)
+                                <i class="fa-solid fa-lock text-muted me-1"></i>Farine : Niv. 5 requis (<?= $lvl ?>/5)
+                            </span>
+                        <?php elseif ($lvl < 10 && !$isAdmin): ?>
+                            <span class="badge bg-success-lt fw-bold">
+                                <i class="fa-solid fa-check text-success me-1"></i>Farine Débloquée
+                            </span>
+                            <span class="badge bg-secondary-lt fw-bold">
+                                <i class="fa-solid fa-lock text-muted me-1"></i>Saké au Niv. 10 (<?= $lvl ?>/10)
                             </span>
                         <?php else: ?>
                             <span class="badge bg-success-lt fw-bold">
-                                <i class="fa-solid fa-check text-success me-1"></i>Raffinage Débloqué
+                                <i class="fa-solid fa-check text-success me-1"></i>Farine &amp; Saké Débloqués
                             </span>
                         <?php endif; ?>
                         <?php if ($isSealActive): ?>
@@ -1095,31 +1108,31 @@ if (!$isEmptyPlot) {
                         </div>
                     </div>
 
-                    <!-- Deux colonnes d'ateliers : Farine & Saké (Déblocage Niveau 10) -->
+                    <!-- Deux colonnes d'ateliers : Farine (Niveau 5) & Saké (Niveau 10) -->
                     <div class="row g-3">
-                        <!-- Atelier 1 : Farine de Riz (Niveau 10) -->
+                        <!-- Atelier 1 : Farine de Riz (Niveau 5) -->
                         <div class="col-md-6">
-                            <?php if ($lvl < 10 && !$isAdmin): ?>
+                            <?php if ($lvl < 5 && !$isAdmin): ?>
                             <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-muted">
-                                            <i class="fa-solid fa-lock me-1"></i>Mouture de Farine
+                                            <i class="fa-solid fa-lock me-1"></i>Mouture de Farine de Riz
                                         </h4>
-                                        <span class="badge bg-secondary-lt">Niv. 10 requis</span>
+                                        <span class="badge bg-secondary-lt">Niv. 5 requis</span>
                                     </div>
                                     <p class="text-secondary small mb-3">
-                                        L'installation des meules hydrauliques et le tamisage fin du grain de riz (Komeko) nécessitent une infrastructure avancée.
-                                        Améliorez votre <strong>Meunerie &amp; Brasserie au Niveau 10</strong> pour débloquer la production de farine.
+                                        L'installation des meules hydrauliques et le tamisage fin du grain de riz (Komeko) nécessitent un atelier meunier opérationnel.
+                                        Améliorez votre <strong>Meunerie &amp; Brasserie au Niveau 5</strong> pour débloquer la production de farine de riz.
                                     </p>
                                 </div>
                                 <div class="mt-auto">
                                     <div class="d-flex justify-content-between small text-muted mb-1">
                                         <span>Progression de la Meunerie</span>
-                                        <strong><?= $lvl ?> / 10</strong>
+                                        <strong><?= $lvl ?> / 5</strong>
                                     </div>
                                     <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-success" style="width: <?= min(100, ($lvl / 10) * 100) ?>%;"></div>
+                                        <div class="progress-bar bg-success" style="width: <?= min(100, ($lvl / 5) * 100) ?>%;"></div>
                                     </div>
                                 </div>
                             </div>

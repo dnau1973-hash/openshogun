@@ -3,6 +3,20 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.2] - 2026-10-16
+### Modifié (Changed)
+- **Meunerie & Brasserie de Riz &bull; Paliers de Production Échelonnés (Farine au Niv. 5, Saké au Niv. 10) (`core/PlanetEngine.php`, `views/building.php`, `views/docs.php`) :**
+  * **Échelonnement de la Mouture de Farine de Riz (Niveau 5) :**
+    - Dans `core/PlanetEngine.php`, le déblocage du raffinage de farine de riz (`rice_flour`) est abaissé au **Niveau 5** de la Meunerie & Brasserie (au lieu du Niveau 10).
+    - Dans `views/building.php`, l'Atelier 1 affiche le déblocage et la jauge de progression calés sur le Niveau 5 (`X / 5`).
+    - Le bouton d'accès rapide en haut de page du bâtiment devient actif dès le Niveau 5.
+  * **Maintien de la Fermentation du Saké Féodal (Niveau 10) :**
+    - Les cuves de fermentation traditionnelle du saké (Sakagura) restent exigeantes et réservées au **Niveau 10** de l'édifice castral.
+  * **Contrôles d'Intégrité Backend & Feedback UI :**
+    - Blocage côté serveur explicite avec message d'erreur ciblé selon le produit sollicité (`La Meunerie & Brasserie doit être érigée au Niveau 5 pour produire la farine de riz`, `au Niveau 10 pour le saké`).
+    - Badges d'état dans l'en-tête de l'atelier reflétant les 3 états : *Verrouillé (< 5)*, *Farine Débloquée (5-9)*, *Farine & Saké Débloqués (10+)*.
+    - Ajout du comparatif d'élévation `grain_mill` dans les statistiques d'aperçu de niveau.
+
 ## [1.34.1] - 2026-10-16
 ### Modifié (Changed)
 - **Migration & Intégration des Chroniques Féodales & Événements Hebdomadaires dans Game Studio &bull; Game Elevate Designer (`views/gamestudio.php`, `views/gamestudio/elevate_events.php`, `views/gamestudio/elevate_weekly_events.php`, `views/studio/game-elevate-designer/weekly-chronicles.php`, `views/admin.php`, `views/partials/admin_weekly_events.php`, `api/weekly_events.php`) :**

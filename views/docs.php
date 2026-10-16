@@ -2122,7 +2122,7 @@ foreach ($allUnits as $u) {
                         <span style="background: #d97706; color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">
                             Recettes de Raffinage
                         </span>
-                        <span style="font-size: 0.8rem; color: #d97706; font-weight: 700;">Accessible dès le Moulin Niv. 1</span>
+                        <span style="font-size: 0.8rem; color: #d97706; font-weight: 700;">Farine débloquée au Moulin Niv. 5 &bull; Saké au Niv. 10</span>
                     </div>
                     <h3 style="margin: 0 0 0.5rem 0; font-size: 1.35rem; color: var(--text-main);">
                         La Transformation des Grains de Riz

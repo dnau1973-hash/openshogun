@@ -1,5 +1,28 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-16] - grain-mill-level-progression : Paliers de Production Échelonnés Meunerie & Brasserie (Farine Niv. 5, Saké Niv. 10)
+- **Module :** `grain-mill-level-progression`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Déblocage Échelonné dans la Meunerie & Brasserie de Riz (`views/building.php`, `core/PlanetEngine.php`) :**
+     - La mouture de Farine de Riz (`rice_flour`) est accessible dès le **Niveau 5** du bâtiment.
+     - Le brassage du Saké Féodal (`sake`) demeure réservé au **Niveau 10**.
+  2. **Contrôles Backend Stricts (`core/PlanetEngine.php`) :**
+     - Vérification dynamique du niveau du bâtiment selon le produit demandé : retour d'une erreur explicite si tentative de production avant le palier requis (`Niveau 5` pour la farine, `Niveau 10` pour le saké).
+     - Contournement conservé pour les administrateurs (`$isAdmin`).
+  3. **Interface Utilisateur & Navigation :**
+     - Badges d'état dynamiques dans l'en-tête de la section raffinage.
+     - Jauges de progression individuelles pour chaque atelier (`X / 5` pour la farine, `X / 10` pour le saké).
+     - Bouton d'accès rapide en haut de page actif dès le niveau 5.
+- **Fichiers modifiés :** `core/PlanetEngine.php`, `views/building.php`, `views/docs.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Consulter la Meunerie & Brasserie de Riz (`/?page=building&code=grain_mill`) avec un joueur non-admin :
+     - Si niveau < 5 : vérifier que la Farine affiche « Niv. 5 requis » et que le Saké affiche « Niv. 10 requis ».
+     - Si niveau compris entre 5 et 9 : vérifier que l'Atelier de Farine est débloqué et opérationnel (formulaire de mouture actif), tandis que l'Atelier de Saké reste verrouillé (« Niv. 10 requis »).
+     - Si niveau &ge; 10 : vérifier que les deux ateliers sont débloqués.
+  2. Tenter de lancer une production via l'API sur une planète de niveau 4 : vérifier le rejet avec le message d'erreur mentionnant le niveau 5.
+  3. Tenter de lancer une production de saké sur une planète de niveau 7 : vérifier le rejet avec le message d'erreur mentionnant le niveau 10.
+
 ### [2026-10-16] - elevate-weekly-chronicles : Déplacement des Chroniques Féodales dans Game Elevate Designer
 - **Module :** `elevate-weekly-chronicles`
 - **Statut :** `À tester`
