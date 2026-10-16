@@ -3,6 +3,7 @@
  * Moteur de Gestion de l'Assistance, Remontées de Bugs & Suggestions (OpenShogun)
  */
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/MailService.php';
 
 class SupportEngine {
     private PDO $db;
@@ -130,7 +131,7 @@ class SupportEngine {
     ): array {
         $sql = "
             SELECT t.*, 
-                   u.username, u.faction,
+                   u.username, u.email, u.faction,
                    u_adm.username as admin_username
             FROM support_tickets t
             JOIN users u ON t.user_id = u.id
@@ -338,7 +339,7 @@ class SupportEngine {
             SET status = ?, 
                 admin_response = ?, 
                 admin_id = ?, 
-                responded_at = IF(? != '', ?, responded_at), 
+                responded_at = CASE WHEN ? != '' THEN ? ELSE responded_at END, 
                 updated_at = ?
             WHERE id = ?
         ");
@@ -352,14 +353,15 @@ class SupportEngine {
             $ticketId
         ]);
 
-        // Envoi d'une notification en jeu (missive) au joueur si demandé
+        $emailResult = null;
+        // Envoi d'une notification en jeu (missive) et par e-mail au joueur si demandé
         if ($notifyUser && (!empty($adminResponseTrim) || $status !== $ticket['status'])) {
             $statusLabels = [
-                'pending' => 'En attente',
+                'pending'     => 'En attente',
                 'in_progress' => 'En cours d\'examen',
-                'resolved' => 'Résolu / Corrigé',
-                'planned' => 'Retenu pour prochaine mise à jour',
-                'closed' => 'Fermé / Sans suite'
+                'resolved'    => 'Résolu / Corrigé',
+                'planned'     => 'Retenu pour prochaine mise à jour',
+                'closed'      => 'Fermé / Sans suite'
             ];
             $typeLabel = ($ticket['type'] === 'bug') ? 'Dysfonctionnement' : 'Suggestion';
 
@@ -385,13 +387,241 @@ class SupportEngine {
                 $body,
                 $now
             ]);
+
+            // Envoi de l'e-mail transactionnel au joueur à chaque étape du traitement
+            $emailResult = $this->sendTicketEvolutionEmail(
+                $ticket,
+                $ticket['status'],
+                $status,
+                $adminResponseTrim
+            );
         }
 
         return [
-            'id' => $ticketId,
-            'status' => $status,
-            'admin_response' => $adminResponseTrim
+            'id'             => $ticketId,
+            'status'         => $status,
+            'admin_response' => $adminResponseTrim,
+            'email_sent'     => !empty($emailResult['success'])
         ];
+    }
+
+    /**
+     * Envoie un e-mail transactionnel immersif au joueur pour notifier chaque étape d'évolution de son ticket
+     */
+    public function sendTicketEvolutionEmail(
+        array $ticket,
+        string $oldStatus,
+        string $newStatus,
+        string $adminResponseTrim
+    ): array {
+        $toEmail = trim($ticket['email'] ?? '');
+        if (empty($toEmail) || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            return ['success' => false, 'error' => 'Adresse email du joueur absente ou invalide.'];
+        }
+
+        $ticketId = (int)$ticket['id'];
+        $title = (string)$ticket['title'];
+        $username = (string)($ticket['username'] ?? 'Daimyō');
+        $type = (string)($ticket['type'] ?? 'bug');
+        $categoryKey = (string)($ticket['category'] ?? 'other');
+        $categoryName = self::CATEGORIES[$categoryKey] ?? 'Général / Autre';
+        $severity = (string)($ticket['severity'] ?? 'medium');
+
+        $statusLabels = [
+            'pending'     => 'En attente d\'examen',
+            'in_progress' => 'En cours d\'analyse & de correction',
+            'resolved'    => 'Résolu / Corrigé en production',
+            'planned'     => 'Retenu pour une prochaine version',
+            'closed'      => 'Fermé (Sans suite / Non reproduit)',
+        ];
+
+        $statusColors = [
+            'pending'     => '#f59e0b', // Ambre
+            'in_progress' => '#0ea5e9', // Bleu ciel
+            'resolved'    => '#10b981', // Vert émeraude
+            'planned'     => '#8b5cf6', // Violet
+            'closed'      => '#64748b', // Gris ardoise
+        ];
+
+        $severityLabels = [
+            'critical' => 'Critique / Bloquante',
+            'high'     => 'Élevée / Majeure',
+            'medium'   => 'Modérée / Normale',
+            'low'      => 'Faible / Cosmétique',
+        ];
+
+        $typeLabel = ($type === 'bug') ? 'Dysfonctionnement / Bug' : 'Suggestion & Évolution';
+        $oldStatusLabel = $statusLabels[$oldStatus] ?? $oldStatus;
+        $newStatusLabel = $statusLabels[$newStatus] ?? $newStatus;
+        $badgeColor = $statusColors[$newStatus] ?? '#0ea5e9';
+        $severityLabel = $severityLabels[$severity] ?? ucfirst($severity);
+
+        $subject = "🏯 [OpenShogun] Évolution de votre signalement #{$ticketId} : {$newStatusLabel}";
+
+        // URL directe vers le support en jeu
+        $serverHost = $_SERVER['HTTP_HOST'] ?? 'openshogun.local';
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+        $protocol = $isHttps ? 'https://' : 'http://';
+        $supportUrl = $protocol . $serverHost . '/index.php?page=support';
+
+        $safeUsername = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
+        $safeTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+        $safeResponse = nl2br(htmlspecialchars($adminResponseTrim, ENT_QUOTES, 'UTF-8'));
+
+        $htmlBody = <<<HTML
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{$subject}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#0b1120; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#e2e8f0;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#0b1120;">
+        <tr>
+            <td align="center" style="padding: 35px 15px;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="620" style="max-width:620px; background-color:#1e293b; border-radius:12px; overflow:hidden; border:1px solid #334155; box-shadow:0 12px 30px rgba(0,0,0,0.6);">
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="background:linear-gradient(135deg, #111827 0%, #1e1b4b 100%); padding:30px 20px; border-bottom:3px solid #eab308;">
+                            <div style="font-size:38px; margin-bottom:8px;">🏯</div>
+                            <h1 style="margin:0; color:#f8fafc; font-size:22px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">
+                                OpenShogun &bull; Support &amp; Développement
+                            </h1>
+                            <div style="color:#fef08a; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-top:5px;">
+                                Notification de Suivi Féodal &bull; Ticket #{$ticketId}
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Body Content -->
+                    <tr>
+                        <td style="padding:30px 32px; color:#e2e8f0; font-size:15px; line-height:1.6;">
+                            <h2 style="margin:0 0 16px 0; color:#f8fafc; font-size:18px; font-weight:700;">
+                                Salutations, honorable Daimyō <span style="color:#eab308;">{$safeUsername}</span> !
+                            </h2>
+
+                            <p style="margin:0 0 18px 0; color:#cbd5e1;">
+                                Votre signalement déposé auprès des intendants du Shōgunat a franchi une nouvelle étape dans son analyse et son traitement par l'équipe des développeurs.
+                            </p>
+
+                            <!-- Ticket Detail Card -->
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#0f172a; border:1px solid #334155; border-radius:8px; margin:20px 0; overflow:hidden;">
+                                <tr>
+                                    <td style="padding:14px 18px; border-bottom:1px solid #1e293b; background-color:#172033;">
+                                        <span style="color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:700; letter-spacing:1px;">Objet du Ticket</span>
+                                        <div style="color:#f8fafc; font-size:16px; font-weight:bold; margin-top:3px;">{$safeTitle}</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:16px 18px;">
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                            <tr>
+                                                <td style="padding:4px 0; color:#94a3b8; font-size:13px;" width="40%">Nature &amp; Domaine :</td>
+                                                <td style="padding:4px 0; color:#f1f5f9; font-size:13px; font-weight:600;">{$typeLabel} &bull; {$categoryName}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding:4px 0; color:#94a3b8; font-size:13px;">Niveau de gravité :</td>
+                                                <td style="padding:4px 0; color:#f1f5f9; font-size:13px; font-weight:600;">{$severityLabel}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding:6px 0; color:#94a3b8; font-size:13px;">Évolution du statut :</td>
+                                                <td style="padding:6px 0;">
+                                                    <span style="color:#94a3b8; font-size:12px; text-decoration:line-through;">{$oldStatusLabel}</span>
+                                                    <span style="color:#64748b; font-size:12px; margin:0 4px;">&rarr;</span>
+                                                    <span style="display:inline-block; background-color:{$badgeColor}; color:#ffffff; font-size:12px; font-weight:bold; padding:3px 10px; border-radius:12px;">
+                                                        {$newStatusLabel}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+HTML;
+
+        // Si une réponse officielle est fournie
+        if (!empty($adminResponseTrim)) {
+            $htmlBody .= <<<HTML
+                            <!-- Official Developer Response -->
+                            <div style="background-color:#1e1b4b; border-left:4px solid #818cf8; padding:16px 20px; border-radius:0 8px 8px 0; margin:22px 0;">
+                                <div style="color:#c7d2fe; font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">
+                                    💬 Note officielle du Shōgunat &amp; Maîtres Forgerons :
+                                </div>
+                                <div style="color:#f8fafc; font-size:14px; line-height:1.6; font-style:italic;">
+                                    « {$safeResponse} »
+                                </div>
+                            </div>
+HTML;
+        }
+
+        $htmlBody .= <<<HTML
+                            <p style="margin:22px 0 25px 0; color:#cbd5e1; font-size:14px;">
+                                Vous pouvez retrouver l'ensemble de vos démarches et consulter les détails de ce ticket directement dans l'interface de votre domaine.
+                            </p>
+
+                            <!-- CTA Button -->
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin:25px 0 10px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{$supportUrl}" target="_blank" style="background:linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color:#ffffff; text-decoration:none; padding:12px 28px; border-radius:8px; font-weight:700; font-size:14px; display:inline-block; border:1px solid #14b8a6; box-shadow:0 4px 12px rgba(13,148,136,0.35);">
+                                            📮 Accéder à l'Espace Support &amp; Assistance
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="background-color:#0f172a; padding:22px; border-top:1px solid #334155; color:#64748b; font-size:12px; line-height:1.5;">
+                            <div style="color:#94a3b8; font-weight:600; margin-bottom:4px;">
+                                Conseil des Bâtisseurs &amp; Intendants &bull; OpenShogun
+                            </div>
+                            <div>
+                                Ce message vous est adressé suite au suivi du ticket #{$ticketId} associé à votre seigneurie {$safeUsername}.
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+HTML;
+
+        // Corps en texte brut pour les clients e-mail sans HTML
+        $textBody = "========================================================\n"
+                  . "🏯 OPENSHOGUN — SUIVI & TRAITEMENT DU TICKET #{$ticketId}\n"
+                  . "========================================================\n\n"
+                  . "Salutations, honorable Daimyō {$username},\n\n"
+                  . "Votre signalement concernant « {$title} » a franchi une nouvelle étape dans son traitement.\n\n"
+                  . "DÉTAILS DU TICKET :\n"
+                  . "- Référence       : #{$ticketId}\n"
+                  . "- Type & Domaine  : {$typeLabel} ({$categoryName})\n"
+                  . "- Gravité         : {$severityLabel}\n"
+                  . "- Ancien Statut   : {$oldStatusLabel}\n"
+                  . "- Nouveau Statut  : {$newStatusLabel}\n";
+
+        if (!empty($adminResponseTrim)) {
+            $textBody .= "\nNOTE OFFICIELLE DE L'ÉQUIPE DU SHŌGUNAT :\n"
+                       . "« {$adminResponseTrim} »\n";
+        }
+
+        $textBody .= "\nVous pouvez consulter le suivi en jeu dans l'onglet Assistance & Suggestions (📮) :\n"
+                   . "{$supportUrl}\n\n"
+                   . "Que la paix et la prospérité accompagnent votre fief.\n"
+                   . "-- Le Conseil des Développeurs & Intendants d'OpenShogun\n";
+
+        try {
+            return MailService::getInstance()->sendEmail($toEmail, $subject, $htmlBody, $textBody);
+        } catch (Throwable $e) {
+            error_log("SupportEngine: Échec de l'envoi de l'e-mail pour le ticket #{$ticketId}: " . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
     }
 
     /**

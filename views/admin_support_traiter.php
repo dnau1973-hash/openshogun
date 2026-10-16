@@ -294,7 +294,7 @@ $currentStatusCfg = $statusColors[$ticket['status']] ?? ['label' => $ticket['sta
                             <label class="form-check form-switch m-0" style="cursor: pointer;">
                                 <input class="form-check-input" type="checkbox" name="notify_user" value="1" checked>
                                 <span class="form-check-label fw-bold" style="font-size: 0.85rem;">
-                                    Notifier le joueur par missive en jeu
+                                    Notifier le joueur par missive en jeu et par e-mail automatique
                                 </span>
                             </label>
                         </div>

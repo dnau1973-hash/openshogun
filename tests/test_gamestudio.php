@@ -19,6 +19,7 @@ Database::setConnection($sqlite);
 $sqlite->exec("CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT,
+    email TEXT DEFAULT 'test@openshogun.local',
     faction TEXT DEFAULT 'terran',
     is_bot INTEGER DEFAULT 0,
     is_admin INTEGER DEFAULT 0,

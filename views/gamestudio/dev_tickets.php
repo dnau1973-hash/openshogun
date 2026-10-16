@@ -414,7 +414,7 @@ if ($activeTicketId > 0) {
                             <div class="form-check form-switch mt-2">
                                 <input class="form-check-input" type="checkbox" name="notify_user" value="1" id="devModalNotifyUser" checked>
                                 <label class="form-check-label fw-medium text-dark" for="devModalNotifyUser">
-                                    Envoyer une missive officielle en jeu au joueur
+                                    Envoyer une missive en jeu et un e-mail officiel au joueur
                                 </label>
                             </div>
                         </div>
@@ -424,7 +424,7 @@ if ($activeTicketId > 0) {
                                 <i class="fa-solid fa-comment-dots text-primary me-1"></i>Réponse officielle de l'équipe de Dev / Shōgunat :
                             </label>
                             <textarea class="form-control" name="admin_response" id="devModalResponseText" rows="3" placeholder="Expliquez la cause du problème, la solution apportée ou le statut de correction pour informer le joueur..."></textarea>
-                            <div class="form-text text-muted small">Ce message sera inclus dans la missive transmise au joueur si la case ci-dessus est cochée.</div>
+                            <div class="form-text text-muted small">Ce message sera inclus dans la missive en jeu ainsi que dans l'e-mail officiel transmis au joueur si la case ci-dessus est cochée.</div>
                         </div>
                     </div>
                 </div>
@@ -470,7 +470,8 @@ function openDevTicketModal(ticket, tech) {
     `;
 
     // Auteur & Composant
-    document.getElementById('devModalAuthor').textContent = `${ticket.username} (${(ticket.faction || 'Terran').toUpperCase()})`;
+    const emailInfo = ticket.email ? ` <span class="text-muted fw-normal small">(${ticket.email})</span>` : '';
+    document.getElementById('devModalAuthor').innerHTML = `${ticket.username} <span class="badge bg-secondary-lt">${(ticket.faction || 'Terran').toUpperCase()}</span>${emailInfo}`;
     document.getElementById('devModalComponent').textContent = tech.domaine || 'Général';
     document.getElementById('devModalFiles').textContent = tech.file || '--';
 

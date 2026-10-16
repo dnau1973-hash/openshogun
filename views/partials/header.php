@@ -374,6 +374,11 @@ $navItems = [
                                     <span class="dropdown-item-icon"><i class="fa-solid fa-building-columns text-secondary"></i></span>
                                     <span>Archives &amp; Chroniques Féodales</span>
                                 </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'support' ? 'active fw-bold' : '' ?>" href="?page=support">
+                                    <span class="dropdown-item-icon"><i class="fa-solid fa-headset text-teal"></i></span>
+                                    <span>Assistance &amp; Signalements (📮)</span>
+                                </a>
                             </div>
                         </li>
                     </ul>
