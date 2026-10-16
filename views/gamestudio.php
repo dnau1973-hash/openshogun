@@ -65,7 +65,7 @@ $allowedTabs = [
     'elevate_combat', 'elevate_village', 'elevate_speed',
     'elevate_survey', 'elevate_oases', 'elevate_buildings',
     'elevate_events', 'elevate_weekly_events',
-    'narrative_storyboard', 'narrative_lore',
+    'narrative_scenarios', 'narrative_storyboard', 'narrative_lore',
     'liveops_events', 'liveops_features', 'liveops_broadcast', 'liveops_support',
     'dev_tickets'
 ];
@@ -215,6 +215,65 @@ if ($currentTab === 'dashboard') {
             $_SESSION['dev_flash'] = ['type' => 'danger', 'msg' => 'Erreur : ' . $e->getMessage()];
         }
         header('Location: ?page=gamestudio&tab=dev_tickets' . (!empty($_POST['filter_params']) ? '&' . ltrim($_POST['filter_params'], '&') : ''));
+        exit;
+    }
+} elseif ($currentTab === 'narrative_scenarios') {
+    require_once __DIR__ . '/../core/ScenarioEngine.php';
+    $scenarioEngine = new ScenarioEngine();
+
+    // Exportation Markdown GDD en GET direct
+    if (($_GET['action'] ?? '') === 'export_markdown') {
+        $scId = (int)($_GET['scenario_id'] ?? 0);
+        header('Content-Type: text/plain; charset=UTF-8');
+        echo $scenarioEngine->exportMarkdown($scId);
+        exit;
+    }
+
+    // Traitement des actions de formulaire en POST
+    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action'])) {
+        $action = $_POST['action'];
+        try {
+            if ($action === 'create_scenario') {
+                $newId = $scenarioEngine->saveScenarioFull($_POST);
+                $_SESSION['scenario_flash'] = [
+                    'type' => 'success',
+                    'msg'  => "Scénario créé avec succès (ID #$newId) avec sa matrice de 10 tâches métiers !"
+                ];
+            } elseif ($action === 'update_scenario') {
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                $updated = $scenarioEngine->updateScenario($scId, $_POST);
+                $_SESSION['scenario_flash'] = [
+                    'type' => $updated ? 'success' : 'danger',
+                    'msg'  => $updated ? "Scénario #$scId et ses 10 tâches métiers mis à jour avec succès !" : "Erreur lors de la mise à jour du scénario #$scId."
+                ];
+            } elseif ($action === 'update_task_status') {
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                $taskId = (int)($_POST['task_id'] ?? 0);
+                $taskStatus = (string)($_POST['task_status'] ?? 'todo');
+                $updated = $scenarioEngine->updateTaskStatus($scId, $taskId, $taskStatus);
+                $_SESSION['scenario_flash'] = [
+                    'type' => $updated ? 'success' : 'warning',
+                    'msg'  => $updated ? "Statut de la tâche #$taskId mis à jour vers « $taskStatus »." : "Impossible de modifier la tâche."
+                ];
+            } elseif ($action === 'duplicate_scenario') {
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                $clone = $scenarioEngine->duplicateScenario($scId, $userId);
+                $_SESSION['scenario_flash'] = [
+                    'type' => $clone ? 'success' : 'danger',
+                    'msg'  => $clone ? "Scénario dupliqué avec succès (Nouveau ID #" . $clone['id'] . ") !" : "Échec de la duplication."
+                ];
+            } elseif ($action === 'delete_scenario') {
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                $deleted = $scenarioEngine->deleteScenario($scId);
+                $_SESSION['scenario_flash'] = [
+                    'type' => $deleted ? 'success' : 'danger',
+                    'msg'  => $deleted ? "Scénario #$scId supprimé définitivement." : "Échec de la suppression."
+                ];
+            }
+        } catch (Throwable $e) {
+            $_SESSION['scenario_flash'] = ['type' => 'danger', 'msg' => 'Erreur : ' . $e->getMessage()];
+        }
+        header('Location: ?page=gamestudio&tab=narrative_scenarios');
         exit;
     }
 }
@@ -452,6 +511,13 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                         <div class="dropdown-header text-uppercase text-secondary small fw-bold">
                             Narration &amp; Univers
                         </div>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'narrative_scenarios' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=narrative_scenarios">
+                            <i class="fa-solid fa-book-journal-whills text-purple"></i>
+                            <div>
+                                <div>Scénarios de Jeu &amp; Tâches Métiers</div>
+                                <div class="small text-secondary">Steps de gameplay, Événements spéciaux &amp; Matrice des 10 métiers</div>
+                            </div>
+                        </a>
                         <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'narrative_storyboard' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=narrative_storyboard">
                             <i class="fa-solid fa-film text-purple"></i>
                             <div>

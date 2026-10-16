@@ -236,6 +236,16 @@ assert(strpos($devTicketsHtml, 'Traitement des Tickets Support') !== false, "Le 
 assert(strpos($devTicketsHtml, 'modalDevTicket') !== false, "La modale technique de traitement doit être présente");
 echo "OK - Rendu MVC Développeur (Tickets & Bugs) validé (" . strlen($devTicketsHtml) . " octets).\n";
 
+// 6.c Test rendu MVC views/gamestudio/narrative_scenarios.php
+echo "[5.c] Test rendu MVC views/gamestudio/narrative_scenarios.php...\n";
+ob_start();
+include __DIR__ . '/../views/gamestudio/narrative_scenarios.php';
+$narrativeHtml = ob_get_clean();
+assert(strlen($narrativeHtml) > 500, "Le rendu HTML de narrative_scenarios doit être supérieur à 500 octets");
+assert(strpos($narrativeHtml, 'Scénarios de Jeu &amp; Matrice des 10 Tâches Métiers') !== false, "Le titre de narrative_scenarios doit être présent");
+assert(strpos($narrativeHtml, 'modalScenarioDetail') !== false, "La modale de scénario et tâches doit être présente");
+echo "OK - Rendu MVC Narrative Designer (Scénarios & 10 Tâches Métiers) validé (" . strlen($narrativeHtml) . " octets).\n";
+
 // 7. Test de la présence du raccourci Game Studio dans header.php
 echo "[6] Test présence du raccourci Game Studio dans header.php...\n";
 $headerContent = file_get_contents(__DIR__ . '/../views/partials/header.php');
