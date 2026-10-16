@@ -58,15 +58,6 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     border-radius: 12px;
     border: 2px solid var(--border-color, #e2e8f0);
     box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.3), 0 10px 25px rgba(60, 45, 30, 0.15);
-    transition: background-image 0.6s ease;
-}
-
-.rural-map-container.bg-theme-night {
-    background-image: url('/public/assets/shogun_rural_terroir_night.jpg') !important;
-}
-
-.rural-map-container.bg-theme-snow {
-    background-image: url('/public/assets/shogun_rural_terroir_winter.jpg') !important;
 }
 
 
@@ -228,26 +219,6 @@ ob_start();
                     </div>
                 </div>
                 <div style="display:flex; gap:0.5rem; align-items:center;">
-                    <!-- Sélecteur Météo & Cycle Jour/Nuit/Saisons -->
-                    <div class="dropdown">
-                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="btnAtmosphereDropdown" style="font-size:0.8rem; padding:0.35rem 0.75rem;" title="Changer le climat, la saison ou le cycle jour/nuit du Terroir">
-                            <i class="fa-solid fa-clock text-primary me-1" id="iconAtmosphere"></i><span id="txtAtmosphereLabel">Météo : Auto</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow border-secondary" style="font-size:0.8rem; min-width: 220px;">
-                            <li><h6 class="dropdown-header text-muted font-monospace"><i class="fa-solid fa-clock me-1"></i>HORLOGE RÉELLE</h6></li>
-                            <li><a class="dropdown-item weather-dropdown-item active" data-theme="auto" href="javascript:void(0)" onclick="setShogunWeather('auto')"><i class="fa-solid fa-clock me-2 text-primary"></i>Cycle Réel (Heure locale)</a></li>
-                            <li><hr class="dropdown-divider my-1"></li>
-                            <li><h6 class="dropdown-header text-muted font-monospace"><i class="fa-solid fa-cloud-sun me-1"></i>CLIMATS DU FIEF</h6></li>
-                            <li><a class="dropdown-item weather-dropdown-item" data-theme="day" href="javascript:void(0)" onclick="setShogunWeather('day')"><i class="fa-solid fa-sun me-2 text-warning"></i>Plein Jour (Estampe claire)</a></li>
-                            <li><a class="dropdown-item weather-dropdown-item" data-theme="dusk" href="javascript:void(0)" onclick="setShogunWeather('dusk')"><i class="fa-solid fa-cloud-sun me-2 text-orange"></i>Crépuscule d'Ambre (Yūgure)</a></li>
-                            <li><a class="dropdown-item weather-dropdown-item" data-theme="night" href="javascript:void(0)" onclick="setShogunWeather('night')"><i class="fa-solid fa-moon me-2 text-info"></i>Nuit &amp; Lanternes Allumées (Yoru)</a></li>
-                            <li><a class="dropdown-item weather-dropdown-item" data-theme="snow" href="javascript:void(0)" onclick="setShogunWeather('snow')"><i class="fa-solid fa-snowflake me-2 text-cyan"></i>Hiver sous la Neige (Yuki)</a></li>
-                            <li><a class="dropdown-item weather-dropdown-item" data-theme="rain" href="javascript:void(0)" onclick="setShogunWeather('rain')"><i class="fa-solid fa-cloud-rain me-2 text-teal"></i>Pluie &amp; Feuilles d'Érable (Ame)</a></li>
-                            <li><hr class="dropdown-divider my-1"></li>
-                            <li><a class="dropdown-item weather-dropdown-item text-muted" data-theme="off" href="javascript:void(0)" onclick="setShogunWeather('off')"><i class="fa-solid fa-pause me-2"></i>Désactiver animations (Mode Zen)</a></li>
-                        </ul>
-                    </div>
-                    <?php /* = AiPromptHelper::renderBadge('shogun_rural_terroir_9plots.jpg', 'Panorama Stratégique des 9 Parcelles Féodales', '/public/assets/shogun_rural_terroir_9plots.jpg', '', true) */ ?>
                     <a href="?page=city" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">
                         <i class="fa-solid fa-chess-rook me-1"></i>Vers la Cité Castrale &rarr;
                     </a>
@@ -256,9 +227,6 @@ ob_start();
             <div class="card-body">
                 <!-- Conteneur Panoramique 16:9 Fixe (sans pan/zoom) -->
                 <div class="rural-map-container" id="ruralMapContainer">
-
-                    <!-- Calque Vivant Estampe Animée (Brume, Hérons, Paysans, Charrette, Fumée, Sakura) -->
-                    <?php require __DIR__ . '/partials/rural_atmosphere_overlay.php'; ?>
 
                     <?php foreach ($plots as $type => $p): ?>
                         <?php
@@ -275,7 +243,7 @@ ob_start();
                                            '<span class="text-warning"><i class="fa-solid fa-arrow-right me-1"></i>Entrer dans la Cité Castrale</span>';
                             } elseif ($isUpgrading) {
                                 $tooltip = '<strong>' . htmlspecialchars($p['name']) . '</strong><br>' .
-                                           '<span class="text-warning"><i class="fa-solid fa-hammer fa-spin me-1"></i>En travaux vers Niv. ' . $targetLevel . '</span><br>' .
+                                           '<span class="text-warning"><i class="fa-solid fa-hammer me-1"></i>En travaux vers Niv. ' . $targetLevel . '</span><br>' .
                                            '<small class="text-muted">Cliquer pour voir l\'état du chantier</small>';
                             } else {
                                 $fervorInfo = (!empty($p['energy_cons']) && (int)$p['energy_cons'] > 0)
@@ -340,7 +308,7 @@ ob_start();
                                 <div class="rural-badge-inner <?= $isUpgrading ? 'is-upgrading' : '' ?>">
                                     <div class="rural-badge-avatar">
                                         <?php if ($isUpgrading): ?>
-                                            <i class="fa-solid fa-hammer fa-spin text-warning"></i>
+                                            <i class="fa-solid fa-hammer text-warning"></i>
                                         <?php else: ?>
                                             <i class="<?= $p['icon'] ?>"></i>
                                         <?php endif; ?>
@@ -429,11 +397,11 @@ ob_start();
                 <!-- Statut Chantier en cours (si actif) -->
                 <div id="modalPlotActiveWorkBox" class="d-none alert alert-warning p-2 mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="fw-bold fs-4 text-dark"><i class="fa-solid fa-hammer fa-bounce me-1"></i> Chantier en cours</span>
+                        <span class="fw-bold fs-4 text-dark"><i class="fa-solid fa-hammer me-1"></i> Chantier en cours</span>
                         <span class="font-monospace fw-bold text-dark fs-3" id="modalPlotWorkCountdown">--:--:--</span>
                     </div>
                     <div class="progress mb-1" style="height: 6px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" id="modalPlotWorkProgressBar" role="progressbar" style="width: 0%;"></div>
+                        <div class="progress-bar progress-bar-striped bg-warning" id="modalPlotWorkProgressBar" role="progressbar" style="width: 0%;"></div>
                     </div>
                     <div class="small text-muted" id="modalPlotWorkFinishLabel"></div>
                 </div>
