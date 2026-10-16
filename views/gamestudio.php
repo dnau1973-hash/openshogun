@@ -64,7 +64,8 @@ $allowedTabs = [
     'elevate_research', 'elevate_bots',
     'elevate_combat', 'elevate_village', 'elevate_speed',
     'elevate_survey', 'elevate_oases', 'elevate_buildings',
-    'narrative_storyboard', 'narrative_lore'
+    'narrative_storyboard', 'narrative_lore',
+    'liveops_events', 'liveops_features', 'liveops_broadcast', 'liveops_support'
 ];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
 $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
@@ -110,6 +111,71 @@ if ($currentTab === 'dashboard') {
     $settings = GameConfig::load();
     $botsList = $botEngine->getBots();
     $botSpawnStatus = $botEngine->getBotSpawnStatus();
+} elseif (str_starts_with($currentTab, 'liveops_')) {
+    require_once __DIR__ . '/../core/LiveOpsEngine.php';
+    $liveOpsEngine = new LiveOpsEngine();
+
+    // Traitement des actions Live Ops en POST
+    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action'])) {
+        $action = $_POST['action'];
+        try {
+            if ($action === 'toggle_feature_flag') {
+                $key = $_POST['key'] ?? '';
+                $enabled = !empty($_POST['enabled']);
+                $liveOpsEngine->setFeatureFlag($key, $enabled);
+                $_SESSION['liveops_flash'] = ['type' => 'success', 'msg' => 'Feature Flag « ' . htmlspecialchars($key) . ' » mis à jour (' . ($enabled ? 'Activé' : 'Désactivé') . ') !'];
+            } elseif ($action === 'trigger_live_event') {
+                $res = $liveOpsEngine->triggerLiveEvent($_POST);
+                $_SESSION['liveops_flash'] = ['type' => 'success', 'msg' => 'Événement Live « ' . htmlspecialchars($res['event']['title']) . ' » proclamé avec succès !'];
+            } elseif ($action === 'stop_live_event') {
+                $eventId = $_POST['event_id'] ?? '';
+                $liveOpsEngine->stopLiveEvent($eventId);
+                $_SESSION['liveops_flash'] = ['type' => 'info', 'msg' => 'L\'événement a été clos prématurément.'];
+            } elseif ($action === 'set_broadcast') {
+                $liveOpsEngine->setBroadcast(
+                    $_POST['title'] ?? '',
+                    $_POST['message'] ?? '',
+                    $_POST['type'] ?? 'info',
+                    (int)($_POST['duration_minutes'] ?? 60),
+                    true
+                );
+                $_SESSION['liveops_flash'] = ['type' => 'success', 'msg' => 'Bannière Broadcast In-Game déployée en direct !'];
+            } elseif ($action === 'clear_broadcast') {
+                $liveOpsEngine->clearBroadcast();
+                $_SESSION['liveops_flash'] = ['type' => 'info', 'msg' => 'Bannière Broadcast révoquée avec succès.'];
+            } elseif ($action === 'set_maintenance') {
+                $isActive = !empty($_POST['is_active']);
+                $msg = $_POST['message'] ?? '';
+                $sched = !empty($_POST['scheduled_end']) ? trim($_POST['scheduled_end']) : null;
+                $whitelistRaw = $_POST['whitelist'] ?? '';
+                $wl = array_filter(array_map('trim', explode(',', $whitelistRaw)));
+                if (empty($wl)) $wl = [$userId];
+                $liveOpsEngine->setMaintenance($isActive, $msg, $sched, $wl);
+                $_SESSION['liveops_flash'] = ['type' => $isActive ? 'warning' : 'success', 'msg' => $isActive ? '⚠️ Mode Maintenance ACTIVÉ sur l\'univers !' : 'Mode Maintenance DÉSACTIVÉ. Forteresse ouverte à tous.'];
+            } elseif ($action === 'send_compensation') {
+                $sendToAll = !empty($_POST['send_to_all']);
+                $targetUserId = $sendToAll ? null : (int)($_POST['user_id'] ?? 0);
+                $res = $liveOpsEngine->sendCompensation(
+                    $targetUserId,
+                    [
+                        'metal'     => (int)($_POST['metal'] ?? 0),
+                        'crystal'   => (int)($_POST['crystal'] ?? 0),
+                        'deuterium' => (int)($_POST['deuterium'] ?? 0),
+                        'gold'      => (int)($_POST['gold'] ?? 0),
+                        'honor'     => (int)($_POST['honor'] ?? 0)
+                    ],
+                    $_POST['reason'] ?? 'Décret de dédommagement officiel du Shōgunat',
+                    $userId,
+                    $sendToAll
+                );
+                $_SESSION['liveops_flash'] = ['type' => 'success', 'msg' => $res['message']];
+            }
+        } catch (Throwable $e) {
+            $_SESSION['liveops_flash'] = ['type' => 'danger', 'msg' => 'Erreur : ' . $e->getMessage()];
+        }
+        header('Location: ?page=gamestudio&tab=' . $currentTab);
+        exit;
+    }
 }
 
 // 3. Journalisation télémétrique non-bloquante
@@ -350,6 +416,51 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div>
                                 <div>Charte Narrative &amp; Lore Féodal</div>
                                 <div class="small text-secondary">Lexique d'époque, Factions &amp; Cohérence d'univers</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Dropdown Producteur & Live Ops -->
+                <div class="dropdown">
+                    <a href="#" 
+                       class="studio-nav-link dropdown-toggle <?= str_starts_with($currentTab, 'liveops_') ? 'active' : '' ?>"
+                       data-bs-toggle="dropdown" 
+                       aria-expanded="false"
+                       title="Tour de contrôle en direct, Roadmap, Événements & Compensations (Producteur & Live Ops)">
+                        <i class="fa-solid fa-crown text-warning"></i>
+                        <span>Producteur &amp; Live Ops</span>
+                    </a>
+                    <div class="dropdown-menu shadow-sm">
+                        <div class="dropdown-header text-uppercase text-secondary small fw-bold">
+                            Gouvernance &amp; Opérations Live
+                        </div>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'liveops_events' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=liveops_events">
+                            <i class="fa-solid fa-calendar-star text-warning"></i>
+                            <div>
+                                <div>Événements Live &amp; Saisons</div>
+                                <div class="small text-secondary">Planificateur d'événements, Boosts d'univers &amp; Quêtes</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'liveops_features' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=liveops_features">
+                            <i class="fa-solid fa-toggle-on text-success"></i>
+                            <div>
+                                <div>Feature Flags &amp; Roadmap</div>
+                                <div class="small text-secondary">Interrupteurs à chaud On/Off &amp; Jalons de versions</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'liveops_broadcast' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=liveops_broadcast">
+                            <i class="fa-solid fa-bullhorn text-danger"></i>
+                            <div>
+                                <div>Broadcast &amp; Mode Maintenance</div>
+                                <div class="small text-secondary">Bannière in-game défilante, Alertes &amp; Coupure d'urgence</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'liveops_support' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=liveops_support">
+                            <i class="fa-solid fa-gift text-purple"></i>
+                            <div>
+                                <div>Support &amp; Compensations Daimyō</div>
+                                <div class="small text-secondary">Recherche de fief, Colis de dédommagement &amp; Audit logs</div>
                             </div>
                         </a>
                     </div>

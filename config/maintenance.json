@@ -1,0 +1,7 @@
+{
+    "is_active": false,
+    "message": "Test maintenance message",
+    "scheduled_end": null,
+    "whitelisted_users": [],
+    "updated_at": "2026-10-16 11:57:43"
+}

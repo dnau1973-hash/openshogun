@@ -206,6 +206,33 @@ $navItems = [
 <div class="page">
     <div class="page-wrapper">
 
+        <?php
+        // Bannière Flash Flottante LiveOps Broadcast (si active)
+        if (file_exists(__DIR__ . '/../../core/LiveOpsEngine.php')) {
+            require_once __DIR__ . '/../../core/LiveOpsEngine.php';
+            $liveOpsEngineHeader = new LiveOpsEngine();
+            $activeBroadcastHeader = $liveOpsEngineHeader->getActiveBroadcast();
+            if ($activeBroadcastHeader) {
+                $bcType = htmlspecialchars($activeBroadcastHeader['type'] ?? 'info');
+                $bcIcon = htmlspecialchars($activeBroadcastHeader['icon'] ?? 'fa-bullhorn');
+                $bcTitle = htmlspecialchars($activeBroadcastHeader['title'] ?? 'Dépêche Impériale');
+                $bcMsg = htmlspecialchars($activeBroadcastHeader['message'] ?? '');
+                ?>
+                <div class="alert alert-<?= $bcType ?> alert-dismissible mb-0 rounded-0 border-0 border-bottom d-flex align-items-center justify-content-between px-3 py-2 shadow-sm d-print-none" role="alert" style="z-index: 1060; font-size: 0.9rem;">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fs-3"><i class="fa-solid <?= $bcIcon ?>"></i></span>
+                        <div>
+                            <strong><?= $bcTitle ?> :</strong>
+                            <span><?= $bcMsg ?></span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding:0.75rem;"></button>
+                </div>
+                <?php
+            }
+        }
+        ?>
+
         <!-- ── 1. BARRE DE NAVIGATION TABLER EN HAUT DE PAGE (Pleine largeur container-fluid) ── -->
         <header class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm d-print-none sticky-top py-2">
             <div class="container-fluid px-3 px-lg-4">

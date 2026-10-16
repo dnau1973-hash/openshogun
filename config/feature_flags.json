@@ -1,0 +1,67 @@
+{
+    "p2p_market": {
+        "key": "p2p_market",
+        "label": "Bourse Féodale de Troc P2P (Niv. 10)",
+        "category": "Économie & Marché",
+        "description": "Comptoir de troc direct décentralisé entre Daimyōs avec séquestre impérial.",
+        "icon": "fa-scale-balanced",
+        "enabled": true,
+        "updated_at": "2026-10-16 11:57:43"
+    },
+    "narrative_storyboard": {
+        "key": "narrative_storyboard",
+        "label": "Gestionnaire de Storyboard",
+        "category": "Narration & Studio",
+        "description": "Outil de scénarisation vidéo cinématique interactive dans Game Studio.",
+        "icon": "fa-film",
+        "enabled": true
+    },
+    "bot_ai_clans": {
+        "key": "bot_ai_clans",
+        "label": "Daimyōs IA & Clans Autonomes",
+        "category": "Monde & IA",
+        "description": "Génération automatique de rivaux IA, colonisation et comportement autonome.",
+        "icon": "fa-robot",
+        "enabled": true
+    },
+    "gallery_art": {
+        "key": "gallery_art",
+        "label": "Galerie d'Art Féodale (Photogrid)",
+        "category": "Multimédia & Immersion",
+        "description": "Exposition publique de l'ensemble des estampes, forteresses et unités.",
+        "icon": "fa-images",
+        "enabled": true
+    },
+    "weekly_narrative_events": {
+        "key": "weekly_narrative_events",
+        "label": "Chroniques Hebdomadaires Narratives",
+        "category": "Événements & Quêtes",
+        "description": "Système d'événements scénarisés et quêtes séquentielles historiques.",
+        "icon": "fa-calendar-week",
+        "enabled": true
+    },
+    "wisdom_learning": {
+        "key": "wisdom_learning",
+        "label": "Arbre des Savoirs & Sagesses",
+        "category": "Progression Daimyō",
+        "description": "Compétences passives seigneuriales et préceptes des ancêtres.",
+        "icon": "fa-book-bookmark",
+        "enabled": true
+    },
+    "prestige_weapons": {
+        "key": "prestige_weapons",
+        "label": "Armes & Armées de Prestige (Forge 20)",
+        "category": "Militaire & Forge",
+        "description": "Forge d'armements mythiques en tamahagane pur pour les troupes d'élite.",
+        "icon": "fa-khanda",
+        "enabled": true
+    },
+    "famine_system": {
+        "key": "famine_system",
+        "label": "Simulation de Famine & Pénurie de Riz",
+        "category": "Gameplay & Survie",
+        "description": "Gestion des réserves de riz, désertion des troupes et pénalités de rendement.",
+        "icon": "fa-wheat-awn-circle-exclamation",
+        "enabled": false
+    }
+}

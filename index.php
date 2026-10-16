@@ -172,6 +172,21 @@ if (!in_array($page, $allowedPages)) {
     $page = 'resources';
 }
 
+// Vérification du Mode Maintenance Live Ops
+if (file_exists(__DIR__ . '/core/LiveOpsEngine.php')) {
+    require_once __DIR__ . '/core/LiveOpsEngine.php';
+    $liveOpsMain = new LiveOpsEngine();
+    if ($liveOpsMain->isMaintenanceActive()) {
+        $currentUserId = (int)Auth::id();
+        $isAdmin = $auth->isAdmin();
+        $isWhitelisted = $liveOpsMain->isUserWhitelistedInMaintenance($currentUserId);
+        if (!$isAdmin && !$isWhitelisted && !in_array($page, ['gamestudio', 'admin'])) {
+            require __DIR__ . '/views/maintenance.php';
+            exit;
+        }
+    }
+}
+
 // Vérifier les droits si la page demandée est admin
 if ($page === 'admin' && !$auth->isAdmin()) {
     header('Location: /?page=resources');

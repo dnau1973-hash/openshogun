@@ -1,5 +1,34 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-16] - liveops-producer-control : Tour de Contrôle Producteur & Live Ops dans Game Studio
+- **Module :** `liveops-producer-control`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Tour de Contrôle Dédiée dans Game Studio (`views/gamestudio.php`) :**
+     - Nouveau menu déroulant *Producteur & Live Ops* dans la barre de navigation haute du Studio avec accès direct aux 4 sous-outils.
+  2. **Bénédictions & Événements Live (`?tab=liveops_events`) :**
+     - Déclenchement d'événements temporaires appliquant des multiplicateurs globaux à l'univers (récolte de riz/bois/pierre, vitesse de marche et de chantier, gain d'honneur).
+     - 4 presets thématiques féodaux (*Moissons Sakura*, *Furie guerrière de Kai*, *Bâtisseurs d'Oda*, *Grande Forge de Tamahagane*) et formulaire sur-mesure.
+     - Suivi de l'événement actif avec compte à rebours et bouton d'interruption immédiate.
+  3. **Feature Flags & Feuille de Route (`?tab=liveops_features`) :**
+     - Bascule On/Off à chaud des fonctionnalités (ex. Marché P2P, Storyboard Narratif, IA Clans, etc.) avec persistance JSON instantanée.
+     - Tableau de suivi visuel de la feuille de route du projet.
+  4. **Broadcast In-Game & Mode Maintenance (`?tab=liveops_broadcast`) :**
+     - Diffusion d'un bandeau d'alerte flottant défilant sur toutes les pages du jeu avec expiration automatique et révocation à chaud.
+     - Bascule du Mode Maintenance : bloque l'accès public avec affichage d'une page de veille féodale immersive (`views/maintenance.php`), tout en réservant l'accès aux administrateurs autorisés.
+  5. **Support Daimyō & Décrets de Compensation (`?tab=liveops_support`) :**
+     - Recherche en direct des Daimyōs par pseudo, email ou nom de fief.
+     - Distribution de ressources (bois, pierre, riz), Kobans et Honneur (individuelle ou globale à tous les joueurs) avec créditement direct sur la capitale (`planets.is_capital = 1`) et le profil (`users`).
+     - Notification automatique par missive impériale officielle et archivage indélébile dans `liveops_compensations_log`.
+- **Fichiers modifiés :** `core/LiveOpsEngine.php`, `config/*.json`, `views/gamestudio.php`, `views/gamestudio/liveops_events.php`, `views/gamestudio/liveops_features.php`, `views/gamestudio/liveops_broadcast.php`, `views/gamestudio/liveops_support.php`, `views/maintenance.php`, `views/partials/header.php`, `index.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter en tant qu'administrateur et se rendre sur `/?page=gamestudio`.
+  2. Cliquer sur le menu *Producteur & Live Ops* :
+     - Tester l'onglet **Événements Live** : lancer le preset *Moissons Sakura*. Vérifier la bannière d'événement actif. Cliquer sur « Interrompre » : l'événement cesse immédiatement.
+     - Tester l'onglet **Feature Flags** : désactiver / réactiver un flag (ex. `bot_ai_clans`). Vérifier que la notification verte confirme le changement.
+     - Tester l'onglet **Broadcast & Maintenance** : envoyer un message de test avec 5 minutes de validité. Vérifier que la bannière s'affiche en haut de page. Cliquer sur « Révoquer » pour la retirer.
+     - Tester l'onglet **Support & Compensations** : rechercher un joueur, sélectionner des ressources d'incrément (+5 000 bois, +20 Kobans), puis valider. Vérifier que les ressources sont créditées, qu'un message apparaît dans la boîte aux lettres du joueur et que la ligne d'audit est enregistrée.
+
 ### [2026-10-16] - admin-instant-build : Construction & Amélioration Instantanées sans Coût pour Administrateurs
 - **Module :** `admin-instant-build`
 - **Statut :** `À tester`

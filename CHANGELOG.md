@@ -3,6 +3,28 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.0] - 2026-10-16
+### Ajouté (Added)
+- **Tour de Contrôle Producteur & Live Ops dans Game Studio (`core/LiveOpsEngine.php`, `views/gamestudio.php`, `views/gamestudio/liveops_*.php`, `views/maintenance.php`, `views/partials/header.php`, `index.php`) :**
+  * **Module Métier Unifié LiveOps (`core/LiveOpsEngine.php`) :**
+    - Moteur centralisé assurant la persistance sécurisée des configurations en JSON (`config/feature_flags.json`, `config/live_events.json`, `config/liveops_broadcast.json`, `config/maintenance.json`).
+    - Mécanismes de calcul d'impact direct sur l'économie féodale (boosts de production, accélération des chantiers, marche des armées, points d'honneur).
+    - Table d'audit `liveops_compensations_log` et distribution automatisée de courriers impériaux dans la boîte aux lettres du jeu (`messages`).
+  * **Événements Live & Saisons Impériales (`views/gamestudio/liveops_events.php`) :**
+    - Gestionnaire d'événements à durée limitée modifiant les coefficients globaux du jeu en temps réel.
+    - 4 préconfigurations féodales prêtes à l'emploi : *Moissons Sakura* (+50% récolte riz & bois), *Furie guerrière de Kai* (+30% vitesse armées & +20% honneur), *Bâtisseurs d'Oda* (+25% vitesse chantiers), *Grande Forge de Tamahagane* (+40% récolte pierre/fer).
+    - Formulaire d'événement sur-mesure et arrêt anticipé en un clic.
+  * **Feature Flags & Roadmap Stratégique (`views/gamestudio/liveops_features.php`) :**
+    - Interrupteurs On/Off à chaud permettant d'activer ou désactiver des fonctionnalités sans redéploiement (`p2p_market`, `narrative_storyboard`, `bot_ai_clans`, `gallery_art`, etc.).
+    - Tableau de bord de suivi de la feuille de route du projet (Statuts, Priorités, Sprints et Progrès).
+  * **Broadcast In-Game & Mode Maintenance Impériale (`views/gamestudio/liveops_broadcast.php`, `views/maintenance.php`, `views/partials/header.php`, `index.php`) :**
+    - Bannière flottante défilante en temps réel affichée au sommet de toutes les pages pour les annonces d'urgence ou de célébration.
+    - Mode maintenance avec interception automatique dans `index.php`, whitelist d'administrateurs avec accès garanti, et page de veille immersive féodale `views/maintenance.php` avec Torii animé et horodatage prévisionnel.
+  * **Support Joueurs & Décrets de Compensation Impériale (`views/gamestudio/liveops_support.php`) :**
+    - Outil de recherche instantané de Daimyōs (par pseudonyme, e-mail ou nom de fief).
+    - Versement de dédommagements ciblés ou collectifs (à l'ensemble des seigneurs du royaume) avec boutons d'incréments rapides (+5k, +20k, +50k bois/pierre/riz, Kobans, Honneur).
+    - Émission automatique d'une missive impériale officielle et journalisation indélébile dans l'historique d'audit.
+
 ## [1.33.2] - 2026-10-16
 ### Corrigé (Fixed)
 - **Plafond Castral & Apogée des Bâtiments &bull; Blocage des Évolutions au Niveau Max (`core/BuildingEngine.php`, `views/building.php`, `views/city.php`) :**
