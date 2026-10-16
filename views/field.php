@@ -78,7 +78,7 @@ require_once __DIR__ . '/../core/ImperialSealEngine.php';
 $sealEngine = new ImperialSealEngine();
 $isSealActive = $sealEngine->isSealActive((int)($user['id'] ?? 0));
 
-$isAdmin = (($user['role'] ?? '') === 'admin');
+$isAdmin = ((class_exists('Auth') && Auth::check() && Auth::isAdmin()) || !empty($user['is_admin']) || (($user['role'] ?? '') === 'admin'));
 $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 $maxAllowedFields = $isSealActive ? 2 : 1;
 $maxAllowedTotal = $isSealActive ? 2 : 1;
@@ -488,8 +488,8 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                     <button type="button" class="btn btn-warning w-100 mb-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                             onclick="instantFinishBuild(<?= (int)$activeJob['id'] ?>)">
                         <i class="fa-solid fa-bolt text-danger"></i>
-                        <span>Finir instantan&eacute;ment (2 Kobans)</span>
-                        <i class="fa-solid fa-coins"></i>
+                        <span><?= $isAdmin ? '⚡ Finir instantan&eacute;ment (Gratuit Admin)' : 'Finir instantan&eacute;ment (2 Kobans)' ?></span>
+                        <i class="fa-solid <?= $isAdmin ? 'fa-bolt text-warning' : 'fa-coins' ?>"></i>
                     </button>
                     <button type="button" class="btn btn-outline-danger w-100"
                             onclick="cancelFieldBuild(<?= (int)$activeJob['id'] ?>)">
@@ -537,7 +537,7 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
                     </div>
                     <button type="button" class="btn btn-primary btn-lg w-100" id="btnLaunchUpgrade"
                             onclick="launchFieldUpgrade(<?= $slot ?>, <?= $targetLevel ?>)">
-                        <i class="fa-solid fa-hammer me-1"></i> Lancer l'Amélioration au Niveau <?= $targetLevel ?>
+                        <i class="fa-solid fa-hammer me-1"></i> <?= $isAdmin ? '⚡ [Admin] Amélioration Immédiate sans coût (Niveau ' . $targetLevel . ')' : 'Lancer l\'Amélioration au Niveau ' . $targetLevel ?>
                     </button>
                 <?php endif; ?>
 

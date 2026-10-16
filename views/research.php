@@ -19,7 +19,7 @@ $vm = $researchService->getViewModel(
     $_GET
 );
 
-$isAdmin = (($user['role'] ?? '') === 'admin');
+$isAdmin = ((class_exists('Auth') && Auth::check() && Auth::isAdmin()) || !empty($user['is_admin']) || (($user['role'] ?? '') === 'admin'));
 $labLvl = $vm['lab_level'];
 $activeResearch = $vm['active_queue'];
 $items = $vm['items'];

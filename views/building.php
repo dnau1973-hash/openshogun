@@ -96,7 +96,7 @@ require_once __DIR__ . '/../core/ImperialSealEngine.php';
 $sealEngine = new ImperialSealEngine();
 $isSealActive = $sealEngine->isSealActive((int)($user['id'] ?? 0));
 
-$isAdmin = (($user['role'] ?? '') === 'admin');
+$isAdmin = ((class_exists('Auth') && Auth::check() && Auth::isAdmin()) || !empty($user['is_admin']) || (($user['role'] ?? '') === 'admin'));
 $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 $maxAllowedBuildings = $isSealActive ? 2 : 1;
 $maxAllowedTotal = $isSealActive ? 2 : 1;
@@ -528,7 +528,7 @@ if (!$isEmptyPlot) {
                                         <div class="col-auto">
                                             <?php if ($canAfford && $canQueueNewBuilding): ?>
                                                 <button type="button" class="btn btn-primary" onclick="launchBuildingUpgrade('<?= $bCode ?>', 1, <?= $slot ?>)">
-                                                    <i class="fa-solid fa-hammer me-1"></i>Bâtir
+                                                    <i class="fa-solid fa-hammer me-1"></i><?= $isAdmin ? '⚡ Bâtir (Gratuit Admin)' : 'Bâtir' ?>
                                                 </button>
                                             <?php elseif (!$canAfford): ?>
                                                 <button type="button" class="btn btn-secondary disabled" disabled>
@@ -2788,8 +2788,8 @@ if (!$isEmptyPlot) {
                         </div>
                         <button type="button" class="btn btn-warning w-100 mb-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="instantFinishBuild(<?= (int)$activeJob['id'] ?>)">
                             <i class="fa-solid fa-bolt text-danger"></i>
-                            <span>Finir instantan&eacute;ment (2 Kobans)</span>
-                            <i class="fa-solid fa-coins"></i>
+                            <span><?= $isAdmin ? '⚡ Finir instantan&eacute;ment (Gratuit Admin)' : 'Finir instantan&eacute;ment (2 Kobans)' ?></span>
+                            <i class="fa-solid <?= $isAdmin ? 'fa-bolt text-warning' : 'fa-coins' ?>"></i>
                         </button>
                         <button type="button" class="btn btn-outline-danger w-100" onclick="cancelBuildingBuild(<?= (int)$activeJob['id'] ?>)">
                             <i class="fa-solid fa-ban text-danger me-1"></i><?= $isDemolishingJob ? 'Interrompre le démantèlement' : 'Interrompre les travaux (80% remboursé)' ?>
@@ -2835,7 +2835,7 @@ if (!$isEmptyPlot) {
                             </p>
                         </div>
                         <button type="button" class="btn btn-primary btn-lg w-100" id="btnLaunchBuildingUpgrade" onclick="launchBuildingUpgrade('<?= $code ?>', <?= $targetLevel ?>, <?= $slot ?>)">
-                            <?= ($lvl === 0) ? '<i class="fa-solid fa-hammer me-1"></i>Ériger au Niveau 1' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Élever au Niveau ' . $targetLevel ?>
+                            <?= ($lvl === 0) ? ($isAdmin ? '⚡ [Admin] Ériger Immédiatement (Niveau 1 sans coût)' : '<i class="fa-solid fa-hammer me-1"></i>Ériger au Niveau 1') : ($isAdmin ? '⚡ [Admin] Élever Immédiatement (Niveau ' . $targetLevel . ' sans coût)' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Élever au Niveau ' . $targetLevel) ?>
                         </button>
                     <?php endif; ?>
 

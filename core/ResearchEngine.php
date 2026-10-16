@@ -247,10 +247,14 @@ class ResearchEngine {
     }
 
     public function isUserAdmin(int $userId): bool {
+        if (class_exists('Auth') && Auth::check() && Auth::isAdmin()) {
+            return true;
+        }
         try {
-            $st = $this->db->prepare("SELECT role FROM users WHERE id = ?");
+            $st = $this->db->prepare("SELECT is_admin FROM users WHERE id = ?");
             $st->execute([$userId]);
-            return $st->fetchColumn() === 'admin';
+            $val = $st->fetchColumn();
+            return ((int)$val === 1 || $val === 'admin');
         } catch (Throwable $e) {
             return false;
         }

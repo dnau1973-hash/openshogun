@@ -27,7 +27,7 @@ try {
         $targetId = $_POST['target_id'] ?? '';
         $slot = isset($_POST['slot']) ? (int)$_POST['slot'] : null;
         $fieldType = !empty($_POST['field_type']) ? trim($_POST['field_type']) : null;
-        if (!in_array($category, ['field', 'building'])) {
+        if (!in_array($category, ['field', 'building', 'rural_plot'])) {
             throw new Exception("Catégorie de construction invalide.");
         }
         $result = $buildingEngine->startUpgrade((int)$planet['id'], $category, $targetId, $slot, $fieldType);

@@ -16,6 +16,7 @@ require_once __DIR__ . '/../../core/RuralPlotEngine.php';
 $queue = $queue ?? [];
 $queueTitle = $queueTitle ?? 'Chantiers Urbains';
 $isTerran = $isTerran ?? (($planet['faction'] ?? '') === 'terran');
+$isAdmin = $isAdmin ?? ((class_exists('Auth') && Auth::check() && Auth::isAdmin()) || !empty($user['is_admin']) || (($user['role'] ?? '') === 'admin'));
 ?>
 
 <div class="card shadow-sm" id="urban-construction-queue-card">
@@ -104,12 +105,12 @@ $isTerran = $isTerran ?? (($planet['faction'] ?? '') === 'terran');
                         <div class="d-flex align-items-center gap-1">
                             <button type="button" 
                                     class="btn btn-sm btn-warning text-dark fw-bold d-inline-flex align-items-center gap-1 px-2 py-1 shadow-sm" 
-                                    title="Terminer instantanément cette construction pour 2 Kobans"
-                                    aria-label="Terminer instantanément (2 Kobans)"
+                                    title="<?= $isAdmin ? 'Terminer instantanément sans coût (Privilège Administrateur)' : 'Terminer instantanément cette construction pour 2 Kobans' ?>"
+                                    aria-label="<?= $isAdmin ? 'Terminer instantanément (Gratuit Admin)' : 'Terminer instantanément (2 Kobans)' ?>"
                                     onclick="instantFinishBuild(<?= (int)$q['id'] ?>)">
                                 <i class="fa-solid fa-bolt text-danger"></i>
-                                <span>2</span>
-                                <i class="fa-solid fa-coins text-warning-fg"></i>
+                                <span><?= $isAdmin ? 'Gratuit' : '2' ?></span>
+                                <i class="fa-solid <?= $isAdmin ? 'fa-bolt text-warning' : 'fa-coins text-warning-fg' ?>"></i>
                             </button>
                             <button type="button" 
                                     class="btn btn-sm btn-icon btn-outline-danger" 

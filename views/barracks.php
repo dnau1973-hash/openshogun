@@ -8,7 +8,7 @@ require_once __DIR__ . '/../core/PlanetEngine.php';
 $barracksEngine = new BarracksEngine();
 $planetEngine = new PlanetEngine();
 
-$isAdmin = (($user['role'] ?? '') === 'admin');
+$isAdmin = ((class_exists('Auth') && Auth::check() && Auth::isAdmin()) || !empty($user['is_admin']) || (($user['role'] ?? '') === 'admin'));
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
 $barracksLvl = $buildings['barracks'] ?? 0;
 

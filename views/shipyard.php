@@ -8,7 +8,7 @@ require_once __DIR__ . '/../core/PlanetEngine.php';
 $shipyardEngine = new ShipyardEngine();
 $planetEngine = new PlanetEngine();
 
-$isAdmin = (($user['role'] ?? '') === 'admin');
+$isAdmin = ((class_exists('Auth') && Auth::check() && Auth::isAdmin()) || !empty($user['is_admin']) || (($user['role'] ?? '') === 'admin'));
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
 $shipyardLvl = $buildings['shipyard'] ?? 0;
 

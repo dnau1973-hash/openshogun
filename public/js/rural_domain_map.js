@@ -156,12 +156,13 @@
                 finishLabel.textContent = `Élévation au Niveau ${targetLevel} en cours. Fin estimée : ${dateObj.toLocaleTimeString()}`;
             }
 
+            const isAdm = (window.IS_ADMIN === true);
             if (actionContainer) {
                 actionContainer.innerHTML = `
                     <button type="button" class="btn btn-warning w-100 py-2 mb-2 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" onclick="instantFinishBuild(${queueId})">
                         <i class="fa-solid fa-bolt text-danger"></i>
-                        <span>Finir instantanément (2 Kobans)</span>
-                        <i class="fa-solid fa-coins"></i>
+                        <span>${isAdm ? '⚡ Finir instantanément (Gratuit Admin)' : 'Finir instantanément (2 Kobans)'}</span>
+                        <i class="fa-solid ${isAdm ? 'fa-bolt text-warning' : 'fa-coins'}"></i>
                     </button>
                     <button type="button" class="btn btn-outline-danger w-100 py-1" onclick="cancelRuralUpgrade(${queueId}, this)">
                         <i class="fa-solid fa-ban me-1"></i> Annuler le chantier (Remboursement 80%)
@@ -205,6 +206,7 @@
             }
 
             // Bouton d'élévation
+            const isAdm = (window.IS_ADMIN === true);
             const canAfford = (d.canAfford === '1');
             if (actionContainer) {
                 if (isMax) {
@@ -212,10 +214,10 @@
                         <button type="button" class="btn btn-secondary w-100 disabled" style="font-size:0.9rem;">
                             <i class="fa-solid fa-check me-1"></i> Apogée de la structure atteinte
                         </button>`;
-                } else if (canAfford) {
+                } else if (canAfford || isAdm) {
                     actionContainer.innerHTML = `
                         <button type="button" class="btn btn-${d.colorClass || 'primary'} w-100 fw-bold py-2 fs-3" onclick="upgradeRuralPlot('${d.type}', this)">
-                            <i class="fa-solid fa-arrow-up me-1"></i> Lancer le chantier (Niveau ${d.nextLevel} / ${d.maxLevel})
+                            <i class="fa-solid fa-bolt text-warning me-1"></i> ${isAdm ? '⚡ [Admin] Élévation Immédiate (Niv. ' + d.nextLevel + ' sans coût)' : 'Lancer le chantier (Niveau ' + d.nextLevel + ' / ' + d.maxLevel + ')'}
                         </button>`;
                 } else {
                     actionContainer.innerHTML = `

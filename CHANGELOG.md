@@ -3,6 +3,17 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.33.1] - 2026-10-16
+### Corrigé (Fixed)
+- **Privilège Administrateur &bull; Construction et Amélioration Instantanées sans Coût (`core/BuildingEngine.php`, `core/RuralPlotEngine.php`, `core/PlanetEngine.php`, `core/BarracksEngine.php`, `core/ShipyardEngine.php`, `core/ResearchEngine.php`, `api/build.php`, `views/building.php`, `views/city.php`, `views/field.php`, `views/partials/urban_construction_queue.php`, `public/js/app.js`, `public/js/rural_domain_map.js`) :**
+  * **Résolution de l'incompatibilité de schéma SQL sur le rôle Administrateur :**
+    - Remplacement des requêtes obsolètes ciblant une colonne `role` inexistante dans la table `users` par la colonne réelle `is_admin TINYINT(1)` et la méthode `Auth::isAdmin()`.
+    - Correction des méthodes `isUserAdmin()` et `isPlanetAdmin()` dans l'ensemble des moteurs (`BuildingEngine`, `RuralPlotEngine`, `PlanetEngine`, `BarracksEngine`, `ShipyardEngine`, `ResearchEngine`).
+  * **Déblocage Frontend & Backend des Chantiers Instantanés pour Administrateurs :**
+    - **Urbain & Fief Castral :** Les administrateurs peuvent désormais lancer la construction et l'amélioration de n'importe quel bâtiment ou parcelle même avec des réserves de ressources nulles (métal/bois, cristal/pierre, deutérium/riz à 0). Le chantier s'achève immédiatement sans temps d'attente et sans déduction de ressources.
+    - **Parcelles Rurales :** Dans la vue panoramique du domaine rural (`views/resources.php` et `public/js/rural_domain_map.js`), le bouton d'élévation est systématiquement actif pour les administrateurs (`⚡ [Admin] Élévation Immédiate`) et déclenche la complétion immédiate sans coût via l'API.
+    - **Fin Immédiate Gratuite (0 Koban) :** Pour tout chantier en cours dans la file (urbaine ou rurale), le bouton d'achèvement instantané affiche « Gratuit » pour les administrateurs et ne consomme aucun Koban.
+
 ## [1.33.0] - 2026-10-15
 ### Ajouté (Added)
 - **Marché Féodal &bull; Bourse d'Échanges de Troc P2P avec Séquestre Débloquée au Niveau 10 (`core/MarketEngine.php`, `api/market.php`, `views/building.php`, `views/partials/market_p2p_tab.php`) :**

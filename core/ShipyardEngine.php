@@ -17,10 +17,14 @@ class ShipyardEngine {
     }
 
     private function isPlanetAdmin(int $planetId): bool {
+        if (class_exists('Auth') && Auth::check() && Auth::isAdmin()) {
+            return true;
+        }
         try {
-            $st = $this->db->prepare("SELECT u.role FROM users u JOIN planets p ON p.user_id = u.id WHERE p.id = ?");
+            $st = $this->db->prepare("SELECT u.is_admin FROM users u JOIN planets p ON p.user_id = u.id WHERE p.id = ?");
             $st->execute([$planetId]);
-            return $st->fetchColumn() === 'admin';
+            $val = $st->fetchColumn();
+            return ((int)$val === 1 || $val === 'admin');
         } catch (Throwable $e) {
             return false;
         }

@@ -684,9 +684,10 @@ async function cancelBuild(queueId) {
 }
 
 async function instantFinishBuild(queueId) {
+    const isAdm = (window.IS_ADMIN === true);
     const confirmed = await showModalConfirm(
-        'Voulez-vous achever immédiatement ces travaux pour 2 Kobans ?',
-        'Finir Immédiatement (2 Kobans)'
+        isAdm ? 'Voulez-vous achever immédiatement ces travaux sans coût (Privilège Administrateur) ?' : 'Voulez-vous achever immédiatement ces travaux pour 2 Kobans ?',
+        isAdm ? '⚡ Finir Immédiatement (Gratuit Admin)' : 'Finir Immédiatement (2 Kobans)'
     );
     if (!confirmed) return;
 

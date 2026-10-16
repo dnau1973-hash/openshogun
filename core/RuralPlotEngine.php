@@ -248,11 +248,16 @@ class RuralPlotEngine {
         }
 
         $isAdmin = false;
-        try {
-            $stRole = $this->db->prepare("SELECT u.role FROM users u JOIN planets p ON p.user_id = u.id WHERE p.id = ?");
-            $stRole->execute([$planetId]);
-            $isAdmin = ($stRole->fetchColumn() === 'admin');
-        } catch (Throwable $e) {}
+        if (class_exists('Auth') && Auth::check() && Auth::isAdmin()) {
+            $isAdmin = true;
+        } else {
+            try {
+                $stRole = $this->db->prepare("SELECT u.is_admin FROM users u JOIN planets p ON p.user_id = u.id WHERE p.id = ?");
+                $stRole->execute([$planetId]);
+                $val = $stRole->fetchColumn();
+                $isAdmin = ((int)$val === 1 || $val === 'admin');
+            } catch (Throwable $e) {}
+        }
 
         $enriched = [];
 
@@ -409,7 +414,7 @@ class RuralPlotEngine {
             // 2. Verrouiller la planète pour contrôler les ressources, faction, rôle admin et Sceau
             try {
                 $stmtPlanet = $this->db->prepare("
-                    SELECT p.user_id, p.metal, p.crystal, p.deuterium, p.population, u.faction, u.role 
+                    SELECT p.user_id, p.metal, p.crystal, p.deuterium, p.population, u.faction, u.is_admin 
                     FROM planets p 
                     LEFT JOIN users u ON p.user_id = u.id 
                     WHERE p.id = ?" . $lockSql
@@ -417,7 +422,7 @@ class RuralPlotEngine {
                 $stmtPlanet->execute([$planetId]);
                 $planet = $stmtPlanet->fetch(PDO::FETCH_ASSOC);
             } catch (Exception $e) {
-                // Secours si u.faction n'est pas accessible
+                // Secours si u.faction ou u.is_admin n'est pas accessible
                 $stmtPlanet = $this->db->prepare("SELECT user_id, metal, crystal, deuterium, population FROM planets WHERE id = ?" . $lockSql);
                 $stmtPlanet->execute([$planetId]);
                 $planet = $stmtPlanet->fetch(PDO::FETCH_ASSOC);
@@ -433,13 +438,21 @@ class RuralPlotEngine {
                 return ['success' => false, 'error' => 'Planète introuvable.'];
             }
 
-            $isAdmin = (($planet['role'] ?? '') === 'admin');
+            $isAdmin = (class_exists('Auth') && Auth::check() && Auth::isAdmin())
+                || ((int)($planet['is_admin'] ?? 0) === 1)
+                || (($planet['role'] ?? '') === 'admin');
             $nextLevel = $currentLevel + 1;
             $meta = self::STRUCTURES[$structureType];
 
             // Mode Administrateur : Élévation instantanée sans ressources et sans délai
             if ($isAdmin) {
                 $now = time();
+                // Nettoyer tout chantier résiduel sur cette même structure
+                try {
+                    $this->db->prepare("DELETE FROM construction_queue WHERE planet_id = ? AND build_category = 'rural_plot' AND target_id = ?")
+                        ->execute([$planetId, $structureType]);
+                } catch (Throwable $e) {}
+
                 $stmtInsert = $this->db->prepare("
                     INSERT INTO construction_queue (planet_id, build_category, target_id, target_level, started_at, finishes_at)
                     VALUES (?, 'rural_plot', ?, ?, ?, ?)

@@ -19,17 +19,26 @@ class BuildingEngine {
     /**
      * Vérifie si l'utilisateur (ou le propriétaire de la planète) est administrateur
      */
-    private function isUserAdmin(?int $userId = null, ?int $planetId = null): bool {
+    public function isUserAdmin(?int $userId = null, ?int $planetId = null): bool {
+        if (class_exists('Auth') && Auth::check() && Auth::isAdmin()) {
+            return true;
+        }
         try {
             if ($userId !== null && $userId > 0) {
-                $st = $this->db->prepare("SELECT role FROM users WHERE id = ?");
+                $st = $this->db->prepare("SELECT is_admin FROM users WHERE id = ?");
                 $st->execute([$userId]);
-                return $st->fetchColumn() === 'admin';
+                $val = $st->fetchColumn();
+                if ((int)$val === 1 || $val === 'admin') {
+                    return true;
+                }
             }
             if ($planetId !== null && $planetId > 0) {
-                $st = $this->db->prepare("SELECT u.role FROM users u JOIN planets p ON p.user_id = u.id WHERE p.id = ?");
+                $st = $this->db->prepare("SELECT u.is_admin FROM users u JOIN planets p ON p.user_id = u.id WHERE p.id = ?");
                 $st->execute([$planetId]);
-                return $st->fetchColumn() === 'admin';
+                $val = $st->fetchColumn();
+                if ((int)$val === 1 || $val === 'admin') {
+                    return true;
+                }
             }
         } catch (Throwable $e) {}
         return false;
@@ -177,10 +186,23 @@ class BuildingEngine {
             }
         }
 
+        // Délégation vers RuralPlotEngine si la catégorie est une parcelle rurale
+        if ($category === 'rural_plot') {
+            require_once __DIR__ . '/RuralPlotEngine.php';
+            $rpe = new RuralPlotEngine($this->db);
+            return $rpe->upgradePlot($planetId, $targetId);
+        }
+
         // Mode Administrateur : Construction / Amélioration instantanée sans ressources et sans délai
         if ($isAdmin) {
             $now = time();
             $targetLevel = $currentLevel + 1;
+            // Nettoyer tout chantier résiduel sur cette même structure
+            try {
+                $this->db->prepare("DELETE FROM construction_queue WHERE planet_id = ? AND build_category = ? AND target_id = ?")
+                    ->execute([$planetId, $category, $targetId]);
+            } catch (Throwable $e) {}
+
             $stmtInsert = $this->db->prepare("
                 INSERT INTO construction_queue 
                 (planet_id, build_category, target_id, target_level, started_at, finishes_at) 

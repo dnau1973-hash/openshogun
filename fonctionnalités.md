@@ -1,5 +1,31 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-16] - admin-instant-build : Construction & Amélioration Instantanées sans Coût pour Administrateurs
+- **Module :** `admin-instant-build`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Correction Structurelle de Détection d'Administrateur :**
+     - Remplacement de l'interrogation de la colonne inexistante `role` dans `users` par `is_admin = 1` et `Auth::isAdmin()`.
+     - Uniformisation dans `BuildingEngine`, `RuralPlotEngine`, `PlanetEngine`, `BarracksEngine`, `ShipyardEngine`, `ResearchEngine`.
+  2. **Bypass des Coûts en Ressources pour Administrateurs :**
+     - Les contrôles de stocks (bois, pierre, riz) ne bloquent plus les administrateurs. Les boutons restent cliquables même avec 0 ressource.
+     - Aucune ressource n'est déduite lors de la validation.
+  3. **Exécution Instantanée (0 Seconde de Délai) :**
+     - Pour les administrateurs, les constructions urbaines et rurales sont insérées et traitées immédiatement (`finishes_at` dans le passé) sans transiter par une file d'attente.
+  4. **Fin Immédiate sans Koban (Gratuit Admin) :**
+     - Les boutons « Finir instantanément » dans la file de chantiers urbaine et rurale indiquent « Gratuit » au lieu de « 2 Kobans » et n'exigent ni ne déduisent aucun Koban.
+- **Fichiers modifiés :** `core/BuildingEngine.php`, `core/RuralPlotEngine.php`, `core/PlanetEngine.php`, `core/BarracksEngine.php`, `core/ShipyardEngine.php`, `core/ResearchEngine.php`, `api/build.php`, `views/building.php`, `views/city.php`, `views/field.php`, `views/partials/urban_construction_queue.php`, `public/js/app.js`, `public/js/rural_domain_map.js`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se connecter avec un compte Administrateur (`is_admin = 1`).
+  2. Consulter la Cité Castrale (`/?page=city`) ou un Bâtiment (`/?page=building&slot=X`) même avec 0 ressource :
+     - Vérifier que le bouton « Bâtir (Gratuit Admin) » ou « ⚡ [Admin] Élever Immédiatement » est actif.
+     - Cliquer sur le bouton : la page se recharge avec le nouveau niveau immédiatement opérationnel, sans déduction de ressources et sans compte à rebours.
+  3. Consulter le Terroir Rural (`/?page=resources`) :
+     - Cliquer sur une parcelle (ex. Forêt, Sanctuaire, Rizières) : la modale affiche « ⚡ [Admin] Élévation Immédiate ».
+     - Cliquer : le niveau de la structure augmente instantanément.
+  4. Si un chantier est en cours dans la file :
+     - Vérifier que le bouton de complétion rapide affiche « Gratuit » et qu'aucun Koban n'est déduit.
+
 ### [2026-10-15] - narrative-designer-storyboard : Narrative Designer, Banc de Montage Vidéo Linéaire & Upload Bibliothèque
 - **Module :** `narrative-designer-storyboard`
 - **Statut :** `À tester`

@@ -73,7 +73,7 @@ require_once __DIR__ . '/../core/ImperialSealEngine.php';
 $sealEngine = new ImperialSealEngine();
 $isSealActive = $sealEngine->isSealActive((int)($user['id'] ?? 0));
 
-$isAdmin = (($user['role'] ?? '') === 'admin');
+$isAdmin = ((class_exists('Auth') && Auth::check() && Auth::isAdmin()) || !empty($user['is_admin']) || (($user['role'] ?? '') === 'admin'));
 $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 $maxAllowedBuildings = $isSealActive ? 2 : 1;
 $maxAllowedTotal = $isSealActive ? 2 : 1;
@@ -429,7 +429,7 @@ ob_start();
                             <div>
                                 <?php if ($canAfford && $canQueueNewBuilding): ?>
                                     <button type="button" class="btn btn-primary" onclick="confirmBuildOnSlot('<?= $bCode ?>')" style="font-size:0.85rem; padding:0.45rem 0.9rem; font-weight:600; background:linear-gradient(135deg, #b91c1c, #dc2626); border-color:#ef4444; white-space:nowrap;">
-                                        <i class="fa-solid fa-hammer me-1"></i>Bâtir (Niveau 1)
+                                        <i class="fa-solid fa-hammer me-1"></i><?= $isAdmin ? '⚡ Bâtir (Gratuit Admin)' : 'Bâtir (Niveau 1)' ?>
                                     </button>
                                 <?php elseif (!$canAfford): ?>
                                     <button type="button" class="btn btn-secondary" disabled style="font-size:0.8rem; padding:0.45rem 0.75rem; opacity:0.6; cursor:not-allowed; white-space:nowrap;" title="Ressources insuffisantes dans vos réserves">
