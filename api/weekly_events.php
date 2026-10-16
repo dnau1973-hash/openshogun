@@ -6,6 +6,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/WeeklyEventEngine.php';
+require_once __DIR__ . '/../core/GameStudioEngine.php';
 
 $auth = new Auth();
 if (!Auth::check()) {
@@ -26,6 +27,8 @@ if (!$user || !$planet) {
 $userId = (int)$user['id'];
 $planetId = (int)$planet['id'];
 $eventEngine = new WeeklyEventEngine();
+$studioEngine = new GameStudioEngine();
+$isStudioAuthorized = $auth->isAdmin() || $studioEngine->isAuthorized($userId);
 
 $action = $_GET['action'] ?? $_POST['action'] ?? 'get_active';
 
@@ -85,12 +88,12 @@ try {
             break;
 
         // =====================================================================
-        // ACTIONS D'ADMINISTRATION
+        // ACTIONS D'ADMINISTRATION / GAME STUDIO
         // =====================================================================
         case 'admin_save_event':
-            if (!$auth->isAdmin()) {
+            if (!$isStudioAuthorized) {
                 http_response_code(403);
-                throw new Exception("Accès refusé. Privilèges de Shogun requis.");
+                throw new Exception("Accès refusé. Privilèges de Game Studio requis.");
             }
             $savedId = $eventEngine->saveEvent($_POST);
             echo json_encode([
@@ -101,9 +104,9 @@ try {
             break;
 
         case 'admin_set_active':
-            if (!$auth->isAdmin()) {
+            if (!$isStudioAuthorized) {
                 http_response_code(403);
-                throw new Exception("Accès refusé. Privilèges de Shogun requis.");
+                throw new Exception("Accès refusé. Privilèges de Game Studio requis.");
             }
             $eventId = (int)($_POST['event_id'] ?? 0);
             if ($eventId <= 0) throw new Exception("ID d'événement manquant.");
@@ -115,9 +118,9 @@ try {
             break;
 
         case 'admin_delete_event':
-            if (!$auth->isAdmin()) {
+            if (!$isStudioAuthorized) {
                 http_response_code(403);
-                throw new Exception("Accès refusé. Privilèges de Shogun requis.");
+                throw new Exception("Accès refusé. Privilèges de Game Studio requis.");
             }
             $eventId = (int)($_POST['event_id'] ?? 0);
             if ($eventId <= 0) throw new Exception("ID d'événement manquant.");
@@ -129,9 +132,9 @@ try {
             break;
 
         case 'admin_save_task':
-            if (!$auth->isAdmin()) {
+            if (!$isStudioAuthorized) {
                 http_response_code(403);
-                throw new Exception("Accès refusé. Privilèges de Shogun requis.");
+                throw new Exception("Accès refusé. Privilèges de Game Studio requis.");
             }
             $savedTaskId = $eventEngine->saveTask($_POST);
             echo json_encode([
@@ -142,9 +145,9 @@ try {
             break;
 
         case 'admin_delete_task':
-            if (!$auth->isAdmin()) {
+            if (!$isStudioAuthorized) {
                 http_response_code(403);
-                throw new Exception("Accès refusé. Privilèges de Shogun requis.");
+                throw new Exception("Accès refusé. Privilèges de Game Studio requis.");
             }
             $taskId = (int)($_POST['task_id'] ?? 0);
             if ($taskId <= 0) throw new Exception("ID de tâche manquant.");
@@ -156,9 +159,9 @@ try {
             break;
 
         case 'admin_get_event':
-            if (!$auth->isAdmin()) {
+            if (!$isStudioAuthorized) {
                 http_response_code(403);
-                throw new Exception("Accès refusé.");
+                throw new Exception("Accès refusé. Privilèges de Game Studio requis.");
             }
             $eventId = (int)($_GET['event_id'] ?? 0);
             $eventDetails = $eventEngine->getEventDetails($eventId);

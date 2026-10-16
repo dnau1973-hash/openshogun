@@ -64,6 +64,7 @@ $allowedTabs = [
     'elevate_research', 'elevate_bots',
     'elevate_combat', 'elevate_village', 'elevate_speed',
     'elevate_survey', 'elevate_oases', 'elevate_buildings',
+    'elevate_events', 'elevate_weekly_events',
     'narrative_storyboard', 'narrative_lore',
     'liveops_events', 'liveops_features', 'liveops_broadcast', 'liveops_support'
 ];
@@ -385,6 +386,13 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div>
                                 <div>Dérivation des Bâtiments</div>
                                 <div class="small text-secondary">Courbes de progression, Coûts &amp; Délais chantiers</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= in_array($currentTab, ['elevate_events', 'elevate_weekly_events'], true) ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_events">
+                            <i class="fa-solid fa-scroll text-warning"></i>
+                            <div>
+                                <div>Chroniques &amp; Événements Hebdo</div>
+                                <div class="small text-secondary">Récits historiques du Sengoku, Actes narratifs &amp; Quêtes</div>
                             </div>
                         </a>
                     </div>

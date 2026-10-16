@@ -3,6 +3,21 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.1] - 2026-10-16
+### Modifié (Changed)
+- **Migration & Intégration des Chroniques Féodales & Événements Hebdomadaires dans Game Studio &bull; Game Elevate Designer (`views/gamestudio.php`, `views/gamestudio/elevate_events.php`, `views/gamestudio/elevate_weekly_events.php`, `views/studio/game-elevate-designer/weekly-chronicles.php`, `views/admin.php`, `views/partials/admin_weekly_events.php`, `api/weekly_events.php`) :**
+  * **Intégration au Pôle Game Elevate Designer :**
+    - Migration complète du panneau de scénarisation et planification des événements hebdomadaires depuis le tableau de bord administrateur général vers Game Studio (`?page=gamestudio&tab=elevate_events`).
+    - Nouvel onglet et lien dédié dans le menu déroulant *Game Elevate Designer* de la navbar Game Studio.
+    - Architecture modulaire calquée sur les autres outils de conception (`views/studio/game-elevate-designer/weekly-chronicles.php`).
+  * **Redirection & Préservation Rétrocompatible sur la Page Admin :**
+    - Suppression de l'onglet direct `events` dans la barre de navigation de `views/admin.php`.
+    - Redirection HTTP 302 transparente depuis `?page=admin&tab=events` (ainsi que les alias `chroniques`, `evenements`, `event`) directement vers `?page=gamestudio&tab=elevate_events`.
+    - Dans le sous-menu « Autres modules » d'administration, ajout d'un raccourci fléché identifié *« Chroniques Féodales [Game Studio] »*.
+    - Pont rétrocompatible conservé dans `views/partials/admin_weekly_events.php`.
+  * **Accréditations Étendues (`api/weekly_events.php`) :**
+    - Les concepteurs et membres de la Dev Team habilités dans Game Studio disposent désormais des droits de création, modification et activation des chroniques historiques et des actes narratifs via l'API.
+
 ## [1.34.0] - 2026-10-16
 ### Ajouté (Added)
 - **Tour de Contrôle Producteur & Live Ops dans Game Studio (`core/LiveOpsEngine.php`, `views/gamestudio.php`, `views/gamestudio/liveops_*.php`, `views/maintenance.php`, `views/partials/header.php`, `index.php`) :**

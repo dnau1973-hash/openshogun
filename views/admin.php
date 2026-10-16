@@ -453,11 +453,15 @@ $tabAliases = [
     'sauvegardes' => 'maintenance',
     'bdd' => 'maintenance',
     'database' => 'maintenance',
-    'chroniques' => 'events',
-    'evenements' => 'events',
-    'event' => 'events',
 ];
-$allowedTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'mail', 'maintenance', 'events', 'all'];
+
+// Redirection automatique des Chroniques & Événements Hebdomadaires vers Game Studio (Game Elevate Designer)
+if (in_array($_GET['tab'] ?? '', ['events', 'chroniques', 'evenements', 'event'], true)) {
+    header('Location: ?page=gamestudio&tab=elevate_events');
+    exit;
+}
+
+$allowedTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'mail', 'maintenance', 'all'];
 $currentTab = $_GET['tab'] ?? 'dashboard';
 if (isset($tabAliases[$currentTab])) {
     $currentTab = $tabAliases[$currentTab];
@@ -543,13 +547,6 @@ $adminPages = [
         'icon' => '<i class="fa-solid fa-database text-danger"></i>',
         'pretitle' => 'Sécurité & Opérations Techniques',
         'desc' => 'Sauvegardes autonomes (Structure & Données séparées, support USB), réintégration et réinitialisation de l\'univers.',
-    ],
-    'events' => [
-        'title' => 'Chroniques Féodales & Événements Hebdomadaires',
-        'short' => 'Chroniques',
-        'icon' => '<i class="fa-solid fa-scroll text-warning"></i>',
-        'pretitle' => 'Événements & Immersion Sengoku',
-        'desc' => 'Scénarisation des événements historiques hebdomadaires, actes narratifs et récompenses de fidélisation.',
     ],
     'all' => [
         'title' => 'Console Globale (Tout Dérouler)',
@@ -711,24 +708,18 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     </a>
                 </li>
 
-                <!-- 7. Chroniques Féodales & Événements Hebdomadaires -->
-                <li class="nav-item admin-nav-item" role="presentation">
-                    <a href="?page=admin&tab=events" class="nav-link admin-tab-btn <?= ($currentTab === 'events') ? 'active' : '' ?>" data-tab="events" data-bs-target="#tab-events" role="tab" onclick="switchAdminTab('events'); return false;">
-                        <i class="fa-solid fa-scroll text-warning me-1"></i>Chroniques
-                    </a>
-                </li>
-
-                <!-- 8. Menu Déroulant "Autres Modules" -->
+                <!-- 7. Menu Déroulant "Autres Modules" -->
                 <li class="nav-item dropdown admin-nav-item" role="presentation">
-                    <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'mail', 'events']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                    <a href="#" class="nav-link dropdown-toggle <?= in_array($currentTab, ['heroes', 'support', 'announcements', 'medals', 'mail']) ? 'active' : '' ?>" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                         <i class="fa-solid fa-bolt text-warning me-1"></i>Autres modules
                         <?php if ($supportStats['count_pending'] > 0): ?>
                             <span class="badge bg-danger text-white ms-1">!</span>
                         <?php endif; ?>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end shadow-sm admin-dropdown-menu">
-                        <a href="?page=admin&tab=events" class="dropdown-item admin-tab-btn <?= ($currentTab === 'events') ? 'active' : '' ?>" data-tab="events" data-bs-target="#tab-events" onclick="switchAdminTab('events'); return false;">
+                        <a href="?page=gamestudio&tab=elevate_events" class="dropdown-item d-flex align-items-center">
                             <i class="fa-solid fa-scroll text-warning me-2"></i>Chroniques Féodales
+                            <span class="badge bg-indigo-lt text-indigo ms-auto font-monospace" style="font-size: 0.65rem;">Game Studio</span>
                         </a>
                         <a href="?page=admin&tab=heroes" class="dropdown-item admin-tab-btn <?= ($currentTab === 'heroes') ? 'active' : '' ?>" data-tab="heroes" data-bs-target="#tab-heroes" onclick="switchAdminTab('heroes'); return false;">
                             <i class="fa-solid fa-user-ninja text-purple me-2"></i>Samouraïs &amp; Reliques
@@ -1747,10 +1738,6 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
         <?php require __DIR__ . '/partials/admin_mail.php'; ?>
     </div>
 
-    <!-- Section Chroniques Féodales & Événements Hebdomadaires -->
-    <div class="tab-pane admin-tab-pane p-4 <?= ($currentTab === 'events' || $currentTab === 'all') ? 'active show' : '' ?>" id="tab-events" data-tab="events" role="tabpanel">
-        <?php require __DIR__ . '/partials/admin_weekly_events.php'; ?>
-    </div>
 
     
     <!-- Section 11 : Décret Suprême - Réinitialisation Complète du Monde Féodal -->
@@ -2065,11 +2052,12 @@ function switchAdminTab(tabKey) {
         'sauvegarde': 'maintenance',
         'sauvegardes': 'maintenance',
         'bdd': 'maintenance',
-        'database': 'maintenance',
-        'chroniques': 'events',
-        'evenements': 'events',
-        'event': 'events'
+        'database': 'maintenance'
     };
+    if (tabKey === 'events' || tabKey === 'chroniques' || tabKey === 'evenements' || tabKey === 'event') {
+        window.location.href = '?page=gamestudio&tab=elevate_events';
+        return;
+    }
     if (jsTabAliases[tabKey]) {
         tabKey = jsTabAliases[tabKey];
     }
@@ -2079,7 +2067,7 @@ function switchAdminTab(tabKey) {
         return;
     }
 
-    const validTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'mail', 'maintenance', 'events', 'all'];
+    const validTabs = ['dashboard', 'world', 'heroes', 'bots', 'users', 'medals', 'support', 'announcements', 'updates', 'mail', 'maintenance', 'all'];
     if (!validTabs.includes(tabKey)) tabKey = 'dashboard';
 
     // Mettre à jour dynamiquement le fil d'Ariane et l'en-tête de page Tabler

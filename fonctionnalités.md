@@ -1,5 +1,29 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-16] - elevate-weekly-chronicles : Déplacement des Chroniques Féodales dans Game Elevate Designer
+- **Module :** `elevate-weekly-chronicles`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Intégration au Menu Game Elevate Designer (`views/gamestudio.php`) :**
+     - Déplacement de l'interface de gestion des Chroniques & Événements Hebdomadaires depuis la page Admin vers le Studio (`?page=gamestudio&tab=elevate_events`).
+     - Entrée dédiée *« Chroniques & Événements Hebdo »* dans le menu déroulant *Game Elevate Designer*.
+  2. **Composant Modulaire Game Elevate Designer (`views/studio/game-elevate-designer/weekly-chronicles.php`) :**
+     - Outil de création, d'édition, d'ordonnancement d'actes narratifs et d'attribution de récompenses (ressources, Kobans, honneur, objets).
+     - Activation immédiate de l'événement et suivi des chroniques programmées.
+  3. **Redirection & Préservation Rétrocompatible (`views/admin.php`) :**
+     - Retrait de l'onglet direct de la barre de navigation d'administration.
+     - Redirection 302 automatique si consultation de `?page=admin&tab=events` vers `?page=gamestudio&tab=elevate_events`.
+     - Raccourci explicite vers Game Studio dans le sous-menu « Autres modules » de la page admin.
+  4. **Permissions Étendues (`api/weekly_events.php`) :**
+     - Autorisation d'administration accordée à la fois aux Shoguns administrateurs et aux membres habilités de la Dev Team.
+- **Fichiers modifiés :** `views/gamestudio.php`, `views/gamestudio/elevate_events.php`, `views/gamestudio/elevate_weekly_events.php`, `views/studio/game-elevate-designer/weekly-chronicles.php`, `views/partials/admin_weekly_events.php`, `views/admin.php`, `api/weekly_events.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Se rendre sur `/?page=gamestudio&tab=elevate_events` ou via le menu déroulant *Game Elevate Designer* &rarr; *Chroniques & Événements Hebdo*.
+  2. Vérifier la liste des chroniques historiques et des actes narratifs associés.
+  3. Tester la modale d'édition ou de création d'une chronique.
+  4. Se rendre sur `/?page=admin&tab=events` et vérifier la redirection automatique vers Game Studio.
+  5. Vérifier que la barre d'onglets de la page admin ne comporte plus l'onglet Chroniques mais qu'un lien propre figure dans « Autres modules ».
+
 ### [2026-10-16] - liveops-producer-control : Tour de Contrôle Producteur & Live Ops dans Game Studio
 - **Module :** `liveops-producer-control`
 - **Statut :** `À tester`
