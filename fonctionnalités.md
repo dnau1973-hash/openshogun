@@ -1,5 +1,23 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-16] - hud-resource-bar-redesign : Refonte Ergonomique de la Barre HUD des Ressources sous le Carrousel
+- **Module :** `hud-resource-bar-redesign`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Visibilité Immédiate des 7 Ressources & Indicateurs de Base (`views/partials/header.php`) :**
+     - Affichage direct sous le carrousel de 7 pilules cliquables : **Bois**, **Granit**, **Argile**, **Riz**, **Thé**, **Soja** et **Sérénité**.
+     - Chaque pilule présente le stock incrémenté en temps réel (`res-val-*`), la cadence horaire (`+X/h`), le pourcentage de remplissage et la jauge (`bar-*`).
+  2. **Fiche Détaillée au Clic sur Chaque Ressource :**
+     - Affiche le stock exact / plafond, le temps estimé avant saturation de l'entrepôt, le niveau du terroir rural, les bonus d'ateliers urbains, d'Oasis, de Héros et de Matsuri, l'efficacité globale, la projection sur 24h et des raccourcis vers le terroir ou l'atelier.
+  3. **Deux Menus Secondaires Compacts à Droite :**
+     - **`Artisanat & Minerais`** : regroupe les 8 ressources secondaires (*Poutres, Charbon, Sable de Fer, Soufre, Nitrate, Poisson, Farine, Saké*).
+     - **`Peuple & Domaine`** : affiche la population, le moral et les Kobans, et déroule la répartition par castes Shinōkōshō, la main-d'œuvre, le moral et le Trésor Impérial.
+- **Fichiers modifiés :** `views/partials/header.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Vérifier sur n'importe quelle page du jeu que les 7 pilules (Bois, Granit, Argile, Riz, Thé, Soja, Sérénité) sont visibles d'un seul coup d'œil sous le carrousel avec leur stock et leur cadence `/h`.
+  2. Cliquer sur chacune des 7 pilules pour vérifier l'ouverture de sa fiche détaillée (saturation, bonus, projection 24h, liens rapides).
+  3. Ouvrir les 2 menus de droite (`Artisanat & Minerais` et `Peuple & Domaine`) et vérifier la présence de toutes les ressources secondaires et des castes Shinōkōshō.
+
 ### [2026-10-16] - grain-mill-level-progression : Paliers de Production Échelonnés Meunerie & Brasserie (Farine Niv. 5, Saké Niv. 10)
 - **Module :** `grain-mill-level-progression`
 - **Statut :** `À tester`

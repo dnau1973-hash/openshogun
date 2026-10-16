@@ -3,6 +3,18 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.4] - 2026-10-16
+### Modifié (Changed)
+- **Refonte Ergonomique de la Barre HUD des Ressources sous le Carrousel (`views/partials/header.php`) :**
+  * **Affichage Direct en Un Coup d'Œil des 7 Indicateurs Fondamentaux :**
+    - Remplacement des 4 boutons opaques par un bandeau HUD affichant directement 7 pilules cliquables côte à côte : **Bois** (`metal`), **Granit** (`crystal`), **Argile** (`clay`), **Riz** (`deuterium`), **Thé** (`tea`), **Soja** (`soybean`) et **Sérénité** (`energy`).
+    - Chaque pilule affiche le stock en temps réel (`res-val-*`), la cadence horaire (`+X/h`), le taux de remplissage (`%`) et une jauge dynamique (`bar-*`).
+  * **Fiches Techniques Détaillées à la Demande (Progressive Disclosure) :**
+    - Au clic sur chacune des 7 pilules, ouverture d'une fiche synthétique indiquant le stock exact / plafond d'entrepôt, l'estimation du temps avant saturation (`Saturé dans ~Xh Ym`), le niveau du terroir rural, les bonus d'ateliers urbains (Scierie, Tailleur de Pierre, Meunerie, Pavillon de Thé), d'Oasis, de Héros et de Matsuri, l'efficacité globale et la projection sur 24h, avec boutons d'accès direct.
+  * **Regroupement Compact à Droite en 2 Menus Secondaires :**
+    - Menu **`Artisanat & Minerais`** : regroupe par sections les 8 ressources secondaires (*Poutres de Charpente, Charbon de Bois, Sable de Fer, Soufre Volcanique, Nitrate de Potasse, Poisson Frais, Farine de Riz, Saké Impérial*) en conservant tous leurs compteurs JS temps réel.
+    - Menu **`Peuple & Domaine`** : affiche dès le bouton l'indice de moral, la population et les Kobans, et déroule l'ordre féodal Shinōkōshō, la main-d'œuvre, le moral et le Trésor Impérial.
+
 ## [1.34.3] - 2026-10-16
 ### Corrigé (Fixed)
 - **Verrouillage Strict des Paliers Meunerie &bull; Interdiction Totale de Production au Niveau 0 & Avant Paliers Requis (`core/PlanetEngine.php`, `views/building.php`) :**
