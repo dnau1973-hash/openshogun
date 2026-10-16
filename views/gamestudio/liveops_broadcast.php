@@ -227,3 +227,4 @@ $isMaintenance = !empty($maintenanceStatus['is_active']);
         </div>
     </div>
 </div>
+
