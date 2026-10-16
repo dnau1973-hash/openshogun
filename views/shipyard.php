@@ -8,6 +8,7 @@ require_once __DIR__ . '/../core/PlanetEngine.php';
 $shipyardEngine = new ShipyardEngine();
 $planetEngine = new PlanetEngine();
 
+$isAdmin = (($user['role'] ?? '') === 'admin');
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
 $shipyardLvl = $buildings['shipyard'] ?? 0;
 
@@ -25,7 +26,7 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
         <?php endif; ?>
     </div>
     <div class="card-body">
-        <?php if ($shipyardLvl < 1): ?>
+        <?php if ($shipyardLvl < 1 && !$isAdmin): ?>
             <div style="text-align:center; padding:2rem; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:8px;">
                 <h3 style="color:#f87171; margin-bottom:0.5rem;">Atelier de siège non construit</h3>
                 <p style="color:var(--text-muted); margin-bottom:1rem;">Vous devez construire un Atelier de Siège et des Écuries dans votre cité castrale pour mobiliser de la cavalerie et fabriquer des engins de guerre.</p>
@@ -167,7 +168,7 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
                         $maxMetal = ($s['metal_cost'] > 0) ? floor($planet['metal'] / $s['metal_cost']) : 99999;
                         $maxCrystal = ($s['crystal_cost'] > 0) ? floor($planet['crystal'] / $s['crystal_cost']) : 99999;
                         $maxDeut = ($s['deuterium_cost'] > 0) ? floor($planet['deuterium'] / $s['deuterium_cost']) : 99999;
-                        $maxAffordable = max(0, min($maxMetal, $maxCrystal, $maxDeut));
+                        $maxAffordable = $isAdmin ? 9999 : max(0, min($maxMetal, $maxCrystal, $maxDeut));
                     ?>
                     <div class="card unit-card" style="margin:0; background:var(--bg-surface, #fdfbf7); overflow:hidden; border:1px solid var(--border-color); border-radius:10px; display:flex; flex-direction:column; box-shadow:0 6px 18px rgba(0,0,0,0.05); transition:transform 0.2s ease, box-shadow 0.2s ease;">
 

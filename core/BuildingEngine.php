@@ -17,6 +17,25 @@ class BuildingEngine {
     }
 
     /**
+     * Vérifie si l'utilisateur (ou le propriétaire de la planète) est administrateur
+     */
+    private function isUserAdmin(?int $userId = null, ?int $planetId = null): bool {
+        try {
+            if ($userId !== null && $userId > 0) {
+                $st = $this->db->prepare("SELECT role FROM users WHERE id = ?");
+                $st->execute([$userId]);
+                return $st->fetchColumn() === 'admin';
+            }
+            if ($planetId !== null && $planetId > 0) {
+                $st = $this->db->prepare("SELECT u.role FROM users u JOIN planets p ON p.user_id = u.id WHERE p.id = ?");
+                $st->execute([$planetId]);
+                return $st->fetchColumn() === 'admin';
+            }
+        } catch (Throwable $e) {}
+        return false;
+    }
+
+    /**
      * Récupère la file active de construction d'une planète
      */
     public function getQueue(int $planetId): array {
@@ -86,6 +105,7 @@ class BuildingEngine {
      */
     public function startUpgrade(int $planetId, string $category, string $targetId, ?int $slot = null, ?string $fieldType = null): array {
         $planet = $this->planetEngine->updatePlanet($planetId);
+        $isAdmin = $this->isUserAdmin((int)($planet['user_id'] ?? 0), $planetId);
         $faction = $planet['faction'] ?? 'terran';
         $buildings = $this->planetEngine->getBuildings($planetId);
         $hqLevel = $buildings['hq'] ?? 1;
@@ -155,6 +175,30 @@ class BuildingEngine {
                     ")->execute([$planetId, $slot, $type]);
                 }
             }
+        }
+
+        // Mode Administrateur : Construction / Amélioration instantanée sans ressources et sans délai
+        if ($isAdmin) {
+            $now = time();
+            $targetLevel = $currentLevel + 1;
+            $stmtInsert = $this->db->prepare("
+                INSERT INTO construction_queue 
+                (planet_id, build_category, target_id, target_level, started_at, finishes_at) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
+            $stmtInsert->execute([$planetId, $category, $targetId, $targetLevel, $now - 2, $now - 1]);
+            $queueId = (int)$this->db->lastInsertId();
+
+            $this->planetEngine->processConstructionQueue($planetId);
+            $this->planetEngine->updatePlanet($planetId);
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] Construction / Amélioration instantanée (Niveau {$targetLevel}) achevée sans coût !",
+                'queue_id' => $queueId,
+                'finishes_at' => $now,
+                'duration' => 0
+            ];
         }
 
         // 2. Vérification des files existantes, du Sceau Impérial (Architecte de Cour) et du bonus racial Terran
@@ -382,20 +426,24 @@ class BuildingEngine {
             throw new Exception("Ce chantier est introuvable ou est déjà achevé.");
         }
 
+        $isAdmin = $this->isUserAdmin($userId, $planetId);
+
         $stUser = $this->db->prepare("SELECT gold_coins FROM users WHERE id = ?");
         $stUser->execute([$userId]);
         $currentGold = (int)$stUser->fetchColumn();
-        if ($currentGold < 2) {
+        if (!$isAdmin && $currentGold < 2) {
             throw new Exception("Trésor en Kobans insuffisant : 2 Kobans requis (solde actuel : {$currentGold} Kobans).");
         }
 
         $this->db->beginTransaction();
         try {
-            // Déduction des 2 Kobans avec contrôle de solde suffisant
-            $upGold = $this->db->prepare("UPDATE users SET gold_coins = gold_coins - 2 WHERE id = ? AND gold_coins >= 2");
-            $upGold->execute([$userId]);
-            if ($upGold->rowCount() === 0) {
-                throw new Exception("Trésor en Kobans insuffisant : 2 Kobans requis.");
+            if (!$isAdmin) {
+                // Déduction des 2 Kobans avec contrôle de solde suffisant
+                $upGold = $this->db->prepare("UPDATE users SET gold_coins = gold_coins - 2 WHERE id = ? AND gold_coins >= 2");
+                $upGold->execute([$userId]);
+                if ($upGold->rowCount() === 0) {
+                    throw new Exception("Trésor en Kobans insuffisant : 2 Kobans requis.");
+                }
             }
 
             $now = time();
@@ -445,9 +493,9 @@ class BuildingEngine {
 
         return [
             'success' => true,
-            'message' => 'Construction terminée immédiatement pour 2 Kobans !',
-            'gold_spent' => 2,
-            'remaining_gold' => $currentGold - 2
+            'message' => $isAdmin ? '⚡ [Admin] Construction terminée immédiatement sans coût !' : 'Construction terminée immédiatement pour 2 Kobans !',
+            'gold_spent' => $isAdmin ? 0 : 2,
+            'remaining_gold' => $isAdmin ? $currentGold : ($currentGold - 2)
         ];
     }
 
@@ -459,6 +507,7 @@ class BuildingEngine {
     public function demolish(int $planetId, string $category, string $targetId, ?int $slot = null): array {
         $buildings = $this->planetEngine->getBuildings($planetId);
         $hqLevel = (int)($buildings['hq'] ?? 1);
+        $isAdmin = $this->isUserAdmin(null, $planetId);
 
         // Récupérer la faction du joueur
         $stmtOwner = $this->db->prepare("SELECT u.faction FROM planets p JOIN users u ON p.user_id = u.id WHERE p.id = ?");
@@ -551,6 +600,25 @@ class BuildingEngine {
             $type = $fieldType;
             $name = (FIELD_TYPES[$fieldType]['name'] ?? 'Parcelle') . " #$fieldSlot";
             $slotText = "";
+        }
+
+        if ($isAdmin) {
+            $now = time();
+            $this->db->prepare("
+                INSERT INTO construction_queue 
+                (planet_id, build_category, target_id, target_level, started_at, finishes_at)
+                VALUES (?, ?, ?, 0, ?, ?)
+            ")->execute([$planetId, $category, $targetId, $now - 2, $now - 1]);
+
+            $this->planetEngine->processConstructionQueue($planetId);
+            $this->planetEngine->updatePlanet($planetId);
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] Démantèlement instantané achevé pour $name$slotText.",
+                'duration' => 0,
+                'finishes_at' => $now
+            ];
         }
 
         // Vérification des files de construction

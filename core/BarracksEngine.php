@@ -16,6 +16,16 @@ class BarracksEngine {
         $this->planetEngine = new PlanetEngine();
     }
 
+    private function isPlanetAdmin(int $planetId): bool {
+        try {
+            $st = $this->db->prepare("SELECT u.role FROM users u JOIN planets p ON p.user_id = u.id WHERE p.id = ?");
+            $st->execute([$planetId]);
+            return $st->fetchColumn() === 'admin';
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
     /**
      * Récupère les soldats stationnés dans la garnison de la planète
      */
@@ -37,6 +47,7 @@ class BarracksEngine {
     public function getAvailableUnits(int $planetId, string $faction): array {
         $buildings = $this->planetEngine->getBuildings($planetId);
         $barracksLvl = $buildings['barracks'] ?? 0;
+        $isAdmin = $this->isPlanetAdmin($planetId);
 
         $units = $this->getStationedUnits($planetId, $faction);
 
@@ -70,7 +81,7 @@ class BarracksEngine {
             }
             $requiredLvl = $tierReqs[$u['tier']] ?? 1;
             $u['required_barracks_level'] = $requiredLvl;
-            $u['can_train'] = ($barracksLvl >= $requiredLvl);
+            $u['can_train'] = $isAdmin ? true : ($barracksLvl >= $requiredLvl);
 
             $flourCost = isset($u['rice_flour_cost']) ? (int)$u['rice_flour_cost'] : 0;
             if ($flourCost === 0 && ($tierFlour[$u['tier']] ?? 0) > 0 && ($u['faction'] ?? 'all') !== 'all') {
@@ -162,6 +173,7 @@ class BarracksEngine {
         $planet = $this->planetEngine->updatePlanet($planetId);
         $buildings = $this->planetEngine->getBuildings($planetId);
         $barracksLvl = $buildings['barracks'] ?? 0;
+        $isAdmin = $this->isPlanetAdmin($planetId);
 
         $stmt = $this->db->prepare("SELECT * FROM units WHERE code = ? AND (faction = 'all' OR faction = ?)");
         $stmt->execute([$unitCode, $faction]);
@@ -172,8 +184,23 @@ class BarracksEngine {
 
         $tierReqs = [1 => 1, 2 => 3, 3 => 5, 4 => 8];
         $reqLvl = $tierReqs[$unit['tier']] ?? 1;
-        if ($barracksLvl < $reqLvl) {
+        if (!$isAdmin && $barracksLvl < $reqLvl) {
             throw new Exception("Caserne niveau $reqLvl requise pour recruter cette unité.");
+        }
+
+        if ($isAdmin) {
+            $now = time();
+            $this->db->prepare("
+                INSERT INTO planet_units (planet_id, unit_code, count)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE count = count + VALUES(count)
+            ")->execute([$planetId, $unitCode, $count]);
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] $count {$unit['name']} mobilisés instantanément sans coût !",
+                'finishes_at' => $now
+            ];
         }
 
         $tierFlour = [1 => 0, 2 => 15, 3 => 35, 4 => 75];

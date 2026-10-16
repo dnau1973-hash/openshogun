@@ -78,16 +78,17 @@ require_once __DIR__ . '/../core/ImperialSealEngine.php';
 $sealEngine = new ImperialSealEngine();
 $isSealActive = $sealEngine->isSealActive((int)($user['id'] ?? 0));
 
+$isAdmin = (($user['role'] ?? '') === 'admin');
 $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 $maxAllowedFields = $isSealActive ? 2 : 1;
 $maxAllowedTotal = $isSealActive ? 2 : 1;
-$canQueueNewField = $isTerran ? ($fieldsInQueue < $maxAllowedFields) : (count($queue) < $maxAllowedTotal);
+$canQueueNewField = $isAdmin ? true : ($isTerran ? ($fieldsInQueue < $maxAllowedFields) : (count($queue) < $maxAllowedTotal));
 
 // Vérifier les ressources
-$hasMetal = $planet['metal'] >= $cost['metal'];
-$hasCrystal = $planet['crystal'] >= $cost['crystal'];
-$hasDeut = $planet['deuterium'] >= $cost['deuterium'];
-$canAfford = $hasMetal && $hasCrystal && $hasDeut;
+$hasMetal = $isAdmin ? true : ($planet['metal'] >= $cost['metal']);
+$hasCrystal = $isAdmin ? true : ($planet['crystal'] >= $cost['crystal']);
+$hasDeut = $isAdmin ? true : ($planet['deuterium'] >= $cost['deuterium']);
+$canAfford = $isAdmin ? true : ($hasMetal && $hasCrystal && $hasDeut);
 
 // Temps d'attente estimé si ressources manquantes
 $missingWaitSeconds = 0;

@@ -16,12 +16,23 @@ class ShipyardEngine {
         $this->planetEngine = new PlanetEngine();
     }
 
+    private function isPlanetAdmin(int $planetId): bool {
+        try {
+            $st = $this->db->prepare("SELECT u.role FROM users u JOIN planets p ON p.user_id = u.id WHERE p.id = ?");
+            $st->execute([$planetId]);
+            return $st->fetchColumn() === 'admin';
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
     /**
      * Récupère la liste des vaisseaux constructibles par le joueur
      */
     public function getAvailableShips(int $planetId, string $faction): array {
         $buildings = $this->planetEngine->getBuildings($planetId);
         $shipyardLvl = $buildings['shipyard'] ?? 0;
+        $isAdmin = $this->isPlanetAdmin($planetId);
 
         $stmt = $this->db->prepare("
             SELECT s.*, COALESCE(ps.count, 0) as stationed_count
@@ -51,7 +62,7 @@ class ShipyardEngine {
         }
 
         foreach ($ships as &$ship) {
-            $ship['can_build'] = ($shipyardLvl >= 1);
+            $ship['can_build'] = $isAdmin ? true : ($shipyardLvl >= 1);
             $effectiveTime = max(10, (int)(($ship['base_build_time'] / (1 + ($shipyardLvl * 0.15))) * $vorashBonus * $feastSpeedBonus / $speed));
             $ship['effective_build_time'] = $effectiveTime;
         }
@@ -127,8 +138,9 @@ class ShipyardEngine {
         $planet = $this->planetEngine->updatePlanet($planetId);
         $buildings = $this->planetEngine->getBuildings($planetId);
         $shipyardLvl = $buildings['shipyard'] ?? 0;
+        $isAdmin = $this->isPlanetAdmin($planetId);
 
-        if ($shipyardLvl < 1) {
+        if (!$isAdmin && $shipyardLvl < 1) {
             throw new Exception("Vous devez construire un Atelier de Siège & Écuries pour mobiliser ces unités.");
         }
 
@@ -137,6 +149,21 @@ class ShipyardEngine {
         $ship = $stmt->fetch();
         if (!$ship) {
             throw new Exception("Unité ou engin de siège non disponible.");
+        }
+
+        if ($isAdmin) {
+            $now = time();
+            $this->db->prepare("
+                INSERT INTO planet_ships (planet_id, ship_code, count)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE count = count + VALUES(count)
+            ")->execute([$planetId, $shipCode, $count]);
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] $count {$ship['name']} produits instantanément sans coût !",
+                'finishes_at' => $now
+            ];
         }
 
         $totalMetal = $ship['metal_cost'] * $count;

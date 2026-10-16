@@ -73,10 +73,11 @@ require_once __DIR__ . '/../core/ImperialSealEngine.php';
 $sealEngine = new ImperialSealEngine();
 $isSealActive = $sealEngine->isSealActive((int)($user['id'] ?? 0));
 
+$isAdmin = (($user['role'] ?? '') === 'admin');
 $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 $maxAllowedBuildings = $isSealActive ? 2 : 1;
 $maxAllowedTotal = $isSealActive ? 2 : 1;
-$canQueueNewBuilding = $isTerran ? ($buildingsInQueue < $maxAllowedBuildings) : (count($queue) < $maxAllowedTotal);
+$canQueueNewBuilding = $isAdmin ? true : ($isTerran ? ($buildingsInQueue < $maxAllowedBuildings) : (count($queue) < $maxAllowedTotal));
 
 // Bâtiments disponibles à la construction sur les slots libres
 $availableBuildingsToConstruct = [];
@@ -86,7 +87,7 @@ foreach (BUILDINGS as $code => $bInfo) {
     if ($curLvl === 0 && !$inQueue) {
         $details = $buildingEngine->getUpgradeDetails('building', $code, 0, $hqLevel);
         $cost = $details['cost'];
-        $canAfford = ($planet['metal'] >= $cost['metal'] && $planet['crystal'] >= $cost['crystal'] && $planet['deuterium'] >= $cost['deuterium']);
+        $canAfford = $isAdmin ? true : ($planet['metal'] >= $cost['metal'] && $planet['crystal'] >= $cost['crystal'] && $planet['deuterium'] >= $cost['deuterium']);
         $availableBuildingsToConstruct[$code] = [
             'info' => $bInfo,
             'details' => $details,

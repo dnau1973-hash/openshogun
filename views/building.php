@@ -96,10 +96,11 @@ require_once __DIR__ . '/../core/ImperialSealEngine.php';
 $sealEngine = new ImperialSealEngine();
 $isSealActive = $sealEngine->isSealActive((int)($user['id'] ?? 0));
 
+$isAdmin = (($user['role'] ?? '') === 'admin');
 $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 $maxAllowedBuildings = $isSealActive ? 2 : 1;
 $maxAllowedTotal = $isSealActive ? 2 : 1;
-$canQueueNewBuilding = $isTerran ? ($buildingsInQueue < $maxAllowedBuildings) : (count($queue) < $maxAllowedTotal);
+$canQueueNewBuilding = $isAdmin ? true : ($isTerran ? ($buildingsInQueue < $maxAllowedBuildings) : (count($queue) < $maxAllowedTotal));
 
 $isBuildingInQueue = ($code !== 'free_plot' && $activeJob !== null);
 $isEmptyPlot = ($code === 'free_plot');
@@ -119,7 +120,7 @@ if ($isEmptyPlot) {
         if ($curLvl === 0 && !$inQ) {
             $details = $buildingEngine->getUpgradeDetails('building', $bCode, 0, $hqLevel);
             $cost = $details['cost'];
-            $canAfford = ($planet['metal'] >= $cost['metal'] && $planet['crystal'] >= $cost['crystal'] && $planet['deuterium'] >= $cost['deuterium']);
+            $canAfford = $isAdmin ? true : ($planet['metal'] >= $cost['metal'] && $planet['crystal'] >= $cost['crystal'] && $planet['deuterium'] >= $cost['deuterium']);
             $availableBuildingsToConstruct[$bCode] = [
                 'info' => $bInfo,
                 'details' => $details,
@@ -172,10 +173,10 @@ if (!$isEmptyPlot) {
     $heroBgUrl = $buildingIllustrationUrl ?? ('/public/assets/shogun_castle_city_bg.jpg?v=' . (file_exists(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg') ? filemtime(__DIR__ . '/../public/assets/shogun_castle_city_bg.jpg') : 1));
 
     // Vérification des ressources
-    $hasMetal = $planet['metal'] >= $cost['metal'];
-    $hasCrystal = $planet['crystal'] >= $cost['crystal'];
-    $hasDeut = $planet['deuterium'] >= $cost['deuterium'];
-    $canAfford = $hasMetal && $hasCrystal && $hasDeut;
+    $hasMetal = $isAdmin ? true : ($planet['metal'] >= $cost['metal']);
+    $hasCrystal = $isAdmin ? true : ($planet['crystal'] >= $cost['crystal']);
+    $hasDeut = $isAdmin ? true : ($planet['deuterium'] >= $cost['deuterium']);
+    $canAfford = $isAdmin ? true : ($hasMetal && $hasCrystal && $hasDeut);
 
     $missingWaitSeconds = 0;
     if (!$canAfford) {
@@ -807,7 +808,7 @@ if (!$isEmptyPlot) {
 
                                 <button type="button" class="btn btn-warning w-100 text-dark fw-bold btn-sm"
                                         onclick="submitTenshuFeast('matsuri')"
-                                        <?= ($activeFeast || $currentSake < $matsuriCost) ? 'disabled' : '' ?>>
+                                        <?= (!$isAdmin && ($activeFeast || $currentSake < $matsuriCost)) ? 'disabled' : '' ?>>
                                     <i class="fa-solid fa-fan me-1"></i>Célébrer le Matsuri
                                 </button>
                             </div>
@@ -821,8 +822,8 @@ if (!$isEmptyPlot) {
                                         <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
                                             <span><i class="fa-solid fa-khanda text-danger"></i></span> Banquet Guerriers
                                         </h4>
-                                        <span class="badge <?= ($tenshuLvl >= 5) ? 'bg-danger-lt text-danger' : 'bg-secondary text-white' ?>">
-                                            <?= ($tenshuLvl >= 5) ? 'Niv. 5+' : '<i class="fa-solid fa-lock text-muted me-1"></i>Niv. 5 requis' ?>
+                                        <span class="badge <?= ($tenshuLvl >= 5 || $isAdmin) ? 'bg-danger-lt text-danger' : 'bg-secondary text-white' ?>">
+                                            <?= ($tenshuLvl >= 5 || $isAdmin) ? 'Niv. 5+' : '<i class="fa-solid fa-lock text-muted me-1"></i>Niv. 5 requis' ?>
                                         </span>
                                     </div>
                                     <p class="text-secondary small mb-2">
@@ -834,13 +835,13 @@ if (!$isEmptyPlot) {
                                         <div><i class="fa-solid fa-stopwatch text-info me-1"></i>Durée : <strong>6 heures</strong></div>
                                     </div>
                                     <div class="text-muted small mb-3">
-                                        Coût : <strong class="<?= ($currentSake >= $warriorsCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($warriorsCost) ?> Saké <i class="fa-solid fa-wine-bottle text-danger"></i></strong>
+                                        Coût : <strong class="<?= ($currentSake >= $warriorsCost || $isAdmin) ? 'text-warning' : 'text-danger' ?>"><?= number_format($warriorsCost) ?> Saké <i class="fa-solid fa-wine-bottle text-danger"></i></strong>
                                     </div>
                                 </div>
 
                                 <button type="button" class="btn btn-danger w-100 fw-bold btn-sm"
                                         onclick="submitTenshuFeast('warriors')"
-                                        <?= ($activeFeast || $tenshuLvl < 5 || $currentSake < $warriorsCost) ? 'disabled' : '' ?>>
+                                        <?= (!$isAdmin && ($activeFeast || $tenshuLvl < 5 || $currentSake < $warriorsCost)) ? 'disabled' : '' ?>>
                                     <i class="fa-solid fa-khanda me-1"></i>Lever le Kanpai
                                 </button>
                             </div>
@@ -854,8 +855,8 @@ if (!$isEmptyPlot) {
                                         <h4 class="m-0 fw-bold d-flex align-items-center gap-1 text-dark">
                                             <span><i class="fa-solid fa-crown text-purple"></i></span> Banquet Impérial
                                         </h4>
-                                        <span class="badge <?= ($tenshuLvl >= 10) ? 'bg-purple-lt' : 'bg-secondary text-white' ?>">
-                                            <?= ($tenshuLvl >= 10) ? 'Niv. 10+' : '<i class="fa-solid fa-lock text-muted me-1"></i>Niv. 10 requis' ?>
+                                        <span class="badge <?= ($tenshuLvl >= 10 || $isAdmin) ? 'bg-purple-lt' : 'bg-secondary text-white' ?>">
+                                            <?= ($tenshuLvl >= 10 || $isAdmin) ? 'Niv. 10+' : '<i class="fa-solid fa-lock text-muted me-1"></i>Niv. 10 requis' ?>
                                         </span>
                                     </div>
                                     <p class="text-secondary small mb-2">
@@ -867,13 +868,13 @@ if (!$isEmptyPlot) {
                                         <div><i class="fa-solid fa-stopwatch text-info me-1"></i>Durée : <strong>12 heures</strong></div>
                                     </div>
                                     <div class="text-muted small mb-3">
-                                        Coût : <strong class="<?= ($currentSake >= $imperialCost) ? 'text-warning' : 'text-danger' ?>"><?= number_format($imperialCost) ?> Saké <i class="fa-solid fa-wine-bottle text-danger"></i></strong>
+                                        Coût : <strong class="<?= ($currentSake >= $imperialCost || $isAdmin) ? 'text-warning' : 'text-danger' ?>"><?= number_format($imperialCost) ?> Saké <i class="fa-solid fa-wine-bottle text-danger"></i></strong>
                                     </div>
                                 </div>
 
                                 <button type="button" class="btn btn-purple w-100 text-white fw-bold btn-sm" style="background:#7c3aed;"
                                         onclick="submitTenshuFeast('imperial')"
-                                        <?= ($activeFeast || $tenshuLvl < 10 || $currentSake < $imperialCost) ? 'disabled' : '' ?>>
+                                        <?= (!$isAdmin && ($activeFeast || $tenshuLvl < 10 || $currentSake < $imperialCost)) ? 'disabled' : '' ?>>
                                     <i class="fa-solid fa-crown me-1"></i>Décréter le Banquet
                                 </button>
                             </div>
@@ -883,7 +884,7 @@ if (!$isEmptyPlot) {
             </div>
             <?php endif; ?>
 
-            <?php if ($code === 'grain_mill' && $lvl > 0): ?>
+            <?php if ($code === 'grain_mill' && ($lvl > 0 || $isAdmin)): ?>
             <?php
             $planetEngine->processCraftQueue((int)$planet['id']);
             $craftQueue = $planetEngine->getCraftQueue((int)$planet['id'], 'grain_mill');
@@ -894,7 +895,7 @@ if (!$isEmptyPlot) {
             $sealEngine = new ImperialSealEngine();
             $isSealActive = $sealEngine->isSealActive((int)$user['id']);
             $maxCraftQueue = $isSealActive ? 4 : 1;
-            $canEnqueue = count($craftQueue) < $maxCraftQueue;
+            $canEnqueue = $isAdmin ? true : (count($craftQueue) < $maxCraftQueue);
             $famineUpkeep = $planetEngine->getEliteUnitsUpkeep((int)$planet['id']);
             ?>
             <!-- ========================================================
@@ -914,7 +915,7 @@ if (!$isEmptyPlot) {
                         <span class="badge bg-success text-white fw-bold shadow-sm" title="Étage / Niveau actuel de la meunerie">
                             <i class="fa-solid fa-landmark text-white me-1"></i>Niveau <?= $lvl ?>
                         </span>
-                        <?php if ($lvl < 10): ?>
+                        <?php if ($lvl < 10 && !$isAdmin): ?>
                             <span class="badge bg-secondary text-white fw-bold">
                                 <i class="fa-solid fa-lock text-muted me-1"></i>Raffinage : Niv. 10 requis (<?= $lvl ?>/10)
                             </span>
@@ -1079,7 +1080,7 @@ if (!$isEmptyPlot) {
                     <div class="row g-3">
                         <!-- Atelier 1 : Farine de Riz (Niveau 10) -->
                         <div class="col-md-6">
-                            <?php if ($lvl < 10): ?>
+                            <?php if ($lvl < 10 && !$isAdmin): ?>
                             <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -1159,7 +1160,7 @@ if (!$isEmptyPlot) {
 
                         <!-- Atelier 2 : Saké Féodal (Niveau 10) -->
                         <div class="col-md-6">
-                            <?php if ($lvl < 10): ?>
+                            <?php if ($lvl < 10 && !$isAdmin): ?>
                             <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -1252,7 +1253,7 @@ if (!$isEmptyPlot) {
             $sealEngine = new ImperialSealEngine();
             $isSealActive = $sealEngine->isSealActive((int)$user['id']);
             $maxWoodCraftQueue = $isSealActive ? 4 : 1;
-            $canEnqueueWood = count($woodCraftQueue) < $maxWoodCraftQueue;
+            $canEnqueueWood = $isAdmin || (count($woodCraftQueue) < $maxWoodCraftQueue);
             ?>
             <!-- ========================================================
                  ATELIER DE CHARPENTERIE : FAÇONNAGE DE POUTRES EN BOIS
@@ -1271,7 +1272,7 @@ if (!$isEmptyPlot) {
                         <span class="badge bg-warning text-dark fw-bold shadow-sm" title="Étage / Niveau actuel du bâtiment">
                             <i class="fa-solid fa-landmark text-primary me-1"></i>Étage <?= $lvl ?> (Niveau <?= $lvl ?>)
                         </span>
-                        <?php if ($lvl < 10): ?>
+                        <?php if ($lvl < 10 && !$isAdmin): ?>
                             <span class="badge bg-secondary text-white fw-bold">
                                 <i class="fa-solid fa-lock text-muted me-1"></i>Poutres : Niv. 10 (<?= $lvl ?>/10)
                             </span>
@@ -1280,7 +1281,7 @@ if (!$isEmptyPlot) {
                                 <i class="fa-solid fa-check text-success me-1"></i>Poutres Actives
                             </span>
                         <?php endif; ?>
-                        <?php if ($lvl < 15): ?>
+                        <?php if ($lvl < 15 && !$isAdmin): ?>
                             <span class="badge bg-secondary text-white fw-bold">
                                 <i class="fa-solid fa-lock text-muted me-1"></i>Charbon : Niv. 15 (<?= $lvl ?>/15)
                             </span>
@@ -1430,7 +1431,7 @@ if (!$isEmptyPlot) {
                     <div class="row g-3">
                         <!-- Atelier 1 : Façonnage de Poutres en bois (Niveau 10) -->
                         <div class="col-md-6">
-                            <?php if ($lvl < 10): ?>
+                            <?php if ($lvl < 10 && !$isAdmin): ?>
                             <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -1509,7 +1510,7 @@ if (!$isEmptyPlot) {
 
                         <!-- Atelier 2 : Production de Charbon de bois (Niveau 15) -->
                         <div class="col-md-6">
-                            <?php if ($lvl < 15): ?>
+                            <?php if ($lvl < 15 && !$isAdmin): ?>
                             <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between bg-light-lt border-dashed">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -1601,7 +1602,7 @@ if (!$isEmptyPlot) {
             $sealEngine = new ImperialSealEngine();
             $isSealActive = $sealEngine->isSealActive((int)$user['id']);
             $maxMineralCraftQueue = $isSealActive ? 4 : 1;
-            $canEnqueueMineral = count($mineralCraftQueue) < $maxMineralCraftQueue;
+            $canEnqueueMineral = $isAdmin || (count($mineralCraftQueue) < $maxMineralCraftQueue);
             ?>
             <!-- ========================================================
                  ATELIER DU TAILLEUR DE PIERRE : RAFFINAGE MINÉRALIER
@@ -1819,10 +1820,10 @@ if (!$isEmptyPlot) {
             $sealEngine = new ImperialSealEngine();
             $isSealActive = $sealEngine->isSealActive((int)$user['id']);
             $maxForgeCraftQueue = $isSealActive ? 4 : 1;
-            $canEnqueueForge = count($forgeCraftQueue) < $maxForgeCraftQueue;
+            $canEnqueueForge = $isAdmin || (count($forgeCraftQueue) < $maxForgeCraftQueue);
 
-            $hasLevel15 = ($lvl >= 15);
-            $hasLevel20 = ($lvl >= 20);
+            $hasLevel15 = $isAdmin || ($lvl >= 15);
+            $hasLevel20 = $isAdmin || ($lvl >= 20);
 
             $availableIronSand = (float)($planet['iron_sand'] ?? 0);
             $availableCharcoal = (float)($planet['charcoal'] ?? 0);
@@ -2875,7 +2876,7 @@ if (!$isEmptyPlot) {
                 <?php
                     $colonStatus = $planetEngine->getTenshuColonizerStatus((int)$planet['id']);
                     $cCosts = $colonStatus['costs'];
-                    $canAffordColon = ($planet['metal'] >= $cCosts['metal'] && $planet['crystal'] >= $cCosts['crystal'] && $planet['deuterium'] >= $cCosts['deuterium'] && ($planet['rice_flour'] ?? 0) >= $cCosts['rice_flour']);
+                    $canAffordColon = $isAdmin ? true : ($planet['metal'] >= $cCosts['metal'] && $planet['crystal'] >= $cCosts['crystal'] && $planet['deuterium'] >= $cCosts['deuterium'] && ($planet['rice_flour'] ?? 0) >= $cCosts['rice_flour']);
                 ?>
                 <div class="card mb-3" style="border-top: 3px solid #10b981;">
                     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
@@ -3149,6 +3150,7 @@ function closeArtworkModal(e) {
 // ==========================================
 // ATELIER DE RAFFINAGE & CHARPENTERIE
 // ==========================================
+const isAdminUser = <?= $isAdmin ? 'true' : 'false' ?>;
 const grainMillLevel = <?= ($code === 'grain_mill') ? (int)$lvl : (int)($buildings['grain_mill'] ?? 0) ?>;
 const sawmillLevel = <?= ($code === 'sawmill') ? (int)$lvl : (int)($buildings['sawmill'] ?? 0) ?>;
 const stonemasonLevel = <?= ($code === 'stonemason') ? (int)$lvl : (int)($buildings['stonemason'] ?? 0) ?>;
@@ -3216,7 +3218,7 @@ function setRiceFlourAmount(val) {
     const input = document.getElementById('rice_amount_flour');
     if (!input) return;
     if (val === 'max') {
-        input.value = Math.floor(availableRiceStock);
+        input.value = (isAdminUser && availableRiceStock < 100) ? 1000 : Math.floor(availableRiceStock);
     } else {
         input.value = val;
     }
@@ -3227,7 +3229,7 @@ function setRiceSakeAmount(val) {
     const input = document.getElementById('rice_amount_sake');
     if (!input) return;
     if (val === 'max') {
-        input.value = Math.floor(availableRiceStock);
+        input.value = (isAdminUser && availableRiceStock < 100) ? 1000 : Math.floor(availableRiceStock);
     } else {
         input.value = val;
     }
@@ -3292,7 +3294,7 @@ async function submitRiceCraft(product) {
         return;
     }
 
-    if (amount > availableRiceStock) {
+    if (!isAdminUser && amount > availableRiceStock) {
         showModalAlert(`Vos greniers ne disposent que de ${Math.floor(availableRiceStock).toLocaleString('fr-FR')} unités de riz.`, 'warning');
         return;
     }
@@ -3365,7 +3367,7 @@ function setWoodBeamsAmount(val) {
     const input = document.getElementById('wood_amount_beams');
     if (!input) return;
     if (val === 'max') {
-        input.value = Math.floor(availableWoodStock);
+        input.value = (isAdminUser && availableWoodStock < 100) ? 1000 : Math.floor(availableWoodStock);
     } else {
         input.value = val;
     }
@@ -3396,7 +3398,7 @@ function setWoodCharcoalAmount(val) {
     const input = document.getElementById('wood_amount_charcoal');
     if (!input) return;
     if (val === 'max') {
-        input.value = Math.floor(availableWoodStock);
+        input.value = (isAdminUser && availableWoodStock < 100) ? 1000 : Math.floor(availableWoodStock);
     } else {
         input.value = val;
     }
@@ -3407,11 +3409,11 @@ async function submitWoodCraft(product) {
     product = product || 'wooden_beams';
     const isCharcoal = (product === 'charcoal');
 
-    if (isCharcoal && sawmillLevel < 15) {
+    if (!isAdminUser && isCharcoal && sawmillLevel < 15) {
         showModalAlert("La production de charbon de bois n'est accessible qu'à partir du Niveau 15 de l'Atelier de Charpenterie.", 'warning');
         return;
     }
-    if (!isCharcoal && sawmillLevel < 10) {
+    if (!isAdminUser && !isCharcoal && sawmillLevel < 10) {
         showModalAlert("Le façonnage de poutres en bois n'est accessible qu'à partir du Niveau 10 de l'Atelier de Charpenterie.", 'warning');
         return;
     }
@@ -3427,7 +3429,7 @@ async function submitWoodCraft(product) {
         return;
     }
 
-    if (amount > availableWoodStock) {
+    if (!isAdminUser && amount > availableWoodStock) {
         showModalAlert(`Vos réserves ne disposent que de ${Math.floor(availableWoodStock).toLocaleString('fr-FR')} unités de Bois de Cèdre.`, 'warning');
         return;
     }
@@ -3577,7 +3579,7 @@ function setMineralAmount(product, val) {
     const input = document.getElementById(inputId);
     if (!input) return;
     if (val === 'max') {
-        input.value = Math.floor(available);
+        input.value = (isAdminUser && available < 100) ? 1000 : Math.floor(available);
     } else {
         input.value = val;
     }
@@ -3613,7 +3615,7 @@ async function submitMineralCraft(product) {
         return;
     }
 
-    if (amount > available) {
+    if (!isAdminUser && amount > available) {
         showModalAlert(`Vos réserves ne disposent que de ${Math.floor(available).toLocaleString('fr-FR')} unités de ${matName}.`, 'warning');
         return;
     }

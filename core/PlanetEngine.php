@@ -1582,6 +1582,19 @@ class PlanetEngine {
     }
 
     /**
+     * Vérifie si le propriétaire de la planète est un administrateur
+     */
+    public function isPlanetAdmin(int $planetId): bool {
+        try {
+            $st = $this->db->prepare("SELECT u.role FROM users u JOIN planets p ON p.user_id = u.id WHERE p.id = ?");
+            $st->execute([$planetId]);
+            return $st->fetchColumn() === 'admin';
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
      * Lance le raffinage de riz en Farine ou Saké avec durée de préparation
      *
      * @param int $planetId
@@ -1595,7 +1608,11 @@ class PlanetEngine {
             return ['success' => false, 'error' => "Produit de raffinage invalide (Saké ou Farine uniquement)."];
         }
 
+        $isAdmin = $this->isPlanetAdmin($planetId);
         $riceAmount = floor($riceAmount);
+        if ($isAdmin && $riceAmount <= 0) {
+            $riceAmount = ($product === 'sake') ? 250 : 100;
+        }
         if ($riceAmount <= 0) {
             return ['success' => false, 'error' => "Veuillez indiquer une quantité de riz valide supérieure à zéro."];
         }
@@ -1603,8 +1620,38 @@ class PlanetEngine {
         // 1. Vérifier le bâtiment Meunerie & Brasserie (Niveau 10 minimum requis)
         $buildings = $this->getBuildings($planetId);
         $millLvl = (int)($buildings['grain_mill'] ?? 0);
-        if ($millLvl < 10) {
+        if (!$isAdmin && $millLvl < 10) {
             return ['success' => false, 'error' => "La Meunerie & Brasserie de riz (Sakagura) doit être érigée au Niveau 10 minimum pour raffiner le riz en farine ou saké (Niveau actuel : {$millLvl}/10)."];
+        }
+
+        // Mode Administrateur : Raffinage instantané sans coût et sans délai
+        if ($isAdmin) {
+            $details = $this->calculateCraftDetails($planetId, $product, $riceAmount);
+            $produced = max(1, (int)$details['raw_produced']);
+            $now = time();
+            $stmtQueue = $this->db->prepare("
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                VALUES (?, 'grain_mill', ?, 'deuterium', 0, 0, ?, ?, ?)
+            ");
+            $stmtQueue->execute([$planetId, $product, $produced, $now - 2, $now - 1]);
+            $this->processCraftQueue($planetId);
+            $updatedPlanet = $this->getPlanet($planetId);
+            $activeQueue = $this->getCraftQueue($planetId, 'grain_mill');
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] Raffinage instantané de <strong>+" . number_format($produced) . " {$details['product_name']} {$details['product_icon']}</strong> achevé sans coût !",
+                'product' => $product,
+                'product_name' => $details['product_name'],
+                'product_icon' => $details['product_icon'],
+                'produced' => $produced,
+                'consumed_rice' => 0,
+                'duration_seconds' => 0,
+                'craft' => $activeQueue[0] ?? null,
+                'new_deuterium' => $updatedPlanet['deuterium'],
+                'new_product_stock' => $updatedPlanet[$product] ?? 0,
+                'planet' => $updatedPlanet
+            ];
         }
 
         // 2. Traiter les productions terminées et vérifier la limite de la file
@@ -1797,7 +1844,11 @@ class PlanetEngine {
             return ['success' => false, 'error' => "Produit de charpente invalide (Poutres en bois ou Charbon de bois uniquement)."];
         }
 
+        $isAdmin = $this->isPlanetAdmin($planetId);
         $woodAmount = floor($woodAmount);
+        if ($isAdmin && $woodAmount <= 0) {
+            $woodAmount = 100;
+        }
         if ($woodAmount <= 0) {
             return ['success' => false, 'error' => "Veuillez indiquer une quantité de bois valide supérieure à zéro."];
         }
@@ -1805,11 +1856,42 @@ class PlanetEngine {
         // 1. Vérifier le bâtiment Atelier de Charpenterie (Niveau 10 minimum pour les poutres, Niveau 15 pour le charbon)
         $buildings = $this->getBuildings($planetId);
         $sawmillLvl = (int)($buildings['sawmill'] ?? 0);
-        if ($product === 'wooden_beams' && $sawmillLvl < 10) {
+        if (!$isAdmin && $product === 'wooden_beams' && $sawmillLvl < 10) {
             return ['success' => false, 'error' => "L'Atelier de Charpenterie (Kizukuri) doit être érigé au Niveau 10 minimum pour façonner des poutres en bois (Niveau actuel : {$sawmillLvl}/10)."];
         }
-        if ($product === 'charcoal' && $sawmillLvl < 15) {
+        if (!$isAdmin && $product === 'charcoal' && $sawmillLvl < 15) {
             return ['success' => false, 'error' => "L'Atelier de Charpenterie (Kizukuri) doit être érigé au Niveau 15 minimum pour produire du charbon de bois (Niveau actuel : {$sawmillLvl}/15)."];
+        }
+
+        // Mode Administrateur : Façonnage instantané sans coût et sans délai
+        if ($isAdmin) {
+            $details = $this->calculateWoodCraftDetails($planetId, $product, $woodAmount);
+            $produced = max(1, (int)$details['raw_produced']);
+            $now = time();
+            $stmtQueue = $this->db->prepare("
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                VALUES (?, 'sawmill', ?, 'metal', 0, 0, ?, ?, ?)
+            ");
+            $stmtQueue->execute([$planetId, $product, $produced, $now - 2, $now - 1]);
+            $this->processCraftQueue($planetId);
+            $updatedPlanet = $this->getPlanet($planetId);
+            $activeQueue = $this->getCraftQueue($planetId, 'sawmill');
+            $newStock = ($product === 'charcoal') ? ($updatedPlanet['charcoal'] ?? 0) : ($updatedPlanet['wooden_beams'] ?? 0);
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] Façonnage instantané de <strong>+" . number_format($produced) . " {$details['product_name']} {$details['product_icon']}</strong> achevé sans coût !",
+                'product' => $product,
+                'product_name' => $details['product_name'],
+                'product_icon' => $details['product_icon'],
+                'produced' => $produced,
+                'consumed_wood' => 0,
+                'duration_seconds' => 0,
+                'craft' => $activeQueue[0] ?? null,
+                'new_metal' => $updatedPlanet['metal'],
+                'new_product_stock' => $newStock,
+                'planet' => $updatedPlanet
+            ];
         }
 
         // 2. Traiter les productions terminées et vérifier la limite de la file
@@ -2020,9 +2102,44 @@ class PlanetEngine {
             return ['success' => false, 'error' => "Produit minéralier invalide (Soufre, Nitrate ou Sable de fer uniquement)."];
         }
 
+        $isAdmin = $this->isPlanetAdmin($planetId);
         $amount = floor($amount);
+        if ($isAdmin && $amount <= 0) {
+            $amount = 100;
+        }
         if ($amount <= 0) {
             return ['success' => false, 'error' => "Veuillez indiquer une quantité valide supérieure à zéro."];
+        }
+
+        // Mode Administrateur : Raffinage minéral instantané sans coût et sans délai
+        if ($isAdmin) {
+            $details = $this->calculateMineralCraftDetails($planetId, $product, $amount);
+            $produced = max(1, (int)$details['raw_produced']);
+            $costRes = $details['cost_resource'];
+            $now = time();
+            $stmtQueue = $this->db->prepare("
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                VALUES (?, 'stonemason', ?, ?, 0, 0, ?, ?, ?)
+            ");
+            $stmtQueue->execute([$planetId, $product, $costRes, $produced, $now - 2, $now - 1]);
+            $this->processCraftQueue($planetId);
+            $updatedPlanet = $this->getPlanet($planetId);
+            $activeQueue = $this->getCraftQueue($planetId, 'stonemason');
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] Synthèse instantanée de <strong>+" . number_format($produced) . " {$details['product_name']} {$details['product_icon']}</strong> achevée sans coût !",
+                'product' => $product,
+                'product_name' => $details['product_name'],
+                'product_icon' => $details['product_icon'],
+                'produced' => $produced,
+                'consumed_amount' => 0,
+                'consumed_resource' => $costRes,
+                'duration_seconds' => 0,
+                'craft' => $activeQueue[0] ?? null,
+                'new_product_stock' => $updatedPlanet[$product] ?? 0,
+                'planet' => $updatedPlanet
+            ];
         }
 
         $this->processCraftQueue($planetId);
@@ -2276,7 +2393,11 @@ class PlanetEngine {
             return ['success' => false, 'error' => "Produit de forge invalide."];
         }
 
+        $isAdmin = $this->isPlanetAdmin($planetId);
         $amount = floor($amount);
+        if ($isAdmin && $amount <= 0) {
+            $amount = 1;
+        }
         if ($amount <= 0) {
             return ['success' => false, 'error' => "Veuillez indiquer une quantité ou un nombre de lots valide supérieur à zéro."];
         }
@@ -2285,17 +2406,52 @@ class PlanetEngine {
         $forgeLvl = (int)($buildings['blacksmith'] ?? 0);
 
         // Vérification des prérequis de niveau de forge
-        if (in_array($product, ['metal', 'metal_crude']) && $forgeLvl < 15) {
+        if (!$isAdmin && in_array($product, ['metal', 'metal_crude']) && $forgeLvl < 15) {
             return [
                 'success' => false,
                 'error' => "La Grande Forge du Tamahagane doit atteindre le <strong>Niveau 15</strong> minimum pour allumer les fourneaux de fonte de métal (Niveau actuel : {$forgeLvl}/15)."
             ];
         }
 
-        if (in_array($product, ['prestige_weapons', 'prestige_army']) && $forgeLvl < 20) {
+        if (!$isAdmin && in_array($product, ['prestige_weapons', 'prestige_army']) && $forgeLvl < 20) {
             return [
                 'success' => false,
                 'error' => "La Grande Forge du Tamahagane doit atteindre le <strong>Niveau 20</strong> minimum pour forger des armes d'exception et mobiliser des armées de prestige (Niveau actuel : {$forgeLvl}/20)."
+            ];
+        }
+
+        // Mode Administrateur : Forge instantanée sans coût et sans délai
+        if ($isAdmin) {
+            $details = $this->calculateForgeCraftDetails($planetId, $product, $amount);
+            $produced = max(1, (int)($details['raw_produced'] ?? $details['actual_produced'] ?? 1));
+            $batches = max(1, (int)($details['batches'] ?? 1));
+            $now = time();
+            $costRes = match($product) {
+                'metal' => 'iron_sand',
+                'metal_crude' => 'crystal',
+                'prestige_weapons' => 'prestige_weapons',
+                'prestige_army' => 'prestige_army',
+                default => 'metal'
+            };
+            $stmtQueue = $this->db->prepare("
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                VALUES (?, 'blacksmith', ?, ?, ?, 0, ?, ?, ?)
+            ");
+            $stmtQueue->execute([$planetId, $product, $costRes, $batches, $produced, $now - 2, $now - 1]);
+            $this->processCraftQueue($planetId);
+            $updatedPlanet = $this->getPlanet($planetId);
+            $activeQueue = $this->getCraftQueue($planetId, 'blacksmith');
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] Forge instantanée de <strong>{$details['product_name']} {$details['product_icon']}</strong> achevée sans coût !",
+                'product' => $product,
+                'product_name' => $details['product_name'],
+                'product_icon' => $details['product_icon'],
+                'produced' => $produced,
+                'duration_seconds' => 0,
+                'craft' => $activeQueue[0] ?? null,
+                'planet' => $updatedPlanet
             ];
         }
 
@@ -2774,9 +2930,11 @@ class PlanetEngine {
             return ['success' => false, 'error' => "Type de banquet ou célébration inconnu."];
         }
 
+        $isAdmin = $this->isPlanetAdmin($planetId);
+
         // 1. Vérifier si un banquet est déjà actif
         $active = $this->getActiveFeast($planetId);
-        if ($active) {
+        if ($active && !$isAdmin) {
             $remaining = gmdate('H:i:s', $active['time_remaining']);
             return ['success' => false, 'error' => "Une célébration féodale est déjà en cours au Tenshu (temps restant : {$remaining})."];
         }
@@ -2813,7 +2971,7 @@ class PlanetEngine {
         ];
 
         $cfg = $configs[$feastType];
-        if ($tenshuLvl < $cfg['min_tenshu']) {
+        if (!$isAdmin && $tenshuLvl < $cfg['min_tenshu']) {
             return [
                 'success' => false,
                 'error' => "Votre Tenshu doit atteindre le Niveau {$cfg['min_tenshu']} pour organiser le {$cfg['name']} (actuellement Niveau {$tenshuLvl})."
@@ -2822,7 +2980,7 @@ class PlanetEngine {
 
         $sakeCost = $cfg['sake_cost_per_lvl'] * $tenshuLvl;
         $planet = $this->updatePlanet($planetId);
-        if (($planet['sake'] ?? 0) < $sakeCost) {
+        if (!$isAdmin && ($planet['sake'] ?? 0) < $sakeCost) {
             return [
                 'success' => false,
                 'error' => "Stock de Saké insuffisant dans vos cuves (" . number_format((int)($planet['sake'] ?? 0)) . " disponible, " . number_format($sakeCost) . " requis pour un Tenshu Niv. {$tenshuLvl})."
@@ -2834,15 +2992,19 @@ class PlanetEngine {
 
         $this->db->beginTransaction();
         try {
-            $stmt = $this->db->prepare("
-                UPDATE planets
-                SET sake = GREATEST(0, sake - ?)
-                WHERE id = ? AND sake >= ?
-            ");
-            $stmt->execute([$sakeCost, $planetId, $sakeCost]);
-            if ($stmt->rowCount() === 0) {
-                $this->db->rollBack();
-                return ['success' => false, 'error' => "Échec : stock de saké modifié entretemps."];
+            if ($isAdmin) {
+                $this->db->prepare("DELETE FROM planet_feasts WHERE planet_id = ?")->execute([$planetId]);
+            } else {
+                $stmt = $this->db->prepare("
+                    UPDATE planets
+                    SET sake = GREATEST(0, sake - ?)
+                    WHERE id = ? AND sake >= ?
+                ");
+                $stmt->execute([$sakeCost, $planetId, $sakeCost]);
+                if ($stmt->rowCount() === 0) {
+                    $this->db->rollBack();
+                    return ['success' => false, 'error' => "Échec : stock de saké modifié entretemps."];
+                }
             }
 
             $stmtFeast = $this->db->prepare("
@@ -2866,10 +3028,12 @@ class PlanetEngine {
 
         return [
             'success' => true,
-            'message' => "Le <strong>{$cfg['name']} {$cfg['icon']}</strong> a débuté au Tenshu ! Les festivités battront leur plein pendant " . ($cfg['duration'] / 3600) . " heures.",
+            'message' => $isAdmin
+                ? "⚡ [Admin] Le <strong>{$cfg['name']} {$cfg['icon']}</strong> a été décrété instantanément au Tenshu sans coût de Saké !"
+                : "Le <strong>{$cfg['name']} {$cfg['icon']}</strong> a débuté au Tenshu ! Les festivités battront leur plein pendant " . ($cfg['duration'] / 3600) . " heures.",
             'feast_type' => $feastType,
             'tenshu_level' => $tenshuLvl,
-            'sake_consumed' => $sakeCost,
+            'sake_consumed' => $isAdmin ? 0 : $sakeCost,
             'finishes_at' => $finishesAt
         ];
     }
@@ -2958,6 +3122,7 @@ class PlanetEngine {
         $this->ensureSchemaMigration();
         $buildings = $this->getBuildings($planetId);
         $hqLvl = (int)($buildings['hq'] ?? 1);
+        $isAdmin = $this->isPlanetAdmin($planetId);
 
         // Slots débloqués selon niveau du Tenshu
         $maxSlots = 0;
@@ -2967,6 +3132,9 @@ class PlanetEngine {
             $maxSlots = 2;
         } elseif ($hqLvl >= 10) {
             $maxSlots = 1;
+        }
+        if ($isAdmin) {
+            $maxSlots = max(3, $maxSlots);
         }
 
         // Fiefs annexés fondés par ce Tenshu
@@ -2998,7 +3166,7 @@ class PlanetEngine {
         }
 
         $totalUsed = $coloniesCount + $stationedColons + $queuedColons + $inMissionColons;
-        $availableSlots = max(0, $maxSlots - $totalUsed);
+        $availableSlots = $isAdmin ? max(3, $maxSlots - $totalUsed) : max(0, $maxSlots - $totalUsed);
 
         // Coûts de recrutement d'un colon
         $stmtUnit = $this->db->query("SELECT * FROM units WHERE code = 'colonizer'");
@@ -3035,9 +3203,10 @@ class PlanetEngine {
      */
     public function trainColonizer(int $planetId, int $userId, int $count = 1): array {
         $count = max(1, (int)$count);
+        $isAdmin = $this->isPlanetAdmin($planetId);
         $status = $this->getTenshuColonizerStatus($planetId);
 
-        if ($count > $status['available_slots']) {
+        if (!$isAdmin && $count > $status['available_slots']) {
             return [
                 'success' => false,
                 'error' => "Emplacements insuffisants au Tenshu. Vous pouvez recruter au maximum {$status['available_slots']} Pionnier(s) Féodal(s) actuellement."
@@ -3047,6 +3216,22 @@ class PlanetEngine {
         $planet = $this->getPlanet($planetId);
         if (!$planet || (int)$planet['user_id'] !== $userId) {
             return ['success' => false, 'error' => "Ce village ne vous appartient pas."];
+        }
+
+        if ($isAdmin) {
+            $now = time();
+            $this->db->prepare("
+                INSERT INTO planet_units (planet_id, unit_code, count)
+                VALUES (?, 'colonizer', ?)
+                ON DUPLICATE KEY UPDATE count = count + VALUES(count)
+            ")->execute([$planetId, $count]);
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] {$count} Pionnier(s) Féodal(s) (Colon ⛩️) recruté(s) instantanément au Tenshu sans coût !",
+                'finishes_at' => $now,
+                'count' => $count
+            ];
         }
 
         $totalWood = $status['costs']['metal'] * $count;

@@ -19,6 +19,7 @@ $vm = $researchService->getViewModel(
     $_GET
 );
 
+$isAdmin = (($user['role'] ?? '') === 'admin');
 $labLvl = $vm['lab_level'];
 $activeResearch = $vm['active_queue'];
 $items = $vm['items'];
@@ -116,7 +117,7 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
 </div>
 
 <div class="container-fluid px-0">
-    <?php if ($labLvl < 1): ?>
+    <?php if ($labLvl < 1 && !$isAdmin): ?>
         <!-- ========================================== -->
         <!-- ÉTAT VIDE : ACADÉMIE NON CONSTRUITE        -->
         <!-- ========================================== -->
@@ -392,15 +393,15 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                         <span class="text-secondary small d-inline-flex align-items-center gap-1 font-monospace" title="Durée de recherche : <?= $r->getHumanDuration() ?>">
                                             <i class="fa-solid fa-stopwatch text-info me-1"></i><?= $r->getFormattedDuration() ?>
                                         </span>
-                                        <?php if ($activeResearch): ?>
+                                        <?php if ($activeResearch && !$isAdmin): ?>
                                             <button type="button" class="btn btn-sm btn-secondary" disabled title="Une recherche est déjà en cours dans l'Académie">
                                                 File occupée
                                             </button>
-                                        <?php elseif (!$r->civLevelMet): ?>
+                                        <?php elseif (!$r->civLevelMet && !$isAdmin): ?>
                                             <button type="button" class="btn btn-sm btn-outline-warning" disabled title="Civilisation insuffisante : requiert <?= htmlspecialchars($r->civLevelName) ?>">
                                                 <i class="fa-solid fa-lock me-1"></i>Palier <?= $r->civLevelRequired ?> requis
                                             </button>
-                                        <?php elseif (!$r->canAfford): ?>
+                                        <?php elseif (!$r->canAfford && !$isAdmin): ?>
                                             <button type="button" class="btn btn-sm btn-outline-danger" disabled title="Ressources insuffisantes pour lancer ce palier">
                                                 Manque vivres
                                             </button>
@@ -479,15 +480,15 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                             <i class="fa-solid fa-stopwatch text-info me-1"></i><?= $r->getFormattedDuration() ?>
                                         </td>
                                         <td class="text-end">
-                                            <?php if ($activeResearch): ?>
+                                            <?php if ($activeResearch && !$isAdmin): ?>
                                                 <button type="button" class="btn btn-sm btn-secondary" disabled>
                                                     File occupée
                                                 </button>
-                                            <?php elseif (!$r->civLevelMet): ?>
+                                            <?php elseif (!$r->civLevelMet && !$isAdmin): ?>
                                                 <button type="button" class="btn btn-sm btn-outline-warning" disabled title="Civilisation insuffisante : requiert <?= htmlspecialchars($r->civLevelName) ?>">
                                                     <i class="fa-solid fa-lock me-1"></i>Palier <?= $r->civLevelRequired ?>
                                                 </button>
-                                            <?php elseif (!$r->canAfford): ?>
+                                            <?php elseif (!$r->canAfford && !$isAdmin): ?>
                                                 <button type="button" class="btn btn-sm btn-outline-danger" disabled>
                                                     Manque vivres
                                                 </button>

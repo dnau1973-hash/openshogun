@@ -154,6 +154,7 @@ class ResearchService {
 
         // 3. Récupération des technologies brutes et mapping en DTO
         $rawResearches = $this->researchEngine->getResearches($userId, $planetId);
+        $isAdmin = $this->researchEngine->isUserAdmin($userId);
 
         $curMetal = (int)($currentResources['metal'] ?? 0);
         $curCrystal = (int)($currentResources['crystal'] ?? 0);
@@ -170,10 +171,10 @@ class ResearchService {
             $costCrystal = (int)$r['cost_crystal'];
             $costDeut = (int)$r['cost_deuterium'];
 
-            $canAfford = ($curMetal >= $costMetal && $curCrystal >= $costCrystal && $curDeut >= $costDeut);
-            $missingMetal = max(0, $costMetal - $curMetal);
-            $missingCrystal = max(0, $costCrystal - $curCrystal);
-            $missingDeut = max(0, $costDeut - $curDeut);
+            $canAfford = $isAdmin ? true : ($curMetal >= $costMetal && $curCrystal >= $costCrystal && $curDeut >= $costDeut);
+            $missingMetal = $isAdmin ? 0 : max(0, $costMetal - $curMetal);
+            $missingCrystal = $isAdmin ? 0 : max(0, $costCrystal - $curCrystal);
+            $missingDeut = $isAdmin ? 0 : max(0, $costDeut - $curDeut);
 
             $dto = new ResearchDTO(
                 code: (string)$r['code'],
@@ -185,7 +186,7 @@ class ResearchService {
                 costCrystal: $costCrystal,
                 costDeuterium: $costDeut,
                 duration: (int)$r['duration'],
-                canResearch: (bool)($r['can_research'] ?? ($labLvl >= 1)),
+                canResearch: $isAdmin ? true : (bool)($r['can_research'] ?? ($labLvl >= 1)),
                 category: $meta['category'],
                 categoryLabel: $meta['category_label'],
                 icon: $meta['icon'],
@@ -194,7 +195,7 @@ class ResearchService {
                 missingCrystal: $missingCrystal,
                 missingDeuterium: $missingDeut,
                 civLevelRequired: (int)($r['civ_tier_required'] ?? 1),
-                civLevelMet: (bool)($r['civ_tier_met'] ?? true),
+                civLevelMet: $isAdmin ? true : (bool)($r['civ_tier_met'] ?? true),
                 civLevelName: (string)($r['civ_tier_name'] ?? 'Nōmin (Paysans)')
             );
 

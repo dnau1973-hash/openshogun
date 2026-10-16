@@ -246,8 +246,19 @@ class ResearchEngine {
         ];
     }
 
+    public function isUserAdmin(int $userId): bool {
+        try {
+            $st = $this->db->prepare("SELECT role FROM users WHERE id = ?");
+            $st->execute([$userId]);
+            return $st->fetchColumn() === 'admin';
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
     public function getResearches(int $userId, int $planetId): array {
         $this->processQueue($userId);
+        $isAdmin = $this->isUserAdmin($userId);
 
         $planet = $this->planetEngine->updatePlanet($planetId);
         $buildings = $this->planetEngine->getBuildings($planetId);
@@ -300,7 +311,7 @@ class ResearchEngine {
             $upgradeDetails = $this->calculateTechUpgrade($item, $curLvl, $labLvl, $pop, $eruditeRatio);
 
             $requiredCiv = (int)($def['civ_tier'] ?? 1);
-            $civMet = ($civLevel >= $requiredCiv);
+            $civMet = $isAdmin ? true : ($civLevel >= $requiredCiv);
             $casteInfo = SocialCasteEngine::CASTES[$requiredCiv] ?? SocialCasteEngine::CASTES[1];
 
             $item['next_level'] = $upgradeDetails['target_level'];
@@ -311,7 +322,7 @@ class ResearchEngine {
             $item['civ_tier_required'] = $requiredCiv;
             $item['civ_tier_met'] = $civMet;
             $item['civ_tier_name'] = $casteInfo['name'];
-            $item['can_research'] = ($labLvl >= 1 && $civMet);
+            $item['can_research'] = $isAdmin ? true : ($labLvl >= 1 && $civMet);
 
             $researches[] = $item;
         }
@@ -342,8 +353,9 @@ class ResearchEngine {
 
     public function startResearch(int $userId, int $planetId, string $researchCode): array {
         $this->processQueue($userId);
+        $isAdmin = $this->isUserAdmin($userId);
 
-        if ($this->getActiveQueue($userId)) {
+        if (!$isAdmin && $this->getActiveQueue($userId)) {
             throw new Exception("Une recherche scientifique est déjà en cours dans l'Académie.");
         }
 
@@ -351,7 +363,7 @@ class ResearchEngine {
         $buildings = $this->planetEngine->getBuildings($planetId);
         $labLvl = (int)($buildings['research_lab'] ?? 0);
 
-        if ($labLvl < 1) {
+        if (!$isAdmin && $labLvl < 1) {
             throw new Exception("Vous devez d'abord construire l'Académie des Savoirs & Forge.");
         }
 
@@ -363,7 +375,7 @@ class ResearchEngine {
         // Vérification du palier de civilisation (Shinōkōshō)
         $civLevel = (int)($planet['civilization_level'] ?? 1);
         $requiredCiv = (int)($def['civ_tier'] ?? 1);
-        if ($civLevel < $requiredCiv) {
+        if (!$isAdmin && $civLevel < $requiredCiv) {
             $casteInfo = SocialCasteEngine::CASTES[$requiredCiv];
             throw new Exception("Niveau de civilisation insuffisant : requiert la caste '{$casteInfo['name']}' (Palier {$requiredCiv}). Comblez les besoins de votre population !");
         }
@@ -385,13 +397,30 @@ class ResearchEngine {
             'deuterium_cost' => $def['base_cost']['deuterium'],
             'base_time' => $def['base_time']
         ];
-        $upgrade = $this->calculateTechUpgrade($calcItem, $curLvl, $labLvl, $pop, $eruditeRatio);
+        $upgrade = $this->calculateTechUpgrade($calcItem, $curLvl, max(1, $labLvl), $pop, $eruditeRatio);
 
         $costMetal = $upgrade['cost_metal'];
         $costCrystal = $upgrade['cost_crystal'];
         $costDeut = $upgrade['cost_deuterium'];
         $duration = $upgrade['duration'];
         $nextLvl = $upgrade['target_level'];
+
+        if ($isAdmin) {
+            $now = time();
+            $this->db->prepare("
+                INSERT INTO research_queue 
+                (user_id, planet_id, research_code, target_level, started_at, finishes_at) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ")->execute([$userId, $planetId, $researchCode, $nextLvl, $now - 2, $now - 1]);
+
+            $this->processQueue($userId);
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] Étude de '{$def['name']}' (Niveau {$nextLvl}) achevée instantanément sans coût !",
+                'finishes_at' => $now
+            ];
+        }
 
         if ($planet['metal'] < $costMetal || $planet['crystal'] < $costCrystal || $planet['deuterium'] < $costDeut) {
             throw new Exception("Ressources insuffisantes pour lancer ce traité technologique.");

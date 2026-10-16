@@ -8,6 +8,7 @@ require_once __DIR__ . '/../core/PlanetEngine.php';
 $barracksEngine = new BarracksEngine();
 $planetEngine = new PlanetEngine();
 
+$isAdmin = (($user['role'] ?? '') === 'admin');
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
 $barracksLvl = $buildings['barracks'] ?? 0;
 
@@ -83,7 +84,7 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                 </div>
             </div>
         <?php endif; ?>
-        <?php if ($barracksLvl < 1): ?>
+        <?php if ($barracksLvl < 1 && !$isAdmin): ?>
             <div style="text-align:center; padding:2.5rem; background:rgba(239,68,68,0.06); border:1px dashed var(--red-primary, #c2252b); border-radius:10px;">
                 <div style="font-size:2.5rem; margin-bottom:0.5rem;"><i class="fa-solid fa-chess-rook text-secondary"></i></div>
                 <h3 style="color:var(--red-primary, #c2252b); margin-bottom:0.5rem;">Dojo Militaire non construit</h3>
