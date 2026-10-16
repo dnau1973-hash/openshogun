@@ -3,6 +3,39 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.33.0] - 2026-10-15
+### Ajouté (Added)
+- **Marché Féodal &bull; Bourse d'Échanges de Troc P2P avec Séquestre Débloquée au Niveau 10 (`core/MarketEngine.php`, `api/market.php`, `views/building.php`, `views/partials/market_p2p_tab.php`) :**
+  * **Comptoir de Troc Décentralisé entre Seigneurs (P2P) :**
+    - Dès que le Marché castral atteint le **Niveau 10**, un nouvel onglet *« Bourse Féodale (Troc P2P) »* se débloque.
+    - Dépôt d'offres de troc inter-joueurs avec ratios d'échange entièrement personnalisables (ex. *500 Argile contre 1 000 Bois*).
+    - Système de **séquestre immédiat (escrow lock)** : dès le dépôt, les ressources vendues sont déduites des greniers et consignées en coffre sécurisé dans `market_offers`, les rendant inaccessibles pour la construction ou le jeu tant que l'offre n'est pas conclue ou annulée.
+    - Nombre de slots d'offres simultanées indexé sur le niveau du Marché : 3 slots au Niveau 10, puis +1 slot supplémentaire tous les 2 niveaux d'élévation.
+    - Consultation des offres actives avec filtrage par ressource offerte et ressource demandée, calcul automatique du taux de change (ratio), statut d'éligibilité selon les stocks en réserve et conclusion instantanée de l'échange en un clic avec notification messagère.
+    - Annulation d'offre en cours avec restitution intégrale et immédiate des ressources bloquées dans les entrepôts du fief.
+
+### Modifié (Changed)
+- **Mise en Page de la Cité & Bâtiments &bull; Refonte Fluide Pleine Largeur en 1 Colonne (`views/building.php`) :**
+  * **Harmonisation Responsiviste en Colonne Unique :**
+    - Transition de l'ancien découpage en deux colonnes asymétriques (`col-lg-5` / `col-lg-7` ou `col-lg-4` / `col-lg-8`) vers un flux vertical continu en **colonne unique `col-12`**.
+    - Carte d'identité héroïque horizontale du bâtiment (`row g-0`) combinant l'estampe agrandie ou icône monumentale, le badge de niveau, la main-d'œuvre requise, la description narrative, les raccourcis d'action directe et l'ordre de démantèlement.
+    - Suppression du bloc encombrant *« Emplacements de la Cité »* pour aérer l'espace et focaliser la lecture sur l'édifice consulté.
+    - Alignement parfait et correction du décalage des onglets de navigation du Marché Féodal avec padding supérieur aéré (`pt-4`).
+- **Game Studio &bull; Nettoyage de la Barre d'Outils et Alignement à Gauche (`views/gamestudio.php`) :**
+  * **Optimisation de la Barre Supérieure du Studio :**
+    - Retrait des éléments superflus de la barre d'outils : suppression de l'accès au fief, de l'accès à l'administration, du lien direct Dev Team et des filtres temporels (*Aujourd'hui, 7 jours, 30 jours*).
+    - Alignement uniforme de l'ensemble des menus métiers (*Dashboard, Général, Game Elevation Designer, Narrative Designer*) sur la gauche pour une ergonomie de studio de développement limpide.
+
+### Corrigé (Fixed)
+- **Académie des Savoirs & Forge Militaire &bull; Déblocage des Recherches par Caste Sociale (`core/SocialCasteEngine.php`, `core/ResearchEngine.php`) :**
+  * Correction du déblocage des technologies féodales : prise en compte rigoureuse des paliers de caste sociale et de civilisation atteints pour lever les verrous sur l'arbre de recherche.
+- **Intendant du Marché Castral &bull; Troc NPC 1:1 et Tolérance de Production Passive (`core/ImperialSealEngine.php`) :**
+  * Résolution de l'erreur `Le total rééquilibré (...) doit être strictement égal au total actuel` : appel préalable à `PlanetEngine::updatePlanet()` pour synchroniser l'état des stocks réels.
+  * Tolérance adaptative sur l'accumulation naturelle de production horaire survenue pendant la manipulation des jauges par le joueur (redistribution automatique du delta naturel) et mise à jour de l'horodatage `last_resource_update`.
+- **Marché Castral &bull; Éléments d'Amélioration & Schéma SQL (`core/MarketEngine.php`, `core/WeeklyEventEngine.php`, `views/building.php`) :**
+  * Correction de la colonne `building_type` (au lieu de `building_code`) dans les requêtes de `planet_buildings` prévenant l'erreur `SQLSTATE[42S22]: Column not found: 1054 Unknown column 'building_code' in 'WHERE'`.
+  * Restauration des cartes de coûts et boutons de décret d'élévation sur la fiche du marché castral.
+
 ## [1.32.0] - 2026-10-15
 ### Ajouté (Added)
 - **Game Studio &bull; Pôle Narrative Designer & Gestionnaire de Storyboard Multi-Projets (`views/gamestudio.php`, `core/StoryboardEngine.php`, `api/storyboard.php`, `views/studio/narrative-designer/storyboard-manager.php`, `public/assets/bibliotheque/`) :**
