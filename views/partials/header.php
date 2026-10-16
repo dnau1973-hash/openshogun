@@ -188,7 +188,7 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
     <link rel="stylesheet" href="/public/css/ai_prompt_modal.css?v=<?= file_exists(__DIR__ . '/../../public/css/ai_prompt_modal.css') ? filemtime(__DIR__ . '/../../public/css/ai_prompt_modal.css') : time() ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏯</text></svg>">
     <script>
-        window.IS_ADMIN = <?= ((class_exists('Auth') && Auth::check() && Auth::isAdmin()) || !empty($user['is_admin']) || (($user['role'] ?? '') === 'admin')) ? 'true' : 'false' ?>;
+        window.IS_ADMIN = <?= (!empty($user['is_admin']) || (($user['role'] ?? '') === 'admin') || (isset($auth) && $auth->isAdmin())) ? 'true' : 'false' ?>;
     </script>
 </head>
 <body class="antialiased">

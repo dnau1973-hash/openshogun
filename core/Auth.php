@@ -288,19 +288,25 @@ class Auth {
         }
     }
 
-    public function isAdmin(): bool {
-        $user = $this->getCurrentUser();
-        return !empty($user) && (int)$user['is_admin'] === 1;
+    public static function isAdmin(?array $user = null): bool {
+        if ($user === null) {
+            $user = self::getCurrentUser();
+        }
+        return !empty($user) && ((int)($user['is_admin'] ?? 0) === 1 || ($user['role'] ?? '') === 'admin');
     }
 
-    public function isModerator(): bool {
-        $user = $this->getCurrentUser();
-        return !empty($user) && ((int)($user['is_moderator'] ?? 0) === 1 || (int)($user['is_admin'] ?? 0) === 1);
+    public static function isModerator(?array $user = null): bool {
+        if ($user === null) {
+            $user = self::getCurrentUser();
+        }
+        return !empty($user) && ((int)($user['is_moderator'] ?? 0) === 1 || (int)($user['is_admin'] ?? 0) === 1 || in_array($user['role'] ?? '', ['admin', 'moderator']));
     }
 
-    public function isStaff(): bool {
-        $user = $this->getCurrentUser();
-        return !empty($user) && ((int)($user['is_admin'] ?? 0) === 1 || (int)($user['is_moderator'] ?? 0) === 1);
+    public static function isStaff(?array $user = null): bool {
+        if ($user === null) {
+            $user = self::getCurrentUser();
+        }
+        return !empty($user) && ((int)($user['is_admin'] ?? 0) === 1 || (int)($user['is_moderator'] ?? 0) === 1 || in_array($user['role'] ?? '', ['admin', 'moderator']));
     }
 
     public static function isUserModerator(int|array $userOrUserId): bool {
