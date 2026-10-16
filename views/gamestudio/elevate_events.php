@@ -35,3 +35,4 @@ if (file_exists($chroniclesFile)) {
 } else {
     echo '<div class="alert alert-warning">Le module Chroniques Féodales est en cours de déploiement.</div>';
 }
+
