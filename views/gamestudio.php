@@ -312,6 +312,37 @@ if ($currentTab === 'dashboard') {
                     : "?page=gamestudio&tab=narrative_scenarios&action=edit&id=$newId";
                 header('Location: ' . $redirectUrl);
                 exit;
+            } elseif ($action === 'import_markdown_scenario') {
+                $mdContent = trim((string)($_POST['md_content'] ?? ''));
+                $filename  = trim((string)($_POST['md_filename'] ?? ''));
+                if (!empty($_FILES['md_file']['tmp_name']) && is_uploaded_file($_FILES['md_file']['tmp_name'])) {
+                    $mdContent = (string)file_get_contents($_FILES['md_file']['tmp_name']);
+                    $filename  = (string)($_FILES['md_file']['name'] ?? $filename);
+                }
+                $parsed = $scenarioEngine->parseMarkdownToScenario($mdContent, $filename);
+                $payload = [
+                    'type'              => !empty($_POST['type']) ? (string)$_POST['type'] : 'step',
+                    'step_number'       => $_POST['step_number'] ?? null,
+                    'status'            => 'draft',
+                    'title'             => !empty($_POST['title']) ? trim((string)$_POST['title']) : $parsed['title'],
+                    'subtitle'          => !empty($_POST['subtitle']) ? trim((string)$_POST['subtitle']) : $parsed['subtitle'],
+                    'era'               => !empty($_POST['era']) ? trim((string)$_POST['era']) : $parsed['era'],
+                    'synopsis'          => $parsed['synopsis'],
+                    'speaker_name'      => $parsed['speaker_name'] ?: 'Takayama Kagetora (Maître Artificier)',
+                    'speaker_role'      => $parsed['speaker_role'] ?: 'Chroniqueur & Stratège du Shōgunat',
+                    'speaker_avatar'    => $parsed['speaker_avatar'] ?: '🏯',
+                    'dialogue'          => $parsed['dialogue'] ?: 'Noble Daimyō, voici les rouleaux stratégiques importés dans les archives du Shōgunat.',
+                    'trigger_condition' => $parsed['trigger_condition'],
+                    'rewards_summary'   => $parsed['rewards_summary'],
+                    'created_by'        => $userId
+                ];
+                $newId = $scenarioEngine->saveScenarioFull($payload);
+                $_SESSION['scenario_flash'] = [
+                    'type' => 'success',
+                    'msg'  => "Fichier Markdown « " . ($filename ?: 'GDD.md') . " » importé avec succès dans le Synopsis & Contexte Historique (Scénario #$newId) !"
+                ];
+                header("Location: ?page=gamestudio&tab=narrative_scenarios&action=edit&id=$newId");
+                exit;
             } elseif ($action === 'update_scenario') {
                 $scId = (int)($_POST['scenario_id'] ?? 0);
                 $updated = $scenarioEngine->updateScenario($scId, $_POST);

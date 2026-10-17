@@ -3,6 +3,15 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.9] - 2026-10-17
+### Ajouté (Added)
+- **Importation de Fichiers Markdown (`.md`) pour le Synopsis & Contexte Historique dans le Gestionnaire de Scénarios (`core/ScenarioEngine.php`, `views/gamestudio.php`, `views/gamestudio/narrative_scenarios.php`, `docs/gdd_bataille_12_chateaux.md`) :**
+  * **Importation directe dans le Studio d'Édition (`#fullScenSynopsis`) :**
+    - Ajout d'un bouton **« Importer un fichier `.md` »**, d'une zone de **Glisser-Déposer (Drag & Drop)** de fichier `.md` directement sur le champ *Synopsis & Contexte Historique*, d'un sélecteur de mode (*Remplacer* / *Ajouter à la suite*) et d'un panneau repliable **« Aperçu `.md` »**.
+    - Extraction intelligente optionnelle (`parseMarkdownClientSide` / `ScenarioEngine::parseMarkdownToScenario`) pré-remplissant automatiquement le **Titre**, le **Sous-titre**, la **Période/Ère**, le **Personnage**, le **Dialogue**, les **Conditions d'activation** et les **Récompenses** détectés dans le document Markdown.
+  * **Création directe de Scénario par Import `.md` depuis le Catalogue (`#modalImportMarkdownScenario`) :**
+    - Ajout du bouton **« Importer un `.md` »** dans l'en-tête du catalogue ouvrant une modale dédiée pour téléverser ou déposer un fichier `.md`, prévisualiser son contenu et créer immédiatement le scénario pré-rempli dans le Studio Split-Screen.
+
 ## [1.34.8] - 2026-10-17
 ### Corrigé & Modifié (Fixed & Changed)
 - **Kanban Drag & Drop Sans Rechargement & Correction Définitive de la Suppression des Scénarios (`core/ScenarioEngine.php`, `views/gamestudio.php`, `views/gamestudio/narrative_scenarios.php`) :**

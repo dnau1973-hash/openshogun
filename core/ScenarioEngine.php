@@ -1161,6 +1161,98 @@ class ScenarioEngine {
     }
 
     /**
+     * Analyse un fichier Markdown (.md) pour extraire le Synopsis & Contexte Historique
+     * ainsi que les métadonnées narratives éventuelles (Titre, Sous-titre, Ère, Personnage, Dialogue, Triggers, Récompenses).
+     */
+    public function parseMarkdownToScenario(string $markdown, string $filename = ''): array {
+        $raw = str_replace(["\r\n", "\r"], "\n", trim($markdown));
+        if ($raw === '') {
+            return [
+                'title'             => $filename ? pathinfo($filename, PATHINFO_FILENAME) : 'Scénario Importé (.md)',
+                'subtitle'          => '',
+                'era'               => '1580 - Sengoku Jidai',
+                'synopsis'          => '',
+                'speaker_name'      => '',
+                'speaker_role'      => '',
+                'speaker_avatar'    => '🏯',
+                'dialogue'          => '',
+                'trigger_condition' => '',
+                'rewards_summary'   => '',
+            ];
+        }
+
+        // 1. Extraction du Titre principal (# Titre)
+        $title = '';
+        if (preg_match('/^#\s+(.+)$/m', $raw, $mTitle)) {
+            $title = trim(preg_replace('/^[🏯⚔️📜🔥⛩️🏮🧨]+\s*/u', '', strip_tags($mTitle[1])));
+        }
+        if ($title === '' && $filename !== '') {
+            $title = ucwords(str_replace(['_', '-'], ' ', pathinfo($filename, PATHINFO_FILENAME)));
+        }
+        if ($title === '') {
+            $title = 'Scénario Importé (.md)';
+        }
+
+        // 2. Extraction du Sous-titre (## ... ou ligne d'accroche)
+        $subtitle = '';
+        if (preg_match('/^##\s+(.+)$/m', $raw, $mSub)) {
+            $subtitle = trim(preg_replace('/^[🏯⚔️📜🔥⛩️🏮🧨IVX\.\s]+/u', '', strip_tags($mSub[1])));
+        }
+
+        // 3. Extraction de la Période / Ère Historique si mentionnée
+        $era = '1580 - Sengoku Jidai';
+        if (preg_match('/\*\*Période\s*(?:\/\s*Ère)?\s*:\*\*\s*(.+)$/mi', $raw, $mEra)) {
+            $era = trim($mEra[1]);
+        } elseif (preg_match('/(15\d{2}|16\d{2})\s*[-–]\s*([^\n\*]+)/u', $raw, $mEra2)) {
+            $era = trim($mEra2[1] . ' - ' . $mEra2[2]);
+        }
+
+        // 4. Extraction du Personnage & Dialogue (citation > *« ... »* ou > "...")
+        $speakerName = '';
+        $speakerRole = '';
+        $speakerAvatar = '🏯';
+        $dialogue = '';
+
+        if (preg_match('/\*\*(?:Personnage|Interlocuteur)\s*:\*\*\s*([^\n]+)/iu', $raw, $mSp)) {
+            $spLine = trim(str_replace('*', '', $mSp[1]));
+            $parts = preg_split('/[,—–-]/u', $spLine, 2);
+            $speakerName = trim($parts[0] ?? '');
+            if (!empty($parts[1])) {
+                $speakerRole = trim(preg_replace('/Avatar\s*:.*/iu', '', $parts[1]));
+            }
+        }
+
+        if (preg_match('/^>\s*\*?[«"]?([^»"\n]{25,})[»"]?\*?/m', $raw, $mDia)) {
+            $dialogue = trim(str_replace(['*', '«', '»', '"'], '', $mDia[1]));
+        }
+
+        // 5. Extraction Trigger & Récompenses éventuels
+        $trigger = '';
+        if (preg_match('/\*\*(?:Condition(?:s)? d\'activation|Trigger|Déclencheur|Objectif Stratégique(?: Majeur)?)\s*:\*\*\s*([^\n]+)/iu', $raw, $mTr)) {
+            $trigger = trim(str_replace('*', '', $mTr[1]));
+        }
+
+        $rewards = '';
+        if (preg_match('/\*\*(?:Récompenses?(?:\s*&\s*Effets)?|Dotation)\s*:\*\*\s*([^\n]+)/iu', $raw, $mRw)) {
+            $rewards = trim(str_replace('*', '', $mRw[1]));
+        }
+
+        // 6. Le Synopsis & Contexte Historique reçoit le contenu Markdown complet (ou la section Synopsis/Histoire si présente, suivie du document complet)
+        return [
+            'title'             => $title,
+            'subtitle'          => $subtitle,
+            'era'               => $era,
+            'synopsis'          => $raw,
+            'speaker_name'      => $speakerName,
+            'speaker_role'      => $speakerRole,
+            'speaker_avatar'    => $speakerAvatar,
+            'dialogue'          => $dialogue,
+            'trigger_condition' => $trigger,
+            'rewards_summary'   => $rewards,
+        ];
+    }
+
+    /**
      * Helper de slugification
      */
     private function slugify(string $text): string {

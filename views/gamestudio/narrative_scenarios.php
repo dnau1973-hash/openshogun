@@ -385,6 +385,10 @@ if ($viewAction === 'edit' || $viewAction === 'create'):
 
                 <!-- Droite : Actions Rapides & Sauvegarde AJAX Ctrl+S -->
                 <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <button type="button" class="btn btn-outline-purple btn-sm d-inline-flex align-items-center gap-1" onclick="triggerSynopsisMdFileInput()" title="Importer un fichier .md dans le Synopsis & Contexte Historique">
+                        <i class="fa-solid fa-file-import"></i>
+                        <span>Importer .md</span>
+                    </button>
                     <?php if (!$isCreate): ?>
                         <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1" onclick="exportScenarioMarkdown(<?= $activeScenario['id'] ?>)">
                             <i class="fa-solid fa-file-arrow-down text-teal"></i>
@@ -505,8 +509,57 @@ if ($viewAction === 'edit' || $viewAction === 'create'):
                                             </div>
 
                                             <div class="col-12">
-                                                <label class="form-label fw-bold text-dark small mb-1">Synopsis &amp; Contexte Historique (GDD)</label>
-                                                <textarea class="form-control form-control-sm" name="synopsis" id="fullScenSynopsis" rows="3" placeholder="Décrivez la trame narrative, les enjeux politiques féodaux et le rôle du Daimyō..." oninput="renderInGamePreviewLive(); markFormDirty();"><?= htmlspecialchars($activeScenario['synopsis']) ?></textarea>
+                                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
+                                                    <label class="form-label fw-bold text-dark small m-0 d-flex align-items-center gap-1">
+                                                        <i class="fa-brands fa-markdown text-purple"></i>
+                                                        <span>Synopsis &amp; Contexte Historique (GDD / Markdown `.md`)</span>
+                                                    </label>
+                                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                        <input type="file" id="synopsisMdFileInput" accept=".md,.markdown,.txt" style="display:none;" onchange="onSynopsisMdFileSelected(this)">
+                                                        <select id="selMdImportMode" class="form-select form-select-sm py-0 ps-2 pe-4" style="width:auto; height:26px; font-size:0.73rem;" title="Mode d'importation du fichier .md">
+                                                            <option value="replace">Remplacer le synopsis</option>
+                                                            <option value="append">Ajouter à la suite</option>
+                                                        </select>
+                                                        <label class="form-check form-check-inline m-0 small d-flex align-items-center gap-1" style="font-size:0.73rem; cursor:pointer;" title="Extraire automatiquement le Titre, Sous-titre, Période, Personnage, Dialogue, Triggers et Récompenses détectés dans le fichier .md">
+                                                            <input class="form-check-input m-0" type="checkbox" id="chkMdSmartExtract" checked>
+                                                            <span class="text-secondary fw-medium">Auto-remplir les champs détectés</span>
+                                                        </label>
+                                                        <button type="button" class="btn btn-purple btn-sm py-0 px-2 fw-bold d-inline-flex align-items-center gap-1" style="height:26px; font-size:0.74rem;" onclick="triggerSynopsisMdFileInput()">
+                                                            <i class="fa-solid fa-file-import"></i>
+                                                            <span>Importer un fichier .md</span>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2 d-inline-flex align-items-center gap-1" style="height:26px; font-size:0.74rem;" onclick="toggleSynopsisMarkdownPreview()">
+                                                            <i class="fa-solid fa-eye"></i>
+                                                            <span>Aperçu .md</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div id="synopsisDropZoneWrapper"
+                                                     class="position-relative"
+                                                     ondragover="onSynopsisMdDragOver(event)"
+                                                     ondragleave="onSynopsisMdDragLeave(event)"
+                                                     ondrop="onSynopsisMdDrop(event)">
+                                                    <textarea class="form-control form-control-sm font-monospace"
+                                                              name="synopsis"
+                                                              id="fullScenSynopsis"
+                                                              rows="6"
+                                                              placeholder="Décrivez la trame narrative, le contexte historique féodal et les enjeux... ou glissez-déposez directement un fichier .md ici !"
+                                                              oninput="renderInGamePreviewLive(); updateSynopsisMarkdownPreview(); markFormDirty();"><?= htmlspecialchars($activeScenario['synopsis']) ?></textarea>
+                                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                                        <span class="small text-muted" style="font-size:0.7rem;">
+                                                            <i class="fa-solid fa-cloud-arrow-up text-purple me-1"></i>Astuce : vous pouvez glisser-déposer un fichier <code>.md</code> directement dans ce cadre.
+                                                        </span>
+                                                        <span class="badge bg-purple-lt text-purple font-monospace" id="mdImportedBadge" style="display:none; font-size:0.68rem;"></span>
+                                                    </div>
+                                                </div>
+                                                <!-- Panneau d'aperçu Markdown formaté (repliable) -->
+                                                <div id="synopsisMarkdownPreviewBox" class="mt-2 p-3 rounded border bg-light-subtle" style="display:none; max-height: 360px; overflow-y: auto; font-size: 0.85rem;">
+                                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+                                                        <span class="fw-bold text-purple small"><i class="fa-brands fa-markdown me-1"></i>Aperçu du Synopsis &amp; Contexte Historique (.md)</span>
+                                                        <button type="button" class="btn-close" style="font-size:0.65rem;" onclick="toggleSynopsisMarkdownPreview()"></button>
+                                                    </div>
+                                                    <div id="synopsisMarkdownPreviewContent" class="text-dark"></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1084,6 +1137,13 @@ else:
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
                 <span>Nouvel Événement</span>
             </a>
+            <button type="button"
+                    class="btn btn-outline-purple bg-white fw-bold d-inline-flex align-items-center gap-1 shadow-xs"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalImportMarkdownScenario">
+                <i class="fa-solid fa-file-import"></i>
+                <span>Importer un .md</span>
+            </button>
         </div>
     </div>
 
@@ -1673,6 +1733,84 @@ else:
     </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- MODALE D'IMPORT D'UN FICHIER MARKDOWN (.MD) POUR LE SYNOPSIS & HISTOIRE     -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="modalImportMarkdownScenario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content shadow-lg border-0">
+            <form method="POST" action="?page=gamestudio&tab=narrative_scenarios" enctype="multipart/form-data" id="formModalImportMarkdown">
+                <input type="hidden" name="action" value="import_markdown_scenario">
+                <input type="hidden" name="md_filename" id="modalMdFilename" value="">
+                <div class="modal-header bg-dark text-white py-2 px-3">
+                    <h5 class="modal-title d-flex align-items-center gap-2 m-0 text-white">
+                        <i class="fa-brands fa-markdown text-purple"></i>
+                        <span>Importer un fichier Markdown (`.md`) — Synopsis &amp; Contexte Historique</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="alert alert-purple bg-purple-lt border-0 py-2 px-3 small mb-3">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
+                        Sélectionnez ou glissez-déposez un fichier <code>.md</code> (GDD, trame narrative, contexte historique). Son contenu alimentera automatiquement le <strong>Synopsis &amp; Contexte Historique</strong> et pré-remplira le titre, l'époque et le dialogue détectés.
+                    </div>
+
+                    <!-- Zone de sélection / Drag & Drop du fichier .md -->
+                    <div id="modalMdDropzone"
+                         class="border border-2 border-dashed rounded-3 p-4 text-center mb-3 bg-light-subtle"
+                         style="cursor: pointer; border-color: #7950f2 !important;"
+                         onclick="document.getElementById('modalMdFileInput').click()"
+                         ondragover="event.preventDefault(); this.classList.add('bg-purple-lt');"
+                         ondragleave="this.classList.remove('bg-purple-lt');"
+                         ondrop="onModalMdDrop(event)">
+                        <input type="file" name="md_file" id="modalMdFileInput" accept=".md,.markdown,.txt" style="display:none;" onchange="onModalMdFileSelected(this)">
+                        <div class="mb-1">
+                            <i class="fa-solid fa-file-arrow-up fa-2x text-purple"></i>
+                        </div>
+                        <div class="fw-bold text-dark" id="modalMdDropTitle">Cliquez pour choisir un fichier <code>.md</code> ou glissez-le ici</div>
+                        <div class="small text-muted" id="modalMdDropSub">Formats supportés : .md, .markdown, .txt</div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold small mb-1">Titre du Scénario (extrait du `.md`)</label>
+                            <input type="text" name="title" id="modalMdExtractedTitle" class="form-control form-control-sm fw-bold" placeholder="Détecté automatiquement depuis # Titre...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small mb-1">Type de Scénario</label>
+                            <select name="type" id="modalMdType" class="form-select form-select-sm fw-bold">
+                                <option value="step">⛩️ Step de Campagne</option>
+                                <option value="special_event">🏮 Événement Spécial</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold small mb-1">N° Step</label>
+                            <input type="number" name="step_number" value="<?= $totalSteps + 1 ?>" min="1" max="99" class="form-control form-control-sm fw-bold">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold small mb-1">Ère</label>
+                            <input type="text" name="era" id="modalMdExtractedEra" class="form-control form-control-sm" placeholder="1580 - Sengoku">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label fw-bold small mb-1">
+                            Contenu Markdown importé (Synopsis &amp; Contexte Historique) :
+                        </label>
+                        <textarea name="md_content" id="modalMdContentTextarea" class="form-control form-control-sm font-monospace" rows="9" placeholder="Le contenu de votre fichier .md s'affichera ici (vous pouvez aussi coller directement votre Markdown)..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer py-2 d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-purple btn-sm fw-bold px-3">
+                        <i class="fa-solid fa-rocket me-1"></i>Créer le Scénario &amp; Ouvrir dans le Studio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Formulaire POST caché pour actions rapides (duplication, suppression directe) -->
 <form id="catalogQuickActionForm" method="POST" action="?page=gamestudio&tab=narrative_scenarios" style="display:none;">
     <input type="hidden" name="action" id="catQuickActionName" value="">
@@ -1682,6 +1820,260 @@ else:
 
 <script>
 const ROLES_DEF_MAP = <?= json_encode($rolesMap, JSON_UNESCAPED_UNICODE) ?>;
+
+// ---------------------------------------------------------------------------
+// IMPORTATION DE FICHIER MARKDOWN (.MD) POUR LE SYNOPSIS & CONTEXTE HISTORIQUE
+// ---------------------------------------------------------------------------
+function triggerSynopsisMdFileInput() {
+    const inp = document.getElementById('synopsisMdFileInput');
+    if (inp) {
+        inp.value = '';
+        inp.click();
+    }
+}
+
+function parseMarkdownClientSide(mdText, fileName = '') {
+    const raw = (mdText || '').replace(/\r\n|\r/g, '\n').trim();
+    const res = {
+        title: '',
+        subtitle: '',
+        era: '',
+        synopsis: raw,
+        speaker_name: '',
+        speaker_role: '',
+        dialogue: '',
+        trigger_condition: '',
+        rewards_summary: ''
+    };
+    if (!raw) return res;
+
+    // 1. Titre principal (# Titre)
+    const mTitle = raw.match(/^#\s+(.+)$/m);
+    if (mTitle) {
+        res.title = mTitle[1].replace(/^[🏯⚔️📜🔥⛩️🏮🧨]+\s*/u, '').trim();
+    } else if (fileName) {
+        res.title = fileName.replace(/\.(md|markdown|txt)$/i, '').replace(/[_-]+/g, ' ');
+    }
+
+    // 2. Sous-titre (## Sous-titre)
+    const mSub = raw.match(/^##\s+(.+)$/m);
+    if (mSub) {
+        res.subtitle = mSub[1].replace(/^[🏯⚔️📜🔥⛩️🏮🧨IVX\.\s]+/u, '').trim();
+    }
+
+    // 3. Ère / Période
+    const mEra = raw.match(/\*\*Période\s*(?:\/\s*Ère)?\s*:\*\*\s*(.+)$/mi) || raw.match(/((?:15|16)\d{2}\s*[-–]\s*[^\n\*]+)/);
+    if (mEra) {
+        res.era = mEra[1].trim();
+    }
+
+    // 4. Personnage
+    const mSp = raw.match(/\*\*(?:Personnage|Interlocuteur)\s*:\*\*\s*([^\n]+)/i);
+    if (mSp) {
+        const cleanSp = mSp[1].replace(/\*/g, '').trim();
+        const parts = cleanSp.split(/[,—–-]/);
+        res.speaker_name = (parts[0] || '').trim();
+        if (parts[1]) {
+            res.speaker_role = parts[1].replace(/Avatar\s*:.*/i, '').trim();
+        }
+    }
+
+    // 5. Dialogue en citation (> « ... »)
+    const mDia = raw.match(/^>\s*\*?[«"]?([^»"\n]{25,})[»"]?\*?/m);
+    if (mDia) {
+        res.dialogue = mDia[1].replace(/[\*«»"]/g, '').trim();
+    }
+
+    // 6. Trigger & Récompenses
+    const mTr = raw.match(/\*\*(?:Condition(?:s)? d'activation|Trigger|Déclencheur|Objectif Stratégique(?: Majeur)?)\s*:\*\*\s*([^\n]+)/i);
+    if (mTr) {
+        res.trigger_condition = mTr[1].replace(/\*/g, '').trim();
+    }
+    const mRw = raw.match(/\*\*(?:Récompenses?(?:\s*&\s*Effets)?|Dotation)\s*:\*\*\s*([^\n]+)/i);
+    if (mRw) {
+        res.rewards_summary = mRw[1].replace(/\*/g, '').trim();
+    }
+
+    return res;
+}
+
+function applyMarkdownToStudioSynopsis(mdText, fileName = '') {
+    const synEl = document.getElementById('fullScenSynopsis');
+    if (!synEl) return;
+
+    const mode = document.getElementById('selMdImportMode')?.value || 'replace';
+    const smartExtract = document.getElementById('chkMdSmartExtract')?.checked ?? true;
+    const parsed = parseMarkdownClientSide(mdText, fileName);
+
+    if (mode === 'append' && synEl.value.trim() !== '') {
+        synEl.value = synEl.value.trim() + "\n\n---\n\n" + parsed.synopsis;
+    } else {
+        synEl.value = parsed.synopsis;
+    }
+
+    // Si l'extraction intelligente est activée, pré-remplir les champs vides (ou mettre à jour)
+    if (smartExtract) {
+        const titleEl = document.getElementById('fullScenTitle');
+        if (titleEl && parsed.title && (!titleEl.value.trim() || mode === 'replace')) {
+            titleEl.value = parsed.title;
+        }
+        const subEl = document.getElementById('fullScenSubtitle');
+        if (subEl && parsed.subtitle && (!subEl.value.trim() || mode === 'replace')) {
+            subEl.value = parsed.subtitle;
+        }
+        const eraEl = document.getElementById('fullScenEra');
+        if (eraEl && parsed.era && (!eraEl.value.trim() || mode === 'replace')) {
+            eraEl.value = parsed.era;
+        }
+        const spNameEl = document.getElementById('fullScenSpeakerName');
+        if (spNameEl && parsed.speaker_name) {
+            spNameEl.value = parsed.speaker_name;
+        }
+        const spRoleEl = document.getElementById('fullScenSpeakerRole');
+        if (spRoleEl && parsed.speaker_role) {
+            spRoleEl.value = parsed.speaker_role;
+        }
+        const diaEl = document.getElementById('fullScenDialogue');
+        if (diaEl && parsed.dialogue) {
+            diaEl.value = parsed.dialogue;
+        }
+        const trEl = document.getElementById('fullScenTrigger');
+        if (trEl && parsed.trigger_condition) {
+            trEl.value = parsed.trigger_condition;
+        }
+        const rwEl = document.getElementById('fullScenRewards');
+        if (rwEl && parsed.rewards_summary) {
+            rwEl.value = parsed.rewards_summary;
+        }
+    }
+
+    const badge = document.getElementById('mdImportedBadge');
+    if (badge) {
+        badge.style.display = 'inline-block';
+        badge.textContent = `📄 Importé : ${fileName || 'Markdown'} (${parsed.synopsis.length} car.)`;
+    }
+
+    updateSynopsisMarkdownPreview();
+    renderInGamePreviewLive();
+    markFormDirty(true);
+    showStudioToast(`Fichier Markdown « ${fileName || '.md'} » importé dans le Synopsis & Contexte Historique !`);
+}
+
+function onSynopsisMdFileSelected(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        applyMarkdownToStudioSynopsis(evt.target.result || '', file.name);
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+function onSynopsisMdDragOver(e) {
+    e.preventDefault();
+    const ta = document.getElementById('fullScenSynopsis');
+    if (ta) {
+        ta.style.borderColor = '#7950f2';
+        ta.style.backgroundColor = '#faf8ff';
+    }
+}
+
+function onSynopsisMdDragLeave(e) {
+    const ta = document.getElementById('fullScenSynopsis');
+    if (ta) {
+        ta.style.borderColor = '';
+        ta.style.backgroundColor = '';
+    }
+}
+
+function onSynopsisMdDrop(e) {
+    e.preventDefault();
+    onSynopsisMdDragLeave(e);
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (!files || !files.length) return;
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        applyMarkdownToStudioSynopsis(evt.target.result || '', file.name);
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+function renderSimpleMarkdown(md) {
+    if (!md) return '<em class="text-muted">Aucun contenu Markdown à prévisualiser.</em>';
+    let html = md
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    html = html
+        .replace(/^###\s+(.+)$/gm, '<h6 class="fw-bold text-dark mt-2 mb-1">$1</h6>')
+        .replace(/^##\s+(.+)$/gm, '<h5 class="fw-bold text-purple mt-3 mb-1 border-bottom pb-1">$1</h5>')
+        .replace(/^#\s+(.+)$/gm, '<h4 class="fw-bold text-dark mt-2 mb-2">$1</h4>')
+        .replace(/^\s*[-*]\s+(.+)$/gm, '<li class="ms-3">$1</li>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code class="text-purple">$1</code>')
+        .replace(/\n\n/g, '<br><br>');
+    return html;
+}
+
+function updateSynopsisMarkdownPreview() {
+    const box = document.getElementById('synopsisMarkdownPreviewBox');
+    const content = document.getElementById('synopsisMarkdownPreviewContent');
+    const synEl = document.getElementById('fullScenSynopsis');
+    if (!box || !content || !synEl) return;
+    if (box.style.display !== 'none') {
+        content.innerHTML = renderSimpleMarkdown(synEl.value);
+    }
+}
+
+function toggleSynopsisMarkdownPreview() {
+    const box = document.getElementById('synopsisMarkdownPreviewBox');
+    if (!box) return;
+    if (box.style.display === 'none') {
+        box.style.display = 'block';
+        updateSynopsisMarkdownPreview();
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+// Gestion de la modale d'import .md depuis le Catalogue
+function onModalMdFileSelected(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    readModalMdFile(file);
+}
+
+function onModalMdDrop(e) {
+    e.preventDefault();
+    const dz = document.getElementById('modalMdDropzone');
+    if (dz) dz.classList.remove('bg-purple-lt');
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (!files || !files.length) return;
+    readModalMdFile(files[0]);
+}
+
+function readModalMdFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        const content = evt.target.result || '';
+        const parsed = parseMarkdownClientSide(content, file.name);
+        const ta = document.getElementById('modalMdContentTextarea');
+        if (ta) ta.value = content;
+        const fn = document.getElementById('modalMdFilename');
+        if (fn) fn.value = file.name;
+        const t = document.getElementById('modalMdExtractedTitle');
+        if (t && parsed.title) t.value = parsed.title;
+        const era = document.getElementById('modalMdExtractedEra');
+        if (era && parsed.era) era.value = parsed.era;
+        const dt = document.getElementById('modalMdDropTitle');
+        if (dt) dt.innerHTML = `<span class="text-purple"><i class="fa-solid fa-circle-check me-1"></i>Fichier prêt : ${file.name}</span>`;
+        const ds = document.getElementById('modalMdDropSub');
+        if (ds) ds.textContent = `${content.length} caractères analysés — prêt à créer le scénario`;
+    };
+    reader.readAsText(file, 'UTF-8');
+}
 let currentRoleFilter = 'all';
 let currentStatusFilter = 'all';
 let isStudioFormDirty = false;
