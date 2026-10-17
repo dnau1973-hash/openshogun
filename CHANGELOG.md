@@ -3,6 +3,12 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.10] - 2026-10-17
+### Modifié & Supprimé (Changed & Removed)
+- **Persistance 100% Base de Données SQL pour le Studio Narrative Designer & Scénarios de Jeu (`core/ScenarioEngine.php`) :**
+  * Suppression intégrale de l'enregistrement et de la lecture dans un fichier JSON (`loadFromJson`, `saveToJson`, `data/narrative_scenarios_storage.json`).
+  * Toutes les opérations CRUD (`saveScenarioFull`, `getScenarios`, `getScenarioById`, `updateScenario`, `deleteScenario`) et le marqueur d'initialisation (`GameConfig::get('narrative_scenarios_seeded')`) fonctionnent désormais exclusivement en base de données MySQL (`narrative_scenarios` et `game_settings`).
+
 ## [1.34.9] - 2026-10-17
 ### Ajouté (Added)
 - **Importation de Fichiers Markdown (`.md`) pour le Synopsis & Contexte Historique dans le Gestionnaire de Scénarios (`core/ScenarioEngine.php`, `views/gamestudio.php`, `views/gamestudio/narrative_scenarios.php`, `docs/gdd_bataille_12_chateaux.md`) :**

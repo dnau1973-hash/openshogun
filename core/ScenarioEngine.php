@@ -7,10 +7,10 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/GameConfig.php';
 
 class ScenarioEngine {
     private ?PDO $db;
-    private string $jsonStorageFile;
 
     public const VALID_TYPES = ['step', 'special_event'];
     public const VALID_STATUSES = ['draft', 'in_review', 'in_production', 'ready', 'published', 'archived'];
@@ -190,7 +190,6 @@ class ScenarioEngine {
     ];
 
     public function __construct() {
-        $this->jsonStorageFile = __DIR__ . '/../data/narrative_scenarios_storage.json';
         try {
             $this->db = Database::getConnection();
             $this->ensureTables();
@@ -198,7 +197,7 @@ class ScenarioEngine {
             $this->db = null;
         }
 
-        // Si aucun scénario n'est présent, initialiser avec les modèles féodaux complets
+        // Initialisation unique en base de données
         $this->ensureDefaultScenarios();
     }
 
@@ -244,111 +243,38 @@ class ScenarioEngine {
                 $this->db->exec("ALTER TABLE `narrative_scenarios` ADD COLUMN `choices_json` LONGTEXT NULL AFTER `rewards_summary`");
             } catch (Throwable $e) {}
         } catch (Throwable $e) {
-            // Ignorer si déjà existant ou SQLite
+            // Ignorer si déjà existant
         }
     }
 
     /**
-     * Charge les scénarios depuis le stockage JSON
-     */
-    private function loadFromJson(): array {
-        if (!file_exists($this->jsonStorageFile)) {
-            return [];
-        }
-        $raw = file_get_contents($this->jsonStorageFile);
-        $data = json_decode($raw, true);
-        return is_array($data) ? $data : [];
-    }
-
-    /**
-     * Sauvegarde la liste complète des scénarios dans le fichier JSON
-     */
-    private function saveToJson(array $scenarios): bool {
-        $dir = dirname($this->jsonStorageFile);
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0777, true);
-        }
-        $ok = @file_put_contents($this->jsonStorageFile, json_encode(array_values($scenarios), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false;
-        if ($ok) {
-            @chmod($this->jsonStorageFile, 0666);
-        }
-        return $ok;
-    }
-
-    /**
-     * Ensemence les scénarios par défaut uniquement lors de la toute première initialisation
-     * et synchronise la table SQL depuis le miroir JSON si la table vient d'être créée.
+     * Ensemence les scénarios par défaut uniquement lors de la toute première initialisation en base de données
      */
     private function ensureDefaultScenarios(): void {
-        $seedMarker = dirname($this->jsonStorageFile) . '/.narrative_scenarios_seeded';
-        $jsonExists = file_exists($this->jsonStorageFile);
-        $jsonItems  = $jsonExists ? $this->loadFromJson() : [];
+        if (!$this->db) return;
 
-        if ($this->db) {
-            try {
-                if (!file_exists($seedMarker) && !empty($jsonItems)) {
-                    foreach ($jsonItems as $item) {
-                        $now = time();
-                        $tasksJson = json_encode($item['tasks'] ?? [], JSON_UNESCAPED_UNICODE);
-                        $choicesJson = json_encode($this->normalizeChoices($item['choices'] ?? ($item['choices_json'] ?? [])), JSON_UNESCAPED_UNICODE);
-                        $stmtIns = $this->db->prepare("
-                            INSERT IGNORE INTO narrative_scenarios
-                            (id, slug, type, step_number, title, subtitle, era, synopsis, speaker_name, speaker_role, speaker_avatar, dialogue, trigger_condition, rewards_summary, choices_json, status, tasks_json, created_by, created_at, updated_at)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ");
-                        $stmtIns->execute([
-                            (int)($item['id'] ?? 0) ?: null,
-                            (string)($item['slug'] ?? ('scenario-' . $now)),
-                            (string)($item['type'] ?? 'step'),
-                            isset($item['step_number']) && $item['step_number'] !== '' ? (int)$item['step_number'] : null,
-                            (string)($item['title'] ?? 'Scénario'),
-                            (string)($item['subtitle'] ?? ''),
-                            (string)($item['era'] ?? ''),
-                            (string)($item['synopsis'] ?? ''),
-                            (string)($item['speaker_name'] ?? ''),
-                            (string)($item['speaker_role'] ?? ''),
-                            (string)($item['speaker_avatar'] ?? '🏯'),
-                            (string)($item['dialogue'] ?? ''),
-                            (string)($item['trigger_condition'] ?? ''),
-                            (string)($item['rewards_summary'] ?? ''),
-                            $choicesJson,
-                            (string)($item['status'] ?? 'draft'),
-                            $tasksJson,
-                            (int)($item['created_by'] ?? 1),
-                            (int)($item['created_at'] ?? $now),
-                            (int)($item['updated_at'] ?? $now)
-                        ]);
-                    }
-                    @file_put_contents($seedMarker, (string)time());
-                    @chmod($seedMarker, 0666);
-                    return;
-                }
-
-                $stmtCount = $this->db->query("SELECT COUNT(*) FROM narrative_scenarios");
-                $dbCount = (int)$stmtCount->fetchColumn();
-                if ($dbCount > 0) {
-                    if (!file_exists($seedMarker)) {
-                        @file_put_contents($seedMarker, (string)time());
-                        @chmod($seedMarker, 0666);
-                    }
-                    return;
-                }
-            } catch (Throwable $e) {
-                // Fallback JSON
+        try {
+            $alreadySeeded = (bool)GameConfig::get('narrative_scenarios_seeded', false);
+            if ($alreadySeeded) {
+                return;
             }
-        }
 
-        // Si déjà initialisé une première fois (ou si le fichier JSON existe déjà), ne jamais ré-injecter les scénarios supprimés
-        if (file_exists($seedMarker) || $jsonExists) {
-            return;
-        }
+            $stmtCount = $this->db->query("SELECT COUNT(*) FROM narrative_scenarios");
+            $dbCount = (int)$stmtCount->fetchColumn();
 
-        $defaults = $this->buildDefaultScenarios();
-        foreach ($defaults as $scenario) {
-            $this->saveScenarioFull($scenario);
+            if ($dbCount > 0) {
+                GameConfig::set('narrative_scenarios_seeded', true);
+                return;
+            }
+
+            $defaults = $this->buildDefaultScenarios();
+            foreach ($defaults as $scenario) {
+                $this->saveScenarioFull($scenario);
+            }
+            GameConfig::set('narrative_scenarios_seeded', true);
+        } catch (Throwable $e) {
+            // Ignorer en cas d'erreur SQL
         }
-        @file_put_contents($seedMarker, (string)time());
-        @chmod($seedMarker, 0666);
     }
 
     /**
@@ -446,9 +372,11 @@ class ScenarioEngine {
     }
 
     /**
-     * Sauvegarde un scénario complet (DB + fallback JSON)
+     * Sauvegarde un scénario complet en base de données SQL uniquement
      */
     public function saveScenarioFull(array $sc): int {
+        if (!$this->db) return 0;
+
         $now = time();
         $slug = !empty($sc['slug']) ? $this->slugify($sc['slug']) : $this->slugify($sc['title'] ?? 'scenario-' . $now);
         $type = in_array($sc['type'] ?? '', self::VALID_TYPES, true) ? $sc['type'] : 'step';
@@ -480,79 +408,32 @@ class ScenarioEngine {
 
         $tasksJson = json_encode($tasks, JSON_UNESCAPED_UNICODE);
 
-        $insertedId = 0;
-
-        // 1. Sauvegarde en Base SQL si accessible
-        if ($this->db) {
-            try {
-                $stmt = $this->db->prepare("
-                    INSERT INTO narrative_scenarios 
-                    (slug, type, step_number, title, subtitle, era, synopsis, speaker_name, speaker_role, speaker_avatar, dialogue, trigger_condition, rewards_summary, choices_json, status, tasks_json, created_by, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ");
-                $stmt->execute([
-                    $slug, $type, $stepNumber, $title, $subtitle, $era, $synopsis,
-                    $speakerName, $speakerRole, $speakerAvatar, $dialogue, $triggerCond, $rewards,
-                    $choicesJson, $status, $tasksJson, $createdBy, $now, $now
-                ]);
-                $insertedId = (int)$this->db->lastInsertId();
-            } catch (Throwable $e) {
-                // Fallback direct sur JSON
+        try {
+            // Vérification d'unicité du slug en base
+            $stmtSlug = $this->db->prepare("SELECT COUNT(*) FROM narrative_scenarios WHERE slug = ?");
+            $stmtSlug->execute([$slug]);
+            if ((int)$stmtSlug->fetchColumn() > 0) {
+                $slug .= '-' . $now . '-' . mt_rand(10, 99);
             }
-        }
 
-        // 2. Sauvegarde miroir dans le JSON
-        $all = $this->loadFromJson();
-        if ($insertedId === 0) {
-            $maxId = 0;
-            foreach ($all as $item) {
-                if ((int)$item['id'] > $maxId) $maxId = (int)$item['id'];
-            }
-            $insertedId = $maxId + 1;
+            $stmt = $this->db->prepare("
+                INSERT INTO narrative_scenarios 
+                (slug, type, step_number, title, subtitle, era, synopsis, speaker_name, speaker_role, speaker_avatar, dialogue, trigger_condition, rewards_summary, choices_json, status, tasks_json, created_by, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $slug, $type, $stepNumber, $title, $subtitle, $era, $synopsis,
+                $speakerName, $speakerRole, $speakerAvatar, $dialogue, $triggerCond, $rewards,
+                $choicesJson, $status, $tasksJson, $createdBy, $now, $now
+            ]);
+            return (int)$this->db->lastInsertId();
+        } catch (Throwable $e) {
+            return 0;
         }
-
-        $record = [
-            'id'                => $insertedId,
-            'slug'              => $slug,
-            'type'              => $type,
-            'step_number'       => $stepNumber,
-            'title'             => $title,
-            'subtitle'          => $subtitle,
-            'era'               => $era,
-            'synopsis'          => $synopsis,
-            'speaker_name'      => $speakerName,
-            'speaker_role'      => $speakerRole,
-            'speaker_avatar'    => $speakerAvatar,
-            'dialogue'          => $dialogue,
-            'trigger_condition' => $triggerCond,
-            'rewards_summary'   => $rewards,
-            'choices'           => $choices,
-            'status'            => $status,
-            'tasks'             => $tasks,
-            'created_by'        => $createdBy,
-            'created_at'        => $now,
-            'updated_at'        => $now
-        ];
-
-        // Remplacement ou ajout
-        $found = false;
-        foreach ($all as $idx => $existingItem) {
-            if ($existingItem['id'] === $insertedId || $existingItem['slug'] === $slug) {
-                $all[$idx] = $record;
-                $found = true;
-                break;
-            }
-        }
-        if (!$found) {
-            $all[] = $record;
-        }
-
-        $this->saveToJson($all);
-        return $insertedId;
     }
 
     /**
-     * Récupère la liste de tous les scénarios avec filtres et progression des 10 tâches
+     * Récupère la liste de tous les scénarios depuis la base de données avec filtres et progression des 10 tâches
      */
     public function getScenarios(string|array|null $type = null, ?string $status = null, ?string $search = null): array {
         if (is_array($type)) {
@@ -561,134 +442,79 @@ class ScenarioEngine {
             $status  = isset($filters['status']) && $filters['status'] !== '' ? (string)$filters['status'] : null;
             $search  = isset($filters['search']) && $filters['search'] !== '' ? (string)$filters['search'] : null;
         }
+        if (!$this->db) return [];
+
         $results = [];
-        $dbSuccess = false;
-
-        if ($this->db) {
-            try {
-                $sql = "SELECT * FROM narrative_scenarios WHERE 1=1";
-                $params = [];
-                if ($type && in_array($type, self::VALID_TYPES, true)) {
-                    $sql .= " AND type = ?";
-                    $params[] = $type;
-                }
-                if ($status && in_array($status, self::VALID_STATUSES, true)) {
-                    $sql .= " AND status = ?";
-                    $params[] = $status;
-                }
-                if ($search && trim($search) !== '') {
-                    $sql .= " AND (title LIKE ? OR synopsis LIKE ? OR slug LIKE ?)";
-                    $term = '%' . trim($search) . '%';
-                    $params[] = $term;
-                    $params[] = $term;
-                    $params[] = $term;
-                }
-                $sql .= " ORDER BY CASE type WHEN 'step' THEN 1 ELSE 2 END, step_number ASC, created_at DESC";
-                $stmt = $this->db->prepare($sql);
-                $stmt->execute($params);
-                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                $dbSuccess = true;
-
-                foreach ($rows as $row) {
-                    $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
-                    $row['tasks'] = is_array($tasks) ? array_values($tasks) : [];
-                    $row['speaker_avatar'] = !empty($row['speaker_avatar']) ? $row['speaker_avatar'] : '🏯';
-                    $row['choices'] = $this->normalizeChoices($row['choices_json'] ?? []);
-                    if (empty($row['choices'])) {
-                        $row['choices'] = [
-                            ['label' => '⚔️ Décréter la Marche du Fief', 'outcome' => $row['rewards_summary'] ?? '', 'style' => 'warning']
-                        ];
-                    }
-                    $row['metrics'] = $this->calculateTaskMetrics($row['tasks']);
-                    $results[] = $row;
-                }
-            } catch (Throwable $e) {
-                // Erreur DB -> Fallback JSON
-                $dbSuccess = false;
+        try {
+            $sql = "SELECT * FROM narrative_scenarios WHERE 1=1";
+            $params = [];
+            if ($type && in_array($type, self::VALID_TYPES, true)) {
+                $sql .= " AND type = ?";
+                $params[] = $type;
             }
-        }
+            if ($status && in_array($status, self::VALID_STATUSES, true)) {
+                $sql .= " AND status = ?";
+                $params[] = $status;
+            }
+            if ($search && trim($search) !== '') {
+                $sql .= " AND (title LIKE ? OR synopsis LIKE ? OR slug LIKE ?)";
+                $term = '%' . trim($search) . '%';
+                $params[] = $term;
+                $params[] = $term;
+                $params[] = $term;
+            }
+            $sql .= " ORDER BY CASE type WHEN 'step' THEN 1 ELSE 2 END, step_number ASC, created_at DESC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if (!$dbSuccess) {
-            $all = $this->loadFromJson();
-            foreach ($all as $row) {
-                if ($type && $row['type'] !== $type) continue;
-                if ($status && $row['status'] !== $status) continue;
-                if ($search && trim($search) !== '') {
-                    $term = mb_strtolower(trim($search));
-                    $txt = mb_strtolower(($row['title'] ?? '') . ' ' . ($row['synopsis'] ?? '') . ' ' . ($row['slug'] ?? ''));
-                    if (!str_contains($txt, $term)) continue;
-                }
-                $tasks = isset($row['tasks']) && is_array($row['tasks']) ? array_values($row['tasks']) : [];
-                $row['tasks'] = $tasks;
+            foreach ($rows as $row) {
+                $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
+                $row['tasks'] = is_array($tasks) ? array_values($tasks) : [];
                 $row['speaker_avatar'] = !empty($row['speaker_avatar']) ? $row['speaker_avatar'] : '🏯';
-                $row['choices'] = $this->normalizeChoices($row['choices'] ?? ($row['choices_json'] ?? []));
+                $row['choices'] = $this->normalizeChoices($row['choices_json'] ?? []);
                 if (empty($row['choices'])) {
                     $row['choices'] = [
                         ['label' => '⚔️ Décréter la Marche du Fief', 'outcome' => $row['rewards_summary'] ?? '', 'style' => 'warning']
                     ];
                 }
-                $row['metrics'] = $this->calculateTaskMetrics($tasks);
+                $row['metrics'] = $this->calculateTaskMetrics($row['tasks']);
                 $results[] = $row;
             }
-
-            usort($results, function($a, $b) {
-                if ($a['type'] !== $b['type']) {
-                    return $a['type'] === 'step' ? -1 : 1;
-                }
-                if ($a['type'] === 'step') {
-                    return ($a['step_number'] ?? 0) <=> ($b['step_number'] ?? 0);
-                }
-                return ($b['created_at'] ?? 0) <=> ($a['created_at'] ?? 0);
-            });
+        } catch (Throwable $e) {
+            return [];
         }
 
         return $results;
     }
 
     /**
-     * Récupère un scénario par son ID
+     * Récupère un scénario par son ID depuis la base de données
      */
     public function getScenarioById(int $id): ?array {
-        if ($id <= 0) return null;
+        if ($id <= 0 || !$this->db) return null;
 
-        if ($this->db) {
-            try {
-                $stmt = $this->db->prepare("SELECT * FROM narrative_scenarios WHERE id = ? LIMIT 1");
-                $stmt->execute([$id]);
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($row) {
-                    $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
-                    $row['tasks'] = is_array($tasks) ? array_values($tasks) : [];
-                    $row['speaker_avatar'] = !empty($row['speaker_avatar']) ? $row['speaker_avatar'] : '🏯';
-                    $row['choices'] = $this->normalizeChoices($row['choices_json'] ?? []);
-                    if (empty($row['choices'])) {
-                        $row['choices'] = [
-                            ['label' => '⚔️ Décréter la Marche du Fief', 'outcome' => $row['rewards_summary'] ?? '', 'style' => 'warning']
-                        ];
-                    }
-                    $row['metrics'] = $this->calculateTaskMetrics($row['tasks']);
-                    return $row;
-                }
-            } catch (Throwable $e) {
-                // Fallback
-            }
-        }
-
-        $all = $this->loadFromJson();
-        foreach ($all as $item) {
-            if ((int)$item['id'] === $id) {
-                $item['tasks'] = isset($item['tasks']) && is_array($item['tasks']) ? array_values($item['tasks']) : [];
-                $item['speaker_avatar'] = !empty($item['speaker_avatar']) ? $item['speaker_avatar'] : '🏯';
-                $item['choices'] = $this->normalizeChoices($item['choices'] ?? ($item['choices_json'] ?? []));
-                if (empty($item['choices'])) {
-                    $item['choices'] = [
-                        ['label' => '⚔️ Décréter la Marche du Fief', 'outcome' => $item['rewards_summary'] ?? '', 'style' => 'warning']
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM narrative_scenarios WHERE id = ? LIMIT 1");
+            $stmt->execute([$id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
+                $row['tasks'] = is_array($tasks) ? array_values($tasks) : [];
+                $row['speaker_avatar'] = !empty($row['speaker_avatar']) ? $row['speaker_avatar'] : '🏯';
+                $row['choices'] = $this->normalizeChoices($row['choices_json'] ?? []);
+                if (empty($row['choices'])) {
+                    $row['choices'] = [
+                        ['label' => '⚔️ Décréter la Marche du Fief', 'outcome' => $row['rewards_summary'] ?? '', 'style' => 'warning']
                     ];
                 }
-                $item['metrics'] = $this->calculateTaskMetrics($item['tasks']);
-                return $item;
+                $row['metrics'] = $this->calculateTaskMetrics($row['tasks']);
+                return $row;
             }
+        } catch (Throwable $e) {
+            return null;
         }
+
         return null;
     }
 
@@ -787,9 +613,10 @@ class ScenarioEngine {
     }
 
     /**
-     * Met à jour un scénario existant
+     * Met à jour un scénario existant en base de données SQL uniquement
      */
     public function updateScenario(int $id, array $data): bool {
+        if (!$this->db) return false;
         $existing = $this->getScenarioById($id);
         if (!$existing) return false;
 
@@ -831,56 +658,22 @@ class ScenarioEngine {
 
         $tasksJson = json_encode($tasks, JSON_UNESCAPED_UNICODE);
 
-        if ($this->db) {
-            try {
-                $stmt = $this->db->prepare("
-                    UPDATE narrative_scenarios
-                    SET slug = ?, type = ?, step_number = ?, title = ?, subtitle = ?, era = ?, synopsis = ?,
-                        speaker_name = ?, speaker_role = ?, speaker_avatar = ?, dialogue = ?, trigger_condition = ?,
-                        rewards_summary = ?, choices_json = ?, status = ?, tasks_json = ?, updated_at = ?
-                    WHERE id = ?
-                ");
-                $stmt->execute([
-                    $slug, $type, $stepNumber, $title, $subtitle, $era, $synopsis,
-                    $speakerName, $speakerRole, $speakerAvatar, $dialogue, $triggerCond,
-                    $rewards, $choicesJson, $status, $tasksJson, $now, $id
-                ]);
-            } catch (Throwable $e) {
-                // Fallback
-            }
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE narrative_scenarios
+                SET slug = ?, type = ?, step_number = ?, title = ?, subtitle = ?, era = ?, synopsis = ?,
+                    speaker_name = ?, speaker_role = ?, speaker_avatar = ?, dialogue = ?, trigger_condition = ?,
+                    rewards_summary = ?, choices_json = ?, status = ?, tasks_json = ?, updated_at = ?
+                WHERE id = ?
+            ");
+            return $stmt->execute([
+                $slug, $type, $stepNumber, $title, $subtitle, $era, $synopsis,
+                $speakerName, $speakerRole, $speakerAvatar, $dialogue, $triggerCond,
+                $rewards, $choicesJson, $status, $tasksJson, $now, $id
+            ]);
+        } catch (Throwable $e) {
+            return false;
         }
-
-        // Miroir JSON
-        $all = $this->loadFromJson();
-        foreach ($all as $idx => $item) {
-            if ((int)$item['id'] === $id) {
-                $all[$idx] = [
-                    'id'                => $id,
-                    'slug'              => $slug,
-                    'type'              => $type,
-                    'step_number'       => $stepNumber,
-                    'title'             => $title,
-                    'subtitle'          => $subtitle,
-                    'era'               => $era,
-                    'synopsis'          => $synopsis,
-                    'speaker_name'      => $speakerName,
-                    'speaker_role'      => $speakerRole,
-                    'speaker_avatar'    => $speakerAvatar,
-                    'dialogue'          => $dialogue,
-                    'trigger_condition' => $triggerCond,
-                    'rewards_summary'   => $rewards,
-                    'choices'           => $choices,
-                    'status'            => $status,
-                    'tasks'             => $tasks,
-                    'created_by'        => $item['created_by'] ?? 1,
-                    'created_at'        => $item['created_at'] ?? $now,
-                    'updated_at'        => $now
-                ];
-                break;
-            }
-        }
-        $this->saveToJson($all);
-        return true;
     }
 
     /**
@@ -917,26 +710,18 @@ class ScenarioEngine {
     }
 
     /**
-     * Supprime un scénario
+     * Supprime un scénario en base de données SQL uniquement
      */
     public function deleteScenario(int $id): bool {
-        if ($id <= 0) return false;
-        $deletedDb = false;
+        if ($id <= 0 || !$this->db) return false;
 
-        if ($this->db) {
-            try {
-                $stmt = $this->db->prepare("DELETE FROM narrative_scenarios WHERE id = ?");
-                $stmt->execute([$id]);
-                $deletedDb = ($stmt->rowCount() > 0);
-            } catch (Throwable $e) {}
+        try {
+            $stmt = $this->db->prepare("DELETE FROM narrative_scenarios WHERE id = ?");
+            $stmt->execute([$id]);
+            return $stmt->rowCount() > 0;
+        } catch (Throwable $e) {
+            return false;
         }
-
-        $all = $this->loadFromJson();
-        $beforeCount = count($all);
-        $filtered = array_filter($all, fn($item) => (int)($item['id'] ?? 0) !== $id);
-        $savedJson = $this->saveToJson(array_values($filtered));
-
-        return $deletedDb || $savedJson || (count($filtered) < $beforeCount);
     }
 
     /**
