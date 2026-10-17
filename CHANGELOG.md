@@ -3,6 +3,18 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.8] - 2026-10-17
+### Corrigé & Modifié (Fixed & Changed)
+- **Kanban Drag & Drop Sans Rechargement & Correction Définitive de la Suppression des Scénarios (`core/ScenarioEngine.php`, `views/gamestudio.php`, `views/gamestudio/narrative_scenarios.php`) :**
+  * **Glisser-Déposer (Drag & Drop HTML5) Natif & Persistance du Mode Kanban :**
+    - Dans le **Kanban Pipeline du Catalogue** (`#catalogView_kanban`), glisser-déposer une carte d'une colonne à l'autre déplace instantanément la carte dans le DOM, recalcule les compteurs des 5 colonnes et sauvegarde le statut en AJAX (`ajax_update_scenario_status`) sans recharger la page ni revenir à la vue Cartes.
+    - Dans le **Kanban Opérationnel des Tâches** du Studio (`#tasksKanbanBoardContainer`), glisser-déposer une tâche entre les 4 colonnes (*À faire*, *En cours*, *Bloqué*, *Terminé*) synchronise immédiatement le sélecteur de la tâche, la jauge métier et sauvegarde en AJAX (`ajax_update_task_status`).
+    - Mémorisation de la vue active du catalogue (`cards`, `timeline`, `kanban`) dans l'URL (`?view_mode=...`) et dans `localStorage`.
+  * **Correction de la Suppression des Scénarios (Synchronisation SQL ↔ JSON & Permissions) :**
+    - Synchronisation initiale unique (`INSERT IGNORE`) du miroir JSON vers la table MySQL `narrative_scenarios` avec fichier marqueur `.narrative_scenarios_seeded` empêchant la ré-injection automatique des scénarios par défaut après suppression.
+    - Suppression du repli abusif `if (empty($results))` dans `ScenarioEngine::getScenarios()` qui rechargeait le fichier JSON lorsque la requête SQL réussissait avec `0` ligne, et correction des permissions d'écriture (`0666`) sur `data/narrative_scenarios_storage.json`.
+    - Ajout de l'action `ajax_delete_scenario` et d'un bouton de suppression rapide 🗑️ directement sur les **Cartes du Catalogue** et les **Cartes du Kanban Pipeline**.
+
 ## [1.34.7] - 2026-10-17
 ### Ajouté & Modifié (Added & Changed)
 - **Refonte Ergonomique & Opérationnelle du Module Scénarios de Jeu — Studio Narrative Designer 2.0 (`core/ScenarioEngine.php`, `views/gamestudio.php`, `views/gamestudio/narrative_scenarios.php`) :**

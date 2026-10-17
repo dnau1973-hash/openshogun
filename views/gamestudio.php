@@ -265,6 +265,16 @@ if ($currentTab === 'dashboard') {
                     'msg'         => $updated ? "Statut du scénario #$scId mis à jour !" : "Impossible de modifier le statut."
                 ]);
                 exit;
+            } elseif ($action === 'ajax_delete_scenario') {
+                header('Content-Type: application/json; charset=UTF-8');
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                $deleted = $scenarioEngine->deleteScenario($scId);
+                echo json_encode([
+                    'ok'          => $deleted,
+                    'scenario_id' => $scId,
+                    'msg'         => $deleted ? "Scénario #$scId supprimé définitivement." : "Échec de la suppression du scénario #$scId."
+                ]);
+                exit;
             } elseif ($action === 'ajax_save_scenario') {
                 header('Content-Type: application/json; charset=UTF-8');
                 $scId = (int)($_POST['scenario_id'] ?? 0);

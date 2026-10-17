@@ -266,22 +266,89 @@ class ScenarioEngine {
     private function saveToJson(array $scenarios): bool {
         $dir = dirname($this->jsonStorageFile);
         if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
+            @mkdir($dir, 0777, true);
         }
-        return file_put_contents($this->jsonStorageFile, json_encode($scenarios, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false;
+        $ok = @file_put_contents($this->jsonStorageFile, json_encode(array_values($scenarios), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false;
+        if ($ok) {
+            @chmod($this->jsonStorageFile, 0666);
+        }
+        return $ok;
     }
 
     /**
-     * Ensemence les scénarios par défaut de haute qualité si la base est vide
+     * Ensemence les scénarios par défaut uniquement lors de la toute première initialisation
+     * et synchronise la table SQL depuis le miroir JSON si la table vient d'être créée.
      */
     private function ensureDefaultScenarios(): void {
-        $existing = $this->getScenarios();
-        if (!empty($existing)) return;
+        $seedMarker = dirname($this->jsonStorageFile) . '/.narrative_scenarios_seeded';
+        $jsonExists = file_exists($this->jsonStorageFile);
+        $jsonItems  = $jsonExists ? $this->loadFromJson() : [];
+
+        if ($this->db) {
+            try {
+                if (!file_exists($seedMarker) && !empty($jsonItems)) {
+                    foreach ($jsonItems as $item) {
+                        $now = time();
+                        $tasksJson = json_encode($item['tasks'] ?? [], JSON_UNESCAPED_UNICODE);
+                        $choicesJson = json_encode($this->normalizeChoices($item['choices'] ?? ($item['choices_json'] ?? [])), JSON_UNESCAPED_UNICODE);
+                        $stmtIns = $this->db->prepare("
+                            INSERT IGNORE INTO narrative_scenarios
+                            (id, slug, type, step_number, title, subtitle, era, synopsis, speaker_name, speaker_role, speaker_avatar, dialogue, trigger_condition, rewards_summary, choices_json, status, tasks_json, created_by, created_at, updated_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ");
+                        $stmtIns->execute([
+                            (int)($item['id'] ?? 0) ?: null,
+                            (string)($item['slug'] ?? ('scenario-' . $now)),
+                            (string)($item['type'] ?? 'step'),
+                            isset($item['step_number']) && $item['step_number'] !== '' ? (int)$item['step_number'] : null,
+                            (string)($item['title'] ?? 'Scénario'),
+                            (string)($item['subtitle'] ?? ''),
+                            (string)($item['era'] ?? ''),
+                            (string)($item['synopsis'] ?? ''),
+                            (string)($item['speaker_name'] ?? ''),
+                            (string)($item['speaker_role'] ?? ''),
+                            (string)($item['speaker_avatar'] ?? '🏯'),
+                            (string)($item['dialogue'] ?? ''),
+                            (string)($item['trigger_condition'] ?? ''),
+                            (string)($item['rewards_summary'] ?? ''),
+                            $choicesJson,
+                            (string)($item['status'] ?? 'draft'),
+                            $tasksJson,
+                            (int)($item['created_by'] ?? 1),
+                            (int)($item['created_at'] ?? $now),
+                            (int)($item['updated_at'] ?? $now)
+                        ]);
+                    }
+                    @file_put_contents($seedMarker, (string)time());
+                    @chmod($seedMarker, 0666);
+                    return;
+                }
+
+                $stmtCount = $this->db->query("SELECT COUNT(*) FROM narrative_scenarios");
+                $dbCount = (int)$stmtCount->fetchColumn();
+                if ($dbCount > 0) {
+                    if (!file_exists($seedMarker)) {
+                        @file_put_contents($seedMarker, (string)time());
+                        @chmod($seedMarker, 0666);
+                    }
+                    return;
+                }
+            } catch (Throwable $e) {
+                // Fallback JSON
+            }
+        }
+
+        // Si déjà initialisé une première fois (ou si le fichier JSON existe déjà), ne jamais ré-injecter les scénarios supprimés
+        if (file_exists($seedMarker) || $jsonExists) {
+            return;
+        }
 
         $defaults = $this->buildDefaultScenarios();
         foreach ($defaults as $scenario) {
             $this->saveScenarioFull($scenario);
         }
+        @file_put_contents($seedMarker, (string)time());
+        @chmod($seedMarker, 0666);
     }
 
     /**
@@ -495,6 +562,7 @@ class ScenarioEngine {
             $search  = isset($filters['search']) && $filters['search'] !== '' ? (string)$filters['search'] : null;
         }
         $results = [];
+        $dbSuccess = false;
 
         if ($this->db) {
             try {
@@ -519,6 +587,7 @@ class ScenarioEngine {
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute($params);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $dbSuccess = true;
 
                 foreach ($rows as $row) {
                     $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
@@ -535,10 +604,11 @@ class ScenarioEngine {
                 }
             } catch (Throwable $e) {
                 // Erreur DB -> Fallback JSON
+                $dbSuccess = false;
             }
         }
 
-        if (empty($results)) {
+        if (!$dbSuccess) {
             $all = $this->loadFromJson();
             foreach ($all as $row) {
                 if ($type && $row['type'] !== $type) continue;
@@ -850,16 +920,23 @@ class ScenarioEngine {
      * Supprime un scénario
      */
     public function deleteScenario(int $id): bool {
+        if ($id <= 0) return false;
+        $deletedDb = false;
+
         if ($this->db) {
             try {
                 $stmt = $this->db->prepare("DELETE FROM narrative_scenarios WHERE id = ?");
                 $stmt->execute([$id]);
+                $deletedDb = ($stmt->rowCount() > 0);
             } catch (Throwable $e) {}
         }
 
         $all = $this->loadFromJson();
-        $filtered = array_filter($all, fn($item) => (int)$item['id'] !== $id);
-        return $this->saveToJson(array_values($filtered));
+        $beforeCount = count($all);
+        $filtered = array_filter($all, fn($item) => (int)($item['id'] ?? 0) !== $id);
+        $savedJson = $this->saveToJson(array_values($filtered));
+
+        return $deletedDb || $savedJson || (count($filtered) < $beforeCount);
     }
 
     /**

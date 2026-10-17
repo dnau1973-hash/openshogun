@@ -870,8 +870,12 @@ if ($viewAction === 'edit' || $viewAction === 'create'):
                             <?php endforeach; ?>
                         </div>
 
-                        <!-- VUE B : KANBAN OPÉRATIONNEL DES TÂCHES DU SCÉNARIO (4 COLONNES) -->
+                        <!-- VUE B : KANBAN OPÉRATIONNEL DES TÂCHES DU SCÉNARIO (4 COLONNES DRAG & DROP) -->
                         <div id="tasksKanbanBoardContainer" style="display: none;">
+                            <div class="alert alert-teal bg-teal-lt border-0 py-2 px-3 mb-3 d-flex align-items-center gap-2 small">
+                                <i class="fa-solid fa-hand-pointer"></i>
+                                <span><strong>Glisser-Déposer (Drag &amp; Drop) actif :</strong> faites glisser une carte de tâche d'une colonne à l'autre pour modifier instantanément son statut sans recharger la page.</span>
+                            </div>
                             <div class="row g-3">
                                 <?php
                                 $taskKanbanCols = [
@@ -888,7 +892,13 @@ if ($viewAction === 'edit' || $viewAction === 'create'):
                                                 <span class="fw-bold small"><?= $kColCfg['title'] ?></span>
                                                 <span class="badge bg-white text-dark fw-bold" id="kanbanTaskColCount_<?= $kColKey ?>">0</span>
                                             </div>
-                                            <div class="card-body p-2 d-flex flex-column gap-2" id="kanbanTaskColBody_<?= $kColKey ?>" style="min-height: 320px;">
+                                            <div class="card-body p-2 d-flex flex-column gap-2 kanban-dropzone"
+                                                 id="kanbanTaskColBody_<?= $kColKey ?>"
+                                                 data-task-status="<?= $kColKey ?>"
+                                                 ondragover="onTaskKanbanDragOver(event)"
+                                                 ondragleave="onTaskKanbanDragLeave(event)"
+                                                 ondrop="onTaskKanbanDrop(event, '<?= $kColKey ?>')"
+                                                 style="min-height: 320px;">
                                                 <!-- Peuplé dynamiquement depuis les cartes de tâches du DOM -->
                                             </div>
                                         </div>
@@ -991,6 +1001,33 @@ else:
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 0 4px #f3e8ff;
+}
+.kanban-draggable-card {
+    cursor: grab;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    user-select: none;
+}
+.kanban-draggable-card:hover {
+    border-color: #9333ea !important;
+    box-shadow: 0 4px 12px rgba(107, 33, 168, 0.12) !important;
+    transform: translateY(-1px);
+}
+.kanban-draggable-card:active {
+    cursor: grabbing;
+}
+.kanban-draggable-card.kanban-dragging {
+    opacity: 0.45;
+    transform: scale(0.97);
+    border: 2px dashed #9333ea !important;
+}
+.kanban-dropzone {
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    border-radius: 0 0 8px 8px;
+}
+.kanban-dropzone.kanban-dropzone-active {
+    background-color: rgba(147, 51, 234, 0.08) !important;
+    outline: 2px dashed #9333ea;
+    outline-offset: -4px;
 }
 </style>
 
@@ -1213,7 +1250,7 @@ else:
                     $barCol = ($pct >= 100) ? 'bg-success' : (($pct >= 50) ? 'bg-teal' : (($pct > 0) ? 'bg-primary' : 'bg-secondary'));
                     $scChoices = $sc['choices'] ?? [];
                     ?>
-                    <div class="col-md-12 col-xl-6 mb-3">
+                    <div class="col-md-12 col-xl-6 mb-3" id="catalogCardCol_<?= $sc['id'] ?>">
                         <div class="card shadow-sm border h-100 d-flex flex-column transition-hover">
                             <!-- En-tête avec sélecteur rapide de statut AJAX -->
                             <div class="card-header bg-light-subtle d-flex justify-content-between align-items-center py-2 px-3 border-bottom flex-wrap gap-2">
@@ -1230,8 +1267,9 @@ else:
 
                                     <!-- Changement rapide du statut du scénario en 1 clic AJAX -->
                                     <select class="form-select form-select-sm fw-bold py-0 ps-2 pe-4 border-secondary-subtle"
+                                            id="cardStatusSelect_<?= $sc['id'] ?>"
                                             style="font-size: 0.74rem; width: auto; height: 26px;"
-                                            onchange="quickUpdateScenarioStatusAjax(<?= $sc['id'] ?>, this.value)">
+                                            onchange="movePipelineKanbanCard(<?= $sc['id'] ?>, this.value)">
                                         <?php foreach ($statusLabels as $stK => $stInfo): ?>
                                             <option value="<?= $stK ?>" <?= ($sc['status'] === $stK) ? 'selected' : '' ?>>
                                                 <?= $stInfo['label'] ?>
@@ -1349,6 +1387,9 @@ else:
                                     </button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm p-1 px-2" title="Dupliquer" onclick="duplicateCurrentScenario(<?= $sc['id'] ?>)">
                                         <i class="fa-solid fa-copy"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm p-1 px-2" title="Supprimer ce scénario" onclick="deleteScenarioFromCatalogAjax(<?= $sc['id'] ?>)">
+                                        <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                     <a href="?page=gamestudio&tab=narrative_scenarios&action=edit&id=<?= $sc['id'] ?>" class="btn btn-purple btn-sm fw-bold d-inline-flex align-items-center gap-1">
                                         <i class="fa-solid fa-pen-to-square"></i>
@@ -1486,9 +1527,16 @@ else:
         </div>
 
         <!-- ========================================================================= -->
-        <!-- VUE CATALOGUE 3 : KANBAN PIPELINE DE PRODUCTION (5 COLONNES)              -->
+        <!-- VUE CATALOGUE 3 : KANBAN PIPELINE DE PRODUCTION (5 COLONNES DRAG & DROP)  -->
         <!-- ========================================================================= -->
         <div id="catalogView_kanban" style="<?= $catalogView === 'kanban' ? '' : 'display:none;' ?>">
+            <div class="alert alert-purple bg-purple-lt border-0 py-2 px-3 mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-hand-pointer"></i>
+                    <span><strong>Glisser-Déposer (Drag &amp; Drop) actif :</strong> saisissez une carte de scénario et déposez-la dans une autre colonne pour faire évoluer son statut en direct sans quitter le Kanban.</span>
+                </div>
+                <span class="badge bg-purple text-white">Sauvegarde AJAX instantanée</span>
+            </div>
             <div class="row g-3">
                 <?php
                 $kanbanColumns = [
@@ -1498,7 +1546,6 @@ else:
                     'ready'         => ['title' => '✅ Prêt QA',        'bg' => 'bg-teal-lt text-teal'],
                     'published'     => ['title' => '🚀 En ligne (Live)','bg' => 'bg-success-lt text-success']
                 ];
-                $kanbanKeys = array_keys($kanbanColumns);
                 foreach ($kanbanColumns as $colStatus => $colDef):
                     $colItems = array_filter($scenarios, fn($s) => ($s['status'] ?? 'draft') === $colStatus);
                 ?>
@@ -1506,26 +1553,40 @@ else:
                         <div class="card shadow-sm border h-100 bg-light-subtle">
                             <div class="card-header py-2 px-3 <?= $colDef['bg'] ?> d-flex justify-content-between align-items-center">
                                 <span class="fw-bold small"><?= $colDef['title'] ?></span>
-                                <span class="badge bg-white text-dark fw-bold"><?= count($colItems) ?></span>
+                                <span class="badge bg-white text-dark fw-bold" id="kanbanPipelineColCount_<?= $colStatus ?>"><?= count($colItems) ?></span>
                             </div>
-                            <div class="card-body p-2 d-flex flex-column gap-2" style="min-height: 420px;">
+                            <div class="card-body p-2 d-flex flex-column gap-2 kanban-dropzone"
+                                 id="kanbanPipelineColBody_<?= $colStatus ?>"
+                                 data-pipeline-status="<?= $colStatus ?>"
+                                 ondragover="onPipelineKanbanDragOver(event)"
+                                 ondragleave="onPipelineKanbanDragLeave(event)"
+                                 ondrop="onPipelineKanbanDrop(event, '<?= $colStatus ?>')"
+                                 style="min-height: 440px;">
                                 <?php foreach ($colItems as $kSc): ?>
                                     <?php
-                                    $curIdx = array_search($colStatus, $kanbanKeys, true);
-                                    $prevSt = ($curIdx !== false && $curIdx > 0) ? $kanbanKeys[$curIdx - 1] : null;
-                                    $nextSt = ($curIdx !== false && $curIdx < count($kanbanKeys) - 1) ? $kanbanKeys[$curIdx + 1] : null;
                                     $pct = $kSc['metrics']['percent'] ?? 0;
                                     ?>
-                                    <div class="card border shadow-xs bg-white p-2">
+                                    <div class="card border shadow-xs bg-white p-2 kanban-draggable-card"
+                                         id="kanbanPipelineCard_<?= $kSc['id'] ?>"
+                                         draggable="true"
+                                         data-scenario-id="<?= $kSc['id'] ?>"
+                                         data-status="<?= $colStatus ?>"
+                                         ondragstart="onPipelineKanbanDragStart(event, <?= $kSc['id'] ?>)"
+                                         ondragend="onPipelineKanbanDragEnd(event)">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <?php if ($kSc['type'] === 'step'): ?>
-                                                <span class="badge bg-purple text-white" style="font-size:0.68rem;">Step #<?= (int)$kSc['step_number'] ?></span>
-                                            <?php else: ?>
-                                                <span class="badge bg-danger text-white" style="font-size:0.68rem;">🏮 Event</span>
-                                            <?php endif; ?>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-grip-vertical text-muted" style="font-size:0.75rem;" title="Glisser-déposer cette carte"></i>
+                                                <?php if ($kSc['type'] === 'step'): ?>
+                                                    <span class="badge bg-purple text-white" style="font-size:0.68rem;">Step #<?= (int)$kSc['step_number'] ?></span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-danger text-white" style="font-size:0.68rem;">🏮 Event</span>
+                                                <?php endif; ?>
+                                            </div>
                                             <span class="small font-monospace fw-bold text-secondary" style="font-size:0.7rem;"><?= $pct ?>%</span>
                                         </div>
-                                        <a href="?page=gamestudio&tab=narrative_scenarios&action=edit&id=<?= $kSc['id'] ?>" class="fw-bold text-dark text-decoration-none small d-block mb-1">
+                                        <a href="?page=gamestudio&tab=narrative_scenarios&action=edit&id=<?= $kSc['id'] ?>"
+                                           draggable="false"
+                                           class="fw-bold text-dark text-decoration-none small d-block mb-1">
                                             <?= htmlspecialchars($kSc['title']) ?>
                                         </a>
                                         <div class="small text-muted mb-2" style="font-size:0.72rem;">
@@ -1535,25 +1596,24 @@ else:
                                             <div class="progress-bar bg-teal" style="width: <?= $pct ?>%;"></div>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center pt-1 border-top">
-                                            <?php if ($prevSt): ?>
-                                                <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Reculer vers <?= $prevSt ?>" onclick="quickUpdateScenarioStatusAjax(<?= $kSc['id'] ?>, '<?= $prevSt ?>', true)">
-                                                    <i class="fa-solid fa-arrow-left" style="font-size:0.7rem;"></i>
+                                            <span class="small text-muted font-monospace" style="font-size:0.66rem;">
+                                                <i class="fa-solid fa-up-down-left-right me-1"></i>Glisser
+                                            </span>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <button type="button"
+                                                        class="btn btn-outline-danger btn-sm py-0 px-1"
+                                                        style="font-size:0.7rem;"
+                                                        title="Supprimer ce scénario"
+                                                        onclick="deleteScenarioFromCatalogAjax(<?= $kSc['id'] ?>)">
+                                                    <i class="fa-solid fa-trash-can"></i>
                                                 </button>
-                                            <?php else: ?>
-                                                <span></span>
-                                            <?php endif; ?>
-
-                                            <a href="?page=gamestudio&tab=narrative_scenarios&action=edit&id=<?= $kSc['id'] ?>" class="btn btn-ghost-purple btn-sm py-0 px-2 fw-bold" style="font-size:0.72rem;">
-                                                Ouvrir
-                                            </a>
-
-                                            <?php if ($nextSt): ?>
-                                                <button type="button" class="btn btn-outline-purple btn-sm py-0 px-2" title="Avancer vers <?= $nextSt ?>" onclick="quickUpdateScenarioStatusAjax(<?= $kSc['id'] ?>, '<?= $nextSt ?>', true)">
-                                                    <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
-                                                </button>
-                                            <?php else: ?>
-                                                <span></span>
-                                            <?php endif; ?>
+                                                <a href="?page=gamestudio&tab=narrative_scenarios&action=edit&id=<?= $kSc['id'] ?>"
+                                                   draggable="false"
+                                                   class="btn btn-ghost-purple btn-sm py-0 px-2 fw-bold"
+                                                   style="font-size:0.72rem;">
+                                                    <i class="fa-solid fa-pen-to-square me-1"></i>Studio
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -1655,8 +1715,9 @@ function markFormDirty(dirty = true) {
     }
 }
 
-// Bascule des 3 vues du Catalogue (Cartes / Frise / Kanban)
+// Bascule des 3 vues du Catalogue (Cartes / Frise / Kanban) avec persistance URL & localStorage
 function switchCatalogViewMode(mode) {
+    if (!['cards', 'timeline', 'kanban'].includes(mode)) mode = 'cards';
     ['cards', 'timeline', 'kanban'].forEach(m => {
         const panel = document.getElementById('catalogView_' + m);
         const btn   = document.getElementById('btnCatView_' + m);
@@ -1669,10 +1730,103 @@ function switchCatalogViewMode(mode) {
     });
     const hiddenInput = document.getElementById('filterFormViewMode');
     if (hiddenInput) hiddenInput.value = mode;
+
+    try {
+        localStorage.setItem('openshogun_narrative_catalog_view', mode);
+        const url = new URL(window.location.href);
+        url.searchParams.set('view_mode', mode);
+        window.history.replaceState({}, '', url.toString());
+    } catch (e) {}
 }
 
-// Mise à jour rapide du statut d'un scénario depuis le catalogue ou le Kanban
-function quickUpdateScenarioStatusAjax(scenarioId, newStatus, reloadOnSuccess = false) {
+// ---------------------------------------------------------------------------
+// DRAG & DROP — KANBAN PIPELINE DU CATALOGUE (SANS RECHARGEMENT DE PAGE)
+// ---------------------------------------------------------------------------
+let draggedPipelineScenarioId = null;
+
+function onPipelineKanbanDragStart(e, scenarioId) {
+    draggedPipelineScenarioId = scenarioId;
+    if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', String(scenarioId));
+    }
+    const card = document.getElementById('kanbanPipelineCard_' + scenarioId);
+    if (card) {
+        setTimeout(() => card.classList.add('kanban-dragging'), 0);
+    }
+}
+
+function onPipelineKanbanDragEnd(e) {
+    document.querySelectorAll('.kanban-draggable-card.kanban-dragging').forEach(el => {
+        el.classList.remove('kanban-dragging');
+    });
+    document.querySelectorAll('.kanban-dropzone.kanban-dropzone-active').forEach(el => {
+        el.classList.remove('kanban-dropzone-active');
+    });
+    draggedPipelineScenarioId = null;
+}
+
+function onPipelineKanbanDragOver(e) {
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    const zone = e.currentTarget;
+    if (zone && !zone.classList.contains('kanban-dropzone-active')) {
+        zone.classList.add('kanban-dropzone-active');
+    }
+}
+
+function onPipelineKanbanDragLeave(e) {
+    const zone = e.currentTarget;
+    if (zone && !zone.contains(e.relatedTarget)) {
+        zone.classList.remove('kanban-dropzone-active');
+    }
+}
+
+function onPipelineKanbanDrop(e, targetStatus) {
+    e.preventDefault();
+    const zone = e.currentTarget;
+    if (zone) zone.classList.remove('kanban-dropzone-active');
+
+    const scId = draggedPipelineScenarioId || parseInt(e.dataTransfer?.getData('text/plain') || '0', 10);
+    if (!scId) return;
+    movePipelineKanbanCard(scId, targetStatus);
+}
+
+// Déplace une carte de scénario dans le Kanban Pipeline en direct + synchronise en AJAX sans recharger
+function movePipelineKanbanCard(scenarioId, newStatus) {
+    const card = document.getElementById('kanbanPipelineCard_' + scenarioId);
+    const targetCol = document.getElementById('kanbanPipelineColBody_' + newStatus);
+
+    if (card && targetCol) {
+        const oldStatus = card.getAttribute('data-status');
+        if (oldStatus !== newStatus) {
+            card.setAttribute('data-status', newStatus);
+            targetCol.appendChild(card);
+            recalculatePipelineKanbanCounts();
+        }
+    }
+
+    // Synchroniser aussi le sélecteur de la vue Cartes s'il est présent
+    const cardSelect = document.getElementById('cardStatusSelect_' + scenarioId);
+    if (cardSelect && cardSelect.value !== newStatus) {
+        cardSelect.value = newStatus;
+    }
+
+    quickUpdateScenarioStatusAjax(scenarioId, newStatus);
+}
+
+function recalculatePipelineKanbanCounts() {
+    ['draft', 'in_review', 'in_production', 'ready', 'published'].forEach(st => {
+        const col = document.getElementById('kanbanPipelineColBody_' + st);
+        const badge = document.getElementById('kanbanPipelineColCount_' + st);
+        if (col && badge) {
+            badge.textContent = col.querySelectorAll('.kanban-draggable-card').length;
+        }
+    });
+}
+
+// Mise à jour rapide du statut d'un scénario en AJAX (zéro rechargement de page)
+function quickUpdateScenarioStatusAjax(scenarioId, newStatus) {
     const fd = new FormData();
     fd.append('action', 'ajax_update_scenario_status');
     fd.append('scenario_id', scenarioId);
@@ -1683,9 +1837,6 @@ function quickUpdateScenarioStatusAjax(scenarioId, newStatus, reloadOnSuccess = 
         .then(res => {
             if (res.ok) {
                 showStudioToast(res.msg || 'Statut mis à jour !');
-                if (reloadOnSuccess) {
-                    setTimeout(() => window.location.reload(), 350);
-                }
             } else {
                 showStudioToast(res.msg || 'Erreur de mise à jour', true);
             }
@@ -1964,6 +2115,62 @@ function switchMatrixDisplayMode(mode) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// DRAG & DROP — KANBAN OPÉRATIONNEL DES TÂCHES (ONGLET 2 DU STUDIO)
+// ---------------------------------------------------------------------------
+let draggedKanbanTaskInfo = null;
+
+function onTaskKanbanDragStart(e, taskId, roleCode) {
+    draggedKanbanTaskInfo = { taskId: String(taskId), roleCode: String(roleCode) };
+    if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', JSON.stringify(draggedKanbanTaskInfo));
+    }
+    const el = e.currentTarget;
+    if (el) setTimeout(() => el.classList.add('kanban-dragging'), 0);
+}
+
+function onTaskKanbanDragEnd(e) {
+    document.querySelectorAll('.kanban-draggable-card.kanban-dragging').forEach(el => {
+        el.classList.remove('kanban-dragging');
+    });
+    document.querySelectorAll('.kanban-dropzone.kanban-dropzone-active').forEach(el => {
+        el.classList.remove('kanban-dropzone-active');
+    });
+    draggedKanbanTaskInfo = null;
+}
+
+function onTaskKanbanDragOver(e) {
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    const zone = e.currentTarget;
+    if (zone && !zone.classList.contains('kanban-dropzone-active')) {
+        zone.classList.add('kanban-dropzone-active');
+    }
+}
+
+function onTaskKanbanDragLeave(e) {
+    const zone = e.currentTarget;
+    if (zone && !zone.contains(e.relatedTarget)) {
+        zone.classList.remove('kanban-dropzone-active');
+    }
+}
+
+function onTaskKanbanDrop(e, targetStatus) {
+    e.preventDefault();
+    const zone = e.currentTarget;
+    if (zone) zone.classList.remove('kanban-dropzone-active');
+
+    let info = draggedKanbanTaskInfo;
+    if (!info && e.dataTransfer) {
+        try {
+            info = JSON.parse(e.dataTransfer.getData('text/plain'));
+        } catch (err) {}
+    }
+    if (!info || !info.taskId) return;
+    changeTaskStatusFromKanban(info.taskId, info.roleCode, targetStatus);
+}
+
 // Construction dynamique du Kanban des tâches à partir des cartes du formulaire
 function syncKanbanBoardTasks() {
     const cols = { todo: [], in_progress: [], blocked: [], done: [] };
@@ -1994,11 +2201,14 @@ function syncKanbanBoardTasks() {
         bodyEl.innerHTML = '';
         list.forEach(item => {
             const cardEl = document.createElement('div');
-            cardEl.className = 'card border bg-white p-2 shadow-xs';
+            cardEl.className = 'card border bg-white p-2 shadow-xs kanban-draggable-card';
+            cardEl.setAttribute('draggable', 'true');
+            cardEl.addEventListener('dragstart', (ev) => onTaskKanbanDragStart(ev, item.taskId, item.roleCode));
+            cardEl.addEventListener('dragend', (ev) => onTaskKanbanDragEnd(ev));
             cardEl.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <span class="badge bg-${item.rDef.color}-lt text-${item.rDef.color} fw-bold" style="font-size:0.68rem;">
-                        <i class="fa-solid ${item.rDef.icon} me-1"></i>${item.rDef.name}
+                        <i class="fa-solid fa-grip-vertical me-1 text-muted"></i><i class="fa-solid ${item.rDef.icon} me-1"></i>${item.rDef.name}
                     </span>
                     <span class="font-monospace text-muted" style="font-size:0.68rem;">#${item.taskId}</span>
                 </div>
@@ -2023,9 +2233,24 @@ function changeTaskStatusFromKanban(taskId, roleCode, newStatus) {
     const card = document.getElementById('taskCard_' + taskId);
     if (!card) return;
     const sel = card.querySelector('.task-status-select');
-    if (sel) {
+    if (sel && sel.value !== newStatus) {
         sel.value = newStatus;
         onTaskStatusSelectChange(taskId, roleCode, newStatus);
+
+        const scId = parseInt(document.getElementById('fullScenId')?.value || '0', 10);
+        if (scId > 0) {
+            const fd = new FormData();
+            fd.append('action', 'ajax_update_task_status');
+            fd.append('scenario_id', scId);
+            fd.append('task_id', taskId);
+            fd.append('task_status', newStatus);
+            fetch('?page=gamestudio&tab=narrative_scenarios', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.ok) showStudioToast(res.msg || 'Statut de la tâche mis à jour !');
+                })
+                .catch(() => {});
+        }
     }
 }
 
@@ -2314,12 +2539,45 @@ function duplicateCurrentScenario(scId) {
     document.getElementById('catalogQuickActionForm').submit();
 }
 
-// Suppression d'un scénario
+// Suppression d'un scénario (depuis l'éditeur pleine page -> redirection catalogue)
 function deleteCurrentScenario(scId) {
     if (!confirm(`Supprimer définitivement le scénario #${scId} et toutes ses tâches ? Cette action est irréversible.`)) return;
     document.getElementById('catQuickActionName').value = 'delete_scenario';
     document.getElementById('catQuickScenarioId').value = scId;
     document.getElementById('catalogQuickActionForm').submit();
+}
+
+// Suppression rapide AJAX d'un scénario depuis la vue Cartes ou le Kanban Pipeline (sans quitter la vue active)
+function deleteScenarioFromCatalogAjax(scId) {
+    if (!confirm(`Supprimer définitivement le scénario #${scId} et toutes ses tâches ? Cette action est irréversible.`)) return;
+
+    const fd = new FormData();
+    fd.append('action', 'ajax_delete_scenario');
+    fd.append('ajax', '1');
+    fd.append('scenario_id', scId);
+
+    fetch('?page=gamestudio&tab=narrative_scenarios', {
+        method: 'POST',
+        body: fd
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            const cardCol = document.getElementById('catalogCardCol_' + scId);
+            if (cardCol) cardCol.remove();
+            const kanbanCard = document.getElementById('kanbanPipelineCard_' + scId);
+            if (kanbanCard) kanbanCard.remove();
+            if (typeof refreshPipelineKanbanCounts === 'function') {
+                refreshPipelineKanbanCounts();
+            }
+            showStudioToast(data.msg || `Scénario #${scId} supprimé définitivement.`);
+        } else {
+            showStudioToast(data.msg || 'Échec de la suppression du scénario.', true);
+        }
+    })
+    .catch(err => {
+        showStudioToast('Erreur réseau : ' + err, true);
+    });
 }
 
 // Export GDD Markdown
@@ -2344,10 +2602,21 @@ function copyExportMarkdownText() {
     });
 }
 
-// Initialisation au chargement du Studio
+// Initialisation au chargement du Studio ou du Catalogue
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('fullPageScenarioForm')) {
         renderInGamePreviewLive();
+    } else if (document.getElementById('catalogView_cards')) {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlMode = urlParams.get('view_mode');
+            const savedMode = localStorage.getItem('openshogun_narrative_catalog_view');
+            if (urlMode && ['cards', 'timeline', 'kanban'].includes(urlMode)) {
+                switchCatalogViewMode(urlMode);
+            } else if (savedMode && ['cards', 'timeline', 'kanban'].includes(savedMode)) {
+                switchCatalogViewMode(savedMode);
+            }
+        } catch (e) {}
     }
 });
 </script>
