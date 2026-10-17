@@ -487,7 +487,13 @@ class ScenarioEngine {
     /**
      * Récupère la liste de tous les scénarios avec filtres et progression des 10 tâches
      */
-    public function getScenarios(?string $type = null, ?string $status = null, ?string $search = null): array {
+    public function getScenarios(string|array|null $type = null, ?string $status = null, ?string $search = null): array {
+        if (is_array($type)) {
+            $filters = $type;
+            $type    = isset($filters['type']) && $filters['type'] !== '' ? (string)$filters['type'] : null;
+            $status  = isset($filters['status']) && $filters['status'] !== '' ? (string)$filters['status'] : null;
+            $search  = isset($filters['search']) && $filters['search'] !== '' ? (string)$filters['search'] : null;
+        }
         $results = [];
 
         if ($this->db) {
