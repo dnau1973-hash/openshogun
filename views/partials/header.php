@@ -1077,7 +1077,7 @@ $navItems = [
         }
         $moraleTooltip = implode('<br>', $moraleTooltipParts);
 
-        // Niveaux des terroirs ruraux & bonus détaillés pour les fiches au clic
+        // Niveaux des terroirs ruraux & des bâtiments urbains associés pour les sous-menus au clic
         $foretLvl      = (int)($ruralPlotsData['foret']['level'] ?? 1);
         $foretMaxLvl   = max(1, (int)($ruralPlotsData['foret']['max_level'] ?? 30));
         $carriereLvl   = (int)($ruralPlotsData['carriere']['level'] ?? 1);
@@ -1086,6 +1086,26 @@ $navItems = [
         $riziereMaxLvl = max(1, (int)($ruralPlotsData['riziere']['max_level'] ?? 30));
         $shrineLvl     = (int)($ruralPlotsData['sanctuaire_shinto']['level'] ?? 1);
         $shrineMaxLvl  = max(1, (int)($ruralPlotsData['sanctuaire_shinto']['max_level'] ?? 30));
+
+        // Niveaux des bâtiments urbains de la cité (depuis $pBld)
+        $hqLvl          = (int)($pBld['hq'] ?? 0);
+        $hqMaxLvl       = (int)(BUILDING_TYPES['hq']['max_level'] ?? 20);
+        $storageLvl     = (int)($pBld['storage'] ?? 0);
+        $storageMaxLvl  = (int)(BUILDING_TYPES['storage']['max_level'] ?? 20);
+        $tankLvl        = (int)($pBld['tank'] ?? 0);
+        $tankMaxLvl     = (int)(BUILDING_TYPES['tank']['max_level'] ?? 20);
+        $sawmillLvl     = (int)($pBld['sawmill'] ?? 0);
+        $sawmillMaxLvl  = (int)(BUILDING_TYPES['sawmill']['max_level'] ?? 20);
+        $stonemasonLvl  = (int)($pBld['stonemason'] ?? 0);
+        $stonemasonMaxLvl = (int)(BUILDING_TYPES['stonemason']['max_level'] ?? 20);
+        $grainMillLvl   = (int)($pBld['grain_mill'] ?? 0);
+        $grainMillMaxLvl= (int)(BUILDING_TYPES['grain_mill']['max_level'] ?? 20);
+        $blacksmithLvl  = (int)($pBld['blacksmith'] ?? 0);
+        $blacksmithMaxLvl = (int)(BUILDING_TYPES['blacksmith']['max_level'] ?? 20);
+        $teahouseLvl    = (int)($pBld['teahouse'] ?? 0);
+        $teahouseMaxLvl = (int)(BUILDING_TYPES['teahouse']['max_level'] ?? 20);
+        $marketLvl      = (int)($pBld['market'] ?? 0);
+        $marketMaxLvl   = (int)(BUILDING_TYPES['market']['max_level'] ?? 15);
 
         $bldBonuses    = $planet['prod_rates']['building_bonuses'] ?? [];
         $sawmillBonus  = (int)($bldBonuses['sawmill'] ?? 0);
@@ -1171,13 +1191,26 @@ $navItems = [
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
         }
         .hud-res-pill:hover, .hud-res-pill[aria-expanded="true"] {
-            border-color: rgba(32, 107, 196, 0.45);
+            border-color: rgba(32, 107, 196, 0.55);
             background: #f8fafc;
-            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
             transform: translateY(-1px);
         }
         .hud-res-pill::after {
             display: none !important;
+        }
+        /* Sous-menu flottant hors du clipping de #hudResTrack */
+        .hud-floating-menu.show {
+            position: fixed !important;
+            top: var(--hud-menu-top, 110px) !important;
+            left: var(--hud-menu-left, 16px) !important;
+            right: auto !important;
+            bottom: auto !important;
+            transform: none !important;
+            margin: 0 !important;
+            z-index: 1095 !important;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
         }
         .hud-slider-arrow {
             display: inline-flex;
@@ -1252,7 +1285,7 @@ $navItems = [
                                 <div class="progress-bar <?= $pctMetal >= 95 ? 'bg-danger' : ($pctMetal >= 80 ? 'bg-warning' : 'bg-success') ?>" id="bar-metal" style="width:<?= $pctMetal ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResWood" style="min-width:290px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResWood" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-success-lt text-success rounded"><i class="fa-solid fa-tree"></i></span>
@@ -1265,7 +1298,7 @@ $navItems = [
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Entrepôt (Niv. <?= $storageLvl ?>/<?= $storageMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$planet['metal']) ?> / <?= number_format($metalMax) ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between">
@@ -1274,7 +1307,11 @@ $navItems = [
                                 </div>
                                 <hr class="my-1">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Atelier (Scierie) :</span>
+                                    <span class="text-muted">Terroir (Forêt de Cèdres) :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $foretLvl ?> / <?= $foretMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Scierie (Niv. <?= $sawmillLvl ?>/<?= $sawmillMaxLvl ?>) :</span>
                                     <span class="<?= $sawmillBonus > 0 ? 'text-success fw-bold' : 'text-muted' ?>">+<?= $sawmillBonus ?>%</span>
                                 </div>
                                 <?php if ($oasisWood > 0): ?>
@@ -1305,8 +1342,8 @@ $navItems = [
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=resources" class="btn btn-xs btn-success flex-fill"><i class="fa-solid fa-tree me-1"></i>Forêt</a>
-                                <a href="?page=building&code=sawmill" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-saw-blade me-1"></i>Scierie</a>
+                                <a href="?page=resources" class="btn btn-xs btn-success flex-fill"><i class="fa-solid fa-tree me-1"></i>Forêt (Niv. <?= $foretLvl ?>)</a>
+                                <a href="?page=building&code=sawmill" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-saw-blade me-1"></i>Scierie (Niv. <?= $sawmillLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -1335,7 +1372,7 @@ $navItems = [
                                 <div class="progress-bar <?= $pctCrystal >= 95 ? 'bg-danger' : ($pctCrystal >= 80 ? 'bg-warning' : 'bg-primary') ?>" id="bar-crystal" style="width:<?= $pctCrystal ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResStone" style="min-width:290px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResStone" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-primary-lt text-primary rounded"><i class="fa-solid fa-mountain"></i></span>
@@ -1348,7 +1385,7 @@ $navItems = [
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Entrepôt (Niv. <?= $storageLvl ?>/<?= $storageMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$planet['crystal']) ?> / <?= number_format($crystalMax) ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between">
@@ -1357,7 +1394,11 @@ $navItems = [
                                 </div>
                                 <hr class="my-1">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Tailleur de Pierre :</span>
+                                    <span class="text-muted">Terroir (Carrière) :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $carriereLvl ?> / <?= $carriereMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Tailleur (Niv. <?= $stonemasonLvl ?>/<?= $stonemasonMaxLvl ?>) :</span>
                                     <span class="<?= $stonemasonBonus > 0 ? 'text-primary fw-bold' : 'text-muted' ?>">+<?= $stonemasonBonus ?>%</span>
                                 </div>
                                 <?php if ($oasisStone > 0): ?>
@@ -1388,8 +1429,8 @@ $navItems = [
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=resources" class="btn btn-xs btn-primary flex-fill"><i class="fa-solid fa-mountain me-1"></i>Carrière</a>
-                                <a href="?page=building&code=stonemason" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-hammer me-1"></i>Tailleur</a>
+                                <a href="?page=resources" class="btn btn-xs btn-primary flex-fill"><i class="fa-solid fa-mountain me-1"></i>Carrière (Niv. <?= $carriereLvl ?>)</a>
+                                <a href="?page=building&code=stonemason" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-hammer me-1"></i>Tailleur (Niv. <?= $stonemasonLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -1418,7 +1459,7 @@ $navItems = [
                                 <div class="progress-bar bg-orange" id="bar-clay" style="width:<?= $pctClayStock ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResClay" style="min-width:290px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResClay" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-orange-lt text-orange rounded"><i class="fa-solid fa-cubes-stacked"></i></span>
@@ -1431,7 +1472,7 @@ $navItems = [
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Entrepôt (Niv. <?= $storageLvl ?>/<?= $storageMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$clayStock) ?> / <?= number_format($clayMax) ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between">
@@ -1440,7 +1481,7 @@ $navItems = [
                                 </div>
                                 <hr class="my-1">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Niveau de la Fosse :</span>
+                                    <span class="text-muted">Terroir (Fosse d'Argile) :</span>
                                     <span class="text-dark fw-bold">Niv. <?= $clayLvl ?> / <?= $clayMaxLvl ?></span>
                                 </div>
                                 <?php if ($matsuriBonus > 0): ?>
@@ -1459,7 +1500,8 @@ $navItems = [
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=resources" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-cubes-stacked me-1"></i>Fosse d'Argile</a>
+                                <a href="?page=resources" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-cubes-stacked me-1"></i>Fosse (Niv. <?= $clayLvl ?>)</a>
+                                <a href="?page=building&code=storage" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-warehouse me-1"></i>Entrepôt (Niv. <?= $storageLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -1488,7 +1530,7 @@ $navItems = [
                                 <div class="progress-bar <?= $pctDeut >= 95 ? 'bg-danger' : 'bg-warning' ?>" id="bar-deut" style="width:<?= $pctDeut ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResRice" style="min-width:290px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResRice" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-warning-lt text-warning rounded"><i class="fa-solid fa-wheat-awn"></i></span>
@@ -1501,7 +1543,7 @@ $navItems = [
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Grenier Kura :</span>
+                                    <span class="text-muted">Grenier Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$planet['deuterium']) ?> / <?= number_format($deutMax) ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between">
@@ -1510,7 +1552,11 @@ $navItems = [
                                 </div>
                                 <hr class="my-1">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Meunerie &amp; Brasserie :</span>
+                                    <span class="text-muted">Terroir (Rizières) :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $riziereLvl ?> / <?= $riziereMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Meunerie (Niv. <?= $grainMillLvl ?>/<?= $grainMillMaxLvl ?>) :</span>
                                     <span class="<?= $grainMillBonus > 0 ? 'text-warning fw-bold' : 'text-muted' ?>">+<?= $grainMillBonus ?>%</span>
                                 </div>
                                 <?php if ($oasisRice > 0): ?>
@@ -1541,8 +1587,8 @@ $navItems = [
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=resources" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-wheat-awn me-1"></i>Rizières</a>
-                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-bowl-rice me-1"></i>Meunerie</a>
+                                <a href="?page=resources" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-wheat-awn me-1"></i>Rizières (Niv. <?= $riziereLvl ?>)</a>
+                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-bowl-rice me-1"></i>Meunerie (Niv. <?= $grainMillLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -1571,7 +1617,7 @@ $navItems = [
                                 <div class="progress-bar bg-teal" id="bar-tea" style="width:<?= $pctTeaStock ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResTea" style="min-width:290px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResTea" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-teal-lt text-teal rounded"><i class="fa-solid fa-leaf"></i></span>
@@ -1584,7 +1630,7 @@ $navItems = [
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Grenier Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$teaStock) ?> / <?= number_format($teaMax) ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between">
@@ -1593,11 +1639,11 @@ $navItems = [
                                 </div>
                                 <hr class="my-1">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Plantation rurale :</span>
+                                    <span class="text-muted">Terroir (Plantation) :</span>
                                     <span class="text-dark fw-bold">Niv. <?= $teaLvl ?> / <?= $teaMaxLvl ?></span>
                                 </div>
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Pavillon de Thé (Ferveur) :</span>
+                                    <span class="text-muted">Pavillon de Thé (Niv. <?= $teahouseLvl ?>/<?= $teahouseMaxLvl ?>) :</span>
                                     <span class="<?= $teahouseBonus > 0 ? 'text-teal fw-bold' : 'text-muted' ?>">+<?= $teahouseBonus ?>%</span>
                                 </div>
                                 <div class="d-flex justify-content-between">
@@ -1610,8 +1656,8 @@ $navItems = [
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=resources" class="btn btn-xs btn-teal flex-fill"><i class="fa-solid fa-leaf me-1"></i>Plantation</a>
-                                <a href="?page=building&code=teahouse" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-mug-hot me-1"></i>Pavillon</a>
+                                <a href="?page=resources" class="btn btn-xs btn-teal flex-fill"><i class="fa-solid fa-leaf me-1"></i>Plantation (Niv. <?= $teaLvl ?>)</a>
+                                <a href="?page=building&code=teahouse" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-mug-hot me-1"></i>Pavillon (Niv. <?= $teahouseLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -1640,7 +1686,7 @@ $navItems = [
                                 <div class="progress-bar bg-lime" id="bar-soybean" style="width:<?= $pctSoyStock ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResSoy" style="min-width:290px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResSoy" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-lime-lt text-lime rounded"><i class="fa-solid fa-seedling"></i></span>
@@ -1653,7 +1699,7 @@ $navItems = [
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Grenier Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$soyStock) ?> / <?= number_format($soyMax) ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between">
@@ -1662,7 +1708,7 @@ $navItems = [
                                 </div>
                                 <hr class="my-1">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Champ de Soja :</span>
+                                    <span class="text-muted">Terroir (Champ de Soja) :</span>
                                     <span class="text-dark fw-bold">Niv. <?= $soyLvl ?> / <?= $soyMaxLvl ?></span>
                                 </div>
                                 <div class="d-flex justify-content-between">
@@ -1675,7 +1721,8 @@ $navItems = [
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=resources" class="btn btn-xs btn-success flex-fill"><i class="fa-solid fa-seedling me-1"></i>Champ de Soja</a>
+                                <a href="?page=resources" class="btn btn-xs btn-success flex-fill"><i class="fa-solid fa-seedling me-1"></i>Champ (Niv. <?= $soyLvl ?>)</a>
+                                <a href="?page=building&code=tank" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-wheat-awn me-1"></i>Grenier (Niv. <?= $tankLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -1704,7 +1751,7 @@ $navItems = [
                                 <div class="progress-bar <?= $eOk ? 'bg-teal' : 'bg-danger' ?>" style="width:<?= $pctEnergy ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResSerenity" style="min-width:295px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResSerenity" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs <?= $eOk ? 'bg-teal-lt text-teal' : 'bg-danger-lt text-danger' ?> rounded"><i class="fa-solid fa-torii-gate"></i></span>
@@ -1727,7 +1774,11 @@ $navItems = [
                                     <strong class="text-dark">-<?= number_format((int)($planet['energy_used'] ?? 0)) ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Pavillon de Thé :</span>
+                                    <span class="text-muted">Sanctuaire Shintō :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $shrineLvl ?> / <?= $shrineMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Pavillon de Thé (Niv. <?= $teahouseLvl ?>/<?= $teahouseMaxLvl ?>) :</span>
                                     <span class="<?= $teahouseBonus > 0 ? 'text-teal fw-bold' : 'text-muted' ?>">+<?= $teahouseBonus ?>% ferveur</span>
                                 </div>
                                 <hr class="my-1">
@@ -1741,8 +1792,8 @@ $navItems = [
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=resources" class="btn btn-xs btn-teal flex-fill"><i class="fa-solid fa-torii-gate me-1"></i>Sanctuaire</a>
-                                <a href="?page=building&code=teahouse" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-mug-hot me-1"></i>Pavillon</a>
+                                <a href="?page=resources" class="btn btn-xs btn-teal flex-fill"><i class="fa-solid fa-torii-gate me-1"></i>Sanctuaire (Niv. <?= $shrineLvl ?>)</a>
+                                <a href="?page=building&code=teahouse" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-mug-hot me-1"></i>Pavillon (Niv. <?= $teahouseLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -1750,12 +1801,12 @@ $navItems = [
                     <!-- 8. POUTRES DE CHARPENTE -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResBeams" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Poutres de Charpente : cliquer pour le détail">
+                                title="Poutres de Charpente : cliquer pour le détail de production et l'accès à la Scierie">
                             <div class="d-flex align-items-center justify-content-between gap-2 w-100">
                                 <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
                                     <i class="fa-solid fa-hammer text-orange"></i> Poutres
                                 </span>
-                                <span class="font-monospace text-orange fw-semibold" style="font-size:0.65rem;">Scierie</span>
+                                <span class="font-monospace text-orange fw-semibold" style="font-size:0.65rem;">Niv. <?= $sawmillLvl ?></span>
                             </div>
                             <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
                                 <span class="fw-bold text-dark" style="font-size:0.86rem;"
@@ -1770,29 +1821,47 @@ $navItems = [
                                 <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResBeams" style="min-width:280px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResBeams" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-orange-lt text-orange rounded"><i class="fa-solid fa-hammer"></i></span>
                                     <div class="lh-1">
                                         <div class="fw-bold text-dark" style="font-size:0.85rem;">Poutres de Charpente</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Matériau d'atelier urbain</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Atelier de Charpenterie &bull; Niv. <?= $sawmillLvl ?>/<?= $sawmillMaxLvl ?></div>
                                     </div>
                                 </div>
-                                <span class="badge bg-orange-lt text-orange font-monospace"><?= (int)round($pctBeams) ?>%</span>
+                                <span class="badge <?= $sawmillLvl >= 10 ? 'bg-success-lt text-success' : 'bg-warning-lt text-warning' ?> font-monospace">
+                                    <?= $sawmillLvl >= 10 ? 'Actif' : 'Niv. 10 req.' ?>
+                                </span>
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Entrepôt (Niv. <?= $storageLvl ?>/<?= $storageMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Atelier :</span>
-                                    <span class="text-dark fw-bold">Scierie &amp; Charpenterie</span>
+                                    <span class="text-muted">Remplissage :</span>
+                                    <span class="<?= $pctBeams >= 95 ? 'text-danger fw-bold' : 'text-secondary' ?>"><?= (int)round($pctBeams) ?>% de capacité</span>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Bâtiment producteur :</span>
+                                    <span class="text-dark fw-bold">Charpenterie (Niv. <?= $sawmillLvl ?>/<?= $sawmillMaxLvl ?>)</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Production :</span>
+                                    <span class="<?= $sawmillLvl >= 10 ? 'text-success fw-bold' : 'text-warning fw-bold' ?>">
+                                        <?= $sawmillLvl >= 10 ? 'Façonnage sur commande' : 'Débloqué au Niv. 10' ?>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Bonus Bois associé :</span>
+                                    <span class="text-success fw-bold">+<?= $sawmillBonus ?>% récolte</span>
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=sawmill" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-hammer me-1"></i>Ouvrir la Scierie</a>
+                                <a href="?page=building&code=sawmill" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-hammer me-1"></i>Scierie (Niv. <?= $sawmillLvl ?>)</a>
+                                <a href="?page=building&code=storage" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-warehouse me-1"></i>Entrepôt (Niv. <?= $storageLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -1800,12 +1869,12 @@ $navItems = [
                     <!-- 9. CHARBON DE BOIS -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResCharcoal" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Charbon de Bois : cliquer pour le détail">
+                                title="Charbon de Bois : cliquer pour le détail de production et l'accès au Four">
                             <div class="d-flex align-items-center justify-content-between gap-2 w-100">
                                 <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
                                     <i class="fa-solid fa-fire text-dark"></i> Charbon
                                 </span>
-                                <span class="font-monospace text-secondary fw-semibold" style="font-size:0.65rem;">Four</span>
+                                <span class="font-monospace text-secondary fw-semibold" style="font-size:0.65rem;">Niv. <?= $sawmillLvl ?></span>
                             </div>
                             <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
                                 <span class="fw-bold text-dark" style="font-size:0.86rem;"
@@ -1820,29 +1889,45 @@ $navItems = [
                                 <div class="progress-bar bg-dark" id="bar-charcoal" style="width:<?= $pctCharcoal ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResCharcoal" style="min-width:280px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResCharcoal" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-secondary-lt text-dark rounded"><i class="fa-solid fa-fire"></i></span>
                                     <div class="lh-1">
                                         <div class="fw-bold text-dark" style="font-size:0.85rem;">Charbon de Bois</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Combustible de haute chauffe</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Four à Charbon &bull; Scierie Niv. <?= $sawmillLvl ?>/<?= $sawmillMaxLvl ?></div>
                                     </div>
                                 </div>
                                 <span class="badge bg-secondary-lt text-dark font-monospace"><?= (int)round($pctCharcoal) ?>%</span>
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Entrepôt (Niv. <?= $storageLvl ?>/<?= $storageMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$charcoalStock) ?> / <?= number_format($charcoalMax) ?></strong>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Atelier de Charpenterie :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $sawmillLvl ?> / <?= $sawmillMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Grande Forge (Kaji-ba) :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $blacksmithLvl ?> / <?= $blacksmithMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Production :</span>
+                                    <span class="<?= $sawmillLvl >= 1 ? 'text-success fw-bold' : 'text-warning fw-bold' ?>">
+                                        <?= $sawmillLvl >= 1 ? 'Pyrolyse du Bois de Cèdre' : 'Construire la Scierie (Niv. 1)' ?>
+                                    </span>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted">Usage :</span>
-                                    <span class="text-dark fw-bold">Forge Tamahagane &amp; Poudre</span>
+                                    <span class="text-dark fw-bold">Acier Tamahagane &amp; Poudre</span>
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=sawmill" class="btn btn-xs btn-dark flex-fill"><i class="fa-solid fa-fire me-1"></i>Four à Charbon</a>
+                                <a href="?page=building&code=sawmill" class="btn btn-xs btn-dark flex-fill"><i class="fa-solid fa-fire me-1"></i>Four (Niv. <?= $sawmillLvl ?>)</a>
+                                <a href="?page=building&code=blacksmith" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-fire-burner me-1"></i>Forge (Niv. <?= $blacksmithLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -1850,12 +1935,12 @@ $navItems = [
                     <!-- 10. SABLE DE FER (SATETSU) -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResIronSand" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Sable de Fer (Satetsu) : cliquer pour le détail">
+                                title="Sable de Fer (Satetsu) : cliquer pour le détail de production et la Grande Forge">
                             <div class="d-flex align-items-center justify-content-between gap-2 w-100">
                                 <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
                                     <i class="fa-solid fa-gem text-secondary"></i> Satetsu
                                 </span>
-                                <span class="font-monospace text-secondary fw-semibold" style="font-size:0.65rem;">Minerai</span>
+                                <span class="font-monospace text-secondary fw-semibold" style="font-size:0.65rem;">Niv. <?= $blacksmithLvl ?></span>
                             </div>
                             <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
                                 <span class="fw-bold text-dark" style="font-size:0.86rem;"
@@ -1870,29 +1955,43 @@ $navItems = [
                                 <div class="progress-bar bg-secondary" id="bar-iron-sand" style="width:<?= $pctIronSand ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResIronSand" style="min-width:280px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResIronSand" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-secondary-lt text-secondary rounded"><i class="fa-solid fa-gem"></i></span>
                                     <div class="lh-1">
                                         <div class="fw-bold text-dark" style="font-size:0.85rem;">Sable de Fer (Satetsu)</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Minerai ferreux de montagne</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Grande Forge &bull; Niv. <?= $blacksmithLvl ?>/<?= $blacksmithMaxLvl ?></div>
                                     </div>
                                 </div>
                                 <span class="badge bg-secondary-lt text-secondary font-monospace"><?= (int)round($pctIronSand) ?>%</span>
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Entrepôt (Niv. <?= $storageLvl ?>/<?= $storageMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$ironSandStock) ?> / <?= number_format($ironSandMax) ?></strong>
                                 </div>
+                                <hr class="my-1">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Raffinage :</span>
-                                    <span class="text-dark fw-bold">Acier Tamahagane</span>
+                                    <span class="text-muted">Grande Forge (Kaji-ba) :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $blacksmithLvl ?> / <?= $blacksmithMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Carrière de Granit :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $carriereLvl ?> / <?= $carriereMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Extraction &amp; Raffinage :</span>
+                                    <span class="text-dark fw-bold">Mineurs Kōfu &amp; Tatara</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Transformation :</span>
+                                    <span class="text-secondary fw-bold">Acier Tamahagane &amp; Katanas</span>
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=blacksmith#craftSection" class="btn btn-xs btn-secondary flex-fill"><i class="fa-solid fa-fire-burner me-1"></i>Grande Forge</a>
+                                <a href="?page=building&code=blacksmith#craftSection" class="btn btn-xs btn-secondary flex-fill"><i class="fa-solid fa-fire-burner me-1"></i>Forge (Niv. <?= $blacksmithLvl ?>)</a>
+                                <a href="?page=resources" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-mountain me-1"></i>Terroirs</a>
                             </div>
                         </div>
                     </div>
@@ -1900,12 +1999,12 @@ $navItems = [
                     <!-- 11. SOUFRE VOLCANIQUE -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResSulfur" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Soufre Volcanique : cliquer pour le détail">
+                                title="Soufre Volcanique : cliquer pour le détail et l'accès à l'atelier">
                             <div class="d-flex align-items-center justify-content-between gap-2 w-100">
                                 <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
                                     <i class="fa-solid fa-volcano text-warning"></i> Soufre
                                 </span>
-                                <span class="font-monospace text-warning fw-semibold" style="font-size:0.65rem;">Minerai</span>
+                                <span class="font-monospace text-warning fw-semibold" style="font-size:0.65rem;">Niv. <?= $stonemasonLvl ?></span>
                             </div>
                             <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
                                 <span class="fw-bold text-dark" style="font-size:0.86rem;"
@@ -1920,29 +2019,43 @@ $navItems = [
                                 <div class="progress-bar bg-warning" id="bar-sulfur" style="width:<?= $pctSulfur ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResSulfur" style="min-width:280px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResSulfur" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-warning-lt text-warning rounded"><i class="fa-solid fa-volcano"></i></span>
                                     <div class="lh-1">
                                         <div class="fw-bold text-dark" style="font-size:0.85rem;">Soufre Volcanique</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Minerai pyrotechnique</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Maçonnerie &bull; Niv. <?= $stonemasonLvl ?>/<?= $stonemasonMaxLvl ?></div>
                                     </div>
                                 </div>
                                 <span class="badge bg-warning-lt text-warning font-monospace"><?= (int)round($pctSulfur) ?>%</span>
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Entrepôt (Niv. <?= $storageLvl ?>/<?= $storageMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$sulfurStock) ?> / <?= number_format($sulfurMax) ?></strong>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Taille de Granit :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $stonemasonLvl ?> / <?= $stonemasonMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Grande Forge :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $blacksmithLvl ?> / <?= $blacksmithMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Provenance :</span>
+                                    <span class="text-dark fw-bold">Expéditions Kōfu &amp; Raffinage</span>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted">Usage :</span>
-                                    <span class="text-dark fw-bold">Poudre Noire &amp; Artillerie</span>
+                                    <span class="text-warning fw-bold">Poudre Noire &amp; Artillerie</span>
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=stonemason#craftSection" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-volcano me-1"></i>Raffiner</a>
+                                <a href="?page=building&code=stonemason#craftSection" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-hammer me-1"></i>Tailleur (Niv. <?= $stonemasonLvl ?>)</a>
+                                <a href="?page=building&code=blacksmith#craftSection" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-fire-burner me-1"></i>Forge (Niv. <?= $blacksmithLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -1950,12 +2063,12 @@ $navItems = [
                     <!-- 12. NITRATE DE POTASSE -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResNitrate" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Nitrate de Potasse (Salpêtre) : cliquer pour le détail">
+                                title="Nitrate de Potasse (Salpêtre) : cliquer pour le détail et l'accès à l'atelier">
                             <div class="d-flex align-items-center justify-content-between gap-2 w-100">
                                 <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
                                     <i class="fa-solid fa-flask-vial text-info"></i> Nitrate
                                 </span>
-                                <span class="font-monospace text-info fw-semibold" style="font-size:0.65rem;">Salpêtre</span>
+                                <span class="font-monospace text-info fw-semibold" style="font-size:0.65rem;">Niv. <?= $stonemasonLvl ?></span>
                             </div>
                             <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
                                 <span class="fw-bold text-dark" style="font-size:0.86rem;"
@@ -1970,29 +2083,39 @@ $navItems = [
                                 <div class="progress-bar bg-info" id="bar-nitrate" style="width:<?= $pctNitrate ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResNitrate" style="min-width:280px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResNitrate" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-info-lt text-info rounded"><i class="fa-solid fa-flask-vial"></i></span>
                                     <div class="lh-1">
                                         <div class="fw-bold text-dark" style="font-size:0.85rem;">Nitrate de Potasse</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Salpêtre raffiné</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Salpêtrière &bull; Maçonnerie Niv. <?= $stonemasonLvl ?>/<?= $stonemasonMaxLvl ?></div>
                                     </div>
                                 </div>
                                 <span class="badge bg-info-lt text-info font-monospace"><?= (int)round($pctNitrate) ?>%</span>
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Entrepôt (Niv. <?= $storageLvl ?>/<?= $storageMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$nitrateStock) ?> / <?= number_format($nitrateMax) ?></strong>
                                 </div>
+                                <hr class="my-1">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Usage :</span>
-                                    <span class="text-dark fw-bold">Arquebuses Teppō &amp; Munitions</span>
+                                    <span class="text-muted">Taille de Granit :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $stonemasonLvl ?> / <?= $stonemasonMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Grande Forge :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $blacksmithLvl ?> / <?= $blacksmithMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Usage militaire :</span>
+                                    <span class="text-info fw-bold">Arquebuses Teppō &amp; Munitions</span>
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=stonemason#craftSection" class="btn btn-xs btn-info flex-fill"><i class="fa-solid fa-flask-vial me-1"></i>Raffiner</a>
+                                <a href="?page=building&code=stonemason#craftSection" class="btn btn-xs btn-info flex-fill"><i class="fa-solid fa-flask-vial me-1"></i>Tailleur (Niv. <?= $stonemasonLvl ?>)</a>
+                                <a href="?page=building&code=blacksmith#craftSection" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-fire-burner me-1"></i>Forge (Niv. <?= $blacksmithLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -2000,12 +2123,12 @@ $navItems = [
                     <!-- 13. POISSON FRAIS -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResFish" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Poisson Frais : cliquer pour le détail">
+                                title="Poisson Frais : cliquer pour le détail et les raccourcis">
                             <div class="d-flex align-items-center justify-content-between gap-2 w-100">
                                 <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
                                     <i class="fa-solid fa-fish text-cyan"></i> Poisson
                                 </span>
-                                <span class="font-monospace text-cyan fw-semibold" style="font-size:0.65rem;">Pêche</span>
+                                <span class="font-monospace text-cyan fw-semibold" style="font-size:0.65rem;">Kura N.<?= $tankLvl ?></span>
                             </div>
                             <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
                                 <span class="fw-bold text-dark" style="font-size:0.86rem;"
@@ -2020,29 +2143,39 @@ $navItems = [
                                 <div class="progress-bar bg-cyan" id="bar-fish" style="width:<?= $pctFish ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResFish" style="min-width:280px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResFish" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-cyan-lt text-cyan rounded"><i class="fa-solid fa-fish"></i></span>
                                     <div class="lh-1">
                                         <div class="fw-bold text-dark" style="font-size:0.85rem;">Poisson Frais</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Vivres maritimes (Grenier Kura)</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Grenier Kura &bull; Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?></div>
                                     </div>
                                 </div>
                                 <span class="badge bg-cyan-lt text-cyan font-monospace"><?= (int)round($pctFish) ?>%</span>
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Grenier Kura :</span>
+                                    <span class="text-muted">Grenier Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$fishStock) ?> / <?= number_format($fishMax) ?></strong>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Marché Féodal :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $marketLvl ?> / <?= $marketMaxLvl ?></span>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted">Provenance :</span>
-                                    <span class="text-dark fw-bold">Flottilles de Pêche</span>
+                                    <span class="text-cyan fw-bold">Flottilles de Pêche &amp; Côtes</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Usage :</span>
+                                    <span class="text-dark fw-bold">Alimentation &amp; Croissance</span>
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=resources" class="btn btn-xs btn-cyan flex-fill"><i class="fa-solid fa-fish me-1"></i>Voir les Terroirs</a>
+                                <a href="?page=resources" class="btn btn-xs btn-cyan flex-fill"><i class="fa-solid fa-fish me-1"></i>Terroirs</a>
+                                <a href="?page=building&code=tank" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-wheat-awn me-1"></i>Grenier (Niv. <?= $tankLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -2050,12 +2183,12 @@ $navItems = [
                     <!-- 14. FARINE DE RIZ -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResFlour" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Farine de Riz (Komeko) : cliquer pour le détail">
+                                title="Farine de Riz (Komeko) : cliquer pour le détail et l'accès à la Meunerie">
                             <div class="d-flex align-items-center justify-content-between gap-2 w-100">
                                 <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
                                     <i class="fa-solid fa-bowl-rice text-secondary"></i> Farine
                                 </span>
-                                <span class="font-monospace text-secondary fw-semibold" style="font-size:0.65rem;">Niv. 5</span>
+                                <span class="font-monospace <?= $grainMillLvl >= 5 ? 'text-success' : 'text-secondary' ?> fw-semibold" style="font-size:0.65rem;">Niv. <?= $grainMillLvl ?></span>
                             </div>
                             <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
                                 <span class="fw-bold text-dark" style="font-size:0.86rem;"
@@ -2070,29 +2203,43 @@ $navItems = [
                                 <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResFlour" style="min-width:280px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResFlour" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-secondary-lt text-secondary rounded"><i class="fa-solid fa-bowl-rice"></i></span>
                                     <div class="lh-1">
                                         <div class="fw-bold text-dark" style="font-size:0.85rem;">Farine de Riz (Komeko)</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Meunerie &amp; Brasserie (Niv. 5)</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Meunerie &amp; Brasserie &bull; Niv. <?= $grainMillLvl ?>/<?= $grainMillMaxLvl ?></div>
                                     </div>
                                 </div>
-                                <span class="badge bg-secondary-lt text-secondary font-monospace"><?= (int)round($pctFlour) ?>%</span>
+                                <span class="badge <?= $grainMillLvl >= 5 ? 'bg-success-lt text-success' : 'bg-warning-lt text-warning' ?> font-monospace">
+                                    <?= $grainMillLvl >= 5 ? 'Débloqué' : 'Niv. 5 req.' ?>
+                                </span>
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <span class="text-muted">Grenier Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$flourStock) ?> / <?= number_format($flourMax) ?></strong>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Meunerie &amp; Brasserie :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $grainMillLvl ?> / <?= $grainMillMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Statut de mouture :</span>
+                                    <span class="<?= $grainMillLvl >= 5 ? 'text-success fw-bold' : 'text-warning fw-bold' ?>">
+                                        <?= $grainMillLvl >= 5 ? 'Meules actives (sur commande)' : 'Requiert Meunerie Niv. 5' ?>
+                                    </span>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted">Usage :</span>
-                                    <span class="text-dark fw-bold">Rations &amp; Ravitaillement</span>
+                                    <span class="text-dark fw-bold">Rations d'expédition &amp; Siège</span>
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-secondary flex-fill"><i class="fa-solid fa-bowl-rice me-1"></i>Meunerie</a>
+                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-secondary flex-fill"><i class="fa-solid fa-bowl-rice me-1"></i>Meunerie (Niv. <?= $grainMillLvl ?>)</a>
+                                <a href="?page=building&code=tank" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-wheat-awn me-1"></i>Grenier (Niv. <?= $tankLvl ?>)</a>
                             </div>
                         </div>
                     </div>
@@ -2100,12 +2247,12 @@ $navItems = [
                     <!-- 15. SAKÉ IMPÉRIAL -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResSake" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Saké Impérial : cliquer pour le détail">
+                                title="Saké Impérial : cliquer pour le détail et l'accès à la Brasserie">
                             <div class="d-flex align-items-center justify-content-between gap-2 w-100">
                                 <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
                                     <i class="fa-solid fa-wine-bottle text-purple"></i> Saké
                                 </span>
-                                <span class="badge bg-purple-lt text-purple font-monospace py-0 px-1" style="font-size:0.58rem;">+15%</span>
+                                <span class="badge bg-purple-lt text-purple font-monospace py-0 px-1" style="font-size:0.58rem;">Niv. <?= $grainMillLvl ?></span>
                             </div>
                             <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
                                 <span class="fw-bold text-dark" style="font-size:0.86rem;"
@@ -2120,29 +2267,43 @@ $navItems = [
                                 <div class="progress-bar bg-purple" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResSake" style="min-width:280px; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResSake" style="min-width:295px; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar avatar-xs bg-purple-lt text-purple rounded"><i class="fa-solid fa-wine-bottle"></i></span>
                                     <div class="lh-1">
                                         <div class="fw-bold text-dark" style="font-size:0.85rem;">Saké Impérial</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Meunerie &amp; Brasserie (Niv. 10)</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Brasserie Sakagura &bull; Niv. <?= $grainMillLvl ?>/<?= $grainMillMaxLvl ?></div>
                                     </div>
                                 </div>
-                                <span class="badge bg-purple-lt text-purple font-monospace">+15% Moral</span>
+                                <span class="badge <?= $grainMillLvl >= 10 ? 'bg-purple-lt text-purple' : 'bg-warning-lt text-warning' ?> font-monospace">
+                                    <?= $grainMillLvl >= 10 ? '+15% Moral' : 'Niv. 10 req.' ?>
+                                </span>
                             </div>
                             <div class="small font-monospace d-flex flex-column gap-1 mb-2">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Stock / Caves :</span>
+                                    <span class="text-muted">Caves / Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
                                     <strong class="text-dark"><?= number_format((int)$sakeStock) ?> / <?= number_format($sakeMax) ?></strong>
                                 </div>
+                                <hr class="my-1">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Effet :</span>
-                                    <span class="text-purple fw-bold">Moral +15% &amp; Fêtes Matsuri</span>
+                                    <span class="text-muted">Meunerie &amp; Brasserie :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $grainMillLvl ?> / <?= $grainMillMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Statut de brassage :</span>
+                                    <span class="<?= $grainMillLvl >= 10 ? 'text-purple fw-bold' : 'text-warning fw-bold' ?>">
+                                        <?= $grainMillLvl >= 10 ? 'Fermentation active' : 'Requiert Brasserie Niv. 10' ?>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Effet domaine :</span>
+                                    <span class="text-purple fw-bold">Moral +15% &amp; Banquets Matsuri</span>
                                 </div>
                             </div>
                             <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-purple flex-fill"><i class="fa-solid fa-wine-bottle me-1"></i>Brasserie</a>
+                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-purple flex-fill"><i class="fa-solid fa-wine-bottle me-1"></i>Brasserie (Niv. <?= $grainMillLvl ?>)</a>
+                                <a href="?page=city" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-torii-gate me-1"></i>Banquets</a>
                             </div>
                         </div>
                     </div>
@@ -2167,12 +2328,12 @@ $navItems = [
                                 <div class="progress-bar bg-primary" style="width:<?= $pctPop ?>%;"></div>
                             </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-end shadow-lg p-2 border" aria-labelledby="dropdownDomaine" style="min-width:335px; max-width:95vw; z-index:1060;">
+                        <div class="dropdown-menu dropdown-menu-end hud-floating-menu shadow-lg p-2 border" aria-labelledby="dropdownDomaine" style="min-width:340px; max-width:95vw; z-index:1095;">
                             <div class="d-flex justify-content-between align-items-center px-2 py-1 mb-1 border-bottom">
                                 <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size:0.82rem;">
                                     <i class="fa-solid fa-landmark text-azure"></i> Domaine &amp; Démographie
                                 </div>
-                                <a href="?page=city" class="btn btn-xs btn-outline-info py-0 px-2" style="font-size:0.68rem;">Cité &rarr;</a>
+                                <span class="badge bg-azure-lt text-azure font-monospace" style="font-size:0.65rem;">Tenshu Niv. <?= $hqLvl ?>/<?= $hqMaxLvl ?></span>
                             </div>
 
                             <!-- 1. Population & Logements avec sous-menu de répartition par castes (Shinōkōshō) -->
@@ -2314,6 +2475,11 @@ $navItems = [
                                     </div>
                                 </div>
                             </a>
+
+                            <div class="d-flex gap-1 pt-2 mt-1 border-top px-1">
+                                <a href="?page=building&code=hq" class="btn btn-xs btn-azure flex-fill"><i class="fa-solid fa-chess-rook me-1"></i>Tenshu (Niv. <?= $hqLvl ?>)</a>
+                                <a href="?page=city" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-city me-1"></i>Cité &amp; Minka</a>
+                            </div>
                         </div>
                     </div>
 
@@ -2350,6 +2516,17 @@ $navItems = [
                 });
             };
 
+            const positionFloatingMenu = (btn, menu) => {
+                if (!btn || !menu) return;
+                const rect = btn.getBoundingClientRect();
+                const menuWidth = menu.offsetWidth || 300;
+                const maxLeft = Math.max(8, window.innerWidth - menuWidth - 12);
+                const leftPos = Math.max(8, Math.min(rect.left, maxLeft));
+                const topPos = rect.bottom + 6;
+                menu.style.setProperty('--hud-menu-top', topPos + 'px');
+                menu.style.setProperty('--hud-menu-left', leftPos + 'px');
+            };
+
             btnLeft.addEventListener('click', () => {
                 closeOpenHudDropdowns();
                 track.scrollBy({ left: -380, behavior: 'smooth' });
@@ -2360,24 +2537,35 @@ $navItems = [
                 track.scrollBy({ left: 380, behavior: 'smooth' });
             });
 
-            track.addEventListener('scroll', updateArrows, { passive: true });
+            track.addEventListener('scroll', () => {
+                updateArrows();
+                track.querySelectorAll('.dropdown').forEach((dd) => {
+                    const btn = dd.querySelector('.hud-res-pill[aria-expanded="true"]');
+                    const menu = dd.querySelector('.dropdown-menu.show');
+                    if (btn && menu) {
+                        positionFloatingMenu(btn, menu);
+                    }
+                });
+            }, { passive: true });
+
             window.addEventListener('resize', updateArrows);
 
-            // Positionnement fixed des menus déroulants du ruban pour éviter toute coupure par overflow-x
+            // Positionnement fixed hors du flux overflow-x de #hudResTrack au clic sur chaque indicateur
             track.querySelectorAll('.dropdown').forEach((dd) => {
+                const btn = dd.querySelector('.hud-res-pill');
+                const menu = dd.querySelector('.dropdown-menu');
+                if (!btn || !menu) return;
+
+                // Désactiver le positionnement Popper dynamique qui écrase les coordonnées dans un conteneur scrollable
+                btn.setAttribute('data-bs-display', 'static');
+
+                dd.addEventListener('show.bs.dropdown', function () {
+                    positionFloatingMenu(btn, menu);
+                });
+
                 dd.addEventListener('shown.bs.dropdown', function () {
-                    const btn = dd.querySelector('.hud-res-pill');
-                    const menu = dd.querySelector('.dropdown-menu');
-                    if (!btn || !menu) return;
-                    const rect = btn.getBoundingClientRect();
-                    menu.style.position = 'fixed';
-                    menu.style.inset = 'auto';
-                    menu.style.transform = 'none';
-                    menu.style.top = (rect.bottom + 6) + 'px';
-                    const menuWidth = menu.offsetWidth || 300;
-                    const maxLeft = Math.max(8, window.innerWidth - menuWidth - 12);
-                    menu.style.left = Math.max(8, Math.min(rect.left, maxLeft)) + 'px';
-                    menu.style.zIndex = '1090';
+                    positionFloatingMenu(btn, menu);
+                    requestAnimationFrame(() => positionFloatingMenu(btn, menu));
                 });
             });
 

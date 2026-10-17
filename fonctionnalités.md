@@ -1,22 +1,22 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
-### [2026-10-17] - hud-resource-bar-redesign : Hub Glissant Uniforme des 16 Ressources & Indicateurs sous le Carrousel
+### [2026-10-17] - hud-resource-bar-redesign : Hub Glissant Uniforme des 16 Ressources & Sous-Menus Approfondis au Clic
 - **Module :** `hud-resource-bar-redesign`
 - **Statut :** `À tester`
 - **Description :**
   1. **Modèle Uniforme `.hud-res-pill` pour les 16 Indicateurs (`views/partials/header.php`) :**
      - Affichage homogène sous le carrousel des 16 pilules cliquables : **Bois**, **Granit**, **Argile**, **Riz**, **Thé**, **Soja**, **Sérénité**, **Poutres**, **Charbon**, **Satetsu**, **Soufre**, **Nitrate**, **Poisson**, **Farine**, **Saké** et **Peuple & Domaine**.
-     - Chaque pilule présente le stock incrémenté en temps réel (`res-val-*`), la cadence ou étiquette métier, le pourcentage de remplissage et la jauge (`bar-*`), ainsi qu'une fiche détaillée au clic.
-  2. **Glissement Horizontal par Flèches Gauche/Droite sans Scroll Visible :**
-     - Boutons `#hudScrollLeft` et `#hudScrollRight` aux extrémités gauche et droite de la barre faisant glisser la piste `#hudResTrack` sans aucune barre de scroll visible.
-     - Fiches déroulantes positionnées en `position: fixed` au clic pour ne jamais être rognées par le conteneur glissant.
-  3. **Alignement Graphique Gauche/Droite sur les Cards de la Page :**
-     - Conteneur `.container-fluid.px-3.px-lg-4` strictement aligné à gauche et à droite sur les cartes de `.page-body` situées juste en dessous.
+     - Chaque pilule présente le stock incrémenté en temps réel (`res-val-*`), la cadence ou le niveau du bâtiment associé, le pourcentage de remplissage et la jauge (`bar-*`).
+  2. **Sous-Menus Détaillés au Clic (`.hud-floating-menu`) avec Niveaux des Bâtiments & Raccourcis Rapides :**
+     - Ouverture au clic hors du flux `overflow-x: auto` (`position: fixed !important`, `data-bs-display="static"`) garantissant qu'aucun sous-menu n'est rogné par le ruban glissant.
+     - Affichage approfondi dans chaque sous-menu : production horaire et projection 24h (ou statut de raffinage/palier requis), niveau du terroir rural (`Niv. X/30`) et du bâtiment urbain associé (`Scierie`, `Tailleur`, `Meunerie`, `Grande Forge`, `Pavillon de Thé`, `Entrepôt`, `Grenier Kura`, `Tenshu` — `Niv. X/20`), stock / capacité maximale et boutons de raccourcis directs vers le bâtiment (`?page=building&code=...`) et le terroir (`?page=resources`).
+  3. **Glissement Horizontal par Flèches Gauche/Droite sans Scroll Visible & Alignement Graphique :**
+     - Boutons `#hudScrollLeft` et `#hudScrollRight` aux extrémités gauche et droite de la barre faisant glisser la piste `#hudResTrack` sans aucune barre de scroll visible, alignés sur `.container-fluid.px-3.px-lg-4`.
 - **Fichiers modifiés :** `views/partials/header.php`, `CHANGELOG.md`, `fonctionnalités.md`
 - **Vérification QA :**
   1. Vérifier que les bords gauche (flèche `<`) et droit (flèche `>`) du hub des ressources sont parfaitement alignés avec les cartes de contenu situées plus bas.
-  2. Cliquer sur les flèches gauche et droite pour faire glisser les 16 pilules (Bois, Granit, Argile, Riz, Thé, Soja, Sérénité, Poutres, Charbon, Satetsu, Soufre, Nitrate, Poisson, Farine, Saké, Peuple & Domaine) et vérifier l'absence totale de barre de scroll visible.
-  3. Cliquer sur plusieurs pilules (y compris après glissement) pour vérifier que leurs fiches détaillées s'affichent intégralement par-dessus le contenu.
+  2. Cliquer sur les flèches gauche et droite pour faire glisser les 16 pilules et vérifier l'absence totale de barre de scroll visible.
+  3. Cliquer sur chacune des 16 pilules (avant et après glissement) pour vérifier que son sous-menu s'ouvre intégralement par-dessus la page avec la production, le niveau du bâtiment associé et les boutons de raccourcis rapides fonctionnels.
 
 ### [2026-10-16] - grain-mill-level-progression : Paliers de Production Échelonnés Meunerie & Brasserie (Farine Niv. 5, Saké Niv. 10)
 - **Module :** `grain-mill-level-progression`

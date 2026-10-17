@@ -3,6 +3,16 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.6] - 2026-10-17
+### Corrigé & Modifié (Fixed & Changed)
+- **Réimplantation et Enrichissement des Sous-Menus Détaillés au Clic des 16 Indicateurs du Hub des Ressources (`views/partials/header.php`) :**
+  * **Correction du Rognage (Clipping) des Sous-Menus dans le Ruban Glissant (`#hudResTrack`) :**
+    - Ajout de la classe `.hud-floating-menu` (`position: fixed !important` avec variables CSS `--hud-menu-top` et `--hud-menu-left`) couplée à `data-bs-display="static"` afin d'empêcher Popper.js d'écraser le positionnement fixe et d'éviter que le conteneur `overflow-x: auto; overflow-y: hidden` ne masque les sous-menus au clic.
+  * **Niveaux Exacts des Bâtiments Urbains, Production Approfondie & Raccourcis Rapides sur les 16 Pilules :**
+    - **Ressources de base & Sérénité** (`Bois`, `Granit`, `Argile`, `Riz`, `Thé`, `Soja`, `Sérénité`) : affichage du niveau de la parcelle rurale (`Niv. X/30`), du niveau de l'entrepôt/grenier (`Niv. X/20`), du niveau et bonus de l'atelier urbain associé (`Scierie`, `Tailleur`, `Meunerie`, `Pavillon de Thé`), de la cadence `/h`, de la projection `/jour`, de l'échéance de saturation et des boutons de raccourcis rapides vers le terroir et le bâtiment.
+    - **Matériaux, Minerais & Vivres raffinés** (`Poutres`, `Charbon`, `Satetsu`, `Soufre`, `Nitrate`, `Poisson`, `Farine`, `Saké`) : affichage du niveau du bâtiment producteur (`Scierie`, `Grande Forge`, `Tailleur`, `Grenier Kura`, `Meunerie & Brasserie`), du statut de production / palier requis (`Niv. 5` Farine, `Niv. 10` Poutres/Saké) et des raccourcis directs vers les bâtiments.
+    - **Peuple & Domaine** : affichage du niveau du **Tenshu (Donjon Castral)** (`Niv. X/20`) et ajout des boutons d'accès direct au Tenshu (`?page=building&code=hq`) et à la Cité (`?page=city`).
+
 ## [1.34.5] - 2026-10-17
 ### Modifié (Changed)
 - **Évolution du Hub des Ressources sous le Carrousel &bull; Ruban Glissant Uniforme à 16 Pilules & Flèches de Navigation (`views/partials/header.php`) :**
