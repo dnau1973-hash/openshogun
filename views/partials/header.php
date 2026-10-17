@@ -1136,6 +1136,25 @@ $navItems = [
         .resource-dropdown-item:hover {
             background-color: rgba(0, 0, 0, 0.04);
         }
+        .hud-res-track {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            flex: 1 1 auto;
+            min-width: 0;
+            padding: 2px 1px;
+        }
+        .hud-res-track::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
         .hud-res-pill {
             display: inline-flex;
             flex-direction: column;
@@ -1144,7 +1163,8 @@ $navItems = [
             border: 1px solid rgba(15, 23, 42, 0.12);
             border-radius: 8px;
             padding: 4px 10px 5px 10px;
-            min-width: 118px;
+            min-width: 122px;
+            flex-shrink: 0;
             transition: all 0.15s ease;
             cursor: pointer;
             text-align: left;
@@ -1159,19 +1179,54 @@ $navItems = [
         .hud-res-pill::after {
             display: none !important;
         }
+        .hud-slider-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 46px;
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            color: #1e293b;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+            padding: 0;
+        }
+        .hud-slider-arrow:hover:not(:disabled) {
+            background: #f1f5f9;
+            border-color: rgba(32, 107, 196, 0.45);
+            color: #206bc4;
+        }
+        .hud-slider-arrow:disabled {
+            opacity: 0.38;
+            cursor: default;
+        }
         @media (max-width: 991.98px) {
             .hud-res-pill {
-                min-width: 104px;
+                min-width: 110px;
                 padding: 3px 8px 4px 8px;
+            }
+            .hud-slider-arrow {
+                width: 28px;
+                height: 42px;
             }
         }
         </style>
 
-        <div class="border-bottom bg-light-subtle py-1 px-2 px-lg-3 shadow-sm d-print-none position-relative" style="z-index: 1050;">
-            <div class="container-fluid px-2 px-lg-3 d-flex align-items-center justify-content-between gap-1 gap-xl-2 flex-wrap py-0.5">
+        <div class="border-bottom bg-light-subtle py-1.5 shadow-sm d-print-none position-relative" style="z-index: 1050;" id="hudResHubWrapper">
+            <div class="container-fluid px-3 px-lg-4">
+                <div class="d-flex align-items-center justify-content-between gap-2 w-100">
 
-                <!-- GROUPE GAUCHE : LES 7 INDICATEURS DE BASE VISIBLES D'UN COUP D'ŒIL -->
-                <div class="d-flex align-items-center gap-1 gap-md-1.5 flex-wrap">
+                    <!-- Flèche de glissement Gauche (alignée sur le bord gauche des cards du corps de page) -->
+                    <button type="button" class="hud-slider-arrow" id="hudScrollLeft" title="Faire glisser les ressources vers la gauche" aria-label="Précédent">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <!-- Piste horizontale glissante sans barre de scroll visible -->
+                    <div class="hud-res-track" id="hudResTrack">
 
                     <!-- 1. BOIS DE CÈDRE -->
                     <div class="dropdown">
@@ -1692,272 +1747,424 @@ $navItems = [
                         </div>
                     </div>
 
-                </div>
-
-                <!-- GROUPE DROITE : LES 2 MENUS SECONDAIRES COMPACTS (ARTISANAT & MINERAIS / DOMAINE & PEUPLE) -->
-                <div class="d-flex align-items-center gap-1.5 ms-xl-auto">
-
-                    <!-- MENU COMPACT 1 : ARTISANAT & MINERAIS (8 ressources secondaires) -->
+                    <!-- 8. POUTRES DE CHARPENTE -->
                     <div class="dropdown">
-                        <button class="btn btn-outline-secondary bg-white d-flex align-items-center gap-2 px-2.5 py-1 rounded-2 shadow-sm dropdown-toggle text-dark border"
-                                type="button" id="dropdownArtisanatMinerais" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Afficher les produits d'artisanat, minerais de montagne et denrées raffinées">
-                            <i class="fa-solid fa-boxes-stacked text-orange"></i>
-                            <div class="text-start lh-1">
-                                <div class="fw-bold" style="font-size:0.78rem;">Artisanat &amp; Minerais</div>
-                                <div class="text-muted d-none d-xxl-block font-monospace" style="font-size:0.62rem;">Poutres &bull; Fer &bull; Farine &bull; Saké</div>
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResBeams" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Poutres de Charpente : cliquer pour le détail">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-hammer text-orange"></i> Poutres
+                                </span>
+                                <span class="font-monospace text-orange fw-semibold" style="font-size:0.65rem;">Scierie</span>
                             </div>
-                            <span class="badge bg-orange-lt text-orange font-monospace" style="font-size:0.62rem;">8</span>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-wooden-beams"
+                                      data-current="<?= $beamsStock ?>"
+                                      data-max="<?= $beamsMax ?>">
+                                    <?= number_format((int)$beamsStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctBeams) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
+                            </div>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-end shadow-lg p-2 border" aria-labelledby="dropdownArtisanatMinerais" style="min-width:335px; max-width:95vw; z-index:1060;">
-                            <!-- Section A : Matériaux Raffinés -->
-                            <div class="d-flex justify-content-between align-items-center px-2 py-1 mb-1 border-bottom">
-                                <span class="fw-bold text-dark font-monospace text-uppercase" style="font-size:0.68rem;">
-                                    <i class="fa-solid fa-hammer text-orange me-1"></i>Matériaux d'Atelier
-                                </span>
-                                <a href="?page=city" class="text-decoration-none small" style="font-size:0.68rem;">Ateliers &rarr;</a>
+                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResBeams" style="min-width:280px; z-index:1060;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-orange-lt text-orange rounded"><i class="fa-solid fa-hammer"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Poutres de Charpente</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Matériau d'atelier urbain</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-orange-lt text-orange font-monospace"><?= (int)round($pctBeams) ?>%</span>
                             </div>
-
-                            <!-- Poutres de Charpente -->
-                            <a href="?page=city" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between px-2 py-1.5 rounded text-reset text-decoration-none"
-                               title="Poutres de Charpente : Stock <?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?>">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-hammer text-orange flex-shrink-0" style="width:20px; text-align:center;"></i>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.78rem;">Poutres de Charpente</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.64rem;">Max : <?= number_format($beamsMax) ?></div>
-                                    </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <strong class="text-dark"><?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?></strong>
                                 </div>
-                                <div class="text-end lh-1">
-                                    <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
-                                        <span class="fw-bold text-dark" style="font-size:0.8rem;"
-                                              id="res-val-wooden-beams"
-                                              data-current="<?= $beamsStock ?>"
-                                              data-max="<?= $beamsMax ?>">
-                                            <?= number_format((int)$beamsStock) ?>
-                                        </span>
-                                        <span class="text-muted" style="font-size:0.62rem;">Scierie</span>
-                                    </div>
-                                    <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:64px;">
-                                        <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
-                                    </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Atelier :</span>
+                                    <span class="text-dark fw-bold">Scierie &amp; Charpenterie</span>
                                 </div>
-                            </a>
-
-                            <!-- Charbon de Bois -->
-                            <a href="?page=building&code=sawmill" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between px-2 py-1.5 rounded text-reset text-decoration-none"
-                               title="Charbon de Bois : Stock <?= number_format((int)$charcoalStock) ?> / <?= number_format($charcoalMax) ?>">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-fire text-dark flex-shrink-0" style="width:20px; text-align:center;"></i>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.78rem;">Charbon de Bois</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.64rem;">Max : <?= number_format($charcoalMax) ?></div>
-                                    </div>
-                                </div>
-                                <div class="text-end lh-1">
-                                    <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
-                                        <span class="fw-bold text-dark" style="font-size:0.8rem;"
-                                              id="res-val-charcoal"
-                                              data-current="<?= $charcoalStock ?>"
-                                              data-max="<?= $charcoalMax ?>">
-                                            <?= number_format((int)$charcoalStock) ?>
-                                        </span>
-                                        <span class="text-muted" style="font-size:0.62rem;">Four</span>
-                                    </div>
-                                    <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:64px;">
-                                        <div class="progress-bar bg-dark" id="bar-charcoal" style="width:<?= $pctCharcoal ?>%;"></div>
-                                    </div>
-                                </div>
-                            </a>
-
-                            <!-- Section B : Minerais de Montagne -->
-                            <div class="d-flex justify-content-between align-items-center px-2 py-1 mt-1 mb-1 border-top border-bottom">
-                                <span class="fw-bold text-dark font-monospace text-uppercase" style="font-size:0.68rem;">
-                                    <i class="fa-solid fa-gem text-danger me-1"></i>Minerais &amp; Montagnes
-                                </span>
-                                <a href="?page=building&code=stonemason#craftSection" class="text-decoration-none small" style="font-size:0.68rem;">Raffiner &rarr;</a>
                             </div>
-
-                            <!-- Sable de Fer (Satetsu) -->
-                            <a href="?page=building&code=blacksmith#craftSection" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between px-2 py-1.5 rounded text-reset text-decoration-none"
-                               title="Sable de Fer (Satetsu) : Stock <?= number_format((int)$ironSandStock) ?> / <?= number_format($ironSandMax) ?>">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-gem text-secondary flex-shrink-0" style="width:20px; text-align:center;"></i>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.78rem;">Sable de Fer (Satetsu)</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.64rem;">Max : <?= number_format($ironSandMax) ?></div>
-                                    </div>
-                                </div>
-                                <div class="text-end lh-1">
-                                    <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
-                                        <span class="fw-bold text-dark" style="font-size:0.8rem;"
-                                              id="res-val-iron-sand"
-                                              data-current="<?= $ironSandStock ?>"
-                                              data-max="<?= $ironSandMax ?>">
-                                            <?= number_format((int)$ironSandStock) ?>
-                                        </span>
-                                        <span class="text-muted" style="font-size:0.62rem;">Forge</span>
-                                    </div>
-                                    <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:64px;">
-                                        <div class="progress-bar bg-secondary" id="bar-iron-sand" style="width:<?= $pctIronSand ?>%;"></div>
-                                    </div>
-                                </div>
-                            </a>
-
-                            <!-- Soufre Volcanique -->
-                            <a href="?page=building&code=stonemason#craftSection" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between px-2 py-1.5 rounded text-reset text-decoration-none"
-                               title="Soufre Volcanique : Stock <?= number_format((int)$sulfurStock) ?> / <?= number_format($sulfurMax) ?>">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-volcano text-warning flex-shrink-0" style="width:20px; text-align:center;"></i>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.78rem;">Soufre Volcanique</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.64rem;">Max : <?= number_format($sulfurMax) ?></div>
-                                    </div>
-                                </div>
-                                <div class="text-end lh-1">
-                                    <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
-                                        <span class="fw-bold text-dark" style="font-size:0.8rem;"
-                                              id="res-val-sulfur"
-                                              data-current="<?= $sulfurStock ?>"
-                                              data-max="<?= $sulfurMax ?>">
-                                            <?= number_format((int)$sulfurStock) ?>
-                                        </span>
-                                        <span class="text-muted" style="font-size:0.62rem;">Poudre</span>
-                                    </div>
-                                    <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:64px;">
-                                        <div class="progress-bar bg-warning" id="bar-sulfur" style="width:<?= $pctSulfur ?>%;"></div>
-                                    </div>
-                                </div>
-                            </a>
-
-                            <!-- Nitrate de Potasse -->
-                            <a href="?page=building&code=stonemason#craftSection" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between px-2 py-1.5 rounded text-reset text-decoration-none"
-                               title="Nitrate de Potasse (Salpêtre) : Stock <?= number_format((int)$nitrateStock) ?> / <?= number_format($nitrateMax) ?>">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-flask-vial text-info flex-shrink-0" style="width:20px; text-align:center;"></i>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.78rem;">Nitrate de Potasse</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.64rem;">Max : <?= number_format($nitrateMax) ?></div>
-                                    </div>
-                                </div>
-                                <div class="text-end lh-1">
-                                    <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
-                                        <span class="fw-bold text-dark" style="font-size:0.8rem;"
-                                              id="res-val-nitrate"
-                                              data-current="<?= $nitrateStock ?>"
-                                              data-max="<?= $nitrateMax ?>">
-                                            <?= number_format((int)$nitrateStock) ?>
-                                        </span>
-                                        <span class="text-muted" style="font-size:0.62rem;">Salpêtre</span>
-                                    </div>
-                                    <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:64px;">
-                                        <div class="progress-bar bg-info" id="bar-nitrate" style="width:<?= $pctNitrate ?>%;"></div>
-                                    </div>
-                                </div>
-                            </a>
-
-                            <!-- Section C : Denrées Raffinées & Pêche -->
-                            <div class="d-flex justify-content-between align-items-center px-2 py-1 mt-1 mb-1 border-top border-bottom">
-                                <span class="fw-bold text-dark font-monospace text-uppercase" style="font-size:0.68rem;">
-                                    <i class="fa-solid fa-wine-bottle text-purple me-1"></i>Gastronomie &amp; Pêche
-                                </span>
-                                <a href="?page=building&code=grain_mill" class="text-decoration-none small" style="font-size:0.68rem;">Meunerie &rarr;</a>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=sawmill" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-hammer me-1"></i>Ouvrir la Scierie</a>
                             </div>
-
-                            <!-- Poisson Frais -->
-                            <a href="?page=resources" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between px-2 py-1.5 rounded text-reset text-decoration-none"
-                               title="Poisson Frais : Stock <?= number_format((int)$fishStock) ?> / <?= number_format($fishMax) ?>">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-fish text-cyan flex-shrink-0" style="width:20px; text-align:center;"></i>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.78rem;">Poisson Frais</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.64rem;">Kura : <?= number_format($fishMax) ?></div>
-                                    </div>
-                                </div>
-                                <div class="text-end lh-1">
-                                    <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
-                                        <span class="fw-bold text-dark" style="font-size:0.8rem;"
-                                              id="res-val-fish"
-                                              data-current="<?= $fishStock ?>"
-                                              data-max="<?= $fishMax ?>">
-                                            <?= number_format((int)$fishStock) ?>
-                                        </span>
-                                        <span class="text-cyan" style="font-size:0.62rem;">Pêche</span>
-                                    </div>
-                                    <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:64px;">
-                                        <div class="progress-bar bg-cyan" id="bar-fish" style="width:<?= $pctFish ?>%;"></div>
-                                    </div>
-                                </div>
-                            </a>
-
-                            <!-- Farine de Riz -->
-                            <a href="?page=building&code=grain_mill" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between px-2 py-1.5 rounded text-reset text-decoration-none"
-                               title="Farine de Riz : Stock <?= number_format((int)$flourStock) ?> / <?= number_format($flourMax) ?>">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-bowl-rice text-secondary flex-shrink-0" style="width:20px; text-align:center;"></i>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.78rem;">Farine de Riz (Komeko)</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.64rem;">Niv. 5 Meunerie</div>
-                                    </div>
-                                </div>
-                                <div class="text-end lh-1">
-                                    <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
-                                        <span class="fw-bold text-dark" style="font-size:0.8rem;"
-                                              id="res-val-rice-flour"
-                                              data-current="<?= $flourStock ?>"
-                                              data-max="<?= $flourMax ?>">
-                                            <?= number_format((int)$flourStock) ?>
-                                        </span>
-                                        <span class="text-muted" style="font-size:0.62rem;">Raffinage</span>
-                                    </div>
-                                    <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:64px;">
-                                        <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
-                                    </div>
-                                </div>
-                            </a>
-
-                            <!-- Saké Impérial -->
-                            <a href="?page=building&code=grain_mill" class="dropdown-item resource-dropdown-item d-flex align-items-center justify-content-between px-2 py-1.5 rounded text-reset text-decoration-none"
-                               title="Saké Impérial : Stock <?= number_format((int)$sakeStock) ?> / <?= number_format($sakeMax) ?>">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-wine-bottle text-purple flex-shrink-0" style="width:20px; text-align:center;"></i>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.78rem;">Saké Impérial</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.64rem;">Niv. 10 Brasserie</div>
-                                    </div>
-                                </div>
-                                <div class="text-end lh-1">
-                                    <div class="d-flex align-items-baseline gap-1 justify-content-end font-monospace">
-                                        <span class="fw-bold text-dark" style="font-size:0.8rem;"
-                                              id="res-val-sake"
-                                              data-current="<?= $sakeStock ?>"
-                                              data-max="<?= $sakeMax ?>">
-                                            <?= number_format((int)$sakeStock) ?>
-                                        </span>
-                                        <span class="badge bg-purple-lt text-purple font-monospace py-0 px-1" style="font-size:0.58rem;">+15%</span>
-                                    </div>
-                                    <div class="progress progress-xs mt-1 ms-auto" style="height:3px; width:64px;">
-                                        <div class="progress-bar bg-purple" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
-                                    </div>
-                                </div>
-                            </a>
                         </div>
                     </div>
 
-                    <!-- MENU COMPACT 2 : DOMAINE & PEUPLE (Population, Castes, Main-d'œuvre, Moral, Kobans) -->
+                    <!-- 9. CHARBON DE BOIS -->
                     <div class="dropdown">
-                        <button class="btn btn-outline-info bg-white d-flex align-items-center gap-2 px-2.5 py-1 rounded-2 shadow-sm dropdown-toggle text-dark border"
-                                type="button" id="dropdownDomaine" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Afficher la démographie, l'ordre Shinōkōshō, la main-d'œuvre et le Trésor">
-                            <i class="fa-solid fa-users text-azure"></i>
-                            <div class="text-start lh-1">
-                                <div class="fw-bold d-flex align-items-center gap-1" style="font-size:0.78rem;">
-                                    <span>Peuple &amp; Domaine</span>
-                                    <span class="badge bg-<?= $contentmentBadgeColor ?>-lt text-<?= $contentmentBadgeColor ?> font-monospace py-0 px-1" style="font-size:0.6rem;"><?= $contentmentScore ?>%</span>
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResCharcoal" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Charbon de Bois : cliquer pour le détail">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-fire text-dark"></i> Charbon
+                                </span>
+                                <span class="font-monospace text-secondary fw-semibold" style="font-size:0.65rem;">Four</span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-charcoal"
+                                      data-current="<?= $charcoalStock ?>"
+                                      data-max="<?= $charcoalMax ?>">
+                                    <?= number_format((int)$charcoalStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctCharcoal) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-dark" id="bar-charcoal" style="width:<?= $pctCharcoal ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResCharcoal" style="min-width:280px; z-index:1060;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-secondary-lt text-dark rounded"><i class="fa-solid fa-fire"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Charbon de Bois</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Combustible de haute chauffe</div>
+                                    </div>
                                 </div>
-                                <div class="text-muted d-none d-xxl-block font-monospace" style="font-size:0.62rem;">
-                                    <?= number_format($curPop) ?>/<?= number_format($maxPop) ?> hab. &bull; <?= number_format($userGoldCoins) ?> Kobans
+                                <span class="badge bg-secondary-lt text-dark font-monospace"><?= (int)round($pctCharcoal) ?>%</span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <strong class="text-dark"><?= number_format((int)$charcoalStock) ?> / <?= number_format($charcoalMax) ?></strong>
                                 </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Usage :</span>
+                                    <span class="text-dark fw-bold">Forge Tamahagane &amp; Poudre</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=sawmill" class="btn btn-xs btn-dark flex-fill"><i class="fa-solid fa-fire me-1"></i>Four à Charbon</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10. SABLE DE FER (SATETSU) -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResIronSand" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Sable de Fer (Satetsu) : cliquer pour le détail">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-gem text-secondary"></i> Satetsu
+                                </span>
+                                <span class="font-monospace text-secondary fw-semibold" style="font-size:0.65rem;">Minerai</span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-iron-sand"
+                                      data-current="<?= $ironSandStock ?>"
+                                      data-max="<?= $ironSandMax ?>">
+                                    <?= number_format((int)$ironSandStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctIronSand) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-secondary" id="bar-iron-sand" style="width:<?= $pctIronSand ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResIronSand" style="min-width:280px; z-index:1060;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-secondary-lt text-secondary rounded"><i class="fa-solid fa-gem"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Sable de Fer (Satetsu)</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Minerai ferreux de montagne</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-secondary-lt text-secondary font-monospace"><?= (int)round($pctIronSand) ?>%</span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <strong class="text-dark"><?= number_format((int)$ironSandStock) ?> / <?= number_format($ironSandMax) ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Raffinage :</span>
+                                    <span class="text-dark fw-bold">Acier Tamahagane</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=blacksmith#craftSection" class="btn btn-xs btn-secondary flex-fill"><i class="fa-solid fa-fire-burner me-1"></i>Grande Forge</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 11. SOUFRE VOLCANIQUE -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResSulfur" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Soufre Volcanique : cliquer pour le détail">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-volcano text-warning"></i> Soufre
+                                </span>
+                                <span class="font-monospace text-warning fw-semibold" style="font-size:0.65rem;">Minerai</span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-sulfur"
+                                      data-current="<?= $sulfurStock ?>"
+                                      data-max="<?= $sulfurMax ?>">
+                                    <?= number_format((int)$sulfurStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctSulfur) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-warning" id="bar-sulfur" style="width:<?= $pctSulfur ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResSulfur" style="min-width:280px; z-index:1060;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-warning-lt text-warning rounded"><i class="fa-solid fa-volcano"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Soufre Volcanique</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Minerai pyrotechnique</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-warning-lt text-warning font-monospace"><?= (int)round($pctSulfur) ?>%</span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <strong class="text-dark"><?= number_format((int)$sulfurStock) ?> / <?= number_format($sulfurMax) ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Usage :</span>
+                                    <span class="text-dark fw-bold">Poudre Noire &amp; Artillerie</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=stonemason#craftSection" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-volcano me-1"></i>Raffiner</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 12. NITRATE DE POTASSE -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResNitrate" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Nitrate de Potasse (Salpêtre) : cliquer pour le détail">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-flask-vial text-info"></i> Nitrate
+                                </span>
+                                <span class="font-monospace text-info fw-semibold" style="font-size:0.65rem;">Salpêtre</span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-nitrate"
+                                      data-current="<?= $nitrateStock ?>"
+                                      data-max="<?= $nitrateMax ?>">
+                                    <?= number_format((int)$nitrateStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctNitrate) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-info" id="bar-nitrate" style="width:<?= $pctNitrate ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResNitrate" style="min-width:280px; z-index:1060;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-info-lt text-info rounded"><i class="fa-solid fa-flask-vial"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Nitrate de Potasse</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Salpêtre raffiné</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-info-lt text-info font-monospace"><?= (int)round($pctNitrate) ?>%</span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <strong class="text-dark"><?= number_format((int)$nitrateStock) ?> / <?= number_format($nitrateMax) ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Usage :</span>
+                                    <span class="text-dark fw-bold">Arquebuses Teppō &amp; Munitions</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=stonemason#craftSection" class="btn btn-xs btn-info flex-fill"><i class="fa-solid fa-flask-vial me-1"></i>Raffiner</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 13. POISSON FRAIS -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResFish" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Poisson Frais : cliquer pour le détail">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-fish text-cyan"></i> Poisson
+                                </span>
+                                <span class="font-monospace text-cyan fw-semibold" style="font-size:0.65rem;">Pêche</span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-fish"
+                                      data-current="<?= $fishStock ?>"
+                                      data-max="<?= $fishMax ?>">
+                                    <?= number_format((int)$fishStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctFish) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-cyan" id="bar-fish" style="width:<?= $pctFish ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResFish" style="min-width:280px; z-index:1060;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-cyan-lt text-cyan rounded"><i class="fa-solid fa-fish"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Poisson Frais</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Vivres maritimes (Grenier Kura)</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-cyan-lt text-cyan font-monospace"><?= (int)round($pctFish) ?>%</span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Stock / Grenier Kura :</span>
+                                    <strong class="text-dark"><?= number_format((int)$fishStock) ?> / <?= number_format($fishMax) ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Provenance :</span>
+                                    <span class="text-dark fw-bold">Flottilles de Pêche</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=resources" class="btn btn-xs btn-cyan flex-fill"><i class="fa-solid fa-fish me-1"></i>Voir les Terroirs</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 14. FARINE DE RIZ -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResFlour" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Farine de Riz (Komeko) : cliquer pour le détail">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-bowl-rice text-secondary"></i> Farine
+                                </span>
+                                <span class="font-monospace text-secondary fw-semibold" style="font-size:0.65rem;">Niv. 5</span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-rice-flour"
+                                      data-current="<?= $flourStock ?>"
+                                      data-max="<?= $flourMax ?>">
+                                    <?= number_format((int)$flourStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctFlour) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResFlour" style="min-width:280px; z-index:1060;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-secondary-lt text-secondary rounded"><i class="fa-solid fa-bowl-rice"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Farine de Riz (Komeko)</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Meunerie &amp; Brasserie (Niv. 5)</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-secondary-lt text-secondary font-monospace"><?= (int)round($pctFlour) ?>%</span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Stock / Entrepôt :</span>
+                                    <strong class="text-dark"><?= number_format((int)$flourStock) ?> / <?= number_format($flourMax) ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Usage :</span>
+                                    <span class="text-dark fw-bold">Rations &amp; Ravitaillement</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-secondary flex-fill"><i class="fa-solid fa-bowl-rice me-1"></i>Meunerie</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 15. SAKÉ IMPÉRIAL -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResSake" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Saké Impérial : cliquer pour le détail">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-wine-bottle text-purple"></i> Saké
+                                </span>
+                                <span class="badge bg-purple-lt text-purple font-monospace py-0 px-1" style="font-size:0.58rem;">+15%</span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-sake"
+                                      data-current="<?= $sakeStock ?>"
+                                      data-max="<?= $sakeMax ?>">
+                                    <?= number_format((int)$sakeStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctSake) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-purple" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start shadow-lg p-3 border" aria-labelledby="pillResSake" style="min-width:280px; z-index:1060;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-purple-lt text-purple rounded"><i class="fa-solid fa-wine-bottle"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Saké Impérial</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Meunerie &amp; Brasserie (Niv. 10)</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-purple-lt text-purple font-monospace">+15% Moral</span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Stock / Caves :</span>
+                                    <strong class="text-dark"><?= number_format((int)$sakeStock) ?> / <?= number_format($sakeMax) ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Effet :</span>
+                                    <span class="text-purple fw-bold">Moral +15% &amp; Fêtes Matsuri</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-purple flex-fill"><i class="fa-solid fa-wine-bottle me-1"></i>Brasserie</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 16. PEUPLE & DOMAINE (Même gabarit .hud-res-pill) -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="dropdownDomaine" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Peuple & Domaine : Population, Ordre Shinōkōshō, Main-d'œuvre, Moral et Kobans">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-users text-azure"></i> Peuple &amp; Domaine
+                                </span>
+                                <span class="badge bg-<?= $contentmentBadgeColor ?>-lt text-<?= $contentmentBadgeColor ?> font-monospace py-0 px-1" style="font-size:0.6rem;"><?= $contentmentScore ?>%</span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.84rem;">
+                                    <?= number_format($curPop) ?><span class="text-muted" style="font-size:0.65rem;">/<?= number_format($maxPop) ?></span>
+                                </span>
+                                <span class="text-warning fw-bold" style="font-size:0.65rem;"><?= number_format($userGoldCoins) ?> 🪙</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-primary" style="width:<?= $pctPop ?>%;"></div>
                             </div>
                         </button>
                         <div class="dropdown-menu dropdown-menu-end shadow-lg p-2 border" aria-labelledby="dropdownDomaine" style="min-width:335px; max-width:95vw; z-index:1060;">
@@ -2110,10 +2317,73 @@ $navItems = [
                         </div>
                     </div>
 
-                </div>
+                    </div><!-- /#hudResTrack -->
 
+                    <!-- Flèche de glissement Droite (alignée sur le bord droit des cards du corps de page) -->
+                    <button type="button" class="hud-slider-arrow" id="hudScrollRight" title="Faire glisser les ressources vers la droite" aria-label="Suivant">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+
+                </div>
             </div>
         </div>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const track = document.getElementById('hudResTrack');
+            const btnLeft = document.getElementById('hudScrollLeft');
+            const btnRight = document.getElementById('hudScrollRight');
+            if (!track || !btnLeft || !btnRight) return;
+
+            const updateArrows = () => {
+                const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+                btnLeft.disabled = track.scrollLeft <= 2;
+                btnRight.disabled = maxScroll <= 2 || track.scrollLeft >= (maxScroll - 2);
+            };
+
+            const closeOpenHudDropdowns = () => {
+                track.querySelectorAll('.hud-res-pill[aria-expanded="true"]').forEach((btn) => {
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+                        const inst = bootstrap.Dropdown.getInstance(btn);
+                        if (inst) inst.hide();
+                    }
+                });
+            };
+
+            btnLeft.addEventListener('click', () => {
+                closeOpenHudDropdowns();
+                track.scrollBy({ left: -380, behavior: 'smooth' });
+            });
+
+            btnRight.addEventListener('click', () => {
+                closeOpenHudDropdowns();
+                track.scrollBy({ left: 380, behavior: 'smooth' });
+            });
+
+            track.addEventListener('scroll', updateArrows, { passive: true });
+            window.addEventListener('resize', updateArrows);
+
+            // Positionnement fixed des menus déroulants du ruban pour éviter toute coupure par overflow-x
+            track.querySelectorAll('.dropdown').forEach((dd) => {
+                dd.addEventListener('shown.bs.dropdown', function () {
+                    const btn = dd.querySelector('.hud-res-pill');
+                    const menu = dd.querySelector('.dropdown-menu');
+                    if (!btn || !menu) return;
+                    const rect = btn.getBoundingClientRect();
+                    menu.style.position = 'fixed';
+                    menu.style.inset = 'auto';
+                    menu.style.transform = 'none';
+                    menu.style.top = (rect.bottom + 6) + 'px';
+                    const menuWidth = menu.offsetWidth || 300;
+                    const maxLeft = Math.max(8, window.innerWidth - menuWidth - 12);
+                    menu.style.left = Math.max(8, Math.min(rect.left, maxLeft)) + 'px';
+                    menu.style.zIndex = '1090';
+                });
+            });
+
+            setTimeout(updateArrows, 60);
+        });
+        </script>
         <?php endif; ?>
 
 

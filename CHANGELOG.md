@@ -3,6 +3,17 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.5] - 2026-10-17
+### Modifié (Changed)
+- **Évolution du Hub des Ressources sous le Carrousel &bull; Ruban Glissant Uniforme à 16 Pilules & Flèches de Navigation (`views/partials/header.php`) :**
+  * **Uniformisation de Toutes les Ressources et Indicateurs sur le Modèle `.hud-res-pill` :**
+    - Intégration directe dans le ruban des pilules **Poutres de Charpente** (`#pillResBeams`), **Charbon de Bois** (`#pillResCharcoal`), des **Minerais** (**Satetsu / Sable de Fer** `#pillResIronSand`, **Soufre Volcanique** `#pillResSulfur`, **Nitrate de Potasse** `#pillResNitrate`), des **Vivres raffinées** (**Poisson Frais** `#pillResFish`, **Farine de Riz** `#pillResFlour`, **Saké Impérial** `#pillResSake`) ainsi que **Peuple & Domaine** (`#dropdownDomaine`) sur le même gabarit visuel que les ressources de base.
+  * **Navigation par Flèches Gauche/Droite sans Barre de Scroll Visible :**
+    - Ajout des boutons `#hudScrollLeft` et `#hudScrollRight` aux extrémités gauche et droite de la barre pour faire glisser les indicateurs avec fluidité (`scrollBy` smooth), tout en masquant intégralement la barre de défilement native (`scrollbar-width: none`, `::-webkit-scrollbar { display: none }`).
+    - Positionnement dynamique en `position: fixed` des fiches détaillées au clic afin d'éviter toute coupure par le conteneur glissant.
+  * **Alignement Graphique Gauche/Droite sur les Cartes du Corps de Page :**
+    - Alignement strict du conteneur du hub (`container-fluid px-3 px-lg-4`) sur celui de `.page-body` juste en dessous pour une cohérence géométrique parfaite.
+
 ## [1.34.4] - 2026-10-16
 ### Modifié (Changed)
 - **Refonte Ergonomique de la Barre HUD des Ressources sous le Carrousel (`views/partials/header.php`) :**

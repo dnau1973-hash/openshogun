@@ -1,22 +1,22 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
-### [2026-10-16] - hud-resource-bar-redesign : Refonte Ergonomique de la Barre HUD des Ressources sous le Carrousel
+### [2026-10-17] - hud-resource-bar-redesign : Hub Glissant Uniforme des 16 Ressources & Indicateurs sous le Carrousel
 - **Module :** `hud-resource-bar-redesign`
 - **Statut :** `À tester`
 - **Description :**
-  1. **Visibilité Immédiate des 7 Ressources & Indicateurs de Base (`views/partials/header.php`) :**
-     - Affichage direct sous le carrousel de 7 pilules cliquables : **Bois**, **Granit**, **Argile**, **Riz**, **Thé**, **Soja** et **Sérénité**.
-     - Chaque pilule présente le stock incrémenté en temps réel (`res-val-*`), la cadence horaire (`+X/h`), le pourcentage de remplissage et la jauge (`bar-*`).
-  2. **Fiche Détaillée au Clic sur Chaque Ressource :**
-     - Affiche le stock exact / plafond, le temps estimé avant saturation de l'entrepôt, le niveau du terroir rural, les bonus d'ateliers urbains, d'Oasis, de Héros et de Matsuri, l'efficacité globale, la projection sur 24h et des raccourcis vers le terroir ou l'atelier.
-  3. **Deux Menus Secondaires Compacts à Droite :**
-     - **`Artisanat & Minerais`** : regroupe les 8 ressources secondaires (*Poutres, Charbon, Sable de Fer, Soufre, Nitrate, Poisson, Farine, Saké*).
-     - **`Peuple & Domaine`** : affiche la population, le moral et les Kobans, et déroule la répartition par castes Shinōkōshō, la main-d'œuvre, le moral et le Trésor Impérial.
+  1. **Modèle Uniforme `.hud-res-pill` pour les 16 Indicateurs (`views/partials/header.php`) :**
+     - Affichage homogène sous le carrousel des 16 pilules cliquables : **Bois**, **Granit**, **Argile**, **Riz**, **Thé**, **Soja**, **Sérénité**, **Poutres**, **Charbon**, **Satetsu**, **Soufre**, **Nitrate**, **Poisson**, **Farine**, **Saké** et **Peuple & Domaine**.
+     - Chaque pilule présente le stock incrémenté en temps réel (`res-val-*`), la cadence ou étiquette métier, le pourcentage de remplissage et la jauge (`bar-*`), ainsi qu'une fiche détaillée au clic.
+  2. **Glissement Horizontal par Flèches Gauche/Droite sans Scroll Visible :**
+     - Boutons `#hudScrollLeft` et `#hudScrollRight` aux extrémités gauche et droite de la barre faisant glisser la piste `#hudResTrack` sans aucune barre de scroll visible.
+     - Fiches déroulantes positionnées en `position: fixed` au clic pour ne jamais être rognées par le conteneur glissant.
+  3. **Alignement Graphique Gauche/Droite sur les Cards de la Page :**
+     - Conteneur `.container-fluid.px-3.px-lg-4` strictement aligné à gauche et à droite sur les cartes de `.page-body` situées juste en dessous.
 - **Fichiers modifiés :** `views/partials/header.php`, `CHANGELOG.md`, `fonctionnalités.md`
 - **Vérification QA :**
-  1. Vérifier sur n'importe quelle page du jeu que les 7 pilules (Bois, Granit, Argile, Riz, Thé, Soja, Sérénité) sont visibles d'un seul coup d'œil sous le carrousel avec leur stock et leur cadence `/h`.
-  2. Cliquer sur chacune des 7 pilules pour vérifier l'ouverture de sa fiche détaillée (saturation, bonus, projection 24h, liens rapides).
-  3. Ouvrir les 2 menus de droite (`Artisanat & Minerais` et `Peuple & Domaine`) et vérifier la présence de toutes les ressources secondaires et des castes Shinōkōshō.
+  1. Vérifier que les bords gauche (flèche `<`) et droit (flèche `>`) du hub des ressources sont parfaitement alignés avec les cartes de contenu situées plus bas.
+  2. Cliquer sur les flèches gauche et droite pour faire glisser les 16 pilules (Bois, Granit, Argile, Riz, Thé, Soja, Sérénité, Poutres, Charbon, Satetsu, Soufre, Nitrate, Poisson, Farine, Saké, Peuple & Domaine) et vérifier l'absence totale de barre de scroll visible.
+  3. Cliquer sur plusieurs pilules (y compris après glissement) pour vérifier que leurs fiches détaillées s'affichent intégralement par-dessus le contenu.
 
 ### [2026-10-16] - grain-mill-level-progression : Paliers de Production Échelonnés Meunerie & Brasserie (Farine Niv. 5, Saké Niv. 10)
 - **Module :** `grain-mill-level-progression`
