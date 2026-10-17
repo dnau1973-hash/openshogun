@@ -1087,25 +1087,29 @@ $navItems = [
         $shrineLvl     = (int)($ruralPlotsData['sanctuaire_shinto']['level'] ?? 1);
         $shrineMaxLvl  = max(1, (int)($ruralPlotsData['sanctuaire_shinto']['max_level'] ?? 30));
 
-        // Niveaux des bâtiments urbains de la cité (depuis $pBld)
+        // Niveaux des bâtiments urbains de la cité (depuis $pBld & constante BUILDINGS)
+        if (!isset($pBld) || !is_array($pBld)) {
+            $pBld = $planetBuildings ?? ((isset($planetEngine) && $planetEngine && !empty($planet['id'])) ? $planetEngine->getBuildings((int)$planet['id']) : []);
+        }
+        $buildingsDef   = defined('BUILDINGS') ? BUILDINGS : [];
         $hqLvl          = (int)($pBld['hq'] ?? 0);
-        $hqMaxLvl       = (int)(BUILDING_TYPES['hq']['max_level'] ?? 20);
+        $hqMaxLvl       = (int)($buildingsDef['hq']['max_level'] ?? 20);
         $storageLvl     = (int)($pBld['storage'] ?? 0);
-        $storageMaxLvl  = (int)(BUILDING_TYPES['storage']['max_level'] ?? 20);
+        $storageMaxLvl  = (int)($buildingsDef['storage']['max_level'] ?? 20);
         $tankLvl        = (int)($pBld['tank'] ?? 0);
-        $tankMaxLvl     = (int)(BUILDING_TYPES['tank']['max_level'] ?? 20);
+        $tankMaxLvl     = (int)($buildingsDef['tank']['max_level'] ?? 20);
         $sawmillLvl     = (int)($pBld['sawmill'] ?? 0);
-        $sawmillMaxLvl  = (int)(BUILDING_TYPES['sawmill']['max_level'] ?? 20);
+        $sawmillMaxLvl  = (int)($buildingsDef['sawmill']['max_level'] ?? 20);
         $stonemasonLvl  = (int)($pBld['stonemason'] ?? 0);
-        $stonemasonMaxLvl = (int)(BUILDING_TYPES['stonemason']['max_level'] ?? 20);
+        $stonemasonMaxLvl = (int)($buildingsDef['stonemason']['max_level'] ?? 20);
         $grainMillLvl   = (int)($pBld['grain_mill'] ?? 0);
-        $grainMillMaxLvl= (int)(BUILDING_TYPES['grain_mill']['max_level'] ?? 20);
+        $grainMillMaxLvl= (int)($buildingsDef['grain_mill']['max_level'] ?? 20);
         $blacksmithLvl  = (int)($pBld['blacksmith'] ?? 0);
-        $blacksmithMaxLvl = (int)(BUILDING_TYPES['blacksmith']['max_level'] ?? 20);
+        $blacksmithMaxLvl = (int)($buildingsDef['blacksmith']['max_level'] ?? 20);
         $teahouseLvl    = (int)($pBld['teahouse'] ?? 0);
-        $teahouseMaxLvl = (int)(BUILDING_TYPES['teahouse']['max_level'] ?? 20);
+        $teahouseMaxLvl = (int)($buildingsDef['teahouse']['max_level'] ?? 20);
         $marketLvl      = (int)($pBld['market'] ?? 0);
-        $marketMaxLvl   = (int)(BUILDING_TYPES['market']['max_level'] ?? 15);
+        $marketMaxLvl   = (int)($buildingsDef['market']['max_level'] ?? 15);
 
         $bldBonuses    = $planet['prod_rates']['building_bonuses'] ?? [];
         $sawmillBonus  = (int)($bldBonuses['sawmill'] ?? 0);
