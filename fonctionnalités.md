@@ -1,5 +1,25 @@
 # 📋 Registre des Fonctionnalités & Recette QA — OpenShogun
 
+### [2026-10-17] - narrative-scenarios-studio-2-0 : Refonte Ergonomique & Opérationnelle du Module Scénarios de Jeu (Narrative Designer 2.0)
+- **Module :** `narrative-scenarios-studio-2-0`
+- **Statut :** `À tester`
+- **Description :**
+  1. **Catalogue Multi-Vues avec Micro-Interactions AJAX (`views/gamestudio/narrative_scenarios.php`) :**
+     - Bascule instantanée entre **🗂️ Vue Cartes**, **⛩️ Frise des Steps** et **📋 Kanban Pipeline**.
+     - Depuis la vue Cartes, possibilité de changer le statut du scénario en AJAX et de cliquer directement sur chacune des pastilles des 10 métiers pour faire avancer son statut (`⏳ À faire ➔ 🔧 En cours ➔ ✅ Terminé ➔ ⛔ Bloqué`) avec mise à jour de la jauge sans rechargement.
+  2. **Studio d'Édition Côte-à-Côte (Split-Screen Live Simulator) & Assistants Métier :**
+     - Dans l'éditeur pleine page (`action=edit` / `action=create`), affichage du **Simulateur Parchemin In-Game en temps réel dans la colonne droite sticky** pendant la saisie à gauche.
+     - **Galerie de Personnages Sengoku (`SPEAKER_PRESETS`)**, **Quick-Chips Triggers & Récompenses (`TRIGGER_PRESETS`, `REWARD_PRESETS`)**, et **Éditeur de Choix Narratifs du Daimyō (1 à 3 boutons A/B)** testables en direct dans le parchemin.
+     - En-tête sticky doté du **Stepper Pipeline cliquable**, du **sélecteur rapide Inter-Scénarios (`◀ / ▶`)**, de l'indicateur *Dirty State* et de la sauvegarde AJAX (`Ctrl+S`).
+  3. **Matrice Opérationnelle des 10 Métiers 2.0 :**
+     - Affichage en **Mode Compact (1 ligne par tâche + tiroir repliable)** ou en **Mode Kanban des Tâches (4 colonnes)** avec filtres croisés par Métier et par Statut.
+- **Fichiers modifiés :** `core/ScenarioEngine.php`, `views/gamestudio.php`, `views/gamestudio/narrative_scenarios.php`, `CHANGELOG.md`, `fonctionnalités.md`
+- **Vérification QA :**
+  1. Ouvrir `?page=gamestudio&tab=narrative_scenarios` et basculer entre les 3 vues (*Cartes*, *Frise des Steps*, *Kanban Pipeline*).
+  2. Sur une carte du catalogue, cliquer sur une pastille métier et vérifier que son statut et la jauge se mettent à jour en AJAX avec un toast.
+  3. Ouvrir un scénario dans le **Studio Split-Screen**, tester la sélection d'un personnage Sengoku en 1 clic, ajouter/modifier un choix narratif du Daimyō, tester l'animation *Typewriter* dans le parchemin à droite et sauvegarder via `Ctrl+S`.
+  4. Ouvrir l'onglet **Matrice des 10 Métiers 2.0**, tester les filtres croisés (Métier + Statut) ainsi que la bascule vers le **Kanban des Tâches**.
+
 ### [2026-10-17] - hud-resource-bar-redesign : Hub Glissant Uniforme des 16 Ressources & Sous-Menus Approfondis au Clic
 - **Module :** `hud-resource-bar-redesign`
 - **Statut :** `À tester`

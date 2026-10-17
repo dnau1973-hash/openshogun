@@ -3,6 +3,20 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.7] - 2026-10-17
+### Ajouté & Modifié (Added & Changed)
+- **Refonte Ergonomique & Opérationnelle du Module Scénarios de Jeu — Studio Narrative Designer 2.0 (`core/ScenarioEngine.php`, `views/gamestudio.php`, `views/gamestudio/narrative_scenarios.php`) :**
+  * **Catalogue Multi-Vues avec Micro-Interactions AJAX :**
+    - **🗂️ Vue Cartes Interactive** : changement de statut du scénario en 1 clic AJAX et pastilles des 10 métiers cliquables directement sur la carte pour faire avancer le statut d'une tâche (`⏳ À faire ➔ 🔧 En cours ➔ ✅ Terminé ➔ ⛔ Bloqué`) avec recalcul temps réel de la barre de progression.
+    - **⛩️ Vue Frise Chronologique des Steps (Roadmap Campagne)** : visualisation séquentielle `Step #1 ➔ Step #2 ➔ Step #3...` avec triggers d'entrée, harangue du personnage, récompenses et bouton « + Insérer le Step suivant ».
+    - **📋 Vue Kanban Pipeline (5 colonnes)** : pilotage visuel du flux de production (*📝 Brouillon*, *🔍 En revue*, *⚙️ En production*, *✅ Prêt QA*, *🚀 En ligne*) avec boutons d'avancement rapide en AJAX.
+  * **Studio d'Édition Côte-à-Côte (Split-Screen Live Simulator) & Assistants Métier :**
+    - Fusion de l'éditeur narratif (colonne gauche) et du **Simulateur Parchemin In-Game en temps réel** (colonne droite sticky) avec compteur de caractères et bouton de test d'animation machine à écrire (*Typewriter*).
+    - **Barre de Workflow Pipeline & Navigation Inter-Scénarios** dans l'en-tête sticky : stepper cliquable (`Brouillon ➔ En revue ➔ Production ➔ Prêt ➔ Live`), sélecteur rapide (`◀ / ▶`) pour naviguer d'un scénario à l'autre sans retourner au catalogue, indicateur *Dirty State* et sauvegarde AJAX (`Ctrl+S`) avec toast.
+    - **Galerie de Personnages Sengoku (`ScenarioEngine::SPEAKER_PRESETS`)**, **Quick-Chips Triggers & Récompenses (`TRIGGER_PRESETS`, `REWARD_PRESETS`)** et **Éditeur de Choix Narratifs du Daimyō (1 à 3 décisions A/B)** persistés en SQL/JSON et exportés dans le GDD Markdown.
+  * **Matrice Opérationnelle des 10 Métiers 2.0 :**
+    - **Mode Compact 1-ligne avec tiroir repliable** par défaut + **Mode Kanban Opérationnel des Tâches** (4 colonnes : *À faire*, *En cours*, *Bloqué*, *Terminé*) et **filtres croisés** par Métier et par Statut.
+
 ## [1.34.6] - 2026-10-17
 ### Corrigé & Modifié (Fixed & Changed)
 - **Réimplantation et Enrichissement des Sous-Menus Détaillés au Clic des 16 Indicateurs du Hub des Ressources (`views/partials/header.php`) :**
