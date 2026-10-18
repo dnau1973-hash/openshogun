@@ -1173,6 +1173,17 @@ $navItems = [
             flex: 1 1 auto;
             min-width: 0;
             padding: 2px 1px;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .hud-res-track.is-dragging {
+            cursor: grabbing !important;
+            scroll-behavior: auto !important;
+        }
+        .hud-res-track.is-dragging * {
+            user-select: none !important;
+            pointer-events: none !important;
         }
         .hud-res-track::-webkit-scrollbar {
             display: none !important;
@@ -1240,6 +1251,94 @@ $navItems = [
         .hud-slider-arrow:disabled {
             opacity: 0.38;
             cursor: default;
+        }
+        /* Navigation rapide et Curseur de déplacement interactif */
+        .hud-nav-bar {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .hud-nav-btn {
+            font-size: 0.68rem;
+            font-weight: 500;
+            color: #475569;
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            border-radius: 6px;
+            padding: 2px 7px;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            text-decoration: none;
+            cursor: pointer;
+            line-height: 1.3;
+        }
+        .hud-nav-btn:hover {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: rgba(32, 107, 196, 0.4);
+            transform: translateY(-1px);
+        }
+        .hud-nav-btn.active {
+            background: #206bc4;
+            color: #ffffff !important;
+            border-color: #206bc4;
+            box-shadow: 0 1px 4px rgba(32, 107, 196, 0.3);
+        }
+        .hud-nav-btn.active i {
+            color: #ffffff !important;
+        }
+        .hud-res-slider-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .hud-res-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 5px;
+            background: #cbd5e1;
+            border-radius: 999px;
+            outline: none;
+            cursor: pointer;
+            margin: 0;
+            transition: background 0.15s ease;
+        }
+        .hud-res-slider:hover {
+            background: #94a3b8;
+        }
+        .hud-res-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #206bc4;
+            border: 2px solid #ffffff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+            cursor: grab;
+            transition: transform 0.1s ease, background-color 0.15s ease;
+        }
+        .hud-res-slider::-webkit-slider-thumb:hover {
+            background: #1a569d;
+            transform: scale(1.18);
+        }
+        .hud-res-slider::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.28);
+        }
+        .hud-res-slider::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #206bc4;
+            border: 2px solid #ffffff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+            cursor: grab;
+        }
+        .hud-res-slider::-moz-range-thumb:active {
+            cursor: grabbing;
         }
         @media (max-width: 991.98px) {
             .hud-res-pill {
@@ -2495,6 +2594,43 @@ $navItems = [
                     </button>
 
                 </div>
+
+                <!-- Barre de navigation rapide et curseur de déplacement interactif -->
+                <div class="hud-nav-bar d-flex align-items-center justify-content-between gap-2 pt-1 mt-1 border-top border-light-subtle">
+                    <!-- Raccourcis de sections / catégories -->
+                    <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                        <span class="text-muted text-uppercase font-monospace d-none d-md-inline me-1" style="font-size:0.62rem;">
+                            <i class="fa-solid fa-compass text-primary me-1"></i>Accès rapide :
+                        </span>
+                        <button type="button" class="hud-nav-btn active" data-nav-target="#pillResWood" title="Aller aux Matériaux de base (Bois, Granit, Argile, Poutres)">
+                            <i class="fa-solid fa-tree text-success me-1"></i><span>Matériaux</span>
+                        </button>
+                        <button type="button" class="hud-nav-btn" data-nav-target="#pillResRice" title="Aller aux Vivres &amp; Terroir (Riz, Thé, Soja, Poisson, Farine, Saké)">
+                            <i class="fa-solid fa-bowl-rice text-warning me-1"></i><span>Vivres</span>
+                        </button>
+                        <button type="button" class="hud-nav-btn" data-nav-target="#pillResSerenity" title="Aller à l'Énergie &amp; Minerais (Sérénité, Charbon, Fer, Soufre, Nitrate)">
+                            <i class="fa-solid fa-gem text-purple me-1"></i><span>Minerais</span>
+                        </button>
+                        <button type="button" class="hud-nav-btn" data-nav-target="#dropdownDomaine" title="Aller au Peuple &amp; Domaine (Population, Castes, Moral, Kobans)">
+                            <i class="fa-solid fa-users text-azure me-1"></i><span>Domaine</span>
+                        </button>
+                    </div>
+
+                    <!-- Curseur de déplacement interactif (Scrubber) -->
+                    <div class="d-flex align-items-center gap-2 flex-grow-1 ms-2 ms-lg-3" style="max-width: 520px;">
+                        <span class="text-muted d-none d-sm-inline" style="font-size:0.65rem;" title="Début du ruban">
+                            <i class="fa-solid fa-backward-step"></i>
+                        </span>
+                        <div class="hud-res-slider-container flex-grow-1">
+                            <input type="range" class="hud-res-slider" id="hudResScrubber" min="0" max="1000" value="0" step="1" title="Faites glisser ce curseur pour vous déplacer instantanément dans tout le hub de ressources">
+                        </div>
+                        <span class="text-muted d-none d-sm-inline" style="font-size:0.65rem;" title="Fin du ruban">
+                            <i class="fa-solid fa-forward-step"></i>
+                        </span>
+                        <span class="badge bg-white text-muted border font-monospace py-0 px-1 shadow-sm flex-shrink-0" id="hudResPosBadge" style="font-size:0.62rem; min-width:32px; text-align:center;" title="Position dans le hub">0%</span>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -2503,12 +2639,24 @@ $navItems = [
             const track = document.getElementById('hudResTrack');
             const btnLeft = document.getElementById('hudScrollLeft');
             const btnRight = document.getElementById('hudScrollRight');
-            if (!track || !btnLeft || !btnRight) return;
+            const scrubber = document.getElementById('hudResScrubber');
+            const posBadge = document.getElementById('hudResPosBadge');
+            const navBtns = document.querySelectorAll('.hud-nav-btn[data-nav-target]');
+            if (!track) return;
+
+            let isScrubbing = false;
+            let isMouseDown = false;
+            let startX = 0;
+            let scrollStartLeft = 0;
+            let hasDragged = false;
+            let dragDistance = 0;
+
+            const getMaxScroll = () => Math.max(0, track.scrollWidth - track.clientWidth);
 
             const updateArrows = () => {
-                const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
-                btnLeft.disabled = track.scrollLeft <= 2;
-                btnRight.disabled = maxScroll <= 2 || track.scrollLeft >= (maxScroll - 2);
+                const maxScroll = getMaxScroll();
+                if (btnLeft) btnLeft.disabled = track.scrollLeft <= 2;
+                if (btnRight) btnRight.disabled = maxScroll <= 2 || track.scrollLeft >= (maxScroll - 2);
             };
 
             const closeOpenHudDropdowns = () => {
@@ -2531,18 +2679,164 @@ $navItems = [
                 menu.style.setProperty('--hud-menu-left', leftPos + 'px');
             };
 
-            btnLeft.addEventListener('click', () => {
-                closeOpenHudDropdowns();
-                track.scrollBy({ left: -380, behavior: 'smooth' });
+            const updateNavCategoryHighlights = () => {
+                const scrollPos = track.scrollLeft;
+                const targets = [
+                    { id: '#pillResWood', offset: 0 },
+                    { id: '#pillResRice', offset: 0 },
+                    { id: '#pillResSerenity', offset: 0 },
+                    { id: '#dropdownDomaine', offset: 0 }
+                ];
+
+                targets.forEach(t => {
+                    const el = document.querySelector(t.id);
+                    if (el) {
+                        t.offset = el.offsetLeft - track.offsetLeft;
+                    }
+                });
+
+                let activeId = '#pillResWood';
+                for (let i = targets.length - 1; i >= 0; i--) {
+                    if (scrollPos >= targets[i].offset - 60) {
+                        activeId = targets[i].id;
+                        break;
+                    }
+                }
+
+                navBtns.forEach(btn => {
+                    if (btn.getAttribute('data-nav-target') === activeId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            };
+
+            const syncScrubber = () => {
+                if (isScrubbing || !scrubber) return;
+                const maxScroll = getMaxScroll();
+                if (maxScroll > 0) {
+                    const ratio = Math.max(0, Math.min(1, track.scrollLeft / maxScroll));
+                    scrubber.value = Math.round(ratio * 1000);
+                    if (posBadge) {
+                        posBadge.textContent = Math.round(ratio * 100) + '%';
+                    }
+                } else {
+                    scrubber.value = 0;
+                    if (posBadge) posBadge.textContent = '0%';
+                }
+                updateNavCategoryHighlights();
+            };
+
+            // 1. Défilement via les flèches
+            if (btnLeft) {
+                btnLeft.addEventListener('click', () => {
+                    closeOpenHudDropdowns();
+                    track.scrollBy({ left: -380, behavior: 'smooth' });
+                });
+            }
+
+            if (btnRight) {
+                btnRight.addEventListener('click', () => {
+                    closeOpenHudDropdowns();
+                    track.scrollBy({ left: 380, behavior: 'smooth' });
+                });
+            }
+
+            // 2. Déplacement interactif via le curseur (Scrubber)
+            if (scrubber) {
+                scrubber.addEventListener('input', () => {
+                    isScrubbing = true;
+                    closeOpenHudDropdowns();
+                    const maxScroll = getMaxScroll();
+                    track.scrollLeft = (parseFloat(scrubber.value) / 1000) * maxScroll;
+                    if (posBadge) {
+                        posBadge.textContent = Math.round((parseFloat(scrubber.value) / 1000) * 100) + '%';
+                    }
+                    updateNavCategoryHighlights();
+                });
+
+                scrubber.addEventListener('change', () => {
+                    isScrubbing = false;
+                    syncScrubber();
+                });
+
+                scrubber.addEventListener('pointerup', () => {
+                    isScrubbing = false;
+                });
+            }
+
+            // 3. Déplacement direct par raccourcis de catégories
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetSel = btn.getAttribute('data-nav-target');
+                    const targetEl = document.querySelector(targetSel);
+                    if (targetEl) {
+                        closeOpenHudDropdowns();
+                        const targetLeft = targetEl.offsetLeft - track.offsetLeft - 6;
+                        track.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+                    }
+                });
             });
 
-            btnRight.addEventListener('click', () => {
-                closeOpenHudDropdowns();
-                track.scrollBy({ left: 380, behavior: 'smooth' });
+            // 4. Glisser-déplacer direct à la souris (Drag-to-Scroll / Grab & Drag)
+            track.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return; // Uniquement clic gauche
+                isMouseDown = true;
+                hasDragged = false;
+                dragDistance = 0;
+                startX = e.pageX;
+                scrollStartLeft = track.scrollLeft;
             });
 
+            window.addEventListener('mousemove', (e) => {
+                if (!isMouseDown) return;
+                const diff = e.pageX - startX;
+                dragDistance = Math.abs(diff);
+                if (dragDistance > 5) {
+                    if (!hasDragged) {
+                        hasDragged = true;
+                        track.classList.add('is-dragging');
+                        closeOpenHudDropdowns();
+                    }
+                    track.scrollLeft = scrollStartLeft - diff;
+                }
+            });
+
+            const endDrag = () => {
+                if (!isMouseDown) return;
+                isMouseDown = false;
+                track.classList.remove('is-dragging');
+                setTimeout(() => {
+                    hasDragged = false;
+                    dragDistance = 0;
+                }, 60);
+            };
+
+            window.addEventListener('mouseup', endDrag);
+
+            // Bloquer le clic de déclenchement du dropdown si l'utilisateur était en train de glisser pour défiler
+            track.addEventListener('click', (e) => {
+                if (hasDragged || dragDistance > 5) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                }
+            }, true);
+
+            // 5. Défilement fluide à la molette de la souris
+            track.addEventListener('wheel', (e) => {
+                if (Math.abs(e.deltaY) >= Math.abs(e.deltaX)) {
+                    e.preventDefault();
+                    track.scrollLeft += (e.deltaY * 1.25);
+                }
+            }, { passive: false });
+
+            // 6. Écoute globale de l'événement scroll
             track.addEventListener('scroll', () => {
                 updateArrows();
+                syncScrubber();
                 track.querySelectorAll('.dropdown').forEach((dd) => {
                     const btn = dd.querySelector('.hud-res-pill[aria-expanded="true"]');
                     const menu = dd.querySelector('.dropdown-menu.show');
@@ -2552,15 +2846,17 @@ $navItems = [
                 });
             }, { passive: true });
 
-            window.addEventListener('resize', updateArrows);
+            window.addEventListener('resize', () => {
+                updateArrows();
+                syncScrubber();
+            });
 
-            // Positionnement fixed hors du flux overflow-x de #hudResTrack au clic sur chaque indicateur
+            // 7. Positionnement fixed hors du flux overflow-x de #hudResTrack au clic sur chaque indicateur
             track.querySelectorAll('.dropdown').forEach((dd) => {
                 const btn = dd.querySelector('.hud-res-pill');
                 const menu = dd.querySelector('.dropdown-menu');
                 if (!btn || !menu) return;
 
-                // Désactiver le positionnement Popper dynamique qui écrase les coordonnées dans un conteneur scrollable
                 btn.setAttribute('data-bs-display', 'static');
 
                 dd.addEventListener('show.bs.dropdown', function () {
@@ -2573,7 +2869,10 @@ $navItems = [
                 });
             });
 
-            setTimeout(updateArrows, 60);
+            setTimeout(() => {
+                updateArrows();
+                syncScrubber();
+            }, 60);
         });
         </script>
         <?php endif; ?>
