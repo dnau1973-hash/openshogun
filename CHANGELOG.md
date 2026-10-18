@@ -3,6 +3,68 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.34.10] - 2026-10-17
+### Modifié & Supprimé (Changed & Removed)
+- **Persistance 100% Base de Données SQL pour le Studio Narrative Designer & Scénarios de Jeu (`core/ScenarioEngine.php`) :**
+  * Suppression intégrale de l'enregistrement et de la lecture dans un fichier JSON (`loadFromJson`, `saveToJson`, `data/narrative_scenarios_storage.json`).
+  * Toutes les opérations CRUD (`saveScenarioFull`, `getScenarios`, `getScenarioById`, `updateScenario`, `deleteScenario`) et le marqueur d'initialisation (`GameConfig::get('narrative_scenarios_seeded')`) fonctionnent désormais exclusivement en base de données MySQL (`narrative_scenarios` et `game_settings`).
+
+## [1.34.9] - 2026-10-17
+### Ajouté (Added)
+- **Importation de Fichiers Markdown (`.md`) pour le Synopsis & Contexte Historique dans le Gestionnaire de Scénarios (`core/ScenarioEngine.php`, `views/gamestudio.php`, `views/gamestudio/narrative_scenarios.php`, `docs/gdd_bataille_12_chateaux.md`) :**
+  * **Importation directe dans le Studio d'Édition (`#fullScenSynopsis`) :**
+    - Ajout d'un bouton **« Importer un fichier `.md` »**, d'une zone de **Glisser-Déposer (Drag & Drop)** de fichier `.md` directement sur le champ *Synopsis & Contexte Historique*, d'un sélecteur de mode (*Remplacer* / *Ajouter à la suite*) et d'un panneau repliable **« Aperçu `.md` »**.
+    - Extraction intelligente optionnelle (`parseMarkdownClientSide` / `ScenarioEngine::parseMarkdownToScenario`) pré-remplissant automatiquement le **Titre**, le **Sous-titre**, la **Période/Ère**, le **Personnage**, le **Dialogue**, les **Conditions d'activation** et les **Récompenses** détectés dans le document Markdown.
+  * **Création directe de Scénario par Import `.md` depuis le Catalogue (`#modalImportMarkdownScenario`) :**
+    - Ajout du bouton **« Importer un `.md` »** dans l'en-tête du catalogue ouvrant une modale dédiée pour téléverser ou déposer un fichier `.md`, prévisualiser son contenu et créer immédiatement le scénario pré-rempli dans le Studio Split-Screen.
+
+## [1.34.8] - 2026-10-17
+### Corrigé & Modifié (Fixed & Changed)
+- **Kanban Drag & Drop Sans Rechargement & Correction Définitive de la Suppression des Scénarios (`core/ScenarioEngine.php`, `views/gamestudio.php`, `views/gamestudio/narrative_scenarios.php`) :**
+  * **Glisser-Déposer (Drag & Drop HTML5) Natif & Persistance du Mode Kanban :**
+    - Dans le **Kanban Pipeline du Catalogue** (`#catalogView_kanban`), glisser-déposer une carte d'une colonne à l'autre déplace instantanément la carte dans le DOM, recalcule les compteurs des 5 colonnes et sauvegarde le statut en AJAX (`ajax_update_scenario_status`) sans recharger la page ni revenir à la vue Cartes.
+    - Dans le **Kanban Opérationnel des Tâches** du Studio (`#tasksKanbanBoardContainer`), glisser-déposer une tâche entre les 4 colonnes (*À faire*, *En cours*, *Bloqué*, *Terminé*) synchronise immédiatement le sélecteur de la tâche, la jauge métier et sauvegarde en AJAX (`ajax_update_task_status`).
+    - Mémorisation de la vue active du catalogue (`cards`, `timeline`, `kanban`) dans l'URL (`?view_mode=...`) et dans `localStorage`.
+  * **Correction de la Suppression des Scénarios (Synchronisation SQL ↔ JSON & Permissions) :**
+    - Synchronisation initiale unique (`INSERT IGNORE`) du miroir JSON vers la table MySQL `narrative_scenarios` avec fichier marqueur `.narrative_scenarios_seeded` empêchant la ré-injection automatique des scénarios par défaut après suppression.
+    - Suppression du repli abusif `if (empty($results))` dans `ScenarioEngine::getScenarios()` qui rechargeait le fichier JSON lorsque la requête SQL réussissait avec `0` ligne, et correction des permissions d'écriture (`0666`) sur `data/narrative_scenarios_storage.json`.
+    - Ajout de l'action `ajax_delete_scenario` et d'un bouton de suppression rapide 🗑️ directement sur les **Cartes du Catalogue** et les **Cartes du Kanban Pipeline**.
+
+## [1.34.7] - 2026-10-17
+### Ajouté & Modifié (Added & Changed)
+- **Refonte Ergonomique & Opérationnelle du Module Scénarios de Jeu — Studio Narrative Designer 2.0 (`core/ScenarioEngine.php`, `views/gamestudio.php`, `views/gamestudio/narrative_scenarios.php`) :**
+  * **Catalogue Multi-Vues avec Micro-Interactions AJAX :**
+    - **🗂️ Vue Cartes Interactive** : changement de statut du scénario en 1 clic AJAX et pastilles des 10 métiers cliquables directement sur la carte pour faire avancer le statut d'une tâche (`⏳ À faire ➔ 🔧 En cours ➔ ✅ Terminé ➔ ⛔ Bloqué`) avec recalcul temps réel de la barre de progression.
+    - **⛩️ Vue Frise Chronologique des Steps (Roadmap Campagne)** : visualisation séquentielle `Step #1 ➔ Step #2 ➔ Step #3...` avec triggers d'entrée, harangue du personnage, récompenses et bouton « + Insérer le Step suivant ».
+    - **📋 Vue Kanban Pipeline (5 colonnes)** : pilotage visuel du flux de production (*📝 Brouillon*, *🔍 En revue*, *⚙️ En production*, *✅ Prêt QA*, *🚀 En ligne*) avec boutons d'avancement rapide en AJAX.
+  * **Studio d'Édition Côte-à-Côte (Split-Screen Live Simulator) & Assistants Métier :**
+    - Fusion de l'éditeur narratif (colonne gauche) et du **Simulateur Parchemin In-Game en temps réel** (colonne droite sticky) avec compteur de caractères et bouton de test d'animation machine à écrire (*Typewriter*).
+    - **Barre de Workflow Pipeline & Navigation Inter-Scénarios** dans l'en-tête sticky : stepper cliquable (`Brouillon ➔ En revue ➔ Production ➔ Prêt ➔ Live`), sélecteur rapide (`◀ / ▶`) pour naviguer d'un scénario à l'autre sans retourner au catalogue, indicateur *Dirty State* et sauvegarde AJAX (`Ctrl+S`) avec toast.
+    - **Galerie de Personnages Sengoku (`ScenarioEngine::SPEAKER_PRESETS`)**, **Quick-Chips Triggers & Récompenses (`TRIGGER_PRESETS`, `REWARD_PRESETS`)** et **Éditeur de Choix Narratifs du Daimyō (1 à 3 décisions A/B)** persistés en SQL/JSON et exportés dans le GDD Markdown.
+  * **Matrice Opérationnelle des 10 Métiers 2.0 :**
+    - **Mode Compact 1-ligne avec tiroir repliable** par défaut + **Mode Kanban Opérationnel des Tâches** (4 colonnes : *À faire*, *En cours*, *Bloqué*, *Terminé*) et **filtres croisés** par Métier et par Statut.
+
+## [1.34.6] - 2026-10-17
+### Corrigé & Modifié (Fixed & Changed)
+- **Réimplantation et Enrichissement des Sous-Menus Détaillés au Clic des 16 Indicateurs du Hub des Ressources (`views/partials/header.php`) :**
+  * **Correction du Rognage (Clipping) des Sous-Menus dans le Ruban Glissant (`#hudResTrack`) :**
+    - Ajout de la classe `.hud-floating-menu` (`position: fixed !important` avec variables CSS `--hud-menu-top` et `--hud-menu-left`) couplée à `data-bs-display="static"` afin d'empêcher Popper.js d'écraser le positionnement fixe et d'éviter que le conteneur `overflow-x: auto; overflow-y: hidden` ne masque les sous-menus au clic.
+  * **Niveaux Exacts des Bâtiments Urbains, Production Approfondie & Raccourcis Rapides sur les 16 Pilules :**
+    - **Ressources de base & Sérénité** (`Bois`, `Granit`, `Argile`, `Riz`, `Thé`, `Soja`, `Sérénité`) : affichage du niveau de la parcelle rurale (`Niv. X/30`), du niveau de l'entrepôt/grenier (`Niv. X/20`), du niveau et bonus de l'atelier urbain associé (`Scierie`, `Tailleur`, `Meunerie`, `Pavillon de Thé`), de la cadence `/h`, de la projection `/jour`, de l'échéance de saturation et des boutons de raccourcis rapides vers le terroir et le bâtiment.
+    - **Matériaux, Minerais & Vivres raffinés** (`Poutres`, `Charbon`, `Satetsu`, `Soufre`, `Nitrate`, `Poisson`, `Farine`, `Saké`) : affichage du niveau du bâtiment producteur (`Scierie`, `Grande Forge`, `Tailleur`, `Grenier Kura`, `Meunerie & Brasserie`), du statut de production / palier requis (`Niv. 5` Farine, `Niv. 10` Poutres/Saké) et des raccourcis directs vers les bâtiments.
+    - **Peuple & Domaine** : affichage du niveau du **Tenshu (Donjon Castral)** (`Niv. X/20`) et ajout des boutons d'accès direct au Tenshu (`?page=building&code=hq`) et à la Cité (`?page=city`).
+
+## [1.34.5] - 2026-10-17
+### Modifié (Changed)
+- **Évolution du Hub des Ressources sous le Carrousel &bull; Ruban Glissant Uniforme à 16 Pilules & Flèches de Navigation (`views/partials/header.php`) :**
+  * **Uniformisation de Toutes les Ressources et Indicateurs sur le Modèle `.hud-res-pill` :**
+    - Intégration directe dans le ruban des pilules **Poutres de Charpente** (`#pillResBeams`), **Charbon de Bois** (`#pillResCharcoal`), des **Minerais** (**Satetsu / Sable de Fer** `#pillResIronSand`, **Soufre Volcanique** `#pillResSulfur`, **Nitrate de Potasse** `#pillResNitrate`), des **Vivres raffinées** (**Poisson Frais** `#pillResFish`, **Farine de Riz** `#pillResFlour`, **Saké Impérial** `#pillResSake`) ainsi que **Peuple & Domaine** (`#dropdownDomaine`) sur le même gabarit visuel que les ressources de base.
+  * **Navigation par Flèches Gauche/Droite sans Barre de Scroll Visible :**
+    - Ajout des boutons `#hudScrollLeft` et `#hudScrollRight` aux extrémités gauche et droite de la barre pour faire glisser les indicateurs avec fluidité (`scrollBy` smooth), tout en masquant intégralement la barre de défilement native (`scrollbar-width: none`, `::-webkit-scrollbar { display: none }`).
+    - Positionnement dynamique en `position: fixed` des fiches détaillées au clic afin d'éviter toute coupure par le conteneur glissant.
+  * **Alignement Graphique Gauche/Droite sur les Cartes du Corps de Page :**
+    - Alignement strict du conteneur du hub (`container-fluid px-3 px-lg-4`) sur celui de `.page-body` juste en dessous pour une cohérence géométrique parfaite.
+
 ## [1.34.4] - 2026-10-16
 ### Modifié (Changed)
 - **Refonte Ergonomique de la Barre HUD des Ressources sous le Carrousel (`views/partials/header.php`) :**

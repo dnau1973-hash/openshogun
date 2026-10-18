@@ -7,10 +7,10 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/GameConfig.php';
 
 class ScenarioEngine {
     private ?PDO $db;
-    private string $jsonStorageFile;
 
     public const VALID_TYPES = ['step', 'special_event'];
     public const VALID_STATUSES = ['draft', 'in_review', 'in_production', 'ready', 'published', 'archived'];
@@ -113,8 +113,83 @@ class ScenarioEngine {
         ]
     ];
 
+    /**
+     * Galerie de Personnages / Narrateurs Sengoku Préconfigurés
+     */
+    public const SPEAKER_PRESETS = [
+        'sensei' => [
+            'name'   => 'Maître de la Sagesse (Chie no Sensei)',
+            'role'   => 'Mentor Vénérable & Gardien des Traditions',
+            'tone'   => 'Sagesse & Bushido',
+            'avatar' => '🏯',
+            'color'  => 'purple'
+        ],
+        'intendant' => [
+            'name'   => 'Intendant Torii Mototada',
+            'role'   => 'Maître Bâtisseur & Intendant en Chef',
+            'tone'   => 'Forteresse & Chantiers',
+            'avatar' => '📐',
+            'color'  => 'warning'
+        ],
+        'asuka' => [
+            'name'   => 'Dame Asuka du Clan Mori',
+            'role'   => 'Déesse des Récoltes & Émissaire du Terroir',
+            'tone'   => 'Agriculture & Peuple',
+            'avatar' => '🌾',
+            'color'  => 'teal'
+        ],
+        'nobunaga' => [
+            'name'   => 'Général Oda Nobunaga',
+            'role'   => 'Seigneur de Guerre & Maître de l\'Artillerie',
+            'tone'   => 'Conquête & Guerre',
+            'avatar' => '⚔️',
+            'color'  => 'danger'
+        ],
+        'murakami' => [
+            'name'   => 'Amiral Murakami Takeyoshi',
+            'role'   => 'Grand Corsaire de la Mer Intérieure',
+            'tone'   => 'Flotte & Mer de Seto',
+            'avatar' => '⛵',
+            'color'  => 'azure'
+        ],
+        'masamune' => [
+            'name'   => 'Maître Forgeron Masamune',
+            'role'   => 'Grand Artisan du Tamahagane',
+            'tone'   => 'Forge & Métallurgie',
+            'avatar' => '🔥',
+            'color'  => 'orange'
+        ]
+    ];
+
+    /**
+     * Presets rapides de Conditions de Déclenchement (Triggers)
+     */
+    public const TRIGGER_PRESETS = [
+        ['label' => '🏯 Tenshu Niv.1',          'value' => 'Tenshu niveau 1 construit'],
+        ['label' => '🌾 Grenier Kura Niv.2',    'value' => 'Entrepôt & Grenier Kura niveau 2'],
+        ['label' => '🗺️ 4 Parcelles Niv.3+',    'value' => 'Posséder au moins 4 parcelles rurales niveau 3+'],
+        ['label' => '👥 Pop. ≥ 250',            'value' => 'Population du domaine ≥ 250 villageois'],
+        ['label' => '🍶 Brasserie Niv.5+',      'value' => 'Meunerie & Brasserie niveau 5+'],
+        ['label' => '⚒️ Grande Forge Niv.3+',   'value' => 'Grande Forge niveau 3+'],
+        ['label' => '⚔️ Héros Samouraï Niv.5+', 'value' => 'Héros Samouraï niveau 5+'],
+        ['label' => '❄️ Saison Live Ops',       'value' => 'Événement Live Déclenché (Feature Flag Live Ops)']
+    ];
+
+    /**
+     * Presets rapides de Récompenses Gameplay
+     */
+    public const REWARD_PRESETS = [
+        ['label' => '🪙 +250 Kobans',           'value' => '250 Kobans impériaux'],
+        ['label' => '🌲 +1 000 Bois',           'value' => '1 000 Bois de cèdre'],
+        ['label' => '🪨 +1 000 Granit',         'value' => '1 000 Pierres de granit'],
+        ['label' => '🌾 +1 000 Riz',            'value' => '1 000 Riz impérial'],
+        ['label' => '🍶 +300 Saké',             'value' => '300 Saké impérial'],
+        ['label' => '🔥 +15% Moral (24h)',      'value' => '+15% Moral du fief pendant 24h'],
+        ['label' => '🌾 +25% Récoltes (48h)',   'value' => '+25% Rendement agricole pendant 48h'],
+        ['label' => '🏅 Titre & Relique',       'value' => 'Relique & Titre honorifique du Shōgunat']
+    ];
+
     public function __construct() {
-        $this->jsonStorageFile = __DIR__ . '/../data/narrative_scenarios_storage.json';
         try {
             $this->db = Database::getConnection();
             $this->ensureTables();
@@ -122,12 +197,12 @@ class ScenarioEngine {
             $this->db = null;
         }
 
-        // Si aucun scénario n'est présent, initialiser avec les modèles féodaux complets
+        // Initialisation unique en base de données
         $this->ensureDefaultScenarios();
     }
 
     /**
-     * Initialise la table SQL si disponible
+     * Initialise la table SQL si disponible et assure les colonnes additionnelles
      */
     private function ensureTables(): void {
         if (!$this->db) return;
@@ -144,9 +219,11 @@ class ScenarioEngine {
                 `synopsis` TEXT NOT NULL,
                 `speaker_name` VARCHAR(150) NULL,
                 `speaker_role` VARCHAR(150) NULL,
+                `speaker_avatar` VARCHAR(30) NULL DEFAULT '🏯',
                 `dialogue` TEXT NOT NULL,
                 `trigger_condition` TEXT NULL,
                 `rewards_summary` TEXT NULL,
+                `choices_json` LONGTEXT NULL,
                 `status` VARCHAR(30) NOT NULL DEFAULT 'draft',
                 `tasks_json` LONGTEXT NULL,
                 `created_by` INT NULL,
@@ -157,44 +234,46 @@ class ScenarioEngine {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             ";
             $this->db->exec($sql);
+
+            // Auto-migration douce des colonnes speaker_avatar et choices_json si absentes
+            try {
+                $this->db->exec("ALTER TABLE `narrative_scenarios` ADD COLUMN `speaker_avatar` VARCHAR(30) NULL DEFAULT '🏯' AFTER `speaker_role`");
+            } catch (Throwable $e) {}
+            try {
+                $this->db->exec("ALTER TABLE `narrative_scenarios` ADD COLUMN `choices_json` LONGTEXT NULL AFTER `rewards_summary`");
+            } catch (Throwable $e) {}
         } catch (Throwable $e) {
-            // Ignorer si déjà existant ou SQLite
+            // Ignorer si déjà existant
         }
     }
 
     /**
-     * Charge les scénarios depuis le stockage JSON
-     */
-    private function loadFromJson(): array {
-        if (!file_exists($this->jsonStorageFile)) {
-            return [];
-        }
-        $raw = file_get_contents($this->jsonStorageFile);
-        $data = json_decode($raw, true);
-        return is_array($data) ? $data : [];
-    }
-
-    /**
-     * Sauvegarde la liste complète des scénarios dans le fichier JSON
-     */
-    private function saveToJson(array $scenarios): bool {
-        $dir = dirname($this->jsonStorageFile);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
-        }
-        return file_put_contents($this->jsonStorageFile, json_encode($scenarios, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false;
-    }
-
-    /**
-     * Ensemence les scénarios par défaut de haute qualité si la base est vide
+     * Ensemence les scénarios par défaut uniquement lors de la toute première initialisation en base de données
      */
     private function ensureDefaultScenarios(): void {
-        $existing = $this->getScenarios();
-        if (!empty($existing)) return;
+        if (!$this->db) return;
 
-        $defaults = $this->buildDefaultScenarios();
-        foreach ($defaults as $scenario) {
-            $this->saveScenarioFull($scenario);
+        try {
+            $alreadySeeded = (bool)GameConfig::get('narrative_scenarios_seeded', false);
+            if ($alreadySeeded) {
+                return;
+            }
+
+            $stmtCount = $this->db->query("SELECT COUNT(*) FROM narrative_scenarios");
+            $dbCount = (int)$stmtCount->fetchColumn();
+
+            if ($dbCount > 0) {
+                GameConfig::set('narrative_scenarios_seeded', true);
+                return;
+            }
+
+            $defaults = $this->buildDefaultScenarios();
+            foreach ($defaults as $scenario) {
+                $this->saveScenarioFull($scenario);
+            }
+            GameConfig::set('narrative_scenarios_seeded', true);
+        } catch (Throwable $e) {
+            // Ignorer en cas d'erreur SQL
         }
     }
 
@@ -275,9 +354,41 @@ class ScenarioEngine {
     }
 
     /**
-     * Sauvegarde un scénario complet (DB + fallback JSON)
+     * Normalise les choix narratifs (tableau de choix joueur)
+     */
+    private function normalizeChoices(mixed $rawChoices): array {
+        if (is_string($rawChoices) && $rawChoices !== '') {
+            $decoded = json_decode($rawChoices, true);
+            $rawChoices = is_array($decoded) ? $decoded : [];
+        }
+        if (!is_array($rawChoices)) {
+            return [];
+        }
+        $clean = [];
+        foreach ($rawChoices as $c) {
+            if (!is_array($c)) continue;
+            $label = trim((string)($c['label'] ?? ''));
+            $outcome = trim((string)($c['outcome'] ?? ''));
+            $style = in_array($c['style'] ?? '', ['warning', 'emerald', 'crimson', 'purple', 'success', 'danger', 'teal', 'outline-light'], true)
+                ? (string)$c['style']
+                : 'warning';
+            if ($label !== '') {
+                $clean[] = [
+                    'label'   => $label,
+                    'outcome' => $outcome,
+                    'style'   => $style
+                ];
+            }
+        }
+        return $clean;
+    }
+
+    /**
+     * Sauvegarde un scénario complet en base de données SQL uniquement
      */
     public function saveScenarioFull(array $sc): int {
+        if (!$this->db) return 0;
+
         $now = time();
         $slug = !empty($sc['slug']) ? $this->slugify($sc['slug']) : $this->slugify($sc['title'] ?? 'scenario-' . $now);
         $type = in_array($sc['type'] ?? '', self::VALID_TYPES, true) ? $sc['type'] : 'step';
@@ -288,195 +399,134 @@ class ScenarioEngine {
         $synopsis = trim((string)($sc['synopsis'] ?? ''));
         $speakerName = trim((string)($sc['speaker_name'] ?? 'Maître de la Sagesse'));
         $speakerRole = trim((string)($sc['speaker_role'] ?? 'Chie no Sensei (Mentor Féodal)'));
+        $speakerAvatar = trim((string)($sc['speaker_avatar'] ?? '🏯')) ?: '🏯';
         $dialogue = trim((string)($sc['dialogue'] ?? ''));
         $triggerCond = trim((string)($sc['trigger_condition'] ?? ''));
         $rewards = trim((string)($sc['rewards_summary'] ?? ''));
         $status = in_array($sc['status'] ?? '', self::VALID_STATUSES, true) ? $sc['status'] : 'draft';
         $createdBy = (int)($sc['created_by'] ?? 1);
 
+        $choices = $this->normalizeChoices($sc['choices'] ?? ($sc['choices_json'] ?? []));
+        if (empty($choices)) {
+            $choices = [
+                ['label' => '⚔️ Décréter la Marche du Fief', 'outcome' => $rewards ?: 'Validation de l\'étape', 'style' => 'warning']
+            ];
+        }
+        $choicesJson = json_encode($choices, JSON_UNESCAPED_UNICODE);
+
         $tasks = !empty($sc['tasks']) && is_array($sc['tasks']) 
-            ? $sc['tasks'] 
+            ? array_values($sc['tasks']) 
             : $this->generateDefaultTasks($type, $title, $stepNumber, $status);
 
         $tasksJson = json_encode($tasks, JSON_UNESCAPED_UNICODE);
 
-        $insertedId = 0;
-
-        // 1. Sauvegarde en Base SQL si accessible
-        if ($this->db) {
-            try {
-                $stmt = $this->db->prepare("
-                    INSERT INTO narrative_scenarios 
-                    (slug, type, step_number, title, subtitle, era, synopsis, speaker_name, speaker_role, dialogue, trigger_condition, rewards_summary, status, tasks_json, created_by, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ");
-                $stmt->execute([
-                    $slug, $type, $stepNumber, $title, $subtitle, $era, $synopsis,
-                    $speakerName, $speakerRole, $dialogue, $triggerCond, $rewards,
-                    $status, $tasksJson, $createdBy, $now, $now
-                ]);
-                $insertedId = (int)$this->db->lastInsertId();
-            } catch (Throwable $e) {
-                // Fallback direct sur JSON
+        try {
+            // Vérification d'unicité du slug en base
+            $stmtSlug = $this->db->prepare("SELECT COUNT(*) FROM narrative_scenarios WHERE slug = ?");
+            $stmtSlug->execute([$slug]);
+            if ((int)$stmtSlug->fetchColumn() > 0) {
+                $slug .= '-' . $now . '-' . mt_rand(10, 99);
             }
-        }
 
-        // 2. Sauvegarde miroir dans le JSON
-        $all = $this->loadFromJson();
-        $maxId = 0;
-        $existingSlugId = 0;
-        foreach ($all as $item) {
-            if ((int)$item['id'] > $maxId) {
-                $maxId = (int)$item['id'];
-            }
-            if (($item['slug'] ?? '') === $slug) {
-                $existingSlugId = (int)$item['id'];
-            }
+            $stmt = $this->db->prepare("
+                INSERT INTO narrative_scenarios 
+                (slug, type, step_number, title, subtitle, era, synopsis, speaker_name, speaker_role, speaker_avatar, dialogue, trigger_condition, rewards_summary, choices_json, status, tasks_json, created_by, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $slug, $type, $stepNumber, $title, $subtitle, $era, $synopsis,
+                $speakerName, $speakerRole, $speakerAvatar, $dialogue, $triggerCond, $rewards,
+                $choicesJson, $status, $tasksJson, $createdBy, $now, $now
+            ]);
+            return (int)$this->db->lastInsertId();
+        } catch (Throwable $e) {
+            return 0;
         }
-
-        if ($existingSlugId > 0) {
-            $insertedId = $existingSlugId;
-        } elseif ($insertedId <= $maxId) {
-            $insertedId = $maxId + 1;
-        }
-
-        $record = [
-            'id'                => $insertedId,
-            'slug'              => $slug,
-            'type'              => $type,
-            'step_number'       => $stepNumber,
-            'title'             => $title,
-            'subtitle'          => $subtitle,
-            'era'               => $era,
-            'synopsis'          => $synopsis,
-            'speaker_name'      => $speakerName,
-            'speaker_role'      => $speakerRole,
-            'dialogue'          => $dialogue,
-            'trigger_condition' => $triggerCond,
-            'rewards_summary'   => $rewards,
-            'status'            => $status,
-            'tasks'             => $tasks,
-            'created_by'        => $createdBy,
-            'created_at'        => $now,
-            'updated_at'        => $now
-        ];
-
-        // Remplacement ou ajout
-        $found = false;
-        foreach ($all as $idx => $existingItem) {
-            if ((int)$existingItem['id'] === $insertedId || ($existingItem['slug'] ?? '') === $slug) {
-                $all[$idx] = $record;
-                $found = true;
-                break;
-            }
-        }
-        if (!$found) {
-            $all[] = $record;
-        }
-
-        $this->saveToJson($all);
-        return $insertedId;
     }
 
     /**
-     * Récupère la liste de tous les scénarios avec filtres et progression des 10 tâches
+     * Récupère la liste de tous les scénarios depuis la base de données avec filtres et progression des 10 tâches
      */
-    public function getScenarios(?string $type = null, ?string $status = null, ?string $search = null): array {
-        $results = [];
-
-        if ($this->db) {
-            try {
-                $sql = "SELECT * FROM narrative_scenarios WHERE 1=1";
-                $params = [];
-                if ($type && in_array($type, self::VALID_TYPES, true)) {
-                    $sql .= " AND type = ?";
-                    $params[] = $type;
-                }
-                if ($status && in_array($status, self::VALID_STATUSES, true)) {
-                    $sql .= " AND status = ?";
-                    $params[] = $status;
-                }
-                if ($search && trim($search) !== '') {
-                    $sql .= " AND (title LIKE ? OR synopsis LIKE ? OR slug LIKE ?)";
-                    $term = '%' . trim($search) . '%';
-                    $params[] = $term;
-                    $params[] = $term;
-                    $params[] = $term;
-                }
-                $sql .= " ORDER BY CASE type WHEN 'step' THEN 1 ELSE 2 END, step_number ASC, created_at DESC";
-                $stmt = $this->db->prepare($sql);
-                $stmt->execute($params);
-                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                foreach ($rows as $row) {
-                    $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
-                    $row['tasks'] = is_array($tasks) ? $tasks : [];
-                    $row['metrics'] = $this->calculateTaskMetrics($row['tasks']);
-                    $results[] = $row;
-                }
-            } catch (Throwable $e) {
-                // Erreur DB -> Fallback JSON
-            }
+    public function getScenarios(string|array|null $type = null, ?string $status = null, ?string $search = null): array {
+        if (is_array($type)) {
+            $filters = $type;
+            $type    = isset($filters['type']) && $filters['type'] !== '' ? (string)$filters['type'] : null;
+            $status  = isset($filters['status']) && $filters['status'] !== '' ? (string)$filters['status'] : null;
+            $search  = isset($filters['search']) && $filters['search'] !== '' ? (string)$filters['search'] : null;
         }
+        if (!$this->db) return [];
 
-        if (empty($results)) {
-            $all = $this->loadFromJson();
-            foreach ($all as $row) {
-                if ($type && $row['type'] !== $type) continue;
-                if ($status && $row['status'] !== $status) continue;
-                if ($search && trim($search) !== '') {
-                    $term = mb_strtolower(trim($search));
-                    $txt = mb_strtolower(($row['title'] ?? '') . ' ' . ($row['synopsis'] ?? '') . ' ' . ($row['slug'] ?? ''));
-                    if (!str_contains($txt, $term)) continue;
+        $results = [];
+        try {
+            $sql = "SELECT * FROM narrative_scenarios WHERE 1=1";
+            $params = [];
+            if ($type && in_array($type, self::VALID_TYPES, true)) {
+                $sql .= " AND type = ?";
+                $params[] = $type;
+            }
+            if ($status && in_array($status, self::VALID_STATUSES, true)) {
+                $sql .= " AND status = ?";
+                $params[] = $status;
+            }
+            if ($search && trim($search) !== '') {
+                $sql .= " AND (title LIKE ? OR synopsis LIKE ? OR slug LIKE ?)";
+                $term = '%' . trim($search) . '%';
+                $params[] = $term;
+                $params[] = $term;
+                $params[] = $term;
+            }
+            $sql .= " ORDER BY CASE type WHEN 'step' THEN 1 ELSE 2 END, step_number ASC, created_at DESC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($rows as $row) {
+                $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
+                $row['tasks'] = is_array($tasks) ? array_values($tasks) : [];
+                $row['speaker_avatar'] = !empty($row['speaker_avatar']) ? $row['speaker_avatar'] : '🏯';
+                $row['choices'] = $this->normalizeChoices($row['choices_json'] ?? []);
+                if (empty($row['choices'])) {
+                    $row['choices'] = [
+                        ['label' => '⚔️ Décréter la Marche du Fief', 'outcome' => $row['rewards_summary'] ?? '', 'style' => 'warning']
+                    ];
                 }
-                $tasks = $row['tasks'] ?? [];
-                $row['metrics'] = $this->calculateTaskMetrics($tasks);
+                $row['metrics'] = $this->calculateTaskMetrics($row['tasks']);
                 $results[] = $row;
             }
-
-            usort($results, function($a, $b) {
-                if ($a['type'] !== $b['type']) {
-                    return $a['type'] === 'step' ? -1 : 1;
-                }
-                if ($a['type'] === 'step') {
-                    return ($a['step_number'] ?? 0) <=> ($b['step_number'] ?? 0);
-                }
-                return ($b['created_at'] ?? 0) <=> ($a['created_at'] ?? 0);
-            });
+        } catch (Throwable $e) {
+            return [];
         }
 
         return $results;
     }
 
     /**
-     * Récupère un scénario par son ID
+     * Récupère un scénario par son ID depuis la base de données
      */
     public function getScenarioById(int $id): ?array {
-        if ($id <= 0) return null;
+        if ($id <= 0 || !$this->db) return null;
 
-        if ($this->db) {
-            try {
-                $stmt = $this->db->prepare("SELECT * FROM narrative_scenarios WHERE id = ? LIMIT 1");
-                $stmt->execute([$id]);
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($row) {
-                    $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
-                    $row['tasks'] = is_array($tasks) ? $tasks : [];
-                    $row['metrics'] = $this->calculateTaskMetrics($row['tasks']);
-                    return $row;
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM narrative_scenarios WHERE id = ? LIMIT 1");
+            $stmt->execute([$id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
+                $row['tasks'] = is_array($tasks) ? array_values($tasks) : [];
+                $row['speaker_avatar'] = !empty($row['speaker_avatar']) ? $row['speaker_avatar'] : '🏯';
+                $row['choices'] = $this->normalizeChoices($row['choices_json'] ?? []);
+                if (empty($row['choices'])) {
+                    $row['choices'] = [
+                        ['label' => '⚔️ Décréter la Marche du Fief', 'outcome' => $row['rewards_summary'] ?? '', 'style' => 'warning']
+                    ];
                 }
-            } catch (Throwable $e) {
-                // Fallback
+                $row['metrics'] = $this->calculateTaskMetrics($row['tasks']);
+                return $row;
             }
+        } catch (Throwable $e) {
+            return null;
         }
 
-        $all = $this->loadFromJson();
-        foreach ($all as $item) {
-            if ((int)$item['id'] === $id) {
-                $item['metrics'] = $this->calculateTaskMetrics($item['tasks'] ?? []);
-                return $item;
-            }
-        }
         return null;
     }
 
@@ -575,9 +625,10 @@ class ScenarioEngine {
     }
 
     /**
-     * Met à jour un scénario existant
+     * Met à jour un scénario existant en base de données SQL uniquement
      */
     public function updateScenario(int $id, array $data): bool {
+        if (!$this->db) return false;
         $existing = $this->getScenarioById($id);
         if (!$existing) return false;
 
@@ -586,15 +637,31 @@ class ScenarioEngine {
         $slug = !empty($data['slug']) ? $this->slugify($data['slug']) : $existing['slug'];
         $type = in_array($data['type'] ?? '', self::VALID_TYPES, true) ? $data['type'] : $existing['type'];
         $stepNumber = isset($data['step_number']) && $data['step_number'] !== '' ? (int)$data['step_number'] : $existing['step_number'];
+        if ($type !== 'step') {
+            $stepNumber = null;
+        }
         $subtitle = trim((string)($data['subtitle'] ?? $existing['subtitle']));
         $era = trim((string)($data['era'] ?? $existing['era']));
         $synopsis = trim((string)($data['synopsis'] ?? $existing['synopsis']));
         $speakerName = trim((string)($data['speaker_name'] ?? $existing['speaker_name']));
         $speakerRole = trim((string)($data['speaker_role'] ?? $existing['speaker_role']));
+        $speakerAvatar = trim((string)($data['speaker_avatar'] ?? ($existing['speaker_avatar'] ?? '🏯')));
+        if ($speakerAvatar === '') $speakerAvatar = '🏯';
         $dialogue = trim((string)($data['dialogue'] ?? $existing['dialogue']));
         $triggerCond = trim((string)($data['trigger_condition'] ?? $existing['trigger_condition']));
         $rewards = trim((string)($data['rewards_summary'] ?? $existing['rewards_summary']));
         $status = in_array($data['status'] ?? '', self::VALID_STATUSES, true) ? $data['status'] : $existing['status'];
+
+        $choices = $existing['choices'] ?? [];
+        if (isset($data['choices'])) {
+            $choices = $this->normalizeChoices($data['choices']);
+        }
+        if (empty($choices)) {
+            $choices = [
+                ['label' => '⚔️ Décréter la Marche du Fief', 'outcome' => $rewards, 'style' => 'warning']
+            ];
+        }
+        $choicesJson = json_encode($choices, JSON_UNESCAPED_UNICODE);
 
         $tasks = $existing['tasks'];
         if (isset($data['tasks']) && is_array($data['tasks'])) {
@@ -603,60 +670,36 @@ class ScenarioEngine {
 
         $tasksJson = json_encode($tasks, JSON_UNESCAPED_UNICODE);
 
-        if ($this->db) {
-            try {
-                $stmt = $this->db->prepare("
-                    UPDATE narrative_scenarios
-                    SET slug = ?, type = ?, step_number = ?, title = ?, subtitle = ?, era = ?, synopsis = ?,
-                        speaker_name = ?, speaker_role = ?, dialogue = ?, trigger_condition = ?,
-                        rewards_summary = ?, status = ?, tasks_json = ?, updated_at = ?
-                    WHERE id = ?
-                ");
-                $stmt->execute([
-                    $slug, $type, $stepNumber, $title, $subtitle, $era, $synopsis,
-                    $speakerName, $speakerRole, $dialogue, $triggerCond,
-                    $rewards, $status, $tasksJson, $now, $id
-                ]);
-            } catch (Throwable $e) {
-                // Fallback
-            }
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE narrative_scenarios
+                SET slug = ?, type = ?, step_number = ?, title = ?, subtitle = ?, era = ?, synopsis = ?,
+                    speaker_name = ?, speaker_role = ?, speaker_avatar = ?, dialogue = ?, trigger_condition = ?,
+                    rewards_summary = ?, choices_json = ?, status = ?, tasks_json = ?, updated_at = ?
+                WHERE id = ?
+            ");
+            return $stmt->execute([
+                $slug, $type, $stepNumber, $title, $subtitle, $era, $synopsis,
+                $speakerName, $speakerRole, $speakerAvatar, $dialogue, $triggerCond,
+                $rewards, $choicesJson, $status, $tasksJson, $now, $id
+            ]);
+        } catch (Throwable $e) {
+            return false;
         }
+    }
 
-        // Miroir JSON
-        $all = $this->loadFromJson();
-        foreach ($all as $idx => $item) {
-            if ((int)$item['id'] === $id) {
-                $all[$idx] = [
-                    'id'                => $id,
-                    'slug'              => $slug,
-                    'type'              => $type,
-                    'step_number'       => $stepNumber,
-                    'title'             => $title,
-                    'subtitle'          => $subtitle,
-                    'era'               => $era,
-                    'synopsis'          => $synopsis,
-                    'speaker_name'      => $speakerName,
-                    'speaker_role'      => $speakerRole,
-                    'dialogue'          => $dialogue,
-                    'trigger_condition' => $triggerCond,
-                    'rewards_summary'   => $rewards,
-                    'status'            => $status,
-                    'tasks'             => $tasks,
-                    'created_by'        => $item['created_by'] ?? 1,
-                    'created_at'        => $item['created_at'] ?? $now,
-                    'updated_at'        => $now
-                ];
-                break;
-            }
-        }
-        $this->saveToJson($all);
-        return true;
+    /**
+     * Met à jour rapidement le statut d'un scénario dans le pipeline
+     */
+    public function updateScenarioStatus(int $scenarioId, string $newStatus): bool {
+        if (!in_array($newStatus, self::VALID_STATUSES, true)) return false;
+        return $this->updateScenario($scenarioId, ['status' => $newStatus]);
     }
 
     /**
      * Met à jour le statut d'une tâche métier spécifique
      */
-    public function updateTaskStatus(int $scenarioId, int $taskId, string $newStatus): bool {
+    public function updateTaskStatus(int $scenarioId, string|int $taskId, string $newStatus): bool {
         if (!in_array($newStatus, self::VALID_TASK_STATUSES, true)) return false;
 
         $scenario = $this->getScenarioById($scenarioId);
@@ -666,7 +709,7 @@ class ScenarioEngine {
         $modified = false;
 
         foreach ($tasks as $idx => $t) {
-            if ((int)$t['task_id'] === $taskId) {
+            if ((string)($t['task_id'] ?? '') === (string)$taskId) {
                 $tasks[$idx]['status'] = $newStatus;
                 $modified = true;
                 break;
@@ -679,19 +722,18 @@ class ScenarioEngine {
     }
 
     /**
-     * Supprime un scénario
+     * Supprime un scénario en base de données SQL uniquement
      */
     public function deleteScenario(int $id): bool {
-        if ($this->db) {
-            try {
-                $stmt = $this->db->prepare("DELETE FROM narrative_scenarios WHERE id = ?");
-                $stmt->execute([$id]);
-            } catch (Throwable $e) {}
-        }
+        if ($id <= 0 || !$this->db) return false;
 
-        $all = $this->loadFromJson();
-        $filtered = array_filter($all, fn($item) => (int)$item['id'] !== $id);
-        return $this->saveToJson(array_values($filtered));
+        try {
+            $stmt = $this->db->prepare("DELETE FROM narrative_scenarios WHERE id = ?");
+            $stmt->execute([$id]);
+            return $stmt->rowCount() > 0;
+        } catch (Throwable $e) {
+            return false;
+        }
     }
 
     /**
@@ -870,13 +912,23 @@ class ScenarioEngine {
         $md .= "{$sc['synopsis']}\n\n";
 
         $md .= "## 2. Voix Narrative & Discours In-Game\n\n";
-        $md .= "> **{$sc['speaker_name']}** (*{$sc['speaker_role']}*)\n";
+        $md .= "> {$sc['speaker_avatar']} **{$sc['speaker_name']}** (*{$sc['speaker_role']}*)\n";
         $md .= "> \n";
         $md .= "> « {$blockquoteDialogue} »\n\n";
 
-        $md .= "## 3. Déclencheurs & Conséquences de Jeu\n\n";
+        $md .= "## 3. Déclencheurs, Choix du Daimyō & Conséquences\n\n";
         $md .= "- **Conditions d'Activation (Triggers)** : {$sc['trigger_condition']}\n";
-        $md .= "- **Récompenses & Effets Gameplay** : {$sc['rewards_summary']}\n\n";
+        $md .= "- **Récompenses & Effets Globaux** : {$sc['rewards_summary']}\n\n";
+
+        if (!empty($sc['choices'])) {
+            $md .= "### Choix Narratifs Proposés au Joueur\n\n";
+            foreach ($sc['choices'] as $idx => $ch) {
+                $num = $idx + 1;
+                $outcome = !empty($ch['outcome']) ? " ➔ *{$ch['outcome']}*" : "";
+                $md .= "{$num}. **[{$ch['label']}]**{$outcome}\n";
+            }
+            $md .= "\n";
+        }
 
         $md .= "## 4. Synthèse Graphique par Métier\n\n";
         $md .= "| Métier du Studio | Domaine | Progression | Tâches (Terminées / Total) |\n";
@@ -928,9 +980,14 @@ class ScenarioEngine {
                 'synopsis'          => 'Après des années de pillages féodaux, le conseil des anciens de la province accorde l\'autonomie à une jeune lignée de daimyōs. Le joueur doit poser les fondations de son premier domaine : défricher les terres, ériger le premier entrepôt de riz et prêter le serment d\'honneur du Bushido.',
                 'speaker_name'      => 'Maître de la Sagesse (Chie no Sensei)',
                 'speaker_role'      => 'Vénérable Mentor & Gardien des Traditions',
+                'speaker_avatar'    => '🏯',
                 'dialogue'          => 'Salutations, noble jeune Seigneur. Votre terre a longtemps sommeillé sous la cendre des guerres passées. Écoutez le bruissement des bambous et la voix de vos sujets : érigez votre premier grenier et honorez les esprits de cette vallée. Votre destinée commence sous le signe du dragon.',
                 'trigger_condition' => 'Ouverture du Fief (Niveau de joueur 1, achèvement du pacte initial)',
                 'rewards_summary'   => '100 Kobans impériaux, 500 Riz, 500 Bois de cèdre, Titre honorifique : « Seigneur Novice du Domaine »',
+                'choices'           => [
+                    ['label' => '🌾 Prioriser les Greniers & Paysans', 'outcome' => '+500 Riz, +10 Morale paysanne', 'style' => 'emerald'],
+                    ['label' => '⚔️ Prêter le Serment du Bushido', 'outcome' => '+100 Kobans, +15 Prestige de Clan', 'style' => 'warning']
+                ],
                 'status'            => 'published',
                 'created_by'        => 1
             ],
@@ -945,9 +1002,14 @@ class ScenarioEngine {
                 'synopsis'          => 'Les bruits de la renaissance du domaine ont attiré des bandes de pillards et mercenaires errants. Pour protéger les familles paysannes et centraliser le commandement, le seigneur doit ériger le donjon fortifié (Tenshu niveau 1) et dresser des palissades renforcées autour du bourg.',
                 'speaker_name'      => 'Intendant Torii Mototada',
                 'speaker_role'      => 'Maître Bâtisseur & Intendant en Chef',
+                'speaker_avatar'    => '📐',
                 'dialogue'          => 'Mon Daimyō, une armée sans donjon est comme un sabre sans poignée. Les guetteurs ont aperçu des fumées suspectes sur les crêtes de l\'Est. Ordonnez l\'extraction du granit et montons ce donjon avant le premier gel !',
                 'trigger_condition' => 'Tenshu niveau 1 construit + Palissades de bois niveau 1',
                 'rewards_summary'   => '250 Kobans, 1 000 Pierres de carrière, Déblocage du simulateur de combat de garnison',
+                'choices'           => [
+                    ['label' => '🏯 Mobiliser les tailleurs de granit', 'outcome' => '+1 000 Pierres, Tenshu renforcé (+10% Défense)', 'style' => 'warning'],
+                    ['label' => '🏹 Poster des guetteurs Ashigaru aux crêtes', 'outcome' => '+250 Kobans, Alerte précoce contre les rōnins', 'style' => 'crimson']
+                ],
                 'status'            => 'in_production',
                 'created_by'        => 1
             ],
@@ -961,10 +1023,15 @@ class ScenarioEngine {
                 'era'               => '1565 - Essor Agricole des Provinces',
                 'synopsis'          => 'Une forteresse ne peut tenir sans un approvisionnement continu. Ce scénario plonge le joueur dans la mise en valeur des 9 parcelles extérieures : rizières inondées, sylviculture des cèdres, carrière de granit et plantations de thé vert montagnard.',
                 'speaker_name'      => 'Dame Asuka du Clan Mori',
-                'speaker_role'      => 'Déesse des Récoltes & Emissaire du Terroir',
+                'speaker_role'      => 'Déesse des Récoltes & Émissaire du Terroir',
+                'speaker_avatar'    => '🌾',
                 'dialogue'          => 'Regardez ces collines en terrasses, Mon Seigneur. L\'eau douce descend des névés pour nourrir nos rizières. Donnez des outils aux paysans, creusez les canaux d\'irrigation et notre grenier ne connaîtra jamais l\'ombre de la disette.',
                 'trigger_condition' => 'Posséder au moins 4 parcelles rurales de niveau 3 ou supérieur',
                 'rewards_summary'   => '+25% Rendement agricole pendant 48h, Déverrouillage des outils agraires en fer',
+                'choices'           => [
+                    ['label' => '💧 Creuser les grands canaux d\'irrigation', 'outcome' => '+25% Rendement Riz & Thé pendant 48h', 'style' => 'emerald'],
+                    ['label' => '⚒️ Forger des outils agraires en fer', 'outcome' => '+15% Production Bois & Granit permanente', 'style' => 'warning']
+                ],
                 'status'            => 'in_review',
                 'created_by'        => 1
             ],
@@ -979,9 +1046,14 @@ class ScenarioEngine {
                 'synopsis'          => 'Une terrible tempête de neige s\'abat sur tout l\'archipel. Les rizières gèlent, les caravanes de marchands sont bloquées dans les cols et les oasis deviennent glacées. Les seigneurs doivent choisir entre distribuer leurs réserves de saké et de riz pour sauver leurs paysans ou thésauriser pour armer leurs soldats.',
                 'speaker_name'      => 'Chie no Sensei (Maître de la Sagesse)',
                 'speaker_role'      => 'Grand Ermite du Temple Shinto',
+                'speaker_avatar'    => '🏯',
                 'dialogue'          => 'Le ciel blanc ne distingue ni samouraï ni laboureur. Ouvrez les portes de vos greniers royaux, offrez le bouillon chaud et le saké à vos sujets. Le Daimyō qui protège son peuple en temps d\'épreuve trouvera dix mille sabres fidèles lorsque reviendra le printemps.',
                 'trigger_condition' => 'Événement Live Déclenché (Saison Hivernale ou Feature Flag Live Ops)',
                 'rewards_summary'   => 'Relique « Sceau du Flocon Éternel », Médaille de Bienveillance (+15 Morale permanente)',
+                'choices'           => [
+                    ['label' => '🍶 Ouvrir les greniers & distribuer le Saké', 'outcome' => '+15 Morale permanente, Sceau du Flocon Éternel', 'style' => 'emerald'],
+                    ['label' => '🛡️ Rationner pour la garnison des samouraïs', 'outcome' => '+20% Défense hivernale, -10 Loyauté paysanne', 'style' => 'crimson']
+                ],
                 'status'            => 'ready',
                 'created_by'        => 1
             ],
@@ -996,9 +1068,14 @@ class ScenarioEngine {
                 'synopsis'          => 'L\'Empereur et le Shōgun organisent au cœur de la capitale un tournoi sacré pour honorer la déesse Amaterasu. Les plus grands champions de chaque fief (Oda, Takeda, Mori) sont conviés dans l\'arène du palais pour croiser le fer dans le respect absolu du code Bushido.',
                 'speaker_name'      => 'Général Oda Nobunaga',
                 'speaker_role'      => 'Seigneur de Guerre & Maître de l\'Artillerie',
+                'speaker_avatar'    => '⚔️',
                 'dialogue'          => 'Que les lâches tremblent ! Envoyez votre plus valeureux samouraï à Kyōto. Montrez à ces seigneurs engourdis ce que vaut la lame d\'un combattant forgé par nos rudes provinces !',
                 'trigger_condition' => 'Avoir un Héros Samouraï niveau 5 ou supérieur + Dojo niveau 4',
                 'rewards_summary'   => 'Katana légendaire de l\'Empereur (+35 Attaque Héros), 500 Kobans, Bannière impériale de prestige',
+                'choices'           => [
+                    ['label' => '⚔️ Engager notre Champion en duel singulier', 'outcome' => 'Katana de l\'Empereur (+35 ATQ), +500 Kobans', 'style' => 'crimson'],
+                    ['label' => '🎌 Parrainer les joutes diplomatiques', 'outcome' => 'Bannière Impériale (+25 Prestige de Clan)', 'style' => 'warning']
+                ],
                 'status'            => 'in_production',
                 'created_by'        => 1
             ],
@@ -1013,12 +1090,109 @@ class ScenarioEngine {
                 'synopsis'          => 'Des escadres de jonques de pirates Wakō pillent les navires marchands et menacent les ports de pêche. Tous les daimyōs côtiers doivent mobiliser leurs Atakebune et équiper leurs pêcheurs pour briser le blocus pirate.',
                 'speaker_name'      => 'Amiral Murakami Takeyoshi',
                 'speaker_role'      => 'Grand Corsaire du Clan Mori',
+                'speaker_avatar'    => '⛵',
                 'dialogue'          => 'Ces chiens de mer croient pouvoir braver nos côtes impunément ! Hissez nos étendards, chargez les canons à pierre et envoyons leurs jonques par le fond !',
                 'trigger_condition' => 'Chantier naval niveau 2 ou 3 barques de pêche opérationnelles',
                 'rewards_summary'   => 'Plans du Navire Blindé Tekkōsen, 1 500 Bois précieux, Coffres de butin pirate',
+                'choices'           => [
+                    ['label' => '⛵ Lancer l\'assaut naval des Atakebune', 'outcome' => 'Plans du Tekkōsen + Coffres de butin pirate', 'style' => 'crimson'],
+                    ['label' => '🔥 Tendre une embuscade de brûlots côtiers', 'outcome' => '+1 500 Bois précieux, Flotte Wakō dispersée', 'style' => 'warning']
+                ],
                 'status'            => 'draft',
                 'created_by'        => 1
             ]
+        ];
+    }
+
+    /**
+     * Analyse un fichier Markdown (.md) pour extraire le Synopsis & Contexte Historique
+     * ainsi que les métadonnées narratives éventuelles (Titre, Sous-titre, Ère, Personnage, Dialogue, Triggers, Récompenses).
+     */
+    public function parseMarkdownToScenario(string $markdown, string $filename = ''): array {
+        $raw = str_replace(["\r\n", "\r"], "\n", trim($markdown));
+        if ($raw === '') {
+            return [
+                'title'             => $filename ? pathinfo($filename, PATHINFO_FILENAME) : 'Scénario Importé (.md)',
+                'subtitle'          => '',
+                'era'               => '1580 - Sengoku Jidai',
+                'synopsis'          => '',
+                'speaker_name'      => '',
+                'speaker_role'      => '',
+                'speaker_avatar'    => '🏯',
+                'dialogue'          => '',
+                'trigger_condition' => '',
+                'rewards_summary'   => '',
+            ];
+        }
+
+        // 1. Extraction du Titre principal (# Titre)
+        $title = '';
+        if (preg_match('/^#\s+(.+)$/m', $raw, $mTitle)) {
+            $title = trim(preg_replace('/^[🏯⚔️📜🔥⛩️🏮🧨]+\s*/u', '', strip_tags($mTitle[1])));
+        }
+        if ($title === '' && $filename !== '') {
+            $title = ucwords(str_replace(['_', '-'], ' ', pathinfo($filename, PATHINFO_FILENAME)));
+        }
+        if ($title === '') {
+            $title = 'Scénario Importé (.md)';
+        }
+
+        // 2. Extraction du Sous-titre (## ... ou ligne d'accroche)
+        $subtitle = '';
+        if (preg_match('/^##\s+(.+)$/m', $raw, $mSub)) {
+            $subtitle = trim(preg_replace('/^[🏯⚔️📜🔥⛩️🏮🧨IVX\.\s]+/u', '', strip_tags($mSub[1])));
+        }
+
+        // 3. Extraction de la Période / Ère Historique si mentionnée
+        $era = '1580 - Sengoku Jidai';
+        if (preg_match('/\*\*Période\s*(?:\/\s*Ère)?\s*:\*\*\s*(.+)$/mi', $raw, $mEra)) {
+            $era = trim($mEra[1]);
+        } elseif (preg_match('/(15\d{2}|16\d{2})\s*[-–]\s*([^\n\*]+)/u', $raw, $mEra2)) {
+            $era = trim($mEra2[1] . ' - ' . $mEra2[2]);
+        }
+
+        // 4. Extraction du Personnage & Dialogue (citation > *« ... »* ou > "...")
+        $speakerName = '';
+        $speakerRole = '';
+        $speakerAvatar = '🏯';
+        $dialogue = '';
+
+        if (preg_match('/\*\*(?:Personnage|Interlocuteur)\s*:\*\*\s*([^\n]+)/iu', $raw, $mSp)) {
+            $spLine = trim(str_replace('*', '', $mSp[1]));
+            $parts = preg_split('/[,—–-]/u', $spLine, 2);
+            $speakerName = trim($parts[0] ?? '');
+            if (!empty($parts[1])) {
+                $speakerRole = trim(preg_replace('/Avatar\s*:.*/iu', '', $parts[1]));
+            }
+        }
+
+        if (preg_match('/^>\s*\*?[«"]?([^»"\n]{25,})[»"]?\*?/m', $raw, $mDia)) {
+            $dialogue = trim(str_replace(['*', '«', '»', '"'], '', $mDia[1]));
+        }
+
+        // 5. Extraction Trigger & Récompenses éventuels
+        $trigger = '';
+        if (preg_match('/\*\*(?:Condition(?:s)? d\'activation|Trigger|Déclencheur|Objectif Stratégique(?: Majeur)?)\s*:\*\*\s*([^\n]+)/iu', $raw, $mTr)) {
+            $trigger = trim(str_replace('*', '', $mTr[1]));
+        }
+
+        $rewards = '';
+        if (preg_match('/\*\*(?:Récompenses?(?:\s*&\s*Effets)?|Dotation)\s*:\*\*\s*([^\n]+)/iu', $raw, $mRw)) {
+            $rewards = trim(str_replace('*', '', $mRw[1]));
+        }
+
+        // 6. Le Synopsis & Contexte Historique reçoit le contenu Markdown complet (ou la section Synopsis/Histoire si présente, suivie du document complet)
+        return [
+            'title'             => $title,
+            'subtitle'          => $subtitle,
+            'era'               => $era,
+            'synopsis'          => $raw,
+            'speaker_name'      => $speakerName,
+            'speaker_role'      => $speakerRole,
+            'speaker_avatar'    => $speakerAvatar,
+            'dialogue'          => $dialogue,
+            'trigger_condition' => $trigger,
+            'rewards_summary'   => $rewards,
         ];
     }
 

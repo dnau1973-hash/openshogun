@@ -232,11 +232,79 @@ if ($currentTab === 'dashboard') {
         exit;
     }
 
-    // Traitement des actions de formulaire en POST
+    // Traitement des actions de formulaire et AJAX en POST
     if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action'])) {
         $action = $_POST['action'];
+        $isAjax = !empty($_POST['ajax']) || str_starts_with($action, 'ajax_');
+
         try {
-            if ($action === 'create_scenario') {
+            if ($action === 'ajax_update_task_status') {
+                header('Content-Type: application/json; charset=UTF-8');
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                $taskId = trim((string)($_POST['task_id'] ?? ''));
+                $taskStatus = (string)($_POST['task_status'] ?? 'todo');
+                $updated = $scenarioEngine->updateTaskStatus($scId, $taskId, $taskStatus);
+                $sc = $scenarioEngine->getScenarioById($scId);
+                echo json_encode([
+                    'ok'          => $updated,
+                    'scenario_id' => $scId,
+                    'task_id'     => $taskId,
+                    'task_status' => $taskStatus,
+                    'metrics'     => $sc['metrics'] ?? null,
+                    'msg'         => $updated ? "Tâche #$taskId passée à « $taskStatus »." : "Impossible de modifier la tâche."
+                ]);
+                exit;
+            } elseif ($action === 'ajax_update_scenario_status') {
+                header('Content-Type: application/json; charset=UTF-8');
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                $newStatus = (string)($_POST['status'] ?? 'draft');
+                $updated = $scenarioEngine->updateScenarioStatus($scId, $newStatus);
+                $sc = $scenarioEngine->getScenarioById($scId);
+                echo json_encode([
+                    'ok'          => $updated,
+                    'scenario_id' => $scId,
+                    'status'      => $sc['status'] ?? $newStatus,
+                    'metrics'     => $sc['metrics'] ?? null,
+                    'msg'         => $updated ? "Statut du scénario #$scId mis à jour !" : "Impossible de modifier le statut."
+                ]);
+                exit;
+            } elseif ($action === 'ajax_delete_scenario') {
+                header('Content-Type: application/json; charset=UTF-8');
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                $deleted = $scenarioEngine->deleteScenario($scId);
+                echo json_encode([
+                    'ok'          => $deleted,
+                    'scenario_id' => $scId,
+                    'msg'         => $deleted ? "Scénario #$scId supprimé définitivement." : "Échec de la suppression du scénario #$scId."
+                ]);
+                exit;
+            } elseif ($action === 'ajax_save_scenario') {
+                header('Content-Type: application/json; charset=UTF-8');
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                if ($scId > 0) {
+                    $updated = $scenarioEngine->updateScenario($scId, $_POST);
+                    $sc = $scenarioEngine->getScenarioById($scId);
+                    echo json_encode([
+                        'ok'          => $updated,
+                        'scenario_id' => $scId,
+                        'is_new'      => false,
+                        'metrics'     => $sc['metrics'] ?? null,
+                        'msg'         => $updated ? "Scénario #$scId sauvegardé en direct !" : "Erreur lors de la sauvegarde."
+                    ]);
+                } else {
+                    $newId = $scenarioEngine->saveScenarioFull($_POST);
+                    $sc = $scenarioEngine->getScenarioById($newId);
+                    echo json_encode([
+                        'ok'          => $newId > 0,
+                        'scenario_id' => $newId,
+                        'is_new'      => true,
+                        'redirect'    => "?page=gamestudio&tab=narrative_scenarios&action=edit&id=$newId",
+                        'metrics'     => $sc['metrics'] ?? null,
+                        'msg'         => "Nouveau scénario créé (#$newId) !"
+                    ]);
+                }
+                exit;
+            } elseif ($action === 'create_scenario') {
                 $newId = $scenarioEngine->saveScenarioFull($_POST);
                 $_SESSION['scenario_flash'] = [
                     'type' => 'success',
@@ -246,6 +314,37 @@ if ($currentTab === 'dashboard') {
                     ? '?page=gamestudio&tab=narrative_scenarios'
                     : "?page=gamestudio&tab=narrative_scenarios&action=edit&id=$newId";
                 header('Location: ' . $redirectUrl);
+                exit;
+            } elseif ($action === 'import_markdown_scenario') {
+                $mdContent = trim((string)($_POST['md_content'] ?? ''));
+                $filename  = trim((string)($_POST['md_filename'] ?? ''));
+                if (!empty($_FILES['md_file']['tmp_name']) && is_uploaded_file($_FILES['md_file']['tmp_name'])) {
+                    $mdContent = (string)file_get_contents($_FILES['md_file']['tmp_name']);
+                    $filename  = (string)($_FILES['md_file']['name'] ?? $filename);
+                }
+                $parsed = $scenarioEngine->parseMarkdownToScenario($mdContent, $filename);
+                $payload = [
+                    'type'              => !empty($_POST['type']) ? (string)$_POST['type'] : 'step',
+                    'step_number'       => $_POST['step_number'] ?? null,
+                    'status'            => 'draft',
+                    'title'             => !empty($_POST['title']) ? trim((string)$_POST['title']) : $parsed['title'],
+                    'subtitle'          => !empty($_POST['subtitle']) ? trim((string)$_POST['subtitle']) : $parsed['subtitle'],
+                    'era'               => !empty($_POST['era']) ? trim((string)$_POST['era']) : $parsed['era'],
+                    'synopsis'          => $parsed['synopsis'],
+                    'speaker_name'      => $parsed['speaker_name'] ?: 'Takayama Kagetora (Maître Artificier)',
+                    'speaker_role'      => $parsed['speaker_role'] ?: 'Chroniqueur & Stratège du Shōgunat',
+                    'speaker_avatar'    => $parsed['speaker_avatar'] ?: '🏯',
+                    'dialogue'          => $parsed['dialogue'] ?: 'Noble Daimyō, voici les rouleaux stratégiques importés dans les archives du Shōgunat.',
+                    'trigger_condition' => $parsed['trigger_condition'],
+                    'rewards_summary'   => $parsed['rewards_summary'],
+                    'created_by'        => $userId
+                ];
+                $newId = $scenarioEngine->saveScenarioFull($payload);
+                $_SESSION['scenario_flash'] = [
+                    'type' => 'success',
+                    'msg'  => "Fichier Markdown « " . ($filename ?: 'GDD.md') . " » importé avec succès dans le Synopsis & Contexte Historique (Scénario #$newId) !"
+                ];
+                header("Location: ?page=gamestudio&tab=narrative_scenarios&action=edit&id=$newId");
                 exit;
             } elseif ($action === 'update_scenario') {
                 $scId = (int)($_POST['scenario_id'] ?? 0);
@@ -259,9 +358,19 @@ if ($currentTab === 'dashboard') {
                     : "?page=gamestudio&tab=narrative_scenarios&action=edit&id=$scId";
                 header('Location: ' . $redirectUrl);
                 exit;
+            } elseif ($action === 'update_scenario_status') {
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                $newStatus = (string)($_POST['status'] ?? 'draft');
+                $updated = $scenarioEngine->updateScenarioStatus($scId, $newStatus);
+                $_SESSION['scenario_flash'] = [
+                    'type' => $updated ? 'success' : 'warning',
+                    'msg'  => $updated ? "Statut du scénario #$scId mis à jour." : "Impossible de modifier le statut."
+                ];
+                header('Location: ?page=gamestudio&tab=narrative_scenarios');
+                exit;
             } elseif ($action === 'update_task_status') {
                 $scId = (int)($_POST['scenario_id'] ?? 0);
-                $taskId = (int)($_POST['task_id'] ?? 0);
+                $taskId = trim((string)($_POST['task_id'] ?? ''));
                 $taskStatus = (string)($_POST['task_status'] ?? 'todo');
                 $updated = $scenarioEngine->updateTaskStatus($scId, $taskId, $taskStatus);
                 $_SESSION['scenario_flash'] = [
@@ -298,6 +407,11 @@ if ($currentTab === 'dashboard') {
                 exit;
             }
         } catch (Throwable $e) {
+            if ($isAjax) {
+                header('Content-Type: application/json; charset=UTF-8');
+                echo json_encode(['ok' => false, 'msg' => 'Erreur : ' . $e->getMessage()]);
+                exit;
+            }
             $_SESSION['scenario_flash'] = ['type' => 'danger', 'msg' => 'Erreur : ' . $e->getMessage()];
         }
         header('Location: ?page=gamestudio&tab=narrative_scenarios');
