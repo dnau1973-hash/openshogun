@@ -231,10 +231,26 @@ if (isset($globalMetrics['by_role']) && count($globalMetrics['by_role']) === 10 
     exit(1);
 }
 
-// Cleanup des scénarios de test temporaires dans le fichier JSON
+// 8.b Test de non-résurrection des scénarios supprimés (persistance 100% SQL)
 $engine->deleteScenario($multiId);
 if ($duplicate && isset($duplicate['id'])) {
     $engine->deleteScenario((int)$duplicate['id']);
+}
+
+// Supprimer un des scénarios par défaut pour prouver qu'il ne revient plus
+$scList = $engine->getScenarios();
+$testVictim = $scList[0] ?? null;
+if ($testVictim) {
+    $victimId = (int)$testVictim['id'];
+    $engine->deleteScenario($victimId);
+    $engineReopened = new ScenarioEngine();
+    $foundAfterReload = $engineReopened->getScenarioById($victimId);
+    if ($foundAfterReload === null) {
+        echo "[PASS] Non-résurrection validée : Le scénario supprimé (#$victimId) ne réapparaît pas lors du rechargement du moteur\n";
+    } else {
+        echo "[FAIL] Régression : Le scénario supprimé a été ré-ensemencé !\n";
+        exit(1);
+    }
 }
 
 // 9. Test de rendu MVC : Mode Catalogue & Graphiques

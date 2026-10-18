@@ -264,19 +264,32 @@ class ScenarioEngine {
     }
 
     /**
-     * Ensemence les scénarios par défaut en base de données SQL s'ils n'existent pas encore
+     * Ensemence les scénarios par défaut uniquement lors de la toute première initialisation en base de données SQL.
+     * Ne ré-insère JAMAIS un scénario supprimé par l'utilisateur.
      */
     private function ensureDefaultScenarios(): void {
         if (!$this->db) return;
 
         try {
+            // 1. Si déjà ensemencé selon GameConfig, ne rien faire
+            $alreadySeeded = (bool)GameConfig::get('narrative_scenarios_seeded', false);
+            if ($alreadySeeded) {
+                return;
+            }
+
+            // 2. Si la table contient déjà des scénarios, marquer comme ensemencé et sortir
+            $stmtCount = $this->db->query("SELECT COUNT(*) FROM narrative_scenarios");
+            $dbCount = (int)$stmtCount->fetchColumn();
+
+            if ($dbCount > 0) {
+                GameConfig::set('narrative_scenarios_seeded', true);
+                return;
+            }
+
+            // 3. Table SQL entièrement vierge lors de l'installation : injection initiale unique
             $defaults = $this->buildDefaultScenarios();
             foreach ($defaults as $scenario) {
-                $stmtCheck = $this->db->prepare("SELECT COUNT(*) FROM narrative_scenarios WHERE slug = ?");
-                $stmtCheck->execute([$scenario['slug']]);
-                if ((int)$stmtCheck->fetchColumn() === 0) {
-                    $this->saveScenarioFull($scenario);
-                }
+                $this->saveScenarioFull($scenario);
             }
             GameConfig::set('narrative_scenarios_seeded', true);
         } catch (Throwable $e) {
