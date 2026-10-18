@@ -1040,7 +1040,7 @@ async function runSiegeSimulation(isMonteCarlo = false) {
     const payload = buildSiegePayload(isMonteCarlo);
 
     try {
-        const res = await fetch('/api/dev_team.php', {
+        const res = await fetch('/api/dev_team.php?action=simulate_castle_siege', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

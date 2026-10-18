@@ -32,7 +32,9 @@ if (!$devEngine->isDevTeamMember($currentUserId)) {
     exit;
 }
 
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
+$rawBody = file_get_contents('php://input');
+$jsonBody = !empty($rawBody) ? json_decode($rawBody, true) : null;
+$action = $_GET['action'] ?? $_POST['action'] ?? ($jsonBody['action'] ?? '');
 
 try {
     switch ($action) {
@@ -603,11 +605,7 @@ try {
             require_once __DIR__ . '/../core/CastleSiegeSimulatorEngine.php';
             $siegeEngine = new CastleSiegeSimulatorEngine($db);
 
-            $payloadRaw = file_get_contents('php://input');
-            $payload = json_decode($payloadRaw, true);
-            if (!is_array($payload)) {
-                $payload = $_POST;
-            }
+            $payload = is_array($jsonBody) ? $jsonBody : $_POST;
 
             $isMonteCarlo = !empty($payload['is_monte_carlo']) && ($payload['is_monte_carlo'] === '1' || $payload['is_monte_carlo'] === true || $payload['is_monte_carlo'] === 'true');
             $iterations = max(10, min(200, (int)($payload['iterations'] ?? 100)));
@@ -630,8 +628,7 @@ try {
             require_once __DIR__ . '/../core/CastleSiegeSimulatorEngine.php';
             $siegeEngine = new CastleSiegeSimulatorEngine($db);
 
-            $payloadRaw = file_get_contents('php://input');
-            $payload = json_decode($payloadRaw, true) ?: $_POST;
+            $payload = is_array($jsonBody) ? $jsonBody : $_POST;
             $markdown = $siegeEngine->exportMarkdownReport($payload);
 
             echo json_encode([
