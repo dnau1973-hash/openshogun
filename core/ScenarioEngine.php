@@ -158,6 +158,13 @@ class ScenarioEngine {
             'tone'   => 'Forge & Métallurgie',
             'avatar' => '🔥',
             'color'  => 'orange'
+        ],
+        'kagetora' => [
+            'name'   => 'Takayama Kagetora',
+            'role'   => 'Grand Maître Artificier du Hōjutsu (Artillerie & Poudre Noire)',
+            'tone'   => 'Feu Tonnerre & Sièges Coordonnés',
+            'avatar' => '🧨',
+            'color'  => 'danger'
         ]
     ];
 
@@ -172,7 +179,12 @@ class ScenarioEngine {
         ['label' => '🍶 Brasserie Niv.5+',      'value' => 'Meunerie & Brasserie niveau 5+'],
         ['label' => '⚒️ Grande Forge Niv.3+',   'value' => 'Grande Forge niveau 3+'],
         ['label' => '⚔️ Héros Samouraï Niv.5+', 'value' => 'Héros Samouraï niveau 5+'],
-        ['label' => '❄️ Saison Live Ops',       'value' => 'Événement Live Déclenché (Feature Flag Live Ops)']
+        ['label' => '❄️ Saison Live Ops',       'value' => 'Événement Live Déclenché (Feature Flag Live Ops)'],
+        ['label' => '🔥 Guerre des 12 Châteaux', 'value' => 'Déclenchement mondial de la Guerre des 12 Châteaux (Genson Jūni Tenshu)'],
+        ['label' => '🧨 Poudre Noire Niv.20',   'value' => 'Recherche « Poudre Noire (Kayaku) » développée jusqu\'au Niveau 20'],
+        ['label' => '💣 Arsenal Pyrotechnique', 'value' => 'Production de 10 Grenades Hōroku et 5 Bombes de siège Teppō-dama en Forge'],
+        ['label' => '🏯 2 Châteaux Authentiques', 'value' => 'L\'Alliance détient au minimum 2 des Douze Châteaux Authentiques (castles_owned >= 2)'],
+        ['label' => '⛩️ Dōjō Impérial Niv.10',   'value' => 'Achèvement du Niveau 10 du Dōjō Impérial par l\'Alliance (Fin de Partie)']
     ];
 
     /**
@@ -186,7 +198,11 @@ class ScenarioEngine {
         ['label' => '🍶 +300 Saké',             'value' => '300 Saké impérial'],
         ['label' => '🔥 +15% Moral (24h)',      'value' => '+15% Moral du fief pendant 24h'],
         ['label' => '🌾 +25% Récoltes (48h)',   'value' => '+25% Rendement agricole pendant 48h'],
-        ['label' => '🏅 Titre & Relique',       'value' => 'Relique & Titre honorifique du Shōgunat']
+        ['label' => '🏅 Titre & Relique',       'value' => 'Relique & Titre honorifique du Shōgunat'],
+        ['label' => '🧨 Déblocage Poudre Noire', 'value' => 'Apparition de la recherche « Poudre Noire (Kayaku) » dans l\'Académie des Savoirs'],
+        ['label' => '💣 Arsenal Forge Débloqué', 'value' => 'Déverrouillage de l\'« Arsenal Pyrotechnique » dans la Grande Forge (Grenades & Bombes)'],
+        ['label' => '🏯 2 Sceaux & Dōjō Impérial', 'value' => 'Attribution des 2 Sceaux Impériaux Fondateurs & Déblocage du Dōjō Impérial'],
+        ['label' => '👑 Victoire Seii Taishōgun', 'value' => 'Fin de partie : Victoire Suprême & Inscription au Panthéon des Vainqueurs d\'OpenShogun']
     ];
 
     public function __construct() {
@@ -248,28 +264,19 @@ class ScenarioEngine {
     }
 
     /**
-     * Ensemence les scénarios par défaut uniquement lors de la toute première initialisation en base de données
+     * Ensemence les scénarios par défaut en base de données SQL s'ils n'existent pas encore
      */
     private function ensureDefaultScenarios(): void {
         if (!$this->db) return;
 
         try {
-            $alreadySeeded = (bool)GameConfig::get('narrative_scenarios_seeded', false);
-            if ($alreadySeeded) {
-                return;
-            }
-
-            $stmtCount = $this->db->query("SELECT COUNT(*) FROM narrative_scenarios");
-            $dbCount = (int)$stmtCount->fetchColumn();
-
-            if ($dbCount > 0) {
-                GameConfig::set('narrative_scenarios_seeded', true);
-                return;
-            }
-
             $defaults = $this->buildDefaultScenarios();
             foreach ($defaults as $scenario) {
-                $this->saveScenarioFull($scenario);
+                $stmtCheck = $this->db->prepare("SELECT COUNT(*) FROM narrative_scenarios WHERE slug = ?");
+                $stmtCheck->execute([$scenario['slug']]);
+                if ((int)$stmtCheck->fetchColumn() === 0) {
+                    $this->saveScenarioFull($scenario);
+                }
             }
             GameConfig::set('narrative_scenarios_seeded', true);
         } catch (Throwable $e) {
@@ -1100,6 +1107,676 @@ class ScenarioEngine {
                 ],
                 'status'            => 'draft',
                 'created_by'        => 1
+            ],
+            // STEP 4 - LA GUERRE DES 12 CHÂTEAUX (ACTE II)
+            [
+                'slug'              => 'step-04-poudre-noire-20',
+                'type'              => 'step',
+                'step_number'       => 4,
+                'title'             => 'Le 20e Cercle du Kayaku & le Secret des Alchimistes',
+                'subtitle'          => 'Step 4 : Atteindre la maîtrise absolue de la Poudre Noire au Niveau 20',
+                'era'               => '1583 - Les Secrets de la Poudre Tonnerre',
+                'synopsis'          => 'Pendant des mois, les alchimistes du domaine ont purifié le salpêtre des grottes volcaniques, distillé le soufre jaune et calciné le bois de saule pour obtenir le charbon idéal. En atteignant le Niveau 20 de la Poudre Noire, le fief maîtrise la formule explosive parfaite et débloque l\'Arsenal Pyrotechnique dans la Grande Forge.',
+                'speaker_name'      => 'Takayama Kagetora',
+                'speaker_role'      => 'Grand Maître Artificier du Hōjutsu',
+                'speaker_avatar'    => '🧨',
+                'dialogue'          => 'Admirez ce grain noir, Daimyō ! Ni trop humide, ni trop friable. Au 20e palier de notre art alchimique, la détonation n\'est plus un simple pétard : c\'est la foudre d\'Izanagi lui-même ! Notre Grande Forge peut désormais couler les redoutables grenades en céramique Hōroku et les bombes de brèche Teppō-dama capables de pulvériser les murailles de granit !',
+                'trigger_condition' => 'Recherche « Poudre Noire (Kayaku) » développée jusqu\'au Niveau 20 dans l\'Académie des Savoirs',
+                'rewards_summary'   => 'Déverrouillage de l\'« Arsenal Pyrotechnique » dans la Grande Forge, Recettes : Baril de Poudre (150 Nitrate + 50 Soufre + 100 Charbon), Grenade Hōroku-hiya et Bombe de siège Teppō-dama',
+                'choices'           => [
+                    ['label' => '⚒️ Allumer les fourneaux de l\'Arsenal Pyrotechnique', 'outcome' => 'Déblocage immédiat de la fabrication des Bombes et Grenades en Grande Forge', 'style' => 'crimson'],
+                    ['label' => '🧪 Perfectionner la pureté pyrotechnique', 'outcome' => '+10% Dégâts explosifs supplémentaires pour les troupes de siège du fief', 'style' => 'warning']
+                ],
+                'status'            => 'in_production',
+                'created_by'        => 1,
+                'tasks'             => [
+                    [
+                        'task_id'      => 1,
+                        'role_code'    => 'level_designer',
+                        'role_name'    => 'Game & Level Designer',
+                        'title'        => 'Équilibrage de la courbe de recherche Poudre Noire Niv. 1 à 20',
+                        'description'  => 'Définir les coûts croissants en Nitrate, Soufre et Charbon pour les 20 niveaux de la techno gunpowder_tech.',
+                        'assignee'     => 'Lead Level Designer',
+                        'complexity'   => 'L',
+                        'status'       => 'done',
+                        'deliverables' => 'docs/gdd_bataille_12_chateaux.md / Courbes de progression'
+                    ],
+                    [
+                        'task_id'      => 2,
+                        'role_code'    => 'backend',
+                        'role_name'    => 'Développeur Back-End',
+                        'title'        => 'Contrôle strict du seuil Niveau 20 et déblocage conditionnel de l\'Arsenal',
+                        'description'  => 'Implémenter dans ResearchEngine et ForgeEngine la vérification du niveau 20 de la Poudre Noire.',
+                        'assignee'     => 'Dev Back Senior',
+                        'complexity'   => 'L',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'core/ResearchEngine.php / core/ForgeEngine.php'
+                    ],
+                    [
+                        'task_id'      => 3,
+                        'role_code'    => 'frontend',
+                        'role_name'    => 'Développeur Front-End',
+                        'title'        => 'Interface de l\'Académie avec jauge de maîtrise Niveau 20 et alertes de complétion',
+                        'description'  => 'Intégrer la jauge de progression 1..20 de la Poudre Noire avec badge d\'arsenal déverrouillé.',
+                        'assignee'     => 'Dev Front UI/UX',
+                        'complexity'   => 'M',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'views/research.php / assets CSS'
+                    ],
+                    [
+                        'task_id'      => 4,
+                        'role_code'    => 'network',
+                        'role_name'    => 'Développeur Réseau & Infra',
+                        'title'        => 'Notification en temps réel du franchissement du Palier 20 aux alliés',
+                        'description'  => 'Diffuser un broadcast réseau au sein de l\'alliance lorsqu\'un membre débloque le Niveau 20 de Kayaku.',
+                        'assignee'     => 'Dev Réseau',
+                        'complexity'   => 'S',
+                        'status'       => 'todo',
+                        'deliverables' => 'core/SocketNotification.php'
+                    ],
+                    [
+                        'task_id'      => 5,
+                        'role_code'    => 'artist_2d',
+                        'role_name'    => 'Game Artist 2D & Ukiyo-e',
+                        'title'        => 'Illustration du rouleau d\'alchimie du Kayaku et médaillon pyrotechnique',
+                        'description'  => 'Produire les icônes d\'alchimie, du creuset et de la flamme tonnerre dans le style estampe ukiyo-e.',
+                        'assignee'     => 'Concept Artist 2D',
+                        'complexity'   => 'M',
+                        'status'       => 'done',
+                        'deliverables' => 'public/assets/researches/gunpowder.jpg'
+                    ],
+                    [
+                        'task_id'      => 6,
+                        'role_code'    => 'artist_env',
+                        'role_name'    => 'Environment & Isometric Artist',
+                        'title'        => 'Variante visuelle de l\'Académie des Savoirs avec laboratoire de salpêtre',
+                        'description'  => 'Ajouter des détails visuels (mortiers, cornues et volutes de fumée noire) au bâtiment de l\'Académie.',
+                        'assignee'     => 'Isometric Artist',
+                        'complexity'   => 'M',
+                        'status'       => 'todo',
+                        'deliverables' => 'public/assets/buildings/research_lab_lvl20.png'
+                    ],
+                    [
+                        'task_id'      => 7,
+                        'role_code'    => 'sound',
+                        'role_name'    => 'Sound Designer & Compositeur',
+                        'title'        => 'Effet sonore de déflagration d\'essai et crépitements de poudres',
+                        'description'  => 'Concevoir le SFX de montée au niveau 20 : crépitement de mèche puis détonation sourde et écho féodal.',
+                        'assignee'     => 'Sound Designer',
+                        'complexity'   => 'S',
+                        'status'       => 'done',
+                        'deliverables' => 'public/assets/sounds/black_powder_lvl20.mp3'
+                    ],
+                    [
+                        'task_id'      => 8,
+                        'role_code'    => 'narrative',
+                        'role_name'    => 'Narrative Designer & Scénariste',
+                        'title'        => 'Rédaction du grimoire des 20 paliers alchimiques du salpêtre',
+                        'description'  => 'Écrire les descriptions narratives immersives des 20 niveaux de découverte de la poudre noire.',
+                        'assignee'     => 'Scénariste Principal',
+                        'complexity'   => 'M',
+                        'status'       => 'done',
+                        'deliverables' => 'docs/lore_alchimie_kayaku.md'
+                    ],
+                    [
+                        'task_id'      => 9,
+                        'role_code'    => 'qa',
+                        'role_name'    => 'QA Tester & Recetteur',
+                        'title'        => 'Test du palier critique : verrouillé à 19, accessible à 20',
+                        'description'  => 'Écrire un test automatisé vérifiant qu\'aucune commande de craft de bombe n\'est autorisée avant le niveau 20.',
+                        'assignee'     => 'QA Automation Engineer',
+                        'complexity'   => 'M',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'tests/test_black_powder_threshold.php'
+                    ],
+                    [
+                        'task_id'      => 10,
+                        'role_code'    => 'producer',
+                        'role_name'    => 'Producteur Live Ops & Économiste',
+                        'title'        => 'Monitoring du temps moyen de recherche et équilibrage de la rétention',
+                        'description'  => 'Vérifier la télémétrie du passage au niveau 20 pour calibrer le timing de déclenchement des sièges.',
+                        'assignee'     => 'Live Ops Producer',
+                        'complexity'   => 'S',
+                        'status'       => 'todo',
+                        'deliverables' => 'Dashboards KPIs Game Studio'
+                    ]
+                ]
+            ],
+            // STEP 5 - LA GUERRE DES 12 CHÂTEAUX (ACTE III)
+            [
+                'slug'              => 'step-05-fourneaux-tonnerre',
+                'type'              => 'step',
+                'step_number'       => 5,
+                'title'             => 'Les Fourneaux du Tonnerre & Armes de Siège',
+                'subtitle'          => 'Step 5 : Fonder les premières Grenades Hōroku et Bombes de Siège en Grande Forge',
+                'era'               => '1584 - Tumulte des Fonderies',
+                'synopsis'          => 'Les forges tournent jour et nuit. Les maîtres potiers cuisent les coques de céramique étanches tandis que les forgerons coulent la fonte des bombes renforcées au Satetsu. Dès la sortie des premiers engins explosifs, le clan débloque l\'ordre d\'opération militaire « Siège Coordonné d\'Alliance » contre les 12 Châteaux Authentiques.',
+                'speaker_name'      => 'Maître Forgeron Masamune',
+                'speaker_role'      => 'Grand Artisan de la Forge & du Tamahagane',
+                'speaker_avatar'    => '🔥',
+                'dialogue'          => 'Le métal et le feu ne font qu\'un ! Sous la direction du Maître Kagetora, nos creusets ont enfanté les premières bombes Teppō-dama. Regardez cette fonte trempée au sable de fer Satetsu : les remparts des douze forteresses n\'y résisteront pas. Donnez l\'ordre à vos alliés de se regrouper, l\'heure du siège a sonné !',
+                'trigger_condition' => 'Avoir produit au moins 10 Grenades Hōroku-hiya et 5 Bombes de siège Teppō-dama dans la Grande Forge',
+                'rewards_summary'   => 'Déblocage de l\'ordre d\'opération « Siège Coordonné d\'Alliance », +25% Vitesse de marche des caravanes d\'artillerie, 5 Barils de poudre noire offerts',
+                'choices'           => [
+                    ['label' => '💣 Équiper les sapeurs d\'artillerie de siège', 'outcome' => 'Déblocage de l\'ordre de Siège Coordonné d\'Alliance + 5 Barils de Kayaku', 'style' => 'crimson'],
+                    ['label' => '🛡️ Distribuer les Grenades Hōroku aux garnisons', 'outcome' => '+30% Puissance défensive en cas d\'assaut de forteresse adverse', 'style' => 'warning']
+                ],
+                'status'            => 'in_production',
+                'created_by'        => 1,
+                'tasks'             => [
+                    [
+                        'task_id'      => 1,
+                        'role_code'    => 'level_designer',
+                        'role_name'    => 'Game & Level Designer',
+                        'title'        => 'Équilibrage des recettes Forge : Baril de poudre, Grenade Hōroku & Bombe Teppō-dama',
+                        'description'  => 'Paramétrer les coûts de craft en Nitrate, Soufre, Charbon, Fer et Satetsu, ainsi que les dégâts de siège.',
+                        'assignee'     => 'Combat & Economy Designer',
+                        'complexity'   => 'L',
+                        'status'       => 'done',
+                        'deliverables' => 'docs/gdd_bataille_12_chateaux.md (Section IV)'
+                    ],
+                    [
+                        'task_id'      => 2,
+                        'role_code'    => 'backend',
+                        'role_name'    => 'Développeur Back-End',
+                        'title'        => 'Moteur de fabrication de l\'Arsenal Pyrotechnique en Grande Forge',
+                        'description'  => 'Développer l\'API de commande de craft des barils, grenades et bombes avec déduction transactionnelle des stocks.',
+                        'assignee'     => 'Dev Back Senior',
+                        'complexity'   => 'L',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'core/SiegeWeaponsEngine.php / migrations SQL'
+                    ],
+                    [
+                        'task_id'      => 3,
+                        'role_code'    => 'frontend',
+                        'role_name'    => 'Développeur Front-End',
+                        'title'        => 'Interface de l\'Atelier Pyrotechnique dans la Grande Forge',
+                        'description'  => 'Créer l\'onglet dédié dans views/forge.php avec cartes d\'armes, temps restant et boutons de fabrication rapide.',
+                        'assignee'     => 'Dev Front',
+                        'complexity'   => 'M',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'views/forge.php / modal_craft_bomb.php'
+                    ],
+                    [
+                        'task_id'      => 4,
+                        'role_code'    => 'network',
+                        'role_name'    => 'Développeur Réseau & Infra',
+                        'title'        => 'File d\'attente de production de forge et synchronisation de stock',
+                        'description'  => 'Gérer le timer asynchrone de fin de coulée des bombes et l\'actualisation de l\'inventaire sans rechargement.',
+                        'assignee'     => 'Dev Réseau',
+                        'complexity'   => 'M',
+                        'status'       => 'todo',
+                        'deliverables' => 'core/CronEngine.php / Webhooks'
+                    ],
+                    [
+                        'task_id'      => 5,
+                        'role_code'    => 'artist_2d',
+                        'role_name'    => 'Game Artist 2D & Ukiyo-e',
+                        'title'        => 'Icônes ukiyo-e de la Grenade Hōroku-hiya et de la Bombe Teppō-dama',
+                        'description'  => 'Créer les assets haute définition des bombes sphériques en fonte cerclée de bronze et grenades de céramique.',
+                        'assignee'     => 'Concept Artist 2D',
+                        'complexity'   => 'M',
+                        'status'       => 'done',
+                        'deliverables' => 'public/assets/items/horoku_grenade.png, public/assets/items/siege_bomb.png'
+                    ],
+                    [
+                        'task_id'      => 6,
+                        'role_code'    => 'artist_env',
+                        'role_name'    => 'Environment & Isometric Artist',
+                        'title'        => 'Modélisation des fonderies de bombes en activité dans la Grande Forge',
+                        'description'  => 'Illustrer les cheminées crachant des étincelles, les moules en sable et les piles de boulets explosifs.',
+                        'assignee'     => 'Isometric Artist',
+                        'complexity'   => 'M',
+                        'status'       => 'todo',
+                        'deliverables' => 'public/assets/buildings/forge_pyro_active.png'
+                    ],
+                    [
+                        'task_id'      => 7,
+                        'role_code'    => 'sound',
+                        'role_name'    => 'Sound Designer & Compositeur',
+                        'title'        => 'SFX de martelage d\'enclume, coulée de fonte liquide et sifflement de mèche',
+                        'description'  => 'Enregistrer les ambiances immersives de forge d\'artillerie et les bruits de chargement de barils.',
+                        'assignee'     => 'Sound Designer',
+                        'complexity'   => 'S',
+                        'status'       => 'done',
+                        'deliverables' => 'public/assets/sounds/forge_bomb_craft.mp3'
+                    ],
+                    [
+                        'task_id'      => 8,
+                        'role_code'    => 'narrative',
+                        'role_name'    => 'Narrative Designer & Scénariste',
+                        'title'        => 'Fiches descriptives et contextes d\'utilisation des engins pyrotechniques',
+                        'description'  => 'Rédiger les infobulles tactiques expliquant la distinction entre grenades (anti-troupe) et bombes (anti-murs).',
+                        'assignee'     => 'Scénariste Principal',
+                        'complexity'   => 'S',
+                        'status'       => 'done',
+                        'deliverables' => 'core/ItemDescriptions.php'
+                    ],
+                    [
+                        'task_id'      => 9,
+                        'role_code'    => 'qa',
+                        'role_name'    => 'QA Tester & Recetteur',
+                        'title'        => 'Banc de tests unitaires sur les recettes et déductions de stocks rares',
+                        'description'  => 'Valider la déduction exacte des ressources (Nitrate, Soufre, Charbon, Satetsu, Or) et l\'annulation sécurisée.',
+                        'assignee'     => 'QA Automation Engineer',
+                        'complexity'   => 'M',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'tests/test_forge_pyro_craft.php'
+                    ],
+                    [
+                        'task_id'      => 10,
+                        'role_code'    => 'producer',
+                        'role_name'    => 'Producteur Live Ops & Économiste',
+                        'title'        => 'Surveillance des volumes de production avant le grand week-end de siège',
+                        'description'  => 'Analyser le stock moyen de bombes par clan pour s\'assurer que les alliances disposent de l\'arsenal nécessaire.',
+                        'assignee'     => 'Live Ops Producer',
+                        'complexity'   => 'S',
+                        'status'       => 'todo',
+                        'deliverables' => 'Tableau de bord de monitoring Game Studio'
+                    ]
+                ]
+            ],
+            // ÉVÉNEMENT SPÉCIAL 4 - LA GUERRE DES 12 CHÂTEAUX (ACTE I)
+            [
+                'slug'              => 'event-decret-12-chateaux',
+                'type'              => 'special_event',
+                'step_number'       => null,
+                'title'             => 'Le Décret des Douze Châteaux (Genson Jūni Tenshu)',
+                'subtitle'          => 'Événement Mondial : L\'Éveil des 12 Châteaux Authentiques et l\'Alchimie du Kayaku',
+                'era'               => '1582 - Apogée du Sengoku Jidai',
+                'synopsis'          => 'Le Premier Shōgun fit jadis sceller les douze reliques impériales dans les 12 Châteaux Authentiques (Himeji, Matsumoto, Hikone, etc.). Un décret impérial mondial proclame l\'ouverture de la Grande Guerre : pour prétendre au Shōgunat absolu, toute alliance doit conquérir au moins 2 de ces 12 forteresses imprenables. Face à leurs remparts cyclopéens, les katanas sont impuissants. L\'Académie des Savoirs dévoile les premiers manuscrits secrets de la Poudre Noire (Kayaku).',
+                'speaker_name'      => 'Takayama Kagetora',
+                'speaker_role'      => 'Grand Maître Artificier du Hōjutsu (Artillerie & Poudre Noire)',
+                'speaker_avatar'    => '🧨',
+                'dialogue'          => 'Noble Daimyō ! Le décret impérial a retenti : seule l\'Alliance qui fera tomber au moins deux des Douze Châteaux Authentiques réunira les Sceaux sacrés pour ériger le Dōjō Impérial et sceller le destin du Japon ! Mais vos katanas se briseront sur les pierres millénaires de Himeji et de Matsumoto. Ouvrez sans délai votre Académie des Savoirs et poussez la recherche de la Poudre Noire (Kayaku) jusqu\'au Niveau 20 ! Le feu tonnerre sera notre seule clé.',
+                'trigger_condition' => 'Déclenchement mondial de la Guerre des 12 Châteaux (Feature Flag Mondial / Live Ops)',
+                'rewards_summary'   => 'Éveil des 12 Châteaux sur la Carte du Monde, Déblocage de la recherche « Poudre Noire (Kayaku) » dans l\'Académie des Savoirs, 500 Salpêtre (Nitrate), 300 Soufre, 500 Charbon',
+                'choices'           => [
+                    ['label' => '🧨 Ouvrir l\'Académie & chercher le Kayaku', 'outcome' => 'Apparition de la Poudre Noire dans l\'Académie (+500 Salpêtre, +300 Soufre)', 'style' => 'crimson'],
+                    ['label' => '🗺️ Dépêcher des éclaireurs vers les 12 Châteaux', 'outcome' => 'Révélation des coordonnées cartographiques des 12 Châteaux Authentiques', 'style' => 'warning']
+                ],
+                'status'            => 'in_production',
+                'created_by'        => 1,
+                'tasks'             => [
+                    [
+                        'task_id'      => 1,
+                        'role_code'    => 'level_designer',
+                        'role_name'    => 'Game & Level Designer',
+                        'title'        => 'Mapping cartographique des 12 Châteaux Authentiques & équilibrage des PV',
+                        'description'  => 'Définir l\'emplacement sur la World Map des 12 forteresses historiques et leurs statistiques défensives (2,5M PV, 1M remparts).',
+                        'assignee'     => 'Lead Level Designer',
+                        'complexity'   => 'L',
+                        'status'       => 'done',
+                        'deliverables' => 'docs/gdd_bataille_12_chateaux.md (Section V)'
+                    ],
+                    [
+                        'task_id'      => 2,
+                        'role_code'    => 'backend',
+                        'role_name'    => 'Développeur Back-End',
+                        'title'        => 'Table SQL des 12 Châteaux et logique d\'apparition dynamique de black_powder',
+                        'description'  => 'Créer la table authentic_castles avec état de siège et brancher l\'activation conditionnelle de la techno dans ResearchEngine.',
+                        'assignee'     => 'Dev Back Senior',
+                        'complexity'   => 'L',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'core/AuthenticCastlesEngine.php / migration SQL'
+                    ],
+                    [
+                        'task_id'      => 3,
+                        'role_code'    => 'frontend',
+                        'role_name'    => 'Développeur Front-End',
+                        'title'        => 'Bannière d\'alerte mondiale et pins de forteresses sur la World Map',
+                        'description'  => 'Intégrer les pins dorés des 12 Châteaux sur la carte du monde avec barres de PV et nom du château historique.',
+                        'assignee'     => 'Dev Front',
+                        'complexity'   => 'M',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'views/world_map.php / partials/header.php'
+                    ],
+                    [
+                        'task_id'      => 4,
+                        'role_code'    => 'network',
+                        'role_name'    => 'Développeur Réseau & Infra',
+                        'title'        => 'Broadcast mondial Websocket de proclamation de la Guerre des 12 Châteaux',
+                        'description'  => 'Diffuser la sonnerie du décret impérial à l\'ensemble des joueurs connectés simultanément.',
+                        'assignee'     => 'Dev Réseau',
+                        'complexity'   => 'M',
+                        'status'       => 'todo',
+                        'deliverables' => 'core/SocketServer.php'
+                    ],
+                    [
+                        'task_id'      => 5,
+                        'role_code'    => 'artist_2d',
+                        'role_name'    => 'Game Artist 2D & Ukiyo-e',
+                        'title'        => 'Portrait ukiyo-e du Maître Artificier Takayama Kagetora',
+                        'description'  => 'Peindre le portrait de Takayama Kagetora avec tenue de canonnier féodal, lunettes d\'artificier et mèche allumée.',
+                        'assignee'     => 'Character Artist',
+                        'complexity'   => 'M',
+                        'status'       => 'done',
+                        'deliverables' => 'public/assets/characters/takayama_kagetora.jpg'
+                    ],
+                    [
+                        'task_id'      => 6,
+                        'role_code'    => 'artist_env',
+                        'role_name'    => 'Environment & Isometric Artist',
+                        'title'        => 'Illustrations isométriques des 12 Châteaux Historiques (Himeji, Matsumoto, etc.)',
+                        'description'  => 'Dessiner les 12 donjons authentiques avec leurs spécificités architecturales (Himeji blanc, Matsumoto noir).',
+                        'assignee'     => 'Isometric Artist',
+                        'complexity'   => 'XL',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'public/assets/castles/himeji.png, public/assets/castles/matsumoto.png...'
+                    ],
+                    [
+                        'task_id'      => 7,
+                        'role_code'    => 'sound',
+                        'role_name'    => 'Sound Designer & Compositeur',
+                        'title'        => 'Thème musical martial de proclamation du Décret Impérial',
+                        'description'  => 'Composer l\'introduction dramatique avec taikos lourds, cornes de guerre et clameur de cour impériale.',
+                        'assignee'     => 'Sound Designer',
+                        'complexity'   => 'M',
+                        'status'       => 'done',
+                        'deliverables' => 'public/assets/music/decret_12_chateaux.mp3'
+                    ],
+                    [
+                        'task_id'      => 8,
+                        'role_code'    => 'narrative',
+                        'role_name'    => 'Narrative Designer & Scénariste',
+                        'title'        => 'Écriture du Décret des Douze Sceaux et fiches historiques des 12 forteresses',
+                        'description'  => 'Rédiger les notices historiques authentiques de chaque forteresse du patrimoine national japonais.',
+                        'assignee'     => 'Scénariste Principal',
+                        'complexity'   => 'M',
+                        'status'       => 'done',
+                        'deliverables' => 'docs/lore_12_chateaux_authentiques.md'
+                    ],
+                    [
+                        'task_id'      => 9,
+                        'role_code'    => 'qa',
+                        'role_name'    => 'QA Tester & Recetteur',
+                        'title'        => 'Tests de non-régression sur l\'éveil des châteaux et l\'ouverture de la recherche',
+                        'description'  => 'Valider que la techno Kayaku apparaît correctement dès l\'activation du feature flag sans corrompre les arbres existants.',
+                        'assignee'     => 'QA Lead',
+                        'complexity'   => 'M',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'tests/test_12_castles_activation.php'
+                    ],
+                    [
+                        'task_id'      => 10,
+                        'role_code'    => 'producer',
+                        'role_name'    => 'Producteur Live Ops & Économiste',
+                        'title'        => 'Cadrage de l\'événement mondial et synchronisation des communications communautaires',
+                        'description'  => 'Planifier l\'annonce Discord, l\'e-mail aux joueurs et la durée de la saison de siège des 12 châteaux.',
+                        'assignee'     => 'Live Ops Producer',
+                        'complexity'   => 'S',
+                        'status'       => 'todo',
+                        'deliverables' => 'Plan de release Live Ops 2.0'
+                    ]
+                ]
+            ],
+            // ÉVÉNEMENT SPÉCIAL 5 - LA GUERRE DES 12 CHÂTEAUX (ACTE IV)
+            [
+                'slug'              => 'event-deux-piliers-alliance',
+                'type'              => 'special_event',
+                'step_number'       => null,
+                'title'             => 'Les Deux Piliers de l\'Alliance : Conquête des Châteaux Authentiques',
+                'subtitle'          => 'Événement d\'Alliance Majeur : Règle impériale des 2 Châteaux et Sceaux Fondateurs',
+                'era'               => '1585 - La Guerre des Reliques',
+                'synopsis'          => 'Après des semaines de bombardements coordonnés en alliance où les grenades ont balayé les garnisons et les bombes ont éventré les murailles, l\'Alliance s\'empare d\'au moins 2 Châteaux Authentiques parmi les 12 du monde. Les deux premiers Sceaux Impériaux s\'illuminent, accordant à l\'Alliance le droit sacré de lancer la construction du Dōjō Impérial (Kōshitsu Dōjō).',
+                'speaker_name'      => 'Takayama Kagetora',
+                'speaker_role'      => 'Grand Maître Artificier du Hōjutsu',
+                'speaker_avatar'    => '🧨',
+                'dialogue'          => 'Hourra pour notre Alliance ! Les bannières ennemies sont tombées à Himeji et Matsumoto ! Nous détenons désormais les Deux Piliers sacrés du Shōgunat. Mais prenez garde : si nos rivaux coalisés nous reprennent une forteresse et nous font chuter sous le seuil des 2 châteaux, le chantier céleste sera gelé ! Protégez vos bastions et ordonnez la pose de la Première Pierre du Dōjō Impérial !',
+                'trigger_condition' => 'L\'Alliance du joueur contrôle au minimum 2 Châteaux Authentiques parmi les 12 du monde (castles_owned >= 2)',
+                'rewards_summary'   => 'Attribution des 2 Sceaux Impériaux Fondateurs, Déblocage du chantier suprême du « Dōjō Impérial (Kōshitsu Dōjō) », Bannière des Conquérants de Châteaux, +20% Prestige Mondial d\'Alliance',
+                'choices'           => [
+                    ['label' => '⛩️ Poser la Première Pierre du Dōjō Impérial', 'outcome' => 'Ouverture du Chantier Monumental du Dōjō Impérial pour toute l\'Alliance', 'style' => 'warning'],
+                    ['label' => '🏯 Fortifier en urgence les deux forteresses conquises', 'outcome' => 'Régénération immédiate de 500 000 PV de remparts et garnison renforcée', 'style' => 'emerald']
+                ],
+                'status'            => 'in_production',
+                'created_by'        => 1,
+                'tasks'             => [
+                    [
+                        'task_id'      => 1,
+                        'role_code'    => 'level_designer',
+                        'role_name'    => 'Game & Level Designer',
+                        'title'        => 'Règle stricte des 2 Châteaux minimum et mécanique de gel / dégel du Dōjō',
+                        'description'  => 'Définir l\'état actif/gelé du chantier du Dōjō en fonction du count(castles_owned) et le bonus de +15% vitesse par château supplémentaire.',
+                        'assignee'     => 'Alliance & System Designer',
+                        'complexity'   => 'L',
+                        'status'       => 'done',
+                        'deliverables' => 'docs/gdd_bataille_12_chateaux.md (Section VI)'
+                    ],
+                    [
+                        'task_id'      => 2,
+                        'role_code'    => 'backend',
+                        'role_name'    => 'Développeur Back-End',
+                        'title'        => 'Trigger automatique de déblocage / suspension du Dōjō selon le compteur de châteaux',
+                        'description'  => 'Développer la vérification transactionnelle à chaque capture/perte de forteresse pour mettre à jour alliance_dojo_status.',
+                        'assignee'     => 'Dev Back Senior',
+                        'complexity'   => 'L',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'core/AllianceCastleEngine.php'
+                    ],
+                    [
+                        'task_id'      => 3,
+                        'role_code'    => 'frontend',
+                        'role_name'    => 'Développeur Front-End',
+                        'title'        => 'Tableau de bord de l\'Alliance avec Sceaux Fondateurs et compteur de châteaux',
+                        'description'  => 'Intégrer dans views/alliance.php le composant affichant les châteaux contrôlés (ex: 2/12) et l\'état du chantier du Dōjō.',
+                        'assignee'     => 'Dev Front',
+                        'complexity'   => 'M',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'views/alliance.php / partials/alliance_castles_badge.php'
+                    ],
+                    [
+                        'task_id'      => 4,
+                        'role_code'    => 'network',
+                        'role_name'    => 'Développeur Réseau & Infra',
+                        'title'        => 'Synchronisation des sièges coordonnés et calcul de résonance d\'attaque',
+                        'description'  => 'Gérer le moteur d\'impact synchronisé des flottes de bombardement arrivant dans une même fenêtre de 60 secondes.',
+                        'assignee'     => 'Dev Réseau',
+                        'complexity'   => 'XL',
+                        'status'       => 'todo',
+                        'deliverables' => 'core/CombatSyncEngine.php'
+                    ],
+                    [
+                        'task_id'      => 5,
+                        'role_code'    => 'artist_2d',
+                        'role_name'    => 'Game Artist 2D & Ukiyo-e',
+                        'title'        => 'Estampes des Sceaux Fondateurs (Pilier de la Terre & Pilier du Ciel)',
+                        'description'  => 'Illustrer les 2 sceaux impériaux gravés d\'or et d\'encre rouge vermillon symbolisant la double souveraineté.',
+                        'assignee'     => 'Concept Artist 2D',
+                        'complexity'   => 'M',
+                        'status'       => 'done',
+                        'deliverables' => 'public/assets/items/seal_earth.png, public/assets/items/seal_sky.png'
+                    ],
+                    [
+                        'task_id'      => 6,
+                        'role_code'    => 'artist_env',
+                        'role_name'    => 'Environment & Isometric Artist',
+                        'title'        => 'État visuel de forteresse conquise avec bannières de l\'alliance victorieuse',
+                        'description'  => 'Créer les variations de remparts avec étendards flottants personnalisables aux couleurs du clan vainqueur.',
+                        'assignee'     => 'Isometric Artist',
+                        'complexity'   => 'M',
+                        'status'       => 'todo',
+                        'deliverables' => 'public/assets/castles/captured_variant.png'
+                    ],
+                    [
+                        'task_id'      => 7,
+                        'role_code'    => 'sound',
+                        'role_name'    => 'Sound Designer & Compositeur',
+                        'title'        => 'Sonnerie triomphale d\'alliance et cri de guerre de victoire',
+                        'description'  => 'Produire le jingle sonore retentissant lorsqu\'une forteresse est capturée et que le 2e sceau est validé.',
+                        'assignee'     => 'Sound Designer',
+                        'complexity'   => 'S',
+                        'status'       => 'done',
+                        'deliverables' => 'public/assets/sounds/castle_capture_triumph.mp3'
+                    ],
+                    [
+                        'task_id'      => 8,
+                        'role_code'    => 'narrative',
+                        'role_name'    => 'Narrative Designer & Scénariste',
+                        'title'        => 'Chroniques des prises de châteaux et serment de bâtisseurs du Dōjō',
+                        'description'  => 'Rédiger les messages d\'éloge impérial envoyés à tous les membres de l\'alliance à la capture du 2e château.',
+                        'assignee'     => 'Scénariste Principal',
+                        'complexity'   => 'M',
+                        'status'       => 'done',
+                        'deliverables' => 'docs/chroniques_siege_deux_chateaux.md'
+                    ],
+                    [
+                        'task_id'      => 9,
+                        'role_code'    => 'qa',
+                        'role_name'    => 'QA Tester & Recetteur',
+                        'title'        => 'Tests exhaustifs de la règle des 2 châteaux : gel immédiat si perte du 2e',
+                        'description'  => 'Simuler la perte d\'un château sous attaque ennemie et vérifier que la construction du Dōjō est immédiatement suspendue.',
+                        'assignee'     => 'QA Lead',
+                        'complexity'   => 'L',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'tests/test_two_castles_freeze_logic.php'
+                    ],
+                    [
+                        'task_id'      => 10,
+                        'role_code'    => 'producer',
+                        'role_name'    => 'Producteur Live Ops & Économiste',
+                        'title'        => 'Analyse de la répartition géopolitique des châteaux entre les alliances majeures',
+                        'description'  => 'Vérifier qu\'aucune alliance ne monopolise plus de 4 châteaux sans coalition adverse pour préserver la dynamique compétitive.',
+                        'assignee'     => 'Lead Game Economist',
+                        'complexity'   => 'S',
+                        'status'       => 'todo',
+                        'deliverables' => 'Rapport géopolitique Live Ops'
+                    ]
+                ]
+            ],
+            // ÉVÉNEMENT SPÉCIAL 6 - LA GUERRE DES 12 CHÂTEAUX (ACTE V - FIN DU JEU)
+            [
+                'slug'              => 'event-apotheose-dojo-imperial',
+                'type'              => 'special_event',
+                'step_number'       => null,
+                'title'             => 'L\'Apothéose du Dōjō Impérial : Le Point Culminant de Fin de Partie',
+                'subtitle'          => 'Événement Ultime : Achèvement du Niveau 10 du Dōjō Impérial & Victoire du Shōgunat',
+                'era'               => '1588 - L\'Ère de l\'Harmonie Impériale (Fin du Jeu)',
+                'synopsis'          => 'Mobilisant des millions de troncs de cèdres, de pierres de granit, de poutres de charpente, de tonnes d\'acier, de barils de poudre et de kobans d\'or offerts par tous les membres de l\'Alliance, le Dōjō Impérial atteint son 10e et dernier niveau. Maintenu sous la garde indéfectible des 2 Châteaux Authentiques minimum, le sanctuaire suprême s\'illumine. L\'ère des guerres s\'achève : l\'Alliance est proclamée Maîtresse Suprême du Japon et entre vivante au Panthéon de l\'Histoire.',
+                'speaker_name'      => 'Maître de la Sagesse (Chie no Sensei)',
+                'speaker_role'      => 'Grand Maître Spirituel & Messager de l\'Empereur',
+                'speaker_avatar'    => '🏯',
+                'dialogue'          => 'Les cloches sacrées résonnent d\'Edo jusqu\'à Kyōto ! Regardez le Dōjō Impérial s\'élever au-dessus des nuages, reflet parfait de l\'honneur, de la ruse tactique et de l\'union fraternelle de votre Alliance. Les Douze Châteaux se prosternent devant vos deux bannières victorieuses. Par décret du Trône Impérial, votre Alliance est sacrée Gardienne de l\'Archipel (Seii Taishōgun). Votre légende est gravée dans l\'or pour l\'éternité !',
+                'trigger_condition' => 'Achèvement du Niveau 10 du Dōjō Impérial par l\'Alliance + Maintien d\'au moins 2 Châteaux Authentiques',
+                'rewards_summary'   => 'Victoire Finale de la Partie d\'OpenShogun, Titre Suprême : « Seii Taishōgun & Gardiens du Dōjō Impérial », Inscription au Panthéon des Vainqueurs, Aura Dorée Mondiale et Relique d\'Or Éternelle',
+                'choices'           => [
+                    ['label' => '👑 Proclamer l\'Avènement du Nouveau Shōgunat', 'outcome' => 'Déclenchement du Sacre Mondial & Entrée Triomphale au Panthéon d\'OpenShogun', 'style' => 'warning'],
+                    ['label' => '🎌 Graver les noms de tous les membres de l\'Alliance', 'outcome' => 'Palmarès d\'Honneur avec distribution des Reliques d\'Or Impériales à tous les frères d\'armes', 'style' => 'emerald']
+                ],
+                'status'            => 'in_production',
+                'created_by'        => 1,
+                'tasks'             => [
+                    [
+                        'task_id'      => 1,
+                        'role_code'    => 'level_designer',
+                        'role_name'    => 'Game & Level Designer',
+                        'title'        => 'Équilibrage des 10 paliers de construction du Dōjō Impérial et conditions de victoire',
+                        'description'  => 'Définir les coûts colossaux de chaque palier (Poutres, Granit, Acier, Or, Honneur) et les conditions strictes de victoire finale.',
+                        'assignee'     => 'Lead Game Designer',
+                        'complexity'   => 'XL',
+                        'status'       => 'done',
+                        'deliverables' => 'docs/gdd_bataille_12_chateaux.md (Section VI)'
+                    ],
+                    [
+                        'task_id'      => 2,
+                        'role_code'    => 'backend',
+                        'role_name'    => 'Développeur Back-End',
+                        'title'        => 'Routine de Fin de Jeu : détection du Niveau 10, gel du monde et Panthéon SQL',
+                        'description'  => 'Développer le script transactionnel de couronnement mondial, gel des actions hostiles et enregistrement de l\'alliance au Panthéon.',
+                        'assignee'     => 'Lead Dev Back',
+                        'complexity'   => 'XL',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'core/EndGameEngine.php / core/PantheonEngine.php'
+                    ],
+                    [
+                        'task_id'      => 3,
+                        'role_code'    => 'frontend',
+                        'role_name'    => 'Développeur Front-End',
+                        'title'        => 'Écran d\'apothéose mondiale de fin de jeu et vue monumentale du Dōjō Impérial',
+                        'description'  => 'Concevoir l\'écran de couronnement avec feux d\'artifice, bannière impériale géante, liste des vainqueurs et reliques dorées.',
+                        'assignee'     => 'Lead Dev Front',
+                        'complexity'   => 'L',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'views/endgame_apotheose.php / views/pantheon.php'
+                    ],
+                    [
+                        'task_id'      => 4,
+                        'role_code'    => 'network',
+                        'role_name'    => 'Développeur Réseau & Infra',
+                        'title'        => 'Verrouillage sécurisé des serveurs et broadcast mondial de victoire',
+                        'description'  => 'Assurer la diffusion instantanée de l\'écran de victoire à 100% des joueurs connectés avec bascule en mode célébration.',
+                        'assignee'     => 'Dev Réseau & SecOps',
+                        'complexity'   => 'M',
+                        'status'       => 'todo',
+                        'deliverables' => 'core/ServerLockdownService.php'
+                    ],
+                    [
+                        'task_id'      => 5,
+                        'role_code'    => 'artist_2d',
+                        'role_name'    => 'Game Artist 2D & Ukiyo-e',
+                        'title'        => 'Grande fresque triomphale d\'apothéose du Dōjō Impérial sous la pleine lune',
+                        'description'  => 'Peindre l\'illustration finale de fin de jeu au format panoramique 16:9 haute résolution pour le Panthéon.',
+                        'assignee'     => 'Lead Concept Artist',
+                        'complexity'   => 'XL',
+                        'status'       => 'done',
+                        'deliverables' => 'public/assets/illustrations/imperial_dojo_apotheose.jpg'
+                    ],
+                    [
+                        'task_id'      => 6,
+                        'role_code'    => 'artist_env',
+                        'role_name'    => 'Environment & Isometric Artist',
+                        'title'        => 'Modélisation des 10 stades d\'élévation isométrique du Dōjō Impérial',
+                        'description'  => 'Modéliser les 10 rendus isométriques du sanctuaire, depuis les fondations cyclopéennes jusqu\'au dôme céleste laqué d\'or.',
+                        'assignee'     => 'Lead 3D/Isometric Artist',
+                        'complexity'   => 'XL',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'public/assets/buildings/dojo_tier1.png... dojo_tier10.png'
+                    ],
+                    [
+                        'task_id'      => 7,
+                        'role_code'    => 'sound',
+                        'role_name'    => 'Sound Designer & Compositeur',
+                        'title'        => 'Hymne triomphal impérial pour l\'Apothéose de fin de jeu',
+                        'description'  => 'Composer la symphonie féodale finale avec grand ensemble de taiko, koto céleste, flûte shakuhachi et cloches shinto.',
+                        'assignee'     => 'Compositeur Audio',
+                        'complexity'   => 'L',
+                        'status'       => 'done',
+                        'deliverables' => 'public/assets/music/apotheose_victory_theme.mp3'
+                    ],
+                    [
+                        'task_id'      => 8,
+                        'role_code'    => 'narrative',
+                        'role_name'    => 'Narrative Designer & Scénariste',
+                        'title'        => 'Texte solennel du Sacre Impérial et éloge des héros du serveur',
+                        'description'  => 'Rédiger le parchemin final proclamant la dynastie victorieuse et clôturant l\'arc narratif d\'OpenShogun.',
+                        'assignee'     => 'Lead Narrative Designer',
+                        'complexity'   => 'M',
+                        'status'       => 'done',
+                        'deliverables' => 'docs/epilogue_sacre_imperial.md'
+                    ],
+                    [
+                        'task_id'      => 9,
+                        'role_code'    => 'qa',
+                        'role_name'    => 'QA Tester & Recetteur',
+                        'title'        => 'Recette intégrale du cycle de victoire et persistance du Panthéon SQL',
+                        'description'  => 'Tester le déclenchement de la victoire sur serveur de staging, vérifier l\'exactitude des récompenses et la non-régression.',
+                        'assignee'     => 'QA Lead',
+                        'complexity'   => 'L',
+                        'status'       => 'in_progress',
+                        'deliverables' => 'tests/test_endgame_victory_flow.php'
+                    ],
+                    [
+                        'task_id'      => 10,
+                        'role_code'    => 'producer',
+                        'role_name'    => 'Producteur Live Ops & Économiste',
+                        'title'        => 'Plan de clôture de saison, remise des prix et teaser de l\'Ère suivante',
+                        'description'  => 'Organiser la cérémonie de clôture du serveur, la remise des badges permanents et le planning du reset.',
+                        'assignee'     => 'Executive Producer',
+                        'complexity'   => 'M',
+                        'status'       => 'todo',
+                        'deliverables' => 'Feuille de route de fin de saison & Reset'
+                    ]
+                ]
             ]
         ];
     }
