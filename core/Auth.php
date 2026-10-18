@@ -15,6 +15,13 @@ class Auth {
 
     public static function initSession(): void {
         if (!headers_sent() && session_status() === PHP_SESSION_NONE) {
+            if (ini_get('session.cookie_path') !== '/') {
+                @session_set_cookie_params([
+                    'path' => '/',
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ]);
+            }
             session_start();
         }
     }
@@ -291,6 +298,24 @@ class Auth {
     public static function isAdmin(?array $user = null): bool {
         if ($user === null) {
             $user = self::getCurrentUser();
+            if ($user === null && self::check()) {
+                try {
+                    $db = Database::getConnection();
+                    $stmt = $db->prepare("SELECT is_admin, role FROM users WHERE id = ?");
+                    $stmt->execute([self::id()]);
+                    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($row) {
+                        return ((int)($row['is_admin'] ?? 0) === 1 || ($row['role'] ?? '') === 'admin');
+                    }
+                } catch (Exception $e) {
+                    try {
+                        $db = Database::getConnection();
+                        $stmt = $db->prepare("SELECT is_admin FROM users WHERE id = ?");
+                        $stmt->execute([self::id()]);
+                        return (int)$stmt->fetchColumn() === 1;
+                    } catch (Exception $e2) {}
+                }
+            }
         }
         return !empty($user) && ((int)($user['is_admin'] ?? 0) === 1 || ($user['role'] ?? '') === 'admin');
     }

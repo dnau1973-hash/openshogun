@@ -309,6 +309,14 @@ function clearUpdateLogs() {
     }
 }
 
+function getAdminApiUrl(queryString = '') {
+    const path = window.location.pathname;
+    let base = path.substring(0, path.lastIndexOf('/') + 1);
+    if (!base.endsWith('/')) base += '/';
+    const cleanQuery = queryString ? (queryString.startsWith('?') ? queryString : '?' + queryString) : '';
+    return base + 'api/admin.php' + cleanQuery;
+}
+
 // 1. Vérification des mises à jour sur GitHub
 async function checkGitHubUpdates(showNotification = true) {
     const btnCheck = document.getElementById('btn-check-updates');
@@ -326,11 +334,19 @@ async function checkGitHubUpdates(showNotification = true) {
     logToConsole("Interrogation de l'API GitHub en cours...");
 
     try {
-        const response = await fetch('/api/admin.php?action=check_github_updates');
+        const response = await fetch(getAdminApiUrl('action=check_github_updates'), {
+            credentials: 'same-origin'
+        });
+
+        let data = null;
+        try {
+            data = await response.json();
+        } catch (_) {}
+
         if (!response.ok) {
-            throw new Error(`Erreur serveur HTTP ${response.status}`);
+            const serverMsg = data && data.error ? data.error : `Erreur serveur HTTP ${response.status}`;
+            throw new Error(serverMsg);
         }
-        const data = await response.json();
 
         if (!data || !data.success) {
             const errMsg = (data && data.error) ? data.error : "Impossible de contacter l'API GitHub.";
@@ -456,16 +472,21 @@ async function executeInstallGitHubUpdate() {
         formData.append('action', 'install_github_update');
         formData.append('auto_stash', autoStash ? '1' : '0');
 
-        const response = await fetch('/api/admin.php', {
+        const response = await fetch(getAdminApiUrl(), {
             method: 'POST',
-            body: formData
+            body: formData,
+            credentials: 'same-origin'
         });
 
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP ${response.status}`);
-        }
+        let data = null;
+        try {
+            data = await response.json();
+        } catch (_) {}
 
-        const data = await response.json();
+        if (!response.ok) {
+            const errText = data && (data.error || data.message) ? (data.error || data.message) : `Erreur HTTP ${response.status}`;
+            throw new Error(errText);
+        }
 
         if (data && Array.isArray(data.logs)) {
             data.logs.forEach(l => logToConsole(l));
@@ -502,14 +523,21 @@ async function saveGitHubSettings(event) {
     formData.append('action', 'save_github_settings');
 
     try {
-        const response = await fetch('/api/admin.php', {
+        const response = await fetch(getAdminApiUrl(), {
             method: 'POST',
-            body: formData
+            body: formData,
+            credentials: 'same-origin'
         });
+
+        let data = null;
+        try {
+            data = await response.json();
+        } catch (_) {}
+
         if (!response.ok) {
-            throw new Error(`Erreur HTTP ${response.status}`);
+            const errText = data && (data.error || data.message) ? (data.error || data.message) : `Erreur HTTP ${response.status}`;
+            throw new Error(errText);
         }
-        const data = await response.json();
 
         if (!data || !data.success) {
             throw new Error((data && data.error) ? data.error : "Erreur de sauvegarde.");

@@ -29,6 +29,23 @@ class GameStudioEngine {
      */
     public function isAuthorized(int $userId): bool {
         if ($userId <= 0) return false;
+        try {
+            $stmt = $this->db->prepare("SELECT is_admin, role FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $u = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($u && ((int)($u['is_admin'] ?? 0) === 1 || ($u['role'] ?? '') === 'admin')) {
+                return true;
+            }
+        } catch (Exception $e) {
+            try {
+                $stmt = $this->db->prepare("SELECT is_admin FROM users WHERE id = ?");
+                $stmt->execute([$userId]);
+                if ((int)$stmt->fetchColumn() === 1) {
+                    return true;
+                }
+            } catch (Exception $e2) {}
+        }
+
         $auth = new Auth();
         if ($auth->isAdmin()) return true;
         return $this->devEngine->isDevTeamMember($userId);

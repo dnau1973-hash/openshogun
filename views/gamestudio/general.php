@@ -488,6 +488,14 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'update
             }
         }
 
+        function getGeneralAdminApiUrl(queryString = '') {
+            const path = window.location.pathname;
+            let base = path.substring(0, path.lastIndexOf('/') + 1);
+            if (!base.endsWith('/')) base += '/';
+            const cleanQuery = queryString ? (queryString.startsWith('?') ? queryString : '?' + queryString) : '';
+            return base + 'api/admin.php' + cleanQuery;
+        }
+
         async function createDatabaseBackup() {
             const btn = document.getElementById('btnCreateBackup');
             const origHtml = btn ? btn.innerHTML : '';
@@ -505,7 +513,11 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'update
                     formData.append('custom_usb_path', customUsb);
                 }
 
-                const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+                const res = await fetch(getGeneralAdminApiUrl(), {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
                 const json = await res.json();
 
                 if (json.success) {
@@ -541,7 +553,9 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'update
             if (btn) btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i>Actualisation...`;
 
             try {
-                const res = await fetch('/api/admin.php?action=list_backups');
+                const res = await fetch(getGeneralAdminApiUrl('action=list_backups'), {
+                    credentials: 'same-origin'
+                });
                 const json = await res.json();
                 if (json.success) {
                     renderBackupSets(json.backups, json.usb_drives);
@@ -716,7 +730,11 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'update
                 formData.append('structure_file', currentRestoreContext.structureFile);
                 formData.append('data_file', currentRestoreContext.dataFile);
 
-                const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
+                const res = await fetch(getGeneralAdminApiUrl(), {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
                 const json = await res.json();
 
                 closeRestoreModal();

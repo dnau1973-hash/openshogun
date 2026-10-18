@@ -20,8 +20,8 @@ $gameStudioEngine = new GameStudioEngine();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 $userId = (int)Auth::id();
 
-$isAdmin = Auth::check() && $auth->isAdmin();
-$isStudioMember = Auth::check() && $gameStudioEngine->isAuthorized($userId);
+$isAdmin = Auth::check() && ($auth->isAdmin() || Auth::isAdmin());
+$isStudioMember = Auth::check() && ($isAdmin || $gameStudioEngine->isAuthorized($userId));
 $studioAllowedActions = [
     'backup_database', 'list_backups', 'restore_backup',
     'save_settings', 'spawn_spontaneous_village', 'run_bot_cycle',
@@ -32,7 +32,10 @@ $studioAllowedActions = [
 // 1. Vérification stricte des droits Administrateur ou Studio Habilité
 if (!$isAdmin && !($isStudioMember && in_array($action, $studioAllowedActions, true))) {
     http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'Accès restreint au Shogun et aux Administrateurs habilités.']);
+    $authError = !Auth::check() 
+        ? 'Session expirée ou non authentifiée. Veuillez vous reconnecter.' 
+        : 'Accès restreint au Shogun et aux Administrateurs habilités.';
+    echo json_encode(['success' => false, 'error' => $authError]);
     exit;
 }
 
@@ -476,6 +479,9 @@ try {
             }
 
             SlotPositionEngine::resetPositions($view);
+            echo json_encode(['success' => true, 'message' => "Positions réinitialisées avec succès."]);
+            break;
+
         // Vérifier les mises à jour GitHub
         case 'check_github_updates':
             require_once __DIR__ . '/../core/UpdateEngine.php';

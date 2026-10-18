@@ -528,10 +528,19 @@ class DevTeamEngine {
         if ($userId <= 0) return false;
         
         // Tout administrateur suprême est membre de droit
-        $stmtAdmin = $this->db->prepare("SELECT is_admin FROM users WHERE id = ?");
-        $stmtAdmin->execute([$userId]);
-        if ((int)$stmtAdmin->fetchColumn() === 1) {
-            return true;
+        try {
+            $stmtAdmin = $this->db->prepare("SELECT is_admin, role FROM users WHERE id = ?");
+            $stmtAdmin->execute([$userId]);
+            $u = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
+            if ($u && ((int)($u['is_admin'] ?? 0) === 1 || ($u['role'] ?? '') === 'admin')) {
+                return true;
+            }
+        } catch (Exception $e) {
+            $stmtAdmin = $this->db->prepare("SELECT is_admin FROM users WHERE id = ?");
+            $stmtAdmin->execute([$userId]);
+            if ((int)$stmtAdmin->fetchColumn() === 1) {
+                return true;
+            }
         }
 
         $stmt = $this->db->prepare("SELECT 1 FROM user_dev_roles WHERE user_id = ? LIMIT 1");

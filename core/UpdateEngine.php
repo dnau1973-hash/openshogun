@@ -31,8 +31,9 @@ class UpdateEngine {
      * Exécute une commande Git avec bypass safe.directory systématique
      */
     public function git(string $subCommand, array &$output = [], int &$ret = 0): string {
-        $safeOpt = "-c safe.directory=* -c safe.directory=" . escapeshellarg($this->basePath);
-        $cmd = "cd " . escapeshellarg($this->basePath) . " && git {$safeOpt} {$subCommand} 2>&1";
+        $safeOpt = "-c safe.directory=* -c safe.directory=" . escapeshellarg($this->basePath) . " -c core.askPass=echo";
+        $envPrefix = (DIRECTORY_SEPARATOR === '\\') ? "set GIT_TERMINAL_PROMPT=0 && " : "GIT_TERMINAL_PROMPT=0 ";
+        $cmd = "cd " . escapeshellarg($this->basePath) . " && {$envPrefix}git {$safeOpt} {$subCommand} 2>&1";
         $output = [];
         $ret = 0;
         exec($cmd, $output, $ret);
@@ -231,8 +232,10 @@ class UpdateEngine {
             return $result;
         }
 
-        // 3. Fallback en ligne de commande locale : git ls-remote avec token
-        $repoUrl = "https://{$this->token}@github.com/{$this->owner}/{$this->repo}.git";
+        // 3. Fallback en ligne de commande locale : git ls-remote avec token si disponible
+        $repoUrl = !empty($this->token) 
+            ? "https://{$this->token}@github.com/{$this->owner}/{$this->repo}.git"
+            : "https://github.com/{$this->owner}/{$this->repo}.git";
         $subCmd = "ls-remote " . escapeshellarg($repoUrl) . " " . escapeshellarg("refs/heads/{$this->branch}");
         $output = [];
         $ret = 0;
@@ -308,9 +311,11 @@ class UpdateEngine {
         // Tentative de sécurisation des permissions d'écriture Git avant le pull
         $this->ensureGitPermissions();
 
-        // Commande Git Pull avec Token sécurisé
+        // Commande Git Pull avec Token sécurisé si configuré
         $logs[] = "📥 [2/4] Récupération et fusion des modifications (git pull)...";
-        $pullUrl = "https://{$this->token}@github.com/{$this->owner}/{$this->repo}.git";
+        $pullUrl = !empty($this->token)
+            ? "https://{$this->token}@github.com/{$this->owner}/{$this->repo}.git"
+            : "https://github.com/{$this->owner}/{$this->repo}.git";
         $pullCmd = "pull " . escapeshellarg($pullUrl) . " " . escapeshellarg($this->branch);
 
         $pullOutput = [];
