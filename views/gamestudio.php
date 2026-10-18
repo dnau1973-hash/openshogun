@@ -224,6 +224,9 @@ if ($currentTab === 'dashboard') {
     // Exportation Markdown GDD en GET direct
     if (($_GET['action'] ?? '') === 'export_markdown') {
         $scId = (int)($_GET['scenario_id'] ?? 0);
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         header('Content-Type: text/plain; charset=UTF-8');
         echo $scenarioEngine->exportMarkdown($scId);
         exit;
@@ -574,7 +577,7 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             Gouvernance &amp; Opérations Live
                         </div>
                         <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'liveops_events' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=liveops_events">
-                            <i class="fa-solid fa-calendar-star text-warning"></i>
+                            <i class="fa-solid fa-calendar-check text-warning"></i>
                             <div>
                                 <div>Événements Live &amp; Saisons</div>
                                 <div class="small text-secondary">Planificateur d'événements, Boosts d'univers &amp; Quêtes</div>

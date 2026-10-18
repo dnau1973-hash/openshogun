@@ -201,7 +201,7 @@ class ScenarioEngine {
     /**
      * Génère la matrice standard des 10 tâches métiers pour un scénario donné
      */
-    public function generateDefaultTasks(string $type, string $title, ?int $stepNumber = null): array {
+    public function generateDefaultTasks(string $type, string $title, ?int $stepNumber = null, string $scenarioStatus = 'draft'): array {
         $tasks = [];
         $i = 1;
 
@@ -240,6 +240,18 @@ class ScenarioEngine {
                 default                                  => 'S'
             };
 
+            $taskStatus = match($scenarioStatus) {
+                'published'     => 'done',
+                'ready'         => in_array($roleKey, ['qa', 'producer'], true) ? 'in_progress' : 'done',
+                'in_production' => in_array($roleKey, ['narrative', 'level_designer', 'backend', 'artist_2d', 'sound'], true)
+                                    ? 'done'
+                                    : (in_array($roleKey, ['frontend', 'artist_env', 'network'], true) ? 'in_progress' : 'todo'),
+                'in_review'     => in_array($roleKey, ['narrative', 'level_designer', 'producer'], true)
+                                    ? 'done'
+                                    : (in_array($roleKey, ['artist_2d', 'backend'], true) ? 'in_progress' : 'todo'),
+                default         => ($roleKey === 'narrative') ? 'in_progress' : 'todo'
+            };
+
             $tasks[] = [
                 'task_id'      => $i++,
                 'role_code'    => $roleKey,
@@ -248,7 +260,7 @@ class ScenarioEngine {
                 'description'  => $desc,
                 'assignee'     => $roleDef['name'],
                 'complexity'   => $complexity,
-                'status'       => 'todo',
+                'status'       => $taskStatus,
                 'deliverables' => match($roleKey) {
                     'backend'   => 'core/ScenarioEngine.php / migrations SQL',
                     'frontend'  => 'views/partials/modal_scenario.php / CSS',
@@ -284,7 +296,7 @@ class ScenarioEngine {
 
         $tasks = !empty($sc['tasks']) && is_array($sc['tasks']) 
             ? $sc['tasks'] 
-            : $this->generateDefaultTasks($type, $title, $stepNumber);
+            : $this->generateDefaultTasks($type, $title, $stepNumber, $status);
 
         $tasksJson = json_encode($tasks, JSON_UNESCAPED_UNICODE);
 
@@ -311,11 +323,20 @@ class ScenarioEngine {
 
         // 2. Sauvegarde miroir dans le JSON
         $all = $this->loadFromJson();
-        if ($insertedId === 0) {
-            $maxId = 0;
-            foreach ($all as $item) {
-                if ((int)$item['id'] > $maxId) $maxId = (int)$item['id'];
+        $maxId = 0;
+        $existingSlugId = 0;
+        foreach ($all as $item) {
+            if ((int)$item['id'] > $maxId) {
+                $maxId = (int)$item['id'];
             }
+            if (($item['slug'] ?? '') === $slug) {
+                $existingSlugId = (int)$item['id'];
+            }
+        }
+
+        if ($existingSlugId > 0) {
+            $insertedId = $existingSlugId;
+        } elseif ($insertedId <= $maxId) {
             $insertedId = $maxId + 1;
         }
 
@@ -343,7 +364,7 @@ class ScenarioEngine {
         // Remplacement ou ajout
         $found = false;
         foreach ($all as $idx => $existingItem) {
-            if ($existingItem['id'] === $insertedId || $existingItem['slug'] === $slug) {
+            if ((int)$existingItem['id'] === $insertedId || ($existingItem['slug'] ?? '') === $slug) {
                 $all[$idx] = $record;
                 $found = true;
                 break;
@@ -699,6 +720,132 @@ class ScenarioEngine {
     }
 
     /**
+     * Calcule les métriques globales et séries graphiques sur un ensemble de scénarios
+     */
+    public function getGlobalStudioMetrics(array $scenarios): array {
+        $totalScenarios = count($scenarios);
+        $stepsCount = 0;
+        $eventsCount = 0;
+
+        $statusCounts = [
+            'draft'         => 0,
+            'in_review'     => 0,
+            'in_production' => 0,
+            'ready'         => 0,
+            'published'     => 0,
+            'archived'      => 0
+        ];
+
+        $taskStatusTotals = [
+            'done'        => 0,
+            'in_progress' => 0,
+            'todo'        => 0,
+            'blocked'     => 0,
+            'total'       => 0
+        ];
+
+        $complexityTotals = [
+            'S'  => 0,
+            'M'  => 0,
+            'L'  => 0,
+            'XL' => 0
+        ];
+
+        $byRole = [];
+        foreach (self::ROLES as $rCode => $rDef) {
+            $byRole[$rCode] = [
+                'code'        => $rCode,
+                'name'        => $rDef['name'],
+                'icon'        => $rDef['icon'],
+                'color'       => $rDef['color'],
+                'domain'      => $rDef['domain'],
+                'total'       => 0,
+                'done'        => 0,
+                'in_progress' => 0,
+                'todo'        => 0,
+                'blocked'     => 0,
+                'percent'     => 0
+            ];
+        }
+
+        foreach ($scenarios as $sc) {
+            if (($sc['type'] ?? 'step') === 'step') {
+                $stepsCount++;
+            } else {
+                $eventsCount++;
+            }
+
+            $scStatus = $sc['status'] ?? 'draft';
+            if (isset($statusCounts[$scStatus])) {
+                $statusCounts[$scStatus]++;
+            }
+
+            $tasks = $sc['tasks'] ?? [];
+            foreach ($tasks as $t) {
+                $taskStatusTotals['total']++;
+                $st = $t['status'] ?? 'todo';
+                if (isset($taskStatusTotals[$st])) {
+                    $taskStatusTotals[$st]++;
+                } else {
+                    $taskStatusTotals['todo']++;
+                }
+
+                $comp = strtoupper((string)($t['complexity'] ?? 'M'));
+                if (isset($complexityTotals[$comp])) {
+                    $complexityTotals[$comp]++;
+                } else {
+                    $complexityTotals['M']++;
+                }
+
+                $rCode = $t['role_code'] ?? 'level_designer';
+                if (!isset($byRole[$rCode])) {
+                    $byRole[$rCode] = [
+                        'code'        => $rCode,
+                        'name'        => $t['role_name'] ?? 'Autre Métier',
+                        'icon'        => 'fa-gear',
+                        'color'       => 'secondary',
+                        'domain'      => 'Spécialité',
+                        'total'       => 0,
+                        'done'        => 0,
+                        'in_progress' => 0,
+                        'todo'        => 0,
+                        'blocked'     => 0,
+                        'percent'     => 0
+                    ];
+                }
+                $byRole[$rCode]['total']++;
+                if (isset($byRole[$rCode][$st])) {
+                    $byRole[$rCode][$st]++;
+                } else {
+                    $byRole[$rCode]['todo']++;
+                }
+            }
+        }
+
+        foreach ($byRole as $rCode => &$rStat) {
+            if ($rStat['total'] > 0) {
+                $rStat['percent'] = (int)round(($rStat['done'] / $rStat['total']) * 100);
+            }
+        }
+        unset($rStat);
+
+        $globalPercent = ($taskStatusTotals['total'] > 0)
+            ? (int)round(($taskStatusTotals['done'] / $taskStatusTotals['total']) * 100)
+            : 0;
+
+        return [
+            'total_scenarios' => $totalScenarios,
+            'steps_count'     => $stepsCount,
+            'events_count'    => $eventsCount,
+            'scenario_status' => $statusCounts,
+            'tasks_totals'    => $taskStatusTotals,
+            'complexity'      => $complexityTotals,
+            'by_role'         => $byRole,
+            'global_percent'  => $globalPercent
+        ];
+    }
+
+    /**
      * Export du Scénario sous format Game Design Document (GDD Markdown)
      */
     public function exportMarkdown(int $id): string {
@@ -706,38 +853,59 @@ class ScenarioEngine {
         if (!$sc) return "# Erreur : Scénario introuvable.\n";
 
         $typeLabel = ($sc['type'] === 'step') ? "Étape de Jeu (Step #{$sc['step_number']})" : "Événement Spécial";
+        $cleanDialogue = str_replace(["\r\n", "\r"], "\n", trim((string)($sc['dialogue'] ?? '')));
+        $blockquoteDialogue = str_replace("\n", "\n> ", $cleanDialogue);
 
         $md = "# 📜 CAHIER DE SCÉNARISATION & GDD : {$sc['title']}\n\n";
-        $md .= "**Type** : {$typeLabel}  \n";
-        $md .= "**Identifiant** : `{$sc['slug']}`  \n";
-        $md .= "**Période Historique** : {$sc['era']}  \n";
-        $md .= "**Statut de Production** : " . strtoupper($sc['status']) . "  \n";
-        $md .= "**Avancement Global des Tâches Métiers** : {$sc['metrics']['percent']}% ({$sc['metrics']['done']}/{$sc['metrics']['total']} terminées)  \n\n";
+        if (!empty($sc['subtitle'])) {
+            $md .= "*{$sc['subtitle']}*\n\n";
+        }
+        $md .= "- **Type** : {$typeLabel}\n";
+        $md .= "- **Identifiant Technique** : `{$sc['slug']}`\n";
+        $md .= "- **Période Historique** : {$sc['era']}\n";
+        $md .= "- **Statut de Production** : `" . strtoupper((string)$sc['status']) . "`\n";
+        $md .= "- **Avancement Global des Tâches Métiers** : **{$sc['metrics']['percent']}%** ({$sc['metrics']['done']}/{$sc['metrics']['total']} terminées, {$sc['metrics']['in_progress']} en cours, {$sc['metrics']['blocked']} bloquées)\n\n";
 
-        $md .= "## 1. Trame Narrative & Synopsis\n";
+        $md .= "## 1. Trame Narrative & Synopsis\n\n";
         $md .= "{$sc['synopsis']}\n\n";
 
-        $md .= "## 2. Voix Narrative & Discours In-Game\n";
+        $md .= "## 2. Voix Narrative & Discours In-Game\n\n";
         $md .= "> **{$sc['speaker_name']}** (*{$sc['speaker_role']}*)\n";
         $md .= "> \n";
-        $md .= "> « " . nl2br($sc['dialogue']) . " »\n\n";
+        $md .= "> « {$blockquoteDialogue} »\n\n";
 
-        $md .= "## 3. Déclencheurs & Conséquences de Jeu\n";
-        $md .= "- **Conditions d'Activation** : {$sc['trigger_condition']}\n";
-        $md .= "- **Récompenses & Effets** : {$sc['rewards_summary']}\n\n";
+        $md .= "## 3. Déclencheurs & Conséquences de Jeu\n\n";
+        $md .= "- **Conditions d'Activation (Triggers)** : {$sc['trigger_condition']}\n";
+        $md .= "- **Récompenses & Effets Gameplay** : {$sc['rewards_summary']}\n\n";
 
-        $md .= "## 4. Matrice des 10 Tâches Métiers\n\n";
+        $md .= "## 4. Synthèse Graphique par Métier\n\n";
+        $md .= "| Métier du Studio | Domaine | Progression | Tâches (Terminées / Total) |\n";
+        $md .= "|---|---|---|---|\n";
+        $byRole = $sc['metrics']['by_role'] ?? [];
+        foreach (self::ROLES as $rCode => $rDef) {
+            $rStat = $byRole[$rCode] ?? ['total' => 0, 'done' => 0, 'percent' => 0];
+            $filled = (int)round(($rStat['percent'] / 100) * 10);
+            $bar = str_repeat('█', $filled) . str_repeat('░', max(0, 10 - $filled));
+            $md .= "| **{$rDef['name']}** | {$rDef['domain']} | `{$bar}` **{$rStat['percent']}%** | {$rStat['done']} / {$rStat['total']} |\n";
+        }
+        $md .= "\n";
+
+        $md .= "## 5. Matrice Opérationnelle des Tâches Métiers\n\n";
         $md .= "| # | Métier Clé | Tâche Opérationnelle | Complexité | Assigné | Statut | Livrables |\n";
         $md .= "|---|---|---|---|---|---|---|\n";
 
         foreach ($sc['tasks'] as $t) {
-            $stBadge = match($t['status']) {
+            $stBadge = match($t['status'] ?? 'todo') {
                 'done'        => '✅ Terminé',
                 'in_progress' => '🔧 En cours',
                 'blocked'     => '⛔ Bloqué',
                 default       => '⏳ À faire'
             };
-            $md .= "| {$t['task_id']} | **{$t['role_name']}** | {$t['title']} | `{$t['complexity']}` | {$t['assignee']} | {$stBadge} | `{$t['deliverables']}` |\n";
+            $titleClean = str_replace('|', '/', (string)($t['title'] ?? ''));
+            $delivClean = str_replace('|', '/', (string)($t['deliverables'] ?? ''));
+            $roleClean = str_replace('|', '/', (string)($t['role_name'] ?? ''));
+            $assignClean = str_replace('|', '/', (string)($t['assignee'] ?? ''));
+            $md .= "| {$t['task_id']} | **{$roleClean}** | {$titleClean} | `{$t['complexity']}` | {$assignClean} | {$stBadge} | `{$delivClean}` |\n";
         }
 
         $md .= "\n---\n*Généré automatiquement par OpenShogun Game Studio (Narrative Designer)*\n";

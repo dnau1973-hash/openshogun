@@ -1,177 +1,265 @@
 [
     {
         "id": 1,
-        "slug": "step-04-appel-aux-armes-multitasks",
+        "slug": "step-01-eveil-du-fief",
         "type": "step",
-        "step_number": 4,
-        "title": "Step 4 : L'Appel aux Armes & Voie du Bushido (Multi-Tâches)",
-        "subtitle": "Chapitre 4 : Fondation du Dojo et formation des premiers Ashigarus",
-        "era": "1568 - Montée en Puissance Martiale",
-        "synopsis": "Pour défendre le fief et projeter sa puissance, le daimyō doit construire le Dojo et entraîner ses premiers lanciers.",
-        "speaker_name": "Maître d'Armes Yagyū Muneyoshi",
-        "speaker_role": "Grand Bretteur du Shinkage-ryū",
-        "dialogue": "Un samouraï sans discipline n'est qu'un vent mauvais. Forgez vos lances et élevez le dojo sur la colline.",
-        "trigger_condition": "Dojo niveau 1 + 20 Ashigarus en garnison",
-        "rewards_summary": "300 Kobans, Déverrouillage des archers Yumi",
+        "step_number": 1,
+        "title": "L'Éveil du Fief & l'Appel du Clan",
+        "subtitle": "Prologue : Fondation de la seigneurie et première moisson",
+        "era": "1560 - Aube du Sengoku Jidai",
+        "synopsis": "Après des années de pillages féodaux, le conseil des anciens de la province accorde l'autonomie à une jeune lignée de daimyōs. Le joueur doit poser les fondations de son premier domaine : défricher les terres, ériger le premier entrepôt de riz et prêter le serment d'honneur du Bushido.",
+        "speaker_name": "Maître de la Sagesse (Chie no Sensei)",
+        "speaker_role": "Vénérable Mentor & Gardien des Traditions",
+        "dialogue": "Salutations, noble jeune Seigneur. Votre terre a longtemps sommeillé sous la cendre des guerres passées. Écoutez le bruissement des bambous et la voix de vos sujets : érigez votre premier grenier et honorez les esprits de cette vallée. Votre destinée commence sous le signe du dragon.",
+        "trigger_condition": "Ouverture du Fief (Niveau de joueur 1, achèvement du pacte initial)",
+        "rewards_summary": "100 Kobans impériaux, 500 Riz, 500 Bois de cèdre, Titre honorifique : « Seigneur Novice du Domaine »",
+        "status": "published",
+        "tasks": [
+            {
+                "task_id": 1,
+                "role_code": "level_designer",
+                "role_name": "Game & Level Designer",
+                "title": "Conception du parcours gameplay & équilibrage des objectifs (Step 1 : L'Éveil du Fief & l'Appel du Clan)",
+                "description": "Définir les seuils de déclenchement, les coûts de progression et s'assurer que le joueur ne rencontre ni goulot d'étranglement ni facilité excessive.",
+                "assignee": "Game & Level Designer",
+                "complexity": "L",
+                "status": "done",
+                "deliverables": "Spécifications GDD \/ Assets livrés"
+            },
+            {
+                "task_id": 2,
+                "role_code": "backend",
+                "role_name": "Développeur Back-End",
+                "title": "Moteur de validation des conditions de trigger & attribution des récompenses",
+                "description": "Implémenter la logique dans ScenarioEngine \/ QuestEngine. Vérifier l'atomicité des transactions SQL lors de la distribution des Kobans et ressources.",
+                "assignee": "Développeur Back-End",
+                "complexity": "L",
+                "status": "done",
+                "deliverables": "core\/ScenarioEngine.php \/ migrations SQL"
+            },
+            {
+                "task_id": 3,
+                "role_code": "frontend",
+                "role_name": "Développeur Front-End",
+                "title": "Intégration de l'interface joueur, boîte de dialogue et HUD de progression",
+                "description": "Développer la modale narrative avec avatar animé, typewriter de dialogue, boutons de choix et affichage des récompenses en particules.",
+                "assignee": "Développeur Front-End",
+                "complexity": "L",
+                "status": "done",
+                "deliverables": "views\/partials\/modal_scenario.php \/ CSS"
+            },
+            {
+                "task_id": 4,
+                "role_code": "network",
+                "role_name": "Développeur Réseau & Infra",
+                "title": "Synchronisation serveur en direct et broadcast de progression inter-joueurs",
+                "description": "Assurer que la notification de fin de step ou de proclamation de l'événement est transmise sans latence excessive sur le cluster.",
+                "assignee": "Développeur Réseau & Infra",
+                "complexity": "S",
+                "status": "done",
+                "deliverables": "Spécifications GDD \/ Assets livrés"
+            },
+            {
+                "task_id": 5,
+                "role_code": "artist_2d",
+                "role_name": "Game Artist 2D & Ukiyo-e",
+                "title": "Illustration du personnage narrateur & estampe d'ambiance 16:9",
+                "description": "Produire un portrait expressif du narrateur au format carré (512x512) et une bannière thématique ukiyo-e respectant la charte graphique féodale.",
+                "assignee": "Game Artist 2D & Ukiyo-e",
+                "complexity": "M",
+                "status": "done",
+                "deliverables": "public\/assets\/scenarios\/portrait.jpg"
+            },
+            {
+                "task_id": 6,
+                "role_code": "artist_env",
+                "role_name": "Environment & Isometric Artist",
+                "title": "Modélisation des assets visuels du fief et modifications d'état du décor",
+                "description": "Mettre à jour les tuiles isométriques correspondantes dans la cité castrale ou sur le terroir des 9 parcelles.",
+                "assignee": "Environment & Isometric Artist",
+                "complexity": "M",
+                "status": "done",
+                "deliverables": "Spécifications GDD \/ Assets livrés"
+            },
+            {
+                "task_id": 7,
+                "role_code": "sound",
+                "role_name": "Sound Designer & Compositeur",
+                "title": "Création de la nappe musicale Sengoku et effets sonores de triomphe",
+                "description": "Composer un leitmotiv distinctif (koto \/ shakuhachi \/ taiko) et concevoir les jingles de validation de quête.",
+                "assignee": "Sound Designer & Compositeur",
+                "complexity": "S",
+                "status": "done",
+                "deliverables": "Spécifications GDD \/ Assets livrés"
+            },
+            {
+                "task_id": 8,
+                "role_code": "narrative",
+                "role_name": "Narrative Designer & Scénariste",
+                "title": "Rédaction finale des dialogues, relecture historique et résonance du lore",
+                "description": "Vérifier la concordance avec la Bible Narrative d'OpenShogun, l'exactitude des kanjis et l'élégance littéraire des répliques.",
+                "assignee": "Narrative Designer & Scénariste",
+                "complexity": "S",
+                "status": "done",
+                "deliverables": "Spécifications GDD \/ Assets livrés"
+            },
+            {
+                "task_id": 9,
+                "role_code": "qa",
+                "role_name": "QA Tester & Recetteur",
+                "title": "Cahier de recette, tests de non-régression et cas limites d'abandon\/succès",
+                "description": "Tester la reprise de sauvegarde, l'absence de doublons de récompenses, et l'affichage sur mobile\/tablette\/PC.",
+                "assignee": "QA Tester & Recetteur",
+                "complexity": "M",
+                "status": "done",
+                "deliverables": "tests\/test_scenario_1.php"
+            },
+            {
+                "task_id": 10,
+                "role_code": "producer",
+                "role_name": "Producteur Live Ops & Économiste",
+                "title": "Cadrage du jalon de release, monitoring de rétention et KPIs d'engagement",
+                "description": "Vérifier la vélocité des 10 métiers sur le sprint, arbitrer les priorités et programmer la date de déploiement en Live.",
+                "assignee": "Producteur Live Ops & Économiste",
+                "complexity": "S",
+                "status": "done",
+                "deliverables": "Spécifications GDD \/ Assets livrés"
+            }
+        ],
+        "created_by": 1,
+        "created_at": 1792345787,
+        "updated_at": 1792345787
+    },
+    {
+        "id": 2,
+        "slug": "step-02-erection-forteresse",
+        "type": "step",
+        "step_number": 2,
+        "title": "L'Érection du Tenshu & la Muraille Cyclopéenne",
+        "subtitle": "Chapitre 2 : Fortification de la cité castrale face aux rōnins",
+        "era": "1562 - Tumulte des Marches Frontalières",
+        "synopsis": "Les bruits de la renaissance du domaine ont attiré des bandes de pillards et mercenaires errants. Pour protéger les familles paysannes et centraliser le commandement, le seigneur doit ériger le donjon fortifié (Tenshu niveau 1) et dresser des palissades renforcées autour du bourg.",
+        "speaker_name": "Intendant Torii Mototada",
+        "speaker_role": "Maître Bâtisseur & Intendant en Chef",
+        "dialogue": "Mon Daimyō, une armée sans donjon est comme un sabre sans poignée. Les guetteurs ont aperçu des fumées suspectes sur les crêtes de l'Est. Ordonnez l'extraction du granit et montons ce donjon avant le premier gel !",
+        "trigger_condition": "Tenshu niveau 1 construit + Palissades de bois niveau 1",
+        "rewards_summary": "250 Kobans, 1 000 Pierres de carrière, Déblocage du simulateur de combat de garnison",
         "status": "in_production",
         "tasks": [
             {
                 "task_id": 1,
-                "role_code": "backend",
-                "role_name": "Développeur Back-End",
-                "title": "Migration DDL tables support et triggers",
-                "description": "Créer la table narrative_steps et triggers d'état",
-                "assignee": "Dev Back Senior",
-                "complexity": "M",
+                "role_code": "level_designer",
+                "role_name": "Game & Level Designer",
+                "title": "Conception du parcours gameplay & équilibrage des objectifs (Step 2 : L'Érection du Tenshu & la Muraille Cyclopéenne)",
+                "description": "Définir les seuils de déclenchement, les coûts de progression et s'assurer que le joueur ne rencontre ni goulot d'étranglement ni facilité excessive.",
+                "assignee": "Game & Level Designer",
+                "complexity": "L",
                 "status": "done",
-                "deliverables": "core\/ScenarioEngine.php"
+                "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
                 "task_id": 2,
                 "role_code": "backend",
                 "role_name": "Développeur Back-End",
-                "title": "Logique de validation des conditions de victoire",
-                "description": "Vérifier la garnison de 20 lanciers dans BarracksEngine",
-                "assignee": "Dev Back Junior",
+                "title": "Moteur de validation des conditions de trigger & attribution des récompenses",
+                "description": "Implémenter la logique dans ScenarioEngine \/ QuestEngine. Vérifier l'atomicité des transactions SQL lors de la distribution des Kobans et ressources.",
+                "assignee": "Développeur Back-End",
                 "complexity": "L",
-                "status": "in_progress",
-                "deliverables": "core\/BarracksEngine.php"
+                "status": "done",
+                "deliverables": "core\/ScenarioEngine.php \/ migrations SQL"
             },
             {
                 "task_id": 3,
-                "role_code": "backend",
-                "role_name": "Développeur Back-End",
-                "title": "Distribution transactionnelle des Kobans et récompenses",
-                "description": "Garantir l'atomicité de remise des 300 Kobans",
-                "assignee": "Dev Back Senior",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "core\/RewardsEngine.php"
+                "role_code": "frontend",
+                "role_name": "Développeur Front-End",
+                "title": "Intégration de l'interface joueur, boîte de dialogue et HUD de progression",
+                "description": "Développer la modale narrative avec avatar animé, typewriter de dialogue, boutons de choix et affichage des récompenses en particules.",
+                "assignee": "Développeur Front-End",
+                "complexity": "L",
+                "status": "in_progress",
+                "deliverables": "views\/partials\/modal_scenario.php \/ CSS"
             },
             {
                 "task_id": 4,
-                "role_code": "level_designer",
-                "role_name": "Game & Level Designer",
-                "title": "Courbe de coût d'entraînement du lancier Ashigaru",
-                "description": "Équilibrer le coût en riz et fer par unité",
-                "assignee": "Lead Game Designer",
-                "complexity": "M",
-                "status": "done",
-                "deliverables": "config\/game_constants.php"
+                "role_code": "network",
+                "role_name": "Développeur Réseau & Infra",
+                "title": "Synchronisation serveur en direct et broadcast de progression inter-joueurs",
+                "description": "Assurer que la notification de fin de step ou de proclamation de l'événement est transmise sans latence excessive sur le cluster.",
+                "assignee": "Développeur Réseau & Infra",
+                "complexity": "S",
+                "status": "in_progress",
+                "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
                 "task_id": 5,
-                "role_code": "level_designer",
-                "role_name": "Game & Level Designer",
-                "title": "Paliers de quêtes intermédiaires du didacticiel",
-                "description": "Sous-objectifs : 5 puis 10 puis 20 unités",
-                "assignee": "Level Designer",
-                "complexity": "S",
+                "role_code": "artist_2d",
+                "role_name": "Game Artist 2D & Ukiyo-e",
+                "title": "Illustration du personnage narrateur & estampe d'ambiance 16:9",
+                "description": "Produire un portrait expressif du narrateur au format carré (512x512) et une bannière thématique ukiyo-e respectant la charte graphique féodale.",
+                "assignee": "Game Artist 2D & Ukiyo-e",
+                "complexity": "M",
                 "status": "done",
-                "deliverables": "data\/quests.json"
+                "deliverables": "public\/assets\/scenarios\/portrait.jpg"
             },
             {
                 "task_id": 6,
-                "role_code": "frontend",
-                "role_name": "Développeur Front-End",
-                "title": "Modale de triomphe avec animation particules",
-                "description": "Intégrer les confettis dorés lors de la complétion du Step 4",
-                "assignee": "Dev Front",
+                "role_code": "artist_env",
+                "role_name": "Environment & Isometric Artist",
+                "title": "Modélisation des assets visuels du fief et modifications d'état du décor",
+                "description": "Mettre à jour les tuiles isométriques correspondantes dans la cité castrale ou sur le terroir des 9 parcelles.",
+                "assignee": "Environment & Isometric Artist",
                 "complexity": "M",
                 "status": "in_progress",
-                "deliverables": "views\/partials\/modal_victory.php"
+                "deliverables": "Spécifications GDD \/ Assets livrés"
+            },
+            {
+                "task_id": 7,
+                "role_code": "sound",
+                "role_name": "Sound Designer & Compositeur",
+                "title": "Création de la nappe musicale Sengoku et effets sonores de triomphe",
+                "description": "Composer un leitmotiv distinctif (koto \/ shakuhachi \/ taiko) et concevoir les jingles de validation de quête.",
+                "assignee": "Sound Designer & Compositeur",
+                "complexity": "S",
+                "status": "done",
+                "deliverables": "Spécifications GDD \/ Assets livrés"
+            },
+            {
+                "task_id": 8,
+                "role_code": "narrative",
+                "role_name": "Narrative Designer & Scénariste",
+                "title": "Rédaction finale des dialogues, relecture historique et résonance du lore",
+                "description": "Vérifier la concordance avec la Bible Narrative d'OpenShogun, l'exactitude des kanjis et l'élégance littéraire des répliques.",
+                "assignee": "Narrative Designer & Scénariste",
+                "complexity": "S",
+                "status": "done",
+                "deliverables": "Spécifications GDD \/ Assets livrés"
+            },
+            {
+                "task_id": 9,
+                "role_code": "qa",
+                "role_name": "QA Tester & Recetteur",
+                "title": "Cahier de recette, tests de non-régression et cas limites d'abandon\/succès",
+                "description": "Tester la reprise de sauvegarde, l'absence de doublons de récompenses, et l'affichage sur mobile\/tablette\/PC.",
+                "assignee": "QA Tester & Recetteur",
+                "complexity": "M",
+                "status": "todo",
+                "deliverables": "tests\/test_scenario_2.php"
+            },
+            {
+                "task_id": 10,
+                "role_code": "producer",
+                "role_name": "Producteur Live Ops & Économiste",
+                "title": "Cadrage du jalon de release, monitoring de rétention et KPIs d'engagement",
+                "description": "Vérifier la vélocité des 10 métiers sur le sprint, arbitrer les priorités et programmer la date de déploiement en Live.",
+                "assignee": "Producteur Live Ops & Économiste",
+                "complexity": "S",
+                "status": "todo",
+                "deliverables": "Spécifications GDD \/ Assets livrés"
             }
         ],
         "created_by": 1,
-        "created_at": 1792182231,
-        "updated_at": 1792182231
-    },
-    {
-        "id": 2,
-        "slug": "step-04-appel-aux-armes-multitasks-copie-1792182231",
-        "type": "step",
-        "step_number": 4,
-        "title": "Step 4 : L'Appel aux Armes & Voie du Bushido (Multi-Tâches) (Copie)",
-        "subtitle": "Chapitre 4 : Fondation du Dojo et formation des premiers Ashigarus",
-        "era": "1568 - Montée en Puissance Martiale",
-        "synopsis": "Pour défendre le fief et projeter sa puissance, le daimyō doit construire le Dojo et entraîner ses premiers lanciers.",
-        "speaker_name": "Maître d'Armes Yagyū Muneyoshi",
-        "speaker_role": "Grand Bretteur du Shinkage-ryū",
-        "dialogue": "Un samouraï sans discipline n'est qu'un vent mauvais. Forgez vos lances et élevez le dojo sur la colline.",
-        "trigger_condition": "Dojo niveau 1 + 20 Ashigarus en garnison",
-        "rewards_summary": "300 Kobans, Déverrouillage des archers Yumi",
-        "status": "draft",
-        "tasks": [
-            {
-                "task_id": 1,
-                "role_code": "backend",
-                "role_name": "Développeur Back-End",
-                "title": "Migration DDL tables support et triggers",
-                "description": "Créer la table narrative_steps et triggers d'état",
-                "assignee": "Dev Back Senior",
-                "complexity": "M",
-                "status": "todo",
-                "deliverables": "core\/ScenarioEngine.php"
-            },
-            {
-                "task_id": 2,
-                "role_code": "backend",
-                "role_name": "Développeur Back-End",
-                "title": "Logique de validation des conditions de victoire",
-                "description": "Vérifier la garnison de 20 lanciers dans BarracksEngine",
-                "assignee": "Dev Back Junior",
-                "complexity": "L",
-                "status": "todo",
-                "deliverables": "core\/BarracksEngine.php"
-            },
-            {
-                "task_id": 3,
-                "role_code": "backend",
-                "role_name": "Développeur Back-End",
-                "title": "Distribution transactionnelle des Kobans et récompenses",
-                "description": "Garantir l'atomicité de remise des 300 Kobans",
-                "assignee": "Dev Back Senior",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "core\/RewardsEngine.php"
-            },
-            {
-                "task_id": 4,
-                "role_code": "level_designer",
-                "role_name": "Game & Level Designer",
-                "title": "Courbe de coût d'entraînement du lancier Ashigaru",
-                "description": "Équilibrer le coût en riz et fer par unité",
-                "assignee": "Lead Game Designer",
-                "complexity": "M",
-                "status": "todo",
-                "deliverables": "config\/game_constants.php"
-            },
-            {
-                "task_id": 5,
-                "role_code": "level_designer",
-                "role_name": "Game & Level Designer",
-                "title": "Paliers de quêtes intermédiaires du didacticiel",
-                "description": "Sous-objectifs : 5 puis 10 puis 20 unités",
-                "assignee": "Level Designer",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "data\/quests.json"
-            },
-            {
-                "task_id": 6,
-                "role_code": "frontend",
-                "role_name": "Développeur Front-End",
-                "title": "Modale de triomphe avec animation particules",
-                "description": "Intégrer les confettis dorés lors de la complétion du Step 4",
-                "assignee": "Dev Front",
-                "complexity": "M",
-                "status": "todo",
-                "deliverables": "views\/partials\/modal_victory.php"
-            }
-        ],
-        "created_by": 1,
-        "created_at": 1792182231,
-        "updated_at": 1792182231
+        "created_at": 1792345787,
+        "updated_at": 1792345787
     },
     {
         "id": 3,
@@ -197,7 +285,7 @@
                 "description": "Définir les seuils de déclenchement, les coûts de progression et s'assurer que le joueur ne rencontre ni goulot d'étranglement ni facilité excessive.",
                 "assignee": "Game & Level Designer",
                 "complexity": "L",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -208,7 +296,7 @@
                 "description": "Implémenter la logique dans ScenarioEngine \/ QuestEngine. Vérifier l'atomicité des transactions SQL lors de la distribution des Kobans et ressources.",
                 "assignee": "Développeur Back-End",
                 "complexity": "L",
-                "status": "todo",
+                "status": "in_progress",
                 "deliverables": "core\/ScenarioEngine.php \/ migrations SQL"
             },
             {
@@ -241,7 +329,7 @@
                 "description": "Produire un portrait expressif du narrateur au format carré (512x512) et une bannière thématique ukiyo-e respectant la charte graphique féodale.",
                 "assignee": "Game Artist 2D & Ukiyo-e",
                 "complexity": "M",
-                "status": "todo",
+                "status": "in_progress",
                 "deliverables": "public\/assets\/scenarios\/portrait.jpg"
             },
             {
@@ -274,7 +362,7 @@
                 "description": "Vérifier la concordance avec la Bible Narrative d'OpenShogun, l'exactitude des kanjis et l'élégance littéraire des répliques.",
                 "assignee": "Narrative Designer & Scénariste",
                 "complexity": "S",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -296,13 +384,13 @@
                 "description": "Vérifier la vélocité des 10 métiers sur le sprint, arbitrer les priorités et programmer la date de déploiement en Live.",
                 "assignee": "Producteur Live Ops & Économiste",
                 "complexity": "S",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             }
         ],
         "created_by": 1,
-        "created_at": 1792181246,
-        "updated_at": 1792181246
+        "created_at": 1792345787,
+        "updated_at": 1792345787
     },
     {
         "id": 4,
@@ -328,7 +416,7 @@
                 "description": "Définir les seuils de déclenchement, les coûts de progression et s'assurer que le joueur ne rencontre ni goulot d'étranglement ni facilité excessive.",
                 "assignee": "Game & Level Designer",
                 "complexity": "L",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -339,7 +427,7 @@
                 "description": "Implémenter la logique dans ScenarioEngine \/ QuestEngine. Vérifier l'atomicité des transactions SQL lors de la distribution des Kobans et ressources.",
                 "assignee": "Développeur Back-End",
                 "complexity": "L",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "core\/ScenarioEngine.php \/ migrations SQL"
             },
             {
@@ -350,7 +438,7 @@
                 "description": "Développer la modale narrative avec avatar animé, typewriter de dialogue, boutons de choix et affichage des récompenses en particules.",
                 "assignee": "Développeur Front-End",
                 "complexity": "L",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "views\/partials\/modal_scenario.php \/ CSS"
             },
             {
@@ -361,7 +449,7 @@
                 "description": "Assurer que la notification de fin de step ou de proclamation de l'événement est transmise sans latence excessive sur le cluster.",
                 "assignee": "Développeur Réseau & Infra",
                 "complexity": "S",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -372,7 +460,7 @@
                 "description": "Produire un portrait expressif du narrateur au format carré (512x512) et une bannière thématique ukiyo-e respectant la charte graphique féodale.",
                 "assignee": "Game Artist 2D & Ukiyo-e",
                 "complexity": "M",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "public\/assets\/scenarios\/portrait.jpg"
             },
             {
@@ -383,7 +471,7 @@
                 "description": "Mettre à jour les tuiles isométriques correspondantes dans la cité castrale ou sur le terroir des 9 parcelles.",
                 "assignee": "Environment & Isometric Artist",
                 "complexity": "M",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -394,7 +482,7 @@
                 "description": "Composer un leitmotiv distinctif (koto \/ shakuhachi \/ taiko) et concevoir les jingles de validation de quête.",
                 "assignee": "Sound Designer & Compositeur",
                 "complexity": "S",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -405,7 +493,7 @@
                 "description": "Vérifier la concordance avec la Bible Narrative d'OpenShogun, l'exactitude des kanjis et l'élégance littéraire des répliques.",
                 "assignee": "Narrative Designer & Scénariste",
                 "complexity": "S",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -416,7 +504,7 @@
                 "description": "Tester la reprise de sauvegarde, l'absence de doublons de récompenses, et l'affichage sur mobile\/tablette\/PC.",
                 "assignee": "QA Tester & Recetteur",
                 "complexity": "M",
-                "status": "todo",
+                "status": "in_progress",
                 "deliverables": "tests\/test_scenario_event.php"
             },
             {
@@ -427,13 +515,13 @@
                 "description": "Vérifier la vélocité des 10 métiers sur le sprint, arbitrer les priorités et programmer la date de déploiement en Live.",
                 "assignee": "Producteur Live Ops & Économiste",
                 "complexity": "S",
-                "status": "todo",
+                "status": "in_progress",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             }
         ],
         "created_by": 1,
-        "created_at": 1792181246,
-        "updated_at": 1792181246
+        "created_at": 1792345787,
+        "updated_at": 1792345787
     },
     {
         "id": 5,
@@ -459,7 +547,7 @@
                 "description": "Définir les seuils de déclenchement, les coûts de progression et s'assurer que le joueur ne rencontre ni goulot d'étranglement ni facilité excessive.",
                 "assignee": "Game & Level Designer",
                 "complexity": "L",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -470,7 +558,7 @@
                 "description": "Implémenter la logique dans ScenarioEngine \/ QuestEngine. Vérifier l'atomicité des transactions SQL lors de la distribution des Kobans et ressources.",
                 "assignee": "Développeur Back-End",
                 "complexity": "L",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "core\/ScenarioEngine.php \/ migrations SQL"
             },
             {
@@ -481,7 +569,7 @@
                 "description": "Développer la modale narrative avec avatar animé, typewriter de dialogue, boutons de choix et affichage des récompenses en particules.",
                 "assignee": "Développeur Front-End",
                 "complexity": "L",
-                "status": "todo",
+                "status": "in_progress",
                 "deliverables": "views\/partials\/modal_scenario.php \/ CSS"
             },
             {
@@ -492,7 +580,7 @@
                 "description": "Assurer que la notification de fin de step ou de proclamation de l'événement est transmise sans latence excessive sur le cluster.",
                 "assignee": "Développeur Réseau & Infra",
                 "complexity": "S",
-                "status": "todo",
+                "status": "in_progress",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -503,7 +591,7 @@
                 "description": "Produire un portrait expressif du narrateur au format carré (512x512) et une bannière thématique ukiyo-e respectant la charte graphique féodale.",
                 "assignee": "Game Artist 2D & Ukiyo-e",
                 "complexity": "M",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "public\/assets\/scenarios\/portrait.jpg"
             },
             {
@@ -514,7 +602,7 @@
                 "description": "Mettre à jour les tuiles isométriques correspondantes dans la cité castrale ou sur le terroir des 9 parcelles.",
                 "assignee": "Environment & Isometric Artist",
                 "complexity": "M",
-                "status": "todo",
+                "status": "in_progress",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -525,7 +613,7 @@
                 "description": "Composer un leitmotiv distinctif (koto \/ shakuhachi \/ taiko) et concevoir les jingles de validation de quête.",
                 "assignee": "Sound Designer & Compositeur",
                 "complexity": "S",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -536,7 +624,7 @@
                 "description": "Vérifier la concordance avec la Bible Narrative d'OpenShogun, l'exactitude des kanjis et l'élégance littéraire des répliques.",
                 "assignee": "Narrative Designer & Scénariste",
                 "complexity": "S",
-                "status": "todo",
+                "status": "done",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -563,8 +651,8 @@
             }
         ],
         "created_by": 1,
-        "created_at": 1792181246,
-        "updated_at": 1792181246
+        "created_at": 1792345787,
+        "updated_at": 1792345787
     },
     {
         "id": 6,
@@ -667,7 +755,7 @@
                 "description": "Vérifier la concordance avec la Bible Narrative d'OpenShogun, l'exactitude des kanjis et l'élégance littéraire des répliques.",
                 "assignee": "Narrative Designer & Scénariste",
                 "complexity": "S",
-                "status": "todo",
+                "status": "in_progress",
                 "deliverables": "Spécifications GDD \/ Assets livrés"
             },
             {
@@ -694,269 +782,7 @@
             }
         ],
         "created_by": 1,
-        "created_at": 1792181246,
-        "updated_at": 1792181246
-    },
-    {
-        "id": 7,
-        "slug": "step-04-appel-aux-armes",
-        "type": "step",
-        "step_number": 4,
-        "title": "Step 4 : L'Appel aux Armes & Voie du Bushido",
-        "subtitle": "Chapitre 4 : Fondation du Dojo et formation des premiers Ashigarus",
-        "era": "1568 - Montée en Puissance Martiale",
-        "synopsis": "Pour défendre le fief et projeter sa puissance, le daimyō doit construire le Dojo et entraîner ses premiers lanciers.",
-        "speaker_name": "Maître d'Armes Yagyū Muneyoshi",
-        "speaker_role": "Grand Bretteur du Shinkage-ryū",
-        "dialogue": "Un samouraï sans discipline n'est qu'un vent mauvais. Forgez vos lances et élevez le dojo sur la colline.",
-        "trigger_condition": "Dojo niveau 1 + 20 Ashigarus en garnison",
-        "rewards_summary": "300 Kobans, Déverrouillage des archers Yumi",
-        "status": "in_production",
-        "tasks": [
-            {
-                "task_id": 1,
-                "role_code": "level_designer",
-                "role_name": "Game & Level Designer",
-                "title": "Conception du parcours gameplay & équilibrage des objectifs (Step 4 : Step 4 : L'Appel aux Armes & Voie du Bushido)",
-                "description": "Définir les seuils de déclenchement, les coûts de progression et s'assurer que le joueur ne rencontre ni goulot d'étranglement ni facilité excessive.",
-                "assignee": "Game & Level Designer",
-                "complexity": "L",
-                "status": "in_progress",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            },
-            {
-                "task_id": 2,
-                "role_code": "backend",
-                "role_name": "Développeur Back-End",
-                "title": "Moteur de validation des conditions de trigger & attribution des récompenses",
-                "description": "Implémenter la logique dans ScenarioEngine \/ QuestEngine. Vérifier l'atomicité des transactions SQL lors de la distribution des Kobans et ressources.",
-                "assignee": "Développeur Back-End",
-                "complexity": "L",
-                "status": "done",
-                "deliverables": "core\/ScenarioEngine.php \/ migrations SQL"
-            },
-            {
-                "task_id": 3,
-                "role_code": "frontend",
-                "role_name": "Développeur Front-End",
-                "title": "Intégration de l'interface joueur, boîte de dialogue et HUD de progression",
-                "description": "Développer la modale narrative avec avatar animé, typewriter de dialogue, boutons de choix et affichage des récompenses en particules.",
-                "assignee": "Développeur Front-End",
-                "complexity": "L",
-                "status": "todo",
-                "deliverables": "views\/partials\/modal_scenario.php \/ CSS"
-            },
-            {
-                "task_id": 4,
-                "role_code": "network",
-                "role_name": "Développeur Réseau & Infra",
-                "title": "Synchronisation serveur en direct et broadcast de progression inter-joueurs",
-                "description": "Assurer que la notification de fin de step ou de proclamation de l'événement est transmise sans latence excessive sur le cluster.",
-                "assignee": "Développeur Réseau & Infra",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            },
-            {
-                "task_id": 5,
-                "role_code": "artist_2d",
-                "role_name": "Game Artist 2D & Ukiyo-e",
-                "title": "Illustration du personnage narrateur & estampe d'ambiance 16:9",
-                "description": "Produire un portrait expressif du narrateur au format carré (512x512) et une bannière thématique ukiyo-e respectant la charte graphique féodale.",
-                "assignee": "Game Artist 2D & Ukiyo-e",
-                "complexity": "M",
-                "status": "todo",
-                "deliverables": "public\/assets\/scenarios\/portrait.jpg"
-            },
-            {
-                "task_id": 6,
-                "role_code": "artist_env",
-                "role_name": "Environment & Isometric Artist",
-                "title": "Modélisation des assets visuels du fief et modifications d'état du décor",
-                "description": "Mettre à jour les tuiles isométriques correspondantes dans la cité castrale ou sur le terroir des 9 parcelles.",
-                "assignee": "Environment & Isometric Artist",
-                "complexity": "M",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            },
-            {
-                "task_id": 7,
-                "role_code": "sound",
-                "role_name": "Sound Designer & Compositeur",
-                "title": "Création de la nappe musicale Sengoku et effets sonores de triomphe",
-                "description": "Composer un leitmotiv distinctif (koto \/ shakuhachi \/ taiko) et concevoir les jingles de validation de quête.",
-                "assignee": "Sound Designer & Compositeur",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            },
-            {
-                "task_id": 8,
-                "role_code": "narrative",
-                "role_name": "Narrative Designer & Scénariste",
-                "title": "Rédaction finale des dialogues, relecture historique et résonance du lore",
-                "description": "Vérifier la concordance avec la Bible Narrative d'OpenShogun, l'exactitude des kanjis et l'élégance littéraire des répliques.",
-                "assignee": "Narrative Designer & Scénariste",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            },
-            {
-                "task_id": 9,
-                "role_code": "qa",
-                "role_name": "QA Tester & Recetteur",
-                "title": "Cahier de recette, tests de non-régression et cas limites d'abandon\/succès",
-                "description": "Tester la reprise de sauvegarde, l'absence de doublons de récompenses, et l'affichage sur mobile\/tablette\/PC.",
-                "assignee": "QA Tester & Recetteur",
-                "complexity": "M",
-                "status": "todo",
-                "deliverables": "tests\/test_scenario_4.php"
-            },
-            {
-                "task_id": 10,
-                "role_code": "producer",
-                "role_name": "Producteur Live Ops & Économiste",
-                "title": "Cadrage du jalon de release, monitoring de rétention et KPIs d'engagement",
-                "description": "Vérifier la vélocité des 10 métiers sur le sprint, arbitrer les priorités et programmer la date de déploiement en Live.",
-                "assignee": "Producteur Live Ops & Économiste",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            }
-        ],
-        "created_by": 1,
-        "created_at": 1792181246,
-        "updated_at": 1792181246
-    },
-    {
-        "id": 8,
-        "slug": "step-04-appel-aux-armes-copie-1792181246",
-        "type": "step",
-        "step_number": 4,
-        "title": "Step 4 : L'Appel aux Armes & Voie du Bushido (Copie)",
-        "subtitle": "Chapitre 4 : Fondation du Dojo et formation des premiers Ashigarus",
-        "era": "1568 - Montée en Puissance Martiale",
-        "synopsis": "Pour défendre le fief et projeter sa puissance, le daimyō doit construire le Dojo et entraîner ses premiers lanciers.",
-        "speaker_name": "Maître d'Armes Yagyū Muneyoshi",
-        "speaker_role": "Grand Bretteur du Shinkage-ryū",
-        "dialogue": "Un samouraï sans discipline n'est qu'un vent mauvais. Forgez vos lances et élevez le dojo sur la colline.",
-        "trigger_condition": "Dojo niveau 1 + 20 Ashigarus en garnison",
-        "rewards_summary": "300 Kobans, Déverrouillage des archers Yumi",
-        "status": "draft",
-        "tasks": [
-            {
-                "task_id": 1,
-                "role_code": "level_designer",
-                "role_name": "Game & Level Designer",
-                "title": "Conception du parcours gameplay & équilibrage des objectifs (Step 4 : Step 4 : L'Appel aux Armes & Voie du Bushido)",
-                "description": "Définir les seuils de déclenchement, les coûts de progression et s'assurer que le joueur ne rencontre ni goulot d'étranglement ni facilité excessive.",
-                "assignee": "Game & Level Designer",
-                "complexity": "L",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            },
-            {
-                "task_id": 2,
-                "role_code": "backend",
-                "role_name": "Développeur Back-End",
-                "title": "Moteur de validation des conditions de trigger & attribution des récompenses",
-                "description": "Implémenter la logique dans ScenarioEngine \/ QuestEngine. Vérifier l'atomicité des transactions SQL lors de la distribution des Kobans et ressources.",
-                "assignee": "Développeur Back-End",
-                "complexity": "L",
-                "status": "todo",
-                "deliverables": "core\/ScenarioEngine.php \/ migrations SQL"
-            },
-            {
-                "task_id": 3,
-                "role_code": "frontend",
-                "role_name": "Développeur Front-End",
-                "title": "Intégration de l'interface joueur, boîte de dialogue et HUD de progression",
-                "description": "Développer la modale narrative avec avatar animé, typewriter de dialogue, boutons de choix et affichage des récompenses en particules.",
-                "assignee": "Développeur Front-End",
-                "complexity": "L",
-                "status": "todo",
-                "deliverables": "views\/partials\/modal_scenario.php \/ CSS"
-            },
-            {
-                "task_id": 4,
-                "role_code": "network",
-                "role_name": "Développeur Réseau & Infra",
-                "title": "Synchronisation serveur en direct et broadcast de progression inter-joueurs",
-                "description": "Assurer que la notification de fin de step ou de proclamation de l'événement est transmise sans latence excessive sur le cluster.",
-                "assignee": "Développeur Réseau & Infra",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            },
-            {
-                "task_id": 5,
-                "role_code": "artist_2d",
-                "role_name": "Game Artist 2D & Ukiyo-e",
-                "title": "Illustration du personnage narrateur & estampe d'ambiance 16:9",
-                "description": "Produire un portrait expressif du narrateur au format carré (512x512) et une bannière thématique ukiyo-e respectant la charte graphique féodale.",
-                "assignee": "Game Artist 2D & Ukiyo-e",
-                "complexity": "M",
-                "status": "todo",
-                "deliverables": "public\/assets\/scenarios\/portrait.jpg"
-            },
-            {
-                "task_id": 6,
-                "role_code": "artist_env",
-                "role_name": "Environment & Isometric Artist",
-                "title": "Modélisation des assets visuels du fief et modifications d'état du décor",
-                "description": "Mettre à jour les tuiles isométriques correspondantes dans la cité castrale ou sur le terroir des 9 parcelles.",
-                "assignee": "Environment & Isometric Artist",
-                "complexity": "M",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            },
-            {
-                "task_id": 7,
-                "role_code": "sound",
-                "role_name": "Sound Designer & Compositeur",
-                "title": "Création de la nappe musicale Sengoku et effets sonores de triomphe",
-                "description": "Composer un leitmotiv distinctif (koto \/ shakuhachi \/ taiko) et concevoir les jingles de validation de quête.",
-                "assignee": "Sound Designer & Compositeur",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            },
-            {
-                "task_id": 8,
-                "role_code": "narrative",
-                "role_name": "Narrative Designer & Scénariste",
-                "title": "Rédaction finale des dialogues, relecture historique et résonance du lore",
-                "description": "Vérifier la concordance avec la Bible Narrative d'OpenShogun, l'exactitude des kanjis et l'élégance littéraire des répliques.",
-                "assignee": "Narrative Designer & Scénariste",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            },
-            {
-                "task_id": 9,
-                "role_code": "qa",
-                "role_name": "QA Tester & Recetteur",
-                "title": "Cahier de recette, tests de non-régression et cas limites d'abandon\/succès",
-                "description": "Tester la reprise de sauvegarde, l'absence de doublons de récompenses, et l'affichage sur mobile\/tablette\/PC.",
-                "assignee": "QA Tester & Recetteur",
-                "complexity": "M",
-                "status": "todo",
-                "deliverables": "tests\/test_scenario_4.php"
-            },
-            {
-                "task_id": 10,
-                "role_code": "producer",
-                "role_name": "Producteur Live Ops & Économiste",
-                "title": "Cadrage du jalon de release, monitoring de rétention et KPIs d'engagement",
-                "description": "Vérifier la vélocité des 10 métiers sur le sprint, arbitrer les priorités et programmer la date de déploiement en Live.",
-                "assignee": "Producteur Live Ops & Économiste",
-                "complexity": "S",
-                "status": "todo",
-                "deliverables": "Spécifications GDD \/ Assets livrés"
-            }
-        ],
-        "created_by": 1,
-        "created_at": 1792181246,
-        "updated_at": 1792181246
+        "created_at": 1792345787,
+        "updated_at": 1792345787
     }
 ]

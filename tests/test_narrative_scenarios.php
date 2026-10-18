@@ -207,42 +207,76 @@ if ($duplicate && strpos($duplicate['title'], 'Copie') !== false && count($dupli
     exit(1);
 }
 
-// 8. Test d'export Markdown GDD
+// 8. Test d'export Markdown GDD & getGlobalStudioMetrics()
 $mdExport = $engine->exportMarkdown($multiId);
-if (strpos($mdExport, 'CAHIER DE SCÉNARISATION') !== false && strpos($mdExport, 'Matrice des 10 Tâches Métiers') !== false) {
-    echo "[PASS] exportMarkdown() génère un GDD structuré complet\n";
+if (
+    strpos($mdExport, 'CAHIER DE SCÉNARISATION') !== false &&
+    strpos($mdExport, 'Synthèse Graphique par Métier') !== false &&
+    strpos($mdExport, 'Matrice Opérationnelle des Tâches Métiers') !== false &&
+    strpos($mdExport, '<br') === false
+) {
+    echo "[PASS] exportMarkdown() génère un GDD propre avec synthèse graphique par métier\n";
 } else {
-    echo "[FAIL] Export Markdown incomplet\n";
+    echo "[FAIL] Export Markdown incomplet ou contient du HTML brut\n";
     exit(1);
 }
 
-// 9. Test de rendu MVC : Mode Catalogue
+$globalMetrics = $engine->getGlobalStudioMetrics($engine->getScenarios());
+if (isset($globalMetrics['by_role']) && count($globalMetrics['by_role']) === 10 && $globalMetrics['tasks_totals']['total'] > 0) {
+    echo "[PASS] getGlobalStudioMetrics() calcule les séries graphiques des 10 métiers avec succès\n";
+} else {
+    echo "[FAIL] getGlobalStudioMetrics() défaillant\n";
+    exit(1);
+}
+
+// Cleanup des scénarios de test temporaires dans le fichier JSON
+$engine->deleteScenario($multiId);
+if ($duplicate && isset($duplicate['id'])) {
+    $engine->deleteScenario((int)$duplicate['id']);
+}
+
+// 9. Test de rendu MVC : Mode Catalogue & Graphiques
 $_GET['action'] = 'catalog';
 ob_start();
 include __DIR__ . '/../views/gamestudio/narrative_scenarios.php';
 $htmlCatalog = ob_get_clean();
 
-if (strlen($htmlCatalog) > 1000 && strpos($htmlCatalog, 'gamestudio-narrative-scenarios-catalog') !== false) {
-    echo "[PASS] Rendu MVC Mode Catalogue validé (" . strlen($htmlCatalog) . " octets)\n";
+if (
+    strlen($htmlCatalog) > 1000 &&
+    strpos($htmlCatalog, 'gamestudio-narrative-scenarios-catalog') !== false &&
+    strpos($htmlCatalog, 'catalogRolesApexChart') !== false &&
+    strpos($htmlCatalog, 'scenario-pipeline-track') !== false &&
+    strpos($htmlCatalog, 'renderMarkdownToGddHtml') !== false &&
+    strpos($htmlCatalog, 'fa-calendar-star') === false
+) {
+    echo "[PASS] Rendu MVC Mode Catalogue, Graphiques & Visionneuse Markdown validés (" . strlen($htmlCatalog) . " octets)\n";
 } else {
     echo "[FAIL] Rendu MVC Mode Catalogue défaillant\n";
     exit(1);
 }
 
 // 10. Test de rendu MVC : Mode Éditeur Pleine Page Studio (action = 'edit')
+$firstSc = $engine->getScenarios()[0] ?? null;
 $_GET['action'] = 'edit';
-$_GET['id'] = $multiId;
+$_GET['id'] = $firstSc['id'] ?? 1;
 ob_start();
 include __DIR__ . '/../views/gamestudio/narrative_scenarios.php';
 $htmlFullPage = ob_get_clean();
 
-if (strlen($htmlFullPage) > 1000 && strpos($htmlFullPage, 'gamestudio-narrative-editor-fullpage') !== false && strpos($htmlFullPage, 'Matrice Transversale des 10 Métiers') !== false) {
-    echo "[PASS] Rendu MVC Mode Éditeur Pleine Page validé (" . strlen($htmlFullPage) . " octets)\n";
+if (
+    strlen($htmlFullPage) > 1000 &&
+    strpos($htmlFullPage, 'gamestudio-narrative-editor-fullpage') !== false &&
+    strpos($htmlFullPage, 'editorSvgDonutCircle') !== false &&
+    strpos($htmlFullPage, 'tab-pane-gdd') !== false &&
+    strpos($htmlFullPage, 'Matrice Transversale des 10 Métiers') !== false
+) {
+    echo "[PASS] Rendu MVC Mode Éditeur Pleine Page, Jauge Graphique & Onglet GDD validés (" . strlen($htmlFullPage) . " octets)\n";
 } else {
     echo "[FAIL] Rendu MVC Mode Éditeur Pleine Page défaillant\n";
     exit(1);
 }
 
 echo "\n========================================================================\n";
-echo " TOUS LES TESTS NARRATIVE DESIGNER (FULL PAGE & MULTI-TÂCHES) SONT AU VERT !\n";
+echo " TOUS LES TESTS NARRATIVE DESIGNER (GDD MARKDOWN & GRAPHIQUES) SONT AU VERT !\n";
 echo "========================================================================\n";
+
