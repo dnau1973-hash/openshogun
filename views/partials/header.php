@@ -2679,37 +2679,59 @@ $navItems = [
                 menu.style.setProperty('--hud-menu-left', leftPos + 'px');
             };
 
-            const updateNavCategoryHighlights = () => {
-                const scrollPos = track.scrollLeft;
-                const targets = [
-                    { id: '#pillResWood', offset: 0 },
-                    { id: '#pillResRice', offset: 0 },
-                    { id: '#pillResSerenity', offset: 0 },
-                    { id: '#dropdownDomaine', offset: 0 }
-                ];
+            let isNavClicking = false;
+            let navClickTimer = null;
 
-                targets.forEach(t => {
-                    const el = document.querySelector(t.id);
-                    if (el) {
-                        t.offset = el.offsetLeft - track.offsetLeft;
-                    }
+            const setActiveNavBtn = (targetSel) => {
+                navBtns.forEach(btn => {
+                    const isTarget = (btn.getAttribute('data-nav-target') === targetSel);
+                    btn.classList.toggle('active', isTarget);
                 });
+            };
 
-                let activeId = '#pillResWood';
-                for (let i = targets.length - 1; i >= 0; i--) {
-                    if (scrollPos >= targets[i].offset - 60) {
-                        activeId = targets[i].id;
-                        break;
-                    }
+            const updateNavCategoryHighlights = () => {
+                if (isNavClicking) return;
+                const scrollPos = track.scrollLeft;
+                const maxScroll = getMaxScroll();
+                if (maxScroll <= 0) {
+                    setActiveNavBtn('#pillResWood');
+                    return;
                 }
 
-                navBtns.forEach(btn => {
-                    if (btn.getAttribute('data-nav-target') === activeId) {
-                        btn.classList.add('active');
-                    } else {
-                        btn.classList.remove('active');
-                    }
-                });
+                // 1. Début du ruban -> Matériaux
+                if (scrollPos <= 35) {
+                    setActiveNavBtn('#pillResWood');
+                    return;
+                }
+
+                // 2. Fin du ruban -> Domaine
+                if (scrollPos >= (maxScroll - 40)) {
+                    setActiveNavBtn('#dropdownDomaine');
+                    return;
+                }
+
+                const trackRect = track.getBoundingClientRect();
+                const getTargetAbsoluteLeft = (selector) => {
+                    const el = document.querySelector(selector);
+                    if (!el) return null;
+                    const elRect = el.getBoundingClientRect();
+                    return track.scrollLeft + (elRect.left - trackRect.left);
+                };
+
+                const ricePos = getTargetAbsoluteLeft('#pillResRice');
+                const serenityPos = getTargetAbsoluteLeft('#pillResSerenity');
+                const domainePos = getTargetAbsoluteLeft('#dropdownDomaine');
+
+                let activeId = '#pillResWood';
+                if (domainePos !== null && scrollPos >= (domainePos - track.clientWidth * 0.75)) {
+                    activeId = '#dropdownDomaine';
+                } else if (serenityPos !== null && scrollPos >= (serenityPos - 80)) {
+                    activeId = '#pillResSerenity';
+                } else if (ricePos !== null && scrollPos >= (ricePos - 80)) {
+                    activeId = '#pillResRice';
+                }
+
+                setActiveNavBtn(activeId);
             };
 
             const syncScrubber = () => {
@@ -2770,13 +2792,33 @@ $navItems = [
             navBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
+                    closeOpenHudDropdowns();
                     const targetSel = btn.getAttribute('data-nav-target');
-                    const targetEl = document.querySelector(targetSel);
-                    if (targetEl) {
-                        closeOpenHudDropdowns();
-                        const targetLeft = targetEl.offsetLeft - track.offsetLeft - 6;
-                        track.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+                    const maxScroll = getMaxScroll();
+
+                    isNavClicking = true;
+                    if (navClickTimer) clearTimeout(navClickTimer);
+                    setActiveNavBtn(targetSel);
+
+                    if (targetSel === '#pillResWood') {
+                        track.scrollTo({ left: 0, behavior: 'smooth' });
+                    } else if (targetSel === '#dropdownDomaine') {
+                        track.scrollTo({ left: maxScroll, behavior: 'smooth' });
+                    } else {
+                        const targetEl = document.querySelector(targetSel);
+                        if (targetEl) {
+                            const trackRect = track.getBoundingClientRect();
+                            const elRect = targetEl.getBoundingClientRect();
+                            const targetLeft = track.scrollLeft + (elRect.left - trackRect.left) - 10;
+                            const finalLeft = Math.max(0, Math.min(maxScroll, targetLeft));
+                            track.scrollTo({ left: finalLeft, behavior: 'smooth' });
+                        }
                     }
+
+                    navClickTimer = setTimeout(() => {
+                        isNavClicking = false;
+                        updateNavCategoryHighlights();
+                    }, 500);
                 });
             });
 
