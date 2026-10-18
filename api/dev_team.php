@@ -607,7 +607,7 @@ try {
 
             $payload = is_array($jsonBody) ? $jsonBody : $_POST;
 
-            $isMonteCarlo = !empty($payload['is_monte_carlo']) && ($payload['is_monte_carlo'] === '1' || $payload['is_monte_carlo'] === true || $payload['is_monte_carlo'] === 'true');
+            $isMonteCarlo = !empty($payload['is_monte_carlo']) && in_array((string)$payload['is_monte_carlo'], ['1', 'true'], true);
             $iterations = max(10, min(200, (int)($payload['iterations'] ?? 100)));
 
             if ($isMonteCarlo) {

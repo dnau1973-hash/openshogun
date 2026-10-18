@@ -1051,7 +1051,7 @@ async function runSiegeSimulation(isMonteCarlo = false) {
             throw new Error((data && data.error) ? data.error : "Erreur de simulation.");
         }
 
-        latestSiegeResult = isMonteCarlo ? data.detailed_sample : data;
+        latestSiegeResult = data.detailed_sample || data;
         displaySiegeResults(data, isMonteCarlo);
         document.getElementById('btn-export-markdown').disabled = false;
 
@@ -1069,8 +1069,9 @@ function displaySiegeResults(data, isMonteCarlo) {
     container.classList.remove('d-none');
     container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    const sample = isMonteCarlo ? data.detailed_sample : data;
-    const isConquered = sample.conquered;
+    const isMc = Boolean(isMonteCarlo || data.is_monte_carlo);
+    const sample = data.detailed_sample || data;
+    const isConquered = Boolean(sample && sample.conquered);
 
     // 1. Bannière globale
     const statusCard = document.getElementById('result-status-card');
@@ -1083,26 +1084,26 @@ function displaySiegeResults(data, isMonteCarlo) {
         statusCard.style.borderLeft = '6px solid #22c55e';
         statusTitle.textContent = "VICTOIRE TOTALE DU SIÈGE";
         statusTitle.className = "h2 fw-bold mb-1 text-success font-game";
-        statusDesc.textContent = sample.summary_message;
+        statusDesc.textContent = sample.summary_message || "La forteresse a capitulé face à la puissance d'assaut.";
         statusIcon.className = "fa-solid fa-trophy text-white";
         iconWrapper.className = "d-inline-flex p-3 rounded-circle mb-2 bg-success";
     } else {
         statusCard.style.borderLeft = '6px solid #ef4444';
         statusTitle.textContent = "ÉCHEC DU SIÈGE — DÉFAITE ASSAILLANTE";
         statusTitle.className = "h2 fw-bold mb-1 text-danger font-game";
-        statusDesc.textContent = sample.summary_message;
+        statusDesc.textContent = sample.summary_message || "Les assaillants ont été repoussés ou anéantis.";
         statusIcon.className = "fa-solid fa-shield-xmark text-white";
         iconWrapper.className = "d-inline-flex p-3 rounded-circle mb-2 bg-danger";
     }
 
     // 2. Widget Monte Carlo
     const mcCard = document.getElementById('montecarlo-stats-card');
-    if (isMonteCarlo) {
+    if (isMc && data.failure_breakdown) {
         mcCard.classList.remove('d-none');
-        document.getElementById('mc-win-rate').textContent = `${data.win_rate}%`;
-        document.getElementById('mc-fail-p1').textContent = `${data.failure_breakdown.phase1_moat_pct}%`;
-        document.getElementById('mc-fail-p2').textContent = `${data.failure_breakdown.phase2_walls_pct}%`;
-        document.getElementById('mc-fail-p3').textContent = `${data.failure_breakdown.phase3_tenshu_pct}%`;
+        document.getElementById('mc-win-rate').textContent = `${data.win_rate ?? 0}%`;
+        document.getElementById('mc-fail-p1').textContent = `${data.failure_breakdown.phase1_moat_pct ?? 0}%`;
+        document.getElementById('mc-fail-p2').textContent = `${data.failure_breakdown.phase2_walls_pct ?? 0}%`;
+        document.getElementById('mc-fail-p3').textContent = `${data.failure_breakdown.phase3_tenshu_pct ?? 0}%`;
     } else {
         mcCard.classList.add('d-none');
     }
