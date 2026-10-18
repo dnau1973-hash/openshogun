@@ -592,6 +592,54 @@ try {
             ]);
             break;
 
+        // 20. Simulation de Siège sur les 12 Châteaux Authentiques (Game Elevate Designer)
+        case 'simulate_castle_siege':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            if (!$auth->isAdmin() && !$devEngine->isDevTeamMember($currentUserId)) {
+                http_response_code(403);
+                throw new Exception("Accès interdit : le simulateur de siège des 12 châteaux est réservé au Game Elevate Designer.");
+            }
+
+            require_once __DIR__ . '/../core/CastleSiegeSimulatorEngine.php';
+            $siegeEngine = new CastleSiegeSimulatorEngine($db);
+
+            $payloadRaw = file_get_contents('php://input');
+            $payload = json_decode($payloadRaw, true);
+            if (!is_array($payload)) {
+                $payload = $_POST;
+            }
+
+            $isMonteCarlo = !empty($payload['is_monte_carlo']) && ($payload['is_monte_carlo'] === '1' || $payload['is_monte_carlo'] === true || $payload['is_monte_carlo'] === 'true');
+            $iterations = max(10, min(200, (int)($payload['iterations'] ?? 100)));
+
+            if ($isMonteCarlo) {
+                $result = $siegeEngine->runMonteCarlo($payload, $iterations);
+            } else {
+                $result = $siegeEngine->simulateSiege($payload);
+            }
+
+            // Gamification : gain d'XP Forge pour le Game Elevate Designer
+            $devEngine->addForgeXp($currentUserId, $isMonteCarlo ? 25 : 10, 'castle_siege_simulation', "Simulation tactique de siège sur le château " . ($payload['castle_code'] ?? 'himeji'));
+
+            echo json_encode($result);
+            break;
+
+        // 21. Exportation Markdown du rapport de siège
+        case 'export_castle_siege_markdown':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Méthode invalide.");
+            require_once __DIR__ . '/../core/CastleSiegeSimulatorEngine.php';
+            $siegeEngine = new CastleSiegeSimulatorEngine($db);
+
+            $payloadRaw = file_get_contents('php://input');
+            $payload = json_decode($payloadRaw, true) ?: $_POST;
+            $markdown = $siegeEngine->exportMarkdownReport($payload);
+
+            echo json_encode([
+                'success' => true,
+                'markdown' => $markdown
+            ]);
+            break;
+
         default:
             throw new Exception("Action Dev Team non reconnue.");
     }

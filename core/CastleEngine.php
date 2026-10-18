@@ -17,38 +17,72 @@ class CastleEngine {
      * Initialise la table et injecte les 12 châteaux authentiques si la table est vide
      */
     public function ensureTableAndSeed(): void {
-        $this->db->exec("
-            CREATE TABLE IF NOT EXISTS authentic_castles (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                code VARCHAR(50) UNIQUE NOT NULL,
-                name VARCHAR(100) NOT NULL,
-                japanese_name VARCHAR(100) NOT NULL,
-                kanji VARCHAR(50) NOT NULL,
-                province VARCHAR(100) NOT NULL,
-                historical_builder VARCHAR(150) NOT NULL,
-                construction_year VARCHAR(50) NOT NULL,
-                classification VARCHAR(100) NOT NULL DEFAULT 'Trésor National du Japon',
-                icon VARCHAR(10) NOT NULL DEFAULT '🏯',
-                image VARCHAR(255) NULL,
-                short_desc TEXT NOT NULL,
-                full_description LONGTEXT NOT NULL,
-                architectural_features TEXT NOT NULL,
-                final_battle_lore LONGTEXT NOT NULL,
-                relic_bonus TEXT NOT NULL,
-                default_x INT NOT NULL,
-                default_y INT NOT NULL,
-                coord_x INT NULL,
-                coord_y INT NULL,
-                is_spawned TINYINT(1) NOT NULL DEFAULT 0,
-                planet_id INT NULL,
-                defense_power INT NOT NULL DEFAULT 25000,
-                controlling_user_id INT NULL,
-                controlling_faction VARCHAR(50) NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX idx_coords (coord_x, coord_y),
-                INDEX idx_spawned (is_spawned)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-        ");
+        $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS authentic_castles (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    code TEXT UNIQUE NOT NULL,
+                    name TEXT NOT NULL,
+                    japanese_name TEXT NOT NULL,
+                    kanji TEXT NOT NULL,
+                    province TEXT NOT NULL,
+                    historical_builder TEXT NOT NULL,
+                    construction_year TEXT NOT NULL,
+                    classification TEXT NOT NULL DEFAULT 'Trésor National du Japon',
+                    icon TEXT NOT NULL DEFAULT '🏯',
+                    image TEXT NULL,
+                    short_desc TEXT NOT NULL,
+                    full_description TEXT NOT NULL,
+                    architectural_features TEXT NOT NULL,
+                    final_battle_lore TEXT NOT NULL,
+                    relic_bonus TEXT NOT NULL,
+                    default_x INTEGER NOT NULL,
+                    default_y INTEGER NOT NULL,
+                    coord_x INTEGER NULL,
+                    coord_y INTEGER NULL,
+                    is_spawned INTEGER NOT NULL DEFAULT 0,
+                    planet_id INTEGER NULL,
+                    defense_power INTEGER NOT NULL DEFAULT 25000,
+                    controlling_user_id INTEGER NULL,
+                    controlling_faction TEXT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+            ");
+        } else {
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS authentic_castles (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    code VARCHAR(50) UNIQUE NOT NULL,
+                    name VARCHAR(100) NOT NULL,
+                    japanese_name VARCHAR(100) NOT NULL,
+                    kanji VARCHAR(50) NOT NULL,
+                    province VARCHAR(100) NOT NULL,
+                    historical_builder VARCHAR(150) NOT NULL,
+                    construction_year VARCHAR(50) NOT NULL,
+                    classification VARCHAR(100) NOT NULL DEFAULT 'Trésor National du Japon',
+                    icon VARCHAR(10) NOT NULL DEFAULT '🏯',
+                    image VARCHAR(255) NULL,
+                    short_desc TEXT NOT NULL,
+                    full_description LONGTEXT NOT NULL,
+                    architectural_features TEXT NOT NULL,
+                    final_battle_lore LONGTEXT NOT NULL,
+                    relic_bonus TEXT NOT NULL,
+                    default_x INT NOT NULL,
+                    default_y INT NOT NULL,
+                    coord_x INT NULL,
+                    coord_y INT NULL,
+                    is_spawned TINYINT(1) NOT NULL DEFAULT 0,
+                    planet_id INT NULL,
+                    defense_power INT NOT NULL DEFAULT 25000,
+                    controlling_user_id INT NULL,
+                    controlling_faction VARCHAR(50) NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_coords (coord_x, coord_y),
+                    INDEX idx_spawned (is_spawned)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+        }
 
         $count = (int)$this->db->query("SELECT COUNT(*) FROM authentic_castles")->fetchColumn();
         if ($count === 0) {

@@ -249,6 +249,20 @@ class DevTeamEngine {
             'icon'        => '📈',
             'roles'       => ['game_designer'],
             'permissions' => ['formulas.tune', 'debug.sandbox']
+        ],
+        'elevate_castles' => [
+            'id'          => 'elevate_castles',
+            'title'       => 'Siège des 12 Châteaux',
+            'icon'        => '🏯',
+            'roles'       => ['game_designer'],
+            'permissions' => ['formulas.tune', 'debug.sandbox']
+        ],
+        'castle_siege_simulator' => [
+            'id'          => 'castle_siege_simulator',
+            'title'       => 'Siège des 12 Châteaux Authentiques',
+            'icon'        => '🏯',
+            'roles'       => ['game_designer'],
+            'permissions' => ['formulas.tune', 'debug.sandbox']
         ]
     ];
 
@@ -748,7 +762,7 @@ class DevTeamEngine {
 
         // 2. Règle pour les modules Game Elevate Designer :
         // Réservés aux détenteurs du métier "Game Elevate Designer" (game_designer) ou à l'administrateur.
-        if (in_array($tab, ['game_speeds', 'world_expansion', 'oases_ecosystem', 'combat_simulator', 'village_simulator'], true)) {
+        if (in_array($tab, ['game_speeds', 'world_expansion', 'oases_ecosystem', 'combat_simulator', 'village_simulator', 'building_derivation', 'elevate_castles', 'castle_siege_simulator'], true)) {
             return in_array('game_designer', $userRoleIds, true) || $isAdmin;
         }
 

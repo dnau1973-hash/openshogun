@@ -62,7 +62,7 @@ if (($_GET['tab'] ?? '') === 'backups') {
 $allowedTabs = [
     'dashboard', 'general',
     'elevate_research', 'elevate_bots',
-    'elevate_combat', 'elevate_village', 'elevate_speed',
+    'elevate_combat', 'elevate_castles', 'elevate_village', 'elevate_speed',
     'elevate_survey', 'elevate_oases', 'elevate_buildings',
     'elevate_events', 'elevate_weekly_events',
     'narrative_scenarios', 'narrative_storyboard', 'narrative_lore',
@@ -591,6 +591,13 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div>
                                 <div>Simulateur de Combat</div>
                                 <div class="small text-secondary">Split-screen tactique, Murailles &amp; Sièges</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_castles' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_castles">
+                            <i class="fa-solid fa-chess-rook text-warning"></i>
+                            <div>
+                                <div>Siège des 12 Châteaux Authentiques</div>
+                                <div class="small text-secondary">3 Échelons tactiques, Topographie, Météo &amp; Reliques</div>
                             </div>
                         </a>
                         <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_village' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_village">
