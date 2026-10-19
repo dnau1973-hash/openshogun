@@ -1141,6 +1141,191 @@ unset($_SESSION['general_flash']);
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- CINQUIÈME ITEM MAJEUR : RÉGÉNÉRATION DU MONDE & CONSERVATION DES    -->
+    <!-- JOUEURS HUMAINS                                                    -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="card mb-4 border-danger shadow-sm overflow-hidden" id="section-world-regeneration-config" style="border-width: 2px;">
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
+            <div>
+                <h3 class="card-title text-white m-0 d-flex align-items-center gap-2 fw-bold" style="font-size:1.25rem;">
+                    <i class="fa-solid fa-arrows-rotate text-warning fs-2"></i>
+                    <span>5. Régénération &amp; Réinitialisation du Monde Féodal</span>
+                </h3>
+                <div class="text-white-50 small mt-1">
+                    Préparez une nouvelle saison ou régénérez l'archipel en contrôlant strictement la conservation des comptes joueurs.
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-white text-danger fw-bold px-3 py-2 font-monospace fs-4 shadow-sm" id="badge-preserve-status-header">
+                    <?= !empty($preserveHumanUsers) ? 'Joueurs Humains Conservés' : 'Purge Intégrale' ?>
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body p-4 bg-light bg-opacity-25">
+            <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" id="formWorldRegenerationSettings">
+                <input type="hidden" name="action" value="save_world_regeneration_settings">
+
+                <!-- Option Clé demandée : Conserver les Joueurs Humains -->
+                <div class="card p-3 mb-4 border-2 shadow-xs <?= !empty($preserveHumanUsers) ? 'border-primary bg-primary-lt bg-opacity-10' : 'border-danger bg-danger-lt bg-opacity-10' ?>" id="cardPreserveHumanUsers">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                        <div class="form-check form-switch m-0 d-flex align-items-start gap-3">
+                            <input class="form-check-input mt-1" type="checkbox" role="switch" id="switchPreserveHumanUsers" name="preserve_human_users" value="1" <?= !empty($preserveHumanUsers) ? 'checked' : '' ?> style="cursor:pointer; width:2.8em; height:1.4em;" onchange="updatePreserveHumanUsersUI(this.checked)">
+                            <div>
+                                <label class="form-check-label fw-bold text-dark fs-2 mb-1" for="switchPreserveHumanUsers" style="cursor:pointer;">
+                                    <i class="fa-solid fa-user-shield text-primary me-1"></i>Conserver les Joueurs Humains
+                                </label>
+                                <div class="text-secondary small">
+                                    <strong>Règle fondamentale :</strong> Conserver les comptes des joueurs déjà présents dans le monde après la régénération du monde.
+                                </div>
+                            </div>
+                        </div>
+                        <span class="badge <?= !empty($preserveHumanUsers) ? 'bg-primary' : 'bg-danger' ?> fs-4 py-2 px-3 shadow-xs font-monospace" id="badge-preserve-state">
+                            <i class="fa-solid <?= !empty($preserveHumanUsers) ? 'fa-shield-halved' : 'fa-skull-crossbones' ?> me-1"></i>
+                            <span id="badge-preserve-text"><?= !empty($preserveHumanUsers) ? 'Comptes Joueurs Protégés' : 'Purge Complète Prévue' ?></span>
+                        </span>
+                    </div>
+
+                    <!-- Explications détaillées -->
+                    <div class="row g-3 mt-2 pt-2 border-top">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-white rounded border h-100">
+                                <div class="fw-bold text-success mb-1">
+                                    <i class="fa-solid fa-circle-check me-1"></i>Si l'option est ACTIVÉE (Comportement recommandé) :
+                                </div>
+                                <div class="text-secondary small">
+                                    Les comptes de tous les joueurs humains (identifiant, email, mot de passe hashé) sont <strong>conservés</strong> dans la base de données.
+                                    Leurs anciens fiefs, armées, flottes et quêtes sont remis à zéro pour le nouveau cycle.
+                                    Chaque joueur conserve son compte et recevra un nouveau domaine castral de départ, sa dotation initiale en ressources et un Héros Samouraï niveau 1.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-white rounded border h-100">
+                                <div class="fw-bold text-danger mb-1">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>Si l'option est DÉSACTIVÉE (Table rase totale) :
+                                </div>
+                                <div class="text-secondary small">
+                                    Tous les comptes des joueurs humains (non-administrateurs) sont <strong>définitivement supprimés</strong> de la table <code>users</code>.
+                                    Le monde repart d'une base totalement vierge où seul le Shogun Administrateur (<code>nezzar</code>) est recréé.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paramètres Complémentaires pour la Régénération -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
+                            <span><i class="fa-solid fa-flag text-secondary me-1"></i>Terres Libres Initiales</span>
+                            <span class="badge bg-secondary-lt font-monospace fw-bold">12 fiefs</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="number" class="form-control font-monospace fw-bold" id="inputNeutralPlanets" name="neutral_planets" min="5" max="50" value="12">
+                            <span class="input-group-text text-muted">provinces</span>
+                        </div>
+                        <div class="text-secondary small mt-1">Nombre d'emplacements neutres vierges arpentés pour les futures expansions.</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">
+                            <i class="fa-solid fa-robot text-warning me-1"></i>Déploiement des Clans IA
+                        </label>
+                        <div class="p-2 bg-white border rounded">
+                            <label class="form-check form-switch m-0" style="cursor:pointer;">
+                                <input class="form-check-input" type="checkbox" id="switchDeployBots" name="deploy_bots" value="1" checked style="cursor:pointer;">
+                                <span class="form-check-label fw-bold text-dark small">Déployer les 3 Seigneurs IA</span>
+                            </label>
+                        </div>
+                        <div class="text-secondary small mt-1">Clans Oda, Takeda et Tokugawa créés pour animer la carte dès l'ouverture.</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark mb-1">
+                            <i class="fa-solid fa-key text-danger me-1"></i>Mot de Passe Shogun (Nezzar)
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control font-monospace" id="inputAdminPassword" name="admin_password" value="Gabriel125#">
+                            <button class="btn btn-outline-secondary" type="button" onclick="toggleAdminPasswordVisibility()"><i class="fa-solid fa-eye" id="iconEyeAdminPass"></i></button>
+                        </div>
+                        <div class="text-secondary small mt-1">Mot de passe de synchronisation garanti pour le compte Administrateur.</div>
+                    </div>
+                </div>
+
+                <!-- Boutons d'Action -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pt-3 border-top">
+                    <button type="submit" class="btn btn-outline-secondary btn-lg fw-bold shadow-xs">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Enregistrer l'Option par Défaut
+                    </button>
+
+                    <button type="button" class="btn btn-danger btn-lg px-4 fw-bold shadow-sm" onclick="openStudioRegenerateModal()">
+                        <i class="fa-solid fa-fire text-warning me-2"></i>Régénérer le Monde Féodal...
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modale de Confirmation Sécurisée de Régénération du Monde -->
+    <div class="modal modal-blur fade" id="modalStudioRegenerateWorld" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content shadow-lg border-danger" style="border-width: 2px;">
+                <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" id="formExecuteRegenerateWorld">
+                    <input type="hidden" name="action" value="regenerate_world_action">
+                    <input type="hidden" name="preserve_human_users" id="hiddenPreserveHumanUsers" value="<?= !empty($preserveHumanUsers) ? '1' : '0' ?>">
+                    <input type="hidden" name="neutral_planets" id="hiddenNeutralPlanets" value="12">
+                    <input type="hidden" name="deploy_bots" id="hiddenDeployBots" value="1">
+                    <input type="hidden" name="admin_password" id="hiddenAdminPassword" value="Gabriel125#">
+
+                    <div class="modal-header bg-danger text-white py-3">
+                        <h5 class="modal-title fw-bold d-flex align-items-center gap-2 m-0 fs-3">
+                            <i class="fa-solid fa-fire text-warning fs-2"></i>Régénération Complète du Monde
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+
+                    <div class="modal-body p-4">
+                        <div class="alert alert-danger mb-3" id="modalRegenAlertBox">
+                            <div class="d-flex align-items-start">
+                                <i class="fa-solid fa-triangle-exclamation text-danger fs-1 me-3 mt-1"></i>
+                                <div>
+                                    <strong class="d-block mb-1">Avertissement de Réinitialisation :</strong>
+                                    <div id="modalRegenPreserveDescription" class="small">
+                                        <?= !empty($preserveHumanUsers) 
+                                            ? "<strong>Option active :</strong> Les comptes des joueurs humains déjà présents dans le monde seront <strong>conservés</strong>. Leurs anciens fiefs sont remis à zéro et ils recevront un nouveau départ avec Héros et dotation."
+                                            : "<strong>⚠️ ATTENTION CRITIQUE :</strong> L'option de conservation est désactivée. <strong>TOUS les comptes de joueurs humains seront IRRÉVOCABLEMENT SUPPRIMÉS</strong> !" ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark mb-1">
+                                Saisissez le mot de confirmation <code class="text-danger fw-bold">RESET</code> en majuscules :
+                            </label>
+                            <input type="text" 
+                                   class="form-control form-control-lg text-center font-monospace fw-bold" 
+                                   id="inputRegenConfirmKeyword" 
+                                   name="confirm_keyword" 
+                                   placeholder="RESET" 
+                                   autocomplete="off" 
+                                   style="letter-spacing: 3px; font-size: 1.3rem;">
+                        </div>
+                    </div>
+
+                    <div class="modal-footer bg-light py-3 d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-danger btn-lg fw-bold px-4" id="btnConfirmRegenerateWorld" disabled>
+                            <i class="fa-solid fa-fire me-2"></i>Exécuter la Régénération
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
     <!-- SECTION 5 : TÉLÉMÉTRIE D'OCCUPATION DU MONDE & DENSITÉ SPATIALE     -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <div class="row row-cards mb-4">
@@ -1812,6 +1997,111 @@ document.addEventListener('DOMContentLoaded', function() {
             btnElem.classList.add('btn-purple', 'shadow-sm');
         }
     };
+
+    // ── Item 5 : Régénération du Monde & Préservation des Joueurs Humains ──
+    window.updatePreserveHumanUsersUI = function(isChecked) {
+        const card = document.getElementById('cardPreserveHumanUsers');
+        const badgeState = document.getElementById('badge-preserve-state');
+        const badgeHeader = document.getElementById('badge-preserve-status-header');
+        const hiddenPreserve = document.getElementById('hiddenPreserveHumanUsers');
+        const modalDesc = document.getElementById('modalRegenPreserveDescription');
+
+        if (hiddenPreserve) hiddenPreserve.value = isChecked ? '1' : '0';
+
+        if (isChecked) {
+            if (card) {
+                card.classList.remove('border-danger', 'bg-danger-lt');
+                card.classList.add('border-primary', 'bg-primary-lt');
+            }
+            if (badgeState) {
+                badgeState.className = 'badge bg-primary fs-4 py-2 px-3 shadow-xs font-monospace';
+                badgeState.innerHTML = '<i class="fa-solid fa-shield-halved me-1"></i><span id="badge-preserve-text">Comptes Joueurs Protégés</span>';
+            }
+            if (badgeHeader) {
+                badgeHeader.innerText = 'Joueurs Humains Conservés';
+                badgeHeader.className = 'badge bg-white text-danger fw-bold px-3 py-2 font-monospace fs-4 shadow-sm';
+            }
+            if (modalDesc) {
+                modalDesc.innerHTML = '<strong>Option active :</strong> Les comptes des joueurs humains déjà présents dans le monde seront <strong>conservés</strong>. Leurs anciens fiefs sont remis à zéro et ils recevront un nouveau départ avec Héros et dotation.';
+            }
+        } else {
+            if (card) {
+                card.classList.remove('border-primary', 'bg-primary-lt');
+                card.classList.add('border-danger', 'bg-danger-lt');
+            }
+            if (badgeState) {
+                badgeState.className = 'badge bg-danger fs-4 py-2 px-3 shadow-xs font-monospace';
+                badgeState.innerHTML = '<i class="fa-solid fa-skull-crossbones me-1"></i><span id="badge-preserve-text">Purge Complète Prévue</span>';
+            }
+            if (badgeHeader) {
+                badgeHeader.innerText = 'Purge Intégrale';
+                badgeHeader.className = 'badge bg-white text-danger fw-bold px-3 py-2 font-monospace fs-4 shadow-sm';
+            }
+            if (modalDesc) {
+                modalDesc.innerHTML = '<strong>⚠️ ATTENTION CRITIQUE :</strong> L\'option de conservation est désactivée. <strong>TOUS les comptes de joueurs humains seront IRRÉVOCABLEMENT SUPPRIMÉS</strong> !';
+            }
+        }
+    };
+
+    window.openStudioRegenerateModal = function() {
+        const sw = document.getElementById('switchPreserveHumanUsers');
+        const inpNeut = document.getElementById('inputNeutralPlanets');
+        const swBots = document.getElementById('switchDeployBots');
+        const inpPass = document.getElementById('inputAdminPassword');
+
+        const hidPres = document.getElementById('hiddenPreserveHumanUsers');
+        const hidNeut = document.getElementById('hiddenNeutralPlanets');
+        const hidBots = document.getElementById('hiddenDeployBots');
+        const hidPass = document.getElementById('hiddenAdminPassword');
+
+        if (hidPres && sw) hidPres.value = sw.checked ? '1' : '0';
+        if (hidNeut && inpNeut) hidNeut.value = inpNeut.value;
+        if (hidBots && swBots) hidBots.value = swBots.checked ? '1' : '0';
+        if (hidPass && inpPass) hidPass.value = inpPass.value;
+
+        const keyInp = document.getElementById('inputRegenConfirmKeyword');
+        if (keyInp) keyInp.value = '';
+        const btnSubmit = document.getElementById('btnConfirmRegenerateWorld');
+        if (btnSubmit) btnSubmit.disabled = true;
+
+        if (sw) updatePreserveHumanUsersUI(sw.checked);
+
+        const modalElem = document.getElementById('modalStudioRegenerateWorld');
+        if (modalElem) {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const m = bootstrap.Modal.getOrCreateInstance(modalElem);
+                m.show();
+            } else {
+                modalElem.classList.add('show');
+                modalElem.style.display = 'block';
+            }
+        }
+    };
+
+    window.toggleAdminPasswordVisibility = function() {
+        const passInp = document.getElementById('inputAdminPassword');
+        const icon = document.getElementById('iconEyeAdminPass');
+        if (passInp && icon) {
+            if (passInp.type === 'password') {
+                passInp.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passInp.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    };
+
+    // Surveillance du mot-clé RESET pour déverrouiller la régénération
+    const inputKeyword = document.getElementById('inputRegenConfirmKeyword');
+    const btnRegenSubmit = document.getElementById('btnConfirmRegenerateWorld');
+    if (inputKeyword && btnRegenSubmit) {
+        inputKeyword.addEventListener('input', function() {
+            btnRegenSubmit.disabled = (this.value.trim() !== 'RESET');
+        });
+    }
 
     updateStarterSimulator();
     updateSpeedSimulator();

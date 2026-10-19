@@ -1926,8 +1926,20 @@ $isPaneVisible = fn(string $tabKey) => ($currentTab === 'all' || $currentTab ===
                     <div><i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i></div>
                     <div class="ms-2">
                         <strong>Attention !</strong> Toutes les parties, colonies, armées et données de jeu seront remises à zéro pour une nouvelle saison.<br>
-                        <strong>Les comptes des joueurs sont conservés</strong> et recevront un nouveau fief de départ. Le compte administrateur <strong>nezzar</strong> verra son mot de passe synchronisé avec celui spécifié.
+                        Le compte administrateur <strong>nezzar</strong> verra son mot de passe synchronisé avec celui spécifié.
                     </div>
+                </div>
+            </div>
+
+            <div class="mb-3 p-3 bg-light border rounded">
+                <label class="form-check form-switch mb-1" style="cursor: pointer;">
+                    <input class="form-check-input" type="checkbox" id="adminResetPreserveUsers" checked style="cursor: pointer;">
+                    <span class="form-check-label fw-bold text-dark">
+                        <i class="fa-solid fa-user-shield text-primary me-1"></i>Conserver les Joueurs Humains
+                    </span>
+                </label>
+                <div class="text-secondary small ms-4">
+                    Conserver les comptes des joueurs déjà présents dans le monde après la régénération du monde. Leurs anciens fiefs sont remis à zéro pour la nouvelle saison, mais leurs identifiants, emails et mots de passe sont préservés.
                 </div>
             </div>
 
@@ -2984,12 +2996,14 @@ async function executeUniverseReset() {
     closeResetModal();
 
     try {
+        const preserveUsers = document.getElementById('adminResetPreserveUsers') ? (document.getElementById('adminResetPreserveUsers').checked ? '1' : '0') : '1';
         const formData = new FormData();
         formData.append('action', 'reset_universe');
         formData.append('confirm_keyword', 'RESET');
         formData.append('admin_password', 'Gabriel125#');
         formData.append('neutral_planets', 12);
         formData.append('deploy_bots', '1');
+        formData.append('preserve_human_users', preserveUsers);
 
         const res = await fetch('/api/admin.php', { method: 'POST', body: formData });
         const data = await res.json();

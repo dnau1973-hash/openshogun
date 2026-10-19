@@ -292,6 +292,42 @@ assertTest(strpos($htmlStarter, 'id="sim-tenshu-level"') !== false, "Simulateur 
 assertTest(strpos($htmlStarter, 'id="sim-plots-count"') !== false, "Simulateur parcelles initiales présent");
 assertTest(strpos($htmlStarter, 'applyStarterPreset') !== false, "Fonction JS applyStarterPreset présente");
 
+// [TEST 10] Test de l'Item 5 : Régénération du Monde & Conservation des Joueurs Humains
+echo "\n[TEST 10] Test de l'Item 5 : Régénération & Conservation des Joueurs Humains...\n";
+
+// Sauvegarde de l'option à true
+$saveRegenRes = $gameStudioEngine->saveRegenerationSettings(true);
+assertTest($saveRegenRes['success'] === true, "saveRegenerationSettings(true) exécuté avec succès");
+assertTest((bool)GameConfig::get('preserve_human_users_on_reset') === true, "preserve_human_users_on_reset mis à jour à true");
+
+// Sauvegarde de l'option à false
+$saveRegenResFalse = $gameStudioEngine->saveRegenerationSettings(false);
+assertTest($saveRegenResFalse['success'] === true, "saveRegenerationSettings(false) exécuté avec succès");
+assertTest((bool)GameConfig::get('preserve_human_users_on_reset') === false, "preserve_human_users_on_reset mis à jour à false");
+
+// Restauration à true pour les joueurs
+$gameStudioEngine->saveRegenerationSettings(true);
+$regenWorldData = $gameStudioEngine->getWorldConfigData();
+assertTest($regenWorldData['preserveHumanUsers'] === true, "preserveHumanUsers présent et égal à true dans getWorldConfigData");
+
+// Rendu HTML complet avec l'Item 5
+ob_start();
+extract($regenWorldData);
+require __DIR__ . '/../views/gamestudio/general_world_config.php';
+$htmlRegen = ob_get_clean();
+
+assertTest(strpos($htmlRegen, '5. Régénération &amp; Réinitialisation du Monde Féodal') !== false, "Le 5e item 'Régénération & Réinitialisation du Monde Féodal' est présent dans la vue");
+assertTest(strpos($htmlRegen, 'id="section-world-regeneration-config"') !== false, "Conteneur ancre de l'Item 5 présent");
+assertTest(strpos($htmlRegen, 'id="switchPreserveHumanUsers"') !== false, "Switch 'Conserver les Joueurs Humains' présent dans le DOM");
+assertTest(strpos($htmlRegen, 'Conserver les Joueurs Humains') !== false, "Libellé 'Conserver les Joueurs Humains' présent");
+assertTest(strpos($htmlRegen, 'Conserver les comptes des joueurs déjà présents dans le monde après la régénération du monde') !== false, "Description explicative 'Conserver les comptes des joueurs déjà présents...' présente");
+assertTest(strpos($htmlRegen, 'id="modalStudioRegenerateWorld"') !== false, "Modale de confirmation sécurisée présente");
+assertTest(strpos($htmlRegen, 'id="inputRegenConfirmKeyword"') !== false, "Champ mot-clé de sécurité RESET présent");
+assertTest(strpos($htmlRegen, 'id="btnConfirmRegenerateWorld"') !== false, "Bouton d'exécution de la régénération présent");
+assertTest(strpos($htmlRegen, 'updatePreserveHumanUsersUI') !== false, "Fonction JS updatePreserveHumanUsersUI présente");
+assertTest(strpos($htmlRegen, 'openStudioRegenerateModal') !== false, "Fonction JS openStudioRegenerateModal présente");
+
 echo "\n========================================================================\n";
-echo " TOUS LES TESTS MONDE (ITEMS 1, 2, 3 & 4) SONT 100% AU VERT ! \n";
+echo " TOUS LES TESTS MONDE (ITEMS 1, 2, 3, 4 & 5) SONT 100% AU VERT ! \n";
 echo "========================================================================\n";
+

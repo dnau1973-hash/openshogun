@@ -137,6 +137,36 @@ if ($currentTab === 'dashboard') {
             ];
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-starting-endowment');
             exit;
+        } elseif ($_POST['action'] === 'save_world_regeneration_settings') {
+            $preserve = !empty($_POST['preserve_human_users']);
+            $res = $gameStudioEngine->saveRegenerationSettings($preserve);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Option de régénération enregistrée.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-regeneration-config');
+            exit;
+        } elseif ($_POST['action'] === 'regenerate_world_action') {
+            $confirmKeyword = trim((string)($_POST['confirm_keyword'] ?? ''));
+            if ($confirmKeyword !== 'RESET') {
+                $_SESSION['general_flash'] = [
+                    'type' => 'danger',
+                    'msg'  => "Échec de régénération : Vous devez impérativement saisir le mot-clé RESET en majuscules pour confirmer."
+                ];
+            } else {
+                $preserve = !empty($_POST['preserve_human_users']);
+                $neutralCount = max(5, min(50, (int)($_POST['neutral_planets'] ?? 12)));
+                $deployBots = !empty($_POST['deploy_bots']);
+                $adminPassword = !empty($_POST['admin_password']) ? trim((string)$_POST['admin_password']) : 'Gabriel125#';
+
+                $res = $gameStudioEngine->regenerateWorld($preserve, $neutralCount, $deployBots, $adminPassword);
+                $_SESSION['general_flash'] = [
+                    'type' => !empty($res['success']) ? 'success' : 'danger',
+                    'msg'  => $res['message'] ?? 'Régénération du monde terminée.'
+                ];
+            }
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-regeneration-config');
+            exit;
         }
     }
     $generalData = $gameStudioEngine->getGeneralData();

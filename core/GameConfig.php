@@ -67,7 +67,8 @@ class GameConfig {
                     'starter_rice' => 1000,
                     'starter_fish' => 250,
                     'starter_gold_coins' => 100,
-                    'beginner_protection_days' => 7
+                    'beginner_protection_days' => 7,
+                    'preserve_human_users_on_reset' => true
                 ];
             }
         }

@@ -307,6 +307,22 @@ if (!$adminHero) {
 }
 echo "[OK] Héros '{$adminHero['name']}' présent pour l'Administrateur nezzar\n";
 
+// 8. Test de l'option DÉSACTIVÉE (purge totale quand preserveHumanUsers = false)
+echo "\n6. Test de l'option DÉSACTIVÉE : resetUniverse avec preserveHumanUsers = false...\n";
+$resPurge = $worldGen->resetUniverse('NouveauAdmin125#', 5, false, false);
+if (!$resPurge['success']) {
+    echo "[FAIL] Erreur lors du reset purge totale: " . ($resPurge['message'] ?? '') . "\n";
+    exit(1);
+}
+$remainingUsers = (int)$sqlite->query("SELECT COUNT(*) FROM users")->fetchColumn();
+$nonAdminUsers = (int)$sqlite->query("SELECT COUNT(*) FROM users WHERE is_admin = 0")->fetchColumn();
+if ($nonAdminUsers !== 0) {
+    echo "[FAIL] Des utilisateurs non-admins subsistent après purge totale ({$nonAdminUsers} trouvés) !\n";
+    exit(1);
+}
+echo "[OK] Purge totale validée : 0 joueur non-admin restant, seul l'admin subsiste ({$remainingUsers} utilisateur au total)\n";
+
 echo "\n=================================================================\n";
-echo " TOUS LES TESTS DE PRÉSERVATION DES COMPTES ONT RÉUSSI (100%)\n";
+echo " TOUS LES TESTS DE PRÉSERVATION & PURGE DES COMPTES ONT RÉUSSI !\n";
 echo "=================================================================\n";
+

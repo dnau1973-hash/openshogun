@@ -659,7 +659,9 @@ class GameStudioEngine {
             'starterStone'           => $starterStone,
             'starterRice'            => $starterRice,
             'starterFish'            => $starterFish,
-            'starterGoldCoins'       => $starterGoldCoins
+            'starterGoldCoins'       => $starterGoldCoins,
+            // Régénération & Préservation des Joueurs Humains (Item 5)
+            'preserveHumanUsers'     => (bool)GameConfig::get('preserve_human_users_on_reset', true)
         ];
     }
 
@@ -870,5 +872,30 @@ class GameStudioEngine {
             'message' => "Dotation initiale et immunité enregistrées : Bois {$starterWood}, Pierre {$starterStone}, Riz {$starterRice}, Poisson {$starterFish}, Or {$starterGoldCoins} Ryō, Immunité {$protectionDays} jours."
         ];
     }
+
+    /**
+     * Enregistre l'option de préservation des comptes joueurs humains pour les futures régénérations (Item 5)
+     */
+    public function saveRegenerationSettings(bool $preserveHumanUsers): array {
+        $res = GameConfig::set('preserve_human_users_on_reset', $preserveHumanUsers ? 1 : 0);
+        return [
+            'success' => (bool)$res,
+            'preserve_human_users' => $preserveHumanUsers,
+            'message' => $preserveHumanUsers
+                ? "Option enregistrée : Les comptes des joueurs humains actuels seront conservés lors de la prochaine régénération du monde."
+                : "Option enregistrée : Les comptes des joueurs non-administrateurs seront purgés lors de la prochaine régénération du monde (remise à blanc totale)."
+        ];
+    }
+
+    /**
+     * Déclenche la régénération et réinitialisation de l'univers féodal (Item 5)
+     */
+    public function regenerateWorld(bool $preserveHumanUsers, int $neutralCount = 12, bool $deployBots = true, string $adminPassword = 'Gabriel125#'): array {
+        require_once __DIR__ . '/WorldGenerator.php';
+        GameConfig::set('preserve_human_users_on_reset', $preserveHumanUsers ? 1 : 0);
+        $worldGen = new WorldGenerator($this->db);
+        return $worldGen->resetUniverse($adminPassword, $neutralCount, $deployBots, $preserveHumanUsers);
+    }
 }
+
 

@@ -332,13 +332,14 @@ try {
             $adminPassword = !empty($_POST['admin_password']) ? trim($_POST['admin_password']) : 'Gabriel125#';
             $neutralCount = max(5, min(50, (int)($_POST['neutral_planets'] ?? 12)));
             $deployBots = !isset($_POST['deploy_bots']) || $_POST['deploy_bots'] === '1' || $_POST['deploy_bots'] === 'true';
+            $preserveHumanUsers = !isset($_POST['preserve_human_users']) || $_POST['preserve_human_users'] === '1' || $_POST['preserve_human_users'] === 'true';
 
             require_once __DIR__ . '/../core/PlanetEngine.php';
             $pe = new PlanetEngine();
             $pe->ensureSchemaMigration(true);
 
             $worldGen = new WorldGenerator();
-            $result = $worldGen->resetUniverse($adminPassword, $neutralCount, $deployBots);
+            $result = $worldGen->resetUniverse($adminPassword, $neutralCount, $deployBots, $preserveHumanUsers);
             echo json_encode($result);
             break;
 

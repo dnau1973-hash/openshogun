@@ -190,8 +190,22 @@ class WorldGenerator {
 
     /**
      * Réinitialisation complète de l'univers avec recréation de l'Administrateur par défaut
+     * 
+     * @param string $adminPassword Mot de passe assigné au compte administrateur nezzar
+     * @param int $neutralPlanetsCount Nombre de provinces neutres non colonisées à générer
+     * @param bool $deployBots Déployer ou non les 3 seigneurs IA de départ (Oda, Takeda, Tokugawa)
+     * @param bool|null $preserveHumanUsers Conserver les comptes des joueurs déjà présents dans le monde (null = selon GameConfig)
      */
-    public function resetUniverse(string $adminPassword = 'Gabriel125#', int $neutralPlanetsCount = 12, bool $deployBots = true): array {
+    public function resetUniverse(
+        string $adminPassword = 'Gabriel125#', 
+        int $neutralPlanetsCount = 12, 
+        bool $deployBots = true, 
+        ?bool $preserveHumanUsers = null
+    ): array {
+        $preserveHumanUsers = ($preserveHumanUsers !== null) 
+            ? (bool)$preserveHumanUsers 
+            : (bool)GameConfig::get('preserve_human_users_on_reset', true);
+
         $driverName = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
         if ($driverName !== 'sqlite') {
             $this->db->exec("SET FOREIGN_KEY_CHECKS = 0;");
@@ -207,8 +221,6 @@ class WorldGenerator {
         }
 
         // 1. Vidage de toutes les tables dynamiques de partie (progression, armées, fiefs, quêtes)
-        // NOTE : La table `users` n'est PLUS tronquée afin de préserver l'ensemble des comptes de joueurs.
-        // Seuls les comptes créés comme bots (is_bot = 1) sont purgés pour recréer proprement les clans IA.
         $dynamicTables = [
             'combat_reports',
             'messages',
@@ -249,31 +261,56 @@ class WorldGenerator {
             }
         }
 
-        // Purge des bots IA précédents dans `users`
+        // Purge systématique des bots IA précédents dans `users`
         try {
             $this->db->exec("DELETE FROM users WHERE is_bot = 1");
         } catch (Exception $e) {
             error_log("WorldGenerator::resetUniverse - DELETE bots notice: " . $e->getMessage());
         }
 
-        // Réinitialisation des statistiques, classements et appartenances pour TOUS les utilisateurs conservés
-        $protectionDays = (int)GameConfig::get('beginner_protection_days', 7);
-        $protectionSql = ($protectionDays > 0)
-            ? "DATE_ADD(NOW(), INTERVAL {$protectionDays} DAY)"
-            : "NULL";
-
-        // Détection pilote DB (compatibilité SQLite pour tests)
-        $driverName = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
-        if ($driverName === 'sqlite') {
-            $protVal = ($protectionDays > 0) ? (time() + ($protectionDays * 86400)) : 'NULL';
-            $this->db->exec("UPDATE users SET points = 0, alliance_id = NULL, protection_until = {$protVal}");
+        // Traitement des comptes joueurs selon l'option 'preserve_human_users'
+        if (!$preserveHumanUsers) {
+            // Option DÉSACTIVÉE : purge complète des comptes joueurs non-administrateurs
+            try {
+                $this->db->exec("DELETE FROM users WHERE is_admin = 0");
+            } catch (Exception $e) {
+                error_log("WorldGenerator::resetUniverse - DELETE non-admin users notice: " . $e->getMessage());
+            }
         } else {
-            $this->db->exec("
-                UPDATE users 
-                SET points = 0, 
-                    alliance_id = NULL, 
-                    protection_until = {$protectionSql}
-            ");
+            // Option ACTIVÉE : Réinitialisation des statistiques, classements et appartenances pour TOUS les utilisateurs conservés
+            $protectionDays = (int)GameConfig::get('beginner_protection_days', 7);
+            $starterGold    = (int)GameConfig::get('starter_gold_coins', 100);
+            $protectionSql  = ($protectionDays > 0)
+                ? "DATE_ADD(NOW(), INTERVAL {$protectionDays} DAY)"
+                : "NULL";
+
+            // Détection pilote DB (compatibilité SQLite pour tests)
+            $driverName = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
+            if ($driverName === 'sqlite') {
+                $protVal = ($protectionDays > 0) ? (time() + ($protectionDays * 86400)) : 'NULL';
+                try {
+                    $this->db->exec("UPDATE users SET points = 0, alliance_id = NULL, protection_until = {$protVal}, gold_coins = {$starterGold}");
+                } catch (Exception $eGold) {
+                    $this->db->exec("UPDATE users SET points = 0, alliance_id = NULL, protection_until = {$protVal}");
+                }
+            } else {
+                try {
+                    $this->db->exec("
+                        UPDATE users 
+                        SET points = 0, 
+                            alliance_id = NULL, 
+                            protection_until = {$protectionSql},
+                            gold_coins = {$starterGold}
+                    ");
+                } catch (Exception $eGold) {
+                    $this->db->exec("
+                        UPDATE users 
+                        SET points = 0, 
+                            alliance_id = NULL, 
+                            protection_until = {$protectionSql}
+                    ");
+                }
+            }
         }
 
         // 2. Initialiser / Vérifier les constantes de jeu
@@ -402,65 +439,70 @@ class WorldGenerator {
         }
 
         // 8c. Fonder un nouveau domaine de départ et un Héros pour CHAQUE autre joueur humain conservé
-        $stmtOtherUsers = $this->db->prepare("SELECT id, username, faction FROM users WHERE is_bot = 0 AND id != ?");
-        $stmtOtherUsers->execute([$adminId]);
-        $otherUsers = $stmtOtherUsers->fetchAll(PDO::FETCH_ASSOC);
+        $preservedUsersCount = 1; // Shogun Admin
+        if ($preserveHumanUsers) {
+            $stmtOtherUsers = $this->db->prepare("SELECT id, username, faction FROM users WHERE is_bot = 0 AND id != ?");
+            $stmtOtherUsers->execute([$adminId]);
+            $otherUsers = $stmtOtherUsers->fetchAll(PDO::FETCH_ASSOC);
+            $preservedUsersCount += count($otherUsers);
 
-        $starterUnits = [
-            'terran' => ['code' => 'piquier_ashigaru_yari', 'count' => 15],
-            'vorash' => ['code' => 'fantassin_leger_takeda', 'count' => 20],
-            'aethelis' => ['code' => 'sentinelle_yari_tokugawa', 'count' => 15]
-        ];
+            $starterUnits = [
+                'terran' => ['code' => 'piquier_ashigaru_yari', 'count' => 15],
+                'vorash' => ['code' => 'fantassin_leger_takeda', 'count' => 20],
+                'aethelis' => ['code' => 'sentinelle_yari_tokugawa', 'count' => 15]
+            ];
 
-        foreach ($otherUsers as $ou) {
-            $uId = (int)$ou['id'];
-            $uName = $ou['username'];
-            $uFaction = $ou['faction'] ?? 'terran';
+            foreach ($otherUsers as $ou) {
+                $uId = (int)$ou['id'];
+                $uName = $ou['username'];
+                $uFaction = $ou['faction'] ?? 'terran';
 
-            // Coordonnées libres pour le nouveau départ du joueur
-            $uCoords = VillageFieldGenerator::findRandomFreeCoordinates($this->db, null, 'random');
-            $uPlanetName = "Château " . ucfirst($uName);
+                // Coordonnées libres pour le nouveau départ du joueur
+                $uCoords = VillageFieldGenerator::findRandomFreeCoordinates($this->db, null, 'random');
+                $uPlanetName = "Château " . ucfirst($uName);
 
-            if ($hasFishCol) {
-                $stmtUserPlan = $this->db->prepare("
-                    INSERT INTO planets 
-                    (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
-                    VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 0, 120, 30000, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
-                ");
-            } else {
-                $stmtUserPlan = $this->db->prepare("
-                    INSERT INTO planets 
-                    (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
-                    VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 120, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
-                ");
-            }
-            $stmtUserPlan->execute([$uId, $uPlanetName, $uCoords['x'], $uCoords['y']]);
-            $uPlanetId = (int)$this->db->lastInsertId();
+                if ($hasFishCol) {
+                    $stmtUserPlan = $this->db->prepare("
+                        INSERT INTO planets 
+                        (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
+                        VALUES (?, ?, ?, ?, 'terrestrial', ?, ?, ?, ?, 0, 120, 30000, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
+                    ");
+                    $stmtUserPlan->execute([$uId, $uPlanetName, $uCoords['x'], $uCoords['y'], $starterWood, $starterStone, $starterRice, $starterFish]);
+                } else {
+                    $stmtUserPlan = $this->db->prepare("
+                        INSERT INTO planets 
+                        (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
+                        VALUES (?, ?, ?, ?, 'terrestrial', ?, ?, ?, 0, 120, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
+                    ");
+                    $stmtUserPlan->execute([$uId, $uPlanetName, $uCoords['x'], $uCoords['y'], $starterWood, $starterStone, $starterRice]);
+                }
+                $uPlanetId = (int)$this->db->lastInsertId();
 
-            // Parcelles de ressources
-            $uArchetype = VillageFieldGenerator::getRandomArchetypeKey(true);
-            VillageFieldGenerator::populatePlanetFields($this->db, $uPlanetId, $uArchetype, 0, false);
+                // Parcelles de ressources
+                $uArchetype = VillageFieldGenerator::getRandomArchetypeKey(true);
+                VillageFieldGenerator::populatePlanetFields($this->db, $uPlanetId, $uArchetype, 0, false);
 
-            // Domaine rural
-            if (isset($villageService)) {
-                try {
-                    $villageService->generateVillage($uPlanetId, false, true, true);
-                } catch (Exception $eVil) {}
-            }
+                // Domaine rural
+                if (isset($villageService)) {
+                    try {
+                        $villageService->generateVillage($uPlanetId, false, true, true);
+                    } catch (Exception $eVil) {}
+                }
 
-            // Troupes de départ
-            $stUnitInfo = $starterUnits[$uFaction] ?? $starterUnits['terran'];
-            $stmtUnit->execute([$uPlanetId, $stUnitInfo['code'], $stUnitInfo['count']]);
+                // Troupes de départ
+                $stUnitInfo = $starterUnits[$uFaction] ?? $starterUnits['terran'];
+                $stmtUnit->execute([$uPlanetId, $stUnitInfo['code'], $stUnitInfo['count']]);
 
-            // Vaisseaux éclaireurs
-            $stmtShip->execute([$uPlanetId, 'transporter_light', 1]);
-            $stmtShip->execute([$uPlanetId, 'spy_probe', 2]);
+                // Vaisseaux éclaireurs
+                $stmtShip->execute([$uPlanetId, 'transporter_light', 1]);
+                $stmtShip->execute([$uPlanetId, 'spy_probe', 2]);
 
-            // Héros Samouraï
-            if (isset($heroEngine)) {
-                try {
-                    $heroEngine->createHeroForUser($uId, "Samouraï " . ucfirst($uName), $uPlanetId, $uCoords['x'], $uCoords['y']);
-                } catch (Exception $eHero) {}
+                // Héros Samouraï
+                if (isset($heroEngine)) {
+                    try {
+                        $heroEngine->createHeroForUser($uId, "Samouraï " . ucfirst($uName), $uPlanetId, $uCoords['x'], $uCoords['y']);
+                    } catch (Exception $eHero) {}
+                }
             }
         }
 
@@ -521,9 +563,13 @@ class WorldGenerator {
         $_SESSION['faction'] = $adminFaction;
         $_SESSION['current_planet_id'] = $capitalPlanetId;
 
+        $usersPreservedMsg = $preserveHumanUsers 
+            ? "{$preservedUsersCount} compte(s) joueur(s) humain(s) ont été conservés avec un nouveau fief capital."
+            : "Tous les anciens comptes joueurs ont été purgés (remise à blanc totale).";
+
         return [
             'success' => true,
-            'message' => "L'univers des Shoguns a été réinitialisé avec succès ! Vous êtes connecté sous le Daimyō '{$adminUsername}'.",
+            'message' => "L'univers des Shoguns a été réinitialisé avec succès ! {$usersPreservedMsg} Vous êtes connecté sous le Daimyō '{$adminUsername}'.",
             'admin' => [
                 'id' => $adminId,
                 'username' => $adminUsername,
@@ -531,7 +577,9 @@ class WorldGenerator {
                 'capital_planet' => "{$capitalName} [{$capitalX} : {$capitalY}]"
             ],
             'neutral_planets' => $worldGenRes['generated_count'],
-            'bots_deployed' => $botsResult ? $botsResult['created_count'] : 0
+            'bots_deployed' => $botsResult ? $botsResult['created_count'] : 0,
+            'preserve_human_users' => $preserveHumanUsers,
+            'preserved_users_count' => $preservedUsersCount
         ];
     }
 }
