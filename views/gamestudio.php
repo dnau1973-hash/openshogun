@@ -101,7 +101,6 @@ if ($currentTab === 'dashboard') {
         $worldConfigData = $gameStudioEngine->getWorldConfigData();
         extract($worldConfigData);
     }
-}
 } elseif ($currentTab === 'elevate_research') {
     require_once __DIR__ . '/../core/ResearchElevateService.php';
     $elevateService = new ResearchElevateService();
