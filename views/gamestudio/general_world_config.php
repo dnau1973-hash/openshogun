@@ -1170,6 +1170,27 @@ unset($_SESSION['general_flash']);
             <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" id="formWorldBotsConfig">
                 <input type="hidden" name="action" value="save_world_bots_settings">
 
+                <!-- Préréglages Stratégiques 1-Clic Recommandés -->
+                <div class="p-3 bg-white border rounded shadow-xs mb-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <span class="fw-bold text-dark d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-sliders text-indigo"></i>Préréglages Stratégiques 1-Clic Recommandés :
+                        </span>
+                        <span class="text-secondary small">Calibre instantanément les directives globales des Daimyōs IA</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn <?= $botAggressiveness === 'passive' ? 'btn-success shadow-sm' : 'btn-outline-secondary' ?> btn-sm bot-world-preset-btn fw-bold" onclick="applyWorldBotsPreset('peaceful', this)">
+                            <i class="fa-solid fa-shield text-success me-1"></i>Bonsaï Défensif (Agricole &amp; Shinto)
+                        </button>
+                        <button type="button" class="btn <?= $botAggressiveness === 'moderate' ? 'btn-indigo shadow-sm' : 'btn-outline-secondary' ?> btn-sm bot-world-preset-btn fw-bold" onclick="applyWorldBotsPreset('moderate', this)">
+                            <i class="fa-solid fa-scale-balanced me-1"></i>Sengoku Équilibré (Standard Shogun)
+                        </button>
+                        <button type="button" class="btn <?= $botAggressiveness === 'aggressive' ? 'btn-danger shadow-sm' : 'btn-outline-secondary' ?> btn-sm bot-world-preset-btn fw-bold" onclick="applyWorldBotsPreset('aggressive', this)">
+                            <i class="fa-solid fa-fire text-danger me-1"></i>Tempête Martiale Oda (Guerre Totale)
+                        </button>
+                    </div>
+                </div>
+
                 <!-- 1. Directives Fondamentales (3 Switches) -->
                 <div class="row g-3 mb-4">
                     <!-- Switch 1 : Activation Globale du Moteur IA -->
@@ -1385,7 +1406,198 @@ unset($_SESSION['general_flash']);
                 </div>
             </form>
 
-            <!-- ── 3. Actions Féodales Immédiates (3 Boutons 1-Clic) ── -->
+            <!-- ── 3. Directives Stratégiques & Règles de Décision des PNJ (Arbres & Exemples) ── -->
+            <div class="card card-body bg-white border mb-4 shadow-xs">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h4 class="m-0 text-dark fw-bold d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-diagram-project text-indigo"></i>Directives Stratégiques &amp; Règles de Décision des PNJ (Moteur <code>BotEngine</code>)
+                        </h4>
+                        <div class="text-secondary small">
+                            Comportements décisionnels appliqués à chaque cycle de simulation autonome féodale (~5 minutes).
+                        </div>
+                    </div>
+                    <span class="badge bg-indigo-lt text-indigo font-monospace fw-bold">6 Arbres Décisionnels</span>
+                </div>
+
+                <!-- Grille des 6 Arbres de Décision avec Exemples Concrets -->
+                <div class="row g-3 mb-3">
+                    <!-- Règle 1 : Économie & 18 Parcelles Rurales -->
+                    <div class="col-lg-6">
+                        <div class="card h-100 border shadow-xs bg-white">
+                            <div class="card-header bg-success-lt py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-success d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-seedling"></i>1. Décision Économique &amp; Parcelles Rurales
+                                </span>
+                                <span class="badge bg-success text-white font-monospace">Niv Max 15</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="small mb-2">
+                                    <strong>Algorithme :</strong> Tri ascendant <code>usort(fields, level ASC)</code>. Le bot identifie la parcelle la plus faible sous le niveau 15 et lance son amélioration dès que ses greniers le permettent.
+                                </div>
+                                <div class="p-2 bg-light rounded border-start border-3 border-success small mb-2">
+                                    <div class="text-success fw-bold mb-1"><i class="fa-solid fa-lightbulb me-1"></i>Exemple Concret :</div>
+                                    Le Daimyō <strong>Oda Nobunaga</strong> inspecte son fief. Ses rizières sont Niv 4, ses scieries Niv 3, mais sa <em>Carrière de Granit #6</em> est restée Niv 2. Le moteur consacre immédiatement ses stocks de Koku et de Bois pour promouvoir la carrière au <strong>Niveau 3</strong> (+22 Pierre/h).
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fa-solid fa-circle-check text-success me-1"></i>Garantit un développement harmonieux et homogène des 18 parcelles du terroir.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Règle 2 : Urbanisme & Tenshu Castral -->
+                    <div class="col-lg-6">
+                        <div class="card h-100 border shadow-xs bg-white">
+                            <div class="card-header bg-primary-lt py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-primary d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-chess-rook"></i>2. Décision d'Urbanisme &amp; Fortifications
+                                </span>
+                                <span class="badge bg-primary text-white font-monospace">Tenshu &bull; Caserne</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="small mb-2">
+                                    <strong>Algorithme :</strong> Arbitrage aléatoire pondéré : si le Tenshu / Donjon (<code>hq</code>) est &lt; Niv 10, le bot a <strong>60% de chance</strong> (tirage 1-10 &le; 6) de l'élever. Sinon, si la Caserne (<code>barracks</code>) est &lt; Niv 8, il améliore la Caserne.
+                                </div>
+                                <div class="p-2 bg-light rounded border-start border-3 border-primary small mb-2">
+                                    <div class="text-primary fw-bold mb-1"><i class="fa-solid fa-lightbulb me-1"></i>Exemple Concret :</div>
+                                    Avec 2 500 bois et 3 000 pierre en réserve, le bot tire un score de 4 (&le; 6) : il lance l'élévation du <strong>Tenshu Niveau 5</strong>, augmentant de +10% la vitesse de tous les futurs chantiers du fief.
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fa-solid fa-circle-check text-primary me-1"></i>Priorise le cœur castral pour réduire les temps de construction avant les armées.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Règle 3 : Conscription Militaire par Faction -->
+                    <div class="col-lg-6">
+                        <div class="card h-100 border shadow-xs bg-white">
+                            <div class="card-header bg-danger-lt py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-danger d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-person-rifle"></i>3. Conscription Martiale selon la Faction
+                                </span>
+                                <span class="badge bg-danger text-white font-monospace">5 à 15 unités / cycle</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="small mb-2">
+                                    <strong>Algorithme :</strong> Recrutement automatique d'un bataillon de <strong>5 à 15 unités</strong> par fief à chaque tick, selon la doctrine de guerre propre à la faction du seigneur :
+                                </div>
+                                <div class="small mb-2">
+                                    <span class="badge bg-primary-lt text-primary font-monospace me-1">Terran (Oda)</span> : Piquiers Ashigaru Yari &amp; Arquebusiers Tanegashima<br>
+                                    <span class="badge bg-danger-lt text-danger font-monospace me-1">Vorash (Takeda)</span> : Fantassins légers &amp; Archers Yumi montés (Cavalerie)<br>
+                                    <span class="badge bg-warning-lt text-warning font-monospace me-1">Aethelis (Tokugawa)</span> : Sentinelles Yari &amp; Archers de muraille
+                                </div>
+                                <div class="p-2 bg-light rounded border-start border-3 border-danger small">
+                                    <div class="text-danger fw-bold mb-1"><i class="fa-solid fa-shield-cat me-1"></i>Garnison Inviolable :</div>
+                                    Le bot maintient en permanence une garnison minimale de <strong>15 soldats</strong> au château : aucune troupe ne part en raid si les réserves de garde sont insuffisantes.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Règle 4 : Raids Féodaux & Sécurité Débutants -->
+                    <div class="col-lg-6">
+                        <div class="card h-100 border shadow-xs bg-white">
+                            <div class="card-header bg-pink-lt py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-pink d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-khanda"></i>4. Règles d'Engagement &amp; Raids Féodaux
+                                </span>
+                                <span class="badge bg-success text-white font-monospace">Immunité Débutant Inviolable</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="small mb-2">
+                                    <strong>Clause Sacrée :</strong> <code>WHERE u.protection_until IS NULL OR u.protection_until &le; NOW()</code>. Les seigneurs protégés par le bouclier débutant sont <strong>totalement exclus</strong> et invisibles pour le cerveau offensif des bots.
+                                </div>
+                                <div class="p-2 bg-light rounded border-start border-3 border-pink small mb-2">
+                                    <div class="text-pink fw-bold mb-1"><i class="fa-solid fa-crosshairs me-1"></i>Critères de Ciblage :</div>
+                                    • <strong>Rayon d'action :</strong> &le; 35 lieues cartographiques.<br>
+                                    • <strong>Probabilité :</strong> 0% (Pacifique), 15% (Modéré), 35% (Belliqueux).<br>
+                                    • <strong>Cooldown anti-acharnement :</strong> 10 min en Belliqueux, 20 min en Modéré.<br>
+                                    • <strong>Cibles prioritaires :</strong> Fiefs humains non protégés les plus proches, puis rivaux IA.
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fa-solid fa-circle-check text-success me-1"></i>Respect absolu du sanctuaire des nouveaux joueurs arrivant sur le serveur.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Règle 5 : Infiltration Shinobi & Espionnage -->
+                    <div class="col-lg-6">
+                        <div class="card h-100 border shadow-xs bg-white">
+                            <div class="card-header bg-azure-lt py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-azure d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-user-ninja"></i>5. Reconnaissance Shinobi &amp; Infiltration
+                                </span>
+                                <span class="badge bg-azure text-white font-monospace">Portée 45 lieues</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="small mb-2">
+                                    <strong>Algorithme :</strong> Envoi d'éclaireurs Shinobi pour sonder les garnisons et stocks ennemis avant toute campagne militaire.
+                                </div>
+                                <div class="p-2 bg-light rounded border-start border-3 border-azure small mb-2">
+                                    <div class="text-azure fw-bold mb-1"><i class="fa-solid fa-lightbulb me-1"></i>Fréquence &amp; Cadence :</div>
+                                    • Mode Pacifique : 0% espionnage.<br>
+                                    • Mode Modéré : 20% probabilité, cooldown 15 minutes.<br>
+                                    • Mode Belliqueux : 45% probabilité, cooldown 8 minutes.<br>
+                                    • Auto-ravitaillement : Si le fief manque d'espions, production automatique de 3 éclaireurs d'avant-garde.
+                                </div>
+                                <div class="text-muted small">
+                                    Les missions sont tracées dans la table <code>fleet_missions</code> avec durée de marche réelle.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Règle 6 : Colonisation Autonome & Expansion Fiefs -->
+                    <div class="col-lg-6">
+                        <div class="card h-100 border shadow-xs bg-white">
+                            <div class="card-header bg-indigo-lt py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-indigo d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-map-location-dot"></i>6. Colonisation &amp; Expansion Provinciale
+                                </span>
+                                <span class="badge bg-indigo text-white font-monospace">1 à 10 fiefs max</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="small mb-2">
+                                    <strong>Algorithme :</strong> Déclenchement à <strong>25% de chance</strong> si <code>bot_colonize_enabled = 1</code> et nombre de fiefs actuels &lt; <code>bot_max_planets</code>.
+                                </div>
+                                <div class="p-2 bg-light rounded border-start border-3 border-indigo small mb-2">
+                                    <div class="text-indigo fw-bold mb-1"><i class="fa-solid fa-lightbulb me-1"></i>Processus d'Implantation :</div>
+                                    1. Recherche automatique d'une coordonnée libre <code>(x, y)</code> dans l'archipel.<br>
+                                    2. Fondation du nouveau domaine : <em>"Fief Daimyō N"</em> avec 2 000 Bois, 1 500 Pierre et 800 Fer.<br>
+                                    3. Génération instantanée des 18 parcelles vierges de terroir via <code>VillageFieldGenerator</code>.
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fa-solid fa-circle-check text-indigo me-1"></i>Le clan étend sa présence territoriale sans dépasser le plafond fixé par l'administrateur.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Console Simulée : Exemple de Rapport d'un Cycle Réel BotEngine -->
+                <div class="card bg-dark text-white shadow-sm border-0">
+                    <div class="card-header bg-black py-2 d-flex justify-content-between align-items-center">
+                        <span class="font-monospace text-success small fw-bold d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-terminal"></i>Console BotEngine &bull; Exemple de Trace d'Exécution d'un Cycle de Simulation
+                        </span>
+                        <span class="badge bg-dark text-white-50 font-monospace">executeBotCycle() &bull; JSON Output</span>
+                    </div>
+                    <div class="card-body p-3 font-monospace small bg-black bg-opacity-75 text-light" style="font-size: 0.82rem; line-height: 1.5;">
+                        <span class="text-success">[BotEngine]</span> Démarrage du cycle de simulation féodale pour <strong class="text-warning">3 Daimyōs actifs</strong>...<br>
+                        <span class="text-cyan">&gt; Clan Oda Nobunaga [12 : 8] :</span> Rizières #3 &rarr; Niv 5 (+32 Riz/h) | Tenshu &rarr; Niv 4 | +12 Arquebusiers Tanegashima recrutés.<br>
+                        <span class="text-danger">&gt; Clan Takeda Shingen [-14 : 22] :</span> Carrière de Granit #2 &rarr; Niv 3 | Caserne &rarr; Niv 3 | +10 Archers Yumi montés.<br>
+                        <span class="text-pink">&gt; Mission Infiltration Shinobi :</span> Éclaireur de Takeda envoyé vers le fief voisin [-10 : 18] (Distance: 15.2 lieues, vol: 48s).<br>
+                        <span class="text-purple">&gt; Colonisation Autonome :</span> Oda Nobunaga fonde <strong>"Fief Oda Nobunaga 2"</strong> aux coordonnées [18 : 6] (18 parcelles générées).<br>
+                        <span class="text-success">&gt; Contrôle Sécurité Débutants :</span> 4 nouveaux joueurs sous bouclier débutant &rarr; 100% exclus des listes de cibles.<br>
+                        <span class="text-warning">[Rapport Global]</span> 3 bots traités, +3 parcelles élevées, +2 bâtiments fortifiés, +22 soldats conscrits, 1 nouveau fief fondé.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── 4. Actions Féodales Immédiates (3 Boutons 1-Clic) ── -->
             <div class="card card-body bg-white border mb-4 shadow-xs">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                     <div>
@@ -1463,7 +1675,7 @@ unset($_SESSION['general_flash']);
                 </div>
             </div>
 
-            <!-- ── 4. Registre des Daimyōs IA Actifs sur la Carte ── -->
+            <!-- ── 5. Registre des Daimyōs IA Actifs sur la Carte ── -->
             <div class="card border shadow-xs overflow-hidden">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h4 class="card-title text-dark m-0 d-flex align-items-center gap-2">
@@ -2434,6 +2646,90 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 badge.className = 'badge bg-danger-lt font-monospace text-uppercase fw-bold';
             }
+        }
+    };
+
+    window.applyWorldBotsPreset = function(preset, btn) {
+        document.querySelectorAll('.bot-world-preset-btn').forEach(b => {
+            b.classList.remove('btn-indigo', 'btn-danger', 'btn-success', 'shadow-sm');
+            b.classList.add('btn-outline-secondary');
+        });
+        if (btn) {
+            btn.classList.remove('btn-outline-secondary');
+            if (preset === 'peaceful') btn.classList.add('btn-success', 'shadow-sm');
+            else if (preset === 'aggressive') btn.classList.add('btn-danger', 'shadow-sm');
+            else btn.classList.add('btn-indigo', 'shadow-sm');
+        }
+
+        const swBots = document.getElementById('switchBotsEnabled');
+        const swColonize = document.getElementById('switchBotColonize');
+        const swSpawn = document.getElementById('switchBotSpawn');
+        const slPlanets = document.getElementById('sliderBotMaxPlanets');
+        const inPlanets = document.getElementById('inputBotMaxPlanets');
+        const slInterval = document.getElementById('sliderBotSpawnInterval');
+        const inInterval = document.getElementById('inputBotSpawnInterval');
+        const slMax = document.getElementById('sliderBotSpawnMax');
+        const inMax = document.getElementById('inputBotSpawnMax');
+
+        const radPassive = document.querySelector('input[name="bot_aggressiveness"][value="passive"]');
+        const radModerate = document.querySelector('input[name="bot_aggressiveness"][value="moderate"]');
+        const radAggressive = document.querySelector('input[name="bot_aggressiveness"][value="aggressive"]');
+
+        if (preset === 'peaceful') {
+            if (swBots) swBots.checked = true;
+            if (swColonize) swColonize.checked = false;
+            if (swSpawn) swSpawn.checked = true;
+            if (slPlanets) slPlanets.value = 1;
+            if (inPlanets) inPlanets.value = 1;
+            if (slInterval) slInterval.value = 60;
+            if (inInterval) inInterval.value = 60;
+            if (slMax) slMax.value = 20;
+            if (inMax) inMax.value = 20;
+            if (radPassive) radPassive.checked = true;
+            updateAggressivenessBadge('passive');
+        } else if (preset === 'moderate') {
+            if (swBots) swBots.checked = true;
+            if (swColonize) swColonize.checked = true;
+            if (swSpawn) swSpawn.checked = true;
+            if (slPlanets) slPlanets.value = 3;
+            if (inPlanets) inPlanets.value = 3;
+            if (slInterval) slInterval.value = 15;
+            if (inInterval) inInterval.value = 15;
+            if (slMax) slMax.value = 50;
+            if (inMax) inMax.value = 50;
+            if (radModerate) radModerate.checked = true;
+            updateAggressivenessBadge('moderate');
+        } else if (preset === 'aggressive') {
+            if (swBots) swBots.checked = true;
+            if (swColonize) swColonize.checked = true;
+            if (swSpawn) swSpawn.checked = true;
+            if (slPlanets) slPlanets.value = 5;
+            if (inPlanets) inPlanets.value = 5;
+            if (slInterval) slInterval.value = 5;
+            if (inInterval) inInterval.value = 5;
+            if (slMax) slMax.value = 100;
+            if (inMax) inMax.value = 100;
+            if (radAggressive) radAggressive.checked = true;
+            updateAggressivenessBadge('aggressive');
+        }
+
+        if (swBots) updateBotsEnabledUI(swBots.checked);
+        const bPlanets = document.getElementById('badge-val-bot-max-planets');
+        if (bPlanets && inPlanets) bPlanets.innerText = inPlanets.value + ' fiefs / clan';
+        const bInterval = document.getElementById('badge-val-bot-spawn-interval');
+        if (bInterval && inInterval) bInterval.innerText = inInterval.value + ' min';
+        const bMax = document.getElementById('badge-val-bot-spawn-max');
+        if (bMax && inMax) bMax.innerText = inMax.value + ' fiefs max';
+
+        const bSwitchColonize = document.getElementById('badge-switch-bot-colonize');
+        if (bSwitchColonize && swColonize) {
+            bSwitchColonize.className = swColonize.checked ? 'badge bg-teal font-monospace' : 'badge bg-secondary font-monospace';
+            bSwitchColonize.innerText = swColonize.checked ? 'Autorisée' : 'Bloquée';
+        }
+        const bSwitchSpawn = document.getElementById('badge-switch-bot-spawn');
+        if (bSwitchSpawn && swSpawn) {
+            bSwitchSpawn.className = swSpawn.checked ? 'badge bg-pink font-monospace' : 'badge bg-secondary font-monospace';
+            bSwitchSpawn.innerText = swSpawn.checked ? 'Activée' : 'Désactivée';
         }
     };
 

@@ -343,6 +343,15 @@ assertTest(strpos($htmlBots, 'trigger_spontaneous_spawn') !== false, "Action Éc
 assertTest(strpos($htmlBots, 'run_bot_cycle') !== false, "Action Cycle de Décision IA présente");
 assertTest(strpos($htmlBots, 'updateBotsEnabledUI') !== false, "Fonction JS updateBotsEnabledUI présente");
 assertTest(strpos($htmlBots, 'updateAggressivenessBadge') !== false, "Fonction JS updateAggressivenessBadge présente");
+assertTest(strpos($htmlBots, 'applyWorldBotsPreset') !== false, "Fonction JS applyWorldBotsPreset présente");
+assertTest(strpos($htmlBots, 'Directives Stratégiques &amp; Règles de Décision des PNJ') !== false, "Bloc Directives Stratégiques & Règles de Décision présent");
+assertTest(strpos($htmlBots, '1. Décision Économique &amp; Parcelles Rurales') !== false, "Règle 1 Économie & 18 parcelles présente");
+assertTest(strpos($htmlBots, '2. Décision d\'Urbanisme &amp; Fortifications') !== false, "Règle 2 Urbanisme & Tenshu présente");
+assertTest(strpos($htmlBots, '3. Conscription Martiale selon la Faction') !== false, "Règle 3 Conscription militaire présente");
+assertTest(strpos($htmlBots, '4. Règles d\'Engagement &amp; Raids Féodaux') !== false, "Règle 4 Raids & Exclusion débutants présente");
+assertTest(strpos($htmlBots, '5. Reconnaissance Shinobi &amp; Infiltration') !== false, "Règle 5 Infiltration Shinobi présente");
+assertTest(strpos($htmlBots, '6. Colonisation &amp; Expansion Provinciale') !== false, "Règle 6 Colonisation & Fiefs présente");
+assertTest(strpos($htmlBots, 'executeBotCycle() &bull; JSON Output') !== false, "Console simulée BotEngine avec JSON output présente");
 
 // [TEST 11] Test de l'Item 6 : Régénération du Monde & Conservation des Joueurs Humains
 echo "\n[TEST 11] Test de l'Item 6 : Régénération & Conservation des Joueurs Humains...\n";
@@ -379,8 +388,49 @@ assertTest(strpos($htmlRegen, 'id="btnConfirmRegenerateWorld"') !== false, "Bout
 assertTest(strpos($htmlRegen, 'updatePreserveHumanUsersUI') !== false, "Fonction JS updatePreserveHumanUsersUI présente");
 assertTest(strpos($htmlRegen, 'openStudioRegenerateModal') !== false, "Fonction JS openStudioRegenerateModal présente");
 
+// [TEST 12] Test de Game Elevate Designer : Clans IA & Daimyōs Autonomes (elevate_bots.php)
+echo "\n[TEST 12] Test de Game Elevate Designer : Directives Stratégiques & Règles PNJ...\n";
+
+$elevateBotsScope = [
+    'botsList' => $botWorldData['botsList'],
+    'settings' => [
+        'bots_enabled' => 1,
+        'bot_colonize_enabled' => 1,
+        'bot_max_planets' => 3,
+        'bot_aggressiveness' => 'moderate',
+        'bot_spawn_enabled' => 1,
+        'bot_spawn_interval_min' => 15,
+        'bot_spawn_max_villages' => 50
+    ],
+    'botSpawnStatus' => [
+        'enabled' => true,
+        'current_villages' => 3,
+        'next_spawn_in_formatted' => '12m 30s',
+        'last_spawn_formatted' => 'Il y a 5 min',
+        'quadrants' => ['NO' => 1, 'NE' => 1, 'SO' => 1, 'SE' => 0]
+    ]
+];
+
+ob_start();
+extract($elevateBotsScope);
+require __DIR__ . '/../views/gamestudio/elevate_bots.php';
+$htmlElevateBots = ob_get_clean();
+
+assertTest(strpos($htmlElevateBots, 'Directives Stratégiques &amp; Règles de Décision des PNJ') !== false, "Titre Directives Stratégiques présent dans elevate_bots.php");
+assertTest(strpos($htmlElevateBots, 'applyElevateBotPreset') !== false, "Fonction JS applyElevateBotPreset présente");
+assertTest(strpos($htmlElevateBots, 'Bonsaï Défensif') !== false, "Preset Bonsaï Défensif présent dans Elevate Designer");
+assertTest(strpos($htmlElevateBots, 'Sengoku Équilibré') !== false, "Preset Sengoku Équilibré présent dans Elevate Designer");
+assertTest(strpos($htmlElevateBots, 'Tempête Martiale Oda') !== false, "Preset Tempête Martiale Oda présent dans Elevate Designer");
+assertTest(strpos($htmlElevateBots, '1. Décision Économique &amp; Parcelles Rurales') !== false, "Arbre 1 Économie présent dans Elevate Designer");
+assertTest(strpos($htmlElevateBots, '2. Décision d\'Urbanisme &amp; Fortifications') !== false, "Arbre 2 Urbanisme présent dans Elevate Designer");
+assertTest(strpos($htmlElevateBots, '3. Conscription Martiale selon la Faction') !== false, "Arbre 3 Conscription présent dans Elevate Designer");
+assertTest(strpos($htmlElevateBots, '4. Règles d\'Engagement &amp; Raids Féodaux') !== false, "Arbre 4 Raids & Exclusion débutants présent dans Elevate Designer");
+assertTest(strpos($htmlElevateBots, '5. Reconnaissance Shinobi &amp; Infiltration') !== false, "Arbre 5 Shinobi présent dans Elevate Designer");
+assertTest(strpos($htmlElevateBots, '6. Colonisation &amp; Expansion Provinciale') !== false, "Arbre 6 Colonisation présent dans Elevate Designer");
+assertTest(strpos($htmlElevateBots, 'executeBotCycle() &bull; JSON Output') !== false, "Console simulée d'exécution de cycle présente dans Elevate Designer");
+
 echo "\n========================================================================\n";
-echo " TOUS LES TESTS MONDE (ITEMS 1, 2, 3, 4, 5 & 6) SONT 100% AU VERT ! \n";
+echo " TOUS LES TESTS MONDE & ELEVATE DESIGNER SONT 100% AU VERT ! \n";
 echo "========================================================================\n";
 
 
