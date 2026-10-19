@@ -385,6 +385,11 @@ assertTest(strpos($htmlRegen, 'Conserver les comptes des joueurs déjà présent
 assertTest(strpos($htmlRegen, 'id="modalStudioRegenerateWorld"') !== false, "Modale de confirmation sécurisée présente");
 assertTest(strpos($htmlRegen, 'id="inputRegenConfirmKeyword"') !== false, "Champ mot-clé de sécurité RESET présent");
 assertTest(strpos($htmlRegen, 'id="btnConfirmRegenerateWorld"') !== false, "Bouton d'exécution de la régénération présent");
+assertTest(strpos($htmlRegen, 'btnAutoFillRegenKeyword') !== false, "Bouton de remplissage 'RESET' en 1-clic présent");
+assertTest(strpos($htmlRegen, 'checkAcknowledgeRegen') !== false, "Case d'attestation de réinitialisation présente");
+assertTest(strpos($htmlRegen, 'labelRegenValidationStatus') !== false, "Indicateur d'état de déverrouillage présent");
+assertTest(strpos($htmlRegen, 'checkRegenValidation') !== false, "Fonction JS checkRegenValidation présente");
+assertTest(strpos($htmlRegen, 'autoFillRegenKeyword') !== false, "Fonction JS autoFillRegenKeyword présente");
 assertTest(strpos($htmlRegen, 'updatePreserveHumanUsersUI') !== false, "Fonction JS updatePreserveHumanUsersUI présente");
 assertTest(strpos($htmlRegen, 'openStudioRegenerateModal') !== false, "Fonction JS openStudioRegenerateModal présente");
 

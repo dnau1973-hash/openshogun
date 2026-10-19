@@ -180,11 +180,11 @@ if ($currentTab === 'dashboard') {
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-regeneration-config');
             exit;
         } elseif ($_POST['action'] === 'regenerate_world_action') {
-            $confirmKeyword = trim((string)($_POST['confirm_keyword'] ?? ''));
+            $confirmKeyword = strtoupper(trim((string)($_POST['confirm_keyword'] ?? '')));
             if ($confirmKeyword !== 'RESET') {
                 $_SESSION['general_flash'] = [
                     'type' => 'danger',
-                    'msg'  => "Échec de régénération : Vous devez impérativement saisir le mot-clé RESET en majuscules pour confirmer."
+                    'msg'  => "Échec de régénération : Vous devez impérativement saisir le mot-clé RESET pour confirmer."
                 ];
             } else {
                 $preserve = !empty($_POST['preserve_human_users']);

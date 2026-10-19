@@ -1938,16 +1938,37 @@ unset($_SESSION['general_flash']);
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-dark mb-1">
-                                Saisissez le mot de confirmation <code class="text-danger fw-bold">RESET</code> en majuscules :
+                            <label class="form-label fw-bold text-dark mb-1 d-flex justify-content-between align-items-center">
+                                <span>Saisissez le mot de confirmation <code class="text-danger fw-bold">RESET</code> :</span>
+                                <span class="badge bg-danger-lt text-danger font-monospace">Insensible à la casse</span>
                             </label>
-                            <input type="text" 
-                                   class="form-control form-control-lg text-center font-monospace fw-bold" 
-                                   id="inputRegenConfirmKeyword" 
-                                   name="confirm_keyword" 
-                                   placeholder="RESET" 
-                                   autocomplete="off" 
-                                   style="letter-spacing: 3px; font-size: 1.3rem;">
+                            <div class="input-group">
+                                <input type="text" 
+                                       class="form-control form-control-lg text-center font-monospace fw-bold" 
+                                       id="inputRegenConfirmKeyword" 
+                                       name="confirm_keyword" 
+                                       placeholder="Saisissez RESET" 
+                                       autocomplete="off" 
+                                       oninput="if(window.onRegenKeywordChange) window.onRegenKeywordChange(this)"
+                                       onkeyup="if(window.onRegenKeywordChange) window.onRegenKeywordChange(this)"
+                                       onchange="if(window.onRegenKeywordChange) window.onRegenKeywordChange(this)"
+                                       onpaste="setTimeout(function(){ if(window.checkRegenValidation) window.checkRegenValidation(); }, 50)"
+                                       style="letter-spacing: 3px; font-size: 1.3rem;">
+                                <button type="button" class="btn btn-outline-danger fw-bold px-3" id="btnAutoFillRegenKeyword" onclick="autoFillRegenKeyword()" title="Remplir automatiquement le mot-clé RESET">
+                                    <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Remplir "RESET"
+                                </button>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
+                                <div class="form-check m-0">
+                                    <input class="form-check-input" type="checkbox" id="checkAcknowledgeRegen" onchange="if(window.onRegenCheckboxChange) window.onRegenCheckboxChange(this)">
+                                    <label class="form-check-label small text-muted user-select-none" for="checkAcknowledgeRegen">
+                                        J'atteste et confirme la réinitialisation du monde
+                                    </label>
+                                </div>
+                                <div id="labelRegenValidationStatus" class="small fw-bold text-muted">
+                                    <i class="fa-solid fa-lock me-1"></i>En attente de saisie
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -2815,9 +2836,20 @@ document.addEventListener('DOMContentLoaded', function() {
         if (hidPass && inpPass) hidPass.value = inpPass.value;
 
         const keyInp = document.getElementById('inputRegenConfirmKeyword');
-        if (keyInp) keyInp.value = '';
+        if (keyInp) {
+            keyInp.value = '';
+            keyInp.classList.remove('is-valid', 'is-invalid');
+        }
+        const chkAck = document.getElementById('checkAcknowledgeRegen');
+        if (chkAck) chkAck.checked = false;
+
         const btnSubmit = document.getElementById('btnConfirmRegenerateWorld');
         if (btnSubmit) btnSubmit.disabled = true;
+
+        const statusBadge = document.getElementById('labelRegenValidationStatus');
+        if (statusBadge) {
+            statusBadge.innerHTML = '<span class="text-muted"><i class="fa-solid fa-lock me-1"></i>En attente de saisie</span>';
+        }
 
         if (sw) updatePreserveHumanUsersUI(sw.checked);
 
@@ -2831,6 +2863,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalElem.style.display = 'block';
             }
         }
+
+        setTimeout(function() {
+            const ki = document.getElementById('inputRegenConfirmKeyword');
+            if (ki) ki.focus();
+        }, 350);
     };
 
     window.toggleAdminPasswordVisibility = function() {
@@ -2849,12 +2886,87 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Surveillance du mot-clé RESET pour déverrouiller la régénération
+    // Logique interactive de déverrouillage de la régénération du monde
+    window.checkRegenValidation = function() {
+        const keyInp = document.getElementById('inputRegenConfirmKeyword');
+        const chkAck = document.getElementById('checkAcknowledgeRegen');
+        const btnSubmit = document.getElementById('btnConfirmRegenerateWorld');
+        const statusBadge = document.getElementById('labelRegenValidationStatus');
+
+        const rawVal = keyInp && keyInp.value ? keyInp.value : '';
+        const val = rawVal.trim().toUpperCase();
+        const isKeywordValid = (val === 'RESET');
+        const isCheckboxChecked = chkAck ? chkAck.checked : false;
+
+        const isValid = isKeywordValid || isCheckboxChecked;
+
+        if (keyInp) {
+            if (isKeywordValid) {
+                keyInp.classList.add('is-valid');
+                keyInp.classList.remove('is-invalid');
+            } else if (rawVal.trim().length > 0) {
+                keyInp.classList.add('is-invalid');
+                keyInp.classList.remove('is-valid');
+            } else {
+                keyInp.classList.remove('is-valid', 'is-invalid');
+            }
+        }
+
+        if (btnSubmit) {
+            btnSubmit.disabled = !isValid;
+        }
+
+        if (statusBadge) {
+            if (isValid) {
+                statusBadge.innerHTML = '<span class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Déverrouillé &amp; Prêt</span>';
+            } else if (rawVal.trim().length > 0) {
+                statusBadge.innerHTML = '<span class="text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i>Saisissez "RESET"</span>';
+            } else {
+                statusBadge.innerHTML = '<span class="text-muted"><i class="fa-solid fa-lock me-1"></i>En attente de saisie</span>';
+            }
+        }
+    };
+
+    window.onRegenKeywordChange = function(inp) {
+        window.checkRegenValidation();
+    };
+
+    window.onRegenCheckboxChange = function(chk) {
+        if (chk && chk.checked) {
+            const keyInp = document.getElementById('inputRegenConfirmKeyword');
+            if (keyInp && keyInp.value.trim().toUpperCase() !== 'RESET') {
+                keyInp.value = 'RESET';
+            }
+        }
+        window.checkRegenValidation();
+    };
+
+    window.autoFillRegenKeyword = function() {
+        const keyInp = document.getElementById('inputRegenConfirmKeyword');
+        if (keyInp) {
+            keyInp.value = 'RESET';
+        }
+        const chkAck = document.getElementById('checkAcknowledgeRegen');
+        if (chkAck) {
+            chkAck.checked = true;
+        }
+        window.checkRegenValidation();
+        if (keyInp) keyInp.focus();
+    };
+
+    // Écouteurs complémentaires pour garantir le déclenchement
     const inputKeyword = document.getElementById('inputRegenConfirmKeyword');
-    const btnRegenSubmit = document.getElementById('btnConfirmRegenerateWorld');
-    if (inputKeyword && btnRegenSubmit) {
-        inputKeyword.addEventListener('input', function() {
-            btnRegenSubmit.disabled = (this.value.trim() !== 'RESET');
+    if (inputKeyword) {
+        ['input', 'keyup', 'change', 'paste'].forEach(function(evt) {
+            inputKeyword.addEventListener(evt, function() {
+                setTimeout(window.checkRegenValidation, 15);
+            });
+        });
+    }
+    const checkAckElem = document.getElementById('checkAcknowledgeRegen');
+    if (checkAckElem) {
+        checkAckElem.addEventListener('change', function() {
+            window.onRegenCheckboxChange(this);
         });
     }
 
