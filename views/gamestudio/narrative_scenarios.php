@@ -135,18 +135,56 @@ if (!function_exists('renderTaskCardHtml')) {
             <input type="hidden" name="tasks[<?= $taskId ?>][role_code]" value="<?= $roleCode ?>" class="task-role-code-input">
             <input type="hidden" name="tasks[<?= $taskId ?>][role_name]" value="<?= $roleName ?>" class="task-role-name-input">
 
-            <!-- Tiroir Repliable (Cahier des charges & Livrables) -->
+            <!-- Tiroir Repliable (Cahier des charges & Livrables avec Import & Aperçu .md) -->
             <div class="p-3 bg-white border-top task-drawer-body" id="taskDrawer_<?= $taskId ?>" style="display: none;">
                 <div class="row g-2">
                     <div class="col-md-8">
-                        <label class="form-label small fw-bold text-secondary m-0">
-                            <i class="fa-solid fa-clipboard-list me-1"></i>Cahier des Charges &amp; Spécifications Métier :
-                        </label>
-                        <textarea class="form-control form-control-sm mt-1 task-desc-input"
-                                  name="tasks[<?= $taskId ?>][description]"
-                                  rows="2"
-                                  placeholder="Détaillez le travail attendu pour ce métier..."
-                                  oninput="markFormDirty()"><?= $description ?></textarea>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">
+                            <label class="form-label small fw-bold text-secondary m-0 d-flex align-items-center gap-1">
+                                <i class="fa-solid fa-clipboard-list text-purple"></i>
+                                <span>Cahier des Charges &amp; Équilibrage des Objectifs :</span>
+                            </label>
+                            <div class="d-flex align-items-center gap-1">
+                                <input type="file" id="taskMdFileInput_<?= $taskId ?>" accept=".md,.markdown,.txt" style="display:none;" onchange="onTaskMdFileSelected('<?= $taskId ?>', this)">
+                                <span class="badge bg-purple-lt text-purple font-monospace" id="taskMdBadge_<?= $taskId ?>" style="display:none; font-size:0.65rem;"></span>
+                                <button type="button" 
+                                        class="btn btn-purple btn-sm py-0 px-2 fw-bold d-inline-flex align-items-center gap-1" 
+                                        style="height:22px; font-size:0.7rem;" 
+                                        onclick="triggerTaskMdFileInput('<?= $taskId ?>')"
+                                        title="Importer un fichier .md pour le cahier des charges & équilibrage de cette tâche">
+                                    <i class="fa-solid fa-file-import"></i>
+                                    <span>Importer .md</span>
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-outline-secondary btn-sm py-0 px-2 d-inline-flex align-items-center gap-1" 
+                                        style="height:22px; font-size:0.7rem;" 
+                                        id="btnToggleTaskMdPreview_<?= $taskId ?>" 
+                                        onclick="toggleTaskMdPreview('<?= $taskId ?>')"
+                                        title="Afficher/masquer l'aperçu Markdown de la tâche">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <span>Aperçu .md</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="position-relative"
+                             ondragover="onTaskMdDragOver(event, '<?= $taskId ?>')"
+                             ondragleave="onTaskMdDragLeave(event, '<?= $taskId ?>')"
+                             ondrop="onTaskMdDrop(event, '<?= $taskId ?>')">
+                            <textarea class="form-control form-control-sm font-monospace task-desc-input"
+                                      id="taskDescTextarea_<?= $taskId ?>"
+                                      name="tasks[<?= $taskId ?>][description]"
+                                      rows="3"
+                                      placeholder="Détaillez le cahier des charges, équilibrage et spécifications... ou glissez-déposez un fichier .md !"
+                                      oninput="updateTaskMdPreview('<?= $taskId ?>'); markFormDirty(); refreshInlineEditorGddViewer();"><?= $description ?></textarea>
+                        </div>
+                        <!-- Panneau d'Aperçu Markdown de la tâche -->
+                        <div id="taskMdPreviewBox_<?= $taskId ?>" class="mt-2 p-3 rounded border bg-light-subtle shadow-xs" style="display:none; max-height: 280px; overflow-y: auto; overflow-x: auto; font-size: 0.82rem; background: #ffffff;">
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+                                <span class="fw-bold text-purple small" style="font-size:0.75rem;"><i class="fa-brands fa-markdown me-1"></i>Aperçu Cahier des Charges &amp; Équilibrage (.md)</span>
+                                <button type="button" class="btn-close" style="font-size:0.6rem;" onclick="toggleTaskMdPreview('<?= $taskId ?>')" aria-label="Fermer"></button>
+                            </div>
+                            <div id="taskMdPreviewContent_<?= $taskId ?>" class="text-dark p-2"></div>
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-secondary m-0">
@@ -157,7 +195,7 @@ if (!function_exists('renderTaskCardHtml')) {
                                name="tasks[<?= $taskId ?>][deliverables]"
                                value="<?= $deliverables ?>"
                                placeholder="Ex: core/ScenarioEngine.php, public/assets/..."
-                               oninput="markFormDirty()">
+                               oninput="markFormDirty(); refreshInlineEditorGddViewer();">
                         <div class="small text-muted mt-1" style="font-size: 0.7rem;">
                             Domaine : <strong><?= htmlspecialchars($rDef['domain'] ?? 'Production') ?></strong>
                         </div>
@@ -3591,6 +3629,114 @@ function toggleSynopsisMarkdownPreview() {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// IMPORT & APERÇU .MD POUR LE CAHIER DES CHARGES & ÉQUILIBRAGE DES TÂCHES
+// ═══════════════════════════════════════════════════════════════════════════
+function triggerTaskMdFileInput(taskId) {
+    const inp = document.getElementById('taskMdFileInput_' + taskId);
+    if (inp) {
+        inp.value = '';
+        inp.click();
+    }
+}
+
+function onTaskMdFileSelected(taskId, input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        const content = evt.target.result || '';
+        const ta = document.getElementById('taskDescTextarea_' + taskId);
+        if (ta) {
+            ta.value = content;
+            const badge = document.getElementById('taskMdBadge_' + taskId);
+            if (badge) {
+                badge.style.display = 'inline-block';
+                badge.textContent = `📄 ${file.name} (${content.length} car.)`;
+            }
+            updateTaskMdPreview(taskId);
+            markFormDirty(true);
+            refreshInlineEditorGddViewer();
+            showStudioToast(`Fichier « ${file.name} » importé dans le Cahier des Charges & Équilibrage !`);
+        }
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+function onTaskMdDragOver(e, taskId) {
+    e.preventDefault();
+    const ta = document.getElementById('taskDescTextarea_' + taskId);
+    if (ta) {
+        ta.style.borderColor = '#7950f2';
+        ta.style.backgroundColor = '#faf8ff';
+    }
+}
+
+function onTaskMdDragLeave(e, taskId) {
+    const ta = document.getElementById('taskDescTextarea_' + taskId);
+    if (ta) {
+        ta.style.borderColor = '';
+        ta.style.backgroundColor = '';
+    }
+}
+
+function onTaskMdDrop(e, taskId) {
+    e.preventDefault();
+    onTaskMdDragLeave(e, taskId);
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (!files || !files.length) return;
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        const content = evt.target.result || '';
+        const ta = document.getElementById('taskDescTextarea_' + taskId);
+        if (ta) {
+            ta.value = content;
+            const badge = document.getElementById('taskMdBadge_' + taskId);
+            if (badge) {
+                badge.style.display = 'inline-block';
+                badge.textContent = `📄 ${file.name} (${content.length} car.)`;
+            }
+            updateTaskMdPreview(taskId);
+            markFormDirty(true);
+            refreshInlineEditorGddViewer();
+            showStudioToast(`Fichier « ${file.name} » importé dans le Cahier des Charges & Équilibrage !`);
+        }
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+function updateTaskMdPreview(taskId) {
+    const box = document.getElementById('taskMdPreviewBox_' + taskId);
+    const content = document.getElementById('taskMdPreviewContent_' + taskId);
+    const ta = document.getElementById('taskDescTextarea_' + taskId);
+    if (!box || !content || !ta) return;
+    if (box.style.display !== 'none') {
+        content.innerHTML = renderSimpleMarkdown(ta.value);
+        renderAllMermaidInContainer(content);
+    }
+}
+
+function toggleTaskMdPreview(taskId) {
+    const box = document.getElementById('taskMdPreviewBox_' + taskId);
+    const btn = document.getElementById('btnToggleTaskMdPreview_' + taskId);
+    if (!box) return;
+    if (box.style.display === 'none' || !box.style.display) {
+        box.style.display = 'block';
+        if (btn) {
+            btn.classList.add('btn-purple');
+            btn.classList.remove('btn-outline-secondary');
+        }
+        updateTaskMdPreview(taskId);
+    } else {
+        box.style.display = 'none';
+        if (btn) {
+            btn.classList.remove('btn-purple');
+            btn.classList.add('btn-outline-secondary');
+        }
+    }
+}
+
 // Gestion de la modale d'import .md depuis le Catalogue
 function onModalMdFileSelected(input) {
     const file = input.files && input.files[0];
@@ -4329,8 +4475,51 @@ function addNewTaskForRole(roleCode) {
         <div class="p-3 bg-white border-top task-drawer-body" id="taskDrawer_${uniqueTaskId}" style="display: block;">
             <div class="row g-2">
                 <div class="col-md-8">
-                    <label class="form-label small fw-bold text-secondary m-0">Cahier des Charges &amp; Spécifications Métier :</label>
-                    <textarea class="form-control form-control-sm mt-1 task-desc-input" name="tasks[${uniqueTaskId}][description]" rows="2" oninput="markFormDirty(); refreshInlineEditorGddViewer();">${escapeHtmlStr(rDef.desc || '')}</textarea>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">
+                        <label class="form-label small fw-bold text-secondary m-0 d-flex align-items-center gap-1">
+                            <i class="fa-solid fa-clipboard-list text-purple"></i>
+                            <span>Cahier des Charges &amp; Équilibrage des Objectifs :</span>
+                        </label>
+                        <div class="d-flex align-items-center gap-1">
+                            <input type="file" id="taskMdFileInput_${uniqueTaskId}" accept=".md,.markdown,.txt" style="display:none;" onchange="onTaskMdFileSelected('${uniqueTaskId}', this)">
+                            <span class="badge bg-purple-lt text-purple font-monospace" id="taskMdBadge_${uniqueTaskId}" style="display:none; font-size:0.65rem;"></span>
+                            <button type="button" 
+                                    class="btn btn-purple btn-sm py-0 px-2 fw-bold d-inline-flex align-items-center gap-1" 
+                                    style="height:22px; font-size:0.7rem;" 
+                                    onclick="triggerTaskMdFileInput('${uniqueTaskId}')"
+                                    title="Importer un fichier .md pour le cahier des charges & équilibrage">
+                                <i class="fa-solid fa-file-import"></i>
+                                <span>Importer .md</span>
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-outline-secondary btn-sm py-0 px-2 d-inline-flex align-items-center gap-1" 
+                                    style="height:22px; font-size:0.7rem;" 
+                                    id="btnToggleTaskMdPreview_${uniqueTaskId}" 
+                                    onclick="toggleTaskMdPreview('${uniqueTaskId}')"
+                                    title="Afficher/masquer l'aperçu Markdown">
+                                <i class="fa-solid fa-eye"></i>
+                                <span>Aperçu .md</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="position-relative"
+                         ondragover="onTaskMdDragOver(event, '${uniqueTaskId}')"
+                         ondragleave="onTaskMdDragLeave(event, '${uniqueTaskId}')"
+                         ondrop="onTaskMdDrop(event, '${uniqueTaskId}')">
+                        <textarea class="form-control form-control-sm font-monospace task-desc-input"
+                                  id="taskDescTextarea_${uniqueTaskId}"
+                                  name="tasks[${uniqueTaskId}][description]"
+                                  rows="3"
+                                  placeholder="Détaillez le cahier des charges, équilibrage et spécifications... ou glissez-déposez un fichier .md !"
+                                  oninput="updateTaskMdPreview('${uniqueTaskId}'); markFormDirty(); refreshInlineEditorGddViewer();">${escapeHtmlStr(rDef.desc || '')}</textarea>
+                    </div>
+                    <div id="taskMdPreviewBox_${uniqueTaskId}" class="mt-2 p-3 rounded border bg-light-subtle shadow-xs" style="display:none; max-height: 280px; overflow-y: auto; overflow-x: auto; font-size: 0.82rem; background: #ffffff;">
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+                            <span class="fw-bold text-purple small" style="font-size:0.75rem;"><i class="fa-brands fa-markdown me-1"></i>Aperçu Cahier des Charges &amp; Équilibrage (.md)</span>
+                            <button type="button" class="btn-close" style="font-size:0.6rem;" onclick="toggleTaskMdPreview('${uniqueTaskId}')" aria-label="Fermer"></button>
+                        </div>
+                        <div id="taskMdPreviewContent_${uniqueTaskId}" class="text-dark p-2"></div>
+                    </div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label small fw-bold text-secondary m-0">Livrables / Fichiers Attendus :</label>
