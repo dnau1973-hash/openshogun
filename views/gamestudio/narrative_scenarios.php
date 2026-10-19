@@ -1472,6 +1472,44 @@ else:
     outline: 2px dashed #9333ea;
     outline-offset: -4px;
 }
+/* Styles de la boîte d'aperçu .md scrollable dans view_mode=cards */
+.card-md-rendered-box {
+    max-height: 220px;
+    overflow-y: auto;
+    overflow-x: auto;
+    background-color: #fbfbfd;
+    transition: border-color 0.15s ease;
+}
+.card-md-rendered-box:hover {
+    border-color: #c084fc !important;
+}
+.card-md-rendered-box::-webkit-scrollbar,
+.card-md-raw-box::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.card-md-rendered-box::-webkit-scrollbar-thumb,
+.card-md-raw-box::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.card-md-rendered-box::-webkit-scrollbar-thumb:hover,
+.card-md-raw-box::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+.card-md-rendered-box .mermaid-diagram-container {
+    margin-top: 0.4rem !important;
+    margin-bottom: 0.4rem !important;
+    border-color: #e9d5ff !important;
+}
+.card-md-rendered-box h1, .card-md-rendered-box h2, .card-md-rendered-box h3, .card-md-rendered-box h4, .card-md-rendered-box h5, .card-md-rendered-box h6 {
+    font-size: 0.86rem !important;
+    margin-top: 0.45rem !important;
+    margin-bottom: 0.3rem !important;
+}
+.card-md-rendered-box p {
+    margin-bottom: 0.4rem !important;
+}
 </style>
 
 <div class="gamestudio-narrative-scenarios gamestudio-narrative-scenarios-catalog">
@@ -1930,9 +1968,51 @@ else:
                                     </div>
                                 <?php endif; ?>
 
-                                <p class="text-secondary small mb-3" style="line-height:1.5;">
-                                    <?= htmlspecialchars($sc['synopsis']) ?>
-                                </p>
+                                <!-- Aperçu .md du Synopsis (avec support Flowcharts & limite de hauteur scrollable) -->
+                                <div class="card-md-preview-wrapper mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="small fw-bold text-purple d-flex align-items-center gap-1" style="font-size:0.75rem;">
+                                            <i class="fa-brands fa-markdown"></i>
+                                            <span>Aperçu .md (Synopsis &amp; Flowchart)</span>
+                                        </span>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <button type="button" 
+                                                    class="btn btn-xs btn-outline-secondary py-0 px-1" 
+                                                    style="font-size:0.68rem; height:20px;" 
+                                                    id="btnToggleCardRaw_<?= $sc['id'] ?>" 
+                                                    onclick="toggleCatalogCardMarkdownView(<?= $sc['id'] ?>)" 
+                                                    title="Basculer entre l'aperçu formaté et le texte brut">
+                                                <i class="fa-solid fa-code me-1"></i>Texte brut
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn btn-xs btn-outline-purple py-0 px-1" 
+                                                    style="font-size:0.68rem; height:20px;" 
+                                                    onclick="exportScenarioMarkdown(<?= (int)$sc['id'] ?>)" 
+                                                    title="Ouvrir dans la visionneuse GDD complète">
+                                                <i class="fa-solid fa-expand"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Conteneur d'aperçu Markdown avec limite de hauteur et scroll -->
+                                    <div class="card-md-rendered-box p-2-5 rounded border shadow-xs" 
+                                         id="cardMdRendered_<?= $sc['id'] ?>"
+                                         data-scenario-id="<?= $sc['id'] ?>">
+                                        <div class="card-md-rendered-content text-dark" id="cardMdContent_<?= $sc['id'] ?>">
+                                            <div class="text-muted small py-2 text-center">
+                                                <div class="spinner-border spinner-border-sm text-purple me-1" role="status"></div>
+                                                <span>Chargement de l'aperçu .md...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Conteneur texte brut repliable -->
+                                    <div class="card-md-raw-box p-2 rounded border bg-dark text-light font-monospace small" 
+                                         id="cardMdRaw_<?= $sc['id'] ?>"
+                                         style="display:none; max-height: 220px; overflow-y: auto; overflow-x: auto; font-size: 0.74rem;">
+                                        <pre class="m-0 text-light" style="white-space: pre-wrap; font-family: inherit;"><?= htmlspecialchars($sc['synopsis']) ?></pre>
+                                    </div>
+                                </div>
 
                                 <!-- Dialogue condensé avec Avatar -->
                                 <div class="p-2 bg-light rounded border mb-3">
@@ -3573,6 +3653,67 @@ function markFormDirty(dirty = true) {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// APERÇU .MD DANS LA VUE CARTES DU CATALOGUE (AVEC LIMITE DE HAUTEUR & SCROLL)
+// ═══════════════════════════════════════════════════════════════════════════
+function renderAllCatalogCardsMarkdown() {
+    const cardBoxes = document.querySelectorAll('.card-md-rendered-box');
+    if (!cardBoxes || cardBoxes.length === 0) return;
+
+    initMermaidEngine();
+
+    cardBoxes.forEach(box => {
+        const scId = box.getAttribute('data-scenario-id');
+        const contentEl = box.querySelector('.card-md-rendered-content');
+        if (!contentEl) return;
+
+        // Si déjà rendu, on s'assure que les diagrammes Mermaid internes sont rendus
+        if (box.getAttribute('data-rendered') === 'true') {
+            renderAllMermaidInContainer(contentEl);
+            return;
+        }
+
+        const scObj = PRELOADED_SCENARIOS_MAP[scId];
+        const rawSynopsis = scObj ? (scObj.synopsis || '') : '';
+
+        if (!rawSynopsis.trim()) {
+            contentEl.innerHTML = '<em class="text-muted small">Aucun synopsis rédigé pour ce scénario.</em>';
+            box.setAttribute('data-rendered', 'true');
+            return;
+        }
+
+        // Rendu Markdown compact (avec Mermaid, flowcharts, tables, badges)
+        const renderedHtml = renderSimpleMarkdown(rawSynopsis);
+        contentEl.innerHTML = renderedHtml;
+        box.setAttribute('data-rendered', 'true');
+
+        // Dessin des flowcharts Mermaid
+        renderAllMermaidInContainer(contentEl);
+    });
+}
+
+function toggleCatalogCardMarkdownView(scId) {
+    const renderedBox = document.getElementById('cardMdRendered_' + scId);
+    const rawBox = document.getElementById('cardMdRaw_' + scId);
+    const btn = document.getElementById('btnToggleCardRaw_' + scId);
+    if (!renderedBox || !rawBox || !btn) return;
+
+    if (rawBox.style.display === 'none' || !rawBox.style.display) {
+        renderedBox.style.display = 'none';
+        rawBox.style.display = 'block';
+        btn.innerHTML = '<i class="fa-brands fa-markdown me-1"></i>Aperçu .md';
+        btn.classList.add('btn-purple');
+        btn.classList.remove('btn-outline-secondary');
+    } else {
+        rawBox.style.display = 'none';
+        renderedBox.style.display = 'block';
+        btn.innerHTML = '<i class="fa-solid fa-code me-1"></i>Texte brut';
+        btn.classList.remove('btn-purple');
+        btn.classList.add('btn-outline-secondary');
+        renderAllMermaidInContainer(renderedBox);
+    }
+}
+
 // Bascule des 3 vues du Catalogue (Cartes / Frise / Kanban) avec persistance URL & localStorage
 function switchCatalogViewMode(mode) {
     if (!['cards', 'timeline', 'kanban'].includes(mode)) mode = 'cards';
@@ -3588,6 +3729,10 @@ function switchCatalogViewMode(mode) {
     });
     const hiddenInput = document.getElementById('filterFormViewMode');
     if (hiddenInput) hiddenInput.value = mode;
+
+    if (mode === 'cards') {
+        renderAllCatalogCardsMarkdown();
+    }
 
     try {
         localStorage.setItem('openshogun_narrative_catalog_view', mode);
@@ -4607,12 +4752,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const urlMode = urlParams.get('view_mode');
             const savedMode = localStorage.getItem('openshogun_narrative_catalog_view');
-            if (urlMode && ['cards', 'timeline', 'kanban'].includes(urlMode)) {
-                switchCatalogViewMode(urlMode);
-            } else if (savedMode && ['cards', 'timeline', 'kanban'].includes(savedMode)) {
-                switchCatalogViewMode(savedMode);
-            }
-        } catch (e) {}
+            const targetMode = (urlMode && ['cards', 'timeline', 'kanban'].includes(urlMode))
+                ? urlMode
+                : (savedMode && ['cards', 'timeline', 'kanban'].includes(savedMode) ? savedMode : 'cards');
+
+            switchCatalogViewMode(targetMode);
+        } catch (e) {
+            renderAllCatalogCardsMarkdown();
+        }
     }
 });
 </script>
