@@ -802,7 +802,7 @@ if ($viewAction === 'edit' || $viewAction === 'create'):
                                                             <button type="button" class="btn-close" style="font-size:0.65rem;" onclick="toggleSynopsisMarkdownPreview()" aria-label="Fermer l'aperçu"></button>
                                                         </div>
                                                     </div>
-                                                    <div id="synopsisMarkdownPreviewContent" class="text-dark"></div>
+                                                    <div id="synopsisMarkdownPreviewContent" class="text-dark p-2"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1474,14 +1474,22 @@ else:
 }
 /* Styles de la boîte d'aperçu .md scrollable dans view_mode=cards */
 .card-md-rendered-box {
-    max-height: 220px;
+    max-height: 230px;
     overflow-y: auto;
     overflow-x: auto;
-    background-color: #fbfbfd;
-    transition: border-color 0.15s ease;
+    background-color: #ffffff;
+    padding: 1rem 1.25rem !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .card-md-rendered-box:hover {
     border-color: #c084fc !important;
+    box-shadow: 0 2px 8px rgba(147, 51, 234, 0.08) !important;
+}
+.card-md-rendered-content {
+    padding: 0.25rem 0.2rem;
+}
+.card-md-raw-box {
+    padding: 1rem 1.25rem !important;
 }
 .card-md-rendered-box::-webkit-scrollbar,
 .card-md-raw-box::-webkit-scrollbar {
@@ -1498,17 +1506,17 @@ else:
     background: #94a3b8;
 }
 .card-md-rendered-box .mermaid-diagram-container {
-    margin-top: 0.4rem !important;
-    margin-bottom: 0.4rem !important;
+    margin-top: 0.6rem !important;
+    margin-bottom: 0.6rem !important;
     border-color: #e9d5ff !important;
 }
 .card-md-rendered-box h1, .card-md-rendered-box h2, .card-md-rendered-box h3, .card-md-rendered-box h4, .card-md-rendered-box h5, .card-md-rendered-box h6 {
-    font-size: 0.86rem !important;
-    margin-top: 0.45rem !important;
-    margin-bottom: 0.3rem !important;
+    font-size: 0.88rem !important;
+    margin-top: 0.55rem !important;
+    margin-bottom: 0.35rem !important;
 }
 .card-md-rendered-box p {
-    margin-bottom: 0.4rem !important;
+    margin-bottom: 0.5rem !important;
 }
 </style>
 
@@ -1995,7 +2003,7 @@ else:
                                     </div>
 
                                     <!-- Conteneur d'aperçu Markdown avec limite de hauteur et scroll -->
-                                    <div class="card-md-rendered-box p-2-5 rounded border shadow-xs" 
+                                    <div class="card-md-rendered-box p-3 rounded border shadow-xs" 
                                          id="cardMdRendered_<?= $sc['id'] ?>"
                                          data-scenario-id="<?= $sc['id'] ?>">
                                         <div class="card-md-rendered-content text-dark" id="cardMdContent_<?= $sc['id'] ?>">
@@ -2007,9 +2015,9 @@ else:
                                     </div>
 
                                     <!-- Conteneur texte brut repliable -->
-                                    <div class="card-md-raw-box p-2 rounded border bg-dark text-light font-monospace small" 
+                                    <div class="card-md-raw-box p-3 rounded border bg-dark text-light font-monospace small" 
                                          id="cardMdRaw_<?= $sc['id'] ?>"
-                                         style="display:none; max-height: 220px; overflow-y: auto; overflow-x: auto; font-size: 0.74rem;">
+                                         style="display:none; max-height: 230px; overflow-y: auto; overflow-x: auto; font-size: 0.74rem;">
                                         <pre class="m-0 text-light" style="white-space: pre-wrap; font-family: inherit;"><?= htmlspecialchars($sc['synopsis']) ?></pre>
                                     </div>
                                 </div>
