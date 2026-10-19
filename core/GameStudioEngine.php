@@ -610,6 +610,13 @@ class GameStudioEngine {
         $famineRate             = (float)GameConfig::get('famine_rate', 3.0);
         $famineFlourConsumption = (float)GameConfig::get('famine_flour_consumption', 1.0);
 
+        // ── Dotation Initiale & Immunité Débutant (Item 4) ──
+        $starterWood      = (int)GameConfig::get('starter_wood', 1000);
+        $starterStone     = (int)GameConfig::get('starter_stone', 1000);
+        $starterRice      = (int)GameConfig::get('starter_rice', 1000);
+        $starterFish      = (int)GameConfig::get('starter_fish', 250);
+        $starterGoldCoins = (int)GameConfig::get('starter_gold_coins', 100);
+
         return [
             'worldRadius'           => $radius,
             'totalTiles'            => $totalTiles,
@@ -646,7 +653,13 @@ class GameStudioEngine {
             'heroCageDropRate'       => $heroCageDropRate,
             'famineEnabled'          => $famineEnabled,
             'famineRate'             => $famineRate,
-            'famineFlourConsumption' => $famineFlourConsumption
+            'famineFlourConsumption' => $famineFlourConsumption,
+            // Dotation Initiale & Immunité Débutant (Item 4)
+            'starterWood'            => $starterWood,
+            'starterStone'           => $starterStone,
+            'starterRice'            => $starterRice,
+            'starterFish'            => $starterFish,
+            'starterGoldCoins'       => $starterGoldCoins
         ];
     }
 
@@ -828,6 +841,30 @@ class GameStudioEngine {
         return [
             'success' => true,
             'message' => "Vitesses et équilibrage féodal enregistrés avec succès : Jeu x{$gameSpeed}, Ressources x{$resourceSpeed}, Marche x{$fleetSpeed}, Immunité {$beginnerProtectionDays}j."
+        ];
+    }
+
+    /**
+     * Sauvegarde la dotation initiale et la durée d'immunité débutant (Item 4)
+     */
+    public function saveStartingEndowment(array $params): array {
+        $starterWood      = max(0, min(50000, (int)($params['starter_wood'] ?? 1000)));
+        $starterStone     = max(0, min(50000, (int)($params['starter_stone'] ?? 1000)));
+        $starterRice      = max(0, min(50000, (int)($params['starter_rice'] ?? 1000)));
+        $starterFish      = max(0, min(50000, (int)($params['starter_fish'] ?? 250)));
+        $starterGoldCoins = max(0, min(10000, (int)($params['starter_gold_coins'] ?? 100)));
+        $protectionDays   = max(0, min(60, (int)($params['beginner_protection_days'] ?? 7)));
+
+        GameConfig::set('starter_wood', $starterWood);
+        GameConfig::set('starter_stone', $starterStone);
+        GameConfig::set('starter_rice', $starterRice);
+        GameConfig::set('starter_fish', $starterFish);
+        GameConfig::set('starter_gold_coins', $starterGoldCoins);
+        GameConfig::set('beginner_protection_days', $protectionDays);
+
+        return [
+            'success' => true,
+            'message' => "Dotation initiale et immunité enregistrées : Bois {$starterWood}, Pierre {$starterStone}, Riz {$starterRice}, Poisson {$starterFish}, Or {$starterGoldCoins} Ryō, Immunité {$protectionDays} jours."
         ];
     }
 }

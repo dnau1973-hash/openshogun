@@ -61,7 +61,13 @@ class GameConfig {
                     'research_time_growth' => 1.35,
                     'research_cost_coeff' => 1.0,
                     'research_cost_growth' => 1.65,
-                    'world_radius' => 35
+                    'world_radius' => 35,
+                    'starter_wood' => 1000,
+                    'starter_stone' => 1000,
+                    'starter_rice' => 1000,
+                    'starter_fish' => 250,
+                    'starter_gold_coins' => 100,
+                    'beginner_protection_days' => 7
                 ];
             }
         }

@@ -129,6 +129,14 @@ if ($currentTab === 'dashboard') {
             ];
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-speed-config');
             exit;
+        } elseif ($_POST['action'] === 'save_world_starting_endowment') {
+            $res = $gameStudioEngine->saveStartingEndowment($_POST);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Dotation initiale et immunité enregistrées.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-starting-endowment');
+            exit;
         }
     }
     $generalData = $gameStudioEngine->getGeneralData();

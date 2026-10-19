@@ -903,7 +903,261 @@ unset($_SESSION['general_flash']);
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!-- SECTION 4 : TÉLÉMÉTRIE D'OCCUPATION DU MONDE & DENSITÉ SPATIALE     -->
+    <!-- QUATRIÈME ITEM MAJEUR : DOTATION INITIALE & IMMUNITÉ DÉBUTANT       -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="card mb-4 border-purple shadow-sm overflow-hidden" id="section-world-starting-endowment" style="border-width: 2px;">
+        <div class="card-header bg-purple text-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
+            <div>
+                <h3 class="card-title text-white m-0 d-flex align-items-center gap-2 fw-bold" style="font-size:1.25rem;">
+                    <i class="fa-solid fa-gift text-warning fs-2"></i>
+                    <span>4. Dotation Initiale du Nouveau Seigneur &amp; Durée de l'Immunité</span>
+                </h3>
+                <div class="text-white-50 small mt-1">
+                    Définissez les vivres, matériaux et trésors attribués d'office à la fondation du premier domaine, ainsi que la durée de la trêve sacrée (bouclier féodal).
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge bg-white text-purple fw-bold px-3 py-2 font-monospace fs-4 shadow-sm" id="badge-header-starter-res">
+                    <?= number_format((int)$starterWood, 0, ',', ' ') ?> / <?= number_format((int)$starterStone, 0, ',', ' ') ?> / <?= number_format((int)$starterRice, 0, ',', ' ') ?> Matériaux
+                </span>
+                <span class="badge bg-white text-dark fw-bold px-3 py-2 font-monospace fs-4 shadow-sm" id="badge-header-starter-gold">
+                    <i class="fa-solid fa-coins text-warning me-1"></i><?= number_format((int)$starterGoldCoins, 0, ',', ' ') ?> Ryō
+                </span>
+                <span class="badge bg-white text-success fw-bold px-3 py-2 font-monospace fs-4 shadow-sm" id="badge-header-starter-protection">
+                    <i class="fa-solid fa-shield-halved text-success me-1"></i><?= (int)$beginnerProtectionDays ?> jours
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body p-4 bg-light bg-opacity-25">
+            <!-- 1. Préréglages Rapides 1-Clic de Dotation -->
+            <div class="p-3 bg-white border rounded shadow-xs mb-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                    <span class="fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-purple"></i>Préréglages de Démarrage 1-Clic Recommandés :
+                    </span>
+                    <span class="text-secondary small">Ajuste instantanément ressources, or et durée d'immunité</span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-purple btn-sm starter-preset-btn fw-bold shadow-sm" onclick="applyStarterPreset(1000, 1000, 1000, 250, 100, 7, this)">
+                        <i class="fa-solid fa-award me-1"></i>Standard Shogun (1 000 / 100 Or / 7j)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm starter-preset-btn fw-bold" onclick="applyStarterPreset(750, 750, 750, 0, 50, 3, this)">
+                        <i class="fa-solid fa-scroll me-1"></i>Classique Travian (750 / 50 Or / 3j)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm starter-preset-btn fw-bold" onclick="applyStarterPreset(2500, 2500, 2500, 500, 250, 14, this)">
+                        <i class="fa-solid fa-hand-holding-heart me-1"></i>Découverte &amp; Bienvenue (2 500 / 250 Or / 14j)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm starter-preset-btn fw-bold" onclick="applyStarterPreset(5000, 5000, 5000, 1000, 500, 3, this)">
+                        <i class="fa-solid fa-bolt me-1"></i>Tournoi Éclair (5 000 / 500 Or / 3j)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm starter-preset-btn fw-bold" onclick="applyStarterPreset(300, 300, 300, 0, 0, 0, this)">
+                        <i class="fa-solid fa-skull me-1"></i>Survie Hardcore (300 / 0 Or / 0j)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm starter-preset-btn fw-bold" onclick="applyStarterPreset(15000, 15000, 15000, 3000, 1000, 30, this)">
+                        <i class="fa-solid fa-crown me-1"></i>Bâtisseur Impérial (15k / 1 000 Or / 30j)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulaire Principal de Dotation & Protection -->
+            <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" id="formWorldStarterEndowment">
+                <input type="hidden" name="action" value="save_world_starting_endowment">
+
+                <!-- 2. Les 4 Ressources Féodales de Dotation -->
+                <div class="row g-3 mb-4">
+                    <!-- Bois de Cèdre -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100 border bg-white shadow-xs p-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fa-solid fa-tree text-success me-1"></i>Bois de Cèdre (Sugi)</span>
+                                    <span class="badge bg-green text-white font-monospace fs-4" id="badge-val-starter-wood"><?= number_format((int)$starterWood) ?></span>
+                                </label>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <input type="range" class="form-range flex-grow-1" id="sliderStarterWood" name="starter_wood_slider" min="0" max="20000" step="50" value="<?= (int)$starterWood ?>" style="cursor:pointer; height:8px;">
+                                    <input type="number" class="form-control text-center font-monospace fw-bold fs-4" style="width: 85px;" id="inputStarterWood" name="starter_wood" min="0" max="50000" value="<?= (int)$starterWood ?>">
+                                </div>
+                            </div>
+                            <div class="text-secondary small mt-2">
+                                Bois d'œuvre pour charpentes, scieries et Tenshu.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pierre de Granit -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100 border bg-white shadow-xs p-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre de Granit</span>
+                                    <span class="badge bg-secondary text-white font-monospace fs-4" id="badge-val-starter-stone"><?= number_format((int)$starterStone) ?></span>
+                                </label>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <input type="range" class="form-range flex-grow-1" id="sliderStarterStone" name="starter_stone_slider" min="0" max="20000" step="50" value="<?= (int)$starterStone ?>" style="cursor:pointer; height:8px;">
+                                    <input type="number" class="form-control text-center font-monospace fw-bold fs-4" style="width: 85px;" id="inputStarterStone" name="starter_stone" min="0" max="50000" value="<?= (int)$starterStone ?>">
+                                </div>
+                            </div>
+                            <div class="text-secondary small mt-2">
+                                Blocs taillés pour les remparts cyclopéens et carrières.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Koku de Riz -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100 border bg-white shadow-xs p-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Koku de Riz</span>
+                                    <span class="badge bg-warning text-dark font-monospace fs-4" id="badge-val-starter-rice"><?= number_format((int)$starterRice) ?></span>
+                                </label>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <input type="range" class="form-range flex-grow-1" id="sliderStarterRice" name="starter_rice_slider" min="0" max="20000" step="50" value="<?= (int)$starterRice ?>" style="cursor:pointer; height:8px;">
+                                    <input type="number" class="form-control text-center font-monospace fw-bold fs-4" style="width: 85px;" id="inputStarterRice" name="starter_rice" min="0" max="50000" value="<?= (int)$starterRice ?>">
+                                </div>
+                            </div>
+                            <div class="text-secondary small mt-2">
+                                Rations agricoles pour les ouvriers et paysans du fief.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Poisson Féodal -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100 border bg-white shadow-xs p-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fa-solid fa-fish text-azure me-1"></i>Poisson Féodal</span>
+                                    <span class="badge bg-azure text-white font-monospace fs-4" id="badge-val-starter-fish"><?= number_format((int)$starterFish) ?></span>
+                                </label>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <input type="range" class="form-range flex-grow-1" id="sliderStarterFish" name="starter_fish_slider" min="0" max="10000" step="25" value="<?= (int)$starterFish ?>" style="cursor:pointer; height:8px;">
+                                    <input type="number" class="form-control text-center font-monospace fw-bold fs-4" style="width: 85px;" id="inputStarterFish" name="starter_fish" min="0" max="50000" value="<?= (int)$starterFish ?>">
+                                </div>
+                            </div>
+                            <div class="text-secondary small mt-2">
+                                Vivres pêchés pour dojo, caserne et négoce lacustre.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Trésor Monétaire & Bouclier d'Immunité -->
+                <div class="row g-4 mb-4">
+                    <!-- Pièces d'Or / Ryō -->
+                    <div class="col-lg-6">
+                        <div class="card h-100 border bg-white shadow-xs p-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fa-solid fa-coins text-warning me-1"></i>Trésor Monétaire (Pièces d'Or / Ryō)</span>
+                                    <span class="badge bg-warning text-dark font-monospace fs-4" id="badge-val-starter-gold"><?= number_format((int)$starterGoldCoins) ?> Ryō</span>
+                                </label>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <input type="range" class="form-range flex-grow-1" id="sliderStarterGold" name="starter_gold_slider" min="0" max="2000" step="10" value="<?= (int)$starterGoldCoins ?>" style="cursor:pointer; height:8px;">
+                                    <div class="input-group" style="width: 120px;">
+                                        <input type="number" class="form-control text-center font-monospace fw-bold fs-4" id="inputStarterGold" name="starter_gold_coins" min="0" max="10000" value="<?= (int)$starterGoldCoins ?>">
+                                        <span class="input-group-text bg-light fw-bold text-warning px-2"><i class="fa-solid fa-coins"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-secondary small mt-2">
+                                <i class="fa-solid fa-circle-info text-warning me-1"></i>Solde de pièces d'or disponible dès l'inscription pour les finitions instantanées, le marchand PNJ ou les bonus impériaux.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Durée de l'Immunité Débutant -->
+                    <div class="col-lg-6">
+                        <div class="card h-100 border bg-white shadow-xs p-3 d-flex flex-column justify-content-between" style="border-left: 4px solid #2fb344 !important;">
+                            <div>
+                                <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fa-solid fa-shield-halved text-success me-1"></i>Durée du Bouclier d'Immunité Débutant</span>
+                                    <span class="badge <?= $beginnerProtectionDays > 0 ? 'bg-success text-white' : 'bg-secondary text-white' ?> font-monospace fs-4" id="badge-val-starter-protection"><?= (int)$beginnerProtectionDays ?> jours</span>
+                                </label>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <input type="range" class="form-range flex-grow-1" id="sliderStarterProtection" name="starter_protection_slider" min="0" max="60" step="1" value="<?= (int)$beginnerProtectionDays ?>" style="cursor:pointer; height:8px;">
+                                    <div class="input-group" style="width: 120px;">
+                                        <input type="number" class="form-control text-center font-monospace fw-bold fs-4" id="inputStarterProtection" name="beginner_protection_days" min="0" max="60" value="<?= (int)$beginnerProtectionDays ?>">
+                                        <span class="input-group-text bg-light fw-bold text-success px-2">jours</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-secondary small mt-2">
+                                <span class="d-block mb-1" id="label-protection-status-desc">
+                                    <?php if ($beginnerProtectionDays > 0): ?>
+                                        <i class="fa-solid fa-circle-check text-success me-1"></i>Trêve sacrée active : <strong><?= (int)$beginnerProtectionDays ?> jours</strong> de protection inviolable contre les assauts et raids ennemis.
+                                    <?php else: ?>
+                                        <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Bouclier désactivé : les nouveaux seigneurs peuvent être attaqués dès leur première minute de jeu.
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Simulateur d'Autonomie Féodale Immédiate -->
+                <div class="card border-purple bg-purple bg-opacity-10 shadow-xs mb-4">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <h5 class="m-0 text-purple fw-bold d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-calculator text-purple"></i>Simulateur d'Autonomie Féodale Immédiate
+                            </h5>
+                            <span class="badge bg-white text-purple border font-monospace">Capacités d'investissement dès le premier jour</span>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="p-3 bg-white border rounded shadow-xs h-100">
+                                    <div class="text-secondary small fw-bold mb-1">
+                                        <i class="fa-solid fa-chess-rook text-purple me-1"></i>Élévation du Tenshu :
+                                    </div>
+                                    <div class="d-flex align-items-baseline gap-2">
+                                        <span class="h2 m-0 font-monospace text-purple fw-bold" id="sim-tenshu-level">Niveau 1</span>
+                                    </div>
+                                    <div class="text-muted small mt-1" id="sim-tenshu-desc">Finançable directement sans attendre les récoltes</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 bg-white border rounded shadow-xs h-100">
+                                    <div class="text-secondary small fw-bold mb-1">
+                                        <i class="fa-solid fa-seedling text-success me-1"></i>Parcelles Rurales Niv 1 :
+                                    </div>
+                                    <div class="d-flex align-items-baseline gap-2">
+                                        <span class="h2 m-0 font-monospace text-success fw-bold" id="sim-plots-count">~12 parcelles</span>
+                                    </div>
+                                    <div class="text-muted small mt-1">Sur les 18 parcelles du domaine initial</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 bg-white border rounded shadow-xs h-100">
+                                    <div class="text-secondary small fw-bold mb-1">
+                                        <i class="fa-solid fa-shield-halved text-success me-1"></i>Trêve Débutant :
+                                    </div>
+                                    <div class="d-flex align-items-baseline gap-2">
+                                        <span class="h2 m-0 font-monospace text-success fw-bold" id="sim-protection-days"><?= (int)$beginnerProtectionDays ?> jours</span>
+                                    </div>
+                                    <div class="text-muted small mt-1" id="sim-protection-date">Bouclier inviolable à l'inscription</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Bouton d'Enregistrement -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pt-3 border-top">
+                    <div class="text-secondary small">
+                        <i class="fa-solid fa-circle-check text-success me-1"></i>Ces paramètres seront immédiatement appliqués à tout nouveau compte joueur ou lors de la fondation d'un premier fief.
+                    </div>
+                    <button type="submit" class="btn btn-purple btn-lg px-4 fw-bold shadow-sm">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Enregistrer la Dotation &amp; l'Immunité
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION 5 : TÉLÉMÉTRIE D'OCCUPATION DU MONDE & DENSITÉ SPATIALE     -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <div class="row row-cards mb-4">
         <!-- Décomposition de l'occupation spatiale -->
@@ -1437,6 +1691,146 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    // ── Item 4 : Dotation Initiale & Immunité Débutant ──
+    const sWood = document.getElementById('sliderStarterWood');
+    const iWood = document.getElementById('inputStarterWood');
+    const bWood = document.getElementById('badge-val-starter-wood');
+
+    const sStone = document.getElementById('sliderStarterStone');
+    const iStone = document.getElementById('inputStarterStone');
+    const bStone = document.getElementById('badge-val-starter-stone');
+
+    const sRice = document.getElementById('sliderStarterRice');
+    const iRice = document.getElementById('inputStarterRice');
+    const bRice = document.getElementById('badge-val-starter-rice');
+
+    const sFish = document.getElementById('sliderStarterFish');
+    const iFish = document.getElementById('inputStarterFish');
+    const bFish = document.getElementById('badge-val-starter-fish');
+
+    const sGold = document.getElementById('sliderStarterGold');
+    const iGold = document.getElementById('inputStarterGold');
+    const bGold = document.getElementById('badge-val-starter-gold');
+
+    const sProt = document.getElementById('sliderStarterProtection');
+    const iProt = document.getElementById('inputStarterProtection');
+    const bProt = document.getElementById('badge-val-starter-protection');
+    const hProt = document.getElementById('badge-header-starter-protection');
+    const hStarterRes = document.getElementById('badge-header-starter-res');
+    const hStarterGold = document.getElementById('badge-header-starter-gold');
+
+    const simTenshu = document.getElementById('sim-tenshu-level');
+    const simPlots = document.getElementById('sim-plots-count');
+    const simProtDays = document.getElementById('sim-protection-days');
+    const simProtDate = document.getElementById('sim-protection-date');
+    const protStatusDesc = document.getElementById('label-protection-status-desc');
+
+    function updateStarterSimulator() {
+        const w = parseInt(iWood ? iWood.value : 1000, 10) || 0;
+        const s = parseInt(iStone ? iStone.value : 1000, 10) || 0;
+        const r = parseInt(iRice ? iRice.value : 1000, 10) || 0;
+        const pDays = parseInt(iProt ? iProt.value : 7, 10) || 0;
+
+        // Mise à jour header badges
+        if (hStarterRes) hStarterRes.innerText = formatNumberFr(w) + " / " + formatNumberFr(s) + " / " + formatNumberFr(r) + " Matériaux";
+        if (hStarterGold && iGold) hStarterGold.innerHTML = '<i class="fa-solid fa-coins text-warning me-1"></i>' + formatNumberFr(iGold.value) + " Ryō";
+        if (hProt) hProt.innerHTML = '<i class="fa-solid fa-shield-halved text-success me-1"></i>' + pDays + " jours";
+
+        // Tenshu finançable
+        let tenshuLvl = "Niveau 0";
+        if (w >= 3500 && s >= 2800 && r >= 2300) tenshuLvl = "Niveau 5+";
+        else if (w >= 2000 && s >= 1600 && r >= 1300) tenshuLvl = "Niveau 4";
+        else if (w >= 1100 && s >= 880 && r >= 720) tenshuLvl = "Niveau 3";
+        else if (w >= 600 && s >= 480 && r >= 400) tenshuLvl = "Niveau 2";
+        else if (w >= 120 && s >= 100 && r >= 80) tenshuLvl = "Niveau 1";
+        if (simTenshu) simTenshu.innerText = tenshuLvl;
+
+        // Parcelles niveau 1 finançables (coût moyen 250 total par parcelle)
+        const totalMat = w + s + r;
+        const plotsAffordable = Math.min(18, Math.floor(totalMat / 250));
+        if (simPlots) simPlots.innerText = "~" + plotsAffordable + " parcelles";
+
+        // Protection débutant
+        if (simProtDays) simProtDays.innerText = pDays > 0 ? (pDays + " jours") : "Désactivée (0j)";
+        if (simProtDate) {
+            simProtDate.innerText = pDays > 0 ? "Bouclier inviolable pendant " + pDays + " jours" : "Aucun bouclier (vulnérable dès le départ)";
+        }
+        if (protStatusDesc) {
+            if (pDays > 0) {
+                protStatusDesc.innerHTML = '<i class="fa-solid fa-circle-check text-success me-1"></i>Trêve sacrée active : <strong>' + pDays + ' jours</strong> de protection inviolable contre les assauts et raids ennemis.';
+            } else {
+                protStatusDesc.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Bouclier désactivé : les nouveaux seigneurs peuvent être attaqués dès leur première minute de jeu.';
+            }
+        }
+    }
+
+    function syncStarterControl(slider, input, badge, suffix) {
+        if (!slider || !input) return;
+        slider.addEventListener('input', function() {
+            input.value = this.value;
+            if (badge) badge.innerText = formatNumberFr(this.value) + (suffix ? ' ' + suffix : '');
+            updateStarterSimulator();
+        });
+        input.addEventListener('input', function() {
+            let val = parseInt(this.value, 10);
+            if (!isNaN(val)) {
+                if (val >= parseInt(slider.min, 10) && val <= parseInt(slider.max, 10)) {
+                    slider.value = val;
+                }
+                if (badge) badge.innerText = formatNumberFr(val) + (suffix ? ' ' + suffix : '');
+                updateStarterSimulator();
+            }
+        });
+    }
+
+    syncStarterControl(sWood, iWood, bWood, '');
+    syncStarterControl(sStone, iStone, bStone, '');
+    syncStarterControl(sRice, iRice, bRice, '');
+    syncStarterControl(sFish, iFish, bFish, '');
+    syncStarterControl(sGold, iGold, bGold, 'Ryō');
+    syncStarterControl(sProt, iProt, bProt, 'jours');
+
+    window.applyStarterPreset = function(w, s, r, f, gold, prot, btnElem) {
+        if (sWood) sWood.value = w;
+        if (iWood) iWood.value = w;
+        if (bWood) bWood.innerText = formatNumberFr(w);
+
+        if (sStone) sStone.value = s;
+        if (iStone) iStone.value = s;
+        if (bStone) bStone.innerText = formatNumberFr(s);
+
+        if (sRice) sRice.value = r;
+        if (iRice) iRice.value = r;
+        if (bRice) bRice.innerText = formatNumberFr(r);
+
+        if (sFish) sFish.value = f;
+        if (iFish) iFish.value = f;
+        if (bFish) bFish.innerText = formatNumberFr(f);
+
+        if (sGold) sGold.value = gold;
+        if (iGold) iGold.value = gold;
+        if (bGold) bGold.innerText = formatNumberFr(gold) + ' Ryō';
+
+        if (sProt) sProt.value = prot;
+        if (iProt) iProt.value = prot;
+        if (bProt) {
+            bProt.className = (prot > 0 ? 'badge bg-success text-white font-monospace fs-4' : 'badge bg-secondary text-white font-monospace fs-4');
+            bProt.innerText = prot + ' jours';
+        }
+
+        updateStarterSimulator();
+
+        document.querySelectorAll('.starter-preset-btn').forEach(function(b) {
+            b.classList.remove('btn-purple', 'shadow-sm');
+            b.classList.add('btn-outline-secondary');
+        });
+        if (btnElem) {
+            btnElem.classList.remove('btn-outline-secondary');
+            btnElem.classList.add('btn-purple', 'shadow-sm');
+        }
+    };
+
+    updateStarterSimulator();
     updateSpeedSimulator();
 });
 </script>

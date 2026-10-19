@@ -342,21 +342,26 @@ class WorldGenerator {
                 $hasFishCol = false;
             }
         }
+        $starterWood  = (float)GameConfig::get('starter_wood', 1000.0);
+        $starterStone = (float)GameConfig::get('starter_stone', 1000.0);
+        $starterRice  = (float)GameConfig::get('starter_rice', 1000.0);
+        $starterFish  = (float)GameConfig::get('starter_fish', 250.0);
 
         if ($hasFishCol) {
             $stmtCap = $this->db->prepare("
                 INSERT INTO planets 
                 (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
-                VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 0, 120, 30000, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
+                VALUES (?, ?, ?, ?, 'terrestrial', ?, ?, ?, ?, 0, 120, 30000, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
             ");
+            $stmtCap->execute([$adminId, $capitalName, $capitalX, $capitalY, $starterWood, $starterStone, $starterRice, $starterFish]);
         } else {
             $stmtCap = $this->db->prepare("
                 INSERT INTO planets 
                 (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
-                VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 120, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
+                VALUES (?, ?, ?, ?, 'terrestrial', ?, ?, ?, 0, 120, 30000, 30000, 30000, 1, UNIX_TIMESTAMP())
             ");
+            $stmtCap->execute([$adminId, $capitalName, $capitalX, $capitalY, $starterWood, $starterStone, $starterRice]);
         }
-        $stmtCap->execute([$adminId, $capitalName, $capitalX, $capitalY]);
         $capitalPlanetId = (int)$this->db->lastInsertId();
 
         // 5. Initialiser les 18 Parcelles de ressources vierges (Style Travian, niveau 0 = parcelles disponibles)

@@ -249,6 +249,52 @@ assertTest(strpos($htmlSpeed, 'id="sim-resource-prod"') !== false, "Simulateur p
 assertTest(strpos($htmlSpeed, 'applyDevSpeedPreset') !== false, "Fonction JS de préréglages de vitesse présente");
 assertTest(strpos($htmlSpeed, 'id="checkFamineEnabled"') !== false, "Switch de péril de famine présent");
 
+// [TEST 9] Item 4 : Dotation Initiale du Nouveau Seigneur & Immunité Débutant
+echo "\n[TEST 9] Test de l'Item 4 : Dotation Initiale (Bois, Pierre, Riz, Poisson, Or) & Immunité...\n";
+$starterParams = [
+    'starter_wood'             => 2500,
+    'starter_stone'            => 2200,
+    'starter_rice'             => 1800,
+    'starter_fish'             => 450,
+    'starter_gold_coins'       => 200,
+    'beginner_protection_days' => 14
+];
+$saveStarterRes = $gameStudioEngine->saveStartingEndowment($starterParams);
+assertTest($saveStarterRes['success'] === true, "saveStartingEndowment() exécuté avec succès");
+assertTest((int)GameConfig::get('starter_wood') === 2500, "starter_wood mis à jour à 2 500");
+assertTest((int)GameConfig::get('starter_stone') === 2200, "starter_stone mis à jour à 2 200");
+assertTest((int)GameConfig::get('starter_rice') === 1800, "starter_rice mis à jour à 1 800");
+assertTest((int)GameConfig::get('starter_fish') === 450, "starter_fish mis à jour à 450");
+assertTest((int)GameConfig::get('starter_gold_coins') === 200, "starter_gold_coins mis à jour à 200 Ryō");
+assertTest((int)GameConfig::get('beginner_protection_days') === 14, "beginner_protection_days mis à jour à 14 jours");
+
+// Données enrichies dans getWorldConfigData
+$starterWorldData = $gameStudioEngine->getWorldConfigData();
+assertTest($starterWorldData['starterWood'] === 2500, "starterWood présent dans getWorldConfigData");
+assertTest($starterWorldData['starterStone'] === 2200, "starterStone présent dans getWorldConfigData");
+assertTest($starterWorldData['starterRice'] === 1800, "starterRice présent dans getWorldConfigData");
+assertTest($starterWorldData['starterFish'] === 450, "starterFish présent dans getWorldConfigData");
+assertTest($starterWorldData['starterGoldCoins'] === 200, "starterGoldCoins présent dans getWorldConfigData");
+assertTest($starterWorldData['beginnerProtectionDays'] === 14, "beginnerProtectionDays reflété dans getWorldConfigData");
+
+// Rendu HTML complet avec l'Item 4
+ob_start();
+extract($starterWorldData);
+require __DIR__ . '/../views/gamestudio/general_world_config.php';
+$htmlStarter = ob_get_clean();
+
+assertTest(strpos($htmlStarter, '4. Dotation Initiale du Nouveau Seigneur &amp; Durée de l\'Immunité') !== false, "Le 4e item 'Dotation Initiale & Durée de l\'Immunité' est présent dans la vue");
+assertTest(strpos($htmlStarter, 'id="section-world-starting-endowment"') !== false, "Conteneur ancre de l'Item 4 présent");
+assertTest(strpos($htmlStarter, 'id="sliderStarterWood"') !== false, "Slider Bois initial présent");
+assertTest(strpos($htmlStarter, 'id="sliderStarterStone"') !== false, "Slider Pierre initiale présent");
+assertTest(strpos($htmlStarter, 'id="sliderStarterRice"') !== false, "Slider Riz initial présent");
+assertTest(strpos($htmlStarter, 'id="sliderStarterFish"') !== false, "Slider Poisson initial présent");
+assertTest(strpos($htmlStarter, 'id="sliderStarterGold"') !== false, "Slider Or initial présent");
+assertTest(strpos($htmlStarter, 'id="sliderStarterProtection"') !== false, "Slider Immunité débutant présent");
+assertTest(strpos($htmlStarter, 'id="sim-tenshu-level"') !== false, "Simulateur Tenshu initial présent");
+assertTest(strpos($htmlStarter, 'id="sim-plots-count"') !== false, "Simulateur parcelles initiales présent");
+assertTest(strpos($htmlStarter, 'applyStarterPreset') !== false, "Fonction JS applyStarterPreset présente");
+
 echo "\n========================================================================\n";
-echo " TOUS LES TESTS MONDE, OASIS & VITESSES (ITEMS 1, 2 & 3) SONT AU VERT ! \n";
+echo " TOUS LES TESTS MONDE (ITEMS 1, 2, 3 & 4) SONT 100% AU VERT ! \n";
 echo "========================================================================\n";

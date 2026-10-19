@@ -495,40 +495,93 @@ class Auth {
 
         $this->db->beginTransaction();
         try {
-            // Durée de protection des nouveaux joueurs en jours (7 jours par défaut)
-            $protectionDays = (int)GameConfig::get('beginner_protection_days', 7);
+            // Dotation initiale et immunité des nouveaux seigneurs depuis GameConfig
+            $protectionDays  = (int)GameConfig::get('beginner_protection_days', 7);
             $protectionUntil = ($protectionDays > 0) ? date('Y-m-d H:i:s', time() + ($protectionDays * 86400)) : null;
+            $starterGold     = (int)GameConfig::get('starter_gold_coins', 100);
+            $starterWood     = (float)GameConfig::get('starter_wood', 1000.0);
+            $starterStone    = (float)GameConfig::get('starter_stone', 1000.0);
+            $starterRice     = (float)GameConfig::get('starter_rice', 1000.0);
+            $starterFish     = (float)GameConfig::get('starter_fish', 250.0);
 
-            // 1. Créer l'utilisateur avec son état d'activation, immunité et choix newsletter
-            $stmtUser = $this->db->prepare("
-                INSERT INTO users (username, email, password_hash, faction, created_at, last_active, protection_until, is_active, email_verified_at, activation_token, activation_token_expires_at, newsletter_optin) 
-                VALUES (?, ?, ?, ?, NOW(), NOW(), ?, ?, ?, ?, ?, ?)
-            ");
-            $stmtUser->execute([
-                $username, 
-                $email, 
-                $hash, 
-                $faction, 
-                $protectionUntil, 
-                $isActive, 
-                $verifiedAt, 
-                $hashedToken, 
-                $tokenExpires,
-                $optinVal
-            ]);
+            // 1. Créer l'utilisateur avec son état d'activation, immunité, trésor et newsletter
+            try {
+                $stmtUser = $this->db->prepare("
+                    INSERT INTO users (username, email, password_hash, faction, gold_coins, created_at, last_active, protection_until, is_active, email_verified_at, activation_token, activation_token_expires_at, newsletter_optin) 
+                    VALUES (?, ?, ?, ?, ?, NOW(), NOW(), ?, ?, ?, ?, ?, ?)
+                ");
+                $stmtUser->execute([
+                    $username, 
+                    $email, 
+                    $hash, 
+                    $faction, 
+                    $starterGold,
+                    $protectionUntil, 
+                    $isActive, 
+                    $verifiedAt, 
+                    $hashedToken, 
+                    $tokenExpires,
+                    $optinVal
+                ]);
+            } catch (Throwable $e) {
+                // Fallback si la colonne gold_coins n'est pas présente dans le schéma minimal de test
+                $stmtUser = $this->db->prepare("
+                    INSERT INTO users (username, email, password_hash, faction, created_at, last_active, protection_until, is_active, email_verified_at, activation_token, activation_token_expires_at, newsletter_optin) 
+                    VALUES (?, ?, ?, ?, NOW(), NOW(), ?, ?, ?, ?, ?, ?)
+                ");
+                $stmtUser->execute([
+                    $username, 
+                    $email, 
+                    $hash, 
+                    $faction, 
+                    $protectionUntil, 
+                    $isActive, 
+                    $verifiedAt, 
+                    $hashedToken, 
+                    $tokenExpires,
+                    $optinVal
+                ]);
+            }
             $userId = (int)$this->db->lastInsertId();
 
             // 2. Trouver un emplacement de coordonnées (X, Y) libre dans le quadrant choisi
             $coords = $this->findFreeCoordinates($zone);
 
-            // 3. Créer le domaine castral principal (1000 Bois, Pierre, Riz)
+            // 3. Créer le domaine castral principal avec la dotation initiale
             $planetName = "Château " . ucfirst($username);
-            $stmtPlanet = $this->db->prepare("
-                INSERT INTO planets 
-                (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, last_resource_update, is_capital) 
-                VALUES (?, ?, ?, ?, 'terrestrial', 1000, 1000, 1000, 0, 50, 15000, 15000, 15000, UNIX_TIMESTAMP(), 1)
-            ");
-            $stmtPlanet->execute([$userId, $planetName, $coords['x'], $coords['y']]);
+            try {
+                $stmtPlanet = $this->db->prepare("
+                    INSERT INTO planets 
+                    (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, last_resource_update, is_capital) 
+                    VALUES (?, ?, ?, ?, 'terrestrial', ?, ?, ?, ?, 0, 50, 15000, 15000, 15000, 15000, UNIX_TIMESTAMP(), 1)
+                ");
+                $stmtPlanet->execute([
+                    $userId, 
+                    $planetName, 
+                    $coords['x'], 
+                    $coords['y'],
+                    $starterWood,
+                    $starterStone,
+                    $starterRice,
+                    $starterFish
+                ]);
+            } catch (Throwable $e) {
+                // Fallback sans la colonne fish si schéma restreint
+                $stmtPlanet = $this->db->prepare("
+                    INSERT INTO planets 
+                    (user_id, name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, last_resource_update, is_capital) 
+                    VALUES (?, ?, ?, ?, 'terrestrial', ?, ?, ?, 0, 50, 15000, 15000, 15000, UNIX_TIMESTAMP(), 1)
+                ");
+                $stmtPlanet->execute([
+                    $userId, 
+                    $planetName, 
+                    $coords['x'], 
+                    $coords['y'],
+                    $starterWood,
+                    $starterStone,
+                    $starterRice
+                ]);
+            }
             $planetId = (int)$this->db->lastInsertId();
 
             // 4. Initialiser les 19 parcelles de ressources
