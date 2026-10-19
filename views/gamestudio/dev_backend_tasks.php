@@ -85,7 +85,7 @@ $complexityLabels = [
                 <span>Synchroniser Scénarios</span>
             </button>
             <!-- Bouton Nouvelle Tâche -->
-            <button type="button" class="btn btn-primary shadow-sm d-flex align-items-center gap-2" onclick="openCreateTaskModal()">
+            <button type="button" class="btn btn-primary shadow-sm d-flex align-items-center gap-2" id="btnOpenCreateTaskModal" onclick="openCreateTaskModal()">
                 <i class="fa-solid fa-plus"></i>
                 <span>Nouvelle Tâche</span>
             </button>
@@ -682,15 +682,492 @@ $complexityLabels = [
     </div>
 </div>
 
-<!-- Moteur de Rendu Graphique Mermaid.js v10 pour Flowcharts & Diagrammes Back-End -->
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<!-- Moteur de Rendu Graphique Mermaid.js v10 (chargé avec defer pour ne pas bloquer l'interface) -->
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
-// REGISTRE DES TÂCHES PRÉCHARGÉES
+// REGISTRE DES TÂCHES PRÉCHARGÉES (SÉCURISÉ CONTRE LES INJECTIONS ET ERREURS DE PARSING)
 // ═══════════════════════════════════════════════════════════════════════════
-const PRELOADED_BACKEND_TASKS = <?= json_encode($tasks, JSON_UNESCAPED_UNICODE) ?>;
+const PRELOADED_BACKEND_TASKS = <?= json_encode($tasks ?: [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?: '[]' ?>;
 let activePreviewTaskId = null;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GESTIONNAIRE UNIVERSEL DE MODALES BOOTSTRAP TABLER
+// ═══════════════════════════════════════════════════════════════════════════
+function getBootstrapModalInstance(modalEl) {
+    if (!modalEl) return null;
+    if (window.bootstrap && window.bootstrap.Modal) {
+        if (typeof window.bootstrap.Modal.getOrCreateInstance === 'function') {
+            return window.bootstrap.Modal.getOrCreateInstance(modalEl);
+        }
+        return new window.bootstrap.Modal(modalEl);
+    }
+    return null;
+}
+
+function showModalSafely(modalId) {
+    const el = document.getElementById(modalId);
+    if (!el) {
+        console.error('[OpenShogun Back-End] Élément modal #' + modalId + ' introuvable.');
+        return;
+    }
+    const bsModal = getBootstrapModalInstance(el);
+    if (bsModal) {
+        bsModal.show();
+    } else {
+        // En cas de chargement asynchrone différé de Bootstrap
+        setTimeout(() => {
+            const retryModal = getBootstrapModalInstance(el);
+            if (retryModal) {
+                retryModal.show();
+            } else {
+                el.classList.add('show');
+                el.style.display = 'block';
+            }
+        }, 150);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FONCTIONS DE GESTION DES MODALES CRÉATION & MODIFICATION DE TÂCHE
+// (DÉCLARÉES IMMÉDIATEMENT POUR ÊTRE DISPONIBLES DANS TOUT LE DOM)
+// ═══════════════════════════════════════════════════════════════════════════
+function openCreateTaskModal() {
+    try {
+        const actionInput = document.getElementById('taskFormAction');
+        const idInput = document.getElementById('taskFormId');
+        const titleModal = document.getElementById('modalTaskFormTitle');
+        const submitText = document.getElementById('btnSubmitTaskFormText');
+
+        if (actionInput) actionInput.value = 'create_task';
+        if (idInput) idInput.value = '0';
+        if (titleModal) titleModal.innerHTML = '<i class="fa-solid fa-server text-teal"></i> <span>Nouvelle Tâche Back-End</span>';
+        if (submitText) submitText.textContent = 'Créer la Tâche';
+
+        const titleInput = document.getElementById('taskFormTitleInput');
+        const statusSelect = document.getElementById('taskFormStatusSelect');
+        const prioritySelect = document.getElementById('taskFormPrioritySelect');
+        const complexitySelect = document.getElementById('taskFormComplexitySelect');
+        const assignedInput = document.getElementById('taskFormAssignedInput');
+        const hoursInput = document.getElementById('taskFormHoursInput');
+        const deliverablesInput = document.getElementById('taskFormDeliverablesInput');
+        const descTextarea = document.getElementById('taskFormDescTextarea');
+
+        if (titleInput) titleInput.value = '';
+        if (statusSelect) statusSelect.value = 'todo';
+        if (prioritySelect) prioritySelect.value = 'medium';
+        if (complexitySelect) complexitySelect.value = 'M';
+        if (assignedInput) assignedInput.value = '';
+        if (hoursInput) hoursInput.value = '';
+        if (deliverablesInput) deliverablesInput.value = '';
+        if (descTextarea) descTextarea.value = '';
+
+        const badge = document.getElementById('taskFormMdImportBadge');
+        if (badge) badge.style.display = 'none';
+
+        onTaskFormDescInput();
+        switchTaskDescMode('edit');
+
+        showModalSafely('modalBackendTaskForm');
+    } catch (e) {
+        console.error('[OpenShogun Back-End] Erreur openCreateTaskModal:', e);
+    }
+}
+
+function openEditTaskModal(taskId) {
+    try {
+        const task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
+        if (!task) return;
+
+        const actionInput = document.getElementById('taskFormAction');
+        const idInput = document.getElementById('taskFormId');
+        const titleModal = document.getElementById('modalTaskFormTitle');
+        const submitText = document.getElementById('btnSubmitTaskFormText');
+
+        if (actionInput) actionInput.value = 'update_task';
+        if (idInput) idInput.value = task.id;
+        if (titleModal) titleModal.innerHTML = `<i class="fa-solid fa-pen-to-square text-warning"></i> <span>Modifier la Tâche #${task.id}</span>`;
+        if (submitText) submitText.textContent = 'Enregistrer les Modifications';
+
+        const titleInput = document.getElementById('taskFormTitleInput');
+        const statusSelect = document.getElementById('taskFormStatusSelect');
+        const prioritySelect = document.getElementById('taskFormPrioritySelect');
+        const complexitySelect = document.getElementById('taskFormComplexitySelect');
+        const assignedInput = document.getElementById('taskFormAssignedInput');
+        const hoursInput = document.getElementById('taskFormHoursInput');
+        const deliverablesInput = document.getElementById('taskFormDeliverablesInput');
+        const descTextarea = document.getElementById('taskFormDescTextarea');
+
+        if (titleInput) titleInput.value = task.title || '';
+        if (statusSelect) statusSelect.value = task.status || 'todo';
+        if (prioritySelect) prioritySelect.value = task.priority || 'medium';
+        if (complexitySelect) complexitySelect.value = task.complexity || 'M';
+        if (assignedInput) assignedInput.value = task.assigned_to || '';
+        if (hoursInput) hoursInput.value = task.estimated_hours || '';
+        if (deliverablesInput) deliverablesInput.value = task.deliverables || '';
+        if (descTextarea) descTextarea.value = task.description || '';
+
+        const badge = document.getElementById('taskFormMdImportBadge');
+        if (badge) badge.style.display = 'none';
+
+        onTaskFormDescInput();
+        switchTaskDescMode('edit');
+
+        showModalSafely('modalBackendTaskForm');
+    } catch (e) {
+        console.error('[OpenShogun Back-End] Erreur openEditTaskModal:', e);
+    }
+}
+
+function confirmDeleteTask(taskId, taskTitle) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement la tâche #${taskId} « ${taskTitle} » ?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '?page=gamestudio&tab=dev_backend_tasks';
+        form.innerHTML = `
+            <input type="hidden" name="action" value="delete_task">
+            <input type="hidden" name="task_id" value="${taskId}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GESTION DU CHAMP DESCRIPTION : SWITCH MODE ÉDITION VS APERÇU .MD
+// ═══════════════════════════════════════════════════════════════════════════
+function switchTaskDescMode(mode) {
+    const editArea = document.getElementById('taskFormEditArea');
+    const previewArea = document.getElementById('taskFormPreviewArea');
+    const btnEdit = document.getElementById('btnTabTaskEdit');
+    const btnPreview = document.getElementById('btnTabTaskPreview');
+    const ta = document.getElementById('taskFormDescTextarea');
+    const previewContent = document.getElementById('taskFormPreviewContent');
+
+    if (!editArea || !previewArea || !btnEdit || !btnPreview || !ta || !previewContent) return;
+
+    if (mode === 'preview') {
+        editArea.style.display = 'none';
+        previewArea.style.display = 'block';
+        btnEdit.classList.remove('btn-primary');
+        btnEdit.classList.add('btn-outline-secondary');
+        btnPreview.classList.remove('btn-outline-secondary');
+        btnPreview.classList.add('btn-primary');
+
+        previewContent.innerHTML = renderSimpleMarkdown(ta.value);
+        renderAllMermaidInContainer(previewContent);
+    } else {
+        previewArea.style.display = 'none';
+        editArea.style.display = 'block';
+        btnPreview.classList.remove('btn-primary');
+        btnPreview.classList.add('btn-outline-secondary');
+        btnEdit.classList.remove('btn-outline-secondary');
+        btnEdit.classList.add('btn-primary');
+        ta.focus();
+    }
+}
+
+function onTaskFormDescInput() {
+    const ta = document.getElementById('taskFormDescTextarea');
+    const countEl = document.getElementById('taskFormDescCharCount');
+    if (ta && countEl) {
+        countEl.textContent = `${ta.value.length} caractère(s)`;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// IMPORTATION DE FICHIER .MD DANS LA DESCRIPTION (BOUTON & DRAG & DROP)
+// ═══════════════════════════════════════════════════════════════════════════
+function triggerTaskFormMdFileInput() {
+    const inp = document.getElementById('taskFormMdFileInput');
+    if (inp) {
+        inp.value = '';
+        inp.click();
+    }
+}
+
+function onTaskFormMdFileSelected(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    loadMdFileContent(file);
+}
+
+function onTaskFormDescDragOver(e) {
+    e.preventDefault();
+    const ta = document.getElementById('taskFormDescTextarea');
+    if (ta) {
+        ta.style.borderColor = '#7950f2';
+        ta.style.backgroundColor = '#faf8ff';
+    }
+}
+
+function onTaskFormDescDragLeave(e) {
+    const ta = document.getElementById('taskFormDescTextarea');
+    if (ta) {
+        ta.style.borderColor = '';
+        ta.style.backgroundColor = '';
+    }
+}
+
+function onTaskFormDescDrop(e) {
+    e.preventDefault();
+    onTaskFormDescDragLeave(e);
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (!files || !files.length) return;
+    loadMdFileContent(files[0]);
+}
+
+function loadMdFileContent(file) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        const content = evt.target.result || '';
+        const ta = document.getElementById('taskFormDescTextarea');
+        if (ta) {
+            ta.value = content;
+            onTaskFormDescInput();
+            const badge = document.getElementById('taskFormMdImportBadge');
+            if (badge) {
+                badge.style.display = 'inline-block';
+                badge.textContent = `📄 ${file.name} (${content.length} car.) importé`;
+            }
+            showToastNotification(`Fichier « ${file.name} » importé avec succès !`, 'success');
+        }
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODALE D'APERÇU PLEIN ÉCRAN .MD & FLOWCHARTS
+// ═══════════════════════════════════════════════════════════════════════════
+function openTaskQuickPreview(taskId) {
+    const task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
+    if (!task) return;
+
+    activePreviewTaskId = task.id;
+
+    const titleEl = document.getElementById('quickPreviewTaskTitle');
+    const subEl = document.getElementById('quickPreviewTaskSub');
+    const bodyEl = document.getElementById('quickPreviewTaskBody');
+    const badgesEl = document.getElementById('quickPreviewMetaBadges');
+
+    if (titleEl) titleEl.textContent = `Tâche #${task.id} : ${task.title}`;
+    if (subEl) {
+        subEl.textContent = `Assigné à ${task.assigned_to || 'Back-End'} • Estimation : ${task.estimated_hours || 0}h • Créée le ${task.created_at || ''}`;
+    }
+
+    let metaBadgesHtml = '';
+    const prioLabels = { low: 'Basse', medium: 'Moyenne', high: 'Haute', critical: 'Critique' };
+    metaBadgesHtml += `<span class="badge bg-dark-lt text-dark">#${task.id}</span>`;
+    metaBadgesHtml += `<span class="badge bg-secondary-lt text-secondary">Statut: ${task.status}</span>`;
+    metaBadgesHtml += `<span class="badge bg-warning-lt text-warning">Priorité: ${prioLabels[task.priority] || task.priority}</span>`;
+    metaBadgesHtml += `<span class="badge bg-teal-lt text-teal">Taille: ${task.complexity}</span>`;
+    if (task.scenario_id) {
+        metaBadgesHtml += `<span class="badge bg-purple-lt text-purple"><i class="fa-solid fa-scroll me-1"></i>Scénario #${task.scenario_id}</span>`;
+    }
+    if (badgesEl) badgesEl.innerHTML = metaBadgesHtml;
+
+    let contentHtml = '';
+    if (task.deliverables) {
+        contentHtml += `
+            <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center gap-2 small">
+                <i class="fa-solid fa-box-archive text-info fs-4"></i>
+                <div>
+                    <strong>Livrables Attendus :</strong> <code>${escapeHtmlStr(task.deliverables)}</code>
+                </div>
+            </div>
+        `;
+    }
+
+    contentHtml += renderCustomMarkdown(task.description || '', { compact: false });
+    if (bodyEl) {
+        bodyEl.innerHTML = contentHtml;
+        renderAllMermaidInContainer(bodyEl);
+    }
+
+    showModalSafely('modalTaskQuickPreview');
+}
+
+function editFromQuickPreview() {
+    if (!activePreviewTaskId) return;
+    const modalEl = document.getElementById('modalTaskQuickPreview');
+    const prevModal = getBootstrapModalInstance(modalEl);
+    if (prevModal) prevModal.hide();
+    openEditTaskModal(activePreviewTaskId);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// KANBAN DRAG & DROP & MISE À JOUR AJAX DU STATUT
+// ═══════════════════════════════════════════════════════════════════════════
+let draggedTaskId = null;
+
+function onKanbanDragStart(e, taskId) {
+    draggedTaskId = taskId;
+    e.dataTransfer.setData('text/plain', taskId);
+    e.dataTransfer.effectAllowed = 'move';
+    const card = document.getElementById('task-card-' + taskId);
+    if (card) card.classList.add('opacity-50', 'border-primary');
+}
+
+function onKanbanDragEnd(e) {
+    if (draggedTaskId) {
+        const card = document.getElementById('task-card-' + draggedTaskId);
+        if (card) card.classList.remove('opacity-50', 'border-primary');
+    }
+    document.querySelectorAll('.kanban-column').forEach(col => {
+        col.classList.remove('bg-primary-subtle', 'border-primary');
+    });
+}
+
+function onKanbanDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const col = e.currentTarget;
+    col.classList.add('bg-primary-subtle', 'border-primary');
+}
+
+function onKanbanDragLeave(e) {
+    const col = e.currentTarget;
+    col.classList.remove('bg-primary-subtle', 'border-primary');
+}
+
+function onKanbanDrop(e, targetStatus) {
+    e.preventDefault();
+    const col = e.currentTarget;
+    col.classList.remove('bg-primary-subtle', 'border-primary');
+
+    const taskId = draggedTaskId || parseInt(e.dataTransfer.getData('text/plain'), 10);
+    if (!taskId) return;
+
+    const task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
+    if (!task) return;
+
+    if (task.status === targetStatus) return; // Rien à changer
+
+    const cardEl = document.getElementById('task-card-' + taskId);
+    const cardList = col.querySelector('.kanban-card-list');
+    const placeholder = col.querySelector('.kanban-empty-placeholder');
+
+    if (cardEl && cardList) {
+        if (placeholder) placeholder.style.display = 'none';
+        cardList.appendChild(cardEl);
+        task.status = targetStatus;
+    }
+
+    // Appel AJAX
+    const formData = new FormData();
+    formData.append('action', 'update_status_ajax');
+    formData.append('task_id', taskId);
+    formData.append('status', targetStatus);
+
+    fetch('?page=gamestudio&tab=dev_backend_tasks', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            updateKanbanCounters();
+            showToastNotification(`Tâche #${taskId} déplacée vers « ${targetStatus} »`, 'success');
+        } else {
+            showToastNotification(`Erreur lors du déplacement de la tâche #${taskId}`, 'danger');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToastNotification(`Erreur réseau lors de la mise à jour du statut`, 'danger');
+    });
+}
+
+function updateKanbanCounters() {
+    ['todo', 'in_progress', 'review', 'blocked', 'done'].forEach(st => {
+        const countBadge = document.getElementById('count-' + st);
+        const col = document.querySelector(`.kanban-column[data-status="${st}"]`);
+        if (countBadge && col) {
+            const cards = col.querySelectorAll('.kanban-task-card');
+            countBadge.textContent = cards.length;
+            const placeholder = col.querySelector('.kanban-empty-placeholder');
+            if (placeholder) {
+                placeholder.style.display = cards.length === 0 ? 'block' : 'none';
+            }
+        }
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SYNCHRONISATION 1-CLIC DES SCÉNARIOS NARRATIFS (AJAX)
+// ═══════════════════════════════════════════════════════════════════════════
+function triggerScenarioSync() {
+    const btn = document.getElementById('btnSyncScenarios');
+    const origHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span> Synchronisation...`;
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'sync_scenarios_ajax');
+
+    fetch('?page=gamestudio&tab=dev_backend_tasks', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+        }
+        if (data.success && data.result) {
+            const res = data.result;
+            showToastNotification(`Synchronisation réussie : ${res.imported} importée(s), ${res.updated} actualisée(s) sur ${res.total} tâche(s) de scénario trouvée(s).`, 'success');
+            setTimeout(() => { window.location.reload(); }, 1200);
+        } else {
+            showToastNotification(`Erreur lors de la synchronisation des scénarios.`, 'danger');
+        }
+    })
+    .catch(err => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+        }
+        console.error(err);
+        showToastNotification(`Erreur de communication serveur.`, 'danger');
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TOAST NOTIFICATIONS TABLER
+// ═══════════════════════════════════════════════════════════════════════════
+function showToastNotification(message, type = 'info') {
+    const container = document.getElementById('tablerToastContainer');
+    if (!container) {
+        alert(message);
+        return;
+    }
+    const toastId = 'toast_' + Date.now();
+    const bgCol = type === 'success' ? 'bg-success text-white' : (type === 'danger' ? 'bg-danger text-white' : 'bg-primary text-white');
+    const icon = type === 'success' ? 'fa-circle-check' : (type === 'danger' ? 'fa-triangle-exclamation' : 'fa-info-circle');
+
+    const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center ${bgCol} border-0 shadow-lg mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2">
+                    <i class="fa-solid ${icon} fs-4"></i>
+                    <div style="font-size:0.85rem;">${escapeHtmlStr(message)}</div>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', toastHtml);
+    const toastEl = document.getElementById(toastId);
+    if (toastEl && window.bootstrap && window.bootstrap.Toast) {
+        const bsToast = new window.bootstrap.Toast(toastEl, { delay: 4000 });
+        bsToast.show();
+        toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+    }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MOTEUR MERMAID.JS v10 & DIAGRAMMES DE FLUX
@@ -730,9 +1207,6 @@ function initMermaidEngine() {
     return false;
 }
 
-/**
- * Diagramme de secours élégant en cas de souci réseau ou syntaxe Mermaid
- */
 function buildFallbackFlowchartHtml(code, errorNotice = null) {
     if (!code) return '';
     const cleanLines = code.split('\n')
@@ -797,9 +1271,6 @@ function buildFallbackFlowchartHtml(code, errorNotice = null) {
     return outHtml;
 }
 
-/**
- * Rend tous les blocs Mermaid d'un conteneur DOM
- */
 function renderAllMermaidInContainer(container) {
     if (!container) return;
     const diagramEls = container.querySelectorAll('.mermaid-diagram');
@@ -875,7 +1346,6 @@ function escapeHtmlStr(str) {
 function formatInlineMarkdown(text) {
     let html = escapeHtmlStr(text);
 
-    // Code inline `...`
     html = html.replace(/`([^`]+)`/g, function(_, codeContent) {
         if (/^[█░]+$/.test(codeContent)) {
             const total = codeContent.length || 10;
@@ -895,11 +1365,9 @@ function formatInlineMarkdown(text) {
         return `<code>${codeContent}</code>`;
     });
 
-    // Gras & Italique
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
 
-    // Badges de statut
     html = html.replace(/✅ Terminé/g, '<span class="badge bg-success text-white">✅ Terminé</span>');
     html = html.replace(/🔧 En cours/g, '<span class="badge bg-primary text-white">🔧 En cours</span>');
     html = html.replace(/⛔ Bloqué/g, '<span class="badge bg-danger text-white">⛔ Bloqué</span>');
@@ -1040,7 +1508,6 @@ function renderCustomMarkdown(mdText, options = {}) {
             continue;
         }
 
-        // Tableaux Markdown
         if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
             flushList();
             flushBlockquote();
@@ -1052,7 +1519,6 @@ function renderCustomMarkdown(mdText, options = {}) {
             flushTable();
         }
 
-        // Blockquotes
         if (trimmed.startsWith('>')) {
             flushList();
             inBlockquote = true;
@@ -1062,7 +1528,6 @@ function renderCustomMarkdown(mdText, options = {}) {
             flushBlockquote();
         }
 
-        // Listes
         if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
             if (!inList || listType !== 'ul') {
                 flushList();
@@ -1090,7 +1555,6 @@ function renderCustomMarkdown(mdText, options = {}) {
         if (trimmed === '') continue;
         if (trimmed === '---') { htmlOut += '<hr class="my-3">'; continue; }
 
-        // Titres
         if (trimmed.startsWith('# ')) {
             htmlOut += `<h4 class="fw-bold text-dark mt-3 mb-2 border-bottom pb-1">${formatInlineMarkdown(trimmed.slice(2))}</h4>`;
             continue;
@@ -1119,408 +1583,42 @@ function renderSimpleMarkdown(md) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// GESTION DU CHAMP DESCRIPTION : SWITCH MODE ÉDITION VS APERÇU .MD
+// EXPORTATION EXPLICITE SUR WINDOW & INITIALISATION AU CHARGEMENT DU DOM
 // ═══════════════════════════════════════════════════════════════════════════
-function switchTaskDescMode(mode) {
-    const editArea = document.getElementById('taskFormEditArea');
-    const previewArea = document.getElementById('taskFormPreviewArea');
-    const btnEdit = document.getElementById('btnTabTaskEdit');
-    const btnPreview = document.getElementById('btnTabTaskPreview');
-    const ta = document.getElementById('taskFormDescTextarea');
-    const previewContent = document.getElementById('taskFormPreviewContent');
+window.openCreateTaskModal = openCreateTaskModal;
+window.openEditTaskModal = openEditTaskModal;
+window.confirmDeleteTask = confirmDeleteTask;
+window.openTaskQuickPreview = openTaskQuickPreview;
+window.editFromQuickPreview = editFromQuickPreview;
+window.switchTaskDescMode = switchTaskDescMode;
+window.triggerTaskFormMdFileInput = triggerTaskFormMdFileInput;
+window.onTaskFormMdFileSelected = onTaskFormMdFileSelected;
+window.onTaskFormDescDragOver = onTaskFormDescDragOver;
+window.onTaskFormDescDragLeave = onTaskFormDescDragLeave;
+window.onTaskFormDescDrop = onTaskFormDescDrop;
+window.onTaskFormDescInput = onTaskFormDescInput;
+window.onKanbanDragStart = onKanbanDragStart;
+window.onKanbanDragEnd = onKanbanDragEnd;
+window.onKanbanDragOver = onKanbanDragOver;
+window.onKanbanDragLeave = onKanbanDragLeave;
+window.onKanbanDrop = onKanbanDrop;
+window.triggerScenarioSync = triggerScenarioSync;
+window.showToastNotification = showToastNotification;
+window.initMermaidEngine = initMermaidEngine;
+window.renderAllMermaidInContainer = renderAllMermaidInContainer;
+window.toggleMermaidSource = toggleMermaidSource;
+window.copyMermaidCode = copyMermaidCode;
+window.renderCustomMarkdown = renderCustomMarkdown;
+window.renderSimpleMarkdown = renderSimpleMarkdown;
 
-    if (mode === 'preview') {
-        editArea.style.display = 'none';
-        previewArea.style.display = 'block';
-        btnEdit.classList.remove('btn-primary');
-        btnEdit.classList.add('btn-outline-secondary');
-        btnPreview.classList.remove('btn-outline-secondary');
-        btnPreview.classList.add('btn-primary');
-
-        previewContent.innerHTML = renderSimpleMarkdown(ta.value);
-        renderAllMermaidInContainer(previewContent);
-    } else {
-        previewArea.style.display = 'none';
-        editArea.style.display = 'block';
-        btnPreview.classList.remove('btn-primary');
-        btnPreview.classList.add('btn-outline-secondary');
-        btnEdit.classList.remove('btn-outline-secondary');
-        btnEdit.classList.add('btn-primary');
-        ta.focus();
-    }
-}
-
-function onTaskFormDescInput() {
-    const ta = document.getElementById('taskFormDescTextarea');
-    const countEl = document.getElementById('taskFormDescCharCount');
-    if (ta && countEl) {
-        countEl.textContent = `${ta.value.length} caractère(s)`;
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// IMPORTATION DE FICHIER .MD DANS LA DESCRIPTION (BOUTON & DRAG & DROP)
-// ═══════════════════════════════════════════════════════════════════════════
-function triggerTaskFormMdFileInput() {
-    const inp = document.getElementById('taskFormMdFileInput');
-    if (inp) {
-        inp.value = '';
-        inp.click();
-    }
-}
-
-function onTaskFormMdFileSelected(input) {
-    const file = input.files && input.files[0];
-    if (!file) return;
-    loadMdFileContent(file);
-}
-
-function onTaskFormDescDragOver(e) {
-    e.preventDefault();
-    const ta = document.getElementById('taskFormDescTextarea');
-    if (ta) {
-        ta.style.borderColor = '#7950f2';
-        ta.style.backgroundColor = '#faf8ff';
-    }
-}
-
-function onTaskFormDescDragLeave(e) {
-    const ta = document.getElementById('taskFormDescTextarea');
-    if (ta) {
-        ta.style.borderColor = '';
-        ta.style.backgroundColor = '';
-    }
-}
-
-function onTaskFormDescDrop(e) {
-    e.preventDefault();
-    onTaskFormDescDragLeave(e);
-    const files = e.dataTransfer && e.dataTransfer.files;
-    if (!files || !files.length) return;
-    loadMdFileContent(files[0]);
-}
-
-function loadMdFileContent(file) {
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-        const content = evt.target.result || '';
-        const ta = document.getElementById('taskFormDescTextarea');
-        if (ta) {
-            ta.value = content;
-            onTaskFormDescInput();
-            const badge = document.getElementById('taskFormMdImportBadge');
-            if (badge) {
-                badge.style.display = 'inline-block';
-                badge.textContent = `📄 ${file.name} (${content.length} car.) importé`;
-            }
-            showToastNotification(`Fichier « ${file.name} » importé avec succès !`, 'success');
-        }
-    };
-    reader.readAsText(file, 'UTF-8');
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MODALES CRÉATION & MODIFICATION DE TÂCHE
-// ═══════════════════════════════════════════════════════════════════════════
-function openCreateTaskModal() {
-    document.getElementById('taskFormAction').value = 'create_task';
-    document.getElementById('taskFormId').value = '0';
-    document.getElementById('modalTaskFormTitle').innerHTML = '<i class="fa-solid fa-server text-teal"></i> <span>Nouvelle Tâche Back-End</span>';
-    document.getElementById('btnSubmitTaskFormText').textContent = 'Créer la Tâche';
-
-    document.getElementById('taskFormTitleInput').value = '';
-    document.getElementById('taskFormStatusSelect').value = 'todo';
-    document.getElementById('taskFormPrioritySelect').value = 'medium';
-    document.getElementById('taskFormComplexitySelect').value = 'M';
-    document.getElementById('taskFormAssignedInput').value = '';
-    document.getElementById('taskFormHoursInput').value = '';
-    document.getElementById('taskFormDeliverablesInput').value = '';
-    document.getElementById('taskFormDescTextarea').value = '';
-
-    const badge = document.getElementById('taskFormMdImportBadge');
-    if (badge) badge.style.display = 'none';
-
-    onTaskFormDescInput();
-    switchTaskDescMode('edit');
-
-    const modalEl = document.getElementById('modalBackendTaskForm');
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
-}
-
-function openEditTaskModal(taskId) {
-    const task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
-    if (!task) return;
-
-    document.getElementById('taskFormAction').value = 'update_task';
-    document.getElementById('taskFormId').value = task.id;
-    document.getElementById('modalTaskFormTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-warning"></i> <span>Modifier la Tâche #${task.id}</span>`;
-    document.getElementById('btnSubmitTaskFormText').textContent = 'Enregistrer les Modifications';
-
-    document.getElementById('taskFormTitleInput').value = task.title || '';
-    document.getElementById('taskFormStatusSelect').value = task.status || 'todo';
-    document.getElementById('taskFormPrioritySelect').value = task.priority || 'medium';
-    document.getElementById('taskFormComplexitySelect').value = task.complexity || 'M';
-    document.getElementById('taskFormAssignedInput').value = task.assigned_to || '';
-    document.getElementById('taskFormHoursInput').value = task.estimated_hours || '';
-    document.getElementById('taskFormDeliverablesInput').value = task.deliverables || '';
-    document.getElementById('taskFormDescTextarea').value = task.description || '';
-
-    const badge = document.getElementById('taskFormMdImportBadge');
-    if (badge) badge.style.display = 'none';
-
-    onTaskFormDescInput();
-    switchTaskDescMode('edit');
-
-    const modalEl = document.getElementById('modalBackendTaskForm');
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
-}
-
-function confirmDeleteTask(taskId, taskTitle) {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement la tâche #${taskId} « ${taskTitle} » ?`)) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '?page=gamestudio&tab=dev_backend_tasks';
-        form.innerHTML = `
-            <input type="hidden" name="action" value="delete_task">
-            <input type="hidden" name="task_id" value="${taskId}">
-        `;
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MODALE D'APERÇU PLEIN ÉCRAN .MD & FLOWCHARTS
-// ═══════════════════════════════════════════════════════════════════════════
-function openTaskQuickPreview(taskId) {
-    const task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
-    if (!task) return;
-
-    activePreviewTaskId = task.id;
-
-    const titleEl = document.getElementById('quickPreviewTaskTitle');
-    const subEl = document.getElementById('quickPreviewTaskSub');
-    const bodyEl = document.getElementById('quickPreviewTaskBody');
-    const badgesEl = document.getElementById('quickPreviewMetaBadges');
-
-    if (titleEl) titleEl.textContent = `Tâche #${task.id} : ${task.title}`;
-    if (subEl) {
-        subEl.textContent = `Assigné à ${task.assigned_to || 'Back-End'} • Estimation : ${task.estimated_hours || 0}h • Créée le ${task.created_at || ''}`;
-    }
-
-    let metaBadgesHtml = '';
-    const prioLabels = { low: 'Basse', medium: 'Moyenne', high: 'Haute', critical: 'Critique' };
-    metaBadgesHtml += `<span class="badge bg-dark-lt text-dark">#${task.id}</span>`;
-    metaBadgesHtml += `<span class="badge bg-secondary-lt text-secondary">Statut: ${task.status}</span>`;
-    metaBadgesHtml += `<span class="badge bg-warning-lt text-warning">Priorité: ${prioLabels[task.priority] || task.priority}</span>`;
-    metaBadgesHtml += `<span class="badge bg-teal-lt text-teal">Taille: ${task.complexity}</span>`;
-    if (task.scenario_id) {
-        metaBadgesHtml += `<span class="badge bg-purple-lt text-purple"><i class="fa-solid fa-scroll me-1"></i>Scénario #${task.scenario_id}</span>`;
-    }
-    if (badgesEl) badgesEl.innerHTML = metaBadgesHtml;
-
-    let contentHtml = '';
-    if (task.deliverables) {
-        contentHtml += `
-            <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center gap-2 small">
-                <i class="fa-solid fa-box-archive text-info fs-4"></i>
-                <div>
-                    <strong>Livrables Attendus :</strong> <code>${escapeHtmlStr(task.deliverables)}</code>
-                </div>
-            </div>
-        `;
-    }
-
-    contentHtml += renderCustomMarkdown(task.description || '', { compact: false });
-    if (bodyEl) {
-        bodyEl.innerHTML = contentHtml;
-        renderAllMermaidInContainer(bodyEl);
-    }
-
-    const modalEl = document.getElementById('modalTaskQuickPreview');
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
-}
-
-function editFromQuickPreview() {
-    if (!activePreviewTaskId) return;
-    const prevModal = bootstrap.Modal.getInstance(document.getElementById('modalTaskQuickPreview'));
-    if (prevModal) prevModal.hide();
-    openEditTaskModal(activePreviewTaskId);
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// KANBAN DRAG & DROP & MISE À JOUR AJAX DU STATUT
-// ═══════════════════════════════════════════════════════════════════════════
-let draggedTaskId = null;
-
-function onKanbanDragStart(e, taskId) {
-    draggedTaskId = taskId;
-    e.dataTransfer.setData('text/plain', taskId);
-    e.dataTransfer.effectAllowed = 'move';
-    const card = document.getElementById('task-card-' + taskId);
-    if (card) card.classList.add('opacity-50', 'border-primary');
-}
-
-function onKanbanDragEnd(e) {
-    if (draggedTaskId) {
-        const card = document.getElementById('task-card-' + draggedTaskId);
-        if (card) card.classList.remove('opacity-50', 'border-primary');
-    }
-    document.querySelectorAll('.kanban-column').forEach(col => {
-        col.classList.remove('bg-primary-subtle', 'border-primary');
-    });
-}
-
-function onKanbanDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const col = e.currentTarget;
-    col.classList.add('bg-primary-subtle', 'border-primary');
-}
-
-function onKanbanDragLeave(e) {
-    const col = e.currentTarget;
-    col.classList.remove('bg-primary-subtle', 'border-primary');
-}
-
-function onKanbanDrop(e, targetStatus) {
-    e.preventDefault();
-    const col = e.currentTarget;
-    col.classList.remove('bg-primary-subtle', 'border-primary');
-
-    const taskId = draggedTaskId || parseInt(e.dataTransfer.getData('text/plain'), 10);
-    if (!taskId) return;
-
-    const task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
-    if (!task) return;
-
-    if (task.status === targetStatus) return; // Rien à changer
-
-    const cardEl = document.getElementById('task-card-' + taskId);
-    const cardList = col.querySelector('.kanban-card-list');
-    const placeholder = col.querySelector('.kanban-empty-placeholder');
-
-    if (cardEl && cardList) {
-        if (placeholder) placeholder.style.display = 'none';
-        cardList.appendChild(cardEl);
-        task.status = targetStatus;
-    }
-
-    // Appel AJAX
-    const formData = new FormData();
-    formData.append('action', 'update_status_ajax');
-    formData.append('task_id', taskId);
-    formData.append('status', targetStatus);
-
-    fetch('?page=gamestudio&tab=dev_backend_tasks', {
-        method: 'POST',
-        body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            updateKanbanCounters();
-            showToastNotification(`Tâche #${taskId} déplacée vers « ${targetStatus} »`, 'success');
-        } else {
-            showToastNotification(`Erreur lors du déplacement de la tâche #${taskId}`, 'danger');
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        showToastNotification(`Erreur réseau lors de la mise à jour du statut`, 'danger');
-    });
-}
-
-function updateKanbanCounters() {
-    ['todo', 'in_progress', 'review', 'blocked', 'done'].forEach(st => {
-        const countBadge = document.getElementById('count-' + st);
-        const col = document.querySelector(`.kanban-column[data-status="${st}"]`);
-        if (countBadge && col) {
-            const cards = col.querySelectorAll('.kanban-task-card');
-            countBadge.textContent = cards.length;
-            const placeholder = col.querySelector('.kanban-empty-placeholder');
-            if (placeholder) {
-                placeholder.style.display = cards.length === 0 ? 'block' : 'none';
-            }
-        }
-    });
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// SYNCHRONISATION 1-CLIC DES SCÉNARIOS NARRATIFS (AJAX)
-// ═══════════════════════════════════════════════════════════════════════════
-function triggerScenarioSync() {
-    const btn = document.getElementById('btnSyncScenarios');
-    const origHtml = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span> Synchronisation...`;
-
-    const formData = new FormData();
-    formData.append('action', 'sync_scenarios_ajax');
-
-    fetch('?page=gamestudio&tab=dev_backend_tasks', {
-        method: 'POST',
-        body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-        btn.disabled = false;
-        btn.innerHTML = origHtml;
-        if (data.success && data.result) {
-            const res = data.result;
-            showToastNotification(`Synchronisation réussie : ${res.imported} importée(s), ${res.updated} actualisée(s) sur ${res.total} tâche(s) de scénario trouvée(s).`, 'success');
-            // Recharger la page pour actualiser la grille
-            setTimeout(() => { window.location.reload(); }, 1200);
-        } else {
-            showToastNotification(`Erreur lors de la synchronisation des scénarios.`, 'danger');
-        }
-    })
-    .catch(err => {
-        btn.disabled = false;
-        btn.innerHTML = origHtml;
-        console.error(err);
-        showToastNotification(`Erreur de communication serveur.`, 'danger');
-    });
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// TOAST NOTIFICATIONS TABLER
-// ═══════════════════════════════════════════════════════════════════════════
-function showToastNotification(message, type = 'info') {
-    const container = document.getElementById('tablerToastContainer');
-    if (!container) {
-        alert(message);
-        return;
-    }
-    const toastId = 'toast_' + Date.now();
-    const bgCol = type === 'success' ? 'bg-success text-white' : (type === 'danger' ? 'bg-danger text-white' : 'bg-primary text-white');
-    const icon = type === 'success' ? 'fa-circle-check' : (type === 'danger' ? 'fa-triangle-exclamation' : 'fa-info-circle');
-
-    const toastHtml = `
-        <div id="${toastId}" class="toast align-items-center ${bgCol} border-0 shadow-lg mb-2" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body d-flex align-items-center gap-2">
-                    <i class="fa-solid ${icon} fs-4"></i>
-                    <div style="font-size:0.85rem;">${escapeHtmlStr(message)}</div>
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
-            </div>
-        </div>
-    `;
-    container.insertAdjacentHTML('beforeend', toastHtml);
-    const toastEl = document.getElementById(toastId);
-    if (toastEl && typeof bootstrap !== 'undefined') {
-        const bsToast = new bootstrap.Toast(toastEl, { delay: 4000 });
-        bsToast.show();
-        toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
-    }
-}
-
-// Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', function() {
+    const btnCreate = document.getElementById('btnOpenCreateTaskModal');
+    if (btnCreate) {
+        btnCreate.addEventListener('click', function(e) {
+            e.preventDefault();
+            openCreateTaskModal();
+        });
+    }
     initMermaidEngine();
 });
 </script>
