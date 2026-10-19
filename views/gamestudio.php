@@ -372,6 +372,23 @@ if ($currentTab === 'dashboard') {
                     'msg'         => $updated ? "Statut du scénario #$scId mis à jour !" : "Impossible de modifier le statut."
                 ]);
                 exit;
+            } elseif ($action === 'ajax_set_scenario_pipeline_anchor') {
+                header('Content-Type: application/json; charset=UTF-8');
+                $scId = (int)($_POST['scenario_id'] ?? 0);
+                $afterStep = isset($_POST['after_step']) && $_POST['after_step'] !== '' && $_POST['after_step'] !== 'null'
+                    ? (int)$_POST['after_step']
+                    : null;
+                $sequenceOrder = (int)($_POST['sequence_order'] ?? 0);
+                $updated = $scenarioEngine->updateScenarioPipelinePosition($scId, $afterStep, $sequenceOrder);
+                $sc = $scenarioEngine->getScenarioById($scId);
+                echo json_encode([
+                    'ok'                  => $updated,
+                    'scenario_id'         => $scId,
+                    'position_after_step' => $sc['position_after_step'] ?? $afterStep,
+                    'sequence_order'      => $sc['sequence_order'] ?? $sequenceOrder,
+                    'msg'                 => $updated ? "Position de l'événement dans le pipeline mise à jour !" : "Impossible de modifier la position."
+                ]);
+                exit;
             } elseif ($action === 'ajax_delete_scenario') {
                 header('Content-Type: application/json; charset=UTF-8');
                 $scId = (int)($_POST['scenario_id'] ?? 0);

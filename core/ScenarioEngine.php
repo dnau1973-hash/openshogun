@@ -229,6 +229,8 @@ class ScenarioEngine {
                 `slug` VARCHAR(100) NOT NULL UNIQUE,
                 `type` VARCHAR(30) NOT NULL DEFAULT 'step',
                 `step_number` INT NULL,
+                `position_after_step` INT NULL DEFAULT NULL,
+                `sequence_order` INT NOT NULL DEFAULT 0,
                 `title` VARCHAR(255) NOT NULL,
                 `subtitle` VARCHAR(255) NULL,
                 `era` VARCHAR(100) NULL,
@@ -246,17 +248,24 @@ class ScenarioEngine {
                 `created_at` INT NOT NULL,
                 `updated_at` INT NOT NULL,
                 INDEX `idx_scenario_type` (`type`),
-                INDEX `idx_scenario_status` (`status`)
+                INDEX `idx_scenario_status` (`status`),
+                INDEX `idx_scenario_pipeline_order` (`position_after_step`, `sequence_order`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             ";
             $this->db->exec($sql);
 
-            // Auto-migration douce des colonnes speaker_avatar et choices_json si absentes
+            // Auto-migration douce des colonnes speaker_avatar, choices_json, position_after_step et sequence_order si absentes
             try {
                 $this->db->exec("ALTER TABLE `narrative_scenarios` ADD COLUMN `speaker_avatar` VARCHAR(30) NULL DEFAULT '🏯' AFTER `speaker_role`");
             } catch (Throwable $e) {}
             try {
                 $this->db->exec("ALTER TABLE `narrative_scenarios` ADD COLUMN `choices_json` LONGTEXT NULL AFTER `rewards_summary`");
+            } catch (Throwable $e) {}
+            try {
+                $this->db->exec("ALTER TABLE `narrative_scenarios` ADD COLUMN `position_after_step` INT NULL DEFAULT NULL AFTER `step_number`");
+            } catch (Throwable $e) {}
+            try {
+                $this->db->exec("ALTER TABLE `narrative_scenarios` ADD COLUMN `sequence_order` INT NOT NULL DEFAULT 0 AFTER `position_after_step`");
             } catch (Throwable $e) {}
         } catch (Throwable $e) {
             // Ignorer si déjà existant
@@ -413,6 +422,8 @@ class ScenarioEngine {
         $slug = !empty($sc['slug']) ? $this->slugify($sc['slug']) : $this->slugify($sc['title'] ?? 'scenario-' . $now);
         $type = in_array($sc['type'] ?? '', self::VALID_TYPES, true) ? $sc['type'] : 'step';
         $stepNumber = isset($sc['step_number']) && $sc['step_number'] !== '' ? (int)$sc['step_number'] : null;
+        $positionAfterStep = isset($sc['position_after_step']) && $sc['position_after_step'] !== '' ? (int)$sc['position_after_step'] : null;
+        $sequenceOrder = isset($sc['sequence_order']) ? (int)$sc['sequence_order'] : 0;
         $title = trim((string)($sc['title'] ?? 'Nouveau Scénario'));
         $subtitle = trim((string)($sc['subtitle'] ?? ''));
         $era = trim((string)($sc['era'] ?? 'Sengoku Jidai (~1560)'));
@@ -450,11 +461,11 @@ class ScenarioEngine {
 
             $stmt = $this->db->prepare("
                 INSERT INTO narrative_scenarios 
-                (slug, type, step_number, title, subtitle, era, synopsis, speaker_name, speaker_role, speaker_avatar, dialogue, trigger_condition, rewards_summary, choices_json, status, tasks_json, created_by, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (slug, type, step_number, position_after_step, sequence_order, title, subtitle, era, synopsis, speaker_name, speaker_role, speaker_avatar, dialogue, trigger_condition, rewards_summary, choices_json, status, tasks_json, created_by, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
-                $slug, $type, $stepNumber, $title, $subtitle, $era, $synopsis,
+                $slug, $type, $stepNumber, $positionAfterStep, $sequenceOrder, $title, $subtitle, $era, $synopsis,
                 $speakerName, $speakerRole, $speakerAvatar, $dialogue, $triggerCond, $rewards,
                 $choicesJson, $status, $tasksJson, $createdBy, $now, $now
             ]);
@@ -495,7 +506,7 @@ class ScenarioEngine {
                 $params[] = $term;
                 $params[] = $term;
             }
-            $sql .= " ORDER BY CASE type WHEN 'step' THEN 1 ELSE 2 END, step_number ASC, created_at DESC";
+            $sql .= " ORDER BY CASE type WHEN 'step' THEN 1 ELSE 2 END, step_number ASC, sequence_order ASC, created_at DESC";
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -504,6 +515,8 @@ class ScenarioEngine {
                 $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
                 $row['tasks'] = is_array($tasks) ? array_values($tasks) : [];
                 $row['speaker_avatar'] = !empty($row['speaker_avatar']) ? $row['speaker_avatar'] : '🏯';
+                $row['position_after_step'] = isset($row['position_after_step']) && $row['position_after_step'] !== null ? (int)$row['position_after_step'] : null;
+                $row['sequence_order'] = (int)($row['sequence_order'] ?? 0);
                 $row['choices'] = $this->normalizeChoices($row['choices_json'] ?? []);
                 if (empty($row['choices'])) {
                     $row['choices'] = [
@@ -533,6 +546,9 @@ class ScenarioEngine {
             if ($row) {
                 $tasks = !empty($row['tasks_json']) ? json_decode($row['tasks_json'], true) : [];
                 $row['tasks'] = is_array($tasks) ? array_values($tasks) : [];
+                $row['speaker_avatar'] = !empty($row['speaker_avatar']) ? $row['speaker_avatar'] : '🏯';
+                $row['position_after_step'] = isset($row['position_after_step']) && $row['position_after_step'] !== null ? (int)$row['position_after_step'] : null;
+                $row['sequence_order'] = (int)($row['sequence_order'] ?? 0);
                 $row['speaker_avatar'] = !empty($row['speaker_avatar']) ? $row['speaker_avatar'] : '🏯';
                 $row['choices'] = $this->normalizeChoices($row['choices_json'] ?? []);
                 if (empty($row['choices'])) {
@@ -660,6 +676,10 @@ class ScenarioEngine {
         if ($type !== 'step') {
             $stepNumber = null;
         }
+        $positionAfterStep = array_key_exists('position_after_step', $data)
+            ? ($data['position_after_step'] !== null && $data['position_after_step'] !== '' ? (int)$data['position_after_step'] : null)
+            : ($existing['position_after_step'] ?? null);
+        $sequenceOrder = isset($data['sequence_order']) ? (int)$data['sequence_order'] : (int)($existing['sequence_order'] ?? 0);
         $subtitle = trim((string)($data['subtitle'] ?? $existing['subtitle']));
         $era = trim((string)($data['era'] ?? $existing['era']));
         $synopsis = trim((string)($data['synopsis'] ?? $existing['synopsis']));
@@ -693,15 +713,37 @@ class ScenarioEngine {
         try {
             $stmt = $this->db->prepare("
                 UPDATE narrative_scenarios
-                SET slug = ?, type = ?, step_number = ?, title = ?, subtitle = ?, era = ?, synopsis = ?,
+                SET slug = ?, type = ?, step_number = ?, position_after_step = ?, sequence_order = ?, title = ?, subtitle = ?, era = ?, synopsis = ?,
                     speaker_name = ?, speaker_role = ?, speaker_avatar = ?, dialogue = ?, trigger_condition = ?,
                     rewards_summary = ?, choices_json = ?, status = ?, tasks_json = ?, updated_at = ?
                 WHERE id = ?
             ");
             return $stmt->execute([
-                $slug, $type, $stepNumber, $title, $subtitle, $era, $synopsis,
+                $slug, $type, $stepNumber, $positionAfterStep, $sequenceOrder, $title, $subtitle, $era, $synopsis,
                 $speakerName, $speakerRole, $speakerAvatar, $dialogue, $triggerCond,
                 $rewards, $choicesJson, $status, $tasksJson, $now, $id
+            ]);
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Met à jour rapidement l'ancrage d'un événement spécial dans le pipeline narratif (drag & drop inter-step)
+     */
+    public function updateScenarioPipelinePosition(int $scenarioId, ?int $afterStep, int $sequenceOrder = 0): bool {
+        if ($scenarioId <= 0 || !$this->db) return false;
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE narrative_scenarios
+                SET position_after_step = ?, sequence_order = ?, updated_at = ?
+                WHERE id = ?
+            ");
+            return $stmt->execute([
+                $afterStep !== null && $afterStep >= 0 ? $afterStep : null,
+                $sequenceOrder,
+                time(),
+                $scenarioId
             ]);
         } catch (Throwable $e) {
             return false;

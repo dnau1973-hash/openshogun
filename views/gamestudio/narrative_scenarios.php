@@ -278,9 +278,22 @@ if (!function_exists('renderTaskCardHtml')) {
 .scenario-pipeline-track {
     display: flex;
     align-items: stretch;
-    gap: 0.75rem;
+    gap: 0.65rem;
     overflow-x: auto;
-    padding: 0.5rem 0.25rem 0.75rem 0.25rem;
+    padding: 0.75rem 0.5rem 1rem 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f8fafc;
+}
+.scenario-pipeline-track::-webkit-scrollbar {
+    height: 7px;
+}
+.scenario-pipeline-track::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+.scenario-pipeline-track::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
 }
 .scenario-pipeline-node {
     min-width: 230px;
@@ -303,8 +316,144 @@ if (!function_exists('renderTaskCardHtml')) {
     align-items: center;
     justify-content: center;
     color: #94a3b8;
-    font-size: 1.1rem;
-    flex: 0 0 20px;
+    font-size: 0.95rem;
+    flex: 0 0 16px;
+    user-select: none;
+}
+
+/* Médaillon Compact d'Événement Intercalé (Option A) */
+.pipeline-event-medallion {
+    min-width: 190px;
+    max-width: 210px;
+    flex: 0 0 auto;
+    border-radius: 10px;
+    border: 1.5px dashed #f43f5e;
+    background: linear-gradient(180deg, #ffffff 0%, #fff1f2 100%);
+    padding: 0.65rem 0.75rem;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: grab;
+    user-select: none;
+}
+.pipeline-event-medallion:active {
+    cursor: grabbing;
+}
+.pipeline-event-medallion:hover {
+    border-color: #e11d48;
+    border-style: solid;
+    box-shadow: 0 6px 18px rgba(225, 29, 72, 0.16);
+    transform: translateY(-2px);
+}
+.pipeline-event-medallion.pipeline-dragging {
+    opacity: 0.45;
+    transform: scale(0.96);
+    border-style: dashed;
+}
+
+/* Dropzones d'Interstices entre les Steps */
+.pipeline-interstice-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+.pipeline-interstice-dropzone {
+    min-width: 48px;
+    min-height: 85px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    background: rgba(248, 250, 252, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    padding: 0.4rem 0.5rem;
+    text-align: center;
+    user-select: none;
+}
+.pipeline-interstice-dropzone:hover {
+    border-color: #8b5cf6;
+    color: #7c3aed;
+    background: #f5f3ff;
+}
+.pipeline-interstice-dropzone .dropzone-plus-icon {
+    font-size: 1.05rem;
+    transition: transform 0.2s ease;
+}
+.pipeline-interstice-dropzone .dropzone-hint {
+    font-size: 0.64rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-transform: uppercase;
+    display: none;
+}
+
+/* État actif lors du Drag & Drop d'un événement */
+.pipeline-dragging-active .pipeline-interstice-dropzone {
+    border-color: #8b5cf6;
+    background: #fdf4ff;
+    color: #9333ea;
+    animation: pipelinePulseZone 1.6s infinite ease-in-out;
+}
+.pipeline-dragging-active .pipeline-interstice-dropzone .dropzone-hint {
+    display: block;
+}
+@keyframes pipelinePulseZone {
+    0%, 100% { border-color: #8b5cf6; box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.3); }
+    50% { border-color: #d946ef; box-shadow: 0 0 0 4px rgba(217, 70, 239, 0.18); }
+}
+
+/* État de survol ciblé (drag-over) */
+.pipeline-interstice-dropzone.drag-over {
+    min-width: 140px;
+    border-color: #7c3aed !important;
+    background: #ede9fe !important;
+    color: #6d28d9 !important;
+    transform: scale(1.04);
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+    animation: none;
+}
+.pipeline-interstice-dropzone.drag-over .dropzone-plus-icon {
+    transform: rotate(90deg) scale(1.25);
+}
+
+/* Vivier des Événements Disponibles (Pool / Drawer) */
+.pipeline-pool-drawer {
+    border-radius: 8px;
+    border: 1px dashed #e2e8f0;
+    background: #fafafa;
+    transition: all 0.2s ease;
+}
+.pipeline-pool-drawer.drag-over {
+    border-color: #f43f5e;
+    background: #fff1f2;
+    box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15);
+}
+.pipeline-pool-card {
+    min-width: 175px;
+    max-width: 200px;
+    border-radius: 8px;
+    border: 1px solid #fecdd3;
+    background: #ffffff;
+    padding: 0.5rem 0.65rem;
+    cursor: grab;
+    user-select: none;
+    transition: all 0.18s ease;
+}
+.pipeline-pool-card:active {
+    cursor: grabbing;
+}
+.pipeline-pool-card:hover {
+    border-color: #e11d48;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.12);
+}
+.pipeline-pool-card.pipeline-dragging {
+    opacity: 0.45;
 }
 
 /* Visionneuse Markdown GDD Rendue */
@@ -1447,10 +1596,26 @@ else:
 
     $globalCompletionPct = ($totalTasksGlobal > 0) ? (int)round(($doneTasksGlobal / $totalTasksGlobal) * 100) : 0;
 
-    // Séparer les steps pour la vue Frise Chronologique
+    // Séparer les steps et événements pour la frise chronologique et le schéma graphique interactif
     $stepScenarios = array_values(array_filter($scenarios, fn($s) => ($s['type'] ?? '') === 'step'));
     usort($stepScenarios, fn($a, $b) => ((int)($a['step_number'] ?? 0)) <=> ((int)($b['step_number'] ?? 0)));
     $eventScenarios = array_values(array_filter($scenarios, fn($s) => ($s['type'] ?? '') !== 'step'));
+
+    // Indexation des événements spéciaux ancrés dans le pipeline par position_after_step
+    $pipelineAnchoredEvents = []; // [ afterStep => [ scenarios ] ]
+    $pipelineFloatingEvents = []; // [ scenarios non assignés ]
+    foreach ($eventScenarios as $evSc) {
+        $afterSt = $evSc['position_after_step'] ?? null;
+        if ($afterSt !== null && $afterSt !== '') {
+            $pipelineAnchoredEvents[(int)$afterSt][] = $evSc;
+        } else {
+            $pipelineFloatingEvents[] = $evSc;
+        }
+    }
+    foreach ($pipelineAnchoredEvents as $k => &$evArr) {
+        usort($evArr, fn($a, $b) => ((int)($a['sequence_order'] ?? 0)) <=> ((int)($b['sequence_order'] ?? 0)));
+    }
+    unset($evArr);
 ?>
 
 <style>
@@ -1831,64 +1996,278 @@ else:
         </div>
     </div>
 
-    <!-- Frise Graphique Interactive du Flow Narratif (Steps & Événements) -->
+    <!-- Frise Graphique Interactive du Flow Narratif (Steps & Événements avec Drag & Drop) -->
     <?php if (!empty($scenarios)): ?>
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center">
-            <h4 class="card-title m-0 fw-bold text-dark d-flex align-items-center gap-2">
-                <i class="fa-solid fa-diagram-project text-purple"></i>
-                <span>Schéma Graphique du Pipeline Narratif (Steps &amp; Événements Spéciaux)</span>
-            </h4>
-            <span class="text-muted small">Cliquez sur un nœud pour éditer ou prévisualiser son GDD Markdown</span>
+    <div class="card shadow-sm border-0 mb-4" id="scenarioPipelineCard">
+        <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <h4 class="card-title m-0 fw-bold text-dark d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-diagram-project text-purple"></i>
+                    <span>Schéma Graphique du Pipeline Narratif (Steps &amp; Événements Spéciaux)</span>
+                </h4>
+                <span class="badge bg-purple text-white fw-bold font-monospace">
+                    ⛩️ <?= count($stepScenarios) ?> Steps
+                </span>
+                <span class="badge bg-danger-lt text-danger fw-bold font-monospace" id="pipelineAnchoredBadge">
+                    🏮 <?= count($eventScenarios) - count($pipelineFloatingEvents) ?> Intercalés
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" 
+                        class="btn btn-xs <?= !empty($pipelineFloatingEvents) ? 'btn-danger' : 'btn-outline-secondary' ?> fw-bold d-inline-flex align-items-center gap-1"
+                        id="btnTogglePipelinePool" 
+                        onclick="togglePipelineEventsPool()"
+                        title="Afficher/masquer les événements en réserve non encore positionnés">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span>Vivier en Réserve (<span id="pipelinePoolCountNum"><?= count($pipelineFloatingEvents) ?></span>)</span>
+                </button>
+                <span class="text-muted small d-none d-md-inline">Glissez un événement entre deux steps pour l'intercaler</span>
+            </div>
         </div>
-        <div class="card-body p-3 bg-light-subtle">
-            <div class="scenario-pipeline-track">
-                <?php foreach ($scenarios as $idx => $scNode):
-                    $isStepNode = ($scNode['type'] === 'step');
-                    $nodePct = (int)($scNode['metrics']['percent'] ?? 0);
-                    $nodeColor = $isStepNode ? '#7c3aed' : '#e11d48';
+
+        <!-- Vivier d'Événements Spéciaux Disponibles (Tiroir Dropzone) -->
+        <div class="px-3 pt-3 pb-2 bg-light border-bottom" id="pipelineEventsPoolDrawer" style="<?= empty($pipelineFloatingEvents) ? 'display:none;' : '' ?>">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="small fw-bold text-danger text-uppercase d-flex align-items-center gap-1" style="font-size:0.75rem;">
+                    <i class="fa-solid fa-box-archive"></i>
+                    <span>Vivier des Événements Spéciaux (Non encore intercalés dans la frise)</span>
+                </div>
+                <div class="text-muted small" style="font-size:0.72rem;">
+                    <i class="fa-solid fa-hand-pointer text-danger me-1"></i>Glissez une carte vers un interstice <strong>[ + ]</strong> ci-dessous
+                </div>
+            </div>
+
+            <!-- Conteneur déplaçable / Dropzone de retour au vivier -->
+            <div class="pipeline-pool-drawer p-2 d-flex flex-wrap gap-2 align-items-center"
+                 id="pipelinePoolDropzone"
+                 ondragover="onPipelinePoolDragOver(event)"
+                 ondragleave="onPipelinePoolDragLeave(event)"
+                 ondrop="onPipelinePoolDrop(event)"
+                 title="Glissez un événement ici pour le détacher du pipeline et le renvoyer en réserve">
+
+                <div id="pipelinePoolEmptyMsg" class="text-muted small py-2 px-3 text-center w-100" style="<?= empty($pipelineFloatingEvents) ? '' : 'display:none;' ?>">
+                    <i class="fa-solid fa-circle-check text-success me-1"></i>Tous les événements spéciaux sont actuellement positionnés dans le pipeline. Glissez un événement ici pour le renvoyer en réserve.
+                </div>
+
+                <?php foreach ($pipelineFloatingEvents as $flNode):
+                    $flPct = (int)($flNode['metrics']['percent'] ?? 0);
                 ?>
-                    <?php if ($idx > 0): ?>
-                        <div class="scenario-pipeline-arrow">
-                            <i class="fa-solid fa-chevron-right"></i>
+                    <div class="pipeline-pool-card shadow-xs d-flex flex-column justify-content-between"
+                         id="pipelineScenarioCard_<?= (int)$flNode['id'] ?>"
+                         data-scenario-id="<?= (int)$flNode['id'] ?>"
+                         data-scenario-title="<?= htmlspecialchars($flNode['title']) ?>"
+                         draggable="true"
+                         ondragstart="onPipelineEventDragStart(event, <?= (int)$flNode['id'] ?>, null)"
+                         ondragend="onPipelineEventDragEnd(event)">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-danger text-white fw-bold font-monospace" style="font-size:0.65rem;">
+                                    <i class="fa-solid fa-grip-vertical me-1 text-light"></i>🏮 Événement
+                                </span>
+                                <span class="badge bg-teal-lt text-teal font-monospace" style="font-size:0.65rem;"><?= $flPct ?>%</span>
+                            </div>
+                            <div class="fw-bold text-dark small text-truncate" title="<?= htmlspecialchars($flNode['title']) ?>" style="font-size:0.78rem;">
+                                <?= htmlspecialchars($flNode['title']) ?>
+                            </div>
+                            <div class="text-muted text-truncate" style="font-size:0.68rem;">
+                                <?= htmlspecialchars($flNode['speaker_name'] ?? 'Narrateur') ?>
+                            </div>
                         </div>
+                        <div class="mt-2 pt-1 border-top d-flex justify-content-between gap-1">
+                            <button type="button" class="btn btn-xs btn-outline-teal flex-grow-1 py-0" style="font-size:0.65rem;" onclick="exportScenarioMarkdown(<?= (int)$flNode['id'] ?>)">
+                                <i class="fa-brands fa-markdown"></i> GDD
+                            </button>
+                            <a href="?page=gamestudio&tab=narrative_scenarios&action=edit&id=<?= (int)$flNode['id'] ?>" class="btn btn-xs btn-purple flex-grow-1 py-0" style="font-size:0.65rem;">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <div class="card-body p-3 bg-light-subtle">
+            <div class="scenario-pipeline-track" id="scenarioPipelineTrack">
+
+                <!-- 1. Interstice Prologue (Avant Step 1) -->
+                <div class="pipeline-interstice-container" id="pipelineIntersticeContainer_0" data-after-step="0">
+                    <?php if (!empty($pipelineAnchoredEvents[0])): ?>
+                        <?php foreach ($pipelineAnchoredEvents[0] as $seqIdx => $evNode):
+                            $evPct = (int)($evNode['metrics']['percent'] ?? 0);
+                        ?>
+                            <div class="pipeline-event-medallion shadow-xs d-flex flex-column justify-content-between"
+                                 id="pipelineScenarioCard_<?= (int)$evNode['id'] ?>"
+                                 data-scenario-id="<?= (int)$evNode['id'] ?>"
+                                 data-scenario-title="<?= htmlspecialchars($evNode['title']) ?>"
+                                 data-current-after-step="0"
+                                 draggable="true"
+                                 ondragstart="onPipelineEventDragStart(event, <?= (int)$evNode['id'] ?>, 0)"
+                                 ondragend="onPipelineEventDragEnd(event)">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-danger text-white fw-bold font-monospace" style="font-size:0.65rem;">
+                                            <i class="fa-solid fa-grip-vertical me-1 text-light"></i>🏮 Prologue
+                                        </span>
+                                        <button type="button" 
+                                                class="btn btn-xs btn-outline-danger py-0 px-1 border-0" 
+                                                title="Renvoyer au vivier de réserve"
+                                                onclick="detachScenarioFromPipeline(<?= (int)$evNode['id'] ?>)">
+                                            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                                        </button>
+                                    </div>
+                                    <div class="fw-bold text-dark small text-truncate" title="<?= htmlspecialchars($evNode['title']) ?>" style="font-size:0.78rem;">
+                                        <?= htmlspecialchars($evNode['title']) ?>
+                                    </div>
+                                    <div class="text-muted text-truncate" style="font-size:0.68rem;">
+                                        <i class="fa-solid fa-comment-dots text-danger me-1"></i><?= htmlspecialchars($evNode['speaker_name'] ?? 'Narrateur') ?>
+                                    </div>
+                                </div>
+                                <div class="mt-2 pt-1 border-top">
+                                    <div class="progress mb-1" style="height: 3px;">
+                                        <div class="progress-bar bg-danger" style="width: <?= $evPct ?>%;"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between gap-1">
+                                        <button type="button" class="btn btn-xs btn-outline-teal flex-grow-1 py-0" style="font-size:0.65rem;" onclick="exportScenarioMarkdown(<?= (int)$evNode['id'] ?>)">
+                                            <i class="fa-brands fa-markdown"></i> GDD
+                                        </button>
+                                        <a href="?page=gamestudio&tab=narrative_scenarios&action=edit&id=<?= (int)$evNode['id'] ?>" class="btn btn-xs btn-purple flex-grow-1 py-0" style="font-size:0.65rem;">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     <?php endif; ?>
-                    <div class="scenario-pipeline-node shadow-sm d-flex flex-column justify-content-between">
+
+                    <!-- Dropzone d'insertion Prologue -->
+                    <div class="pipeline-interstice-dropzone"
+                         id="pipelineIntersticeDropzone_0"
+                         data-after-step="0"
+                         ondragover="onPipelineIntersticeDragOver(event, 0)"
+                         ondragleave="onPipelineIntersticeDragLeave(event, 0)"
+                         ondrop="onPipelineIntersticeDrop(event, 0)"
+                         title="Glisser un événement ici pour le placer au Prologue (avant Step 1)">
+                        <i class="fa-solid fa-plus dropzone-plus-icon"></i>
+                        <span class="dropzone-hint">Prologue</span>
+                    </div>
+                </div>
+
+                <?php if (!empty($stepScenarios)): ?>
+                    <div class="scenario-pipeline-arrow">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                <?php endif; ?>
+
+                <!-- 2. Boucle sur les Steps séquentiels et leurs interstices -->
+                <?php foreach ($stepScenarios as $sIdx => $stepSc):
+                    $sNum = (int)($stepSc['step_number'] ?? ($sIdx + 1));
+                    $stepPct = (int)($stepSc['metrics']['percent'] ?? 0);
+                    $anchoredEvents = $pipelineAnchoredEvents[$sNum] ?? [];
+                ?>
+                    <!-- Carte du Step Principal -->
+                    <div class="scenario-pipeline-node shadow-sm d-flex flex-column justify-content-between" id="pipelineStepCard_<?= $sNum ?>">
                         <div>
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <?php if ($isStepNode): ?>
-                                    <span class="badge bg-purple text-white fw-bold font-monospace">
-                                        ⛩️ Step #<?= (int)$scNode['step_number'] ?>
-                                    </span>
-                                <?php else: ?>
-                                    <span class="badge bg-danger text-white fw-bold font-monospace">
-                                        🏮 Événement
-                                    </span>
-                                <?php endif; ?>
-                                <span class="badge bg-teal-lt text-teal font-monospace"><?= $nodePct ?>%</span>
+                                <span class="badge bg-purple text-white fw-bold font-monospace">
+                                    ⛩️ Step #<?= $sNum ?>
+                                </span>
+                                <span class="badge bg-teal-lt text-teal font-monospace"><?= $stepPct ?>%</span>
                             </div>
-                            <div class="fw-bold text-dark small mb-1 text-truncate" title="<?= htmlspecialchars($scNode['title']) ?>">
-                                <?= htmlspecialchars($scNode['title']) ?>
+                            <div class="fw-bold text-dark small mb-1 text-truncate" title="<?= htmlspecialchars($stepSc['title']) ?>">
+                                <?= htmlspecialchars($stepSc['title']) ?>
                             </div>
-                            <div class="text-muted" style="font-size: 0.72rem;">
-                                <i class="fa-solid fa-comment-dots text-purple me-1"></i><?= htmlspecialchars($scNode['speaker_name'] ?? 'Narrateur') ?>
+                            <div class="text-muted text-truncate" style="font-size: 0.72rem;">
+                                <i class="fa-solid fa-comment-dots text-purple me-1"></i><?= htmlspecialchars($stepSc['speaker_name'] ?? 'Narrateur') ?>
                             </div>
                         </div>
                         <div class="mt-2 pt-2 border-top">
                             <div class="progress mb-2" style="height: 4px;">
-                                <div class="progress-bar" style="width: <?= $nodePct ?>%; background-color: <?= $nodeColor ?>;"></div>
+                                <div class="progress-bar bg-purple" style="width: <?= $stepPct ?>%;"></div>
                             </div>
                             <div class="d-flex justify-content-between gap-1">
-                                <button type="button" class="btn btn-xs btn-outline-teal flex-grow-1 py-1" onclick="exportScenarioMarkdown(<?= (int)$scNode['id'] ?>)" title="Visionneuse GDD Markdown">
+                                <button type="button" class="btn btn-xs btn-outline-teal flex-grow-1 py-1" onclick="exportScenarioMarkdown(<?= (int)$stepSc['id'] ?>)" title="Visionneuse GDD Markdown">
                                     <i class="fa-brands fa-markdown me-1"></i>GDD
                                 </button>
-                                <a href="?page=gamestudio&tab=narrative_scenarios&action=edit&id=<?= (int)$scNode['id'] ?>" class="btn btn-xs btn-purple flex-grow-1 py-1">
+                                <a href="?page=gamestudio&tab=narrative_scenarios&action=edit&id=<?= (int)$stepSc['id'] ?>" class="btn btn-xs btn-purple flex-grow-1 py-1">
                                     <i class="fa-solid fa-pen-to-square me-1"></i>Éditer
                                 </a>
                             </div>
                         </div>
                     </div>
+
+                    <div class="scenario-pipeline-arrow">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+
+                    <!-- Interstice après Step N -->
+                    <div class="pipeline-interstice-container" id="pipelineIntersticeContainer_<?= $sNum ?>" data-after-step="<?= $sNum ?>">
+                        <!-- Événements spéciaux déjà intercalés à cette position -->
+                        <?php foreach ($anchoredEvents as $evNode):
+                            $evPct = (int)($evNode['metrics']['percent'] ?? 0);
+                        ?>
+                            <div class="pipeline-event-medallion shadow-xs d-flex flex-column justify-content-between"
+                                 id="pipelineScenarioCard_<?= (int)$evNode['id'] ?>"
+                                 data-scenario-id="<?= (int)$evNode['id'] ?>"
+                                 data-scenario-title="<?= htmlspecialchars($evNode['title']) ?>"
+                                 data-current-after-step="<?= $sNum ?>"
+                                 draggable="true"
+                                 ondragstart="onPipelineEventDragStart(event, <?= (int)$evNode['id'] ?>, <?= $sNum ?>)"
+                                 ondragend="onPipelineEventDragEnd(event)">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-danger text-white fw-bold font-monospace" style="font-size:0.65rem;">
+                                            <i class="fa-solid fa-grip-vertical me-1 text-light"></i>🏮 Inter-Step #<?= $sNum ?>
+                                        </span>
+                                        <button type="button" 
+                                                class="btn btn-xs btn-outline-danger py-0 px-1 border-0" 
+                                                title="Renvoyer au vivier de réserve"
+                                                onclick="detachScenarioFromPipeline(<?= (int)$evNode['id'] ?>)">
+                                            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                                        </button>
+                                    </div>
+                                    <div class="fw-bold text-dark small text-truncate" title="<?= htmlspecialchars($evNode['title']) ?>" style="font-size:0.78rem;">
+                                        <?= htmlspecialchars($evNode['title']) ?>
+                                    </div>
+                                    <div class="text-muted text-truncate" style="font-size:0.68rem;">
+                                        <i class="fa-solid fa-comment-dots text-danger me-1"></i><?= htmlspecialchars($evNode['speaker_name'] ?? 'Narrateur') ?>
+                                    </div>
+                                </div>
+                                <div class="mt-2 pt-1 border-top">
+                                    <div class="progress mb-1" style="height: 3px;">
+                                        <div class="progress-bar bg-danger" style="width: <?= $evPct ?>%;"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between gap-1">
+                                        <button type="button" class="btn btn-xs btn-outline-teal flex-grow-1 py-0" style="font-size:0.65rem;" onclick="exportScenarioMarkdown(<?= (int)$evNode['id'] ?>)">
+                                            <i class="fa-brands fa-markdown"></i> GDD
+                                        </button>
+                                        <a href="?page=gamestudio&tab=narrative_scenarios&action=edit&id=<?= (int)$evNode['id'] ?>" class="btn btn-xs btn-purple flex-grow-1 py-0" style="font-size:0.65rem;">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+
+                        <!-- Dropzone interactive d'interstice -->
+                        <div class="pipeline-interstice-dropzone"
+                             id="pipelineIntersticeDropzone_<?= $sNum ?>"
+                             data-after-step="<?= $sNum ?>"
+                             ondragover="onPipelineIntersticeDragOver(event, <?= $sNum ?>)"
+                             ondragleave="onPipelineIntersticeDragLeave(event, <?= $sNum ?>)"
+                             ondrop="onPipelineIntersticeDrop(event, <?= $sNum ?>)"
+                             title="Glisser un événement ici pour l'intercaler après le Step #<?= $sNum ?>">
+                            <i class="fa-solid fa-plus dropzone-plus-icon"></i>
+                            <span class="dropzone-hint">Inter-Step</span>
+                        </div>
+                    </div>
+
+                    <?php if ($sIdx < count($stepScenarios) - 1): ?>
+                        <div class="scenario-pipeline-arrow">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                    <?php endif; ?>
                 <?php endforeach; ?>
+
             </div>
         </div>
     </div>
@@ -2264,12 +2643,16 @@ else:
                     </div>
                     <div class="card-body p-3">
                         <div class="row g-3">
-                            <?php foreach ($eventScenarios as $evSc): ?>
+                            <?php foreach ($eventScenarios as $evSc): 
+                                $evPos = $evSc['position_after_step'] ?? null;
+                            ?>
                                 <div class="col-md-4">
                                     <div class="card border h-100">
                                         <div class="card-body p-3">
                                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <span class="badge bg-danger text-white">🏮 Événement</span>
+                                                <span class="badge bg-danger text-white font-monospace" style="font-size:0.7rem;">
+                                                    <?= $evPos !== null ? ($evPos === 0 ? '🏮 Prologue (avant Step 1)' : "🏮 Inter-Step #$evPos") : '🏮 En réserve' ?>
+                                                </span>
                                                 <span class="small font-monospace text-muted"><?= htmlspecialchars($evSc['era'] ?? '') ?></span>
                                             </div>
                                             <h5 class="fw-bold text-dark mb-1"><?= htmlspecialchars($evSc['title']) ?></h5>
@@ -3999,6 +4382,217 @@ function quickUpdateScenarioStatusAjax(scenarioId, newStatus) {
             }
         })
         .catch(() => showStudioToast('Erreur réseau', true));
+}
+
+// ===========================================================================
+// SCHÉMA GRAPHIQUE DU PIPELINE NARRATIF : GLISSER-DÉPOSER D'ÉVÉNEMENTS
+// ===========================================================================
+let draggedPipelineIntersticeId = null;
+let draggedPipelineFromStep = null;
+
+function onPipelineEventDragStart(e, scenarioId, fromAfterStep) {
+    draggedPipelineIntersticeId = scenarioId;
+    draggedPipelineFromStep = (fromAfterStep !== undefined && fromAfterStep !== null) ? Number(fromAfterStep) : null;
+    if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', String(scenarioId));
+    }
+    const card = document.getElementById('pipelineScenarioCard_' + scenarioId);
+    if (card) {
+        setTimeout(() => card.classList.add('pipeline-dragging'), 0);
+    }
+    const trackCard = document.getElementById('scenarioPipelineCard');
+    if (trackCard) {
+        trackCard.classList.add('pipeline-dragging-active');
+    }
+}
+
+function onPipelineEventDragEnd(e) {
+    document.querySelectorAll('.pipeline-event-medallion.pipeline-dragging, .pipeline-pool-card.pipeline-dragging').forEach(el => {
+        el.classList.remove('pipeline-dragging');
+    });
+    document.querySelectorAll('.pipeline-interstice-dropzone.drag-over, .pipeline-pool-drawer.drag-over').forEach(el => {
+        el.classList.remove('drag-over');
+    });
+    const trackCard = document.getElementById('scenarioPipelineCard');
+    if (trackCard) {
+        trackCard.classList.remove('pipeline-dragging-active');
+    }
+    draggedPipelineIntersticeId = null;
+    draggedPipelineFromStep = null;
+}
+
+function onPipelineIntersticeDragOver(e, afterStep) {
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    const zone = e.currentTarget;
+    if (zone && !zone.classList.contains('drag-over')) {
+        zone.classList.add('drag-over');
+    }
+}
+
+function onPipelineIntersticeDragLeave(e, afterStep) {
+    const zone = e.currentTarget;
+    if (zone && !zone.contains(e.relatedTarget)) {
+        zone.classList.remove('drag-over');
+    }
+}
+
+function onPipelineIntersticeDrop(e, targetAfterStep) {
+    e.preventDefault();
+    const zone = e.currentTarget;
+    if (zone) zone.classList.remove('drag-over');
+
+    const scId = draggedPipelineIntersticeId || parseInt(e.dataTransfer?.getData('text/plain') || '0', 10);
+    if (!scId) return;
+
+    const targetContainer = document.getElementById('pipelineIntersticeContainer_' + targetAfterStep);
+    const card = document.getElementById('pipelineScenarioCard_' + scId);
+    if (!targetContainer || !card) return;
+
+    // Déplacement optimiste dans le DOM
+    transformCardToMedallion(card, scId, targetAfterStep);
+    targetContainer.insertBefore(card, zone);
+
+    recalculatePipelineBadges();
+    quickSetScenarioPipelineAnchorAjax(scId, targetAfterStep);
+}
+
+function onPipelinePoolDragOver(e) {
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    const drawer = document.getElementById('pipelinePoolDropzone');
+    if (drawer && !drawer.classList.contains('drag-over')) {
+        drawer.classList.add('drag-over');
+    }
+}
+
+function onPipelinePoolDragLeave(e) {
+    const drawer = document.getElementById('pipelinePoolDropzone');
+    if (drawer && !drawer.contains(e.relatedTarget)) {
+        drawer.classList.remove('drag-over');
+    }
+}
+
+function onPipelinePoolDrop(e) {
+    e.preventDefault();
+    const drawer = document.getElementById('pipelinePoolDropzone');
+    if (drawer) drawer.classList.remove('drag-over');
+
+    const scId = draggedPipelineIntersticeId || parseInt(e.dataTransfer?.getData('text/plain') || '0', 10);
+    if (!scId) return;
+
+    detachScenarioFromPipeline(scId);
+}
+
+function detachScenarioFromPipeline(scenarioId) {
+    const card = document.getElementById('pipelineScenarioCard_' + scenarioId);
+    const pool = document.getElementById('pipelinePoolDropzone');
+    if (!card || !pool) return;
+
+    transformCardToPoolCard(card, scenarioId);
+    pool.appendChild(card);
+
+    recalculatePipelineBadges();
+    quickSetScenarioPipelineAnchorAjax(scenarioId, null);
+}
+
+function transformCardToMedallion(card, scenarioId, targetAfterStep) {
+    card.className = 'pipeline-event-medallion shadow-xs d-flex flex-column justify-content-between';
+    card.setAttribute('data-current-after-step', String(targetAfterStep));
+    card.setAttribute('ondragstart', `onPipelineEventDragStart(event, ${scenarioId}, ${targetAfterStep})`);
+
+    const labelBadge = targetAfterStep === 0 ? '🏮 Prologue' : `🏮 Inter-Step #${targetAfterStep}`;
+    const badgeEl = card.querySelector('.badge.bg-danger');
+    if (badgeEl) {
+        badgeEl.innerHTML = `<i class="fa-solid fa-grip-vertical me-1 text-light"></i>${labelBadge}`;
+    }
+
+    // Ajout bouton détacher si absent
+    let detachBtn = card.querySelector('.btn-outline-danger');
+    if (!detachBtn) {
+        const topRow = card.querySelector('.d-flex.justify-content-between.align-items-center.mb-1');
+        if (topRow) {
+            detachBtn = document.createElement('button');
+            detachBtn.type = 'button';
+            detachBtn.className = 'btn btn-xs btn-outline-danger py-0 px-1 border-0';
+            detachBtn.title = 'Renvoyer au vivier de réserve';
+            detachBtn.onclick = () => detachScenarioFromPipeline(scenarioId);
+            detachBtn.innerHTML = '<i class="fa-solid fa-arrow-up-from-bracket"></i>';
+            topRow.appendChild(detachBtn);
+        }
+    }
+}
+
+function transformCardToPoolCard(card, scenarioId) {
+    card.className = 'pipeline-pool-card shadow-xs d-flex flex-column justify-content-between';
+    card.removeAttribute('data-current-after-step');
+    card.setAttribute('ondragstart', `onPipelineEventDragStart(event, ${scenarioId}, null)`);
+
+    const badgeEl = card.querySelector('.badge.bg-danger');
+    if (badgeEl) {
+        badgeEl.innerHTML = '<i class="fa-solid fa-grip-vertical me-1 text-light"></i>🏮 Événement';
+    }
+
+    const detachBtn = card.querySelector('.btn-outline-danger');
+    if (detachBtn) {
+        detachBtn.remove();
+    }
+}
+
+function recalculatePipelineBadges() {
+    const pool = document.getElementById('pipelinePoolDropzone');
+    const poolCountNum = document.getElementById('pipelinePoolCountNum');
+    const emptyMsg = document.getElementById('pipelinePoolEmptyMsg');
+    const btnToggle = document.getElementById('btnTogglePipelinePool');
+    const anchoredBadge = document.getElementById('pipelineAnchoredBadge');
+
+    if (pool) {
+        const poolCards = pool.querySelectorAll('.pipeline-pool-card');
+        const count = poolCards.length;
+        if (poolCountNum) poolCountNum.textContent = count;
+        if (emptyMsg) emptyMsg.style.display = count === 0 ? 'block' : 'none';
+
+        if (btnToggle) {
+            if (count > 0) {
+                btnToggle.className = 'btn btn-xs btn-danger fw-bold d-inline-flex align-items-center gap-1';
+            } else {
+                btnToggle.className = 'btn btn-xs btn-outline-secondary fw-bold d-inline-flex align-items-center gap-1';
+            }
+        }
+
+        const allAnchored = document.querySelectorAll('.scenario-pipeline-track .pipeline-event-medallion');
+        if (anchoredBadge) {
+            anchoredBadge.textContent = `🏮 ${allAnchored.length} Intercalés`;
+        }
+    }
+}
+
+function togglePipelineEventsPool() {
+    const drawer = document.getElementById('pipelineEventsPoolDrawer');
+    if (!drawer) return;
+    drawer.style.display = (drawer.style.display === 'none' || !drawer.style.display) ? 'block' : 'none';
+}
+
+function quickSetScenarioPipelineAnchorAjax(scenarioId, afterStep) {
+    const fd = new FormData();
+    fd.append('action', 'ajax_set_scenario_pipeline_anchor');
+    fd.append('scenario_id', scenarioId);
+    fd.append('after_step', afterStep !== null ? String(afterStep) : '');
+
+    fetch('?page=gamestudio&tab=narrative_scenarios', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(res => {
+            if (res.ok) {
+                const stepLabel = afterStep === null 
+                    ? 'renvoyé au vivier de réserve' 
+                    : (afterStep === 0 ? 'intercalé au Prologue (avant Step 1)' : `intercalé après le Step #${afterStep}`);
+                showStudioToast(`🏮 Événement #${scenarioId} ${stepLabel} !`);
+            } else {
+                showStudioToast(res.msg || 'Erreur lors du déplacement de l\'événement', true);
+            }
+        })
+        .catch(() => showStudioToast('Erreur réseau lors de la mise à jour', true));
 }
 
 // Cycle rapide du statut d'une tâche en 1 clic sur sa pastille dans le catalogue
