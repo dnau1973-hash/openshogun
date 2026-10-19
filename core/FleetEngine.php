@@ -101,6 +101,17 @@ class FleetEngine {
             return;
         }
 
+        // Cas du Sanctuaire Suprême : Renfort de Garnison ou Siège Destructeur sur [0 : 0]
+        if ($mission['mission_type'] === 'dojo_reinforce') {
+            $this->resolveDojoReinforceArrival($mission);
+            return;
+        }
+
+        if ($mission['mission_type'] === 'dojo_siege') {
+            $this->resolveDojoSiegeArrival($mission);
+            return;
+        }
+
         // Cas d'une expédition vers une oasis naturelle ou sauvage
         if ($targetOasisId) {
             require_once __DIR__ . '/OasisEngine.php';
@@ -603,6 +614,189 @@ class FleetEngine {
     }
 
     /**
+     * Résolution de l'arrivée d'un renfort de garnison sur le Dōjō Impérial [0 : 0]
+     */
+    private function resolveDojoReinforceArrival(array $mission): void {
+        $missionId = (int)$mission['id'];
+        $userId = (int)$mission['user_id'];
+        require_once __DIR__ . '/ImperialDojoEngine.php';
+        $dojoEngine = new ImperialDojoEngine($this->db);
+        $state = $dojoEngine->getDojoState();
+
+        // Récupérer l'alliance de l'utilisateur
+        $stmtUser = $this->db->prepare("SELECT alliance_id FROM users WHERE id = ?");
+        $stmtUser->execute([$userId]);
+        $userAllianceId = (int)$stmtUser->fetchColumn();
+
+        $controllingAllianceId = (int)($state['controlling_alliance_id'] ?? 0);
+        if ($userAllianceId === 0 || $userAllianceId !== $controllingAllianceId) {
+            // Repli : pas membre de l'alliance bâtisseuse
+            $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
+            return;
+        }
+
+        // Déposer les unités dans imperial_dojo_garrison
+        $fleet = json_decode($mission['fleet_data'], true) ?: [];
+        $now = time();
+        $this->db->beginTransaction();
+        try {
+            foreach ($fleet as $unitCode => $count) {
+                $cnt = (int)$count;
+                if ($cnt <= 0) continue;
+                $stmtCheck = $this->db->prepare("
+                    SELECT id FROM imperial_dojo_garrison 
+                    WHERE dojo_id = ? AND user_id = ? AND unit_code = ?
+                ");
+                $stmtCheck->execute([(int)$state['id'], $userId, $unitCode]);
+                $garrId = $stmtCheck->fetchColumn();
+                if ($garrId) {
+                    $this->db->prepare("UPDATE imperial_dojo_garrison SET amount = amount + ? WHERE id = ?")
+                        ->execute([$cnt, $garrId]);
+                } else {
+                    $this->db->prepare("
+                        INSERT INTO imperial_dojo_garrison (dojo_id, alliance_id, user_id, unit_code, amount, arrived_at)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    ")->execute([(int)$state['id'], $userAllianceId, $userId, $unitCode, $cnt, $now]);
+                }
+            }
+
+            // Héros rentre au fief s'il était présent
+            if (!empty($mission['has_hero'])) {
+                $this->db->prepare("
+                    UPDATE heroes 
+                    SET status = 'home', current_planet_id = ?, last_health_update = UNIX_TIMESTAMP() 
+                    WHERE user_id = ? AND status != 'dead'
+                ")->execute([$mission['source_planet_id'], $userId]);
+            }
+
+            $this->db->prepare("UPDATE fleet_missions SET status = 'completed' WHERE id = ?")->execute([$missionId]);
+            $this->db->commit();
+
+            require_once __DIR__ . '/MessageEngine.php';
+            $msgEngine = new MessageEngine();
+            $msgEngine->sendSystemMessage(
+                $userId,
+                "Garnison Fédérale du Dōjō Impérial [0 : 0]",
+                "Vos régiments ont pris position avec honneur sur la Terre Sacrée [0 : 0]. Ils montent la garde sous les toitures du Dōjō Impérial pour repousser les bombes et les sièges adverses !"
+            );
+        } catch (Throwable $e) {
+            $this->db->rollBack();
+            $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
+        }
+    }
+
+    /**
+     * Résolution de l'arrivée d'un siège destructeur sur le Dōjō Impérial [0 : 0]
+     */
+    private function resolveDojoSiegeArrival(array $mission): void {
+        $missionId = (int)$mission['id'];
+        $attackerUserId = (int)$mission['user_id'];
+        require_once __DIR__ . '/ImperialDojoEngine.php';
+        $dojoEngine = new ImperialDojoEngine($this->db);
+        $state = $dojoEngine->getDojoState();
+
+        $stmtAttacker = $this->db->prepare("SELECT u.*, a.id as alliance_id, a.tag as alliance_tag FROM users u LEFT JOIN alliances a ON u.alliance_id = a.id WHERE u.id = ?");
+        $stmtAttacker->execute([$attackerUserId]);
+        $attackerUser = $stmtAttacker->fetch();
+
+        $controllingAllianceId = (int)($state['controlling_alliance_id'] ?? 0);
+        if ($controllingAllianceId > 0 && !empty($attackerUser['alliance_id']) && (int)$attackerUser['alliance_id'] === $controllingAllianceId) {
+            // On n'attaque pas son propre sanctuaire d'alliance
+            $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
+            return;
+        }
+
+        $fleet = json_decode($mission['fleet_data'], true) ?: [];
+
+        // Récupérer la garnison en faction
+        $garrison = $dojoEngine->getGarrison();
+        $totalGarrisonCount = 0;
+        foreach ($garrison as $g) {
+            $totalGarrisonCount += (int)$g['amount'];
+        }
+
+        // Barème des dégâts de siège
+        $rawSiegeDamage = 0;
+        $siegeDamageTable = [
+            'siege_bomb'        => 75000,
+            'horoku_grenade'    => 15000,
+            'ram'               => 5000,
+            'catapult'          => 8000,
+            'trebuchet'         => 12000,
+            'cannon'            => 25000,
+            'tanegashima'       => 500,
+            'samurai_katana'    => 400,
+            'samurai_heavy'     => 600,
+            'cavalry_yari'      => 450
+        ];
+
+        foreach ($fleet as $unitCode => $count) {
+            $cnt = (int)$count;
+            if ($cnt <= 0) continue;
+            $unitDmg = $siegeDamageTable[$unitCode] ?? 200;
+            $rawSiegeDamage += ($cnt * $unitDmg);
+        }
+
+        // Si garnison présente, la garnison défend et inflige des pertes mutuelles
+        $survivors = $fleet;
+        if ($totalGarrisonCount > 0) {
+            $lossRatio = min(0.60, max(0.10, $totalGarrisonCount / (array_sum($fleet) + 1)));
+            foreach ($survivors as $uCode => &$uCnt) {
+                $uCnt = max(0, (int)round($uCnt * (1.0 - $lossRatio)));
+            }
+            unset($uCnt);
+            // Réduction de garnison
+            $this->db->prepare("UPDATE imperial_dojo_garrison SET amount = GREATEST(0, ROUND(amount * 0.75)) WHERE dojo_id = ?")
+                ->execute([(int)$state['id']]);
+            $this->db->prepare("DELETE FROM imperial_dojo_garrison WHERE amount <= 0")->execute();
+            $rawSiegeDamage = (int)round($rawSiegeDamage * (1.0 - $lossRatio));
+        }
+
+        // Appliquer les dégâts au Dōjō Impérial
+        $damageResult = $dojoEngine->applySiegeDamage(
+            $attackerUserId,
+            !empty($attackerUser['alliance_id']) ? (int)$attackerUser['alliance_id'] : null,
+            $rawSiegeDamage
+        );
+
+        // La flotte survivante rentre au fief
+        $this->db->prepare("
+            UPDATE fleet_missions 
+            SET status = 'returning', fleet_data = ? 
+            WHERE id = ?
+        ")->execute([json_encode($survivors), $missionId]);
+
+        // Rapports de siège féodal
+        require_once __DIR__ . '/MessageEngine.php';
+        $msgEngine = new MessageEngine();
+        $msgEngine->sendSystemMessage(
+            $attackerUserId,
+            "Rapport de Siège Destructeur sur le Dōjō Impérial [0 : 0]",
+            "Votre assaut pyrotechnique a frappé la Terre Sacrée [0 : 0] !\n"
+            . "• Dégâts infligés au sanctuaire : " . number_format($damageResult['net_damage']) . " PV\n"
+            . "• État des défenses du Dōjō : " . number_format($damageResult['new_hp']) . " PV restants\n"
+            . ($damageResult['was_regressed'] ? "🔥 RÉSULTAT STRATÉGIQUE : " . $damageResult['log'] : "La structure a encaissé le bombardement.")
+        );
+
+        // Notifier le chef de l'alliance bâtisseuse
+        if ($controllingAllianceId > 0) {
+            $stmtLeader = $this->db->prepare("SELECT leader_id FROM alliances WHERE id = ?");
+            $stmtLeader->execute([$controllingAllianceId]);
+            $leaderId = (int)$stmtLeader->fetchColumn();
+            if ($leaderId > 0 && $leaderId !== $attackerUserId) {
+                $msgEngine->sendSystemMessage(
+                    $leaderId,
+                    "⚠️ ALERTE DE GUERRE : Bombardement sur le Dōjō Impérial [0 : 0] !",
+                    "Le seigneur " . ($attackerUser['username'] ?? 'Adverse') . " [" . ($attackerUser['alliance_tag'] ?? '') . "] a lancé un siège destructeur contre votre sanctuaire en [0 : 0] !\n"
+                    . "• Dégâts subis : -" . number_format($damageResult['net_damage']) . " PV\n"
+                    . "• PV restants : " . number_format($damageResult['new_hp']) . " PV\n"
+                    . ($damageResult['was_regressed'] ? "🚨 GRAVE REVERS : " . $damageResult['log'] : "Vos garnisons et les tuiles ont tenu le choc !")
+                );
+            }
+        }
+    }
+
+    /**
      * Génère un rapport d'espionnage détaillé
      */
     private function generateSpyReport(array $mission, array $targetPlanet, array $attackerUser, ?array $defenderUser): void {
@@ -816,6 +1010,37 @@ class FleetEngine {
             $mountainStock = (new MountainEngine($this->db))->getStock($destX, $destY);
             if ($mountainStock !== null && $mountainStock['depleted']) {
                 throw new Exception("Ce filon de montagne est épuisé : toutes ses réserves de soufre, nitrate et sable de fer ont été extraites.");
+            }
+        }
+
+        // 2a-ter. Contrôles spécifiques au Dōjō Impérial en [0 : 0]
+        if ($missionType === 'dojo_reinforce') {
+            if ($destX !== 0 || $destY !== 0) {
+                throw new Exception("L'ordre de garnison fédérale ne peut être dépêché que sur la Terre Sacrée [0 : 0].");
+            }
+            require_once __DIR__ . '/ImperialDojoEngine.php';
+            $dojoEng = new ImperialDojoEngine($this->db);
+            $dojoSt = $dojoEng->getDojoState();
+            $stmtU = $this->db->prepare("SELECT alliance_id FROM users WHERE id = ?");
+            $stmtU->execute([$userId]);
+            $uAllId = (int)$stmtU->fetchColumn();
+            if (!$uAllId || $uAllId !== (int)($dojoSt['controlling_alliance_id'] ?? 0)) {
+                throw new Exception("Seuls les membres de l'alliance bâtisseuse peuvent déployer des régiments en garnison sur le Dōjō Impérial.");
+            }
+        }
+
+        if ($missionType === 'dojo_siege') {
+            if ($destX !== 0 || $destY !== 0) {
+                throw new Exception("L'ordre de siège destructeur ne peut cibler que la Terre Sacrée [0 : 0].");
+            }
+            require_once __DIR__ . '/ImperialDojoEngine.php';
+            $dojoEng = new ImperialDojoEngine($this->db);
+            $dojoSt = $dojoEng->getDojoState();
+            $stmtU = $this->db->prepare("SELECT alliance_id FROM users WHERE id = ?");
+            $stmtU->execute([$userId]);
+            $uAllId = (int)$stmtU->fetchColumn();
+            if ($uAllId > 0 && $uAllId === (int)($dojoSt['controlling_alliance_id'] ?? 0)) {
+                throw new Exception("Le code de l'honneur interdit d'attaquer le sanctuaire sacré érigé par votre propre alliance !");
             }
         }
 

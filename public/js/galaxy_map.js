@@ -292,7 +292,8 @@ class GalaxyMapController {
                 let tileClass = 'galaxy-tile';
                 if (isCurrent) tileClass += ' current-planet';
                 if (isCenter) tileClass += ' tile-center';
-                if (planet && planet.is_authentic_castle) tileClass += ' authentic-castle-tile';
+                if (planet && (planet.is_imperial_dojo || (x === 0 && y === 0))) tileClass += ' imperial-dojo-tile';
+                else if (planet && planet.is_authentic_castle) tileClass += ' authentic-castle-tile';
                 else if (planet && planet.is_oasis) tileClass += (planet.is_occupied ? ' oasis-tile oasis-occupied' : ' oasis-tile oasis-wild');
                 else if (planet && planet.user_id) tileClass += ' village-tile';
                 else tileClass += ` terrain-tile-${terrain.type}`;
@@ -304,7 +305,28 @@ class GalaxyMapController {
 
                 let contentHtml = '';
                 if (planet) {
-                    if (planet.is_authentic_castle) {
+                    if (planet.is_imperial_dojo || (x === 0 && y === 0)) {
+                        const dojoLvl = parseInt(planet.dojo_level, 10) || 0;
+                        const isFrozen = (planet.dojo_status === 'frozen');
+                        const isComplete = (planet.dojo_status === 'completed' || dojoLvl >= 10);
+                        let badgeBg = 'background:rgba(217,119,6,0.95);';
+                        let badgeTxt = `NIV. ${dojoLvl}`;
+                        if (isFrozen) {
+                            badgeBg = 'background:rgba(220,38,38,0.95);';
+                            badgeTxt = 'GELÉ';
+                        } else if (isComplete) {
+                            badgeBg = 'background:rgba(147,51,234,0.95);';
+                            badgeTxt = 'SHŌGUN';
+                        } else if (dojoLvl === 0) {
+                            badgeBg = 'background:rgba(180,83,9,0.95);';
+                            badgeTxt = 'TERRE 0:0';
+                        }
+
+                        contentHtml = `
+                            <span class="tile-authentic-badge" style="${badgeBg} border-color:#fde047; color:#fff; font-weight:800; font-size:0.65rem; letter-spacing:0.5px;">⛩️ ${badgeTxt}</span>
+                            <span class="tile-owner castle-label" style="color:#fef08a; font-weight:bold; text-shadow:0 1px 3px rgba(0,0,0,0.9);">${escapeHtml(planet.dojo_alliance_tag ? '[' + planet.dojo_alliance_tag + ']' : 'DŌJŌ IMPÉRIAL')}</span>
+                        `;
+                    } else if (planet.is_authentic_castle) {
                         contentHtml = `
                             <span class="tile-authentic-badge">TRÉSOR</span>
                             <span class="tile-owner castle-label">${escapeHtml(planet.castle_name || planet.planet_name)}</span>

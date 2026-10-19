@@ -166,7 +166,7 @@ if ($page === 'galaxy') {
     $page = 'view_resource';
 }
 
-$allowedPages = ['resources', 'view_resource', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'gamestudio', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team', 'poster', 'newsletter_compose', 'gallery'];
+$allowedPages = ['resources', 'view_resource', 'field', 'building', 'city', 'map', 'fleet', 'shipyard', 'barracks', 'research', 'reports', 'ranking', 'messages', 'admin', 'gamestudio', 'castle', 'docs', 'hero', 'support', 'edit_ticket', 'alliance', 'forum', 'chat', 'empire', 'privilege', 'pedagogy', 'changelog', 'dev_team', 'poster', 'newsletter_compose', 'gallery', 'imperial_dojo'];
 
 if (!in_array($page, $allowedPages)) {
     $page = 'resources';

@@ -146,6 +146,18 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
             $preselectedTargetType = 'oasis';
             $preselectedTarget = (int)$foundOasisId;
             $preselectedMission = $_GET['mission'] ?? 'occupy';
+        } elseif ($targetX === 0 && $targetY === 0) {
+            // Emplacement central sacré : Dōjō Impérial
+            require_once __DIR__ . '/../core/ImperialDojoEngine.php';
+            $dojoEng = new ImperialDojoEngine($db);
+            $dojoEng->ensureDojoTile();
+            $stmtFindP0 = $db->prepare("SELECT id FROM planets WHERE coord_x = 0 AND coord_y = 0 LIMIT 1");
+            $stmtFindP0->execute();
+            $createdPlanetId = (int)$stmtFindP0->fetchColumn();
+
+            $preselectedTargetType = 'planet';
+            $preselectedTarget = $createdPlanetId;
+            $preselectedMission = $_GET['mission'] ?? 'dojo_siege';
         } else {
             // Emplacement vierge : vérifier le type de paysage
             require_once __DIR__ . '/../core/GalaxyEngine.php';
@@ -702,6 +714,22 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                                 <input type="radio" name="mission_type" value="mining" class="form-selectgroup-input" <?= ($preselectedMission === 'mining') ? 'checked' : '' ?>>
                                                 <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2">
                                                     <span><i class="fa-solid fa-pickaxe text-warning"></i></span> Expédition Minière
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-selectgroup-item w-100">
+                                                <input type="radio" name="mission_type" value="dojo_reinforce" class="form-selectgroup-input" <?= ($preselectedMission === 'dojo_reinforce') ? 'checked' : '' ?>>
+                                                <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2">
+                                                    <span><i class="fa-solid fa-torii-gate text-warning"></i></span> Garnison Dōjō [0:0]
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-selectgroup-item w-100">
+                                                <input type="radio" name="mission_type" value="dojo_siege" class="form-selectgroup-input" <?= ($preselectedMission === 'dojo_siege') ? 'checked' : '' ?>>
+                                                <span class="form-selectgroup-label d-flex align-items-center justify-content-center gap-2 py-2 text-danger">
+                                                    <span><i class="fa-solid fa-bomb text-danger"></i></span> Siège Dōjō [0:0]
                                                 </span>
                                             </label>
                                         </div>

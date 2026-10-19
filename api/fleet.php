@@ -37,35 +37,43 @@ if (!$targetPlanetId && !$targetOasisId && isset($_POST['target_x'], $_POST['tar
         $targetOasisId = $stOasis->fetchColumn() ?: null;
 
         if (!$targetPlanetId && !$targetOasisId) {
-            require_once __DIR__ . '/../core/GalaxyEngine.php';
-            $terrain = GalaxyEngine::getTerrainType((int)$_POST['target_x'], (int)$_POST['target_y']);
-            if ($terrain['type'] === 'lake') {
-                $hasFish = false;
-                try {
-                    $chk = $db->query("SHOW COLUMNS FROM `planets` LIKE 'fish'");
-                    $hasFish = ($chk && $chk->rowCount() > 0);
-                } catch (Exception $e) {
+            if ((int)$_POST['target_x'] === 0 && (int)$_POST['target_y'] === 0) {
+                require_once __DIR__ . '/../core/ImperialDojoEngine.php';
+                $dojoEng = new ImperialDojoEngine($db);
+                $dojoEng->ensureDojoTile();
+                $stCoord->execute([0, 0]);
+                $targetPlanetId = (int)$stCoord->fetchColumn();
+            } else {
+                require_once __DIR__ . '/../core/GalaxyEngine.php';
+                $terrain = GalaxyEngine::getTerrainType((int)$_POST['target_x'], (int)$_POST['target_y']);
+                if ($terrain['type'] === 'lake') {
+                    $hasFish = false;
                     try {
-                        $db->query("SELECT fish FROM planets LIMIT 0");
-                        $hasFish = true;
-                    } catch (Exception $e2) {
-                        $hasFish = false;
+                        $chk = $db->query("SHOW COLUMNS FROM `planets` LIKE 'fish'");
+                        $hasFish = ($chk && $chk->rowCount() > 0);
+                    } catch (Exception $e) {
+                        try {
+                            $db->query("SELECT fish FROM planets LIMIT 0");
+                            $hasFish = true;
+                        } catch (Exception $e2) {
+                            $hasFish = false;
+                        }
                     }
-                }
 
-                if ($hasFish) {
-                    $stCreateLake = $db->prepare("
-                        INSERT INTO planets (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
-                        VALUES (?, ?, ?, 'oceanic', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, UNIX_TIMESTAMP())
-                    ");
-                } else {
-                    $stCreateLake = $db->prepare("
-                        INSERT INTO planets (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
-                        VALUES (?, ?, ?, 'oceanic', 0, 0, 0, 0, 0, 0, 0, 0, 0, UNIX_TIMESTAMP())
-                    ");
+                    if ($hasFish) {
+                        $stCreateLake = $db->prepare("
+                            INSERT INTO planets (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, fish, energy_used, energy_max, metal_max, crystal_max, deuterium_max, fish_max, is_capital, last_resource_update)
+                            VALUES (?, ?, ?, 'oceanic', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, UNIX_TIMESTAMP())
+                        ");
+                    } else {
+                        $stCreateLake = $db->prepare("
+                            INSERT INTO planets (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
+                            VALUES (?, ?, ?, 'oceanic', 0, 0, 0, 0, 0, 0, 0, 0, 0, UNIX_TIMESTAMP())
+                        ");
+                    }
+                    $stCreateLake->execute([$terrain['name'] . ' d\'Eaux Vives', (int)$_POST['target_x'], (int)$_POST['target_y']]);
+                    $targetPlanetId = (int)$db->lastInsertId();
                 }
-                $stCreateLake->execute([$terrain['name'] . ' d\'Eaux Vives', (int)$_POST['target_x'], (int)$_POST['target_y']]);
-                $targetPlanetId = (int)$db->lastInsertId();
             }
         }
     }

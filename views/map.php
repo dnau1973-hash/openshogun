@@ -423,6 +423,97 @@ window.selectPlanetTile = function(data) {
 
     coords.innerText = `[${data.coord_x} : ${data.coord_y}]`;
 
+    // ── Terre Sacrée [0 : 0] / Le Dōjō Impérial ──────────────────────────────
+    if (data.is_imperial_dojo || (parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0)) {
+        const dojoLvl = parseInt(data.dojo_level, 10) || 0;
+        const targetLvl = parseInt(data.dojo_target_level, 10) || 1;
+        const hp = parseInt(data.dojo_hp, 10) || 0;
+        const maxHp = parseInt(data.dojo_max_hp, 10) || 5000000;
+        const hpPercent = maxHp > 0 ? Math.min(100, Math.round((hp / maxHp) * 100)) : 0;
+        const allianceTag = data.dojo_alliance_tag || '';
+        const allianceName = data.dojo_alliance_name || 'Aucune alliance';
+        const isFrozen = (data.dojo_status === 'frozen');
+        const isCompleted = (data.dojo_status === 'completed' || dojoLvl >= 10);
+        const progressPercent = parseInt(data.dojo_progress_percent, 10) || 0;
+
+        title.innerHTML = `<i class="fa-solid fa-torii-gate text-warning me-1"></i> <span style="color:#b45309;">Terre Sacrée [0 : 0] &bull; Dōjō Impérial</span> <span class="badge bg-warning text-dark font-monospace">[0 : 0]</span>`;
+
+        let statusBadge = '<span class="badge bg-secondary">Terre Neutre Non Réclamée</span>';
+        if (isFrozen) {
+            statusBadge = '<span class="badge bg-danger"><i class="fa-solid fa-snowflake me-1"></i>Chantier Gelé (&lt; 2 Châteaux)</span>';
+        } else if (isCompleted) {
+            statusBadge = '<span class="badge bg-purple text-white"><i class="fa-solid fa-crown me-1"></i>Niveau 10 Suprême &bull; Victoire</span>';
+        } else if (allianceTag) {
+            statusBadge = `<span class="badge bg-success"><i class="fa-solid fa-hammer me-1"></i>Chantier Actif [${escapeHtml(allianceTag)}]</span>`;
+        }
+
+        body.innerHTML = `
+            <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #d97706; flex-shrink:0; background:#fef3c7; box-shadow:0 0 10px rgba(245,158,11,0.4);">
+                        <img src="/public/assets/map/tile_imperial_dojo.jpg?v=1" alt="Dojo Imperial" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div>
+                        <div style="font-weight:800; color:#92400e; font-size:1.2rem;">
+                            Dōjō Impérial (Tenchi no Seichi)
+                        </div>
+                        <div class="small text-secondary mt-0.5">
+                            Le Sanctuaire Suprême de Kyōto &bull; Point culminant de la fin du monde
+                        </div>
+                        <div class="mt-1">${statusBadge}</div>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="p-2 bg-white rounded border">
+                            <span class="text-secondary small d-block">Palier Actuel :</span>
+                            <strong class="text-dark font-monospace" style="font-size:1.05rem;">Niveau ${dojoLvl} / 10</strong>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 bg-white rounded border">
+                            <span class="text-secondary small d-block">Alliance Bâtisseuse :</span>
+                            <strong class="text-primary">${allianceTag ? `[${escapeHtml(allianceTag)}] ${escapeHtml(allianceName)}` : 'Non revendiqué'}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jauge de Structure PV -->
+                <div class="mb-3 p-2 bg-white rounded border">
+                    <div class="d-flex justify-content-between align-items-center mb-1 small">
+                        <span><i class="fa-solid fa-shield-halved text-danger me-1"></i>Résistance de Structure :</span>
+                        <span class="font-monospace fw-bold">${Number(hp).toLocaleString()} / ${Number(maxHp).toLocaleString()} PV (${hpPercent}%)</span>
+                    </div>
+                    <div class="progress" style="height:10px;">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width:${hpPercent}%"></div>
+                    </div>
+                </div>
+
+                <!-- Jauge de ressources vers le palier suivant -->
+                ${!isCompleted ? `
+                <div class="mb-3 p-2 bg-white rounded border">
+                    <div class="d-flex justify-content-between align-items-center mb-1 small">
+                        <span><i class="fa-solid fa-cubes-stacked text-warning me-1"></i>Ressources Palier ${targetLvl} :</span>
+                        <span class="font-monospace fw-bold">${progressPercent}% Réunies</span>
+                    </div>
+                    <div class="progress" style="height:10px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width:${progressPercent}%"></div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="d-flex gap-2 justify-content-end flex-wrap pt-2 border-top">
+                    <a href="?page=imperial_dojo" class="btn btn-warning font-weight-bold text-dark"><i class="fa-solid fa-torii-gate me-1"></i>Ouvrir le Grand Dōjō</a>
+                    <a href="?page=fleet&target_x=0&target_y=0&mission=dojo_reinforce" class="btn btn-primary"><i class="fa-solid fa-shield me-1"></i>Renforcer la Garnison</a>
+                    <a href="?page=fleet&target_x=0&target_y=0&mission=dojo_siege" class="btn btn-danger"><i class="fa-solid fa-bomb me-1"></i>Siège Destructeur</a>
+                </div>
+            </div>
+        `;
+        openMapModal();
+        return;
+    }
+
     // ── Terres Vierges Naturelles (Plaines, Collines, Lacs, etc.) ─────────────
     if (data.empty) {
         const isLake = (data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac')));

@@ -473,6 +473,43 @@ class GalaxyEngine {
             // Fallback silencieux
         }
 
+        // Injection de la Terre Sacrée [0 : 0] / Le Dōjō Impérial (Tenchi no Seichi)
+        if ($minX <= 0 && $maxX >= 0 && $minY <= 0 && $maxY >= 0) {
+            try {
+                require_once __DIR__ . '/ImperialDojoEngine.php';
+                $dojoEngine = new ImperialDojoEngine($this->db);
+                $dojoState = $dojoEngine->getDojoState();
+                $kZero = '0:0';
+                $dojoData = [
+                    'is_imperial_dojo' => 1,
+                    'planet_id' => null,
+                    'planet_name' => 'Dōjō Impérial (Tenchi no Seichi)',
+                    'coord_x' => 0,
+                    'coord_y' => 0,
+                    'planet_type' => 'imperial_dojo',
+                    'user_id' => null,
+                    'username' => !empty($dojoState['alliance_name']) ? ('Garde [' . $dojoState['alliance_tag'] . ']') : 'Garde Impériale de Kyōto',
+                    'faction' => 'Imperial',
+                    'points' => 100000 + ((int)$dojoState['current_level'] * 25000),
+                    'alliance_tag' => !empty($dojoState['alliance_tag']) ? $dojoState['alliance_tag'] : 'TENCHI',
+                    'terrain_type' => 'imperial_dojo',
+                    'terrain_name' => 'Dōjō Impérial (Niv. ' . $dojoState['current_level'] . ')',
+                    'terrain_img' => '/public/assets/map/tile_imperial_dojo.jpg?v=1',
+                    'dojo_level' => (int)$dojoState['current_level'],
+                    'dojo_target_level' => (int)$dojoState['target_level'],
+                    'dojo_status' => $dojoState['status'],
+                    'dojo_hp' => (int)$dojoState['health_points'],
+                    'dojo_max_hp' => (int)$dojoState['max_health_points'],
+                    'dojo_alliance_name' => $dojoState['alliance_name'] ?? null,
+                    'dojo_alliance_tag' => $dojoState['alliance_tag'] ?? null,
+                    'dojo_progress_percent' => (int)$dojoState['progress_percent']
+                ];
+                $gridMap[$kZero] = array_merge($gridMap[$kZero] ?? [], $dojoData);
+            } catch (Throwable $e) {
+                // Fallback silencieux
+            }
+        }
+
         // Générer les terrains naturels pour toutes les cases du secteur
         $terrains = [];
         for ($y = $minY; $y <= $maxY; $y++) {

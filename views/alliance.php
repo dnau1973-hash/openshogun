@@ -111,6 +111,48 @@ $potentialCapacity = min(ALLIANCE_MAX_MEMBERS, max(ALLIANCE_CREATION_MIN_EMBASSY
         </div>
     </div>
 
+    <?php
+    require_once __DIR__ . '/../core/ImperialDojoEngine.php';
+    $dojoEngineAlliance = new ImperialDojoEngine();
+    $dojoAllianceState = $dojoEngineAlliance->getDojoState();
+    $allianceCastles = $dojoEngineAlliance->countAllianceCastles((int)$myAlliance['id']);
+    $isOurDojo = (!empty($dojoAllianceState['controlling_alliance_id']) && (int)$dojoAllianceState['controlling_alliance_id'] === (int)$myAlliance['id']);
+    ?>
+
+    <!-- Bannière Dōjō Impérial [0 : 0] dans l'Alliance -->
+    <div class="card mb-4 border-warning shadow-sm" style="border-width: 2px; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);">
+        <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <span style="font-size: 2.2rem; line-height: 1;">⛩️</span>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="mb-0 fw-bold text-dark">
+                            Le Dōjō Impérial sur la Tuile Centrale [0 : 0]
+                        </h4>
+                        <span class="badge bg-warning text-dark font-monospace">Palier <?= (int)$dojoAllianceState['current_level'] ?> / 10</span>
+                        <?php if ($allianceCastles >= 2): ?>
+                            <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i><?= $allianceCastles ?> / 2 Châteaux (Éligible)</span>
+                        <?php else: ?>
+                            <span class="badge bg-danger-lt"><i class="fa-solid fa-lock me-1"></i><?= $allianceCastles ?> / 2 Châteaux Requis</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="small text-secondary mt-1">
+                        <?php if ($isOurDojo): ?>
+                            Votre clan contrôle le chantier du sanctuaire suprême ! Coordonnez vos convois de tuiles et de ressources pour couronner votre Shōgunat.
+                        <?php else: ?>
+                            Chantier titanesque de fin de partie. Mobilisez vos forces pour conquérir 2 Châteaux Authentiques et revendiquer la Terre Sacrée.
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <a href="/?page=imperial_dojo" class="btn btn-warning text-dark fw-bold shadow-xs">
+                    <i class="fa-solid fa-torii-gate me-1"></i>Accéder au Dōjō Impérial [0 : 0] &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Navigation par Onglets du Clan -->
     <div class="card">
         <div class="card-header">

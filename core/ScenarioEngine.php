@@ -1665,7 +1665,7 @@ class ScenarioEngine {
                 'title'             => 'L\'Apothéose du Dōjō Impérial : Le Point Culminant de Fin de Partie',
                 'subtitle'          => 'Événement Ultime : Achèvement du Niveau 10 du Dōjō Impérial & Victoire du Shōgunat',
                 'era'               => '1588 - L\'Ère de l\'Harmonie Impériale (Fin du Jeu)',
-                'synopsis'          => 'Mobilisant des millions de troncs de cèdres, de pierres de granit, de poutres de charpente, de tonnes d\'acier, de barils de poudre et de kobans d\'or offerts par tous les membres de l\'Alliance, le Dōjō Impérial atteint son 10e et dernier niveau. Maintenu sous la garde indéfectible des 2 Châteaux Authentiques minimum, le sanctuaire suprême s\'illumine. L\'ère des guerres s\'achève : l\'Alliance est proclamée Maîtresse Suprême du Japon et entre vivante au Panthéon de l\'Histoire.',
+                'synopsis'          => 'Mobilisant des millions de troncs de cèdres, de pierres de granit, de poutres de charpente, de tonnes d\'acier, de tuiles Hongawara, de tuiles démoniaques Onigawara et de kobans d\'or offerts par tous les membres de l\'Alliance, le Dōjō Impérial atteint son 10e et dernier niveau. Maintenu sous la garde indéfectible des 2 Châteaux Authentiques minimum, le sanctuaire suprême s\'illumine. L\'ère des guerres s\'achève : l\'Alliance est proclamée Maîtresse Suprême du Japon et entre vivante au Panthéon de l\'Histoire.',
                 'speaker_name'      => 'Maître de la Sagesse (Chie no Sensei)',
                 'speaker_role'      => 'Grand Maître Spirituel & Messager de l\'Empereur',
                 'speaker_avatar'    => '🏯',
@@ -1698,8 +1698,8 @@ class ScenarioEngine {
                         'description'  => 'Développer le script transactionnel de couronnement mondial, gel des actions hostiles et enregistrement de l\'alliance au Panthéon.',
                         'assignee'     => 'Lead Dev Back',
                         'complexity'   => 'XL',
-                        'status'       => 'in_progress',
-                        'deliverables' => 'core/EndGameEngine.php / core/PantheonEngine.php'
+                        'status'       => 'done',
+                        'deliverables' => 'core/ImperialDojoEngine.php / core/FleetEngine.php'
                     ],
                     [
                         'task_id'      => 3,

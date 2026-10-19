@@ -267,7 +267,7 @@ $navItems = [
 
                         <!-- Position 4 : Menu déroulant « Mon Empire » -->
                         <?php 
-                        $isEmpireActive = in_array($page, ['fleet', 'hero', 'alliance', 'empire']);
+                        $isEmpireActive = in_array($page, ['fleet', 'hero', 'alliance', 'empire', 'imperial_dojo']);
                         ?>
                         <li class="nav-item dropdown <?= $isEmpireActive ? 'active' : '' ?>">
                             <a class="nav-link dropdown-toggle <?= $isEmpireActive ? 'active fw-bold' : '' ?>" 
@@ -293,6 +293,11 @@ $navItems = [
                                     <span class="dropdown-item-icon"><i class="fa-solid fa-flag text-danger"></i></span>
                                     <span>Alliance</span>
                                 </a>                                    
+                                <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'imperial_dojo' ? 'active fw-bold' : '' ?>" href="?page=imperial_dojo">
+                                    <span class="dropdown-item-icon"><i class="fa-solid fa-torii-gate text-warning"></i></span>
+                                    <span>Dōjō Impérial [0:0]</span>
+                                    <span class="badge bg-warning-lt ms-auto" style="font-size:0.65rem;">FIN DU JEU</span>
+                                </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item d-flex align-items-center gap-2 <?= $page === 'poster' ? 'active fw-bold' : '' ?>" href="?page=poster">
                                     <span class="dropdown-item-icon"><i class="fa-solid fa-user-shield text-info"></i></span>
