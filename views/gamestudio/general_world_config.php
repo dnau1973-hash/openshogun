@@ -1597,80 +1597,96 @@ unset($_SESSION['general_flash']);
                 </div>
             </div>
 
-            <!-- ── 4. Actions Féodales Immédiates (3 Boutons 1-Clic) ── -->
-            <div class="card card-body bg-white border mb-4 shadow-xs">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <!-- ── 4. Déclencheurs Stratégiques Immédiats (1-Click) ── -->
+            <div class="card mb-4 shadow-xs border bg-white overflow-hidden">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom">
                     <div>
-                        <h4 class="m-0 text-dark fw-bold d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-bolt text-warning"></i>Déclencheurs Stratégiques Immédiats (1-Clic)
+                        <h4 class="card-title m-0 text-dark fw-bold d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-bolt text-warning fs-3"></i>
+                            <span>Déclencheurs Stratégiques Immédiats (1-Click)</span>
                         </h4>
-                        <div class="text-secondary small">Commandes directes pour peupler la carte, forcer une expansion ou éprouver les réactions des clans.</div>
+                        <div class="text-secondary small mt-1">Commandes directes pour peupler la carte, forcer une expansion ou tester les réactions des clans en temps réel.</div>
                     </div>
+                    <span class="badge bg-warning-lt text-dark fw-bold font-monospace px-3 py-1">Actions 1-Click</span>
                 </div>
 
-                <div class="row g-3">
-                    <!-- Action 1 : Déployer 3 Daimyōs IA Historiques -->
-                    <div class="col-md-4">
-                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" class="h-100">
-                            <input type="hidden" name="action" value="spawn_preset_bots">
-                            <input type="hidden" name="count" value="3">
-                            <button type="submit" class="btn btn-outline-primary w-100 p-3 text-start h-100 d-flex flex-column justify-content-between border-2">
-                                <div>
-                                    <div class="fw-bold fs-4 text-primary mb-1 d-flex align-items-center justify-content-between">
-                                        <span><i class="fa-solid fa-users-viewfinder me-2"></i>3 Daimyōs Historiques</span>
-                                        <span class="badge bg-primary text-white">+3</span>
+                <div class="card-body p-4 bg-light bg-opacity-25">
+                    <div class="row g-4 align-items-stretch">
+                        <!-- Action 1 : Déployer 3 Daimyōs IA Historiques -->
+                        <div class="col-lg-4 d-flex">
+                            <div class="card w-100 border shadow-xs bg-white d-flex flex-column justify-content-between" style="border-top: 3px solid #206bc4 !important;">
+                                <div class="card-body p-3 d-flex flex-column">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="fw-bold fs-4 text-primary d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-users-viewfinder text-primary"></i>3 Daimyōs Historiques
+                                        </span>
+                                        <span class="badge bg-primary text-white font-monospace">+3 Seigneurs</span>
                                     </div>
-                                    <div class="text-secondary small">
+                                    <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.45;">
                                         Crée instantanément les clans légendaires <strong>Oda</strong>, <strong>Takeda</strong> et <strong>Tokugawa</strong> avec leurs châteaux capitaux et garnisons.
+                                    </p>
+                                    <div class="mt-auto pt-2 border-top">
+                                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" class="m-0">
+                                            <input type="hidden" name="action" value="spawn_preset_bots">
+                                            <input type="hidden" name="count" value="3">
+                                            <button type="submit" class="btn btn-primary w-100 fw-bold shadow-xs py-2">
+                                                <i class="fa-solid fa-plus-circle me-1"></i>Déployer les 3 Seigneurs
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
-                                <div class="mt-3 pt-2 border-top text-primary fw-bold small">
-                                    <i class="fa-solid fa-plus-circle me-1"></i>Déployer les 3 Seigneurs
-                                </div>
-                            </button>
-                        </form>
-                    </div>
+                            </div>
+                        </div>
 
-                    <!-- Action 2 : Faire Éclore un Fief PNJ Spontané -->
-                    <div class="col-md-4">
-                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" class="h-100">
-                            <input type="hidden" name="action" value="trigger_spontaneous_spawn">
-                            <button type="submit" class="btn btn-outline-pink w-100 p-3 text-start h-100 d-flex flex-column justify-content-between border-2">
-                                <div>
-                                    <div class="fw-bold fs-4 text-pink mb-1 d-flex align-items-center justify-content-between">
-                                        <span><i class="fa-solid fa-spa me-2"></i>Éclosion Immédiate 360°</span>
-                                        <span class="badge bg-pink text-white">+1 Fief</span>
+                        <!-- Action 2 : Faire Éclore un Fief PNJ Spontané -->
+                        <div class="col-lg-4 d-flex">
+                            <div class="card w-100 border shadow-xs bg-white d-flex flex-column justify-content-between" style="border-top: 3px solid #d6336c !important;">
+                                <div class="card-body p-3 d-flex flex-column">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="fw-bold fs-4 text-pink d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-spa text-pink"></i>Éclosion Immédiate 360°
+                                        </span>
+                                        <span class="badge bg-pink text-white font-monospace">+1 Fief PNJ</span>
                                     </div>
-                                    <div class="text-secondary small">
-                                        Sélectionne un angle libre à 360° autour de Kyoto et fait germer un domaine PNJ autonome avec 18 parcelles vierges.
+                                    <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.45;">
+                                        Sélectionne un angle libre à 360° autour de Kyoto et fait germer un domaine PNJ autonome avec 18 parcelles vierges de terroir.
+                                    </p>
+                                    <div class="mt-auto pt-2 border-top">
+                                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" class="m-0">
+                                            <input type="hidden" name="action" value="trigger_spontaneous_spawn">
+                                            <button type="submit" class="btn text-white w-100 fw-bold shadow-xs py-2" style="background-color: #d6336c; border-color: #d6336c;">
+                                                <i class="fa-solid fa-seedling me-1"></i>Faire Éclore un Fief
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
-                                <div class="mt-3 pt-2 border-top text-pink fw-bold small">
-                                    <i class="fa-solid fa-seedling me-1"></i>Faire Éclore un Fief
-                                </div>
-                            </button>
-                        </form>
-                    </div>
+                            </div>
+                        </div>
 
-                    <!-- Action 3 : Forcer un Cycle IA Immédiat -->
-                    <div class="col-md-4">
-                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" class="h-100">
-                            <input type="hidden" name="action" value="run_bot_cycle">
-                            <button type="submit" class="btn btn-outline-indigo w-100 p-3 text-start h-100 d-flex flex-column justify-content-between border-2">
-                                <div>
-                                    <div class="fw-bold fs-4 text-indigo mb-1 d-flex align-items-center justify-content-between">
-                                        <span><i class="fa-solid fa-gear me-2"></i>Cycle de Décision IA</span>
-                                        <span class="badge bg-indigo text-white">Tick IA</span>
+                        <!-- Action 3 : Forcer un Cycle IA Immédiat -->
+                        <div class="col-lg-4 d-flex">
+                            <div class="card w-100 border shadow-xs bg-white d-flex flex-column justify-content-between" style="border-top: 3px solid #4263eb !important;">
+                                <div class="card-body p-3 d-flex flex-column">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="fw-bold fs-4 text-indigo d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-gear text-indigo"></i>Cycle de Décision IA
+                                        </span>
+                                        <span class="badge bg-indigo text-white font-monospace">Tick IA</span>
                                     </div>
-                                    <div class="text-secondary small">
-                                        Exécute immédiatement le cerveau des bots : collecte économique, investissements de parcelles, conscription et expéditions.
+                                    <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.45;">
+                                        Exécute immédiatement le cerveau des bots : collecte économique, investissements de parcelles, conscription et expéditions féodales.
+                                    </p>
+                                    <div class="mt-auto pt-2 border-top">
+                                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" class="m-0">
+                                            <input type="hidden" name="action" value="run_bot_cycle">
+                                            <button type="submit" class="btn btn-indigo text-white w-100 fw-bold shadow-xs py-2">
+                                                <i class="fa-solid fa-play me-1"></i>Exécuter un Cycle
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
-                                <div class="mt-3 pt-2 border-top text-indigo fw-bold small">
-                                    <i class="fa-solid fa-play me-1"></i>Exécuter un Cycle
-                                </div>
-                            </button>
-                        </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
