@@ -788,11 +788,19 @@ if ($viewAction === 'edit' || $viewAction === 'create'):
                                                         <span class="badge bg-purple-lt text-purple font-monospace" id="mdImportedBadge" style="display:none; font-size:0.68rem;"></span>
                                                     </div>
                                                 </div>
-                                                <!-- Panneau d'aperçu Markdown formaté (repliable) -->
-                                                <div id="synopsisMarkdownPreviewBox" class="mt-2 p-3 rounded border bg-light-subtle" style="display:none; max-height: 360px; overflow-y: auto; font-size: 0.85rem;">
-                                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
-                                                        <span class="fw-bold text-purple small"><i class="fa-brands fa-markdown me-1"></i>Aperçu du Synopsis &amp; Contexte Historique (.md)</span>
-                                                        <button type="button" class="btn-close" style="font-size:0.65rem;" onclick="toggleSynopsisMarkdownPreview()"></button>
+                                                <!-- Panneau d'aperçu Markdown formaté (repliable) avec support Flowcharts Mermaid & Tableaux -->
+                                                <div id="synopsisMarkdownPreviewBox" class="mt-2 p-3 rounded border bg-light-subtle shadow-xs" style="display:none; max-height: 540px; overflow-y: auto; overflow-x: auto; font-size: 0.85rem;">
+                                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2 flex-wrap gap-2">
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <span class="fw-bold text-purple small"><i class="fa-brands fa-markdown me-1"></i>Aperçu du Synopsis &amp; Contexte Historique (.md)</span>
+                                                            <span class="badge bg-purple-lt text-purple small" style="font-size:0.68rem;"><i class="fa-solid fa-diagram-project me-1"></i>Flowcharts &amp; Mermaid supportés</span>
+                                                        </div>
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <button type="button" class="btn btn-outline-purple btn-sm py-0 px-2" style="font-size:0.72rem; height:22px;" onclick="updateSynopsisMarkdownPreview()" title="Rafraîchir le rendu Markdown et Flowcharts">
+                                                                <i class="fa-solid fa-arrows-rotate me-1"></i>Actualiser
+                                                            </button>
+                                                            <button type="button" class="btn-close" style="font-size:0.65rem;" onclick="toggleSynopsisMarkdownPreview()" aria-label="Fermer l'aperçu"></button>
+                                                        </div>
                                                     </div>
                                                     <div id="synopsisMarkdownPreviewContent" class="text-dark"></div>
                                                 </div>
@@ -2414,6 +2422,9 @@ else:
     <input type="hidden" name="return_action" value="<?= htmlspecialchars($viewAction) ?>">
 </form>
 
+<!-- Moteur de Rendu Graphique Mermaid.js v10 pour Flowcharts & Diagrammes Narratifs Sengoku -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
 // DONNÉES PRÉCHARGÉES & RÉFÉRENTIEL DES 10 MÉTIERS DU STUDIO
@@ -2428,7 +2439,209 @@ const STUDIO_GLOBAL_METRICS = null;
 <?php endif; ?>
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PARSEUR & RENDU VISUEL MARKDOWN GDD + BLOCS GRAPHIQUES INTÉGRÉS
+// MOTEUR MERMAID.JS v10 & FLOWCHARTS DU STUDIO NARRATIF
+// ═══════════════════════════════════════════════════════════════════════════
+let MERMAID_INITIALIZED = false;
+let mermaidRenderCounter = 0;
+
+function initMermaidEngine() {
+    if (MERMAID_INITIALIZED) return true;
+    if (typeof mermaid !== 'undefined' && mermaid.initialize) {
+        try {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'neutral',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                themeVariables: {
+                    primaryColor: '#f3e8ff',
+                    primaryTextColor: '#581c87',
+                    primaryBorderColor: '#7c3aed',
+                    lineColor: '#6d28d9',
+                    secondaryColor: '#ede9fe',
+                    tertiaryColor: '#ffffff'
+                },
+                securityLevel: 'loose'
+            });
+            MERMAID_INITIALIZED = true;
+            return true;
+        } catch (e) {
+            console.warn('[OpenShogun Studio] Erreur initialisation Mermaid:', e);
+        }
+    }
+    return false;
+}
+
+/**
+ * Moteur de secours fluide : génère un diagramme de flux visuel même si Mermaid est hors-ligne
+ */
+function buildFallbackFlowchartHtml(code, errorNotice = null) {
+    if (!code) return '';
+    const cleanLines = code.split('\n')
+        .map(l => l.trim())
+        .filter(l => l && !l.startsWith('%%') && !/^flowchart\b/i.test(l) && !/^graph\b/i.test(l));
+
+    const steps = [];
+    const relations = [];
+
+    cleanLines.forEach((line) => {
+        if (line.includes('-->') || line.includes('-.->') || line.includes('==>')) {
+            const arrowRegex = /-->|-\.->|==>/;
+            const parts = line.split(arrowRegex).map(p => p.trim());
+            if (parts.length >= 2) {
+                const parseNode = (raw) => {
+                    const m = raw.match(/^([a-zA-Z0-9_]+)\s*[\[\(\{]["']?([^\]\)\}]+)["']?[\]\)\}]/);
+                    if (m) {
+                        return { id: m[1], label: m[2].replace(/\\n/g, ' ') };
+                    }
+                    return { id: raw, label: raw };
+                };
+
+                // Gestion de A & B --> C
+                const rawSources = parts[0].split('&').map(s => s.trim());
+                const targetNode = parseNode(parts[1]);
+                if (!steps.find(s => s.id === targetNode.id)) steps.push(targetNode);
+
+                rawSources.forEach(rs => {
+                    const srcNode = parseNode(rs);
+                    if (!steps.find(s => s.id === srcNode.id)) steps.push(srcNode);
+                    relations.push({ from: srcNode.id, to: targetNode.id });
+                });
+            }
+        } else {
+            const m = line.match(/^([a-zA-Z0-9_]+)\s*[\[\(\{]["']?([^\]\)\}]+)["']?[\]\)\}]/);
+            if (m) {
+                if (!steps.find(s => s.id === m[1])) {
+                    steps.push({ id: m[1], label: m[2].replace(/\\n/g, ' ') });
+                }
+            }
+        }
+    });
+
+    if (steps.length === 0) {
+        return `<div class="p-3 bg-light rounded text-muted font-monospace small"><pre class="m-0">${escapeHtmlStr(code)}</pre></div>`;
+    }
+
+    let outHtml = `<div class="flowchart-fallback-diagram py-2">`;
+    outHtml += `<div class="d-flex flex-wrap align-items-center justify-content-center gap-3">`;
+    steps.forEach((st, idx) => {
+        outHtml += `
+            <div class="card border border-purple shadow-sm px-3 py-2 text-start" style="min-width: 170px; max-width: 250px; background: linear-gradient(180deg, #ffffff 0%, #fbf9fe 100%);">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="badge bg-purple text-white rounded-pill" style="font-size:0.65rem;">Étape #${idx + 1}</span>
+                    <span class="fw-bold text-purple font-monospace" style="font-size:0.75rem;">${escapeHtmlStr(st.id)}</span>
+                </div>
+                <div class="small text-dark fw-medium" style="font-size:0.8rem; line-height:1.25;">${escapeHtmlStr(st.label)}</div>
+            </div>
+        `;
+        if (idx < steps.length - 1) {
+            outHtml += `
+                <div class="text-purple fs-4 px-1 d-flex align-items-center justify-content-center" title="Liaison vers l'étape suivante">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            `;
+        }
+    });
+    outHtml += `</div>`;
+    if (errorNotice) {
+        outHtml += `<div class="text-secondary small mt-2" style="font-size:0.7rem;"><i class="fa-solid fa-info-circle me-1"></i>Diagramme de secours (${escapeHtmlStr(errorNotice)})</div>`;
+    }
+    outHtml += `</div>`;
+    return outHtml;
+}
+
+/**
+ * Rend tous les diagrammes Mermaid au sein d'un conteneur DOM
+ */
+function renderAllMermaidInContainer(container) {
+    if (!container) return;
+    const diagramEls = container.querySelectorAll('.mermaid-diagram');
+    if (!diagramEls || diagramEls.length === 0) return;
+
+    initMermaidEngine();
+
+    diagramEls.forEach((el) => {
+        const code = el.getAttribute('data-mermaid-code');
+        if (!code) return;
+
+        // Si déjà rendu en SVG
+        if (el.querySelector('svg')) return;
+
+        if (typeof mermaid !== 'undefined' && mermaid.render) {
+            const uniqueId = 'os_mermaid_' + Date.now() + '_' + (++mermaidRenderCounter);
+            try {
+                mermaid.render(uniqueId, code).then((res) => {
+                    el.innerHTML = res.svg;
+                    if (res.bindFunctions) {
+                        res.bindFunctions(el);
+                    }
+                }).catch((err) => {
+                    console.warn('[OpenShogun Studio] Erreur de syntaxe Mermaid:', err);
+                    el.innerHTML = buildFallbackFlowchartHtml(code, err && err.message ? err.message : 'Erreur syntaxe');
+                });
+            } catch (errSync) {
+                console.warn('[OpenShogun Studio] Erreur synchrone Mermaid:', errSync);
+                el.innerHTML = buildFallbackFlowchartHtml(code, errSync.message);
+            }
+        } else {
+            // Rendu immédiat de secours
+            el.innerHTML = buildFallbackFlowchartHtml(code);
+            // Tentative asynchrone dès que Mermaid est chargé
+            let retries = 0;
+            const checkTimer = setInterval(() => {
+                retries++;
+                if (typeof mermaid !== 'undefined' && mermaid.render) {
+                    clearInterval(checkTimer);
+                    initMermaidEngine();
+                    const uId = 'os_mermaid_retry_' + Date.now() + '_' + (++mermaidRenderCounter);
+                    mermaid.render(uId, code).then((res) => {
+                        el.innerHTML = res.svg;
+                        if (res.bindFunctions) res.bindFunctions(el);
+                    }).catch(() => {});
+                } else if (retries > 25) {
+                    clearInterval(checkTimer);
+                }
+            }, 200);
+        }
+    });
+}
+
+function toggleMermaidSource(btn) {
+    const container = btn.closest('.mermaid-diagram-container');
+    if (!container) return;
+    const src = container.querySelector('.mermaid-source-code');
+    if (!src) return;
+    if (src.style.display === 'none' || !src.style.display) {
+        src.style.display = 'block';
+        btn.classList.add('active', 'btn-secondary');
+        btn.classList.remove('btn-outline-secondary');
+    } else {
+        src.style.display = 'none';
+        btn.classList.remove('active', 'btn-secondary');
+        btn.classList.add('btn-outline-secondary');
+    }
+}
+
+function copyMermaidCode(btn) {
+    const container = btn.closest('.mermaid-diagram-container');
+    if (!container) return;
+    const diag = container.querySelector('.mermaid-diagram');
+    const code = diag ? diag.getAttribute('data-mermaid-code') : '';
+    if (code) {
+        navigator.clipboard.writeText(code).then(() => {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check text-success"></i> Copié !';
+            setTimeout(() => { btn.innerHTML = orig; }, 1800);
+        }).catch(() => {});
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PARSEUR & RENDU VISUEL MARKDOWN GDD + BLOCS GRAPHIQUES & FLOWCHARTS
 // ═══════════════════════════════════════════════════════════════════════════
 function escapeHtmlStr(str) {
     if (str === null || str === undefined) return '';
@@ -2478,31 +2691,64 @@ function formatInlineMarkdown(text) {
 }
 
 /**
- * Convertit un document Markdown GDD en HTML riche avec graphiques SVG intégrés
+ * Parseur Markdown universel enrichi : support des Flowcharts Mermaid, tableaux,
+ * listes, blockquotes, code-blocks et styles inline
  */
-function renderMarkdownToGddHtml(mdText, scenarioObj = null) {
+function renderCustomMarkdown(mdText, options = {}) {
     if (!mdText || !mdText.trim()) {
-        return '<div class="text-muted text-center py-4">Aucun contenu Markdown à afficher.</div>';
+        return '<em class="text-muted">Aucun contenu Markdown à afficher.</em>';
     }
 
-    const lines = mdText.replace(/\r\n/g, '\n').split('\n');
+    const isCompact = !!options.compact;
+    const scenarioObj = options.scenarioObj || null;
+
+    // 1. Extraction préalable des blocs de code clôturés ``` ... ```
+    const codeBlocks = [];
+    let textWithoutBlocks = mdText.replace(/```([a-zA-Z0-9_-]*)[ \t]*\r?\n([\s\S]*?)```/g, function(match, lang, code) {
+        const langLower = (lang || '').trim().toLowerCase();
+        let codeTrimmed = code.trim();
+        const placeholder = `@@CODE_BLOCK_TOKEN_${codeBlocks.length}@@`;
+
+        const isMermaid = (
+            langLower === 'mermaid' ||
+            langLower === 'flowchart' ||
+            langLower === 'graph' ||
+            /^(flowchart|graph|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie)\b/m.test(codeTrimmed)
+        );
+
+        if ((langLower === 'flowchart' || langLower === 'graph') && !/^(flowchart|graph)\b/m.test(codeTrimmed)) {
+            codeTrimmed = langLower + ' TD\n' + codeTrimmed;
+        }
+
+        codeBlocks.push({
+            isMermaid: isMermaid,
+            lang: langLower || (isMermaid ? 'mermaid' : 'text'),
+            code: codeTrimmed
+        });
+
+        return '\n\n' + placeholder + '\n\n';
+    });
+
+    const lines = textWithoutBlocks.replace(/\r\n/g, '\n').split('\n');
     let htmlOut = '';
     let inList = false;
+    let listType = 'ul';
     let inBlockquote = false;
     let blockquoteLines = [];
     let inTable = false;
     let tableRows = [];
+    let visualHeaderInjected = false;
 
     function flushList() {
         if (inList) {
-            htmlOut += '</ul>';
+            htmlOut += (listType === 'ol' ? '</ol>' : '</ul>');
             inList = false;
         }
     }
 
     function flushBlockquote() {
         if (inBlockquote) {
-            htmlOut += '<blockquote>' + blockquoteLines.join('<br>') + '</blockquote>';
+            htmlOut += '<blockquote class="border-start border-3 border-purple ps-3 my-2 text-secondary fst-italic bg-light-subtle py-1 rounded-end">' + blockquoteLines.join('<br>') + '</blockquote>';
             inBlockquote = false;
             blockquoteLines = [];
         }
@@ -2510,17 +2756,17 @@ function renderMarkdownToGddHtml(mdText, scenarioObj = null) {
 
     function flushTable() {
         if (!inTable || tableRows.length === 0) return;
-        let tHtml = '<div class="table-responsive"><table class="table table-sm table-bordered">';
+        let tHtml = '<div class="table-responsive my-2"><table class="table table-sm table-bordered table-hover align-middle mb-0 bg-white">';
         tableRows.forEach((rowCells, rIdx) => {
             if (rIdx === 0) {
-                tHtml += '<thead><tr>';
-                rowCells.forEach(c => { tHtml += `<th>${formatInlineMarkdown(c)}</th>`; });
+                tHtml += '<thead class="table-light"><tr>';
+                rowCells.forEach(c => { tHtml += `<th class="py-1 px-2 text-dark">${formatInlineMarkdown(c)}</th>`; });
                 tHtml += '</tr></thead><tbody>';
             } else if (rIdx === 1 && rowCells.every(c => /^[-:\s]+$/.test(c))) {
-                // Ligne de séparation Markdown |---|---|
+                // Séparateur markdown |---|---|
             } else {
                 tHtml += '<tr>';
-                rowCells.forEach(c => { tHtml += `<td>${formatInlineMarkdown(c)}</td>`; });
+                rowCells.forEach(c => { tHtml += `<td class="py-1 px-2">${formatInlineMarkdown(c)}</td>`; });
                 tHtml += '</tr>';
             }
         });
@@ -2530,14 +2776,63 @@ function renderMarkdownToGddHtml(mdText, scenarioObj = null) {
         tableRows = [];
     }
 
-    // Insertion d'un bandeau graphique visuel en haut du GDD si les métriques sont disponibles
-    let visualHeaderInjected = false;
-
     for (let i = 0; i < lines.length; i++) {
         const rawLine = lines[i];
         const trimmed = rawLine.trim();
 
-        // Détection Tableau Markdown
+        // Détection de placeholder de bloc de code
+        const codeTokenMatch = trimmed.match(/^@@CODE_BLOCK_TOKEN_(\d+)@@$/);
+        if (codeTokenMatch) {
+            flushList();
+            flushBlockquote();
+            flushTable();
+            const idx = parseInt(codeTokenMatch[1], 10);
+            const blk = codeBlocks[idx];
+            if (blk) {
+                if (blk.isMermaid) {
+                    htmlOut += `
+                    <div class="mermaid-diagram-container my-3 rounded border bg-white shadow-sm overflow-hidden text-start">
+                        <div class="d-flex justify-content-between align-items-center bg-light px-3 py-1-5 border-bottom">
+                            <span class="small fw-bold text-purple d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-diagram-project"></i>
+                                <span>Diagramme de Flux (Flowchart Mermaid)</span>
+                            </span>
+                            <div class="d-flex align-items-center gap-1">
+                                <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size:0.7rem; height:24px;" onclick="toggleMermaidSource(this)" title="Afficher/masquer le code source Mermaid">
+                                    <i class="fa-solid fa-code me-1"></i>Code
+                                </button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size:0.7rem; height:24px;" onclick="copyMermaidCode(this)" title="Copier le code Mermaid">
+                                    <i class="fa-solid fa-copy me-1"></i>Copier
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mermaid-diagram-body p-3 text-center" style="overflow-x:auto; background:#ffffff; min-height:80px;">
+                            <div class="mermaid-diagram" data-mermaid-code="${escapeHtmlStr(blk.code)}">
+                                <div class="d-flex align-items-center justify-content-center gap-2 text-muted py-3">
+                                    <div class="spinner-border spinner-border-sm text-purple" role="status"></div>
+                                    <span class="small">Rendu du diagramme de flux...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mermaid-source-code p-2 bg-dark text-white font-monospace small" style="display:none; max-height:220px; overflow-y:auto; font-size:0.75rem;">
+                            <pre class="m-0 text-light p-1"><code>${escapeHtmlStr(blk.code)}</code></pre>
+                        </div>
+                    </div>`;
+                } else {
+                    htmlOut += `
+                    <div class="code-block my-2 rounded border overflow-hidden">
+                        <div class="bg-dark text-secondary px-2 py-1 small font-monospace d-flex justify-content-between align-items-center border-bottom border-secondary" style="font-size:0.7rem;">
+                            <span>${escapeHtmlStr(blk.lang || 'code')}</span>
+                            <button type="button" class="btn btn-link btn-sm text-secondary p-0 text-decoration-none" style="font-size:0.68rem;" onclick="navigator.clipboard.writeText(this.closest('.code-block').querySelector('code').textContent)">Copier</button>
+                        </div>
+                        <pre class="bg-dark text-light p-2 mb-0 font-monospace small" style="max-height:280px; overflow-y:auto;"><code>${escapeHtmlStr(blk.code)}</code></pre>
+                    </div>`;
+                }
+            }
+            continue;
+        }
+
+        // Tableau Markdown
         if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
             flushList();
             flushBlockquote();
@@ -2549,7 +2844,7 @@ function renderMarkdownToGddHtml(mdText, scenarioObj = null) {
             flushTable();
         }
 
-        // Détection Blockquote
+        // Blockquote
         if (trimmed.startsWith('>')) {
             flushList();
             inBlockquote = true;
@@ -2560,15 +2855,32 @@ function renderMarkdownToGddHtml(mdText, scenarioObj = null) {
             flushBlockquote();
         }
 
-        // Détection Liste
-        if (trimmed.startsWith('- ')) {
-            if (!inList) {
-                htmlOut += '<ul class="mb-3">';
+        // Liste à puces (- ou *)
+        if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+            if (!inList || listType !== 'ul') {
+                flushList();
+                htmlOut += '<ul class="mb-2 ps-3">';
                 inList = true;
+                listType = 'ul';
             }
             htmlOut += `<li class="mb-1">${formatInlineMarkdown(trimmed.slice(2))}</li>`;
             continue;
-        } else if (inList) {
+        }
+
+        // Liste numérotée (1. 2. etc.)
+        const numListMatch = trimmed.match(/^(\d+)\.\s+(.+)$/);
+        if (numListMatch) {
+            if (!inList || listType !== 'ol') {
+                flushList();
+                htmlOut += '<ol class="mb-2 ps-3">';
+                inList = true;
+                listType = 'ol';
+            }
+            htmlOut += `<li class="mb-1">${formatInlineMarkdown(numListMatch[2])}</li>`;
+            continue;
+        }
+
+        if (inList) {
             flushList();
         }
 
@@ -2577,26 +2889,44 @@ function renderMarkdownToGddHtml(mdText, scenarioObj = null) {
         }
 
         if (trimmed === '---') {
-            htmlOut += '<hr>';
+            htmlOut += '<hr class="my-3">';
             continue;
         }
 
+        // Titres Markdown
         if (trimmed.startsWith('# ')) {
-            htmlOut += `<h1>${formatInlineMarkdown(trimmed.slice(2))}</h1>`;
-            if (!visualHeaderInjected && scenarioObj) {
-                htmlOut += buildGddGraphicalDiagramHtml(scenarioObj);
-                visualHeaderInjected = true;
+            if (isCompact) {
+                htmlOut += `<h5 class="fw-bold text-dark mt-3 mb-2 border-bottom pb-1">${formatInlineMarkdown(trimmed.slice(2))}</h5>`;
+            } else {
+                htmlOut += `<h1 class="fw-bold text-dark mt-3 mb-2">${formatInlineMarkdown(trimmed.slice(2))}</h1>`;
+                if (!visualHeaderInjected && scenarioObj) {
+                    htmlOut += buildGddGraphicalDiagramHtml(scenarioObj);
+                    visualHeaderInjected = true;
+                }
             }
             continue;
         }
 
         if (trimmed.startsWith('## ')) {
-            htmlOut += `<h2>${formatInlineMarkdown(trimmed.slice(3))}</h2>`;
+            if (isCompact) {
+                htmlOut += `<h6 class="fw-bold text-purple mt-3 mb-1 border-bottom pb-1">${formatInlineMarkdown(trimmed.slice(3))}</h6>`;
+            } else {
+                htmlOut += `<h2 class="fw-bold text-purple mt-4 mb-2 pb-1 border-bottom">${formatInlineMarkdown(trimmed.slice(3))}</h2>`;
+            }
             continue;
         }
 
         if (trimmed.startsWith('### ')) {
-            htmlOut += `<h3>${formatInlineMarkdown(trimmed.slice(4))}</h3>`;
+            if (isCompact) {
+                htmlOut += `<div class="fw-bold text-dark mt-2 mb-1 small">${formatInlineMarkdown(trimmed.slice(4))}</div>`;
+            } else {
+                htmlOut += `<h3 class="fw-bold text-dark mt-3 mb-2">${formatInlineMarkdown(trimmed.slice(4))}</h3>`;
+            }
+            continue;
+        }
+
+        if (trimmed.startsWith('#### ')) {
+            htmlOut += `<h6 class="fw-bold text-secondary mt-2 mb-1">${formatInlineMarkdown(trimmed.slice(5))}</h6>`;
             continue;
         }
 
@@ -2608,6 +2938,13 @@ function renderMarkdownToGddHtml(mdText, scenarioObj = null) {
     flushTable();
 
     return htmlOut;
+}
+
+/**
+ * Convertit un document Markdown GDD en HTML riche avec graphiques SVG intégrés
+ */
+function renderMarkdownToGddHtml(mdText, scenarioObj = null) {
+    return renderCustomMarkdown(mdText, { compact: false, scenarioObj: scenarioObj });
 }
 
 /**
@@ -2826,10 +3163,12 @@ function setModalGddMode(mode) {
         if (bSplit) bSplit.className = 'btn btn-purple fw-bold';
         renderedCol.className = 'col-lg-6';
         rawCol.className = 'col-lg-6';
+        renderAllMermaidInContainer(renderedCol);
     } else {
         if (bRend) bRend.className = 'btn btn-purple fw-bold';
         renderedCol.className = 'col-12';
         rawCol.className = 'col-12 d-none';
+        renderAllMermaidInContainer(renderedCol);
     }
 }
 
@@ -2850,10 +3189,12 @@ function setInlineGddMode(mode) {
         if (bSplit) bSplit.className = 'btn btn-purple fw-bold';
         renderedCol.className = 'col-lg-6';
         rawCol.className = 'col-lg-6';
+        renderAllMermaidInContainer(renderedCol);
     } else {
         if (bRend) bRend.className = 'btn btn-purple fw-bold';
         renderedCol.className = 'col-12';
         rawCol.className = 'col-12 d-none';
+        renderAllMermaidInContainer(renderedCol);
     }
 }
 
@@ -2864,7 +3205,10 @@ function refreshInlineEditorGddViewer() {
     const rawTa = document.getElementById('inlineGddRawTextarea');
     const rendDiv = document.getElementById('inlineGddRenderedOutput');
     if (rawTa) rawTa.value = md;
-    if (rendDiv) rendDiv.innerHTML = renderMarkdownToGddHtml(md, liveSc);
+    if (rendDiv) {
+        rendDiv.innerHTML = renderMarkdownToGddHtml(md, liveSc);
+        renderAllMermaidInContainer(rendDiv);
+    }
 }
 
 function openLiveEditorMarkdownModal() {
@@ -2880,7 +3224,10 @@ function displayMarkdownInModal(md, scenarioObj = null) {
     const titleLbl = document.getElementById('modalGddTitleLabel');
 
     if (ta) ta.value = md;
-    if (rendered) rendered.innerHTML = renderMarkdownToGddHtml(md, scenarioObj);
+    if (rendered) {
+        rendered.innerHTML = renderMarkdownToGddHtml(md, scenarioObj);
+        renderAllMermaidInContainer(rendered);
+    }
     if (titleLbl && scenarioObj && scenarioObj.title) {
         titleLbl.textContent = `Visionneuse GDD Markdown : ${scenarioObj.title}`;
     }
@@ -3131,21 +3478,7 @@ function onSynopsisMdDrop(e) {
 }
 
 function renderSimpleMarkdown(md) {
-    if (!md) return '<em class="text-muted">Aucun contenu Markdown à prévisualiser.</em>';
-    let html = md
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    html = html
-        .replace(/^###\s+(.+)$/gm, '<h6 class="fw-bold text-dark mt-2 mb-1">$1</h6>')
-        .replace(/^##\s+(.+)$/gm, '<h5 class="fw-bold text-purple mt-3 mb-1 border-bottom pb-1">$1</h5>')
-        .replace(/^#\s+(.+)$/gm, '<h4 class="fw-bold text-dark mt-2 mb-2">$1</h4>')
-        .replace(/^\s*[-*]\s+(.+)$/gm, '<li class="ms-3">$1</li>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/`([^`]+)`/g, '<code class="text-purple">$1</code>')
-        .replace(/\n\n/g, '<br><br>');
-    return html;
+    return renderCustomMarkdown(md, { compact: true });
 }
 
 function updateSynopsisMarkdownPreview() {
@@ -3155,6 +3488,7 @@ function updateSynopsisMarkdownPreview() {
     if (!box || !content || !synEl) return;
     if (box.style.display !== 'none') {
         content.innerHTML = renderSimpleMarkdown(synEl.value);
+        renderAllMermaidInContainer(content);
     }
 }
 
