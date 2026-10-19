@@ -373,7 +373,7 @@ $complexityLabels = [
                                             <div class="d-flex align-items-center justify-content-between pt-1 border-top border-secondary-subtle">
                                                 <div class="d-flex align-items-center gap-1 text-secondary" style="font-size:0.7rem;">
                                                     <i class="fa-solid fa-user-circle"></i>
-                                                    <span><?= htmlspecialchars($task['assigned_to'] ?: 'Back-End') ?></span>
+                                                    <span><?= htmlspecialchars(($task['assignee'] ?? $task['assigned_to'] ?? '') ?: 'Back-End') ?></span>
                                                     <?php if ($task['estimated_hours'] > 0): ?>
                                                         <span class="ms-1 badge bg-secondary-lt text-secondary font-monospace" style="font-size:0.62rem;"><?= $task['estimated_hours'] ?>h</span>
                                                     <?php endif; ?>
@@ -451,7 +451,7 @@ $complexityLabels = [
                                         </span>
                                     </td>
                                     <td class="small text-secondary">
-                                        <i class="fa-solid fa-user me-1"></i><?= htmlspecialchars($task['assigned_to'] ?: 'Back-End') ?>
+                                        <i class="fa-solid fa-user me-1"></i><?= htmlspecialchars(($task['assignee'] ?? $task['assigned_to'] ?? '') ?: 'Back-End') ?>
                                         <?php if ($task['estimated_hours'] > 0): ?>
                                             <span class="badge bg-secondary-lt text-secondary font-monospace ms-1"><?= $task['estimated_hours'] ?>h</span>
                                         <?php endif; ?>
@@ -803,7 +803,7 @@ function openEditTaskModal(taskId) {
         if (statusSelect) statusSelect.value = task.status || 'todo';
         if (prioritySelect) prioritySelect.value = task.priority || 'medium';
         if (complexitySelect) complexitySelect.value = task.complexity || 'M';
-        if (assignedInput) assignedInput.value = task.assigned_to || '';
+        if (assignedInput) assignedInput.value = task.assignee || task.assigned_to || '';
         if (hoursInput) hoursInput.value = task.estimated_hours || '';
         if (deliverablesInput) deliverablesInput.value = task.deliverables || '';
         if (descTextarea) descTextarea.value = task.description || '';
@@ -953,7 +953,7 @@ function openTaskQuickPreview(taskId) {
 
     if (titleEl) titleEl.textContent = `Tâche #${task.id} : ${task.title}`;
     if (subEl) {
-        subEl.textContent = `Assigné à ${task.assigned_to || 'Back-End'} • Estimation : ${task.estimated_hours || 0}h • Créée le ${task.created_at || ''}`;
+        subEl.textContent = `Assigné à ${task.assignee || task.assigned_to || 'Back-End'} • Estimation : ${task.estimated_hours || 0}h • Créée le ${task.created_at || ''}`;
     }
 
     let metaBadgesHtml = '';

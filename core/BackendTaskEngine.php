@@ -86,6 +86,10 @@ class BackendTaskEngine {
         'XL' => ['label' => 'XL (Épique - 3j+)',   'color' => 'danger']
     ];
 
+    public const VALID_STATUSES = ['todo', 'in_progress', 'review', 'blocked', 'done'];
+    public const VALID_PRIORITIES = ['low', 'medium', 'high', 'critical'];
+    public const VALID_COMPLEXITIES = ['S', 'M', 'L', 'XL'];
+
     public function __construct() {
         try {
             $this->db = Database::getConnection();
@@ -223,7 +227,7 @@ class BackendTaskEngine {
             $status = in_array($data['status'] ?? '', array_keys(self::STATUSES), true) ? $data['status'] : 'todo';
             $priority = in_array($data['priority'] ?? '', array_keys(self::PRIORITIES), true) ? $data['priority'] : 'medium';
             $complexity = in_array($data['complexity'] ?? '', array_keys(self::COMPLEXITIES), true) ? $data['complexity'] : 'M';
-            $assignee = trim((string)($data['assignee'] ?? 'Développeur Back-End'));
+            $assignee = trim((string)($data['assignee'] ?? $data['assigned_to'] ?? 'Développeur Back-End'));
             $deliverables = trim((string)($data['deliverables'] ?? ''));
             $scenarioId = !empty($data['scenario_id']) ? (int)$data['scenario_id'] : null;
             $scenarioTaskId = !empty($data['scenario_task_id']) ? (string)$data['scenario_task_id'] : null;
@@ -260,7 +264,7 @@ class BackendTaskEngine {
             $status = (!empty($data['status']) && in_array($data['status'], array_keys(self::STATUSES), true)) ? $data['status'] : $task['status'];
             $priority = (!empty($data['priority']) && in_array($data['priority'], array_keys(self::PRIORITIES), true)) ? $data['priority'] : $task['priority'];
             $complexity = (!empty($data['complexity']) && in_array($data['complexity'], array_keys(self::COMPLEXITIES), true)) ? $data['complexity'] : $task['complexity'];
-            $assignee = isset($data['assignee']) ? trim((string)$data['assignee']) : $task['assignee'];
+            $assignee = isset($data['assignee']) ? trim((string)$data['assignee']) : (isset($data['assigned_to']) ? trim((string)$data['assigned_to']) : $task['assignee']);
             $deliverables = isset($data['deliverables']) ? trim((string)$data['deliverables']) : $task['deliverables'];
 
             $stmt = $this->db->prepare("
