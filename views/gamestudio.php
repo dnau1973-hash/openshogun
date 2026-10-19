@@ -67,7 +67,7 @@ $allowedTabs = [
     'elevate_events', 'elevate_weekly_events',
     'narrative_scenarios', 'narrative_storyboard', 'narrative_lore',
     'liveops_events', 'liveops_features', 'liveops_broadcast', 'liveops_support',
-    'dev_tickets'
+    'dev_tickets', 'dev_backend_tasks'
 ];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
 $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
@@ -215,6 +215,73 @@ if ($currentTab === 'dashboard') {
             $_SESSION['dev_flash'] = ['type' => 'danger', 'msg' => 'Erreur : ' . $e->getMessage()];
         }
         header('Location: ?page=gamestudio&tab=dev_tickets' . (!empty($_POST['filter_params']) ? '&' . ltrim($_POST['filter_params'], '&') : ''));
+        exit;
+    }
+} elseif ($currentTab === 'dev_backend_tasks') {
+    require_once __DIR__ . '/../core/BackendTaskEngine.php';
+    $backendTaskEngine = new BackendTaskEngine();
+
+    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action'])) {
+        $action = (string)$_POST['action'];
+
+        // Micro-actions AJAX
+        if ($action === 'update_status_ajax') {
+            while (ob_get_level() > 0) ob_end_clean();
+            header('Content-Type: application/json; charset=UTF-8');
+            $taskId = (int)($_POST['task_id'] ?? 0);
+            $newStatus = (string)($_POST['status'] ?? 'todo');
+            $success = $backendTaskEngine->updateTaskStatus($taskId, $newStatus);
+            echo json_encode([
+                'success' => $success,
+                'metrics' => $backendTaskEngine->getMetrics()
+            ]);
+            exit;
+        }
+
+        if ($action === 'sync_scenarios_ajax') {
+            while (ob_get_level() > 0) ob_end_clean();
+            header('Content-Type: application/json; charset=UTF-8');
+            $res = $backendTaskEngine->syncTasksFromScenarios();
+            echo json_encode([
+                'success' => true,
+                'result'  => $res,
+                'metrics' => $backendTaskEngine->getMetrics()
+            ]);
+            exit;
+        }
+
+        try {
+            if ($action === 'create_task') {
+                $newId = $backendTaskEngine->createTask($_POST);
+                $_SESSION['dev_backend_flash'] = [
+                    'type' => $newId > 0 ? 'success' : 'danger',
+                    'msg'  => $newId > 0 ? "Tâche Back-End #$newId créée avec succès !" : "Erreur lors de la création de la tâche."
+                ];
+            } elseif ($action === 'update_task') {
+                $taskId = (int)($_POST['task_id'] ?? 0);
+                $ok = $backendTaskEngine->updateTask($taskId, $_POST);
+                $_SESSION['dev_backend_flash'] = [
+                    'type' => $ok ? 'success' : 'danger',
+                    'msg'  => $ok ? "Tâche Back-End #$taskId mise à jour avec succès !" : "Erreur lors de la mise à jour."
+                ];
+            } elseif ($action === 'delete_task') {
+                $taskId = (int)($_POST['task_id'] ?? 0);
+                $ok = $backendTaskEngine->deleteTask($taskId);
+                $_SESSION['dev_backend_flash'] = [
+                    'type' => $ok ? 'success' : 'danger',
+                    'msg'  => $ok ? "Tâche Back-End #$taskId supprimée avec succès." : "Erreur lors de la suppression."
+                ];
+            } elseif ($action === 'sync_scenarios') {
+                $res = $backendTaskEngine->syncTasksFromScenarios();
+                $_SESSION['dev_backend_flash'] = [
+                    'type' => 'success',
+                    'msg'  => "Synchronisation effectuée : {$res['imported']} tâche(s) importée(s), {$res['updated']} actualisée(s) sur {$res['total']} tâche(s) de scénarios trouvée(s)."
+                ];
+            }
+        } catch (Throwable $e) {
+            $_SESSION['dev_backend_flash'] = ['type' => 'danger', 'msg' => 'Erreur : ' . $e->getMessage()];
+        }
+        header('Location: ?page=gamestudio&tab=dev_backend_tasks');
         exit;
     }
 } elseif ($currentTab === 'narrative_scenarios') {
@@ -747,6 +814,13 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div>
                                 <div>Traitement des Tickets Support &amp; Bugs</div>
                                 <div class="small text-secondary">Signalements joueurs, triage, diagnostic technique &amp; résolution</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'dev_backend_tasks' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=dev_backend_tasks">
+                            <i class="fa-solid fa-server text-teal"></i>
+                            <div>
+                                <div>Backlog &amp; Tâches Développeur Back-End</div>
+                                <div class="small text-secondary">Feuille de route technique, synchronisation scénarios &amp; GDD .md</div>
                             </div>
                         </a>
                     </div>
