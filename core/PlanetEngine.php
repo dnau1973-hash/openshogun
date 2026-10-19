@@ -637,6 +637,32 @@ class PlanetEngine {
                     } catch (Exception $e) {
                         $this->db->rollBack();
                     }
+                } elseif (in_array($product, ['roof_tiles', 'onigawara_tiles'])) {
+                    $this->db->beginTransaction();
+                    try {
+                        if ($product === 'roof_tiles') {
+                            $up = $this->db->prepare("
+                                UPDATE planets
+                                SET roof_tiles = LEAST(roof_tiles_max, roof_tiles + ?)
+                                WHERE id = ?
+                            ");
+                            $up->execute([$amount, $planetId]);
+                        } else {
+                            $up = $this->db->prepare("
+                                UPDATE planets
+                                SET onigawara_tiles = onigawara_tiles + ?
+                                WHERE id = ?
+                            ");
+                            $up->execute([$amount, $planetId]);
+                        }
+
+                        $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
+                        $del->execute([$item['id']]);
+
+                        $this->db->commit();
+                    } catch (Exception $e) {
+                        $this->db->rollBack();
+                    }
                 } elseif ($product === 'prestige_weapons') {
                     $this->db->beginTransaction();
                     try {
@@ -1508,6 +1534,18 @@ class PlanetEngine {
                 require_once __DIR__ . '/MountainEngine.php';
                 (new MountainEngine($this->db))->ensureSchema();
             } catch (Exception $eMountain) {}
+
+            // 21. Colonnes roof_tiles, roof_tiles_max et onigawara_tiles sur planets pour la toiture du Grand Dōjō (Tailleuse Niv. 20)
+            try {
+                $stmtTiles = $this->db->query("SHOW COLUMNS FROM `planets` LIKE 'roof_tiles'");
+                if ($stmtTiles && $stmtTiles->rowCount() === 0) {
+                    $this->db->exec("ALTER TABLE `planets`
+                        ADD COLUMN `roof_tiles` DOUBLE NOT NULL DEFAULT 0,
+                        ADD COLUMN `roof_tiles_max` INT UNSIGNED NOT NULL DEFAULT 15000,
+                        ADD COLUMN `onigawara_tiles` INT UNSIGNED NOT NULL DEFAULT 0
+                    ");
+                }
+            } catch (Exception $eTilesPlanets) {}
         } catch (Exception $e) {
             // Ignorer silencieusement si déjà en cours ou permissions limitées
         }
@@ -2256,6 +2294,309 @@ class PlanetEngine {
     }
 
     /**
+     * Calcule les détails de cuisson des tuiles impériales (Kawara-gama)
+     * Débloqué STRICTEMENT au Niveau 20 de la Taille de Granit & Maçonnerie (stonemason)
+     */
+    public function calculateTileCraftDetails(int $planetId, string $tileType, float $batches): array {
+        $planet = $this->getPlanet($planetId);
+        $buildings = $this->getBuildings($planetId);
+        $stoneLvl = (int)($buildings['stonemason'] ?? 0);
+
+        $efficiencyMultiplier = 1.0 + ($stoneLvl * 0.02);
+        $gameSpeed = (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1);
+        if ($gameSpeed <= 0) $gameSpeed = 1;
+
+        $batches = max(1, floor($batches));
+
+        if ($tileType === 'onigawara_tiles') {
+            // Tuiles Démoniaques d'Arête : 50 Argile + 30 Granit + 15 Charbon + 5 Sable de Fer -> 1 Onigawara
+            $baseClay = 50;
+            $baseCrystal = 30;
+            $baseCharcoal = 15;
+            $baseIronSand = 5;
+            $yieldPerBatch = 1;
+
+            $rawProduced = (int)floor($batches * $yieldPerBatch);
+            $actualProduced = $rawProduced;
+            $actualBatches = $batches;
+
+            $engagedClay = $actualBatches * $baseClay;
+            $engagedCrystal = $actualBatches * $baseCrystal;
+            $engagedCharcoal = $actualBatches * $baseCharcoal;
+            $engagedIronSand = $actualBatches * $baseIronSand;
+
+            $durationSeconds = max(30, (int)round(($actualBatches * 60) / (1 + ($stoneLvl * 0.15)) / $gameSpeed));
+
+            return [
+                'product' => 'onigawara_tiles',
+                'product_name' => 'Tuiles Démoniaques de Faîtage (Onigawara 鬼瓦)',
+                'product_icon' => '👹',
+                'stone_level' => $stoneLvl,
+                'batches' => $actualBatches,
+                'actual_produced' => $actualProduced,
+                'raw_produced' => $rawProduced,
+                'current_stock' => (float)($planet['onigawara_tiles'] ?? 0),
+                'max_stock' => 999999,
+                'available_space' => 999999,
+                'engaged_clay' => $engagedClay,
+                'engaged_crystal' => $engagedCrystal,
+                'engaged_charcoal' => $engagedCharcoal,
+                'engaged_iron_sand' => $engagedIronSand,
+                'duration_seconds' => $durationSeconds
+            ];
+        }
+
+        // Par défaut : Tuiles Communes (Hongawara - roof_tiles)
+        // 1 lot de 10 Tuiles : 40 Argile + 20 Granit + 10 Charbon -> 10 Tuiles
+        $baseClay = 40;
+        $baseCrystal = 20;
+        $baseCharcoal = 10;
+        $yieldPerBatch = 10;
+
+        $currentStock = (float)($planet['roof_tiles'] ?? 0);
+        $maxStock = (int)($planet['roof_tiles_max'] ?? 15000);
+        $availableSpace = max(0, $maxStock - $currentStock);
+
+        $rawProduced = (int)floor($batches * $yieldPerBatch * $efficiencyMultiplier);
+        $actualProduced = min($rawProduced, $availableSpace);
+
+        $actualBatches = $batches;
+        if ($actualProduced < $rawProduced && $actualProduced > 0) {
+            $actualBatches = max(1, (int)ceil($actualProduced / ($yieldPerBatch * $efficiencyMultiplier)));
+        }
+
+        $engagedClay = $actualBatches * $baseClay;
+        $engagedCrystal = $actualBatches * $baseCrystal;
+        $engagedCharcoal = $actualBatches * $baseCharcoal;
+
+        $durationSeconds = max(15, (int)round(($actualBatches * 35) / (1 + ($stoneLvl * 0.15)) / $gameSpeed));
+
+        return [
+            'product' => 'roof_tiles',
+            'product_name' => 'Tuiles Impériales de Toiture (Hongawara 本瓦)',
+            'product_icon' => '🧱',
+            'stone_level' => $stoneLvl,
+            'batches' => $actualBatches,
+            'actual_produced' => $actualProduced,
+            'raw_produced' => $rawProduced,
+            'current_stock' => $currentStock,
+            'max_stock' => $maxStock,
+            'available_space' => $availableSpace,
+            'engaged_clay' => $engagedClay,
+            'engaged_crystal' => $engagedCrystal,
+            'engaged_charcoal' => $engagedCharcoal,
+            'duration_seconds' => $durationSeconds
+        ];
+    }
+
+    /**
+     * Lance la cuisson artisanale de tuiles dans le grand four Kawara-gama de la tailleuse
+     * Strictement réservé au Niveau 20 de la Taille de Granit & Maçonnerie (stonemason)
+     */
+    public function craftTileProduct(int $planetId, string $tileType, float $batches): array {
+        $this->ensureSchemaMigration();
+        if (!in_array($tileType, ['roof_tiles', 'onigawara_tiles'])) {
+            return ['success' => false, 'error' => "Type de tuile invalide (Hongawara ou Onigawara uniquement)."];
+        }
+
+        $buildings = $this->getBuildings($planetId);
+        $stoneLvl = (int)($buildings['stonemason'] ?? 0);
+        $isAdmin = $this->isPlanetAdmin($planetId);
+
+        if ($stoneLvl < 20 && !$isAdmin) {
+            return [
+                'success' => false,
+                'error' => "Le grand fourneau Kawara-gama requiert impérativement une <strong>Taille de Granit & Maçonnerie de Niveau 20</strong> (Niveau actuel : {$stoneLvl}/20)."
+            ];
+        }
+
+        $batches = floor($batches);
+        if ($isAdmin && $batches <= 0) {
+            $batches = 10;
+        }
+        if ($batches <= 0) {
+            return ['success' => false, 'error' => "Veuillez indiquer un nombre de lots de tuiles supérieur à zéro."];
+        }
+
+        $details = $this->calculateTileCraftDetails($planetId, $tileType, $batches);
+
+        if ($tileType === 'roof_tiles' && $details['available_space'] <= 0) {
+            return [
+                'success' => false,
+                'error' => "Vos entrepôts de tuiles sont pleins (" . number_format($details['current_stock']) . " / " . number_format($details['max_stock']) . "). Acheminez-les vers le Grand Dōjō !"
+            ];
+        }
+
+        // Mode Administrateur : Cuisson instantanée sans coût
+        if ($isAdmin) {
+            $produced = max(1, (int)$details['raw_produced']);
+            $now = time();
+            $stmtQueue = $this->db->prepare("
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                VALUES (?, 'stonemason', ?, 'clay', 0, 0, ?, ?, ?)
+            ");
+            $stmtQueue->execute([$planetId, $tileType, $produced, $now - 2, $now - 1]);
+            $this->processCraftQueue($planetId);
+            $updatedPlanet = $this->getPlanet($planetId);
+            $activeQueue = $this->getCraftQueue($planetId, 'stonemason');
+
+            return [
+                'success' => true,
+                'message' => "⚡ [Admin] Cuisson impériale instantanée de <strong>+" . number_format($produced) . " {$details['product_name']} {$details['product_icon']}</strong> achevée sans coût !",
+                'product' => $tileType,
+                'product_name' => $details['product_name'],
+                'product_icon' => $details['product_icon'],
+                'produced' => $produced,
+                'duration_seconds' => 0,
+                'craft' => $activeQueue[0] ?? null,
+                'new_product_stock' => $updatedPlanet[$tileType] ?? 0,
+                'planet' => $updatedPlanet
+            ];
+        }
+
+        $this->processCraftQueue($planetId);
+        $activeQueue = $this->getCraftQueue($planetId, 'stonemason');
+
+        $planet = $this->getPlanet($planetId);
+        require_once __DIR__ . '/ImperialSealEngine.php';
+        $sealEngine = new ImperialSealEngine($this->db);
+        $isSealActive = $sealEngine->isSealActive((int)$planet['user_id']);
+        $maxQueueSlots = $isSealActive ? 4 : 1;
+
+        if (count($activeQueue) >= $maxQueueSlots) {
+            $msg = $isSealActive
+                ? "La file de cuisson des fours de maçonnerie est saturée (4/4 lots en cours)."
+                : "Les fours de maçonnerie sont déjà occupés. Activez le Sceau Impérial pour ouvrir jusqu'à 4 files de cuisson simultanées.";
+            return ['success' => false, 'error' => $msg];
+        }
+
+        // Vérification des matières premières
+        $curClay = (float)($planet['clay'] ?? 0);
+        $curCrystal = (float)($planet['crystal'] ?? 0);
+        $curCharcoal = (float)($planet['charcoal'] ?? 0);
+        $curIronSand = (float)($planet['iron_sand'] ?? 0);
+
+        if ($curClay < $details['engaged_clay']) {
+            return [
+                'success' => false,
+                'error' => "Argile alluviale insuffisante : requis " . number_format($details['engaged_clay']) . " 🏺 (disponible : " . number_format((int)$curClay) . ")."
+            ];
+        }
+        if ($curCrystal < $details['engaged_crystal']) {
+            return [
+                'success' => false,
+                'error' => "Pierre de granit insuffisante pour la chamotte : requis " . number_format($details['engaged_crystal']) . " 🪨 (disponible : " . number_format((int)$curCrystal) . ")."
+            ];
+        }
+        if ($curCharcoal < $details['engaged_charcoal']) {
+            return [
+                'success' => false,
+                'error' => "Charbon de bois insuffisant pour monter les fours à 1000°C : requis " . number_format($details['engaged_charcoal']) . " 🔥 (disponible : " . number_format((int)$curCharcoal) . ")."
+            ];
+        }
+        if ($tileType === 'onigawara_tiles' && $curIronSand < ($details['engaged_iron_sand'] ?? 0)) {
+            return [
+                'success' => false,
+                'error' => "Sable de fer (Satetsu) insuffisant pour le vernis protecteur : requis " . number_format($details['engaged_iron_sand']) . " 💎 (disponible : " . number_format((int)$curIronSand) . ")."
+            ];
+        }
+
+        $now = time();
+        $startedAt = $now;
+        if (!empty($activeQueue)) {
+            $lastCraft = end($activeQueue);
+            $startedAt = max($now, (int)$lastCraft['finishes_at']);
+        }
+        $finishesAt = $startedAt + $details['duration_seconds'];
+
+        $this->db->beginTransaction();
+        try {
+            if ($tileType === 'onigawara_tiles') {
+                $stmt = $this->db->prepare("
+                    UPDATE planets
+                    SET clay = GREATEST(0, clay - ?),
+                        crystal = GREATEST(0, crystal - ?),
+                        charcoal = GREATEST(0, charcoal - ?),
+                        iron_sand = GREATEST(0, iron_sand - ?)
+                    WHERE id = ? AND clay >= ? AND crystal >= ? AND charcoal >= ? AND iron_sand >= ?
+                ");
+                $stmt->execute([
+                    $details['engaged_clay'],
+                    $details['engaged_crystal'],
+                    $details['engaged_charcoal'],
+                    $details['engaged_iron_sand'],
+                    $planetId,
+                    $details['engaged_clay'],
+                    $details['engaged_crystal'],
+                    $details['engaged_charcoal'],
+                    $details['engaged_iron_sand']
+                ]);
+            } else {
+                $stmt = $this->db->prepare("
+                    UPDATE planets
+                    SET clay = GREATEST(0, clay - ?),
+                        crystal = GREATEST(0, crystal - ?),
+                        charcoal = GREATEST(0, charcoal - ?)
+                    WHERE id = ? AND clay >= ? AND crystal >= ? AND charcoal >= ?
+                ");
+                $stmt->execute([
+                    $details['engaged_clay'],
+                    $details['engaged_crystal'],
+                    $details['engaged_charcoal'],
+                    $planetId,
+                    $details['engaged_clay'],
+                    $details['engaged_crystal'],
+                    $details['engaged_charcoal']
+                ]);
+            }
+
+            if ($stmt->rowCount() === 0) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => "Échec de l'opération : stock de matière modifié entretemps."];
+            }
+
+            $stmtQueue = $this->db->prepare("
+                INSERT INTO craft_queue (planet_id, building_type, product, cost_resource, cost_amount, rice_amount, produced_amount, started_at, finishes_at)
+                VALUES (?, 'stonemason', ?, 'clay', ?, ?, ?, ?, ?)
+            ");
+            $stmtQueue->execute([
+                $planetId,
+                $tileType,
+                $details['engaged_clay'],
+                $details['engaged_charcoal'],
+                $details['actual_produced'],
+                $startedAt,
+                $finishesAt
+            ]);
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['success' => false, 'error' => "Erreur lors du lancement de la cuisson des tuiles : " . $e->getMessage()];
+        }
+
+        $updatedPlanet = $this->getPlanet($planetId);
+        $activeQueue = $this->getCraftQueue($planetId, 'stonemason');
+        $durationFmt = gmdate('i\m s\s', $details['duration_seconds']);
+
+        return [
+            'success' => true,
+            'message' => "La cuisson de <strong>+" . number_format($details['actual_produced']) . " {$details['product_name']} {$details['product_icon']}</strong> a été lancée dans les fours Kawara-gama ! Durée : <strong>{$durationFmt}</strong>.",
+            'product' => $tileType,
+            'product_name' => $details['product_name'],
+            'product_icon' => $details['product_icon'],
+            'produced' => $details['actual_produced'],
+            'engaged_clay' => $details['engaged_clay'],
+            'engaged_crystal' => $details['engaged_crystal'],
+            'engaged_charcoal' => $details['engaged_charcoal'],
+            'duration_seconds' => $details['duration_seconds'],
+            'craft' => $activeQueue[0] ?? null,
+            'new_product_stock' => $updatedPlanet[$tileType] ?? 0,
+            'planet' => $updatedPlanet
+        ];
+    }
+
+    /**
      * Calcule les détails de fabrication pour la Grande Forge du Tamahagane
      * - Palier 15+ : Fonte de Métal (Fourneau Tatara des Maîtres & Réduction Rustique)
      * - Palier 20+ : Armes de Prestige (Katanas de Maître) & Armées de Prestige (Garde d'Honneur au Tamahagane)
@@ -2779,6 +3120,78 @@ class PlanetEngine {
             return [
                 'success' => true,
                 'message' => "Commande de forge annulée. <strong>{$refundMsg}</strong> (80% des matières engagées) ont été restitués.",
+                'planet' => $updatedPlanet
+            ];
+        }
+
+        // Cas spécifique de la cuisson de Tuiles dans la Tailleuse (stonemason)
+        if ($bType === 'stonemason' && in_array($craft['product'], ['roof_tiles', 'onigawara_tiles'])) {
+            $product = $craft['product'];
+            $rawEngaged = !empty($craft['cost_amount']) ? (float)$craft['cost_amount'] : 40;
+
+            $this->db->beginTransaction();
+            try {
+                $del = $this->db->prepare("DELETE FROM craft_queue WHERE id = ?");
+                $del->execute([$craftId]);
+
+                $refundMsg = "";
+                if ($product === 'onigawara_tiles') {
+                    $batches = max(1, (int)ceil($rawEngaged / 50));
+                    $clayRefund = floor($rawEngaged * 0.8);
+                    $stoneRefund = floor($batches * 30 * 0.8);
+                    $charcoalRefund = floor($batches * 15 * 0.8);
+                    $ironSandRefund = floor($batches * 5 * 0.8);
+
+                    $up = $this->db->prepare("UPDATE planets SET clay = clay + ?, crystal = crystal + ?, charcoal = charcoal + ?, iron_sand = iron_sand + ? WHERE id = ?");
+                    $up->execute([$clayRefund, $stoneRefund, $charcoalRefund, $ironSandRefund, $planetId]);
+                    $refundMsg = "+{$clayRefund} Argile 🏺, +{$stoneRefund} Pierre 🪨, +{$charcoalRefund} Charbon 🔥 et +{$ironSandRefund} Sable de fer 💎";
+                } else {
+                    $batches = max(1, (int)ceil($rawEngaged / 40));
+                    $clayRefund = floor($rawEngaged * 0.8);
+                    $stoneRefund = floor($batches * 20 * 0.8);
+                    $charcoalRefund = floor((float)($craft['rice_amount'] ?? ($batches * 10)) * 0.8);
+
+                    $up = $this->db->prepare("UPDATE planets SET clay = clay + ?, crystal = crystal + ?, charcoal = charcoal + ? WHERE id = ?");
+                    $up->execute([$clayRefund, $stoneRefund, $charcoalRefund, $planetId]);
+                    $refundMsg = "+{$clayRefund} Argile 🏺, +{$stoneRefund} Pierre 🪨 et +{$charcoalRefund} Charbon 🔥";
+                }
+
+                // Réaligner séquentiellement les créneaux restants pour stonemason
+                $stmtRem = $this->db->prepare("SELECT id, started_at, finishes_at FROM craft_queue WHERE planet_id = ? AND building_type = 'stonemason' ORDER BY started_at ASC, id ASC");
+                $stmtRem->execute([$planetId]);
+                $remainingQueue = $stmtRem->fetchAll(PDO::FETCH_ASSOC);
+
+                $now = time();
+                $timeCursor = $now;
+                foreach ($remainingQueue as $idx => $rItem) {
+                    $duration = max(1, (int)$rItem['finishes_at'] - (int)$rItem['started_at']);
+                    if ($idx === 0) {
+                        if ((int)$rItem['started_at'] <= $now && (int)$rItem['finishes_at'] > $now) {
+                            $timeCursor = (int)$rItem['finishes_at'];
+                        } else {
+                            $newStart = $now;
+                            $newFinish = $newStart + $duration;
+                            $this->db->prepare("UPDATE craft_queue SET started_at = ?, finishes_at = ? WHERE id = ?")->execute([$newStart, $newFinish, $rItem['id']]);
+                            $timeCursor = $newFinish;
+                        }
+                    } else {
+                        $newStart = max($now, $timeCursor);
+                        $newFinish = $newStart + $duration;
+                        $this->db->prepare("UPDATE craft_queue SET started_at = ?, finishes_at = ? WHERE id = ?")->execute([$newStart, $newFinish, $rItem['id']]);
+                        $timeCursor = $newFinish;
+                    }
+                }
+
+                $this->db->commit();
+            } catch (Exception $e) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => "Erreur lors de l'annulation : " . $e->getMessage()];
+            }
+
+            $updatedPlanet = $this->getPlanet($planetId);
+            return [
+                'success' => true,
+                'message' => "Cuisson de tuiles annulée. <strong>{$refundMsg}</strong> (80% des matières engagées) ont été restitués.",
                 'planet' => $updatedPlanet
             ];
         }

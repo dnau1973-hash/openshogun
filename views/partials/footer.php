@@ -881,6 +881,7 @@ function updateHudResources(planet) {
     if (planet.iron_sand !== undefined) updateEl('res-val-iron-sand', 'bar-iron-sand', planet.iron_sand, planet.iron_sand_max || 15000);
     if (planet.sulfur !== undefined) updateEl('res-val-sulfur', 'bar-sulfur', planet.sulfur, planet.sulfur_max || 10000);
     if (planet.nitrate !== undefined) updateEl('res-val-nitrate', 'bar-nitrate', planet.nitrate, planet.nitrate_max || 10000);
+    if (planet.roof_tiles !== undefined) updateEl('res-val-roof-tiles', 'bar-roof-tiles', planet.roof_tiles, planet.roof_tiles_max || 15000);
 }
 </script>
 <script src="/public/js/audio_manager.js"></script>

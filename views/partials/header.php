@@ -989,6 +989,11 @@ $navItems = [
         $nitrateMax = max(1, (int)($planet['nitrate_max'] ?? 10000));
         $pctNitrate = min(100, max(0, ($nitrateStock / $nitrateMax) * 100));
 
+        $roofTilesStock = (float)($planet['roof_tiles'] ?? 0);
+        $roofTilesMax = max(1, (int)($planet['roof_tiles_max'] ?? 15000));
+        $pctRoofTiles = min(100, max(0, ($roofTilesStock / $roofTilesMax) * 100));
+        $onigawaraStock = (int)($planet['onigawara_tiles'] ?? 0);
+
         $eBalance = (int)($planet['energy_max'] ?? 0) - (int)($planet['energy_used'] ?? 0);
         $eOk = ($eBalance >= 0);
         $pctEnergy = ($planet['energy_max'] > 0) ? min(100, max(0, ((int)($planet['energy_used'] ?? 0) / (int)$planet['energy_max']) * 100)) : 0;
@@ -2411,7 +2416,69 @@ $navItems = [
                         </div>
                     </div>
 
-                    <!-- 16. PEUPLE & DOMAINE (Même gabarit .hud-res-pill) -->
+                    <!-- 16. TUILES IMPÉRIALES (KAWARA) -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResTiles" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Tuiles Impériales (Kawara 瓦) : cliquer pour le détail et l'accès aux fours">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-shapes text-secondary"></i> Tuiles
+                                </span>
+                                <span class="font-monospace <?= $stonemasonLvl >= 20 ? 'text-success' : 'text-secondary' ?> fw-semibold" style="font-size:0.65rem;">Niv. <?= $stonemasonLvl ?></span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-roof-tiles"
+                                      data-current="<?= $roofTilesStock ?>"
+                                      data-max="<?= $roofTilesMax ?>">
+                                    <?= number_format((int)$roofTilesStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctRoofTiles) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-secondary" id="bar-roof-tiles" style="width:<?= $pctRoofTiles ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResTiles" style="min-width:305px; z-index:1095;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-dark text-white rounded">🧱</span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Tuiles Impériales (Kawara)</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Tailleuse &amp; Maçonnerie &bull; Niv. <?= $stonemasonLvl ?>/<?= $stonemasonMaxLvl ?></div>
+                                    </div>
+                                </div>
+                                <span class="badge <?= $stonemasonLvl >= 20 ? 'bg-success-lt text-success' : 'bg-secondary-lt text-secondary' ?> font-monospace">
+                                    <?= $stonemasonLvl >= 20 ? 'Four Actif' : 'Niv. 20 req.' ?>
+                                </span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Tuiles Hongawara (Stock) :</span>
+                                    <strong class="text-dark"><?= number_format((int)$roofTilesStock) ?> / <?= number_format($roofTilesMax) ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Tuiles Onigawara (Faîtage) :</span>
+                                    <strong class="text-danger"><?= number_format($onigawaraStock) ?> 👹</strong>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Four Kawara-gama :</span>
+                                    <span class="text-dark fw-bold"><?= $stonemasonLvl >= 20 ? 'Opérationnel (Palier 20)' : 'Verrouillé (' . $stonemasonLvl . '/20)' ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Usage suprême :</span>
+                                    <span class="text-secondary fw-bold">Couverture du Grand Dōjō (Fin de Jeu)</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=stonemason#tileCraftSection" class="btn btn-xs btn-dark flex-fill"><i class="fa-solid fa-fire-burner me-1"></i>Fours Kawara</a>
+                                <a href="?page=city" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-torii-gate me-1"></i>Grand Dōjō</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 17. PEUPLE & DOMAINE (Même gabarit .hud-res-pill) -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="dropdownDomaine" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
                                 title="Peuple & Domaine : Population, Ordre Shinōkōshō, Main-d'œuvre, Moral et Kobans">

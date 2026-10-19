@@ -31,6 +31,10 @@ try {
         $forgeAmount = (float)($_POST['amount'] ?? $_POST['batches'] ?? 1);
         $result = $planetEngine->craftForgeProduct((int)$planet['id'], $product, $forgeAmount);
         echo json_encode($result);
+    } elseif ($action === 'craft_tile' || ($action === 'start_craft' && in_array($product, ['roof_tiles', 'onigawara_tiles']))) {
+        $tileBatches = (float)($_POST['batches'] ?? $_POST['amount'] ?? 1);
+        $result = $planetEngine->craftTileProduct((int)$planet['id'], $product, $tileBatches);
+        echo json_encode($result);
     } elseif ($action === 'craft_mineral' || ($action === 'start_craft' && in_array($product, ['sulfur', 'nitrate', 'iron_sand']))) {
         $mineralAmount = (float)($_POST['amount'] ?? $_POST['mineral_amount'] ?? 0);
         $result = $planetEngine->craftMineralProduct((int)$planet['id'], $product, $mineralAmount);

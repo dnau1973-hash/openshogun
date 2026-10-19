@@ -1675,12 +1675,16 @@ if (!$isEmptyPlot) {
                         'sulfur' => '🌋',
                         'nitrate' => '🧪',
                         'iron_sand' => '💎',
+                        'roof_tiles' => '🧱',
+                        'onigawara_tiles' => '👹',
                         default => '⛏️'
                     };
                     $mTitle = match($mProd) {
                         'sulfur' => 'Synthèse de Soufre Volcanique en cours...',
                         'nitrate' => 'Cristallisation de Salpêtre (Nitrate) en cours...',
                         'iron_sand' => 'Broyage & Lavage de Sable de Fer en cours...',
+                        'roof_tiles' => 'Cuisson de Tuiles Impériales Hongawara en cours...',
+                        'onigawara_tiles' => 'Cuisson de Tuiles Démoniaques Onigawara en cours...',
                         default => 'Raffinage Minéralier en cours...'
                     };
                     ?>
@@ -1837,6 +1841,229 @@ if (!$isEmptyPlot) {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($code === 'stonemason' && $lvl > 0): ?>
+            <?php
+            $hasTileLevel20 = $isAdmin || ($lvl >= 20);
+            $availableClayForTiles = (float)($planet['clay'] ?? 0);
+            $availableStoneForTiles = (float)($planet['crystal'] ?? 0);
+            $availableCharcoalForTiles = (float)($planet['charcoal'] ?? 0);
+            $availableIronSandForTiles = (float)($planet['iron_sand'] ?? 0);
+            $currentRoofTiles = (float)($planet['roof_tiles'] ?? 0);
+            $maxRoofTiles = (int)($planet['roof_tiles_max'] ?? 15000);
+            $currentOnigawara = (int)($planet['onigawara_tiles'] ?? 0);
+            ?>
+            <!-- ========================================================
+                 FOUR À TUILES IMPÉRIAL (KAWARA-GAMA) : COUVERTURE DU GRAND DŌJŌ
+                 Débloqué UNIQUEMENT à partir du Niveau 20
+                 ======================================================== -->
+            <div class="card mb-3" id="tileCraftSection" style="border-top: 3px solid #78716c;">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h3 class="card-title text-secondary-emphasis d-flex align-items-center gap-2 m-0">
+                            <span>🧱</span> Grand Fourneau à Tuiles (Kawara-gama 瓦窯)
+                        </h3>
+                        <div class="text-secondary small mt-1">
+                            Manufacture impériale de cuisson de tuiles en terre cuite pour la couverture monumentale du <strong>Grand Dōjō Impérial</strong> (Endgame).
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap ms-auto">
+                        <span class="badge bg-dark text-white fw-bold shadow-sm">
+                            <i class="fa-solid fa-landmark me-1"></i>Palier 20 Requis
+                        </span>
+                        <?php if ($hasTileLevel20): ?>
+                            <span class="badge bg-success text-white fw-bold shadow-sm">
+                                <i class="fa-solid fa-check me-1"></i>Fours Allumés
+                            </span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary-lt fw-bold">
+                                <i class="fa-solid fa-lock me-1"></i>Verrouillé (<?= $lvl ?>/20)
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <?php if (!$hasTileLevel20): ?>
+                        <!-- État Verrouillé : Niveau < 20 -->
+                        <div class="alert alert-secondary p-3 mb-0 border-secondary shadow-sm" style="background:#fcfbf9; border-left: 5px solid #78716c;">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="fs-1 text-secondary">🔒</span>
+                                    <div>
+                                        <h4 class="m-0 fw-bold text-dark">Grand Fourneau Kawara-gama Verrouillé</h4>
+                                        <div class="text-secondary small mt-1">
+                                            La cuisson des tuiles impériales indispensables pour achever la toiture du <strong>Grand Dōjō</strong> dans la phase finale nécessite d'élever la <strong>Taille de Granit &amp; Maçonnerie au Niveau 20</strong>.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge bg-secondary text-white fw-bold px-3 py-2 fs-6">Niveau <?= $lvl ?> / 20</span>
+                                </div>
+                            </div>
+                            <div class="progress mb-3" style="height: 12px;">
+                                <div class="progress-bar bg-secondary progress-bar-striped" style="width: <?= min(100, round(($lvl / 20) * 100)) ?>%;">
+                                    <?= round(($lvl / 20) * 100) ?>%
+                                </div>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <div class="p-2 border rounded bg-white small">
+                                        <div class="fw-bold text-dark"><i class="fa-solid fa-cubes text-secondary me-1"></i>Tuiles Communes (Hongawara 本瓦)</div>
+                                        <div class="text-muted mt-1">Fournisseur de toiture de masse pour les Paliers 8 et 9 du Grand Dōjō. Recette : Terre d'Argile + Granit broyé + Charbon de bois (> 1000°C).</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-2 border rounded bg-white small">
+                                        <div class="fw-bold text-dark"><i class="fa-solid fa-shield-halved text-danger me-1"></i>Tuiles Démoniaques (Onigawara 鬼瓦)</div>
+                                        <div class="text-muted mt-1">Gargouilles faîtières sacrées du Palier 10 (Sacre Shōgunal) avec vernis au Sable de Fer (Satetsu). Confèrent une immunité incendiaire au Dōjō.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <!-- État Débloqué : Niveau >= 20 -->
+                        <!-- Résumé des stocks pertinents -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-sm-6 col-md-3">
+                                <div class="p-2 border rounded text-center bg-light">
+                                    <div class="text-secondary small"><i class="fa-solid fa-cubes text-secondary me-1"></i>Tuiles en Réserve</div>
+                                    <div class="fs-4 fw-bold text-dark" id="stock_val_roof_tiles"><?= number_format((int)$currentRoofTiles) ?></div>
+                                    <div class="text-muted" style="font-size:0.7rem;">/ <?= number_format($maxRoofTiles) ?> max (Entrepôt)</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <div class="p-2 border rounded text-center bg-light">
+                                    <div class="text-secondary small"><i class="fa-solid fa-shield-cat text-danger me-1"></i>Tuiles Onigawara</div>
+                                    <div class="fs-4 fw-bold text-danger"><?= number_format($currentOnigawara) ?></div>
+                                    <div class="text-muted" style="font-size:0.7rem;">Gargouilles de Faîtage Dōjō</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-md-2">
+                                <div class="p-2 border rounded text-center bg-light">
+                                    <div class="text-secondary small"><i class="fa-solid fa-shapes text-info me-1"></i>Argile Alluviale</div>
+                                    <div class="fs-5 fw-bold text-info"><?= number_format((int)$availableClayForTiles) ?></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-md-2">
+                                <div class="p-2 border rounded text-center bg-light">
+                                    <div class="text-secondary small"><i class="fa-solid fa-mountain text-secondary me-1"></i>Granit Broyé</div>
+                                    <div class="fs-5 fw-bold text-secondary"><?= number_format((int)$availableStoneForTiles) ?></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-md-2">
+                                <div class="p-2 border rounded text-center bg-light">
+                                    <div class="text-secondary small"><i class="fa-solid fa-fire text-dark me-1"></i>Charbon de Bois</div>
+                                    <div class="fs-5 fw-bold text-dark"><?= number_format((int)$availableCharcoalForTiles) ?></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2 Recettes de Cuisson de Tuiles -->
+                        <div class="row g-3">
+                            <!-- Recette 1 : Tuiles Communes Hongawara -->
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9; border-top: 3px solid #64748b !important;">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <h4 class="m-0 fw-bold d-flex align-items-center gap-2 text-dark">
+                                                <span>🧱</span> Tuiles Impériales (Hongawara 本瓦)
+                                            </h4>
+                                            <span class="badge bg-secondary text-white">1 Lot = 10 Tuiles</span>
+                                        </div>
+                                        <p class="text-secondary small mb-2">
+                                            Cuisson en réduction de tuiles creuses et plates imbriquées. Nécessaires en grand nombre pour imperméabiliser et couvrir les cinq versants du <strong>Grand Dōjō</strong>.
+                                        </p>
+                                        <div class="alert alert-light border small p-2 mb-3">
+                                            <div class="fw-bold text-secondary mb-1"><i class="fa-solid fa-scroll text-warning me-1"></i>Recette par lot (10 Tuiles) :</div>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <span class="badge bg-info-lt">40 Argile 🏺</span>
+                                                <span class="badge bg-secondary-lt">20 Granit 🪨</span>
+                                                <span class="badge bg-dark-lt">10 Charbon 🔥</span>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-secondary mb-1">Nombre de lots (x10 Tuiles) :</label>
+                                            <div class="input-group">
+                                                <input type="number" id="tile_batches_roof" class="form-control font-monospace" min="1" step="1" value="5" oninput="calcRoofTilesPreview()">
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setTileBatches('roof_tiles', 1)">1</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setTileBatches('roof_tiles', 10)">10</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setTileBatches('roof_tiles', 50)">50</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setTileBatches('roof_tiles', 'max')">Max</button>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white p-2 rounded border mb-3 small">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <span>Rendement : <strong id="preview_roof_tiles_gain" class="text-dark fw-bold">+50 🧱</strong></span>
+                                                <span id="preview_roof_tiles_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size:0.75rem;" id="preview_roof_tiles_cost">
+                                                Coût : 200 Argile, 100 Granit, 50 Charbon
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-dark text-white w-100 fw-bold shadow-sm" onclick="submitTileCraft('roof_tiles')" <?= !$canEnqueueMineral ? 'disabled' : '' ?>>
+                                            <i class="fa-solid fa-fire-burner me-1"></i>Cuire des Tuiles Hongawara
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recette 2 : Tuiles Démoniaques Onigawara -->
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 h-100 d-flex flex-column justify-content-between" style="background:#fafaf9; border-top: 3px solid #b91c1c !important;">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <h4 class="m-0 fw-bold d-flex align-items-center gap-2 text-dark">
+                                                <span>👹</span> Tuiles Démoniaques (Onigawara 鬼瓦)
+                                            </h4>
+                                            <span class="badge bg-danger text-white">1 Lot = 1 Onigawara</span>
+                                        </div>
+                                        <p class="text-secondary small mb-2">
+                                            Masques démoniaques de faîtage sculptés dans la glaise et vernissés au sable de fer (*Satetsu*). Posées au sommet du <strong>Grand Dōjō</strong> (Palier 10) pour éloigner les mauvais présages et résister aux incendies de siège.
+                                        </p>
+                                        <div class="alert alert-light border small p-2 mb-3">
+                                            <div class="fw-bold text-secondary mb-1"><i class="fa-solid fa-crown text-danger me-1"></i>Recette d'élite (1 Onigawara) :</div>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <span class="badge bg-info-lt">50 Argile 🏺</span>
+                                                <span class="badge bg-secondary-lt">30 Granit 🪨</span>
+                                                <span class="badge bg-dark-lt">15 Charbon 🔥</span>
+                                                <span class="badge bg-warning-lt">5 Sable de Fer 💎</span>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-secondary mb-1">Nombre d'Onigawara à sculpter :</label>
+                                            <div class="input-group">
+                                                <input type="number" id="tile_batches_onigawara" class="form-control font-monospace" min="1" step="1" value="1" oninput="calcOnigawaraPreview()">
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setTileBatches('onigawara_tiles', 1)">1</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setTileBatches('onigawara_tiles', 5)">5</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setTileBatches('onigawara_tiles', 10)">10</button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="setTileBatches('onigawara_tiles', 'max')">Max</button>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white p-2 rounded border mb-3 small">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <span>Rendement : <strong id="preview_onigawara_gain" class="text-danger fw-bold">+1 👹</strong></span>
+                                                <span id="preview_onigawara_time"><i class="fa-solid fa-stopwatch text-info me-1"></i>--</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size:0.75rem;" id="preview_onigawara_cost">
+                                                Coût : 50 Argile, 30 Granit, 15 Charbon, 5 Sable de fer
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-danger text-white w-100 fw-bold shadow-sm" onclick="submitTileCraft('onigawara_tiles')" <?= !$canEnqueueMineral ? 'disabled' : '' ?>>
+                                            <i class="fa-solid fa-shield-halved me-1"></i>Forger des Onigawara
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php endif; ?>
@@ -3222,6 +3449,9 @@ const availableClayStock = <?= (float)($planet['clay'] ?? 0) ?>;
 const availableIronSandStock = <?= (float)($planet['iron_sand'] ?? 0) ?>;
 const availableCharcoalStock = <?= (float)($planet['charcoal'] ?? 0) ?>;
 const availableSakeStock = <?= (float)($planet['sake'] ?? 0) ?>;
+const availableRoofTilesStock = <?= (float)($planet['roof_tiles'] ?? 0) ?>;
+const maxRoofTilesStorage = <?= (int)($planet['roof_tiles_max'] ?? 15000) ?>;
+const availableOnigawaraStock = <?= (int)($planet['onigawara_tiles'] ?? 0) ?>;
 const gameSpeed = <?= (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 1) ?>;
 
 function formatCraftDuration(sec) {
@@ -3731,6 +3961,180 @@ async function cancelMineralCraft(craftId) {
 }
 
 // ==========================================
+// FOUR À TUILES IMPÉRIAL : KAWARA-GAMA (NIV. 20)
+// ==========================================
+function calcRoofTilesPreview() {
+    const input = document.getElementById('tile_batches_roof');
+    const previewGain = document.getElementById('preview_roof_tiles_gain');
+    const previewCost = document.getElementById('preview_roof_tiles_cost');
+    const previewTime = document.getElementById('preview_roof_tiles_time');
+    if (!input) return;
+
+    const batches = Math.max(1, Math.floor(parseFloat(input.value) || 1));
+    const efficiency = 1 + (stonemasonLevel * 0.02);
+    const rawGain = Math.floor(batches * 10 * efficiency);
+    const availableSpace = Math.max(0, maxRoofTilesStorage - availableRoofTilesStock);
+    const gain = Math.min(rawGain, availableSpace);
+
+    const costClay = batches * 40;
+    const costStone = batches * 20;
+    const costCharcoal = batches * 10;
+
+    if (previewGain) {
+        previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' 🧱';
+        if (gain < rawGain) {
+            previewGain.innerHTML += ' <span class="badge bg-warning text-dark" style="font-size:0.65rem;">Entrepôt plein</span>';
+        }
+    }
+    if (previewCost) {
+        previewCost.innerHTML = `Coût : <strong>${costClay.toLocaleString('fr-FR')}</strong> Argile 🏺, <strong>${costStone.toLocaleString('fr-FR')}</strong> Granit 🪨, <strong>${costCharcoal.toLocaleString('fr-FR')}</strong> Charbon 🔥`;
+    }
+    if (previewTime) {
+        const duration = Math.max(15, Math.round((batches * 35) / (1 + (stonemasonLevel * 0.15)) / (gameSpeed || 1)));
+        previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
+    }
+}
+
+function calcOnigawaraPreview() {
+    const input = document.getElementById('tile_batches_onigawara');
+    const previewGain = document.getElementById('preview_onigawara_gain');
+    const previewCost = document.getElementById('preview_onigawara_cost');
+    const previewTime = document.getElementById('preview_onigawara_time');
+    if (!input) return;
+
+    const batches = Math.max(1, Math.floor(parseFloat(input.value) || 1));
+    const gain = batches * 1;
+
+    const costClay = batches * 50;
+    const costStone = batches * 30;
+    const costCharcoal = batches * 15;
+    const costIronSand = batches * 5;
+
+    if (previewGain) {
+        previewGain.innerHTML = '+' + gain.toLocaleString('fr-FR') + ' 👹';
+    }
+    if (previewCost) {
+        previewCost.innerHTML = `Coût : <strong>${costClay.toLocaleString('fr-FR')}</strong> Argile 🏺, <strong>${costStone.toLocaleString('fr-FR')}</strong> Granit 🪨, <strong>${costCharcoal.toLocaleString('fr-FR')}</strong> Charbon 🔥, <strong>${costIronSand.toLocaleString('fr-FR')}</strong> Satetsu 💎`;
+    }
+    if (previewTime) {
+        const duration = Math.max(30, Math.round((batches * 60) / (1 + (stonemasonLevel * 0.15)) / (gameSpeed || 1)));
+        previewTime.innerHTML = '<i class="fa-solid fa-stopwatch text-info me-1"></i>' + formatCraftDuration(duration);
+    }
+}
+
+function setTileBatches(tileType, val) {
+    const inputId = (tileType === 'onigawara_tiles') ? 'tile_batches_onigawara' : 'tile_batches_roof';
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    if (val === 'max') {
+        if (tileType === 'onigawara_tiles') {
+            const maxByClay = Math.floor(availableClayStock / 50);
+            const maxByStone = Math.floor(availableStoneStock / 30);
+            const maxByCharcoal = Math.floor(availableCharcoalStock / 15);
+            const maxBySatetsu = Math.floor(availableIronSandStock / 5);
+            let maxPossible = Math.min(maxByClay, maxByStone, maxByCharcoal, maxBySatetsu);
+            if (isAdminUser && maxPossible < 5) maxPossible = 10;
+            input.value = Math.max(1, maxPossible);
+        } else {
+            const maxByClay = Math.floor(availableClayStock / 40);
+            const maxByStone = Math.floor(availableStoneStock / 20);
+            const maxByCharcoal = Math.floor(availableCharcoalStock / 10);
+            const efficiency = 1 + (stonemasonLevel * 0.02);
+            const availableSpace = Math.max(0, maxRoofTilesStorage - availableRoofTilesStock);
+            const maxBySpace = Math.floor(availableSpace / (10 * efficiency));
+            let maxPossible = Math.min(maxByClay, maxByStone, maxByCharcoal, maxBySpace);
+            if (isAdminUser && maxPossible < 10) maxPossible = 50;
+            input.value = Math.max(1, maxPossible);
+        }
+    } else {
+        input.value = val;
+    }
+
+    if (tileType === 'onigawara_tiles') {
+        calcOnigawaraPreview();
+    } else {
+        calcRoofTilesPreview();
+    }
+}
+
+async function submitTileCraft(tileType) {
+    const inputId = (tileType === 'onigawara_tiles') ? 'tile_batches_onigawara' : 'tile_batches_roof';
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const batches = Math.max(1, Math.floor(parseFloat(input.value) || 1));
+
+    if (tileType === 'onigawara_tiles') {
+        const reqClay = batches * 50;
+        const reqStone = batches * 30;
+        const reqCharcoal = batches * 15;
+        const reqIronSand = batches * 5;
+        if (!isAdminUser) {
+            if (availableClayStock < reqClay) {
+                showModalAlert(`Argile insuffisante (${Math.floor(availableClayStock).toLocaleString('fr-FR')} / ${reqClay} requis).`, 'warning');
+                return;
+            }
+            if (availableStoneStock < reqStone) {
+                showModalAlert(`Granit insuffisant (${Math.floor(availableStoneStock).toLocaleString('fr-FR')} / ${reqStone} requis).`, 'warning');
+                return;
+            }
+            if (availableCharcoalStock < reqCharcoal) {
+                showModalAlert(`Charbon insuffisant (${Math.floor(availableCharcoalStock).toLocaleString('fr-FR')} / ${reqCharcoal} requis).`, 'warning');
+                return;
+            }
+            if (availableIronSandStock < reqIronSand) {
+                showModalAlert(`Sable de fer (Satetsu) insuffisant (${Math.floor(availableIronSandStock).toLocaleString('fr-FR')} / ${reqIronSand} requis).`, 'warning');
+                return;
+            }
+        }
+    } else {
+        const reqClay = batches * 40;
+        const reqStone = batches * 20;
+        const reqCharcoal = batches * 10;
+        if (!isAdminUser) {
+            if (availableClayStock < reqClay) {
+                showModalAlert(`Argile insuffisante (${Math.floor(availableClayStock).toLocaleString('fr-FR')} / ${reqClay} requis).`, 'warning');
+                return;
+            }
+            if (availableStoneStock < reqStone) {
+                showModalAlert(`Granit insuffisant (${Math.floor(availableStoneStock).toLocaleString('fr-FR')} / ${reqStone} requis).`, 'warning');
+                return;
+            }
+            if (availableCharcoalStock < reqCharcoal) {
+                showModalAlert(`Charbon insuffisant (${Math.floor(availableCharcoalStock).toLocaleString('fr-FR')} / ${reqCharcoal} requis).`, 'warning');
+                return;
+            }
+            if (availableRoofTilesStock >= maxRoofTilesStorage) {
+                showModalAlert(`Vos entrepôts de tuiles sont pleins (${Math.floor(availableRoofTilesStock).toLocaleString('fr-FR')} / ${maxRoofTilesStorage}). Acheminez-les vers le Grand Dōjō !`, 'warning');
+                return;
+            }
+        }
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'craft_tile');
+    formData.append('product', tileType);
+    formData.append('batches', batches);
+
+    try {
+        const res = await fetch('/api/craft.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showModalAlert(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showModalAlert(data.error || 'Erreur lors de la cuisson des tuiles.', 'error');
+        }
+    } catch (e) {
+        showModalAlert('Erreur de transmission avec les fours à tuiles.', 'error');
+    }
+}
+
+// ==========================================
 // GRANDE FORGE DU TAMAHAGANE : FONTE & PRESTIGE
 // ==========================================
 <?php if (!empty($activeForgeCraft)): ?>
@@ -3911,6 +4315,8 @@ async function cancelForgeCraft(craftId) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    calcRoofTilesPreview();
+    calcOnigawaraPreview();
     calcForgeMetalPreview();
     calcForgeCrudePreview();
     calcForgePrestigePreview();
