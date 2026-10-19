@@ -201,7 +201,6 @@ $speedParams = [
     'game_speed'               => 10,
     'resource_speed'           => 8,
     'fleet_speed'              => 5,
-    'beginner_protection_days' => 5,
     'hero_xp_rate_percent'     => 150,
     'hero_cage_drop_rate'      => 30,
     'famine_enabled'           => '1',
@@ -213,7 +212,6 @@ assertTest($saveSpeedRes['success'] === true, "saveSpeedBalancing() exécuté av
 assertTest((int)GameConfig::get('game_speed') === 10, "game_speed mis à jour à 10");
 assertTest((int)GameConfig::get('resource_speed') === 8, "resource_speed mis à jour à 8");
 assertTest((int)GameConfig::get('fleet_speed') === 5, "fleet_speed mis à jour à 5");
-assertTest((int)GameConfig::get('beginner_protection_days') === 5, "beginner_protection_days mis à jour à 5");
 assertTest((int)GameConfig::get('hero_xp_rate_percent') === 150, "hero_xp_rate_percent mis à jour à 150%");
 assertTest((int)GameConfig::get('hero_cage_drop_rate') === 30, "hero_cage_drop_rate mis à jour à 30%");
 assertTest((bool)GameConfig::get('famine_enabled') === true, "famine_enabled mis à jour à true");
@@ -225,7 +223,6 @@ $speedWorldData = $gameStudioEngine->getWorldConfigData();
 assertTest($speedWorldData['gameSpeed'] === 10, "gameSpeed présent dans getWorldConfigData");
 assertTest($speedWorldData['resourceSpeed'] === 8, "resourceSpeed présent dans getWorldConfigData");
 assertTest($speedWorldData['fleetSpeed'] === 5, "fleetSpeed présent dans getWorldConfigData");
-assertTest($speedWorldData['beginnerProtectionDays'] === 5, "beginnerProtectionDays présent dans getWorldConfigData");
 assertTest($speedWorldData['heroXpRatePercent'] === 150, "heroXpRatePercent présent dans getWorldConfigData");
 assertTest($speedWorldData['heroCageDropRate'] === 30, "heroCageDropRate présent dans getWorldConfigData");
 assertTest($speedWorldData['famineEnabled'] === true, "famineEnabled présent dans getWorldConfigData");

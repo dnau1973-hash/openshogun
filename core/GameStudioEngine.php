@@ -821,7 +821,6 @@ class GameStudioEngine {
         $gameSpeed              = max(1, min(100, (int)($params['game_speed'] ?? 5)));
         $resourceSpeed          = max(1, min(100, (int)($params['resource_speed'] ?? 5)));
         $fleetSpeed             = max(1, min(50, (int)($params['fleet_speed'] ?? 5)));
-        $beginnerProtectionDays = max(0, min(30, (int)($params['beginner_protection_days'] ?? 7)));
         $heroXpRate             = max(10, min(500, (int)($params['hero_xp_rate_percent'] ?? 100)));
         $heroCageDropRate       = max(0, min(100, (int)($params['hero_cage_drop_rate'] ?? 25)));
         $famineEnabled          = !empty($params['famine_enabled']);
@@ -831,16 +830,20 @@ class GameStudioEngine {
         GameConfig::set('game_speed', $gameSpeed);
         GameConfig::set('resource_speed', $resourceSpeed);
         GameConfig::set('fleet_speed', $fleetSpeed);
-        GameConfig::set('beginner_protection_days', $beginnerProtectionDays);
         GameConfig::set('hero_xp_rate_percent', $heroXpRate);
         GameConfig::set('hero_cage_drop_rate', $heroCageDropRate);
         GameConfig::set('famine_enabled', $famineEnabled);
         GameConfig::set('famine_rate', $famineRate);
         GameConfig::set('famine_flour_consumption', $famineFlour);
 
+        if (isset($params['beginner_protection_days'])) {
+            $beginnerProtectionDays = max(0, min(60, (int)$params['beginner_protection_days']));
+            GameConfig::set('beginner_protection_days', $beginnerProtectionDays);
+        }
+
         return [
             'success' => true,
-            'message' => "Vitesses et équilibrage féodal enregistrés avec succès : Jeu x{$gameSpeed}, Ressources x{$resourceSpeed}, Marche x{$fleetSpeed}, Immunité {$beginnerProtectionDays}j."
+            'message' => "Vitesses et équilibrage féodal enregistrés avec succès : Jeu x{$gameSpeed}, Ressources x{$resourceSpeed}, Marche x{$fleetSpeed}."
         ];
     }
 

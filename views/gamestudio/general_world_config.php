@@ -736,26 +736,10 @@ unset($_SESSION['general_flash']);
                     </div>
                 </div>
 
-                <!-- 4. Règles & Équilibrage Féodal (Protection, Héros, Famine) -->
+                <!-- 4. Quêtes Féodales & Samouraï Héros (Cages Kago & Expérience) -->
                 <div class="row g-4 mb-4">
-                    <!-- Immunité Débutant -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                            <span><i class="fa-solid fa-shield-halved text-success me-1"></i>Immunité Débutant</span>
-                            <span class="badge bg-success-lt font-monospace fw-bold" id="badge-val-protection-days"><?= (int)$beginnerProtectionDays ?> jours</span>
-                        </label>
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <input type="range" class="form-range flex-grow-1" id="sliderProtectionDays" name="protection_days_slider" min="0" max="30" value="<?= (int)$beginnerProtectionDays ?>" style="cursor:pointer;">
-                            <div class="input-group" style="width: 90px;">
-                                <input type="number" class="form-control text-center font-monospace fw-bold" id="inputProtectionDays" name="beginner_protection_days" min="0" max="60" value="<?= (int)$beginnerProtectionDays ?>">
-                                <span class="input-group-text px-1 text-muted">j</span>
-                            </div>
-                        </div>
-                        <div class="text-secondary small">Durée d'immunité accordée à l'inscription (0 = désactiver).</div>
-                    </div>
-
                     <!-- Cages de Capture Kago Héros -->
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
                             <span><i class="fa-solid fa-box-open text-warning me-1"></i>Cages Kago en Quête (%)</span>
                             <span class="badge bg-warning-lt font-monospace fw-bold" id="badge-val-cage-drop"><?= (int)$heroCageDropRate ?> %</span>
@@ -767,13 +751,13 @@ unset($_SESSION['general_flash']);
                                 <span class="input-group-text px-1 text-muted">%</span>
                             </div>
                         </div>
-                        <div class="text-secondary small">Probabilité de rapporter des cages pour capturer la faune sauvage.</div>
+                        <div class="text-secondary small">Probabilité pour le Samouraï de rapporter des cages de capture pour apprivoiser la faune sauvage des oasis sans combat.</div>
                     </div>
 
                     <!-- Gain d'XP du Héros -->
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                            <span><i class="fa-solid fa-user-ninja text-purple me-1"></i>Gain d'XP Héros (%)</span>
+                            <span><i class="fa-solid fa-user-ninja text-purple me-1"></i>Gain d'XP Héros en Aventure (%)</span>
                             <span class="badge bg-purple-lt font-monospace fw-bold" id="badge-val-hero-xp"><?= (int)$heroXpRatePercent ?> %</span>
                         </label>
                         <div class="d-flex align-items-center gap-2 mb-1">
@@ -783,7 +767,7 @@ unset($_SESSION['general_flash']);
                                 <span class="input-group-text px-1 text-muted">%</span>
                             </div>
                         </div>
-                        <div class="text-secondary small">Multiplicateur d'XP en aventures (100% = normal, 200% = double XP).</div>
+                        <div class="text-secondary small">Multiplicateur d'XP en aventures (100% = normal, 200% = double XP). Ralentit ou accélère la montée de niveau du Héros.</div>
                     </div>
                 </div>
 
@@ -1634,7 +1618,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    syncSimpleControl('sliderProtectionDays', 'inputProtectionDays', 'badge-val-protection-days', 'jours');
     syncSimpleControl('sliderCageDrop', 'inputCageDrop', 'badge-val-cage-drop', '%');
     syncSimpleControl('sliderHeroXp', 'inputHeroXp', 'badge-val-hero-xp', '%');
     syncSimpleControl('sliderFamineRate', 'inputFamineRate', 'badge-val-famine-rate', '%');
