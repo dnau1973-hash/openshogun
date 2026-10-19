@@ -250,6 +250,8 @@ if ($currentTab === 'dashboard') {
             exit;
         }
 
+        $redirectUrl = '?page=gamestudio&tab=dev_backend_tasks';
+
         try {
             if ($action === 'create_task') {
                 $newId = $backendTaskEngine->createTask($_POST);
@@ -257,6 +259,9 @@ if ($currentTab === 'dashboard') {
                     'type' => $newId > 0 ? 'success' : 'danger',
                     'msg'  => $newId > 0 ? "Tâche Back-End #$newId créée avec succès !" : "Erreur lors de la création de la tâche."
                 ];
+                if ($newId > 0 && !empty($_POST['redirect_to_detail'])) {
+                    $redirectUrl .= '&task_id=' . $newId;
+                }
             } elseif ($action === 'update_task') {
                 $taskId = (int)($_POST['task_id'] ?? 0);
                 $ok = $backendTaskEngine->updateTask($taskId, $_POST);
@@ -264,6 +269,9 @@ if ($currentTab === 'dashboard') {
                     'type' => $ok ? 'success' : 'danger',
                     'msg'  => $ok ? "Tâche Back-End #$taskId mise à jour avec succès !" : "Erreur lors de la mise à jour."
                 ];
+                if (!empty($_POST['redirect_to_detail']) && $taskId > 0) {
+                    $redirectUrl .= '&task_id=' . $taskId;
+                }
             } elseif ($action === 'delete_task') {
                 $taskId = (int)($_POST['task_id'] ?? 0);
                 $ok = $backendTaskEngine->deleteTask($taskId);
@@ -277,11 +285,40 @@ if ($currentTab === 'dashboard') {
                     'type' => 'success',
                     'msg'  => "Synchronisation effectuée : {$res['imported']} tâche(s) importée(s), {$res['updated']} actualisée(s) sur {$res['total']} tâche(s) de scénarios trouvée(s)."
                 ];
+            } elseif ($action === 'add_annotation') {
+                $taskId = (int)($_POST['task_id'] ?? 0);
+                $content = trim((string)($_POST['content'] ?? ''));
+                $authorName = trim((string)($_POST['author_name'] ?? '')) ?: ($currentUser['username'] ?? 'Développeur Back-End');
+                if ($taskId > 0 && $content !== '') {
+                    $annId = $backendTaskEngine->addAnnotation($taskId, [
+                        'user_id'     => $userId,
+                        'author_name' => $authorName,
+                        'content'     => $content
+                    ]);
+                    $_SESSION['dev_backend_flash'] = [
+                        'type' => $annId > 0 ? 'success' : 'danger',
+                        'msg'  => $annId > 0 ? "Annotation ajoutée avec succès !" : "Erreur lors de l'ajout de l'annotation."
+                    ];
+                } else {
+                    $_SESSION['dev_backend_flash'] = ['type' => 'warning', 'msg' => "Le contenu de l'annotation ne peut pas être vide."];
+                }
+                $redirectUrl .= '&task_id=' . $taskId;
+            } elseif ($action === 'delete_annotation') {
+                $taskId = (int)($_POST['task_id'] ?? 0);
+                $annotationId = (int)($_POST['annotation_id'] ?? 0);
+                $ok = $backendTaskEngine->deleteAnnotation($annotationId);
+                $_SESSION['dev_backend_flash'] = [
+                    'type' => $ok ? 'success' : 'danger',
+                    'msg'  => $ok ? "Annotation supprimée." : "Erreur lors de la suppression de l'annotation."
+                ];
+                if ($taskId > 0) {
+                    $redirectUrl .= '&task_id=' . $taskId;
+                }
             }
         } catch (Throwable $e) {
             $_SESSION['dev_backend_flash'] = ['type' => 'danger', 'msg' => 'Erreur : ' . $e->getMessage()];
         }
-        header('Location: ?page=gamestudio&tab=dev_backend_tasks');
+        header('Location: ' . $redirectUrl);
         exit;
     }
 } elseif ($currentTab === 'narrative_scenarios') {

@@ -114,6 +114,7 @@ class BackendTaskEngine {
                 `priority` VARCHAR(30) NOT NULL DEFAULT 'medium',
                 `complexity` VARCHAR(10) NOT NULL DEFAULT 'M',
                 `assignee` VARCHAR(100) NULL DEFAULT 'Développeur Back-End',
+                `estimated_hours` DECIMAL(5,1) NOT NULL DEFAULT 0.0,
                 `deliverables` VARCHAR(255) NULL,
                 `scenario_id` INT NULL,
                 `scenario_task_id` VARCHAR(50) NULL,
@@ -124,8 +125,23 @@ class BackendTaskEngine {
                 INDEX `idx_priority` (`priority`),
                 INDEX `idx_scenario` (`scenario_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+            CREATE TABLE IF NOT EXISTS `dev_backend_task_annotations` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `task_id` INT NOT NULL,
+                `user_id` INT NULL,
+                `author_name` VARCHAR(100) NOT NULL DEFAULT 'Développeur Back-End',
+                `content` MEDIUMTEXT NOT NULL,
+                `created_at` INT NOT NULL,
+                INDEX `idx_task_id` (`task_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             ";
             $this->db->exec($sql);
+
+            // Migration douce pour tables existantes sans estimated_hours
+            try {
+                $this->db->exec("ALTER TABLE `dev_backend_tasks` ADD COLUMN `estimated_hours` DECIMAL(5,1) NOT NULL DEFAULT 0.0 AFTER `assignee`");
+            } catch (Throwable $ignore) {}
         } catch (Throwable $e) {
             error_log("[BackendTaskEngine] Table initialization error: " . $e->getMessage());
         }
@@ -168,7 +184,8 @@ class BackendTaskEngine {
                 $params[] = $term;
             }
 
-            $sql = "SELECT t.*, s.title AS scenario_title, s.type AS scenario_type, s.step_number AS scenario_step_number 
+            $sql = "SELECT t.*, s.title AS scenario_title, s.type AS scenario_type, s.step_number AS scenario_step_number,
+                    (SELECT COUNT(*) FROM `dev_backend_task_annotations` a WHERE a.task_id = t.id) AS annotations_count
                     FROM `dev_backend_tasks` t
                     LEFT JOIN `narrative_scenarios` s ON t.scenario_id = s.id";
 
@@ -201,7 +218,8 @@ class BackendTaskEngine {
         if (!$this->db) return null;
         try {
             $stmt = $this->db->prepare("
-                SELECT t.*, s.title AS scenario_title, s.type AS scenario_type, s.step_number AS scenario_step_number 
+                SELECT t.*, s.title AS scenario_title, s.type AS scenario_type, s.step_number AS scenario_step_number,
+                (SELECT COUNT(*) FROM `dev_backend_task_annotations` a WHERE a.task_id = t.id) AS annotations_count
                 FROM `dev_backend_tasks` t
                 LEFT JOIN `narrative_scenarios` s ON t.scenario_id = s.id
                 WHERE t.id = ?
@@ -228,6 +246,7 @@ class BackendTaskEngine {
             $priority = in_array($data['priority'] ?? '', array_keys(self::PRIORITIES), true) ? $data['priority'] : 'medium';
             $complexity = in_array($data['complexity'] ?? '', array_keys(self::COMPLEXITIES), true) ? $data['complexity'] : 'M';
             $assignee = trim((string)($data['assignee'] ?? $data['assigned_to'] ?? 'Développeur Back-End'));
+            $hours = !empty($data['estimated_hours']) ? (float)$data['estimated_hours'] : 0.0;
             $deliverables = trim((string)($data['deliverables'] ?? ''));
             $scenarioId = !empty($data['scenario_id']) ? (int)$data['scenario_id'] : null;
             $scenarioTaskId = !empty($data['scenario_task_id']) ? (string)$data['scenario_task_id'] : null;
@@ -235,11 +254,11 @@ class BackendTaskEngine {
 
             $stmt = $this->db->prepare("
                 INSERT INTO `dev_backend_tasks` 
-                (`title`, `description`, `status`, `priority`, `complexity`, `assignee`, `deliverables`, `scenario_id`, `scenario_task_id`, `source`, `created_at`, `updated_at`)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (`title`, `description`, `status`, `priority`, `complexity`, `assignee`, `estimated_hours`, `deliverables`, `scenario_id`, `scenario_task_id`, `source`, `created_at`, `updated_at`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
-                $title, $desc, $status, $priority, $complexity, $assignee, $deliverables, $scenarioId, $scenarioTaskId, $source, $now, $now
+                $title, $desc, $status, $priority, $complexity, $assignee, $hours, $deliverables, $scenarioId, $scenarioTaskId, $source, $now, $now
             ]);
 
             return (int)$this->db->lastInsertId();
@@ -265,14 +284,15 @@ class BackendTaskEngine {
             $priority = (!empty($data['priority']) && in_array($data['priority'], array_keys(self::PRIORITIES), true)) ? $data['priority'] : $task['priority'];
             $complexity = (!empty($data['complexity']) && in_array($data['complexity'], array_keys(self::COMPLEXITIES), true)) ? $data['complexity'] : $task['complexity'];
             $assignee = isset($data['assignee']) ? trim((string)$data['assignee']) : (isset($data['assigned_to']) ? trim((string)$data['assigned_to']) : $task['assignee']);
+            $hours = isset($data['estimated_hours']) ? (float)$data['estimated_hours'] : (float)($task['estimated_hours'] ?? 0.0);
             $deliverables = isset($data['deliverables']) ? trim((string)$data['deliverables']) : $task['deliverables'];
 
             $stmt = $this->db->prepare("
                 UPDATE `dev_backend_tasks` 
-                SET `title` = ?, `description` = ?, `status` = ?, `priority` = ?, `complexity` = ?, `assignee` = ?, `deliverables` = ?, `updated_at` = ?
+                SET `title` = ?, `description` = ?, `status` = ?, `priority` = ?, `complexity` = ?, `assignee` = ?, `estimated_hours` = ?, `deliverables` = ?, `updated_at` = ?
                 WHERE `id` = ?
             ");
-            $res = $stmt->execute([$title, $desc, $status, $priority, $complexity, $assignee, $deliverables, $now, $id]);
+            $res = $stmt->execute([$title, $desc, $status, $priority, $complexity, $assignee, $hours, $deliverables, $now, $id]);
 
             // Si c'est une tâche liée à un scénario, répercuter le statut dans le scénario
             if ($res && !empty($task['scenario_id']) && !empty($task['scenario_task_id'])) {
@@ -308,15 +328,82 @@ class BackendTaskEngine {
     }
 
     /**
-     * Supprime une tâche
+     * Supprime une tâche et ses annotations associées
      */
     public function deleteTask(int $id): bool {
         if (!$this->db) return false;
         try {
+            // Nettoyage des annotations
+            $this->db->prepare("DELETE FROM `dev_backend_task_annotations` WHERE `task_id` = ?")->execute([$id]);
+
             $stmt = $this->db->prepare("DELETE FROM `dev_backend_tasks` WHERE `id` = ?");
             return $stmt->execute([$id]);
         } catch (Throwable $e) {
             error_log("[BackendTaskEngine] deleteTask error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Récupère toutes les annotations associées à une tâche
+     */
+    public function getAnnotations(int $taskId): array {
+        if (!$this->db) return [];
+        try {
+            $stmt = $this->db->prepare("
+                SELECT * FROM `dev_backend_task_annotations` 
+                WHERE `task_id` = ? 
+                ORDER BY `created_at` ASC, `id` ASC
+            ");
+            $stmt->execute([$taskId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (Throwable $e) {
+            error_log("[BackendTaskEngine] getAnnotations error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Ajoute une annotation à une tâche
+     */
+    public function addAnnotation(int $taskId, array $data): int {
+        if (!$this->db) return 0;
+        $content = trim((string)($data['content'] ?? ''));
+        if ($content === '') return 0;
+
+        $userId = !empty($data['user_id']) ? (int)$data['user_id'] : null;
+        $authorName = trim((string)($data['author_name'] ?? 'Développeur Back-End')) ?: 'Développeur Back-End';
+        $now = time();
+
+        try {
+            $stmt = $this->db->prepare("
+                INSERT INTO `dev_backend_task_annotations` 
+                (`task_id`, `user_id`, `author_name`, `content`, `created_at`)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([$taskId, $userId, $authorName, $content, $now]);
+            $newId = (int)$this->db->lastInsertId();
+
+            // Mettre à jour la date d'actualisation de la tâche
+            $this->db->prepare("UPDATE `dev_backend_tasks` SET `updated_at` = ? WHERE `id` = ?")->execute([$now, $taskId]);
+
+            return $newId;
+        } catch (Throwable $e) {
+            error_log("[BackendTaskEngine] addAnnotation error: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Supprime une annotation
+     */
+    public function deleteAnnotation(int $annotationId): bool {
+        if (!$this->db) return false;
+        try {
+            $stmt = $this->db->prepare("DELETE FROM `dev_backend_task_annotations` WHERE `id` = ?");
+            return $stmt->execute([$annotationId]);
+        } catch (Throwable $e) {
+            error_log("[BackendTaskEngine] deleteAnnotation error: " . $e->getMessage());
             return false;
         }
     }

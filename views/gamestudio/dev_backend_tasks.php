@@ -9,7 +9,12 @@ if (!isset($backendTaskEngine)) {
     $backendTaskEngine = new BackendTaskEngine();
 }
 
-// Paramètres de filtrage GET
+// Détection de l'affichage : Tâche dédiée ou Vue globale Kanban/Tableau
+$activeTaskId = isset($_GET['task_id']) ? (int)$_GET['task_id'] : 0;
+$activeTask = $activeTaskId > 0 ? $backendTaskEngine->getTaskById($activeTaskId) : null;
+$taskAnnotations = $activeTask ? $backendTaskEngine->getAnnotations($activeTask['id']) : [];
+
+// Paramètres de filtrage GET (pour la vue globale)
 $filterStatus = !empty($_GET['status']) && in_array($_GET['status'], BackendTaskEngine::VALID_STATUSES) ? $_GET['status'] : null;
 $filterPriority = !empty($_GET['priority']) && in_array($_GET['priority'], BackendTaskEngine::VALID_PRIORITIES) ? $_GET['priority'] : null;
 $filterComplexity = !empty($_GET['complexity']) && in_array($_GET['complexity'], BackendTaskEngine::VALID_COMPLEXITIES) ? $_GET['complexity'] : null;
@@ -67,424 +72,755 @@ $complexityLabels = [
         </div>
     <?php endif; ?>
 
-    <!-- En-tête de page -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-        <div>
-            <h3 class="card-title text-indigo d-flex align-items-center gap-2 m-0" style="font-size:1.4rem;">
-                <i class="fa-solid fa-server text-indigo"></i>
-                <span>Développeur Back-End &bull; Backlog Technique &amp; Tâches Scénarios</span>
-            </h3>
-            <div class="text-secondary small mt-1">
-                Gestion unifiée du backlog technique, synchronisation directe avec le Gestionnaire de Scénarios narratifs et cahier des charges Markdown/Mermaid.
-            </div>
-        </div>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <!-- Bouton Synchronisation Scénarios -->
-            <button type="button" class="btn btn-outline-purple shadow-sm d-flex align-items-center gap-2" id="btnSyncScenarios" onclick="triggerScenarioSync()">
-                <i class="fa-solid fa-rotate text-purple"></i>
-                <span>Synchroniser Scénarios</span>
-            </button>
-            <!-- Bouton Nouvelle Tâche -->
-            <button type="button" class="btn btn-primary shadow-sm d-flex align-items-center gap-2" id="btnOpenCreateTaskModal" onclick="openCreateTaskModal()">
-                <i class="fa-solid fa-plus"></i>
-                <span>Nouvelle Tâche</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Cockpit d'avancement & Métriques clés -->
-    <div class="row row-cards mb-4">
-        <!-- Progression Globale -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="text-secondary small fw-bold text-uppercase">Taux d'Achèvement</span>
-                        <span class="badge bg-indigo-lt text-indigo fw-bold"><?= $metrics['total'] ?> Tâches</span>
-                    </div>
-                    <div class="d-flex align-items-baseline gap-2 mb-2">
-                        <div class="h1 mb-0 text-dark"><?= $metrics['pct_done'] ?>%</div>
-                        <div class="text-secondary small">livrées</div>
-                    </div>
-                    <div class="progress progress-sm">
-                        <div class="progress-bar bg-indigo" style="width: <?= $metrics['pct_done'] ?>%" role="progressbar" aria-valuenow="<?= $metrics['pct_done'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Répartition Statuts -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-secondary small fw-bold text-uppercase mb-2">Pipeline Actif</div>
-                    <div class="row g-2 text-center">
-                        <div class="col-4">
-                            <div class="p-1 rounded bg-secondary-lt">
-                                <div class="fw-bold fs-3 text-secondary"><?= $metrics['todo'] ?></div>
-                                <div class="text-muted" style="font-size:0.7rem;">À faire</div>
+    <?php if ($activeTask): 
+        // ═══════════════════════════════════════════════════════════════════
+        // VUE DÉDIÉE DE LA TÂCHE (PAGE DÉDIÉE AVEC ANNOTATIONS & MARKDOWN)
+        // ═══════════════════════════════════════════════════════════════════
+        $taskPrio = $priorityLabels[$activeTask['priority']] ?? $priorityLabels['medium'];
+        $taskCpx  = $complexityLabels[$activeTask['complexity']] ?? $complexityLabels['M'];
+        $taskSt   = $statusLabels[$activeTask['status']] ?? $statusLabels['todo'];
+    ?>
+        <!-- Barre de Navigation & Actions de la Tâche -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body py-3">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="?page=gamestudio&tab=dev_backend_tasks" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Retour au Kanban</span>
+                        </a>
+                        <div class="vr d-none d-sm-block my-1"></div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="badge bg-dark-lt text-dark font-monospace fs-5">#<?= $activeTask['id'] ?></span>
+                                <h3 class="card-title text-indigo m-0 fs-2"><?= htmlspecialchars($activeTask['title']) ?></h3>
                             </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="p-1 rounded bg-primary-lt">
-                                <div class="fw-bold fs-3 text-primary"><?= $metrics['in_progress'] ?></div>
-                                <div class="text-muted" style="font-size:0.7rem;">En cours</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="p-1 rounded bg-purple-lt">
-                                <div class="fw-bold fs-3 text-purple"><?= $metrics['review'] ?></div>
-                                <div class="text-muted" style="font-size:0.7rem;">Revue</div>
+                            <div class="text-secondary small mt-1 d-flex align-items-center gap-2 flex-wrap">
+                                <span><i class="fa-solid fa-user me-1 text-muted"></i><?= htmlspecialchars(($activeTask['assignee'] ?? $activeTask['assigned_to'] ?? '') ?: 'Back-End') ?></span>
+                                <span>&bull;</span>
+                                <span><i class="fa-solid fa-clock me-1 text-muted"></i>Créée le <?= date('d/m/Y à H:i', (int)$activeTask['created_at']) ?></span>
+                                <?php if (!empty($activeTask['updated_at']) && $activeTask['updated_at'] !== $activeTask['created_at']): ?>
+                                    <span>&bull;</span>
+                                    <span><i class="fa-solid fa-rotate me-1 text-muted"></i>Actualisée le <?= date('d/m/Y à H:i', (int)$activeTask['updated_at']) ?></span>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Blocages & Alertes -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-secondary small fw-bold text-uppercase mb-2">Santé &amp; Blocages</div>
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="d-flex align-items-center gap-1 text-danger fw-bold">
-                            <i class="fa-solid fa-ban"></i> Tâches Bloquées
-                        </span>
-                        <span class="badge bg-danger text-white rounded-pill fs-4 px-2"><?= $metrics['blocked'] ?></span>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between">
-                        <span class="d-flex align-items-center gap-1 text-warning fw-bold">
-                            <i class="fa-solid fa-triangle-exclamation"></i> Priorité Critique
-                        </span>
-                        <span class="badge bg-warning-lt text-warning fw-bold"><?= $metrics['critical'] ?></span>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <!-- Sélecteur rapide de statut -->
+                        <div class="dropdown">
+                            <button class="btn btn-<?= $taskSt['badge'] ?> dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid <?= $taskSt['icon'] ?> me-1"></i><?= $taskSt['label'] ?>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li class="dropdown-header small text-uppercase fw-bold">Modifier le statut</li>
+                                <?php foreach ($statusLabels as $stKey => $stMeta): ?>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center justify-content-between gap-3 <?= $activeTask['status'] === $stKey ? 'active fw-bold' : '' ?>" 
+                                           href="javascript:void(0)" 
+                                           onclick="changeActiveTaskStatus(<?= $activeTask['id'] ?>, '<?= $stKey ?>')">
+                                            <span><i class="fa-solid <?= $stMeta['icon'] ?> me-2"></i><?= $stMeta['label'] ?></span>
+                                            <?php if ($activeTask['status'] === $stKey): ?><i class="fa-solid fa-check small"></i><?php endif; ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
 
-        <!-- Tâches Synchronisées Scénarios -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card card-sm border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="text-secondary small fw-bold text-uppercase">Origine des Tâches</span>
-                        <i class="fa-solid fa-scroll text-purple fs-3"></i>
-                    </div>
-                    <div class="d-flex align-items-baseline gap-2 mb-1">
-                        <div class="h2 mb-0 text-purple"><?= $metrics['from_scenarios'] ?></div>
-                        <div class="text-secondary small">issues des scénarios</div>
-                    </div>
-                    <div class="text-secondary small" style="font-size:0.75rem;">
-                        <?= $metrics['manual'] ?> tâche(s) manuelle(s) créée(s)
+                        <!-- Bouton Modifier Tâche -->
+                        <button type="button" class="btn btn-warning shadow-sm d-flex align-items-center gap-2" onclick="openEditTaskModal(<?= $activeTask['id'] ?>, true)">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>Modifier</span>
+                        </button>
+
+                        <!-- Bouton Supprimer Tâche -->
+                        <button type="button" class="btn btn-outline-danger shadow-sm" onclick="confirmDeleteTask(<?= $activeTask['id'] ?>, '<?= htmlspecialchars(addslashes($activeTask['title'])) ?>')" title="Supprimer définitivement la tâche">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Barre d'outils, Recherche & Filtres -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body py-3">
-            <form method="GET" action="" class="row g-2 align-items-center">
-                <input type="hidden" name="page" value="gamestudio">
-                <input type="hidden" name="tab" value="dev_backend_tasks">
-                <input type="hidden" name="view" value="<?= htmlspecialchars($viewMode) ?>">
-
-                <!-- Champ Recherche -->
-                <div class="col-md-3">
-                    <div class="input-icon">
-                        <span class="input-icon-addon"><i class="fa-solid fa-magnifying-glass"></i></span>
-                        <input type="text" name="search" class="form-control form-control-sm" placeholder="Rechercher par titre, livrables..." value="<?= htmlspecialchars($searchQuery) ?>">
-                    </div>
-                </div>
-
-                <!-- Filtre Statut -->
-                <div class="col-md-2">
-                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">Tous les statuts</option>
-                        <?php foreach (BackendTaskEngine::VALID_STATUSES as $st): ?>
-                            <option value="<?= $st ?>" <?= $filterStatus === $st ? 'selected' : '' ?>>
-                                <?= $statusLabels[$st]['label'] ?> (<?= $metrics[$st] ?? 0 ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <!-- Filtre Priorité -->
-                <div class="col-md-2">
-                    <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">Toutes priorités</option>
-                        <?php foreach (BackendTaskEngine::VALID_PRIORITIES as $pr): ?>
-                            <option value="<?= $pr ?>" <?= $filterPriority === $pr ? 'selected' : '' ?>>
-                                Priorité <?= $priorityLabels[$pr]['label'] ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <!-- Filtre Complexité -->
-                <div class="col-md-2">
-                    <select name="complexity" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">Toutes complexités</option>
-                        <?php foreach (BackendTaskEngine::VALID_COMPLEXITIES as $cpx): ?>
-                            <option value="<?= $cpx ?>" <?= $filterComplexity === $cpx ? 'selected' : '' ?>>
-                                Taille <?= $complexityLabels[$cpx]['label'] ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <!-- Filtre Source -->
-                <div class="col-md-1">
-                    <select name="source" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">Source</option>
-                        <option value="scenario" <?= $filterSource === 'scenario' ? 'selected' : '' ?>>Scénario</option>
-                        <option value="manual" <?= $filterSource === 'manual' ? 'selected' : '' ?>>Manuel</option>
-                    </select>
-                </div>
-
-                <!-- Actions et Bascule de vue -->
-                <div class="col-md-2 d-flex align-items-center justify-content-end gap-2">
-                    <?php if ($filterStatus || $filterPriority || $filterComplexity || $filterSource || $searchQuery !== ''): ?>
-                        <a href="?page=gamestudio&tab=dev_backend_tasks&view=<?= htmlspecialchars($viewMode) ?>" class="btn btn-sm btn-outline-secondary" title="Réinitialiser filtres">
-                            <i class="fa-solid fa-xmark"></i>
-                        </a>
-                    <?php endif; ?>
-
-                    <div class="btn-group btn-group-sm" role="group">
-                        <a href="?page=gamestudio&tab=dev_backend_tasks&view=kanban<?= $filterStatus ? '&status='.$filterStatus : '' ?><?= $filterPriority ? '&priority='.$filterPriority : '' ?><?= $filterComplexity ? '&complexity='.$filterComplexity : '' ?><?= $filterSource ? '&source='.$filterSource : '' ?><?= $searchQuery !== '' ? '&search='.urlencode($searchQuery) : '' ?>" 
-                           class="btn <?= $viewMode === 'kanban' ? 'btn-primary' : 'btn-outline-secondary' ?>" title="Vue Kanban">
-                            <i class="fa-solid fa-table-columns"></i>
-                        </a>
-                        <a href="?page=gamestudio&tab=dev_backend_tasks&view=table<?= $filterStatus ? '&status='.$filterStatus : '' ?><?= $filterPriority ? '&priority='.$filterPriority : '' ?><?= $filterComplexity ? '&complexity='.$filterComplexity : '' ?><?= $filterSource ? '&source='.$filterSource : '' ?><?= $searchQuery !== '' ? '&search='.urlencode($searchQuery) : '' ?>" 
-                           class="btn <?= $viewMode === 'table' ? 'btn-primary' : 'btn-outline-secondary' ?>" title="Vue Liste">
-                            <i class="fa-solid fa-list-ul"></i>
-                        </a>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <?php if ($viewMode === 'kanban'): ?>
-        <!-- ═══════════════════════════════════════════════════════════════════ -->
-        <!-- VUE KANBAN INTERACTIVE (DRAG & DROP SUR 5 COLONNES)                  -->
-        <!-- ═══════════════════════════════════════════════════════════════════ -->
-        <div class="row g-3 kanban-board">
-            <?php foreach (BackendTaskEngine::VALID_STATUSES as $colStatus): 
-                $colTasks = array_values(array_filter($tasks, fn($t) => $t['status'] === $colStatus));
-                $colMeta = $statusLabels[$colStatus];
-            ?>
-                <div class="col-12 col-md-6 col-xl">
-                    <div class="kanban-column bg-light-subtle rounded-3 p-2 border border-2 border-dashed border-secondary-subtle d-flex flex-column h-100" 
-                         data-status="<?= $colStatus ?>" 
-                         ondragover="onKanbanDragOver(event)" 
-                         ondragleave="onKanbanDragLeave(event)" 
-                         ondrop="onKanbanDrop(event, '<?= $colStatus ?>')">
-                        
-                        <!-- En-tête de colonne -->
-                        <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded shadow-sm border-start border-3 border-<?= $colMeta['badge'] ?>">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="fa-solid <?= $colMeta['icon'] ?> text-<?= $colMeta['badge'] ?>"></i>
-                                <span class="fw-bold small text-dark"><?= $colMeta['label'] ?></span>
-                            </div>
-                            <span class="badge bg-<?= $colMeta['badge'] ?>-lt text-<?= $colMeta['badge'] ?> rounded-pill kanban-col-count" id="count-<?= $colStatus ?>">
-                                <?= count($colTasks) ?>
+        <!-- Corps de la Page Dédiée en 2 Colonnes -->
+        <div class="row g-4">
+            <!-- Colonne Principale (Spécifications Markdown + Annotations) -->
+            <div class="col-lg-8">
+                <!-- Card Cahier des Charges & Spécifications Markdown -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-file-lines text-indigo fs-3"></i>
+                            <h4 class="card-title text-dark m-0">Cahier des Charges &amp; Spécifications Techniques</h4>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-purple-lt text-purple font-monospace small">
+                                <i class="fa-solid fa-diagram-project me-1"></i>Mermaid v10 Supporté
                             </span>
+                            <button type="button" class="btn btn-xs btn-outline-secondary py-1 px-2" style="font-size:0.75rem;" onclick="openEditTaskModal(<?= $activeTask['id'] ?>, true)">
+                                <i class="fa-solid fa-pen-to-square me-1"></i>Éditer le .md
+                            </button>
                         </div>
+                    </div>
 
-                        <!-- Liste des cartes de tâches -->
-                        <div class="kanban-card-list d-flex flex-column gap-2 flex-grow-1" style="min-height: 380px;">
-                            <?php if (empty($colTasks)): ?>
-                                <div class="text-center text-muted p-4 my-auto kanban-empty-placeholder">
-                                    <i class="fa-regular fa-clipboard fs-2 mb-2 opacity-50"></i>
-                                    <div class="small">Aucune tâche</div>
+                    <div class="card-body p-4 bg-white" id="activeTaskMarkdownBody">
+                        <!-- Livrables attendus si définis -->
+                        <?php if (!empty($activeTask['deliverables'])): ?>
+                            <div class="alert alert-info py-2-5 px-3 mb-4 d-flex align-items-center justify-content-between gap-3 rounded-3 shadow-none border-info-subtle">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-box-archive text-info fs-3"></i>
+                                    <div>
+                                        <div class="fw-bold small text-dark">Livrables Techniques Attendus :</div>
+                                        <div class="font-monospace text-dark small" style="word-break:break-all;"><?= htmlspecialchars($activeTask['deliverables']) ?></div>
+                                    </div>
                                 </div>
-                            <?php else: ?>
-                                <?php foreach ($colTasks as $task): 
-                                    $prioMeta = $priorityLabels[$task['priority']] ?? $priorityLabels['medium'];
-                                    $cpxMeta = $complexityLabels[$task['complexity']] ?? $complexityLabels['M'];
-                                ?>
-                                    <div class="card kanban-task-card shadow-sm border border-secondary-subtle cursor-grab" 
-                                         id="task-card-<?= $task['id'] ?>"
-                                         draggable="true" 
-                                         ondragstart="onKanbanDragStart(event, <?= $task['id'] ?>)" 
-                                         ondragend="onKanbanDragEnd(event)">
-                                        <div class="card-body p-2-5">
-                                            <!-- En-tête de carte : ID, Priorité, Complexité -->
-                                            <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
-                                                <div class="d-flex align-items-center gap-1">
-                                                    <span class="badge bg-dark-lt text-dark font-monospace" style="font-size:0.68rem;">#<?= $task['id'] ?></span>
-                                                    <span class="badge <?= $prioMeta['badge'] ?>" style="font-size:0.65rem;" title="Priorité <?= $prioMeta['label'] ?>">
-                                                        <i class="fa-solid <?= $prioMeta['icon'] ?> me-1"></i><?= $prioMeta['label'] ?>
-                                                    </span>
-                                                    <span class="badge <?= $cpxMeta['badge'] ?> fw-bold font-monospace" style="font-size:0.65rem;" title="Taille / Complexité">
-                                                        <?= $task['complexity'] ?>
-                                                    </span>
-                                                </div>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-ghost-secondary p-0 text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width:20px; height:20px;">
-                                                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                                        <li>
-                                                            <a class="dropdown-item d-flex align-items-center gap-2 small" href="javascript:void(0)" onclick="openTaskQuickPreview(<?= $task['id'] ?>)">
-                                                                <i class="fa-solid fa-eye text-primary"></i> Aperçu .md
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item d-flex align-items-center gap-2 small" href="javascript:void(0)" onclick="openEditTaskModal(<?= $task['id'] ?>)">
-                                                                <i class="fa-solid fa-pen-to-square text-warning"></i> Modifier
-                                                            </a>
-                                                        </li>
-                                                        <li><hr class="dropdown-divider my-1"></li>
-                                                        <li>
-                                                            <a class="dropdown-item d-flex align-items-center gap-2 small text-danger" href="javascript:void(0)" onclick="confirmDeleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars(addslashes($task['title'])) ?>')">
-                                                                <i class="fa-solid fa-trash"></i> Supprimer
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
+                                <button type="button" class="btn btn-xs btn-outline-info" onclick="navigator.clipboard.writeText('<?= htmlspecialchars(addslashes($activeTask['deliverables'])) ?>'); showToastNotification('Livrables copiés !', 'success');" title="Copier les livrables">
+                                    <i class="fa-solid fa-copy"></i>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Contenu Markdown interprété -->
+                        <div class="task-markdown-content" style="line-height:1.6;">
+                            <div id="renderedActiveTaskDescription"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Annotations & Notes de Travail -->
+                <div class="card border-0 shadow-sm" id="sectionAnnotations">
+                    <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-comments text-purple fs-3"></i>
+                            <h4 class="card-title text-dark m-0">Annotations &amp; Notes de Travail</h4>
+                        </div>
+                        <span class="badge bg-purple text-white rounded-pill fs-5 px-3">
+                            <?= count($taskAnnotations) ?> Note(s)
+                        </span>
+                    </div>
+
+                    <div class="card-body p-4 bg-light-subtle">
+                        <!-- Liste des annotations existantes -->
+                        <?php if (empty($taskAnnotations)): ?>
+                            <div class="text-center text-muted py-4 mb-4 bg-white rounded-3 border border-secondary-subtle">
+                                <i class="fa-regular fa-comment-dots fs-1 mb-2 opacity-50 text-purple"></i>
+                                <div class="fw-medium small">Aucune annotation pour cette tâche pour le moment.</div>
+                                <div class="text-secondary small mt-1">Utilisez le formulaire ci-dessous pour consigner vos remarques d'implémentation, retours de tests, requêtes SQL ou logs de debug.</div>
+                            </div>
+                        <?php else: ?>
+                            <div class="timeline mb-4 d-flex flex-column gap-3">
+                                <?php foreach ($taskAnnotations as $ann): ?>
+                                    <div class="card border border-secondary-subtle shadow-sm bg-white rounded-3">
+                                        <div class="card-header bg-light py-2 px-3 d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="avatar avatar-xs rounded-circle bg-purple-lt text-purple fw-bold">
+                                                    <?= strtoupper(substr($ann['author_name'] ?: 'D', 0, 2)) ?>
+                                                </span>
+                                                <span class="fw-bold text-dark small"><?= htmlspecialchars($ann['author_name']) ?></span>
+                                                <span class="text-muted small" style="font-size:0.75rem;">&bull; le <?= date('d/m/Y à H:i', (int)$ann['created_at']) ?></span>
                                             </div>
-
-                                            <!-- Titre de la tâche -->
-                                            <div class="fw-bold text-dark small mb-1 kanban-task-title" style="line-height:1.25; font-size:0.85rem;">
-                                                <?= htmlspecialchars($task['title']) ?>
-                                            </div>
-
-                                            <!-- Scénario lié si applicable -->
-                                            <?php if (!empty($task['scenario_id'])): ?>
-                                                <div class="mb-1">
-                                                    <a href="?page=gamestudio&tab=narrative_scenarios&scenario_id=<?= (int)$task['scenario_id'] ?>" target="_blank" class="badge bg-purple-lt text-purple text-decoration-none text-truncate d-inline-block" style="max-width:100%; font-size:0.65rem;" title="Origine : Scénario #<?= $task['scenario_id'] ?> (<?= htmlspecialchars($task['scenario_title'] ?? '') ?>)">
-                                                        <i class="fa-solid fa-scroll me-1"></i><?= htmlspecialchars($task['scenario_title'] ?: 'Scénario #' . $task['scenario_id']) ?>
-                                                    </a>
-                                                </div>
-                                            <?php endif; ?>
-
-                                            <!-- Livrables attendus (si définis) -->
-                                            <?php if (!empty($task['deliverables'])): ?>
-                                                <div class="text-secondary small font-monospace mb-2 text-truncate" style="font-size:0.7rem;" title="<?= htmlspecialchars($task['deliverables']) ?>">
-                                                    <i class="fa-solid fa-box-archive me-1 text-muted"></i><?= htmlspecialchars($task['deliverables']) ?>
-                                                </div>
-                                            <?php endif; ?>
-
-                                            <!-- Pied de carte : Assigné, Heures et Bouton Aperçu .md rapide -->
-                                            <div class="d-flex align-items-center justify-content-between pt-1 border-top border-secondary-subtle">
-                                                <div class="d-flex align-items-center gap-1 text-secondary" style="font-size:0.7rem;">
-                                                    <i class="fa-solid fa-user-circle"></i>
-                                                    <span><?= htmlspecialchars(($task['assignee'] ?? $task['assigned_to'] ?? '') ?: 'Back-End') ?></span>
-                                                    <?php if ($task['estimated_hours'] > 0): ?>
-                                                        <span class="ms-1 badge bg-secondary-lt text-secondary font-monospace" style="font-size:0.62rem;"><?= $task['estimated_hours'] ?>h</span>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <button type="button" class="btn btn-xs btn-outline-purple py-0 px-1-5" style="font-size:0.68rem; height:22px;" onclick="openTaskQuickPreview(<?= $task['id'] ?>)" title="Aperçu Markdown & Flowcharts">
-                                                    <i class="fa-solid fa-file-lines me-1"></i>.md
+                                            <form method="POST" action="?page=gamestudio&tab=dev_backend_tasks" onsubmit="return confirm('Supprimer définitivement cette annotation ?');">
+                                                <input type="hidden" name="action" value="delete_annotation">
+                                                <input type="hidden" name="task_id" value="<?= $activeTask['id'] ?>">
+                                                <input type="hidden" name="annotation_id" value="<?= $ann['id'] ?>">
+                                                <button type="submit" class="btn btn-xs btn-ghost-danger p-0 px-1 text-danger" title="Supprimer cette annotation">
+                                                    <i class="fa-solid fa-trash-can"></i>
                                                 </button>
-                                            </div>
+                                            </form>
+                                        </div>
+                                        <div class="card-body p-3 font-monospace small text-dark" style="white-space: pre-wrap; word-break: break-word; font-family: system-ui, -apple-system, sans-serif;">
+                                            <?= nl2br(htmlspecialchars($ann['content'])) ?>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
-                            <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Formulaire d'ajout d'annotation -->
+                        <div class="card border border-purple-subtle bg-white shadow-sm rounded-3">
+                            <div class="card-header bg-purple-lt py-2 px-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-pen text-purple"></i>
+                                <span class="fw-bold small text-purple">Ajouter une Annotation / Note de Suivi</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <form method="POST" action="?page=gamestudio&tab=dev_backend_tasks">
+                                    <input type="hidden" name="action" value="add_annotation">
+                                    <input type="hidden" name="task_id" value="<?= $activeTask['id'] ?>">
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small text-dark mb-1">Auteur de la note</label>
+                                        <input type="text" name="author_name" class="form-control form-control-sm" value="<?= htmlspecialchars($currentUser['username'] ?? 'Développeur Back-End') ?>" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small text-dark mb-1">Contenu de l'annotation</label>
+                                        <textarea name="content" class="form-control font-monospace small" rows="4" placeholder="Notez ici les avancées, points bloquants, endpoints testés, retours de merge request ou snippets SQL..." required></textarea>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-purple shadow-sm d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-paper-plane"></i>
+                                            <span>Publier l'Annotation</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?>
-        </div>
+            </div>
 
-    <?php else: ?>
-        <!-- ═══════════════════════════════════════════════════════════════════ -->
-        <!-- VUE TABLEAU / LISTE STRUCTURÉE                                      -->
-        <!-- ═══════════════════════════════════════════════════════════════════ -->
-        <div class="card border-0 shadow-sm">
-            <div class="table-responsive">
-                <table class="table table-hover table-vcenter card-table align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="w-1">ID</th>
-                            <th>Titre &amp; Livrables</th>
-                            <th>Statut</th>
-                            <th>Priorité</th>
-                            <th>Taille</th>
-                            <th>Assigné</th>
-                            <th>Origine</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($tasks)): ?>
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-5">
-                                    <i class="fa-solid fa-inbox fs-1 mb-2 opacity-50"></i>
-                                    <div>Aucune tâche Back-End trouvée selon les critères actuels.</div>
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($tasks as $task): 
-                                $stMeta = $statusLabels[$task['status']] ?? $statusLabels['todo'];
-                                $prioMeta = $priorityLabels[$task['priority']] ?? $priorityLabels['medium'];
-                                $cpxMeta = $complexityLabels[$task['complexity']] ?? $complexityLabels['M'];
-                            ?>
-                                <tr>
-                                    <td class="font-monospace text-muted small">#<?= $task['id'] ?></td>
-                                    <td>
-                                        <div class="fw-bold text-dark"><?= htmlspecialchars($task['title']) ?></div>
-                                        <?php if (!empty($task['deliverables'])): ?>
-                                            <div class="text-secondary small font-monospace mt-1" style="font-size:0.75rem;">
-                                                <i class="fa-solid fa-box-archive me-1 text-muted"></i><?= htmlspecialchars($task['deliverables']) ?>
-                                            </div>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-<?= $stMeta['badge'] ?> text-white">
-                                            <i class="fa-solid <?= $stMeta['icon'] ?> me-1"></i><?= $stMeta['label'] ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge <?= $prioMeta['badge'] ?>">
-                                            <i class="fa-solid <?= $prioMeta['icon'] ?> me-1"></i><?= $prioMeta['label'] ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge <?= $cpxMeta['badge'] ?> fw-bold font-monospace">
-                                            <?= $task['complexity'] ?>
-                                        </span>
-                                    </td>
-                                    <td class="small text-secondary">
-                                        <i class="fa-solid fa-user me-1"></i><?= htmlspecialchars(($task['assignee'] ?? $task['assigned_to'] ?? '') ?: 'Back-End') ?>
-                                        <?php if ($task['estimated_hours'] > 0): ?>
-                                            <span class="badge bg-secondary-lt text-secondary font-monospace ms-1"><?= $task['estimated_hours'] ?>h</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php if (!empty($task['scenario_id'])): ?>
-                                            <a href="?page=gamestudio&tab=narrative_scenarios&scenario_id=<?= (int)$task['scenario_id'] ?>" target="_blank" class="badge bg-purple-lt text-purple text-decoration-none">
-                                                <i class="fa-solid fa-scroll me-1"></i>Scénario #<?= $task['scenario_id'] ?>
-                                            </a>
-                                        <?php else: ?>
-                                            <span class="badge bg-light text-muted">Manuel</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="text-end">
-                                        <div class="btn-group btn-group-sm">
-                                            <button type="button" class="btn btn-outline-purple" onclick="openTaskQuickPreview(<?= $task['id'] ?>)" title="Aperçu .md & Flowcharts">
-                                                <i class="fa-solid fa-eye"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-outline-warning" onclick="openEditTaskModal(<?= $task['id'] ?>)" title="Modifier">
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-outline-danger" onclick="confirmDeleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars(addslashes($task['title'])) ?>')" title="Supprimer">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+            <!-- Colonne Latérale (Métadonnées & Résumé) -->
+            <div class="col-lg-4">
+                <!-- Boîte de Suivi & Métriques -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h4 class="card-title text-dark m-0 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-sliders text-indigo"></i>
+                            <span>Paramètres &amp; Suivi</span>
+                        </h4>
+                    </div>
+                    <div class="card-body p-3">
+                        <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                            <li class="d-flex align-items-center justify-content-between pb-2 border-bottom">
+                                <span class="text-secondary small fw-medium">Statut Actuel</span>
+                                <span class="badge bg-<?= $taskSt['badge'] ?> text-white py-1-5 px-2">
+                                    <i class="fa-solid <?= $taskSt['icon'] ?> me-1"></i><?= $taskSt['label'] ?>
+                                </span>
+                            </li>
+                            <li class="d-flex align-items-center justify-content-between pb-2 border-bottom">
+                                <span class="text-secondary small fw-medium">Niveau de Priorité</span>
+                                <span class="badge <?= $taskPrio['badge'] ?> py-1-5 px-2">
+                                    <i class="fa-solid <?= $taskPrio['icon'] ?> me-1"></i><?= $taskPrio['label'] ?>
+                                </span>
+                            </li>
+                            <li class="d-flex align-items-center justify-content-between pb-2 border-bottom">
+                                <span class="text-secondary small fw-medium">Taille / Complexité</span>
+                                <span class="badge <?= $taskCpx['badge'] ?> fw-bold font-monospace py-1 px-2 fs-5">
+                                    <?= $activeTask['complexity'] ?> &bull; <?= $taskCpx['label'] ?>
+                                </span>
+                            </li>
+                            <li class="d-flex align-items-center justify-content-between pb-2 border-bottom">
+                                <span class="text-secondary small fw-medium">Temps Estimé</span>
+                                <span class="badge bg-secondary-lt text-secondary font-monospace py-1 px-2 fs-5">
+                                    <?= (float)($activeTask['estimated_hours'] ?? 0) ?> heure(s)
+                                </span>
+                            </li>
+                            <li class="d-flex align-items-center justify-content-between pb-2 border-bottom">
+                                <span class="text-secondary small fw-medium">Développeur Assigné</span>
+                                <span class="fw-bold text-dark small"><?= htmlspecialchars(($activeTask['assignee'] ?? $activeTask['assigned_to'] ?? '') ?: 'Développeur Back-End') ?></span>
+                            </li>
+                            <li class="d-flex align-items-center justify-content-between">
+                                <span class="text-secondary small fw-medium">Source de la tâche</span>
+                                <?php if (!empty($activeTask['scenario_id'])): ?>
+                                    <span class="badge bg-purple-lt text-purple"><i class="fa-solid fa-scroll me-1"></i>Scénario Narratif</span>
+                                <?php else: ?>
+                                    <span class="badge bg-light text-muted">Création Manuelle</span>
+                                <?php endif; ?>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Scénario Narratif Associé si applicable -->
+                <?php if (!empty($activeTask['scenario_id'])): ?>
+                    <div class="card border border-purple-subtle bg-purple-lt shadow-sm mb-4">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="fa-solid fa-scroll text-purple fs-3"></i>
+                                <div class="fw-bold text-purple">Issu d'un Scénario Narratif</div>
+                            </div>
+                            <div class="small text-dark fw-medium mb-1">
+                                <?= htmlspecialchars($activeTask['scenario_title'] ?: 'Scénario #' . $activeTask['scenario_id']) ?>
+                            </div>
+                            <div class="text-secondary small mb-3" style="font-size:0.75rem;">
+                                Identifiant Tâche Scénario : <code><?= htmlspecialchars($activeTask['scenario_task_id'] ?: 'Tâche #' . $activeTask['id']) ?></code>
+                            </div>
+                            <a href="?page=gamestudio&tab=narrative_scenarios&scenario_id=<?= (int)$activeTask['scenario_id'] ?>" target="_blank" class="btn btn-purple btn-sm w-100 d-flex align-items-center justify-content-center gap-2 shadow-sm">
+                                <span>Voir le Scénario GDD</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Actions Rapides -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-3 d-flex flex-column gap-2">
+                        <button type="button" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" onclick="openEditTaskModal(<?= $activeTask['id'] ?>, true)">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>Modifier cette Tâche</span>
+                        </button>
+                        <a href="?page=gamestudio&tab=dev_backend_tasks" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+                            <i class="fa-solid fa-table-columns"></i>
+                            <span>Retour au Tableau Kanban</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
+
+    <?php else: 
+        // ═══════════════════════════════════════════════════════════════════
+        // VUE GLOBALE DU BACKLOG TECHNIQUE (KANBAN & TABLEAU)
+        // ═══════════════════════════════════════════════════════════════════
+    ?>
+        <!-- En-tête de page -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <h3 class="card-title text-indigo d-flex align-items-center gap-2 m-0" style="font-size:1.4rem;">
+                    <i class="fa-solid fa-server text-indigo"></i>
+                    <span>Développeur Back-End &bull; Backlog Technique &amp; Tâches Scénarios</span>
+                </h3>
+                <div class="text-secondary small mt-1">
+                    Gestion unifiée du backlog technique, synchronisation directe avec le Gestionnaire de Scénarios narratifs et cahier des charges Markdown/Mermaid.
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <!-- Bouton Synchronisation Scénarios -->
+                <button type="button" class="btn btn-outline-purple shadow-sm d-flex align-items-center gap-2" id="btnSyncScenarios" onclick="triggerScenarioSync()">
+                    <i class="fa-solid fa-rotate text-purple"></i>
+                    <span>Synchroniser Scénarios</span>
+                </button>
+                <!-- Bouton Nouvelle Tâche -->
+                <button type="button" class="btn btn-primary shadow-sm d-flex align-items-center gap-2" id="btnOpenCreateTaskModal" onclick="openCreateTaskModal()">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Nouvelle Tâche</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Cockpit d'avancement & Métriques clés -->
+        <div class="row row-cards mb-4">
+            <!-- Progression Globale -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-secondary small fw-bold text-uppercase">Taux d'Achèvement</span>
+                            <span class="badge bg-indigo-lt text-indigo fw-bold"><?= $metrics['total'] ?> Tâches</span>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-2 mb-2">
+                            <div class="h1 mb-0 text-dark"><?= $metrics['pct_done'] ?>%</div>
+                            <div class="text-secondary small">livrées</div>
+                        </div>
+                        <div class="progress progress-sm">
+                            <div class="progress-bar bg-indigo" style="width: <?= $metrics['pct_done'] ?>%" role="progressbar" aria-valuenow="<?= $metrics['pct_done'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Répartition Statuts -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="text-secondary small fw-bold text-uppercase mb-2">Pipeline Actif</div>
+                        <div class="row g-2 text-center">
+                            <div class="col-4">
+                                <div class="p-1 rounded bg-secondary-lt">
+                                    <div class="fw-bold fs-3 text-secondary"><?= $metrics['todo'] ?></div>
+                                    <div class="text-muted" style="font-size:0.7rem;">À faire</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-1 rounded bg-primary-lt">
+                                    <div class="fw-bold fs-3 text-primary"><?= $metrics['in_progress'] ?></div>
+                                    <div class="text-muted" style="font-size:0.7rem;">En cours</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-1 rounded bg-purple-lt">
+                                    <div class="fw-bold fs-3 text-purple"><?= $metrics['review'] ?></div>
+                                    <div class="text-muted" style="font-size:0.7rem;">Revue</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blocages & Alertes -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="text-secondary small fw-bold text-uppercase mb-2">Santé &amp; Blocages</div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="d-flex align-items-center gap-1 text-danger fw-bold">
+                                <i class="fa-solid fa-ban"></i> Tâches Bloquées
+                            </span>
+                            <span class="badge bg-danger text-white rounded-pill fs-4 px-2"><?= $metrics['blocked'] ?></span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="d-flex align-items-center gap-1 text-warning fw-bold">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Priorité Critique
+                            </span>
+                            <span class="badge bg-warning-lt text-warning fw-bold"><?= $metrics['critical'] ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tâches Synchronisées Scénarios -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-sm border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-secondary small fw-bold text-uppercase">Origine des Tâches</span>
+                            <i class="fa-solid fa-scroll text-purple fs-3"></i>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-2 mb-1">
+                            <div class="h2 mb-0 text-purple"><?= $metrics['from_scenarios'] ?></div>
+                            <div class="text-secondary small">issues des scénarios</div>
+                        </div>
+                        <div class="text-secondary small" style="font-size:0.75rem;">
+                            <?= $metrics['manual'] ?> tâche(s) manuelle(s) créée(s)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barre d'outils, Recherche & Filtres -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body py-3">
+                <form method="GET" action="" class="row g-2 align-items-center">
+                    <input type="hidden" name="page" value="gamestudio">
+                    <input type="hidden" name="tab" value="dev_backend_tasks">
+                    <input type="hidden" name="view" value="<?= htmlspecialchars($viewMode) ?>">
+
+                    <!-- Champ Recherche -->
+                    <div class="col-md-3">
+                        <div class="input-icon">
+                            <span class="input-icon-addon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" name="search" class="form-control form-control-sm" placeholder="Rechercher par titre, livrables..." value="<?= htmlspecialchars($searchQuery) ?>">
+                        </div>
+                    </div>
+
+                    <!-- Filtre Statut -->
+                    <div class="col-md-2">
+                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">Tous les statuts</option>
+                            <?php foreach (BackendTaskEngine::VALID_STATUSES as $st): ?>
+                                <option value="<?= $st ?>" <?= $filterStatus === $st ? 'selected' : '' ?>>
+                                    <?= $statusLabels[$st]['label'] ?> (<?= $metrics[$st] ?? 0 ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Filtre Priorité -->
+                    <div class="col-md-2">
+                        <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">Toutes priorités</option>
+                            <?php foreach (BackendTaskEngine::VALID_PRIORITIES as $pr): ?>
+                                <option value="<?= $pr ?>" <?= $filterPriority === $pr ? 'selected' : '' ?>>
+                                    Priorité <?= $priorityLabels[$pr]['label'] ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Filtre Complexité -->
+                    <div class="col-md-2">
+                        <select name="complexity" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">Toutes complexités</option>
+                            <?php foreach (BackendTaskEngine::VALID_COMPLEXITIES as $cpx): ?>
+                                <option value="<?= $cpx ?>" <?= $filterComplexity === $cpx ? 'selected' : '' ?>>
+                                    Taille <?= $complexityLabels[$cpx]['label'] ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Filtre Source -->
+                    <div class="col-md-1">
+                        <select name="source" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">Source</option>
+                            <option value="scenario" <?= $filterSource === 'scenario' ? 'selected' : '' ?>>Scénario</option>
+                            <option value="manual" <?= $filterSource === 'manual' ? 'selected' : '' ?>>Manuel</option>
+                        </select>
+                    </div>
+
+                    <!-- Actions et Bascule de vue -->
+                    <div class="col-md-2 d-flex align-items-center justify-content-end gap-2">
+                        <?php if ($filterStatus || $filterPriority || $filterComplexity || $filterSource || $searchQuery !== ''): ?>
+                            <a href="?page=gamestudio&tab=dev_backend_tasks&view=<?= htmlspecialchars($viewMode) ?>" class="btn btn-sm btn-outline-secondary" title="Réinitialiser filtres">
+                                <i class="fa-solid fa-xmark"></i>
+                            </a>
+                        <?php endif; ?>
+
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="?page=gamestudio&tab=dev_backend_tasks&view=kanban<?= $filterStatus ? '&status='.$filterStatus : '' ?><?= $filterPriority ? '&priority='.$filterPriority : '' ?><?= $filterComplexity ? '&complexity='.$filterComplexity : '' ?><?= $filterSource ? '&source='.$filterSource : '' ?><?= $searchQuery !== '' ? '&search='.urlencode($searchQuery) : '' ?>" 
+                               class="btn <?= $viewMode === 'kanban' ? 'btn-primary' : 'btn-outline-secondary' ?>" title="Vue Kanban">
+                                <i class="fa-solid fa-table-columns"></i>
+                            </a>
+                            <a href="?page=gamestudio&tab=dev_backend_tasks&view=table<?= $filterStatus ? '&status='.$filterStatus : '' ?><?= $filterPriority ? '&priority='.$filterPriority : '' ?><?= $filterComplexity ? '&complexity='.$filterComplexity : '' ?><?= $filterSource ? '&source='.$filterSource : '' ?><?= $searchQuery !== '' ? '&search='.urlencode($searchQuery) : '' ?>" 
+                               class="btn <?= $viewMode === 'table' ? 'btn-primary' : 'btn-outline-secondary' ?>" title="Vue Liste">
+                                <i class="fa-solid fa-list-ul"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <?php if ($viewMode === 'kanban'): ?>
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- VUE KANBAN INTERACTIVE (DRAG & DROP SUR 5 COLONNES)              -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <div class="row g-3 kanban-board">
+                <?php foreach (BackendTaskEngine::VALID_STATUSES as $colStatus): 
+                    $colTasks = array_values(array_filter($tasks, fn($t) => $t['status'] === $colStatus));
+                    $colMeta = $statusLabels[$colStatus];
+                ?>
+                    <div class="col-12 col-md-6 col-xl">
+                        <div class="kanban-column bg-light-subtle rounded-3 p-2 border border-2 border-dashed border-secondary-subtle d-flex flex-column h-100" 
+                             data-status="<?= $colStatus ?>" 
+                             ondragover="onKanbanDragOver(event)" 
+                             ondragleave="onKanbanDragLeave(event)" 
+                             ondrop="onKanbanDrop(event, '<?= $colStatus ?>')">
+                            
+                            <!-- En-tête de colonne -->
+                            <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded shadow-sm border-start border-3 border-<?= $colMeta['badge'] ?>">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fa-solid <?= $colMeta['icon'] ?> text-<?= $colMeta['badge'] ?>"></i>
+                                    <span class="fw-bold small text-dark"><?= $colMeta['label'] ?></span>
+                                </div>
+                                <span class="badge bg-<?= $colMeta['badge'] ?>-lt text-<?= $colMeta['badge'] ?> rounded-pill kanban-col-count" id="count-<?= $colStatus ?>">
+                                    <?= count($colTasks) ?>
+                                </span>
+                            </div>
+
+                            <!-- Liste des cartes de tâches -->
+                            <div class="kanban-card-list d-flex flex-column gap-2 flex-grow-1" style="min-height: 380px;">
+                                <?php if (empty($colTasks)): ?>
+                                    <div class="text-center text-muted p-4 my-auto kanban-empty-placeholder">
+                                        <i class="fa-regular fa-clipboard fs-2 mb-2 opacity-50"></i>
+                                        <div class="small">Aucune tâche</div>
+                                    </div>
+                                <?php else: ?>
+                                    <?php foreach ($colTasks as $task): 
+                                        $prioMeta = $priorityLabels[$task['priority']] ?? $priorityLabels['medium'];
+                                        $cpxMeta = $complexityLabels[$task['complexity']] ?? $complexityLabels['M'];
+                                        $annCount = (int)($task['annotations_count'] ?? 0);
+                                    ?>
+                                        <div class="card kanban-task-card shadow-sm border border-secondary-subtle cursor-grab" 
+                                             id="task-card-<?= $task['id'] ?>"
+                                             draggable="true" 
+                                             ondragstart="onKanbanDragStart(event, <?= $task['id'] ?>)" 
+                                             ondragend="onKanbanDragEnd(event)">
+                                            <div class="card-body p-2-5">
+                                                <!-- En-tête de carte : ID, Priorité, Complexité, Annotations -->
+                                                <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                                                        <span class="badge bg-dark-lt text-dark font-monospace" style="font-size:0.68rem;">#<?= $task['id'] ?></span>
+                                                        <span class="badge <?= $prioMeta['badge'] ?>" style="font-size:0.65rem;" title="Priorité <?= $prioMeta['label'] ?>">
+                                                            <i class="fa-solid <?= $prioMeta['icon'] ?> me-1"></i><?= $prioMeta['label'] ?>
+                                                        </span>
+                                                        <span class="badge <?= $cpxMeta['badge'] ?> fw-bold font-monospace" style="font-size:0.65rem;" title="Taille / Complexité">
+                                                            <?= $task['complexity'] ?>
+                                                        </span>
+                                                        <?php if ($annCount > 0): ?>
+                                                            <a href="?page=gamestudio&tab=dev_backend_tasks&task_id=<?= $task['id'] ?>#sectionAnnotations" class="badge bg-purple-lt text-purple text-decoration-none" style="font-size:0.65rem;" title="<?= $annCount ?> annotation(s)">
+                                                                <i class="fa-solid fa-comment me-1"></i><?= $annCount ?>
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm btn-ghost-secondary p-0 text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width:20px; height:20px;">
+                                                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center gap-2 small text-indigo fw-bold" href="?page=gamestudio&tab=dev_backend_tasks&task_id=<?= $task['id'] ?>">
+                                                                    <i class="fa-solid fa-arrow-up-right-from-square text-indigo"></i> Ouvrir page dédiée
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center gap-2 small" href="javascript:void(0)" onclick="openTaskQuickPreview(<?= $task['id'] ?>)">
+                                                                    <i class="fa-solid fa-eye text-primary"></i> Aperçu rapide .md
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center gap-2 small" href="javascript:void(0)" onclick="openEditTaskModal(<?= $task['id'] ?>)">
+                                                                    <i class="fa-solid fa-pen-to-square text-warning"></i> Modifier
+                                                                </a>
+                                                            </li>
+                                                            <li><hr class="dropdown-divider my-1"></li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center gap-2 small text-danger" href="javascript:void(0)" onclick="confirmDeleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars(addslashes($task['title'])) ?>')">
+                                                                    <i class="fa-solid fa-trash"></i> Supprimer
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Titre de la tâche (Cliquable vers la page dédiée) -->
+                                                <div class="fw-bold text-dark small mb-1 kanban-task-title" style="line-height:1.25; font-size:0.85rem;">
+                                                    <a href="?page=gamestudio&tab=dev_backend_tasks&task_id=<?= $task['id'] ?>" class="text-dark text-decoration-none hover-indigo">
+                                                        <?= htmlspecialchars($task['title']) ?>
+                                                    </a>
+                                                </div>
+
+                                                <!-- Scénario lié si applicable -->
+                                                <?php if (!empty($task['scenario_id'])): ?>
+                                                    <div class="mb-1">
+                                                        <a href="?page=gamestudio&tab=narrative_scenarios&scenario_id=<?= (int)$task['scenario_id'] ?>" target="_blank" class="badge bg-purple-lt text-purple text-decoration-none text-truncate d-inline-block" style="max-width:100%; font-size:0.65rem;" title="Origine : Scénario #<?= $task['scenario_id'] ?> (<?= htmlspecialchars($task['scenario_title'] ?? '') ?>)">
+                                                            <i class="fa-solid fa-scroll me-1"></i><?= htmlspecialchars($task['scenario_title'] ?: 'Scénario #' . $task['scenario_id']) ?>
+                                                        </a>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <!-- Livrables attendus (si définis) -->
+                                                <?php if (!empty($task['deliverables'])): ?>
+                                                    <div class="text-secondary small font-monospace mb-2 text-truncate" style="font-size:0.7rem;" title="<?= htmlspecialchars($task['deliverables']) ?>">
+                                                        <i class="fa-solid fa-box-archive me-1 text-muted"></i><?= htmlspecialchars($task['deliverables']) ?>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <!-- Pied de carte : Assigné, Heures et Boutons rapides -->
+                                                <div class="d-flex align-items-center justify-content-between pt-1 border-top border-secondary-subtle">
+                                                    <div class="d-flex align-items-center gap-1 text-secondary" style="font-size:0.7rem;">
+                                                        <i class="fa-solid fa-user-circle"></i>
+                                                        <span><?= htmlspecialchars(($task['assignee'] ?? $task['assigned_to'] ?? '') ?: 'Back-End') ?></span>
+                                                        <?php if ((float)($task['estimated_hours'] ?? 0) > 0): ?>
+                                                            <span class="ms-1 badge bg-secondary-lt text-secondary font-monospace" style="font-size:0.62rem;"><?= (float)$task['estimated_hours'] ?>h</span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <button type="button" class="btn btn-xs btn-outline-purple py-0 px-1-5" style="font-size:0.68rem; height:22px;" onclick="openTaskQuickPreview(<?= $task['id'] ?>)" title="Aperçu rapide Markdown & Flowcharts">
+                                                            <i class="fa-solid fa-file-lines me-1"></i>.md
+                                                        </button>
+                                                        <a href="?page=gamestudio&tab=dev_backend_tasks&task_id=<?= $task['id'] ?>" class="btn btn-xs btn-outline-indigo py-0 px-1-5" style="font-size:0.68rem; height:22px;" title="Ouvrir dans une page dédiée">
+                                                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+        <?php else: ?>
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- VUE TABLEAU / LISTE STRUCTURÉE                                  -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover table-vcenter card-table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="w-1">ID</th>
+                                <th>Titre &amp; Livrables</th>
+                                <th>Statut</th>
+                                <th>Priorité</th>
+                                <th>Taille</th>
+                                <th>Assigné</th>
+                                <th>Notes</th>
+                                <th>Origine</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($tasks)): ?>
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-5">
+                                        <i class="fa-solid fa-inbox fs-1 mb-2 opacity-50"></i>
+                                        <div>Aucune tâche Back-End trouvée selon les critères actuels.</div>
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($tasks as $task): 
+                                    $stMeta = $statusLabels[$task['status']] ?? $statusLabels['todo'];
+                                    $prioMeta = $priorityLabels[$task['priority']] ?? $priorityLabels['medium'];
+                                    $cpxMeta = $complexityLabels[$task['complexity']] ?? $complexityLabels['M'];
+                                    $annCount = (int)($task['annotations_count'] ?? 0);
+                                ?>
+                                    <tr>
+                                        <td class="font-monospace text-muted small">#<?= $task['id'] ?></td>
+                                        <td>
+                                            <div class="fw-bold text-dark">
+                                                <a href="?page=gamestudio&tab=dev_backend_tasks&task_id=<?= $task['id'] ?>" class="text-dark text-decoration-none hover-indigo">
+                                                    <?= htmlspecialchars($task['title']) ?>
+                                                </a>
+                                            </div>
+                                            <?php if (!empty($task['deliverables'])): ?>
+                                                <div class="text-secondary small font-monospace mt-1" style="font-size:0.75rem;">
+                                                    <i class="fa-solid fa-box-archive me-1 text-muted"></i><?= htmlspecialchars($task['deliverables']) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<?= $stMeta['badge'] ?> text-white">
+                                                <i class="fa-solid <?= $stMeta['icon'] ?> me-1"></i><?= $stMeta['label'] ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge <?= $prioMeta['badge'] ?>">
+                                                <i class="fa-solid <?= $prioMeta['icon'] ?> me-1"></i><?= $prioMeta['label'] ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge <?= $cpxMeta['badge'] ?> fw-bold font-monospace">
+                                                <?= $task['complexity'] ?>
+                                            </span>
+                                        </td>
+                                        <td class="small text-secondary">
+                                            <i class="fa-solid fa-user me-1"></i><?= htmlspecialchars(($task['assignee'] ?? $task['assigned_to'] ?? '') ?: 'Back-End') ?>
+                                            <?php if ((float)($task['estimated_hours'] ?? 0) > 0): ?>
+                                                <span class="badge bg-secondary-lt text-secondary font-monospace ms-1"><?= (float)$task['estimated_hours'] ?>h</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($annCount > 0): ?>
+                                                <a href="?page=gamestudio&tab=dev_backend_tasks&task_id=<?= $task['id'] ?>#sectionAnnotations" class="badge bg-purple-lt text-purple text-decoration-none">
+                                                    <i class="fa-solid fa-comment me-1"></i><?= $annCount ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="text-muted small">0</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($task['scenario_id'])): ?>
+                                                <a href="?page=gamestudio&tab=narrative_scenarios&scenario_id=<?= (int)$task['scenario_id'] ?>" target="_blank" class="badge bg-purple-lt text-purple text-decoration-none">
+                                                    <i class="fa-solid fa-scroll me-1"></i>Scénario #<?= $task['scenario_id'] ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="badge bg-light text-muted">Manuel</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="?page=gamestudio&tab=dev_backend_tasks&task_id=<?= $task['id'] ?>" class="btn btn-outline-indigo" title="Ouvrir la page dédiée">
+                                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-outline-purple" onclick="openTaskQuickPreview(<?= $task['id'] ?>)" title="Aperçu rapide .md">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-warning" onclick="openEditTaskModal(<?= $task['id'] ?>)" title="Modifier">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger" onclick="confirmDeleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars(addslashes($task['title'])) ?>')" title="Supprimer">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
 
@@ -497,6 +833,7 @@ $complexityLabels = [
             <form method="POST" action="?page=gamestudio&tab=dev_backend_tasks" id="formBackendTask">
                 <input type="hidden" name="action" id="taskFormAction" value="create_task">
                 <input type="hidden" name="task_id" id="taskFormId" value="0">
+                <input type="hidden" name="redirect_to_detail" id="taskFormRedirectToDetail" value="0">
 
                 <div class="modal-header bg-dark text-white py-2">
                     <h5 class="modal-title d-flex align-items-center gap-2 m-0" id="modalTaskFormTitle">
@@ -551,7 +888,7 @@ $complexityLabels = [
                             <label class="form-label fw-bold small">Développeur Assigné</label>
                             <div class="input-icon">
                                 <span class="input-icon-addon"><i class="fa-solid fa-user"></i></span>
-                                <input type="text" name="assigned_to" id="taskFormAssignedInput" class="form-control" placeholder="ex: Back-End Lead, Daimyō, etc.">
+                                <input type="text" name="assignee" id="taskFormAssignedInput" class="form-control" placeholder="ex: Back-End Lead, Daimyō, etc.">
                             </div>
                         </div>
 
@@ -572,9 +909,7 @@ $complexityLabels = [
                             </div>
                         </div>
 
-                        <!-- ═══════════════════════════════════════════════════════ -->
                         <!-- CHAMP DESCRIPTION AVEC DOUBLE FONCTION : MODIF & APERÇU -->
-                        <!-- ═══════════════════════════════════════════════════════ -->
                         <div class="col-12">
                             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                                 <div class="d-flex align-items-center gap-2">
@@ -672,6 +1007,9 @@ $complexityLabels = [
             <div class="modal-footer bg-light py-2 d-flex justify-content-between">
                 <div class="d-flex align-items-center gap-2" id="quickPreviewMetaBadges"></div>
                 <div class="d-flex align-items-center gap-2">
+                    <a href="#" id="btnQuickPreviewOpenDetail" class="btn btn-outline-indigo btn-sm">
+                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Ouvrir la page dédiée
+                    </a>
                     <button type="button" class="btn btn-outline-warning btn-sm" id="btnQuickPreviewEdit" onclick="editFromQuickPreview()">
                         <i class="fa-solid fa-pen-to-square me-1"></i>Modifier la Tâche
                     </button>
@@ -690,6 +1028,7 @@ $complexityLabels = [
 // REGISTRE DES TÂCHES PRÉCHARGÉES (SÉCURISÉ CONTRE LES INJECTIONS ET ERREURS DE PARSING)
 // ═══════════════════════════════════════════════════════════════════════════
 const PRELOADED_BACKEND_TASKS = <?= json_encode($tasks ?: [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?: '[]' ?>;
+const ACTIVE_TASK_DATA = <?= $activeTask ? json_encode($activeTask, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) : 'null' ?>;
 let activePreviewTaskId = null;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -716,7 +1055,6 @@ function showModalSafely(modalId) {
     if (bsModal) {
         bsModal.show();
     } else {
-        // En cas de chargement asynchrone différé de Bootstrap
         setTimeout(() => {
             const retryModal = getBootstrapModalInstance(el);
             if (retryModal) {
@@ -731,17 +1069,18 @@ function showModalSafely(modalId) {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // FONCTIONS DE GESTION DES MODALES CRÉATION & MODIFICATION DE TÂCHE
-// (DÉCLARÉES IMMÉDIATEMENT POUR ÊTRE DISPONIBLES DANS TOUT LE DOM)
 // ═══════════════════════════════════════════════════════════════════════════
 function openCreateTaskModal() {
     try {
         const actionInput = document.getElementById('taskFormAction');
         const idInput = document.getElementById('taskFormId');
+        const redirectInput = document.getElementById('taskFormRedirectToDetail');
         const titleModal = document.getElementById('modalTaskFormTitle');
         const submitText = document.getElementById('btnSubmitTaskFormText');
 
         if (actionInput) actionInput.value = 'create_task';
         if (idInput) idInput.value = '0';
+        if (redirectInput) redirectInput.value = '0';
         if (titleModal) titleModal.innerHTML = '<i class="fa-solid fa-server text-teal"></i> <span>Nouvelle Tâche Back-End</span>';
         if (submitText) submitText.textContent = 'Créer la Tâche';
 
@@ -775,18 +1114,23 @@ function openCreateTaskModal() {
     }
 }
 
-function openEditTaskModal(taskId) {
+function openEditTaskModal(taskId, redirectToDetail = false) {
     try {
-        const task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
+        let task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
+        if (!task && ACTIVE_TASK_DATA && parseInt(ACTIVE_TASK_DATA.id, 10) === parseInt(taskId, 10)) {
+            task = ACTIVE_TASK_DATA;
+        }
         if (!task) return;
 
         const actionInput = document.getElementById('taskFormAction');
         const idInput = document.getElementById('taskFormId');
+        const redirectInput = document.getElementById('taskFormRedirectToDetail');
         const titleModal = document.getElementById('modalTaskFormTitle');
         const submitText = document.getElementById('btnSubmitTaskFormText');
 
         if (actionInput) actionInput.value = 'update_task';
         if (idInput) idInput.value = task.id;
+        if (redirectInput) redirectInput.value = redirectToDetail ? '1' : '0';
         if (titleModal) titleModal.innerHTML = `<i class="fa-solid fa-pen-to-square text-warning"></i> <span>Modifier la Tâche #${task.id}</span>`;
         if (submitText) submitText.textContent = 'Enregistrer les Modifications';
 
@@ -821,7 +1165,7 @@ function openEditTaskModal(taskId) {
 }
 
 function confirmDeleteTask(taskId, taskTitle) {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement la tâche #${taskId} « ${taskTitle} » ?`)) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement la tâche #${taskId} « ${taskTitle} » ?\nToutes les annotations et notes associées seront également supprimées.`)) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '?page=gamestudio&tab=dev_backend_tasks';
@@ -832,6 +1176,31 @@ function confirmDeleteTask(taskId, taskTitle) {
         document.body.appendChild(form);
         form.submit();
     }
+}
+
+function changeActiveTaskStatus(taskId, newStatus) {
+    const formData = new FormData();
+    formData.append('action', 'update_status_ajax');
+    formData.append('task_id', taskId);
+    formData.append('status', newStatus);
+
+    fetch('?page=gamestudio&tab=dev_backend_tasks', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToastNotification(`Statut de la tâche mis à jour : ${newStatus}`, 'success');
+            setTimeout(() => { window.location.reload(); }, 600);
+        } else {
+            showToastNotification(`Erreur lors de la mise à jour du statut.`, 'danger');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToastNotification(`Erreur réseau.`, 'danger');
+    });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -876,9 +1245,6 @@ function onTaskFormDescInput() {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// IMPORTATION DE FICHIER .MD DANS LA DESCRIPTION (BOUTON & DRAG & DROP)
-// ═══════════════════════════════════════════════════════════════════════════
 function triggerTaskFormMdFileInput() {
     const inp = document.getElementById('taskFormMdFileInput');
     if (inp) {
@@ -938,10 +1304,13 @@ function loadMdFileContent(file) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// MODALE D'APERÇU PLEIN ÉCRAN .MD & FLOWCHARTS
+// MODALE D'APERÇU RAPIDE .MD & FLOWCHARTS
 // ═══════════════════════════════════════════════════════════════════════════
 function openTaskQuickPreview(taskId) {
-    const task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
+    let task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
+    if (!task && ACTIVE_TASK_DATA && parseInt(ACTIVE_TASK_DATA.id, 10) === parseInt(taskId, 10)) {
+        task = ACTIVE_TASK_DATA;
+    }
     if (!task) return;
 
     activePreviewTaskId = task.id;
@@ -950,10 +1319,15 @@ function openTaskQuickPreview(taskId) {
     const subEl = document.getElementById('quickPreviewTaskSub');
     const bodyEl = document.getElementById('quickPreviewTaskBody');
     const badgesEl = document.getElementById('quickPreviewMetaBadges');
+    const openDetailBtn = document.getElementById('btnQuickPreviewOpenDetail');
 
     if (titleEl) titleEl.textContent = `Tâche #${task.id} : ${task.title}`;
     if (subEl) {
         subEl.textContent = `Assigné à ${task.assignee || task.assigned_to || 'Back-End'} • Estimation : ${task.estimated_hours || 0}h • Créée le ${task.created_at || ''}`;
+    }
+
+    if (openDetailBtn) {
+        openDetailBtn.href = `?page=gamestudio&tab=dev_backend_tasks&task_id=${task.id}`;
     }
 
     let metaBadgesHtml = '';
@@ -1042,7 +1416,7 @@ function onKanbanDrop(e, targetStatus) {
     const task = PRELOADED_BACKEND_TASKS.find(t => parseInt(t.id, 10) === parseInt(taskId, 10));
     if (!task) return;
 
-    if (task.status === targetStatus) return; // Rien à changer
+    if (task.status === targetStatus) return;
 
     const cardEl = document.getElementById('task-card-' + taskId);
     const cardList = col.querySelector('.kanban-card-list');
@@ -1054,7 +1428,6 @@ function onKanbanDrop(e, targetStatus) {
         task.status = targetStatus;
     }
 
-    // Appel AJAX
     const formData = new FormData();
     formData.append('action', 'update_status_ajax');
     formData.append('task_id', taskId);
@@ -1094,9 +1467,6 @@ function updateKanbanCounters() {
     });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// SYNCHRONISATION 1-CLIC DES SCÉNARIOS NARRATIFS (AJAX)
-// ═══════════════════════════════════════════════════════════════════════════
 function triggerScenarioSync() {
     const btn = document.getElementById('btnSyncScenarios');
     const origHtml = btn ? btn.innerHTML : '';
@@ -1136,9 +1506,6 @@ function triggerScenarioSync() {
     });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// TOAST NOTIFICATIONS TABLER
-// ═══════════════════════════════════════════════════════════════════════════
 function showToastNotification(message, type = 'info') {
     const container = document.getElementById('tablerToastContainer');
     if (!container) {
@@ -1610,6 +1977,7 @@ window.toggleMermaidSource = toggleMermaidSource;
 window.copyMermaidCode = copyMermaidCode;
 window.renderCustomMarkdown = renderCustomMarkdown;
 window.renderSimpleMarkdown = renderSimpleMarkdown;
+window.changeActiveTaskStatus = changeActiveTaskStatus;
 
 document.addEventListener('DOMContentLoaded', function() {
     const btnCreate = document.getElementById('btnOpenCreateTaskModal');
@@ -1619,7 +1987,16 @@ document.addEventListener('DOMContentLoaded', function() {
             openCreateTaskModal();
         });
     }
+
+    // Rendu automatique si on est sur la page dédiée d'une tâche
+    if (ACTIVE_TASK_DATA && ACTIVE_TASK_DATA.description) {
+        const descBox = document.getElementById('renderedActiveTaskDescription');
+        if (descBox) {
+            descBox.innerHTML = renderCustomMarkdown(ACTIVE_TASK_DATA.description, { compact: false });
+            renderAllMermaidInContainer(descBox);
+        }
+    }
+
     initMermaidEngine();
 });
 </script>
-
