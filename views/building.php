@@ -1847,7 +1847,7 @@ if (!$isEmptyPlot) {
 
             <?php if ($code === 'stonemason' && $lvl > 0): ?>
             <?php
-            $hasTileLevel20 = $isAdmin || ($lvl >= 20);
+            $hasTileLevel20 = ($lvl >= 20);
             $availableClayForTiles = (float)($planet['clay'] ?? 0);
             $availableStoneForTiles = (float)($planet['crystal'] ?? 0);
             $availableCharcoalForTiles = (float)($planet['charcoal'] ?? 0);
@@ -4059,6 +4059,11 @@ function setTileBatches(tileType, val) {
 }
 
 async function submitTileCraft(tileType) {
+    if (stonemasonLevel < 20) {
+        showModalAlert("Le grand fourneau Kawara-gama requiert impérativement une Taille de Granit & Maçonnerie de Niveau 20.", 'warning');
+        return;
+    }
+
     const inputId = (tileType === 'onigawara_tiles') ? 'tile_batches_onigawara' : 'tile_batches_roof';
     const input = document.getElementById(inputId);
     if (!input) return;

@@ -2403,7 +2403,7 @@ class PlanetEngine {
         $stoneLvl = (int)($buildings['stonemason'] ?? 0);
         $isAdmin = $this->isPlanetAdmin($planetId);
 
-        if ($stoneLvl < 20 && !$isAdmin) {
+        if ($stoneLvl < 20) {
             return [
                 'success' => false,
                 'error' => "Le grand fourneau Kawara-gama requiert impérativement une <strong>Taille de Granit & Maçonnerie de Niveau 20</strong> (Niveau actuel : {$stoneLvl}/20)."
