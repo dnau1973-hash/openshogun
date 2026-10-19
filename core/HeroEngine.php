@@ -12,6 +12,22 @@ require_once __DIR__ . '/../config/game_constants.php';
 class HeroEngine {
     public const MAX_DAILY_ADVENTURES = 3;
 
+    /**
+     * Catalogue des 10 expéditions provinciales uniques avec illustrations dédiées
+     */
+    public const ADVENTURE_TEMPLATES = [
+        ['name' => 'Sanctuaire Shintō Abandonné dans la Forêt', 'diff' => 'easy'],
+        ['name' => 'Ruines d\'un Vieux Donjon Fief Noir', 'diff' => 'easy'],
+        ['name' => 'Gorge Brumeuse et Repaire de Ronins', 'diff' => 'medium'],
+        ['name' => 'Temple Antique Caché sous les Bambous', 'diff' => 'easy'],
+        ['name' => 'Cimetière des Guerriers Oubliés', 'diff' => 'easy'],
+        ['name' => 'Grotte du Dragon Fluvial', 'diff' => 'hard'],
+        ['name' => 'Pagode Oubliée des Maîtres d\'Armes', 'diff' => 'medium'],
+        ['name' => 'Défilé des Shinobis de l\'Ombre', 'diff' => 'hard'],
+        ['name' => 'Vallée des Cerisiers Ancestraux', 'diff' => 'easy'],
+        ['name' => 'Montagne Sacrée du Dieu Tonnerre Raiden', 'diff' => 'hard']
+    ];
+
     private PDO $db;
     private static bool $schemaChecked = false;
 
@@ -156,18 +172,7 @@ class HeroEngine {
             $coordY = (int)($p['coord_y'] ?? 500);
         }
 
-        $stmtAdv = $this->db->prepare("
-            INSERT INTO hero_adventures (user_id, coord_x, coord_y, name, difficulty, status) 
-            VALUES (?, ?, ?, ?, ?, 'available')
-        ");
-        $advTemplates = [
-            ['name' => 'Sanctuaire Shintō Abandonné dans la Forêt', 'diff' => 'easy', 'dx' => 2, 'dy' => 3],
-            ['name' => 'Ruines d\'un Vieux Donjon Fief Noir', 'diff' => 'easy', 'dx' => -3, 'dy' => 2],
-            ['name' => 'Gorge Brumeuse et Repaire de Ronins', 'diff' => 'medium', 'dx' => 4, 'dy' => -3]
-        ];
-        foreach ($advTemplates as $t) {
-            $stmtAdv->execute([$userId, $coordX + $t['dx'], $coordY + $t['dy'], $t['name'], $t['diff']]);
-        }
+        $this->ensureAvailableAdventures($userId, 3);
 
         return $this->getHeroByUserId($userId);
     }
@@ -605,12 +610,47 @@ class HeroEngine {
     }
 
     /**
-     * Garantit qu'un joueur a toujours un nombre minimal d'aventures provinciales disponibles
+     * Garantit qu'un joueur a toujours un nombre minimal d'aventures provinciales disponibles.
+     * RÈGLE D'UNICITÉ STRICTE : Un joueur ne peut JAMAIS avoir en même temps deux fois la même expédition active.
      */
     public function ensureAvailableAdventures(int $userId, int $targetCount = 3): int {
         $hero = $this->getHeroByUserId($userId);
         if (!$hero) return 0;
 
+        // 1. Détection et nettoyage immédiat de tout doublon parmi les aventures disponibles
+        $stmtActive = $this->db->prepare("
+            SELECT id, name FROM hero_adventures 
+            WHERE user_id = ? AND status = 'available' 
+            ORDER BY id ASC
+        ");
+        $stmtActive->execute([$userId]);
+        $availableRows = $stmtActive->fetchAll(PDO::FETCH_ASSOC);
+
+        $seen = [];
+        $duplicateIds = [];
+        foreach ($availableRows as $row) {
+            $nameKey = trim(mb_strtolower((string)$row['name']));
+            if (isset($seen[$nameKey])) {
+                $duplicateIds[] = (int)$row['id'];
+            } else {
+                $seen[$nameKey] = true;
+            }
+        }
+        if (!empty($duplicateIds)) {
+            $inClause = implode(',', array_fill(0, count($duplicateIds), '?'));
+            $this->db->prepare("DELETE FROM hero_adventures WHERE id IN ($inClause)")->execute($duplicateIds);
+        }
+
+        // 2. Récupérer toutes les expéditions déjà actives (disponibles OU en cours de trajet)
+        $stmtCurrent = $this->db->prepare("
+            SELECT name FROM hero_adventures 
+            WHERE user_id = ? AND status IN ('available', 'in_progress')
+        ");
+        $stmtCurrent->execute([$userId]);
+        $activeNamesRaw = $stmtCurrent->fetchAll(PDO::FETCH_COLUMN);
+        $activeNames = array_map(fn($n) => trim(mb_strtolower((string)$n)), $activeNamesRaw);
+
+        // 3. Compter le nombre actuel d'aventures disponibles
         $stmtCount = $this->db->prepare("
             SELECT COUNT(*) FROM hero_adventures 
             WHERE user_id = ? AND status = 'available'
@@ -626,22 +666,17 @@ class HeroEngine {
         $centerX = (int)($hero['coord_x'] ?? 1);
         $centerY = (int)($hero['coord_y'] ?? 1);
 
-        $templates = [
-            ['name' => 'Sanctuaire Shintō Abandonné dans la Forêt', 'diff' => 'easy'],
-            ['name' => 'Ruines d\'un Vieux Donjon Fief Noir', 'diff' => 'easy'],
-            ['name' => 'Gorge Brumeuse et Repaire de Ronins', 'diff' => 'medium'],
-            ['name' => 'Temple Antique Caché sous les Bambous', 'diff' => 'easy'],
-            ['name' => 'Campement de Ronins Hors-la-loi', 'diff' => 'medium'],
-            ['name' => 'Cimetière des Guerriers Oubliés', 'diff' => 'easy'],
-            ['name' => 'Grotte du Dragon Fluvial', 'diff' => 'hard'],
-            ['name' => 'Pagode Oubliée des Maîtres d\'Armes', 'diff' => 'medium'],
-            ['name' => 'Défilé des Shinobis de l\'Ombre', 'diff' => 'hard'],
-            ['name' => 'Vallée des Cerisiers Ancestraux', 'diff' => 'easy'],
-            ['name' => 'Fortin Délaissé du Clan Déchu', 'diff' => 'medium'],
-            ['name' => 'Montagne Sacrée du Dieu Tonnerre Raiden', 'diff' => 'hard']
-        ];
+        // 4. Filtrer les templates pour exclure formellement toute expédition déjà active
+        $candidateTemplates = array_values(array_filter(self::ADVENTURE_TEMPLATES, function($t) use ($activeNames) {
+            return !in_array(trim(mb_strtolower((string)$t['name'])), $activeNames, true);
+        }));
 
-        shuffle($templates);
+        // En cas exceptionnel où toutes les templates seraient actives, utiliser la liste complète
+        if (empty($candidateTemplates)) {
+            $candidateTemplates = self::ADVENTURE_TEMPLATES;
+        }
+
+        shuffle($candidateTemplates);
         $created = 0;
 
         $stmtInsert = $this->db->prepare("
@@ -649,8 +684,11 @@ class HeroEngine {
             VALUES (?, ?, ?, ?, ?, 'available')
         ");
 
-        for ($i = 0; $i < $needed; $i++) {
-            $t = $templates[$i % count($templates)];
+        for ($i = 0; $i < $needed && $i < count($candidateTemplates); $i++) {
+            $t = $candidateTemplates[$i];
+            // Ajouter immédiatement pour interdire tout doublon dans la même passe
+            $activeNames[] = trim(mb_strtolower((string)$t['name']));
+
             $dx = rand(-7, 7);
             $dy = rand(-7, 7);
             if ($dx === 0 && $dy === 0) {
@@ -1248,26 +1286,10 @@ class HeroEngine {
     }
 
     /**
-     * Génère une aventure de remplacement
+     * Génère une aventure de remplacement sans jamais dupliquer une aventure active
      */
     public function generateReplacementAdventure(int $userId, int $centerX, int $centerY): void {
-        $names = [
-            ['name' => 'Temple Antique Caché sous les Bambous', 'diff' => 'easy'],
-            ['name' => 'Campement de Ronins Hors-la-loi', 'diff' => 'medium'],
-            ['name' => 'Cimetière des Guerriers Oubliés', 'diff' => 'easy'],
-            ['name' => 'Grotte du Dragon Fluvial', 'diff' => 'hard'],
-            ['name' => 'Ruines d\'un Village de Montagne Pillé', 'diff' => 'easy'],
-            ['name' => 'Passage des Brumes de Kai', 'diff' => 'medium']
-        ];
-        $chosen = $names[array_rand($names)];
-        $dx = rand(-6, 6);
-        $dy = rand(-6, 6);
-        if ($dx === 0 && $dy === 0) $dx = 3;
-
-        $this->db->prepare("
-            INSERT INTO hero_adventures (user_id, coord_x, coord_y, name, difficulty, status) 
-            VALUES (?, ?, ?, ?, ?, 'available')
-        ")->execute([$userId, $centerX + $dx, $centerY + $dy, $chosen['name'], $chosen['diff']]);
+        $this->ensureAvailableAdventures($userId, 3);
     }
 
     /**

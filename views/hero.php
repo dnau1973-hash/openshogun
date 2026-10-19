@@ -620,15 +620,15 @@ if (!function_exists('renderRelicBonusesHtml')) {
                         <div class="col-md-6 col-lg-4">
                             <div class="card h-100 border shadow-xs overflow-hidden" style="border-radius: 12px;">
                                 <!-- En-tête illustré grand format Style Travian -->
-                                <div style="position: relative; width: 100%; height: 145px; overflow: hidden; background: #0f172a;">
+                                <div style="position: relative; width: 100%; height: 230px; overflow: hidden; background: #0f172a;">
                                     <img src="<?= htmlspecialchars($advImg) ?>" alt="<?= htmlspecialchars($adv['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" class="hover-scale">
-                                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.3) 60%, transparent 100%);"></div>
-                                    <div style="position: absolute; top: 8px; left: 10px; right: 10px;" class="d-flex justify-content-between align-items-center">
+                                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.25) 55%, transparent 100%);"></div>
+                                    <div style="position: absolute; top: 10px; left: 12px; right: 12px;" class="d-flex justify-content-between align-items-center">
                                         <span class="badge <?= $dbdg['class'] ?> fw-bold px-2 py-1 shadow-sm"><?= $dbdg['label'] ?></span>
                                         <span class="badge bg-dark bg-opacity-75 border border-light text-white font-monospace">[<?= $adv['coord_x'] ?> : <?= $adv['coord_y'] ?>]</span>
                                     </div>
-                                    <div style="position: absolute; bottom: 8px; left: 12px; right: 12px;">
-                                        <h4 class="m-0 fw-bold text-white text-truncate shadow-sm" style="font-size: 0.95rem;">
+                                    <div style="position: absolute; bottom: 12px; left: 14px; right: 14px;">
+                                        <h4 class="m-0 fw-bold text-white text-truncate shadow-sm" style="font-size: 1.05rem;">
                                             <i class="fa-solid fa-torii-gate text-warning me-1"></i><?= htmlspecialchars($adv['name']) ?>
                                         </h4>
                                     </div>
@@ -1328,7 +1328,7 @@ function confirmAndLaunchAdventure() {
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 12px;">
             <!-- Illustration d'en-tête de l'aventure -->
-            <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
+            <div style="position: relative; width: 100%; height: 260px; overflow: hidden; background: #0f172a;">
                 <img id="adventureModalImage" src="/public/assets/adventures/adventure_depart.jpeg" alt="Aventure Féodale" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
                 <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
                 <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">

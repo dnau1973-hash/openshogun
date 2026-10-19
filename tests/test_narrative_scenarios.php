@@ -23,6 +23,8 @@ $sqlite->exec("CREATE TABLE narrative_scenarios (
     slug TEXT NOT NULL UNIQUE,
     type TEXT NOT NULL DEFAULT 'step',
     step_number INTEGER NULL,
+    position_after_step INTEGER NULL DEFAULT NULL,
+    sequence_order INTEGER NOT NULL DEFAULT 0,
     title TEXT NOT NULL,
     subtitle TEXT NULL,
     era TEXT NULL,
