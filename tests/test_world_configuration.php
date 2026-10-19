@@ -195,6 +195,60 @@ assertTest(strpos($html, 'id="formRepopulateOases"') !== false, "Formulaire de g
 assertTest(strpos($html, 'id="formRespawnFauna"') !== false, "Formulaire de régénération de faune présent");
 assertTest(strpos($html, 'id="tableOasesList"') !== false, "Registre interactif des oasis présent dans la vue");
 
+// [TEST 8] Item 3 : Vitesses & Équilibrage du Monde Féodal
+echo "\n[TEST 8] Test de l'Item 3 : Vitesses, Équilibrage & Simulateur d'Impact...\n";
+$speedParams = [
+    'game_speed'               => 10,
+    'resource_speed'           => 8,
+    'fleet_speed'              => 5,
+    'beginner_protection_days' => 5,
+    'hero_xp_rate_percent'     => 150,
+    'hero_cage_drop_rate'      => 30,
+    'famine_enabled'           => '1',
+    'famine_rate'              => 4.5,
+    'famine_flour_consumption' => 1.5
+];
+$saveSpeedRes = $gameStudioEngine->saveSpeedBalancing($speedParams);
+assertTest($saveSpeedRes['success'] === true, "saveSpeedBalancing() exécuté avec succès");
+assertTest((int)GameConfig::get('game_speed') === 10, "game_speed mis à jour à 10");
+assertTest((int)GameConfig::get('resource_speed') === 8, "resource_speed mis à jour à 8");
+assertTest((int)GameConfig::get('fleet_speed') === 5, "fleet_speed mis à jour à 5");
+assertTest((int)GameConfig::get('beginner_protection_days') === 5, "beginner_protection_days mis à jour à 5");
+assertTest((int)GameConfig::get('hero_xp_rate_percent') === 150, "hero_xp_rate_percent mis à jour à 150%");
+assertTest((int)GameConfig::get('hero_cage_drop_rate') === 30, "hero_cage_drop_rate mis à jour à 30%");
+assertTest((bool)GameConfig::get('famine_enabled') === true, "famine_enabled mis à jour à true");
+assertTest((float)GameConfig::get('famine_rate') === 4.5, "famine_rate mis à jour à 4.5%");
+assertTest((float)GameConfig::get('famine_flour_consumption') === 1.5, "famine_flour_consumption mis à jour à 1.5");
+
+// Vérifier les nouvelles données extraites dans getWorldConfigData
+$speedWorldData = $gameStudioEngine->getWorldConfigData();
+assertTest($speedWorldData['gameSpeed'] === 10, "gameSpeed présent dans getWorldConfigData");
+assertTest($speedWorldData['resourceSpeed'] === 8, "resourceSpeed présent dans getWorldConfigData");
+assertTest($speedWorldData['fleetSpeed'] === 5, "fleetSpeed présent dans getWorldConfigData");
+assertTest($speedWorldData['beginnerProtectionDays'] === 5, "beginnerProtectionDays présent dans getWorldConfigData");
+assertTest($speedWorldData['heroXpRatePercent'] === 150, "heroXpRatePercent présent dans getWorldConfigData");
+assertTest($speedWorldData['heroCageDropRate'] === 30, "heroCageDropRate présent dans getWorldConfigData");
+assertTest($speedWorldData['famineEnabled'] === true, "famineEnabled présent dans getWorldConfigData");
+assertTest($speedWorldData['famineRate'] === 4.5, "famineRate présent dans getWorldConfigData");
+assertTest($speedWorldData['famineFlourConsumption'] === 1.5, "famineFlourConsumption présent dans getWorldConfigData");
+
+// Rendu HTML complet avec l'Item 3 rafraîchi
+ob_start();
+extract($speedWorldData);
+require __DIR__ . '/../views/gamestudio/general_world_config.php';
+$htmlSpeed = ob_get_clean();
+
+assertTest(strpos($htmlSpeed, '3. Vitesses &amp; Équilibrage du Monde Féodal') !== false, "Le 3e item 'Vitesses & Équilibrage du Monde Féodal' est présent dans la vue");
+assertTest(strpos($htmlSpeed, 'id="section-world-speed-config"') !== false, "Conteneur ancre de l'Item 3 présent");
+assertTest(strpos($htmlSpeed, 'id="sliderGameSpeed"') !== false, "Slider Vitesse Jeu présent");
+assertTest(strpos($htmlSpeed, 'id="sliderResourceSpeed"') !== false, "Slider Vitesse Production présent");
+assertTest(strpos($htmlSpeed, 'id="sliderFleetSpeed"') !== false, "Slider Vitesse Marche présent");
+assertTest(strpos($htmlSpeed, 'id="sim-build-time"') !== false, "Simulateur temps de chantier présent");
+assertTest(strpos($htmlSpeed, 'id="sim-march-time"') !== false, "Simulateur temps de marche présent");
+assertTest(strpos($htmlSpeed, 'id="sim-resource-prod"') !== false, "Simulateur production horaire présent");
+assertTest(strpos($htmlSpeed, 'applyDevSpeedPreset') !== false, "Fonction JS de préréglages de vitesse présente");
+assertTest(strpos($htmlSpeed, 'id="checkFamineEnabled"') !== false, "Switch de péril de famine présent");
+
 echo "\n========================================================================\n";
-echo " TOUS LES TESTS DE CONFIGURATION DU MONDE & OASIS SONT AU VERT ! \n";
+echo " TOUS LES TESTS MONDE, OASIS & VITESSES (ITEMS 1, 2 & 3) SONT AU VERT ! \n";
 echo "========================================================================\n";

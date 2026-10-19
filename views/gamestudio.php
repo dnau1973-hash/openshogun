@@ -119,7 +119,15 @@ if ($currentTab === 'dashboard') {
                 'type' => !empty($res['success']) ? 'success' : 'danger',
                 'msg'  => $res['message'] ?? 'Faune sauvage régénérée.'
             ];
-            header('Location: ?page=gamestudio&tab=general&subtab=world_config');
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-oases-config');
+            exit;
+        } elseif ($_POST['action'] === 'save_world_speed_balancing') {
+            $res = $gameStudioEngine->saveSpeedBalancing($_POST);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Vitesses et équilibrage enregistrés.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-speed-config');
             exit;
         }
     }

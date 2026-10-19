@@ -571,7 +571,287 @@ unset($_SESSION['general_flash']);
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!-- SECTION 3 : TÉLÉMÉTRIE D'OCCUPATION DU MONDE & DENSITÉ SPATIALE     -->
+    <!-- TROISIÈME ITEM MAJEUR : VITESSES & ÉQUILIBRAGE DU MONDE FÉODAL     -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="card mb-4 border-danger shadow-sm overflow-hidden" id="section-world-speed-config" style="border-width: 2px;">
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
+            <div>
+                <h3 class="card-title text-white m-0 d-flex align-items-center gap-2 fw-bold" style="font-size:1.25rem;">
+                    <i class="fa-solid fa-bolt text-warning fs-2"></i>
+                    <span>3. Vitesses &amp; Équilibrage du Monde Féodal</span>
+                </h3>
+                <div class="text-white-50 small mt-1">
+                    Multiplicateurs temporels majeurs : chantiers, production des ressources, marche des armées féodales et règles d'immunité.
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge bg-white text-danger fw-bold px-3 py-2 font-monospace fs-4 shadow-sm" id="badge-header-game-speed">
+                    x<?= (int)$gameSpeed ?> Jeu
+                </span>
+                <span class="badge bg-white text-dark fw-bold px-3 py-2 font-monospace fs-4 shadow-sm" id="badge-header-resource-speed">
+                    x<?= (int)$resourceSpeed ?> Prod
+                </span>
+                <span class="badge bg-white text-dark fw-bold px-3 py-2 font-monospace fs-4 shadow-sm" id="badge-header-fleet-speed">
+                    x<?= (int)$fleetSpeed ?> Marche
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body p-4 bg-light bg-opacity-25">
+            <!-- 1. Préréglages Rapides 1-Clic -->
+            <div class="p-3 bg-white border rounded shadow-xs mb-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                    <span class="fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-gauge-high text-danger"></i>Préréglages Serveur 1-Clic Recommandés :
+                    </span>
+                    <span class="text-secondary small">Calibre instantanément les 3 curseurs temporels</span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm speed-preset-btn fw-bold" onclick="applyDevSpeedPreset(1, 1, 1, this)">
+                        <i class="fa-solid fa-hourglass-start me-1"></i>1x Classique (Temps Réel)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm speed-preset-btn fw-bold" onclick="applyDevSpeedPreset(3, 3, 2, this)">
+                        <i class="fa-solid fa-shield-halved me-1"></i>3x Cadence Sengoku
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm speed-preset-btn fw-bold shadow-sm" onclick="applyDevSpeedPreset(5, 5, 5, this)">
+                        <i class="fa-solid fa-bolt me-1"></i>5x Vitesse Shogun (Défaut)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm speed-preset-btn fw-bold" onclick="applyDevSpeedPreset(10, 10, 8, this)">
+                        <i class="fa-solid fa-fire me-1"></i>10x Guerre Totale
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm speed-preset-btn fw-bold" onclick="applyDevSpeedPreset(20, 20, 10, this)">
+                        <i class="fa-solid fa-forward-fast me-1"></i>20x Tournoi Éclair
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm speed-preset-btn fw-bold" onclick="applyDevSpeedPreset(50, 50, 20, this)">
+                        <i class="fa-solid fa-rocket me-1"></i>50x Hyper / Dev
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulaire Principal de Vitesses et Équilibrage -->
+            <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" id="formWorldSpeedConfig">
+                <input type="hidden" name="action" value="save_world_speed_balancing">
+
+                <!-- 2. Les 3 Curseurs de Vitesse -->
+                <div class="row g-4 mb-4">
+                    <!-- Vitesse du Jeu (Chantiers & Recherches) -->
+                    <div class="col-lg-4">
+                        <div class="card h-100 border shadow-xs p-3 bg-white">
+                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fa-solid fa-bolt text-danger me-1"></i>Vitesse du Jeu (Chantiers)</span>
+                                <span class="badge bg-danger text-white font-monospace fs-4" id="badge-val-game-speed">x<?= (int)$gameSpeed ?></span>
+                            </label>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <input type="range" class="form-range flex-grow-1" id="sliderGameSpeed" name="game_speed_slider" min="1" max="100" value="<?= (int)$gameSpeed ?>" style="cursor:pointer; height:8px;">
+                                <input type="number" class="form-control text-center font-monospace fw-bold fs-4" style="width: 80px;" id="inputGameSpeed" name="game_speed" min="1" max="100" value="<?= (int)$gameSpeed ?>">
+                            </div>
+                            <div class="text-secondary small mt-auto">
+                                <i class="fa-solid fa-circle-info text-danger me-1"></i>Divise la durée requise pour tous les chantiers (Tenshu, Parcelles rurales, Bâtiments urbains) et recherches de l'Académie.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Production des Ressources -->
+                    <div class="col-lg-4">
+                        <div class="card h-100 border shadow-xs p-3 bg-white">
+                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Production des Ressources</span>
+                                <span class="badge bg-warning text-dark font-monospace fs-4" id="badge-val-resource-speed">x<?= (int)$resourceSpeed ?></span>
+                            </label>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <input type="range" class="form-range flex-grow-1" id="sliderResourceSpeed" name="resource_speed_slider" min="1" max="100" value="<?= (int)$resourceSpeed ?>" style="cursor:pointer; height:8px;">
+                                <input type="number" class="form-control text-center font-monospace fw-bold fs-4" style="width: 80px;" id="inputResourceSpeed" name="resource_speed" min="1" max="100" value="<?= (int)$resourceSpeed ?>">
+                            </div>
+                            <div class="text-secondary small mt-auto">
+                                <i class="fa-solid fa-circle-info text-warning me-1"></i>Multiplie la cadence horaire de Bois de Cèdre, Pierre de Granit, Koku de Riz, Poisson, Argile et Charbon.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Marche des Troupes & Expéditions -->
+                    <div class="col-lg-4">
+                        <div class="card h-100 border shadow-xs p-3 bg-white">
+                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fa-solid fa-person-walking text-primary me-1"></i>Marche des Troupes &amp; Trajets</span>
+                                <span class="badge bg-primary text-white font-monospace fs-4" id="badge-val-fleet-speed">x<?= (int)$fleetSpeed ?></span>
+                            </label>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <input type="range" class="form-range flex-grow-1" id="sliderFleetSpeed" name="fleet_speed_slider" min="1" max="50" value="<?= (int)$fleetSpeed ?>" style="cursor:pointer; height:8px;">
+                                <input type="number" class="form-control text-center font-monospace fw-bold fs-4" style="width: 80px;" id="inputFleetSpeed" name="fleet_speed" min="1" max="50" value="<?= (int)$fleetSpeed ?>">
+                            </div>
+                            <div class="text-secondary small mt-auto">
+                                <i class="fa-solid fa-circle-info text-primary me-1"></i>Accélère les régiments féodaux pour les assauts, convois de tributs marchands, fondations de fiefs et quêtes du Héros.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Simulateur d'Impact Temporel en Direct (JS Temps Réel) -->
+                <div class="card border-primary bg-primary bg-opacity-10 shadow-xs mb-4">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <h5 class="m-0 text-primary fw-bold d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-calculator text-primary"></i>Simulateur d'Impact Temporel en Temps Réel
+                            </h5>
+                            <span class="badge bg-white text-primary border font-monospace">Prévisualisation instantanée sans rechargement</span>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="p-3 bg-white border rounded shadow-xs h-100">
+                                    <div class="text-secondary small fw-bold mb-1">
+                                        <i class="fa-solid fa-building text-danger me-1"></i>Chantier Tenshu Niv 10 :
+                                    </div>
+                                    <div class="d-flex align-items-baseline gap-2">
+                                        <span class="h2 m-0 font-monospace text-danger fw-bold" id="sim-build-time">--</span>
+                                        <span class="text-muted small text-decoration-line-through">base 1h 00m</span>
+                                    </div>
+                                    <div class="text-muted small mt-1">Impact Vitesse Jeu (Base 3 600 s)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 bg-white border rounded shadow-xs h-100">
+                                    <div class="text-secondary small fw-bold mb-1">
+                                        <i class="fa-solid fa-horse text-primary me-1"></i>Marche Régimentaire (10 Tuiles) :
+                                    </div>
+                                    <div class="d-flex align-items-baseline gap-2">
+                                        <span class="h2 m-0 font-monospace text-primary fw-bold" id="sim-march-time">--</span>
+                                        <span class="text-muted small text-decoration-line-through">base 30m 00s</span>
+                                    </div>
+                                    <div class="text-muted small mt-1">Impact Vitesse Marche (Base 1 800 s)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 bg-white border rounded shadow-xs h-100">
+                                    <div class="text-secondary small fw-bold mb-1">
+                                        <i class="fa-solid fa-wheat-awn text-warning me-1"></i>Rizière Niv 10 (Production) :
+                                    </div>
+                                    <div class="d-flex align-items-baseline gap-2">
+                                        <span class="h2 m-0 font-monospace text-success fw-bold" id="sim-resource-prod">--</span>
+                                        <span class="text-muted small text-decoration-line-through">base 250/h</span>
+                                    </div>
+                                    <div class="text-muted small mt-1">Impact Vitesse Prod (Base 250 koku/h)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Règles & Équilibrage Féodal (Protection, Héros, Famine) -->
+                <div class="row g-4 mb-4">
+                    <!-- Immunité Débutant -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
+                            <span><i class="fa-solid fa-shield-halved text-success me-1"></i>Immunité Débutant</span>
+                            <span class="badge bg-success-lt font-monospace fw-bold" id="badge-val-protection-days"><?= (int)$beginnerProtectionDays ?> jours</span>
+                        </label>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <input type="range" class="form-range flex-grow-1" id="sliderProtectionDays" name="protection_days_slider" min="0" max="30" value="<?= (int)$beginnerProtectionDays ?>" style="cursor:pointer;">
+                            <div class="input-group" style="width: 90px;">
+                                <input type="number" class="form-control text-center font-monospace fw-bold" id="inputProtectionDays" name="beginner_protection_days" min="0" max="60" value="<?= (int)$beginnerProtectionDays ?>">
+                                <span class="input-group-text px-1 text-muted">j</span>
+                            </div>
+                        </div>
+                        <div class="text-secondary small">Durée d'immunité accordée à l'inscription (0 = désactiver).</div>
+                    </div>
+
+                    <!-- Cages de Capture Kago Héros -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
+                            <span><i class="fa-solid fa-box-open text-warning me-1"></i>Cages Kago en Quête (%)</span>
+                            <span class="badge bg-warning-lt font-monospace fw-bold" id="badge-val-cage-drop"><?= (int)$heroCageDropRate ?> %</span>
+                        </label>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <input type="range" class="form-range flex-grow-1" id="sliderCageDrop" name="cage_drop_slider" min="0" max="100" value="<?= (int)$heroCageDropRate ?>" style="cursor:pointer;">
+                            <div class="input-group" style="width: 90px;">
+                                <input type="number" class="form-control text-center font-monospace fw-bold" id="inputCageDrop" name="hero_cage_drop_rate" min="0" max="100" value="<?= (int)$heroCageDropRate ?>">
+                                <span class="input-group-text px-1 text-muted">%</span>
+                            </div>
+                        </div>
+                        <div class="text-secondary small">Probabilité de rapporter des cages pour capturer la faune sauvage.</div>
+                    </div>
+
+                    <!-- Gain d'XP du Héros -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
+                            <span><i class="fa-solid fa-user-ninja text-purple me-1"></i>Gain d'XP Héros (%)</span>
+                            <span class="badge bg-purple-lt font-monospace fw-bold" id="badge-val-hero-xp"><?= (int)$heroXpRatePercent ?> %</span>
+                        </label>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <input type="range" class="form-range flex-grow-1" id="sliderHeroXp" name="hero_xp_slider" min="10" max="500" step="5" value="<?= (int)$heroXpRatePercent ?>" style="cursor:pointer;">
+                            <div class="input-group" style="width: 90px;">
+                                <input type="number" class="form-control text-center font-monospace fw-bold" id="inputHeroXp" name="hero_xp_rate_percent" min="10" max="500" step="5" value="<?= (int)$heroXpRatePercent ?>">
+                                <span class="input-group-text px-1 text-muted">%</span>
+                            </div>
+                        </div>
+                        <div class="text-secondary small">Multiplicateur d'XP en aventures (100% = normal, 200% = double XP).</div>
+                    </div>
+                </div>
+
+                <!-- 5. Mécanisme de Famine & Farine Féodale (Optionnel) -->
+                <div class="p-3 rounded border border-danger-subtle bg-danger bg-opacity-10 mb-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <div class="fw-bold text-danger d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-danger"></i>Mécanisme de Famine &amp; Rations de Farine (Optionnel)
+                        </div>
+                        <span class="badge <?= !empty($famineEnabled) ? 'bg-danger text-white' : 'bg-secondary text-white' ?> font-monospace">
+                            <?= !empty($famineEnabled) ? 'Activé' : 'Désactivé' ?>
+                        </span>
+                    </div>
+                    <div class="text-secondary small mb-3">
+                        Si activé, les régiments d'élite consomment de la farine de riz. En cas de pénurie totale, une famine décime les garnisons d'élite à hauteur du taux horaire configuré.
+                    </div>
+
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-4">
+                            <label class="form-check form-switch m-0 d-flex align-items-center gap-2">
+                                <input class="form-check-input" type="checkbox" id="checkFamineEnabled" name="famine_enabled" value="1" <?= !empty($famineEnabled) ? 'checked' : '' ?>>
+                                <span class="form-check-label fw-bold text-dark">Activer le péril de la famine</span>
+                            </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
+                                <span>Pertes horaires en famine :</span>
+                                <span class="badge bg-danger text-white font-monospace" id="badge-val-famine-rate"><?= (float)$famineRate ?> %</span>
+                            </label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="range" class="form-range flex-grow-1" id="sliderFamineRate" name="famine_rate_slider" min="0.5" max="25.0" step="0.5" value="<?= (float)$famineRate ?>" style="cursor:pointer;">
+                                <div class="input-group" style="width: 85px;">
+                                    <input type="number" class="form-control text-center font-monospace fw-bold" id="inputFamineRate" name="famine_rate" min="0.5" max="25.0" step="0.5" value="<?= (float)$famineRate ?>">
+                                    <span class="input-group-text px-1 text-muted">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
+                                <span>Rations requises (Farine / 100 sold. / h) :</span>
+                                <span class="badge bg-warning text-dark font-monospace" id="badge-val-famine-flour"><?= (float)$famineFlourConsumption ?></span>
+                            </label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="range" class="form-range flex-grow-1" id="sliderFamineFlour" name="famine_flour_slider" min="0.1" max="10.0" step="0.1" value="<?= (float)$famineFlourConsumption ?>" style="cursor:pointer;">
+                                <div class="input-group" style="width: 85px;">
+                                    <input type="number" class="form-control text-center font-monospace fw-bold" id="inputFamineFlour" name="famine_flour_consumption" min="0.1" max="10.0" step="0.1" value="<?= (float)$famineFlourConsumption ?>">
+                                    <span class="input-group-text px-1 text-muted"><i class="fa-solid fa-bowl-rice"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Bouton d'Enregistrement -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pt-3 border-top">
+                    <div class="text-secondary small">
+                        <i class="fa-solid fa-circle-check text-success me-1"></i>Les modifications sont appliquées instantanément à tous les fiefs et armées en cours.
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-lg px-4 fw-bold shadow-sm">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Enregistrer les Vitesses &amp; l'Équilibrage
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION 4 : TÉLÉMÉTRIE D'OCCUPATION DU MONDE & DENSITÉ SPATIALE     -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <div class="row row-cards mb-4">
         <!-- Décomposition de l'occupation spatiale -->
@@ -951,5 +1231,137 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     };
+
+    // ── Item 3 : Vitesses & Équilibrage du Monde Féodal ──
+    const sGame = document.getElementById('sliderGameSpeed');
+    const iGame = document.getElementById('inputGameSpeed');
+    const bGame = document.getElementById('badge-val-game-speed');
+    const hGame = document.getElementById('badge-header-game-speed');
+
+    const sRes = document.getElementById('sliderResourceSpeed');
+    const iRes = document.getElementById('inputResourceSpeed');
+    const bRes = document.getElementById('badge-val-resource-speed');
+    const hRes = document.getElementById('badge-header-resource-speed');
+
+    const sFleet = document.getElementById('sliderFleetSpeed');
+    const iFleet = document.getElementById('inputFleetSpeed');
+    const bFleet = document.getElementById('badge-val-fleet-speed');
+    const hFleet = document.getElementById('badge-header-fleet-speed');
+
+    const simBuild = document.getElementById('sim-build-time');
+    const simMarch = document.getElementById('sim-march-time');
+    const simProd = document.getElementById('sim-resource-prod');
+
+    function formatDurationFr(seconds) {
+        seconds = Math.round(seconds);
+        if (seconds < 60) return seconds + "s";
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        if (m < 60) {
+            return s > 0 ? (m + "m " + (s < 10 ? "0" : "") + s + "s") : (m + "m 00s");
+        }
+        const h = Math.floor(m / 60);
+        const remM = m % 60;
+        return h + "h " + (remM < 10 ? "0" : "") + remM + "m";
+    }
+
+    function updateSpeedSimulator() {
+        const gSpeed = parseInt(iGame ? iGame.value : 5, 10) || 1;
+        const rSpeed = parseInt(iRes ? iRes.value : 5, 10) || 1;
+        const fSpeed = parseInt(iFleet ? iFleet.value : 5, 10) || 1;
+
+        // Tenshu niv 10 base = 3600s
+        const buildSec = Math.max(1, Math.round(3600 / gSpeed));
+        if (simBuild) simBuild.innerText = formatDurationFr(buildSec);
+
+        // Marche infanterie 10 tuiles base = 1800s
+        const marchSec = Math.max(1, Math.round(1800 / fSpeed));
+        if (simMarch) simMarch.innerText = formatDurationFr(marchSec);
+
+        // Rizière niv 10 base = 250 koku/h
+        const prod = 250 * rSpeed;
+        if (simProd) simProd.innerText = formatNumberFr(prod) + " koku/h";
+    }
+
+    function syncSpeedControl(slider, input, badge, headerBadge, suffixTitle) {
+        if (!slider || !input) return;
+        slider.addEventListener('input', function() {
+            input.value = this.value;
+            if (badge) badge.innerText = 'x' + this.value;
+            if (headerBadge) headerBadge.innerText = 'x' + this.value + ' ' + suffixTitle;
+            updateSpeedSimulator();
+        });
+        input.addEventListener('input', function() {
+            let val = parseInt(this.value, 10);
+            if (!isNaN(val)) {
+                if (val >= parseInt(slider.min, 10) && val <= parseInt(slider.max, 10)) {
+                    slider.value = val;
+                }
+                if (badge) badge.innerText = 'x' + val;
+                if (headerBadge) headerBadge.innerText = 'x' + val + ' ' + suffixTitle;
+                updateSpeedSimulator();
+            }
+        });
+    }
+
+    syncSpeedControl(sGame, iGame, bGame, hGame, 'Jeu');
+    syncSpeedControl(sRes, iRes, bRes, hRes, 'Prod');
+    syncSpeedControl(sFleet, iFleet, bFleet, hFleet, 'Marche');
+
+    function syncSimpleControl(sliderId, inputId, badgeId, suffix) {
+        const s = document.getElementById(sliderId);
+        const i = document.getElementById(inputId);
+        const b = document.getElementById(badgeId);
+        if (!s || !i) return;
+        s.addEventListener('input', function() {
+            i.value = this.value;
+            if (b) b.innerText = this.value + (suffix ? ' ' + suffix : '');
+        });
+        i.addEventListener('input', function() {
+            let val = parseFloat(this.value);
+            if (!isNaN(val)) {
+                if (val >= parseFloat(s.min) && val <= parseFloat(s.max)) {
+                    s.value = val;
+                }
+                if (b) b.innerText = this.value + (suffix ? ' ' + suffix : '');
+            }
+        });
+    }
+
+    syncSimpleControl('sliderProtectionDays', 'inputProtectionDays', 'badge-val-protection-days', 'jours');
+    syncSimpleControl('sliderCageDrop', 'inputCageDrop', 'badge-val-cage-drop', '%');
+    syncSimpleControl('sliderHeroXp', 'inputHeroXp', 'badge-val-hero-xp', '%');
+    syncSimpleControl('sliderFamineRate', 'inputFamineRate', 'badge-val-famine-rate', '%');
+    syncSimpleControl('sliderFamineFlour', 'inputFamineFlour', 'badge-val-famine-flour', '');
+
+    window.applyDevSpeedPreset = function(g, r, f, btnElem) {
+        if (sGame) sGame.value = g;
+        if (iGame) iGame.value = g;
+        if (bGame) bGame.innerText = 'x' + g;
+        if (hGame) hGame.innerText = 'x' + g + ' Jeu';
+
+        if (sRes) sRes.value = r;
+        if (iRes) iRes.value = r;
+        if (bRes) bRes.innerText = 'x' + r;
+        if (hRes) hRes.innerText = 'x' + r + ' Prod';
+
+        if (sFleet) sFleet.value = f;
+        if (iFleet) iFleet.value = f;
+        if (bFleet) bFleet.innerText = 'x' + f;
+        if (hFleet) hFleet.innerText = 'x' + f + ' Marche';
+
+        updateSpeedSimulator();
+
+        document.querySelectorAll('.speed-preset-btn').forEach(function(b) {
+            b.classList.remove('btn-danger', 'shadow-sm');
+            b.classList.add('btn-outline-secondary');
+        });
+        if (btnElem) {
+            btnElem.classList.remove('btn-outline-secondary');
+            btnElem.classList.add('btn-danger', 'shadow-sm');
+        }
+    };
+
+    updateSpeedSimulator();
 });
 </script>

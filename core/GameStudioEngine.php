@@ -599,6 +599,17 @@ class GameStudioEngine {
             }
         } catch (Throwable $e) {}
 
+        // ── Vitesses & Équilibrage du Monde Féodal (Item 3) ──
+        $gameSpeed              = (int)GameConfig::get('game_speed', 5);
+        $resourceSpeed          = (int)GameConfig::get('resource_speed', 5);
+        $fleetSpeed             = (int)GameConfig::get('fleet_speed', 5);
+        $beginnerProtectionDays = (int)GameConfig::get('beginner_protection_days', 7);
+        $heroXpRatePercent      = (int)GameConfig::get('hero_xp_rate_percent', 100);
+        $heroCageDropRate       = (int)GameConfig::get('hero_cage_drop_rate', 25);
+        $famineEnabled          = (bool)GameConfig::get('famine_enabled', false);
+        $famineRate             = (float)GameConfig::get('famine_rate', 3.0);
+        $famineFlourConsumption = (float)GameConfig::get('famine_flour_consumption', 1.0);
+
         return [
             'worldRadius'           => $radius,
             'totalTiles'            => $totalTiles,
@@ -617,7 +628,7 @@ class GameStudioEngine {
             'biomesEstimate'        => $biomesEstimate,
             'quadrants'             => $quadrants,
             'outOfBoundsEntities'   => $outOfBoundsEntities,
-            // Oasis
+            // Oasis (Item 2)
             'oasisDensityPercent'   => $oasisDensityPercent,
             'oasisRespawnOnCapture' => $oasisRespawnOnCapture,
             'targetOasesCount'      => $targetOasesCount,
@@ -625,7 +636,17 @@ class GameStudioEngine {
             'oasisWild'             => $oasisWild,
             'allOasesList'          => $allOasesList,
             'oasisFaunaCount'       => $oasisFaunaCount,
-            'faunaSummary'          => $faunaSummary
+            'faunaSummary'          => $faunaSummary,
+            // Vitesses & Équilibrage (Item 3)
+            'gameSpeed'              => $gameSpeed,
+            'resourceSpeed'          => $resourceSpeed,
+            'fleetSpeed'             => $fleetSpeed,
+            'beginnerProtectionDays' => $beginnerProtectionDays,
+            'heroXpRatePercent'      => $heroXpRatePercent,
+            'heroCageDropRate'       => $heroCageDropRate,
+            'famineEnabled'          => $famineEnabled,
+            'famineRate'             => $famineRate,
+            'famineFlourConsumption' => $famineFlourConsumption
         ];
     }
 
@@ -778,6 +799,36 @@ class GameStudioEngine {
                 'message' => 'Erreur lors du repeuplement de la faune sauvage : ' . $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * Sauvegarde les vitesses et les règles d'équilibrage du monde féodal (Item 3)
+     */
+    public function saveSpeedBalancing(array $params): array {
+        $gameSpeed              = max(1, min(100, (int)($params['game_speed'] ?? 5)));
+        $resourceSpeed          = max(1, min(100, (int)($params['resource_speed'] ?? 5)));
+        $fleetSpeed             = max(1, min(50, (int)($params['fleet_speed'] ?? 5)));
+        $beginnerProtectionDays = max(0, min(30, (int)($params['beginner_protection_days'] ?? 7)));
+        $heroXpRate             = max(10, min(500, (int)($params['hero_xp_rate_percent'] ?? 100)));
+        $heroCageDropRate       = max(0, min(100, (int)($params['hero_cage_drop_rate'] ?? 25)));
+        $famineEnabled          = !empty($params['famine_enabled']);
+        $famineRate             = max(0.5, min(25.0, (float)($params['famine_rate'] ?? 3.0)));
+        $famineFlour            = max(0.1, min(10.0, (float)($params['famine_flour_consumption'] ?? 1.0)));
+
+        GameConfig::set('game_speed', $gameSpeed);
+        GameConfig::set('resource_speed', $resourceSpeed);
+        GameConfig::set('fleet_speed', $fleetSpeed);
+        GameConfig::set('beginner_protection_days', $beginnerProtectionDays);
+        GameConfig::set('hero_xp_rate_percent', $heroXpRate);
+        GameConfig::set('hero_cage_drop_rate', $heroCageDropRate);
+        GameConfig::set('famine_enabled', $famineEnabled);
+        GameConfig::set('famine_rate', $famineRate);
+        GameConfig::set('famine_flour_consumption', $famineFlour);
+
+        return [
+            'success' => true,
+            'message' => "Vitesses et équilibrage féodal enregistrés avec succès : Jeu x{$gameSpeed}, Ressources x{$resourceSpeed}, Marche x{$fleetSpeed}, Immunité {$beginnerProtectionDays}j."
+        ];
     }
 }
 
