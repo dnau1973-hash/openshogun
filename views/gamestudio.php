@@ -93,6 +93,34 @@ if ($currentTab === 'dashboard') {
             ];
             header('Location: ?page=gamestudio&tab=general&subtab=world_config');
             exit;
+        } elseif ($_POST['action'] === 'save_oasis_settings') {
+            $density = (float)($_POST['oasis_density_percent'] ?? 2.0);
+            $respawn = !empty($_POST['oasis_respawn_on_capture']);
+            $res = $gameStudioEngine->saveOasisSettings($density, $respawn);
+            $_SESSION['general_flash'] = [
+                'type' => $res['success'] ? 'success' : 'danger',
+                'msg'  => $res['message']
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config');
+            exit;
+        } elseif ($_POST['action'] === 'repopulate_world_oases') {
+            $density = (float)($_POST['oasis_density_percent'] ?? 2.0);
+            $clearUnoccupied = !empty($_POST['clear_unoccupied']);
+            $res = $gameStudioEngine->repopulateWorldOases($density, null, $clearUnoccupied);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Génération des oasis terminée.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config');
+            exit;
+        } elseif ($_POST['action'] === 'respawn_wild_fauna') {
+            $res = $gameStudioEngine->respawnWildFauna();
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Faune sauvage régénérée.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config');
+            exit;
         }
     }
     $generalData = $gameStudioEngine->getGeneralData();

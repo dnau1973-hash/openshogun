@@ -63,17 +63,38 @@ $sqlite->exec("CREATE TABLE authentic_castles (
 
 $sqlite->exec("CREATE TABLE oases (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    owner_planet_id INTEGER NULL,
     name TEXT,
+    oasis_type TEXT DEFAULT 'lake_rice_50',
     coord_x INTEGER DEFAULT 0,
-    coord_y INTEGER DEFAULT 0
+    coord_y INTEGER DEFAULT 0,
+    bonus_wood INTEGER DEFAULT 0,
+    bonus_stone INTEGER DEFAULT 0,
+    bonus_rice INTEGER DEFAULT 50,
+    res_wood INTEGER DEFAULT 1000,
+    res_stone INTEGER DEFAULT 1000,
+    res_rice INTEGER DEFAULT 1000,
+    res_max INTEGER DEFAULT 5000,
+    last_loot_time INTEGER DEFAULT 0
+)");
+
+$sqlite->exec("CREATE TABLE oasis_units (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    oasis_id INTEGER,
+    unit_code TEXT,
+    count INTEGER DEFAULT 0,
+    is_wild INTEGER DEFAULT 1
 )");
 
 // Insertion de données de test
 $sqlite->exec("INSERT INTO game_settings (setting_key, setting_value, setting_type) VALUES ('world_radius', '35', 'int')");
+$sqlite->exec("INSERT INTO game_settings (setting_key, setting_value, setting_type) VALUES ('oasis_density_percent', '2.0', 'float')");
+$sqlite->exec("INSERT INTO game_settings (setting_key, setting_value, setting_type) VALUES ('oasis_respawn_on_capture', '1', 'boolean')");
 $sqlite->exec("INSERT INTO users (id, username, is_bot) VALUES (1, 'Nezzar', 0), (2, 'TakedaBot', 1)");
 $sqlite->exec("INSERT INTO planets (user_id, name, coord_x, coord_y) VALUES (1, 'Château Nezzar', 1, 1), (2, 'Fort Takeda', -12, 18), (NULL, 'Terre Libre', 15, -20)");
 $sqlite->exec("INSERT INTO authentic_castles (name, coord_x, coord_y, is_spawned) VALUES ('Château de Himeji', -25, -20, 1)");
-$sqlite->exec("INSERT INTO oases (name, coord_x, coord_y) VALUES ('Source Chaude de Kusatsu', 10, 15)");
+$sqlite->exec("INSERT INTO oases (id, name, oasis_type, coord_x, coord_y, bonus_wood, bonus_rice) VALUES (1, 'Source Chaude de Kusatsu', 'lake_rice_50', 10, 15, 0, 50)");
+$sqlite->exec("INSERT INTO oasis_units (oasis_id, unit_code, count, is_wild) VALUES (1, 'sanglier_sauvage', 25, 1), (1, 'loup_honshu', 15, 1)");
 
 GameConfig::clearCache();
 
@@ -152,6 +173,28 @@ assertTest(strpos($html, 'applyWorldPreset') !== false, "Fonction JS de prérég
 assertTest(strpos($html, 'Biomes Naturels Déterministes') !== false, "Section des biomes procéduraux présente");
 assertTest(strpos($html, 'Découpage Tactique des 4 Quadrants') !== false, "Section des 4 quadrants tactiques présente");
 
+// [TEST 7] Item 2 : Configuration & Écosystème des Oasis
+echo "\n[TEST 7] Test de l'Item 2 : Configuration des Oasis et Calcul Dynamique...\n";
+$saveOasisRes = $gameStudioEngine->saveOasisSettings(2.5, true);
+assertTest($saveOasisRes['success'] === true, "saveOasisSettings(2.5, true) exécuté avec succès");
+assertTest((float)GameConfig::get('oasis_density_percent') === 2.5, "oasis_density_percent mis à jour à 2.5%");
+assertTest((bool)GameConfig::get('oasis_respawn_on_capture') === true, "oasis_respawn_on_capture mis à jour à true");
+
+// Vérifier les nouvelles données extraites
+$refreshedWorldData = $gameStudioEngine->getWorldConfigData();
+assertTest(isset($refreshedWorldData['oasisDensityPercent']) && $refreshedWorldData['oasisDensityPercent'] === 2.5, "oasisDensityPercent reflété dans getWorldConfigData");
+assertTest(isset($refreshedWorldData['targetOasesCount']) && $refreshedWorldData['targetOasesCount'] === 126, "targetOasesCount calculé pour 5041 tuiles à 2.5% (= 126 oasis)");
+assertTest(isset($refreshedWorldData['allOasesList']) && count($refreshedWorldData['allOasesList']) >= 1, "allOasesList contient les oasis du monde");
+assertTest(isset($refreshedWorldData['oasisFaunaCount']) && $refreshedWorldData['oasisFaunaCount'] === 40, "oasisFaunaCount compte exactement les bêtes sauvages (25 + 15 = 40)");
+
+// Rendu HTML Item 2
+assertTest(strpos($html, '2. Configuration &amp; Écosystème des Oasis Naturelles') !== false, "Le 2e item 'Configuration & Écosystème des Oasis Naturelles' est présent");
+assertTest(strpos($html, 'id="oasisDensitySlider"') !== false, "Slider de densité des oasis présent dans le DOM");
+assertTest(strpos($html, 'id="oasisRespawnToggle"') !== false, "Switch de réapparition automatique présent");
+assertTest(strpos($html, 'id="formRepopulateOases"') !== false, "Formulaire de génération & rééquilibrage présent");
+assertTest(strpos($html, 'id="formRespawnFauna"') !== false, "Formulaire de régénération de faune présent");
+assertTest(strpos($html, 'id="tableOasesList"') !== false, "Registre interactif des oasis présent dans la vue");
+
 echo "\n========================================================================\n";
-echo " TOUS LES TESTS DE CONFIGURATION DU MONDE SONT AU VERT ! \n";
+echo " TOUS LES TESTS DE CONFIGURATION DU MONDE & OASIS SONT AU VERT ! \n";
 echo "========================================================================\n";

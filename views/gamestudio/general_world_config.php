@@ -49,7 +49,7 @@ unset($_SESSION['general_flash']);
                 <i class="fa-solid fa-earth-asia text-azure"></i>Configuration Spatiale &amp; Arpentage de l'Archipel
             </h4>
             <div class="text-secondary small mt-1">
-                Ajustez les dimensions de la grille de coordonnées, calculez le nombre total de tuiles générées et supervisez la répartition géographique du Japon féodal.
+                Ajustez les dimensions de la grille de coordonnées, calculez le nombre total de tuiles générées, supervisez l'écosystème des oasis et la répartition géographique du Japon féodal.
             </div>
         </div>
         <div class="d-flex align-items-center gap-2">
@@ -272,7 +272,306 @@ unset($_SESSION['general_flash']);
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!-- SECTION 2 : TÉLÉMÉTRIE D'OCCUPATION DU MONDE & DENSITÉ SPATIALE     -->
+    <!-- DEUXIÈME ITEM MAJEUR : OUTILS DE CONFIGURATION DES OASIS            -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="card mb-4 border-success shadow-sm overflow-hidden" id="section-world-oases-config" style="border-width: 2px;">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
+            <div>
+                <h3 class="card-title text-white m-0 d-flex align-items-center gap-2 fw-bold" style="font-size:1.25rem;">
+                    <i class="fa-solid fa-leaf text-warning fs-2"></i>
+                    <span>2. Configuration &amp; Écosystème des Oasis Naturelles</span>
+                </h3>
+                <div class="text-white-50 small mt-1">
+                    Maîtrisez la densité de couverture (%), le cycle de réapparition automatique après capture et la garnison de faune sauvage (Sangliers, Loups, Ours).
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-white text-success fw-bold px-3 py-2 font-monospace fs-4 shadow-sm" id="badge-oases-total-preview">
+                    <?= number_format((int)$oasesCount) ?> Oasis Actives
+                </span>
+                <span class="badge bg-success-subtle text-white font-monospace">
+                    <?= htmlspecialchars((string)$oasisDensityPercent) ?>% de couverture
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body p-4 bg-light bg-opacity-25">
+            <!-- Formulaire des Paramètres d'Oasis -->
+            <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" id="formOasisSettings" class="mb-4">
+                <input type="hidden" name="action" value="save_oasis_settings">
+
+                <div class="row g-4 align-items-center">
+                    <!-- Slider de Densité Cible (%) -->
+                    <div class="col-lg-6">
+                        <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                            <span>
+                                <i class="fa-solid fa-percent text-success me-1"></i>Densité de Couverture Cible (%) :
+                            </span>
+                            <span class="text-secondary small font-monospace">
+                                Objectif Calculé : <strong class="text-success" id="label-target-oases-count"><?= (int)$targetOasesCount ?></strong> oasis cibles
+                            </span>
+                        </label>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="range" 
+                                   class="form-range flex-grow-1" 
+                                   id="oasisDensitySlider" 
+                                   name="oasis_density_slider" 
+                                   min="0.5" 
+                                   max="10.0" 
+                                   step="0.1" 
+                                   value="<?= (float)$oasisDensityPercent ?>"
+                                   style="cursor: pointer; height: 8px;">
+
+                            <div class="input-group" style="width: 130px;">
+                                <input type="number" 
+                                       class="form-control text-center fw-bold font-monospace fs-4" 
+                                       id="oasisDensityInput" 
+                                       name="oasis_density_percent" 
+                                       min="0.5" 
+                                       max="20.0" 
+                                       step="0.1" 
+                                       value="<?= (float)$oasisDensityPercent ?>">
+                                <span class="input-group-text bg-white fw-bold text-success font-monospace">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Raccourcis de densité -->
+                        <div class="d-flex gap-2 mt-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 font-monospace" onclick="applyOasisDensity(1.0)">1.0% (Rare)</button>
+                            <button type="button" class="btn btn-sm btn-outline-success py-1 px-2 font-monospace fw-bold" onclick="applyOasisDensity(2.0)">2.0% (Standard)</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 font-monospace" onclick="applyOasisDensity(3.5)">3.5% (Abondant)</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 font-monospace" onclick="applyOasisDensity(5.0)">5.0% (Luxuriant)</button>
+                        </div>
+                    </div>
+
+                    <!-- Switch de Réapparition Automatique & Bouton Sauvegarde -->
+                    <div class="col-lg-6">
+                        <div class="card card-body bg-white border p-3 shadow-xs">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       role="switch" 
+                                       id="oasisRespawnToggle" 
+                                       name="oasis_respawn_on_capture" 
+                                       value="1" 
+                                       <?= $oasisRespawnOnCapture ? 'checked' : '' ?>>
+                                <label class="form-check-label fw-bold text-dark ms-2" for="oasisRespawnToggle">
+                                    <i class="fa-solid fa-arrows-rotate text-success me-1"></i>Réapparition Automatique après Capture (Style Travian)
+                                </label>
+                                <div class="text-secondary small mt-1">
+                                    Dès qu'une oasis sauvage est capturée par un fief, une nouvelle oasis sauvage apparaît immédiatement dans un quadrant pour maintenir constante la densité mondiale.
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success fw-bold w-100 shadow-sm" id="btnSaveOasisSettings">
+                                <i class="fa-solid fa-floppy-disk me-2"></i>Enregistrer les Paramètres des Oasis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- ── OUTILS OPÉRATIONNELS D'ACTION DIRECTE (GÉNÉRATEUR & FAUNE) ── -->
+            <div class="card card-body bg-white border mb-4 shadow-xs">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <h4 class="card-title text-dark m-0 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-toolbox text-secondary"></i>Outils Opérationnels du Générateur d'Oasis
+                    </h4>
+                    <span class="text-secondary small">
+                        Calcul basé sur les <strong class="text-dark"><?= number_format((int)$totalTiles, 0, ',', ' ') ?> tuiles</strong> du monde actuel
+                    </span>
+                </div>
+
+                <div class="row g-3 align-items-center">
+                    <!-- Outil 1 : Génération & Rééquilibrage du Réseau -->
+                    <div class="col-md-7">
+                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" id="formRepopulateOases" class="p-3 bg-light rounded border h-100">
+                            <input type="hidden" name="action" value="repopulate_world_oases">
+                            <input type="hidden" name="oasis_density_percent" id="hiddenRepopDensity" value="<?= (float)$oasisDensityPercent ?>">
+
+                            <div class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-seedling text-success"></i>Génération &amp; Rééquilibrage Mondial
+                            </div>
+                            <div class="text-secondary small mb-3">
+                                Peuple la carte jusqu'au quota cible (<span class="font-monospace fw-bold text-success" id="label-repop-target"><?= (int)$targetOasesCount ?></span> oasis) réparties équitablement entre les 4 quadrants.
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="clear_unoccupied" id="checkClearUnoccupied" value="1" checked>
+                                <label class="form-check-label small fw-bold text-dark" for="checkClearUnoccupied">
+                                    <i class="fa-solid fa-shield-halved text-primary me-1"></i>Sécurité : Remplacer uniquement les oasis sauvages existantes (préserve 100% des oasis annexées par des joueurs)
+                                </label>
+                            </div>
+
+                            <button type="button" onclick="confirmRepopulateOases()" class="btn btn-success fw-bold w-100 shadow-sm">
+                                <i class="fa-solid fa-bolt me-1"></i>Lancer la Génération &amp; Rééquilibrage
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Outil 2 : Régénération de la Faune Sauvage -->
+                    <div class="col-md-5">
+                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" id="formRespawnFauna" class="p-3 bg-light rounded border h-100 d-flex flex-column justify-content-between">
+                            <input type="hidden" name="action" value="respawn_wild_fauna">
+
+                            <div>
+                                <div class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-paw text-warning"></i>Régénération de la Faune Sauvage
+                                </div>
+                                <div class="text-secondary small mb-3">
+                                    Réapprovisionne la garnison animale (Sangliers, Loups du Kiso, Ours bruns) sur les oasis sauvages dépeuplées ou pacifiées par les raids.
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-outline-warning text-dark fw-bold w-100 shadow-sm mt-auto">
+                                <i class="fa-solid fa-paw me-1"></i>Régénérer les Bêtes Sauvages
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── 4 CARTES KPIS DE L'ÉCOSYSTÈME D'OASIS ── -->
+            <div class="row row-cards mb-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-sm border-start border-3 border-success shadow-xs h-100 bg-white">
+                        <div class="card-body p-3">
+                            <div class="text-secondary small fw-bold text-uppercase mb-1">Oasis Sauvages Libres</div>
+                            <div class="h1 m-0 text-success fw-bold font-monospace"><?= number_format((int)$oasisWild) ?></div>
+                            <div class="text-secondary small mt-2 pt-2 border-top">
+                                <i class="fa-solid fa-tree text-success me-1"></i>Disponibles à la conquête
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-sm border-start border-3 border-primary shadow-xs h-100 bg-white">
+                        <div class="card-body p-3">
+                            <div class="text-secondary small fw-bold text-uppercase mb-1">Oasis Annexées / Fiefs</div>
+                            <div class="h1 m-0 text-primary fw-bold font-monospace"><?= number_format((int)$oasisCaptured) ?></div>
+                            <div class="text-secondary small mt-2 pt-2 border-top">
+                                <i class="fa-solid fa-chess-rook text-primary me-1"></i>Sous protectorat d'un Daimyō
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-sm border-start border-3 border-warning shadow-xs h-100 bg-white">
+                        <div class="card-body p-3">
+                            <div class="text-secondary small fw-bold text-uppercase mb-1">Faune Sauvage Totale</div>
+                            <div class="h1 m-0 text-warning fw-bold font-monospace"><?= number_format((int)$oasisFaunaCount) ?></div>
+                            <div class="text-secondary small mt-2 pt-2 border-top font-monospace">
+                                <i class="fa-solid fa-paw text-warning me-1"></i>Sangliers, Loups &amp; Ours
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-sm border-start border-3 border-teal shadow-xs h-100 bg-white">
+                        <div class="card-body p-3">
+                            <div class="text-secondary small fw-bold text-uppercase mb-1">Couverture Réelle</div>
+                            <?php $actualOasisPct = $totalTiles > 0 ? round(($oasesCount / $totalTiles) * 100, 2) : 0; ?>
+                            <div class="h1 m-0 text-teal fw-bold font-monospace"><?= $actualOasisPct ?>%</div>
+                            <div class="text-secondary small mt-2 pt-2 border-top">
+                                <i class="fa-solid fa-chart-line text-teal me-1"></i>Cible : <?= (float)$oasisDensityPercent ?>%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TABLE DES OASIS ENREGISTRÉES DU MONDE ── -->
+            <div class="card shadow-xs border">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h4 class="card-title text-dark m-0 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-list-check text-success"></i>Registre des Oasis Actives sur l'Archipel (<?= count($allOasesList) ?> recensées)
+                    </h4>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="text" id="filterOasisTable" class="form-control form-control-sm" placeholder="Filtrer par nom ou coords..." style="width: 220px;" onkeyup="filterOasesRows()">
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height: 380px;">
+                    <table class="table table-vcenter table-striped table-hover card-table text-nowrap" id="tableOasesList">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th class="w-1">#</th>
+                                <th>Nom du Havre Naturel</th>
+                                <th class="text-center">Coordonnées</th>
+                                <th>Bonus de Récolte</th>
+                                <th class="text-center">Statut Féodal</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($allOasesList)): ?>
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        <i class="fa-solid fa-seedling text-muted fs-2 d-block mb-2"></i>
+                                        Aucune oasis n'est actuellement déployée. Utilisez le générateur ci-dessus pour peupler l'archipel !
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($allOasesList as $oa): ?>
+                                    <?php 
+                                    $isOccupied = !empty($oa['owner_planet_id']);
+                                    $x = (int)$oa['coord_x'];
+                                    $y = (int)$oa['coord_y'];
+                                    ?>
+                                    <tr class="oasis-data-row">
+                                        <td class="text-secondary font-monospace">#<?= (int)$oa['id'] ?></td>
+                                        <td class="fw-bold">
+                                            <span class="oasis-name-col">
+                                                <i class="fa-solid fa-leaf text-success me-1"></i><?= htmlspecialchars($oa['name']) ?>
+                                            </span>
+                                            <div class="small text-secondary font-monospace"><?= htmlspecialchars($oa['oasis_type'] ?? 'nature') ?></div>
+                                        </td>
+                                        <td class="text-center font-monospace oasis-coords-col">
+                                            <span class="badge bg-dark bg-opacity-75 text-white font-monospace">[<?= $x ?> : <?= $y ?>]</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1 flex-wrap">
+                                                <?php if (!empty($oa['bonus_wood'])): ?>
+                                                    <span class="badge bg-green-lt font-monospace">+<?= (int)$oa['bonus_wood'] ?>% Bois</span>
+                                                <?php endif; ?>
+                                                <?php if (!empty($oa['bonus_stone'])): ?>
+                                                    <span class="badge bg-blue-lt font-monospace">+<?= (int)$oa['bonus_stone'] ?>% Pierre</span>
+                                                <?php endif; ?>
+                                                <?php if (!empty($oa['bonus_rice'])): ?>
+                                                    <span class="badge bg-yellow-lt font-monospace">+<?= (int)$oa['bonus_rice'] ?>% Riz</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <?php if ($isOccupied): ?>
+                                                <span class="badge bg-primary text-white font-monospace">
+                                                    <i class="fa-solid fa-crown me-1"></i>Annexée par <?= htmlspecialchars($oa['owner_username'] ?? 'Fief') ?>
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge bg-success-lt text-success font-monospace fw-bold">
+                                                    <i class="fa-solid fa-paw me-1"></i>Sauvage Libre
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="/?page=galaxy&x=<?= $x ?>&y=<?= $y ?>" target="_blank" class="btn btn-outline-secondary btn-sm" title="Voir sur la Carte des Provinces">
+                                                <i class="fa-solid fa-map-location-dot me-1"></i>Carte
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION 3 : TÉLÉMÉTRIE D'OCCUPATION DU MONDE & DENSITÉ SPATIALE     -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <div class="row row-cards mb-4">
         <!-- Décomposition de l'occupation spatiale -->
@@ -411,7 +710,7 @@ unset($_SESSION['general_flash']);
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!-- SECTION 3 : MINICARTE RADAR DES 4 QUADRANTS & KYOTO [0:0]           -->
+    <!-- SECTION 4 : MINICARTE RADAR DES 4 QUADRANTS & KYOTO [0:0]           -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <div class="card mb-4 border shadow-sm">
         <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -484,10 +783,11 @@ unset($_SESSION['general_flash']);
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->
-<!-- SCRIPT JS DE CALCUL EN TEMPS RÉEL DU NOMBRE DE TUILES                -->
+<!-- SCRIPT JS DE CALCUL EN TEMPS RÉEL (TUILES & OASIS)                   -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ── Item 1 : Dimension du Monde ──
     const slider = document.getElementById('worldRadiusSlider');
     const input = document.getElementById('worldRadiusInput');
     const badgePreview = document.getElementById('badge-total-tiles-preview');
@@ -500,11 +800,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const boxWarning = document.getElementById('boxRadiusSecurityWarning');
     const warnRadiusSpan = document.getElementById('warnSelectedRadius');
 
+    // ── Item 2 : Écosystème des Oasis ──
+    const oasisSlider = document.getElementById('oasisDensitySlider');
+    const oasisInput = document.getElementById('oasisDensityInput');
+    const labelTargetOases = document.getElementById('label-target-oases-count');
+    const hiddenRepopDensity = document.getElementById('hiddenRepopDensity');
+    const labelRepopTarget = document.getElementById('label-repop-target');
+
+    let currentCalculatedTotalTiles = <?= (int)$totalTiles ?>;
     const totalOccupied = <?= (int)$totalOccupied ?>;
     const minRequiredRadius = <?= (int)$minRequiredRadius ?>;
 
     function formatNumberFr(num) {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+
+    function updateOasisCalculations(density) {
+        density = parseFloat(density);
+        if (isNaN(density) || density <= 0) density = 2.0;
+
+        const targetCount = Math.round(currentCalculatedTotalTiles * (density / 100.0));
+        if (labelTargetOases) labelTargetOases.innerText = formatNumberFr(targetCount);
+        if (hiddenRepopDensity) hiddenRepopDensity.value = density.toFixed(1);
+        if (labelRepopTarget) labelRepopTarget.innerText = formatNumberFr(targetCount);
     }
 
     function updateWorldCalculations(radius) {
@@ -513,10 +831,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const dim = (radius * 2) + 1;
         const total = dim * dim;
+        currentCalculatedTotalTiles = total;
         const perimeter = radius * 8;
         const saturation = total > 0 ? ((totalOccupied / total) * 100).toFixed(2) : 0;
 
-        // Mise à jour des affichages
+        // Mise à jour des affichages Item 1
         if (badgePreview) badgePreview.innerText = formatNumberFr(total) + " Tuiles";
         if (labelRange) labelRange.innerText = "[-" + radius + " : +" + radius + "]";
         if (kpiTotal) kpiTotal.innerText = formatNumberFr(total);
@@ -534,6 +853,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 boxWarning.classList.add('d-none');
             }
         }
+
+        // Réactualiser également le nombre cible d'oasis (Item 2) basé sur ce nouveau nombre de tuiles
+        if (oasisInput) {
+            updateOasisCalculations(oasisInput.value);
+        }
     }
 
     if (slider && input) {
@@ -549,6 +873,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     slider.value = val;
                 }
                 updateWorldCalculations(val);
+            }
+        });
+    }
+
+    if (oasisSlider && oasisInput) {
+        oasisSlider.addEventListener('input', function() {
+            oasisInput.value = this.value;
+            updateOasisCalculations(this.value);
+        });
+
+        oasisInput.addEventListener('input', function() {
+            let val = parseFloat(this.value);
+            if (!isNaN(val)) {
+                if (val >= parseFloat(oasisSlider.min) && val <= parseFloat(oasisSlider.max)) {
+                    oasisSlider.value = val;
+                }
+                updateOasisCalculations(val);
             }
         });
     }
@@ -570,6 +911,45 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     };
+
+    window.applyOasisDensity = function(densityVal) {
+        if (oasisSlider) oasisSlider.value = densityVal;
+        if (oasisInput) oasisInput.value = densityVal.toFixed(1);
+        updateOasisCalculations(densityVal);
+    };
+
+    window.confirmRepopulateOases = function() {
+        const density = oasisInput ? parseFloat(oasisInput.value) : 2.0;
+        const target = labelTargetOases ? labelTargetOases.innerText : '';
+        const msg = `Confirmez-vous le rééquilibrage du réseau d'oasis avec une densité de ${density}% (~${target} oasis au total) ?`;
+        
+        if (typeof showConfirmModal === 'function') {
+            showConfirmModal(
+                "Génération & Rééquilibrage des Oasis",
+                msg,
+                () => { document.getElementById('formRepopulateOases').submit(); },
+                'btn-success',
+                '<i class="fa-solid fa-leaf text-success"></i>'
+            );
+        } else {
+            if (confirm(msg)) {
+                document.getElementById('formRepopulateOases').submit();
+            }
+        }
+    };
+
+    window.filterOasesRows = function() {
+        const query = (document.getElementById('filterOasisTable')?.value || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.oasis-data-row');
+        rows.forEach(function(r) {
+            const name = (r.querySelector('.oasis-name-col')?.innerText || '').toLowerCase();
+            const coords = (r.querySelector('.oasis-coords-col')?.innerText || '').toLowerCase();
+            if (!query || name.includes(query) || coords.includes(query)) {
+                r.style.display = '';
+            } else {
+                r.style.display = 'none';
+            }
+        });
+    };
 });
 </script>
-

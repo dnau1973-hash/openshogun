@@ -554,24 +554,78 @@ class GameStudioEngine {
             'lake'     => (int)round($naturalTiles * 0.05)
         ];
 
+        // ── Données et Télémétrie Spécifiques aux Oasis (Item 2) ──
+        $oasisDensityPercent = (float)GameConfig::get('oasis_density_percent', 2.0);
+        $oasisRespawnOnCapture = (bool)GameConfig::get('oasis_respawn_on_capture', true);
+        $targetOasesCount = (int)round($totalTiles * ($oasisDensityPercent / 100.0));
+
+        $oasisCaptured = 0;
+        $oasisWild = 0;
+        $allOasesList = [];
+        $oasisFaunaCount = 0;
+        $faunaSummary = [];
+
+        try {
+            $stmtAllOases = $this->db->query("
+                SELECT o.*, p.name as owner_planet_name, u.username as owner_username
+                FROM oases o
+                LEFT JOIN planets p ON o.owner_planet_id = p.id
+                LEFT JOIN users u ON p.user_id = u.id
+                ORDER BY o.owner_planet_id DESC, o.id ASC
+                LIMIT 150
+            ");
+            if ($stmtAllOases) {
+                while ($row = $stmtAllOases->fetch(PDO::FETCH_ASSOC)) {
+                    if (!empty($row['owner_planet_id'])) {
+                        $oasisCaptured++;
+                    } else {
+                        $oasisWild++;
+                    }
+                    $allOasesList[] = $row;
+                }
+            }
+        } catch (Throwable $e) {}
+
+        try {
+            $stmtUnits = $this->db->query("
+                SELECT ou.unit_code, COALESCE(SUM(ou.count), 0) as total_count
+                FROM oasis_units ou
+                WHERE ou.is_wild = 1
+                GROUP BY ou.unit_code
+            ");
+            if ($stmtUnits) {
+                $faunaSummary = $stmtUnits->fetchAll(PDO::FETCH_KEY_PAIR);
+                $oasisFaunaCount = (int)array_sum($faunaSummary);
+            }
+        } catch (Throwable $e) {}
+
         return [
-            'worldRadius'         => $radius,
-            'totalTiles'          => $totalTiles,
-            'gridDimension'       => $gridDimension,
-            'boundaryPerimeter'   => $boundaryPerimeter,
-            'presets'             => $presets,
-            'minRequiredRadius'   => $minRequiredRadius,
-            'humanVillages'       => $humanVillages,
-            'botVillages'         => $botVillages,
-            'freeLands'           => $freeLands,
-            'authenticCastles'    => $authenticCastles,
-            'oasesCount'          => $oasesCount,
-            'totalOccupied'       => $totalOccupied,
-            'saturationRate'      => $saturationRate,
-            'naturalTiles'        => $naturalTiles,
-            'biomesEstimate'      => $biomesEstimate,
-            'quadrants'           => $quadrants,
-            'outOfBoundsEntities' => $outOfBoundsEntities
+            'worldRadius'           => $radius,
+            'totalTiles'            => $totalTiles,
+            'gridDimension'         => $gridDimension,
+            'boundaryPerimeter'     => $boundaryPerimeter,
+            'presets'               => $presets,
+            'minRequiredRadius'     => $minRequiredRadius,
+            'humanVillages'         => $humanVillages,
+            'botVillages'           => $botVillages,
+            'freeLands'             => $freeLands,
+            'authenticCastles'      => $authenticCastles,
+            'oasesCount'            => $oasesCount,
+            'totalOccupied'         => $totalOccupied,
+            'saturationRate'        => $saturationRate,
+            'naturalTiles'          => $naturalTiles,
+            'biomesEstimate'        => $biomesEstimate,
+            'quadrants'             => $quadrants,
+            'outOfBoundsEntities'   => $outOfBoundsEntities,
+            // Oasis
+            'oasisDensityPercent'   => $oasisDensityPercent,
+            'oasisRespawnOnCapture' => $oasisRespawnOnCapture,
+            'targetOasesCount'      => $targetOasesCount,
+            'oasisCaptured'         => $oasisCaptured,
+            'oasisWild'             => $oasisWild,
+            'allOasesList'          => $allOasesList,
+            'oasisFaunaCount'       => $oasisFaunaCount,
+            'faunaSummary'          => $faunaSummary
         ];
     }
 
@@ -617,6 +671,113 @@ class GameStudioEngine {
             'success' => false,
             'message' => 'Impossible d\'enregistrer la configuration du monde en base de données.'
         ];
+    }
+
+    /**
+     * Enregistre les paramètres de configuration des oasis
+     */
+    public function saveOasisSettings(float $density, bool $respawnOnCapture): array {
+        $density = max(0.5, min(20.0, $density));
+        $res1 = GameConfig::set('oasis_density_percent', $density);
+        $res2 = GameConfig::set('oasis_respawn_on_capture', $respawnOnCapture ? 1 : 0);
+
+        $totalTiles = GameConfig::getTotalTilesCount();
+        $targetCount = (int)round($totalTiles * ($density / 100.0));
+
+        if ($res1 && $res2) {
+            return [
+                'success' => true,
+                'message' => "Configuration des oasis sauvegardée : Densité cible à {$density}% (~{$targetCount} oasis pour {$totalTiles} tuiles), Réapparition automatique après capture : " . ($respawnOnCapture ? 'Activée' : 'Désactivée') . "."
+            ];
+        }
+
+        return [
+            'success' => false,
+            'message' => 'Erreur lors de la sauvegarde des paramètres des oasis dans game_settings.'
+        ];
+    }
+
+    /**
+     * Lance la génération et le rééquilibrage du réseau d'oasis sur la carte
+     */
+    public function repopulateWorldOases(float $density, ?int $radius = null, bool $clearUnoccupied = false): array {
+        require_once __DIR__ . '/OasisEngine.php';
+        $oasisEngine = new OasisEngine();
+        $radius = $radius ?? GameConfig::getWorldRadius();
+
+        // Enregistrer la densité dans les paramètres
+        GameConfig::set('oasis_density_percent', $density);
+
+        $res = $oasisEngine->spawnOasesByDensity($density, $radius, $clearUnoccupied);
+        return $res;
+    }
+
+    /**
+     * Régénère la faune sauvage hostile sur toutes les oasis libres sans défense
+     */
+    public function respawnWildFauna(): array {
+        require_once __DIR__ . '/OasisEngine.php';
+        $templates = OasisEngine::getOasisTemplates();
+        
+        $repopulatedOases = 0;
+        $totalBeastsAdded = 0;
+
+        try {
+            // Sélectionner les oasis libres
+            $stmt = $this->db->query("SELECT id, oasis_type FROM oases WHERE owner_planet_id IS NULL");
+            $wildOases = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+
+            $stmtCheckGarrison = $this->db->prepare("SELECT COALESCE(SUM(count), 0) FROM oasis_units WHERE oasis_id = ? AND is_wild = 1");
+            $stmtInsertGarrison = $this->db->prepare("INSERT INTO oasis_units (oasis_id, unit_code, count, is_wild) VALUES (?, ?, ?, 1)");
+            $stmtUpdateGarrison = $this->db->prepare("UPDATE oasis_units SET count = ? WHERE oasis_id = ? AND unit_code = ? AND is_wild = 1");
+
+            foreach ($wildOases as $wo) {
+                $oid = (int)$wo['id'];
+                $stmtCheckGarrison->execute([$oid]);
+                $currentAnimals = (int)$stmtCheckGarrison->fetchColumn();
+
+                if ($currentAnimals < 15) {
+                    // Trouver le template correspondant ou en choisir un
+                    $chosen = null;
+                    foreach ($templates as $t) {
+                        if ($t['type'] === $wo['oasis_type']) {
+                            $chosen = $t;
+                            break;
+                        }
+                    }
+                    if (!$chosen) {
+                        $chosen = $templates[array_rand($templates)];
+                    }
+
+                    // Réapprovisionner les animaux
+                    foreach ($chosen['animals'] as $uCode => $cnt) {
+                        $stmtCheckAnimal = $this->db->prepare("SELECT id FROM oasis_units WHERE oasis_id = ? AND unit_code = ? AND is_wild = 1");
+                        $stmtCheckAnimal->execute([$oid, $uCode]);
+                        $existingUnitId = $stmtCheckAnimal->fetchColumn();
+
+                        if ($existingUnitId) {
+                            $stmtUpdateGarrison->execute([$cnt, $oid, $uCode]);
+                        } else {
+                            $stmtInsertGarrison->execute([$oid, $uCode, $cnt]);
+                        }
+                        $totalBeastsAdded += $cnt;
+                    }
+                    $repopulatedOases++;
+                }
+            }
+
+            return [
+                'success' => true,
+                'repopulated_oases' => $repopulatedOases,
+                'beasts_added'      => $totalBeastsAdded,
+                'message'           => "Faune sauvage régénérée sur {$repopulatedOases} oasis libres (+{$totalBeastsAdded} bêtes sauvages réintroduites)."
+            ];
+        } catch (Throwable $e) {
+            return [
+                'success' => false,
+                'message' => 'Erreur lors du repeuplement de la faune sauvage : ' . $e->getMessage()
+            ];
+        }
     }
 }
 
