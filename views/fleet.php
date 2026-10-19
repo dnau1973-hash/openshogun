@@ -1177,7 +1177,77 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
     </div>
 </div>
 
+<!-- ========================================================
+     MODALE DE CONFIRMATION : EXPÉDITION D'OUVRIERS DANS UNE OASIS (PÊCHEURS / MINEURS)
+     ======================================================== -->
+<div class="modal fade" id="modalConfirmWorkerExpedition" tabindex="-1" aria-labelledby="workerModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 12px;">
+            <!-- Illustration d'en-tête de l'ouvrier (Pêcheur ou Mineur des Cimes) -->
+            <div style="position: relative; width: 100%; height: 210px; overflow: hidden; background: #0f172a;">
+                <img id="workerModalImage" src="/public/assets/units/pecheur.jpg" alt="Ouvrier Féodal" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
+                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                    <div>
+                        <span id="workerModalBadge" class="badge bg-cyan text-white fw-bold px-2 py-1 mb-1 shadow-sm" style="font-size:0.75rem;">
+                            <i class="fa-solid fa-fish me-1"></i>Pêcheurs Féodaux (Ryōshi 漁師)
+                        </span>
+                        <h3 class="m-0 fw-bold text-white shadow-sm" id="workerModalTitle" style="font-size: 1.25rem;">
+                            Expédition Halieutique
+                        </h3>
+                    </div>
+                    <div>
+                        <span id="workerModalCountBadge" class="badge bg-dark bg-opacity-75 border border-light text-white font-monospace fs-6 px-3 py-1">
+                            10 Ouvriers
+                        </span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+            </div>
+
+            <!-- Corps de la modale -->
+            <div class="modal-body p-4 bg-white">
+                <p class="text-secondary small mb-3" id="workerModalDescription">
+                    Vous êtes sur le point de dépêcher vos ouvriers pour récolter les ressources d'une oasis naturelle.
+                </p>
+
+                <div class="p-3 rounded border mb-3" style="background: #f8fafc;">
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <span class="text-secondary small"><i class="fa-solid fa-location-dot me-1 text-danger"></i>Oasis Ciblée :</span>
+                        <strong class="text-dark font-monospace" id="workerModalTargetText">--</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <span class="text-secondary small"><i class="fa-solid fa-users me-1 text-primary"></i>Artisans Mobilisés :</span>
+                        <strong class="text-dark font-monospace" id="workerModalWorkersCount">--</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary small"><i class="fa-solid fa-boxes-stacked me-1 text-warning"></i>Ressources Ciblées :</span>
+                        <span class="fw-bold" id="workerModalTargetResources">--</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-secondary small p-2 mb-0 d-flex align-items-center gap-2" id="workerModalAlertTip" style="border-left: 4px solid #0ea5e9;">
+                    <i class="fa-solid fa-circle-info fs-4 text-info"></i>
+                    <span id="workerModalTipText">Les cargaisons récoltées lors de l'expédition seront automatiquement déchargées dans vos réserves dès le retour au fief.</span>
+                </div>
+            </div>
+
+            <!-- Pied de modale avec confirmation -->
+            <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-primary fw-bold px-4 shadow-sm" id="btnConfirmWorkerDispatch" onclick="executeFleetDispatch()">
+                    <i class="fa-solid fa-paper-plane me-1"></i>Confirmer l'Expédition
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+let pendingFleetFormData = null;
+
 async function submitFleet() {
     const rawTarget = document.getElementById('targetSelect').value;
     if (!rawTarget) {
@@ -1255,6 +1325,90 @@ async function submitFleet() {
     formData.append('cargo_crystal', document.getElementById('cargo_crystal').value);
     formData.append('cargo_deuterium', document.getElementById('cargo_deuterium').value);
 
+    // Si mission Pêcheurs ou Mineurs : déclenchement de la modale illustrée de confirmation
+    if (missionType === 'fishing' || missionType === 'mining') {
+        pendingFleetFormData = formData;
+
+        const targetSelectEl = document.getElementById('targetSelect');
+        const targetText = targetSelectEl ? targetSelectEl.options[targetSelectEl.selectedIndex].text.trim() : rawTarget;
+
+        const imgEl = document.getElementById('workerModalImage');
+        const badgeEl = document.getElementById('workerModalBadge');
+        const titleEl = document.getElementById('workerModalTitle');
+        const countBadgeEl = document.getElementById('workerModalCountBadge');
+        const descEl = document.getElementById('workerModalDescription');
+        const targetTextEl = document.getElementById('workerModalTargetText');
+        const workersCountEl = document.getElementById('workerModalWorkersCount');
+        const resourcesEl = document.getElementById('workerModalTargetResources');
+        const alertTipEl = document.getElementById('workerModalAlertTip');
+        const tipTextEl = document.getElementById('workerModalTipText');
+        const confirmBtn = document.getElementById('btnConfirmWorkerDispatch');
+
+        if (targetTextEl) targetTextEl.textContent = targetText;
+
+        if (missionType === 'fishing') {
+            const pecheurCnt = parseInt(document.getElementById('ship-pecheur')?.value || '0', 10);
+            if (imgEl) imgEl.src = '/public/assets/units/pecheur.jpg';
+            if (badgeEl) {
+                badgeEl.className = 'badge bg-cyan text-white fw-bold px-2 py-1 mb-1 shadow-sm';
+                badgeEl.innerHTML = '<i class="fa-solid fa-fish me-1"></i>Pêcheurs Féodaux (Ryōshi 漁師)';
+            }
+            if (titleEl) titleEl.textContent = 'Expédition Halieutique — Eaux Calmes';
+            if (countBadgeEl) countBadgeEl.textContent = `${pecheurCnt.toLocaleString('fr-FR')} Pêcheur(s)`;
+            if (descEl) descEl.textContent = 'Vous êtes sur le point de dépêcher vos pêcheurs pour jeter leurs filets sur ce lac naturel et rapporter des cargaisons halieutiques.';
+            if (workersCountEl) workersCountEl.innerHTML = `<span class="text-cyan fw-bold">${pecheurCnt.toLocaleString('fr-FR')}</span> Pêcheurs Féodaux 🐟`;
+            if (resourcesEl) resourcesEl.innerHTML = '<span class="badge bg-cyan-lt text-cyan font-monospace">🐟 Poisson Frais</span> <span class="text-muted small">(Entreposé en Grenier Kura)</span>';
+            if (alertTipEl) alertTipEl.style.borderLeft = '4px solid #06b6d4';
+            if (tipTextEl) tipTextEl.textContent = 'Les poissons pêchés seront automatiquement stockés dans votre Grenier Kura à la vitesse de navigation de vos embarcations.';
+            if (confirmBtn) {
+                confirmBtn.className = 'btn btn-cyan text-white fw-bold px-4 shadow-sm';
+                confirmBtn.innerHTML = '<i class="fa-solid fa-fish me-1"></i>Déployer les Pêcheurs';
+            }
+        } else {
+            const mineurCnt = parseInt(document.getElementById('ship-mineur')?.value || '0', 10);
+            if (imgEl) imgEl.src = '/public/assets/units/mineur.jpg';
+            if (badgeEl) {
+                badgeEl.className = 'badge bg-warning text-dark fw-bold px-2 py-1 mb-1 shadow-sm';
+                badgeEl.innerHTML = '<i class="fa-solid fa-pickaxe me-1"></i>Mineurs des Cimes (Kōfu 鉱夫)';
+            }
+            if (titleEl) titleEl.textContent = 'Expédition des Hauteurs — Forage Minier';
+            if (countBadgeEl) countBadgeEl.textContent = `${mineurCnt.toLocaleString('fr-FR')} Mineur(s)`;
+            if (descEl) descEl.textContent = 'Vous êtes sur le point de mobiliser vos mineurs de montagne pour sonder les gisements rocheux et crêtes volcaniques de cette oasis.';
+            if (workersCountEl) workersCountEl.innerHTML = `<span class="text-warning fw-bold">${mineurCnt.toLocaleString('fr-FR')}</span> Mineurs des Cimes ⛏️`;
+            if (resourcesEl) resourcesEl.innerHTML = '<span class="badge bg-warning-lt text-warning font-monospace">🌋 Soufre</span> <span class="badge bg-info-lt text-info font-monospace">🧪 Nitrate</span> <span class="badge bg-secondary-lt text-secondary font-monospace">💎 Sable de Fer</span>';
+            if (alertTipEl) alertTipEl.style.borderLeft = '4px solid #eab308';
+            if (tipTextEl) tipTextEl.textContent = 'Les minerais extraits seront acheminés dans vos manufactures et entrepôts dès le retour de l\'expédition au fief.';
+            if (confirmBtn) {
+                confirmBtn.className = 'btn btn-warning text-dark fw-bold px-4 shadow-sm';
+                confirmBtn.innerHTML = '<i class="fa-solid fa-hammer me-1"></i>Déployer les Mineurs';
+            }
+        }
+
+        const modalEl = document.getElementById('modalConfirmWorkerExpedition');
+        if (modalEl) {
+            const workerModal = new bootstrap.Modal(modalEl);
+            workerModal.show();
+            return;
+        }
+    }
+
+    await executeFleetDispatch(formData);
+}
+
+async function executeFleetDispatch(directFormData = null) {
+    const formData = directFormData || pendingFleetFormData;
+    if (!formData) return;
+
+    // Fermeture de la modale si ouverte
+    const modalEl = document.getElementById('modalConfirmWorkerExpedition');
+    if (modalEl) {
+        const workerModal = bootstrap.Modal.getInstance(modalEl);
+        if (workerModal) workerModal.hide();
+    }
+
+    const confirmBtn = document.getElementById('btnConfirmWorkerDispatch');
+    if (confirmBtn) confirmBtn.disabled = true;
+
     try {
         const res = await fetch('/api/fleet.php', { method: 'POST', body: formData });
         const data = await res.json();
@@ -1263,9 +1417,11 @@ async function submitFleet() {
             window.location.reload();
         } else {
             showModalAlert(data.error || 'Impossible de lancer cette expédition.', 'error');
+            if (confirmBtn) confirmBtn.disabled = false;
         }
     } catch (e) {
         showModalAlert('Erreur de transmission avec vos généraux.', 'error');
+        if (confirmBtn) confirmBtn.disabled = false;
     }
 }
 
