@@ -788,49 +788,101 @@ unset($_SESSION['general_flash']);
                 </div>
 
                 <!-- 5. Mécanisme de Famine & Farine Féodale (Optionnel) -->
-                <div class="p-3 rounded border border-danger-subtle bg-danger bg-opacity-10 mb-4">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                        <div class="fw-bold text-danger d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-triangle-exclamation text-danger"></i>Mécanisme de Famine &amp; Rations de Farine (Optionnel)
-                        </div>
-                        <span class="badge <?= !empty($famineEnabled) ? 'bg-danger text-white' : 'bg-secondary text-white' ?> font-monospace">
-                            <?= !empty($famineEnabled) ? 'Activé' : 'Désactivé' ?>
-                        </span>
-                    </div>
-                    <div class="text-secondary small mb-3">
-                        Si activé, les régiments d'élite consomment de la farine de riz. En cas de pénurie totale, une famine décime les garnisons d'élite à hauteur du taux horaire configuré.
-                    </div>
-
-                    <div class="row g-3 align-items-center">
-                        <div class="col-md-4">
-                            <label class="form-check form-switch m-0 d-flex align-items-center gap-2">
-                                <input class="form-check-input" type="checkbox" id="checkFamineEnabled" name="famine_enabled" value="1" <?= !empty($famineEnabled) ? 'checked' : '' ?>>
-                                <span class="form-check-label fw-bold text-dark">Activer le péril de la famine</span>
-                            </label>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>Pertes horaires en famine :</span>
-                                <span class="badge bg-danger text-white font-monospace" id="badge-val-famine-rate"><?= (float)$famineRate ?> %</span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2">
-                                <input type="range" class="form-range flex-grow-1" id="sliderFamineRate" name="famine_rate_slider" min="0.5" max="25.0" step="0.5" value="<?= (float)$famineRate ?>" style="cursor:pointer;">
-                                <div class="input-group" style="width: 85px;">
-                                    <input type="number" class="form-control text-center font-monospace fw-bold" id="inputFamineRate" name="famine_rate" min="0.5" max="25.0" step="0.5" value="<?= (float)$famineRate ?>">
-                                    <span class="input-group-text px-1 text-muted">%</span>
+                <div class="card border border-danger-subtle shadow-sm mb-4 overflow-hidden" style="border-left: 5px solid #dc3545 !important;">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger text-white p-2 rounded-2 fs-3 shadow-xs">
+                                <i class="fa-solid fa-wheat-awn"></i>
+                            </span>
+                            <div>
+                                <h4 class="card-title text-danger m-0 fw-bold d-flex align-items-center gap-2" style="font-size: 1.1rem;">
+                                    Mécanisme de Famine &amp; Rations de Farine (Optionnel)
+                                </h4>
+                                <div class="text-secondary small mt-1">
+                                    Régulation de subsistance pour les régiments d'élite et gestion des disettes de farine.
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
-                                <span>Rations requises (Farine / 100 sold. / h) :</span>
-                                <span class="badge bg-warning text-dark font-monospace" id="badge-val-famine-flour"><?= (float)$famineFlourConsumption ?></span>
-                            </label>
-                            <div class="d-flex align-items-center gap-2">
-                                <input type="range" class="form-range flex-grow-1" id="sliderFamineFlour" name="famine_flour_slider" min="0.1" max="10.0" step="0.1" value="<?= (float)$famineFlourConsumption ?>" style="cursor:pointer;">
-                                <div class="input-group" style="width: 85px;">
-                                    <input type="number" class="form-control text-center font-monospace fw-bold" id="inputFamineFlour" name="famine_flour_consumption" min="0.1" max="10.0" step="0.1" value="<?= (float)$famineFlourConsumption ?>">
-                                    <span class="input-group-text px-1 text-muted"><i class="fa-solid fa-bowl-rice"></i></span>
+                        <span class="badge <?= !empty($famineEnabled) ? 'bg-danger text-white' : 'bg-secondary text-white' ?> font-monospace px-3 py-2 fs-5 shadow-xs" id="badge-famine-status-pill">
+                            <i class="fa-solid <?= !empty($famineEnabled) ? 'fa-triangle-exclamation' : 'fa-circle-xmark' ?> me-1"></i><?= !empty($famineEnabled) ? 'Famine Activée' : 'Famine Désactivée' ?>
+                        </span>
+                    </div>
+
+                    <div class="card-body p-4 bg-light bg-opacity-50">
+                        <div class="alert alert-danger bg-white border-danger border-opacity-25 text-dark mb-4 p-3 shadow-xs">
+                            <div class="d-flex align-items-start gap-3">
+                                <i class="fa-solid fa-circle-exclamation text-danger fs-2 mt-1"></i>
+                                <div class="small text-dark" style="line-height: 1.55;">
+                                    <strong>Règle féodale de subsistance :</strong> Si activé, les régiments d'élite (Tier 2, 3 et 4) exigent un entretien horaire en <strong class="text-danger">Farine de Riz</strong>. En cas de pénurie totale (stock de farine à 0), une disette s'abat sur le fief et décime progressivement les garnisons d'élite à hauteur du taux horaire configuré. <em>(Désactivé par défaut)</em>.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Contrôle 1 : Switch d'activation -->
+                            <div class="col-lg-4">
+                                <div class="card h-100 border bg-white shadow-xs p-3 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                            <span><i class="fa-solid fa-power-off text-danger me-1"></i>État du Mécanisme</span>
+                                            <span class="badge <?= !empty($famineEnabled) ? 'bg-danger text-white' : 'bg-secondary text-white' ?> font-monospace" id="badge-famine-switch-state">
+                                                <?= !empty($famineEnabled) ? 'En service' : 'Inactif' ?>
+                                            </span>
+                                        </label>
+                                        <div class="p-3 rounded bg-light border mb-2">
+                                            <label class="form-check form-switch m-0 d-flex align-items-center gap-2 cursor-pointer">
+                                                <input class="form-check-input ms-0 me-2" type="checkbox" id="checkFamineEnabled" name="famine_enabled" value="1" <?= !empty($famineEnabled) ? 'checked' : '' ?> onchange="updateFamineSwitchBadges(this.checked)" style="cursor: pointer; transform: scale(1.2);">
+                                                <span class="form-check-label fw-bold text-dark fs-4">Activer le péril de famine</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="text-secondary small mt-2">
+                                        <i class="fa-solid fa-shield-halved text-success me-1"></i>Si décoché, les troupes d'élite ne subissent aucune perte même en cas d'épuisement des stocks.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contrôle 2 : Taux de pertes horaire -->
+                            <div class="col-lg-4">
+                                <div class="card h-100 border bg-white shadow-xs p-3 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                            <span><i class="fa-solid fa-skull text-danger me-1"></i>Pertes horaires en disette</span>
+                                            <span class="badge bg-danger text-white font-monospace fs-4" id="badge-val-famine-rate"><?= (float)$famineRate ?> %</span>
+                                        </label>
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <input type="range" class="form-range flex-grow-1" id="sliderFamineRate" name="famine_rate_slider" min="0.5" max="25.0" step="0.5" value="<?= (float)$famineRate ?>" style="cursor:pointer; height:8px;">
+                                            <div class="input-group" style="width: 100px;">
+                                                <input type="number" class="form-control text-center font-monospace fw-bold fs-4" id="inputFamineRate" name="famine_rate" min="0.5" max="25.0" step="0.5" value="<?= (float)$famineRate ?>">
+                                                <span class="input-group-text bg-light fw-bold text-danger px-2">%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-secondary small mt-2">
+                                        Pourcentage de soldats d'élite mourant de faim ou désertant par heure de rupture complète de farine.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contrôle 3 : Rations requises -->
+                            <div class="col-lg-4">
+                                <div class="card h-100 border bg-white shadow-xs p-3 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                            <span><i class="fa-solid fa-bowl-rice text-warning me-1"></i>Rations Requises</span>
+                                            <span class="badge bg-warning text-dark font-monospace fs-4" id="badge-val-famine-flour"><?= (float)$famineFlourConsumption ?> / h</span>
+                                        </label>
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <input type="range" class="form-range flex-grow-1" id="sliderFamineFlour" name="famine_flour_slider" min="0.1" max="10.0" step="0.1" value="<?= (float)$famineFlourConsumption ?>" style="cursor:pointer; height:8px;">
+                                            <div class="input-group" style="width: 100px;">
+                                                <input type="number" class="form-control text-center font-monospace fw-bold fs-4" id="inputFamineFlour" name="famine_flour_consumption" min="0.1" max="10.0" step="0.1" value="<?= (float)$famineFlourConsumption ?>">
+                                                <span class="input-group-text bg-light px-2"><i class="fa-solid fa-bowl-rice text-warning"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-secondary small mt-2">
+                                        Unités de farine de riz nécessaires par heure pour nourrir 100 soldats d'élite et prévenir la famine.
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1359,6 +1411,29 @@ document.addEventListener('DOMContentLoaded', function() {
         if (btnElem) {
             btnElem.classList.remove('btn-outline-secondary');
             btnElem.classList.add('btn-danger', 'shadow-sm');
+        }
+    };
+
+    window.updateFamineSwitchBadges = function(checked) {
+        const statusPill = document.getElementById('badge-famine-status-pill');
+        const switchState = document.getElementById('badge-famine-switch-state');
+        if (statusPill) {
+            if (checked) {
+                statusPill.className = 'badge bg-danger text-white font-monospace px-3 py-2 fs-5 shadow-xs';
+                statusPill.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i>Famine Activée';
+            } else {
+                statusPill.className = 'badge bg-secondary text-white font-monospace px-3 py-2 fs-5 shadow-xs';
+                statusPill.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i>Famine Désactivée';
+            }
+        }
+        if (switchState) {
+            if (checked) {
+                switchState.className = 'badge bg-danger text-white font-monospace';
+                switchState.innerText = 'En service';
+            } else {
+                switchState.className = 'badge bg-secondary text-white font-monospace';
+                switchState.innerText = 'Inactif';
+            }
         }
     };
 
