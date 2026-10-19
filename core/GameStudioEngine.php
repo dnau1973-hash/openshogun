@@ -617,6 +617,22 @@ class GameStudioEngine {
         $starterFish      = (int)GameConfig::get('starter_fish', 250);
         $starterGoldCoins = (int)GameConfig::get('starter_gold_coins', 100);
 
+        // ── Clans IA & Daimyōs Autonomes (Item 5) ──
+        $botsEnabled         = (bool)GameConfig::get('bots_enabled', true);
+        $botColonizeEnabled  = (bool)GameConfig::get('bot_colonize_enabled', true);
+        $botAggressiveness   = (string)GameConfig::get('bot_aggressiveness', 'moderate');
+        $botMaxPlanets       = (int)GameConfig::get('bot_max_planets', 3);
+        $botSpawnEnabled     = (bool)GameConfig::get('bot_spawn_enabled', false);
+        $botSpawnIntervalMin = (int)GameConfig::get('bot_spawn_interval_min', 15);
+        $botSpawnMaxVillages = (int)GameConfig::get('bot_spawn_max_villages', 50);
+
+        $botsList = [];
+        try {
+            require_once __DIR__ . '/BotEngine.php';
+            $botEngine = new BotEngine();
+            $botsList = $botEngine->getBots();
+        } catch (Throwable $e) {}
+
         return [
             'worldRadius'           => $radius,
             'totalTiles'            => $totalTiles,
@@ -660,7 +676,17 @@ class GameStudioEngine {
             'starterRice'            => $starterRice,
             'starterFish'            => $starterFish,
             'starterGoldCoins'       => $starterGoldCoins,
-            // Régénération & Préservation des Joueurs Humains (Item 5)
+            // Clans IA & Daimyōs Autonomes (Item 5)
+            'botsEnabled'            => $botsEnabled,
+            'botColonizeEnabled'     => $botColonizeEnabled,
+            'botAggressiveness'      => $botAggressiveness,
+            'botMaxPlanets'          => $botMaxPlanets,
+            'botSpawnEnabled'        => $botSpawnEnabled,
+            'botSpawnIntervalMin'    => $botSpawnIntervalMin,
+            'botSpawnMaxVillages'    => $botSpawnMaxVillages,
+            'botsList'               => $botsList,
+            'botsCount'              => count($botsList),
+            // Régénération & Préservation des Joueurs Humains (Item 6)
             'preserveHumanUsers'     => (bool)GameConfig::get('preserve_human_users_on_reset', true)
         ];
     }
@@ -874,7 +900,81 @@ class GameStudioEngine {
     }
 
     /**
-     * Enregistre l'option de préservation des comptes joueurs humains pour les futures régénérations (Item 5)
+     * Sauvegarde les paramètres des Clans IA et Daimyōs Autonomes (Item 5)
+     */
+    public function saveBotsSettings(array $params): array {
+        $botsEnabled         = !empty($params['bots_enabled']);
+        $botColonizeEnabled  = !empty($params['bot_colonize_enabled']);
+        $botSpawnEnabled     = !empty($params['bot_spawn_enabled']);
+        $botAggressiveness   = in_array($params['bot_aggressiveness'] ?? '', ['passive', 'moderate', 'aggressive'], true)
+            ? (string)$params['bot_aggressiveness']
+            : 'moderate';
+        $botMaxPlanets       = max(1, min(10, (int)($params['bot_max_planets'] ?? 3)));
+        $botSpawnIntervalMin = max(5, min(120, (int)($params['bot_spawn_interval_min'] ?? 15)));
+        $botSpawnMaxVillages = max(5, min(200, (int)($params['bot_spawn_max_villages'] ?? 50)));
+
+        GameConfig::set('bots_enabled', $botsEnabled ? 1 : 0);
+        GameConfig::set('bot_colonize_enabled', $botColonizeEnabled ? 1 : 0);
+        GameConfig::set('bot_spawn_enabled', $botSpawnEnabled ? 1 : 0);
+        GameConfig::set('bot_aggressiveness', $botAggressiveness);
+        GameConfig::set('bot_max_planets', $botMaxPlanets);
+        GameConfig::set('bot_spawn_interval_min', $botSpawnIntervalMin);
+        GameConfig::set('bot_spawn_max_villages', $botSpawnMaxVillages);
+
+        return [
+            'success' => true,
+            'message' => "Directives des Clans IA enregistrées avec succès : IA " . ($botsEnabled ? 'Active' : 'En Veille') . ", Colonisation " . ($botColonizeEnabled ? 'Activée' : 'Désactivée') . ", Profil " . ucfirst($botAggressiveness) . ", Max " . $botMaxPlanets . " fiefs/clan."
+        ];
+    }
+
+    /**
+     * Déploie les 3 Daimyōs IA prédéfinis (Clan Oda, Clan Takeda, Clan Tokugawa) (Item 5)
+     */
+    public function spawnPresetBots(int $count = 3): array {
+        require_once __DIR__ . '/BotEngine.php';
+        $botEngine = new BotEngine();
+        $res = $botEngine->generatePresetBots($count);
+        return [
+            'success' => !empty($res['success']),
+            'message' => !empty($res['success'])
+                ? "Déploiement féodal réussi : {$res['created_count']} Seigneurs IA historiques ont rejoint le monde !"
+                : ($res['error'] ?? "Impossible de déployer les Daimyōs IA.")
+        ];
+    }
+
+    /**
+     * Fait éclore immédiatement un fief PNJ spontané de manière homogène à 360° (Item 5)
+     */
+    public function triggerSpontaneousBotSpawn(): array {
+        require_once __DIR__ . '/BotEngine.php';
+        $botEngine = new BotEngine();
+        $radius = GameConfig::getWorldRadius();
+        $res = $botEngine->spawnSpontaneousVillage($radius);
+        return [
+            'success' => !empty($res['success']),
+            'message' => !empty($res['success'])
+                ? "Éclosion féodale réussie : {$res['message']}"
+                : ($res['error'] ?? "Impossible de faire éclore un fief PNJ spontané.")
+        ];
+    }
+
+    /**
+     * Force l'exécution immédiate d'un cycle de décision IA (Item 5)
+     */
+    public function runBotCycle(): array {
+        require_once __DIR__ . '/BotEngine.php';
+        $botEngine = new BotEngine();
+        $res = $botEngine->executeBotCycle();
+        return [
+            'success' => !empty($res['success']),
+            'message' => !empty($res['success'])
+                ? "Cycle de décision IA exécuté avec succès ({$res['bots_processed']} daimyōs traités)."
+                : ($res['message'] ?? "Le cycle IA n'a pas pu être exécuté.")
+        ];
+    }
+
+    /**
+     * Enregistre l'option de préservation des comptes joueurs humains pour les futures régénérations (Item 6)
      */
     public function saveRegenerationSettings(bool $preserveHumanUsers): array {
         $res = GameConfig::set('preserve_human_users_on_reset', $preserveHumanUsers ? 1 : 0);
@@ -888,7 +988,7 @@ class GameStudioEngine {
     }
 
     /**
-     * Déclenche la régénération et réinitialisation de l'univers féodal (Item 5)
+     * Déclenche la régénération et réinitialisation de l'univers féodal (Item 6)
      */
     public function regenerateWorld(bool $preserveHumanUsers, int $neutralCount = 12, bool $deployBots = true, string $adminPassword = 'Gabriel125#'): array {
         require_once __DIR__ . '/WorldGenerator.php';

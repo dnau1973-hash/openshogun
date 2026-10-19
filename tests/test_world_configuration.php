@@ -292,8 +292,60 @@ assertTest(strpos($htmlStarter, 'id="sim-tenshu-level"') !== false, "Simulateur 
 assertTest(strpos($htmlStarter, 'id="sim-plots-count"') !== false, "Simulateur parcelles initiales présent");
 assertTest(strpos($htmlStarter, 'applyStarterPreset') !== false, "Fonction JS applyStarterPreset présente");
 
-// [TEST 10] Test de l'Item 5 : Régénération du Monde & Conservation des Joueurs Humains
-echo "\n[TEST 10] Test de l'Item 5 : Régénération & Conservation des Joueurs Humains...\n";
+// [TEST 10] Test de l'Item 5 : Gestion des Clans IA & Daimyōs Autonomes
+echo "\n[TEST 10] Test de l'Item 5 : Gestion des Clans IA & Daimyōs Autonomes...\n";
+
+$botParams = [
+    'bots_enabled'           => '1',
+    'bot_colonize_enabled'   => '1',
+    'bot_spawn_enabled'      => '1',
+    'bot_aggressiveness'     => 'aggressive',
+    'bot_max_planets'        => 5,
+    'bot_spawn_interval_min' => 20,
+    'bot_spawn_max_villages' => 75
+];
+$saveBotRes = $gameStudioEngine->saveBotsSettings($botParams);
+assertTest($saveBotRes['success'] === true, "saveBotsSettings() exécuté avec succès");
+assertTest((bool)GameConfig::get('bots_enabled') === true, "bots_enabled mis à jour à true");
+assertTest((bool)GameConfig::get('bot_colonize_enabled') === true, "bot_colonize_enabled mis à jour à true");
+assertTest((bool)GameConfig::get('bot_spawn_enabled') === true, "bot_spawn_enabled mis à jour à true");
+assertTest(GameConfig::get('bot_aggressiveness') === 'aggressive', "bot_aggressiveness mis à jour à aggressive");
+assertTest((int)GameConfig::get('bot_max_planets') === 5, "bot_max_planets mis à jour à 5");
+assertTest((int)GameConfig::get('bot_spawn_interval_min') === 20, "bot_spawn_interval_min mis à jour à 20");
+assertTest((int)GameConfig::get('bot_spawn_max_villages') === 75, "bot_spawn_max_villages mis à jour à 75");
+
+$botWorldData = $gameStudioEngine->getWorldConfigData();
+assertTest($botWorldData['botsEnabled'] === true, "botsEnabled présent dans getWorldConfigData");
+assertTest($botWorldData['botColonizeEnabled'] === true, "botColonizeEnabled présent dans getWorldConfigData");
+assertTest($botWorldData['botSpawnEnabled'] === true, "botSpawnEnabled présent dans getWorldConfigData");
+assertTest($botWorldData['botAggressiveness'] === 'aggressive', "botAggressiveness présent dans getWorldConfigData");
+assertTest($botWorldData['botMaxPlanets'] === 5, "botMaxPlanets présent dans getWorldConfigData");
+assertTest($botWorldData['botSpawnIntervalMin'] === 20, "botSpawnIntervalMin présent dans getWorldConfigData");
+assertTest($botWorldData['botSpawnMaxVillages'] === 75, "botSpawnMaxVillages présent dans getWorldConfigData");
+assertTest(isset($botWorldData['botsList']), "botsList présent dans getWorldConfigData");
+
+// Rendu HTML complet avec l'Item 5 et l'Item 6
+ob_start();
+extract($botWorldData);
+require __DIR__ . '/../views/gamestudio/general_world_config.php';
+$htmlBots = ob_get_clean();
+
+assertTest(strpos($htmlBots, '5. Gestion des Clans IA &amp; Daimyōs Autonomes') !== false, "Le 5e item 'Gestion des Clans IA & Daimyōs Autonomes' est présent dans la vue");
+assertTest(strpos($htmlBots, 'id="section-world-bots-config"') !== false, "Conteneur ancre de l'Item 5 présent");
+assertTest(strpos($htmlBots, 'id="switchBotsEnabled"') !== false, "Switch Moteur IA présent");
+assertTest(strpos($htmlBots, 'id="switchBotColonize"') !== false, "Switch Colonisation IA présent");
+assertTest(strpos($htmlBots, 'id="switchBotSpawn"') !== false, "Switch Éclosion Spontanée présent");
+assertTest(strpos($htmlBots, 'id="sliderBotMaxPlanets"') !== false, "Slider Fiefs max par clan présent");
+assertTest(strpos($htmlBots, 'id="sliderBotSpawnInterval"') !== false, "Slider Intervalle d'éclosion présent");
+assertTest(strpos($htmlBots, 'id="sliderBotSpawnMax"') !== false, "Slider Plafond mondial fiefs PNJ présent");
+assertTest(strpos($htmlBots, 'spawn_preset_bots') !== false, "Action Déployer 3 Daimyōs IA présente");
+assertTest(strpos($htmlBots, 'trigger_spontaneous_spawn') !== false, "Action Éclosion Spontanée 360° présente");
+assertTest(strpos($htmlBots, 'run_bot_cycle') !== false, "Action Cycle de Décision IA présente");
+assertTest(strpos($htmlBots, 'updateBotsEnabledUI') !== false, "Fonction JS updateBotsEnabledUI présente");
+assertTest(strpos($htmlBots, 'updateAggressivenessBadge') !== false, "Fonction JS updateAggressivenessBadge présente");
+
+// [TEST 11] Test de l'Item 6 : Régénération du Monde & Conservation des Joueurs Humains
+echo "\n[TEST 11] Test de l'Item 6 : Régénération & Conservation des Joueurs Humains...\n";
 
 // Sauvegarde de l'option à true
 $saveRegenRes = $gameStudioEngine->saveRegenerationSettings(true);
@@ -310,14 +362,14 @@ $gameStudioEngine->saveRegenerationSettings(true);
 $regenWorldData = $gameStudioEngine->getWorldConfigData();
 assertTest($regenWorldData['preserveHumanUsers'] === true, "preserveHumanUsers présent et égal à true dans getWorldConfigData");
 
-// Rendu HTML complet avec l'Item 5
+// Rendu HTML complet avec l'Item 6
 ob_start();
 extract($regenWorldData);
 require __DIR__ . '/../views/gamestudio/general_world_config.php';
 $htmlRegen = ob_get_clean();
 
-assertTest(strpos($htmlRegen, '5. Régénération &amp; Réinitialisation du Monde Féodal') !== false, "Le 5e item 'Régénération & Réinitialisation du Monde Féodal' est présent dans la vue");
-assertTest(strpos($htmlRegen, 'id="section-world-regeneration-config"') !== false, "Conteneur ancre de l'Item 5 présent");
+assertTest(strpos($htmlRegen, '6. Régénération &amp; Réinitialisation du Monde Féodal') !== false, "Le 6e item 'Régénération & Réinitialisation du Monde Féodal' est présent dans la vue");
+assertTest(strpos($htmlRegen, 'id="section-world-regeneration-config"') !== false, "Conteneur ancre de l'Item 6 présent");
 assertTest(strpos($htmlRegen, 'id="switchPreserveHumanUsers"') !== false, "Switch 'Conserver les Joueurs Humains' présent dans le DOM");
 assertTest(strpos($htmlRegen, 'Conserver les Joueurs Humains') !== false, "Libellé 'Conserver les Joueurs Humains' présent");
 assertTest(strpos($htmlRegen, 'Conserver les comptes des joueurs déjà présents dans le monde après la régénération du monde') !== false, "Description explicative 'Conserver les comptes des joueurs déjà présents...' présente");
@@ -328,6 +380,7 @@ assertTest(strpos($htmlRegen, 'updatePreserveHumanUsersUI') !== false, "Fonction
 assertTest(strpos($htmlRegen, 'openStudioRegenerateModal') !== false, "Fonction JS openStudioRegenerateModal présente");
 
 echo "\n========================================================================\n";
-echo " TOUS LES TESTS MONDE (ITEMS 1, 2, 3, 4 & 5) SONT 100% AU VERT ! \n";
+echo " TOUS LES TESTS MONDE (ITEMS 1, 2, 3, 4, 5 & 6) SONT 100% AU VERT ! \n";
 echo "========================================================================\n";
+
 

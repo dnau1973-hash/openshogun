@@ -1141,7 +1141,416 @@ unset($_SESSION['general_flash']);
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!-- CINQUIÈME ITEM MAJEUR : RÉGÉNÉRATION DU MONDE & CONSERVATION DES    -->
+    <!-- CINQUIÈME ITEM MAJEUR : GESTION DES CLANS IA & DAIMYŌS AUTONOMES    -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="card mb-4 border-indigo shadow-sm overflow-hidden" id="section-world-bots-config" style="border-width: 2px;">
+        <div class="card-header bg-indigo text-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
+            <div>
+                <h3 class="card-title text-white m-0 d-flex align-items-center gap-2 fw-bold" style="font-size:1.25rem;">
+                    <i class="fa-solid fa-robot text-warning fs-2"></i>
+                    <span>5. Gestion des Clans IA &amp; Daimyōs Autonomes</span>
+                </h3>
+                <div class="text-white-50 small mt-1">
+                    Pilotez le moteur d'intelligence féodale, l'agressivité des clans rivaux (Oda, Takeda, Tokugawa), l'éclosion spontanée et la colonisation autonome.
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge <?= !empty($botsEnabled) ? 'bg-white text-indigo' : 'bg-secondary text-white' ?> fw-bold px-3 py-2 font-monospace fs-4 shadow-sm" id="badge-bots-status-header">
+                    <i class="fa-solid <?= !empty($botsEnabled) ? 'fa-microchip' : 'fa-moon' ?> me-1"></i>
+                    <span id="label-bots-status-text"><?= !empty($botsEnabled) ? 'Cycles IA Actifs' : 'IA en Veille' ?></span>
+                </span>
+                <span class="badge bg-dark text-white fw-bold px-3 py-2 font-monospace fs-4 shadow-sm" id="badge-bots-count-header">
+                    <i class="fa-solid fa-users me-1"></i><?= (int)count($botsList) ?> Daimyōs IA
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body p-4 bg-light bg-opacity-25">
+            <!-- ── Formulaire Principal des Directives IA ── -->
+            <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" id="formWorldBotsConfig">
+                <input type="hidden" name="action" value="save_world_bots_settings">
+
+                <!-- 1. Directives Fondamentales (3 Switches) -->
+                <div class="row g-3 mb-4">
+                    <!-- Switch 1 : Activation Globale du Moteur IA -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white border rounded shadow-xs h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-dark fs-3">
+                                        <i class="fa-solid fa-brain text-indigo me-1"></i>Moteur d'IA Féodale
+                                    </span>
+                                    <span class="badge <?= !empty($botsEnabled) ? 'bg-indigo' : 'bg-secondary' ?> font-monospace" id="badge-switch-bots-enabled">
+                                        <?= !empty($botsEnabled) ? 'Actif' : 'En Veille' ?>
+                                    </span>
+                                </div>
+                                <div class="text-secondary small mb-3">
+                                    Active les prises de décision autonomes des seigneurs IA : améliorations de bâtiments, récoltes, recrutement d'armées et marches militaires.
+                                </div>
+                            </div>
+                            <div class="form-check form-switch m-0 pt-2 border-top">
+                                <input class="form-check-input" type="checkbox" role="switch" id="switchBotsEnabled" name="bots_enabled" value="1" <?= !empty($botsEnabled) ? 'checked' : '' ?> style="cursor:pointer; width:2.5em; height:1.25em;" onchange="updateBotsEnabledUI(this.checked)">
+                                <label class="form-check-label fw-bold text-dark ms-2 small" for="switchBotsEnabled" style="cursor:pointer;">
+                                    Permettre les cycles de simulation IA
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Switch 2 : Colonisation & Expansion Autonome -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white border rounded shadow-xs h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-dark fs-3">
+                                        <i class="fa-solid fa-compass text-teal me-1"></i>Colonisation Autonome
+                                    </span>
+                                    <span class="badge <?= !empty($botColonizeEnabled) ? 'bg-teal' : 'bg-secondary' ?> font-monospace" id="badge-switch-bot-colonize">
+                                        <?= !empty($botColonizeEnabled) ? 'Autorisée' : 'Bloquée' ?>
+                                    </span>
+                                </div>
+                                <div class="text-secondary small mb-3">
+                                    Autorise les Daimyōs IA à envoyer des pionniers pour arpentér la carte et fonder de nouvelles provinces castrales lorsque leurs stocks le permettent.
+                                </div>
+                            </div>
+                            <div class="form-check form-switch m-0 pt-2 border-top">
+                                <input class="form-check-input" type="checkbox" role="switch" id="switchBotColonize" name="bot_colonize_enabled" value="1" <?= !empty($botColonizeEnabled) ? 'checked' : '' ?> style="cursor:pointer; width:2.5em; height:1.25em;">
+                                <label class="form-check-label fw-bold text-dark ms-2 small" for="switchBotColonize" style="cursor:pointer;">
+                                    Autoriser l'expansion territoriale IA
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Switch 3 : Éclosion Spontanée 360° -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white border rounded shadow-xs h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-dark fs-3">
+                                        <i class="fa-solid fa-spa text-pink me-1"></i>Éclosion Spontanée 360°
+                                    </span>
+                                    <span class="badge <?= !empty($botSpawnEnabled) ? 'bg-pink' : 'bg-secondary' ?> font-monospace" id="badge-switch-bot-spawn">
+                                        <?= !empty($botSpawnEnabled) ? 'Activée' : 'Désactivée' ?>
+                                    </span>
+                                </div>
+                                <div class="text-secondary small mb-3">
+                                    Fait éclore périodiquement et automatiquement de nouveaux villages PNJ répartis harmonieusement autour de Kyoto pour dynamiser les territoires vierges.
+                                </div>
+                            </div>
+                            <div class="form-check form-switch m-0 pt-2 border-top">
+                                <input class="form-check-input" type="checkbox" role="switch" id="switchBotSpawn" name="bot_spawn_enabled" value="1" <?= !empty($botSpawnEnabled) ? 'checked' : '' ?> style="cursor:pointer; width:2.5em; height:1.25em;">
+                                <label class="form-check-label fw-bold text-dark ms-2 small" for="switchBotSpawn" style="cursor:pointer;">
+                                    Activer l'éclosion périodique automatique
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Paramètres Stratégiques & Tactiques -->
+                <div class="row g-4 mb-4">
+                    <!-- Agressivité Militaire & Tempérament -->
+                    <div class="col-lg-6">
+                        <div class="p-3 bg-white border rounded shadow-xs h-100">
+                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fa-solid fa-khanda text-danger me-1"></i>Tempérament &amp; Agressivité Militaire :</span>
+                                <span class="badge bg-danger-lt font-monospace text-uppercase fw-bold" id="badge-val-bot-aggressiveness"><?= htmlspecialchars((string)$botAggressiveness) ?></span>
+                            </label>
+                            
+                            <div class="row g-2">
+                                <div class="col-sm-4">
+                                    <label class="form-selectgroup-item w-100">
+                                        <input type="radio" name="bot_aggressiveness" value="passive" class="form-selectgroup-input" <?= $botAggressiveness === 'passive' ? 'checked' : '' ?> onchange="updateAggressivenessBadge('passive')">
+                                        <div class="form-selectgroup-label d-flex flex-column p-2 text-start h-100">
+                                            <span class="fw-bold text-success"><i class="fa-solid fa-shield me-1"></i>Pacifique</span>
+                                            <span class="small text-muted mt-1">Défense uniquement, aucun raid non provoqué.</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-selectgroup-item w-100">
+                                        <input type="radio" name="bot_aggressiveness" value="moderate" class="form-selectgroup-input" <?= $botAggressiveness === 'moderate' ? 'checked' : '' ?> onchange="updateAggressivenessBadge('moderate')">
+                                        <div class="form-selectgroup-label d-flex flex-column p-2 text-start h-100">
+                                            <span class="fw-bold text-warning"><i class="fa-solid fa-scale-balanced me-1"></i>Équilibré</span>
+                                            <span class="small text-muted mt-1">Économie équilibrée et escarmouches modérées.</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-selectgroup-item w-100">
+                                        <input type="radio" name="bot_aggressiveness" value="aggressive" class="form-selectgroup-input" <?= $botAggressiveness === 'aggressive' ? 'checked' : '' ?> onchange="updateAggressivenessBadge('aggressive')">
+                                        <div class="form-selectgroup-label d-flex flex-column p-2 text-start h-100">
+                                            <span class="fw-bold text-danger"><i class="fa-solid fa-fire-flame-curved me-1"></i>Belliqueux</span>
+                                            <span class="small text-muted mt-1">Raids fréquents, guerre de mouvement et sièges.</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="text-secondary small mt-2">
+                                <i class="fa-solid fa-shield-halved text-success me-1"></i>Les seigneurs débutants bénéficiant de l'Immunité Débutant ne sont <strong>jamais attaqués</strong> par les bots.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fiefs Maximum par Daimyō IA -->
+                    <div class="col-lg-6">
+                        <div class="p-3 bg-white border rounded shadow-xs h-100">
+                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fa-solid fa-chess-rook text-indigo me-1"></i>Plafond de Provinces par Clan IA :</span>
+                                <span class="badge bg-indigo-lt font-monospace fs-4" id="badge-val-bot-max-planets"><?= (int)$botMaxPlanets ?> fiefs / clan</span>
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="range" class="form-range flex-grow-1" id="sliderBotMaxPlanets" name="bot_max_planets_slider" min="1" max="10" step="1" value="<?= (int)$botMaxPlanets ?>" style="cursor:pointer; height:8px;">
+                                <div class="input-group" style="width: 110px;">
+                                    <input type="number" class="form-control text-center font-monospace fw-bold fs-4" id="inputBotMaxPlanets" name="bot_max_planets" min="1" max="15" value="<?= (int)$botMaxPlanets ?>">
+                                    <span class="input-group-text px-1 text-muted">fiefs</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between text-secondary small font-monospace mt-1">
+                                <span>1 (Capitale seule)</span>
+                                <span>3 (Standard Shogun)</span>
+                                <span>5 (Grand Clan)</span>
+                                <span>10 (Empire provincial)</span>
+                            </div>
+                            <div class="text-secondary small mt-2">
+                                Limite la superficie maximale qu'un même clan autonome peut coloniser simultanément.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Intervalle d'Éclosion Spontanée -->
+                    <div class="col-lg-6">
+                        <div class="p-3 bg-white border rounded shadow-xs h-100">
+                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fa-solid fa-stopwatch text-pink me-1"></i>Intervalle d'Éclosion Spontanée :</span>
+                                <span class="badge bg-pink-lt font-monospace fs-4" id="badge-val-bot-spawn-interval"><?= (int)$botSpawnIntervalMin ?> min</span>
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="range" class="form-range flex-grow-1" id="sliderBotSpawnInterval" name="bot_spawn_interval_slider" min="5" max="120" step="5" value="<?= (int)$botSpawnIntervalMin ?>" style="cursor:pointer; height:8px;">
+                                <div class="input-group" style="width: 110px;">
+                                    <input type="number" class="form-control text-center font-monospace fw-bold fs-4" id="inputBotSpawnInterval" name="bot_spawn_interval_min" min="5" max="240" value="<?= (int)$botSpawnIntervalMin ?>">
+                                    <span class="input-group-text px-1 text-muted">min</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between text-secondary small font-monospace mt-1">
+                                <span>5 min (Intense)</span>
+                                <span>15 min (Standard)</span>
+                                <span>30 min</span>
+                                <span>60 min</span>
+                                <span>120 min</span>
+                            </div>
+                            <div class="text-secondary small mt-2">
+                                Cadence à laquelle le système vérifie et fait germer un nouveau domaine PNJ sur une province libre.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Plafond Mondial des Fiefs PNJ -->
+                    <div class="col-lg-6">
+                        <div class="p-3 bg-white border rounded shadow-xs h-100">
+                            <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fa-solid fa-map-location-dot text-azure me-1"></i>Plafond Mondial de Fiefs PNJ :</span>
+                                <span class="badge bg-azure-lt font-monospace fs-4" id="badge-val-bot-spawn-max"><?= (int)$botSpawnMaxVillages ?> fiefs max</span>
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="range" class="form-range flex-grow-1" id="sliderBotSpawnMax" name="bot_spawn_max_slider" min="5" max="200" step="5" value="<?= (int)$botSpawnMaxVillages ?>" style="cursor:pointer; height:8px;">
+                                <div class="input-group" style="width: 110px;">
+                                    <input type="number" class="form-control text-center font-monospace fw-bold fs-4" id="inputBotSpawnMax" name="bot_spawn_max_villages" min="5" max="500" value="<?= (int)$botSpawnMaxVillages ?>">
+                                    <span class="input-group-text px-1 text-muted">max</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between text-secondary small font-monospace mt-1">
+                                <span>5 (Minimum)</span>
+                                <span>25</span>
+                                <span>50 (Équilibré)</span>
+                                <span>100</span>
+                                <span>200 (Archipel saturé)</span>
+                            </div>
+                            <div class="text-secondary small mt-2">
+                                Bloque l'éclosion spontanée dès que le nombre total de fiefs PNJ actifs atteint ce seuil.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bouton d'Enregistrement des Directives IA -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pt-3 border-top mb-4">
+                    <div class="text-secondary small">
+                        <i class="fa-solid fa-circle-check text-success me-1"></i>Ces règles régissent immédiatement les décisions du moteur <code>BotEngine</code> lors de chaque tick spatial.
+                    </div>
+                    <button type="submit" class="btn btn-indigo btn-lg px-4 fw-bold shadow-sm">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Enregistrer les Directives des Clans IA
+                    </button>
+                </div>
+            </form>
+
+            <!-- ── 3. Actions Féodales Immédiates (3 Boutons 1-Clic) ── -->
+            <div class="card card-body bg-white border mb-4 shadow-xs">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h4 class="m-0 text-dark fw-bold d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-bolt text-warning"></i>Déclencheurs Stratégiques Immédiats (1-Clic)
+                        </h4>
+                        <div class="text-secondary small">Commandes directes pour peupler la carte, forcer une expansion ou éprouver les réactions des clans.</div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Action 1 : Déployer 3 Daimyōs IA Historiques -->
+                    <div class="col-md-4">
+                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" class="h-100">
+                            <input type="hidden" name="action" value="spawn_preset_bots">
+                            <input type="hidden" name="count" value="3">
+                            <button type="submit" class="btn btn-outline-primary w-100 p-3 text-start h-100 d-flex flex-column justify-content-between border-2">
+                                <div>
+                                    <div class="fw-bold fs-4 text-primary mb-1 d-flex align-items-center justify-content-between">
+                                        <span><i class="fa-solid fa-users-viewfinder me-2"></i>3 Daimyōs Historiques</span>
+                                        <span class="badge bg-primary text-white">+3</span>
+                                    </div>
+                                    <div class="text-secondary small">
+                                        Crée instantanément les clans légendaires <strong>Oda</strong>, <strong>Takeda</strong> et <strong>Tokugawa</strong> avec leurs châteaux capitaux et garnisons.
+                                    </div>
+                                </div>
+                                <div class="mt-3 pt-2 border-top text-primary fw-bold small">
+                                    <i class="fa-solid fa-plus-circle me-1"></i>Déployer les 3 Seigneurs
+                                </div>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Action 2 : Faire Éclore un Fief PNJ Spontané -->
+                    <div class="col-md-4">
+                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" class="h-100">
+                            <input type="hidden" name="action" value="trigger_spontaneous_spawn">
+                            <button type="submit" class="btn btn-outline-pink w-100 p-3 text-start h-100 d-flex flex-column justify-content-between border-2">
+                                <div>
+                                    <div class="fw-bold fs-4 text-pink mb-1 d-flex align-items-center justify-content-between">
+                                        <span><i class="fa-solid fa-spa me-2"></i>Éclosion Immédiate 360°</span>
+                                        <span class="badge bg-pink text-white">+1 Fief</span>
+                                    </div>
+                                    <div class="text-secondary small">
+                                        Sélectionne un angle libre à 360° autour de Kyoto et fait germer un domaine PNJ autonome avec 18 parcelles vierges.
+                                    </div>
+                                </div>
+                                <div class="mt-3 pt-2 border-top text-pink fw-bold small">
+                                    <i class="fa-solid fa-seedling me-1"></i>Faire Éclore un Fief
+                                </div>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Action 3 : Forcer un Cycle IA Immédiat -->
+                    <div class="col-md-4">
+                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" class="h-100">
+                            <input type="hidden" name="action" value="run_bot_cycle">
+                            <button type="submit" class="btn btn-outline-indigo w-100 p-3 text-start h-100 d-flex flex-column justify-content-between border-2">
+                                <div>
+                                    <div class="fw-bold fs-4 text-indigo mb-1 d-flex align-items-center justify-content-between">
+                                        <span><i class="fa-solid fa-gear me-2"></i>Cycle de Décision IA</span>
+                                        <span class="badge bg-indigo text-white">Tick IA</span>
+                                    </div>
+                                    <div class="text-secondary small">
+                                        Exécute immédiatement le cerveau des bots : collecte économique, investissements de parcelles, conscription et expéditions.
+                                    </div>
+                                </div>
+                                <div class="mt-3 pt-2 border-top text-indigo fw-bold small">
+                                    <i class="fa-solid fa-play me-1"></i>Exécuter un Cycle
+                                </div>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── 4. Registre des Daimyōs IA Actifs sur la Carte ── -->
+            <div class="card border shadow-xs overflow-hidden">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h4 class="card-title text-dark m-0 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-chess-king text-indigo"></i>Registre des Seigneurs &amp; Clans IA Déployés
+                    </h4>
+                    <span class="badge bg-indigo-lt text-indigo font-monospace fw-bold"><?= count($botsList) ?> seigneurs actifs</span>
+                </div>
+                <?php if (empty($botsList)): ?>
+                    <div class="card-body p-4 text-center">
+                        <div class="avatar avatar-xl rounded-circle bg-light text-secondary mb-3">
+                            <i class="fa-solid fa-user-slash fs-1"></i>
+                        </div>
+                        <h4 class="fw-bold text-dark">Aucun Clan IA n'arpente actuellement l'archipel</h4>
+                        <div class="text-secondary small mb-3">
+                            Les terres sont calmes mais dépourvues de seigneurs rivaux. Déployez les 3 Daimyōs historiques pour animer la carte.
+                        </div>
+                        <form method="POST" action="?page=gamestudio&tab=general&subtab=world_config" class="d-inline-block">
+                            <input type="hidden" name="action" value="spawn_preset_bots">
+                            <input type="hidden" name="count" value="3">
+                            <button type="submit" class="btn btn-primary fw-bold">
+                                <i class="fa-solid fa-plus me-1"></i>Déployer Oda, Takeda et Tokugawa
+                            </button>
+                        </form>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Daimyō IA</th>
+                                    <th>Faction / Bannière</th>
+                                    <th>Château Capital</th>
+                                    <th class="text-center">Provinces</th>
+                                    <th class="text-end">Puissance</th>
+                                    <th class="text-center">Dernière Activité</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($botsList as $b): ?>
+                                    <?php 
+                                    $fClass = 'bg-secondary';
+                                    $fName = ucfirst($b['faction'] ?? 'terran');
+                                    if (($b['faction'] ?? '') === 'terran') { $fClass = 'bg-primary'; $fName = 'Clan Oda (Terran)'; }
+                                    elseif (($b['faction'] ?? '') === 'vorash') { $fClass = 'bg-danger'; $fName = 'Clan Takeda (Vorash)'; }
+                                    elseif (($b['faction'] ?? '') === 'aethelis') { $fClass = 'bg-warning text-dark'; $fName = 'Clan Tokugawa (Aethelis)'; }
+                                    ?>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="avatar avatar-sm rounded-circle bg-indigo text-white font-weight-bold">
+                                                    <i class="fa-solid fa-robot"></i>
+                                                </span>
+                                                <div>
+                                                    <strong class="text-dark"><?= htmlspecialchars((string)$b['username']) ?></strong>
+                                                    <div class="text-muted small font-monospace">#<?= (int)$b['id'] ?></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge <?= $fClass ?> font-monospace"><?= htmlspecialchars($fName) ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark font-monospace border">
+                                                [<?= (int)($b['capital_x'] ?? 0) ?> : <?= (int)($b['capital_y'] ?? 0) ?>]
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-indigo-lt font-monospace fw-bold"><?= (int)($b['planet_count'] ?? 1) ?> fiefs</span>
+                                        </td>
+                                        <td class="text-end font-monospace fw-bold text-dark">
+                                            <?= number_format((int)($b['points'] ?? 0), 0, ',', ' ') ?> pts
+                                        </td>
+                                        <td class="text-center text-secondary small font-monospace">
+                                            <?= !empty($b['last_active']) ? htmlspecialchars((string)$b['last_active']) : 'Récemment' ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SIXIÈME ITEM MAJEUR : RÉGÉNÉRATION DU MONDE & CONSERVATION DES      -->
     <!-- JOUEURS HUMAINS                                                    -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <div class="card mb-4 border-danger shadow-sm overflow-hidden" id="section-world-regeneration-config" style="border-width: 2px;">
@@ -1149,7 +1558,7 @@ unset($_SESSION['general_flash']);
             <div>
                 <h3 class="card-title text-white m-0 d-flex align-items-center gap-2 fw-bold" style="font-size:1.25rem;">
                     <i class="fa-solid fa-arrows-rotate text-warning fs-2"></i>
-                    <span>5. Régénération &amp; Réinitialisation du Monde Féodal</span>
+                    <span>6. Régénération &amp; Réinitialisation du Monde Féodal</span>
                 </h3>
                 <div class="text-white-50 small mt-1">
                     Préparez une nouvelle saison ou régénérez l'archipel en contrôlant strictement la conservation des comptes joueurs.
@@ -1998,7 +2407,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // ── Item 5 : Régénération du Monde & Préservation des Joueurs Humains ──
+    // ── Item 5 : Gestion des Clans IA & Daimyōs Autonomes ──
+    window.updateBotsEnabledUI = function(isChecked) {
+        const badgeSwitch = document.getElementById('badge-switch-bots-enabled');
+        const badgeHeader = document.getElementById('badge-bots-status-header');
+        const labelHeaderText = document.getElementById('label-bots-status-text');
+
+        if (badgeSwitch) {
+            badgeSwitch.className = (isChecked ? 'badge bg-indigo font-monospace' : 'badge bg-secondary font-monospace');
+            badgeSwitch.innerText = (isChecked ? 'Actif' : 'En Veille');
+        }
+        if (badgeHeader && labelHeaderText) {
+            badgeHeader.className = (isChecked ? 'badge bg-white text-indigo fw-bold px-3 py-2 font-monospace fs-4 shadow-sm' : 'badge bg-secondary text-white fw-bold px-3 py-2 font-monospace fs-4 shadow-sm');
+            badgeHeader.innerHTML = '<i class="fa-solid ' + (isChecked ? 'fa-microchip' : 'fa-moon') + ' me-1"></i><span id="label-bots-status-text">' + (isChecked ? 'Cycles IA Actifs' : 'IA en Veille') + '</span>';
+        }
+    };
+
+    window.updateAggressivenessBadge = function(val) {
+        const badge = document.getElementById('badge-val-bot-aggressiveness');
+        if (badge) {
+            badge.innerText = val.toUpperCase();
+            if (val === 'passive') {
+                badge.className = 'badge bg-success-lt font-monospace text-uppercase fw-bold';
+            } else if (val === 'moderate') {
+                badge.className = 'badge bg-warning-lt font-monospace text-uppercase fw-bold';
+            } else {
+                badge.className = 'badge bg-danger-lt font-monospace text-uppercase fw-bold';
+            }
+        }
+    };
+
+    syncSimpleControl('sliderBotMaxPlanets', 'inputBotMaxPlanets', 'badge-val-bot-max-planets', 'fiefs / clan');
+    syncSimpleControl('sliderBotSpawnInterval', 'inputBotSpawnInterval', 'badge-val-bot-spawn-interval', 'min');
+    syncSimpleControl('sliderBotSpawnMax', 'inputBotSpawnMax', 'badge-val-bot-spawn-max', 'fiefs max');
+
+    // ── Item 6 : Régénération du Monde & Préservation des Joueurs Humains ──
     window.updatePreserveHumanUsersUI = function(isChecked) {
         const card = document.getElementById('cardPreserveHumanUsers');
         const badgeState = document.getElementById('badge-preserve-state');

@@ -137,6 +137,39 @@ if ($currentTab === 'dashboard') {
             ];
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-starting-endowment');
             exit;
+        } elseif ($_POST['action'] === 'save_world_bots_settings') {
+            $res = $gameStudioEngine->saveBotsSettings($_POST);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Directives des Clans IA enregistrées.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-bots-config');
+            exit;
+        } elseif ($_POST['action'] === 'spawn_preset_bots') {
+            $count = max(1, min(10, (int)($_POST['count'] ?? 3)));
+            $res = $gameStudioEngine->spawnPresetBots($count);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Déploiement des seigneurs IA terminé.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-bots-config');
+            exit;
+        } elseif ($_POST['action'] === 'trigger_spontaneous_spawn') {
+            $res = $gameStudioEngine->triggerSpontaneousBotSpawn();
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Éclosion spontanée PNJ terminée.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-bots-config');
+            exit;
+        } elseif ($_POST['action'] === 'run_bot_cycle') {
+            $res = $gameStudioEngine->runBotCycle();
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Cycle IA terminé.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-bots-config');
+            exit;
         } elseif ($_POST['action'] === 'save_world_regeneration_settings') {
             $preserve = !empty($_POST['preserve_human_users']);
             $res = $gameStudioEngine->saveRegenerationSettings($preserve);
