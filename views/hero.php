@@ -567,39 +567,99 @@ if (!function_exists('renderRelicBonusesHtml')) {
                     </p>
                 </div>
             <?php else: ?>
+                <?php
+                if (!function_exists('getAdventureIllustrationUrl')) {
+                    function getAdventureIllustrationUrl(string $name): string {
+                        $normalized = mb_strtolower($name);
+                        if (str_contains($normalized, 'sanctuaire')) {
+                            return '/public/assets/adventures/aventure_sanctuaire_shinto_abandonne.jpeg';
+                        }
+                        if (str_contains($normalized, 'donjon') || str_contains($normalized, 'fief noir') || str_contains($normalized, 'fortin')) {
+                            return '/public/assets/adventures/aventure_ruine_vieux_donjon_fief_noir.jpeg';
+                        }
+                        if (str_contains($normalized, 'gorge') || str_contains($normalized, 'ronin') || str_contains($normalized, 'campement')) {
+                            return '/public/assets/adventures/aventure_gorge_brumeuse_repaire_ronins.jpeg';
+                        }
+                        if (str_contains($normalized, 'bambou') || str_contains($normalized, 'temple')) {
+                            return '/public/assets/adventures/aventure_temple_antique-cache.jpeg';
+                        }
+                        if (str_contains($normalized, 'cimetiere') || str_contains($normalized, 'cimetière') || str_contains($normalized, 'guerrier')) {
+                            return '/public/assets/adventures/aventure_cimetiere_guerriers_oublies.jpeg';
+                        }
+                        if (str_contains($normalized, 'grotte') || str_contains($normalized, 'dragon') || str_contains($normalized, 'fluvial')) {
+                            return '/public/assets/adventures/aventure_grotte_dragon_fluvial.jpeg';
+                        }
+                        if (str_contains($normalized, 'pagode') || str_contains($normalized, 'maître') || str_contains($normalized, 'maitre')) {
+                            return '/public/assets/adventures/aventure_pagode_oubliee_maitres_armes.jpeg';
+                        }
+                        if (str_contains($normalized, 'shinobi') || str_contains($normalized, 'ombre') || str_contains($normalized, 'défilé') || str_contains($normalized, 'defile')) {
+                            return '/public/assets/adventures/aventure_defile_shinobis.jpeg';
+                        }
+                        if (str_contains($normalized, 'cerisier') || str_contains($normalized, 'vallée') || str_contains($normalized, 'vallee')) {
+                            return '/public/assets/adventures/aventure_vallee_cerisiers_ancestraux.jpeg';
+                        }
+                        if (str_contains($normalized, 'montagne') || str_contains($normalized, 'tonnerre') || str_contains($normalized, 'raiden')) {
+                            return '/public/assets/adventures/aventure_montagne_sacree.jpeg';
+                        }
+                        return '/public/assets/adventures/adventure_depart.jpeg';
+                    }
+                }
+                ?>
                 <div class="row g-3">
                     <?php foreach ($adventures as $adv): ?>
                         <?php 
                             $diffBadges = [
-                                'easy' => ['label' => 'Difficulté : Faible', 'class' => 'bg-success-lt text-success border border-success'],
-                                'medium' => ['label' => 'Difficulté : Moyenne', 'class' => 'bg-warning-lt text-warning border border-warning'],
-                                'hard' => ['label' => 'Difficulté : Périlleuse', 'class' => 'bg-danger-lt text-danger border border-danger']
+                                'easy' => ['label' => 'Difficulté : Faible', 'class' => 'bg-success text-white', 'border' => 'border-success'],
+                                'medium' => ['label' => 'Difficulté : Moyenne', 'class' => 'bg-warning text-dark', 'border' => 'border-warning'],
+                                'hard' => ['label' => 'Difficulté : Périlleuse', 'class' => 'bg-danger text-white', 'border' => 'border-danger']
                             ];
                             $dbdg = $diffBadges[$adv['difficulty']] ?? $diffBadges['easy'];
                             $canStart = ($hero['status'] === 'home' && $hero['health'] >= 15.0 && $dailyQuota['can_adventure']);
+                            $advImg = getAdventureIllustrationUrl((string)$adv['name']);
                         ?>
                         <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="badge <?= $dbdg['class'] ?>"><?= $dbdg['label'] ?></span>
-                                        <span class="badge bg-secondary-lt font-monospace">[<?= $adv['coord_x'] ?> : <?= $adv['coord_y'] ?>]</span>
+                            <div class="card h-100 border shadow-xs overflow-hidden" style="border-radius: 12px;">
+                                <!-- En-tête illustré grand format Style Travian -->
+                                <div style="position: relative; width: 100%; height: 145px; overflow: hidden; background: #0f172a;">
+                                    <img src="<?= htmlspecialchars($advImg) ?>" alt="<?= htmlspecialchars($adv['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" class="hover-scale">
+                                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.3) 60%, transparent 100%);"></div>
+                                    <div style="position: absolute; top: 8px; left: 10px; right: 10px;" class="d-flex justify-content-between align-items-center">
+                                        <span class="badge <?= $dbdg['class'] ?> fw-bold px-2 py-1 shadow-sm"><?= $dbdg['label'] ?></span>
+                                        <span class="badge bg-dark bg-opacity-75 border border-light text-white font-monospace">[<?= $adv['coord_x'] ?> : <?= $adv['coord_y'] ?>]</span>
                                     </div>
-                                    <h4 class="card-title font-weight-bold mb-2">
-                                        <i class="fa-solid fa-torii-gate text-danger me-1"></i><?= htmlspecialchars($adv['name']) ?>
-                                    </h4>
+                                    <div style="position: absolute; bottom: 8px; left: 12px; right: 12px;">
+                                        <h4 class="m-0 fw-bold text-white text-truncate shadow-sm" style="font-size: 0.95rem;">
+                                            <i class="fa-solid fa-torii-gate text-warning me-1"></i><?= htmlspecialchars($adv['name']) ?>
+                                        </h4>
+                                    </div>
+                                </div>
+
+                                <div class="card-body p-3">
                                     <div class="bg-surface-secondary border rounded p-2 small text-secondary d-flex justify-content-between mb-2">
-                                        <span>Distance : <strong><?= $adv['distance'] ?></strong> lieues</span>
-                                        <span>Marche : <strong><?= gmdate('H:i:s', $adv['duration']) ?></strong></span>
+                                        <span><i class="fa-solid fa-person-walking text-primary me-1"></i>Distance : <strong><?= $adv['distance'] ?></strong> lieues</span>
+                                        <span><i class="fa-solid fa-stopwatch text-warning me-1"></i>Marche : <strong><?= gmdate('H:i:s', $adv['duration']) ?></strong></span>
                                     </div>
                                     <div class="small text-muted">
-                                        Gains potentiels : XP, Vivres, Troupes ou Relique unique
+                                        <i class="fa-solid fa-gem text-purple me-1"></i>Gains potentiels : XP, Vivres, Troupes ou Relique unique
                                     </div>
                                 </div>
                                 <div class="card-footer bg-surface d-flex justify-content-between align-items-center py-2 px-3 border-top">
                                     <span class="small text-secondary">Statut : <?= $canStart ? '<span class="text-success font-weight-bold">Prêt</span>' : '<span class="text-muted">Bloqué</span>' ?></span>
                                     <?php if ($canStart): ?>
-                                        <button type="button" onclick="executeStartAdventure(<?= (int)$adv['id'] ?>)" class="btn btn-sm btn-primary font-weight-bold">
+                                        <button type="button" 
+                                                onclick="openAdventureConfirmModal({
+                                                    id: <?= (int)$adv['id'] ?>,
+                                                    name: <?= htmlspecialchars(json_encode($adv['name']), ENT_QUOTES, 'UTF-8') ?>,
+                                                    difficulty: '<?= $adv['difficulty'] ?>',
+                                                    diffLabel: '<?= $dbdg['label'] ?>',
+                                                    diffClass: '<?= $dbdg['class'] ?>',
+                                                    coordX: <?= (int)$adv['coord_x'] ?>,
+                                                    coordY: <?= (int)$adv['coord_y'] ?>,
+                                                    distance: <?= (int)$adv['distance'] ?>,
+                                                    durationStr: '<?= gmdate('H:i:s', $adv['duration']) ?>',
+                                                    imgUrl: '<?= htmlspecialchars($advImg) ?>'
+                                                })" 
+                                                class="btn btn-sm btn-primary font-weight-bold shadow-xs">
                                             Partir en Aventure &rarr;
                                         </button>
                                     <?php else: ?>
@@ -1210,4 +1270,128 @@ function closeItemDetailModal(e) {
         modal.style.display = 'none';
     }
 }
+
+// ---------------------------------------------------------------------------
+// GESTION DE LA MODALE DE CONFIRMATION DES AVENTURES DU HÉROS (STYLE TRAVIAN)
+// ---------------------------------------------------------------------------
+let selectedAdventureToLaunch = null;
+
+function openAdventureConfirmModal(adv) {
+    if (!adv || !adv.id) return;
+    selectedAdventureToLaunch = adv;
+
+    const imgEl = document.getElementById('adventureModalImage');
+    const titleEl = document.getElementById('adventureModalTitle');
+    const badgeEl = document.getElementById('adventureModalDiffBadge');
+    const coordsEl = document.getElementById('adventureModalCoordsBadge');
+    const distEl = document.getElementById('adventureModalDistanceText');
+
+    if (imgEl) imgEl.src = adv.imgUrl || '/public/assets/adventures/adventure_depart.jpeg';
+    if (titleEl) titleEl.textContent = adv.name || 'Aventure Provinciale';
+    if (coordsEl) coordsEl.textContent = `[${adv.coordX} : ${adv.coordY}]`;
+    if (distEl) distEl.innerHTML = `<strong>${adv.distance}</strong> lieues &bull; Marche : <strong>${adv.durationStr}</strong>`;
+
+    if (badgeEl) {
+        badgeEl.textContent = adv.diffLabel || 'Difficulté : Faible';
+        badgeEl.className = `badge ${adv.diffClass || 'bg-success text-white'} fw-bold px-2 py-1 mb-1 shadow-sm`;
+    }
+
+    const modalEl = document.getElementById('modalConfirmHeroAdventure');
+    if (modalEl) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const advModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            advModal.show();
+        } else {
+            $(modalEl).modal('show');
+        }
+    }
+}
+
+function confirmAndLaunchAdventure() {
+    if (!selectedAdventureToLaunch || !selectedAdventureToLaunch.id) return;
+    const modalEl = document.getElementById('modalConfirmHeroAdventure');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const advModal = bootstrap.Modal.getInstance(modalEl);
+        if (advModal) advModal.hide();
+    }
+    const advId = selectedAdventureToLaunch.id;
+    selectedAdventureToLaunch = null;
+    executeStartAdventure(advId);
+}
 </script>
+
+<!-- ========================================================
+     MODALE DE CONFIRMATION : DÉPART EN AVENTURE DU SAMOURAÏ
+     Illustration d'en-tête de l'aventure (Style Travian)
+     ======================================================== -->
+<div class="modal fade" id="modalConfirmHeroAdventure" tabindex="-1" aria-labelledby="adventureModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 12px;">
+            <!-- Illustration d'en-tête de l'aventure -->
+            <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
+                <img id="adventureModalImage" src="/public/assets/adventures/adventure_depart.jpeg" alt="Aventure Féodale" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
+                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                    <div style="max-width: 75%;">
+                        <span id="adventureModalDiffBadge" class="badge bg-success text-white fw-bold px-2 py-1 mb-1 shadow-sm" style="font-size:0.75rem;">
+                            Difficulté : Faible
+                        </span>
+                        <h3 class="m-0 fw-bold text-white shadow-sm text-truncate" id="adventureModalTitle" style="font-size: 1.25rem;">
+                            Sanctuaire Shintō Abandonné dans la Forêt
+                        </h3>
+                    </div>
+                    <div>
+                        <span id="adventureModalCoordsBadge" class="badge bg-dark bg-opacity-75 border border-light text-white font-monospace fs-6 px-3 py-1">
+                            [502 : 503]
+                        </span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+            </div>
+
+            <!-- Corps de la modale -->
+            <div class="modal-body p-4 bg-white">
+                <p class="text-secondary small mb-3">
+                    Votre Samouraï s'apprête à entreprendre une expédition provinciale périlleuse vers ce lieu mystérieux.
+                </p>
+
+                <div class="p-3 rounded border mb-3" style="background: #f8fafc;">
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <span class="text-secondary small"><i class="fa-solid fa-person-walking me-1 text-danger"></i>Distance &amp; Trajet :</span>
+                        <span class="text-dark font-monospace" id="adventureModalDistanceText">-- lieues (Marche : --:--:--)</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <span class="text-secondary small"><i class="fa-solid fa-heart-pulse me-1 text-success"></i>État du Samouraï :</span>
+                        <span class="text-dark fw-bold font-monospace">
+                            <span class="<?= ($hero['health'] < 30) ? 'text-danger' : 'text-success' ?>"><?= number_format($hero['health'], 1) ?>% PV</span>
+                            &bull; Niveau <?= (int)$hero['level'] ?>
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <span class="text-secondary small"><i class="fa-solid fa-gem me-1 text-purple"></i>Gains Potentiels :</span>
+                        <span class="fw-bold text-purple" style="font-size:0.85rem;">Expérience, Vivres, Troupes ou Relique</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary small"><i class="fa-solid fa-clock-rotate-left me-1 text-warning"></i>Quota Journalier :</span>
+                        <span class="fw-bold text-dark font-monospace"><?= $dailyQuota['count'] ?> / <?= $dailyQuota['max'] ?> effectuées (<?= $dailyQuota['remaining'] ?> restante<?= $dailyQuota['remaining'] > 1 ? 's' : '' ?>)</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-secondary small p-2 mb-0 d-flex align-items-center gap-2" style="border-left: 4px solid #7c3aed;">
+                    <i class="fa-solid fa-circle-info fs-4 text-purple"></i>
+                    <span>À son arrivée sur place, votre héros explorera le site et affrontera d'éventuels gardiens avant de vous rapporter son compte-rendu d'expédition.</span>
+                </div>
+            </div>
+
+            <!-- Pied de modale avec confirmation -->
+            <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-primary fw-bold px-4 shadow-sm" id="btnConfirmAdventureLaunch" onclick="confirmAndLaunchAdventure()">
+                    <i class="fa-solid fa-person-running me-1"></i>En route pour l'Aventure &rarr;
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
