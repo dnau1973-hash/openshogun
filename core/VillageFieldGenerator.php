@@ -247,11 +247,15 @@ class VillageFieldGenerator {
      * Recherche des coordonnées (X, Y) libres dans un quadrant géographique donné
      * Zones supportées : 'nord_ouest' (-X, +Y), 'nord_est' (+X, +Y), 'sud_ouest' (-X, -Y), 'sud_est' (+X, -Y), 'random'
      */
-    public static function findRandomFreeCoordinates(PDO $db, int $radius = 35, string $zone = 'random'): array {
+    public static function findRandomFreeCoordinates(PDO $db, ?int $radius = null, string $zone = 'random'): array {
+        require_once __DIR__ . '/GameConfig.php';
+        if ($radius === null) {
+            $radius = (int)GameConfig::getWorldRadius();
+        }
         $checkStmt = $db->prepare("SELECT id FROM planets WHERE coord_x = ? AND coord_y = ?");
 
         $attempts = 0;
-        $curRadius = max(15, $radius);
+        $curRadius = max(10, $radius);
 
         $zone = strtolower(trim($zone));
         if ($zone === 'random' || !in_array($zone, ['nord_ouest', 'nord_est', 'sud_ouest', 'sud_est', 'no', 'ne', 'so', 'se'])) {

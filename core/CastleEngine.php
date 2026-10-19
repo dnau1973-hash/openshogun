@@ -397,7 +397,11 @@ class CastleEngine {
     /**
      * Déploie et répartit de manière homogène les 12 châteaux authentiques sur toute la carte
      */
-    public function deployCastlesHomogeneously(int $radius = 35): array {
+    public function deployCastlesHomogeneously(?int $radius = null): array {
+        if ($radius === null) {
+            require_once __DIR__ . '/GameConfig.php';
+            $radius = (int)GameConfig::getWorldRadius();
+        }
         $coordsMap = self::getHomogeneousCoordinatesMapping();
         $castles = $this->getAllCastles();
         $deployed = [];
@@ -452,7 +456,7 @@ class CastleEngine {
      * Déploie tous les 12 châteaux sur la carte aux coordonnées homogènes
      */
     public function spawnAllCastles(): array {
-        return $this->deployCastlesHomogeneously(35);
+        return $this->deployCastlesHomogeneously(null);
     }
 
     /**

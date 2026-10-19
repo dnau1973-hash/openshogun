@@ -743,7 +743,7 @@ class BotEngine {
         }
 
         // Repli standard si la zone est dense
-        $fallback = VillageFieldGenerator::findRandomFreeCoordinates($this->db, 35, strtolower($targetQuadrant));
+        $fallback = VillageFieldGenerator::findRandomFreeCoordinates($this->db, null, strtolower($targetQuadrant));
         return [
             'x' => $fallback['x'],
             'y' => $fallback['y'],
@@ -988,7 +988,7 @@ class BotEngine {
      * Trouve des coordonnées libres aléatoires (Style Travian)
      */
     private function findFreeCoordinates(): array {
-        return VillageFieldGenerator::findRandomFreeCoordinates($this->db, 35);
+        return VillageFieldGenerator::findRandomFreeCoordinates($this->db, null);
     }
 }
 

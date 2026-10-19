@@ -724,7 +724,7 @@ class Auth {
      * Recherche un emplacement libre (X, Y) dans le quadrant souhaité (Style Travian)
      */
     private function findFreeCoordinates(string $zone = 'random'): array {
-        return VillageFieldGenerator::findRandomFreeCoordinates($this->db, 35, $zone);
+        return VillageFieldGenerator::findRandomFreeCoordinates($this->db, null, $zone);
     }
 
     public static function csrfToken(): string {

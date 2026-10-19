@@ -60,11 +60,29 @@ class GameConfig {
                     'research_time_coeff' => 1.0,
                     'research_time_growth' => 1.35,
                     'research_cost_coeff' => 1.0,
-                    'research_cost_growth' => 1.65
+                    'research_cost_growth' => 1.65,
+                    'world_radius' => 35
                 ];
             }
         }
         return self::$cache;
+    }
+
+    /**
+     * Récupère le rayon du monde actuel
+     */
+    public static function getWorldRadius(): int {
+        return (int)self::get('world_radius', 35);
+    }
+
+    /**
+     * Calcule le nombre total de tuiles pour un rayon donné (ou le rayon actif)
+     * Formule cartésienne : (2 * R + 1)^2
+     */
+    public static function getTotalTilesCount(?int $radius = null): int {
+        $r = $radius ?? self::getWorldRadius();
+        $dim = ($r * 2) + 1;
+        return $dim * $dim;
     }
 
     /**

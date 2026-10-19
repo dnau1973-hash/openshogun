@@ -413,7 +413,7 @@ class WorldGenerator {
             $uFaction = $ou['faction'] ?? 'terran';
 
             // Coordonnées libres pour le nouveau départ du joueur
-            $uCoords = VillageFieldGenerator::findRandomFreeCoordinates($this->db, 35, 'random');
+            $uCoords = VillageFieldGenerator::findRandomFreeCoordinates($this->db, null, 'random');
             $uPlanetName = "Château " . ucfirst($uName);
 
             if ($hasFishCol) {
@@ -483,7 +483,7 @@ class WorldGenerator {
         try {
             require_once __DIR__ . '/CastleEngine.php';
             $castleEngine = new CastleEngine();
-            $castleEngine->deployCastlesHomogeneously(35);
+            $castleEngine->deployCastlesHomogeneously(null);
         } catch (Exception $e) {
             // Ignorer silencieusement
         }

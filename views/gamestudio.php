@@ -57,6 +57,10 @@ if (($_GET['tab'] ?? '') === 'backups') {
     header('Location: ?page=gamestudio&tab=general&subtab=backups');
     exit;
 }
+if (in_array($_GET['tab'] ?? '', ['world', 'world_config'], true)) {
+    header('Location: ?page=gamestudio&tab=general&subtab=world_config');
+    exit;
+}
 
 // 1. Détection de l'onglet actif dans la barre d'outils
 $allowedTabs = [
@@ -70,7 +74,7 @@ $allowedTabs = [
     'dev_tickets', 'dev_backend_tasks'
 ];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
-$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
+$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
 $analyticsPeriod = in_array($_GET['period'] ?? '', ['today', '7d', '30d', 'all'], true) ? (string)$_GET['period'] : '30d';
 
 // 2. Préparation des données selon l'onglet
@@ -78,8 +82,26 @@ if ($currentTab === 'dashboard') {
     $dashboardData = $gameStudioEngine->getDashboardData($analyticsPeriod);
     extract($dashboardData);
 } elseif ($currentTab === 'general') {
+    // Traitement des actions en POST pour Général
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+        if ($_POST['action'] === 'save_world_radius') {
+            $radius = (int)($_POST['world_radius'] ?? 35);
+            $res = $gameStudioEngine->saveWorldRadius($radius);
+            $_SESSION['general_flash'] = [
+                'type' => $res['success'] ? (!empty($res['warning']) ? 'warning' : 'success') : 'danger',
+                'msg'  => $res['message'] . (!empty($res['warning']) ? ' ' . $res['warning'] : '')
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config');
+            exit;
+        }
+    }
     $generalData = $gameStudioEngine->getGeneralData();
     extract($generalData);
+    if ($currentSubTab === 'world_config') {
+        $worldConfigData = $gameStudioEngine->getWorldConfigData();
+        extract($worldConfigData);
+    }
+}
 } elseif ($currentTab === 'elevate_research') {
     require_once __DIR__ . '/../core/ResearchElevateService.php';
     $elevateService = new ResearchElevateService();
@@ -660,6 +682,13 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div>
                                 <div>Synthèse &amp; Dev Team</div>
                                 <div class="small text-secondary">Environnement, KPIs &amp; Accréditations</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'world_config') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=world_config">
+                            <i class="fa-solid fa-earth-asia text-azure"></i>
+                            <div>
+                                <div>Configuration du Monde</div>
+                                <div class="small text-secondary">Dimensions, tuiles générées &amp; arpentage</div>
                             </div>
                         </a>
                         <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'backups') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=backups">

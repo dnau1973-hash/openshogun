@@ -369,4 +369,254 @@ class GameStudioEngine {
             'gameVersion'      => defined('GAME_VERSION') ? GAME_VERSION : '1.27.0'
         ];
     }
+
+    /**
+     * Récupère l'ensemble des données pour la page Configuration du Monde
+     */
+    public function getWorldConfigData(): array {
+        $radius = GameConfig::getWorldRadius();
+        $totalTiles = GameConfig::getTotalTilesCount($radius);
+        $gridDimension = ($radius * 2) + 1;
+        $boundaryPerimeter = $radius * 8;
+
+        // Préréglages recommandés
+        $presets = [
+            [
+                'id'          => 'skirmish',
+                'name'        => 'Escarmouche / Découverte',
+                'radius'      => 15,
+                'dimension'   => '31 × 31',
+                'total_tiles' => 961,
+                'capacity'    => '5 - 15 Daimyōs',
+                'badge'       => 'bg-blue-lt text-blue',
+                'icon'        => 'fa-compass'
+            ],
+            [
+                'id'          => 'standard',
+                'name'        => 'Monde Provincial Standard',
+                'radius'      => 35,
+                'dimension'   => '71 × 71',
+                'total_tiles' => 5041,
+                'capacity'    => '20 - 60 Daimyōs',
+                'badge'       => 'bg-azure text-white',
+                'icon'        => 'fa-torii-gate'
+            ],
+            [
+                'id'          => 'large',
+                'name'        => 'Grand Monde Sengoku',
+                'radius'      => 50,
+                'dimension'   => '101 × 101',
+                'total_tiles' => 10201,
+                'capacity'    => '80 - 200 Daimyōs',
+                'badge'       => 'bg-indigo-lt text-indigo',
+                'icon'        => 'fa-mountain'
+            ],
+            [
+                'id'          => 'epic',
+                'name'        => 'Archipel Impérial Épique',
+                'radius'      => 75,
+                'dimension'   => '151 × 151',
+                'total_tiles' => 22801,
+                'capacity'    => '200 - 600 Daimyōs',
+                'badge'       => 'bg-purple-lt text-purple',
+                'icon'        => 'fa-chess-rook'
+            ],
+            [
+                'id'          => 'mega',
+                'name'        => 'Mégamonde Shogunat Ultime',
+                'radius'      => 100,
+                'dimension'   => '201 × 201',
+                'total_tiles' => 40401,
+                'capacity'    => '1000+ Daimyōs',
+                'badge'       => 'bg-red-lt text-red',
+                'icon'        => 'fa-fire'
+            ]
+        ];
+
+        // Télémétrie spatiale des entités existantes
+        $humanVillages = 0;
+        $botVillages = 0;
+        $freeLands = 0;
+        $authenticCastles = 0;
+        $oasesCount = 0;
+        $maxAbsX = 0;
+        $maxAbsY = 0;
+        $quadrants = ['KYOTO' => 0, 'NO' => 0, 'NE' => 0, 'SO' => 0, 'SE' => 0];
+        $outOfBoundsEntities = [];
+
+        try {
+            // Planètes (Fiefs joueurs, bots et terres libres)
+            $stmtPlanets = $this->db->query("
+                SELECT p.id, p.name, p.coord_x, p.coord_y, p.user_id, u.username, u.is_bot
+                FROM planets p
+                LEFT JOIN users u ON p.user_id = u.id
+            ");
+            while ($p = $stmtPlanets->fetch(PDO::FETCH_ASSOC)) {
+                $x = (int)$p['coord_x'];
+                $y = (int)$p['coord_y'];
+                $absX = abs($x);
+                $absY = abs($y);
+                if ($absX > $maxAbsX) $maxAbsX = $absX;
+                if ($absY > $maxAbsY) $maxAbsY = $absY;
+
+                if (!empty($p['user_id'])) {
+                    if (!empty($p['is_bot'])) {
+                        $botVillages++;
+                    } else {
+                        $humanVillages++;
+                    }
+                } else {
+                    $freeLands++;
+                }
+
+                // Quadrants
+                if ($x === 0 && $y === 0) {
+                    $quadrants['KYOTO']++;
+                } elseif ($x <= 0 && $y >= 0) {
+                    $quadrants['NO']++;
+                } elseif ($x >= 0 && $y >= 0) {
+                    $quadrants['NE']++;
+                } elseif ($x <= 0 && $y <= 0) {
+                    $quadrants['SO']++;
+                } else {
+                    $quadrants['SE']++;
+                }
+
+                // Détection hors rayon
+                if ($absX > $radius || $absY > $radius) {
+                    $outOfBoundsEntities[] = [
+                        'type'   => !empty($p['user_id']) ? (!empty($p['is_bot']) ? 'Fief Bot' : 'Fief Joueur') : 'Terre Libre',
+                        'name'   => $p['name'] . (!empty($p['username']) ? ' (' . $p['username'] . ')' : ''),
+                        'coords' => "[{$x} : {$y}]",
+                        'excess' => max($absX, $absY) - $radius
+                    ];
+                }
+            }
+        } catch (Throwable $e) {}
+
+        try {
+            // Châteaux authentiques
+            $stmtCastles = $this->db->query("SELECT name, coord_x, coord_y FROM authentic_castles WHERE is_spawned = 1");
+            while ($c = $stmtCastles->fetch(PDO::FETCH_ASSOC)) {
+                $authenticCastles++;
+                $x = (int)$c['coord_x'];
+                $y = (int)$c['coord_y'];
+                $absX = abs($x);
+                $absY = abs($y);
+                if ($absX > $maxAbsX) $maxAbsX = $absX;
+                if ($absY > $maxAbsY) $maxAbsY = $absY;
+
+                if ($absX > $radius || $absY > $radius) {
+                    $outOfBoundsEntities[] = [
+                        'type'   => 'Donjon Authentique',
+                        'name'   => $c['name'],
+                        'coords' => "[{$x} : {$y}]",
+                        'excess' => max($absX, $absY) - $radius
+                    ];
+                }
+            }
+        } catch (Throwable $e) {}
+
+        try {
+            // Oasis
+            $stmtOases = $this->db->query("SELECT name, coord_x, coord_y FROM oases");
+            while ($o = $stmtOases->fetch(PDO::FETCH_ASSOC)) {
+                $oasesCount++;
+                $x = (int)$o['coord_x'];
+                $y = (int)$o['coord_y'];
+                $absX = abs($x);
+                $absY = abs($y);
+                if ($absX > $maxAbsX) $maxAbsX = $absX;
+                if ($absY > $maxAbsY) $maxAbsY = $absY;
+
+                if ($absX > $radius || $absY > $radius) {
+                    $outOfBoundsEntities[] = [
+                        'type'   => 'Oasis Naturelle',
+                        'name'   => $o['name'] ?? 'Oasis Sauvage',
+                        'coords' => "[{$x} : {$y}]",
+                        'excess' => max($absX, $absY) - $radius
+                    ];
+                }
+            }
+        } catch (Throwable $e) {}
+
+        $minRequiredRadius = max($maxAbsX, $maxAbsY);
+        $totalOccupied = $humanVillages + $botVillages + $freeLands + $authenticCastles + $oasesCount;
+        $saturationRate = $totalTiles > 0 ? round(($totalOccupied / $totalTiles) * 100, 2) : 0;
+        $naturalTiles = max(0, $totalTiles - $totalOccupied);
+
+        // Estimation biomes naturels sur les tuiles non construites
+        $biomesEstimate = [
+            'plains'   => (int)round($naturalTiles * 0.60),
+            'forest'   => (int)round($naturalTiles * 0.15),
+            'mountain' => (int)round($naturalTiles * 0.12),
+            'hills'    => (int)round($naturalTiles * 0.08),
+            'lake'     => (int)round($naturalTiles * 0.05)
+        ];
+
+        return [
+            'worldRadius'         => $radius,
+            'totalTiles'          => $totalTiles,
+            'gridDimension'       => $gridDimension,
+            'boundaryPerimeter'   => $boundaryPerimeter,
+            'presets'             => $presets,
+            'minRequiredRadius'   => $minRequiredRadius,
+            'humanVillages'       => $humanVillages,
+            'botVillages'         => $botVillages,
+            'freeLands'           => $freeLands,
+            'authenticCastles'    => $authenticCastles,
+            'oasesCount'          => $oasesCount,
+            'totalOccupied'       => $totalOccupied,
+            'saturationRate'      => $saturationRate,
+            'naturalTiles'        => $naturalTiles,
+            'biomesEstimate'      => $biomesEstimate,
+            'quadrants'           => $quadrants,
+            'outOfBoundsEntities' => $outOfBoundsEntities
+        ];
+    }
+
+    /**
+     * Met à jour le rayon du monde avec vérification de sécurité
+     */
+    public function saveWorldRadius(int $newRadius): array {
+        if ($newRadius < 10) {
+            return [
+                'success' => false,
+                'message' => 'Le rayon minimum du monde est de 10 tuiles (grille minimale 21 × 21 = 441 tuiles).'
+            ];
+        }
+        if ($newRadius > 200) {
+            return [
+                'success' => false,
+                'message' => 'Le rayon maximum supporté est de 200 tuiles (grille 401 × 401 = 160 801 tuiles).'
+            ];
+        }
+
+        $currentData = $this->getWorldConfigData();
+        $minRequired = $currentData['minRequiredRadius'];
+        $warning = null;
+
+        if ($newRadius < $minRequired) {
+            $warning = "Attention : le nouveau rayon ($newRadius) est inférieur aux coordonnées maximales occupées ($minRequired). Certains fiefs ou entités se trouvent temporairement au-delà des frontières.";
+        }
+
+        $res = GameConfig::set('world_radius', $newRadius);
+        if ($res) {
+            $newTotal = GameConfig::getTotalTilesCount($newRadius);
+            $msg = "Dimension du monde enregistrée : Rayon $newRadius (Grille " . (($newRadius * 2) + 1) . " × " . (($newRadius * 2) + 1) . " = " . number_format($newTotal, 0, ',', ' ') . " tuiles).";
+            return [
+                'success' => true,
+                'message' => $msg,
+                'warning' => $warning,
+                'radius'  => $newRadius,
+                'total_tiles' => $newTotal
+            ];
+        }
+
+        return [
+            'success' => false,
+            'message' => 'Impossible d\'enregistrer la configuration du monde en base de données.'
+        ];
+    }
 }
+

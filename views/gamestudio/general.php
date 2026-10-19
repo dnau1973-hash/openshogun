@@ -5,7 +5,7 @@
  */
 
 $currentPageSlug = $page ?? 'gamestudio';
-$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
+$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
 ?>
 
 <div class="gamestudio-general">
@@ -16,7 +16,7 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'update
                 <i class="fa-solid fa-sliders text-indigo me-1"></i>Configuration &amp; Administration Générale
             </h3>
             <div class="text-secondary small mt-1">
-                Aperçu de l'environnement serveur, accréditations de l'équipe, centre de sauvegardes et synchronisation GitHub.
+                Aperçu de l'environnement serveur, dimensionnement du monde, accréditations de l'équipe et centre de sauvegardes.
             </div>
         </div>
         <div class="d-flex align-items-center gap-2">
@@ -34,6 +34,14 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'update
                    class="nav-link py-2 px-3 d-flex align-items-center justify-content-center gap-2 <?= $currentSubTab === 'overview' ? 'active fw-bold text-indigo border-bottom-0' : 'text-secondary' ?>">
                     <i class="fa-solid fa-gauge text-indigo"></i>
                     <span>Synthèse &amp; Dev Team</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="?page=gamestudio&tab=general&subtab=world_config" 
+                   class="nav-link py-2 px-3 d-flex align-items-center justify-content-center gap-2 <?= $currentSubTab === 'world_config' ? 'active fw-bold text-azure border-bottom-0' : 'text-secondary' ?>">
+                    <i class="fa-solid fa-earth-asia text-azure"></i>
+                    <span>Configuration du Monde</span>
+                    <span class="badge bg-azure-lt ms-1 font-monospace"><?= number_format((int)GameConfig::getTotalTilesCount(), 0, ',', ' ') ?> tuiles</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -205,6 +213,12 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'backups', 'update
                 </div>
             </div>
         </div>
+
+    <?php elseif ($currentSubTab === 'world_config'): ?>
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- SOUS-ONGLET NOUVEAU : CONFIGURATION DU MONDE & TUILES GÉNÉRÉES     -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <?php require __DIR__ . '/general_world_config.php'; ?>
 
     <?php elseif ($currentSubTab === 'backups'): ?>
         <!-- ═══════════════════════════════════════════════════════════════════ -->
