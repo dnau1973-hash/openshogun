@@ -11,6 +11,7 @@ class ServerMonitorEngine {
     private ?PDO $db;
 
     public function __construct(?PDO $pdo = null) {
+        $this->db = null;
         if ($pdo) {
             $this->db = $pdo;
         } else {
@@ -21,9 +22,21 @@ class ServerMonitorEngine {
                     $inst = $ref->getValue();
                     if ($inst instanceof PDO) {
                         $this->db = $inst;
-                    } else {
-                        $this->db = Database::getInstance();
                     }
+                }
+                if ($this->db === null && class_exists('Database') && file_exists(__DIR__ . '/../config/database.php')) {
+                    require_once __DIR__ . '/../config/database.php';
+                    $host = defined('DB_HOST') ? DB_HOST : '127.0.0.1';
+                    $port = defined('DB_PORT') ? DB_PORT : '3306';
+                    $dbname = defined('DB_NAME') ? DB_NAME : 'openshogun';
+                    $user = defined('DB_USER') ? DB_USER : 'root';
+                    $pass = defined('DB_PASS') ? DB_PASS : '';
+                    $charset = defined('DB_CHARSET') ? DB_CHARSET : 'utf8mb4';
+                    $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset={$charset}";
+                    $this->db = new PDO($dsn, $user, $pass, [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT,
+                        PDO::ATTR_TIMEOUT => 2
+                    ]);
                 }
             } catch (Throwable $e) {
                 $this->db = null;
@@ -35,18 +48,22 @@ class ServerMonitorEngine {
      * Diagnostic complet et instantané du serveur hôte
      */
     public function getSystemDiagnostics(): array {
+        // Enregistrement automatique transparent d'un relevé toutes les 30s
+        $this->recordHardwareLog(false, 30);
+
         return [
-            'timestamp'    => time(),
-            'datetime'     => date('Y-m-d H:i:s'),
-            'hardware'     => $this->getHardwareInfo(),
-            'cpu'          => $this->getCpuAndThermalInfo(),
-            'memory'       => $this->getMemoryAndSwapInfo(),
-            'disk'         => $this->getDiskInfo(),
-            'database'     => $this->getDatabaseMetrics(),
-            'php'          => $this->getPhpAndOpcacheInfo(),
-            'network'      => $this->getNetworkInfo(),
-            'uptime'       => $this->getUptimeInfo(),
-            'health_score' => $this->calculateHealthScore()
+            'timestamp'        => time(),
+            'datetime'         => date('Y-m-d H:i:s'),
+            'hardware'         => $this->getHardwareInfo(),
+            'cpu'              => $this->getCpuAndThermalInfo(),
+            'memory'           => $this->getMemoryAndSwapInfo(),
+            'disk'             => $this->getDiskInfo(),
+            'database'         => $this->getDatabaseMetrics(),
+            'php'              => $this->getPhpAndOpcacheInfo(),
+            'network'          => $this->getNetworkInfo(),
+            'uptime'           => $this->getUptimeInfo(),
+            'health_score'     => $this->calculateHealthScore(),
+            'hardware_summary' => $this->getHardwareLogSummary()
         ];
     }
 
@@ -143,16 +160,42 @@ class ServerMonitorEngine {
         $cores = $this->getHardwareInfo()['cores'] ?: 1;
         $loadPercent = min(100, round(($loadAvg[0] / $cores) * 100, 1));
 
+        // Fréquence CPU en MHz (Spécifique Linux / Raspberry Pi cpufreq)
+        $freqMhz = null;
+        $freqMaxMhz = null;
+        $freqCurPath = '/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq';
+        $freqMaxPath = '/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq';
+        if (is_readable($freqCurPath)) {
+            $curVal = (int)@file_get_contents($freqCurPath);
+            if ($curVal > 0) $freqMhz = round($curVal / 1000);
+        }
+        if (is_readable($freqMaxPath)) {
+            $maxVal = (int)@file_get_contents($freqMaxPath);
+            if ($maxVal > 0) $freqMaxMhz = round($maxVal / 1000);
+        }
+
+        // Détection de Throttling (Bridage par surchauffe)
+        $throttlingDetected = false;
+        if ($freqMhz && $freqMaxMhz && ($freqMhz < $freqMaxMhz * 0.75) && ($tempCelsius !== null && $tempCelsius >= 68)) {
+            $throttlingDetected = true;
+            $thermalStatus = 'throttling_critical';
+            $thermalLabel = 'Bridage Fréquence (Throttling)';
+            $thermalClass = 'danger';
+        }
+
         return [
-            'temperature'   => $tempCelsius,
-            'thermal_status'=> $thermalStatus,
-            'thermal_label' => $thermalLabel,
-            'thermal_class' => $thermalClass,
-            'load_1m'       => $loadAvg[0],
-            'load_5m'       => $loadAvg[1],
-            'load_15m'      => $loadAvg[2],
-            'load_percent'  => $loadPercent,
-            'cores'         => $cores
+            'temperature'          => $tempCelsius,
+            'thermal_status'       => $thermalStatus,
+            'thermal_label'        => $thermalLabel,
+            'thermal_class'        => $thermalClass,
+            'load_1m'              => $loadAvg[0],
+            'load_5m'              => $loadAvg[1],
+            'load_15m'             => $loadAvg[2],
+            'load_percent'         => $loadPercent,
+            'cores'                => $cores,
+            'frequency_mhz'        => $freqMhz,
+            'frequency_max_mhz'    => $freqMaxMhz,
+            'throttling_detected'  => $throttlingDetected
         ];
     }
 
@@ -357,14 +400,121 @@ class ServerMonitorEngine {
     }
 
     /**
-     * Informations réseau basiques
+     * Télémétrie réseau complète & estimation du débit instantané (Rx/Tx)
      */
     public function getNetworkInfo(): array {
         $serverIp = $_SERVER['SERVER_ADDR'] ?? gethostbyname(gethostname());
+        $interfaces = [];
+        $totalRxBytes = 0.0;
+        $totalTxBytes = 0.0;
+        $totalRxPackets = 0;
+        $totalTxPackets = 0;
+
+        if (is_readable('/proc/net/dev')) {
+            $lines = @file('/proc/net/dev') ?: [];
+            foreach ($lines as $line) {
+                if (strpos($line, ':') === false) continue;
+                [$ifaceName, $data] = explode(':', $line, 2);
+                $ifaceName = trim($ifaceName);
+                $parts = preg_split('/\s+/', trim($data));
+                if (count($parts) >= 10) {
+                    $rxB = (float)$parts[0];
+                    $rxP = (int)$parts[1];
+                    $txB = (float)$parts[8];
+                    $txP = (int)$parts[9];
+
+                    $interfaces[$ifaceName] = [
+                        'interface'  => $ifaceName,
+                        'rx_bytes'   => $rxB,
+                        'rx_mb'      => round($rxB / (1024 * 1024), 2),
+                        'rx_packets' => $rxP,
+                        'tx_bytes'   => $txB,
+                        'tx_mb'      => round($txB / (1024 * 1024), 2),
+                        'tx_packets' => $txP,
+                        'is_loopback'=> ($ifaceName === 'lo')
+                    ];
+
+                    if ($ifaceName !== 'lo') {
+                        $totalRxBytes += $rxB;
+                        $totalTxBytes += $txB;
+                        $totalRxPackets += $rxP;
+                        $totalTxPackets += $txP;
+                    }
+                }
+            }
+        }
+
+        // Détermination de l'interface principale
+        $primaryIface = 'eth0';
+        $primaryType = 'Ethernet (Filaire)';
+        $foundNonLo = false;
+
+        foreach ($interfaces as $name => $meta) {
+            if ($name !== 'lo') {
+                $primaryIface = $name;
+                $foundNonLo = true;
+                if (str_starts_with($name, 'wlan') || str_starts_with($name, 'wifi')) {
+                    $primaryType = 'Wi-Fi (Sans fil)';
+                } elseif (str_starts_with($name, 'eth') || str_starts_with($name, 'en')) {
+                    $primaryType = 'Ethernet (Filaire)';
+                } else {
+                    $primaryType = 'Interface Réseau (' . $name . ')';
+                }
+                break;
+            }
+        }
+
+        if (!$foundNonLo && isset($interfaces['lo'])) {
+            $primaryIface = 'lo';
+            $primaryType = 'Boucle Locale (Loopback)';
+            $totalRxBytes = $interfaces['lo']['rx_bytes'];
+            $totalTxBytes = $interfaces['lo']['tx_bytes'];
+            $totalRxPackets = $interfaces['lo']['rx_packets'];
+            $totalTxPackets = $interfaces['lo']['tx_packets'];
+        }
+
+        // Calcul du débit instantané (Ko/s)
+        $now = microtime(true);
+        $rxSpeedKbps = 0.0;
+        $txSpeedKbps = 0.0;
+        $cacheFile = __DIR__ . '/../config/.net_traffic_cache.json';
+
+        $prevData = null;
+        if (file_exists($cacheFile)) {
+            $prevData = @json_decode((string)@file_get_contents($cacheFile), true);
+        }
+
+        if ($prevData && isset($prevData['time'], $prevData['rx_bytes'], $prevData['tx_bytes'])) {
+            $elapsed = $now - (float)$prevData['time'];
+            if ($elapsed > 0.4 && $elapsed < 300) {
+                $deltaRx = max(0, $totalRxBytes - (float)$prevData['rx_bytes']);
+                $deltaTx = max(0, $totalTxBytes - (float)$prevData['tx_bytes']);
+                $rxSpeedKbps = round(($deltaRx / 1024) / $elapsed, 1);
+                $txSpeedKbps = round(($deltaTx / 1024) / $elapsed, 1);
+            }
+        }
+
+        @file_put_contents($cacheFile, json_encode([
+            'time'     => $now,
+            'rx_bytes' => $totalRxBytes,
+            'tx_bytes' => $totalTxBytes
+        ]), LOCK_EX);
+
         return [
-            'server_ip' => $serverIp,
-            'port'      => (int)($_SERVER['SERVER_PORT'] ?? 80),
-            'scheme'    => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http'
+            'server_ip'      => $serverIp,
+            'port'           => (int)($_SERVER['SERVER_PORT'] ?? 80),
+            'scheme'         => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
+            'primary_iface'  => $primaryIface,
+            'primary_type'   => $primaryType,
+            'total_rx_mb'    => round($totalRxBytes / (1024 * 1024), 2),
+            'total_tx_mb'    => round($totalTxBytes / (1024 * 1024), 2),
+            'total_rx_gb'    => round($totalRxBytes / (1024 * 1024 * 1024), 3),
+            'total_tx_gb'    => round($totalTxBytes / (1024 * 1024 * 1024), 3),
+            'rx_speed_kbps'  => $rxSpeedKbps,
+            'tx_speed_kbps'  => $txSpeedKbps,
+            'rx_packets'     => $totalRxPackets,
+            'tx_packets'     => $totalTxPackets,
+            'interfaces'     => $interfaces
         ];
     }
 
@@ -459,5 +609,254 @@ class ServerMonitorEngine {
             'success' => false,
             'message' => "L'extension OPcache n'est pas active sur ce serveur."
         ];
+    }
+
+    // =========================================================================
+    // MODULE DE JOURNALISATION DE TÉLÉMÉTRIE MATÉRIELLE (LOGS RASPBERRY PI)
+    // =========================================================================
+
+    /**
+     * Chemin vers le fichier de stockage des logs matériels
+     */
+    public static function getHardwareLogsPath(): string {
+        $dir = __DIR__ . '/../config';
+        if (!is_dir($dir)) @mkdir($dir, 0775, true);
+        return $dir . '/server_hardware_logs.json';
+    }
+
+    /**
+     * Enregistre un instantané de télémétrie matérielle (Température, Load, RAM, Swap, Réseau)
+     */
+    public function recordHardwareLog(bool $force = false, int $minIntervalSec = 30): array {
+        $path = self::getHardwareLogsPath();
+        $logs = [];
+        if (file_exists($path)) {
+            $logs = @json_decode((string)@file_get_contents($path), true) ?: [];
+        }
+
+        $now = time();
+        if (!$force && !empty($logs)) {
+            $last = end($logs);
+            if (isset($last['timestamp']) && ($now - (int)$last['timestamp']) < $minIntervalSec) {
+                return $last;
+            }
+        }
+
+        $cpu = $this->getCpuAndThermalInfo();
+        $mem = $this->getMemoryAndSwapInfo();
+        $disk = $this->getDiskInfo();
+        $net = $this->getNetworkInfo();
+        $health = $this->calculateHealthScore();
+
+        $entry = [
+            'id'                => count($logs) + 1,
+            'timestamp'         => $now,
+            'datetime'          => date('Y-m-d H:i:s', $now),
+            'time_label'        => date('H:i:s', $now),
+            'cpu_temp'          => $cpu['temperature'],
+            'thermal_status'    => $cpu['thermal_status'],
+            'cpu_load_1m'       => $cpu['load_1m'],
+            'cpu_load_5m'       => $cpu['load_5m'],
+            'cpu_load_percent'  => $cpu['load_percent'],
+            'cpu_freq_mhz'      => $cpu['frequency_mhz'],
+            'ram_used_mb'       => $mem['ram_used_mb'],
+            'ram_total_mb'      => $mem['ram_total_mb'],
+            'ram_percent'       => $mem['ram_percent'],
+            'swap_used_mb'      => $mem['swap_used_mb'],
+            'swap_percent'      => $mem['swap_percent'],
+            'disk_percent'      => $disk['used_percent'],
+            'net_rx_mb'         => $net['total_rx_mb'],
+            'net_tx_mb'         => $net['total_tx_mb'],
+            'net_rx_speed_kbps' => $net['rx_speed_kbps'],
+            'net_tx_speed_kbps' => $net['tx_speed_kbps'],
+            'health_score'      => $health['score']
+        ];
+
+        $logs[] = $entry;
+
+        // Rotation : conserver les 300 derniers relevés
+        if (count($logs) > 300) {
+            $logs = array_slice($logs, -300);
+        }
+
+        @file_put_contents($path, json_encode($logs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+
+        return $entry;
+    }
+
+    /**
+     * Récupère la liste des logs matériels ordonnée par date décroissante
+     */
+    public function getHardwareLogs(int $limit = 60): array {
+        $path = self::getHardwareLogsPath();
+        if (!file_exists($path)) {
+            $first = $this->recordHardwareLog(true, 0);
+            return [$first];
+        }
+
+        $logs = @json_decode((string)@file_get_contents($path), true) ?: [];
+        if (empty($logs)) {
+            $first = $this->recordHardwareLog(true, 0);
+            return [$first];
+        }
+
+        if ($limit > 0 && count($logs) > $limit) {
+            $logs = array_slice($logs, -$limit);
+        }
+
+        return array_reverse($logs);
+    }
+
+    /**
+     * Synthèse statistique des relevés (Pics de chauffe, Charge Max, RAM Max, Réseau cumulé)
+     */
+    public function getHardwareLogSummary(): array {
+        $path = self::getHardwareLogsPath();
+        $logs = file_exists($path) ? (@json_decode((string)@file_get_contents($path), true) ?: []) : [];
+
+        if (empty($logs)) {
+            $entry = $this->recordHardwareLog(true, 0);
+            $logs = [$entry];
+        }
+
+        $temps = [];
+        $loads = [];
+        $rams = [];
+        $peakTemp = null;
+        $peakTempTime = '--:--';
+        $peakLoad = 0.0;
+        $peakLoadTime = '--:--';
+        $peakRam = 0.0;
+        $peakRamTime = '--:--';
+        $anomalies = 0;
+
+        foreach ($logs as $l) {
+            // Température
+            if (isset($l['cpu_temp']) && $l['cpu_temp'] !== null) {
+                $t = (float)$l['cpu_temp'];
+                $temps[] = $t;
+                if ($peakTemp === null || $t > $peakTemp) {
+                    $peakTemp = $t;
+                    $peakTempTime = $l['time_label'] ?? date('H:i', $l['timestamp']);
+                }
+                if ($t >= 75.0) $anomalies++;
+            }
+
+            // Charge
+            if (isset($l['cpu_load_1m'])) {
+                $ld = (float)$l['cpu_load_1m'];
+                $loads[] = $ld;
+                if ($ld > $peakLoad) {
+                    $peakLoad = $ld;
+                    $peakLoadTime = $l['time_label'] ?? date('H:i', $l['timestamp']);
+                }
+                if (isset($l['cpu_load_percent']) && $l['cpu_load_percent'] >= 90) $anomalies++;
+            }
+
+            // RAM
+            if (isset($l['ram_percent'])) {
+                $rp = (float)$l['ram_percent'];
+                $rams[] = $rp;
+                if ($rp > $peakRam) {
+                    $peakRam = $rp;
+                    $peakRamTime = $l['time_label'] ?? date('H:i', $l['timestamp']);
+                }
+                if ($rp >= 90.0) $anomalies++;
+            }
+        }
+
+        $last = end($logs);
+
+        return [
+            'count'             => count($logs),
+            'peak_temp'         => $peakTemp,
+            'peak_temp_time'    => $peakTempTime,
+            'avg_temp'          => !empty($temps) ? round(array_sum($temps) / count($temps), 1) : null,
+            'min_temp'          => !empty($temps) ? min($temps) : null,
+            'peak_load'         => round($peakLoad, 2),
+            'peak_load_time'    => $peakLoadTime,
+            'avg_load'          => !empty($loads) ? round(array_sum($loads) / count($loads), 2) : 0.0,
+            'peak_ram'          => round($peakRam, 1),
+            'peak_ram_time'     => $peakRamTime,
+            'avg_ram'           => !empty($rams) ? round(array_sum($rams) / count($rams), 1) : 0.0,
+            'anomalies_count'   => $anomalies,
+            'total_rx_mb'       => (float)($last['net_rx_mb'] ?? 0),
+            'total_tx_mb'       => (float)($last['net_tx_mb'] ?? 0),
+            'last_recorded_at'  => $last['datetime'] ?? date('Y-m-d H:i:s')
+        ];
+    }
+
+    /**
+     * Génère un fichier CSV de l'historique complet pour téléchargement
+     */
+    public function exportLogsCsv(): string {
+        $path = self::getHardwareLogsPath();
+        $logs = file_exists($path) ? (@json_decode((string)@file_get_contents($path), true) ?: []) : [];
+
+        $fp = fopen('php://temp', 'r+');
+        fputs($fp, "\xEF\xBB\xBF"); // BOM UTF-8
+
+        fputcsv($fp, [
+            'ID',
+            'Horodatage (Unix)',
+            'Date & Heure',
+            'Température CPU (°C)',
+            'Statut Thermique',
+            'Charge 1m',
+            'Charge 5m',
+            'Charge CPU (%)',
+            'Fréquence CPU (MHz)',
+            'RAM Utilisée (Mo)',
+            'RAM Totale (Mo)',
+            'RAM Utilisée (%)',
+            'Swap Utilisé (Mo)',
+            'Swap Utilisé (%)',
+            'Espace Disque Utilisé (%)',
+            'Trafic Réseau Reçu (Mo)',
+            'Trafic Réseau Transmis (Mo)',
+            'Débit Réception (Ko/s)',
+            'Débit Émission (Ko/s)',
+            'Score Santé Hôte (%)'
+        ], ';');
+
+        foreach ($logs as $l) {
+            fputcsv($fp, [
+                $l['id'] ?? '',
+                $l['timestamp'] ?? '',
+                $l['datetime'] ?? '',
+                $l['cpu_temp'] ?? 'N/A',
+                $l['thermal_status'] ?? '',
+                $l['cpu_load_1m'] ?? '',
+                $l['cpu_load_5m'] ?? '',
+                $l['cpu_load_percent'] ?? '',
+                $l['cpu_freq_mhz'] ?? '',
+                $l['ram_used_mb'] ?? '',
+                $l['ram_total_mb'] ?? '',
+                $l['ram_percent'] ?? '',
+                $l['swap_used_mb'] ?? '',
+                $l['swap_percent'] ?? '',
+                $l['disk_percent'] ?? '',
+                $l['net_rx_mb'] ?? '',
+                $l['net_tx_mb'] ?? '',
+                $l['net_rx_speed_kbps'] ?? '',
+                $l['net_tx_speed_kbps'] ?? '',
+                $l['health_score'] ?? ''
+            ], ';');
+        }
+
+        rewind($fp);
+        $csv = stream_get_contents($fp);
+        fclose($fp);
+
+        return (string)$csv;
+    }
+
+    /**
+     * Purge des logs de télémétrie matérielle
+     */
+    public function purgeLogs(): bool {
+        $path = self::getHardwareLogsPath();
+        $current = $this->recordHardwareLog(true, 0);
+        return (bool)file_put_contents($path, json_encode([$current], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
     }
 }

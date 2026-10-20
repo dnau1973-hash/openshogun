@@ -63,10 +63,10 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
         </div>
 
         <div class="card-body p-3">
-            <!-- ── 4 Jauges Hardware Clés (Température, CPU, RAM, Disque) ── -->
+            <!-- ── 5 Jauges Hardware Clés (Température, CPU, RAM, Disque, Réseau) ── -->
             <div class="row row-cards mb-3">
                 <!-- 1. Température CPU (Critique Raspberry Pi) -->
-                <div class="col-sm-6 col-xl-3">
+                <div class="col-sm-6 col-lg-4 col-xl">
                     <div class="card card-sm border shadow-none h-100 bg-white">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center justify-content-between mb-1.5">
@@ -95,8 +95,8 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                     </div>
                 </div>
 
-                <!-- 2. Charge Processeur (Load Average) -->
-                <div class="col-sm-6 col-xl-3">
+                <!-- 2. Charge Processeur (Load Average & Fréquence) -->
+                <div class="col-sm-6 col-lg-4 col-xl">
                     <div class="card card-sm border shadow-none h-100 bg-white">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center justify-content-between mb-1.5">
@@ -104,7 +104,7 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                                     <i class="fa-solid fa-microchip text-primary me-1"></i>Charge Système
                                 </span>
                                 <span class="badge bg-primary-lt font-monospace small">
-                                    <span id="rpi-cpu-cores"><?= $serverDiag['cpu']['cores'] ?></span> Cœurs
+                                    <span id="rpi-cpu-cores"><?= $serverDiag['cpu']['cores'] ?></span> Cœur(s) &bull; <span id="rpi-cpu-freq"><?= $serverDiag['cpu']['frequency_mhz'] ?? 'auto' ?></span> MHz
                                 </span>
                             </div>
                             <div class="d-flex align-items-baseline gap-2 mb-2">
@@ -128,7 +128,7 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                 </div>
 
                 <!-- 3. Mémoire Vive & Swap -->
-                <div class="col-sm-6 col-xl-3">
+                <div class="col-sm-6 col-lg-4 col-xl">
                     <div class="card card-sm border shadow-none h-100 bg-white">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center justify-content-between mb-1.5">
@@ -160,7 +160,7 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                 </div>
 
                 <!-- 4. Espace Disque SD / SSD -->
-                <div class="col-sm-6 col-xl-3">
+                <div class="col-sm-6 col-lg-4 col-xl">
                     <div class="card card-sm border shadow-none h-100 bg-white">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center justify-content-between mb-1.5">
@@ -188,10 +188,222 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                         </div>
                     </div>
                 </div>
+
+                <!-- 5. NOUVEL INDICATEUR : Trafic Réseau Hôte (Rx / Tx) -->
+                <div class="col-sm-6 col-lg-4 col-xl">
+                    <div class="card card-sm border shadow-none h-100 bg-white">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                <span class="text-muted small fw-bold text-uppercase" style="font-size:0.72rem;">
+                                    <i class="fa-solid fa-network-wired text-azure me-1"></i>Trafic Réseau
+                                </span>
+                                <span id="rpi-net-badge" class="badge bg-azure-lt font-monospace small" title="<?= htmlspecialchars($serverDiag['network']['primary_type'] ?? '') ?>">
+                                    <span id="rpi-net-iface"><?= htmlspecialchars($serverDiag['network']['primary_iface'] ?? 'eth0') ?></span>
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-baseline gap-2 mb-2">
+                                <div id="rpi-net-speed-total" class="h1 m-0 fw-bold font-monospace text-azure">
+                                    <span id="rpi-net-rx-speed"><?= $serverDiag['network']['rx_speed_kbps'] ?? 0 ?></span> <span class="fs-4 text-muted fw-normal">Ko/s</span>
+                                </div>
+                                <span class="text-muted small font-monospace" title="Débit montant (Tx)">
+                                    &uarr; <span id="rpi-net-tx-speed"><?= $serverDiag['network']['tx_speed_kbps'] ?? 0 ?></span> Ko/s
+                                </span>
+                            </div>
+                            <div class="progress progress-sm mb-1.5">
+                                <div id="rpi-net-bar" class="progress-bar bg-azure" style="width: <?= min(100, max(5, (($serverDiag['network']['rx_speed_kbps'] ?? 0) / 500) * 100)) ?>%"></div>
+                            </div>
+                            <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
+                                <span>&darr; <strong id="rpi-net-rx"><?= $serverDiag['network']['total_rx_mb'] ?? 0 ?> Mo</strong></span>
+                                <span>&uarr; <strong id="rpi-net-tx"><?= $serverDiag['network']['total_tx_mb'] ?? 0 ?> Mo</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- ── Synthèse Technique des Services & Pile Logicielle ── -->
-            <div class="row g-3 font-monospace small">
+            <div class="row g-3 font-monospace small mb-3">
+                <!-- Base MySQL -->
+                <div class="col-md-3">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
+                        <div>
+                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-database text-primary me-1"></i>Base de Données SQL</span>
+                            <div class="d-flex align-items-center gap-1.5 mt-1">
+                                <strong id="rpi-db-latency" class="text-<?= $serverDiag['database']['latency_class'] ?> fs-6">
+                                    <?= $serverDiag['database']['latency_ms'] ?> ms
+                                </strong>
+                                <span class="text-muted small">&bull; <span id="rpi-db-threads"><?= $serverDiag['database']['threads_active'] ?></span> conn.</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary-lt px-2.5 py-1.5" id="rpi-db-size"><?= $serverDiag['database']['db_size_mb'] ?> Mo</span>
+                    </div>
+                </div>
+
+                <!-- PHP & OPcache -->
+                <div class="col-md-3">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
+                        <div>
+                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-brands fa-php text-purple me-1"></i>Moteur PHP &amp; OPcache</span>
+                            <div class="mt-1">
+                                <strong class="text-dark">v<?= $serverDiag['php']['version'] ?></strong>
+                                <span class="text-muted small">(<?= $serverDiag['php']['memory_limit'] ?>)</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-success-lt px-2.5 py-1.5" id="rpi-opcache-badge" title="Taux de succès du cache d'opcodes">
+                            <span id="rpi-opcache-hit"><?= $serverDiag['php']['opcache_hit_rate'] ?></span>% Hit
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Simulation & Game Loop -->
+                <div class="col-md-3">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
+                        <div>
+                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-gear text-secondary me-1"></i>Simulation IA &amp; Ticks</span>
+                            <div class="mt-1">
+                                <strong class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Active</strong>
+                                <span class="text-muted small">&bull; <?= (int)($totalBots ?? 0) ?> bots</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-secondary-lt font-monospace px-2.5 py-1.5">Auto</span>
+                    </div>
+                </div>
+
+                <!-- Déploiement Git -->
+                <div class="col-md-3">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
+                        <div>
+                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-code-branch text-teal me-1"></i>Version Déployée (Git)</span>
+                            <div class="mt-1">
+                                <strong class="text-teal font-monospace"><?= htmlspecialchars($localGitInfo['branch'] ?? 'main') ?></strong>
+                                <span class="text-muted small">(<?= htmlspecialchars($localGitInfo['short_sha'] ?? 'HEAD') ?>)</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-teal-lt px-2.5 py-1.5">Synchronisé</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── HISTORIQUE DE TÉLÉMÉTRIE & LOGS DU RASPBERRY PI ── -->
+            <div class="mt-3 pt-3 border-top">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h4 class="text-dark fw-bold m-0 d-flex align-items-center gap-2" style="font-size:0.95rem;">
+                            <i class="fa-solid fa-clock-rotate-left text-danger"></i>
+                            <span>Journal &amp; Historique Télémétrique</span>
+                            <span class="badge bg-secondary-lt font-monospace small"><span id="rpi-logs-count"><?= $serverDiag['hardware_summary']['count'] ?? 1 ?></span> relevés</span>
+                        </h4>
+                        <div class="text-muted small" style="font-size:0.73rem;">
+                            Surveillance continue de la température CPU, de la charge, de la mémoire vive et de la bande passante avec détection de pics.
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <!-- Sélecteur de vue : Graphique vs Tableau -->
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary active" id="btn-view-hw-chart" onclick="switchHwLogsView('chart')">
+                                <i class="fa-solid fa-chart-area me-1"></i>Graphique Temporel
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" id="btn-view-hw-table" onclick="switchHwLogsView('table')">
+                                <i class="fa-solid fa-table-list me-1"></i>Tableau Détaillé
+                            </button>
+                        </div>
+
+                        <!-- Actions sur les logs -->
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="triggerRecordHardwareSnapshot(this)" title="Enregistrer manuellement un instantané immédiat">
+                            <i class="fa-solid fa-camera me-1"></i>Prendre Instantané
+                        </button>
+                        <a href="/api/server_monitor.php?action=export_csv" class="btn btn-sm btn-outline-secondary" title="Télécharger l'historique complet au format CSV">
+                            <i class="fa-solid fa-file-csv text-success me-1"></i>Exporter CSV
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="triggerPurgeHardwareLogs(this)" title="Effacer les anciens relevés pour libérer l'espace carte SD">
+                            <i class="fa-solid fa-trash-can me-1"></i>Purger
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── 4 Cartes de Records & Pics Historiques ── -->
+                <div class="row g-2 mb-3 font-monospace">
+                    <!-- Pic Température -->
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded border bg-light d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted d-block small" style="font-size:0.68rem;">🔥 PIC TEMPÉRATURE</span>
+                                <strong class="text-danger fs-5" id="rpi-summary-peak-temp">
+                                    <?= $serverDiag['hardware_summary']['peak_temp'] !== null ? $serverDiag['hardware_summary']['peak_temp'] . ' °C' : 'N/A' ?>
+                                </strong>
+                            </div>
+                            <span class="badge bg-danger-lt small" id="rpi-summary-peak-temp-time"><?= $serverDiag['hardware_summary']['peak_temp_time'] ?? '--:--' ?></span>
+                        </div>
+                    </div>
+                    <!-- Pic Charge -->
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded border bg-light d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted d-block small" style="font-size:0.68rem;">⚡ PIC CHARGE CPU</span>
+                                <strong class="text-primary fs-5" id="rpi-summary-peak-load">
+                                    <?= $serverDiag['hardware_summary']['peak_load'] ?? '0.0' ?>
+                                </strong>
+                            </div>
+                            <span class="badge bg-primary-lt small" id="rpi-summary-peak-load-time"><?= $serverDiag['hardware_summary']['peak_load_time'] ?? '--:--' ?></span>
+                        </div>
+                    </div>
+                    <!-- Pic RAM -->
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded border bg-light d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted d-block small" style="font-size:0.68rem;">🧠 PIC MÉMOIRE RAM</span>
+                                <strong class="text-teal fs-5" id="rpi-summary-peak-ram">
+                                    <?= $serverDiag['hardware_summary']['peak_ram'] ?? '0.0' ?> %
+                                </strong>
+                            </div>
+                            <span class="badge bg-teal-lt small" id="rpi-summary-peak-ram-time"><?= $serverDiag['hardware_summary']['peak_ram_time'] ?? '--:--' ?></span>
+                        </div>
+                    </div>
+                    <!-- Anomalies / Santé -->
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded border bg-light d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted d-block small" style="font-size:0.68rem;">🛡️ ALERTES SURCHAUFFE</span>
+                                <strong class="<?= ($serverDiag['hardware_summary']['anomalies_count'] ?? 0) > 0 ? 'text-danger' : 'text-success' ?> fs-5" id="rpi-summary-anomalies">
+                                    <?= $serverDiag['hardware_summary']['anomalies_count'] ?? 0 ?> alerte(s)
+                                </strong>
+                            </div>
+                            <span class="badge <?= ($serverDiag['hardware_summary']['anomalies_count'] ?? 0) > 0 ? 'bg-danger text-white' : 'bg-success-lt' ?>" id="rpi-summary-anomalies-badge">
+                                <?= ($serverDiag['hardware_summary']['anomalies_count'] ?? 0) > 0 ? 'Vigilance' : 'RAS' ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── VUE 1 : Graphique Temporel Interactif (ApexCharts) ── -->
+                <div id="rpi-hw-chart-container" class="border rounded bg-white p-2 mb-2 shadow-2xs">
+                    <div id="rpi-hardware-apex-chart" style="min-height: 230px;"></div>
+                </div>
+
+                <!-- ── VUE 2 : Tableau des Derniers Relevés Horodatés ── -->
+                <div id="rpi-hw-table-container" class="border rounded bg-white overflow-hidden shadow-2xs d-none">
+                    <div class="table-responsive" style="max-height: 280px;">
+                        <table class="table table-vcenter table-sm card-table table-hover font-monospace" style="font-size:0.75rem;">
+                            <thead class="bg-light sticky-top">
+                                <tr>
+                                    <th>Heure</th>
+                                    <th>Température CPU</th>
+                                    <th>Charge (1m / %)</th>
+                                    <th>Fréquence</th>
+                                    <th>RAM Utilisée</th>
+                                    <th>Swap</th>
+                                    <th>Débit Réseau</th>
+                                    <th>Santé</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rpi-hw-logs-tbody">
+                                <!-- Rempli dynamiquement en JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
                 <!-- Base MySQL -->
                 <div class="col-md-3">
                     <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
@@ -1416,6 +1628,33 @@ async function fetchRpiMetrics(isManual = false) {
             if (opHit) opHit.textContent = d.php.opcache_hit_rate;
         }
 
+        // 7. NOUVEL INDICATEUR : Trafic Réseau & Débit Rx/Tx
+        if (d.network) {
+            const netRxSpeed = document.getElementById('rpi-net-rx-speed');
+            const netTxSpeed = document.getElementById('rpi-net-tx-speed');
+            const netRx = document.getElementById('rpi-net-rx');
+            const netTx = document.getElementById('rpi-net-tx');
+            const netIface = document.getElementById('rpi-net-iface');
+            const netBar = document.getElementById('rpi-net-bar');
+            const netBadge = document.getElementById('rpi-net-badge');
+
+            if (netRxSpeed) netRxSpeed.textContent = d.network.rx_speed_kbps ?? 0;
+            if (netTxSpeed) netTxSpeed.textContent = d.network.tx_speed_kbps ?? 0;
+            if (netRx) netRx.textContent = `${d.network.total_rx_mb ?? 0} Mo`;
+            if (netTx) netTx.textContent = `${d.network.total_tx_mb ?? 0} Mo`;
+            if (netIface) netIface.textContent = d.network.primary_iface ?? 'eth0';
+            if (netBadge && d.network.primary_type) netBadge.title = d.network.primary_type;
+            if (netBar) {
+                const totalSpd = (d.network.rx_speed_kbps ?? 0) + (d.network.tx_speed_kbps ?? 0);
+                netBar.style.width = `${Math.min(100, Math.max(5, (totalSpd / 500) * 100))}%`;
+            }
+        }
+
+        // 8. Synthèse Télémétrique & Pics Historiques
+        if (d.hardware_summary) {
+            updateHwSummaryUI(d.hardware_summary);
+        }
+
         // Animation clignotement subtil du témoin Live
         const dot = document.getElementById('rpi-live-dot');
         if (dot) {
@@ -1424,6 +1663,279 @@ async function fetchRpiMetrics(isManual = false) {
         }
     } catch (e) {
         console.warn('Erreur monitoring Raspberry Pi:', e);
+    }
+}
+
+// Variables & Mécanisme de Graphique / Logs Matériels
+let rpiHwApexChart = null;
+let rpiHwLogsData = [];
+let rpiLastLogsFetch = 0;
+
+function updateHwSummaryUI(s) {
+    if (!s) return;
+    const pTemp = document.getElementById('rpi-summary-peak-temp');
+    const pTempTime = document.getElementById('rpi-summary-peak-temp-time');
+    const pLoad = document.getElementById('rpi-summary-peak-load');
+    const pLoadTime = document.getElementById('rpi-summary-peak-load-time');
+    const pRam = document.getElementById('rpi-summary-peak-ram');
+    const pRamTime = document.getElementById('rpi-summary-peak-ram-time');
+    const anom = document.getElementById('rpi-summary-anomalies');
+    const anomBadge = document.getElementById('rpi-summary-anomalies-badge');
+    const lCount = document.getElementById('rpi-logs-count');
+
+    if (pTemp && s.peak_temp !== null) pTemp.textContent = `${s.peak_temp} °C`;
+    if (pTempTime && s.peak_temp_time) pTempTime.textContent = s.peak_temp_time;
+    if (pLoad) pLoad.textContent = s.peak_load;
+    if (pLoadTime && s.peak_load_time) pLoadTime.textContent = s.peak_load_time;
+    if (pRam) pRam.textContent = `${s.peak_ram} %`;
+    if (pRamTime && s.peak_ram_time) pRamTime.textContent = s.peak_ram_time;
+    if (lCount) lCount.textContent = s.count || 1;
+
+    if (anom) {
+        anom.textContent = `${s.anomalies_count || 0} alerte(s)`;
+        anom.className = (s.anomalies_count > 0 ? 'text-danger' : 'text-success') + ' fs-5';
+    }
+    if (anomBadge) {
+        anomBadge.textContent = (s.anomalies_count > 0 ? 'Vigilance' : 'RAS');
+        anomBadge.className = 'badge ' + (s.anomalies_count > 0 ? 'bg-danger text-white' : 'bg-success-lt');
+    }
+}
+
+async function loadHardwareLogs(forceRefresh = false) {
+    const now = Date.now();
+    if (!forceRefresh && (now - rpiLastLogsFetch < 12000)) {
+        return; // Éviter le spam réseau, rafraîchir toutes les 12s en live
+    }
+    rpiLastLogsFetch = now;
+
+    try {
+        const res = await fetch('/api/server_monitor.php?action=logs&limit=40');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.logs)) {
+            rpiHwLogsData = json.logs;
+            if (json.summary) updateHwSummaryUI(json.summary);
+            renderHwLogsChart(rpiHwLogsData);
+            renderHwLogsTable(rpiHwLogsData);
+        }
+    } catch (e) {
+        console.warn('Erreur chargement logs matériels:', e);
+    }
+}
+
+function renderHwLogsChart(logs) {
+    if (!logs || !logs.length) return;
+    const container = document.getElementById('rpi-hardware-apex-chart');
+    if (!container) return;
+
+    // Trier les logs par ordre chronologique pour le graphique
+    const sorted = [...logs].reverse();
+    const categories = sorted.map(l => l.time_label || (l.datetime ? l.datetime.split(' ')[1] : ''));
+    const seriesTemp = sorted.map(l => (l.cpu_temp !== null ? parseFloat(l.cpu_temp) : null));
+    const seriesLoad = sorted.map(l => parseFloat(l.cpu_load_percent || (l.cpu_load_1m * 25) || 0));
+    const seriesRam = sorted.map(l => parseFloat(l.ram_percent || 0));
+    const seriesNet = sorted.map(l => parseFloat((l.net_rx_speed_kbps || 0) + (l.net_tx_speed_kbps || 0)));
+
+    if (typeof ApexCharts === 'undefined') {
+        // Rendu SVG léger de repli
+        container.innerHTML = `
+            <div class="p-3 text-center text-muted font-monospace small">
+                <i class="fa-solid fa-chart-line text-primary me-1"></i>Historique : <strong>${sorted.length} points</strong> enregistrés &bull; 
+                Dernière température : <strong class="text-danger">${sorted[sorted.length-1].cpu_temp || 'N/A'} °C</strong> &bull; 
+                RAM : <strong class="text-teal">${sorted[sorted.length-1].ram_percent || '0'} %</strong>
+            </div>
+        `;
+        return;
+    }
+
+    const options = {
+        chart: {
+            type: 'area',
+            height: 220,
+            sparkline: { enabled: false },
+            toolbar: { show: false },
+            animations: { enabled: true, easing: 'easeinout', speed: 300 }
+        },
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: [2.5, 2, 2, 1.5] },
+        colors: ['#ef4444', '#3b82f6', '#10b981', '#06b6d4'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: [0.35, 0.25, 0.2, 0.15],
+                opacityTo: [0.05, 0.05, 0.05, 0.02],
+                stops: [0, 95]
+            }
+        },
+        series: [
+            { name: 'Température CPU (°C)', data: seriesTemp },
+            { name: 'Charge CPU (%)', data: seriesLoad },
+            { name: 'Mémoire RAM (%)', data: seriesRam },
+            { name: 'Débit Réseau (Ko/s)', data: seriesNet }
+        ],
+        xaxis: {
+            categories: categories,
+            labels: {
+                rotate: 0,
+                style: { fontSize: '10px', fontFamily: 'monospace' },
+                hideOverlappingLabels: true
+            },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+        },
+        yaxis: [
+            {
+                title: { text: 'Temp / Charge / RAM (%)', style: { fontSize: '10px', color: '#64748b' } },
+                min: 0,
+                max: 100,
+                labels: { style: { fontSize: '10px', fontFamily: 'monospace' } }
+            }
+        ],
+        grid: {
+            borderColor: '#f1f5f9',
+            strokeDashArray: 3,
+            padding: { top: 0, right: 10, bottom: 0, left: 10 }
+        },
+        tooltip: {
+            theme: 'light',
+            shared: true,
+            intersect: false,
+            style: { fontSize: '11px', fontFamily: 'monospace' }
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'right',
+            fontSize: '11px',
+            fontFamily: 'monospace'
+        }
+    };
+
+    if (rpiHwApexChart) {
+        rpiHwApexChart.updateOptions({
+            xaxis: { categories: categories },
+            series: options.series
+        });
+    } else {
+        container.innerHTML = '';
+        rpiHwApexChart = new ApexCharts(container, options);
+        rpiHwApexChart.render();
+    }
+}
+
+function renderHwLogsTable(logs) {
+    const tbody = document.getElementById('rpi-hw-logs-tbody');
+    if (!tbody || !logs) return;
+
+    if (!logs.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">Aucun relevé télémétrique disponible.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = logs.slice(0, 25).map(l => {
+        const tempClass = (l.cpu_temp >= 75 ? 'danger' : (l.cpu_temp >= 65 ? 'warning' : 'success'));
+        const ramClass = (l.ram_percent >= 90 ? 'danger' : (l.ram_percent >= 75 ? 'warning' : 'teal'));
+        const loadClass = (l.cpu_load_percent >= 90 ? 'danger' : (l.cpu_load_percent >= 70 ? 'warning' : 'dark'));
+
+        return `
+            <tr>
+                <td class="fw-bold text-dark">${l.time_label || (l.datetime ? l.datetime.split(' ')[1] : '--')}</td>
+                <td>
+                    <span class="badge bg-${tempClass}-lt font-monospace">
+                        <i class="fa-solid fa-temperature-half me-1"></i>${l.cpu_temp !== null ? l.cpu_temp + ' °C' : 'N/A'}
+                    </span>
+                </td>
+                <td class="text-${loadClass}">
+                    <strong>${l.cpu_load_1m || '0.0'}</strong> <span class="text-muted small">(${l.cpu_load_percent || 0}%)</span>
+                </td>
+                <td class="text-secondary">${l.cpu_freq_mhz ? l.cpu_freq_mhz + ' MHz' : '--'}</td>
+                <td>
+                    <span class="badge bg-${ramClass}-lt font-monospace">${l.ram_percent || 0}%</span>
+                    <span class="text-muted small">(${Math.round(l.ram_used_mb || 0)} Mo)</span>
+                </td>
+                <td class="text-muted">${l.swap_used_mb ? Math.round(l.swap_used_mb) + ' Mo' : '0 Mo'}</td>
+                <td class="text-azure">
+                    &darr; ${l.net_rx_speed_kbps || 0} &bull; &uarr; ${l.net_tx_speed_kbps || 0} <span class="small text-muted">Ko/s</span>
+                </td>
+                <td>
+                    <span class="badge bg-${(l.health_score >= 80 ? 'success' : (l.health_score >= 60 ? 'warning' : 'danger'))}-lt">
+                        ${l.health_score || 100}%
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function switchHwLogsView(view) {
+    const chartCont = document.getElementById('rpi-hw-chart-container');
+    const tableCont = document.getElementById('rpi-hw-table-container');
+    const btnChart = document.getElementById('btn-view-hw-chart');
+    const btnTable = document.getElementById('btn-view-hw-table');
+
+    if (view === 'table') {
+        if (chartCont) chartCont.classList.add('d-none');
+        if (tableCont) tableCont.classList.remove('d-none');
+        if (btnChart) btnChart.classList.remove('active');
+        if (btnTable) btnTable.classList.add('active');
+    } else {
+        if (tableCont) tableCont.classList.add('d-none');
+        if (chartCont) chartCont.classList.remove('d-none');
+        if (btnTable) btnTable.classList.remove('active');
+        if (btnChart) btnChart.classList.add('active');
+        if (rpiHwApexChart) {
+            setTimeout(() => { rpiHwApexChart.windowResizeHandler(); }, 50);
+        }
+    }
+}
+
+async function triggerRecordHardwareSnapshot(btn) {
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>';
+    }
+    try {
+        const res = await fetch('/api/server_monitor.php?action=record_log', { method: 'POST' });
+        const json = await res.json();
+        if (json.success) {
+            await loadHardwareLogs(true);
+            if (typeof showModalAlert === 'function') {
+                showModalAlert(json.message, 'success');
+            } else {
+                alert(json.message);
+            }
+        }
+    } catch (e) {
+        alert("Erreur lors de l'enregistrement de l'instantané.");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-camera me-1"></i>Prendre Instantané';
+        }
+    }
+}
+
+async function triggerPurgeHardwareLogs(btn) {
+    if (!confirm("Voulez-vous purger l'ensemble de l'historique de télémétrie matérielle ?\nUn instantané récent sera conservé pour initialiser les compteurs.")) {
+        return;
+    }
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>';
+    }
+    try {
+        const res = await fetch('/api/server_monitor.php?action=purge_logs', { method: 'POST' });
+        const json = await res.json();
+        if (json.success) {
+            await loadHardwareLogs(true);
+            alert(json.message);
+        }
+    } catch (e) {
+        alert("Erreur lors de la purge de l'historique.");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-trash-can me-1"></i>Purger';
+        }
     }
 }
 
@@ -1518,11 +2030,15 @@ async function triggerServerResetOpcache(btn) {
     }
 }
 
-// Lancement automatique du Live Polling Raspberry Pi (3 secondes)
+// Lancement automatique du Live Polling Raspberry Pi (3 secondes) & Historique Télémétrique
 document.addEventListener('DOMContentLoaded', () => {
     if (rpiLiveActive) {
         rpiLiveInterval = setInterval(() => fetchRpiMetrics(), 3000);
     }
+    // Chargement initial du graphique et des logs de télémétrie
+    setTimeout(() => {
+        loadHardwareLogs(true);
+    }, 400);
 });
 </script>
 

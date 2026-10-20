@@ -63,6 +63,50 @@ try {
             echo json_encode($res, JSON_UNESCAPED_UNICODE);
             break;
 
+        case 'logs':
+            $limit = isset($_GET['limit']) ? max(5, min(300, (int)$_GET['limit'])) : 60;
+            $logs = $engine->getHardwareLogs($limit);
+            $summary = $engine->getHardwareLogSummary();
+            echo json_encode([
+                'success' => true,
+                'logs'    => $logs,
+                'summary' => $summary
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            break;
+
+        case 'record_log':
+            $entry = $engine->recordHardwareLog(true, 0);
+            $summary = $engine->getHardwareLogSummary();
+            echo json_encode([
+                'success' => true,
+                'message' => "Instantané de télémétrie matérielle enregistré avec succès !",
+                'entry'   => $entry,
+                'summary' => $summary
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            break;
+
+        case 'export_csv':
+            $csv = $engine->exportLogsCsv();
+            $filename = 'openshogun_hardware_telemetry_' . date('Y-m-d_His') . '.csv';
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Content-Length: ' . strlen($csv));
+            echo $csv;
+            exit;
+
+        case 'purge_logs':
+            if (!$isAdmin) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'error' => 'Privilège administrateur requis.']);
+                exit;
+            }
+            $engine->purgeLogs();
+            echo json_encode([
+                'success' => true,
+                'message' => "Historique des logs matériels purgé avec succès !"
+            ], JSON_UNESCAPED_UNICODE);
+            break;
+
         default:
             echo json_encode([
                 'success' => false,
