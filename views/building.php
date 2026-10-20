@@ -3230,12 +3230,15 @@ if (!$isEmptyPlot) {
                             </div>
                         </div>
 
-                        <!-- Recrutement -->
+                        <!-- Recrutement & Transfert au Dojo -->
                         <?php if ($colonStatus['available_slots'] > 0): ?>
                             <div class="border rounded p-3 bg-light">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <strong class="text-dark">Équiper 1 Pionnier Féodal</strong>
+                                    <strong class="text-dark"><i class="fa-solid fa-user-ninja text-danger me-1"></i>Enrôlement des Pionniers Féodaux</strong>
                                     <span class="text-muted small"><i class="fa-solid fa-hourglass-half text-info me-1"></i><?= gmdate("H:i:s", $colonStatus['train_time']) ?> de préparation</span>
+                                </div>
+                                <div class="text-muted small mb-2">
+                                    La mobilisation des Pionniers Féodaux (Colons) s'effectue désormais au <strong>Dojo &amp; Quartier Militaire (Caserne)</strong>, au sein de l'onglet « Enrôlement &amp; Troupes ».
                                 </div>
                                 <div class="d-flex flex-wrap gap-2 mb-3" style="font-size:0.8rem;">
                                     <span class="badge bg-secondary-lt"><i class="fa-solid fa-tree text-success me-1"></i><?= number_format($cCosts['metal']) ?> Bois</span>
@@ -3243,9 +3246,14 @@ if (!$isEmptyPlot) {
                                     <span class="badge bg-secondary-lt"><i class="fa-solid fa-wheat-awn text-warning me-1"></i><?= number_format($cCosts['deuterium']) ?> Riz</span>
                                     <span class="badge bg-secondary-lt"><i class="fa-solid fa-bowl-rice text-warning me-1"></i><?= number_format($cCosts['rice_flour']) ?> Farine de Riz</span>
                                 </div>
-                                <button type="button" class="btn btn-success w-100 fw-bold" onclick="trainColonizer()" <?= !$canAffordColon ? 'disabled' : '' ?>>
-                                    <i class="fa-solid fa-torii-gate me-1"></i>Former 1 Pionnier Féodal (Colon)
-                                </button>
+                                <div class="d-flex flex-column gap-2">
+                                    <a href="?page=city&code=barracks" class="btn btn-danger w-100 fw-bold">
+                                        <i class="fa-solid fa-user-ninja me-1"></i>Enrôler au Dojo &amp; Quartier Militaire
+                                    </a>
+                                    <button type="button" class="btn btn-outline-success btn-sm w-100" onclick="trainColonizer()" <?= !$canAffordColon ? 'disabled' : '' ?>>
+                                        <i class="fa-solid fa-torii-gate me-1"></i>Former directement depuis le Tenshu
+                                    </button>
+                                </div>
                                 <?php if (!$canAffordColon): ?>
                                     <div class="text-danger small mt-1 text-center">Ressources ou farine de riz insuffisantes dans vos réserves.</div>
                                 <?php endif; ?>

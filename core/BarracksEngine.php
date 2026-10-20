@@ -77,15 +77,23 @@ class BarracksEngine {
         $tierFlour = [1 => 0, 2 => 15, 3 => 35, 4 => 75];
 
         $filteredUnits = [];
-        $excludedCodes = ['sanglier_sauvage', 'loup_honshu', 'ours_hokkaido', 'colonizer'];
+        $excludedCodes = ['sanglier_sauvage', 'loup_honshu', 'ours_hokkaido'];
 
         foreach ($units as &$u) {
             if (in_array($u['code'], $excludedCodes)) {
-                continue; // Les animaux ne sont plus entraînables (capturés via cages) et les colons se forment au Tenshu
+                continue; // Les animaux ne sont plus entraînables (capturés via cages)
             }
-            $requiredLvl = $tierReqs[$u['tier']] ?? 1;
+            $requiredLvl = ($u['code'] === 'colonizer') ? 10 : ($tierReqs[$u['tier']] ?? 1);
             $u['required_barracks_level'] = $requiredLvl;
-            $u['can_train'] = $isAdmin ? true : ($barracksLvl >= $requiredLvl);
+
+            if ($u['code'] === 'colonizer') {
+                $colonStatus = $this->planetEngine->getTenshuColonizerStatus($planetId);
+                $u['available_slots'] = (int)($colonStatus['available_slots'] ?? 0);
+                $u['max_slots'] = (int)($colonStatus['max_slots'] ?? 0);
+                $u['can_train'] = $isAdmin ? true : ($barracksLvl >= $requiredLvl && $u['available_slots'] > 0);
+            } else {
+                $u['can_train'] = $isAdmin ? true : ($barracksLvl >= $requiredLvl);
+            }
 
             $flourCost = isset($u['rice_flour_cost']) ? (int)$u['rice_flour_cost'] : 0;
             if ($flourCost === 0 && ($tierFlour[$u['tier']] ?? 0) > 0 && ($u['faction'] ?? 'all') !== 'all') {
@@ -171,7 +179,11 @@ class BarracksEngine {
             throw new Exception("Les animaux sauvages ne peuvent plus être formés au Dojo. Utilisez les Cages du Héros pour les capturer lors de vos expéditions !");
         }
         if ($unitCode === 'colonizer') {
-            throw new Exception("Les Colons Pionniers doivent être formés au Tenshu (Palais Castral).");
+            $status = $this->planetEngine->getTenshuColonizerStatus($planetId);
+            $isAdmin = $this->isPlanetAdmin($planetId);
+            if (!$isAdmin && $count > $status['available_slots']) {
+                throw new Exception("Emplacements d'expansion insuffisants. Vous pouvez recruter au maximum {$status['available_slots']} Pionnier(s) Féodal(s).");
+            }
         }
 
         $planet = $this->planetEngine->updatePlanet($planetId);
@@ -187,9 +199,9 @@ class BarracksEngine {
         }
 
         $tierReqs = [1 => 1, 2 => 3, 3 => 5, 4 => 8];
-        $reqLvl = $tierReqs[$unit['tier']] ?? 1;
+        $reqLvl = ($unitCode === 'colonizer') ? 10 : ($tierReqs[$unit['tier']] ?? 1);
         if (!$isAdmin && $barracksLvl < $reqLvl) {
-            throw new Exception("Caserne niveau $reqLvl requise pour recruter cette unité.");
+            throw new Exception("Dojo & Quartier Militaire niveau $reqLvl requis pour recruter cette troupe.");
         }
 
         if ($isAdmin) {

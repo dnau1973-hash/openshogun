@@ -424,12 +424,12 @@ foreach ($citySlots as $s => $sd) {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 0.9rem;
+    overflow: hidden;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .city-troop-card:hover, .city-tech-card:hover {
     border-color: #cbd5e1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 /* Scrollbar esthétique pour la modale à dimension fixe */
@@ -1955,7 +1955,7 @@ function renderCitySpecialPane(data) {
 }
 
 // ==========================================
-// 5. RENDU DE L'ONGLET ENRÔLEMENT DES TROUPES (BARRACKS / DOJO)
+// 5. RENDU DE L'ONGLET ENRÔLEMENT DES TROUPES (BARRACKS / DOJO & QUARTIER MILITAIRE)
 // ==========================================
 function renderCityTroopsPane(data) {
     const container = document.getElementById('cityModalTroopsContent');
@@ -1967,14 +1967,18 @@ function renderCityTroopsPane(data) {
     let queueHtml = '';
     if (queue.length > 0) {
         queueHtml = `
-            <div class="p-3 mb-3 rounded border border-warning-subtle bg-warning-lt">
-                <strong class="d-block text-dark small mb-2"><i class="fa-solid fa-clock-rotate-left text-warning me-1"></i>Entraînement en cours au Dojo :</strong>
+            <div class="p-3 mb-3 rounded border border-warning-subtle bg-warning-lt shadow-sm">
+                <strong class="d-block text-dark small mb-2"><i class="fa-solid fa-clock-rotate-left text-warning me-1"></i>Entraînement en cours au Dojo &amp; Quartier Militaire :</strong>
                 <div class="d-flex flex-column gap-1.5">
                     ${queue.map(q => {
                         const dateFin = new Date(q.finishes_at * 1000);
+                        const imgThumb = q.unit_image ? `/public/assets/units/${q.unit_image}` : `/public/assets/units/${q.unit_code}.jpg`;
                         return `
                             <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded border small">
-                                <span><i class="fa-solid fa-user-ninja text-danger me-1"></i><strong>${q.unit_name || q.unit_code}</strong> &times; ${q.count}</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="${imgThumb}" alt="${q.unit_name || q.unit_code}" style="width: 28px; height: 28px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'">
+                                    <span><strong>${q.unit_name || q.unit_code}</strong> &times; ${q.count}</span>
+                                </div>
                                 <span class="badge bg-secondary font-monospace">Fin : ${dateFin.toLocaleTimeString()}</span>
                             </div>
                         `;
@@ -1985,69 +1989,129 @@ function renderCityTroopsPane(data) {
     }
 
     const cardsHtml = units.map(u => {
+        const metalCost = parseInt(u.metal_cost || 0, 10);
+        const crystalCost = parseInt(u.crystal_cost || 0, 10);
+        const deutCost = parseInt(u.deuterium_cost || 0, 10);
+        const flourCost = parseInt(u.rice_flour_cost || 0, 10);
+
         const canAfford = (
-            window.CITY_CONFIG.metal >= u.cost_metal &&
-            window.CITY_CONFIG.crystal >= u.cost_crystal &&
-            window.CITY_CONFIG.deuterium >= u.cost_deuterium &&
-            window.CITY_CONFIG.rice_flour >= (u.rice_flour_cost || 0)
+            window.CITY_CONFIG.metal >= metalCost &&
+            window.CITY_CONFIG.crystal >= crystalCost &&
+            window.CITY_CONFIG.deuterium >= deutCost &&
+            window.CITY_CONFIG.rice_flour >= flourCost
         ) || window.CITY_CONFIG.isAdmin;
 
-        // Calcul du maximum possible
+        // Calcul du maximum finançable
         let maxAffordable = 0;
         if (window.CITY_CONFIG.isAdmin) {
             maxAffordable = 100;
         } else {
-            const maxM = u.cost_metal > 0 ? Math.floor(window.CITY_CONFIG.metal / u.cost_metal) : 9999;
-            const maxC = u.cost_crystal > 0 ? Math.floor(window.CITY_CONFIG.crystal / u.cost_crystal) : 9999;
-            const maxD = u.cost_deuterium > 0 ? Math.floor(window.CITY_CONFIG.deuterium / u.cost_deuterium) : 9999;
-            const maxF = (u.rice_flour_cost && u.rice_flour_cost > 0) ? Math.floor(window.CITY_CONFIG.rice_flour / u.rice_flour_cost) : 9999;
+            const maxM = metalCost > 0 ? Math.floor(window.CITY_CONFIG.metal / metalCost) : 9999;
+            const maxC = crystalCost > 0 ? Math.floor(window.CITY_CONFIG.crystal / crystalCost) : 9999;
+            const maxD = deutCost > 0 ? Math.floor(window.CITY_CONFIG.deuterium / deutCost) : 9999;
+            const maxF = flourCost > 0 ? Math.floor(window.CITY_CONFIG.rice_flour / flourCost) : 9999;
             maxAffordable = Math.max(0, Math.min(maxM, maxC, maxD, maxF));
         }
 
+        const isColonizer = (u.code === 'colonizer');
+        if (isColonizer && !window.CITY_CONFIG.isAdmin) {
+            const availSlots = parseInt(u.available_slots ?? 1, 10);
+            maxAffordable = Math.min(maxAffordable, availSlots);
+        }
+
+        const imgSrc = `/public/assets/units/${u.image || (u.code + '.jpg')}`;
+
         return `
             <div class="col-md-6 col-lg-4">
-                <div class="city-troop-card h-100 d-flex flex-column justify-content-between">
+                <div class="city-troop-card h-100 d-flex flex-column justify-content-between shadow-sm">
                     <div>
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <h5 class="m-0 fw-bold text-dark fs-6">${u.name}</h5>
-                                <span class="badge bg-secondary-lt text-secondary font-monospace small">Tier ${u.tier} &bull; ${u.stationed_count || 0} en garnison</span>
+                        <!-- Bannière Visuelle HD -->
+                        <div class="position-relative" style="height: 145px; background: #0f172a; overflow: hidden;">
+                            <img src="${imgSrc}" 
+                                 alt="${u.name}" 
+                                 style="width: 100%; height: 100%; object-fit: cover; object-position: center top;"
+                                 onerror="this.src='/public/assets/units/${u.code}.jpg'; this.onerror=function(){this.src='/public/assets/tiles/tile_barracks.png';};">
+                            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.85) 100%);"></div>
+                            
+                            <!-- Badges flottants -->
+                            <div class="position-absolute top-0 start-0 p-2">
+                                <span class="badge bg-dark bg-opacity-75 text-white font-monospace border border-secondary shadow-sm" style="font-size:0.7rem;">
+                                    Tier ${u.tier || 1}
+                                </span>
                             </div>
-                            <span class="fs-4">${u.icon || '🥷'}</span>
+                            <div class="position-absolute top-0 end-0 p-2">
+                                <span class="badge bg-danger text-white shadow-sm font-monospace" style="font-size:0.7rem;">
+                                    ${Number(u.stationed_count || 0).toLocaleString()} en garnison
+                                </span>
+                            </div>
+                            <div class="position-absolute bottom-0 start-0 p-2 text-white">
+                                <h5 class="m-0 fw-bold fs-6 text-white text-shadow-sm d-flex align-items-center gap-1.5">
+                                    <span>${u.icon || '🥷'}</span> ${u.name}
+                                </h5>
+                            </div>
                         </div>
-                        <p class="small text-muted mb-2 text-truncate-2" style="font-size:0.75rem; line-height:1.3;">${u.description || ''}</p>
 
-                        <div class="d-flex justify-content-between small text-secondary p-1.5 rounded bg-light mb-2 font-monospace" style="font-size:0.75rem;">
-                            <span>⚔️ Atk: <strong>${u.attack_points}</strong></span>
-                            <span>🛡️ Déf: <strong>${u.defense_infantry}/${u.defense_cavalry}</strong></span>
-                            <span>⚡ Vit: <strong>${u.speed}</strong></span>
-                        </div>
+                        <!-- Caractéristiques & Coûts -->
+                        <div class="p-2.5">
+                            <p class="small text-muted mb-2 text-truncate-2" style="font-size:0.75rem; line-height:1.35; min-height: 2rem;">
+                                ${u.description || ''}
+                            </p>
 
-                        <!-- Coûts -->
-                        <div class="d-flex flex-wrap gap-1 mb-2 font-monospace" style="font-size:0.72rem;">
-                            <span style="color:${window.CITY_CONFIG.metal >= u.cost_metal ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-tree me-0.5"></i>${u.cost_metal}</span>
-                            <span style="color:${window.CITY_CONFIG.crystal >= u.cost_crystal ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-mountain me-0.5"></i>${u.cost_crystal}</span>
-                            <span style="color:${window.CITY_CONFIG.deuterium >= u.cost_deuterium ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-wheat-awn me-0.5"></i>${u.cost_deuterium}</span>
-                            ${u.rice_flour_cost > 0 ? `<span style="color:${window.CITY_CONFIG.rice_flour >= u.rice_flour_cost ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-bowl-rice me-0.5"></i>${u.rice_flour_cost}</span>` : ''}
-                            <span class="text-muted"><i class="fa-regular fa-clock me-0.5"></i>${formatCityDuration(u.effective_train_time)}</span>
+                            <!-- Métriques martiales -->
+                            <div class="d-flex justify-content-between small text-secondary p-1.5 rounded bg-light mb-2 font-monospace" style="font-size:0.73rem;">
+                                <span title="Puissance d'attaque">⚔️ Atk: <strong class="text-dark">${u.attack ?? 0}</strong></span>
+                                <span title="Défense Infanterie / Cavalerie">🛡️ Déf: <strong class="text-dark">${u.def_infantry ?? 0}/${u.def_mech ?? 0}</strong></span>
+                                <span title="Vitesse de déplacement">⚡ Vit: <strong class="text-dark">${u.speed ?? 0}</strong></span>
+                                <span title="Capacité de chargement / butin">🎒 Fret: <strong class="text-dark">${Number(u.cargo_capacity ?? 0).toLocaleString()}</strong></span>
+                            </div>
+
+                            <!-- Coûts d'équipement -->
+                            <div class="d-flex flex-wrap gap-1.5 mb-2 font-monospace" style="font-size:0.72rem;">
+                                <span style="color:${window.CITY_CONFIG.metal >= metalCost ? '#16a34a' : '#dc2626'};" title="Bois">
+                                    <i class="fa-solid fa-tree me-0.5"></i>${metalCost.toLocaleString()}
+                                </span>
+                                <span style="color:${window.CITY_CONFIG.crystal >= crystalCost ? '#16a34a' : '#dc2626'};" title="Pierre">
+                                    <i class="fa-solid fa-mountain me-0.5"></i>${crystalCost.toLocaleString()}
+                                </span>
+                                <span style="color:${window.CITY_CONFIG.deuterium >= deutCost ? '#16a34a' : '#dc2626'};" title="Riz">
+                                    <i class="fa-solid fa-wheat-awn me-0.5"></i>${deutCost.toLocaleString()}
+                                </span>
+                                ${flourCost > 0 ? `
+                                    <span style="color:${window.CITY_CONFIG.rice_flour >= flourCost ? '#16a34a' : '#dc2626'};" title="Farine de Riz">
+                                        <i class="fa-solid fa-bowl-rice me-0.5"></i>${flourCost.toLocaleString()}
+                                    </span>
+                                ` : ''}
+                                <span class="text-muted ms-auto" title="Temps d'entraînement">
+                                    <i class="fa-regular fa-clock me-0.5"></i>${formatCityDuration(u.effective_train_time || 60)}
+                                </span>
+                            </div>
+
+                            ${isColonizer ? `
+                                <div class="p-1.5 mb-2 rounded bg-info-lt text-info small font-monospace" style="font-size:0.72rem;">
+                                    <i class="fa-solid fa-torii-gate me-1"></i>Slots d'expansion Tenshu : <strong>${u.available_slots ?? 0} libre(s)</strong>
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
 
-                    ${u.can_train ? `
-                        <div>
-                            <div class="input-group input-group-sm mb-1.5">
-                                <input type="number" class="form-control font-monospace" id="input-troop-${u.code}" value="1" min="1" max="${Math.max(1, maxAffordable)}">
-                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('input-troop-${u.code}').value = Math.max(1, ${maxAffordable})">Max (${maxAffordable})</button>
+                    <!-- Actions d'enrôlement -->
+                    <div class="p-2.5 pt-0">
+                        ${u.can_train ? `
+                            <div>
+                                <div class="input-group input-group-sm mb-1.5">
+                                    <input type="number" class="form-control font-monospace" id="input-troop-${u.code}" value="1" min="1" max="${Math.max(1, maxAffordable)}">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('input-troop-${u.code}').value = Math.max(1, ${maxAffordable})">Max (${maxAffordable})</button>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger w-100 fw-bold" onclick="submitCityTrainUnits('${u.code}', 'input-troop-${u.code}', this)" ${maxAffordable <= 0 ? 'disabled' : ''}>
+                                    <i class="fa-solid fa-user-plus me-1"></i>${isColonizer ? 'Équiper le Pionnier Féodal' : 'Enrôler au Dojo'}
+                                </button>
                             </div>
-                            <button type="button" class="btn btn-sm btn-danger w-100 fw-bold" onclick="submitCityTrainUnits('${u.code}', 'input-troop-${u.code}', this)">
-                                <i class="fa-solid fa-user-plus me-1"></i>Enrôler au Dojo
-                            </button>
-                        </div>
-                    ` : `
-                        <div class="alert alert-secondary py-1 px-2 small m-0 text-center">
-                            <i class="fa-solid fa-lock me-1"></i>Requis : Dojo Niveau ${u.required_barracks_level}
-                        </div>
-                    `}
+                        ` : `
+                            <div class="alert alert-secondary py-1 px-2 small m-0 text-center" style="font-size:0.75rem;">
+                                <i class="fa-solid fa-lock me-1"></i>${isColonizer && (u.available_slots <= 0) ? 'Tenshu Niv. 10/15/20 requis (Slots pleins)' : `Requis : Dojo Niveau ${u.required_barracks_level}`}
+                            </div>
+                        `}
+                    </div>
                 </div>
             </div>
         `;
@@ -2086,14 +2150,18 @@ function renderCityShipsPane(data) {
     let queueHtml = '';
     if (queue.length > 0) {
         queueHtml = `
-            <div class="p-3 mb-3 rounded border border-warning-subtle bg-warning-lt">
+            <div class="p-3 mb-3 rounded border border-warning-subtle bg-warning-lt shadow-sm">
                 <strong class="d-block text-dark small mb-2"><i class="fa-solid fa-clock-rotate-left text-warning me-1"></i>Mobilisation en cours aux Haras / Chantiers :</strong>
                 <div class="d-flex flex-column gap-1.5">
                     ${queue.map(q => {
                         const dateFin = new Date(q.finishes_at * 1000);
+                        const imgThumb = q.ship_image ? `/public/assets/units/${q.ship_image}` : `/public/assets/units/${q.ship_code}.jpg`;
                         return `
                             <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded border small">
-                                <span><i class="fa-solid fa-horse text-warning me-1"></i><strong>${q.ship_name || q.ship_code}</strong> &times; ${q.count}</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="${imgThumb}" alt="${q.ship_name || q.ship_code}" style="width: 28px; height: 28px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'">
+                                    <span><strong>${q.ship_name || q.ship_code}</strong> &times; ${q.count}</span>
+                                </div>
                                 <span class="badge bg-secondary font-monospace">Fin : ${dateFin.toLocaleTimeString()}</span>
                             </div>
                         `;
@@ -2104,65 +2172,108 @@ function renderCityShipsPane(data) {
     }
 
     const cardsHtml = ships.map(s => {
+        const metalCost = parseInt(s.metal_cost || 0, 10);
+        const crystalCost = parseInt(s.crystal_cost || 0, 10);
+        const deutCost = parseInt(s.deuterium_cost || 0, 10);
+
         const canAfford = (
-            window.CITY_CONFIG.metal >= s.metal_cost &&
-            window.CITY_CONFIG.crystal >= s.crystal_cost &&
-            window.CITY_CONFIG.deuterium >= s.deuterium_cost
+            window.CITY_CONFIG.metal >= metalCost &&
+            window.CITY_CONFIG.crystal >= crystalCost &&
+            window.CITY_CONFIG.deuterium >= deutCost
         ) || window.CITY_CONFIG.isAdmin;
 
         let maxAffordable = 0;
         if (window.CITY_CONFIG.isAdmin) {
             maxAffordable = 100;
         } else {
-            const maxM = s.metal_cost > 0 ? Math.floor(window.CITY_CONFIG.metal / s.metal_cost) : 9999;
-            const maxC = s.crystal_cost > 0 ? Math.floor(window.CITY_CONFIG.crystal / s.crystal_cost) : 9999;
-            const maxD = s.deuterium_cost > 0 ? Math.floor(window.CITY_CONFIG.deuterium / s.deuterium_cost) : 9999;
+            const maxM = metalCost > 0 ? Math.floor(window.CITY_CONFIG.metal / metalCost) : 9999;
+            const maxC = crystalCost > 0 ? Math.floor(window.CITY_CONFIG.crystal / crystalCost) : 9999;
+            const maxD = deutCost > 0 ? Math.floor(window.CITY_CONFIG.deuterium / deutCost) : 9999;
             maxAffordable = Math.max(0, Math.min(maxM, maxC, maxD));
         }
 
+        const imgSrc = `/public/assets/units/${s.image || (s.code + '.jpg')}`;
+
         return `
             <div class="col-md-6 col-lg-4">
-                <div class="city-troop-card h-100 d-flex flex-column justify-content-between">
+                <div class="city-troop-card h-100 d-flex flex-column justify-content-between shadow-sm">
                     <div>
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <h5 class="m-0 fw-bold text-dark fs-6">${s.name}</h5>
-                                <span class="badge bg-secondary-lt text-secondary font-monospace small">${s.stationed_count || 0} disponibles</span>
+                        <!-- Bannière Visuelle HD -->
+                        <div class="position-relative" style="height: 145px; background: #0f172a; overflow: hidden;">
+                            <img src="${imgSrc}" 
+                                 alt="${s.name}" 
+                                 style="width: 100%; height: 100%; object-fit: cover; object-position: center top;"
+                                 onerror="this.src='/public/assets/units/${s.code}.jpg'; this.onerror=function(){this.src='/public/assets/tiles/tile_shipyard.png';};">
+                            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.85) 100%);"></div>
+                            
+                            <!-- Badges flottants -->
+                            <div class="position-absolute top-0 start-0 p-2">
+                                <span class="badge bg-dark bg-opacity-75 text-white font-monospace border border-secondary shadow-sm" style="font-size:0.7rem;">
+                                    ${s.faction ? s.faction.toUpperCase() : 'TOUS'}
+                                </span>
                             </div>
-                            <span class="fs-4">${s.icon || '🐎'}</span>
+                            <div class="position-absolute top-0 end-0 p-2">
+                                <span class="badge bg-warning text-dark shadow-sm font-monospace" style="font-size:0.7rem;">
+                                    ${Number(s.stationed_count || 0).toLocaleString()} disponibles
+                                </span>
+                            </div>
+                            <div class="position-absolute bottom-0 start-0 p-2 text-white">
+                                <h5 class="m-0 fw-bold fs-6 text-white text-shadow-sm d-flex align-items-center gap-1.5">
+                                    <span>${s.icon || '🐎'}</span> ${s.name}
+                                </h5>
+                            </div>
                         </div>
-                        <p class="small text-muted mb-2 text-truncate-2" style="font-size:0.75rem; line-height:1.3;">${s.description || ''}</p>
 
-                        <div class="d-flex justify-content-between small text-secondary p-1.5 rounded bg-light mb-2 font-monospace" style="font-size:0.75rem;">
-                            <span>⚔️ Atk: <strong>${s.attack_points}</strong></span>
-                            <span>🛡️ Déf: <strong>${s.defense_points}</strong></span>
-                            <span>⚡ Vit: <strong>${s.speed}</strong></span>
-                        </div>
+                        <!-- Caractéristiques & Coûts -->
+                        <div class="p-2.5">
+                            <p class="small text-muted mb-2 text-truncate-2" style="font-size:0.75rem; line-height:1.35; min-height: 2rem;">
+                                ${s.description || ''}
+                            </p>
 
-                        <!-- Coûts -->
-                        <div class="d-flex flex-wrap gap-1.5 mb-2 font-monospace" style="font-size:0.72rem;">
-                            <span style="color:${window.CITY_CONFIG.metal >= s.metal_cost ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-tree me-0.5"></i>${s.metal_cost}</span>
-                            <span style="color:${window.CITY_CONFIG.crystal >= s.crystal_cost ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-mountain me-0.5"></i>${s.crystal_cost}</span>
-                            <span style="color:${window.CITY_CONFIG.deuterium >= s.deuterium_cost ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-wheat-awn me-0.5"></i>${s.deuterium_cost}</span>
-                            <span class="text-muted"><i class="fa-regular fa-clock me-0.5"></i>${formatCityDuration(s.effective_build_time)}</span>
+                            <!-- Métriques martiales -->
+                            <div class="d-flex justify-content-between small text-secondary p-1.5 rounded bg-light mb-2 font-monospace" style="font-size:0.73rem;">
+                                <span title="Puissance d'attaque">⚔️ Atk: <strong class="text-dark">${s.attack ?? 0}</strong></span>
+                                <span title="Défense / Coque">🛡️ Coque: <strong class="text-dark">${s.defense ?? 0}</strong></span>
+                                <span title="Bouclier">🔮 Bouclier: <strong class="text-dark">${s.shield ?? 0}</strong></span>
+                                <span title="Vitesse">⚡ Vit: <strong class="text-dark">${s.speed ?? 0}</strong></span>
+                            </div>
+
+                            <!-- Coûts -->
+                            <div class="d-flex flex-wrap gap-1.5 mb-2 font-monospace" style="font-size:0.72rem;">
+                                <span style="color:${window.CITY_CONFIG.metal >= metalCost ? '#16a34a' : '#dc2626'};" title="Bois">
+                                    <i class="fa-solid fa-tree me-0.5"></i>${metalCost.toLocaleString()}
+                                </span>
+                                <span style="color:${window.CITY_CONFIG.crystal >= crystalCost ? '#16a34a' : '#dc2626'};" title="Pierre">
+                                    <i class="fa-solid fa-mountain me-0.5"></i>${crystalCost.toLocaleString()}
+                                </span>
+                                <span style="color:${window.CITY_CONFIG.deuterium >= deutCost ? '#16a34a' : '#dc2626'};" title="Riz">
+                                    <i class="fa-solid fa-wheat-awn me-0.5"></i>${deutCost.toLocaleString()}
+                                </span>
+                                <span class="text-muted ms-auto" title="Temps de mobilisation">
+                                    <i class="fa-regular fa-clock me-0.5"></i>${formatCityDuration(s.effective_build_time || 60)}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    ${s.can_build ? `
-                        <div>
-                            <div class="input-group input-group-sm mb-1.5">
-                                <input type="number" class="form-control font-monospace" id="input-ship-${s.code}" value="1" min="1" max="${Math.max(1, maxAffordable)}">
-                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('input-ship-${s.code}').value = Math.max(1, ${maxAffordable})">Max (${maxAffordable})</button>
+                    <!-- Actions -->
+                    <div class="p-2.5 pt-0">
+                        ${s.can_build ? `
+                            <div>
+                                <div class="input-group input-group-sm mb-1.5">
+                                    <input type="number" class="form-control font-monospace" id="input-ship-${s.code}" value="1" min="1" max="${Math.max(1, maxAffordable)}">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('input-ship-${s.code}').value = Math.max(1, ${maxAffordable})">Max (${maxAffordable})</button>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-warning text-dark w-100 fw-bold" onclick="submitCityBuildShips('${s.code}', 'input-ship-${s.code}', this)" ${maxAffordable <= 0 ? 'disabled' : ''}>
+                                    <i class="fa-solid fa-horse me-1"></i>Mobiliser
+                                </button>
                             </div>
-                            <button type="button" class="btn btn-sm btn-warning text-dark w-100 fw-bold" onclick="submitCityBuildShips('${s.code}', 'input-ship-${s.code}', this)">
-                                <i class="fa-solid fa-horse me-1"></i>Mobiliser
-                            </button>
-                        </div>
-                    ` : `
-                        <div class="alert alert-secondary py-1 px-2 small m-0 text-center">
-                            <i class="fa-solid fa-lock me-1"></i>Requis : Écuries Niveau 1
-                        </div>
-                    `}
+                        ` : `
+                            <div class="alert alert-secondary py-1 px-2 small m-0 text-center" style="font-size:0.75rem;">
+                                <i class="fa-solid fa-lock me-1"></i>Requis : Écuries Niveau 1
+                            </div>
+                        `}
+                    </div>
                 </div>
             </div>
         `;
