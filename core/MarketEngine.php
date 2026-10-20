@@ -55,6 +55,14 @@ class MarketEngine {
         }
     }
 
+    private function forUpdate(): string {
+        try {
+            return ($this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') ? '' : ' FOR UPDATE';
+        } catch (Throwable $e) {
+            return ' FOR UPDATE';
+        }
+    }
+
     /**
      * Dictionnaire des ressources autorisées dans la bourse
      */
@@ -180,11 +188,18 @@ class MarketEngine {
 
     /**
      * Nombre max de slots d'offres simultanées selon le niveau du marché
-     * Niveau 10 : 3 slots, +1 slot tous les 2 niveaux au-delà
+     * Accessible dès le Niveau 1 :
+     * - Niveau 1-2 : 1 slot
+     * - Niveau 3-4 : 2 slots
+     * - Niveau 5-9 : 3 slots
+     * - Niveau 10+ : 4 + 1 slot tous les 2 niveaux
      */
     public function getMaxOfferSlots(int $marketLevel): int {
-        if ($marketLevel < 10) return 0;
-        return 3 + (int)floor(($marketLevel - 10) / 2);
+        if ($marketLevel < 1) return 0;
+        if ($marketLevel < 3) return 1;
+        if ($marketLevel < 5) return 2;
+        if ($marketLevel < 10) return 3;
+        return 4 + (int)floor(($marketLevel - 10) / 2);
     }
 
     /**
@@ -192,8 +207,8 @@ class MarketEngine {
      */
     public function createOffer(int $userId, int $planetId, string $offerRes, int $offerAmount, string $demandRes, int $demandAmount): array {
         $marketLevel = $this->getMarketLevel($planetId);
-        if ($marketLevel < 10) {
-            throw new Exception("Le Marché doit être au moins au Niveau 10 pour déposer des offres de troc féodal.");
+        if ($marketLevel < 1) {
+            throw new Exception("Le Marché doit être construit pour déposer des offres sur la Bourse Féodale.");
         }
 
         $resDefs = self::getTradableResources();
@@ -231,7 +246,7 @@ class MarketEngine {
         $this->db->beginTransaction();
         try {
             // Verrouiller la ligne du fief
-            $stLock = $this->db->prepare("SELECT id, user_id, `{$offerCol}` FROM planets WHERE id = ? FOR UPDATE");
+            $stLock = $this->db->prepare("SELECT id, user_id, `{$offerCol}` FROM planets WHERE id = ?" . $this->forUpdate());
             $stLock->execute([$planetId]);
             $planetRow = $stLock->fetch(PDO::FETCH_ASSOC);
 
@@ -295,7 +310,7 @@ class MarketEngine {
 
         $this->db->beginTransaction();
         try {
-            $st = $this->db->prepare("SELECT * FROM market_offers WHERE id = ? FOR UPDATE");
+            $st = $this->db->prepare("SELECT * FROM market_offers WHERE id = ?" . $this->forUpdate());
             $st->execute([$offerId]);
             $offer = $st->fetch(PDO::FETCH_ASSOC);
 
@@ -349,8 +364,8 @@ class MarketEngine {
      */
     public function acceptOffer(int $buyerUserId, int $buyerPlanetId, int $offerId): array {
         $buyerMarketLvl = $this->getMarketLevel($buyerPlanetId);
-        if ($buyerMarketLvl < 10) {
-            throw new Exception("Votre fief doit disposer d'un Marché au moins au Niveau 10 pour commercer sur la Bourse Féodale.");
+        if ($buyerMarketLvl < 1) {
+            throw new Exception("Votre fief doit disposer d'un Marché pour commercer sur la Bourse Féodale.");
         }
 
         $resDefs = self::getTradableResources();
@@ -358,7 +373,7 @@ class MarketEngine {
         $this->db->beginTransaction();
         try {
             // Verrouiller l'offre
-            $stOffer = $this->db->prepare("SELECT * FROM market_offers WHERE id = ? FOR UPDATE");
+            $stOffer = $this->db->prepare("SELECT * FROM market_offers WHERE id = ?" . $this->forUpdate());
             $stOffer->execute([$offerId]);
             $offer = $stOffer->fetch(PDO::FETCH_ASSOC);
 
@@ -390,7 +405,7 @@ class MarketEngine {
             $stBuyerP = $this->db->prepare("
                 SELECT id, user_id, `{$demandCol}`, `{$offerCol}`, `{$offerDef['max_col']}` 
                 FROM planets 
-                WHERE id = ? FOR UPDATE
+                WHERE id = ?" . $this->forUpdate() . "
             ");
             $stBuyerP->execute([$buyerPlanetId]);
             $buyerPlanet = $stBuyerP->fetch(PDO::FETCH_ASSOC);
@@ -506,10 +521,29 @@ class MarketEngine {
             FROM market_offers mo
             JOIN planets p ON mo.planet_id = p.id
             WHERE mo.user_id = ?
-            ORDER BY FIELD(mo.status, 'active', 'completed', 'cancelled'), mo.created_at DESC
+            ORDER BY (CASE mo.status WHEN 'active' THEN 1 WHEN 'completed' THEN 2 ELSE 3 END), mo.created_at DESC
             LIMIT 30
         ");
         $st->execute([$userId]);
+        return $st->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Récapitulatif de la Bourse des Sens d'Échange (agrégation par couple offre/demande)
+     */
+    public function getExchangeDirectionsSummary(): array {
+        $st = $this->db->query("
+            SELECT mo.offer_res, mo.demand_res,
+                   COUNT(*) as offers_count,
+                   SUM(mo.offer_amount) as total_offered,
+                   SUM(mo.demand_amount) as total_demanded,
+                   MIN(mo.ratio) as best_ratio,
+                   AVG(mo.ratio) as avg_ratio
+            FROM market_offers mo
+            WHERE mo.status = 'active'
+            GROUP BY mo.offer_res, mo.demand_res
+            ORDER BY offers_count DESC, total_offered DESC
+        ");
         return $st->fetchAll(PDO::FETCH_ASSOC);
     }
 }

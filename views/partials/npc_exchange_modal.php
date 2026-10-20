@@ -12,6 +12,27 @@
 $npcKobanBalance = isset($goldCoins) ? (int)$goldCoins : (isset($user['gold_coins']) ? (int)$user['gold_coins'] : null);
 ?>
 
+<?php if (!empty($isInlineNpcExchange)): ?>
+<!-- PANNEAU DIRECT DU MARCHAND NPC / INTENDANT DU MARCHÉ (TROC 1:1:1) -->
+<div class="card shadow-sm border mb-3" id="inlineNpcExchangeContainer" style="border-top: 3px solid #7c3aed !important;">
+    <div class="card-header bg-warning-subtle py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h4 class="card-title fw-bold text-dark d-flex align-items-center gap-2 m-0">
+            <i class="fa-solid fa-scale-balanced text-warning fs-3"></i>
+            <span>Intendant du Marché Castral &bull; Troc Équilibré 1:1:1</span>
+        </h4>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-purple text-white font-monospace py-1 px-2">
+                <i class="fa-solid fa-coins me-1"></i>Tribut : 3 Koban
+            </span>
+            <?php if ($npcKobanBalance !== null): ?>
+                <span class="badge bg-warning-lt text-dark font-monospace py-1 px-2">
+                    Solde : <strong><?= (int)$npcKobanBalance ?> Koban</strong>
+                </span>
+            <?php endif; ?>
+        </div>
+    </div>
+    <div class="card-body p-3 p-md-4">
+<?php else: ?>
 <!-- MODALE DU MARCHAND NPC / INTENDANT DU MARCHÉ (TROC 1:1) -->
 <div class="modal modal-blur fade" id="modalNpcExchange" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
@@ -24,6 +45,7 @@ $npcKobanBalance = isset($goldCoins) ? (int)$goldCoins : (isset($user['gold_coin
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body p-3 p-md-4">
+<?php endif; ?>
                 <div class="p-3 bg-light border rounded mb-3">
                     <div class="row align-items-center">
                         <div class="col-md-7 text-md-start">
@@ -352,8 +374,11 @@ $npcKobanBalance = isset($goldCoins) ? (int)$goldCoins : (isset($user['gold_coin
 
                 <!-- ACTIONS D'AIDE ET RÉPARTITION RAPIDE -->
                 <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-sm btn-outline-warning fw-bold" onclick="distributeThirds()">
+                        <i class="fa-solid fa-scale-balanced me-1"></i>Troc 1:1:1 en Tiers (Bois / Pierre / Riz)
+                    </button>
                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="distributeEvenly()">
-                        <i class="fa-solid fa-scale-balanced me-1"></i>Répartir équitablement
+                        <i class="fa-solid fa-boxes-stacked me-1"></i>Répartir équitablement (toutes les denrées)
                     </button>
                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetInitialStocks()">
                         <i class="fa-solid fa-rotate-left me-1"></i>Rétablir les stocks d'origine
@@ -364,6 +389,26 @@ $npcKobanBalance = isset($goldCoins) ? (int)$goldCoins : (isset($user['gold_coin
                     La somme répartie ne correspond pas au total disponible.
                 </div>
             </div>
+
+<?php if (!empty($isInlineNpcExchange)): ?>
+            <div class="card-footer d-flex justify-content-between align-items-center bg-light flex-wrap gap-2 py-3">
+                <span class="small text-muted">
+                    Tribut impérial : <strong class="text-warning">3 Koban <i class="fa-solid fa-coins text-warning"></i></strong>
+                    <?php if ($npcKobanBalance !== null): ?>
+                        (Solde disponible : <strong><?= (int)$npcKobanBalance ?> Koban</strong>)
+                    <?php endif; ?>
+                </span>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-secondary" onclick="resetInitialStocks()">
+                        <i class="fa-solid fa-rotate-left me-1"></i>Rétablir
+                    </button>
+                    <button type="button" class="btn btn-warning fw-bold shadow-sm px-4" id="btnSubmitNpcExchange" onclick="submitNpcExchange()">
+                        <i class="fa-solid fa-coins me-1"></i>Sceller le Troc 1:1:1 (3 Koban)
+                    </button>
+                </div>
+            </div>
+        </div>
+<?php else: ?>
             <div class="modal-footer d-flex justify-content-between align-items-center bg-light">
                 <span class="small text-muted">
                     Tribut impérial : <strong class="text-warning">3 Koban <i class="fa-solid fa-coins text-warning"></i></strong>
@@ -381,6 +426,7 @@ $npcKobanBalance = isset($goldCoins) ? (int)$goldCoins : (isset($user['gold_coin
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <script>
 // =========================================================================
@@ -517,9 +563,11 @@ function openNpcExchangeModal(planetId, planetName, resOrWood, maxOrStone, rice,
     updateNpcDisplay();
 
     const modalEl = document.getElementById('modalNpcExchange');
-    if (modalEl) {
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.show();
+    if (modalEl && modalEl.classList && modalEl.classList.contains('modal')) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
     }
 }
 
@@ -775,6 +823,45 @@ function updateNpcDisplay() {
 }
 
 /**
+ * Troc 1:1:1 : Répartition équitable en 3 tiers égaux sur les denrées majeures (Bois, Pierre, Riz)
+ */
+function distributeThirds() {
+    const triad = ['wood', 'stone', 'rice'];
+    let otherSum = 0;
+    ALL_NPC_RESOURCES.forEach(r => {
+        if (!triad.includes(r)) {
+            const val = parseInt(initialNpcStocks[r] || 0, 10);
+            otherSum += val;
+            const inp = document.getElementById(`npc_input_${r}`);
+            const rng = document.getElementById(`npc_range_${r}`);
+            if (inp) inp.value = val;
+            if (rng) rng.value = val;
+        }
+    });
+
+    const pool = Math.max(0, currentNpcTotal - otherSum);
+    const third = Math.floor(pool / 3);
+    let rem = pool;
+
+    triad.forEach((res, idx) => {
+        const isLast = (idx === triad.length - 1);
+        let val = isLast ? rem : third;
+        const max = currentNpcMax[res] || val;
+        val = Math.min(val, max);
+        rem -= val;
+
+        const inp = document.getElementById(`npc_input_${res}`);
+        const rng = document.getElementById(`npc_range_${res}`);
+        if (inp) inp.value = val;
+        if (rng) rng.value = val;
+    });
+
+    npcCheckedResources = [];
+    updateNpcCheckState();
+    updateNpcDisplay();
+}
+
+/**
  * Répartition équitable des ressources
  */
 function distributeEvenly() {
@@ -883,4 +970,20 @@ async function submitNpcExchange() {
         if (btn) btn.disabled = false;
     }
 }
+
+<?php if (!empty($isInlineNpcExchange) && !empty($planet)): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    <?php 
+    $npcInlinePayload = isset($npcPlanetData) ? $npcPlanetData : (isset($sealEngine) ? $sealEngine->getNpcPlanetResourceData($planet) : null);
+    ?>
+    if (typeof openNpcExchangeModal === 'function') {
+        openNpcExchangeModal(
+            <?= (int)$planet['id'] ?>, 
+            <?= json_encode($planet['name']) ?>, 
+            <?= json_encode($npcInlinePayload['resources'] ?? []) ?>, 
+            <?= json_encode($npcInlinePayload['maxes'] ?? []) ?>
+        );
+    }
+});
+<?php endif; ?>
 </script>

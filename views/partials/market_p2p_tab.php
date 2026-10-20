@@ -1,45 +1,53 @@
 <?php
 /**
- * Vue partielle : Onglet Bourse Féodale (Troc P2P)
- * Débloqué au Marché Niveau 10
+ * Vue partielle : Onglet Bourse des Sens d'Échange & Troc Féodal (P2P)
+ * Débloqué dès le Niveau 1 du Marché
  */
+
+// Paires de référence des sens d'échange pour la matrice
+$benchmarkDirections = [
+    ['offer' => 'metal', 'demand' => 'crystal', 'label' => 'Bois de Cèdre ➔ Pierre de Granit'],
+    ['offer' => 'crystal', 'demand' => 'metal', 'label' => 'Pierre de Granit ➔ Bois de Cèdre'],
+    ['offer' => 'metal', 'demand' => 'deuterium', 'label' => 'Bois de Cèdre ➔ Riz Impérial'],
+    ['offer' => 'deuterium', 'demand' => 'metal', 'label' => 'Riz Impérial ➔ Bois de Cèdre'],
+    ['offer' => 'crystal', 'demand' => 'deuterium', 'label' => 'Pierre de Granit ➔ Riz Impérial'],
+    ['offer' => 'deuterium', 'demand' => 'crystal', 'label' => 'Riz Impérial ➔ Pierre de Granit'],
+    ['offer' => 'clay', 'demand' => 'metal', 'label' => 'Argile Alluviale ➔ Bois de Cèdre'],
+    ['offer' => 'clay', 'demand' => 'crystal', 'label' => 'Argile Alluviale ➔ Pierre de Granit'],
+];
+
+// Indexer le récapitulatif des sens d'échange en cours
+$dirStatsMap = [];
+if (!empty($p2pExchangeDirections)) {
+    foreach ($p2pExchangeDirections as $ed) {
+        $key = $ed['offer_res'] . '_to_' . $ed['demand_res'];
+        $dirStatsMap[$key] = $ed;
+    }
+}
 ?>
-<!-- ONGLET 4 : BOURSE FÉODALE (TROC P2P & ESCROW) -->
+<!-- ONGLET 4 : BOURSE DES SENS D'ÉCHANGE & TROC P2P -->
 <div class="tab-pane" id="tab-market-p2p" role="tabpanel">
-    <?php if ($lvl < 10): ?>
+    <?php if ($lvl < 1): ?>
     <div class="border rounded p-4 text-center bg-light-lt border-dashed">
         <div class="mb-3">
             <span class="avatar avatar-xl rounded-circle bg-secondary-lt text-secondary">
                 <i class="fa-solid fa-lock fs-1"></i>
             </span>
         </div>
-        <h3 class="fw-bold text-dark mb-1">Bourse Féodale de Troc Privé &bull; Niveau 10 Requis</h3>
+        <h3 class="fw-bold text-dark mb-1">Marché Féodal Requis</h3>
         <p class="text-secondary small mx-auto mb-4" style="max-width: 620px;">
-            À partir du <strong>Niveau 10 du Marché</strong>, vos marchands établissent des comptoirs permanents pour déposer des offres de troc avec les autres seigneurs du Japon féodal. Vous pourrez fixer vos propres ratios d'échange (ex. <em>500 Argile contre 1 000 Bois</em>). Les ressources mises en vente sont alors immédiatement consignées en coffre sécurisé (séquestre) jusqu'à ce que l'échange soit conclu ou annulé.
+            Pour accéder à la Bourse des Sens d'Échange et déposer des offres de troc avec les autres seigneurs du Japon féodal, vous devez d'abord ériger le bâtiment <strong>Marché</strong> dans votre cité.
         </p>
-
-        <div class="mx-auto" style="max-width: 360px;">
-            <div class="d-flex justify-content-between small text-muted mb-1">
-                <span>Niveau du Marché actuel</span>
-                <strong><?= $lvl ?> / 10</strong>
-            </div>
-            <div class="progress mb-3" style="height: 10px;">
-                <div class="progress-bar bg-warning" style="width: <?= min(100, ($lvl / 10) * 100) ?>%;"></div>
-            </div>
-            <a href="#buildActionBtn" class="btn btn-warning text-dark fw-bold btn-sm shadow-sm" onclick="document.getElementById('buildActionBtn')?.scrollIntoView({behavior:'smooth'})">
-                <i class="fa-solid fa-arrow-up me-1"></i>Améliorer le Marché au Niveau <?= $lvl + 1 ?>
-            </a>
-        </div>
     </div>
     <?php else: ?>
-    <!-- BOURSE ACTIVE : DÉBLOCAGE NIVEAU 10+ -->
+    <!-- BOURSE ACTIVE : DÉBLOCAGE DÈS LE NIVEAU 1 -->
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pb-2 border-bottom">
         <div>
             <h4 class="m-0 fw-bold text-dark d-flex align-items-center gap-2">
-                <span><i class="fa-solid fa-handshake text-success"></i></span> Bourse Féodale des Seigneurs (Troc P2P)
+                <span><i class="fa-solid fa-arrow-right-arrow-left text-success"></i></span> Bourse des Sens d'Échange &amp; Troc Féodal (P2P)
             </h4>
             <div class="text-secondary small mt-1">
-                Déposez des offres de troc à ratio libre ou concluez les offres proposées par les daimyōs du shogunat.
+                Consultez les sens d'échange provinciaux, analysez les cours et liquidités du shogunat, échangez en 1-clic ou déposez vos cargaisons sous séquestre sécurisé.
             </div>
         </div>
         <div class="d-flex align-items-center gap-2">
@@ -47,17 +55,92 @@
                 <i class="fa-solid fa-coins me-1"></i>Slots d'offres : <?= $p2pMyActiveOffersCount ?> / <?= $p2pMaxSlots ?>
             </span>
             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="refreshP2POffers()">
-                <i class="fa-solid fa-arrows-rotate me-1"></i>Actualiser
+                <i class="fa-solid fa-arrows-rotate me-1"></i>Actualiser la Bourse
             </button>
         </div>
     </div>
 
-    <!-- 1. FORMULAIRE DE DÉPÔT D'OFFRE -->
-    <div class="card mb-4 border-success-lt shadow-sm" style="border-left: 4px solid #16a34a;">
-        <div class="card-header bg-light py-2">
+    <!-- 0. REGISTRE DE LA BOURSE DES SENS D'ÉCHANGE (MATRICE DES FLUX & COURS EN TEMPS RÉEL) -->
+    <div class="card mb-4 border-warning-lt shadow-sm" style="border-left: 4px solid #f59e0b;">
+        <div class="card-header bg-warning-subtle py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h4 class="card-title text-dark d-flex align-items-center gap-2 m-0" style="font-size:0.95rem;">
+                    <i class="fa-solid fa-scale-balanced text-warning"></i> Registre de la Bourse des Sens d'Échange &bull; Cours &amp; Liquidité
+                </h4>
+                <div class="text-secondary small" style="font-size:0.75rem;">
+                    Surveillez la liquidité disponible et le meilleur taux selon chaque sens d'échange entre domaines féodaux.
+                </div>
+            </div>
+            <span class="badge bg-warning text-dark fw-bold font-monospace">
+                <?= count($p2pActiveOffers) ?> offre(s) active(s) au total
+            </span>
+        </div>
+        <div class="card-body p-3">
+            <div class="row g-2">
+                <?php foreach ($benchmarkDirections as $bd): 
+                    $k = $bd['offer'] . '_to_' . $bd['demand'];
+                    $offDef = $p2pTradables[$bd['offer']] ?? ['name' => $bd['offer'], 'icon' => 'fa-solid fa-box'];
+                    $demDef = $p2pTradables[$bd['demand']] ?? ['name' => $bd['demand'], 'icon' => 'fa-solid fa-box'];
+                    $stats = $dirStatsMap[$k] ?? null;
+                    $hasOffers = !empty($stats);
+                    $offerCount = $hasOffers ? (int)$stats['offers_count'] : 0;
+                    $bestRatio = $hasOffers ? (float)$stats['best_ratio'] : null;
+                    $totalVol = $hasOffers ? (int)$stats['total_offered'] : 0;
+                ?>
+                <div class="col-md-6 col-lg-3">
+                    <div class="border rounded p-2 h-100 bg-white shadow-none d-flex flex-column justify-content-between <?= $hasOffers ? 'border-success-subtle' : 'border-light' ?>">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge <?= $hasOffers ? 'bg-success text-white' : 'bg-secondary-lt' ?> font-monospace" style="font-size:0.7rem;">
+                                    <?= $offerCount ?> offre<?= $offerCount > 1 ? 's' : '' ?>
+                                </span>
+                                <?php if ($hasOffers): ?>
+                                    <span class="badge bg-success-lt font-monospace fw-bold" style="font-size:0.7rem;" title="Meilleur taux d'échange constaté">
+                                        1 : <?= $bestRatio ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="text-muted" style="font-size:0.68rem;">Marché calme</span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="fw-bold small text-dark d-flex align-items-center gap-1 mb-1">
+                                <i class="<?= $offDef['icon'] ?>" title="<?= htmlspecialchars($offDef['name']) ?>"></i>
+                                <span class="text-truncate" style="max-width:85px;"><?= htmlspecialchars($offDef['name']) ?></span>
+                                <i class="fa-solid fa-arrow-right text-muted small mx-1"></i>
+                                <i class="<?= $demDef['icon'] ?>" title="<?= htmlspecialchars($demDef['name']) ?>"></i>
+                                <span class="text-truncate" style="max-width:85px;"><?= htmlspecialchars($demDef['name']) ?></span>
+                            </div>
+                            <div class="small text-muted mb-2" style="font-size:0.72rem;">
+                                <?php if ($hasOffers): ?>
+                                    Volume : <strong class="text-primary font-monospace"><?= number_format($totalVol) ?></strong> unités
+                                <?php else: ?>
+                                    Aucun lot proposé dans ce sens
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-1 pt-1 border-top">
+                            <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1 py-0 px-1" style="font-size:0.72rem;" onclick="selectTradeDirection('<?= $bd['offer'] ?>', '<?= $bd['demand'] ?>', 'filter')" title="Filtrer les offres dans ce sens d'échange">
+                                <i class="fa-solid fa-filter me-1"></i>Filtrer
+                            </button>
+                            <button type="button" class="btn btn-outline-success btn-sm flex-grow-1 py-0 px-1" style="font-size:0.72rem;" onclick="selectTradeDirection('<?= $bd['offer'] ?>', '<?= $bd['demand'] ?>', 'create')" title="Déposer une offre dans ce sens d'échange">
+                                <i class="fa-solid fa-plus me-1"></i>Déposer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. FORMULAIRE DE DÉPÔT D'OFFRE AVEC INVERSION DU SENS -->
+    <div class="card mb-4 border-success-lt shadow-sm" id="p2p_create_offer_card" style="border-left: 4px solid #16a34a;">
+        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h4 class="card-title text-success d-flex align-items-center gap-2 m-0" style="font-size:0.95rem;">
                 <i class="fa-solid fa-plus-circle"></i> Déposer une Offre d'Échange avec Séquestre
             </h4>
+            <span class="small text-muted">
+                Slots disponibles : <strong><?= max(0, $p2pMaxSlots - $p2pMyActiveOffersCount) ?></strong> / <?= $p2pMaxSlots ?>
+            </span>
         </div>
         <div class="card-body p-3">
             <div class="row g-3">
@@ -91,7 +174,7 @@
                     </div>
                 </div>
 
-                <!-- COLONNE CENTRALE : RATIO D'ÉCHANGE -->
+                <!-- COLONNE CENTRALE : RATIO D'ÉCHANGE & BOUTON D'INVERSION DU SENS -->
                 <div class="col-md-2 d-flex flex-column align-items-center justify-content-center text-center">
                     <div class="fs-2 text-warning mb-1">
                         <i class="fa-solid fa-right-left"></i>
@@ -99,6 +182,12 @@
                     <div class="small fw-bold text-muted mb-1">Ratio d'Échange</div>
                     <div class="badge bg-secondary-lt fs-5 px-3 py-1 font-monospace" id="p2p_ratio_display">1 : 2.0</div>
                     <div class="small text-muted mt-1" id="p2p_ratio_hint" style="font-size:0.75rem;">1 Cédé &rarr; 2 Reçu</div>
+
+                    <!-- BOUTON D'INVERSION DU SENS D'ÉCHANGE (⇄) -->
+                    <button type="button" class="btn btn-outline-warning btn-sm fw-bold px-2 py-1 shadow-sm mt-3" 
+                            onclick="swapP2PExchangeDirection()" title="Inverser le sens d'échange : ce que vous cédez devient ce que vous demandez">
+                        <i class="fa-solid fa-right-left me-1"></i>Inverser le Sens (⇄)
+                    </button>
                 </div>
 
                 <!-- COLONNE DROITE : CE QUE JE DEMANDE -->
@@ -141,7 +230,7 @@
                     </div>
                 </div>
                 <div class="text-end">
-                    <span class="text-muted" style="font-size:0.75rem;">Capacité restante : <?= $p2pMaxSlots - $p2pMyActiveOffersCount ?> slot(s)</span>
+                    <span class="text-muted" style="font-size:0.75rem;">Capacité restante : <?= max(0, $p2pMaxSlots - $p2pMyActiveOffersCount) ?> slot(s)</span>
                 </div>
             </div>
 
@@ -167,6 +256,7 @@
                     <tr>
                         <th>N°</th>
                         <th>Fief Origine</th>
+                        <th>Sens d'Échange</th>
                         <th>Ressources Bloquées (Offre)</th>
                         <th>Demande Attendue</th>
                         <th>Ratio</th>
@@ -178,7 +268,7 @@
                 <tbody id="p2p_my_offers_tbody">
                     <?php if (empty($p2pMyOffers)): ?>
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">
+                            <td colspan="9" class="text-center py-4 text-muted">
                                 Vous n'avez aucune offre de troc active ou récente.
                             </td>
                         </tr>
@@ -190,6 +280,11 @@
                         <tr>
                             <td class="font-monospace text-muted">#<?= $mo['id'] ?></td>
                             <td><span class="badge bg-light text-dark"><?= htmlspecialchars($mo['planet_name']) ?></span></td>
+                            <td>
+                                <span class="badge bg-blue-lt font-monospace small" title="Sens de cette offre">
+                                    <i class="<?= $offDef['icon'] ?> me-1"></i> ➔ <i class="<?= $demDef['icon'] ?> ms-1"></i>
+                                </span>
+                            </td>
                             <td>
                                 <strong class="text-danger">
                                     -<?= number_format($mo['offer_amount']) ?> 
@@ -233,24 +328,50 @@
     </div>
 
     <!-- 3. BOURSE DES DAIMYŌS (OFFRES DISPONIBLES DANS LE SHOGUNAT) -->
-    <div class="card">
+    <div class="card" id="p2p_active_offers_card">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
-            <h4 class="card-title text-dark m-0" style="font-size:0.95rem;">
-                <i class="fa-solid fa-landmark text-primary me-1"></i>Bourse des Daimyōs &bull; Offres Disponibles dans le Shogunat
-            </h4>
-            <div class="d-flex align-items-center gap-2">
+            <div>
+                <h4 class="card-title text-dark m-0" style="font-size:0.95rem;">
+                    <i class="fa-solid fa-landmark text-primary me-1"></i>Bourse des Daimyōs &bull; Offres Disponibles dans le Shogunat
+                </h4>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <!-- SÉLECTEUR RAPIDE DE SENS D'ÉCHANGE -->
+                <select id="p2p_filter_direction" class="form-select form-select-sm" style="width: auto;" onchange="onP2PDirectionPresetChange(this)">
+                    <option value="">-- Tous les sens d'échange --</option>
+                    <option value="affordable">★ Offres payables avec mon stock</option>
+                    <option value="metal_to_crystal">🌲 Bois ➔ 🪨 Pierre</option>
+                    <option value="crystal_to_metal">🪨 Pierre ➔ 🌲 Bois</option>
+                    <option value="metal_to_deuterium">🌲 Bois ➔ 🌾 Riz</option>
+                    <option value="deuterium_to_metal">🌾 Riz ➔ 🌲 Bois</option>
+                    <option value="crystal_to_deuterium">🪨 Pierre ➔ 🌾 Riz</option>
+                    <option value="deuterium_to_crystal">🌾 Riz ➔ 🪨 Pierre</option>
+                    <option value="clay_to_metal">🏺 Argile ➔ 🌲 Bois</option>
+                    <option value="clay_to_crystal">🏺 Argile ➔ 🪨 Pierre</option>
+                </select>
+
                 <select id="p2p_filter_offer" class="form-select form-select-sm" style="width: auto;" onchange="refreshP2POffers()">
-                    <option value="">-- Toute ressource offerte --</option>
+                    <option value="">-- Cédé par le vendeur --</option>
                     <?php foreach ($p2pTradables as $k => $t): ?>
                         <option value="<?= $k ?>"><?= htmlspecialchars($t['name']) ?></option>
                     <?php endforeach; ?>
                 </select>
+
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="swapP2PFilters()" title="Inverser les filtres d'échange (⇄)">
+                    <i class="fa-solid fa-right-left"></i>
+                </button>
+
                 <select id="p2p_filter_demand" class="form-select form-select-sm" style="width: auto;" onchange="refreshP2POffers()">
-                    <option value="">-- Toute ressource demandée --</option>
+                    <option value="">-- Demandé par le vendeur --</option>
                     <?php foreach ($p2pTradables as $k => $t): ?>
                         <option value="<?= $k ?>"><?= htmlspecialchars($t['name']) ?></option>
                     <?php endforeach; ?>
                 </select>
+
+                <div class="form-check form-switch m-0 ms-1">
+                    <input class="form-check-input" type="checkbox" id="p2p_filter_affordable" onchange="refreshP2POffers()">
+                    <label class="form-check-label small text-muted" for="p2p_filter_affordable">Payables</label>
+                </div>
             </div>
         </div>
         <div class="table-responsive">
@@ -259,6 +380,7 @@
                     <tr>
                         <th>Offre N°</th>
                         <th>Seigneur Émetteur</th>
+                        <th>Sens d'Échange</th>
                         <th>Vous Recevez (Offert)</th>
                         <th>Vous Donnez (Demandé)</th>
                         <th>Taux d'Échange</th>
@@ -269,8 +391,8 @@
                 <tbody id="p2p_active_offers_tbody">
                     <?php if (empty($p2pActiveOffers)): ?>
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
-                                Aucune offre n'est actuellement déposée sur la Bourse Féodale. Soyez le premier à déposer vos denrées !
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-scale-balanced me-1"></i>Aucune offre n'est actuellement déposée sur la Bourse Féodale. Soyez le premier à déposer vos denrées !
                             </td>
                         </tr>
                     <?php else: ?>
@@ -291,6 +413,11 @@
                                     <?php endif; ?>
                                 </div>
                                 <div class="text-muted small"><?= htmlspecialchars($o['seller_planet_name']) ?> [<?= $o['seller_x'] ?>|<?= $o['seller_y'] ?>]</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-blue-lt font-monospace small" title="Sens de cette transaction">
+                                    <i class="<?= $offDef['icon'] ?> me-1"></i> ➔ <i class="<?= $demDef['icon'] ?> ms-1"></i>
+                                </span>
                             </td>
                             <td>
                                 <span class="badge bg-success text-white fs-6 py-1 px-2">
@@ -338,4 +465,3 @@
     </div>
     <?php endif; ?>
 </div>
-

@@ -2563,11 +2563,12 @@ if (!$isEmptyPlot) {
                 return (int)$tr['source_planet_id'] === (int)$planet['id'] || (int)$tr['target_planet_id'] === (int)$planet['id'];
             });
 
-            // Données de la Bourse P2P (Niveau 10)
+            // Données de la Bourse des Sens d'Échange & Troc P2P (Dès Niveau 1)
             $p2pMaxSlots = $marketEngine->getMaxOfferSlots($lvl);
             $p2pTradables = MarketEngine::getTradableResources();
-            $p2pActiveOffers = ($lvl >= 10) ? $marketEngine->getActiveOffers() : [];
-            $p2pMyOffers = ($lvl >= 10) ? $marketEngine->getUserOffers((int)$user['id']) : [];
+            $p2pActiveOffers = ($lvl >= 1) ? $marketEngine->getActiveOffers() : [];
+            $p2pExchangeDirections = ($lvl >= 1) ? $marketEngine->getExchangeDirectionsSummary() : [];
+            $p2pMyOffers = ($lvl >= 1) ? $marketEngine->getUserOffers((int)$user['id']) : [];
             $p2pMyActiveOffersCount = 0;
             foreach ($p2pMyOffers as $mo) {
                 if ($mo['status'] === 'active' && (int)$mo['planet_id'] === (int)$planet['id']) {
@@ -2619,16 +2620,16 @@ if (!$isEmptyPlot) {
                         </li>
                         <li class="nav-item" role="presentation">
                             <a href="#tab-market-npc" class="nav-link fw-bold text-purple d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="false" role="tab">
-                                <span><i class="fa-solid fa-scale-balanced text-warning"></i></span> Intendant du Marché (Troc 1:1:1)
+                                <span><i class="fa-solid fa-scale-balanced text-warning"></i></span> Troc Équilibré 1:1:1 (Intendant)
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
                             <a href="#tab-market-p2p" class="nav-link fw-bold text-success d-flex align-items-center gap-2" data-bs-toggle="tab" aria-selected="false" role="tab">
-                                <span><i class="fa-solid fa-handshake text-success"></i></span> Bourse Féodale (Troc P2P)
-                                <?php if ($lvl >= 10): ?>
+                                <span><i class="fa-solid fa-arrow-right-arrow-left text-success"></i></span> Bourse des Sens d'Échange (Troc P2P)
+                                <?php if ($lvl >= 1): ?>
                                     <span class="badge bg-success-lt ms-1"><?= count($p2pActiveOffers) ?></span>
                                 <?php else: ?>
-                                    <span class="badge bg-secondary-lt ms-1"><i class="fa-solid fa-lock me-1"></i>Niv. 10</span>
+                                    <span class="badge bg-secondary-lt ms-1"><i class="fa-solid fa-lock me-1"></i>Niv. 1</span>
                                 <?php endif; ?>
                             </a>
                         </li>
@@ -2907,31 +2908,17 @@ if (!$isEmptyPlot) {
                             <?php endif; ?>
                         </div>
 
-                        <!-- ONGLET 3 : INTENDANT DU MARCHÉ (TROC 1:1:1) -->
+                        <!-- ONGLET 3 : INTENDANT DU MARCHÉ (TROC 1:1:1 DIRECT) -->
                         <div class="tab-pane" id="tab-market-npc" role="tabpanel">
-                            <div class="p-3 border rounded bg-light">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="fs-1"><i class="fa-solid fa-scale-balanced text-warning"></i></span>
-                                        <div>
-                                            <h4 class="m-0 fw-bold text-dark">Intendant du Marché Castral (Troc 1:1:1)</h4>
-                                            <div class="text-secondary small mt-1" style="max-width:600px;">
-                                                L'Intendant redistribue immédiatement vos surplus de Bois, Pierre et Riz au ratio parfait de <strong>1:1:1</strong> sans aucune taxe de déperdition pour un tribut de <strong>3 Koban <i class="fa-solid fa-coins text-warning"></i></strong>.
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <?php $npcPlanetData = $sealEngine->getNpcPlanetResourceData($planet); ?>
-                                        <button type="button" class="btn btn-purple text-white fw-bold shadow-sm" style="background:#7c3aed;"
-                                                onclick='openNpcExchangeModal(<?= (int)$planet['id'] ?>, <?= json_encode($planet['name']) ?>, <?= json_encode($npcPlanetData['resources']) ?>, <?= json_encode($npcPlanetData['maxes']) ?>)'>
-                                            <i class="fa-solid fa-scale-balanced me-1"></i>Procéder au Troc 1:1 de ce Fief &rarr;
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                            <?php 
+                            $isInlineNpcExchange = true;
+                            $goldCoins = (int)($user['gold_coins'] ?? 0);
+                            $npcPlanetData = $sealEngine->getNpcPlanetResourceData($planet);
+                            require __DIR__ . '/partials/npc_exchange_modal.php'; 
+                            ?>
                         </div>
 
-                        <!-- ONGLET 4 : BOURSE FÉODALE (TROC P2P & ESCROW NIV 10) -->
+                        <!-- ONGLET 4 : BOURSE DES SENS D'ÉCHANGE & TROC P2P -->
                         <?php require_once __DIR__ . '/partials/market_p2p_tab.php'; ?>
                     </div>
                 </div>
@@ -4767,6 +4754,97 @@ function updateP2PRatioPreview() {
     }
 }
 
+/**
+ * Inverse le sens d'échange dans le formulaire de dépôt (⇄)
+ */
+function swapP2PExchangeDirection() {
+    const offSel = document.getElementById('p2p_offer_res');
+    const demSel = document.getElementById('p2p_demand_res');
+    const offInp = document.getElementById('p2p_offer_amount');
+    const demInp = document.getElementById('p2p_demand_amount');
+    if (!offSel || !demSel) return;
+
+    const prevOff = offSel.value;
+    const prevDem = demSel.value;
+    offSel.value = prevDem;
+    demSel.value = prevOff;
+
+    if (offInp && demInp) {
+        const prevOffVal = offInp.value;
+        const prevDemVal = demInp.value;
+        offInp.value = prevDemVal;
+        demInp.value = prevOffVal;
+    }
+
+    onP2POfferResChange();
+    onP2PDemandResChange();
+    if (typeof showTablerToast === 'function') {
+        showTablerToast("Sens d'échange inversé : l'offre et la demande ont été permutées.", 'info', "Bourse des Sens d'Échange");
+    }
+}
+
+/**
+ * Inverse les filtres d'offre et de demande dans la liste des offres (⇄)
+ */
+function swapP2PFilters() {
+    const fOff = document.getElementById('p2p_filter_offer');
+    const fDem = document.getElementById('p2p_filter_demand');
+    if (!fOff || !fDem) return;
+
+    const tmp = fOff.value;
+    fOff.value = fDem.value;
+    fDem.value = tmp;
+
+    const dirSel = document.getElementById('p2p_filter_direction');
+    if (dirSel) dirSel.value = '';
+
+    refreshP2POffers();
+}
+
+/**
+ * Sélectionne un sens d'échange prédéfini dans la Bourse
+ */
+function selectTradeDirection(offerRes, demandRes, action) {
+    if (action === 'filter') {
+        const fOff = document.getElementById('p2p_filter_offer');
+        const fDem = document.getElementById('p2p_filter_demand');
+        if (fOff) fOff.value = offerRes;
+        if (fDem) fDem.value = demandRes;
+        const dirSel = document.getElementById('p2p_filter_direction');
+        if (dirSel) dirSel.value = `${offerRes}_to_${demandRes}`;
+        refreshP2POffers();
+        document.getElementById('p2p_active_offers_card')?.scrollIntoView({ behavior: 'smooth' });
+    } else if (action === 'create') {
+        const offSel = document.getElementById('p2p_offer_res');
+        const demSel = document.getElementById('p2p_demand_res');
+        if (offSel) offSel.value = offerRes;
+        if (demSel) demSel.value = demandRes;
+        onP2POfferResChange();
+        onP2PDemandResChange();
+        document.getElementById('p2p_create_offer_card')?.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+/**
+ * Gestion du changement du sélecteur rapide de sens d'échange
+ */
+function onP2PDirectionPresetChange(selectEl) {
+    if (!selectEl) return;
+    const val = selectEl.value;
+    const fOff = document.getElementById('p2p_filter_offer');
+    const fDem = document.getElementById('p2p_filter_demand');
+
+    if (val === '' || val === 'affordable') {
+        if (fOff) fOff.value = '';
+        if (fDem) fDem.value = '';
+    } else if (val.includes('_to_')) {
+        const parts = val.split('_to_');
+        if (fOff) fOff.value = parts[0];
+        if (fDem) fDem.value = parts[1];
+    }
+    refreshP2POffers();
+}
+
 async function submitP2POffer() {
     const offRes = document.getElementById('p2p_offer_res')?.value;
     const offAmt = parseInt(document.getElementById('p2p_offer_amount')?.value || 0, 10);
@@ -4875,17 +4953,29 @@ async function acceptP2POffer(offerId, offName, offAmt, demName, demAmt) {
 async function refreshP2POffers() {
     const filterOff = document.getElementById('p2p_filter_offer')?.value || '';
     const filterDem = document.getElementById('p2p_filter_demand')?.value || '';
+    const dirVal = document.getElementById('p2p_filter_direction')?.value || '';
+    const onlyAffordable = (dirVal === 'affordable') || (document.getElementById('p2p_filter_affordable')?.checked);
+
     try {
         const res = await fetch(`/api/market.php?action=list_offers&offer_res=${encodeURIComponent(filterOff)}&demand_res=${encodeURIComponent(filterDem)}`);
         const data = await res.json();
         if (data.success) {
             const tbody = document.getElementById('p2p_active_offers_tbody');
             if (!tbody) return;
-            if (data.offers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Aucune offre ne correspond à vos filtres.</td></tr>`;
+
+            let displayOffers = data.offers;
+            if (onlyAffordable) {
+                displayOffers = displayOffers.filter(o => {
+                    const curStock = p2pPlanetStockMap[o.demand_res] || 0;
+                    return curStock >= parseInt(o.demand_amount, 10);
+                });
+            }
+
+            if (displayOffers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted"><i class="fa-solid fa-scale-balanced me-1"></i>Aucune offre ne correspond à vos filtres sur la Bourse Féodale.</td></tr>`;
                 return;
             }
-            tbody.innerHTML = data.offers.map(o => {
+            tbody.innerHTML = displayOffers.map(o => {
                 const offDef = data.tradables[o.offer_res] || { name: o.offer_res, icon: 'fa-solid fa-box' };
                 const demDef = data.tradables[o.demand_res] || { name: o.demand_res, icon: 'fa-solid fa-box' };
                 const curStock = p2pPlanetStockMap[o.demand_res] || 0;
@@ -4896,6 +4986,11 @@ async function refreshP2POffers() {
                         <td>
                             <strong class="text-dark">${o.seller_name}</strong>
                             <div class="text-muted small">${o.seller_planet_name} [${o.seller_x}|${o.seller_y}]</div>
+                            <div class="mt-1">
+                                <span class="badge bg-blue-lt font-monospace small" title="Sens de transaction de cette offre">
+                                    <i class="${offDef.icon} me-1"></i> ➔ <i class="${demDef.icon} ms-1"></i>
+                                </span>
+                            </div>
                         </td>
                         <td>
                             <span class="badge bg-success text-white fs-6 py-1 px-2">
@@ -4945,7 +5040,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<?php require_once __DIR__ . '/partials/npc_exchange_modal.php'; ?>
+<?php if ($code !== 'market'): ?>
+    <?php require_once __DIR__ . '/partials/npc_exchange_modal.php'; ?>
+<?php endif; ?>
 
 <!-- MODALE LIGHTBOX ESTAMPE HD -->
 <div id="artworkModal" class="modal-overlay" style="display:none;" onclick="closeArtworkModal(event)">

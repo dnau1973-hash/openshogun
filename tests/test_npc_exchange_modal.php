@@ -132,6 +132,7 @@ require_once __DIR__ . '/../core/ImperialSealEngine.php';
 // Création d'une base de données SQLite en mémoire pour tester npcExchange
 $sqlite = new PDO('sqlite::memory:');
 $sqlite->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$sqlite->sqliteCreateFunction('UNIX_TIMESTAMP', 'time');
 
 // Création tables users et planets
 $sqlite->exec("
@@ -166,7 +167,8 @@ $sqlite->exec("
         sake_max INTEGER DEFAULT 10000,
         clay_max INTEGER DEFAULT 10000,
         wooden_beams_max INTEGER DEFAULT 10000,
-        charcoal_max INTEGER DEFAULT 10000
+        charcoal_max INTEGER DEFAULT 10000,
+        last_resource_update INTEGER DEFAULT 0
     );
 ");
 

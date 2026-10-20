@@ -87,6 +87,16 @@ try {
             ]);
             break;
 
+        case 'exchange_directions':
+            $summary = $marketEngine->getExchangeDirectionsSummary();
+            $tradables = MarketEngine::getTradableResources();
+            echo json_encode([
+                'success' => true,
+                'summary' => $summary,
+                'tradables' => $tradables
+            ]);
+            break;
+
         default:
             http_response_code(400);
             echo json_encode(['success' => false, 'error' => "Action '{$action}' inconnue."]);
