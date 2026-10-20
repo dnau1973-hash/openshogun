@@ -2,6 +2,7 @@
 /**
  * Panel de Garnison du Domaine Féodal (Infanterie & Armes de Siège)
  * Widget mutualisé affiché dans la colonne Est (Ressources / Terroir)
+ * Permet l'ouverture d'une modale HD illustrée au clic sur un soldat ou un engin de siège.
  */
 require_once __DIR__ . '/../../core/BarracksEngine.php';
 require_once __DIR__ . '/../../core/ShipyardEngine.php';
@@ -169,6 +170,25 @@ $totalMilitaryUnits   = $totalSoldiers + $totalSiegeEngines + $totalOtherEngines
 $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLevel * 25);
 ?>
 
+<style>
+.garnison-unit-row {
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.garnison-unit-row:hover {
+    transform: translateX(3px);
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+.garnison-unit-row:hover .garnison-thumb img {
+    transform: scale(1.08);
+}
+.garnison-thumb img {
+    transition: transform 0.25s ease;
+}
+</style>
+
 <div class="garnison-container p-1">
 
     <!-- ── BARRE D'ACTIONS RAPIDES & FILTRES D'AFFICHAGE ── -->
@@ -208,7 +228,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                 </span>
                 <div>
                     <strong class="d-block text-dark" style="font-size: 0.82rem;">Armes de Siège Féodales</strong>
-                    <small class="text-secondary" style="font-size: 0.68rem;">Catapultes, béliers &amp; tours de démolition</small>
+                    <small class="text-secondary" style="font-size: 0.68rem;">Catapultes, béliers &amp; tours de démolition (Cliquer pour voir détails)</small>
                 </div>
             </div>
             <div class="text-end">
@@ -231,11 +251,35 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                     } else {
                         $imgSrc = '/public/assets/tiles/tile_shipyard.png';
                     }
+
+                    // Données JSON pour l'ouverture de la modale illustrée
+                    $siegeModalData = [
+                        'name'            => $s['name'],
+                        'short_name'      => $meta['short_name'],
+                        'role_badge'      => $meta['clan'] . ' • ' . $meta['role'],
+                        'badge_class'     => 'bg-danger',
+                        'image_url'       => $imgSrc,
+                        'description'     => !empty($s['description']) ? $s['description'] : ($meta['desc'] ?? ''),
+                        'lore_title'      => 'Génie de Siège & Artillerie Sengoku (' . $meta['clan'] . ') :',
+                        'stationed_count' => $count,
+                        'is_siege'        => true,
+                        'attack'          => (int)($s['attack'] ?? 0),
+                        'defense'         => (int)($s['defense'] ?? 0) + (int)($s['shield'] ?? 0),
+                        'siege_base'      => (int)$meta['base_dmg'],
+                        'wall_mult'       => (float)$meta['wall_mult'],
+                        'speed'           => (int)($s['speed'] ?? 0),
+                        'cargo'           => (int)($s['cargo_capacity'] ?? 0),
+                        'tactical_tip'    => 'Indispensable lors des assauts castraux pour ouvrir des brèches et pulvériser les remparts adverses.'
+                    ];
+                    $siegeJson = htmlspecialchars(json_encode($siegeModalData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8');
                 ?>
-                <div class="d-flex align-items-center justify-content-between p-2 rounded border bg-surface transition-all <?= !$hasUnits ? 'opacity-60 bg-light-lt' : 'border-danger-subtle shadow-xs' ?>" style="min-height:46px;">
+                <div class="d-flex align-items-center justify-content-between p-2 rounded border bg-surface garnison-unit-row <?= !$hasUnits ? 'opacity-60 bg-light-lt' : 'border-danger-subtle shadow-xs' ?>"
+                     style="min-height:46px;"
+                     onclick="openGarrisonUnitModal(<?= $siegeJson ?>)"
+                     title="Cliquer pour afficher l'illustration HD et la description détaillée">
                     <!-- Miniature et descriptif -->
                     <div class="d-flex align-items-center gap-2 text-truncate me-2">
-                        <div class="position-relative flex-shrink-0" style="width:34px; height:34px; border-radius:6px; overflow:hidden; border:1px solid <?= $hasUnits ? '#dc2626' : '#cbd5e1' ?>;">
+                        <div class="position-relative flex-shrink-0 garnison-thumb" style="width:34px; height:34px; border-radius:6px; overflow:hidden; border:1px solid <?= $hasUnits ? '#dc2626' : '#cbd5e1' ?>;">
                             <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($s['name']) ?>" style="width:100%; height:100%; object-fit:cover;">
                             <?php if ($hasUnits): ?>
                                 <span class="position-absolute bottom-0 end-0 bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width:12px; height:12px; font-size:8px;">
@@ -264,7 +308,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                                 <i class="fa-solid fa-bomb me-1"></i><?= number_format($count) ?>
                             </span>
                         <?php else: ?>
-                            <a href="?page=shipyard" class="btn btn-outline-secondary py-0 px-1 text-muted" style="font-size:0.68rem; border-style:dashed;" title="Bâtir ou mobiliser cet engin">
+                            <a href="?page=shipyard" class="btn btn-outline-secondary py-0 px-1 text-muted" style="font-size:0.68rem; border-style:dashed;" onclick="event.stopPropagation();" title="Bâtir ou mobiliser cet engin">
                                 0 <i class="fa-solid fa-plus ms-0.5 text-danger"></i>
                             </a>
                         <?php endif; ?>
@@ -292,7 +336,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                 </span>
                 <div>
                     <strong class="d-block text-dark" style="font-size: 0.82rem;">Guerriers du Dojo</strong>
-                    <small class="text-secondary" style="font-size: 0.68rem;">Ashigaru, archers &amp; samouraïs</small>
+                    <small class="text-secondary" style="font-size: 0.68rem;">Ashigaru, archers &amp; samouraïs (Cliquer pour voir détails)</small>
                 </div>
             </div>
             <div class="text-end">
@@ -314,10 +358,46 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                     } else {
                         $imgSrc = '/public/assets/units/' . $t['code'] . '.svg';
                     }
+
+                    $roleBadge = match((int)($t['tier'] ?? 1)) {
+                        1 => 'Conscrit & Ligne',
+                        2 => 'Spécialiste de Ligne',
+                        3 => 'Guerrier d\'Élite',
+                        4 => 'Champion & Garde Suprême',
+                        default => 'Troupe du Dojo'
+                    };
+                    $tipText = match($t['code']) {
+                        'pecheur' => 'Ouvrier halieutique indispensable pour mener des expéditions de pêche sur les parcelles de lac.',
+                        'mineur' => 'Mineur de roche et métaux précieux mobilisable pour des expéditions sur les gisements montagnards.',
+                        'colonizer' => 'Pionniers et maîtres charpentiers permettant de fonder un nouveau village castral indépendant.',
+                        default => 'Entraîné au Dojo, ce guerrier défend loyalement votre domaine castral et marche sous votre bannière lors des campagnes militaires.'
+                    };
+
+                    $troopModalData = [
+                        'name'            => $t['name'],
+                        'short_name'      => $t['name'],
+                        'role_badge'      => 'Rang ' . ($t['tier'] ?? 1) . ' • ' . $roleBadge,
+                        'badge_class'     => 'bg-primary',
+                        'image_url'       => $imgSrc,
+                        'description'     => !empty($t['description']) ? $t['description'] : 'Guerrier féodal entraîné au Dojo pour défendre les terres du Daimyō.',
+                        'lore_title'      => 'Régiment du Dojo Militaire :',
+                        'stationed_count' => $count,
+                        'is_siege'        => false,
+                        'attack'          => (int)($t['attack'] ?? 0),
+                        'def_infantry'    => (int)($t['def_infantry'] ?? 0),
+                        'def_mech'        => (int)($t['def_mech'] ?? 0),
+                        'speed'           => (int)($t['speed'] ?? 0),
+                        'cargo'           => (int)($t['cargo_capacity'] ?? 0),
+                        'tactical_tip'    => $tipText
+                    ];
+                    $troopJson = htmlspecialchars(json_encode($troopModalData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8');
                 ?>
-                <div class="d-flex align-items-center justify-content-between p-2 rounded border bg-surface transition-all <?= !$hasUnits ? 'opacity-50 bg-light-lt' : 'shadow-xs' ?>" style="min-height:44px;">
+                <div class="d-flex align-items-center justify-content-between p-2 rounded border bg-surface garnison-unit-row <?= !$hasUnits ? 'opacity-50 bg-light-lt' : 'shadow-xs' ?>"
+                     style="min-height:44px;"
+                     onclick="openGarrisonUnitModal(<?= $troopJson ?>)"
+                     title="Cliquer pour afficher l'illustration HD et la description détaillée">
                     <div class="d-flex align-items-center gap-2 text-truncate me-2">
-                        <div class="position-relative flex-shrink-0" style="width:32px; height:32px; border-radius:6px; overflow:hidden; border:1px solid <?= $hasUnits ? '#3b82f6' : '#cbd5e1' ?>;">
+                        <div class="position-relative flex-shrink-0 garnison-thumb" style="width:32px; height:32px; border-radius:6px; overflow:hidden; border:1px solid <?= $hasUnits ? '#3b82f6' : '#cbd5e1' ?>;">
                             <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($t['name']) ?>" style="width:100%; height:100%; object-fit:cover;">
                         </div>
                         <div class="text-truncate">
@@ -361,9 +441,35 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
             </div>
             <div class="d-flex flex-column gap-1">
                 <?php foreach ($otherShips as $os): ?>
-                    <div class="d-flex justify-content-between align-items-center px-2 py-1 rounded border bg-surface" style="font-size:0.75rem;">
+                    <?php
+                        $count = (int)($os['stationed_count'] ?? 0);
+                        $imgFile = !empty($os['image']) ? $os['image'] : ($os['code'] . '.jpg');
+                        $diskFile = __DIR__ . '/../../public/assets/units/' . $imgFile;
+                        $imgSrc = file_exists($diskFile) ? ('/public/assets/units/' . $imgFile . '?v=' . filemtime($diskFile)) : '/public/assets/tiles/tile_shipyard.png';
+                        $otherModalData = [
+                            'name'            => $os['name'],
+                            'short_name'      => $os['name'],
+                            'role_badge'      => 'Cavalerie & Logistique',
+                            'badge_class'     => 'bg-success',
+                            'image_url'       => $imgSrc,
+                            'description'     => !empty($os['description']) ? $os['description'] : 'Escadron monté ou convoi de transport de ravitaillement.',
+                            'lore_title'      => 'Écuries & Convois Féodaux :',
+                            'stationed_count' => $count,
+                            'is_siege'        => false,
+                            'attack'          => (int)($os['attack'] ?? 0),
+                            'defense'         => (int)($os['defense'] ?? 0) + (int)($os['shield'] ?? 0),
+                            'speed'           => (int)($os['speed'] ?? 0),
+                            'cargo'           => (int)($os['cargo_capacity'] ?? 0),
+                            'tactical_tip'    => 'Idéal pour acheminer d\'importantes cargaisons ou mener des frappes de contournement rapides.'
+                        ];
+                        $otherJson = htmlspecialchars(json_encode($otherModalData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8');
+                    ?>
+                    <div class="d-flex justify-content-between align-items-center px-2 py-1 rounded border bg-surface garnison-unit-row"
+                         style="font-size:0.75rem;"
+                         onclick="openGarrisonUnitModal(<?= $otherJson ?>)"
+                         title="Cliquer pour afficher les détails">
                         <span class="fw-semibold text-truncate"><?= htmlspecialchars($os['name']) ?></span>
-                        <strong class="font-monospace text-success"><?= number_format($os['stationed_count']) ?></strong>
+                        <strong class="font-monospace text-success"><?= number_format($count) ?></strong>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -519,8 +625,231 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
 
 </div>
 
-<!-- Script interactif léger pour filtrer les sections sans conflit avec l'accordéon -->
+<!-- ========================================================
+     MODALE DE DÉTAIL D'UNITÉ & ARME DE SIÈGE (STYLE PÊCHEUR / MINEUR / HÉROS)
+     ======================================================== -->
+<div class="modal fade" id="modalGarrisonUnitDetail" tabindex="-1" aria-labelledby="garrisonUnitModalTitle" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+        <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 14px;">
+            <!-- Illustration d'en-tête (215px) avec overlay dégradé sombre (Style Pêcheur/Mineur/Héros) -->
+            <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
+                <img id="garrisonUnitModalImage" src="/public/assets/tiles/tile_barracks.png" alt="Unité Féodale" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
+                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                    <div style="max-width: 72%;">
+                        <span id="garrisonUnitModalBadge" class="badge bg-danger text-white fw-bold px-2 py-1 mb-1 shadow-sm" style="font-size:0.75rem;">
+                            Rôle Martiale
+                        </span>
+                        <h3 class="m-0 fw-bold text-white shadow-sm text-truncate" id="garrisonUnitModalTitle" style="font-size: 1.25rem;">
+                            Nom de l'Unité
+                        </h3>
+                    </div>
+                    <div>
+                        <span id="garrisonUnitModalCountBadge" class="badge bg-dark bg-opacity-75 border border-light text-white font-monospace fs-6 px-3 py-1 shadow-sm">
+                            0 en garnison
+                        </span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 12px; right: 12px; z-index: 10;" onclick="closeGarrisonUnitModal()"></button>
+            </div>
+
+            <!-- Corps de la modale -->
+            <div class="modal-body p-4 bg-white">
+                <!-- Description / Lore du Soldat ou de l'Engin -->
+                <div class="p-3 rounded border mb-3" style="background: #fdfbf7; border-left: 4px solid #dc2626 !important;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span style="font-size: 1.1rem;"><i class="fa-solid fa-scroll text-danger"></i></span>
+                        <strong class="text-danger small" id="garrisonUnitModalSubtitle">Chronique Militaire Féodale :</strong>
+                    </div>
+                    <p class="small text-secondary m-0" id="garrisonUnitModalDescription" style="line-height: 1.55;">
+                        Description de l'unité...
+                    </p>
+                </div>
+
+                <!-- Grille des Statistiques Martiales & Capacités -->
+                <div class="p-3 rounded border mb-3" style="background: #f8fafc;">
+                    <div class="small fw-bold text-dark mb-2 d-flex align-items-center gap-1">
+                        <i class="fa-solid fa-chart-simple text-danger"></i>
+                        <span>Aptitudes &amp; Spécifications Martiales</span>
+                    </div>
+                    <div class="row g-2 text-center" id="garrisonUnitModalStatsGrid">
+                        <!-- Injections dynamiques de stats -->
+                    </div>
+                </div>
+
+                <!-- Encart Astuce Stratégique -->
+                <div class="alert alert-secondary small p-2.5 mb-0 d-flex align-items-center gap-2" id="garrisonUnitModalTipBox" style="border-left: 4px solid #0ea5e9; background: rgba(14,165,233,0.06);">
+                    <i class="fa-solid fa-circle-info fs-3 text-info flex-shrink-0"></i>
+                    <span id="garrisonUnitModalTip" class="text-secondary" style="font-size:0.75rem;">
+                        Conseil tactique...
+                    </span>
+                </div>
+            </div>
+
+            <!-- Pied de modale -->
+            <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal" onclick="closeGarrisonUnitModal()">
+                    <i class="fa-solid fa-xmark me-1"></i>Fermer
+                </button>
+                <a href="?page=barracks" id="garrisonUnitModalActionBtn" class="btn btn-primary fw-bold px-3 shadow-sm">
+                    <i class="fa-solid fa-torii-gate me-1"></i>Accéder au Dojo &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script interactif : Modale & Filtres -->
 <script>
+function openGarrisonUnitModal(unit) {
+    if (!unit) return;
+
+    const imgEl        = document.getElementById('garrisonUnitModalImage');
+    const titleEl      = document.getElementById('garrisonUnitModalTitle');
+    const badgeEl      = document.getElementById('garrisonUnitModalBadge');
+    const countBadgeEl = document.getElementById('garrisonUnitModalCountBadge');
+    const descEl       = document.getElementById('garrisonUnitModalDescription');
+    const subtitleEl   = document.getElementById('garrisonUnitModalSubtitle');
+    const statsGrid    = document.getElementById('garrisonUnitModalStatsGrid');
+    const tipEl        = document.getElementById('garrisonUnitModalTip');
+    const actionBtn    = document.getElementById('garrisonUnitModalActionBtn');
+
+    if (imgEl) imgEl.src = unit.image_url || '/public/assets/tiles/tile_barracks.png';
+    if (titleEl) titleEl.textContent = unit.name || 'Guerrier Féodal';
+    if (badgeEl) {
+        badgeEl.textContent = unit.role_badge || 'Troupe Régulière';
+        badgeEl.className = 'badge text-white fw-bold px-2 py-1 mb-1 shadow-sm ' + (unit.badge_class || 'bg-danger');
+    }
+    if (countBadgeEl) {
+        const count = parseInt(unit.stationed_count || 0, 10);
+        countBadgeEl.textContent = count.toLocaleString('fr-FR') + ' en garnison';
+        if (count > 0) {
+            countBadgeEl.className = 'badge bg-success bg-opacity-90 border border-light text-white font-monospace fs-6 px-3 py-1 shadow-sm';
+        } else {
+            countBadgeEl.className = 'badge bg-dark bg-opacity-75 border border-light text-white font-monospace fs-6 px-3 py-1';
+        }
+    }
+
+    if (descEl) descEl.textContent = unit.description || 'Guerrier dévoué au service du Daimyō.';
+    if (subtitleEl) subtitleEl.textContent = unit.lore_title || 'Chronique Militaire Féodale :';
+    if (tipEl) tipEl.textContent = unit.tactical_tip || 'Mobilisez cette unité pour accroître la force de frappe de votre domaine.';
+
+    // Construction de la grille de stats
+    if (statsGrid) {
+        let statsHtml = '';
+        if (unit.is_siege) {
+            statsHtml = `
+                <div class="col-4">
+                    <div class="p-2 rounded border bg-white">
+                        <div class="text-secondary small" style="font-size:0.68rem;"><i class="fa-solid fa-khanda text-danger me-1"></i>Attaque</div>
+                        <div class="fw-bold font-monospace text-danger fs-4">${(unit.attack || 0).toLocaleString('fr-FR')}</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded border bg-white">
+                        <div class="text-secondary small" style="font-size:0.68rem;"><i class="fa-solid fa-burst text-warning me-1"></i>Brèche Siège</div>
+                        <div class="fw-bold font-monospace text-warning fs-4">${(unit.siege_base || 0).toLocaleString('fr-FR')}</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded border bg-white">
+                        <div class="text-secondary small" style="font-size:0.68rem;"><i class="fa-solid fa-shield-cat text-danger me-1"></i>x Muraille</div>
+                        <div class="fw-bold font-monospace text-danger fs-4">x${unit.wall_mult || 1}</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded border bg-white">
+                        <div class="text-secondary small" style="font-size:0.68rem;"><i class="fa-solid fa-cubes text-success me-1"></i>Blindage</div>
+                        <div class="fw-bold font-monospace text-success fs-4">${(unit.defense || 0).toLocaleString('fr-FR')}</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded border bg-white">
+                        <div class="text-secondary small" style="font-size:0.68rem;"><i class="fa-solid fa-horse text-info me-1"></i>Vitesse</div>
+                        <div class="fw-bold font-monospace text-info fs-4">${(unit.speed || 0).toLocaleString('fr-FR')}</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded border bg-white">
+                        <div class="text-secondary small" style="font-size:0.68rem;"><i class="fa-solid fa-sack-dollar text-warning me-1"></i>Capacité</div>
+                        <div class="fw-bold font-monospace text-warning fs-4">${(unit.cargo || 0).toLocaleString('fr-FR')}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            statsHtml = `
+                <div class="col-3">
+                    <div class="p-2 rounded border bg-white">
+                        <div class="text-secondary small" style="font-size:0.68rem;"><i class="fa-solid fa-khanda text-danger me-1"></i>Attaque</div>
+                        <div class="fw-bold font-monospace text-danger fs-4">${(unit.attack || 0).toLocaleString('fr-FR')}</div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="p-2 rounded border bg-white">
+                        <div class="text-secondary small" style="font-size:0.68rem;"><i class="fa-solid fa-shield-halved text-success me-1"></i>Déf. Inf.</div>
+                        <div class="fw-bold font-monospace text-success fs-4">${(unit.def_infantry || 0).toLocaleString('fr-FR')}</div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="p-2 rounded border bg-white">
+                        <div class="text-secondary small" style="font-size:0.68rem;"><i class="fa-solid fa-shield text-info me-1"></i>Déf. Cav.</div>
+                        <div class="fw-bold font-monospace text-info fs-4">${(unit.def_mech || 0).toLocaleString('fr-FR')}</div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="p-2 rounded border bg-white">
+                        <div class="text-secondary small" style="font-size:0.68rem;"><i class="fa-solid fa-horse text-primary me-1"></i>Vitesse</div>
+                        <div class="fw-bold font-monospace text-primary fs-4">${(unit.speed || 0).toLocaleString('fr-FR')}</div>
+                    </div>
+                </div>
+            `;
+        }
+        statsGrid.innerHTML = statsHtml;
+    }
+
+    // Bouton d'action
+    if (actionBtn) {
+        if (unit.is_siege) {
+            actionBtn.href = '?page=shipyard';
+            actionBtn.className = 'btn btn-danger fw-bold px-3 shadow-sm';
+            actionBtn.innerHTML = '<i class="fa-solid fa-hammer me-1"></i>Atelier de Siège &rarr;';
+        } else {
+            actionBtn.href = '?page=barracks';
+            actionBtn.className = 'btn btn-primary fw-bold px-3 shadow-sm';
+            actionBtn.innerHTML = '<i class="fa-solid fa-torii-gate me-1"></i>Dojo Militaire &rarr;';
+        }
+    }
+
+    // Affichage de la modale
+    const modalEl = document.getElementById('modalGarrisonUnitDetail');
+    if (modalEl) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            bsModal.show();
+        } else if (typeof $ !== 'undefined' && $.fn && $.fn.modal) {
+            $(modalEl).modal('show');
+        } else {
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+        }
+    }
+}
+
+function closeGarrisonUnitModal() {
+    const modalEl = document.getElementById('modalGarrisonUnitDetail');
+    if (modalEl) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const bsModal = bootstrap.Modal.getInstance(modalEl);
+            if (bsModal) bsModal.hide();
+        } else if (typeof $ !== 'undefined' && $.fn && $.fn.modal) {
+            $(modalEl).modal('hide');
+        }
+        modalEl.classList.remove('show');
+        modalEl.style.display = 'none';
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    }
+}
+
 function filterGarnison(category, btn) {
     if (!btn) return;
     document.querySelectorAll('.garnison-filter-btn').forEach(function(b) {

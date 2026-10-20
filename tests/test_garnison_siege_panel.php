@@ -141,7 +141,15 @@ $keywords = [
     'Bélier Titanesque du Dragon de Kai',
     'Forteresse Roulante Blindée',
     'Bilan Martiale &amp; Tactique',
-    'filterGarnison'
+    'filterGarnison',
+    'modalGarrisonUnitDetail',
+    'openGarrisonUnitModal',
+    'closeGarrisonUnitModal',
+    'garrisonUnitModalImage',
+    'garrisonUnitModalTitle',
+    'garrisonUnitModalDescription',
+    'garrisonUnitModalStatsGrid',
+    'garrisonUnitModalActionBtn'
 ];
 
 foreach ($keywords as $kw) {
