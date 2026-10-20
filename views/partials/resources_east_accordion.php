@@ -7,8 +7,11 @@
 
 require_once __DIR__ . '/../../core/QuestEngine.php';
 require_once __DIR__ . '/../../core/BarracksEngine.php';
+require_once __DIR__ . '/../../core/ShipyardEngine.php';
 require_once __DIR__ . '/../../core/PlanetEngine.php';
 require_once __DIR__ . '/../../core/RuralPlotEngine.php';
+require_once __DIR__ . '/../../core/BuildingEngine.php';
+require_once __DIR__ . '/../../core/ResearchEngine.php';
 require_once __DIR__ . '/../../config/game_constants.php';
 
 if (!isset($queue) && !empty($planet['id'])) {
@@ -34,25 +37,45 @@ $barracksEngine = $barracksEngine ?? new BarracksEngine();
 $shipyardEngine = $shipyardEngine ?? new ShipyardEngine();
 
 if (!isset($barracksQueue) && !empty($planet['id'])) {
-    $barracksQueue = $barracksEngine->getQueue((int)$planet['id']);
+    try {
+        $barracksQueue = $barracksEngine->getQueue((int)$planet['id']);
+    } catch (Throwable $e) {
+        $barracksQueue = [];
+    }
 }
 $barracksQueue = $barracksQueue ?? [];
 
 if (!isset($shipyardQueue) && !empty($planet['id'])) {
-    $shipyardQueue = $shipyardEngine->getQueue((int)$planet['id']);
+    try {
+        $shipyardQueue = $shipyardEngine->getQueue((int)$planet['id']);
+    } catch (Throwable $e) {
+        $shipyardQueue = [];
+    }
 }
 $shipyardQueue = $shipyardQueue ?? [];
 
 if (!isset($activeResearch) && !empty($user['id'])) {
-    $activeResearch = $researchEngine->getActiveQueue((int)$user['id']);
+    try {
+        $activeResearch = $researchEngine->getActiveQueue((int)$user['id']);
+    } catch (Throwable $e) {
+        $activeResearch = null;
+    }
 }
 
 if (!isset($activeFeast) && !empty($planet['id'])) {
-    $activeFeast = $planetEngine->getActiveFeast((int)$planet['id']);
+    try {
+        $activeFeast = $planetEngine->getActiveFeast((int)$planet['id']);
+    } catch (Throwable $e) {
+        $activeFeast = null;
+    }
 }
 
 if (!isset($craftQueue) && !empty($planet['id'])) {
-    $craftQueue = $planetEngine->getCraftQueue((int)$planet['id']);
+    try {
+        $craftQueue = $planetEngine->getCraftQueue((int)$planet['id']);
+    } catch (Throwable $e) {
+        $craftQueue = [];
+    }
 }
 $craftQueue = $craftQueue ?? [];
 
@@ -70,21 +93,30 @@ $queueTitle = $queueTitle ?? 'Chantiers en cours';
 
 // Données du Didacticiel
 $questEngine = new QuestEngine();
-$questSummary = ($user && $planet) ? $questEngine->getPlayerQuestsStatus((int)$user['id'], (int)$planet['id']) : null;
+try {
+    $questSummary = ($user && $planet) ? $questEngine->getPlayerQuestsStatus((int)$user['id'], (int)$planet['id']) : null;
+} catch (Throwable $e) {
+    $questSummary = null;
+}
 $activeQuest = $questSummary['active_quest'] ?? null;
 $hasActiveQuest = !empty($activeQuest) && empty($questSummary['all_completed']);
 
 // Données de la Garnison (Troupes du Dojo & Armes de Siège)
-$barracksEngine = new BarracksEngine();
-$stationedTroops = ($user && $planet) ? $barracksEngine->getStationedUnits((int)$planet['id'], $user['faction'] ?? 'terran') : [];
+try {
+    $stationedTroops = ($user && $planet) ? $barracksEngine->getStationedUnits((int)$planet['id'], $user['faction'] ?? 'terran') : [];
+} catch (Throwable $e) {
+    $stationedTroops = [];
+}
 $totalTroopsCount = 0;
 foreach ($stationedTroops as $t) {
     $totalTroopsCount += (int)($t['stationed_count'] ?? 0);
 }
 
-require_once __DIR__ . '/../../core/ShipyardEngine.php';
-$shipyardEngine = new ShipyardEngine();
-$allStationedShips = ($user && $planet) ? $shipyardEngine->getAvailableShips((int)$planet['id'], $user['faction'] ?? 'terran') : [];
+try {
+    $allStationedShips = ($user && $planet) ? $shipyardEngine->getAvailableShips((int)$planet['id'], $user['faction'] ?? 'terran') : [];
+} catch (Throwable $e) {
+    $allStationedShips = [];
+}
 $totalSiegeCount = 0;
 $siegeCodesList = ['terran_cruiser', 'terran_dreadnought', 'vorash_leviathan', 'aethelis_prism', 'aethelis_titan'];
 foreach ($allStationedShips as $s) {
@@ -109,7 +141,11 @@ $malusUnderstaffed = (float)($wfSummary['understaffed_malus_pct'] ?? 0);
 // Données de l'Événement Hebdomadaire (Chronique Féodale)
 require_once __DIR__ . '/../../core/WeeklyEventEngine.php';
 $weeklyEngine = new WeeklyEventEngine();
-$activeEvent = ($user && $planet) ? $weeklyEngine->getActiveEvent((int)$user['id'], (int)$planet['id']) : null;
+try {
+    $activeEvent = ($user && $planet) ? $weeklyEngine->getActiveEvent((int)$user['id'], (int)$planet['id']) : null;
+} catch (Throwable $e) {
+    $activeEvent = null;
+}
 $eventPlayerStatus = $activeEvent['player_status'] ?? null;
 $hasClaimableEvent = false;
 if (!empty($eventPlayerStatus['tasks'])) {
@@ -390,7 +426,11 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
              data-bs-parent="#resourcesEastAccordion">
             <div class="accordion-body">
                 <?php 
-                    require __DIR__ . '/urban_construction_queue.php'; 
+                    try {
+                        require __DIR__ . '/urban_construction_queue.php'; 
+                    } catch (Throwable $e) {
+                        echo '<div class="alert alert-warning py-1 px-2 small mb-0">Chargement des chantiers indisponible.</div>';
+                    }
                 ?>
             </div>
         </div>
@@ -508,7 +548,13 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
              aria-labelledby="heading-east-troops" 
              data-bs-parent="#resourcesEastAccordion">
             <div class="accordion-body">
-                <?php require __DIR__ . '/troops_panel.php'; ?>
+                <?php 
+                    try {
+                        require __DIR__ . '/troops_panel.php'; 
+                    } catch (Throwable $e) {
+                        echo '<div class="alert alert-warning py-1 px-2 small mb-0">Chargement de la garnison indisponible.</div>';
+                    }
+                ?>
             </div>
         </div>
     </div>
