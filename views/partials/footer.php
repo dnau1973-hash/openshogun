@@ -728,7 +728,7 @@ function renderCodexQuestModal() {
     // Titre
     const titleEl = document.getElementById('codexQuestModalTitle');
     if (titleEl) {
-        titleEl.innerText = `${q.icon ? q.icon + ' ' : ''}${q.title}`;
+        titleEl.innerHTML = (q.icon ? `${q.icon} ` : '') + escapeHtmlModal(q.title);
     }
 
     // Badge Statut
